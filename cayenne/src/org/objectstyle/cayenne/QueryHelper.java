@@ -208,12 +208,12 @@ public final class QueryHelper {
             return null;
         }
 
-        ExpressionTranslator trans = new ExpressionTranslator(qual);
+        ExpressionTranslator trans = new ExpressionTranslator();
         ExpressionTraversal parser = new ExpressionTraversal();
         parser.setHandler(trans);
         parser.traverseExpression(qual);
-        
-        return trans.getExp();
+
+        return trans.getPeer(qual);
     }
 
     /** 
@@ -247,23 +247,23 @@ public final class QueryHelper {
         sel.setQualifier(qualifierForDbMap(fkAttrs));
         return sel;
     }
-    
 
     static final class ExpressionTranslator extends TraversalHelper {
-        
-        protected Expression topExp;
-        protected Expression currentExp;
-        
-        public ExpressionTranslator(Expression e) {
-            topExp = createExpressionOfType(e);
-            currentExp = topExp;
+        protected HashMap expMap = new HashMap();
+        protected HashMap expFill = new HashMap();
+
+        public Expression getPeer(Expression orig) {
+            return (Expression) expMap.get(orig);
         }
-        
-        public Expression getExp() {
-            return topExp;
+
+        private int getOperandIndex(Expression orig) {
+            Integer indObj = (Integer) expFill.get(orig);
+            int ind = (indObj != null) ? indObj.intValue() + 1 : 0;
+            expFill.put(orig, new Integer(ind));
+
+            return ind;
         }
-        
-        
+
         /** 
          * Creates expression of the same type and same operands 
          * as the original expression. Operands of the new expression
@@ -272,7 +272,7 @@ public final class QueryHelper {
         public static Expression createExpressionOfType(Expression e)
             throws ExpressionException {
             try {
-                Expression exp = (Expression)e.getClass().newInstance();
+                Expression exp = (Expression) e.getClass().newInstance();
                 exp.setType(e.getType());
                 return exp;
             }
@@ -280,6 +280,43 @@ public final class QueryHelper {
                 logObj.log(Level.INFO, "Error instantiating expression.", ex);
                 throw new ExpressionException("Error instantiating expression.", ex);
             }
+        }
+
+        private void processOperand(Object operand, Expression parentNode) {
+            // attach operand to parent at index
+            if (parentNode != null) {
+                int ind = getOperandIndex(parentNode);
+                Expression parentPeer = getPeer(parentNode);
+                
+                // operands of object expression need translation
+                if(parentPeer.getType() == Expression.OBJ_PATH) {
+                    
+                }
+                                
+                parentPeer.setOperand(ind, operand);
+            }
+        }
+
+        private void processNode(Expression node, Expression parentNode) {
+            Expression e = createExpressionOfType(node);
+            expMap.put(node, e);
+            processOperand(e, parentNode);
+        }
+
+        public void startUnaryNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
+
+        public void startBinaryNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
+
+        public void startTernaryNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
+
+        public void objectNode(Object leaf, Expression parentNode) {
+            processOperand(leaf, parentNode);
         }
     }
 }

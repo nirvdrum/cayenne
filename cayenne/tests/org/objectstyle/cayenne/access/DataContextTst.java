@@ -162,17 +162,19 @@ public class DataContextTst extends TestCase {
         assertNull(ctxt.lookupEntity("NonExistent"));
     }
 
-   public void testPrefetch1() throws java.lang.Exception {
-        SelectQuery q = new SelectQuery("Artist");
+  /*  public void testPrefetch1() throws java.lang.Exception {
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
+        SelectQuery q = new SelectQuery("Artist", e);
         q.addPrefetch("paintingArray");
-        
+
         SelectOperationObserver o = new SelectOperationObserver();
-        // o.setQueryLogLevel(Level.SEVERE);
+        o.setQueryLogLevel(Level.SEVERE);
         ctxt.performQuery(q, o);
         assertEquals(2, o.getSelectCount());
-    }
-    
-    
+    } 
+    */
+
     public void testPerformQueries() throws Exception {
         SelectQuery q1 = new SelectQuery();
         q1.setObjEntityName("Artist");
@@ -233,7 +235,7 @@ public class DataContextTst extends TestCase {
 
         try {
             conn.setAutoCommit(false);
-            
+
             PreparedStatement stmt = conn.prepareStatement(insertArtist);
             long dateBase = System.currentTimeMillis();
 

@@ -218,8 +218,15 @@ public abstract class Entity {
                 return rel;
             }
 
-
-            throw new ExpressionException("Can't resolve path component: '" + pathComp + "'.");
+ 
+            // build error message
+            StringBuffer buf = new StringBuffer();
+            buf.append("Can't resolve path component: [")
+            .append(currentEnt.getName())
+            .append('.')
+            .append(pathComp)
+            .append("].");
+            throw new ExpressionException(buf.toString());
         }
 
         public void remove() {
