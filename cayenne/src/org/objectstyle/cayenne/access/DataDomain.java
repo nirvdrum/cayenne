@@ -217,6 +217,7 @@ public class DataDomain implements QueryEngine {
         return (DataNode)nodesByEntityName.get(objEntityName);
     }
 
+
     /** Returns DataNode that should handle database operations for
       * a specified <code>objEntity</code>. */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {

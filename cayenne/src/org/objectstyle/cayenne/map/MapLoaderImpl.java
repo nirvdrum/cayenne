@@ -492,6 +492,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         }
     }// End processStartObjEntity
 
+    
     private void processStartObjAttribute(Attributes atts) {
         String name = atts.getValue("", "name");
         String type = atts.getValue("", "type");

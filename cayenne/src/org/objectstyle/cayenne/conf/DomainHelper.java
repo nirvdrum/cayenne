@@ -424,10 +424,9 @@ public class DomainHelper {
             if (adapterClass == null)
                 adapterClass = "org.objectstyle.cayenne.dba.JdbcAdapter";
 
-            node = new DataNode(nodeName);
+            this.node = new DataNode(nodeName);
             node.setDataSourceFactory(factoryName);
             node.setDataSourceLocation(dataSrcLocation);
-            domain.addNode(node);
 
 
             // load DataSource
@@ -459,6 +458,12 @@ public class DomainHelper {
             } else {
                 throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
+        }
+        
+        protected void finished() {
+            // it is important to add node to domain after all node maps
+            // are initialized..
+            domain.addNode(node);
         }
     }
 
