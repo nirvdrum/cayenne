@@ -2,13 +2,13 @@
 <title>User Guide - Using SelectQueries</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/fetch/params.html</prev>
-	<next>/userguide/modify/index.html</next>
+	<prev>/userguide/fetch/other.html</prev>
+	<next>/userguide/fetch/raw.html</next>
 </navigator>    
 
 <body>
     <section name="7. Using SelectQueries">        
-        <subsection name="7.6 Executing raw SQL: SqlSelectQuery">
+        <subsection name="7.5 Reusing SelectQueries: Parametrized Queries.">
 	<p>TO BE DONE		
 	</p>
         </subsection>
