@@ -117,8 +117,7 @@ public class ResourceLocator {
 			if (url != null) {
 				logObj.debug("resource found in classpath: " + url);
 				return url.openStream();
-			}
-			else {
+			} else {
 				logObj.debug("resource not found in classpath: " + name);
 				return null;
 			}
@@ -129,18 +128,17 @@ public class ResourceLocator {
 
 	/**
 	 * Returns a resource as InputStream if it is found in the filesystem or
- 	 * <code>null</code> otherwise. Lookup is first performed relative
- 	 * to the user's home directory (as defined by "user.home" system property),
- 	 * and then relative to the current directory.
- 	 */
+		 * <code>null</code> otherwise. Lookup is first performed relative
+		 * to the user's home directory (as defined by "user.home" system property),
+		 * and then relative to the current directory.
+		 */
 	public static InputStream findResourceInFileSystem(String name) {
 		try {
 			File file = findFileInFileSystem(name);
 			if (file != null) {
 				logObj.debug("resource found in file system: " + file);
 				return new FileInputStream(file);
-			}
-			else {
+			} else {
 				logObj.debug("resource not found in file system: " + name);
 				return null;
 			}
@@ -168,8 +166,7 @@ public class ResourceLocator {
 
 		if (file != null) {
 			logObj.debug("file found in file system: " + file);
-		}
-		else {
+		} else {
 			logObj.debug("file not found in file system: " + name);
 		}
 
@@ -184,20 +181,24 @@ public class ResourceLocator {
 	 */
 	public static File findFileInHomeDirectory(String name) {
 		// look in home directory
-		String homeDirPath = System.getProperty("user.home") + File.separator + name;
-		File file = new File(homeDirPath);
-		if (!(file.exists() && file.canRead())) {
-			file = null;
-		}
+		String homeDirPath =
+			System.getProperty("user.home") + File.separator + name;
 
-		if (file != null) {
-			logObj.debug("file found in home directory: " + file);
-		}
-		else {
-			logObj.debug("file not found in home directory: " + name);
-		}
+		try {
 
-		return file;
+			File file = new File(homeDirPath);
+			if (file.exists() && file.canRead()) {
+				logObj.debug("file found in home directory: " + file);
+			} else {
+				file = null;
+				logObj.debug("file not found in home directory: " + name);
+			}
+
+			return file;
+		} catch (SecurityException se) {
+			logObj.debug("permission denied reading file: " + homeDirPath, se);
+			return null;
+		}
 	}
 
 	/**
@@ -207,25 +208,36 @@ public class ResourceLocator {
 	 * if <code>file</code> can not be found is not readable.
 	 */
 	public static File findFileInCurrentDirectory(String name) {
-		// look in current directory
-		File file = new File('.' + File.separator + name);
+		// look in the current directory
+		String currentDirPath =
+			System.getProperty("user.dir") + File.separator + name;
 
-		if (file.exists() && file.canRead()) {
-			logObj.debug("file found in current directory: " + file);
+		try {
+
+			File file = new File(currentDirPath);
+
+			if (file.exists() && file.canRead()) {
+				logObj.debug("file found in current directory: " + file);
+			} else {
+				logObj.debug("file not found in current directory: " + name);
+				file = null;
+			}
+
+			return file;
+		} catch (SecurityException se) {
+			logObj.debug(
+				"permission denied reading file: " + currentDirPath,
+				se);
+			return null;
 		}
-		else {
-			logObj.debug("file not found in current directory: " + name);
-			file = null;
-		} 
-
-		return file;
 	}
 
 	/**
 	 * Looks up the URL for the named resource using this class' ClassLoader.
 	 */
 	public static URL findURLInClasspath(String name) {
-		URL url = findURLInClassLoader(name, ResourceLocator.class.getClassLoader());
+		URL url =
+			findURLInClassLoader(name, ResourceLocator.class.getClassLoader());
 		return url;
 	}
 
@@ -234,11 +246,10 @@ public class ResourceLocator {
 	 */
 	public static URL findURLInClassLoader(String name, ClassLoader loader) {
 		URL url = loader.getResource(name);
-		
+
 		if (url != null) {
 			logObj.debug("URL found with classloader: " + url);
-		}
-		else {
+		} else {
 			logObj.debug("URL not found with classloader: " + name);
 		}
 
@@ -257,7 +268,9 @@ public class ResourceLocator {
 		}
 
 		String urlString = selfUrl.toExternalForm();
-		return urlString.substring( 0, urlString.length() - pathToClass.length());
+		return urlString.substring(
+			0,
+			urlString.length() - pathToClass.length());
 	}
 
 	/**
@@ -276,7 +289,7 @@ public class ResourceLocator {
 	 * readable resource can be found for the given name.
 	 */
 	public InputStream findResourceStream(String name) {
-		URL url = findResource(name);		
+		URL url = findResource(name);
 		if (url == null) {
 			return null;
 		}
@@ -334,10 +347,12 @@ public class ResourceLocator {
 		}
 
 		if (!additionalFilesystemPaths.isEmpty()) {
-			logObj.debug("searching additional paths: " + this.additionalFilesystemPaths);
+			logObj.debug(
+				"searching additional paths: "
+					+ this.additionalFilesystemPaths);
 			Iterator pi = this.additionalFilesystemPaths.iterator();
 			while (pi.hasNext()) {
-				File f = new File((String)pi.next(), name);
+				File f = new File((String) pi.next(), name);
 				logObj.debug("searching for: " + f.getAbsolutePath());
 				if (f.exists()) {
 					try {
@@ -357,7 +372,9 @@ public class ResourceLocator {
 			}
 
 			if (!this.additionalClassPaths.isEmpty()) {
-				logObj.debug("searching additional classpaths: " + this.additionalClassPaths);
+				logObj.debug(
+					"searching additional classpaths: "
+						+ this.additionalClassPaths);
 				Iterator cpi = this.additionalClassPaths.iterator();
 				while (cpi.hasNext()) {
 					String fullName = cpi.next() + "/" + name;
@@ -451,8 +468,7 @@ public class ResourceLocator {
 	public void setClassLoader(ClassLoader classLoader) {
 		if (classLoader != null) {
 			this.classLoader = classLoader;
-		}
-		else {
+		} else {
 			this.classLoader = this.getClass().getClassLoader();
 		}
 	}
@@ -489,8 +505,7 @@ public class ResourceLocator {
 	public void addFilesystemPath(String path) {
 		if (path != null) {
 			this.additionalFilesystemPaths.add(path);
-		}
-		else {
+		} else {
 			throw new IllegalArgumentException("Path must not be null.");
 		}
 	}
@@ -505,12 +520,11 @@ public class ResourceLocator {
 	public void addFilesystemPath(File path) {
 		if (path != null && path.isDirectory()) {
 			this.addFilesystemPath(path.getPath());
-		}
-		else {
-			throw new IllegalArgumentException("Path '" + path + "' is not a directory.");
+		} else {
+			throw new IllegalArgumentException(
+				"Path '" + path + "' is not a directory.");
 		}
 	}
-
 
 	/**
 	 * Custom logger that can be dynamically turned on/off by evaluating a Predicate.
