@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.EOModelFileFilter;
 import org.objectstyle.cayenne.gui.util.EOModelSelectFilter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.util.Preferences;
+import org.objectstyle.cayenne.project.CayennePreferences;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 
 /**
@@ -113,8 +113,8 @@ public class ImportEOModelAction extends CayenneAction {
 				file = file.getParentFile();
 			}
 
-			Preferences.getPreferences().setProperty(
-				Preferences.LAST_EOM_DIR,
+			CayennePreferences.getPreferences().setProperty(
+				CayennePreferences.LAST_EOM_DIR,
 				file.getParent());
 
 			try {
@@ -176,11 +176,11 @@ public class ImportEOModelAction extends CayenneAction {
 		}
 
 		String startDir =
-			Preferences.getPreferences().getString(Preferences.LAST_EOM_DIR);
+			CayennePreferences.getPreferences().getString(CayennePreferences.LAST_EOM_DIR);
 
 		if (startDir == null) {
 			startDir =
-				Preferences.getPreferences().getString(Preferences.LAST_DIR);
+				CayennePreferences.getPreferences().getString(CayennePreferences.LAST_DIR);
 		}
 
 		if (startDir != null) {

@@ -67,8 +67,8 @@ import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.CayennePreferences;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
-import org.objectstyle.cayenne.util.Preferences;
 
 /**
  * Action that creates new DataMap in the project.
@@ -106,8 +106,8 @@ public class CreateDataMapAction extends CayenneAction {
 
     /** Returns location relative to Project or null if nothing selected. */
     static String getMapLocation(Mediator mediator) {
-        Preferences pref = Preferences.getPreferences();
-        String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
+        CayennePreferences pref = CayennePreferences.getPreferences();
+        String init_dir = (String) pref.getProperty(CayennePreferences.LAST_DIR);
         // Data map file
         File file = null;
 

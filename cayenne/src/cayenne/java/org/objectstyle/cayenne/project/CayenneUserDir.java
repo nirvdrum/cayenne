@@ -53,75 +53,90 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.gui.util;
+package org.objectstyle.cayenne.project;
 
-import java.awt.Component;
-import java.util.Vector;
+import java.io.File;
 
-import javax.swing.JMenu;
-
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.action.OpenProjectAction;
-import org.objectstyle.cayenne.project.CayennePreferences;
+import org.apache.log4j.Logger;
 
 /**
- * Menu that contains a list of previously used files.
- * It is built from CayenneModeler preferences by calling 
- * <code>rebuildFromPreferences</code>.
+ * CayenneUserDir represents a directory where all Cayenne-related information 
+ * is stored on the user machine. This is normally a <code>$HOME/.cayenne</code>
+ * directory.
  * 
  * @author Andrei Adamchik
  */
-public class RecentFileMenu extends JMenu {
+public class CayenneUserDir {
+	static final Logger logObj = Logger.getLogger(CayenneUserDir.class.getName());
+	
+    protected static CayenneUserDir sharedInstance;
 
-	/**
-	 * Constructor for RecentFileMenu.
-	 */
-	public RecentFileMenu(String s) {
-		super(s);
-	}
+    public static final String CAYENNE_DIR = ".cayenne";
 
-	/**
-	 * @see javax.swing.JMenu#add(JMenuItem)
-	 */
-	public RecentFileMenuItem add(RecentFileMenuItem menuItem) {
-		return (RecentFileMenuItem) super.add(menuItem);
-	}
+    protected File cayenneUserDir;
 
-	/** 
-	 * Rebuilds internal menu items list with the files stored in
-	 * CayenneModeler properences.
-	 */
-	public void rebuildFromPreferences() {
-		CayennePreferences pref = CayennePreferences.getPreferences();		
-		Vector arr = pref.getVector(CayennePreferences.LAST_PROJ_FILES);
-		while (arr.size() > 4) {
-			arr.remove(arr.size() - 1);
-		}
+    public static CayenneUserDir getInstance() {
+    	if(sharedInstance == null) {
+    		sharedInstance = new CayenneUserDir();
+    	}
+    	return sharedInstance;
+    }
+    
+    
+    /**
+     * Constructor for CayenneUserDir.
+     */
+    protected CayenneUserDir() {
+        super();
+        File homeDir = new File(System.getProperty("user.home"));
+        File tmpDir = new File(homeDir, CAYENNE_DIR);
 
-		// readd menus
-		Component[] comps = getMenuComponents();
-		int curSize = comps.length;
-        int prefSize = arr.size(); 
+        if(tmpDir.exists() && !tmpDir.isDirectory()) {
+        	tmpDir = null;
+        	logObj.warn(tmpDir + " is not a directory.");
+        }
+        else if(tmpDir.exists() && !tmpDir.canRead()) {
+        	tmpDir = null;
+        	logObj.warn(tmpDir + " is not readable.");
+        }
+        else if (!tmpDir.exists()) {
+            tmpDir.mkdirs();
+            if(!tmpDir.exists()) {
+            	tmpDir = null;
+            	logObj.warn("Couldn't create " + tmpDir);
+            }
+        }
         
-		for (int i = 0; i < prefSize; i++) {
-			String name = (String) arr.get(i);
+        cayenneUserDir = tmpDir;
+    }
 
-			if (i < curSize) {
-				// update existing one
-				RecentFileMenuItem item = (RecentFileMenuItem) comps[i];
-				item.setText(name);
-			} else {
-				// add a new one
-				RecentFileMenuItem item = new RecentFileMenuItem(name);
-				item.setAction(
-					Editor.getFrame().getAction(OpenProjectAction.ACTION_NAME));
-				add(item);
-			}
-		}
-
-		// remove any hanging items
-		for (int i = curSize - 1; i >= prefSize; i--) {
-            remove(i);
-		}
-	}
+    /**
+     * Returns a directory object where all user
+     * Cayenne-related configuration is stored. 
+     * May return null if the directory is not accessible 
+     * for whatever reason.
+     */
+    public File getDirectory() {
+        return cayenneUserDir;
+    }
+    
+    /**
+     * Return false if the directory is not accessible for
+     * any reason at least for reading.
+     */    
+    public boolean canRead() {
+    	return cayenneUserDir != null;
+    }
+    
+    /**
+     * Return false if the directory is not accessible for
+     * any reason at least for reading.
+     */    
+    public boolean canWrite() {
+    	return cayenneUserDir != null && cayenneUserDir.canWrite();
+    }
+    
+    public File resolveFile(String name) {
+    	return new File(cayenneUserDir, name);
+    }
 }

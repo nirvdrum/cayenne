@@ -90,8 +90,8 @@ import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
 import org.objectstyle.cayenne.gui.util.SaveHandler;
+import org.objectstyle.cayenne.project.CayennePreferences;
 import org.objectstyle.cayenne.project.ProjectDataSource;
-import org.objectstyle.cayenne.util.Preferences;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo.
@@ -221,15 +221,15 @@ public class DataNodeDetailView
         fileBtn.setVisible(false);
 
         userNameLabel = new JLabel("User name: ");
-        userName = new PreferenceField(Preferences.USER_NAME);
+        userName = new PreferenceField(CayennePreferences.USER_NAME);
         userName.addActionListener(this);
         passwordLabel = new JLabel("Password: ");
         password = new JPasswordField(20);
         driverLabel = new JLabel("Driver class: ");
-        driver = new PreferenceField(Preferences.JDBC_DRIVER);
+        driver = new PreferenceField(CayennePreferences.JDBC_DRIVER);
         driver.addActionListener(this);
         urlLabel = new JLabel("Database URL: ");
-        url = new PreferenceField(Preferences.DB_URL);
+        url = new PreferenceField(CayennePreferences.DB_URL);
         url.addActionListener(this);
         minConnectionsLabel = new JLabel("Min connections: ");
         minConnections = new JTextField(5);

@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.util.Preferences;
+import org.objectstyle.cayenne.project.CayennePreferences;
 
 /** 
  * Dialog for generating Java classes from the DataMap.
@@ -141,9 +141,9 @@ public class GenerateClassDialog
 		folderLabel = new JLabel("Output directory:");
 		folder = new JTextField();
 
-		Preferences pref = Preferences.getPreferences();
+		CayennePreferences pref = CayennePreferences.getPreferences();
 		String startDir =
-			(String) pref.getProperty(Preferences.LAST_GENERATED_CLASSES_DIR);
+			(String) pref.getProperty(CayennePreferences.LAST_GENERATED_CLASSES_DIR);
 		if (startDir != null) {
 			outputFolder = new File(startDir);
 			folder.setText(startDir);
@@ -179,12 +179,12 @@ public class GenerateClassDialog
 		} else if (src == generate) {
 			generateCode();
 		} else if (src == chooseFolder) {
-			Preferences pref = Preferences.getPreferences();
+			CayennePreferences pref = CayennePreferences.getPreferences();
 			String init_dir =
 				(String) pref.getProperty(
-					Preferences.LAST_GENERATED_CLASSES_DIR);
+					CayennePreferences.LAST_GENERATED_CLASSES_DIR);
 			if (null == init_dir)
-				init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
+				init_dir = (String) pref.getProperty(CayennePreferences.LAST_DIR);
 			if (null != init_dir) {
 				File init_dir_file = new File(init_dir);
 				if (init_dir_file.exists())
@@ -197,7 +197,7 @@ public class GenerateClassDialog
 				folder.setText(outputFolder.getAbsolutePath());
 				// Set preferences
 				pref.setProperty(
-					Preferences.LAST_GENERATED_CLASSES_DIR,
+					CayennePreferences.LAST_GENERATED_CLASSES_DIR,
 					outputFolder.getAbsolutePath());
 			}
 		} else if (src == selectAll) {

@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.util.Preferences;
+import org.objectstyle.cayenne.project.CayennePreferences;
 
 /**
  * @author Andrei Adamchik
@@ -97,8 +97,8 @@ public class NewProjectAction extends ProjectAction {
     }
 
     protected void newProject() {
-        Preferences pref = Preferences.getPreferences();
-        String startDir = (String) pref.getProperty(Preferences.LAST_DIR);
+        CayennePreferences pref = CayennePreferences.getPreferences();
+        String startDir = (String) pref.getProperty(CayennePreferences.LAST_DIR);
         try {
             boolean finished = false;
             File file = null;
@@ -153,7 +153,7 @@ public class NewProjectAction extends ProjectAction {
             }
 
             // Save dir path to the preferences
-            pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
+            pref.setProperty(CayennePreferences.LAST_DIR, file.getAbsolutePath());
             setMediator(new Mediator());
             Editor.getFrame().projectOpened(projectFile);
 

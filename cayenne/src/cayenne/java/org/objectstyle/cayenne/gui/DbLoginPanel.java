@@ -67,7 +67,7 @@ import javax.swing.text.Keymap;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
-import org.objectstyle.cayenne.util.Preferences;
+import org.objectstyle.cayenne.project.CayennePreferences;
 
 /**
  * Database login panel.
@@ -142,7 +142,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 	protected JPanel initInputArea() {
 		// user name line
 		JLabel unLabel = new JLabel("User Name:");
-		unInput = new PreferenceField(Preferences.USER_NAME);
+		unInput = new PreferenceField(CayennePreferences.USER_NAME);
 		disableVKEvents(unInput);
 
 		// password line
@@ -152,12 +152,12 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
 		// JDBC driver line
 		JLabel drLabel = new JLabel("JDBC Driver Class:");
-		drInput = new PreferenceField(Preferences.JDBC_DRIVER);
+		drInput = new PreferenceField(CayennePreferences.JDBC_DRIVER);
 		disableVKEvents(drInput);
 
 		// Database URL line
 		JLabel urlLabel = new JLabel("Database URL:");
-		urlInput = new PreferenceField(Preferences.DB_URL);
+		urlInput = new PreferenceField(CayennePreferences.DB_URL);
 		disableVKEvents(urlInput);
 
 		// Adapter class line
@@ -172,7 +172,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 		};
 		adapterInput =
 			new PreferenceField(
-				Preferences.RDBMS_ADAPTER,
+				CayennePreferences.RDBMS_ADAPTER,
 				Arrays.asList(adapter_arr));
 		disableVKEvents(adapterInput);
 
@@ -259,7 +259,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 			drInput.storePreferences();
 			urlInput.storePreferences();
 			adapterInput.storePreferences();
-			Preferences.getPreferences().storePreferences(null);
+			CayennePreferences.getPreferences().storePreferences();
 		} else if (e.getSource() == cancel) {
 			setDataSrcInfo(null);
 		}

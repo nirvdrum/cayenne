@@ -125,10 +125,11 @@ import org.objectstyle.cayenne.gui.util.XmlFilter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.project.CayennePreferences;
+import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectSet;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
-import org.objectstyle.cayenne.util.Preferences;
 
 /** 
  * Main frame of CayenneModeler. Responsibilities include 
@@ -211,30 +212,43 @@ public class Editor
      */
     public static void configLogging() {
         try {
-            String log =
-                Preferences.getPreferences().prefsDir().getCanonicalPath()
-                    + File.separator
-                    + "modeler.log";
-            Logger p1 = logObj;
-            Logger p2 = null;
-            while ((p2 = (Logger) p1.getParent()) != null) {
-                p1 = p2;
-            }
 
-            p1.removeAllAppenders();
-            p1.addAppender(new CayenneFileHandler(new SimpleLayout(), log, true));
+            File log = getLogFile();
+
+            if (log != null) {
+                Logger p1 = logObj;
+                Logger p2 = null;
+                while ((p2 = (Logger) p1.getParent()) != null) {
+                    p1 = p2;
+                }
+
+                p1.removeAllAppenders();
+                p1.addAppender(
+                    new CayenneFileHandler(
+                        new SimpleLayout(),
+                        log.getCanonicalPath(),
+                        true));
+            }
         } catch (IOException ioex) {
             logObj.warn("Error setting logging.", ioex);
         }
     }
-    
+
+    public static File getLogFile() {
+        if (!CayenneUserDir.getInstance().canWrite()) {
+            return null;
+        }
+
+        return CayenneUserDir.getInstance().resolveFile("modeler.log");
+    }
+
     /**
      * Returns a project that is currently a current project of an 
      * Editor singleton instance. This will be changed if CayenneModeler
      * ever starts supporting multiple open projects.
      */
     public static Project getProject() {
-    	return getFrame().projects.getCurrentProject();
+        return getFrame().projects.getCurrentProject();
     }
 
     public Editor() {
@@ -433,8 +447,8 @@ public class Editor
 
     /** Adds path to the list of last opened projects in preferences. */
     public void addToLastProjList(String path) {
-        Preferences pref = Preferences.getPreferences();
-        Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
+        CayennePreferences pref = CayennePreferences.getPreferences();
+        Vector arr = pref.getVector(CayennePreferences.LAST_PROJ_FILES);
         // Add proj path to the preferences
         // Prevent duplicate entries.
         if (arr.contains(path)) {
@@ -446,10 +460,10 @@ public class Editor
             arr.remove(arr.size() - 1);
         }
 
-        pref.remove(Preferences.LAST_PROJ_FILES);
+        pref.remove(CayennePreferences.LAST_PROJ_FILES);
         Iterator iter = arr.iterator();
         while (iter.hasNext()) {
-            pref.addProperty(Preferences.LAST_PROJ_FILES, iter.next());
+            pref.addProperty(CayennePreferences.LAST_PROJ_FILES, iter.next());
         }
     }
 
@@ -474,10 +488,10 @@ public class Editor
     }
 
     public void projectOpened(File projectFile) {
-    	logObj.debug("Creating new project: " + projectFile);
-    	
-    	// create a new project
-    	projects.createProject(DEFAULT_PROJECT_NAME, projectFile, true);
+        logObj.debug("Opening project: " + projectFile);
+
+        // create a new project
+        projects.createProject(DEFAULT_PROJECT_NAME, projectFile, true);
         view = new EditorView(mediator);
         getContentPane().add(view, BorderLayout.CENTER);
 
@@ -554,7 +568,7 @@ public class Editor
             return;
         }
 
-        Preferences.getPreferences().storePreferences(Editor.this);
+        CayennePreferences.getPreferences().storePreferences();
         Editor.this.setVisible(false);
         System.exit(0);
     }
