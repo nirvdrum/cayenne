@@ -188,13 +188,17 @@ public class IncrementalFaultList implements List {
         }
     }
 
-    protected void resolveAll() {
+    /**
+     * Will resolve all unread objects.
+     */
+    public void resolveAll() {
         resolveInterval(0, size());
     }
 
     /**
      * Resolves a sublist of objects starting at <code>fromIndex</code>
-     * up to but not including <code>toIndex</code>.
+     * up to but not including <code>toIndex</code>. Internally performs
+     * bound checking and trims indexes accordingly.
      */
     protected void resolveInterval(int fromIndex, int toIndex) {
         if (fromIndex >= toIndex) {
@@ -202,6 +206,19 @@ public class IncrementalFaultList implements List {
         }
 
         synchronized (elements) {
+        	if(elements.size() == 0) {
+        		return;
+        	}
+        	
+        	// perform bound checking
+        	if(fromIndex < 0) {
+        		fromIndex = 0;
+        	}
+        	
+        	if(toIndex > elements.size()) {
+        		toIndex = elements.size();
+        	}
+        	
             ArrayList quals = new ArrayList();
             ArrayList ids = new ArrayList();
             for (int i = fromIndex; i < toIndex; i++) {

@@ -89,7 +89,10 @@ public class IncrementalFaultListTst extends CayenneTestCase {
         new DataContextTst("Helper").populateTables();
 
         SelectQuery q = new SelectQuery("Artist");
-        q.setPageSize(5);
+        
+        // make sure total number of objects is not divisable
+        // by the page size, to test the last smaller page
+        q.setPageSize(6);
         // q.setLoggingLevel(Level.WARN);
         query = q;
         list = new IncrementalFaultList(super.createDataContext(), query);
@@ -109,9 +112,9 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     }
     
     public void testUnfetchedObjects() throws Exception {
-        assertEquals(DataContextTst.artistCount - 5, list.getUnfetchedObjects());
+        assertEquals(DataContextTst.artistCount - 6, list.getUnfetchedObjects());
         list.get(7);
-        assertEquals(DataContextTst.artistCount - 10, list.getUnfetchedObjects());
+        assertEquals(DataContextTst.artistCount - 12, list.getUnfetchedObjects());
         list.resolveAll();
         assertEquals(0, list.getUnfetchedObjects());
     }
@@ -119,13 +122,13 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     public void testPageIndex() throws Exception {
         assertEquals(0, list.pageIndex(0));
         assertEquals(0, list.pageIndex(1));
-        assertEquals(1, list.pageIndex(5));
-        assertEquals(13, list.pageIndex(69));
+        assertEquals(1, list.pageIndex(6));
+        assertEquals(13, list.pageIndex(82));
     }
 
     public void testPagesRead1() throws Exception {
         assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Map);
+        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Map);
 
         list.resolveInterval(5, 10);
         assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
@@ -138,23 +141,23 @@ public class IncrementalFaultListTst extends CayenneTestCase {
 
     public void testGet1() throws Exception {
         assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Map);
+        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Map);
 
-        Object a = list.get(7);
+        Object a = list.get(8);
 
         assertNotNull(a);
         assertTrue(a instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
+        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Artist);
     }
 
     public void testGet2() throws Exception {
         ((SelectQuery) query).setFetchingDataRows(true);
         assertTrue(((IncrementalFaultList) list).elements.get(0) instanceof Artist);
-        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Map);
+        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Map);
 
-        Object a = list.get(7);
+        Object a = list.get(8);
 
         assertNotNull(a);
-        assertTrue(((IncrementalFaultList) list).elements.get(7) instanceof Artist);
+        assertTrue(((IncrementalFaultList) list).elements.get(8) instanceof Artist);
     }
 }
