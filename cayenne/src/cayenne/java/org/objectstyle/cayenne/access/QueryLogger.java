@@ -259,9 +259,6 @@ public class QueryLogger {
                     buf.append("\n\tMax. connections in the pool: ").append(
                         dsi.getMaxConnections());
                 }
-
-                buf.append("\n\tLogin: ").append(dsi.getUserName());
-                buf.append("\n\tPassword: *******");
             }
             else {
                 buf.append(" pool information unavailable");

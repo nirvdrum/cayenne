@@ -387,8 +387,52 @@ public class PoolManager implements DataSource, ConnectionEventListener {
 
     /** Returns connection from the pool. */
     public synchronized Connection getConnection(String userName, String password)
-        throws SQLException {
+            throws SQLException {
 
+        PooledConnection pooledConnection = uncheckPooledConnection(userName, password);
+
+        try {
+            return uncheckConnection(pooledConnection);
+        }
+        catch (SQLException ex) {
+            logObj.info("Error getting connection", ex);
+
+            try {
+                pooledConnection.close();
+            }
+            catch (SQLException ignored) {
+            }
+
+            logObj.info("Reconnecting...");
+            
+            // do one reconnect attempt...
+            pooledConnection = uncheckPooledConnection(userName, password);
+            try {
+                return uncheckConnection(pooledConnection);
+            }
+            catch (SQLException reconnectEx) {
+                try {
+                    pooledConnection.close();
+                }
+                catch (SQLException ignored) {
+                }
+                
+                throw reconnectEx;
+            }
+        }
+    }
+    
+    private Connection uncheckConnection(PooledConnection pooledConnection)
+            throws SQLException {
+        Connection c = pooledConnection.getConnection();
+
+        // only do that on successfully unchecked connection...
+        usedPool.add(pooledConnection);
+        return c;
+    }
+    
+    private PooledConnection uncheckPooledConnection(String userName, String password)
+            throws SQLException {
         // wait for returned connections or the maintenance thread 
         // to bump the pool size...
 
@@ -396,9 +440,7 @@ public class PoolManager implements DataSource, ConnectionEventListener {
             
             // first try to open a new connection
             if (canGrowPool()) {
-                PooledConnection newConnection = newPooledConnection(userName, password);
-                usedPool.add(newConnection);
-                return newConnection.getConnection();
+                return newPooledConnection(userName, password);
             }
             
             // can't open no more... will have to wait for others to return a connection
@@ -428,10 +470,7 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         }
 
         // get first connection... lets cycle them in FIFO manner
-        PooledConnection pooledConn = (PooledConnection) unusedPool.remove(0);
-        usedPool.add(pooledConn);
-
-        return pooledConn.getConnection();
+        return (PooledConnection) unusedPool.remove(0);
     }
 
     public int getLoginTimeout() throws java.sql.SQLException {
