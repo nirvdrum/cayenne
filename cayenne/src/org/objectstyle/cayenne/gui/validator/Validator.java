@@ -397,6 +397,16 @@ public class Validator {
 						map,
 						attribute));
 			}
+			
+			if (attribute.getDbAttribute() == null) {
+				addErrorMessage(
+					new AttributeErrorMsg(
+						"Must select DbAttribute",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						attribute));
+			}
 		}
 	}
 

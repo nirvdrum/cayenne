@@ -131,6 +131,22 @@ public class ValidatorTst extends TestCase {
 		assertValidator(ErrorMsg.ERROR);
 	}
 
+	public void testValidateObjAttributes() throws Exception {
+		// should succeed
+		DataDomain d1 = new DataDomain("abc");
+		DataMap m1 = new DataMap();
+		ObjAttribute oa1 = buildValidObjAttribute("a1");
+		
+		validator.reset();
+		validator.validateObjAttributes(d1, m1, (ObjEntity)oa1.getEntity());
+		assertValidator(ErrorMsg.NO_ERROR);
+		
+		oa1.setDbAttribute(null);
+		validator.reset();
+		validator.validateObjAttributes(d1, m1, (ObjEntity)oa1.getEntity());
+		assertValidator(ErrorMsg.WARNING);
+	}
+	
 	public void testValidateDbAttributes() throws Exception {
 		// should succeed
 		DataDomain d1 = new DataDomain("abc");
@@ -263,6 +279,25 @@ public class ValidatorTst extends TestCase {
 		r1.addDbRelationship(dr1);
 		return r1;
 	}
+	
+	protected ObjAttribute buildValidObjAttribute(String name) {
+		DbAttribute a1 = new DbAttribute();
+		a1.setName("d" + name);
+		a1.setType(Types.CHAR);
+		a1.setMaxLength(2);
+		DbEntity e1 = new DbEntity("e1");
+		e1.addAttribute(a1);
+		
+		ObjEntity oe1 = new ObjEntity("e1");
+		oe1.setDbEntity(e1);
+		
+		ObjAttribute oa1 = new ObjAttribute(name, "java.lang.Integer", oe1);
+		oe1.addAttribute(oa1);
+		oa1.setDbAttribute(a1);
+	
+		return oa1;
+	}
+
 
 	protected void assertValidator(int expectedSeverity) {
 		assertEquals(expectedSeverity, validator.getErrorSeverity());
