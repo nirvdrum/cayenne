@@ -71,7 +71,12 @@ public abstract class AbstractType implements ExtendedType {
         int type,
         int precision)
         throws Exception {
-        st.setObject(pos, val, type, precision);
+        if (precision != -1) {
+			st.setObject(pos, val, type, precision);
+        }
+        else {
+			st.setObject(pos, val);
+        }
     }
 
     public String toString() {
