@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.query.*;
 public class DataContext implements QueryEngine {
     static Logger logObj = Logger.getLogger(DataContext.class.getName());
 
-    protected DataDomain domain;
+    protected QueryEngine parent;
     protected HashMap registeredMap = new HashMap();
     protected HashMap committedSnapshots = new HashMap();
     protected QueryHelper queryHelper = new QueryHelper(this);
@@ -83,8 +83,15 @@ public class DataContext implements QueryEngine {
         this(null);
     }
 
-    public DataContext(DataDomain domain) {
-        this.domain = domain;
+    /** 
+     * Creates new DataContext and initializes it
+     * with the parent QueryEngine. Normally parent is an 
+     * instance of DataDomain. DataContext will use parent
+     * to execute database queries, updates, and access 
+     * DataMap objects.
+     */
+    public DataContext(QueryEngine parent) {
+        this.parent = parent;
     }
 
     /** Returns an object used to build queries within this context */
@@ -92,9 +99,9 @@ public class DataContext implements QueryEngine {
         return queryHelper;
     }
 
-    /** Returns parent domain object. */
-    public DataDomain getDomain() {
-        return domain;
+    /** Returns parent QUeryEngine object. */
+    public QueryEngine getParent() {
+        return parent;
     }
 
     /** Returns a list of objects that are registered
@@ -469,7 +476,7 @@ public class DataContext implements QueryEngine {
         if (queryList.size() > 0) {
             CommitProcessor result =
                 new CommitProcessor(logLevel, insObjects, updObjects, delObjects);
-            domain.performQueries(queryList, result);
+            parent.performQueries(queryList, result);
             if (!result.isTransactionCommitted())
                 throw new CayenneRuntimeException("Error committing transaction.");
             else if (result.isTransactionRolledback())
@@ -500,23 +507,28 @@ public class DataContext implements QueryEngine {
     /** Performs a single database select query. */
     public List performQuery(SelectQuery query, Level logLevel) {
         SelectProcessor result = new SelectProcessor(logLevel);
-        domain.performQuery(query, result);
+        parent.performQuery(query, result);
         return result.getLastResult();
     }
 
-    /** Delegates queries execution to parent DataDomain. */
+   	/** Delegates node lookup to parent QueryEngine. */
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+        return parent.dataNodeForObjEntity(objEntity);
+    }
+    
+    /** Delegates queries execution to parent QueryEngine. */
     public void performQueries(List queries, OperationObserver resultConsumer) {
-        domain.performQueries(queries, resultConsumer);
+        parent.performQueries(queries, resultConsumer);
     }
 
-    /** Delegates query execution to parent DataDomain. */
+    /** Delegates query execution to parent QueryEngine. */
     public void performQuery(Query query, OperationObserver resultConsumer) {
-        domain.performQuery(query, resultConsumer);
+        parent.performQuery(query, resultConsumer);
     }
 
-    /** Delegates entity name resolution to parent DataDomain. */
+    /** Delegates entity name resolution to parent QueryEngine. */
     public ObjEntity lookupEntity(String objEntityName) {
-        return domain.lookupEntity(objEntityName);
+        return parent.lookupEntity(objEntityName);
     }
 
     /**
@@ -553,7 +565,7 @@ public class DataContext implements QueryEngine {
      */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
         ObjEntity objEntity =
-            getDomain().lookupEntity(dataObject.getObjectId().getObjEntityName());
+            parent.lookupEntity(dataObject.getObjectId().getObjEntityName());
         DbEntity dbEntity = objEntity.getDbEntity();
 
         Iterator it = dbEntity.getRelationshipMap().values().iterator();
@@ -627,9 +639,9 @@ public class DataContext implements QueryEngine {
     public ObjectId createPermId(DataObject anObject)
         throws CayenneRuntimeException {
         TempObjectId tempId = (TempObjectId) anObject.getObjectId();
-        ObjEntity objEntity = getDomain().lookupEntity(tempId.getObjEntityName());
+        ObjEntity objEntity = parent.lookupEntity(tempId.getObjEntityName());
         DbEntity dbEntity = objEntity.getDbEntity();
-        DataNode aNode = domain.dataNodeForObjEntity(objEntity);
+        DataNode aNode = dataNodeForObjEntity(objEntity);
 
         HashMap idMap = new HashMap();
         // first get values delivered via relationships

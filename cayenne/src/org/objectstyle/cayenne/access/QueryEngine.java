@@ -84,5 +84,10 @@ public interface QueryEngine {
      *
      *  @see org.objectstyle.cayenne.map.ObjEntity */
    	public ObjEntity lookupEntity(String objEntityName);
+   	
+   	
+   	/** Returns DataNode that should handle database operations for
+      * a specified <code>objEntity</code>. */
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity);
 }
 

@@ -169,6 +169,14 @@ public class DataNode implements QueryEngine {
 
     // other methods
 
+    /** 
+     * Returns this object if it can hanle queries for
+     * <code>objEntity</code>, returns null otherwise.
+     */
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+        return (lookupEntity(objEntity.getName()) != null) ? this : null;
+    }
+
     /** Lookup an entity by name across all node maps. */
     public ObjEntity lookupEntity(String objEntityName) {
         DataMap[] maps = this.getDataMaps();
