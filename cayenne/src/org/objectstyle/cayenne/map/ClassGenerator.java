@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.map;
 
 import java.io.Writer;
 import java.util.Properties;
-import java.util.logging.Logger;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -73,8 +72,6 @@ import org.objectstyle.util.ResourceLocator;
   * @author Andrei Adamchik
   */
 public class ClassGenerator {
-    static Logger logObj = Logger.getLogger(ClassGenerator.class.getName());
-
     private static boolean initDone;
 
     /** 
@@ -146,8 +143,6 @@ public class ClassGenerator {
     /** Loads Velocity template used for class generation. */
     public ClassGenerator(String template) throws Exception {
         if (!initDone) {
-            logObj.info(
-                "'bootstrapVelocity' wasn't called, initializing with Cayenne library ClassLoader.");
             bootstrapVelocity(this.getClass());
         }
         velCtxt = new VelocityContext();
