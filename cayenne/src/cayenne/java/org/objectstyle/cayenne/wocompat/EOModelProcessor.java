@@ -672,8 +672,12 @@ public class EOModelProcessor {
                 continue;
             }
 
+            DbEntity dbEntity = e.getDbEntity();
+            if(dbEntity == null) {
+                throw new CayenneRuntimeException("no DbEntity for ObjEntity " + e.getName());
+            }
             Expression exp = new ASTDbPath(targetPath);
-            Iterator path = e.getDbEntity().resolvePathComponents(exp);
+            Iterator path = dbEntity.resolvePathComponents(exp);
 
             ObjRelationship flatRel = new ObjRelationship();
             flatRel.setName((String) relMap.get("name"));
