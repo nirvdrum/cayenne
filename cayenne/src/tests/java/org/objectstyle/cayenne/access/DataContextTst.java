@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -289,12 +288,8 @@ public class DataContextTst extends DataContextTestBase {
      * Test fetching a derived entity.
      */
     public void testDerivedEntityFetch1() throws Exception {
-        // Skip HSQLDB, since it currently does not support HAVING;
-        // this is supposed to appear in the next release.
-        if (((DataNode) getDomain().getDataNodes().iterator().next())
-            .getAdapter()
-            .getClass()
-            == HSQLDBAdapter.class) {
+        // some DBs don't support HAVING
+        if (!getDatabaseSetupDelegate().supportsHaving()) {
             return;
         }
 
@@ -314,12 +309,8 @@ public class DataContextTst extends DataContextTestBase {
      * relationships.
      */
     public void testDerivedEntityFetch2() throws Exception {
-        // Skip HSQLDB, since it currently does not support HAVING;
-        // this is supposed to appear in the next release.
-        if (((DataNode) getDomain().getDataNodes().iterator().next())
-            .getAdapter()
-            .getClass()
-            == HSQLDBAdapter.class) {
+        // some DBs don't support HAVING
+        if (!getDatabaseSetupDelegate().supportsHaving()) {
             return;
         }
 

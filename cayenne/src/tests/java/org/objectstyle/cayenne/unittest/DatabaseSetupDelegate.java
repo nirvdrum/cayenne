@@ -67,7 +67,9 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
+import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
+import org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
@@ -95,6 +97,8 @@ public class DatabaseSetupDelegate {
         delegates.put(FirebirdAdapter.class, FirebirdDelegate.class);
         delegates.put(PostgresAdapter.class, PostgresDelegate.class);
         delegates.put(MySQLAdapter.class, MySQLDelegate.class);
+        delegates.put(HSQLDBDelegate.class, HSQLDBAdapter.class);
+        delegates.put(OpenBaseDelegate.class, OpenBaseAdapter.class);
     }
 
     protected DbAdapter adapter;
@@ -157,6 +161,10 @@ public class DatabaseSetupDelegate {
     }
     
     public boolean supportsBinaryPK() {
+        return true;
+    }
+    
+    public boolean supportsHaving() {
         return true;
     }
 
