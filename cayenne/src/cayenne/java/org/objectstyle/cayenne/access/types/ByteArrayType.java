@@ -72,7 +72,7 @@ public class ByteArrayType extends AbstractType {
 
     private static final int BUF_SIZE = 8 * 1024;
 
-    protected boolean trimingBytes;
+    protected boolean trimmingBytes;
     protected boolean usingBlobs;
 
     /**
@@ -99,7 +99,7 @@ public class ByteArrayType extends AbstractType {
 
     public ByteArrayType(boolean trimminBytes, boolean usingBlobs) {
         this.usingBlobs = usingBlobs;
-        this.trimingBytes = trimminBytes;
+        this.trimmingBytes = trimminBytes;
     }
 
     public String getClassName() {
@@ -120,7 +120,7 @@ public class ByteArrayType extends AbstractType {
             bytes = rs.getBytes(index);
 
             // trim BINARY type
-            if (bytes != null && type == Types.BINARY && isTrimingBytes()) {
+            if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
                 bytes = trimBytes(bytes);
             }
         }
@@ -205,11 +205,11 @@ public class ByteArrayType extends AbstractType {
         this.usingBlobs = usingBlobs;
     }
 
-    public boolean isTrimingBytes() {
-        return trimingBytes;
+    public boolean isTrimmingBytes() {
+        return trimmingBytes;
     }
 
-    public void setTrimingBytes(boolean trimingBytes) {
-        this.trimingBytes = trimingBytes;
+    public void setTrimmingBytes(boolean trimingBytes) {
+        this.trimmingBytes = trimingBytes;
     }
 }

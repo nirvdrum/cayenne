@@ -76,11 +76,11 @@ public class CharType extends AbstractType {
 
     private static final int BUF_SIZE = 8 * 1024;
 
-    protected boolean trimingChars;
+    protected boolean trimmingChars;
     protected boolean usingClobs;
 
     public CharType(boolean trimingChars, boolean usingClobs) {
-        this.trimingChars = trimingChars;
+        this.trimmingChars = trimingChars;
         this.usingClobs = usingClobs;
     }
 
@@ -105,7 +105,7 @@ public class CharType extends AbstractType {
             val = rs.getString(index);
 
             // trim CHAR type
-            if (val != null && type == Types.CHAR && isTrimingChars()) {
+            if (val != null && type == Types.CHAR && isTrimmingChars()) {
                 val = val.trim();
             }
         }
@@ -180,12 +180,12 @@ public class CharType extends AbstractType {
      * JDBC drivers (e.g. Oracle), that return Strings for CHAR columsn  padded
      * with spaces.
      */
-    public boolean isTrimingChars() {
-        return trimingChars;
+    public boolean isTrimmingChars() {
+        return trimmingChars;
     }
 
-    public void setTrimingChars(boolean trimingChars) {
-        this.trimingChars = trimingChars;
+    public void setTrimmingChars(boolean trimingChars) {
+        this.trimmingChars = trimingChars;
     }
 
     public boolean isUsingClobs() {

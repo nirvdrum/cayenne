@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.types;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.access.types;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.types;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
