@@ -133,22 +133,33 @@ public interface Expression {
     public static final int MIN = 34;
     
     
-// interface methods
     
-    /** Returns a count of operands of this expression. In real life there are
-     *  unary (count == 1), binary (count == 2) and ternary (count == 3) expressions. */
+    /** 
+     * Returns a count of operands of this expression. In real life there are
+     * unary (count == 1), binary (count == 2) and ternary (count == 3) 
+     * expressions.
+     */
     public int getOperandCount();
     
-    /** Returns a value of operand at <code>index</code>. 
-      * Operand indexing starts at 0. */
+    /** 
+     * Returns a value of operand at <code>index</code>. 
+     * Operand indexing starts at 0. 
+     */
     public Object getOperand(int index);
     
     
-    /** Sets a value of operand at <code>index</code>. 
-      * Operand indexing starts at 0. */
+    /** 
+     * Sets a value of operand at <code>index</code>. 
+     * Operand indexing starts at 0.
+     */
     public void setOperand(int index, Object value);
     
     
-    /** Returns a type of expression. Most common types are defined in this interface. */
+    /** 
+     * Returns a type of expression. Most common types are defined 
+     * as public static fields of this interface.
+     */
     public int getType();
+    
+    public void setType(int type);
 }

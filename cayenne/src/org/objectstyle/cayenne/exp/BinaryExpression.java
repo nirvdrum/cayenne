@@ -63,6 +63,8 @@ public class BinaryExpression implements Expression {
     protected Object rightOperand;
     protected int type;
     
+    protected BinaryExpression() {}
+    
     public BinaryExpression(int type) {
         this.type = type;
     }
@@ -98,5 +100,9 @@ public class BinaryExpression implements Expression {
     
     public int getType() {
         return type;
+    }
+    
+    public void setType(int type) {
+        this.type = type;
     }
 }

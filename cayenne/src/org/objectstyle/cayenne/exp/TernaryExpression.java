@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.exp;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 /** Generic ternary expression. 
  *  Describes expression in a form: "<tt>doSomething(operand1, operand2, operand3)</tt>". 
@@ -61,49 +61,54 @@ package org.objectstyle.cayenne.exp;
 public class TernaryExpression implements Expression {
     protected Object operand0;
     protected Object operand1;
-    protected Object operand2;    
+    protected Object operand2;
     protected int type;
-    
+
+    protected TernaryExpression() {}
+
     public TernaryExpression(int type) {
         this.type = type;
     }
-    
+
     public final int getOperandCount() {
         return 3;
     }
-    
-    
+
     public Object getOperand(int index) {
-        if(index == 0)
+        if (index == 0)
             return operand0;
-        else if(index == 1)
+        else if (index == 1)
             return operand1;
-        else if(index == 2)
+        else if (index == 2)
             return operand2;
-        
-        throw new IllegalArgumentException("Invalid operand index for TernaryExpression: " + index);
+
+        throw new IllegalArgumentException(
+            "Invalid operand index for TernaryExpression: " + index);
     }
-    
-    
+
     public void setOperand(int index, Object value) {
-        if(index == 0) {
+        if (index == 0) {
             operand0 = value;
             return;
         }
-        else if(index == 1) {
+        else if (index == 1) {
             operand1 = value;
             return;
         }
-        else if(index == 2) {
+        else if (index == 2) {
             operand2 = value;
             return;
         }
-        
-        throw new IllegalArgumentException("Invalid operand index for TernaryExpression: " + index);
+
+        throw new IllegalArgumentException(
+            "Invalid operand index for TernaryExpression: " + index);
     }
-    
-    
+
     public int getType() {
         return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }

@@ -166,7 +166,6 @@ public class DataContextTst extends TestCase {
         q.addPrefetch("paintingArray");
         
         SelectOperationObserver o = new SelectOperationObserver();
-        o.
         ctxt.performQuery(q, o);
         assertEquals(2, o.getSelectCount());
     }

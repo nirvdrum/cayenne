@@ -62,6 +62,8 @@ public class UnaryExpression implements Expression {
     protected Object operand;
     protected int type;
     
+    protected UnaryExpression() {}
+    
     public UnaryExpression(int type) {
         this.type = type;
     }
@@ -89,6 +91,10 @@ public class UnaryExpression implements Expression {
     
     public int getType() {
         return type;
+    }
+    
+    public void setType(int type) {
+        this.type = type;
     }
     
     
