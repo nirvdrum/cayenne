@@ -106,7 +106,7 @@
         <mkdir dir="${dist}/doc/dtd"/>
         <mkdir dir="${dist}/bin"/>
     </target>
-
+    
 
     <!-- ========================================== -->
     <!-- Creates full Cayenne distribution          -->
@@ -368,6 +368,19 @@
     <target name="compile_subprojects">
         <ant dir="src" target="compile"/>
         <ant dir="tests" target="compile"/>
+    </target>
+    
+    
+    
+    <!-- ========================================== -->
+    <!-- Release related targets.                   -->
+    <!-- ========================================== -->   
+    <target name="release" depends="prepare,release-notes,dist-src">
+    	<echo>Created ${project.version} release.</echo> 
+    </target>
+    
+    <target name="release-notes">
+    	<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
     </target>
 </project>
 
