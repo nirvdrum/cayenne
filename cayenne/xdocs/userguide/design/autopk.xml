@@ -9,7 +9,7 @@
     <section name="4. Design">
         <subsection name="4.7 Primary Key Generation" anchor="pk">
             <p>Depending on the type of persistent objects and the database
-            design, primary key values can be handled in a few different. 
+            design, primary key values can be handled in a few different ways. 
             A decision to use one or another technique will affect how 
             the mapping is done. Here is a summary of possible scenarious. Each one
             is described below in details.
@@ -44,12 +44,12 @@
             
             <subsection name="4.7.1 Meaningful Primary Key" anchor="pk-do">            
             <p>DataObjects can provide their own values for the primary key 
-            columns. Sometimes this makes sense. For example if a primary
-            key column conains meaningful data, like Social Security Number.
+            columns. Sometimes this makes sense, for example if a primary
+            key column conains meaningful data like a Social Security Number.
             In such cases primary key handling is no different from handling any other
             persistent attributes. Each primary key column (DbAttribute) will
-            have an ObjAttribute mapped to it. Java class implementing DataObject
-            will contain a property described by this ObjAttribute. Value
+            have an ObjAttribute mapped to it. The Java class implementing DataObject
+            will contain a property described by this ObjAttribute. The value
             of this property will be saved to the database.</p>
             </subsection>
             
