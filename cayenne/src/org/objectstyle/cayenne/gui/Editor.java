@@ -127,6 +127,7 @@ implements ActionListener
     JMenuItem createDataSourceMenu	= new JMenuItem("Create Data Source");
     JMenuItem createObjEntityMenu 	= new JMenuItem("Create Object Entity");
     JMenuItem createDbEntityMenu 	= new JMenuItem("Create DB Entity");
+    JMenuItem addDataMapMenu 		= new JMenuItem("Add Data Map");
     JMenuItem removeMenu 			= new JMenuItem("Remove");
 
     JMenu  toolMenu   		= new JMenu("Tools");
@@ -169,6 +170,7 @@ implements ActionListener
         createDataSourceMenu.addActionListener(this);
         createObjEntityMenu.addActionListener(this);
         createDbEntityMenu.addActionListener(this);
+        addDataMapMenu.addActionListener(this);
         removeMenu.addActionListener(this);
         removeMenu.setAccelerator(KeyStroke.getKeyStroke(
 				        	KeyEvent.VK_D, ActionEvent.CTRL_MASK));
@@ -231,6 +233,8 @@ implements ActionListener
         projectMenu.add(createObjEntityMenu);
         projectMenu.add(createDbEntityMenu);
         projectMenu.addSeparator();
+        projectMenu.add(addDataMapMenu);
+        projectMenu.addSeparator();
         projectMenu.add(removeMenu);
 
         toolMenu.add(importDbMenu);
@@ -248,6 +252,7 @@ implements ActionListener
 	private void initAction() {
 		actionMap = new ActionMap();
 		actionMap.put("CreateDataMap", new CreateDataMapAction(mediator));
+		actionMap.put("AddDataMap", new AddDataMapAction(mediator));
 		actionMap.put("SaveAll", new SaveAction(mediator));
 		actionMap.put("ImportDb", new ImportDbAction(mediator));
 		actionMap.put("Remove", new RemoveAction(mediator));
@@ -395,6 +400,8 @@ implements ActionListener
             createDomain();
         } else if (src == createDataMapMenu || src == createDataMapBtn) {
         	actionMap.get("CreateDataMap").actionPerformed(e);
+        } else if (src == addDataMapMenu ) {
+        	actionMap.get("AddDataMap").actionPerformed(e);
     	} else if (src == createDataSourceMenu || src == createDataSourceBtn) {
     		createDataNode();
         } else if (src == createObjEntityMenu || src == createObjEntityBtn) {
@@ -688,6 +695,10 @@ implements ActionListener
 
 
 	public void currentDomainChanged(DomainDisplayEvent e){
+		if (e.getDomain() == null) {
+			disableMenu();
+			return;
+		}
 		enableDomainMenu();
 		createDataMapMenu.setText("Create Data Map");
 		createDataMapBtn.setToolTipText("Create data map");
@@ -696,9 +707,7 @@ implements ActionListener
 	}
 
 	public void currentDataNodeChanged(DataNodeDisplayEvent e){
-		enableDomainMenu();
-		createDataMapMenu.setText("Add Data Map");
-		createDataMapBtn.setToolTipText("Add data map");
+		enableDataNodeMenu();
 		removeMenu.setText("Remove Data Node");
 		removeBtn.setToolTipText("Remove curent data node");
 	}
@@ -712,13 +721,6 @@ implements ActionListener
    	public void currentObjEntityChanged(EntityDisplayEvent e)
    	{
 		enableDataMapMenu();
-		if (mediator.getCurrentDataNode() == null) {
-			createDataMapMenu.setText("Create Data Map");
-			createDataMapBtn.setToolTipText("Create data map");
-		} else {
-			createDataMapMenu.setText("Add Data Map");
-			createDataMapBtn.setToolTipText("Add data map");
-		}
 		removeMenu.setText("Remove Obj Entity");
 		removeBtn.setToolTipText("Remove current obj entity");
    	}
@@ -727,13 +729,6 @@ implements ActionListener
    	public void currentDbEntityChanged(EntityDisplayEvent e)
    	{
 		enableDataMapMenu();
-		if (mediator.getCurrentDataNode() == null) {
-			createDataMapMenu.setText("Create Data Map");
-			createDataMapBtn.setToolTipText("Create data map");
-		} else {
-			createDataMapMenu.setText("Add Data Map");
-			createDataMapBtn.setToolTipText("Add data map");
-		}
 		removeMenu.setText("Remove Db Entity");
 		removeBtn.setToolTipText("Remove Db Entity");
    	}
@@ -784,6 +779,7 @@ implements ActionListener
         createDataSourceMenu.setEnabled(false);
         createObjEntityMenu.setEnabled(false);
         createDbEntityMenu.setEnabled(false);
+        addDataMapMenu.setEnabled(false);
 
         saveMenu.setEnabled(false);
         removeMenu.setEnabled(false);
@@ -793,7 +789,6 @@ implements ActionListener
         generateDbMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);
 
-        createDomainBtn.setEnabled(false);
         createDataMapBtn.setEnabled(false);
         createDataSourceBtn.setEnabled(false);
         createObjEntityBtn.setEnabled(false);
@@ -818,7 +813,10 @@ implements ActionListener
 	}
 
 	private void enableDataMapMenu() {
-		enableDomainMenu();
+		if (mediator.getCurrentDataNode() != null)
+			enableDataNodeMenu();
+		else
+			enableDomainMenu();
 		setPackageMenu.setEnabled(true);
         createObjEntityMenu.setEnabled(true);
         createDbEntityMenu.setEnabled(true);
@@ -828,6 +826,12 @@ implements ActionListener
         createObjEntityBtn.setEnabled(true);
         createDbEntityBtn.setEnabled(true);
 	}
+
+	private void enableDataNodeMenu() {
+		enableDomainMenu();
+		addDataMapMenu.setEnabled(true);
+	}
+
 
     public static void main(String[] args)
     {

@@ -59,6 +59,8 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.io.File;
 import java.util.logging.Logger;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.AbstractAction;
 
@@ -182,6 +184,25 @@ public class RemoveAction extends AbstractAction
 	}
 	
 	private void removeDataMapFromDataNode(){
+		DataNode node = mediator.getCurrentDataNode();
+		DataMap map = mediator.getCurrentDataMap();
+		// Get existing data maps
+		Object[] maps = node.getDataMaps();
+		DataMap[] arr = new DataMap[maps.length - 1];
+		int j = 0;
+		for (int i = 0; i < maps.length; i++) {
+			DataMap temp = (DataMap)maps[i];
+			if (temp == map) {
+				logObj.fine("Skipping map " + map.getName());
+				continue;
+			}
+			arr[j] = temp;
+			j++;
+		}
+		node.setDataMaps(arr);
+		// Force reloading of the data node in the browse view
+		DataNodeEvent ev;
+		ev = new DataNodeEvent(Editor.getFrame(), node);
+		mediator.fireDataNodeEvent(ev);
 	}
-	
 }

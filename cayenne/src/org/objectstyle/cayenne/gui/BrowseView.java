@@ -300,8 +300,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 					}// End for(j)
 					if (false == found) {
 						DefaultMutableTreeNode map_ele = loadMap(maps[i]);
-						node.add(map_ele);
-						logObj.fine("Added map to node");
+						model.insertNodeInto(map_ele, node, node.getChildCount());
+						logObj.fine("Added map " + maps[i].getName() + " to node");
 						break;
 					}
 				}// End for(i)
@@ -319,6 +319,7 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 						}
 					}
 					if (!found) {
+						logObj.fine("About to remove map "+ wrap + " from node");
 						model.removeNodeFromParent(child);
 						break;
 					}
