@@ -7,7 +7,7 @@
         <p>Cayenne provides a comprehensive suite of unit tests. To execute
             unit tests do the following:</p>
             
-            <p><strong>Step 1.</strong> Configure one or more datasources. To do this, create a directory 
+            <p><strong>Step 1.</strong> [Optional] Configure one or more datasources. To do this, create a directory 
             <code>$HOME/.cayenne/</code> and place a file called <code>connection.properties</code>
             in this directory. File contents should be similar to this example:</p>
             
@@ -29,6 +29,11 @@ example2.jdbc.driver = com.xyz.MyDriverClass
 		and "example2" are such identifiers. They can be arbitrary strings without "." (dot) 
 		symbols.
 		</p>
+
+        <p>If no <code>cayenne.test.connection</code> propery is specified, unit tests default to using
+        the "internal_embedded_datasource" identifier, which is an embedded HSQLDB datasource.
+        Note that you cannot use "internal_embedded_datasource" as a datasource identifier.
+        </p>
         
         <p><strong>Step 2.</strong> Run unit tests for one of the configured datasources:</p>
 <source># cd cayenne
