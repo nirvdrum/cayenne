@@ -594,7 +594,7 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
         treePanel = new BrowseView(temp_mediator);
         splitPane.setLeftComponent(treePanel);
         splitPane.setRightComponent(detailPanel);
-  		splitPane.setDividerLocation(170);
+  		splitPane.setContinuousLayout(true);
 
         detailLayout = new CardLayout();
         detailPanel.setLayout(detailLayout);
