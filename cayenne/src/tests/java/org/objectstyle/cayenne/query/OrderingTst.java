@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.unittest.*;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class OrderingTst extends CayenneTestCase {

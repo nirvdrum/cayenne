@@ -59,7 +59,6 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.art.NonPersistentBean;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -69,6 +68,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.TestBean;
 
 /**
  * Test case for in memory expression evaluation by ASTNode produced from
@@ -98,11 +98,11 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
             ASTCompiler.compile(
                 ExpressionFactory.unaryExp(Expression.OBJ_PATH, "property2"));
 
-        NonPersistentBean b1 = new NonPersistentBean();
+        TestBean b1 = new TestBean();
         b1.setProperty2(1);
         assertEquals(new Integer(1), node.evaluateASTChain(b1));
 
-        NonPersistentBean b2 = new NonPersistentBean();
+        TestBean b2 = new TestBean();
         b2.setProperty2(-3);
         assertEquals(new Integer(-3), node.evaluateASTChain(b2));
     }
