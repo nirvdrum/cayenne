@@ -78,7 +78,8 @@ public class ObjEntityValidator extends TreeNodeValidator {
     public void validateObject(Object[] path, Validator validator) {
         ObjEntity ent = (ObjEntity) ProjectTraversal.objectFromPath(path);
         validateName(ent, path, validator);
-
+		validateClassName(ent, path, validator);
+		
         // validate DbEntity presence
         if (ent.getDbEntity() == null) {
             validator.registerWarning("ObjEntity has no DbEntity mapping.", path);
@@ -90,6 +91,35 @@ public class ObjEntityValidator extends TreeNodeValidator {
         }
 
     }
+
+	private void validateClassName(ObjEntity ent, Object[] path, Validator validator) {
+		String className = ent.getClassName();
+		
+        if (Util.isEmptyString(className)) {
+        	return; //empty is ok
+        }
+        
+		DataMap map = (DataMap) ProjectTraversal.objectParentFromPath(path);
+        if (map == null) {
+            return;
+        }
+        
+        // check for duplicate class names in the parent context
+        Iterator it = map.getObjEntitiesAsList().iterator();
+        while (it.hasNext()) {
+            ObjEntity otherEnt = (ObjEntity) it.next();
+            if (otherEnt == ent) {
+                continue;
+            }
+
+            if (className.equals(otherEnt.getClassName())) {
+                validator.registerError("Duplicate ObjEntity class name: " + className + ".", path);
+                break;
+            }
+        }
+
+	}
+
 
     protected void validateName(ObjEntity ent, Object[] path, Validator validator) {
         String name = ent.getName();

@@ -94,12 +94,6 @@ public class DataMap {
 	 */
 	private CayenneMap objEntityMap = new CayenneMap(this);
 
-	/**
-	 * An internal map of classNames to ObjEntities in order to check if an ObjEntity is being added
-	 * that has the same class as another existing ObjEntity.  Not used for any other purpose
-	 */
-	private Map classNameObjEntityMap = new HashMap();
-
 	/** DbEntities representing metadata for individual database tables.
 	  * The name of DbEntity (which is also a database table
 	  * name) serves as a key. */
@@ -236,36 +230,13 @@ public class DataMap {
 
 	/** 
 	 * Adds ObjEntity to the list of map entities.
-	 * If there is another entity registered under the same name, or which uses the same class
-	 * throws an IllegalArgumentException.
 	 */
 	public void addObjEntity(ObjEntity objEntity) {
 		if (objEntity.getName() == null) {
 			throw new NullPointerException("Attempt to add ObjEntity with no name.");
 		}
 
-		//Never check for uniquness if the class name is null - typically this will be during modelling, or
-		// perhaps when there are "generic" records which have no class.  
-		if(null!=objEntity.getClassName()) {
-			ObjEntity existingEntity = (ObjEntity) classNameObjEntityMap.get(objEntity.getClassName());
-			if (existingEntity != null) {
-				throw new IllegalArgumentException(
-					getClass().getName()
-						+ ": Cannot add ObjEntity "
-						+ objEntity.getName()
-						+ " because this DataMap already has an ObjEntity ("
-						+ existingEntity.getName()
-						+ ") for the class "
-						+ objEntity.getClassName());
-			}
-		}
 		objEntityMap.put(objEntity.getName(), objEntity);
-		
-		//Do not add to the className map until adding was otherwise successful, and 
-		// do not add if there is no real classname
-		if(null!=objEntity.getClassName()) {
-			classNameObjEntityMap.put(objEntity.getClassName(), objEntity);
-		}
 	}
 
 	/** 
@@ -533,7 +504,6 @@ public class DataMap {
 		ObjEntity objEntity=(ObjEntity)objEntityMap.get(entity_name);
 		if(objEntity!=null) {
 			objEntityMap.remove(entity_name);
-			classNameObjEntityMap.remove(objEntity.getClassName());
 		}
 	}
 }

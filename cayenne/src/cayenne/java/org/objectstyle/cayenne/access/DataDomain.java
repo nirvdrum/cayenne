@@ -127,45 +127,8 @@ public class DataDomain implements QueryEngine {
 		this.name = name;
 	}
 
-	/** Registers new DataMap with this domain. 
-	 * @throws CayenneRuntimeException if the given map is not already part of this domain, and
-	 * it contains an ObjEntity with the same class name as another ObjEntity in a previously added DataMap
-	 * */
+	/** Registers new DataMap with this domain. */
 	public void addMap(DataMap map) {
-		//The same map may be "added" more than once... do not check if it is not new
-		if (maps.get(map.getName()) == null) {
-			//Check existing maps
-			Iterator mapIterator = maps.values().iterator();
-			while (mapIterator.hasNext()) {
-				DataMap existingMap = (DataMap) mapIterator.next();
-				Iterator existingMapEntities = existingMap.getObjEntitiesAsList(false).iterator(); //No dependencies
-				while (existingMapEntities.hasNext()) {
-					ObjEntity existingEntity = (ObjEntity) existingMapEntities.next();
-					Iterator newMapEntities = map.getObjEntitiesAsList(false).iterator(); //No dependencies
-					while (newMapEntities.hasNext()) {
-						ObjEntity newEntity = (ObjEntity) newMapEntities.next();
-						String newClassName=newEntity.getClassName();
-						//Allow multiple "null" class names
-						if ((null!=newClassName) && (newClassName.equals(existingEntity.getClassName()))) {
-							throw new CayenneRuntimeException(
-								"Cannot add DataMap "
-									+ map.getName()
-									+ " to DataDomain "
-									+ this.getName()
-									+ " because an existing map "
-									+ existingMap.getName()
-									+ " contains an ObjEntity ("
-									+ existingEntity.getName()
-									+ ") with the same className ("
-									+ existingEntity.getClassName()
-									+ ") as an ObjEntity in the new map ("
-									+ newEntity.getName()
-									+ ")");
-						}
-					}
-				}
-			}
-		}
 		maps.put(map.getName(), map);
 	}
 

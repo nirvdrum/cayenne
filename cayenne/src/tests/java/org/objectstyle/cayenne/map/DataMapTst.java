@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * DataMap unit tests.
  * 
  * @author Andrei Adamchik 
+ * @author Craig Miskell
  */
 public class DataMapTst extends CayenneTestCase {
 	protected DataMap map;
@@ -109,19 +110,6 @@ public class DataMapTst extends CayenneTestCase {
 		} catch (Exception e) {
 		}	
 	}
-	
-	public void testAddEntityWithSameClassName() throws Exception {
-		ObjEntity e1 = new ObjEntity("d");
-		ObjEntity e2 = new ObjEntity("e");
-		e1.setClassName("d");
-		e2.setClassName("d");
-		map.addObjEntity(e1);
-		try {
-			map.addObjEntity(e2);
-			fail("Should not be able to add more than one entity with the same class name");	
-		} catch (Exception e) {
-		}	
-	}
 
 	//It should be possible to cleanly remove and then add the same entity again.
 	//Uncovered the need for this while testing modeller manually.
@@ -131,6 +119,15 @@ public class DataMapTst extends CayenneTestCase {
 		
 		map.removeObjEntity(e.getName());
 		map.addObjEntity(e);
+	}
+	
+	//Now possible to have more than one objEntity with a null class name. 
+	//This test proves it
+	public void testMultipleNullClassNames() {
+		ObjEntity e1 = new ObjEntity("g");
+		ObjEntity e2 = new ObjEntity("h");
+		map.addObjEntity(e1);
+		map.addObjEntity(e2);
 	}
 	
 	public void testRemoveThenAddRealClassName() {
