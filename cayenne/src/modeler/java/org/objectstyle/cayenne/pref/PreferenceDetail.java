@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.util.Util;
  * Complete preference descriptor is composed out of two classes - DomainPreference that
  * defines how the preference is located with in domain, and a GenericPreference.
  * GenericPreference API is designed for the application use, while internal
- * DomainPreference is managed behidn the scenes. Note that there is no real Cayenne
+ * DomainPreference is managed behind the scenes. Note that there is no real Cayenne
  * relationship from concrete preference entity to the preference framework entities, so
  * this class handles all needed wiring...
  * 
