@@ -198,17 +198,16 @@ public final class QueryHelper {
         }
 
         newQ.setObjEntityName(r.getTargetEntity().getName());
-        newQ.setQualifier(transformQualifier(q, prefetchPath));
+        newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
         return newQ;
     }
 
-    public static Expression transformQualifier(QualifiedQuery q, String relPath) {
-        Expression qual = q.getQualifier();
+    public static Expression transformQualifier(ObjEntity ent, Expression qual, String relPath) {
         if (qual == null) {
             return null;
         }
 
-        ExpressionTranslator trans = new ExpressionTranslator();
+        ExpressionTranslator trans = new ExpressionTranslator(ent, relPath);
         ExpressionTraversal parser = new ExpressionTraversal();
         parser.setHandler(trans);
         parser.traverseExpression(qual);
@@ -251,6 +250,11 @@ public final class QueryHelper {
     static final class ExpressionTranslator extends TraversalHelper {
         protected HashMap expMap = new HashMap();
         protected HashMap expFill = new HashMap();
+        protected String prependPath;
+        
+        public ExpressionTranslator(ObjEntity e, String relPath) {
+            this.prependPath = reversePath(e, relPath);
+        }
 
         public Expression getPeer(Expression orig) {
             return (Expression) expMap.get(orig);
@@ -264,6 +268,27 @@ public final class QueryHelper {
             return ind;
         }
 
+        public static String reversePath(ObjEntity e, String relPath) {
+            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
+            Iterator it = e.resolvePathComponents(exp);
+            StringBuffer buf = new StringBuffer();
+            boolean hasRels = false;
+            
+            while(it.hasNext()) {
+                ObjRelationship rel = (ObjRelationship)it.next();
+                ObjRelationship reverse = rel.getReverseRelationship();
+                
+                if(hasRels) {
+                    buf.insert(0, Entity.PATH_SEPARATOR);
+                }
+                
+                buf.insert(0, reverse.getName());
+                hasRels = true;
+            }     
+            
+            return buf.toString();       
+        }
+        
         /** 
          * Creates expression of the same type and same operands 
          * as the original expression. Operands of the new expression
@@ -290,7 +315,7 @@ public final class QueryHelper {
                 
                 // operands of object expression need translation
                 if(parentPeer.getType() == Expression.OBJ_PATH) {
-                    
+                    operand = prependPath + Entity.PATH_SEPARATOR + operand;
                 }
                                 
                 parentPeer.setOperand(ind, operand);
