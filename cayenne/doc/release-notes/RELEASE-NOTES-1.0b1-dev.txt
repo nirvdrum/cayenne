@@ -9,4 +9,6 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
-1.
+1. Delete rules now able to be specified on ObjRelationships, to automatically
+cascade along a relationship, nullify the inverse, or completely deny the deletion 
+based on the status of the related objects.
