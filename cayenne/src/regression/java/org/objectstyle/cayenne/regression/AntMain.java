@@ -78,7 +78,7 @@ public class AntMain extends Main {
     public static void main(String[] args) {
         TestPreferences prefs;
 
-        Configuration.configCommonLogging();
+        Configuration.configureCommonLogging();
 
         try {
             prefs = new TestPreferences(System.getProperties());

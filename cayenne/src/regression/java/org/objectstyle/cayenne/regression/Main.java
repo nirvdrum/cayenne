@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conf.DefaultConfiguration;
+import org.objectstyle.cayenne.conf.FileConfiguration;
 
 /**
  * Main configures and runs regression tests defined in RandomDomainBuilder and
@@ -115,9 +115,7 @@ public class Main {
     protected DataDomain createDomain() throws Exception {
         ClassLoader loader = new DOStubClassLoader();
         Configuration.bootstrapSharedConfig(loader.loadClass("Table"));
-        Configuration conf =
-            new DefaultConfiguration(prefs.getCayenneProject());
-        conf.init();
+        Configuration conf = new FileConfiguration(prefs.getCayenneProject());
         return conf.getDomain();
     }
 

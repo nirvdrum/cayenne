@@ -81,7 +81,7 @@ public class PerformMain {
     public static DataDomain sharedDomain;
 
     public static void main(String[] args) {
-        Configuration.configCommonLogging();
+        Configuration.configureCommonLogging();
         prepareDomain();
 
         if (args.length == 0) {
