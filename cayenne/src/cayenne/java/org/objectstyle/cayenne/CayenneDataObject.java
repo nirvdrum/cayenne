@@ -320,10 +320,15 @@ public class CayenneDataObject implements DataObject {
         list.add(value);
         if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
+
+            // retaining a snapshot here is wasteful, but we have to do this for
+            // consistency (see CAY-213)
+            dataContext.getObjectStore().retainSnapshot(this);
         }
 
-        if (value != null && setReverse)
+        if (value != null && setReverse) {
             setReverseRelationship(relName, value);
+        }
     }
 
     /**
