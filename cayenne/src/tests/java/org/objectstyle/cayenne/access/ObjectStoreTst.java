@@ -58,8 +58,6 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
