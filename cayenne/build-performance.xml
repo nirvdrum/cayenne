@@ -35,9 +35,9 @@
     <!-- ======================= -->
     <!-- Run performance tests.  -->
     <!-- ======================= -->
-    <target name="performance" depends="dist-bin">
+    <target name="test" depends="dist-bin">
    		<echo>
-		Performance tests are not available yet.
+		Sorry, performance tests are not available yet.
 		</echo>
     </target>
     

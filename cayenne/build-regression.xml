@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 
-<!-- ========================================== -->
-<!-- Regression Test Application subproject buildfile.-->
-<!-- ========================================== -->
+<!-- ================================================= -->
+<!-- Regression Test Application subproject buildfile. -->
+<!-- ================================================= -->
 <project name="cayenne-regression" default="compile">
 	<property name="regression.dist.src" value="${dist}/src/regression"/>
 	<property name="regression.build" value="build/regression"/>
@@ -68,7 +68,7 @@
 	
 	
 	<!-- ========================================== -->
-    <!-- Build Modeler JAR file.                    -->
+    <!-- Build Regression JAR file.                 -->
     <!-- ========================================== -->
     <target name="jar" depends="compile">
     	<mkdir dir="${dist}/lib/regression"/>

@@ -28,8 +28,9 @@
     <target name="help">
         <echo>
      ******************************************************
-     * TARGETS (also you can use "-projecthelp" ant flag 
+     * Available targets (you can also use the "-projecthelp" ant flag 
      * to see targets):
+     *
      *  1. release      - creates a full Cayenne distribution.
      *  2. release-site - creates a full Cayenne website distribution.
      *  3. build        - (default target) builds all subproject JAR files.
@@ -39,9 +40,10 @@
      *  7. doc          - builds Cayenne documentation including Javadocs.
      *  8. api          - builds Javdoc API documentation.
      *  9. javacc       - runs javacc
-     *  10. test        - runs JUnit tests
-     *  11. performance - runs performance tests
-     *  12. help        - prints this message
+     * 10. test         - runs JUnit tests
+     * 11. performance  - runs performance tests
+     * 12. regression   - runs regression test application
+     * 13. help         - prints this message
      *
      *
      * ENVIRONMENT:
@@ -102,18 +104,18 @@
     </target>
     
     <!-- ========================================== -->
-    <!-- Runs Cayenne Performance Tests   -->
+    <!-- Runs Cayenne Performance Tests             -->
     <!-- ========================================== -->
     <target name="performance">
     	<!-- Cayenne must be fully built -->
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
-		<ant antfile="build-performance.xml" target="performance"/>
+		<ant antfile="build-performance.xml" target="test"/>
     </target>
     
     <!-- ========================================== -->
-    <!-- Builds all Cayenne Java subproject JARS.   -->
+    <!-- Runs Cayenne Regression Tests              -->
     <!-- ========================================== -->
-    <target name="regression-test">
+    <target name="regression">
     	<!-- Cayenne must be fully built -->
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="dist-bin"/>
