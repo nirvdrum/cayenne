@@ -77,32 +77,42 @@ public class ObjEntityValidator extends TreeNodeValidator {
     public void validateObject(ProjectPath path, Validator validator) {
         ObjEntity ent = (ObjEntity) path.getObject();
         validateName(ent, path, validator);
-		validateClassName(ent, path, validator);
-		
+        validateClassName(ent, path, validator);
+        validateSuperClassName(ent, path, validator);
+
         // validate DbEntity presence
         if (ent.getDbEntity() == null) {
             validator.registerWarning("ObjEntity has no DbEntity mapping.", path);
         }
-
-        // validate Java Class
-        if (Util.isEmptyString(ent.getClassName())) {
-            validator.registerWarning("ObjEntity has no Java class mapped.", path);
-        }
-
     }
 
-	private void validateClassName(ObjEntity ent, ProjectPath path, Validator validator) {
-		String className = ent.getClassName();
-		
+    private void validateClassName(ObjEntity ent, ProjectPath path, Validator validator) {
+        String className = ent.getClassName();
+
         if (Util.isEmptyString(className)) {
-        	return; //empty is ok
+            validator.registerWarning("ObjEntity has no Java class mapped.", path);
+            return;
         }
-        
-		DataMap map = (DataMap) path.getObjectParent();
+
+        MappingNamesHelper helper = MappingNamesHelper.getInstance();
+        String invalidChars = helper.invalidCharsInJavaClassName(className);
+
+        if (invalidChars != null) {
+            validator.registerWarning(
+                    "ObjEntity Java class contains invalid characters: " + invalidChars,
+                    path);
+        }
+        else if (helper.invalidDataObjectClass(className)) {
+            validator.registerWarning(
+                    "ObjEntity Java class is invalid: " + className,
+                    path);
+        }
+
+        DataMap map = (DataMap) path.getObjectParent();
         if (map == null) {
             return;
         }
-        
+
         // check for duplicate class names in the parent context
         Iterator it = map.getObjEntities().iterator();
         while (it.hasNext()) {
@@ -112,13 +122,43 @@ public class ObjEntityValidator extends TreeNodeValidator {
             }
 
             if (className.equals(otherEnt.getClassName())) {
-                validator.registerWarning("Duplicate ObjEntity class name: " + className + ".", path);
+                validator.registerWarning("Duplicate ObjEntity class name: "
+                        + className
+                        + ".", path);
                 break;
             }
         }
+    }
 
-	}
+    private void validateSuperClassName(
+            ObjEntity ent,
+            ProjectPath path,
+            Validator validator) {
+        String superClassName = ent.getSuperClassName();
 
+        if (Util.isEmptyString(superClassName)) {
+            return; // null is Ok
+        }
+
+        MappingNamesHelper helper = MappingNamesHelper.getInstance();
+        String invalidChars = helper.invalidCharsInJavaClassName(superClassName);
+
+        if (invalidChars != null) {
+            validator.registerWarning(
+                    "ObjEntity Java superclass contains invalid characters: "
+                            + invalidChars,
+                    path);
+        }
+        else if (helper.invalidDataObjectClass(superClassName)) {
+            validator.registerWarning("ObjEntity Java superclass is invalid: "
+                    + superClassName, path);
+        }
+
+        DataMap map = (DataMap) path.getObjectParent();
+        if (map == null) {
+            return;
+        }
+    }
 
     protected void validateName(ObjEntity ent, ProjectPath path, Validator validator) {
         String name = ent.getName();

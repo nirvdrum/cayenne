@@ -76,13 +76,28 @@ public class ObjAttributeValidator extends TreeNodeValidator {
 
         // skip validation of inherited attributes
         if (path.getObjectParent() != null
-            && path.getObjectParent() != attribute.getEntity()) {
+                && path.getObjectParent() != attribute.getEntity()) {
             return;
         }
 
         // Must have name
         if (Util.isEmptyString(attribute.getName())) {
             validator.registerError("Unnamed ObjAttribute.", path);
+        }
+        else {
+            MappingNamesHelper helper = MappingNamesHelper.getInstance();
+            String invalidChars = helper.invalidCharsInObjPathComponent(attribute
+                    .getName());
+
+            if (invalidChars != null) {
+                validator.registerWarning(
+                        "ObjAttribute name contains invalid characters: " + invalidChars,
+                        path);
+            }
+            else if (helper.invalidDataObjectProperty(attribute.getName())) {
+                validator.registerWarning("ObjAttribute name is invalid: "
+                        + attribute.getName(), path);
+            }
         }
 
         // all attributes must have type

@@ -79,6 +79,16 @@ public class DbAttributeValidator extends TreeNodeValidator {
         if (Util.isEmptyString(attribute.getName())) {
             validator.registerError("Unnamed DbAttribute.", path);
         }
+        else {
+            MappingNamesHelper helper = MappingNamesHelper.getInstance();
+            String invalidChars = helper.invalidCharsInDbPathComponent(attribute
+                    .getName());
+            
+            if (invalidChars != null) {
+                validator.registerWarning("DbAttribute name contains invalid characters: "
+                        + invalidChars, path);
+            }
+        }
 
         // all attributes must have type
         if (attribute.getType() == TypesMapping.NOT_DEFINED) {
@@ -94,32 +104,25 @@ public class DbAttributeValidator extends TreeNodeValidator {
             if (spec != null) {
                 // count tokens
                 int ind = -DerivedDbAttribute.ATTRIBUTE_TOKEN.length();
-                while ((ind =
-                    spec.indexOf(
-                        DerivedDbAttribute.ATTRIBUTE_TOKEN,
-                        ind + DerivedDbAttribute.ATTRIBUTE_TOKEN.length()))
-                    >= 0) {
+                while ((ind = spec.indexOf(DerivedDbAttribute.ATTRIBUTE_TOKEN, ind
+                        + DerivedDbAttribute.ATTRIBUTE_TOKEN.length())) >= 0) {
                     paramsExpected++;
                 }
             }
 
             if (paramsExpected != paramCount) {
-                validator.registerWarning(
-                    "Derived Attribute's \""
+                validator.registerWarning("Derived Attribute's \""
                         + attribute.getName()
-                        + "\" parameter mismatch.",
-                    path);
+                        + "\" parameter mismatch.", path);
             }
         }
         // VARCHAR and CHAR attributes must have max length
-        else if (
-            attribute.getMaxLength() < 0
-                && (attribute.getType() == java.sql.Types.VARCHAR
-                    || attribute.getType() == java.sql.Types.CHAR)) {
+        else if (attribute.getMaxLength() < 0
+                && (attribute.getType() == java.sql.Types.VARCHAR || attribute.getType() == java.sql.Types.CHAR)) {
 
             validator.registerWarning(
-                "Character DbAttribute doesn't have max length.",
-                path);
+                    "Character DbAttribute doesn't have max length.",
+                    path);
         }
     }
 }

@@ -88,27 +88,29 @@ public class DbRelationshipValidator extends TreeNodeValidator {
             while (joins.hasNext()) {
                 DbJoin join = (DbJoin) joins.next();
                 if (join.getSource() == null && join.getTarget() == null) {
-                    validator.registerWarning(
-                        "DbRelationship join has no source and target attributes selected.",
-                        path);
+                    validator
+                            .registerWarning(
+                                    "DbRelationship join has no source and target attributes selected.",
+                                    path);
                 }
                 else if (join.getSource() == null) {
                     validator.registerWarning(
-                        "DbRelationship join has no source attribute selected.",
-                        path);
+                            "DbRelationship join has no source attribute selected.",
+                            path);
                 }
                 else if (join.getTarget() == null) {
                     validator.registerWarning(
-                        "DbRelationship join has no target attribute selected.",
-                        path);
+                            "DbRelationship join has no target attribute selected.",
+                            path);
                 }
             }
-            
+
             // validate reverse
             if (rel.getReverseRelationship() == null) {
-                validator.registerWarning(
-                    "Missing reverse DbRelationship (currently required by Cayenne).",
-                    path);
+                validator
+                        .registerWarning(
+                                "Missing reverse DbRelationship (currently required by Cayenne).",
+                                path);
             }
         }
 
@@ -118,8 +120,20 @@ public class DbRelationshipValidator extends TreeNodeValidator {
         // check if there are attributes having the same name
         else if (rel.getSourceEntity().getAttribute(rel.getName()) != null) {
             validator.registerWarning(
-                "DbRelationship has the same name as one of DbAttributes",
-                path);
+                    "DbRelationship has the same name as one of DbAttributes",
+                    path);
+        }
+        else {
+            MappingNamesHelper helper = MappingNamesHelper.getInstance();
+            String invalidChars = helper.invalidCharsInDbPathComponent(rel.getName());
+
+            if (invalidChars != null) {
+                validator
+                        .registerWarning(
+                                "DbRelationship name contains invalid characters: "
+                                        + invalidChars,
+                                path);
+            }
         }
     }
 }
