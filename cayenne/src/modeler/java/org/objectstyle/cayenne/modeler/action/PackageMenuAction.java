@@ -61,6 +61,7 @@ import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.event.DataMapEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -92,7 +93,7 @@ public class PackageMenuAction extends CayenneAction {
         }
         String package_name;
         package_name =
-            JOptionPane.showInputDialog(this, "Enter the new package name");
+            JOptionPane.showInputDialog(Editor.getFrame(), "Enter the new package name");
         if (null == package_name || package_name.trim().length() == 0)
             return;
         // Append period to the end of package name, if it is not there.
