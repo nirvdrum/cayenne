@@ -103,10 +103,28 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
- * User-level Cayenne access class. Provides isolated object view of
- * the datasource to the application code. Normal use pattern is to
- * create one DataContext per session (whatever session may mean in
- * a given application).
+ * Class that provides applications with access to Cayenne persistence features. 
+ * In most cases this is the only access class directly used in the application.
+ * 
+ * <p>
+ * Most common DataContext utilization pattern is to
+ * create one DataContext per session. "Session" may be a an HttpSesession in a 
+ * web application, or any other similar concept in a multiuser application.
+ * 
+ * </p><p>
+ * All persistent objects (DataObjects) are registered with DataContext either
+ * <strong>implicitly</strong> when they are fetched via a query, or read via a relationship 
+ * from another object, 
+ * or <strong>explicitly</strong> via calling {@link #createAndRegisterNewObject(String)
+ * createAndRegisterNewObject(String entityName)} during new DataObject creation.
+ * DataContext tracks changes made to its DataObjects in memory, and flushes them to the
+ * database when {@link #commitChanges()
+ * commitChanges()} is called. Until DataContext is committed, changes made to its objects
+ * are not visible in other DataContexts.</p><p>
+ * 
+ * Each DataObject can belong only to a single DataContext. To create a replica of an object
+ * from a different DataContext in a local context, use {@link #localObjects(java.util.List)
+ * localObjects(List objects)} method.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
@@ -169,16 +187,6 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient ToManyListDataSource relationshipDataSource;
 
     /**
-     * Convenience method to create a new instance of
-     * DataContext based on default domain. If more
-     * than one domain exists, createDataContext(String)
-     * must be used.
-     */
-    public static DataContext createDataContext() {
-        return Configuration.getSharedConfiguration().getDomain().createDataContext();
-    }
-
-    /**
       * A factory method of DataObjects. Uses Configuration ClassLoader to
       * instantiate a new instance of DataObject of a given class.
       */
@@ -188,12 +196,20 @@ public class DataContext implements QueryEngine, Serializable {
             .loadClass(className)
             .newInstance();
     }
+    
+    /**
+     * Factory method that creates and returns a new instance of DataContext based on default domain. If more
+     * than one domain exists in the current configuration, {@link #createDataContext(String)
+     * createDataContext(String domainName)} must be used instead.
+     */
+    public static DataContext createDataContext() {
+        return Configuration.getSharedConfiguration().getDomain().createDataContext();
+    }
 
     /**
-     * Convenience method to create a new instance of
-     * DataContext based on a named domain.
-     * If there is no domain matching the name,
-     * an exception is thrown.
+     * Factory method that creates and returns a new instance of DataContext using named 
+     * domain as its parent. If there is no domain matching the name argument, an exception 
+     * is thrown.
      */
     public static DataContext createDataContext(String domainName) {
         DataDomain domain = Configuration.getSharedConfiguration().getDomain(domainName);
@@ -203,16 +219,18 @@ public class DataContext implements QueryEngine, Serializable {
         return domain.createDataContext();
     }
 
+    /**
+     * Default constructor that creates a DataContext that has no
+     * association with a DataDomain. 
+     */
     public DataContext() {
         this(null);
     }
 
     /**
-     * Creates new DataContext and initializes it
-     * with the parent QueryEngine. Normally parent is an
-     * instance of DataDomain. DataContext will use parent
-     * to execute database queries, updates, and access
-     * DataMap objects.
+     * Creates new DataContext and initializes it with the parent QueryEngine. 
+     * Normally parent is an instance of DataDomain. DataContext will use parent
+     * to execute database queries, updates, and access mapping information.
      */
     public DataContext(QueryEngine parent) {
         setParent(parent);
@@ -244,16 +262,21 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** Returns parent QueryEngine object. */
+    /** 
+     * Returns parent QueryEngine object. In most cases returned object
+     * is an instance of DataDomain.
+     */
     public QueryEngine getParent() {
         awakeFromDeserialization();
         return parent;
     }
     
     /**
-     * <i>Note: currently nested DataContexts are not supported,
+     * <i>
+     * Note: currently nested DataContexts are not supported,
      * so this method simply calls "getParent()". Using this method is preferrable
-     * to calling "getParent()" directly and casting it to DataDomain.
+     * to calling "getParent()" directly and casting it to DataDomain, since it more
+     * likely to be compatible with the future releases of Cayenne.</i>
      * 
      * @return DataDomain that is a direct or indirect parent
      * of this DataContext.
@@ -265,14 +288,18 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Sets parent QueryEngine of this DataContext.
+     * Sets direct parent of this DataContext.
      */
     public void setParent(QueryEngine parent) {
         this.parent = parent;
     }
 
     /**
-     * Sets a DataContextDelegate for this context.
+     * Sets a DataContextDelegate for this context. Delegate
+     * is notified of certain events in the DataContext lifecycle
+     * and can customize DataContext behavior.
+     * 
+     * @since 1.1
      */
     public void setDelegate(DataContextDelegate delegate) {
         this.delegate = delegate;
@@ -280,14 +307,17 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Returns a delegate currently associated with this DataContext.
+     * 
+     * @since 1.1
      */
     public DataContextDelegate getDelegate() {
         return delegate;
     }
 
     /**
-     * Returns delegate instance if it is initialized, or a shared
-     * noop implementation if not. 
+     * @return a delegate instance if it is initialized, or a shared
+     * noop implementation the context has no delegate. Useful to prevent
+     * extra null checks and conditional logic in the code.
      * 
      * @since 1.1
      */
@@ -296,12 +326,18 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @deprecated Since 1.1 all SnapshotManager methods are static
+     * @deprecated Since 1.1 all SnapshotManager methods are defined
+     * as static methods in DataRowUtils.
      */
     public SnapshotManager getSnapshotManager() {
         return new SnapshotManager(relationshipDataSource);
     }
 
+    /**
+     * Returns ToManyListDataSource instance that uses this DataContext to populate relationships.
+     * 
+     * @return ToManyListDataSource instance that uses this DataContext to populate relationships.
+     */
     public ToManyListDataSource getRelationshipDataSource() {
         return this.relationshipDataSource;
     }
@@ -590,7 +626,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Newly created object is registered with this DataContext.
      *
      * <p>Internally this method calls {@link 
-     * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
+     * #objectsFromDataRows(org.objectstyle.cayenne.map.ObjEntity,java.util.List,boolean)
      * objectsFromDataRows(ObjEntity, List, boolean)}
      * with <code>false</code> "refersh" parameter.</p>
      * 
@@ -618,7 +654,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
       * @deprecated Since 1.1 use {@link 
-      * #objectFromDataRow(Class,org.objectstyle.cayenne.access.DataRow,boolean)
+      * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
       * objectFromDataRow(Class, DataRow, boolean)}.
       */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
@@ -634,7 +670,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
       * @deprecated Since 1.1 use {@link 
-      * #objectFromDataRow(Class,org.objectstyle.cayenne.access.DataRow,boolean)
+      * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
       * objectFromDataRow(Class, DataRow, boolean)}.
       */
     public DataObject objectFromDataRow(
@@ -1396,6 +1432,9 @@ public class DataContext implements QueryEngine, Serializable {
         return this.getParent().getEntityResolver();
     }
 
+    /**
+     * Used internally by Cayenne. Users should not call this method directly.
+     */
     public void registerFlattenedRelationshipInsert(
         DataObject source,
         ObjRelationship relationship,
@@ -1425,6 +1464,9 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
+    /**
+     * Used internally by Cayenne. Users should not call this method directly.
+     */
     public void registerFlattenedRelationshipDelete(
         DataObject source,
         ObjRelationship relationship,
