@@ -85,144 +85,148 @@ import org.objectstyle.cayenne.ConfigurationException;
  * 
  *  
  *   
- *         #
- *         # This file defines the configuration properties for Commons DBCP pool
- *         # which is used for Cayenne during some of the test cases. 
- *         # For more info on setting parameters see the documentation for commons
- *         # dbcp and commons pool. The following prefixes are required:
- *         # cayenne.dbcp.&lt;param&gt; = configure the connection pool
- *         # cayenne.dbcp.ps.&lt;param&gt; = configuration for the prepared connection pools
- *         # that are associated with each pooled connections
- *        
- *        
- *         #driver class to use to connect to the database
- *         cayenne.dbcp.driverClassName=net.sourceforge.jtds.jdbc.Driver
- *        
- *         #url to the database, the parameters should be part of the connection string
- *         #and not here
- *         cayenne.dbcp.url=jdbc:jtds:sqlserver://192.168.20.2:1433/x_test2;TDS=8.0
- *        
- *         #username to use to connect to the database
- *         cayenne.dbcp.username=garyj
- *        
- *         #password to use to connect to the database
- *         cayenne.dbcp.password=somepass
- *        
- *         #maximum number of active connections
- *         cayenne.dbcp.maxActive=500
- *        
- *         #minimum number of idle connections
- *         cayenne.dbcp.minIdle=10
- *        
- *         #maximum number of active connections that can remain idle in the pool
- *         cayenne.dbcp.maxIdle=10
- *        
- *         #maximum number of milliseconds to wait for a connection to be returned to the 
- *         #pool before throwing an exception when the connection is required and the pool
- *         #is exhaused of the active connections. -1 for indefinetly
- *         cayenne.dbcp.maxWait=10000
- *        
- *         #sql query to be used to validate connections from the pool. Must return
- *         #at least one row
- *         cayenne.dbcp.validationQuery=SELECT GETDATE()
- *        
- *         #should the object be validated when it is borrowed from the pool
- *         cayenne.dbcp.testOnBorrow=false
- *        
- *         #should the object be validated when it is returned to the pool
- *         cayenne.dbcp.testOnReturn=true
- *        
- *         #should the object be validated when it is idle
- *         cayenne.dbcp.testWhileIdle=true
- *        
- *         #number of milliseconds to sleep between runs of the idle object evictor thread
- *         cayenne.dbcp.timeBetweenEvictionRunsMillis=120000
- *        
- *        
- *         #number of objects to examin during each run of the idle object evictor
- *         cayenne.dbcp.numTestsPerEvictionRun=10
- *        
- *         #minimum time an object may sit idle in the pool before it is elegible for
- *         #an eviction
- *         cayenne.dbcp.minEvictableIdleTimeMillis=2000000
- *        
- *         #action to take the the pool is exhausted of all active connections
- *         #see GenericObjectPool class
- *         #this value can be set as either an int or a String the setter method
- *         #will attempt to convert the String value to it's resective representation
- *         #in the GenericObjectPool class and if successfull will use the byte 
- *         #value as the config paramter to the pool. If not the default value will
- *         #be used
- *         cayenne.dbcp.whenExhaustedAction=WHEN_EXHAUSTED_GROW
- *        
- *         #The default auto-commit state of connections created by this pool
- *         caynne.dbcp.defaultAutoCommit=false
- *        
- *         #Default read only state of connections created by the pool. Can be left
- *         #as null for driver default
- *         cayenne.dbcp.defaultReadOnly=true
- *        
- *        
- *         # Default TransactionIsolation state of connections created by this pool. This can
- *         # be either a String representation of the isolation level defined in the interface 
- *         # java.sql.Connection. Can be left as null for 
- *         # driver default
- *         cayenne.dbcp.defaultTransactionIsolation=TRANSACTION_SERIALIZABLE
- *        
- *         #If set to true the application will be able to get access to the
- *         #actual connection object which is normally wrapped by a poolable connections
- *         cayenne.dbcp.accessToUnderlyingConnectionAllowed=true
- *        
- *         #Default catalog of connections created by this pool
- *         cayenne.dbcp.defaultCatalog=someCat
- *        
- *         #Specifies whether prepared statments should be pooled
- *         cayenne.dbcp.poolPreparedStatements=true
- *        
- *        
- *         #Controlls the maximum number of objects that can be borrowed from the pool at 
- *         #one time
- *         cayenne.dbcp.ps.maxActive=500
- *        
- *         #Maximum number of idle objects in the pool
- *         cayenne.dbcp.ps.maxIdle=50
- *        
- *         #Maximum number of objects that can exist in the prepared statement pool at one time
- *         cayenne.dbcp.ps.maxTotal=600
- *        
- *        
- *         # Minimum number of milliseconds to wait for an objec the the pool of 
- *         # prepared statements is exhausted and the whenExhaustedAction is set to 
- *         # 1 (WHEN_EXHAUSTED_BLOCK)
- *         cayenne.dbcp.ps.maxWait=10000
- *        
- *        
- *         # Number of milliseconds an object can sit idle in the pool before it is 
- *         # elegible for eviction
- *         cayenne.dbcp.ps.minEvictableIdleTimeMillis=2000000
- *        
- *        
- *         #Number of idle objects that should be examined per eviction run
- *         cayenne.dbcp.ps.numTestsPerEvictionRun=20
- *        
- *        
- *         #Specifies whether objects should be validated before they are borrowed from this pool
- *         cayenne.dbcp.ps.testOnBorrow=false
- *        
- *         #Specifies whether objects should be validated when they are returned to the pool
- *         cayenne.dbcp.ps.testOnReturn=true
- *        
- *        
- *         #Specifies whether objects should be validated in the idle eviction thread
- *         cayenne.dbcp.ps.testWhileIdle=true
- *        
- *         #Specifies the time between the runs of the eviction thread
- *         cayenne.dbcp.ps.timeBetweenEvictionRunsMillis=120000
- *        
- *         # action to take when the the pool is exhausted of all active objects.
- *         # acceptable values are strings (WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_BLOCK (default), 
- *         # WHEN_EXHAUSTED_GROW), or their corresponding int values defined in commons-pool GenericObjectPool:
- *         cayenne.dbcp.ps.whenExhaustedAction=WHEN_EXHAUSTED_FAIL
+ *    
+ *     
+ *           #
+ *           # This file defines the configuration properties for Commons DBCP pool
+ *           # which is used for Cayenne during some of the test cases. 
+ *           # For more info on setting parameters see the documentation for commons
+ *           # dbcp and commons pool. The following prefixes are required:
+ *           # cayenne.dbcp.&lt;param&gt; = configure the connection pool
+ *           # cayenne.dbcp.ps.&lt;param&gt; = configuration for the prepared connection pools
+ *           # that are associated with each pooled connections
+ *          
+ *          
+ *           #driver class to use to connect to the database
+ *           cayenne.dbcp.driverClassName=net.sourceforge.jtds.jdbc.Driver
+ *          
+ *           #url to the database, the parameters should be part of the connection string
+ *           #and not here
+ *           cayenne.dbcp.url=jdbc:jtds:sqlserver://192.168.20.2:1433/x_test2;TDS=8.0
+ *          
+ *           #username to use to connect to the database
+ *           cayenne.dbcp.username=garyj
+ *          
+ *           #password to use to connect to the database
+ *           cayenne.dbcp.password=somepass
+ *          
+ *           #maximum number of active connections
+ *           cayenne.dbcp.maxActive=500
+ *          
+ *           #minimum number of idle connections
+ *           cayenne.dbcp.minIdle=10
+ *          
+ *           #maximum number of active connections that can remain idle in the pool
+ *           cayenne.dbcp.maxIdle=10
+ *          
+ *           #maximum number of milliseconds to wait for a connection to be returned to the 
+ *           #pool before throwing an exception when the connection is required and the pool
+ *           #is exhaused of the active connections. -1 for indefinetly
+ *           cayenne.dbcp.maxWait=10000
+ *          
+ *           #sql query to be used to validate connections from the pool. Must return
+ *           #at least one row
+ *           cayenne.dbcp.validationQuery=SELECT GETDATE()
+ *          
+ *           #should the object be validated when it is borrowed from the pool
+ *           cayenne.dbcp.testOnBorrow=false
+ *          
+ *           #should the object be validated when it is returned to the pool
+ *           cayenne.dbcp.testOnReturn=true
+ *          
+ *           #should the object be validated when it is idle
+ *           cayenne.dbcp.testWhileIdle=true
+ *          
+ *           #number of milliseconds to sleep between runs of the idle object evictor thread
+ *           cayenne.dbcp.timeBetweenEvictionRunsMillis=120000
+ *          
+ *          
+ *           #number of objects to examin during each run of the idle object evictor
+ *           cayenne.dbcp.numTestsPerEvictionRun=10
+ *          
+ *           #minimum time an object may sit idle in the pool before it is elegible for
+ *           #an eviction
+ *           cayenne.dbcp.minEvictableIdleTimeMillis=2000000
+ *          
+ *           #action to take the the pool is exhausted of all active connections
+ *           #see GenericObjectPool class
+ *           #this value can be set as either an int or a String the setter method
+ *           #will attempt to convert the String value to it's resective representation
+ *           #in the GenericObjectPool class and if successfull will use the byte 
+ *           #value as the config paramter to the pool. If not the default value will
+ *           #be used
+ *           cayenne.dbcp.whenExhaustedAction=WHEN_EXHAUSTED_GROW
+ *          
+ *           #The default auto-commit state of connections created by this pool
+ *           caynne.dbcp.defaultAutoCommit=false
+ *          
+ *           #Default read only state of connections created by the pool. Can be left
+ *           #as null for driver default
+ *           cayenne.dbcp.defaultReadOnly=true
+ *          
+ *          
+ *           # Default TransactionIsolation state of connections created by this pool. This can
+ *           # be either a String representation of the isolation level defined in the interface 
+ *           # java.sql.Connection. Can be left as null for 
+ *           # driver default
+ *           cayenne.dbcp.defaultTransactionIsolation=TRANSACTION_SERIALIZABLE
+ *          
+ *           #If set to true the application will be able to get access to the
+ *           #actual connection object which is normally wrapped by a poolable connections
+ *           cayenne.dbcp.accessToUnderlyingConnectionAllowed=true
+ *          
+ *           #Default catalog of connections created by this pool
+ *           cayenne.dbcp.defaultCatalog=someCat
+ *          
+ *           #Specifies whether prepared statments should be pooled
+ *           cayenne.dbcp.poolPreparedStatements=true
+ *          
+ *          
+ *           #Controlls the maximum number of objects that can be borrowed from the pool at 
+ *           #one time
+ *           cayenne.dbcp.ps.maxActive=500
+ *          
+ *           #Maximum number of idle objects in the pool
+ *           cayenne.dbcp.ps.maxIdle=50
+ *          
+ *           #Maximum number of objects that can exist in the prepared statement pool at one time
+ *           cayenne.dbcp.ps.maxTotal=600
+ *          
+ *          
+ *           # Minimum number of milliseconds to wait for an objec the the pool of 
+ *           # prepared statements is exhausted and the whenExhaustedAction is set to 
+ *           # 1 (WHEN_EXHAUSTED_BLOCK)
+ *           cayenne.dbcp.ps.maxWait=10000
+ *          
+ *          
+ *           # Number of milliseconds an object can sit idle in the pool before it is 
+ *           # elegible for eviction
+ *           cayenne.dbcp.ps.minEvictableIdleTimeMillis=2000000
+ *          
+ *          
+ *           #Number of idle objects that should be examined per eviction run
+ *           cayenne.dbcp.ps.numTestsPerEvictionRun=20
+ *          
+ *          
+ *           #Specifies whether objects should be validated before they are borrowed from this pool
+ *           cayenne.dbcp.ps.testOnBorrow=false
+ *          
+ *           #Specifies whether objects should be validated when they are returned to the pool
+ *           cayenne.dbcp.ps.testOnReturn=true
+ *          
+ *          
+ *           #Specifies whether objects should be validated in the idle eviction thread
+ *           cayenne.dbcp.ps.testWhileIdle=true
+ *          
+ *           #Specifies the time between the runs of the eviction thread
+ *           cayenne.dbcp.ps.timeBetweenEvictionRunsMillis=120000
+ *          
+ *           # action to take when the the pool is exhausted of all active objects.
+ *           # acceptable values are strings (WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_BLOCK (default), 
+ *           # WHEN_EXHAUSTED_GROW), or their corresponding int values defined in commons-pool GenericObjectPool:
+ *           cayenne.dbcp.ps.whenExhaustedAction=WHEN_EXHAUSTED_FAIL
+ *      
+ *     
  *    
  *   
  *  
@@ -342,6 +346,12 @@ public class DBCPDataSourceFactory implements DataSourceFactory {
     void loadDriverClass(Properties properties, Level level) throws Exception {
         String driver = stringProperty(properties, "driverClassName");
         logger.log(level, "loading JDBC driver class: " + driver);
+
+        if (driver == null) {
+            throw new NullPointerException("No value for required property: "
+                    + PROPERTY_PREFIX
+                    + "driverClassName");
+        }
         Class.forName(driver);
     }
 
@@ -425,6 +435,13 @@ public class DBCPDataSourceFactory implements DataSourceFactory {
         String url = stringProperty(properties, "url");
         String userName = stringProperty(properties, "username");
         String password = stringProperty(properties, "password");
+
+        // sanity check
+        if (url == null) {
+            throw new NullPointerException("No value for required property: "
+                    + PROPERTY_PREFIX
+                    + "url");
+        }
 
         return new DriverManagerConnectionFactory(url, userName, password);
     }
