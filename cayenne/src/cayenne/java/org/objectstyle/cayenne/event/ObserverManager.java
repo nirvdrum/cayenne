@@ -89,7 +89,7 @@ public class ObserverManager extends Object {
 		super();
 		_subjects = new HashMap();
 	}
-	
+
 	public void addObserver(Object observer, String methodName, ObserverSubject subject) throws NoSuchMethodException {
 		if (observer == null) {
 			throw new IllegalArgumentException("observer may not be null");
@@ -133,8 +133,6 @@ public class ObserverManager extends Object {
 
 				// fire invocation, detect if anything went wrong
 				if (invocation.fire(event) == false) {
-					log.debug("invalid invocation detected");
-
 					if (invalidInvocations == null) {
 						invalidInvocations = new ArrayList();
 					}
@@ -145,38 +143,47 @@ public class ObserverManager extends Object {
 
 			// clear out all invalid invocations
 			if (invalidInvocations != null) {
-				observersForEvent.removeAll(invalidInvocations);	
+				observersForEvent.removeAll(invalidInvocations);
 			}
 		}
 	}
-	
+
 	/**
-	 * @return <code>true</code> if <code>observer</code> could be removed,
-	 * else returns <code>false</code>.
+	 * @return <code>true</code> if <code>observer</code> could be removed for
+	 * all existing subjects, else returns <code>false</code>.
+	 */
+	public boolean removeObserver(Object observer) {
+		boolean didRemove = false;
+
+		if ((_subjects.isEmpty() == false) && (observer != null)) {
+			Iterator subjectIter = _subjects.keySet().iterator();
+			while (subjectIter.hasNext()) {
+				didRemove |= this.removeObserver(observer, (ObserverSubject)subjectIter.next());
+			}
+		}
+
+		return didRemove;
+	}
+
+	/**
+	 * @return <code>true</code> if <code>observer</code> could be removed for
+	 * the given subject, else returns <code>false</code>.
 	 */
 	public boolean removeObserver(Object observer, ObserverSubject subject) {
 		boolean didRemove = false;
 
-		// @HH: is this correct? observer/null subject should IMHO remove for all subjects..
 		if ((observer != null) && (subject != null)) {
 			Set observersForSubject = this.observersForSubject(subject);
-	
-			if (observersForSubject != null) {
+
+			if ((observersForSubject != null) && (observersForSubject.isEmpty() == false)) {
 				// remove all invocations with the given target
 				Iterator observerIter = observersForSubject.iterator();
 				while (observerIter.hasNext()) {
 					Invocation element = (Invocation)observerIter.next();
 					if (element.getTarget() == observer) {
-						log.debug("will remove " + observer);
 						observerIter.remove();
 						didRemove = true;
-					}	
-				}
-
-				// remove the subject if the corresponding observer queue is empty
-				if (observersForSubject.isEmpty()) {
-					log.debug("no remaining observers for '" + subject + "' - removing subject");
-					this.removeSubject(subject);
+					}
 				}
 			}
 		}
@@ -191,7 +198,6 @@ public class ObserverManager extends Object {
 	private void addSubject(ObserverSubject subject) {
 		// make sure we don't add a subject twice, losing the old observers
 		if (_subjects.get(subject) == null) {
-			log.debug("no observers for '" + subject + "' - creating new subject");
 			_subjects.put(subject, new HashSet());
 		}
 	}
