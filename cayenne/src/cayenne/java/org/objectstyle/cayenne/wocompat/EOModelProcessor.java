@@ -250,7 +250,6 @@ public class EOModelProcessor {
                 rel.setName(relName);
                 rel.setSourceEntity(e);
                 rel.setTargetEntity(target);
-                rel.setToMany(toMany);
                 e.addRelationship(rel);
                 rel.addDbRelationship(dbRel);
             }
@@ -313,7 +312,6 @@ public class EOModelProcessor {
                 }
 
                 flatRel.setTargetEntity((ObjEntity) potentialTargets.get(0));
-                flatRel.setToMany(toMany);
 
                 e.addRelationship(flatRel);
             } else {

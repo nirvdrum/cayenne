@@ -57,10 +57,13 @@ package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 
 /** 
  * Metadata for the navigational association between the data objects. For
@@ -73,7 +76,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * database entity relationships.  The ObjRelationship objects are stored in the
  * ObjEntities. 
  */
-public class ObjRelationship extends Relationship {
+public class ObjRelationship extends Relationship implements EventListener {
 
 	// What to do with any inverse relationship when the source object
 	// is deleted
@@ -99,11 +102,11 @@ public class ObjRelationship extends Relationship {
 		super(name);
 	}
 
+
 	public ObjRelationship(ObjEntity source, ObjEntity target, boolean toMany) {
 		this();
 		this.setSourceEntity(source);
 		this.setTargetEntity(target);
-		this.setToMany(toMany);
 		if (toMany) {
 			this.setName(target.getName() + "Array");
 		}
@@ -214,39 +217,83 @@ public class ObjRelationship extends Relationship {
 						+ dbRel
 						+ " to ObjRelationship "
 						+ this
-						+ " because the source of the newly added relationship is not the target of the previous relationship in the chain");
+						+ " because the source of the newly added relationship "
+						+ "is not the target of the previous relationship "
+						+ "in the chain");
 			}
 			isFlattened = true;
 			//Now there will be more than one dbRel - this is a flattened relationship
 		}
+		try {
+			EventManager.getDefaultManager().addListener(
+				this,
+				"dbRelationshipDidChange",
+				RelationshipEvent.class,
+				DbRelationship.PROPERTY_DID_CHANGE,
+				dbRel);
+		} catch (NoSuchMethodException e) {
+			//Really, not going to happen, but we have to catch it
+			throw new CayenneRuntimeException(e);
+		}
 		dbRelationships.add(dbRel);
-		this.isReadOnly = this.newReadOnlyValue();
+		//Recalculate whether this relationship is readOnly,
+		this.calculateReadOnlyValue();
+		// and whether it is toMany
+		this.calculateToManyValue();
 	}
 
-	/** Removes a relationship <code>dbRel</code> from the list of relationships. */
+	/** Removes the relationship <code>dbRel</code> from the list of relationships. */
 	public void removeDbRelationship(DbRelationship dbRel) {
 		dbRelationships.remove(dbRel);
+		//Do not listen any more
+		EventManager.getDefaultManager().removeListener(
+			this,
+			DbRelationship.PROPERTY_DID_CHANGE,
+			dbRel);
 		//If we removed all but one dbRel, then it's no longer flattened
 		if (dbRelationships.size() <= 1) {
 			isFlattened = false;
 		}
-		this.isReadOnly = this.newReadOnlyValue();
+		this.calculateReadOnlyValue();
+		this.calculateToManyValue();
 	}
 
 	public void clearDbRelationships() {
 		dbRelationships.clear();
+		this.isReadOnly = false;
+		this.toMany = false;
 	}
 
-	// calculates a new readonly value after having added/removed dbRelationships
-	private boolean newReadOnlyValue() {
+	//Recalculates whether a relationship is toMany or toOne, based on the 
+	// underlying db relationships
+	private void calculateToManyValue() {
+		//If there is a single toMany along the path, then the flattend
+		// rel is toMany.  If all are toOne, then the rel is toOne.
+		// Simple (non-flattened) relationships form the degenerate case
+		// taking the value of the single underlying dbrel.
+		Iterator dbRelIterator = this.dbRelationships.iterator();
+		while (dbRelIterator.hasNext()) {
+			DbRelationship thisRel = (DbRelationship) dbRelIterator.next();
+			if (thisRel.isToMany()) {
+				this.toMany=true;
+				return;
+			}
+		}
+		this.toMany=false;
+	}
+
+	//Implements logic to calculate a new readonly value after having added/removed dbRelationships
+	private void calculateReadOnlyValue() {
 		//Quickly filter the single dbrel case
 		if (dbRelationships.size() < 2) {
-			return false;
+			this.isReadOnly=false;
+			return;
 		}
 
 		//Also quickly filter any really complex db rel cases
 		if (dbRelationships.size() > 2) {
-			return true;
+			this.isReadOnly=true;
+			return;
 		}
 
 		//Now check for a toMany -> toOne series (to return false)
@@ -255,7 +302,8 @@ public class ObjRelationship extends Relationship {
 
 		//First toOne or second toMany means read only
 		if (!firstRel.isToMany() || secondRel.isToMany()) {
-			return true;
+			this.isReadOnly=true;
+			return;
 		}
 
 		//Relationship type is in order, now we only have to check the intermediate table
@@ -269,15 +317,16 @@ public class ObjRelationship extends Relationship {
 
 		DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName(), true);
 		List pkAttribs = intermediateEntity.getPrimaryKey();
+
 		Iterator allAttribs = intermediateEntity.getAttributes().iterator();
 		while (allAttribs.hasNext()) {
 			if (!pkAttribs.contains(allAttribs.next())) {
-				return true;
+					this.isReadOnly=true;
+					return;
 				//one of the attributes of intermediate entity is not in the pk.  Must be readonly
 			}
 		}
-
-		return false;
+		this.isReadOnly=false;
 	}
 
 	/**
@@ -322,7 +371,7 @@ public class ObjRelationship extends Relationship {
 	public void setDeleteRule(int value) {
 		if ((value != DeleteRule.CASCADE)
 			&& (value != DeleteRule.DENY)
-			&& (value != DeleteRule.NULLIFY) 
+			&& (value != DeleteRule.NULLIFY)
 			&& (value != DeleteRule.NO_ACTION)) {
 
 			throw new IllegalArgumentException(
@@ -333,4 +382,7 @@ public class ObjRelationship extends Relationship {
 		this.deleteRule = value;
 	}
 
+	public void dbRelationshipDidChange(RelationshipEvent event) {
+		this.calculateToManyValue();
+	}
 }

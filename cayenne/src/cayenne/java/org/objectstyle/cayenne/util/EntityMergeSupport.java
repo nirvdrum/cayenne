@@ -131,7 +131,6 @@ public class EntityMergeSupport {
 
 			ObjRelationship or = new ObjRelationship(dr.getName());
 			or.addDbRelationship(dr);
-			or.setToMany(dr.isToMany());
 			or.setSourceEntity(entity);
 			or.setTargetEntity((Entity) mappedTargets.get(0));
 			entity.addRelationship(or);

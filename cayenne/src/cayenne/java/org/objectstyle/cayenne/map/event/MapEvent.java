@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.map.event;
 
-import java.util.EventObject;
-
+import org.objectstyle.cayenne.event.CayenneEvent;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -64,7 +63,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class MapEvent extends EventObject {
+public class MapEvent extends CayenneEvent {
 
 	/** Signifies a changed object. */
 	public static final int CHANGE = 1;

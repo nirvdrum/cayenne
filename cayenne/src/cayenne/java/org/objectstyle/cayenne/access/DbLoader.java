@@ -562,7 +562,6 @@ public class DbLoader {
                 DbRelationship dbRel = (DbRelationship) relIt.next();
                 ObjRelationship objRel = new ObjRelationship(dbRel.getName());
                 objRel.addDbRelationship(dbRel);
-                objRel.setToMany(dbRel.isToMany());
                 objRel.setSourceEntity(objEnt);
                 objRel.setTargetEntity(
                 	(Entity)map.getMappedEntities(

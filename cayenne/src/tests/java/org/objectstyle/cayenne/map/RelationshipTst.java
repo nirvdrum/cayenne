@@ -99,11 +99,4 @@ public class RelationshipTst extends CayenneTestCase {
         rel.setTargetEntityName("abc");
         assertSame("abc", rel.getTargetEntityName());
     }
-
-    public void testToMany() throws Exception {
-        rel.setToMany(true);
-        assertTrue(rel.isToMany());
-        rel.setToMany(false);
-        assertFalse(rel.isToMany());
-    }
 }

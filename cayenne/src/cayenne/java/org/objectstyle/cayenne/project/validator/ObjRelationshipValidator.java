@@ -116,7 +116,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
 
 		//Disallow a Nullify delete rule where the relationship is toMany and the 
 		//foreign key attributes are mandatory.
-		if (rel.isToMany() && (rel.getDeleteRule() == DeleteRule.NULLIFY)) {
+		if (rel.isToMany() && !rel.isFlattened() && (rel.getDeleteRule() == DeleteRule.NULLIFY)) {
 			ObjRelationship inverse = rel.getReverseRelationship();
 			if (inverse != null) {
 				DbRelationship firstRel = (DbRelationship)inverse.getDbRelationships().get(0);
@@ -125,12 +125,6 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
 					DbAttributePair pair =
 						(DbAttributePair) attributePairIterator.next();
 					if (pair.getSource().isMandatory()) {
-						/* System.out.println("rel:"+rel.getName());
-						System.out.println("inverse"+inverse.getName());
-						System.out.println("firstRel"+firstRel.getName());
-						System.out.println("pair"+pair);
-						System.out.println("pair.getSource()"+pair.getSource());*/
-
 						validator.registerWarning(
 							"ObjRelationship "
 								+ rel.getName()

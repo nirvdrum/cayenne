@@ -83,19 +83,24 @@
                 <li><a href="perform/index.html#paged">10.3 Paged Queries</a></li>
             </ul><br/></li>
             
-            <li><a href="deploy/index.html"><strong>11. Deployment</strong></a>
+            <li><a href="advmodel/index.html"><strong>11. Advanced modelling</strong></a>
             <ul>
-                <li><a href="deploy/index.html#config">11.1 Configuration</a></li>
-                <li><a href="deploy/index.html#standalone">11.2 Standalone Applications</a></li>
-                <li><a href="deploy/index.html#web">11.3 Web Applications</a></li>
-                <li><a href="deploy/index.html#custom">11.4 Customizing Configuration</a></li>
-                <li><a href="deploy/index.html#jndi">11.5 Using JNDI</a></li>
-                <li><a href="deploy/cdeploy.html">11.6 Deployment Configuration With Ant</a></li>
+            	<li><a href="advmodel/flattenedrel.html">11.1 Flattened relationship</a></li>
             </ul><br/></li>
             
-            <li><a href="misc.html"><strong>12. Miscellaneous Information</strong></a>
+            <li><a href="deploy/index.html"><strong>12. Deployment</strong></a>
             <ul>
-                <li><a href="misc.html#webobjects">12.1 Cayenne and WebObjects</a></li>
+                <li><a href="deploy/index.html#config">12.1 Configuration</a></li>
+                <li><a href="deploy/index.html#standalone">12.2 Standalone Applications</a></li>
+                <li><a href="deploy/index.html#web">12.3 Web Applications</a></li>
+                <li><a href="deploy/index.html#custom">12.4 Customizing Configuration</a></li>
+                <li><a href="deploy/index.html#jndi">12.5 Using JNDI</a></li>
+                <li><a href="deploy/cdeploy.html">12.6 Deployment Configuration With Ant</a></li>
+            </ul><br/></li>
+            
+            <li><a href="misc.html"><strong>13. Miscellaneous Information</strong></a>
+            <ul>
+                <li><a href="misc.html#webobjects">13.1 Cayenne and WebObjects</a></li>
             </ul><br/></li>
         </ul>
     </section>

@@ -161,11 +161,12 @@ public class ObjEntity extends Entity {
     }
 
     /**
-     * Creates an object id from the values in object snapshot.
+     * Creates an id snapshot (the key/value pairs for the pk of the object)
+     * from the values in object snapshot.
      * If needed attributes are missing in a snapshot or if it is null,
      * CayenneRuntimeException is thrown.
      */
-    public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
+	public Map idSnapshotMapFromSnapshot(Map objectSnapshot) {
         Map idMap = new HashMap();
         Iterator it = getDbEntity().getPrimaryKey().iterator();
         while (it.hasNext()) {
@@ -181,7 +182,16 @@ public class ObjEntity extends Entity {
 
             idMap.put(attr.getName(), val);
         }
-
+		return idMap;
+	}
+	
+    /**
+     * Creates an object id from the values in object snapshot.
+     * If needed attributes are missing in a snapshot or if it is null,
+     * CayenneRuntimeException is thrown.
+     */
+    public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
+		Map idMap=this.idSnapshotMapFromSnapshot(objectSnapshot);
         Class objClass;
         try {
             objClass = Class.forName(this.getClassName());

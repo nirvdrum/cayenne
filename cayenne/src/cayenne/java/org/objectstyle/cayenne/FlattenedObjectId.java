@@ -53,100 +53,99 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne;
 
-/** Superclass of metadata relationship classes. */
-public abstract class Relationship extends MapObject {
-	protected String targetEntityName;
-	protected boolean toMany;
+import org.objectstyle.cayenne.util.Util;
 
-	public Relationship() {
-		super();
-	}
+/**
+ * A FlattenedObjectId is a class that uniquely identifies 
+ * an object that is the destination of a flattened relationship
+ * that is defined by a series of toOne relationships
+ * 
+ * <p>It encapsulates enough information (relationship, source object 
+ * pk etc.) in order for DataContext to fetch the appropriate row
+ * when the object is touched
+ * </p>
+ * 
+ * @author Craig Miskell
+ */
+public class FlattenedObjectId extends ObjectId {
+	protected String relationshipName;
+	protected DataObject sourceObject;
 
-	public Relationship(String name) {
-		this();
-		this.setName(name);
-	}
-
-	/** Returns relationship source entity. */
-	public Entity getSourceEntity() {
-		return (Entity)this.getParent();
-	}
-
-	/** Sets relationship source entity. */
-	public void setSourceEntity(Entity sourceEntity) {
-		setParent(sourceEntity);
-	}
-
-	/** Returns relationship target entity. */
-	public abstract Entity getTargetEntity();
-
-	/** 
-	 * Sets relationship target entity. Internally
-	 * calls <code>setTargetEntityName</code>.
+	/**
+	 * Constructs a FlattenedObjectId
+	 * @param objClass the class of the DataObject this id represents
+	 * @param aSourceIdSnapshot the idsnapshot of the source object of the 
+	 * flattened relationship
+	 * @param aRelationshipName the name of the relationship on the source 
+	 * object.
 	 */
-	public void setTargetEntity(Entity targetEntity) {
-		if (targetEntity != null) {
-			this.setTargetEntityName(targetEntity.getName());
-		} else {
-			this.setTargetEntityName(null);
-		}
+	public FlattenedObjectId(
+		Class objClass,
+		DataObject aSourceObject,
+		String aRelationshipName) {
+
+		super(objClass, null);
+		this.relationshipName = aRelationshipName;
+		this.sourceObject = aSourceObject;
 	}
 
 	/**
-	 * Returns the targetEntityName.
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object object) {
+		if (!(object instanceof FlattenedObjectId)) {
+			return false;
+		}
+
+		if (this == object) {
+			return true;
+		}
+
+		FlattenedObjectId id = (FlattenedObjectId) object;
+		// use the class name because two Objectid's should be equal
+		// even if their objClass'es were loaded by different class loaders.
+		return objectClass.getName().equals(id.objectClass.getName())
+			&& Util.nullSafeEquals(id.objectIdKeys, this.objectIdKeys)
+			&& Util.nullSafeEquals(id.relationshipName, this.relationshipName);
+
+	}
+
+	/**
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		int mapHash = (objectIdKeys != null) ? objectIdKeys.hashCode() : 0;
+		// use the class name because two Objectid's should be equal
+		// even if their objClass'es were loaded by different class loaders.
+		return relationshipName.hashCode()
+			+ objectClass.getName().hashCode()
+			+ mapHash;
+	}
+
+	/**
+	 * @see org.objectstyle.cayenne.ObjectId#isTemporary()
+	 */
+	public boolean isTemporary() {
+		return true;
+	}
+	/**
+	 * Returns the name of the flattened relationship from
+	 * the source object (identified by sourceIdSnapshot) that
+	 * leads to the object that this id represents
 	 * @return String
 	 */
-	public String getTargetEntityName() {
-		return targetEntityName;
+	public String getRelationshipName() {
+		return relationshipName;
 	}
 
 	/**
-	 * Sets the targetEntityName.
-	 * @param targetEntityName The targetEntityName to set
+	 * Returns the id snapshot of the source object
+	 * @return Map
 	 */
-	public void setTargetEntityName(String targetEntityName) {
-		this.targetEntityName = targetEntityName;
+	public DataObject getSourceObject() {
+		return this.sourceObject;
 	}
 
-	public String toString() {
-		StringBuffer sb = new StringBuffer(this.getClass().getName());
-		sb.append(" - relationship name '").append(this.getName());
-		if (toMany) {
-			sb.append("' (to-many)\n");
-		}
-		else {
-			sb.append("' (to-one)\n");
-		}
-
-		sb.append("Source entity: ");
-		Entity src = this.getSourceEntity();
-		if (src == null) {
-			sb.append("<null>");
-		} else {
-			sb.append(src.getName());
-		}
-
-		sb.append(" Target entity: ");
-		Entity target = this.getTargetEntity();
-		if (target == null)
-			sb.append("<null>");
-		else
-			sb.append(target.getName());
-
-		sb.append("\n------------------\n");
-		return sb.toString();
-	}
-	
-	/** Is relationship from source to target to-one or to-many.
-	  * If one-to-many, getxxx() method of the data object class would 
-	  * return a list, otherwise it returns a single DataObject
-	  * There is explicitly no setToMany on Relationship.. only DbRelationship
-	  * supports such a notion, and ObjRelationship derives it's value from the
-	  * underlying DbRelationship(s) */
-	public boolean isToMany() {
-		return toMany;
-	}
-	
 }

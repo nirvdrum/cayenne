@@ -59,6 +59,9 @@ import java.util.List;
 
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.FlattenedTest1;
+import org.objectstyle.art.FlattenedTest2;
+import org.objectstyle.art.FlattenedTest3;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
@@ -379,6 +382,34 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
         //a1 = fetchArtist();
         //assertTrue(group.getArtistArray().contains(a1));
     }
+    
+	public void testToOneSeriesFlattenedRel() {
+		FlattenedTest1 ft1 =
+			(FlattenedTest1) ctxt.createAndRegisterNewObject("FlattenedTest1");
+		ft1.setName("FT1Name");
+		FlattenedTest2 ft2 =
+			(FlattenedTest2) ctxt.createAndRegisterNewObject("FlattenedTest2");
+		ft2.setName("FT2Name");
+		FlattenedTest3 ft3 =
+			(FlattenedTest3) ctxt.createAndRegisterNewObject("FlattenedTest3");
+		ft3.setName("FT3Name");
+		
+		ft2.setToFT1(ft1);
+		ft2.addToFt3Array(ft3);
+		ctxt.commitChanges();
+		
+		this.resetContext(); //We need a new context
+		SelectQuery q=new SelectQuery(FlattenedTest3.class);
+		q.setQualifier(ExpressionFactory.matchExp("name", "FT3Name"));
+		List results=ctxt.performQuery(q);
+		
+		assertEquals(1, results.size());
+		
+		FlattenedTest3 fetchedFT3=(FlattenedTest3)results.get(0);
+		FlattenedTest1 fetchedFT1=fetchedFT3.getToFT1();
+		assertEquals("FT1Name", fetchedFT1.getName());
+		
+	}
 
     public void testReflexiveRelationshipInsertOrder1() {
         DataContext dc = this.createDataContext();

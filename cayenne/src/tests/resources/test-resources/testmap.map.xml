@@ -56,6 +56,20 @@
 		<db-attribute name="GALLERY_ID" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="OPENING_DATE" type="TIMESTAMP" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="FLATTENED_TEST_1">
+		<db-attribute name="FT1_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" isMandatory="true" length="100"/>
+	</db-entity>
+	<db-entity name="FLATTENED_TEST_2">
+		<db-attribute name="FT1_ID" type="INTEGER"/>
+		<db-attribute name="FT2_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" isMandatory="true" length="100"/>
+	</db-entity>
+	<db-entity name="FLATTENED_TEST_3">
+		<db-attribute name="FT2_ID" type="INTEGER"/>
+		<db-attribute name="FT3_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" isMandatory="true" length="100"/>
+	</db-entity>
 	<db-entity name="FLOAT_TEST">
 		<db-attribute name="FLOAT_COL" type="FLOAT"/>
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -144,6 +158,15 @@
 		<obj-attribute name="closingDate" type="java.util.Date" db-attribute-path="CLOSING_DATE"/>
 		<obj-attribute name="openingDate" type="java.util.Date" db-attribute-path="OPENING_DATE"/>
 	</obj-entity>
+	<obj-entity name="FlattenedTest1" className="org.objectstyle.art.FlattenedTest1" dbEntityName="FLATTENED_TEST_1">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="FlattenedTest2" className="org.objectstyle.art.FlattenedTest2" dbEntityName="FLATTENED_TEST_2">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="FlattenedTest3" className="org.objectstyle.art.FlattenedTest3" dbEntityName="FLATTENED_TEST_3">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
 	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="GALLERY_NAME"/>
 	</obj-entity>
@@ -194,6 +217,12 @@
 	<db-relationship name="exhibitArray" source="GALLERY" target="EXHIBIT" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
+	<db-relationship name="ft2Array" source="FLATTENED_TEST_1" target="FLATTENED_TEST_2" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="FT1_ID" target="FT1_ID"/>
+	</db-relationship>
+	<db-relationship name="ft3Array" source="FLATTENED_TEST_2" target="FLATTENED_TEST_3" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
+	</db-relationship>
 	<db-relationship name="painting" source="PAINTING_INFO" target="PAINTING" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
@@ -234,6 +263,12 @@
 	<db-relationship name="toExhibit" source="ARTIST_EXHIBIT" target="EXHIBIT" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
 	</db-relationship>
+	<db-relationship name="toFT1" source="FLATTENED_TEST_2" target="FLATTENED_TEST_1" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="FT1_ID" target="FT1_ID"/>
+	</db-relationship>
+	<db-relationship name="toFT2" source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
+	</db-relationship>
 	<db-relationship name="toGallery" source="EXHIBIT" target="GALLERY" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
@@ -265,8 +300,18 @@
 	<obj-relationship name="compoundFkArray" source="CompoundPkTest" target="CompoundFkTest" toMany="true">
 		<db-relationship-ref source="COMPOUND_PK_TEST" target="COMPOUND_FK_TEST" name="compoundFkArray"/>
 	</obj-relationship>
-	<obj-relationship name="exhibitArray" source="Gallery" target="Exhibit" toMany="true" deleteRule="Nullify">
+	<obj-relationship name="exhibitArray" source="Gallery" target="Exhibit" toMany="true" deleteRule="Cascade">
 		<db-relationship-ref source="GALLERY" target="EXHIBIT" name="exhibitArray"/>
+	</obj-relationship>
+	<obj-relationship name="ft2Array" source="FlattenedTest1" target="FlattenedTest2" toMany="true">
+		<db-relationship-ref source="FLATTENED_TEST_1" target="FLATTENED_TEST_2" name="ft2Array"/>
+	</obj-relationship>
+	<obj-relationship name="ft3Array" source="FlattenedTest1" target="FlattenedTest3" toMany="true">
+		<db-relationship-ref source="FLATTENED_TEST_1" target="FLATTENED_TEST_2" name="ft2Array"/>
+		<db-relationship-ref source="FLATTENED_TEST_2" target="FLATTENED_TEST_3" name="ft3Array"/>
+	</obj-relationship>
+	<obj-relationship name="ft3Array" source="FlattenedTest2" target="FlattenedTest3" toMany="true">
+		<db-relationship-ref source="FLATTENED_TEST_2" target="FLATTENED_TEST_3" name="ft3Array"/>
 	</obj-relationship>
 	<obj-relationship name="groupArray" source="Artist" target="ArtGroup" toMany="true" deleteRule="Cascade">
 		<db-relationship-ref source="ARTIST" target="ARTIST_GROUP" name="artistGroupArray"/>
@@ -313,6 +358,16 @@
 	</obj-relationship>
 	<obj-relationship name="toExhibit" source="ArtistExhibit" target="Exhibit" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="ARTIST_EXHIBIT" target="EXHIBIT" name="toExhibit"/>
+	</obj-relationship>
+	<obj-relationship name="toFT1" source="FlattenedTest2" target="FlattenedTest1" toMany="false">
+		<db-relationship-ref source="FLATTENED_TEST_2" target="FLATTENED_TEST_1" name="toFT1"/>
+	</obj-relationship>
+	<obj-relationship name="toFT1" source="FlattenedTest3" target="FlattenedTest1" toMany="false">
+		<db-relationship-ref source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" name="toFT2"/>
+		<db-relationship-ref source="FLATTENED_TEST_2" target="FLATTENED_TEST_1" name="toFT1"/>
+	</obj-relationship>
+	<obj-relationship name="toFT2" source="FlattenedTest3" target="FlattenedTest2" toMany="false">
+		<db-relationship-ref source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" name="toFT2"/>
 	</obj-relationship>
 	<obj-relationship name="toGallery" source="CompoundPainting" target="Gallery" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>

@@ -186,12 +186,12 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 			rel.setTargetEntity(target);
 			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireObjRelationshipEvent(e);
-		} else if (column == REL_CARDINALITY) {
+		} /*else if (column == REL_CARDINALITY) {
 			Boolean temp = (Boolean) aValue;
 			rel.setToMany(temp.booleanValue());
 			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireObjRelationshipEvent(e);
-		} else if (column == REL_DELETERULE) {
+		}*/ else if (column == REL_DELETERULE) {
 			String temp = (String)aValue;
 			rel.setDeleteRule(DeleteRule.deleteRuleForName(temp));
 			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
@@ -221,6 +221,9 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 	}
 
 	public boolean isCellEditable(int row, int col) {
+		if(col==REL_CARDINALITY) {
+			return false; //Cannot edit the toMany flag on an ObjRelationship
+		}
 		return true;
 	} 
 

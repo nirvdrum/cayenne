@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.util.Invocation;
 
 /**
  * This class acts as bridge between an Object that wants to inform others about
- * its current state or a achnage thereof (Publisher) and a list of objects
+ * its current state or a change thereof (Publisher) and a list of objects
  * interested in the Subject (Listeners).
  * 
  * @author Dirk Olmes

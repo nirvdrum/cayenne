@@ -129,7 +129,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
         assertEquals(r1, rel.getDbRelationships().get(0));
         assertFalse(rel.isFlattened());
         assertFalse(rel.isReadOnly());
-
+        assertEquals(r1.isToMany(), rel.isToMany());
         rel.removeDbRelationship(r1);
         assertEquals(0, rel.getDbRelationships().size());
      }
@@ -148,18 +148,22 @@ public class ObjRelationshipTst extends CayenneTestCase {
 		
         rel.addDbRelationship(r1);
         rel.addDbRelationship(r2);
+        assertTrue(rel.isToMany());
         assertEquals(2, rel.getDbRelationships().size());
         assertEquals(r1, rel.getDbRelationships().get(0));
         assertEquals(r2, rel.getDbRelationships().get(1));
+
         
         assertTrue(rel.isFlattened());
         assertFalse(rel.isReadOnly());
         
         rel.removeDbRelationship(r1);
+        assertFalse(rel.isToMany()); //only remaining rel is r2... a toOne
         assertEquals(1, rel.getDbRelationships().size());
         assertEquals(r2, rel.getDbRelationships().get(0));
         assertFalse(rel.isFlattened());
         assertFalse(rel.isReadOnly());
+
     }
     
     public void testReadOnlyMoreThan3DbRelsRelationship() {
@@ -184,7 +188,8 @@ public class ObjRelationshipTst extends CayenneTestCase {
         
  		assertTrue(rel.isFlattened());
         assertTrue(rel.isReadOnly());
-  	
+  	    assertTrue(rel.isToMany());
+
     }
     
     //Test for a read-only flattened relationship that is readonly because it's dbrel sequence is "incorrect" (or rather, unsupported)
@@ -204,6 +209,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
 		
 		assertTrue(rel.isFlattened());
 		assertTrue(rel.isReadOnly());
+		assertTrue(rel.isToMany());
     }
     
     //Test a relationship loaded from the test datamap that we know should be flattened
@@ -233,5 +239,16 @@ public class ObjRelationshipTst extends CayenneTestCase {
     		e.printStackTrace();
     		fail("Should not have thrown an exception :"+e.getMessage());
     	}
+    }
+    
+    public void testWatchesDbRelChanges() {
+        DbRelationship r1 = new DbRelationship();
+        r1.setToMany(true);
+   		rel.addDbRelationship(r1);
+   		assertTrue(rel.isToMany());
+   		
+   		//rel should be watching r1 (events) to see when that changes
+   		r1.setToMany(false);
+   		assertFalse(rel.isToMany());
     }
 }

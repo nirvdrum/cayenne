@@ -62,6 +62,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 
 /**
  * A DbRelationship is a descriptor of a database inter-table relationship
@@ -71,9 +74,13 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrei Adamchik
  */
 public class DbRelationship extends Relationship {
+	//DbRelationship events
+    public static final EventSubject PROPERTY_DID_CHANGE =
+        EventSubject.getSubject(DbRelationship.class, "PropertyDidChange");
+
 	// The columns through which the join is implemented.
 	protected List joins = new ArrayList();
-
+	
 	// Is relationship from source to target points to dependent primary
 	//  key (primary key column of destination table that is also a FK to the source column)
 	protected boolean toDependentPK;
@@ -286,5 +293,15 @@ public class DbRelationship extends Relationship {
 			throw new CayenneRuntimeException("Only 'to many' relationships support this method.");
 		return srcSnapshotWithTargetSnapshot(targetSnapshot);
 	}
+	
+	/** Set relationship multiplicity. */
+	public void setToMany(boolean toMany) {
+		this.toMany = toMany;
+		this.firePropertyDidChange();
+	}
 
+	protected void firePropertyDidChange() {
+		RelationshipEvent event=new RelationshipEvent(this, this, this.getSourceEntity());
+		EventManager.getDefaultManager().postEvent(event, PROPERTY_DID_CHANGE);
+	}
 }

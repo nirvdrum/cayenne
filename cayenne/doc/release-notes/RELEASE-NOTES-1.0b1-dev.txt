@@ -65,4 +65,13 @@ $HOME/.cayenne/modeler.preferences.
 
 18. In-memory BLOB/CLOB support.
 
+19. Fixes to prefetching bugs - toMany prefetching now "works" (doesn't
+trigger a second fetch when the toMany is hit), and all prefetching works
+even when there is no reverse ObjRelationship path for the prefetch path.
+
+20. Fixed partial snapshots bug - partial snapshots will now result
+in a HOLLOW object that will be fully fetched when it is 
+
+21. Fixed flattened relationships on a series of toOne dbrelationships 
+(didn't work at all before)
 

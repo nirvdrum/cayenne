@@ -1,0 +1,97 @@
+ <document>
+<title>User Guide - Flattened relationships</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/advmodel/index.html</prev>
+	<next>/userguide/deploy/index.html</next>
+</navigator>    
+
+<body>
+    <section name="10. Advanced modelling">
+    	<subsection name="10.1 Flattened relationships">
+	<p>
+	Flattened relationships take a sequence (or path) of Object level 
+	relationships, and "flatten" them into the root entity.  For example if we
+	had an Employee entity, with a toOne relationship "toDept" to the Department 
+	entity; and the Department entity has a toOne relationship "toManager" to the 
+	Employee entity, indicating the manager for that department.  We could create
+	a flattened relationship from Employee to Employee, following toDept.toManager
+	The generated class files for Employee would then contain a getToManager() 
+	method, which when called will return the manager for the department to which
+	this employee belongs.  The class will also contain a setToManager() method,
+	but this will throw an exception if used, as the relationship is considered
+	read-only.  The slight advantage of this setup would come if you did not
+	intend on touching Department very often, and would much more likely be wanting
+	to find an Employee's manager.  When this relationship is touched
+	</p>
+
+<source>
+import java.math.BigDecimal;
+import java.util.List;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.art.Painting;
+import org.objectstyle.art.Artist;
+...
+
+// assume this exists and initialized
+DataContext ctxt;
+...
+Expression e = 
+  ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, 
+                        "estimatedPrice", 
+                        new BigDecimal(100000.0));
+SelectQuery q = new SelectQuery(Painting.class, e);
+List realExpensiveArt = ctxt.performQuery(q);
+
+if(realExpensiveArt.size() > 0) {
+  Painting firstPainting = (Painting)realExpensiveArt.get(0);
+
+  // double the price
+  double oldPrice = firstPainting.getEstimatedPrice().doubleValue();
+  firstPainting.setEstimatedPrice(new BigDecimal(oldPrice * 2.00));
+
+  // create new painting and register it with DataContext
+  // "Painting" string is a name of ObjEntity in the DataMap
+  Painting newPainting = (Painting)ctxt.createAndRegisterNewObject("Painting");
+  newPainting.setPaintingTitle("Sunset as it is");
+
+  // price it as unreasonable as other paintings
+  newPainting.setEstimatedPrice(new BigDecimal(5000000.0));
+            
+  // get artist via relationship
+  Artist artist = firstPainting.getToArtist();
+
+  // assign new painting to an artist
+  artist.addToPaintingArray(newPainting);
+
+  // save all the changes we've made so far
+  ctxt.commitChanges();
+}
+...
+</source>
+
+		<p>If SQL tracing is turned on, and depending on the preexisting data in the database,
+		the following SQL statements might be printed to console during the
+		commit phase:</p>
+
+<source>
+[main 12-22 15:50:19] QueryLogger: --- will run 2 queries.
+[main 12-22 15:50:19] QueryLogger: INSERT INTO PAINTING 
+                                   (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE, ARTIST_ID) 
+                                   VALUES (?, ?, ?, ?) 
+                                   [params: 200, 'Sunset as it is', 5000000, 10]
+[main 12-22 15:50:19] QueryLogger: === updated 1 row.
+[main 12-22 15:50:19] QueryLogger: UPDATE PAINTING SET ESTIMATED_PRICE = ? 
+                                   WHERE PAINTING_ID = ? 
+                                   [params: 2000000, 34]
+[main 12-22 15:50:19] QueryLogger: === updated 1 row.
+[main 12-22 15:50:19] QueryLogger: +++ transaction committed.
+</source>
+	</subsection>
+    </section>
+</body>
+</document>
+
