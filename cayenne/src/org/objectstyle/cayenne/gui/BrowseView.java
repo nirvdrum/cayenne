@@ -65,7 +65,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 
-import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.event.*;
@@ -217,8 +216,9 @@ public class BrowseView
 	}
 
 	public void currentDomainChanged(DomainDisplayEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this) {
 			return;
+		}
 		DefaultMutableTreeNode temp;
 		temp = getDomainNode(e.getDomain());
 		if (null == temp)
@@ -284,20 +284,20 @@ public class BrowseView
 	}
 
 	public void domainRemoved(DomainEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this) {
 			return;
-		DefaultMutableTreeNode node;
-		node = getDomainNode(e.getDomain());
-		if (null != node)
-			model.removeNodeFromParent(node);
+		}
+		
+		DefaultMutableTreeNode treeNode = getDomainNode(e.getDomain());
+		if (treeNode != null) {
+			removeNode(treeNode);
+		}
 	}
 
 	public void dataNodeChanged(DataNodeEvent e) {
 		if (e.getSource() == this)
 			return;
-		DefaultMutableTreeNode node;
-		node =
-			getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
+		DefaultMutableTreeNode node = getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
 		if (null != node) {
 			model.nodeChanged(node);
 			DataMap[] maps = e.getDataNode().getDataMaps();
@@ -344,7 +344,7 @@ public class BrowseView
 					if (!found) {
 						logObj.fine(
 							"About to remove map " + wrap + " from node");
-						model.removeNodeFromParent(child);
+                        removeNode(child);
 						break;
 					}
 				} // End for(j)
@@ -396,27 +396,32 @@ public class BrowseView
 		node = loadMap(e.getDataMap());
 		model.insertNodeInto(node, parent, parent.getChildCount());
 	}
+	
 	public void dataMapRemoved(DataMapEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this) {
 			return;
-		DefaultMutableTreeNode node;
+		}
+		
 		DataMap map = e.getDataMap();
 		DataDomain domain = mediator.getCurrentDataDomain();
-		node = getMapNode(domain, map);
-		if (null != node)
-			model.removeNodeFromParent(node);
+		DefaultMutableTreeNode treeNode = getMapNode(domain, map);
+		if (treeNode != null) {
+			removeNode(treeNode);
+		}
+		
 		// Clean up map from the nodes
 		DataNode[] nodes = domain.getDataNodes();
 		for (int i = 0; i < nodes.length; i++) {
 			DataMap[] maps = nodes[i].getDataMaps();
 			for (int j = 0; j < maps.length; j++) {
 				if (maps[j] == map) {
-					node = getMapNode(domain, nodes[i], map);
-					if (null != node)
-						model.removeNodeFromParent(node);
-				} // End if found the map under node
-			} // End for(maps in the node)
-		} // End for(nodes in current domain)
+					DefaultMutableTreeNode mapNode = getMapNode(domain, nodes[i], map);
+					if (null != mapNode) {
+						model.removeNodeFromParent(mapNode);
+					}
+				} 
+			} 
+		}
 	}
 
 	private ArrayList getNodesWithMap(DataMap map) {
@@ -728,9 +733,14 @@ public class BrowseView
 		}
 
 		currentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
+		
 		Object[] data = getUserObjects(currentNode);
-		if (data.length == 0)
+		if (data.length == 0) {
+			// this should clear the right-side panel
+			mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, null));
 			return;
+		}
+		
 		Object obj = data[data.length - 1];
 		if (obj instanceof DataDomain) {
 			mediator.fireDomainDisplayEvent(

@@ -104,16 +104,31 @@ public class RemoveAction extends CayenneAction {
 			// In context of Data node just remove from Data Node
 			if (mediator.getCurrentDataNode() != null) {
 				removeDataMapFromDataNode();
-				// Not under Data Node? Remove completely
 			} else {
-				mediator.removeDataMap(src, mediator.getCurrentDataMap());
+				// Not under Data Node, remove completely
+				removeDataMap();
 			}
 		} else if (mediator.getCurrentDataNode() != null) {
 			removeDataNode();
 		} else if (mediator.getCurrentDataDomain() != null) {
-			mediator.removeDomain(src, mediator.getCurrentDataDomain());
+			removeDomain();
 		}
 	}
+	
+	protected void removeDomain() {
+		DataDomain domain = mediator.getCurrentDataDomain();
+		mediator.getConfig().removeDomain(domain.getName());
+		mediator.fireDomainEvent(new DomainEvent(Editor.getFrame(), domain, DomainEvent.REMOVE));
+	}
+	
+	
+	protected void removeDataMap() {
+		DataMap map = mediator.getCurrentDataMap();
+		DataDomain domain = mediator.getCurrentDataDomain();
+		domain.removeMap(map.getName());
+		mediator.fireDataMapEvent(new DataMapEvent(Editor.getFrame(), map, DataMapEvent.REMOVE));
+	}
+	
 
 	protected void removeDataNode() {
 		DataNode node = mediator.getCurrentDataNode();
@@ -126,7 +141,7 @@ public class RemoveAction extends CayenneAction {
 	 * Removes current DbEntity from its DataMap and fires 
 	 * "remove" EntityEvent.
 	 */
-	public void removeDbEntity() {
+	protected void removeDbEntity() {
 		DbEntity ent = mediator.getCurrentDbEntity();
 		DataMap map = mediator.getCurrentDataMap();
 		map.deleteDbEntity(ent.getName());

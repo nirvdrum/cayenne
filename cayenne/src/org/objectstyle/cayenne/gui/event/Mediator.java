@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.gui.event;
 
 import java.util.*;
@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.GuiConfiguration;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.util.*;
-
 
 /** 
  * Interface for mediator of all views of DataMapEditor. 
@@ -83,70 +82,67 @@ import org.objectstyle.cayenne.gui.util.*;
  * 
  * @author Michael Misha Shengaout 
  */
-public class Mediator
-{
+public class Mediator {
 	//DataMapEditor parent;
 	protected EventListenerList listenerList;
 	/** The list of the currently open DataMapModel-s */
-	DataDomain currentDomain 	= null;
-	DataNode currentNode 		= null;
-	DataMap currentMap 			= null;	
-	ObjEntity currentObjEntity 	= null;
-	DbEntity  currentDbEntity  	= null;
+	DataDomain currentDomain = null;
+	DataNode currentNode = null;
+	DataMap currentMap = null;
+	ObjEntity currentObjEntity = null;
+	DbEntity currentDbEntity = null;
 	ObjAttribute currentObjAttr = null;
-	DbAttribute currentDbAttr 	= null;
-	ObjRelationship currentObjRel=null;
+	DbAttribute currentDbAttr = null;
+	ObjRelationship currentObjRel = null;
 	DbRelationship currentDbRel = null;
-	
+
 	/** The list of changed data domains.*/
 	ArrayList dirtyDomains = new ArrayList();
 	/** The list of changed data maps.*/
 	ArrayList dirtyMaps = new ArrayList();
 	/** The list of changed data nodes.*/
 	ArrayList dirtyNodes = new ArrayList();
-	
+
 	GuiConfiguration config;
 	/** Changes have been made, need to be saved. */
 	boolean dirty;
 	private static Mediator mediator;
-	
-	private Mediator()	{
+
+	private Mediator() {
 		listenerList = new EventListenerList();
 	}
-	
 
 	private Mediator(GuiConfiguration config) {
 		this();
 		this.config = config;
 	}
-	
+
 	public static Mediator getMediator() {
 		if (mediator == null) {
 			mediator = new Mediator();
 		}
 		return mediator;
 	}
-	
 
 	public static Mediator getMediator(GuiConfiguration gui_config) {
 		mediator = new Mediator(gui_config);
 		return mediator;
 	}
-	
+
 	public GuiConfiguration getConfig() {
 		return config;
 	}
-	
+
 	public boolean isDirty() {
 		return dirty;
 	}
-	
+
 	public boolean isDirty(DataMap map) {
 		if (dirtyMaps.contains(map))
 			return true;
 		return false;
 	}
-	
+
 	public boolean isDirty(DataDomain domain) {
 		if (dirtyDomains.contains(domain))
 			return true;
@@ -164,45 +160,43 @@ public class Mediator
 		currentObjEntity = null;
 		currentDbEntity = null;
 	}
-	
+
 	/** Makes Db Attribute current. Clears Db Relationship.*/
 	public void setCurrentDbAttribute(DbAttribute temp_attribute) {
 		this.currentDbAttr = temp_attribute;
 		this.currentDbRel = null;
 	}
-	
+
 	/** Makes Obj Attribute current. Clears nothing.*/
 	public void setCurrentObjAttribute(ObjAttribute temp_attribute) {
 		this.currentObjAttr = temp_attribute;
 	}
-	
+
 	/** Makes Db Relationship current. Clears Db Attribute.*/
 	public void setCurrentDbRelationship(DbRelationship temp_rel) {
 		this.currentDbRel = temp_rel;
 		this.currentDbAttr = null;
 	}
-	
+
 	/** Makes Obj Relationship current. Clears Obj Attribute.*/
 	public void setCurrentObjRelationship(ObjRelationship temp_rel) {
 		this.currentObjRel = temp_rel;
 		this.currentObjAttr = null;
 	}
-	
 
-	
 	/** Resets all current models to null. */
 	private void clearState() {
-		currentDomain 	= null;
-		currentNode 	= null;
-		currentMap 		= null;	
-		currentObjEntity= null;
+		currentDomain = null;
+		currentNode = null;
+		currentMap = null;
+		currentObjEntity = null;
 		currentDbEntity = null;
-		currentObjAttr 	= null;
-		currentDbAttr	= null;
-		currentObjRel	= null;
-		currentDbRel	= null;
+		currentObjAttr = null;
+		currentDbAttr = null;
+		currentObjRel = null;
+		currentDbRel = null;
 	}
-	
+
 	/** Makes data map current. This means also clearing the current
 	  * entities, populating browse trees and making detail views invisible
 	  * until entities in browse trees are selected. 
@@ -211,8 +205,7 @@ public class Mediator
 	public void setCurrentModel(DataMap model) {
 		setCurrentDataMap(model);
 	}
-	
-	
+
 	/** Gets data map under specified name. 
 	  * @deprecated
 	  * @see #getDataMap */
@@ -220,10 +213,8 @@ public class Mediator
 		return getDataMap(name);
 	}
 
-
 	/** Gets data map under specified name. */
-	public DataMapWrapper getDataMap(String name)
-	{
+	public DataMapWrapper getDataMap(String name) {
 		return null;
 	}
 
@@ -231,188 +222,243 @@ public class Mediator
 		java.util.List domains = config.getDomainList();
 		if (null == domains)
 			return new DataDomain[0];
-		return (DataDomain[])domains.toArray(new DataDomain[domains.size()]);
+		return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
 	}
 
-	
-	public DataNode getCurrentDataNode() {return currentNode;}
-	public DataDomain getCurrentDataDomain() {return currentDomain;}
-	public DataMap getCurrentDataMap() {return currentMap;}
-	public ObjEntity getCurrentObjEntity() {return currentObjEntity;}
-	public DbEntity getCurrentDbEntity() {return currentDbEntity;}
-	public ObjAttribute getCurrentObjAttribute() {return currentObjAttr;}
-	public DbAttribute getCurrentDbAttribute() {return currentDbAttr;}
-	public ObjRelationship getCurrentObjRelationship() {return currentObjRel;}
-	public DbRelationship getCurrentDbRelationship() {return currentDbRel;}
-
+	public DataNode getCurrentDataNode() {
+		return currentNode;
+	}
+	public DataDomain getCurrentDataDomain() {
+		return currentDomain;
+	}
+	public DataMap getCurrentDataMap() {
+		return currentMap;
+	}
+	public ObjEntity getCurrentObjEntity() {
+		return currentObjEntity;
+	}
+	public DbEntity getCurrentDbEntity() {
+		return currentDbEntity;
+	}
+	public ObjAttribute getCurrentObjAttribute() {
+		return currentObjAttr;
+	}
+	public DbAttribute getCurrentDbAttribute() {
+		return currentDbAttr;
+	}
+	public ObjRelationship getCurrentObjRelationship() {
+		return currentObjRel;
+	}
+	public DbRelationship getCurrentDbRelationship() {
+		return currentDbRel;
+	}
 
 	public void addDomainDisplayListener(DomainDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DomainDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DomainDisplayListener",
+			listener);
 	}
 
 	public void addDomainListener(DomainListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DomainListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DomainListener",
+			listener);
 	}
 
 	public void addDataNodeDisplayListener(DataNodeDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DataNodeDisplayListener",
+			listener);
 	}
 
 	public void addDataNodeListener(DataNodeListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DataNodeListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DataNodeListener",
+			listener);
 	}
-	
+
 	public void addDataMapDisplayListener(DataMapDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DataMapDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DataMapDisplayListener",
+			listener);
 	}
 
 	public void addDataMapListener(DataMapListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DataMapListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DataMapListener",
+			listener);
 	}
 
 	public void addDbEntityListener(DbEntityListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DbEntityListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DbEntityListener",
+			listener);
 	}
 
 	public void addObjEntityListener(ObjEntityListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.ObjEntityListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.ObjEntityListener",
+			listener);
 	}
 
 	public void addDbEntityDisplayListener(DbEntityDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DbEntityDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DbEntityDisplayListener",
+			listener);
 	}
 
-	public void addObjEntityDisplayListener(ObjEntityDisplayListener listener){
-		addListener("org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener", listener);
+	public void addObjEntityDisplayListener(ObjEntityDisplayListener listener) {
+		addListener(
+			"org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener",
+			listener);
 	}
 
 	public void addDbAttributeListener(DbAttributeListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DbAttributeListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DbAttributeListener",
+			listener);
 	}
 
 	public void addDbAttributeDisplayListener(DbAttributeDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener",
+			listener);
 	}
 
 	public void addObjAttributeListener(ObjAttributeListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.ObjAttributeListener", listener);		
+		addListener(
+			"org.objectstyle.cayenne.gui.event.ObjAttributeListener",
+			listener);
 	}
 
 	public void addObjAttributeDisplayListener(ObjAttributeDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener", listener);		
+		addListener(
+			"org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener",
+			listener);
 	}
 
 	public void addDbRelationshipListener(DbRelationshipListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DbRelationshipListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DbRelationshipListener",
+			listener);
 	}
 
 	public void addDbRelationshipDisplayListener(DbRelationshipDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener",
+			listener);
 	}
 
 	public void addObjRelationshipListener(ObjRelationshipListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.ObjRelationshipListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.ObjRelationshipListener",
+			listener);
 	}
 
 	public void addObjRelationshipDisplayListener(ObjRelationshipDisplayListener listener) {
-		addListener("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener", listener);
+		addListener(
+			"org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener",
+			listener);
 	}
 
-
-	public void fireDomainDisplayEvent(DomainDisplayEvent e)
-	{
+	public void fireDomainDisplayEvent(DomainDisplayEvent e) {
 		if (e.getDomain() == currentDomain)
 			e.setDomainChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DomainDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DomainDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			DomainDisplayListener temp = (DomainDisplayListener)list[i];
+			DomainDisplayListener temp = (DomainDisplayListener) list[i];
 			temp.currentDomainChanged(e);
-		}// End for()
+		} // End for()
 	}
-	
 
 	/** Informs all listeners of the DomainEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDomainEvent(DomainEvent e) {
 		setDirty(true);
-		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DomainListener");
+
+		if (e.getId() == DomainEvent.REMOVE) {
+			dirtyDomains.remove(e.getDomain());
+			java.util.List list = e.getDomain().getMapList();
+			Iterator iter = list.iterator();
+			while (iter.hasNext()) {
+				dirtyMaps.remove(iter.next());
+			}
+		}
+
+		EventListener[] list =
+			getListeners("org.objectstyle.cayenne.gui.event.DomainListener");
 		for (int i = 0; i < list.length; i++) {
-			DomainListener temp = (DomainListener)list[i];
-			switch(e.getId()) {
-				case DomainEvent.ADD:
+			DomainListener temp = (DomainListener) list[i];
+			switch (e.getId()) {
+				case DomainEvent.ADD :
 					temp.domainAdded(e);
 					break;
-				case DomainEvent.CHANGE:
+				case DomainEvent.CHANGE :
 					temp.domainChanged(e);
 					break;
-				case DomainEvent.REMOVE:
+				case DomainEvent.REMOVE :
 					temp.domainRemoved(e);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid DomainEvent type: " + e.getId());
-			}// End switch
-		}// End for()
-		
+						"Invalid DomainEvent type: " + e.getId());
+			}
+		}
+
 	}
 
-
-	public void fireDataNodeDisplayEvent(DataNodeDisplayEvent e)
-	{
+	public void fireDataNodeDisplayEvent(DataNodeDisplayEvent e) {
 		if (e.getDataNode() == this.getCurrentDataNode())
 			e.setDataNodeChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
-		EventListener[] list = getListeners("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener");
+		EventListener[] list =
+			getListeners("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-            ((DataNodeDisplayListener)list[i]).currentDataNodeChanged(e);
+			((DataNodeDisplayListener) list[i]).currentDataNodeChanged(e);
 		}
 	}
-	
 
 	/** Informs all listeners of the DataNodeEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDataNodeEvent(DataNodeEvent e) {
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DataNodeListener");
-		
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DataNodeListener");
+
 		// FIXME: "dirty" flag and other procesisng is
 		// done in the loop. Loop should only care about 
 		// notifications...
 		for (int i = 0; i < list.length; i++) {
-			DataNodeListener temp = (DataNodeListener)list[i];
-			switch(e.getId()) {
-				case DataNodeEvent.ADD:
+			DataNodeListener temp = (DataNodeListener) list[i];
+			switch (e.getId()) {
+				case DataNodeEvent.ADD :
 					temp.dataNodeAdded(e);
 					setDirty(e.getDataNode());
 					break;
-				case DataNodeEvent.CHANGE:
+				case DataNodeEvent.CHANGE :
 					temp.dataNodeChanged(e);
 					setDirty(currentDomain);
 					setDirty(e.getDataNode());
 					break;
-				case DataNodeEvent.REMOVE:
+				case DataNodeEvent.REMOVE :
 					temp.dataNodeRemoved(e);
 					dirtyNodes.remove(e.getDataNode());
 					setDirty(currentDomain);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid DataNodeEvent type: " + e.getId());
+						"Invalid DataNodeEvent type: " + e.getId());
 			}
-		}		
+		}
 	}
 
-
-
-
-	public void fireDataMapDisplayEvent(DataMapDisplayEvent e)
-	{
+	public void fireDataMapDisplayEvent(DataMapDisplayEvent e) {
 		if (e.getDataMap() == this.getCurrentDataMap())
 			e.setDataMapChanged(false);
 		clearState();
@@ -420,41 +466,41 @@ public class Mediator
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DataMapDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DataMapDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			DataMapDisplayListener temp = (DataMapDisplayListener)list[i];
+			DataMapDisplayListener temp = (DataMapDisplayListener) list[i];
 			temp.currentDataMapChanged(e);
-		}// End for()
+		} // End for()
 	}
-	
 
 	/** Informs all listeners of the DataMapEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDataMapEvent(DataMapEvent e) {
-		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DataMapListener");
+		EventListener[] list =
+			getListeners("org.objectstyle.cayenne.gui.event.DataMapListener");
 		for (int i = 0; i < list.length; i++) {
-			DataMapListener temp = (DataMapListener)list[i];
-			switch(e.getId()) {
-				case DataMapEvent.ADD:
+			DataMapListener temp = (DataMapListener) list[i];
+			switch (e.getId()) {
+				case DataMapEvent.ADD :
 					temp.dataMapAdded(e);
 					setDirty(e.getDataMap());
 					setDirty(currentDomain);
 					break;
-				case DataMapEvent.CHANGE:
+				case DataMapEvent.CHANGE :
 					temp.dataMapChanged(e);
 					setDirty(e.getDataMap());
 					break;
-				case DataMapEvent.REMOVE:
+				case DataMapEvent.REMOVE :
 					temp.dataMapRemoved(e);
 					dirtyMaps.remove(e.getDataMap());
+					setDirty(currentDomain);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid DataMapEvent type: " + e.getId());
-			}// End switch
-		}// End for()
-		
+						"Invalid DataMapEvent type: " + e.getId());
+			}
+		}
 	}
 
 	/** Informs all listeners of the EntityEvent. 
@@ -462,313 +508,291 @@ public class Mediator
 	public void fireObjEntityEvent(EntityEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.ObjEntityListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.ObjEntityListener");
 		for (int i = 0; i < list.length; i++) {
-			ObjEntityListener temp = (ObjEntityListener)list[i];
-			switch(e.getId()) {
-				case EntityEvent.ADD:
+			ObjEntityListener temp = (ObjEntityListener) list[i];
+			switch (e.getId()) {
+				case EntityEvent.ADD :
 					temp.objEntityAdded(e);
 					break;
-				case EntityEvent.CHANGE:
+				case EntityEvent.CHANGE :
 					temp.objEntityChanged(e);
 					break;
-				case EntityEvent.REMOVE:
+				case EntityEvent.REMOVE :
 					temp.objEntityRemoved(e);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid EntityEvent type: " + e.getId());
+						"Invalid EntityEvent type: " + e.getId());
 			}
 		}
 	}
-	
+
 	/** Informs all listeners of the EntityEvent. 
 	  * Does not send the event to its originator. */
-	public void fireDbEntityEvent(EntityEvent e) 
-	{
+	public void fireDbEntityEvent(EntityEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DbEntityListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DbEntityListener");
 		for (int i = 0; i < list.length; i++) {
-			DbEntityListener temp = (DbEntityListener)list[i];
-			switch(e.getId()) {
-				case EntityEvent.ADD:
+			DbEntityListener temp = (DbEntityListener) list[i];
+			switch (e.getId()) {
+				case EntityEvent.ADD :
 					temp.dbEntityAdded(e);
 					break;
-				case EntityEvent.CHANGE:
+				case EntityEvent.CHANGE :
 					temp.dbEntityChanged(e);
 					break;
-				case EntityEvent.REMOVE:
+				case EntityEvent.REMOVE :
 					temp.dbEntityRemoved(e);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid EntityEvent type: " + e.getId());
-			}// End switch
-		}// End for()
+						"Invalid EntityEvent type: " + e.getId());
+			} // End switch
+		} // End for()
 	}
-	
-	public void fireObjEntityDisplayEvent(EntityDisplayEvent e)
-	{
+
+	public void fireObjEntityDisplayEvent(EntityDisplayEvent e) {
 		if (currentObjEntity == e.getEntity())
 			e.setEntityChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
 		currentMap = e.getDataMap();
-			
-		currentObjEntity = (ObjEntity)e.getEntity();		
+
+		currentObjEntity = (ObjEntity) e.getEntity();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			ObjEntityDisplayListener temp = (ObjEntityDisplayListener)list[i];
+			ObjEntityDisplayListener temp = (ObjEntityDisplayListener) list[i];
 			temp.currentObjEntityChanged(e);
-		}// End for()
+		} // End for()
 	}
-	
-	public void fireDbEntityDisplayEvent(EntityDisplayEvent e){
+
+	public void fireDbEntityDisplayEvent(EntityDisplayEvent e) {
 		if (currentDbEntity == e.getEntity())
 			e.setEntityChanged(false);
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
 		currentMap = e.getDataMap();
-		currentDbEntity = (DbEntity)e.getEntity();
+		currentDbEntity = (DbEntity) e.getEntity();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DbEntityDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DbEntityDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			DbEntityDisplayListener temp = (DbEntityDisplayListener)list[i];
+			DbEntityDisplayListener temp = (DbEntityDisplayListener) list[i];
 			temp.currentDbEntityChanged(e);
-		}// End for()
-	}
-	
-	/** Notifies all listeners of the change(add, remove) and does the change.*/
-	public void fireDbAttributeEvent(AttributeEvent e) 
-	{
-		setDirty(currentMap);
-		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DbAttributeListener");
-		for (int i = 0; i < list.length; i++) {
-			DbAttributeListener temp = (DbAttributeListener)list[i];
-			switch(e.getId()) {
-				case AttributeEvent.ADD:
-					temp.dbAttributeAdded(e);
-					break;
-				case AttributeEvent.CHANGE:
-					temp.dbAttributeChanged(e);
-					break;
-				case AttributeEvent.REMOVE:
-					temp.dbAttributeRemoved(e);
-					break;
-				default:
-					throw new IllegalArgumentException(
-								"Invalid AttributeEvent type: " + e.getId());
-			}// End switch
-		}// End for()
+		} // End for()
 	}
 
-	public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e)
-	{
+	/** Notifies all listeners of the change(add, remove) and does the change.*/
+	public void fireDbAttributeEvent(AttributeEvent e) {
+		setDirty(currentMap);
+		EventListener[] list;
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DbAttributeListener");
+		for (int i = 0; i < list.length; i++) {
+			DbAttributeListener temp = (DbAttributeListener) list[i];
+			switch (e.getId()) {
+				case AttributeEvent.ADD :
+					temp.dbAttributeAdded(e);
+					break;
+				case AttributeEvent.CHANGE :
+					temp.dbAttributeChanged(e);
+					break;
+				case AttributeEvent.REMOVE :
+					temp.dbAttributeRemoved(e);
+					break;
+				default :
+					throw new IllegalArgumentException(
+						"Invalid AttributeEvent type: " + e.getId());
+			} // End switch
+		} // End for()
+	}
+
+	public void fireDbAttributeDisplayEvent(AttributeDisplayEvent e) {
 		if (e.getAttribute() == this.getCurrentDbAttribute())
 			e.setAttributeChanged(false);
 		this.fireDbEntityDisplayEvent(e);
 		clearState();
 		// Must follow DbEntityDisplayEvent, 
 		// as it resets curr Attr and Rel values to null.
-		currentDbAttr = (DbAttribute)e.getAttribute();
-		this.currentDbEntity = (DbEntity)e.getEntity();
+		currentDbAttr = (DbAttribute) e.getAttribute();
+		this.currentDbEntity = (DbEntity) e.getEntity();
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			DbAttributeDisplayListener temp = (DbAttributeDisplayListener)list[i];
+			DbAttributeDisplayListener temp =
+				(DbAttributeDisplayListener) list[i];
 			temp.currentDbAttributeChanged(e);
-		}// End for()
-		currentDbAttr = (DbAttribute)e.getAttribute();
+		} // End for()
+		currentDbAttr = (DbAttribute) e.getAttribute();
 	}
-	
 
 	/** Notifies all listeners of the change (add, remove) and does the change.*/
-	public void fireObjAttributeEvent(AttributeEvent e) 
-	{
+	public void fireObjAttributeEvent(AttributeEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeListener");
 		for (int i = 0; i < list.length; i++) {
-			ObjAttributeListener temp = (ObjAttributeListener)list[i];
-			switch(e.getId()) {
-				case AttributeEvent.ADD:
+			ObjAttributeListener temp = (ObjAttributeListener) list[i];
+			switch (e.getId()) {
+				case AttributeEvent.ADD :
 					temp.objAttributeAdded(e);
 					break;
-				case AttributeEvent.CHANGE:
+				case AttributeEvent.CHANGE :
 					temp.objAttributeChanged(e);
 					break;
-				case AttributeEvent.REMOVE:
+				case AttributeEvent.REMOVE :
 					temp.objAttributeRemoved(e);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid AttributeEvent type: " + e.getId());
-			}// End switch
-		}// End for()
+						"Invalid AttributeEvent type: " + e.getId());
+			} // End switch
+		} // End for()
 	}
 
-	public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e)
-	{
+	public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e) {
 		if (e.getAttribute() == this.getCurrentObjAttribute())
 			e.setAttributeChanged(false);
 		this.fireObjEntityDisplayEvent(e);
 		// Must follow ObjEntityDisplayEvent, 
 		// as it resets curr Attr and Rel values to null.
-		currentObjAttr = (ObjAttribute)e.getAttribute();
-		this.currentObjEntity = (ObjEntity)e.getEntity();
+		currentObjAttr = (ObjAttribute) e.getAttribute();
+		this.currentObjEntity = (ObjEntity) e.getEntity();
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			ObjAttributeDisplayListener temp = (ObjAttributeDisplayListener)list[i];
+			ObjAttributeDisplayListener temp =
+				(ObjAttributeDisplayListener) list[i];
 			temp.currentObjAttributeChanged(e);
-		}// End for()
-	}
-	
-	/** Notifies all listeners of the change(add, remove) and does the change.*/
-	public void fireDbRelationshipEvent(RelationshipEvent e) 
-	{
-		setDirty(currentMap);
-		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipListener");
-		for (int i = 0; i < list.length; i++) {
-			DbRelationshipListener temp = (DbRelationshipListener)list[i];
-			switch(e.getId()) {
-				case RelationshipEvent.ADD:
-					temp.dbRelationshipAdded(e);
-					break;
-				case RelationshipEvent.CHANGE:
-					temp.dbRelationshipChanged(e);
-					break;
-				case RelationshipEvent.REMOVE:
-					temp.dbRelationshipRemoved(e);
-					break;
-				default:
-					throw new IllegalArgumentException(
-								"Invalid RelationshipEvent type: " + e.getId());
-			}// End switch
-		}// End for()
+		} // End for()
 	}
 
-	public void fireDbRelationshipDisplayEvent(RelationshipDisplayEvent e)
-	{
+	/** Notifies all listeners of the change(add, remove) and does the change.*/
+	public void fireDbRelationshipEvent(RelationshipEvent e) {
+		setDirty(currentMap);
+		EventListener[] list;
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipListener");
+		for (int i = 0; i < list.length; i++) {
+			DbRelationshipListener temp = (DbRelationshipListener) list[i];
+			switch (e.getId()) {
+				case RelationshipEvent.ADD :
+					temp.dbRelationshipAdded(e);
+					break;
+				case RelationshipEvent.CHANGE :
+					temp.dbRelationshipChanged(e);
+					break;
+				case RelationshipEvent.REMOVE :
+					temp.dbRelationshipRemoved(e);
+					break;
+				default :
+					throw new IllegalArgumentException(
+						"Invalid RelationshipEvent type: " + e.getId());
+			} // End switch
+		} // End for()
+	}
+
+	public void fireDbRelationshipDisplayEvent(RelationshipDisplayEvent e) {
 		if (e.getRelationship() == this.getCurrentDbRelationship())
 			e.setRelationshipChanged(false);
 		this.fireDbEntityDisplayEvent(e);
-		this.currentDbEntity = (DbEntity)e.getEntity();
+		this.currentDbEntity = (DbEntity) e.getEntity();
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		// Must follow DbEntityDisplayEvent, 
 		// as it resets curr Attr and Rel values to null.
-		currentDbRel = (DbRelationship)e.getRelationship();
+		currentDbRel = (DbRelationship) e.getRelationship();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			DbRelationshipDisplayListener temp = (DbRelationshipDisplayListener)list[i];
+			DbRelationshipDisplayListener temp =
+				(DbRelationshipDisplayListener) list[i];
 			temp.currentDbRelationshipChanged(e);
-		}// End for()
+		} // End for()
 	}
-	
-
 
 	/** Notifies all listeners of the change(add, remove) and does the change.*/
-	public void fireObjRelationshipEvent(RelationshipEvent e) 
-	{
+	public void fireObjRelationshipEvent(RelationshipEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipListener");
 		for (int i = 0; i < list.length; i++) {
-			ObjRelationshipListener temp = (ObjRelationshipListener)list[i];
-			switch(e.getId()) {
-				case RelationshipEvent.ADD:
+			ObjRelationshipListener temp = (ObjRelationshipListener) list[i];
+			switch (e.getId()) {
+				case RelationshipEvent.ADD :
 					temp.objRelationshipAdded(e);
 					break;
-				case RelationshipEvent.CHANGE:
+				case RelationshipEvent.CHANGE :
 					temp.objRelationshipChanged(e);
 					break;
-				case RelationshipEvent.REMOVE:
+				case RelationshipEvent.REMOVE :
 					temp.objRelationshipRemoved(e);
 					break;
-				default:
+				default :
 					throw new IllegalArgumentException(
-								"Invalid RelationshipEvent type: " + e.getId());
-			}// End switch
-		}// End for()
+						"Invalid RelationshipEvent type: " + e.getId());
+			} // End switch
+		} // End for()
 	}
 
-	public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e)
-	{
+	public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e) {
 		if (e.getRelationship() == this.getCurrentObjRelationship())
 			e.setRelationshipChanged(false);
 		this.fireObjEntityDisplayEvent(e);
 		// Must follow DbEntityDisplayEvent, 
 		// as it resets curr Attr and Rel values to null.
-		currentObjRel = (ObjRelationship)e.getRelationship();
-		this.currentObjEntity = (ObjEntity)e.getEntity();
+		currentObjRel = (ObjRelationship) e.getRelationship();
+		this.currentObjEntity = (ObjEntity) e.getEntity();
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		EventListener[] list;
-		list = getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener");
+		list =
+			getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener");
 		for (int i = 0; i < list.length; i++) {
-			ObjRelationshipDisplayListener temp = (ObjRelationshipDisplayListener)list[i];
+			ObjRelationshipDisplayListener temp =
+				(ObjRelationshipDisplayListener) list[i];
 			temp.currentObjRelationshipChanged(e);
-		}// End for()
-		
-	}
-	
-	
-	public void removeDataMap(Object src, DataMap map) {
-		currentDomain.removeMap(map.getName());
-		fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.REMOVE));
-		fireDataMapDisplayEvent(new DataMapDisplayEvent(src
-												, null
-												, currentDomain
-												, currentNode));
-	}
-	
+		} // End for()
 
-	public void addDataMap(Object src, DataMap wrap){
+	}
+
+	public void addDataMap(Object src, DataMap wrap) {
 		addDataMap(src, wrap, true);
 	}
-	
-	public void addDataMap(Object src, DataMap map, boolean make_current)
-	{
+
+	public void addDataMap(Object src, DataMap map, boolean make_current) {
 		currentDomain.addMap(map);
 		fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.ADD));
 		if (make_current)
-			fireDataMapDisplayEvent(new DataMapDisplayEvent(src
-												, map
-												, currentDomain
-												, currentNode));
+			fireDataMapDisplayEvent(
+				new DataMapDisplayEvent(src, map, currentDomain, currentNode));
 	}
 
-
-	public void removeDomain(Object src, DataDomain domain) {
-		config.removeDomain(domain.getName());
-		dirtyDomains.remove(domain);
-		setDirty(true);
-		java.util.List list = domain.getMapList();
-		Iterator iter = list.iterator();
-		while (iter.hasNext())
-			dirtyMaps.remove(iter.next());
-		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.REMOVE));
-		fireDomainDisplayEvent(new DomainDisplayEvent(src, null));
-	}
-	
 	public void addDomain(Object src, DataDomain domain) {
 		addDomain(src, domain, true);
 	}
-	
-	public void addDomain(Object src, DataDomain domain, boolean make_current) 
-	{
+
+	public void addDomain(
+		Object src,
+		DataDomain domain,
+		boolean make_current) {
 		config.addDomain(domain);
 		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.ADD));
 		if (make_current)
@@ -795,14 +819,14 @@ public class Mediator
 		EventListener[] list = listenerList.getListeners(temp_class);
 		return list;
 	}
-	
+
 	public void setDirty(boolean dirty) {
-		if (this.dirty != dirty) {	
-		     this.dirty = dirty;
-		     Editor.getFrame().setDirty(dirty);
+		if (this.dirty != dirty) {
+			this.dirty = dirty;
+			Editor.getFrame().setDirty(dirty);
 		}
 	}
-	
+
 	public void setDirty(DataMap map) {
 		if (dirtyMaps.contains(map))
 			return;
@@ -825,16 +849,16 @@ public class Mediator
 		dirtyDomains.add(domain);
 		setDirty(true);
 	}
-	
-	public ArrayList getDirtyDataMaps(){
+
+	public ArrayList getDirtyDataMaps() {
 		return dirtyMaps;
 	}
 
-	public ArrayList getDirtyDataNodes(){
+	public ArrayList getDirtyDataNodes() {
 		return dirtyNodes;
 	}
 
-	public ArrayList getDirtyDomains(){
+	public ArrayList getDirtyDomains() {
 		return dirtyDomains;
 	}
 }

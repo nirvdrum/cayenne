@@ -67,8 +67,11 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
-/** Detail view of the Data Domain
- * @author Michael Misha Shengaout */
+/** 
+ * Detail view of the Data Domain
+ * 
+ * @author Michael Misha Shengaout 
+ */
 public class DomainDetailView extends JPanel 
 implements DocumentListener, DomainDisplayListener
 {
