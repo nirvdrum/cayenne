@@ -58,55 +58,106 @@ package org.objectstyle.cayenne.conn;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
 /**
- * DriverDataSource is a simple DataSource implementation
- * wrapping a JDBC driver. 
+ * A DataSource implementation wrapping a JDBC driver.
  * 
  * @author Andrei Adamchik
  */
 public class DriverDataSource implements DataSource {
-    private int loginTimeout;
+
+    protected Driver driver;
+
     protected String connectionUrl;
-    protected String jdbcDriver;
+    protected String userName;
+    protected String password;
+
     protected ConnectionEventLoggingDelegate logger;
 
-    /** Creates new DriverDataSource */
-    public DriverDataSource(String jdbcDriver, String connectionUrl)
-        throws SQLException {
+    /**
+     * Creates a new DriverDataSource.
+     */
+    public DriverDataSource(String driverClassName, String connectionUrl)
+            throws SQLException {
+
         this.connectionUrl = connectionUrl;
-        this.jdbcDriver = jdbcDriver;
 
-        try {
-            Class.forName(jdbcDriver).newInstance();
-        } catch (Exception ex) {
-            throw new SQLException(
-                "Can not load JDBC driver named '"
-                    + jdbcDriver
-                    + "': "
-                    + ex.getMessage());
+        if (driverClassName != null) {
+            try {
+                this.driver = (Driver) Class.forName(driverClassName).newInstance();
+            }
+            catch (Exception ex) {
+                throw new SQLException("Can not load JDBC driver named '"
+                        + driverClassName
+                        + "': "
+                        + ex.getMessage());
+            }
         }
-
     }
 
-    public Connection getConnection() throws java.sql.SQLException {
+    /**
+     * Creates a new DriverDataSource wrapping a given Driver.
+     * 
+     * @since 1.1
+     */
+    public DriverDataSource(Driver driver, String connectionUrl, String userName,
+            String password) {
+        this.driver = driver;
+        this.connectionUrl = connectionUrl;
+        this.userName = userName;
+        this.password = password;
+    }
+
+    /**
+     * Returns a new database connection, using preconfigured data to locate the database
+     * and obtain a connection.
+     */
+    public Connection getConnection() throws SQLException {
+        // login with internal credentials
+        return getConnection(userName, password);
+    }
+
+    /**
+     * Returns a new database connection using provided credentials to login to the
+     * database.
+     */
+    public Connection getConnection(String userName, String password) throws SQLException {
         try {
             if (logger != null) {
-                logger.logConnect(connectionUrl, null, null);
+                logger.logConnect(connectionUrl, userName, password);
             }
 
-            Connection c = DriverManager.getConnection(connectionUrl);
+            Connection c = null;
+
+            if (driver == null) {
+                c = DriverManager.getConnection(connectionUrl, userName, password);
+            }
+            else {
+                Properties connectProperties = new Properties();
+
+                if (userName != null) {
+                    connectProperties.put("user", userName);
+                }
+
+                if (password != null) {
+                    connectProperties.put("password", password);
+                }
+                c = driver.connect(connectionUrl, connectProperties);
+            }
 
             if (logger != null) {
                 logger.logConnectSuccess();
             }
 
             return c;
-        } catch (SQLException sqlex) {
+        }
+        catch (SQLException sqlex) {
             if (logger != null) {
                 logger.logConnectFailure(sqlex);
             }
@@ -115,43 +166,19 @@ public class DriverDataSource implements DataSource {
         }
     }
 
-    public Connection getConnection(String username, String password)
-        throws java.sql.SQLException {
-        try {
-            if (logger != null) {
-                logger.logConnect(connectionUrl, username, password);
-            }
-
-            Connection c =
-                DriverManager.getConnection(connectionUrl, username, password);
-
-            if (logger != null) {
-                logger.logConnectSuccess();
-            }
-
-            return c;
-        } catch (SQLException sqlex) {
-            if (logger != null) {
-                logger.logConnectFailure(sqlex);
-            }
-
-            throw sqlex;
-        }
+    public int getLoginTimeout() throws SQLException {
+        return -1;
     }
 
-    public int getLoginTimeout() throws java.sql.SQLException {
-        return loginTimeout;
+    public void setLoginTimeout(int seconds) throws SQLException {
+        // noop
     }
 
-    public void setLoginTimeout(int seconds) throws java.sql.SQLException {
-        loginTimeout = seconds;
-    }
-
-    public PrintWriter getLogWriter() throws java.sql.SQLException {
+    public PrintWriter getLogWriter() throws SQLException {
         return DriverManager.getLogWriter();
     }
 
-    public void setLogWriter(PrintWriter out) throws java.sql.SQLException {
+    public void setLogWriter(PrintWriter out) throws SQLException {
         DriverManager.setLogWriter(out);
     }
 

@@ -72,6 +72,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -287,6 +288,12 @@ public class Util {
             SAXException sax = (SAXException) th;
             if (sax.getException() != null) {
                 return unwindException(sax.getException());
+            }
+        }
+        else if (th instanceof SQLException) {
+            SQLException sql = (SQLException) th;
+            if (sql.getNextException() != null) {
+                return unwindException(sql.getNextException());
             }
         }
 

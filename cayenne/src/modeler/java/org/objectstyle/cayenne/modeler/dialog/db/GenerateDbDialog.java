@@ -66,9 +66,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.SQLException;
+import java.sql.Driver;
 import java.util.Iterator;
 
+import javax.sql.DataSource;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -80,24 +81,26 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
+import org.objectstyle.cayenne.util.Util;
 
-/** 
+/**
  * Wizard for generating the database from the data map.
  * 
- * @author Michael Misha Shengaout 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class GenerateDbDialog
-    extends CayenneDialog
-    implements ActionListener, ItemListener {
+public class GenerateDbDialog extends CayenneDialog implements ActionListener,
+        ItemListener {
+
     private static Logger logObj = Logger.getLogger(GenerateDbDialog.class);
 
     private static final int GENERATEDB_WIDTH = 380;
@@ -120,7 +123,7 @@ public class GenerateDbDialog
 
     public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter, DbGenerator gen) {
         super(CayenneModelerFrame.getFrame(), "Generate Database Schema", true);
-        
+
         this.dsi = dsi;
         this.adapter = adapter;
         this.gen = gen;
@@ -156,7 +159,8 @@ public class GenerateDbDialog
         createFK = new JCheckBox("Create FK Support");
         if (!adapter.supportsFkConstraints()) {
             createFK.setEnabled(false);
-        } else {
+        }
+        else {
             createFK.setSelected(gen.shouldCreateFKConstraints());
         }
 
@@ -166,10 +170,11 @@ public class GenerateDbDialog
         dropPK = new JCheckBox("Drop Primary Key Support");
         dropPK.setSelected(gen.shouldDropPKSupport());
 
-        JPanel optionsPane =
-            PanelFactory.createForm(
-                new Component[] { dropTables, new JLabel(), dropPK },
-                new Component[] { createTables, createFK, createPK });
+        JPanel optionsPane = PanelFactory.createForm(new Component[] {
+                dropTables, new JLabel(), dropPK
+        }, new Component[] {
+                createTables, createFK, createPK
+        });
         optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
         contentPane.add(optionsPane, BorderLayout.NORTH);
 
@@ -180,8 +185,7 @@ public class GenerateDbDialog
         sql.setLineWrap(true);
         sql.setWrapStyleWord(true);
 
-        JScrollPane scrollPanel =
-            new JScrollPane(
+        JScrollPane scrollPanel = new JScrollPane(
                 sql,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -190,14 +194,15 @@ public class GenerateDbDialog
         sqlTextPanel.add(scrollPanel, BorderLayout.CENTER);
         contentPane.add(sqlTextPanel, BorderLayout.CENTER);
 
-        JPanel btnPanel =
-            PanelFactory.createButtonPanel(new JButton[] { generate, saveSql, cancel });
+        JPanel btnPanel = PanelFactory.createButtonPanel(new JButton[] {
+                generate, saveSql, cancel
+        });
         contentPane.add(btnPanel, BorderLayout.SOUTH);
 
         initStatements();
     }
 
-    /** 
+    /**
      * Builds a list of SQL statements to run.
      */
     protected void initStatements() {
@@ -206,8 +211,9 @@ public class GenerateDbDialog
         Iterator it = gen.configuredStatements().iterator();
         String batchTerminator = gen.getAdapter().getBatchTerminator();
 
-        String lineEnd =
-            (batchTerminator != null) ? "\n" + batchTerminator + "\n\n" : "\n\n";
+        String lineEnd = (batchTerminator != null)
+                ? "\n" + batchTerminator + "\n\n"
+                : "\n\n";
 
         while (it.hasNext()) {
             buf.append(it.next()).append(lineEnd);
@@ -219,34 +225,51 @@ public class GenerateDbDialog
         Object src = e.getSource();
         if (generate == src) {
             generateDBSchema();
-        } else if (src == saveSql) {
+        }
+        else if (src == saveSql) {
             storeSQL();
-        } else if (cancel == src) {
+        }
+        else if (cancel == src) {
             setVisible(false);
             dispose();
         }
     }
 
+    /**
+     * Performs the actual schema generation.
+     */
     protected void generateDBSchema() {
         try {
-            gen.runGenerator(dsi);
+            // use modeler custom class loader
+            Class driverClass = ModelerClassLoader.getClassLoader().loadClass(
+                    dsi.getJdbcDriver());
+            Driver driver = (Driver) driverClass.newInstance();
+            DataSource dataSource = new DriverDataSource(
+                    driver,
+                    dsi.getDataSourceUrl(),
+                    dsi.getUserName(),
+                    dsi.getPassword());
+            gen.runGenerator(dataSource);
+            
             JOptionPane.showMessageDialog(this, "Schema Generation Complete.");
-
-        } catch (Exception ex) {
-            StringBuffer buffer = new StringBuffer("Schema Generation Error - " + ex.getMessage());
-            if (ex instanceof SQLException) {
-                SQLException exception = (SQLException) ex;
-                while ((exception = exception.getNextException()) != null) {
-                    buffer.append(" - ").append(exception.getMessage());
-                    logObj.log(Level.INFO, "Nested exception", exception);
-                }
-            }
-            logObj.log(Level.INFO, "Main exception", ex);
-
+        }
+        catch (ClassNotFoundException e) {
+            logObj.warn("Error loading driver. Classpath: "
+                    + System.getProperty("java.class.path"), e);
             JOptionPane.showMessageDialog(
-                this,
-                buffer.toString());
-            return;
+                    this,
+                    "Driver class not found: " + dsi.getJdbcDriver(),
+                    "Schema Generation Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Exception ex) {
+            Throwable rootCause = Util.unwindException(ex);
+            logObj.warn("Database connection problem", rootCause);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Database connection problem: " + rootCause.getMessage(),
+                    "Schema Generation Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -269,12 +292,12 @@ public class GenerateDbDialog
                 pw.print(sql.getText());
                 pw.flush();
                 pw.close();
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 logObj.error(ex);
                 ex.printStackTrace();
-                JOptionPane.showMessageDialog(
-                    this,
-                    "Error writing into file - " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Error writing into file - "
+                        + ex.getMessage());
             }
         }
     }
@@ -285,13 +308,17 @@ public class GenerateDbDialog
     public void itemStateChanged(ItemEvent e) {
         if (e.getSource() == dropTables) {
             gen.setShouldDropTables(dropTables.isSelected());
-        } else if (e.getSource() == createTables) {
+        }
+        else if (e.getSource() == createTables) {
             gen.setShouldCreateTables(createTables.isSelected());
-        } else if (e.getSource() == createFK) {
+        }
+        else if (e.getSource() == createFK) {
             gen.setShouldCreateFKConstraints(createFK.isSelected());
-        } else if (e.getSource() == createPK) {
+        }
+        else if (e.getSource() == createPK) {
             gen.setShouldCreatePKSupport(createPK.isSelected());
-        } else if (e.getSource() == dropPK) {
+        }
+        else if (e.getSource() == dropPK) {
             gen.setShouldDropPKSupport(dropPK.isSelected());
         }
 
