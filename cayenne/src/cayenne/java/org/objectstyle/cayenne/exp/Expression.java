@@ -572,8 +572,8 @@ public abstract class Expression implements Serializable {
                 parent.setOperand(childIndex, findExp((Expression) child));
             } else {
                 // check for parameter substitution
-                if (child instanceof ExpressionParam) {
-                    ExpressionParam param = (ExpressionParam) child;
+                if (child instanceof ExpressionParameter) {
+                    ExpressionParameter param = (ExpressionParameter) child;
 
                     // explicitly check if key exists, since null value
                     // may simply indicate NULL

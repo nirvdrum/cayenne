@@ -64,7 +64,7 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.exp.ExpressionParam;
+import org.objectstyle.cayenne.exp.ExpressionParameter;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SelectQueryBasicsTst extends CayenneTestCase {
@@ -202,13 +202,13 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
         
         List list = new ArrayList();
         list.add(
-            ExpressionFactory.matchExp("k1", new ExpressionParam("test1")));
+            ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
         list.add(
-            ExpressionFactory.matchExp("k2", new ExpressionParam("test2")));
+            ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
         list.add(
-            ExpressionFactory.matchExp("k3", new ExpressionParam("test3")));
+            ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
         list.add(
-            ExpressionFactory.matchExp("k4", new ExpressionParam("test4")));
+            ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
         q.setQualifier(ExpressionFactory.joinExp(Expression.OR, list));
         
 

@@ -53,17 +53,32 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.exp;
 
 /**
- * @deprecated Since 1.0 Beta 1 this class is deprecated, use ExpressionParameter instead.
+ * Named parameter for paramterized expressions.
  * 
  * @author Andrei Adamchik
  */
-public class ExpressionParam extends ExpressionParameter {
+public class ExpressionParameter {
+	protected String name;
 
-    public ExpressionParam(String name) {
-        super(name);
+    /**
+     * Constructor for ExpressionParam.
+     */
+    public ExpressionParameter(String name) {
+        this.name = name;
     }
-
+    
+    /**
+     * Returns the name of the expression parameter.
+     */
+    public String getName() {
+        return name;
+    }
+    
+    public String toString() {
+    	return '$' + name;
+    }
 }

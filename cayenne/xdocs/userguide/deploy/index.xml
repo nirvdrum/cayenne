@@ -28,7 +28,7 @@
 <source>import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.access.DataDomain;
 ...           
-Configuration conf = Configuration.getSharedConfig();
+Configuration conf = Configuration.getSharedConfiguration();
 DataDomain domain = conf.getDomain();
 </source>
         	</subsection>
@@ -38,11 +38,11 @@ DataDomain domain = conf.getDomain();
                "../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>
                 will be used to locate and load configuration files. This approach
                 does not require any additional steps. Shared configuration objects
-                can simply be obtained by calling <code>getSharedConfig</code>:</p>
+                can simply be obtained by calling <code>getSharedConfiguration</code>:</p>
                 
 <source>import org.objectstyle.cayenne.conf.Configuration;
 ...           
-Configuration conf = Configuration.getSharedConfig();
+Configuration conf = Configuration.getSharedConfiguration();
 </source>
               <p>DefaultConfiguration will expect <code>cayenne.xml</code> file to be located 
               in the CLASSPATH. Same is true for datamaps referenced in <code>cayenne.xml</code>.
@@ -122,7 +122,7 @@ public class MyServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
   
-        BasicServletConfiguration.initConfig(config.getServletContext());
+        BasicServletConfiguration.setSharedConfiguration(config.getServletContext());
         
         // do other initialization...
     }
@@ -196,7 +196,7 @@ DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
 <source>import org.objectstyle.cayenne.conf.Configuration
 ...
 String myConfigSubclass = "my.package.ConfigSubclass";
-Configuration.initSharedConfig(myConfigSubclass);
+Configuration.setSharedConfiguration(myConfigSubclass);
 </source>
 
             	<p>After this code is executed any subsequent calls to "Configuration.getSharedConfig" 
