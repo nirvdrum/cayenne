@@ -199,11 +199,14 @@ public class DefaultClassGenerator extends MapClassGenerator {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
 
-        // ignore newer files
-        if (dest.exists() && !isOld(dest)) {
-            return null;
-        }
-
+		// Ignore if the destination is newer than the map
+		// (internal timestamp), i.e. has been generated after the map was
+		// last saved AND the template is older than the destination file
+		if (dest.exists() && !isOld(dest)
+			&& (superTemplate == null || superTemplate.lastModified() < dest.lastModified())) {
+			return null;
+		}
+		
         return dest;
     }
 
