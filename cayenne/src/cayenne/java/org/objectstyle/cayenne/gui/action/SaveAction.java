@@ -87,188 +87,188 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Misha Shengaout
  */
 public class SaveAction extends CayenneAction {
-	static Logger logObj = Logger.getLogger(SaveAction.class.getName());
+    static Logger logObj = Logger.getLogger(SaveAction.class.getName());
 
-	public static final String ACTION_NAME = "Save";
+    public static final String ACTION_NAME = "Save";
 
-	protected HashMap tempLookup = new HashMap();
+    protected HashMap tempLookup = new HashMap();
 
-	public SaveAction() {
-		super(ACTION_NAME);
-	}
+    public SaveAction() {
+        super(ACTION_NAME);
+    }
 
-	public KeyStroke getAcceleratorKey() {
-		return KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK);
-	}
+    public KeyStroke getAcceleratorKey() {
+        return KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK);
+    }
 
-	public String getIconName() {
-		return "icon-save.gif";
-	}
+    public String getIconName() {
+        return "icon-save.gif";
+    }
 
-	/** 
-	 * Saves project and related files. Saving is done to temporary files, 
-	 * and only on successful save, master files are replaced with new versions. 
-	 */
-	protected void saveAll() throws Exception {
-		tempLookup.clear();
+    /** 
+     * Saves project and related files. Saving is done to temporary files, 
+     * and only on successful save, master files are replaced with new versions. 
+     */
+    protected void saveAll() throws Exception {
+        tempLookup.clear();
 
-		Mediator mediator = getMediator();
-		Iterator iter = mediator.getDirtyDataMaps().iterator();
-		while (iter.hasNext()) {
-			saveDataMap((DataMap) iter.next());
-		}
+        Mediator mediator = getMediator();
+        Iterator iter = mediator.getDirtyDataMaps().iterator();
+        while (iter.hasNext()) {
+            saveDataMap((DataMap) iter.next());
+        }
 
-		iter = mediator.getDirtyDataNodes().iterator();
-		while (iter.hasNext()) {
-			DataNode node = (DataNode) iter.next();
-			// If using direct connection, save into separate file
-			if (node.getDataSourceFactory().equals(DriverDataSourceFactory.class.getName())) {
-				saveDataNode(node);
-			}
-		}
+        iter = mediator.getDirtyDataNodes().iterator();
+        while (iter.hasNext()) {
+            DataNode node = (DataNode) iter.next();
+            // If using direct connection, save into separate file
+            if (node
+                .getDataSourceFactory()
+                .equals(DriverDataSourceFactory.class.getName())) {
+                saveDataNode(node);
+            }
+        }
 
-		saveProject();
-		replaceMasterFiles();
-	}
+        saveProject();
+        replaceMasterFiles();
+    }
 
-	/**
-	 * Replaces master files with fresh temporary files.
-	 */
-	protected void replaceMasterFiles() throws Exception {
-		Iterator it = tempLookup.keySet().iterator();
-		while (it.hasNext()) {
-			File tmp = (File) it.next();
-			File master = (File) tempLookup.get(tmp);
-			if (master.exists()) {
-				if (!master.delete()) {
-					throw new IOException("Unable to remove old master file " + master);
-				}
-			}
+    /**
+     * Replaces master files with fresh temporary files.
+     */
+    protected void replaceMasterFiles() throws Exception {
+        Iterator it = tempLookup.keySet().iterator();
+        while (it.hasNext()) {
+            File tmp = (File) it.next();
+            File master = (File) tempLookup.get(tmp);
+            if (master.exists()) {
+                if (!master.delete()) {
+                    throw new IOException("Unable to remove old master file " + master);
+                }
+            }
 
-			if (!tmp.renameTo(master)) {
-				throw new IOException("Unable to move " + tmp + " to " + master);
-			}
-		}
-	}
+            if (!tmp.renameTo(master)) {
+                throw new IOException("Unable to move " + tmp + " to " + master);
+            }
+        }
+    }
 
-	/**
-	 * Attempts to remove all temporary files.
-	 */
-	protected void cleanTempFiles() {
-		Iterator it = tempLookup.keySet().iterator();
-		while (it.hasNext()) {
-			File tmp = (File) it.next();
-			tmp.delete();
-		}
-	}
+    /**
+     * Attempts to remove all temporary files.
+     */
+    protected void cleanTempFiles() {
+        Iterator it = tempLookup.keySet().iterator();
+        while (it.hasNext()) {
+            File tmp = (File) it.next();
+            tmp.delete();
+        }
+    }
 
-	/** 
-	 * Creates temporary file for the master file.
-	 */
-	protected File tempFileForFile(File f) throws IOException {
-		File parent = f.getParentFile();
-		String name = f.getName();
+    /** 
+     * Creates temporary file for the master file.
+     */
+    protected File tempFileForFile(File f) throws IOException {
+        File parent = f.getParentFile();
+        String name = f.getName();
 
-		if (name == null || name.length() < 3) {
-			name = "modeler";
-		}
+        if (name == null || name.length() < 3) {
+            name = "modeler";
+        }
 
-		File tmp = File.createTempFile(name, null, parent);
-		tempLookup.put(tmp, f);
+        File tmp = File.createTempFile(name, null, parent);
+        tempLookup.put(tmp, f);
 
-		return tmp;
-	}
+        return tmp;
+    }
 
-	protected void saveProject() throws Exception {
-		Mediator mediator = getMediator();
-		File file = tempFileForFile(Editor.getProject().getMainProjectFile());
-		String masterPath = ((File) tempLookup.get(file)).getAbsolutePath();
+    protected void saveProject() throws Exception {
+        Mediator mediator = getMediator();
+        File file = tempFileForFile(Editor.getProject().getMainProjectFile());
+        String masterPath = ((File) tempLookup.get(file)).getAbsolutePath();
 
-		FileWriter fw = new FileWriter(file);
+        FileWriter fw = new FileWriter(file);
 
-		try {
-			DomainHelper.storeDomains(new PrintWriter(fw), Editor.getProject().getDomains());
-			Editor.getFrame().addToLastProjList(masterPath);
-		} finally {
-			fw.flush();
-			fw.close();
-		}
-	}
+        try {
+            DomainHelper.storeDomains(
+                new PrintWriter(fw),
+                Editor.getProject().getDomains());
+            Editor.getFrame().addToLastProjList(masterPath);
+        } finally {
+            fw.flush();
+            fw.close();
+        }
+    }
 
-	/** Save data source info if data source factory is DIRECT_FACTORY. */
-	protected void saveDataNode(DataNode node) throws Exception {
-		Mediator mediator = getMediator();
-		File projDir = Editor.getProject().getProjectDir();
-		File file = tempFileForFile(new File(projDir, node.getDataSourceLocation()));
+    /** Save data source info if data source factory is DIRECT_FACTORY. */
+    protected void saveDataNode(DataNode node) throws Exception {
+        Mediator mediator = getMediator();
+        File projDir = Editor.getProject().getProjectDir();
+        File file = tempFileForFile(new File(projDir, node.getDataSourceLocation()));
 
-		FileWriter fw = new FileWriter(file);
-		try {
-			PrintWriter pw = new PrintWriter(fw);
-			try {
-				ProjectDataSource src = (ProjectDataSource) node.getDataSource();
-				DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-			} finally {
-				pw.close();
-			}
-		} finally {
-			fw.close();
-		}
-	}
+        FileWriter fw = new FileWriter(file);
+        try {
+            PrintWriter pw = new PrintWriter(fw);
+            try {
+                ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+                DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
+            } finally {
+                pw.close();
+            }
+        } finally {
+            fw.close();
+        }
+    }
 
-	/** Save data map to the file. */
-	protected void saveDataMap(DataMap map) throws Exception {
-		File projDir = Editor.getProject().getProjectDir();
-		File file = tempFileForFile(new File(projDir, map.getLocation()));
+    /** Save data map to the file. */
+    protected void saveDataMap(DataMap map) throws Exception {
+        File projDir = Editor.getProject().getProjectDir();
+        File file = tempFileForFile(new File(projDir, map.getLocation()));
 
-		MapLoader saver = new MapLoader();
-		FileWriter fw = new FileWriter(file);
+        MapLoader saver = new MapLoader();
+        FileWriter fw = new FileWriter(file);
 
-		try {
-			PrintWriter pw = new PrintWriter(fw);
-			try {
-				saver.storeDataMap(pw, map);
-			} finally {
-				pw.close();
-			}
-		} finally {
-			fw.close();
-		}
-	}
+        try {
+            PrintWriter pw = new PrintWriter(fw);
+            try {
+                saver.storeDataMap(pw, map);
+            } finally {
+                pw.close();
+            }
+        } finally {
+            fw.close();
+        }
+    }
 
-	/**
-	 * This method is synchronized to prevent problems on double-clicking "save".
-	 */
-	public synchronized void performAction(ActionEvent e) {
-		performAction(ValidationDisplayHandler.WARNING);
-	}
+    /**
+     * This method is synchronized to prevent problems on double-clicking "save".
+     */
+    public synchronized void performAction(ActionEvent e) {
+        performAction(ValidationDisplayHandler.WARNING);
+    }
 
-	public synchronized void performAction(int warningLevel) {
-		Mediator mediator = getMediator();
-		Validator val = new Validator(Editor.getFrame().getProject());
-		int validationCode = val.validate();
+    public synchronized void performAction(int warningLevel) {
+        Mediator mediator = getMediator();
+        Validator val = new Validator(Editor.getFrame().getProject());
+        int validationCode = val.validate();
 
-		// If no serious errors, perform save.
-		if (validationCode < ValidationDisplayHandler.ERROR) {
-			try {
-				saveAll();
-			} catch (Exception ex) {
-				cleanTempFiles();
-				throw new CayenneRuntimeException("Error on save", ex);
-			}
+        // If no serious errors, perform save.
+        if (validationCode < ValidationDisplayHandler.ERROR) {
+            try {
+                saveAll();
+            } catch (Exception ex) {
+                cleanTempFiles();
+                throw new CayenneRuntimeException("Error on save", ex);
+            }
 
-			mediator.getDirtyDataMaps().clear();
-			mediator.getDirtyDomains().clear();
-			mediator.getDirtyDataNodes().clear();
-			mediator.setDirty(false);
-		}
+            mediator.getDirtyDataMaps().clear();
+            mediator.getDirtyDomains().clear();
+            mediator.getDirtyDataNodes().clear();
+            mediator.setDirty(false);
+        }
 
-		// If there were errors or warnings at validation, display them
-		if (validationCode >= warningLevel) {
-			new ValidatorDialog(
-				Editor.getFrame(),
-				mediator,
-				val.validationResults(),
-				validationCode).setVisible(true);
-		}
-	}
+        // If there were errors or warnings at validation, display them
+        if (validationCode >= warningLevel) {
+            ValidatorDialog.showDialog(Editor.getFrame(), mediator, val);
+        }
+    }
 }

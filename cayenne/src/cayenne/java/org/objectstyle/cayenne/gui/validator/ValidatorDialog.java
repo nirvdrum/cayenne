@@ -70,13 +70,17 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 
 import org.objectstyle.cayenne.gui.CayenneDialog;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.Validator;
 
 /** 
  * Dialog for displaying validation errors.
@@ -88,16 +92,30 @@ public class ValidatorDialog
     extends CayenneDialog
     implements ListSelectionListener, ActionListener {
 
+    protected static ValidatorDialog instance;
+    public static final Color WARNING_COLOR = new Color(255, 220, 220);
+    public static final Color ERROR_COLOR = new Color(255, 100, 100);
+
     protected Mediator mediator;
-    protected List errMsg;
+    protected List validationObjects;
     protected JTable messages;
     protected JButton closeBtn;
 
-    public ValidatorDialog(Editor editor, Mediator mediator, List errMsg, int severity) {
+    public static void showDialog(Editor editor, Mediator mediator, Validator val) {
 
+        ValidatorDialog open = instance;
+
+        if (open != null) {
+            open.dispose();
+        }
+
+        instance = new ValidatorDialog(editor, mediator, val);
+    }
+
+    protected ValidatorDialog(Editor editor, Mediator mediator, Validator val) {
         super(editor, "Validation Errors", false);
         this.mediator = mediator;
-        this.errMsg = errMsg;
+        this.validationObjects = val.validationResults();
 
         init();
 
@@ -113,11 +131,10 @@ public class ValidatorDialog
     protected void init() {
         getContentPane().setLayout(new BorderLayout());
 
-        ValidatorTableModel model = new ValidatorTableModel(errMsg);
-        messages = new JTable(model);
+        ValidatorTableModel model = new ValidatorTableModel(validationObjects);
+        messages = new ValidatorTable(model);
         messages.setRowHeight(25);
         messages.setRowMargin(3);
-        messages.setBackground(new Color(255, 200, 200));
         messages.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         messages.setCellSelectionEnabled(false);
         messages.setRowSelectionAllowed(true);
@@ -139,7 +156,9 @@ public class ValidatorDialog
         if (messages.getSelectedRow() >= 0) {
             ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
             ValidationResult obj = model.getValue(messages.getSelectedRow());
-            ValidationDisplayHandler.getErrorMsg(obj).displayField(mediator, super.getParentEditor());
+            ValidationDisplayHandler.getErrorMsg(obj).displayField(
+                mediator,
+                super.getParentEditor());
         }
     }
 
@@ -148,7 +167,35 @@ public class ValidatorDialog
         this.dispose();
     }
 
-    static class ValidatorTableModel extends AbstractTableModel {
+    class ValidatorTable extends JTable {
+        protected DefaultTableCellRenderer errorRenderer;
+        protected DefaultTableCellRenderer warnRenderer;
+
+        public ValidatorTable(TableModel model) {
+            super(model);
+            errorRenderer = new DefaultTableCellRenderer();
+            errorRenderer.setBackground(ERROR_COLOR);
+
+            warnRenderer = new DefaultTableCellRenderer();
+            warnRenderer.setBackground(WARNING_COLOR);
+        }
+
+        /**
+         * @see javax.swing.JTable#getCellRenderer(int, int)
+         */
+        public TableCellRenderer getCellRenderer(int row, int column) {
+            if(row < 0 || row >= validationObjects.size()) {
+            	return super.getCellRenderer(row, column);
+            }
+         
+            ValidationResult rowObj = (ValidationResult) validationObjects.get(row);
+            return (rowObj.getSeverity() == ValidationResult.ERROR)
+                ? errorRenderer
+                : warnRenderer;
+        }
+    }
+
+    class ValidatorTableModel extends AbstractTableModel {
         List validationObjects;
 
         public ValidatorTableModel(List validationObjects) {
