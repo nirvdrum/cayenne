@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.query;
 import java.util.Map;
 
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /** Describes insert database operation.
  * InsertQuery is initialized with object values snapshot and ObjectId. */
@@ -68,10 +69,19 @@ public class InsertQuery extends AbstractQuery {
     /** Creates empty InsertQuery. */
     public InsertQuery() {}
     
+    /** Creates InsertQuery with the <code>rootEntity</code> as the root object */
+    public InsertQuery(ObjEntity rootEntity) {
+    	this.setRoot(rootEntity);
+    }
+
+    /** Creates InsertQuery with the <code>rootClass</code> as the root object */
+   public InsertQuery(Class rootClass) {
+    	this.setRoot(rootClass);
+    }
     
     /** Creates InsertQuery with <code>objEntityName</code> parameter. */
     public InsertQuery(String objEntityName) {
-        setObjEntityName(objEntityName);
+        this.setRoot(objEntityName);
     }
     
     public int getQueryType() {

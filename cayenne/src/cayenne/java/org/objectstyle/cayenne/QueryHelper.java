@@ -99,7 +99,8 @@ public final class QueryHelper {
 		UpdateQuery upd = new UpdateQuery();
 
 		ObjectId id = dataObject.getObjectId();
-		upd.setObjEntityName(id.getObjEntityName());
+		//upd.setObjEntityName(id.getObjEntityName());
+		upd.setRoot(dataObject.getClass());
 
 		Map committedSnapshot = dataObject.getCommittedSnapshot();
 		Map currentSnapshot = dataObject.getCurrentSnapshot();
@@ -151,7 +152,8 @@ public final class QueryHelper {
 	public static DeleteQuery deleteQuery(DataObject dataObject) {
 		DeleteQuery del = new DeleteQuery();
 		ObjectId id = dataObject.getObjectId();
-		del.setObjEntityName(id.getObjEntityName());
+		//del.setObjEntityName(id.getObjEntityName());
+		del.setRoot(dataObject.getClass());
 		del.setQualifier(ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
 		return del;
 	}
@@ -164,7 +166,8 @@ public final class QueryHelper {
 	 */
 	public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
 		InsertQuery ins = new InsertQuery();
-		ins.setObjEntityName(permId.getObjEntityName());
+		//ins.setObjEntityName(permId.getObjEntityName());
+		ins.setRoot(permId.getObjEntityName());
 		ins.setObjectSnapshot(objectSnapshot);
 		ins.setObjectId(permId);
 		return ins;
@@ -176,7 +179,8 @@ public final class QueryHelper {
 	 */
 	public static SelectQuery selectObjectForId(ObjectId oid) {
 		SelectQuery sel = new SelectQuery();
-		sel.setObjEntityName(oid.getObjEntityName());
+		//sel.setObjEntityName(oid.getObjEntityName());
+		sel.setRoot(oid.getObjEntityName());
 		sel.setQualifier(ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
 		return sel;
 	}
@@ -193,7 +197,8 @@ public final class QueryHelper {
 		}
 		
 		SelectQuery sel = new SelectQuery();
-		sel.setObjEntityName(((ObjectId)oids.get(1)).getObjEntityName());
+		//sel.setObjEntityName(((ObjectId)oids.get(1)).getObjEntityName());
+		sel.setRoot(((ObjectId)oids.get(1)).getObjEntityName());
 		
 		Iterator it = oids.iterator();
 		
@@ -227,7 +232,8 @@ public final class QueryHelper {
 			r = (Relationship) it.next();
 		}
 
-		newQ.setObjEntityName(r.getTargetEntity().getName());
+		//newQ.setObjEntityName(r.getTargetEntity().getName());
+		newQ.setRoot(r.getTargetEntity());
 		newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
 		return newQ;
 	}
@@ -265,7 +271,8 @@ public final class QueryHelper {
 		ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjEntityName());
 		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
 		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
-		sel.setObjEntityName(destEnt.getName());
+		//sel.setObjEntityName(destEnt.getName());
+		sel.setRoot(destEnt);
 
 		// convert source PK into destination FK definition,
 		// use it to build a qualifier that will be applied to the destination entity

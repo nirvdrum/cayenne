@@ -310,13 +310,13 @@ public class JdbcPkGenerator implements PkGenerator {
 		ArrayList queries = new ArrayList(2);
 
 		// 1. prepare select 
-		SqlSelectQuery sel = new SqlSelectQuery(null, pkSelectString(ent.getName()));
+		SqlSelectQuery sel = new SqlSelectQuery(ent, pkSelectString(ent.getName()));
 		sel.setObjDescriptors(objDesc);
 		sel.setResultDescriptors(resultDesc);
 		queries.add(sel);
 
 		// 2. prepare update 
-		queries.add(new SqlModifyQuery(null, pkUpdateString(ent.getName())));
+		queries.add(new SqlModifyQuery(ent, pkUpdateString(ent.getName())));
 
 		PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
 		node.performQueries(queries, observer);
@@ -403,7 +403,8 @@ public class JdbcPkGenerator implements PkGenerator {
 
 		public void nextQueryException(Query query, Exception ex) {
 			super.nextQueryException(query, ex);
-			String entityName = (query != null) ? query.getObjEntityName() : null;
+			//String entityName = (query != null) ? query.getObjEntityName() : null;
+			String entityName = ((query != null) && (query.getRoot()!=null)) ? query.getRoot().toString() : null;
 			throw new CayenneRuntimeException(
 				"Error generating PK for entity '" + entityName + "'.",
 				ex);

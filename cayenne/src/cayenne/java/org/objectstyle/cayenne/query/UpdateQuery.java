@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /** Object encapsulating an UPDATE statement. Note that updated attributes
  *  are expressed in terms of DbAttribute names.  */
@@ -70,16 +71,54 @@ public class UpdateQuery extends QualifiedQuery {
     /** Creates empty UpdateQuery. */
     public UpdateQuery() {}
     
+    private void init(Object root, Expression qualifier) {
+    	setRoot(root);
+    	setQualifier(qualifier);
+    }
+    
+    /**
+     * Creates a UpdateQuery with null qualifier, for the specifed ObjEntity
+     * @param root the ObjEntity this UpdateQuery is for.
+     */
+    public UpdateQuery(ObjEntity root) {
+    	this(root, null);
+    }
+    
+     /**
+     * Creates a UpdateQuery  for the specifed ObjEntity with the given qualifier
+     * @param root the ObjEntity this UpdateQuery is for.
+     * @param qualifier an Expression indicating which objects will be updated
+     */
+   public UpdateQuery(ObjEntity root, Expression qualifier) {
+		init(root, qualifier);
+    }
+    
+     /**
+     * Creates a UpdateQuery with null qualifier, for the entity which uses the given class
+     * @param root the Class of objects this UpdateQuery is for.
+     */
+   public UpdateQuery(Class rootClass) {
+    	this(rootClass, null);
+    }
+    
+	/**
+	 * Creates a UpdateQuery for the entity which uses the given class,  with the given qualifier
+	 * @param root the Class of objects this UpdateQuery is for.
+     * @param qualifier an Expression indicating which objects will be updated
+     */
+   public UpdateQuery(Class rootClass, Expression qualifier) {
+    	init(rootClass, qualifier);
+    }
+    
     
     /** Creates UpdateQuery with <code>objEntityName</code> parameter. */
     public UpdateQuery(String objEntityName) {
-        setObjEntityName(objEntityName);
+        this(objEntityName, null);
     }
     
     /** Creates UpdateQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
     public UpdateQuery(String objEntityName, Expression qualifier) {
-        setObjEntityName(objEntityName);
-        setQualifier(qualifier);
+        init(objEntityName, qualifier);
     }
     
     

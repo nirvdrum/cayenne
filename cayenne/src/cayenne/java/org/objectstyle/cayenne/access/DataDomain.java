@@ -66,6 +66,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
@@ -95,6 +96,7 @@ public class DataDomain implements QueryEngine {
 
 	/** Stores mapping of data nodes to DataNode name keys. */
 	protected Map dataNodes = Collections.synchronizedMap(new HashMap());
+    protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
 
 	/** Stores DataMaps by name. */
 	protected Map maps = Collections.synchronizedMap(new HashMap());
@@ -206,6 +208,15 @@ public class DataDomain implements QueryEngine {
 				nodesByEntityName.remove(text);
 			}
 		}
+		iter = nodesByDbEntityName.keySet().iterator();
+        while (iter.hasNext()) {
+            String text = (String) iter.next();
+            DataNode node = (DataNode) nodesByDbEntityName.get(text);
+            if (node == node_to_remove) {
+                nodesByDbEntityName.remove(text);
+            }
+        }
+
 	}
 
 	/** Returns a list of registered DataMap objects. */
@@ -259,6 +270,7 @@ public class DataDomain implements QueryEngine {
 		synchronized (dataNodes) {
 			dataNodes.clear();
 			nodesByEntityName.clear();
+            nodesByDbEntityName.clear();
 		}
 	}
 
@@ -279,6 +291,12 @@ public class DataDomain implements QueryEngine {
 						ObjEntity e = (ObjEntity) it.next();
 						nodesByEntityName.put(e.getName(), node);
 					}
+					it = maps[i].getDbEntitiesAsList().iterator();
+                    while (it.hasNext()) {
+                        DbEntity e = (DbEntity) it.next();
+                        nodesByDbEntityName.put(e.getName(), node);
+                    }
+
 				}
 			}
 		}
@@ -319,6 +337,8 @@ public class DataDomain implements QueryEngine {
 	 */
 	public void reindexNodes() {
 		nodesByEntityName.clear();
+ 		nodesByDbEntityName.clear();
+
 		DataNode[] nodes = this.getDataNodes();
 		for (int j = 0; j < nodes.length; j++) {
 			DataNode node = nodes[j];
@@ -333,6 +353,12 @@ public class DataDomain implements QueryEngine {
 						ObjEntity e = (ObjEntity) it.next();
 						nodesByEntityName.put(e.getName(), node);
 					}
+					it = maps[i].getDbEntitiesAsList().iterator();
+                    while (it.hasNext()) {
+                        DbEntity e = (DbEntity) it.next();
+                        nodesByDbEntityName.put(e.getName(), node);
+                    }
+
 				}
 			}
 		}
@@ -350,6 +376,25 @@ public class DataDomain implements QueryEngine {
      * @deprecated use getEntityResolver.lookupObjEntity()*/
 	public ObjEntity lookupEntity(String name) {
 		return this.getEntityResolver().lookupObjEntity(name);
+	}
+
+	public DataNode dataNodeForDbEntity(DbEntity dbEntity) {
+		return this.dataNodeForDbEntityName(dbEntity.getName());
+	}
+
+	public synchronized DataNode dataNodeForDbEntityName(String dbEntityName) {
+	
+        DataNode node = (DataNode) nodesByDbEntityName.get(dbEntityName);
+
+        // if lookup fails, it may mean that internal index
+        // in 'nodesByDbEntityName' need to be updated
+        // do it and then try again.
+        if (node == null) {
+            reindexNodes();
+            return (DataNode) nodesByDbEntityName.get(dbEntityName);
+        } else {
+            return node;
+        }		
 	}
 
 	/** 
@@ -389,10 +434,12 @@ public class DataDomain implements QueryEngine {
 		// organize queries by node
 		while (it.hasNext()) {
 			Query nextQ = (Query) it.next();
-			DataNode aNode = this.dataNodeForObjEntityName(nextQ.getObjEntityName());
+			//DataNode aNode = this.dataNodeForObjEntityName(nextQ.getObjEntityName());
+			DbEntity dbe=this.getEntityResolver().lookupDbEntity(nextQ);
+			DataNode aNode = this.dataNodeForDbEntity(dbe);
 			if (aNode == null) {
 				throw new CayenneRuntimeException(
-					"No suitable DataNode to handle entity '" + nextQ.getObjEntityName() + "'.");
+					"No suitable DataNode to handle entity '" + dbe.getName() + "'.");
 			}
 
 			ArrayList nodeQueries = (ArrayList) queryMap.get(aNode);
@@ -417,9 +464,12 @@ public class DataDomain implements QueryEngine {
 
 	/** Analyzes a query and sends it to appropriate DataNode */
 	public void performQuery(Query query, OperationObserver resultCons) {
-		DataNode aNode = this.dataNodeForObjEntityName(query.getObjEntityName());
+		//DataNode aNode = this.dataNodeForObjEntityName(query.getObjEntityName());
+		DbEntity dbe=this.getEntityResolver().lookupDbEntity(query);
+	 	DataNode aNode = this.dataNodeForDbEntity(dbe);
+
 		if (aNode == null) {
-			throw new CayenneRuntimeException("No DataNode to handle entity '" + query.getObjEntityName() + "'.");
+			throw new CayenneRuntimeException("No DataNode to handle entity '" + dbe.getName() + "'.");
 		}
 
 		aNode.performQuery(query, resultCons);

@@ -678,7 +678,8 @@ public class DataContext implements QueryEngine, Serializable {
         int prefetchSize = prefetches.size();
         int objectsSize = objects.size();
         ArrayList queries = new ArrayList(prefetchSize);
-        ObjEntity oe = lookupEntity(query.getObjEntityName());
+        //ObjEntity oe = lookupEntity(query.getObjEntityName());
+        ObjEntity oe = this.getEntityResolver().lookupObjEntity(query);
 
         for (int i = 0; i < prefetchSize; i++) {
             String prefetchKey = (String) prefetches.get(i);

@@ -60,6 +60,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * Describes a database SELECT statement in object terms.
@@ -89,15 +90,53 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public SelectQuery() {
 	}
 
+    private void init(Object root, Expression qualifier) {
+    	setRoot(root);
+    	setQualifier(qualifier);
+    }
+    
+    /**
+     * Creates a SelectQuery with null qualifier, for the specifed ObjEntity
+     * @param root the ObjEntity this SelectQuery is for.
+     */
+    public SelectQuery(ObjEntity root) {
+    	this(root, null);
+    }
+    
+     /**
+     * Creates a SelectQuery  for the specifed ObjEntity with the given qualifier
+     * @param root the ObjEntity this SelectQuery is for.
+     * @param qualifier an Expression indicating which objects should be fetched
+     */
+   public SelectQuery(ObjEntity root, Expression qualifier) {
+		init(root, qualifier);
+    }
+    
+     /**
+     * Creates a SelectQuery with null qualifier, for the entity which uses the given class
+     * @param root the Class of objects this SelectQuery is for.
+     */
+   public SelectQuery(Class rootClass) {
+    	this(rootClass, null);
+    }
+    
+	/**
+	 * Creates a SelectQuery for the entity which uses the given class,  with the given qualifier
+	 * @param root the Class of objects this SelectQuery is for.
+     * @param qualifier an Expression indicating which objects should be fetched
+     */
+   public SelectQuery(Class rootClass, Expression qualifier) {
+    	init(rootClass, qualifier);
+    }  
+
 	/** Creates SelectQuery with <code>objEntityName</code> parameter. */
 	public SelectQuery(String objEntityName) {
-		setObjEntityName(objEntityName);
+		this(objEntityName, null);
 	}
 
 	/** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
 	public SelectQuery(String objEntityName, Expression qualifier) {
-		setObjEntityName(objEntityName);
-		setQualifier(qualifier);
+		init(objEntityName, qualifier);
 	}
 
 	/** 

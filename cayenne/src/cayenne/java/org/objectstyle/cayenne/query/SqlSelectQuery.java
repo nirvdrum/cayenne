@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /** 
  * Allows to send "raw" SQL select statements to the database 
@@ -76,15 +78,69 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     /** Creates empty SqlSelectQuery. */
     public SqlSelectQuery() {}
 
+    private void init(Object root, String sqlString) {
+    	setRoot(root);
+    	setSqlString(sqlString);
+    }
+    
+    /**
+     * Creates a SqlSelectQuery with no initial sqlString, for the specifed ObjEntity
+     * @param root the ObjEntity to use as root
+    */
+    public SqlSelectQuery(ObjEntity root) {
+    	this(root, null);
+    }
+    
+     /**
+     * Creates a SqlSelectQuery using the given ObjEntity as a root, with the given sql string 
+     * @param root the ObjEntity to use as root
+     * @param sqlString the sql to execute
+     */
+   public SqlSelectQuery(ObjEntity root, String sqlString) {
+		init(root, sqlString);
+    }
+    
+    /**
+     * Creates a SqlSelectQuery with no initial sqlString, for the specifed DbEntity
+     * @param root the DbEntity to use as root
+    */
+    public SqlSelectQuery(DbEntity root) {
+    	this(root, null);
+    }
+    
+     /**
+     * Creates a SqlSelectQuery using the given DbEntity as a root, with the given sql string 
+     * @param root the DbEntity to use as root
+     * @param sqlString the sql to execute
+     */
+   public SqlSelectQuery(DbEntity root, String sqlString) {
+		init(root, sqlString);
+    }
+    
+     /**
+     * Creates a SqlSelectQuery with null qualifier, for the entity which uses the given class
+     * @param root the Class of objects this SqlSelectQuery is for.
+     */
+   public SqlSelectQuery(Class rootClass) {
+    	this(rootClass, null);
+    }
+    
+	/**
+	 * Creates a SqlSelectQuery for the entity which uses the given class,  with the given qualifier
+	 * @param root the Class of objects this SqlSelectQuery is for.
+     * @param sqlString the sql to execute
+     */
+   public SqlSelectQuery(Class rootClass, String sqlString) {
+    	init(rootClass, sqlString);
+    }
     /** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
     public SqlSelectQuery(String objEntityName) {
-        setObjEntityName(objEntityName);
+        this(objEntityName, null);
     }
 
     /** Creates SqlSelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
     public SqlSelectQuery(String objEntityName, String sqlString) {
-        setObjEntityName(objEntityName);
-        setSqlString(sqlString);
+        init(objEntityName, sqlString);
     }
 
     public int getQueryType() {

@@ -57,23 +57,61 @@ package org.objectstyle.cayenne.query;
  */ 
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 public class DeleteQuery extends QualifiedQuery {
     /** Creates empty DeleteQuery. */
     public DeleteQuery() {}
     
+    private void init(Object root, Expression qualifier) {
+    	setRoot(root);
+    	setQualifier(qualifier);
+    }
+    
+    /**
+     * Creates a DeleteQuery with null qualifier, for the specifed ObjEntity
+     * @param root the ObjEntity this DeleteQuery is for.
+     */
+    public DeleteQuery(ObjEntity root) {
+    	this(root, null);
+    }
+    
+     /**
+     * Creates a DeleteQuery  for the specifed ObjEntity with the given qualifier
+     * @param root the ObjEntity this DeleteQuery is for.
+     * @param qualifier an Expression indicating which objects should be deleted
+     */
+   public DeleteQuery(ObjEntity root, Expression qualifier) {
+		init(root, qualifier);
+    }
+    
+     /**
+     * Creates a DeleteQuery with null qualifier, for the entity which uses the given class
+     * @param root the Class of objects this DeleteQuery is for.
+     */
+   public DeleteQuery(Class rootClass) {
+    	this(rootClass, null);
+    }
+    
+	/**
+	 * Creates a DeleteQuery for the entity which uses the given class,  with the given qualifier
+	 * @param root the Class of objects this DeleteQuery is for.
+     * @param qualifier an Expression indicating which objects should be deleted
+     */
+   public DeleteQuery(Class rootClass, Expression qualifier) {
+    	init(rootClass, qualifier);
+    }
     
     /** Creates DeleteQuery with <code>objEntityName</code> parameter. */
     public DeleteQuery(String objEntityName) {
-        setObjEntityName(objEntityName);
+        this(objEntityName, null);
     }
     
     /** Creates DeleteQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
     public DeleteQuery(String objEntityName, Expression qualifier) {
-        setObjEntityName(objEntityName);
-        setQualifier(qualifier);
+		init(objEntityName, qualifier);
     }
-    
+
     
     public int getQueryType() {
         return DELETE_QUERY;
