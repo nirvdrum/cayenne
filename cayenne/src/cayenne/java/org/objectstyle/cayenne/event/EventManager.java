@@ -57,16 +57,19 @@
 package org.objectstyle.cayenne.event;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventListener;
 import java.util.EventObject;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.collections.iterators.SingletonIterator;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Invocation;
 
 /**
@@ -76,12 +79,18 @@ import org.objectstyle.cayenne.util.Invocation;
  * 
  * @author Dirk Olmes
  * @author Holger Hoffstaette
+ * @author Andrei Adamchik
  */
 public class EventManager extends Object {
+    private static Logger logObj = Logger.getLogger(EventManager.class);
+
     private static final EventManager defaultManager = new EventManager();
 
+    public static final int DEFAULT_DISPATCH_THREAD_COUNT = 5;
+
     // keeps weak references to subjects
-    private Map subjects;
+	protected Map subjects;
+    protected List eventQueue;
 
     /**
      * This method will return the shared 'default' EventManager.
@@ -92,12 +101,26 @@ public class EventManager extends Object {
         return defaultManager;
     }
 
+    public EventManager() {
+        this(DEFAULT_DISPATCH_THREAD_COUNT);
+    }
+
     /**
      * Default constructor for new EventManager instances, in case you need one.
      */
-    public EventManager() {
+    public EventManager(int dispatchThreadCount) {
         super();
-        this.subjects = new WeakHashMap();
+        this.subjects = Collections.synchronizedMap(new WeakHashMap());
+        this.eventQueue = Collections.synchronizedList(new LinkedList());
+
+        if (dispatchThreadCount <= 0) {
+            dispatchThreadCount = DEFAULT_DISPATCH_THREAD_COUNT;
+        }
+
+        // start dispatch threads
+        for (int i = 0; i < dispatchThreadCount; i++) {
+            new DispatchThread("EventDispatchThread-" + i).start();
+        }
     }
 
     /**
@@ -274,7 +297,7 @@ public class EventManager extends Object {
      * @param subject the subject about which observers will be notified
      * @throws IllegalArgumentException if event or subject are null
      */
-    synchronized public void postEvent(EventObject event, EventSubject subject) {
+    public void postEvent(EventObject event, EventSubject subject) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -282,6 +305,19 @@ public class EventManager extends Object {
         if (subject == null) {
             throw new IllegalArgumentException("subject must not be null");
         }
+
+        Dispatch dispatch = new Dispatch(event, subject);
+
+        // add dispatch to the queue
+        synchronized (eventQueue) {
+            eventQueue.add(dispatch);
+            eventQueue.notifyAll();
+        }
+    }
+
+    private void dispatchEvent(Dispatch dispatch) {
+        EventObject event = dispatch.object;
+        EventSubject subject = dispatch.subject;
 
         // collect listener invocations for subject
         Set specificInvocations =
@@ -349,4 +385,49 @@ public class EventManager extends Object {
         return queue;
     }
 
+    final class Dispatch {
+        EventObject object;
+        EventSubject subject;
+
+        public Dispatch(EventObject object, EventSubject subject) {
+            this.object = object;
+            this.subject = subject;
+        }
+    }
+
+    final class DispatchThread extends Thread {
+        public DispatchThread(String name) {
+            super(name);
+            logObj.debug("starting event dispatch thread: " + name);
+        }
+
+        public void run() {
+            while (true) {
+
+                // get event from the queue, if the queue
+                // is empty, just wait
+                Dispatch dispatch = null;
+
+                synchronized (EventManager.this.eventQueue) {
+                    if (EventManager.this.eventQueue.size() > 0) {
+                        dispatch = (Dispatch) EventManager.this.eventQueue.remove(0);
+                    }
+                    else {
+                        try {
+                            EventManager.this.eventQueue.wait();
+                        }
+                        catch (InterruptedException e) {
+                            // ignore interrupts...
+                            logObj.info("DispatchThread was interrupted.", e);
+                        }
+                    }
+                }
+
+                if (dispatch != null) {
+                    EventManager.this.dispatchEvent(dispatch);
+                }
+            }
+
+        }
+    }
 }
