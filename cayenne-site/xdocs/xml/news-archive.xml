@@ -5,7 +5,19 @@
     <body>        
         <section name="Cayenne News Archive">
         
-        	<p><u><i>[April 25, 2004]</i></u> <strong>M6 - Cayenne 1.1 Milestone  Release</strong></p>
+        <p><u><i>[June 14, 2004]</i></u> <strong>M7 - Cayenne 1.1 Milestone  Release</strong></p>
+		<p>This release includes support for shared and local caching of query results, a complete
+		GUI support for all types of queries, and also lots of bug fixes.. For details see 
+		<a href="release-notes/RELEASE-NOTES-1.1M7.txt">release
+		notes</a> and <a href="upgrade/UPGRADE-1.1M7.txt">upgrade instructions</a>.
+		</p>
+		<p><strong>M7 Note:</strong> There was a bug discovered in M7 that prevents JavaGroups 
+		remote notifications from happenning. If you are using JavaGroups notifications feature please
+		<a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1M7_1.tar.gz">upgrade 
+		to M7_1</a>. Otherwise M7 should work just fine.</p>
+		
+		
+		<p><u><i>[April 25, 2004]</i></u> <strong>M6 - Cayenne 1.1 Milestone  Release</strong></p>
 		<p>This release includes SQLTemplate, a scriptable raw SQL query, and also a number of 
 		bug fixes and other enhancements. For details see <a href="release-notes/RELEASE-NOTES-1.1M6.txt">release
 		notes</a> and <a href="upgrade/UPGRADE-1.1M6.txt">upgrade instructions</a>.
@@ -64,6 +76,14 @@
         download</a>. It contains new aggregate queries mapping example. Examples documentation is now a part
         of the main Cayenne site.
         </p>
+        
+          <p><u><i>[November 1, 2003]</i></u> <strong>Cayenne in "The Best Freeware And Shareware" of DB Magazine, Japan</strong></p>
+         <p><img align="left" hspace="3" src="images/other/db-mag-cover-small.jpg"/> 
+         A December 2003 edition of the DB Magazine, a 250-page software tecnology magazine published in Japanese, includes 
+         Cayenne in the selection of "The Best Freeware &amp; Shareware". Cayenne 1.0 is also distributed on the CD that comes with the magazine.
+         <br/><br/><br/><br/>
+         </p>
+        
         
         <p><u><strong><i>October 27, 2003:</i></strong> <strong>Cayenne 1.0.2 Maintenance Release</strong></u></p>
         
