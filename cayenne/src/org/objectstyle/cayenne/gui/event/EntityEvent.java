@@ -102,8 +102,10 @@ public class EntityEvent extends EventObject
 	/** Get the type of the event.
 	 *  @return CHANGE, ADD or REMOVE.*/
 	public int getId() {return id;}
-	/** Return the old entity name. Used only in CHANGE event. */
+	
+	/** Returns the old entity name. Used only in CHANGE event. */
 	public String getOldName() {return oldName;}
-	/** Return the new entity name. used only in CHANGE event.*/
+	
+	/** Returns the new entity name. Used only in CHANGE event.*/
 	public String getNewName() {return newName;}
 }

@@ -106,6 +106,7 @@ public class DomainEvent extends EventObject
 	public int getId() {return id;}
 	/** Return the old domain name. Used only in CHANGE event. */
 	public String getOldName() {return oldName;}
-	/** Return the new domain name. used only in CHANGE event.*/
+	
+	/** Returns the new domain name. Used only in CHANGE event.*/
 	public String getNewName() {return newName;}
 }

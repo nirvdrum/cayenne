@@ -73,7 +73,7 @@ public class DataMapDisplayEvent extends EventObject
 	
 	/** 
 	 * @deprecated
-	 * @see DataMapDisplayEvent(Object, DataMap, DataDomain)*/
+	 * @see #DataMapDisplayEvent(Object, DataMap, DataDomain)*/
 	public DataMapDisplayEvent(Object src, DataMap data_map_wrap)
 	{
 		super(src);

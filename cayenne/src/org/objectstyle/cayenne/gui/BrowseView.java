@@ -370,10 +370,15 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 	{ entityAdded(e); }
 	public void dbEntityRemoved(EntityEvent e){}
 
-	/** Makes Entity is visible and selected.<br>
-	 *  - If entity is from the current node, refresh the node making sure 
-	 *  changes in the entity name are reflected. <br>
-	 *  - If entity is in another node, make that node visible and selected.<br>
+
+	/** Makes Entity visible and selected.
+	 * 
+	 *  <ul>
+	 *  <li>If entity is from the current node, refreshes the node making sure 
+	 *      changes in the entity name are reflected.</li>
+	 *  <li>If entity is in a different node, makes that node visible and 
+	 *      selected.</li>
+	 *  </ul>
 	 */
 	public void entityChanged(EntityEvent e) {
 		if (e.getSource() == this)

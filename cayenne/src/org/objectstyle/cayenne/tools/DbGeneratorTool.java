@@ -64,12 +64,12 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 
 
-/** Utility class for generating database  schema from a DataMap
-  * <p>This class is an frontend to DbGenerator class. It can be used 
-  * from command line as well as from GUI tools.</p>
-  *
-  * @author Andrei Adamchik
-  */
+/** Utility class for generating database  schema from a DataMap.
+ * 
+ *  <p>This class is a frontend to DbGenerator class.</p>
+ *
+ *  @author Andrei Adamchik
+ */
 public class DbGeneratorTool {
     
     /** Runs DbGenerator with a specified map. */

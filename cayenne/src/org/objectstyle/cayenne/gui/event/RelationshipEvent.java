@@ -108,8 +108,10 @@ public class RelationshipEvent extends EventObject
 	/** Get the type of the event.
 	 *  @return CHANGE, ADD or REMOVE.*/
 	public int getId() {return id;}
-	/** Return the old relationship name. Used only in CHANGE event. */
+	
+	/** Returns the old relationship name. Used only in CHANGE event. */
 	public String getOldName() {return oldName;}
-	/** Return the new relationship name. used only in CHANGE event.*/
+	
+	/** Returns the new relationship name. Used only in CHANGE event. */
 	public String getNewName() {return newName;}
 }

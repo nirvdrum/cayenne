@@ -103,8 +103,10 @@ public class DataMapEvent extends EventObject
 	/** Get the type of the event.
 	 *  @return CHANGE, ADD or REMOVE.*/
 	public int getId() {return id;}
-	/** Return the old dataMap name. Used only in CHANGE event. */
+	
+	/** Returns the old dataMap name. Used only in CHANGE event. */
 	public String getOldName() {return oldName;}
-	/** Return the new dataMap name. used only in CHANGE event.*/
+	
+	/** Returns the new dataMap name. Used only in CHANGE event.*/
 	public String getNewName() {return newName;}
 }
