@@ -53,8 +53,7 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 import java.sql.Connection;
 import java.util.logging.Logger;
@@ -71,34 +70,36 @@ import org.objectstyle.cayenne.query.Query;
  *  @author Andrei Adamchik
  */
 public class DeleteTranslator extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(DeleteTranslator.class.getName());
-        
-    
-    public String aliasForTable(DbEntity dbEnt) {
-        throw new RuntimeException("aliases not supported");
-    }
-    
-    
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        throw new RuntimeException("db relationships not supported");
-    }
-    
-    /** Main method of DeleteTranslator class. Translates DeleteQuery
-     *  into a JDBC PreparedStatement
-     */
-    public String createSqlString() throws Exception {
-        StringBuffer queryBuf = new StringBuffer("DELETE FROM ");
-        
-        // 1. append table name
-        DbEntity dbEnt = engine.lookupEntity(query.getObjEntityName()).getDbEntity();
-        queryBuf.append(dbEnt.getName());
-        
-        
-        // 2. build qualifier
-        String qualifierStr = adapter.getQualifierFactory().createTranslator(this).doTranslation();
-        if(qualifierStr != null)
-            queryBuf.append(" WHERE ").append(qualifierStr);
-        
-        return queryBuf.toString();
-    }
+	static Logger logObj = Logger.getLogger(DeleteTranslator.class.getName());
+
+	public String aliasForTable(DbEntity dbEnt) {
+		throw new RuntimeException("aliases not supported");
+	}
+
+	public void dbRelationshipAdded(DbRelationship dbRel) {
+		throw new RuntimeException("db relationships not supported");
+	}
+
+	/** Main method of DeleteTranslator class. Translates DeleteQuery
+	 *  into a JDBC PreparedStatement
+	 */
+	public String createSqlString() throws Exception {
+		StringBuffer queryBuf = new StringBuffer("DELETE FROM ");
+
+		// 1. append table name
+		DbEntity dbEnt =
+			engine.lookupEntity(query.getObjEntityName()).getDbEntity();
+		queryBuf.append(dbEnt.getFullyQualifiedName());
+
+		// 2. build qualifier
+		String qualifierStr =
+			adapter
+				.getQualifierFactory()
+				.createTranslator(this)
+				.doTranslation();
+		if (qualifierStr != null)
+			queryBuf.append(" WHERE ").append(qualifierStr);
+
+		return queryBuf.toString();
+	}
 }

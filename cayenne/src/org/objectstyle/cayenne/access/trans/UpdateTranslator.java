@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.sql.Connection;
 import java.util.Iterator;
@@ -67,7 +67,6 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
-
 /** Class implements default translation mechanism of 
   * org.objectstyle.cayenne.query.UpdateQuery
   * objects to SQL UPDATE statements.
@@ -75,70 +74,70 @@ import org.objectstyle.cayenne.query.UpdateQuery;
   * @author Andrei Adamchik
   */
 public class UpdateTranslator extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(UpdateTranslator.class.getName());
+	static Logger logObj = Logger.getLogger(UpdateTranslator.class.getName());
 
-    public String aliasForTable(DbEntity dbEnt) {
-        throw new RuntimeException("aliases not supported");
-    }
+	public String aliasForTable(DbEntity dbEnt) {
+		throw new RuntimeException("aliases not supported");
+	}
 
+	public void dbRelationshipAdded(DbRelationship dbRel) {
+		throw new RuntimeException("db relationships not supported");
+	}
 
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        throw new RuntimeException("db relationships not supported");
-    }
+	/** Method that converts an update query into SQL string */
+	public String createSqlString() throws Exception {
+		StringBuffer queryBuf = new StringBuffer();
+		queryBuf.append("UPDATE ");
 
+		// 1. append table name
+		DbEntity dbEnt = getRootEntity().getDbEntity();
+		queryBuf.append(dbEnt.getFullyQualifiedName());
 
-    /** Method that converts an update query into SQL string */
-    public String createSqlString() throws Exception {
-        StringBuffer queryBuf = new StringBuffer();
-        queryBuf.append("UPDATE ");
+		// 2. build "set ..." clause
+		buildSetClause(queryBuf, (UpdateQuery) query);
 
-        // 1. append table name
-        DbEntity dbEnt = getRootEntity().getDbEntity();
-        queryBuf.append(dbEnt.getName());
+		// 3. build qualifier
+		String qualifierStr =
+			adapter
+				.getQualifierFactory()
+				.createTranslator(this)
+				.doTranslation();
+		if (qualifierStr != null)
+			queryBuf.append(" WHERE ").append(qualifierStr);
 
-        // 2. build "set ..." clause
-        buildSetClause(queryBuf, (UpdateQuery)query);
+		return queryBuf.toString();
+	}
 
+	/** Translate updated values and relationships into
+	 *  "SET ATTR1 = Val1, ..." SQL statement.
+	 */
+	private void buildSetClause(StringBuffer queryBuf, UpdateQuery query) {
+		Map updAttrs = query.getUpdAttributes();
+		// set of keys.. each key is supposed to be ObjAttribute
+		Iterator attrIt = updAttrs.keySet().iterator();
 
-        // 3. build qualifier
-        String qualifierStr = adapter.getQualifierFactory().createTranslator(this).doTranslation();
-        if(qualifierStr != null)
-            queryBuf.append(" WHERE ").append(qualifierStr);
+		if (!attrIt.hasNext())
+			throw new CayenneRuntimeException("Nothing to update.");
 
+		DbEntity dbEnt = getRootEntity().getDbEntity();
+		queryBuf.append(" SET ");
 
-        return queryBuf.toString();
-    }
+		// append updated attribute values
+		boolean appendedSomething = false;
 
+		// now process other attrs in the loop
+		while (attrIt.hasNext()) {
+			String nextKey = (String) attrIt.next();
+			Object attrVal = updAttrs.get(nextKey);
 
-    /** Translate updated values and relationships into
-     *  "SET ATTR1 = Val1, ..." SQL statement.
-     */
-    private void buildSetClause(StringBuffer queryBuf, UpdateQuery query) {
-        Map updAttrs = query.getUpdAttributes();
-        // set of keys.. each key is supposed to be ObjAttribute
-        Iterator attrIt  = updAttrs.keySet().iterator();
+			if (appendedSomething)
+				queryBuf.append(", ");
 
-        if(!attrIt.hasNext())
-            throw new CayenneRuntimeException("Nothing to update.");
-
-
-        DbEntity dbEnt = getRootEntity().getDbEntity();
-        queryBuf.append(" SET ");
-
-        // append updated attribute values
-        boolean appendedSomething = false;
-
-        // now process other attrs in the loop
-        while(attrIt.hasNext()) {
-            String nextKey = (String)attrIt.next();
-            Object attrVal = updAttrs.get(nextKey);
-
-            if(appendedSomething)
-                queryBuf.append(", ");
-
-            queryBuf.append(nextKey).append(" = ?");
-            super.addToParamList((DbAttribute)dbEnt.getAttribute(nextKey), attrVal);
-            appendedSomething = true;
-        }
-    }
+			queryBuf.append(nextKey).append(" = ?");
+			super.addToParamList(
+				(DbAttribute) dbEnt.getAttribute(nextKey),
+				attrVal);
+			appendedSomething = true;
+		}
+	}
 }

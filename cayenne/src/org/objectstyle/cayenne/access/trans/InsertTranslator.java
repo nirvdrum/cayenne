@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.Query;
 
-
 /** Class implements default translation mechanism of org.objectstyle.cayenne.query.InsertQuery
   * objects to SQL INSERT statements. Note that in order for this query to execute successfully,
   * ObjectId contained within InsertQuery must be fully initialized.
@@ -74,85 +73,86 @@ import org.objectstyle.cayenne.query.Query;
   * @author Andrei Adamchik  
  */
 public class InsertTranslator extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(InsertTranslator.class.getName());
+	static Logger logObj = Logger.getLogger(InsertTranslator.class.getName());
 
-    private ArrayList columnList = new ArrayList();
+	private ArrayList columnList = new ArrayList();
 
-    public String aliasForTable(DbEntity dbEnt) {
-        throw new RuntimeException("aliases not supported");
-    }
+	public String aliasForTable(DbEntity dbEnt) {
+		throw new RuntimeException("aliases not supported");
+	}
 
+	public void dbRelationshipAdded(DbRelationship dbRel) {
+		throw new RuntimeException("db relationships not supported");
+	}
 
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        throw new RuntimeException("db relationships not supported");
-    }
+	/** Method that converts an insert query into SQL string */
+	public String createSqlString() throws Exception {
+		prepareLists();
+		StringBuffer queryBuf = new StringBuffer("INSERT INTO ");
+		DbEntity dbE =
+			engine.lookupEntity(query.getObjEntityName()).getDbEntity();
+		queryBuf.append(dbE.getFullyQualifiedName()).append(" (");
 
-    /** Method that converts an insert query into SQL string */
-    public String createSqlString() throws Exception {
-        prepareLists();
-        StringBuffer queryBuf = new StringBuffer("INSERT INTO ");
-        DbEntity dbE = engine.lookupEntity(query.getObjEntityName()).getDbEntity();
-        queryBuf.append(dbE.getName()).append(" (");
+		int len = columnList.size();
 
-        int len = columnList.size();
+		// 1. Append column names
 
-        // 1. Append column names
+		// unroll the loop to avoid condition checking in the loop
+		queryBuf.append(columnList.get(0)); // assume we have at least 1 column
+		for (int i = 1; i < len; i++) {
+			queryBuf.append(", ").append(columnList.get(i));
+		}
 
-        // unroll the loop to avoid condition checking in the loop
-        queryBuf.append(columnList.get(0)); // assume we have at least 1 column
-        for(int i = 1; i < len; i++) {
-            queryBuf.append(", ").append(columnList.get(i));
-        }
+		// 2. Append values ('?' in place of actual parameters)
+		queryBuf.append(") VALUES (");
+		if (len > 0) {
+			queryBuf.append('?');
+			for (int i = 1; i < len; i++) {
+				queryBuf.append(", ?");
+			}
+		}
 
-        // 2. Append values ('?' in place of actual parameters)
-        queryBuf.append(") VALUES (");
-        if(len > 0) {
-            queryBuf.append('?');
-            for(int i = 1; i < len; i++) {
-                queryBuf.append(", ?");
-            }
-        }
+		queryBuf.append(')');
+		return queryBuf.toString();
+	}
 
-        queryBuf.append(')');
-        return queryBuf.toString();
-    }
+	public InsertQuery insertQuery() {
+		return (InsertQuery) query;
+	}
 
-    public InsertQuery insertQuery() {
-        return (InsertQuery)query;
-    }
+	/** Creates 2 matching lists: columns names and values */
+	private void prepareLists() throws Exception {
+		DbEntity dbE =
+			engine.lookupEntity(query.getObjEntityName()).getDbEntity();
+		ObjectId oid = insertQuery().getObjectId();
+		Map id = (oid != null) ? oid.getIdSnapshot() : null;
 
-    /** Creates 2 matching lists: columns names and values */
-    private void prepareLists()  throws Exception {
-        DbEntity dbE = engine.lookupEntity(query.getObjEntityName()).getDbEntity();
-        ObjectId oid = insertQuery().getObjectId();
-        Map id = (oid != null) ? oid.getIdSnapshot() : null;
+		if (id != null) {
+			Iterator idIt = id.keySet().iterator();
+			while (idIt.hasNext()) {
+				String attrName = (String) idIt.next();
+				Attribute attr = dbE.getAttribute(attrName);
+				Object attrValue = id.get(attrName);
+				columnList.add(attrName);
+				values.add(attrValue);
+				attributes.add(attr);
+			}
+		}
 
-        if(id != null) {
-            Iterator idIt = id.keySet().iterator();
-            while(idIt.hasNext()) {
-                String attrName = (String)idIt.next();
-                Attribute attr = dbE.getAttribute(attrName);
-                Object attrValue = id.get(attrName);
-                columnList.add(attrName);
-                values.add(attrValue);
-                attributes.add(attr);
-            }
-        }
+		Map snapshot = insertQuery().getObjectSnapshot();
+		Iterator columnsIt = snapshot.keySet().iterator();
+		while (columnsIt.hasNext()) {
+			String attrName = (String) columnsIt.next();
 
-        Map snapshot = insertQuery().getObjectSnapshot();
-        Iterator columnsIt = snapshot.keySet().iterator();
-        while(columnsIt.hasNext()) {
-            String attrName = (String)columnsIt.next();
+			// values taken from ObjectId take precedence.
+			if (id != null && id.get(attrName) != null)
+				continue;
 
-            // values taken from ObjectId take precedence.
-            if(id != null && id.get(attrName) != null)
-                continue;
-
-            Attribute attr = dbE.getAttribute(attrName);
-            Object attrValue = snapshot.get(attrName);
-            columnList.add(attrName);
-            values.add(attrValue);
-            attributes.add(attr);
-        }
-    }
+			Attribute attr = dbE.getAttribute(attrName);
+			Object attrValue = snapshot.get(attrName);
+			columnList.add(attrName);
+			values.add(attrValue);
+			attributes.add(attr);
+		}
+	}
 }

@@ -53,93 +53,93 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 import java.util.*;
 
-
 /** Metadata for the relational database table. */
-public class DbEntity  extends Entity {
-    // The catalog of the database table.
-    private String catalog;
+public class DbEntity extends Entity {
+	// The catalog of the database table.
+	private String catalog;
 
-    // Database table schema
-    private String schema;
+	// Database table schema
+	private String schema;
 
+	public DbEntity() {
+	}
 
-    public DbEntity() {}
+	public DbEntity(String name) {
+		setName(name);
+	}
 
-    public DbEntity(String name) {
-        setName(name);
-    }
+	/**
+	 * Returns table name including schema, if present.
+	 */
+	public String getFullyQualifiedName() {
+		return (schema != null) ? schema + '.' + getName() : getName();
+	}
 
+	/** Get schema of this table.
+	 *  @return table's schema, null if not set.*/
+	public String getSchema() {
+		return schema;
+	}
 
-    /** Get schema of this table.
-     *  @return table's schema, null if not set.*/
-    public String getSchema() {
-        return schema;
-    }
+	/** Set the schema of this table. */
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
 
+	/** Get the catalog of this table.
+	 *  @return catalog, or null if not set or applicable.*/
+	public String getCatalog() {
+		return catalog;
+	}
 
-    /** Set the schema of this table. */
-    public void setSchema(String schema) {
-        this.schema = schema;
-    }
+	/** Set the catalog for this table.*/
+	public void setCatalog(String catalog) {
+		this.catalog = catalog;
+	}
 
+	/** Returns a list of DbAttributes representing the key of the given database table. */
+	public List getPrimaryKey() {
+		ArrayList list = new ArrayList();
+		Iterator it = this.getAttributeList().iterator();
+		while (it.hasNext()) {
+			DbAttribute dba = (DbAttribute) it.next();
+			if (dba.isPrimaryKey())
+				list.add(dba);
+		}
+		return list;
+	}
 
-    /** Get the catalog of this table.
-     *  @return catalog, or null if not set or applicable.*/
-    public String getCatalog() {
-        return catalog;
-    }
+	public String toString() {
+		StringBuffer sb = new StringBuffer("DbEntity:");
+		sb.append("\nTable name: ").append(name);
 
+		// 1. print attributes
+		Iterator attIt = attributes.values().iterator();
+		while (attIt.hasNext()) {
+			DbAttribute dbAttribute = (DbAttribute) attIt.next();
+			String name = dbAttribute.getName();
+			int type = dbAttribute.getType();
+			sb.append("\n   Column name: ").append(name);
+			if (dbAttribute.isPrimaryKey())
+				sb.append(" (pk)");
 
-    /** Set the catalog for this table.*/
-    public void setCatalog(String catalog) {
-        this.catalog = catalog;
-    }
+			sb.append("\n   Column type: ").append(type);
+			sb.append("\n------------------");
+		}
 
+		// 2. print relationships
+		Iterator relIt = getRelationshipList().iterator();
+		while (relIt.hasNext()) {
+			DbRelationship dbRel = (DbRelationship) relIt.next();
+			sb.append("\n   Rel. to: ").append(
+				dbRel.getTargetEntity().getName());
+			sb.append("\n------------------");
+		}
 
-
-    /** Returns a list of DbAttributes representing the key of the given database table. */
-    public List getPrimaryKey() {
-        ArrayList list = new ArrayList();
-        Iterator it = this.getAttributeList().iterator();
-        while(it.hasNext()) {
-            DbAttribute dba = (DbAttribute)it.next();
-            if(dba.isPrimaryKey())
-                list.add(dba);
-        }
-        return list;
-    }
-        
-    public String toString() {
-        StringBuffer sb = new StringBuffer("DbEntity:");
-        sb.append("\nTable name: ").append(name);
-
-        // 1. print attributes
-        Iterator attIt = attributes.values().iterator();
-        while(attIt.hasNext()) {
-            DbAttribute dbAttribute = (DbAttribute)attIt.next();
-            String name = dbAttribute.getName();
-            int type = dbAttribute.getType();
-            sb.append("\n   Column name: ").append(name);
-            if(dbAttribute.isPrimaryKey())
-                sb.append(" (pk)");
-
-            sb.append("\n   Column type: ").append(type);
-            sb.append("\n------------------");
-        }
-
-        // 2. print relationships
-        Iterator relIt = getRelationshipList().iterator();
-        while(relIt.hasNext()) {
-            DbRelationship dbRel = (DbRelationship)relIt.next();
-            sb.append("\n   Rel. to: ").append(dbRel.getTargetEntity().getName());
-            sb.append("\n------------------");
-        }
-
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 }

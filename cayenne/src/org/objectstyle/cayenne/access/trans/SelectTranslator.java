@@ -256,7 +256,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 
 	private void appendTable(StringBuffer queryBuf, int index) {
 		DbEntity ent = (DbEntity) tableList.get(index);
-		queryBuf.append(ent.getName());
+		queryBuf.append(ent.getFullyQualifiedName());
 		queryBuf.append(' ').append(aliasList.get(index));
 	}
 
