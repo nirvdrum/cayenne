@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParam;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -166,30 +165,16 @@ public class ProcedureTranslator
     }
 
     public ResultDescriptor getResultDescriptor(ResultSet rs) {
-        ResultDescriptor descriptor =
-            new ResultDescriptor(getAdapter().getExtendedTypes(), null);
-
-        SqlSelectTranslator.appendSnapshotLabelsFromMetadata(rs, descriptor);
-        SqlSelectTranslator.appendResultTypesFromMetadata(rs, descriptor);
-
-        descriptor.index();
-        return descriptor;
+        return ResultDescriptor.createDescriptor(rs, getAdapter().getExtendedTypes());
     }
 
     /**
      * Returns a result descriptor for the stored procedure OUT parameters. 
      */
     public ResultDescriptor getProcedureResultDescriptor() {
-        ResultDescriptor descriptor =
-            new ResultDescriptor(getAdapter().getExtendedTypes(), null);
-
-        Iterator it = getProcedure().getCallParams().iterator();
-        while(it.hasNext()) {
-            descriptor.addDbAttribute((DbAttribute)it.next());
-        }
-
-        descriptor.index();
-        return descriptor;
+        return ResultDescriptor.createDescriptor(
+            getProcedure(),
+            getAdapter().getExtendedTypes());
     }
 
     /**
@@ -208,7 +193,7 @@ public class ProcedureTranslator
                 if (param.isOutParam()) {
                     setOutParam(stmt, param, i + 1);
                 }
-                
+
                 if (param.isInParam()) {
                     setInParam(stmt, param, values.get(i), i + 1);
                 }

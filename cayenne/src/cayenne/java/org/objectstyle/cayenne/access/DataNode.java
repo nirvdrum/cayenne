@@ -61,10 +61,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -406,7 +404,7 @@ public class DataNode implements QueryEngine {
         if (!delegate.isIteratedResult()) {
             // note that we don't need to close ResultIterator
             // since "dataRows" will do it internally
-            List resultRows = it.dataRows();
+            List resultRows = it.dataRows(true);
             QueryLogger.logSelectCount(
                 query.getLoggingLevel(),
                 resultRows.size(),
@@ -542,7 +540,6 @@ public class DataNode implements QueryEngine {
         Query query,
         OperationObserver delegate)
         throws SQLException, Exception {
-        long t1 = System.currentTimeMillis();
 
         ProcedureTranslator transl =
             (ProcedureTranslator) getAdapter().getQueryTranslator(query);
@@ -551,89 +548,31 @@ public class DataNode implements QueryEngine {
 
         CallableStatement statement =
             (CallableStatement) transl.createStatement(query.getLoggingLevel());
-        boolean readAll = !delegate.isIteratedResult();
 
         // stored procedure may contain a mixture of update counts and result sets,
         // and out parameters. Read out parameters first, then
         // iterate until we exhaust all results
         boolean hasResultSet = statement.execute();
 
-        ResultDescriptor outDesc = transl.getProcedureResultDescriptor();
-        int resultWidth = outDesc.getResultWidth();
-        if (resultWidth > 0) {
-            // TODO: Reading Stored Procedure out parameters is in many respects
-            // similar to how DefaultResultIterator reads rows from ResultSet,
-            // so DataNode feels like a wrong place to put this code, may need to move 
-            // it elsewhere and explore possibilities of reuse
-            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
-            ExtendedType[] converters = outDesc.getConverters();
-            int[] jdbcTypes = outDesc.getJdbcTypes();
-            String[] names = outDesc.getNames();
-            int[] outParamIndexes = outDesc.getOutParamIndexes();
+        // read out parameters
+        readStoredProcedureOutParameters(
+            statement,
+            transl.getProcedureResultDescriptor(),
+            query,
+            delegate);
 
-            // process result row columns,
-            for (int i = 0; i < outParamIndexes.length; i++) {
-                int index = outParamIndexes[i];
-                
-                // note: jdbc column indexes start from 1, not 0 unlike everywhere else
-                Object val =
-                    converters[index].materializeObject(
-                        statement,
-                        index + 1,
-                        jdbcTypes[index]);
-                dataRow.put(names[index], val);
-            }
-
-            // for now treat out parameters as a separate data row set
-            QueryLogger.logSelectCount(
-                query.getLoggingLevel(),
-                1,
-                System.currentTimeMillis() - t1);
-            delegate.nextDataRows(query, Collections.singletonList(dataRow));
-        }
-
+        // read the rest of the query
         while (true) {
             if (hasResultSet) {
                 ResultSet rs = statement.getResultSet();
-
-                // sanity check 
                 SelectQueryTranslator assembler =
                     (SelectQueryTranslator) transl;
-                DefaultResultIterator it =
-                    new DefaultResultIterator(
-                        con,
-                        statement,
-                        rs,
-                        assembler.getResultDescriptor(rs),
-                        ((GenericSelectQuery) query).getFetchLimit());
 
-                if (readAll) {
-                    // read rows one by one, since reading all rows
-                    // in the iterator will lead to closing a statement - something we don't want
-                    List resultRows = new ArrayList();
-                    try {
-                        while (it.hasNextRow()) {
-                            resultRows.add(it.nextDataRow());
-                        }
-
-                    } finally {
-                        rs.close();
-                    }
-
-                    QueryLogger.logSelectCount(
-                        query.getLoggingLevel(),
-                        resultRows.size(),
-                        System.currentTimeMillis() - t1);
-                    delegate.nextDataRows(query, resultRows);
-                } else {
-                    try {
-                        it.setClosingConnection(true);
-                        delegate.nextDataRows(transl.getQuery(), it);
-                    } catch (Exception ex) {
-                        it.close();
-                        throw ex;
-                    }
-                }
+                readResultSet(
+                    rs,
+                    assembler.getResultDescriptor(rs),
+                    (GenericSelectQuery) query,
+                    delegate);
             } else {
                 int updateCount = statement.getUpdateCount();
                 if (updateCount == -1) {
@@ -646,6 +585,70 @@ public class DataNode implements QueryEngine {
             }
 
             hasResultSet = statement.getMoreResults();
+        }
+    }
+
+    /**
+     * Helper method that reads OUT parameters of a CallableStatement.
+     */
+    protected void readStoredProcedureOutParameters(
+        CallableStatement statement,
+        ResultDescriptor descriptor,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        long t1 = System.currentTimeMillis();
+        Map row =
+            DefaultResultIterator.readProcedureOutParameters(
+                statement,
+                descriptor);
+
+        if (!row.isEmpty()) {
+            // treat out parameters as a separate data row set
+            QueryLogger.logSelectCount(
+                query.getLoggingLevel(),
+                1,
+                System.currentTimeMillis() - t1);
+            delegate.nextDataRows(query, Collections.singletonList(row));
+        }
+    }
+
+    /**
+     * Helper method that reads a ResultSet.
+     */
+    protected void readResultSet(
+        ResultSet resultSet,
+        ResultDescriptor descriptor,
+        GenericSelectQuery query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        long t1 = System.currentTimeMillis();
+        DefaultResultIterator resultReader =
+            new DefaultResultIterator(
+                null,
+                null,
+                resultSet,
+                descriptor,
+                query.getFetchLimit());
+
+        if (!delegate.isIteratedResult()) {
+            List resultRows = resultReader.dataRows(false);
+            QueryLogger.logSelectCount(
+                query.getLoggingLevel(),
+                resultRows.size(),
+                System.currentTimeMillis() - t1);
+
+            delegate.nextDataRows(query, resultRows);
+        } else {
+            try {
+                resultReader.setClosingConnection(true);
+                delegate.nextDataRows(query, resultReader);
+            } catch (Exception ex) {
+                resultReader.close();
+                throw ex;
+            }
         }
     }
 

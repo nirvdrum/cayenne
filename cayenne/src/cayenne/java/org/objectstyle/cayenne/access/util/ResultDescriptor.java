@@ -55,17 +55,23 @@
  */
 package org.objectstyle.cayenne.access.util;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParam;
 
 /**
@@ -92,6 +98,71 @@ public class ResultDescriptor {
     protected List javaTypes = new ArrayList();
     protected ExtendedTypeMap typesMapping;
     protected ObjEntity rootEntity;
+
+    /**
+     * Creates and returns a ResultDescritor based on ResultSet metadata.
+     */
+    public static ResultDescriptor createDescriptor(
+        ResultSet resultSet,
+        ExtendedTypeMap typeConverters) {
+        ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
+        try {
+            ResultSetMetaData md = resultSet.getMetaData();
+            int len = md.getColumnCount();
+            if (len == 0) {
+                throw new CayenneRuntimeException("No columns in ResultSet.");
+            }
+
+            for (int i = 0; i < len; i++) {
+
+                // figure out column name
+                int pos = i + 1;
+                String name = md.getColumnLabel(pos);
+                int sqlType = md.getColumnType(pos);
+                int precision = md.getScale(pos);
+                int length = md.getColumnDisplaySize(pos);
+                if (name == null || name.length() == 0) {
+                    name = md.getColumnName(i + 1);
+
+                    if (name == null || name.length() == 0) {
+                        name = "column_" + (i + 1);
+                    }
+                }
+
+                DbAttribute desc = new DbAttribute();
+                desc.setName(name);
+                desc.setType(md.getColumnType(i + 1));
+                
+                descriptor.addDbAttribute(desc);
+                descriptor.addJavaType(TypesMapping.getJavaBySqlType(sqlType, length, precision));
+            }
+        } catch (SQLException sqex) {
+            throw new CayenneRuntimeException("Error reading metadata.", sqex);
+        }
+
+        descriptor.index();
+        return descriptor;
+    }
+
+    /**
+     * Creates and returns a ResultDescriptor for the stored procedure parameters. 
+     */
+    public static ResultDescriptor createDescriptor(
+        Procedure procedure,
+        ExtendedTypeMap typeConverters) {
+        ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
+        Iterator it = procedure.getCallParams().iterator();
+        while (it.hasNext()) {
+            descriptor.addDbAttribute((DbAttribute) it.next());
+        }
+
+        descriptor.index();
+        return descriptor;
+    }
+
+    public ResultDescriptor(ExtendedTypeMap typesMapping) {
+        this(typesMapping, null);
+    }
 
     public ResultDescriptor(
         ExtendedTypeMap typesMapping,

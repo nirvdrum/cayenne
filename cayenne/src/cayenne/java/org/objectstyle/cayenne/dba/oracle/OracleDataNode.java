@@ -55,12 +55,17 @@
  */
 package org.objectstyle.cayenne.dba.oracle;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationObserver;
@@ -71,8 +76,10 @@ import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -81,24 +88,16 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class OracleDataNode extends DataNode {
+    private static Logger logObj = Logger.getLogger(OracleDataNode.class);
 
-    /**
-     * 
-     */
     public OracleDataNode() {
         super();
     }
 
-    /**
-     * @param name
-     */
     public OracleDataNode(String name) {
         super(name);
     }
 
-    /**
-     *
-     */
     protected void runBatchUpdate(
         Connection con,
         BatchQuery query,
@@ -178,7 +177,7 @@ public class OracleDataNode extends DataNode {
             // this differs from super
             int[] results = st.executeBatch();
             delegate.nextBatchCount(query, results);
-            
+
             // TODO: Create QUeryLogger method to log batch counts
         } finally {
             try {
@@ -188,4 +187,64 @@ public class OracleDataNode extends DataNode {
         }
     }
 
+    /**
+     * Implements Oracle-specific handling of StoredProcedure OUT parameters reading.
+     */
+    protected void readStoredProcedureOutParameters(
+        CallableStatement statement,
+        ResultDescriptor descriptor,
+        Query query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        long t1 = System.currentTimeMillis();
+
+        int resultSetType = OracleAdapter.getOracleCursorType();
+        int resultWidth = descriptor.getResultWidth();
+        if (resultWidth > 0) {
+            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
+            ExtendedType[] converters = descriptor.getConverters();
+            int[] jdbcTypes = descriptor.getJdbcTypes();
+            String[] names = descriptor.getNames();
+            int[] outParamIndexes = descriptor.getOutParamIndexes();
+
+            // process result row columns,
+            for (int i = 0; i < outParamIndexes.length; i++) {
+                int index = outParamIndexes[i];
+
+                if (jdbcTypes[index] == resultSetType) {
+                    // note: jdbc column indexes start from 1, not 0 unlike everywhere else
+                    ResultSet rs = (ResultSet) statement.getObject(index + 1);
+                    ResultDescriptor nextDesc =
+                        ResultDescriptor.createDescriptor(
+                            rs,
+                            getAdapter().getExtendedTypes());
+
+                    readResultSet(
+                        rs,
+                        nextDesc,
+                        (GenericSelectQuery) query,
+                        delegate);
+                } else {
+                    // note: jdbc column indexes start from 1, not 0 unlike everywhere else
+                    Object val =
+                        converters[index].materializeObject(
+                            statement,
+                            index + 1,
+                            jdbcTypes[index]);
+                    dataRow.put(names[index], val);
+                }
+            }
+
+            if (!dataRow.isEmpty()) {
+                QueryLogger.logSelectCount(
+                    query.getLoggingLevel(),
+                    1,
+                    System.currentTimeMillis() - t1);
+                delegate.nextDataRows(
+                    query,
+                    Collections.singletonList(dataRow));
+            }
+        }
+    }
 }

@@ -77,8 +77,16 @@ import org.objectstyle.cayenne.CayenneException;
 public interface ResultIterator {
     /**
      * Returns all unread data rows from ResultSet and closes this iterator.
+     * 
+     * @deprecated Since 1.0 Beta1, use dataRows(boolean).
      */
     public List dataRows() throws CayenneException;
+    
+    /**
+     * Returns all unread data rows from ResultSet and closes this iterator
+     * if asked to do so.
+     */
+    public List dataRows(boolean close) throws CayenneException;
            
 	/** 
 	 * Returns true if there is at least one more record

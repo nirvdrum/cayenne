@@ -58,11 +58,18 @@ package org.objectstyle.cayenne.unittest;
 
 import java.sql.Connection;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.objectstyle.cayenne.access.DataContextStoredProcTst;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParam;
 
 /**
  * @author Andrei Adamchik
@@ -78,7 +85,7 @@ public class OracleDelegate extends DatabaseSetupDelegate {
     }
 
     public boolean supportsStoredProcedures() {
-        return false;
+        return true;
     }
 
     /**
@@ -97,9 +104,27 @@ public class OracleDelegate extends DatabaseSetupDelegate {
         executeDDL(con, super.ddlFile("oracle", "create-types-pkg.sql"));
         executeDDL(con, super.ddlFile("oracle", "create-select-sp.sql"));
         executeDDL(con, super.ddlFile("oracle", "create-update-sp.sql"));
+        executeDDL(con, super.ddlFile("oracle", "create-out-sp.sql"));
     }
 
     public boolean supportsLobs() {
         return true;
     }
+    
+    public void willRunProcedure(Procedure proc) {
+      if(DataContextStoredProcTst.SELECT_STORED_PROCEDURE.equals(proc.getName())) {
+          List params = new ArrayList(proc.getCallParams());
+        
+          proc.clearCallParams();
+          proc.addCallParam(new ProcedureParam("result", OracleAdapter.getOracleCursorType(), ProcedureParam.OUT_PARAM));
+          Iterator it = params.iterator();
+          while(it.hasNext()) {
+              ProcedureParam param = (ProcedureParam)it.next();
+              proc.addCallParam(param);
+          }
+          
+          proc.setReturningValue(true);
+      }
+    }
+
 }

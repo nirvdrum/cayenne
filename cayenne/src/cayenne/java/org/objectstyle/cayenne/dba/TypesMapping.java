@@ -187,7 +187,7 @@ public class TypesMapping {
         sqlEnumType.put(new Integer(Types.VARBINARY), SQL_VARBINARY);
         sqlEnumType.put(new Integer(Types.VARCHAR), SQL_VARCHAR);
         sqlEnumType.put(new Integer(Types.OTHER), SQL_OTHER);
-        
+
         sqlEnumJava.put(new Integer(Types.BIGINT), JAVA_LONG);
         sqlEnumJava.put(new Integer(Types.BINARY), JAVA_BYTES);
         sqlEnumJava.put(new Integer(Types.BIT), JAVA_BOOLEAN);
@@ -231,7 +231,7 @@ public class TypesMapping {
      * as a part of column definition. 
      */
     public static boolean supportsLength(int type) {
-       return type == Types.BINARY
+        return type == Types.BINARY
             || type == Types.CHAR
             || type == Types.DECIMAL
             || type == Types.DOUBLE
@@ -241,7 +241,6 @@ public class TypesMapping {
             || type == Types.VARBINARY
             || type == Types.VARCHAR;
     }
-    
 
     /** 
      * Returns true if supplied type is a numeric type.
@@ -366,11 +365,31 @@ public class TypesMapping {
         return (null == temp) ? NOT_DEFINED : temp.intValue();
     }
 
-    /** Get the corresponding Java type by its java.sql.Types counterpart.
-    *  @return Fully qualified Java type name or null if not found. */
+    /** 
+     * Get the corresponding Java type by its java.sql.Types counterpart.
+     * 
+     *  @return Fully qualified Java type name or null if not found. 
+     */
     public static String getJavaBySqlType(int type) {
         return (String) sqlEnumJava.get(new Integer(type));
     }
+
+    /** 
+      * Get the corresponding Java type by its java.sql.Types counterpart.
+      * 
+      *  @return Fully qualified Java type name or null if not found. 
+      */
+    public static String getJavaBySqlType(
+        int type,
+        int length,
+        int precision) {
+
+        if (type == Types.NUMERIC && precision == 0) {
+            type = Types.INTEGER;
+        }
+        return (String) sqlEnumJava.get(new Integer(type));
+    }
+    
 
     // *************************************************************
     // non-static code
@@ -399,8 +418,7 @@ public class TypesMapping {
 
                 infos.add(info);
             }
-        }
-        finally {
+        } finally {
             rs.close();
         }
 
@@ -469,7 +487,8 @@ public class TypesMapping {
         if (alts == null)
             return null;
 
-        TypeInfo[] altArray = (TypeInfo[]) alts.toArray(new TypeInfo[alts.size()]);
+        TypeInfo[] altArray =
+            (TypeInfo[]) alts.toArray(new TypeInfo[alts.size()]);
         return pickDataType(jdbcType, altArray);
     }
 
@@ -482,7 +501,8 @@ public class TypesMapping {
         public String toString() {
             StringBuffer buf = new StringBuffer();
             buf.append("[   TypeInfo: ").append(name);
-            buf.append("\n    JDBC Type: ").append(TypesMapping.getSqlNameByType(jdbcType));
+            buf.append("\n    JDBC Type: ").append(
+                TypesMapping.getSqlNameByType(jdbcType));
             buf.append("\n    Precision: ").append(precision);
             buf.append("\n]");
             return buf.toString();

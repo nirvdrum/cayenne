@@ -100,6 +100,9 @@ public class DataContextStoredProcTst extends CayenneTestCase {
                 ProcedureParam.IN_PARAM);
         proc.addCallParam(param);
 
+        // allow delegate to tweak procedure
+        getDatabaseSetupDelegate().willRunProcedure(proc);
+
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("paintingPrice", new Integer(3000));
         DefaultOperationObserver observer = new DefaultOperationObserver();
@@ -117,7 +120,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         assertEquals(2000, p.getEstimatedPrice().intValue());
     }
 
-    public void testSelect() throws Exception {
+    public void testSelect1() throws Exception {
         // Don't run this on MySQL
         if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
             return;
@@ -138,10 +141,59 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         proc.addCallParam(param1);
         proc.addCallParam(param2);
 
+        // allow delegate to tweak procedure
+        getDatabaseSetupDelegate().willRunProcedure(proc);
+
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
         List artists = ctxt.performQuery(q);
+
+        // check the results
+        assertNotNull("Null result from StoredProcedure.", artists);
+        assertEquals(1, artists.size());
+        Map artistRow = (Map) artists.get(0);
+        Artist a = (Artist) ctxt.objectFromDataRow("Artist", artistRow);
+        Painting p = (Painting) a.getPaintingArray().get(0);
+
+        // invalidate painting, it may have been updated in the proc
+        ctxt.invalidateObject(p);
+        assertEquals(2000, p.getEstimatedPrice().intValue());
+    }
+
+    public void testSelect2() throws Exception {
+        // Don't run this on MySQL
+        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+            return;
+        }
+
+        // create an artist with painting in the database
+        createArtist(1000.0);
+
+        // create and run stored procedure
+        Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
+        ProcedureParam param1 =
+            new ProcedureParam("aName", Types.VARCHAR, ProcedureParam.IN_PARAM);
+        ProcedureParam param2 =
+            new ProcedureParam(
+                "paintingPrice",
+                Types.INTEGER,
+                ProcedureParam.IN_PARAM);
+        proc.addCallParam(param1);
+        proc.addCallParam(param2);
+
+        // allow delegate to tweak procedure
+        getDatabaseSetupDelegate().willRunProcedure(proc);
+
+        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
+        q.addParam("aName", "An Artist");
+        q.addParam("paintingPrice", new Integer(3000));
+
+        QueryResult result = new QueryResult();
+
+        ctxt.performQuery(q, result);
+
+        List artists = result.getFirstRows(q);
 
         // check the results
         assertNotNull("Null result from StoredProcedure.", artists);
@@ -176,6 +228,9 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         proc.addCallParam(param1);
         proc.addCallParam(param2);
 
+        // allow delegate to tweak procedure
+        getDatabaseSetupDelegate().willRunProcedure(proc);
+
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("in_param", new Integer(20));
 
@@ -189,7 +244,9 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         assertEquals(1, rows.size());
         Object row = rows.get(0);
         assertNotNull(row);
-        assertTrue("Unexpected row class: " + row.getClass().getName(), row instanceof Map);
+        assertTrue(
+            "Unexpected row class: " + row.getClass().getName(),
+            row instanceof Map);
         Map outParams = (Map) row;
         Number price = (Number) outParams.get("out_param");
         assertNotNull(price);

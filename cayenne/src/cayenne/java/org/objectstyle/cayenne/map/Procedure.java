@@ -96,6 +96,7 @@ public class Procedure extends DbEntity {
         param.setEntity(this);
         callParams.add(param);
     }
+    
 
     /** Removes a named call parameter. */
     public void removeCallParam(String name) {
@@ -150,7 +151,7 @@ public class Procedure extends DbEntity {
             ? (ProcedureParam) callParams.get(0)
             : null;
     }
-
+    
     /**
      * Returns the returningValue.
      * @return boolean

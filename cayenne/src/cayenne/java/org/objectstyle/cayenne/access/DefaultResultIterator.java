@@ -58,11 +58,13 @@ package org.objectstyle.cayenne.access;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +104,42 @@ public class DefaultResultIterator implements ResultIterator {
     protected boolean nextRow;
     protected int fetchedSoFar;
     protected int fetchLimit;
+
+    /**
+     * Utility method to read stored procedure out parameters as a map. 
+     * Returns an empty map if no out parameters exist.
+     */
+    public static Map readProcedureOutParameters(
+        CallableStatement statement,
+        ResultDescriptor resultDescriptor)
+        throws SQLException, Exception {
+
+        int resultWidth = resultDescriptor.getResultWidth();
+        if (resultWidth > 0) {
+            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
+            ExtendedType[] converters = resultDescriptor.getConverters();
+            int[] jdbcTypes = resultDescriptor.getJdbcTypes();
+            String[] names = resultDescriptor.getNames();
+            int[] outParamIndexes = resultDescriptor.getOutParamIndexes();
+
+            // process result row columns,
+            for (int i = 0; i < outParamIndexes.length; i++) {
+                int index = outParamIndexes[i];
+
+                // note: jdbc column indexes start from 1, not 0 unlike everywhere else
+                Object val =
+                    converters[index].materializeObject(
+                        statement,
+                        index + 1,
+                        jdbcTypes[index]);
+                dataRow.put(names[index], val);
+            }
+            
+            return dataRow;
+        }
+
+        return Collections.EMPTY_MAP;
+    }
 
     public DefaultResultIterator(
         Connection connection,
@@ -170,8 +208,18 @@ public class DefaultResultIterator implements ResultIterator {
     /**
      * Returns all unread data rows from ResultSet and closes
      * this iterator.
+     * 
+     * @deprecated Since 1.0 Beta1, use dataRows(boolean).
      */
     public List dataRows() throws CayenneException {
+        return dataRows(true);
+    }
+
+    /**
+     * Returns all unread data rows from ResultSet, closing
+     * this iterator if needed.
+     */
+    public List dataRows(boolean close) throws CayenneException {
         List list = new ArrayList();
 
         try {
@@ -180,7 +228,9 @@ public class DefaultResultIterator implements ResultIterator {
             }
             return list;
         } finally {
-            this.close();
+            if (close) {
+                this.close();
+            }
         }
     }
 
@@ -221,7 +271,8 @@ public class DefaultResultIterator implements ResultIterator {
 
     /**
      * Reads a row from the internal ResultSet at the current
-     * cursor position.
+     * cursor position, processing only columns that are part of the ObjectId
+     * of a terget class.
      */
     protected Map readIdRow() throws SQLException, CayenneException {
         try {

@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -120,6 +121,13 @@ public class DatabaseSetupDelegate {
 
     public void droppedTables(Connection con, DataMap map) throws Exception {
 
+    }
+    
+    /**
+     * Callback method that allows Delegate to customize
+     * test procedure.
+     */
+    public void willRunProcedure(Procedure proc) {
     }
 
     public void willCreateTables(Connection con, DataMap map)
