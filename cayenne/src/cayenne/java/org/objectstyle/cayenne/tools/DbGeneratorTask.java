@@ -56,74 +56,79 @@
 package org.objectstyle.cayenne.tools;
 
 import java.io.File;
-import java.util.ArrayList;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
+import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.gen.AntClassGenerator;
-import org.objectstyle.cayenne.gen.ClassGenerator;
-import org.objectstyle.cayenne.gen.DefaultClassGenerator;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.InputSource;
 
 /**
- * Ant task to perform class generation from data map. This class is an Ant adapter to
- * DefaultClassGenerator class.
+ * An Ant Task that is a frontend to Cayenne DbGenerator allowing schema generation from
+ * DataMap using Ant.
  * 
- * @author Andrei Adamchik
+ * @author nirvdrum, Andrei Adamchik
+ * @since 1.2
  */
-public class CayenneGenerator extends Task {
+public class DbGeneratorTask extends Task {
 
+    protected DbAdapter adapter;
     protected File map;
-    protected DefaultClassGenerator generator;
+    protected String driver;
+    protected String url;
+    protected String userName;
+    protected String password;
 
-    public CayenneGenerator() {
-        bootstrapVelocity();
-        generator = createGenerator();
-    }
+    // DbGenerator options... setup defaults similar to DbGemerator itself:
+    // all DROP set to false, all CREATE - to true
+    protected boolean dropTables;
+    protected boolean dropPK;
+    protected boolean createTables = true;
+    protected boolean createPK = true;
+    protected boolean createFK = true;
 
     /**
      * Sets up logging to be in line with the Ant logging system.
-     * 
-     * @since 1.1
      */
     protected void configureLogging() {
         Configuration.setLoggingConfigured(true);
         BasicConfigurator.configure(new AntAppender(this));
     }
 
-    /**
-     * Factory method to create internal class generator. Called from constructor.
-     */
-    protected DefaultClassGenerator createGenerator() {
-        AntClassGenerator gen = new AntClassGenerator();
-        gen.setParentTask(this);
-        return gen;
-    }
+    public void execute() {
 
-    /** Initialize Velocity with class loader of the right class. */
-    protected void bootstrapVelocity() {
-        ClassGenerator.bootstrapVelocity(this.getClass());
-    }
-
-    /**
-     * Executes the task. It will be called by ant framework.
-     */
-    public void execute() throws BuildException {
         configureLogging();
         validateAttributes();
 
         try {
-            processMap();
+            // Build up the data source info for the generator.
+            DataSourceInfo dsi = new DataSourceInfo();
+            dsi.setJdbcDriver(driver);
+            dsi.setDataSourceUrl(url);
+            dsi.setUserName(userName);
+            dsi.setPassword(password);
+
+            // Load the data map and run the db generator.
+            DataMap dataMap = loadDataMap();
+            DbGenerator generator = new DbGenerator(adapter, dataMap);
+            generator.setShouldCreateFKConstraints(createFK);
+            generator.setShouldCreatePKSupport(createPK);
+            generator.setShouldCreateTables(createTables);
+            generator.setShouldDropPKSupport(dropPK);
+            generator.setShouldDropTables(dropTables);
+
+            generator.runGenerator(dsi);
         }
         catch (Exception ex) {
             Throwable th = Util.unwindException(ex);
 
-            String message = "Error generating classes";
+            String message = "Error generating database";
 
             if (th.getLocalizedMessage() != null) {
                 message += ": " + th.getLocalizedMessage();
@@ -134,12 +139,32 @@ public class CayenneGenerator extends Task {
         }
     }
 
-    protected void processMap() throws Exception {
-        DataMap dataMap = loadDataMap();
-        generator.setTimestamp(map.lastModified());
-        generator.setObjEntities(new ArrayList(dataMap.getObjEntities()));
-        generator.validateAttributes();
-        generator.execute();
+    /**
+     * Validates atttributes that are not related to internal DefaultClassGenerator.
+     * Throws BuildException if attributes are invalid.
+     */
+    protected void validateAttributes() throws BuildException {
+        StringBuffer error = new StringBuffer("");
+
+        if (map == null) {
+            error.append("The 'map' attribute must be set.\n");
+        }
+
+        if (adapter == null) {
+            error.append("The 'adapter' attribute must be set.\n");
+        }
+
+        if (driver == null) {
+            error.append("The 'driver' attribute must be set.\n");
+        }
+
+        if (url == null) {
+            error.append("The 'adapter' attribute must be set.\n");
+        }
+
+        if (error.length() > 0) {
+            throw new BuildException(error.toString());
+        }
     }
 
     /** Loads and returns DataMap based on <code>map</code> attribute. */
@@ -148,14 +173,24 @@ public class CayenneGenerator extends Task {
         return new MapLoader().loadDataMap(in);
     }
 
-    /**
-     * Validates atttributes that are not related to internal DefaultClassGenerator.
-     * Throws BuildException if attributes are invalid.
-     */
-    protected void validateAttributes() throws BuildException {
-        if (map == null && project == null) {
-            throw new BuildException("either 'map' or 'project' is required.");
-        }
+    public void setCreateFK(boolean createFK) {
+        this.createFK = createFK;
+    }
+
+    public void setCreatePK(boolean createPK) {
+        this.createPK = createPK;
+    }
+
+    public void setCreateTables(boolean createTables) {
+        this.createTables = createTables;
+    }
+
+    public void setDropPK(boolean dropPK) {
+        this.dropPK = dropPK;
+    }
+
+    public void setDropTables(boolean dropTables) {
+        this.dropTables = dropTables;
     }
 
     /**
@@ -168,51 +203,57 @@ public class CayenneGenerator extends Task {
     }
 
     /**
-     * Sets the destDir.
+     * Sets the db adapter.
+     * 
+     * @param adapter The db adapter to set.
      */
-    public void setDestDir(File destDir) {
-        generator.setDestDir(destDir);
+    public void setAdapter(String adapter) {
+
+        if (adapter != null) {
+            // Try to create an instance of the DB adapter.
+            try {
+                Class c = Class.forName(adapter);
+                this.adapter = (DbAdapter) c.newInstance();
+            }
+            catch (Exception e) {
+                throw new BuildException("Can't load DbAdapter: " + adapter);
+            }
+        }
     }
 
     /**
-     * Sets <code>overwrite</code> property.
+     * Sets the JDBC driver used to connect to the database server.
+     * 
+     * @param driver The driver to set.
      */
-    public void setOverwrite(boolean overwrite) {
-        generator.setOverwrite(overwrite);
+    public void setDriver(String driver) {
+        this.driver = driver;
     }
 
     /**
-     * Sets <code>makepairs</code> property.
+     * Sets the JDBC URL used to connect to the database server.
+     * 
+     * @param url The url to set.
      */
-    public void setMakepairs(boolean makepairs) {
-        generator.setMakePairs(makepairs);
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     /**
-     * Sets <code>template</code> property.
+     * Sets the username used to connect to the database server.
+     * 
+     * @param username The username to set.
      */
-    public void setTemplate(File template) {
-        generator.setTemplate(template);
+    public void setUserName(String username) {
+        this.userName = username;
     }
 
     /**
-     * Sets <code>supertemplate</code> property.
+     * Sets the password used to connect to the database server.
+     * 
+     * @param password The password to set.
      */
-    public void setSupertemplate(File supertemplate) {
-        generator.setSuperTemplate(supertemplate);
-    }
-
-    /**
-     * Sets <code>usepkgpath</code> property.
-     */
-    public void setUsepkgpath(boolean usepkgpath) {
-        generator.setUsePkgPath(usepkgpath);
-    }
-
-    /**
-     * Sets <code>superpkg</code> property.
-     */
-    public void setSuperpkg(String superpkg) {
-        generator.setSuperPkg(superpkg);
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
