@@ -84,9 +84,6 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
   * Utility class that does forward engineering of the database.
   * It can generate database schema using the data map. It is a 
   * counterpart of DbLoader class. 
-  * 
-  * <p>It is a responsibility of calling code to close connection
-  * DbGenerator was initialized with or perform any other cleanup.
   *
   * @author Andrei Adamchik
   */
@@ -110,10 +107,10 @@ public class DbGenerator {
 	/** Creates and initializes new DbGenerator. */
 	public DbGenerator(DbAdapter adapter, DataMap map) {
 		// sanity check
-		if(adapter == null) {
+		if (adapter == null) {
 			throw new IllegalArgumentException("Adapter must not be null.");
 		}
-		
+
 		this.map = map;
 		this.node = adapter.createDataNode("internal");
 		node.addDataMap(map);
@@ -146,12 +143,12 @@ public class DbGenerator {
 		boolean supportsFK = adapter.supportsFkConstraints();
 		while (it.hasNext()) {
 			DbEntity dbe = (DbEntity) it.next();
-			
+
 			// view creation support is pending
-			if(dbe instanceof DerivedDbEntity) {
+			if (dbe instanceof DerivedDbEntity) {
 				continue;
 			}
-			
+
 			String name = dbe.getName();
 
 			// build "DROP TABLE"
@@ -233,7 +230,7 @@ public class DbGenerator {
 				dsi.getMaxConnections(),
 				dsi.getUserName(),
 				dsi.getPassword());
-				
+
 		try {
 			runGenerator(dataSource);
 		} finally {
@@ -270,8 +267,8 @@ public class DbGenerator {
 
 				//Refresh the list to ensure all required tables will be created
 				nonExistent = filterNonExistentTables(con);
-				List createdTables=new ArrayList();
-				
+				List createdTables = new ArrayList();
+
 				if (shouldCreateTables) {
 					Iterator it = orderedEnts.iterator();
 					while (it.hasNext()) {
@@ -286,7 +283,7 @@ public class DbGenerator {
 						}
 					}
 				}
-				
+
 				if (shouldCreateTables
 					&& shouldCreateFKConstraints
 					&& getAdapter().supportsFkConstraints()) {
@@ -315,7 +312,7 @@ public class DbGenerator {
 
 		try {
 			if (shouldDropPKSupport) {
-				
+
 				getAdapter().getPkGenerator().dropAutoPk(node, orderedEnts);
 			}
 
@@ -327,6 +324,9 @@ public class DbGenerator {
 		}
 	}
 
+	/**
+	 * Executes a DDL statement, logging the execution via the QueryLogger.
+	 */
 	protected void executeStatement(String stmtText, Statement stmt)
 		throws SQLException {
 		QueryLogger.logQuery(Level.INFO, stmtText, null);
@@ -431,16 +431,16 @@ public class DbGenerator {
 	 */
 	private List dbEntitiesInInsertOrder() {
 		// remove derived db entities
-	    List filteredList = new ArrayList();
-	    Iterator it = map.getDbEntities().iterator();
-	    while(it.hasNext()) {
-	    	Object next = it.next();
-	    	if(!(next instanceof DerivedDbEntity)) {
-	    	    filteredList.add(next);
-	    	}
-	    }
+		List filteredList = new ArrayList();
+		Iterator it = map.getDbEntities().iterator();
+		while (it.hasNext()) {
+			Object next = it.next();
+			if (!(next instanceof DerivedDbEntity)) {
+				filteredList.add(next);
+			}
+		}
 
-        // sort the list
+		// sort the list
 		node.getDependencySorter().sortDbEntities(filteredList, false);
 		return filteredList;
 	}
