@@ -62,10 +62,18 @@
 			transport, J2EE libraries must be available at runtime, and JMS services must be running.
             </p>
             
-            <p><strong>- (Optional) JDOM.</strong> If you develop a Swing application that uses 
+            <p><strong>- (Optional) JDOM.</strong> If you use XML serialization features or 
+           develop a Swing application with
             <a href="../dataview/index.html">DataViews</a>, you need to have JDOM jars installed. JDOM can be downloaded 
             from  <a href="http://www.jdom.org/" target="_blank">http://www.jdom.org/</a>.
             </p>
+
+			<p><strong>- (Optional) Jakarta Commons Pool and DBCP.</strong> If 
+				you use DBCPDataSourceFactory for one of the DataNodes, you 
+				need commons-dbcp and commons-pool jar files that can be 
+				donwloaded from <a href="http://jakarta.apache.org/commons/" 
+				target="_blank">http://jakarta.apache.org/commons/</a>. DBCP 
+				1.2.1 and and Pool 1.2 are the tested versions.</p>
         </subsection>
     </section>
 </body>

@@ -34,6 +34,18 @@
 						DataContext to the request thread. More information can 
 						be found <a href="../deploy/webapplicationcontextfilter.html">here</a>.</p>
 				</subsection>
+				<subsection name="1.1.4 DBCPDataSourcefactory: DBCP Pool Support">
+					<p>A connection pool from jakarta-commons DBCP project is 
+						now supported via the modeler - just select 
+						DBCPDataSourceFactory from the DataSource factories 
+						dropdown. The new factory loads its configuration from 
+						a specified properties file (see <a 
+						href="../../api/cayenne/org/objectstyle/cayenne/conf/DBCPDataSourceFactory.html">DBCPDataSourcefactory 
+						Javadocs</a> for supported properties). DBCP connection 
+						pool is much more advanced than the one provided by 
+						Cayenne and supports a dozen or so runtime 
+						parameters.</p>
+				</subsection>
 			</subsection>
 		</section>
 	</body>

@@ -73,6 +73,8 @@
 					<li><strong><code>plastic-1.1.2.jar</code></strong></li>
 					<li><strong><code>hsqldb-1.7.2.jar</code></strong></li>
 					<li><strong><code>ognl-2.6.5.jar</code></strong></li>
+					<li><strong><code>commons-dbcp-1.2.1.jar</code></strong></li>
+					<li><strong><code>commons-pool-1.2.jar</code></strong></li>
 				</ul>
             	
             	<code>cayenne-modeler.jar</code> implicitly relies on the presence of 
