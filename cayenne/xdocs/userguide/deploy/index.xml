@@ -12,16 +12,16 @@
 <body>
      <section name="13. Deployment">        
            <p>Cayenne application deployment is about configuring the application 
-           so that in runtime it could find a main project file (cayenne.xml) and 
+           so that at runtime it can find a main project file (cayenne.xml) and 
            associated resources, such as DataMap and DataNode XML files.
            </p>
            
-           <p>Central piece in Cayenne deployment is <a href=
-           "../../api/cayenne/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
+           <p>The central point in Cayenne deployment is the
+           	<a href="../../api/cayenne/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
             class. It locates and loads all the mapping and configuration information required 
-            for Cayenne runtime. By default Configuration uses singleton model, i.e. normally 
-            there is only one instance of either Configuration (or its subclass) that exists 
-            in the application. This shared instance can be accessed via a static method like that:
+            for Cayenne at runtime. By default Configuration uses a singleton model, i.e. normally 
+            there is only one instance of Configuration (or a subclass) that exists 
+            in the application. This shared instance can be accessed in the following way:
             </p>
 
 <source>import org.objectstyle.cayenne.conf.Configuration;

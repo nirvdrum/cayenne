@@ -15,22 +15,22 @@
 				<p>A user can create her own subclass of Configuration and use it instead. 
 				Custom subclasses are usually created to load configuration files from 
 				non-standard locations, to automatically configure Cayenne during 
-				certain events that happen in deployment containers, etc. Cayenne framework
-				provides a few implementations of Configuration discussed later in this chapter.
+				certain events that happen in deployment containers, etc.
+				Cayenne provides a few implementations of Configuration discussed later
+				in this chapter.
 				</p>
 
-				<p>To ensure that Cayenne uses configuration object of the right class, 
-				Configuration singleton must be initialized properly before any calls 
-				to Configuration are made: 
+				<p>To ensure that Cayenne uses the correct Configuration class, 
+				it must be initialized properly before any calls to Configuration are made: 
             	</p>
 
 <source>import org.objectstyle.cayenne.conf.Configuration
 ...
-String myConfigSubclass = "my.package.ConfigSubclass";
-Configuration.setSharedConfiguration(myConfigSubclass);
+Class myConfigSubclass = my.package.ConfigSubclass.class;
+Configuration.initializeSharedConfiguration(myConfigSubclass);
 </source>
 
-            	<p>After this code is executed any subsequent calls to "Configuration.getSharedConfig" 
+                <p>After this code is executed, any subsequent calls to "Configuration.getSharedConfiguration()" 
             	will return an instance of the custom class instead of DefaultConfiguration.
             	</p>
 			</subsection>
