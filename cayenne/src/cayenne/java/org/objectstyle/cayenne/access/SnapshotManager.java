@@ -77,6 +77,12 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * SnapshotManager handles snapshot (data row) operations on objects.
  * This is a helper class that works in conjunction with DataContext.
+ * 
+ * <p>
+ * TODO: SnapshotManager is really stateless. All its state information
+ * (including relDataSource) does not span mthod calls and is really beloning
+ * to the DataContext, so switching to a singleton instance should be easy.
+ * </p>
  *
  * @author Andrei Adamchik
  */

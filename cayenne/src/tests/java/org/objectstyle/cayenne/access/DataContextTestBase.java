@@ -59,8 +59,13 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.List;
 
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.ROArtist;
 import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
@@ -92,6 +97,20 @@ public class DataContextTestBase extends CayenneTestCase {
 
     public String artistName(int ind) {
         return "artist" + ind;
+    }
+    
+    protected Artist fetchArtist(String name) {
+        SelectQuery q =
+            new SelectQuery("Artist", ExpressionFactory.matchExp("artistName", name));
+        List ats = ctxt.performQuery(q);
+        return (ats.size() > 0) ? (Artist) ats.get(0) : null;
+    }
+
+    protected ROArtist fetchROArtist(String name) {
+        SelectQuery q =
+            new SelectQuery("ROArtist", ExpressionFactory.matchExp("artistName", name));
+        List ats = ctxt.performQuery(q);
+        return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
     }
 
     /** Give each artist a single painting. */

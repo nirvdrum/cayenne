@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,10 +73,10 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataContextTst extends DataContextTestBase {
+    
 
     public void testCreatePermId1() throws Exception {
         Artist artist = new Artist();
@@ -96,26 +95,6 @@ public class DataContextTst extends DataContextTestBase {
         assertNotNull(id1);
         assertNotNull(id2);
         assertEquals(id1, id2); //Must be the same,
-    }
-
-    public void testMerge() throws Exception {
-        String n1 = "changed";
-        String n2 = "changed again";
-
-        Artist a1 = fetchArtist("artist1");
-        a1.setArtistName(n1);
-
-        Map s2 = new HashMap();
-        s2.put("ARTIST_NAME", n2);
-        s2.put("DATE_OF_BIRTH", new java.util.Date());
-        ObjEntity e = ctxt.getEntityResolver().lookupObjEntity(a1);
-        ctxt.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
-
-        // name was modified, so it should not change during merge
-        assertEquals(n1, a1.getArtistName());
-
-        // date of birth came from database, it should be updated during merge
-        assertEquals(s2.get("DATE_OF_BIRTH"), a1.getDateOfBirth());
     }
 
     public void testTakeObjectsSnapshot1() throws Exception {
@@ -406,19 +385,6 @@ public class DataContextTst extends DataContextTestBase {
         }
     }
 
-    private Artist fetchArtist(String name) {
-        SelectQuery q =
-            new SelectQuery("Artist", ExpressionFactory.matchExp("artistName", name));
-        List ats = ctxt.performQuery(q);
-        return (ats.size() > 0) ? (Artist) ats.get(0) : null;
-    }
-
-    private ROArtist fetchROArtist(String name) {
-        SelectQuery q =
-            new SelectQuery("ROArtist", ExpressionFactory.matchExp("artistName", name));
-        List ats = ctxt.performQuery(q);
-        return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
-    }
 
     public void testPerformIteratedQuery1() throws Exception {
         SelectQuery q1 = new SelectQuery("Artist");
