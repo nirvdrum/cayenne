@@ -194,7 +194,7 @@ public class ResourceLocator {
 		try {
 			return url.openStream();
 		} catch (IOException ioex) {
-			logObj.log(logLevel, "Error reading URL.", ioex);
+			logObj.log(logLevel, "Error reading URL, ignoring", ioex);
 			return null;
 		}
 	}
@@ -212,7 +212,7 @@ public class ResourceLocator {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
-					logObj.log(logLevel, "Malformed url.", ex);
+					logObj.log(logLevel, "Malformed url, ignoring.", ex);
 				}
 			}
 		}
@@ -225,7 +225,7 @@ public class ResourceLocator {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
-					logObj.log(logLevel, "Malformed url.", ex);
+					logObj.log(logLevel, "Malformed url, ignoring", ex);
 				}
 			}
 		}
@@ -238,7 +238,7 @@ public class ResourceLocator {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
-					logObj.log(logLevel, "Malformed url.", ex);
+					logObj.log(logLevel, "Malformed url, ignoring", ex);
 				}
 			}
 		}
