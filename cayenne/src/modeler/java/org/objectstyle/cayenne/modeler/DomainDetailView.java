@@ -133,7 +133,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.appendSeparator("DataDomain Info");
+        builder.appendSeparator("DataDomain Configuration");
         builder.append("DataDomain Name:", name, 3);
         builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
 

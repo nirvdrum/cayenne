@@ -55,13 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -84,6 +81,9 @@ import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.project.ProjectDataSource;
+
+import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo.
@@ -157,23 +157,15 @@ public class DataNodeDetailView
     }
 
     protected void init() {
-        GridBagLayout layout = new GridBagLayout();
-        this.setLayout(layout);
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.weightx = 100;
-        constraints.weighty = 50;
-        constraints.gridwidth = GridBagConstraints.REMAINDER;
-        constraints.gridheight = GridBagConstraints.RELATIVE;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.anchor = GridBagConstraints.NORTHWEST;
-
-        nameLabel = CayenneWidgetFactory.createLabel("Data node name: ");
+        // create widgets
+        nameLabel = CayenneWidgetFactory.createLabel("DataNode Name:");
         name = CayenneWidgetFactory.createTextField();
-        locationLabel = CayenneWidgetFactory.createLabel("Location: ");
+
+        locationLabel = CayenneWidgetFactory.createLabel("Location:");
         location = CayenneWidgetFactory.createTextField();
-        factoryLabel = CayenneWidgetFactory.createLabel("Data source factory:");
+        location.setEditable(false);
+
+        factoryLabel = CayenneWidgetFactory.createLabel("DataSource Factory:");
         factory = CayenneWidgetFactory.createComboBox();
         factory.setEditable(true);
         DefaultComboBoxModel model =
@@ -184,7 +176,7 @@ public class DataNodeDetailView
         factory.setModel(model);
         factory.setSelectedIndex(-1);
 
-        adapterLabel = CayenneWidgetFactory.createLabel("DB adapter:");
+        adapterLabel = CayenneWidgetFactory.createLabel("DB Adapter:");
         adapter =
             CayenneWidgetFactory.createComboBox(
                 DbAdapter.availableAdapterClassNames,
@@ -192,63 +184,55 @@ public class DataNodeDetailView
         adapter.setEditable(true);
         adapter.setSelectedIndex(-1);
 
-        Component[] left_comp = new Component[4];
-        left_comp[0] = nameLabel;
-        left_comp[1] = factoryLabel;
-        left_comp[2] = locationLabel;
-        left_comp[3] = adapterLabel;
-
-        Component[] right_comp = new Component[4];
-        right_comp[0] = name;
-        right_comp[1] = factory;
-        right_comp[2] = location;
-        right_comp[3] = adapter;
-
-        JPanel temp = PanelFactory.createForm(left_comp, right_comp);
-        add(temp, constraints);
-        location.setEditable(false);
-
-        userNameLabel = CayenneWidgetFactory.createLabel("User name: ");
+        userNameLabel = CayenneWidgetFactory.createLabel("User Name:");
         userName =
             CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
         userName.addActionListener(this);
-        passwordLabel = CayenneWidgetFactory.createLabel("Password: ");
+        passwordLabel = CayenneWidgetFactory.createLabel("Password:");
         password = new JPasswordField(20);
-        driverLabel = CayenneWidgetFactory.createLabel("Driver class: ");
+        driverLabel = CayenneWidgetFactory.createLabel("Driver Class:");
         driver =
             CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         driver.addActionListener(this);
-        urlLabel = CayenneWidgetFactory.createLabel("Database URL: ");
+        urlLabel = CayenneWidgetFactory.createLabel("Database URL:");
         url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         url.addActionListener(this);
-        minConnectionsLabel = CayenneWidgetFactory.createLabel("Min connections: ");
+        minConnectionsLabel = CayenneWidgetFactory.createLabel("Min Connections:");
         minConnections = CayenneWidgetFactory.createTextField();
-        maxConnectionsLabel = CayenneWidgetFactory.createLabel("Max connections: ");
+        maxConnectionsLabel = CayenneWidgetFactory.createLabel("Max Connections:");
         maxConnections = CayenneWidgetFactory.createTextField();
 
-        left_comp = new Component[6];
-        left_comp[0] = userNameLabel;
-        left_comp[1] = passwordLabel;
-        left_comp[2] = driverLabel;
-        left_comp[3] = urlLabel;
-        left_comp[4] = minConnectionsLabel;
-        left_comp[5] = maxConnectionsLabel;
+        // assemble
+        this.setLayout(new BorderLayout());
 
-        right_comp = new Component[6];
-        right_comp[0] = userName;
-        right_comp[1] = password;
-        right_comp[2] = driver;
-        right_comp[3] = url;
-        right_comp[4] = minConnections;
-        right_comp[5] = maxConnections;
+        DefaultFormBuilder topPanelBuilder =
+            new DefaultFormBuilder(
+                new FormLayout("right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)", ""));
+        topPanelBuilder.setDefaultDialogBorder();
 
-        driverPanel = PanelFactory.createForm(left_comp, right_comp);
-        driverPanel.setBorder(BorderFactory.createTitledBorder("Data Source Info"));
-        constraints.gridheight = 2;
-        constraints.gridy = 1;
-        constraints.gridwidth = GridBagConstraints.REMAINDER;
-        constraints.gridheight = GridBagConstraints.REMAINDER;
-        add(driverPanel, constraints);
+        topPanelBuilder.appendSeparator("DataNode Configuration");
+        topPanelBuilder.append(nameLabel, name);
+        topPanelBuilder.append(factoryLabel, factory);
+        topPanelBuilder.append(locationLabel, location);
+        topPanelBuilder.append(adapterLabel, adapter);
+
+        add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
+
+        DefaultFormBuilder driverPanelBuilder =
+            new DefaultFormBuilder(
+                new FormLayout("right:max(70dlu;pref), 3dlu, fill:max(200dlu;pref)", ""));
+        driverPanelBuilder.setDefaultDialogBorder();
+
+        driverPanelBuilder.appendSeparator("Data Source Info");
+        driverPanelBuilder.append(userNameLabel, userName);
+        driverPanelBuilder.append(passwordLabel, password);
+        driverPanelBuilder.append(driverLabel, driver);
+        driverPanelBuilder.append(urlLabel, url);
+        driverPanelBuilder.append(minConnectionsLabel, minConnections);
+        driverPanelBuilder.append(maxConnectionsLabel, maxConnections);
+
+        driverPanel = driverPanelBuilder.getPanel();
+        add(driverPanel, BorderLayout.CENTER);
     }
 
     public void insertUpdate(DocumentEvent e) {

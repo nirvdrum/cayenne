@@ -124,7 +124,7 @@ public class ConfigureClasspathDialog extends SPanel {
 
         add(new JScrollPane(table), BorderLayout.CENTER);
 
-        FormLayout layout = new FormLayout("left:max(50dlu;pref)", "");
+        FormLayout layout = new FormLayout("fill:min(150dlu;pref)", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 

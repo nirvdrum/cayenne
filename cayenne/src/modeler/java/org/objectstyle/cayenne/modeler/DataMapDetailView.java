@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -66,7 +65,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
@@ -89,6 +87,9 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 
+import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
+
 /** 
  * Detail view of the DataNode and DataSourceInfo
  * 
@@ -105,15 +106,14 @@ public class DataMapDetailView
 
     protected JLabel location;
     protected JPanel depMapsPanel;
-
     protected JComboBox nodeSelector;
 
     protected Map mapLookup = new HashMap();
 
-    public DataMapDetailView(EventController mediator) {
+    public DataMapDetailView(EventController eventController) {
         super();
-        this.eventController = mediator;
-        mediator.addDataMapDisplayListener(this);
+        this.eventController = eventController;
+
         // Create and layout components
         init();
 
@@ -125,18 +125,59 @@ public class DataMapDetailView
     }
 
     protected void init() {
-        this.setLayout(new BorderLayout());
-
+        // create widgets
         name = CayenneWidgetFactory.createTextField();
         location = CayenneWidgetFactory.createLabel("");
         nodeSelector = CayenneWidgetFactory.createComboBox();
 
-        JPanel panel =
-            PanelFactory.createForm(
-                new String[] { "DataMap Name:", "File:", "Linked to DataNode:" },
-                new Component[] {name, location, nodeSelector});
-                
-        add(panel, BorderLayout.NORTH);
+        // assemble
+        this.setLayout(new BorderLayout());
+        add(buildTopPanel(), BorderLayout.NORTH);
+    }
+
+    private JPanel buildTopPanel() {
+        FormLayout layout =
+            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.appendSeparator("DataMap Configuration");
+        builder.append("DataMap Name:", name);
+        builder.append("File:", location);
+        builder.append("DataNode:", nodeSelector);
+        return builder.getPanel();
+    }
+
+    private JPanel buildMapsPanel(DataMap selectedMap, Collection allMaps) {
+        FormLayout layout =
+            new FormLayout("right:max(50dlu;pref), 3dlu, left:max(170dlu;pref)", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.appendSeparator("Depends on DataMaps");
+        Iterator it = allMaps.iterator();
+        while (it.hasNext()) {
+            DataMap nextMap = (DataMap) it.next();
+            if (nextMap != selectedMap) {
+                JCheckBox check = new JCheckBox();
+                JLabel label = CayenneWidgetFactory.createLabel(nextMap.getName());
+                builder.append(check, label);
+
+                check.addItemListener(this);
+                if (nextMap.isDependentOn(selectedMap)) {
+                    check.setEnabled(false);
+                    label.setEnabled(false);
+                }
+
+                if (selectedMap.isDependentOn(nextMap)) {
+                    check.setSelected(true);
+                }
+
+                mapLookup.put(check, nextMap);
+            }
+        }
+
+        return builder.getPanel();
     }
 
     /** 
@@ -201,42 +242,11 @@ public class DataMapDetailView
         // add a list of dependencies
         Collection maps = eventController.getCurrentDataDomain().getDataMaps();
 
-        if (maps.size() < 2) {
-            return;
+        if (maps.size() > 1) {
+            depMapsPanel = buildMapsPanel(map, maps);
+            add(depMapsPanel, BorderLayout.CENTER);
+            validate();
         }
-
-        Component[] leftComp = new Component[maps.size() - 1];
-        Component[] rightComp = new Component[maps.size() - 1];
-
-        int i = 0;
-        Iterator it = maps.iterator();
-        while (it.hasNext()) {
-            DataMap nextMap = (DataMap) it.next();
-            if (nextMap != map) {
-                JCheckBox check = new JCheckBox();
-                JLabel label = CayenneWidgetFactory.createLabel(nextMap.getName());
-
-                check.addItemListener(this);
-                if (nextMap.isDependentOn(map)) {
-                    check.setEnabled(false);
-                    label.setEnabled(false);
-                }
-
-                if (map.isDependentOn(nextMap)) {
-                    check.setSelected(true);
-                }
-
-                mapLookup.put(check, nextMap);
-                leftComp[i] = label;
-                rightComp[i] = check;
-                i++;
-            }
-        }
-
-        depMapsPanel = PanelFactory.createForm(leftComp, rightComp);
-        depMapsPanel.setBorder(BorderFactory.createTitledBorder("Depends on DataMaps"));
-        add(depMapsPanel, BorderLayout.CENTER);
-        validate();
     }
 
     /**
@@ -250,7 +260,8 @@ public class DataMapDetailView
             DataMap curMap = eventController.getCurrentDataMap();
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 curMap.addDependency(map);
-            } else if (e.getStateChange() == ItemEvent.DESELECTED) {
+            }
+            else if (e.getStateChange() == ItemEvent.DESELECTED) {
                 curMap.removeDependency(map);
             }
 
@@ -311,7 +322,8 @@ public class DataMapDetailView
         public boolean verify(JComponent input) {
             if (input == name) {
                 return verifyName();
-            } else {
+            }
+            else {
                 return true;
             }
         }
@@ -332,10 +344,12 @@ public class DataMapDetailView
                 MapUtil.setDataMapName(domain, map, text);
                 eventController.fireDataMapEvent(e);
                 return true;
-            } else if (matchingMap == map) {
+            }
+            else if (matchingMap == map) {
                 // no name changes, just return
                 return true;
-            } else {
+            }
+            else {
                 // there is an entity with the same name
                 return false;
             }
