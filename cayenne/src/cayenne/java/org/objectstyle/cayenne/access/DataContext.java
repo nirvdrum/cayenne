@@ -70,7 +70,6 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -81,6 +80,7 @@ import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
+import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
@@ -88,8 +88,6 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -830,8 +828,8 @@ public class DataContext implements QueryEngine, Serializable {
 	 * for a list of DataObjects in the most optimized way (preferrably in
 	 * a single query per relationship).
 	 *
-	 * <p><i>Currently supports only "one-step" to one relationships. This is an
-	 * arbitrary limitation and will be removed soon.</i></p>
+	 * <p><i>WARNING: Currently supports only "one-step" to one relationships. This is an
+	 * arbitrary limitation and will be removed eventually.</i></p>
 	 */
 	public void prefetchRelationships(SelectQuery query, List objects) {
 		List prefetches = query.getPrefetches();
@@ -844,10 +842,8 @@ public class DataContext implements QueryEngine, Serializable {
 		}
 
 		int prefetchSize = prefetches.size();
-		int objectsSize = objects.size();
-		List queries = new ArrayList(prefetchSize);
-		ObjEntity oe = this.getEntityResolver().lookupObjEntity(query);
-
+		ObjEntity entity = getEntityResolver().lookupObjEntity(query);
+		
 		for (int i = 0; i < prefetchSize; i++) {
 			String prefetchKey = (String) prefetches.get(i);
 			if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
@@ -858,55 +854,23 @@ public class DataContext implements QueryEngine, Serializable {
 						+ prefetchKey);
 			}
 
-			List needPrefetch = new ArrayList();
-			for (int j = 0; j < objectsSize; j++) {
-				CayenneDataObject obj = (CayenneDataObject) objects.get(j);
-				Object dest = obj.readNestedProperty(prefetchKey);
-
-				if (dest == null) {
-					continue;
-				} else
-					if (dest instanceof DataObject) {
-						DataObject destDO = (DataObject) dest;
-						if (destDO.getPersistenceState()
-							== PersistenceState.HOLLOW) {
-							needPrefetch.add(destDO);
-						}
-					} else {
-						throw new CayenneRuntimeException(
-							"Invalid/unsupported prefetch key '"
-								+ prefetchKey
-								+ "'. Resulting object must be a DataObject, instead it was "
-								+ dest.getClass().getName());
-					}
+			ObjRelationship relationship =
+				(ObjRelationship) entity.getRelationship(prefetchKey);
+			if (relationship == null) {
+				throw new CayenneRuntimeException(
+					"Invalid relationship: " + prefetchKey);
 			}
 
-			if (needPrefetch.size() > 0) {
-
-				ObjRelationship r =
-					(ObjRelationship) oe.getRelationship(prefetchKey);
-				if (r == null) {
-					throw new CayenneRuntimeException(
-						"Invalid prefetch key '"
-							+ prefetchKey
-							+ "'. No relationship found with this name in "
-							+ oe.getName());
-				}
-
-				ObjRelationship rev = r.getReverseRelationship();
-
-				Expression inExp =
-					ExpressionFactory.inExp(rev.getName(), needPrefetch);
-				queries.add(
-					new SelectQuery(r.getTargetEntity().getName(), inExp));
+			if (relationship.isToMany()) {
+				throw new CayenneRuntimeException(
+					"Only to-one relationships are supported at the moment. "
+						+ "Can't prefetch to-many: "
+						+ prefetchKey);
 			}
+			
+			PrefetchHelper.resolveToOneRelations(this, objects, prefetchKey);
 		}
 
-		if (queries.size() > 0) {
-			this.performQueries(
-				queries,
-				new ContextSelectObserver(this, query.getLoggingLevel()));
-		}
 	}
 
 	/** Delegates query execution to parent QueryEngine. */
