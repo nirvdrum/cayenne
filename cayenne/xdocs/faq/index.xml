@@ -62,8 +62,18 @@
     					<li><a href="deploy.html#logging">Q 5.2 
     					I am having problems with logging output. How do I trace them down?</a></li>
     				</ul>
+    				<br/>
     			</li>
-    			<br/>
+    			
+    			<li><a href="contribute.html">FAQ 6. Contribute to Cayenne</a>
+    				<ul>
+    					<li><a href="contribute.html#license">Q 6.1 
+    					What are the licensing terms for accepted contributions?</a></li>
+    					<li><a href="contribute.html#patch">Q 6.2 
+    					I've fixed a few things in Cayenne. How do I submit a patch?</a></li>
+    				</ul>
+    				<br/>
+    			</li>
     		</ul>
 		</p>
     </section>
