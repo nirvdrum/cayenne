@@ -68,7 +68,7 @@ import javax.servlet.ServletContext;
   * 
   * <p>BasicServletConfiguration compatible with Servlet Specification 2.2 and higher.
   * Also look at ServletConfiguration for the information how to utilize listeners 
-  * ntroduced in Servlet Specification 2.3.
+  * introduced in Servlet Specification 2.3.
   * </p>
   *
   * @author Andrei Adamchik
