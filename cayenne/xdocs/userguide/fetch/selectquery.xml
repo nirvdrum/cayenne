@@ -1,0 +1,53 @@
+<document>
+<title>User Guide - Using SelectQueries</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/fetch/index.html</prev>
+	<next>/userguide/fetch/exp.html</next>
+</navigator>    
+<body>
+    <section name="7. Using SelectQueries">      
+        <subsection name="7.1 SelectQuery" anchor="cayenne_fetch">
+            <p>The most commonly used query is <a href=
+            "../../api/cayenne/org/objectstyle/cayenne/query/SelectQuery.html">SelectQuery</a>. 
+            It consists of a query root, qualifier expression and orderings list.
+            Here is a logical correspondence of Cayenne SelectQuery parts and 
+            SQL constructs:
+            </p>
+            
+            <table>
+            	<tr>
+            		<th>Cayenne SelectQuery</th>
+            		<th>SQL SELECT statement</th>
+            		<th>Required</th>
+            	</tr>
+            	<tr>
+            		<td>Root</td>
+            		<td>FROM clause</td>
+            		<td>yes</td>
+            	</tr>
+             	<tr>
+            		<td>Qualifier Expression</td>
+            		<td>WHERE clause</td>
+            		<td>no</td>
+            	</tr>
+            	<tr>
+            		<td>Orderings</td>
+            		<td>ORDER BY clause</td>
+            		<td>no</td>
+            	</tr>
+            </table>
+            <p>
+            The only required query part is root:
+            </p>
+            
+<source>import org.objectstyle.cayenne.query.SelectQuery;
+...
+// this is a valid Cayenne query that would allow to fetch
+// all records from the ARTIST table as Artist objects
+SelectQuery query = new SelectQuery(Artist.class);
+</source>
+        </subsection>
+    </section>
+</body>
+</document>

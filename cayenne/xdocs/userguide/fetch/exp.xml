@@ -2,15 +2,86 @@
 <title>User Guide - Using SelectQueries</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/fetch/fetch.html</prev>
-	<next>/userguide/modify/index.html</next>
+	<prev>/userguide/fetch/selectquery.html</prev>
+	<next>/userguide/fetch/orderings.html</next>
 </navigator>    
 <body>
     <section name="7. Using SelectQueries">        
         <subsection name="7.2 Using Expressions" anchor="exp">
-            <p>
-			To Be Done
+ 		<p>Of course in the real life situations programmers would need a more fine-grained
+			control of what objects should be retrieved from the database. In this
+			case qualifier expression should be used. Qualifier is an instance of
+			a class implementing <a href=
+            "../../api/cayenne/org/objectstyle/cayenne/exp/Expression.html">Expression interface</a>.
+			The easiest way to build valid expressions is by using <a href=
+            "../../api/cayenne/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory
+            class</a>. Extending the previous example, the following code builds a query  
+            that would tell Cayenne to fetch artists that have a name that starts with "A"
+            ignoring case:
+			</p>
+			
+<source>import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+...
+SelectQuery query = new SelectQuery("Artist");
+Expression qualifier 
+   = ExpressionFactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "a%");
+query.setQualifier(qualifier);
+</source>
+
+   			<p>Note that we are using a method "binaryPathExp" to create an expresion.
+   			"Binary" indicates the fact that the target expression has two operands.
+   			"Path" indicates that second argument, the left hand operand of a binary expression ("artistName"),
+   			will be converted to a "path expression" - expression of type <a href=
+            "../../api/cayenne/org/objectstyle/cayenne/exp/Expression.html#OBJ_PATH">Expression.OBJ_PATH</a>.
+            This is a special type of expressions that allows to specify attributes and related entities
+            relative to the query root entity. So in this example "artistName" when resolved relative 
+            to the entity "Artist" is just an attribute of "Artist". More complex path expressions
+            may include relationships to other entities and their attributes. Path components are
+            separated by the "." character:</p>
+            
+<source>import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+...
+SelectQuery query = new SelectQuery("Artist");
+
+// Will match all artists that have paintings displayed in a Metropolitan Museum
+Expression qualifier 
+   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
+                                     "paintingArray.toGallery.galleryName", 
+                                     "Metropolitan Museum");
+query.setQualifier(qualifier);
+</source>           
+            
+            <p>Of course 3rd argument to binaryPathExp (right hand operand) does not 
+            have to be a String.
+            It can be any object that has the same type as the destination of the object path.
+            It can be a number, a date, or even another DataObject. The last case is demonstrated
+            in the example below:
             </p>
+            
+<source>import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+...
+
+// assume this exists
+Gallery metroGallery;
+
+SelectQuery query = new SelectQuery("Artist");
+
+// Will match all artists that have paintings displayed in a Metropolitan Museum
+// Note that the last component of the object path expression
+// is a relationship name, not an attribute like in previous examples:
+Expression qualifier 
+   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
+                                     "paintingArray.toGallery", 
+                                     metroGallery);
+query.setQualifier(qualifier);
+</source>                  
+            
         </subsection>
     </section>
 </body>

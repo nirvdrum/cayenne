@@ -1,0 +1,66 @@
+<document>
+<title>User Guide - Using SelectQueries</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/fetch/exp.html</prev>
+	<next>/userguide/modify/index.html</next>
+</navigator>    
+
+<body>
+    <section name="7. Using SelectQueries">        
+        <subsection name="7.3 Using Orderings" anchor="order">
+		<p>To sort SelectQuery results, orderings are used. 
+		Orderings use path expressions 
+            discussed in the previous section to identify the attributes 
+            that must be used in sorting. For example to order results by
+            artist name, the following code can be used:
+            </p>
+<source>import org.objectstyle.cayenne.query.SelectQuery;
+...
+SelectQuery query = new SelectQuery("Artist");
+
+// add ordering by Artist name:
+query.addOrdering("artistName", true);
+</source>    
+
+		<p>Orderings also support in-memory sorting of lists of Java Beans 
+		(any DataObjects is normally a Java Beans, since it has set/get method
+		pairs for all its properties). For instance 
+		to sort with a single ordering, the following code might be used:
+		</p>
+
+<source>import org.objectstyle.cayenne.query.Ordering;
+...
+// assume this is a properly initialized list of Artists
+List list = ...; 
+
+// creates asending ordering by Artist name
+Ordering ordering = new Ordering("artistName", true);
+
+// orders a list
+ordering.orderList(list);
+</source>    
+
+		<p>Another example shows how multiple orderings can be used
+		to sort a list. In this case a static method <code>orderList</code> 
+		is used:
+		</p>
+
+<source>import org.objectstyle.cayenne.query.Ordering;
+...
+// assume this is a properly initialized list of Paintings
+List list = ...; 
+
+List orderings = new ArrayList();
+orderings.add(new Ordering("paintingTitle", true));
+orderings.add(new Ordering("estimatedPrice", false));
+
+// orders a list aplying multiple orderings
+Ordering.orderList(list, orderings);
+</source>    				
+		
+        </subsection>
+    </section>
+</body>
+</document>
+

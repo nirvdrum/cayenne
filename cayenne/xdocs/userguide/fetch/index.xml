@@ -3,12 +3,20 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/datactxt/index.html</prev>
-	<next>/userguide/fetch/fetch.html</next>
+	<next>/userguide/fetch/selectquery.html</next>
 </navigator>
  
 <body>
     <section name="7. Using SelectQueries">      
-      
+		<p>To give users access to the existing database data, Cayenne
+        provides extensive query API. Queries in Cayenne are Java objects
+        that in most cases create abstraction independent from SQL dialect 
+        used by the target database. SQL queries not covered by Cayenne can 
+        also be performed. This is done using wrappers around SQL statements (<a href=
+            "../../api/cayenne/org/objectstyle/cayenne/query/SqlSelectQuery.html">SqlSelectQuery</a>
+            and <a href=
+            "../../api/cayenne/org/objectstyle/cayenne/query/SqlModifyQuery.html">SqlModfyQuery</a>).
+            </p>
     </section>
 </body>
 

@@ -33,11 +33,10 @@
                 <li><a href="design/index.html#or_map">4.1 Object Relational Mapping</a></li>
                 <li><a href="design/graph.html#do">4.2 Object Graph</a></li>
                 <li><a href="design/dataobj.html#do">4.3 Data Objects</a></li>
-                <li><a href="design/query.html#query">4.4 Select Queries: Retrieving Objects</a></li>
-                <li><a href="design/access.html#access_classes">4.5 Access Classes</a></li>
-                <li><a href="design/datasrc.html#connect">4.6 Cayenne DataSource</a></li>
-                <li><a href="design/crossdb.html#crossdb">4.7 Cross-Database Issues</a></li>
-                <li><a href="design/autopk.html#pk">4.8 Primary Key Generation</a></li>
+                <li><a href="design/access.html#access_classes">4.4 Access Classes</a></li>
+                <li><a href="design/datasrc.html#connect">4.5 Cayenne DataSource</a></li>
+                <li><a href="design/crossdb.html#crossdb">4.6 Cross-Database Issues</a></li>
+                <li><a href="design/autopk.html#pk">4.7 Primary Key Generation</a></li>
             </ul><br/></li>
             
             <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>
@@ -54,8 +53,9 @@
             
             <li><a href="fetch/index.html">7. Using SelectQueries</a>
             <ul>
-                <li><a href="fetch/fetch.html">7.1 SelectQuery</a></li>
+                <li><a href="fetch/selectQuery.html">7.1 SelectQuery</a></li>
                 <li><a href="fetch/exp.html">7.2 Using Expressions</a></li>
+                <li><a href="fetch/orderings.html">7.3 Using Orderings</a></li>
             </ul><br/></li>
             
             <li><a href="modify/index.html">8. Modifying DataObjects</a>

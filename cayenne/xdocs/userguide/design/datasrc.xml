@@ -7,7 +7,7 @@
 </navigator>
 <body>
     <section name="4. Design">
-        <subsection name="4.6 Cayenne DataSource" anchor="connect">
+        <subsection name="4.5 Cayenne DataSource" anchor="connect">
         
         	<p>Cayenne is designed to work with any javax.sql.DataSource implementation. 
         	When Cayenne applications are deployed in containers (Web, EJB, etc.), DataSource
