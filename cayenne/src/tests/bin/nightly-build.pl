@@ -14,7 +14,9 @@
 #   6. Entry in $HOME/.cayenne/connection.properties for "nightly-test"
 #
 # Command line:
-#     nightly-build.pl [-u] [-m email@example.com] 
+#     nightly-build.pl [-u] [-n] [-m email@example.com] 
+#            -u - upload build and test results to the server
+#            -n - skip CVS checkout (used mostly for debugging)
 #
 # Crontab:
 #
@@ -33,8 +35,8 @@ use Cwd;
 $ENV{'JAVA_HOME'} = "/opt/java";
 $ENV{'ANT_HOME'} = "/opt/ant";
 
-our ($opt_u, $opt_m);
-getopts('um:');
+our ($opt_u, $opt_m, $opt_n);
+getopts('unm:');
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = 1900 + $year;
@@ -54,26 +56,13 @@ my $rel_path = "/var/sites/objectstyle/html/downloads/cayenne/nightly";
 print "\n\n===================================================\n";
 print "Nightly build: $mon-$mday-$year\n";
 
-# Prepare checkout directory
-rmtree($cayenne_src, 0, 1) if -d $cayenne_src;
-mkpath($cayenne_src, 1, 0711) or die_with_email("Can't create build directory: $!\n");
-chdir $cayenne_src or die_with_email("Can't change to $cayenne_src: $!\n");
-
-# checkout via anonymous CVS
-# assume anonymous password is already in ~/.cvspass
-my $status = system(
-	"cvs", 
-	"-z3",
-	"-q",
-	"-d:pserver:anonymous\@cvs.sourceforge.net:/cvsroot/cayenne",
-	"export",
-	"-D",
-	"1 minute ago",
-	"cayenne");
-die_with_email("CVS checkout failed, return status: $status\n") if $status;
+get_source();
 
 # build
 chdir "$cayenne_src/cayenne" or die_with_email("Can't change to $cayenne_src/cayenne: $!\n");
+my $status = system($ant, "clean");
+die_with_email("Build failed, return status: $status\n") if $status;
+
 $status = system($ant, "release");
 die_with_email("Build failed, return status: $status\n") if $status;
 
@@ -95,6 +84,32 @@ if($opt_u) {
 	$status = system("scp", $gz_files[0], "www.objectstyle.org:$rel_path/$year-$mon-$mday/");
 	die_with_email("Can't upload release, return status: $status\n") if $status;
 	success_email("Build Succeeded.");
+}
+
+sub get_source() {
+	if($opt_n) {
+		die_with_email("No existing cayenne checkout at $cayenne_src") 
+                       unless -d "$cayenne_src/cayenne";
+	}
+	else {
+		# Prepare checkout directory
+		rmtree($cayenne_src, 0, 1) if -d $cayenne_src;
+		mkpath($cayenne_src, 1, 0711) or die_with_email("Can't create build directory: $!\n");
+		chdir $cayenne_src or die_with_email("Can't change to $cayenne_src: $!\n");
+
+		# checkout via anonymous CVS
+		# assume anonymous password is already in ~/.cvspass
+		my $status = system(
+		"cvs", 
+		"-z3",
+		"-q",
+		"-d:pserver:anonymous\@cvs.sourceforge.net:/cvsroot/cayenne",
+		"export",
+		"-D",
+		"1 minute ago",
+		"cayenne");
+		die_with_email("CVS checkout failed, return status: $status\n") if $status;
+	}
 }
 
 sub success_email() {
