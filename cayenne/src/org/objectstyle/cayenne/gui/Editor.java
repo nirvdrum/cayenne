@@ -1,9 +1,9 @@
 package org.objectstyle.cayenne.gui;
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -11,7 +11,7 @@ package org.objectstyle.cayenne.gui;
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -19,15 +19,15 @@ package org.objectstyle.cayenne.gui;
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.gui;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 
 import java.awt.*;
@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.gui.validator.*;
 
 /** Window for the Cayenne Modeler.
   * Responsibilities include coordination of enabling/disabling of
-  * menu and toolbar. 
+  * menu and toolbar.
   * @author Michael Misha Shengaout */
 public class Editor extends JFrame
 implements ActionListener
@@ -89,11 +89,11 @@ implements ActionListener
 , ObjEntityDisplayListener, DbEntityDisplayListener
 {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
-	
+
 	private static final String TITLE = "Cayenne modeler";
 	/** To indicate in title that the proj is dirty. */
 	private static final String DIRTY_STRING = "* - ";
-	
+
     EditorView view;
     Mediator mediator;
     /** The object last selected in BrowseView. */
@@ -112,7 +112,7 @@ implements ActionListener
 	JMenuItem cutMenu		= new JMenu("Cut");
 	JMenuItem copyMenu		= new JMenu("Copy");
 	JMenuItem pasteMenu		= new JMenu("Paste");
-*/	
+*/
 	JMenu projectMenu				= new JMenu("Project");
     JMenuItem createDomainMenu 		= new JMenuItem("Create Domain");
     JMenuItem createDataMapMenu 	= new JMenuItem("Create Data Map");
@@ -139,11 +139,13 @@ implements ActionListener
     //Create a file chooser
     final JFileChooser fileChooser   = new JFileChooser();
     XmlFilter xmlFilter    			 = new XmlFilter();
-    
+
 	private static Editor frame;
 
     private Editor() {
         super(TITLE);
+
+		frame = this;
 
         init();
 		disableMenu();
@@ -179,10 +181,10 @@ implements ActionListener
 		createObjEntityBtn.addActionListener(this);
 		createDbEntityBtn.addActionListener(this);
 		removeBtn.addActionListener(this);
-	
+
 	    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     	setSize(650, 550);
-    	
+
     	this.addWindowListener(new WindowAdapter() {
     		public void windowClosing(WindowEvent e) {
     			exitEditor();
@@ -207,10 +209,10 @@ implements ActionListener
         fileMenu.addSeparator();
         fileMenu.add(saveMenu);
         fileMenu.addSeparator();
-        fileMenu.addSeparator();        
+        fileMenu.addSeparator();
         fileMenu.add(exitMenu);
 		reloadLastProjList();
-        
+
         projectMenu.add(createDomainMenu);
         projectMenu.add(createDataMapMenu);
         projectMenu.add(createDataSourceMenu);
@@ -221,13 +223,13 @@ implements ActionListener
 
         toolMenu.add(importDbMenu);
         toolMenu.add(generateMenu);
-        
+
         helpMenu.add(aboutMenu);
-        
+
         initToolBar();
     }
-    
-    
+
+
     private void reloadLastProjList() {
 		// Get list of last opened proj files and trim it down to 4
     	Preferences pref = Preferences.getPreferences();
@@ -265,56 +267,53 @@ implements ActionListener
 			pref.addProperty(Preferences.LAST_PROJ_FILES, iter.next());
 	}
 
-    
+
     private void initToolBar() {
     	String path = "org/objectstyle/gui/";
-    	
+
     	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
     	URL url = cl.getResource(path + "images/domain24_grey.gif");
         ImageIcon domainIcon = new ImageIcon(url);
         createDomainBtn = new JButton(domainIcon);
         createDomainBtn.setToolTipText("Create new domain");
         toolBar.add(createDomainBtn);
-        
+
     	url = cl.getResource(path + "images/map24_grey.gif");
     	ImageIcon mapIcon = new ImageIcon(url);
     	createDataMapBtn = new JButton(mapIcon);
     	createDataMapBtn.setToolTipText("Create new data map");
         toolBar.add(createDataMapBtn);
-    	
+
     	url = cl.getResource(path + "images/node24_grey.gif");
     	ImageIcon nodeIcon = new ImageIcon(url);
     	createDataSourceBtn = new JButton(nodeIcon);
     	createDataSourceBtn.setToolTipText("Create new data node");
         toolBar.add(createDataSourceBtn);
-    	
+
     	url = cl.getResource(path + "images/objentity24_grey.gif");
     	ImageIcon objEntityIcon = new ImageIcon(url);
     	createObjEntityBtn = new JButton(objEntityIcon);
     	createObjEntityBtn.setToolTipText("Create new obj entity");
         toolBar.add(createObjEntityBtn);
-    	
+
     	url = cl.getResource(path + "images/dbentity24_grey.gif");
     	ImageIcon dbEntityIcon = new ImageIcon(url);
     	createDbEntityBtn = new JButton(dbEntityIcon);
     	createDbEntityBtn.setToolTipText("Create new db entity");
         toolBar.add(createDbEntityBtn);
-    	
+
     	url = cl.getResource(path + "images/remove24_grey.gif");
     	ImageIcon removeIcon = new ImageIcon(url);
     	removeBtn = new JButton(removeIcon);
     	removeBtn.setToolTipText("Remove current");
         toolBar.add(removeBtn);
-    	
+
     	getContentPane().add(toolBar, BorderLayout.NORTH);
     }
 
 
 	/** Singleton implementation of getting Editor window. */
 	public static Editor getFrame() {
-		if (null == frame) {
-			frame = new Editor();
-		}
 		return frame;
 	}
 
@@ -332,7 +331,7 @@ implements ActionListener
 
 	/** Return false if cancel closing the window, true otherwise. */
 	private boolean checkSaveOnClose() {
-		if (mediator != null && mediator.isDirty()) 
+		if (mediator != null && mediator.isDirty())
 		{
 			int ret_code = JOptionPane.showConfirmDialog(this
 											, "You have unsaved data. "
@@ -342,7 +341,7 @@ implements ActionListener
 			else if (ret_code == JOptionPane.YES_OPTION)
 				saveAll();
 		}
-		return true;	
+		return true;
 	}
 
 
@@ -397,42 +396,42 @@ implements ActionListener
 	{
 		int ret;
 		if (context instanceof DataDomain) {
-			ret = JOptionPane.showConfirmDialog(this, 
+			ret = JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to remove "
 				+ ((DataDomain)context).getName() + " data domain?"
 				, "Cayenne", JOptionPane.YES_NO_OPTION);
 			if (ret == JOptionPane.YES_OPTION)
 				mediator.removeDomain(this, (DataDomain)context);
 		} else if (context instanceof DataNode) {
-			ret = JOptionPane.showConfirmDialog(this, 
+			ret = JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to remove "
 				+ ((DataNode)context).getName() + " data node?"
 				, "Cayenne", JOptionPane.YES_NO_OPTION);
 			if (ret == JOptionPane.YES_OPTION)
 				mediator.removeDataNode(this, (DataNode)context);
 		} else if (context instanceof DataMap) {
-			ret = JOptionPane.showConfirmDialog(this, 
+			ret = JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to remove "
 				+ ((DataMap)context).getName() + " data map?"
 				, "Cayenne", JOptionPane.YES_NO_OPTION);
 			if (ret == JOptionPane.YES_OPTION)
 				mediator.removeDataMap(this, (DataMap)context);
 		} else if (context instanceof DbEntity) {
-			ret = JOptionPane.showConfirmDialog(this, 
+			ret = JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to remove "
 				+ ((DbEntity)context).getName() + " db entity?"
 				, "Cayenne", JOptionPane.YES_NO_OPTION);
 			if (ret == JOptionPane.YES_OPTION)
 				mediator.removeDbEntity(this, (DbEntity)context);
 		} else if (context instanceof ObjEntity) {
-			ret = JOptionPane.showConfirmDialog(this, 
+			ret = JOptionPane.showConfirmDialog(this,
 				"Are you sure you want to remove "
 				+ ((ObjEntity)context).getName() + " obj entity?"
 				, "Cayenne", JOptionPane.YES_NO_OPTION);
 			if (ret == JOptionPane.YES_OPTION)
 				mediator.removeObjEntity(this, (ObjEntity)context);
 		}
-		
+
 	}
 
 	private void generateClasses() {
@@ -501,7 +500,7 @@ implements ActionListener
 				continue;
 			}
 		}// End while()
-		
+
 		ArrayList schemas;
 		DbLoader loader = new DbLoader(conn);
 		try {
@@ -517,15 +516,22 @@ implements ActionListener
 		if (schemas.size() != 0) {
 			ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
 			dialog.show();
-			if (dialog.getChoice() == ChooseSchemaDialog.CANCEL)
+			if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
+				dialog.dispose();
 				return;
+			}
 			schema_name = dialog.getSchemaName();
+			dialog.dispose();
 		}
 		if (schema_name != null && schema_name.length() == 0)
 			schema_name = null;
 		DataMap map;
 		try {
-			map = loader.createDataMapFromDB(schema_name);
+			map = mediator.getCurrentDataMap();
+			if (map != null )
+				loader.loadDataMapFromDB(schema_name, null, map);
+			else
+				map = loader.createDataMapFromDB(schema_name);
 		} catch (SQLException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this
@@ -533,8 +539,18 @@ implements ActionListener
 							, JOptionPane.ERROR_MESSAGE);
 				return;
 		}
-		System.out.println("Num of db entities in the map: " + map.getDbEntities().length);
-		mediator.addDataMap(this, map);
+		// If this is adding to existing data map, remove it
+		// and re-add to the BroseView
+		if (mediator.getCurrentDataMap() != null) {
+			mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.REMOVE));
+			mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.ADD));
+			mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(this
+												, map
+												, mediator.getCurrentDataDomain()
+												, mediator.getCurrentDataNode()));
+		} else {
+			mediator.addDataMap(this, map);
+		}
 	}
 
 
@@ -588,13 +604,13 @@ implements ActionListener
             // Save dir path to the preferences
             pref.setProperty(Preferences.LAST_DIR, file.getParent());
             // Create project file (cayenne.xml)
-            File proj_file = new File(file.getAbsolutePath() 
-            							+ File.separator 
+            File proj_file = new File(file.getAbsolutePath()
+            							+ File.separator
             							+ "cayenne.xml");
             if (!proj_file.exists())
             	proj_file.createNewFile();
             addToLastProjList(proj_file.getAbsolutePath());
-			
+
 			FileWriter fw = new FileWriter(proj_file);
 			PrintWriter pw = new PrintWriter(fw, true);
 			pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
@@ -620,7 +636,7 @@ implements ActionListener
 			return;
 		File file = new File(file_path);
 		if (!file.exists()) {
-			JOptionPane.showMessageDialog(this, 
+			JOptionPane.showMessageDialog(this,
 					"Project file " + file_path + " does not exist.");
 			return;
 		}
@@ -681,10 +697,10 @@ implements ActionListener
 
     private void project(Mediator temp_mediator) {
         mediator = temp_mediator;
-        
+
         view = new EditorView(mediator);
         getContentPane().add(view, BorderLayout.CENTER);
-        
+
         mediator.addDomainDisplayListener(this);
         mediator.addDataNodeDisplayListener(this);
         mediator.addDataMapDisplayListener(this);
@@ -699,7 +715,7 @@ implements ActionListener
     }
 
 
-	/** Save data map to a different location. 
+	/** Save data map to a different location.
 	  * If there already exists proj tree, saves it under that tree.
 	  * otherwise saves using absolute path. */
 	private void saveMapAs(DataMap map) {
@@ -743,7 +759,7 @@ implements ActionListener
 			if (index >= 0)
 				new_name = new_file_name.substring(0, index);
 			else
-				new_name = new_file_name;			
+				new_name = new_file_name;
 			map.setName(new_name);
 			// Determine and set new data map location
 			String new_file_location = file.getAbsolutePath();
@@ -753,7 +769,7 @@ implements ActionListener
 			if (proj_dir_str == null)
 			 	relative_location = new_file_location;
 			else
-				relative_location 
+				relative_location
 					= new_file_location.substring(proj_dir_str.length() + 1);
 			map.setLocation(relative_location);
             // If data map already exists, delete old location after saving new
@@ -775,7 +791,7 @@ implements ActionListener
 	}
 
 
-	/** Save data node (DataSourceInfo) to a different location. 
+	/** Save data node (DataSourceInfo) to a different location.
 	  * If there already exists proj tree, saves it under that tree.
 	  * otherwise saves using absolute path. */
 	private void saveNodeAs(DataNode node) {
@@ -821,7 +837,7 @@ implements ActionListener
 			if (proj_dir_str == null)
 			 	relative_location = new_file_location;
 			else
-				relative_location 
+				relative_location
 					= new_file_location.substring(proj_dir_str.length() + 1);
 			node.setDataSourceLocation(relative_location);
             // If data map already exists, delete old location after saving new
@@ -841,12 +857,12 @@ implements ActionListener
             e.printStackTrace();
         }
 	}
-	
+
 	private void save() {
 		if (mediator.getCurrentDataMap() != null) {
 			saveDataMap(mediator.getCurrentDataMap());
-		} 
-		else 
+		}
+		else
 			saveProject();
 	}
 
@@ -861,16 +877,16 @@ implements ActionListener
 				saveDataMap(map);
 			}// End saving maps
 			mediator.getDirtyDataMaps().clear();
-	
+
 			iter = mediator.getDirtyDataNodes().iterator();
 			while (iter.hasNext()) {
 				DataNode node = (DataNode)iter.next();
-				logObj.fine("Editor::saveAll(), node name " 
-									+ node.getName() + ", factory " 
+				logObj.fine("Editor::saveAll(), node name "
+									+ node.getName() + ", factory "
 									+ node.getDataSourceFactory());
 				// If using direct connection, save into separate file
 				if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
-					logObj.fine("Editor::saveAll(), saving node name " 
+					logObj.fine("Editor::saveAll(), saving node name "
 									+ node.getName());
 					saveDataNode(node);
 				}
@@ -878,7 +894,7 @@ implements ActionListener
 			saveProject();
 			mediator.getDirtyDomains().clear();
 			mediator.getDirtyDataNodes().clear();
-			
+
 			mediator.setDirty(false);
 		}
 		// If there were errors or warnings at validation, display them
@@ -888,9 +904,9 @@ implements ActionListener
 								, val.getErrorMessages(), ret_code);
 			dialog.setVisible(true);
 		}
-		
+
 	}
-	
+
 	private void saveProject() {
 		File file = mediator.getConfig().getProjFile();
 		System.out.println("Saving project to " + file.getAbsolutePath());
@@ -903,8 +919,8 @@ implements ActionListener
 			fw.flush();
 			fw.close();
 			mediator.getDirtyDomains().clear();
-			if (mediator.getDirtyDataMaps().size() <=0 
-				&& mediator.getDirtyDataNodes().size() <=0 ) 
+			if (mediator.getDirtyDataMaps().size() <=0
+				&& mediator.getDirtyDataNodes().size() <=0 )
 			{
 				mediator.setDirty(false);
 			}
@@ -913,13 +929,13 @@ implements ActionListener
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** Save data map to the file. */
 	private void saveDataMap(DataMap map) {
 		try {
             File file = null;
             String proj_dir_str = mediator.getConfig().getProjDir();
-			file = new File(proj_dir_str + File.separator + map.getLocation());			
+			file = new File(proj_dir_str + File.separator + map.getLocation());
 			if (!file.exists()) {
 				saveMapAs(map);
 				return;
@@ -932,16 +948,16 @@ implements ActionListener
 			fw.close();
 			/* Causes problem with concurrent update
 			mediator.getDirtyDataMaps().remove(map);
-			if (mediator.getDirtyDataMaps().size() <=0 
-				&& mediator.getDirtyDataNodes().size() <=0 
-				&& mediator.getDirtyDomains().size() <= 0) 
+			if (mediator.getDirtyDataMaps().size() <=0
+				&& mediator.getDirtyDataNodes().size() <=0
+				&& mediator.getDirtyDomains().size() <= 0)
 			{
 				mediator.setDirty(false);
 			}
 			*/
 		} catch (Exception e) {}
 	}
-	
+
 
 	/** Save data source info if data source factory is DIRECT_FACTORY. */
 	private void saveDataNode(DataNode node) {
@@ -951,7 +967,7 @@ implements ActionListener
 			file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
 			if (!file.exists()) {
 				System.out.println("Editor::saveDataNode(), "
-									+"calling save as for node name " 
+									+"calling save as for node name "
 									+ node.getName());
 				saveNodeAs(node);
 				return;
@@ -959,13 +975,13 @@ implements ActionListener
 			FileWriter fw = new FileWriter(file);
 			PrintWriter pw = new PrintWriter(fw);
 			GuiDataSource src = (GuiDataSource)node.getDataSource();
-			System.out.println("Editor::saveDataNode(), node name " 
+			System.out.println("Editor::saveDataNode(), node name "
 								+ node.getName());
 			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
 			pw.close();
 			fw.close();
 		} catch (Exception e) {
-            System.out.println("SaveDataNode(), Error saving DataNode " 
+            System.out.println("SaveDataNode(), Error saving DataNode "
             				+ node.getName()  +": " + e.getMessage());
             e.printStackTrace();
 		}
@@ -981,7 +997,7 @@ implements ActionListener
 	/** Creates a new data node. Data node may consist of two pieces of information:
 	  * 1. Name/location
 	  * 2. Database url/uid/password (for direct connection to DB).
-	  * First piece of info is stored directly into the cayenne.xml. 
+	  * First piece of info is stored directly into the cayenne.xml.
 	  * Second piece of data should be stored in the separate file
 	  * if the factory requires it. */
 	private void createDataNode() {
@@ -999,7 +1015,7 @@ implements ActionListener
 	private void createDataMap() {
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
-       	// Data map file 
+       	// Data map file
    	    File file = null;
    	    // Map location relative to proj dir
    	    String relative_location = null;
@@ -1032,7 +1048,7 @@ implements ActionListener
 			if (proj_dir_str == null)
 			 	relative_location = new_file_location;
 			else
-				relative_location 
+				relative_location
 					= new_file_location.substring(proj_dir_str.length() + 1);
         } catch (Exception e) {
             System.out.println("Error lcreating data map file, " + e.getMessage());
@@ -1084,7 +1100,7 @@ implements ActionListener
 
 
     /** Disables all menu  for the case when no project is open.
-      * The only menu-s never disabled are "New Project", "Open Project" 
+      * The only menu-s never disabled are "New Project", "Open Project"
       * and "Exit". */
     private void disableMenu() {
         createDataMapMenu.setEnabled(false);
@@ -1121,7 +1137,7 @@ implements ActionListener
 		createDataSourceBtn.setEnabled(true);
         removeBtn.setEnabled(true);
 	}
-	
+
 	private void enableDataMapMenu() {
 		enableDomainMenu();
         createObjEntityMenu.setEnabled(true);
@@ -1131,10 +1147,10 @@ implements ActionListener
         createObjEntityBtn.setEnabled(true);
         createDbEntityBtn.setEnabled(true);
 	}
-	
-    public static void main(String[] args) 
+
+    public static void main(String[] args)
     {
-    	JFrame frame = getFrame();
+    	JFrame frame = new Editor();
     	//Center the window
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     	Dimension frameSize = frame.getSize();

@@ -59,6 +59,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.util.NameConverter;
 
@@ -72,6 +73,9 @@ public class DbLoader {
     static Logger logObj = Logger.getLogger(DbLoader.class.getName());
 
     public static final String WILDCARD = "%";
+    
+    /** List of db entities to process.*/
+    private ArrayList dbEntityList = new ArrayList();
 
     /** Creates default name for loaded relationship */
     private static String defaultDbRelName(String dstName, boolean toMany) {
@@ -192,23 +196,55 @@ public class DbLoader {
      * @param tables The list of TableInfo objects for which DbEntities must 
      * be created.
      * 
-     * @return DataMap populated with DbEntities. 
+     * @return true if need to continue, false if must stop loading. 
      */
-    public void loadDbEntities(DataMap map, ArrayList tables) throws SQLException {
-        Iterator iter = tables.iterator();
+    public boolean loadDbEntities(DataMap map, ArrayList tables) throws SQLException {
+    	boolean ret_code = true;
+    	dbEntityList = new ArrayList();
+    	
+        Iterator iter = tables.iterator();        
+        int duplicate = YesNoToAllDialog.UNDEFINED;
         while (iter.hasNext()) {
             TableInfo table = (TableInfo) iter.next();
+            
+            // Check if there already is db entity under such name
+            DbEntity temp = map.getDbEntity(table.getName());
+            if (null != temp) {
+            	if (duplicate == YesNoToAllDialog.UNDEFINED ) {
+		        	YesNoToAllDialog dialog;
+		        	dialog = new YesNoToAllDialog("Duplicate table name"
+		        		, "Data map already contains db entity for table " 
+		        			+ table.getName() + ". Overwrite?" );
+		        	int code = dialog.getStatus();
+		        	dialog.dispose();
+		        	if (YesNoToAllDialog.CANCEL == code)
+		        		return false;
+		        	else if (YesNoToAllDialog.YES_TO_ALL == code
+		        				|| YesNoToAllDialog.NO_TO_ALL == code) {
+		        		duplicate = code;
+		        	} else if (YesNoToAllDialog.NO == code) {
+		        		continue;
+		        	} else if (YesNoToAllDialog.YES == code) {
+		        		map.deleteDbEntity(table.getName());
+		        	}
+            	}
+            	if (duplicate == YesNoToAllDialog.NO_TO_ALL)
+            		continue;
+            	if (duplicate == YesNoToAllDialog.YES_TO_ALL) {
+	        		map.deleteDbEntity(table.getName());
+            	}
+            }
             DbEntity dbEntity = new DbEntity();
+            dbEntityList.add(dbEntity);
             dbEntity.setName(table.getName());
             dbEntity.setSchema(table.getSchema());
             dbEntity.setCatalog(table.getCatalog());
             
-            ResultSet rs =
-                getMetaData().getColumns(
-                    table.getCatalog(),
-                    table.getSchema(),
-                    table.getName(),
-                    "%");
+            ResultSet rs = getMetaData().getColumns(
+			                    	table.getCatalog(),
+			                    	table.getSchema(),
+			                    	table.getName(),
+			                    	"%");
                     
             while (rs.next()) {
                 // gets attribute's (column's) name and type,
@@ -244,13 +280,14 @@ public class DbLoader {
             }
             rs.close();
         }
+        return ret_code;
     }
 
     /** Creates ObjEntities from DbEntities. Uses NameConverter class to
      *  change database table and attribute names into whatever
      *  user wants them to be, e.g. from EMPLOYEE_NAME to employeeName. */
     public void loadObjEntities(DataMap map) {
-        Iterator it = map.getDbEntitiesAsList().iterator();
+        Iterator it = dbEntityList.iterator();
         while (it.hasNext()) {
             DbEntity dbEntity = (DbEntity) it.next();
             ObjEntity objEntity =
@@ -267,6 +304,17 @@ public class DbLoader {
 
                 String attName = NameConverter.undescoredToJava(dbAtt.getName(), false);
                 String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
+                if (type == null || type.trim().length() == 0) {
+                	System.out.println("DbLoader::loadObjEntities(), Entity " 
+                				+ dbEntity.getName() + ", attribute " + attName 
+                				+ " db type " + dbAtt.getType());
+                }
+                
+                if (dbAtt.getType() == Types.CLOB) {
+                	System.out.println("DbLoader::loadObjEntities(), Entity " 
+                				+ dbEntity.getName() + ", attribute " + attName 
+                				+ " type " + type);
+                }
                 ObjAttribute objAtt = new ObjAttribute(attName, type, objEntity);
                 objAtt.setDbAttribute(dbAtt);
                 objEntity.addAttribute(objAtt);
@@ -276,8 +324,7 @@ public class DbLoader {
 
     /** Loads database relationships into a DataMap. */
     public void loadDbRelationships(DataMap map) throws SQLException {
-        List dbEntities = map.getDbEntitiesAsList();
-        Iterator it = dbEntities.iterator();
+        Iterator it = dbEntityList.iterator();
         while (it.hasNext()) {
             DbEntity pkEnt = (DbEntity) it.next();
             String pkEntName = pkEnt.getName();
@@ -367,10 +414,20 @@ public class DbLoader {
         throws SQLException {
         DataMap dataMap;
         dataMap = new DataMap(org.objectstyle.cayenne.gui.util.NameGenerator.getDataMapName());
-        loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes));
+        return loadDataMapFromDB(schemaName, tableTypes, dataMap);
+    }
+
+    /** Performs database reverse engineering and generates DataMap object
+      * that contains default mapping of the tables and views. Allows to 
+      * limit types of tables to read (usually only tables and views are relevant). */
+    public DataMap loadDataMapFromDB(String schemaName, String[] tableTypes, DataMap dataMap)
+        throws SQLException {
+        if (false == loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes)))
+        	return dataMap;
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);
         loadObjRelationships(dataMap);
         return dataMap;
     }
 }
+
