@@ -1,5 +1,4 @@
-/*
- * ====================================================================
+/* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0
  * 
@@ -51,13 +50,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.ExtendedProperties;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.event.EventBridge;
+import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -66,10 +68,7 @@ import org.shiftone.cache.Cache;
 import org.shiftone.cache.CacheManager;
 
 /**
- * @author Andrei Adamchik
- */
-/**
- * DataRowStore represents a cache of DataRows keyed by ObjectId. 
+ * Represents a fixed size cache of DataRows keyed by ObjectId. 
  * 
  * @author Andrei Adamchik
  * @since 1.1
@@ -77,19 +76,37 @@ import org.shiftone.cache.CacheManager;
 public class DataRowStore implements Serializable {
     private static Logger logObj = Logger.getLogger(DataRowStore.class);
 
-    // default expiration time is 2 hours
-    public static final long SNAPSHOTS_EXPIRATION_DEFAULT = 2 * 60 * 60 * 1000;
-    public static final int SNAPSHOTS_CACHE_SIZE_DEFAULT = 10000;
+    // property keys
+    public static final String SNAPSHOT_EXPIRATION_PROPERTY =
+        "cayenne.DataRowStore.snapshot.expiration";
+    public static final String SNAPSHOT_CACHE_SIZE_PROPERTY =
+        "cayenne.DataRowStore.snapshot.size";
+    public static final String OBJECT_STORE_NOTIFICATION_PROPERTY =
+        "cayenne.DataRowStore.ObjectStore.notify";
+    public static final String REMOTE_NOTIFICATION_PROPERTY =
+        "cayenne.DataRowStore.remote.notify";
+    public static final String EVENT_BRIDGE_FACTORY_PROPERTY =
+        "cayenne.DataRowStore.EventBridge.factory";
 
-    public static final String SNAPSHOTS_EXPIRATION_PROPERTY =
-        "cayenne.datarowstore.snapshot.expiration";
-    public static final String SNAPSHOTS_CACHE_SIZE_PROPERTY =
-        "cayenne.datarowstore.snapshot.size";
+    // default property values
+
+    // default expiration time is 2 hours
+    public static final long SNAPSHOT_EXPIRATION_DEFAULT = 2 * 60 * 60 * 1000;
+    public static final int SNAPSHOT_CACHE_SIZE_DEFAULT = 10000;
+    public static final boolean OBJECT_STORE_NOTIFICATION_DEFAULT = true;
+    public static final boolean REMOTE_NOTIFICATION_DEFAULT = false;
+    public static final String EVENT_BRIDGE_FACTORY_DEFAULT =
+        "org.objectstyle.cayenne.event.JavaGroupsBridgeFactory";
 
     protected String name;
     protected Cache snapshots;
     protected boolean notifyingObjectStores;
+    protected boolean notifyingRemoteListeners;
+    protected EventBridge remoteNotificationsHandler;
 
+    /**
+     * Creates new named DataRowStore with default configuration.
+     */
     public DataRowStore(String name) {
         this(name, Collections.EMPTY_MAP);
     }
@@ -103,51 +120,110 @@ public class DataRowStore implements Serializable {
      */
     public DataRowStore(String name, Map properties) {
         if (name == null) {
-            throw new IllegalArgumentException("SnapshotCache name can't be null.");
+            throw new IllegalArgumentException("DataRowStore name can't be null.");
         }
 
         this.name = name;
+        initFromProperties(properties);
+    }
 
-        if (properties == null) {
-            properties = Collections.EMPTY_MAP;
-        }
-
-        long snapshotsExpiration = SNAPSHOTS_EXPIRATION_DEFAULT;
-        int snapshotsCacheSize = SNAPSHOTS_CACHE_SIZE_DEFAULT;
+    protected void initFromProperties(Map properties) {
+        ExtendedProperties propertiesWrapper = new ExtendedProperties();
 
         if (properties != null) {
-
-            Object value = properties.get(SNAPSHOTS_EXPIRATION_PROPERTY);
-            if (value instanceof Number) {
-                snapshotsExpiration = ((Number) value).longValue();
-            } else if (value instanceof String) {
-                try {
-                    snapshotsExpiration = Long.parseLong((String) value);
-                } catch (NumberFormatException ex) {
-                }
-            }
-
-            value = properties.get(SNAPSHOTS_CACHE_SIZE_PROPERTY);
-            if (value instanceof Number) {
-                snapshotsCacheSize = ((Number) value).intValue();
-            } else if (value instanceof String) {
-                try {
-                    snapshotsCacheSize = Integer.parseInt((String) value);
-                } catch (NumberFormatException ex) {
-                }
-            }
+            propertiesWrapper.putAll(properties);
         }
 
-        logObj.debug(
-            "Creating DataRowStore with snapshots expiration of "
-                + snapshotsExpiration
-                + " ms. and maximum cache size of "
-                + snapshotsCacheSize);
+        long snapshotsExpiration =
+            propertiesWrapper.getLong(
+                SNAPSHOT_EXPIRATION_PROPERTY,
+                SNAPSHOT_EXPIRATION_DEFAULT);
 
+        int snapshotsCacheSize =
+            propertiesWrapper.getInt(
+                SNAPSHOT_CACHE_SIZE_PROPERTY,
+                SNAPSHOT_CACHE_SIZE_DEFAULT);
+
+        boolean notifyRemote =
+            propertiesWrapper.getBoolean(
+                REMOTE_NOTIFICATION_PROPERTY,
+                REMOTE_NOTIFICATION_DEFAULT);
+
+        boolean notifyObjectStores =
+            propertiesWrapper.getBoolean(
+                OBJECT_STORE_NOTIFICATION_PROPERTY,
+                OBJECT_STORE_NOTIFICATION_DEFAULT);
+
+        String eventBridgeFactory =
+            propertiesWrapper.getString(
+                EVENT_BRIDGE_FACTORY_PROPERTY,
+                EVENT_BRIDGE_FACTORY_DEFAULT);
+
+        if (logObj.isDebugEnabled()) {
+            logObj.debug(
+                "DataRowStore property "
+                    + SNAPSHOT_EXPIRATION_PROPERTY
+                    + " = "
+                    + snapshotsExpiration);
+            logObj.debug(
+                "DataRowStore property "
+                    + SNAPSHOT_CACHE_SIZE_PROPERTY
+                    + " = "
+                    + snapshotsCacheSize);
+            logObj.debug(
+                "DataRowStore property "
+                    + REMOTE_NOTIFICATION_PROPERTY
+                    + " = "
+                    + notifyRemote);
+            logObj.debug(
+                "DataRowStore property "
+                    + OBJECT_STORE_NOTIFICATION_PROPERTY
+                    + " = "
+                    + notifyObjectStores);
+            logObj.debug(
+                "DataRowStore property "
+                    + EVENT_BRIDGE_FACTORY_PROPERTY
+                    + " = "
+                    + eventBridgeFactory);
+        }
+
+        // init ivars from properties
+        this.notifyingRemoteListeners = notifyRemote;
+        this.notifyingObjectStores = notifyObjectStores;
         this.snapshots =
             CacheManager.getInstance().newCache(snapshotsExpiration, snapshotsCacheSize);
+
+        // init event bridge only if we are notifying remote listeners
+        if (notifyingRemoteListeners) {
+            try {
+                EventBridgeFactory factory =
+                    (EventBridgeFactory) Class.forName(eventBridgeFactory).newInstance();
+                this.remoteNotificationsHandler =
+                    factory.createEventBridge(getSnapshotEventSubject(), properties);
+                remoteNotificationsHandler.startup(
+                    EventManager.getDefaultManager(),
+                    EventBridge.RECEIVE_LOCAL_EXTERNAL);
+            } catch (Exception ex) {
+                throw new CayenneRuntimeException("Error initializing DataRowStore.", ex);
+            }
+        }
     }
-    
+
+    /**
+     * Shuts down any remote notification connections, and clears internal cache.
+     */
+    public void shutdown() {
+        if (remoteNotificationsHandler != null) {
+            try {
+                remoteNotificationsHandler.shutdown();
+            } catch (Exception ex) {
+                logObj.info("Exception shutting down EventBridge.", ex);
+            }
+            remoteNotificationsHandler = null;
+        }
+        
+        clear();
+    }
 
     /**
      * Returns the name of this SnapshotCache. Name allows to create
@@ -384,6 +460,14 @@ public class DataRowStore implements Serializable {
         }
 
         return diff;
+    }
+
+    public boolean isNotifyingRemoteListeners() {
+        return notifyingRemoteListeners;
+    }
+
+    public void setNotifyingRemoteListeners(boolean notifyingRemoteListeners) {
+        this.notifyingRemoteListeners = notifyingRemoteListeners;
     }
 
     /**

@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.event;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.javagroups.Channel;
@@ -76,47 +74,44 @@ import org.javagroups.blocks.PullPushAdapter;
 public class JavaGroupsBridge extends EventBridge implements MessageListener {
     private static Logger logObj = Logger.getLogger(JavaGroupsBridge.class);
 
-    public static final String MCAST_ADDRESS_DEFAULT = "228.0.0.5";
-    public static final String MCAST_PORT_DEFAULT = "22222";
-
-    public static final String MCAST_ADDRESS_PROPERTY = "cayenne.javagroupsbridge.mcast.address";
-    public static final String MCAST_PORT_PROPERTY = "cayenne.javagroupsbridge.mcast.port";
-
-    /**
-     * Defines a property for JavaGroups XML configuration file. Example file can be found at
-     * <a href="http://www.filip.net/javagroups/javagroups-protocol.xml">http://www.filip.net/javagroups/javagroups-protocol.xml</a>.
-     */
-    public static final String JGROUPS_CONFIG_URL_PROPERTY =
-        "javagroupsbridge.config.url";
-
     // TODO: Meaning of "state" in JGroups is not yet clear to me
     protected byte[] state;
 
     protected Channel channel;
     protected PullPushAdapter adapter;
-    protected Map properties;
+    protected String multicastAddress;
+    protected String multicastPort;
+    protected String configURL;
 
     /**
      * Creates new instance of JavaGroupsBridge.
-     * 
-     * @param localSubject an EventSubject for the local EventManager.
-     * @param properties a map of properties defining bridge configuration parameters. Supported 
-     * property values (also defined as static variables of JavaGroupsBridge): javagroupsbridge.mcast.address, 
-     * javagroupsbridge.mcast.port, javagroupsbridge.config.url.
      */
-    public JavaGroupsBridge(EventSubject localSubject, Map properties) {
-        this(localSubject, convertToExternalSubject(localSubject), properties);
+    public JavaGroupsBridge(EventSubject localSubject, String externalSubject) {
+        super(localSubject, externalSubject);
     }
 
-    public JavaGroupsBridge(
-        EventSubject localSubject,
-        String externalSubject,
-        Map properties) {
+    public String getConfigURL() {
+        return configURL;
+    }
 
-        super(localSubject, externalSubject);
+    public void setConfigURL(String configURL) {
+        this.configURL = configURL;
+    }
 
-        // prevent any further checks for nulls
-        this.properties = (properties != null) ? properties : Collections.EMPTY_MAP;
+    public String getMulticastAddress() {
+        return multicastAddress;
+    }
+
+    public void setMulticastAddress(String multicastAddress) {
+        this.multicastAddress = multicastAddress;
+    }
+
+    public String getMulticastPort() {
+        return multicastPort;
+    }
+
+    public void setMulticastPort(String multicastPort) {
+        this.multicastPort = multicastPort;
     }
 
     public byte[] getState() {
@@ -155,15 +150,13 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
         // TODO: need to do more research to figure out the best default transport settings
         // to avoid fragmentation, etc.
 
-        // if config file is set as a property, use it, otherwise use a default
+        // if config file is set, use it, otherwise use a default
         // set of properties, trying to configure multicast address and port
-
-        String configURL = (String) properties.get(JGROUPS_CONFIG_URL_PROPERTY);
         if (configURL != null) {
             logObj.debug("creating channel with configuration from " + configURL);
             channel = new JChannel(configURL);
         } else {
-            String configString = buildConfigString(properties);
+            String configString = buildConfigString();
             logObj.debug("creating channel with properties: " + configString);
             channel = new JChannel(configString);
         }
@@ -179,24 +172,22 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
     }
 
     /**
-     * Creates JavaGroups configuration String, obtgaining
-     * multicast port and address from properties if possible. 
+     * Creates JavaGroups configuration String, using preconfigured
+     * multicast port and address. 
      */
-    protected String buildConfigString(Map properties) {
-        String address = (String) properties.get(MCAST_ADDRESS_PROPERTY);
-        if (address == null) {
-            address = MCAST_ADDRESS_DEFAULT;
+    protected String buildConfigString() {
+        if (multicastAddress == null) {
+            throw new IllegalStateException("'multcastAddress' is not set");
         }
 
-        String port = (String) properties.get(MCAST_PORT_PROPERTY);
-        if (port == null) {
-            port = MCAST_PORT_DEFAULT;
+        if (multicastPort == null) {
+            throw new IllegalStateException("'multcastPort' is not set");
         }
 
         return "UDP(mcast_addr="
-            + address
+            + multicastAddress
             + ";mcast_port="
-            + port
+            + multicastPort
             + ";ip_ttl=32):"
             + "PING(timeout=3000;num_initial_members=6):"
             + "FD(timeout=3000):"

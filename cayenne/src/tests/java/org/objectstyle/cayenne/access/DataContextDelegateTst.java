@@ -1,5 +1,4 @@
-/*
- * ====================================================================
+/* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0
  * 
@@ -71,6 +70,9 @@ public class DataContextDelegateTst extends MultiContextTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
+        
+        // disable ObjectStore events
+        context.getParentDataDomain().getSnapshotCache().setNotifyingObjectStores(false);
 
         // prepare a single gallery record
         gallery = (Gallery) context.createAndRegisterNewObject("Gallery");

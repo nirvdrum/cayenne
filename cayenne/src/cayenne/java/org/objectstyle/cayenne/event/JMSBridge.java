@@ -94,20 +94,8 @@ public class JMSBridge extends EventBridge implements MessageListener {
     protected TopicPublisher publisher;
     protected TopicSubscriber subscriber;
 
-    public JMSBridge(EventSubject localSubject, String topicConnectionFactoryName) {
-        this(
-            localSubject,
-            convertToExternalSubject(localSubject),
-            topicConnectionFactoryName);
-    }
-
-    public JMSBridge(
-        EventSubject localSubject,
-        String externalSubject,
-        String topicConnectionFactoryName) {
-
+    public JMSBridge(EventSubject localSubject, String externalSubject) {
         super(localSubject, externalSubject);
-        this.topicConnectionFactoryName = topicConnectionFactoryName;
     }
 
     /**
@@ -154,8 +142,15 @@ public class JMSBridge extends EventBridge implements MessageListener {
         }
     }
 
+    /** 
+     * @return Name of javax.jms.TopicConnectionFactory accessible via JNDI.
+     */
     public String getTopicConnectionFactoryName() {
         return topicConnectionFactoryName;
+    }
+    
+    public void setTopicConnectionFactoryName(String name) {
+        this.topicConnectionFactoryName = name;
     }
 
     /**

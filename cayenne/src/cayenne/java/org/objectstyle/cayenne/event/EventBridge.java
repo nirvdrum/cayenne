@@ -96,7 +96,7 @@ public abstract class EventBridge implements EventListener {
      * by external transport as subject for distributed communications. Substitutes all 
      * chars that can be incorrectly interpreted by whoever (JNDI, ...?).
      */
-    protected static String convertToExternalSubject(EventSubject localSubject) {
+    public static String convertToExternalSubject(EventSubject localSubject) {
         char[] chars = localSubject.getSubjectName().toCharArray();
         for (int i = 0; i < chars.length; i++) {
             if (chars[i] == '/' || chars[i] == '.') {

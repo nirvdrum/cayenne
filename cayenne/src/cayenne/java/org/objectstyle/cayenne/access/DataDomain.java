@@ -173,12 +173,17 @@ public class DataDomain implements QueryEngine {
         if (snapshotCache == null) {
             this.snapshotCache = new DataRowStore(name, properties);
         }
+
         return snapshotCache;
     }
 
     public synchronized void setSnapshotCache(DataRowStore snapshotCache) {
-        // TODO: shutdown any existing snapshot cache
-        this.snapshotCache = snapshotCache;
+        if (this.snapshotCache != snapshotCache) {
+            if(this.snapshotCache != null) {
+                this.snapshotCache.shutdown();
+            }
+            this.snapshotCache = snapshotCache;
+        }
     }
 
     /** Registers new DataMap with this domain. */
@@ -569,6 +574,8 @@ public class DataDomain implements QueryEngine {
      * Shutdowns all owned data nodes. Invokes DataNode.shutdown().
      */
     public void shutdown() {
+        this.snapshotCache.shutdown();
+        
         Collection dataNodes = getDataNodes();
         for (Iterator i = dataNodes.iterator(); i.hasNext();) {
             DataNode node = (DataNode) i.next();
