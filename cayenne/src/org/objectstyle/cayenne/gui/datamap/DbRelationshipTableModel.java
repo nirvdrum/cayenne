@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.util.NamedObjectFactory;
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-class DbRelationshipTableModel extends CayenneTableModel {
+public class DbRelationshipTableModel extends CayenneTableModel {
 	// Columns
 	static final int NAME = 0;
 	static final int TARGET = 1;

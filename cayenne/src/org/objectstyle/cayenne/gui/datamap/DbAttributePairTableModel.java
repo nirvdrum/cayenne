@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.util.*;
 import javax.swing.*;

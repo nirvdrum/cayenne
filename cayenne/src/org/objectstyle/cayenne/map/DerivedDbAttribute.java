@@ -75,7 +75,7 @@ import java.util.*;
  */
 public class DerivedDbAttribute extends DbAttribute {
 	public static final String ATTRIBUTE_TOKEN = "%@";
-	
+
 	protected String expressionSpec;
 	protected ArrayList params = new ArrayList();
 
@@ -90,7 +90,11 @@ public class DerivedDbAttribute extends DbAttribute {
 	 * Constructor for DerivedDbAttribute.
 	 * 
 	 */
-	public DerivedDbAttribute(String name, int type, DbEntity entity, String spec) {
+	public DerivedDbAttribute(
+		String name,
+		int type,
+		DbEntity entity,
+		String spec) {
 		super(name, type, entity);
 		setExpressionSpec(spec);
 	}
@@ -104,30 +108,54 @@ public class DerivedDbAttribute extends DbAttribute {
 	}
 
 	public String getAliasedName(String alias) {
-		if(expressionSpec == null) {
+		if (expressionSpec == null) {
 			return super.getAliasedName(alias);
 		}
-		
+
 		int len = params.size();
 		StringBuffer buf = new StringBuffer();
 		int ind = 0;
-		for(int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++) {
 			// no bound checking
 			// expression is assumed to be valid
 			int match = expressionSpec.indexOf(ATTRIBUTE_TOKEN, ind);
-			DbAttribute at = (DbAttribute)params.get(i);
-			if(match > i) {
+			DbAttribute at = (DbAttribute) params.get(i);
+			if (match > i) {
 				buf.append(expressionSpec.substring(ind, match));
 			}
 			buf.append(at.getAliasedName(alias));
 			ind = match + 2;
 		}
-		
-		if(ind < expressionSpec.length()) {
+
+		if (ind < expressionSpec.length()) {
 			buf.append(expressionSpec.substring(ind));
 		}
-		
+
 		return buf.toString();
+	}
+
+	/**
+	 * Returns true if this attribute is used in GROUP BY
+	 * clause of the parent entity.
+	 */
+	public boolean isGroupBy() {
+		if (getEntity() instanceof DerivedDbEntity) {
+			return ((DerivedDbEntity) getEntity())
+				.getGroupByAttributes()
+				.contains(
+				this);
+		} else {
+			return false;
+		}
+	}
+
+	public void setGroupBy(boolean flag) {
+		if (flag) {
+			((DerivedDbEntity) getEntity()).addGroupByAttribute(this);
+		} else {
+			((DerivedDbEntity) getEntity()).removeGroupByAttribute(
+				this.getName());
+		}
 	}
 
 	/**
@@ -138,7 +166,6 @@ public class DerivedDbAttribute extends DbAttribute {
 		return Collections.unmodifiableList(params);
 	}
 
-
 	/**
 	 * Returns the expressionSpec.
 	 * @return String
@@ -146,7 +173,6 @@ public class DerivedDbAttribute extends DbAttribute {
 	public String getExpressionSpec() {
 		return expressionSpec;
 	}
-
 
 	/**
 	 * Sets the params.
@@ -156,7 +182,6 @@ public class DerivedDbAttribute extends DbAttribute {
 		params.add(param);
 	}
 
-
 	/**
 	 * Sets the expressionSpec.
 	 * @param expressionSpec The expressionSpec to set
@@ -165,4 +190,3 @@ public class DerivedDbAttribute extends DbAttribute {
 		this.expressionSpec = expressionSpec;
 	}
 }
-

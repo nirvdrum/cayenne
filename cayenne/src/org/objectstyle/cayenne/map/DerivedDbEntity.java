@@ -139,7 +139,9 @@ public class DerivedDbEntity extends DbEntity {
 
 	/** Adds an attribute to the GROUP BY clause. */
 	public void addGroupByAttribute(DbAttribute dbAttr) {
-		groupByAttributes.add(dbAttr);
+		if (!groupByAttributes.contains(dbAttr)) {
+			groupByAttributes.add(dbAttr);
+		}
 	}
 
 	/** 

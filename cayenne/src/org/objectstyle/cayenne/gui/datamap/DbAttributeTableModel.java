@@ -56,9 +56,9 @@
 package org.objectstyle.cayenne.gui.datamap;
 
 import javax.swing.JOptionPane;
+import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.CayenneTableModel;
@@ -72,14 +72,14 @@ import org.objectstyle.cayenne.map.*;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-class DbAttributeTableModel extends CayenneTableModel {
+public class DbAttributeTableModel extends CayenneTableModel {
 	// Columns
-	static final int DB_ATTRIBUTE_NAME = 0;
-	static final int DB_ATTRIBUTE_TYPE = 1;
-	static final int DB_ATTRIBUTE_PRIMARY_KEY = 2;
-	static final int DB_ATTRIBUTE_MANDATORY = 3;
-	static final int DB_ATTRIBUTE_MAX = 4;
-	static final int DB_ATTRIBUTE_PRECISION = 5;
+	private static final int DB_ATTRIBUTE_NAME = 0;
+	private static final int DB_ATTRIBUTE_TYPE = 1;
+	private static final int DB_ATTRIBUTE_PRIMARY_KEY = 2;
+	private static final int DB_ATTRIBUTE_MANDATORY = 3;
+	private static final int DB_ATTRIBUTE_MAX = 4;
+	private static final int DB_ATTRIBUTE_PRECISION = 5;
 
 	protected DbEntity entity;
 	protected DataMap dataMap;
@@ -94,6 +94,18 @@ class DbAttributeTableModel extends CayenneTableModel {
 		this.dataMap = mediator.getCurrentDataMap();
 	}
 
+    public int nameColumnInd() {
+    	return DB_ATTRIBUTE_NAME;
+    }
+    
+    public int typeColumnInd() {
+    	return DB_ATTRIBUTE_TYPE;
+    }
+    
+    public int mandatoryColumnInd() {
+    	return DB_ATTRIBUTE_MANDATORY;
+    }
+    
 	/**
 	 * Returns DbAttribute class.
 	 */
@@ -114,21 +126,16 @@ class DbAttributeTableModel extends CayenneTableModel {
 			: null;
 	}
 
-	public String getColumnName(int column) {
-		if (column == DB_ATTRIBUTE_NAME)
-			return "Name";
-		else if (column == DB_ATTRIBUTE_TYPE)
-			return "Type";
-		else if (column == DB_ATTRIBUTE_PRIMARY_KEY)
-			return "PK";
-		else if (column == DB_ATTRIBUTE_PRECISION)
-			return "Precision";
-		else if (column == DB_ATTRIBUTE_MANDATORY)
-			return "Mandatory";
-		else if (column == DB_ATTRIBUTE_MAX)
-			return "Max length";
-		else
-			return "";
+	public String getColumnName(int col) {
+		switch(col) {
+			case DB_ATTRIBUTE_NAME: return "Name";
+			case DB_ATTRIBUTE_TYPE: return "Type";
+			case DB_ATTRIBUTE_PRIMARY_KEY: return "PK";
+			case DB_ATTRIBUTE_PRECISION: return "Precision";
+			case DB_ATTRIBUTE_MANDATORY: return "Mandatory";
+			case DB_ATTRIBUTE_MAX: return "Max Length";
+			default: return "";
+		}
 	}
 
 	public Class getColumnClass(int col) {
@@ -166,34 +173,6 @@ class DbAttributeTableModel extends CayenneTableModel {
 		}
 	}
 
-	public String getMaxLength(DbAttribute attr) {
-		return (attr.getMaxLength() >= 0)
-			? String.valueOf(attr.getMaxLength())
-			: "";
-	}
-
-	public String getAttributeName(DbAttribute attr) {
-		return attr.getName();
-	}
-
-	public String getAttributeType(DbAttribute attr) {
-		return TypesMapping.getSqlNameByType(attr.getType());
-	}
-
-	public String getPrecision(DbAttribute attr) {
-		return (attr.getPrecision() >= 0)
-			? String.valueOf(attr.getPrecision())
-			: "";
-	}
-
-	public Boolean isPrimaryKey(DbAttribute attr) {
-		return (attr.isPrimaryKey()) ? Boolean.TRUE : Boolean.FALSE;
-	}
-
-	public Boolean isMandatory(DbAttribute attr) {
-		return (attr.isMandatory()) ? Boolean.TRUE : Boolean.FALSE;
-	}
-
 	public void setValueAt(Object newVal, int row, int col) {
 		DbAttribute attr = getAttribute(row);
 		if (null == attr) {
@@ -229,6 +208,35 @@ class DbAttributeTableModel extends CayenneTableModel {
 		mediator.fireDbAttributeEvent(e);
 	}
 
+
+	public String getMaxLength(DbAttribute attr) {
+		return (attr.getMaxLength() >= 0)
+			? String.valueOf(attr.getMaxLength())
+			: "";
+	}
+
+	public String getAttributeName(DbAttribute attr) {
+		return attr.getName();
+	}
+
+	public String getAttributeType(DbAttribute attr) {
+		return TypesMapping.getSqlNameByType(attr.getType());
+	}
+
+	public String getPrecision(DbAttribute attr) {
+		return (attr.getPrecision() >= 0)
+			? String.valueOf(attr.getPrecision())
+			: "";
+	}
+
+	public Boolean isPrimaryKey(DbAttribute attr) {
+		return (attr.isPrimaryKey()) ? Boolean.TRUE : Boolean.FALSE;
+	}
+
+	public Boolean isMandatory(DbAttribute attr) {
+		return (attr.isMandatory()) ? Boolean.TRUE : Boolean.FALSE;
+	}
+	
 	public void setMaxLength(String newVal, DbAttribute attr) {
 		if (newVal == null || newVal.trim().length() <= 0) {
 			attr.setMaxLength(-1);
@@ -298,9 +306,10 @@ class DbAttributeTableModel extends CayenneTableModel {
 		DbAttribute attrib = getAttribute(row);
 		if (null == attrib)
 			return false;
-		else if (col == DB_ATTRIBUTE_MANDATORY) {
-			if (attrib.isPrimaryKey())
+		else if (col == mandatoryColumnInd()) {
+			if (attrib.isPrimaryKey()) {
 				return false;
+			}
 		}
 		return true;
 	}

@@ -66,8 +66,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Detail view of the DbEntity attributes. 
@@ -82,7 +81,7 @@ public class DbAttributePane
 		ListSelectionListener,
 		DbAttributeListener,
 		ExistingSelectionProcessor {
-			
+
 	Mediator mediator;
 
 	JTable table;
@@ -140,7 +139,7 @@ public class DbAttributePane
 	}
 
 	public void dbAttributeAdded(AttributeEvent e) {
-		rebuildTable((DbEntity)e.getEntity());
+		rebuildTable((DbEntity) e.getEntity());
 	}
 
 	public void dbAttributeRemoved(AttributeEvent e) {
@@ -155,18 +154,22 @@ public class DbAttributePane
 
 		rebuildTable(entity);
 	}
-	
+
 	protected void rebuildTable(DbEntity ent) {
 		DbAttributeTableModel model =
-			new DbAttributeTableModel(ent, mediator, this);
+			(ent instanceof DerivedDbEntity)
+				? new DerivedDbAttributeTableModel(ent, mediator, this)
+				: new DbAttributeTableModel(ent, mediator, this);
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);
-		TableColumn col;
-		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_NAME);
+		TableColumn col =
+			table.getColumnModel().getColumn(model.nameColumnInd());
 		col.setMinWidth(150);
-		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_TYPE);
+
+		col = table.getColumnModel().getColumn(model.typeColumnInd());
 		col.setMinWidth(90);
+
 		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());
 		comboBox.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(comboBox));

@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.util.NamedObjectFactory;
  * @author Michael Misha Shengaout. 
  * @author Andrei Adamchik
  */
-class ObjAttributeTableModel extends CayenneTableModel {
+public class ObjAttributeTableModel extends CayenneTableModel {
 	// Columns
 	static final int OBJ_ATTRIBUTE = 0;
 	static final int OBJ_ATTRIBUTE_TYPE = 1;

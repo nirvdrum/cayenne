@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.gui.util.*;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-class ObjRelationshipTableModel extends CayenneTableModel {
+public class ObjRelationshipTableModel extends CayenneTableModel {
 	static Logger logObj =
 		Logger.getLogger(ObjRelationshipTableModel.class.getName());
 
