@@ -66,12 +66,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.dba.TypesMapping;
 
 /**
  * @author Andrei Adamchik
  */
 public class ByteArrayType extends AbstractType {
+    private static Logger logObj = Logger.getLogger(ByteArrayType.class);
 
 	private static final int BUF_SIZE = 8 * 1024;
 	private static final byte[] EMPTY_BYTES = new byte[0];
@@ -168,7 +171,13 @@ public class ByteArrayType extends AbstractType {
 		if (type == Types.BLOB) {
 			st.setBytes(pos, (byte[]) val);
 		} else {
+            try {
 			super.setJdbcObject(st, val, pos, type, precision);
+            }
+            catch(Exception ex) {
+                logObj.warn("bad type: " + TypesMapping.getSqlNameByType(type), ex);
+                throw ex;
+            }
 		}
 	}
 

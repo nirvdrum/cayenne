@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.unittest;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.Types;
 import java.util.Iterator;
 
 import javax.sql.DataSource;
@@ -73,10 +72,7 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
@@ -252,17 +248,6 @@ public class CayenneTestResources {
                 DataNode node = adapter.createDataNode(nodeNames[i]);
                 node.setDataSource(sharedDataSource);
                 node.addDataMap(map);
-
-                // dirk: Postgres hack to make BLOBs work
-                if ((adapterClass == PostgresAdapter.class)
-                    && (mapPaths[i].indexOf("testmap") != -1)) {
-                    logObj.info(
-                        "changing attribute IMAGE_BLOB of DbEntity PAINTING_INFO to VARBINARY for PostgreSQL");
-                    DbEntity pi = map.getDbEntity("PAINTING_INFO");
-                    DbAttribute att = (DbAttribute) pi.getAttribute("IMAGE_BLOB");
-                    att.setType(Types.VARBINARY);
-                }
-
                 domain.addNode(node);
             } catch (Exception ex) {
                 logObj.error("Can not create domain with map: " + mapPaths[i], ex);

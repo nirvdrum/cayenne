@@ -55,9 +55,15 @@
  */
 package org.objectstyle.cayenne.dba.mysql;
 
+import java.sql.Types;
+
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
@@ -76,9 +82,66 @@ test-mysql.jdbc.driver = org.gjt.mm.mysql.Driver
  * @author Andrei Adamchik
  */
 public class MySQLAdapter extends JdbcAdapter {
+    private static Logger logObj = Logger.getLogger(MySQLAdapter.class);
+    
 	public boolean supportsFkConstraints() {
 		return false;
 	}
+    
+    /**
+     * Installs appropriate ExtendedTypes used as converters for passing values
+     * between JDBC and Java layers.
+     */
+    protected void configureExtendedTypes(ExtendedTypeMap map) {
+        super.configureExtendedTypes(map);
+
+        // must handle CLOBs as strings, otherwise there
+        // are problems with NULL clobs that are treated
+        // as empty strings... somehow this doesn't happen
+        //  for BLOBs (ConnectorJ v. 3.0.9)
+        map.registerType(new CharType(false, false));
+    }
+    
+    public DbAttribute buildAttribute(
+        String name,
+        String typeName,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls) {
+
+        // all LOB types are returned by the driver as OTHER... must remap them manually
+        // (at least on MySQL 3.23)
+        if (type == Types.OTHER) {
+            if ("longblob".equalsIgnoreCase(typeName)) {
+                type = Types.BLOB;
+            }
+            else if ("mediumblob".equalsIgnoreCase(typeName)) {
+                type = Types.BLOB;
+            }
+            else if ("blob".equalsIgnoreCase(typeName)) {
+                type = Types.BLOB;
+            }
+            else if ("tinyblob".equalsIgnoreCase(typeName)) {
+                type = Types.VARBINARY;
+            }
+            else if ("longtext".equalsIgnoreCase(typeName)) {
+                type = Types.CLOB;
+            }
+            else if ("mediumtext".equalsIgnoreCase(typeName)) {
+                type = Types.CLOB;
+            }
+            else if ("text".equalsIgnoreCase(typeName)) {
+                type = Types.CLOB;
+            }
+            else if ("tinytext".equalsIgnoreCase(typeName)) {
+                type = Types.VARCHAR;
+            }
+        }
+
+        return super.buildAttribute(name, typeName, type, size, precision, allowNulls);
+    }
+    
 
 	/** Throws an exception, since FK constraints are not supported by MySQL. */
 	public String createFkConstraint(DbRelationship rel) {

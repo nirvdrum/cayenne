@@ -119,6 +119,14 @@ public class JdbcAdapter implements DbAdapter {
         this.configureExtendedTypes(extendedTypes);
         this.setSupportsBatchUpdates(false);
     }
+    
+    /**
+     * Returns default separator - a semicolon.
+     * @since 1.0.4
+     */
+    public String getBatchTerminator() {
+        return ";";
+    }
 
     /**
      * Installs appropriate ExtendedTypes as converters for passing values

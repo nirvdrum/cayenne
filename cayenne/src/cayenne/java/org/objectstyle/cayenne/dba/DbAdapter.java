@@ -119,6 +119,14 @@ public interface DbAdapter {
 			DbAdapter.POSTGRES,
 			DbAdapter.SYBASE
 		};
+    
+    /**
+     * Returns a String used to terminate a batch in command-line
+     * tools. E.g. ";" on Oracle or "go" on Sybase.
+     * 
+     * @since 1.0.4
+     */
+    public String getBatchTerminator();
 
 	/**
 	 * Creates an returns a named instance of a DataNode. Sets node adapter to be this object.

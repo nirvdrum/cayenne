@@ -205,8 +205,13 @@ public class GenerateDbDialog
         // convert them to string representation for display
         StringBuffer buf = new StringBuffer();
         Iterator it = gen.configuredStatements().iterator();
+        String batchTerminator = gen.getAdapter().getBatchTerminator();
+
+        String lineEnd =
+            (batchTerminator != null) ? "\n" + batchTerminator + "\n\n" : "\n\n";
+
         while (it.hasNext()) {
-            buf.append(it.next()).append("\n\n");
+            buf.append(it.next()).append(lineEnd);
         }
         sql.setText(buf.toString());
     }

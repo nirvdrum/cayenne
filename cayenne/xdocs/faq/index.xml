@@ -61,6 +61,8 @@
     					I get "connection was lost" or similar errors?</a></li>
     					<li><a href="deploy.html#logging">Q 5.2 
     					I am having problems with logging output. How do I trace them down?</a></li>
+    					<li><a href="deploy.html#mysqllob">Q 5.3 
+    					MySQL Driver Throws com.mysql.jdbc.PacketTooBigException when saving large objects.</a></li>
     				</ul>
     				<br/>
     			</li>

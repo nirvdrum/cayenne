@@ -263,7 +263,8 @@ public class TypesMapping {
         return type == Types.DECIMAL
             || type == Types.DOUBLE
             || type == Types.FLOAT
-            || type == Types.REAL;
+            || type == Types.REAL
+            || type == Types.NUMERIC;
     }
     
 

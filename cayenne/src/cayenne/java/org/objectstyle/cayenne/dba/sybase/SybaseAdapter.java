@@ -75,6 +75,15 @@ import org.objectstyle.cayenne.dba.PkGenerator;
 public class SybaseAdapter extends JdbcAdapter {
 
     /**
+     * Returns word "go".
+     * 
+     * @since 1.0.4
+     */
+    public String getBatchTerminator() {
+        return "go";
+    }
+    
+    /**
      * Installs appropriate ExtendedTypes as converters for passing values
      * between JDBC and Java layers.
      */

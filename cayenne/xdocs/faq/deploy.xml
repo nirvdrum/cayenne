@@ -48,6 +48,21 @@
 java -Dlog4j.configDebug=true MyApp
 </source>
     	</subsection>
+    	
+    	<subsection name="Q 5.3 
+    					MySQL Driver Throws com.mysql.jdbc.PacketTooBigException when saving large objects." 
+    	anchor="mysqllob">
+    	
+    	<p>Our testing was done using ConnectorJ driver v. 3.0.9 that doesn't seem to implement streaming 
+    	for CLOB and BLOB. As a result an attempt to save a large object would end in exceptions similar to this: 
+    	"com.mysql.jdbc.PacketTooBigException: Packet for query is too large (1069615 > 1048576)".
+    	A workaround is to increase "max_allowed_packet"  parameter of MySQL server. Edit "my.cnf" file
+    	to contain a line like this (see MySQL documenatation for details):
+    	</p>
+    	
+<source>max_allowed_packet = 16M</source>
+    	
+    	</subsection>
     </section>
 </body>
 </document>

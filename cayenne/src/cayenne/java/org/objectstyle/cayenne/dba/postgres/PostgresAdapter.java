@@ -55,8 +55,11 @@
  */
 package org.objectstyle.cayenne.dba.postgres;
 
+import java.sql.PreparedStatement;
+import java.sql.Types;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
@@ -89,6 +92,9 @@ test-postgresql.jdbc.driver = org.postgresql.Driver
  * @author Andrus Adamchik
  */
 public class PostgresAdapter extends JdbcAdapter {
+    private static Logger logObj = Logger.getLogger(PostgresAdapter.class);
+    
+    
     /**
      * Installs appropriate ExtendedTypes as converters for passing values
      * between JDBC and Java layers.
@@ -97,15 +103,37 @@ public class PostgresAdapter extends JdbcAdapter {
         super.configureExtendedTypes(map);
 
         // create specially configured CharType handler
-        map.registerType(new CharType(true, true));
+        map.registerType(new CharType(true, false));
 
         // create specially configured ByteArrayType handler
-        map.registerType(new ByteArrayType(true, true));
+        map.registerType(new PostgresByteArrayType(true, false));
+    }
+    
+    public DbAttribute buildAttribute(
+        String name,
+        String typeName,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls) {
+
+        // "bytea" maps to pretty much any binary type, so
+        // it is up to us to select the most sensible default.
+        // And the winner is LONGVARBINARY
+        if ("bytea".equalsIgnoreCase(typeName)) {
+            type = Types.LONGVARBINARY;
+        }
+        // somehow the driver reverse-engineers "text" as VARCHAR, must be CLOB
+        else if("text".equalsIgnoreCase(typeName)) {
+            type = Types.CLOB;
+        }
+
+        return super.buildAttribute(name, typeName, type, size, precision, allowNulls);
     }
 
     /**
-     * Customizes table creating procedure for postgres. One difference
-     * with generic implementation is that "bytea" type has no length
+     * Customizes table creating procedure for PostgreSQL. One difference
+     * with generic implementation is that "bytea" type has no explicit length
      * unlike similar binary types in other databases.
      * 
      * @since 1.0.2
@@ -245,5 +273,36 @@ public class PostgresAdapter extends JdbcAdapter {
      */
     protected PkGenerator createPkGenerator() {
         return new PostgresPkGenerator();
+    }
+    
+    
+    /**
+     * PostgresByteArrayType is a byte[] type handler that patches the problem with PostgreSQL 
+     * JDBC driver. Namely the fact that for some misterious reason PostgreSQL JDBC driver 
+     * (as of 7.3.5) completely ignores the existence of LONGVARCHAR type. 
+     * 
+     * @since 1.0.4
+     */
+    class PostgresByteArrayType extends ByteArrayType {
+
+        public PostgresByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
+            super(trimmingBytes, usingBlobs);
+        }
+        
+        public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision)
+            throws Exception {
+                
+            // patch PGSQL driver LONGVARBINARY ignorance 
+            if (type == Types.LONGVARBINARY) {
+                type = Types.VARBINARY;
+            }
+
+            super.setJdbcObject(st, val, pos, type, precision);
+        }
     }
 }

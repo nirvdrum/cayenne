@@ -124,7 +124,7 @@ public class DataContextClobTst extends CayenneTestCase {
         assertEquals(1, objects2.size());
 
         ClobTest clobObj2 = (ClobTest) objects2.get(0);
-        assertNull(clobObj2.getClobCol());
+        assertNull("Expected null, got: '" + clobObj2.getClobCol() + "'", clobObj2.getClobCol());
 
         // update and save Clob
         clobObj2.setClobCol("updated rather small clob...");

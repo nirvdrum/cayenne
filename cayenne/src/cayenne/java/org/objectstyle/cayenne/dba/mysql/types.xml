@@ -16,7 +16,7 @@ MySQL types mapping
        <db-type name="BIT"/>
    </jdbc-type>
    <jdbc-type name="BLOB">
-       <db-type name="BLOB"/>
+       <db-type name="LONGBLOB"/>
    </jdbc-type>
    <jdbc-type name="BOOLEAN">
        <db-type name="BOOL"/>
@@ -25,7 +25,7 @@ MySQL types mapping
        <db-type name="CHAR"/>
    </jdbc-type>
    <jdbc-type name="CLOB">
-       <db-type name="TEXT"/>
+       <db-type name="LONGTEXT"/>
    </jdbc-type>
    <jdbc-type name="DATALINK"/>
    <jdbc-type name="DATE">
