@@ -82,7 +82,7 @@ class EntityDescriptor {
     DataNode node;
     ObjEntity entity;
     DbEntity dbEntity;
-    Map attributeTransformers;
+    Map snapshotTransformers;
 
     EntityDescriptor(DataNode node, ObjEntity entity) {
         this.node = node;
@@ -94,7 +94,7 @@ class EntityDescriptor {
     private void initTransformers() {
 
         Collection attributes = dbEntity.getAttributes();
-        this.attributeTransformers = new HashMap((int) (attributes.size() * 4.00 / 3.00));
+        this.snapshotTransformers = new HashMap((int) (attributes.size() * 4.00 / 3.00));
 
         // init transformers for attributes coming from object...
 
@@ -111,8 +111,8 @@ class EntityDescriptor {
      * resolution.
      */
     Map deferredSnapshot(DataObject object) {
-        Map snapshot = new HashMap((int) (attributeTransformers.size() * 4.00 / 3.00));
-        Iterator it = attributeTransformers.entrySet().iterator();
+        Map snapshot = new HashMap((int) (snapshotTransformers.size() * 4.00 / 3.00));
+        Iterator it = snapshotTransformers.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             snapshot.put(entry.getKey(), ((Transformer) entry.getValue())
@@ -123,7 +123,7 @@ class EntityDescriptor {
     }
 
     Object deferredSnapshotValue(DataObject object, String dbAttributeName) {
-        Transformer transformer = (Transformer) attributeTransformers
+        Transformer transformer = (Transformer) snapshotTransformers
                 .get(dbAttributeName);
 
         if (transformer == null) {
