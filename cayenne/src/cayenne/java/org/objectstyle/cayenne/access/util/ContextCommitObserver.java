@@ -86,9 +86,8 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class ContextCommitObserver
-	extends DefaultOperationObserver
-	implements DataContextTransactionEventListener
-{
+    extends DefaultOperationObserver
+    implements DataContextTransactionEventListener {
 
     protected List updObjects;
     protected List delObjects;
@@ -108,21 +107,23 @@ public class ContextCommitObserver
         this.insObjects = insObjects;
         this.updObjects = updObjects;
         this.delObjects = delObjects;
-		this.objectsToNotify = new ArrayList();
+        this.objectsToNotify = new ArrayList();
 
-		// Build a list of objects that need to be notified about posted
-		// DataContext events. When notifying about a successful completion
-		// of a transaction we cannot build this list anymore, since all
-		// the work will be done by then.
-		Iterator collIter = (Arrays.asList(new List[]{delObjects, updObjects, insObjects})).iterator();
-		while (collIter.hasNext()) {
-			Iterator objIter = ((Collection)collIter.next()).iterator();
-			while (objIter.hasNext()) {
-				Object element = objIter.next();
-				if (element instanceof DataObjectTransactionEventListener) {
-					this.objectsToNotify.add(element);
-				}
-			}
+        // Build a list of objects that need to be notified about posted
+        // DataContext events. When notifying about a successful completion
+        // of a transaction we cannot build this list anymore, since all
+        // the work will be done by then.
+        Iterator collIter =
+            (Arrays.asList(new List[] { delObjects, updObjects, insObjects }))
+                .iterator();
+        while (collIter.hasNext()) {
+            Iterator objIter = ((Collection) collIter.next()).iterator();
+            while (objIter.hasNext()) {
+                Object element = objIter.next();
+                if (element instanceof DataObjectTransactionEventListener) {
+                    this.objectsToNotify.add(element);
+                }
+            }
         }
     }
 
@@ -138,7 +139,7 @@ public class ContextCommitObserver
 
         Iterator insIt = insObjects.iterator();
         ObjectStore objectStore = context.getObjectStore();
-        
+
         synchronized (objectStore) {
             while (insIt.hasNext()) {
 
@@ -197,42 +198,64 @@ public class ContextCommitObserver
         return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
     }
 
-	public void registerForDataContextEvents() {
-		try {
-			EventManager mgr = EventManager.getDefaultManager();
-			mgr.addListener(this, DataContextEvent.class, "dataContextWillCommit", DataContext.WILL_COMMIT); 
-			mgr.addListener(this, DataContextEvent.class, "dataContextDidCommit", DataContext.DID_COMMIT); 
-			mgr.addListener(this, DataContextEvent.class, "dataContextDidRollback", DataContext.DID_ROLLBACK); 
-		}
+    public void registerForDataContextEvents() {
+        try {
+            EventManager mgr = EventManager.getDefaultManager();
+            mgr.addListener(
+                this,
+                DataContextEvent.class,
+                "dataContextWillCommit",
+                DataContext.WILL_COMMIT);
+            mgr.addListener(
+                this,
+                DataContextEvent.class,
+                "dataContextDidCommit",
+                DataContext.DID_COMMIT);
+            mgr.addListener(
+                this,
+                DataContextEvent.class,
+                "dataContextDidRollback",
+                DataContext.DID_ROLLBACK);
+        } catch (NoSuchMethodException nsm) {
+            // this really should not happen since we implement all required methods
+            throw new CayenneRuntimeException(nsm);
+        }
+    }
 
-		catch (NoSuchMethodException nsm) {
-			// this really should not happen since we implement all required methods
-			throw new CayenneRuntimeException(nsm);
-		}
-	}
+    public void unregisterFromDataContextEvents() {
+        EventManager mgr = EventManager.getDefaultManager();
+        mgr.removeListener(this, DataContext.WILL_COMMIT);
+        mgr.removeListener(this, DataContext.DID_COMMIT);
+        mgr.removeListener(this, DataContext.DID_ROLLBACK);
+    }
 
-	public void unregisterFromDataContextEvents() {
-		EventManager mgr = EventManager.getDefaultManager();
-		mgr.removeListener(this, DataContext.WILL_COMMIT); 
-		mgr.removeListener(this, DataContext.DID_COMMIT);
-		mgr.removeListener(this, DataContext.DID_ROLLBACK);
-	}
+    public void dataContextWillCommit(DataContextEvent event) {
+        if (event.getDataContext() != context) {
+            return;
+        }
 
-	public void dataContextWillCommit(DataContextEvent event) {
-		Iterator iter = objectsToNotify.iterator();
-		while (iter.hasNext()) {
-			((DataObjectTransactionEventListener)iter.next()).willCommit();
-		}
-	}
+        Iterator iter = objectsToNotify.iterator();
+        while (iter.hasNext()) {
+            ((DataObjectTransactionEventListener) iter.next()).willCommit();
+        }
+    }
 
-	public void dataContextDidCommit(DataContextEvent event) {
-		Iterator iter = objectsToNotify.iterator();
-		while (iter.hasNext()) {
-			((DataObjectTransactionEventListener)iter.next()).didCommit();
-		}
-	}
+    public void dataContextDidCommit(DataContextEvent event) {
+        if (event.getDataContext() != context) {
+            return;
+        }
 
-	public void dataContextDidRollback(DataContextEvent event) {
+        Iterator iter = objectsToNotify.iterator();
+        while (iter.hasNext()) {
+            ((DataObjectTransactionEventListener) iter.next()).didCommit();
+        }
+    }
 
-	}
+    public void dataContextDidRollback(DataContextEvent event) {
+        if (event.getDataContext() != context) {
+            return;
+        }
+
+        // do nothing for now
+    }
 }

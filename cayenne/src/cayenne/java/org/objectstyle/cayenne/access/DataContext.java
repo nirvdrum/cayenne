@@ -125,7 +125,7 @@ public class DataContext implements QueryEngine, Serializable {
         EventSubject.getSubject(DataContext.class, "DataContextDidRollback");
 
     // event posting default for new DataContexts
-    private static boolean postDataContextTransactionEventsDefault = true;
+    private static boolean postDataContextTransactionEventsDefault = false;
 
     // enable/disable event handling for individual instances
     private boolean postDataContextTransactionEvents;
@@ -858,9 +858,9 @@ public class DataContext implements QueryEngine, Serializable {
         EventManager eventMgr = EventManager.getDefaultManager();
         DataContextEvent commitChangesEvent = null;
         if (this.postDataContextTransactionEvents) {
+            result.registerForDataContextEvents();
             commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, WILL_COMMIT);
-            result.registerForDataContextEvents();
         }
 
         // try/finally needed to remove observer from event notifications

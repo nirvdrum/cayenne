@@ -88,6 +88,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
 
         context = dom.createDataContext();
+        context.setTransactionEventsEnabled(true);
         artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");
         context.commitChanges();
