@@ -31,8 +31,8 @@
 	<!-- derived entity -->
 	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
 		<db-attribute name="SUM(ESTIMATED_PRICE)" type="DECIMAL" length="10" precision="2"/>
-		<db-attribute name="COUNT(PAINTING_ID)" type="INTEGER" length="10" precision="2"/>
-		<db-attribute name="ARTIST_ID" type="INTEGER" groupBy="true"/>
+		<db-attribute name="COUNT(PAINTING_ID)" type="INTEGER" length="10" precision="2" isGroupBy="true"/>
+		<db-attribute name="ARTIST_ID" type="INTEGER" isGroupBy="true"/>
 	</db-entity>
 	
 	<db-entity name="PAINTING_INFO">

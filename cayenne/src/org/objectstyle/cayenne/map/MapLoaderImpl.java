@@ -521,7 +521,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		dbEntity.setCatalog(atts.getValue("", "catalog"));
 	}
 
-	private void processStartDbAttribute(Attributes atts) {
+	private void processStartDbAttribute(Attributes atts) throws SAXException {
 		String name = atts.getValue("", "name");
 		String type = atts.getValue("", "type");
 
@@ -533,17 +533,33 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		dbEntity.addAttribute(attrib);
 
 		String temp = atts.getValue("", "length");
-		if (null != temp)
+		if (temp != null) {
 			attrib.setMaxLength(Integer.parseInt(temp));
+		}
 		temp = atts.getValue("", "precision");
-		if (null != temp)
+		if (temp != null) {
 			attrib.setPrecision(Integer.parseInt(temp));
+		}
 		temp = atts.getValue("", "isPrimaryKey");
-		if (null != temp && temp.equalsIgnoreCase(TRUE))
+		if (temp != null && temp.equalsIgnoreCase(TRUE)) {
 			attrib.setPrimaryKey(true);
+		}
 		temp = atts.getValue("", "isMandatory");
-		if (null != temp && temp.equalsIgnoreCase(TRUE))
+		if (temp != null && temp.equalsIgnoreCase(TRUE)) {
 			attrib.setMandatory(true);
+		}
+
+		temp = atts.getValue("", "isGroupBy");
+		if (temp != null && temp.equalsIgnoreCase(TRUE)) {
+			if (dbEntity instanceof DerivedDbEntity) {
+				((DerivedDbEntity) dbEntity).addGroupByAttribute(attrib);
+			} else {
+				throw new SAXException(
+					"'isGroupBy' not supported for regular DbEntities. Offending attribute name '"
+						+ name
+						+ "'.");
+			}
+		}
 	}
 
 	private void processStartObjEntity(Attributes atts) {

@@ -79,7 +79,14 @@ public class MapLoaderLoadTst extends TestCase {
 
     public void testLoadDataMap() throws Exception {
         InputSource in = new InputSource(testDataMap);
-        assertNotNull(mapLoader.loadDataMap(in));
+        DataMap map = mapLoader.loadDataMap(in);
+        assertNotNull(map);
+        
+        // test derived entities
+        DerivedDbEntity d1 = (DerivedDbEntity)map.getDbEntity("ARTIST_ASSETS");
+        assertNotNull(d1);
+        assertNotNull(d1.getParentEntity());
+        assertEquals(2, d1.getGroupByAttributes().size());
     }
 
     public void testLoadDataMaps1() throws Exception {
