@@ -91,10 +91,18 @@ public class DefaultConfiguration extends Configuration {
 	/**
 	 * Constructor with a named domain configuration resource.
 	 * Simply calls {@link Configuration#Configuration(String)}.
+	 * @throws {@link ConfigurationException} when <code>domainConfigurationName</code>
+	 * is <code>null</code>.
 	 * @see Configuration#Configuration(String)
 	 */
 	public DefaultConfiguration(String domainConfigurationName) {
 		super(domainConfigurationName);
+
+		if (domainConfigurationName == null) {
+			throw new ConfigurationException("cannot use null as domain file name.");
+		}
+
+		logObj.debug("using domain file name: " + domainConfigurationName);
 
 		// configure CLASSPATH-only locator
 		ResourceLocator l = new ResourceLocator();

@@ -76,28 +76,39 @@ public class FileConfiguration extends DefaultConfiguration {
 	protected File projectFile;
 
 	/**
-	 * Disabled default constructor to force use of
-	 * {@link FileConfiguration#FileConfiguration(File)} or
-	 * {@link FileConfiguration#FileConfiguration(String)}.
+	 * Default constructor.
+	 * Simply calls {@link FileConfiguration#FileConfiguration(String)}
+	 * with {@link Configuration#DEFAULT_DOMAIN_FILE} as argument.
+	 * @see DefaultConfiguration#DefaultConfiguration()
 	 */
-	private FileConfiguration() {
-		super();
+	public FileConfiguration() {
+		this(Configuration.DEFAULT_DOMAIN_FILE);
 	}
 
 	/**
-	 * Creates a configuration that uses the provided file 
+	 * Creates a configuration that uses the provided file name
 	 * as the main project file, ignoring any other lookup strategies.
-	 * 
-	 * @throws ConfigurationException when projectFile is <code>null</code>,
-	 * a directory or not readable.
-	 * @see DefaultConfiguration#DefaultConfiguration()
+	 * The file name is <b>not</b> checked for existence and must not
+	 * contain relative or absolute paths, i.e. only the file name.
+	 *
+	 * This allows adding of custom search paths after Constructor invocation:
+	 * <pre>
+	 * conf = new FileConfiguration("myconfig-cayenne.xml");
+	 * ResourceLocator l = conf.getResourceLocator();
+	 * l.addFilesystemPath(new File("a/relative/path"));
+	 * l.addFilesystemPath(new File("/an/absolute/search/path"));
+	 * Configuration.initializeSharedConfiguration(conf);
+	 * </pre>
+	 * The added file search paths must exist.
+	 *
+	 * @throws ConfigurationException when projectFile is <code>null</code>.
+	 * @see DefaultConfiguration#DefaultConfiguration(String)
 	 */
-	public FileConfiguration(File projectFile) {
-		this();
-		logObj.debug("using project file: " + projectFile);
+	public FileConfiguration(String domainConfigurationName) {
+		super(domainConfigurationName);
 
 		// set the project file
-		this.setProjectFile(projectFile);
+		this.projectFile = new File(domainConfigurationName);
 
 		// configure the ResourceLocator for plain files
 		ResourceLocator l = this.getResourceLocator();
@@ -114,35 +125,19 @@ public class FileConfiguration extends DefaultConfiguration {
 	}
 
 	/**
-	 * Creates a configuration that uses the provided file name
+	 * Creates a configuration that uses the provided file 
 	 * as the main project file, ignoring any other lookup strategies.
-	 * The file name is <b>not</b> checked for existence and must not
-	 * contain relative or absolute paths, i.e. only the file name.
 	 * 
-	 * This allows adding of custom lookup paths after Constructor invocation:
-	 * <pre>
-	 * 	conf = new FileConfiguration("myconfig-cayenne.xml");
-	 *  ResourceLocator l = conf.getResourceLocator();
-	 *  l.addFilesystemPath(new File("a/relative/path"));
-	 *  l.addFilesystemPath(new File("/an/absolute/search/path"));
-	 *  Configuration.initializeSharedConfiguration(conf);
-	 * </pre>
-	 * The added file paths must exist.
-	 * 
-	 * @throws ConfigurationException when projectFile is <code>null</code>.
-	 * @see DefaultConfiguration#DefaultConfiguration()
+	 * @throws ConfigurationException when projectFile is <code>null</code>,
+	 * a directory or not readable.
 	 */
-	public FileConfiguration(String projectFileName) {
-		this();
-		logObj.debug("using project file name: " + projectFileName);
+	public FileConfiguration(File domainConfigurationFile) {
+		super();
 
-		if (projectFileName == null) {
-			throw new ConfigurationException("cannot use null as project file name.");
-		}
+		logObj.debug("using domain file: " + domainConfigurationFile);
 
 		// set the project file
-		this.projectFile = new File(projectFileName);
-		this.setDomainConfigurationName(this.projectFile.getName());
+		this.setProjectFile(domainConfigurationFile);
 
 		// configure the ResourceLocator for plain files
 		ResourceLocator l = this.getResourceLocator();
