@@ -208,7 +208,7 @@ public class Invocation extends Object {
 				success = true;
 			}
 			catch (Exception ex) {
-				log.error("exception while firing '" + _method.getName() + "'", ex);
+				log.info("exception firing '" + _method.getName() + "'", ex);
 			}
 		}
 

@@ -56,21 +56,19 @@
 
 package org.objectstyle.cayenne.event;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.EventObject;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.WeakHashMap;
 
-import org.apache.commons.collections.iterators.SingletonIterator;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.event.DispatchQueue.Dispatch;
 import org.objectstyle.cayenne.util.Invocation;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * This class acts as bridge between an Object that wants to inform others about
@@ -129,13 +127,14 @@ public class EventManager extends Object {
      * @throws NoSuchMethodException if <code>methodName</code> is not found
      * @see #addListener(EventListener, String, Class, EventSubject, Object)
      */
-    synchronized public void addListener(
+    public void addListener(
         EventListener listener,
         String methodName,
         Class eventParameterClass,
         EventSubject subject)
         throws NoSuchMethodException {
-        this.addListener(listener, methodName, eventParameterClass, subject, this);
+
+        this.addListener(listener, methodName, eventParameterClass, subject, null);
     }
 
     /**
@@ -151,13 +150,14 @@ public class EventManager extends Object {
      * <code>null</code> means 'any sender'.
      * @throws NoSuchMethodException if <code>methodName</code> is not found
      */
-    synchronized public void addListener(
+    public void addListener(
         EventListener listener,
         String methodName,
         Class eventParameterClass,
         EventSubject subject,
         Object sender)
         throws NoSuchMethodException {
+
         if (listener == null) {
             throw new IllegalArgumentException("Listener must not be null.");
         }
@@ -170,23 +170,8 @@ public class EventManager extends Object {
             throw new IllegalArgumentException("Subject must not be null.");
         }
 
-        Invocation inv = new Invocation(listener, methodName, eventParameterClass);
-
-        Map subjectQueues = this.invocationQueuesForSubject(subject);
-        if (subjectQueues == null) {
-            // make sure the subject can be associated with invocation queues
-            subjectQueues = new WeakHashMap();
-            subjects.put(subject, subjectQueues);
-        }
-
-        Set queueForSender = this.invocationQueueForSubjectAndSender(subject, sender);
-        if (queueForSender == null) {
-            // create a new listener 'queue'; must keep strong references
-            queueForSender = new HashSet();
-            subjectQueues.put(sender, queueForSender);
-        }
-
-        queueForSender.add(inv);
+        Invocation invocation = new Invocation(listener, methodName, eventParameterClass);
+        dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
     }
 
     /**
@@ -197,14 +182,20 @@ public class EventManager extends Object {
      * @return <code>true</code> if <code>listener</code> could be removed for
      * any existing subjects, else returns <code>false</code>.
      */
-    public synchronized boolean removeListener(EventListener listener) {
+    public boolean removeListener(EventListener listener) {
+        if (listener == null) {
+            return false;
+        }
+
         boolean didRemove = false;
 
-        if ((subjects.isEmpty() == false) && (listener != null)) {
-            Iterator subjectIter = subjects.keySet().iterator();
-            while (subjectIter.hasNext()) {
-                didRemove
-                    |= this.removeListener(listener, (EventSubject) subjectIter.next());
+        synchronized (subjects) {
+            if (!subjects.isEmpty()) {
+                Iterator subjectIter = subjects.keySet().iterator();
+                while (subjectIter.hasNext()) {
+                    didRemove
+                        |= this.removeListener(listener, (EventSubject) subjectIter.next());
+                }
             }
         }
 
@@ -214,10 +205,11 @@ public class EventManager extends Object {
     /**
      * Removes all listeners for a given subject.
      */
-    public synchronized boolean removeAllListeners(EventSubject subject) {
-
+    public boolean removeAllListeners(EventSubject subject) {
         if (subject != null) {
-            return subjects.remove(subject) != null;
+            synchronized (subjects) {
+                return subjects.remove(subject) != null;
+            }
         }
 
         return false;
@@ -231,9 +223,7 @@ public class EventManager extends Object {
      * @return <code>true</code> if <code>listener</code> could be removed for
      * the given subject, else returns <code>false</code>.
      */
-    synchronized public boolean removeListener(
-        EventListener listener,
-        EventSubject subject) {
+    public boolean removeListener(EventListener listener, EventSubject subject) {
         return this.removeListener(listener, subject, null);
     }
 
@@ -248,46 +238,21 @@ public class EventManager extends Object {
      * @return <code>true</code> if <code>listener</code> could be removed for
      * the given subject, else returns <code>false</code>.
      */
-    synchronized public boolean removeListener(
+    public boolean removeListener(
         EventListener listener,
         EventSubject subject,
         Object sender) {
-        boolean didRemove = false;
 
-        if ((listener != null) && (subject != null)) {
-            Map subjectQueues = this.invocationQueuesForSubject(subject);
-            if (subjectQueues != null) {
-                Iterator queueIter;
-
-                // remove only listeners for sender?
-                if (sender != null) {
-                    Set senderQueue =
-                        this.invocationQueueForSubjectAndSender(subject, sender);
-                    queueIter = new SingletonIterator(senderQueue);
-                }
-                else {
-                    queueIter = subjectQueues.values().iterator();
-                }
-
-                // iterate over all invocation queues for this subject
-                while (queueIter.hasNext()) {
-                    Set invocations = (Set) queueIter.next();
-                    if ((invocations != null) && (invocations.isEmpty() == false)) {
-                        // remove all invocations with the given target
-                        Iterator invIter = invocations.iterator();
-                        while (invIter.hasNext()) {
-                            Invocation inv = (Invocation) invIter.next();
-                            if (inv.getTarget() == listener) {
-                                invIter.remove();
-                                didRemove = true;
-                            }
-                        }
-                    }
-                }
-            }
+        if (listener == null || subject == null) {
+            return false;
         }
 
-        return didRemove;
+        DispatchQueue subjectQueue = dispatchQueueForSubject(subject, false);
+        if (subjectQueue == null) {
+            return false;
+        }
+
+        return subjectQueue.removeInvocations(listener, sender);
     }
 
     /**
@@ -301,21 +266,21 @@ public class EventManager extends Object {
      * @throws IllegalArgumentException if event or subject are null
      */
     public void postEvent(EventObject event, EventSubject subject) {
-		postEvent(event, subject, false);
+        postEvent(event, subject, false);
     }
 
-	/**
-	 * Sends an event to all registered objects about a particular subject.
-	 * <code>dispatchImmediately</code> argument 
-	 * 
-	 * @param event the event to be posted to the observers
-	 * @param subject the subject about which observers will be notified
-	 * @param dispatchImmediately control whether the even dispatched from
-	 * this method, blocking this thread until all listeners have processed 
-	 * the event, or should be queued for asynchronous notification.
-	 * 
-	 * @throws IllegalArgumentException if event or subject are null
-	 */
+    /**
+     * Sends an event to all registered objects about a particular subject.
+     * <code>dispatchImmediately</code> argument 
+     * 
+     * @param event the event to be posted to the observers
+     * @param subject the subject about which observers will be notified
+     * @param dispatchImmediately control whether the even dispatched from
+     * this method, blocking this thread until all listeners have processed 
+     * the event, or should be queued for asynchronous notification.
+     * 
+     * @throws IllegalArgumentException if event or subject are null
+     */
     public void postEvent(
         EventObject event,
         EventSubject subject,
@@ -345,82 +310,21 @@ public class EventManager extends Object {
     }
 
     private void dispatchEvent(Dispatch dispatch) {
-        EventObject event = dispatch.object;
-        EventSubject subject = dispatch.subject;
-
-        // collect listener invocations for subject
-        Set specificInvocations =
-            this.invocationQueueForSubjectAndSender(subject, event.getSource());
-        Set defaultInvocations = this.invocationQueueForSubjectAndSender(subject, this);
-        Set[] invocationQueues = new Set[] { specificInvocations, defaultInvocations };
-        Object[] eventArgument = new Object[] { event };
-
-        for (int i = 0; i < invocationQueues.length; i++) {
-            Set currentQueue = invocationQueues[i];
-            if ((currentQueue != null) && (currentQueue.isEmpty() == false)) {
-                // used to collect all invalid invocations in order to remove
-                // them at the end of this posting cycle
-                List invalidInvocations = null;
-                Iterator iter = currentQueue.iterator();
-                while (iter.hasNext()) {
-                    Invocation inv = (Invocation) iter.next();
-                    Class[] invParamTypes = inv.getParameterTypes();
-
-                    // we only process event listeners which take exactly
-                    // one argument in their registered methods: the passed
-                    // event or a valid subclass thereof
-                    if ((invParamTypes != null)
-                        && (invParamTypes.length == 1)
-                        && (invParamTypes[0].isAssignableFrom(event.getClass()))) {
-                        // fire invocation, detect if anything went wrong
-                        // (e.g. GC'ed invocation targets)
-                        if (!inv.fire(eventArgument)) {
-                            if (invalidInvocations == null) {
-                                invalidInvocations = new ArrayList();
-                            }
-
-                            invalidInvocations.add(inv);
-                        }
-                    }
-                }
-
-                // clear out all invalid invocations
-                if (invalidInvocations != null) {
-                    currentQueue.removeAll(invalidInvocations);
-                }
-            }
+        DispatchQueue dispatchQueue = dispatchQueueForSubject(dispatch.subject, false);
+        if (dispatchQueue != null) {
+            dispatchQueue.dispatchEvent(dispatch);
         }
     }
 
     // returns a subject's mapping from senders to registered listener invocations
-    private Map invocationQueuesForSubject(EventSubject subject) {
-        return (Map) subjects.get(subject);
-    }
-
-    // returns the registered listener invocations for a particular sender;
-    // the owning event manager instance is used as default sender
-    private Set invocationQueueForSubjectAndSender(EventSubject subject, Object sender) {
-        if (sender == null) {
-            sender = this;
-        }
-
-        Map subjectEntries = this.invocationQueuesForSubject(subject);
-        Set queue = null;
-
-        if (subjectEntries != null) {
-            queue = (Set) subjectEntries.get(sender);
-        }
-
-        return queue;
-    }
-
-    final class Dispatch {
-        EventObject object;
-        EventSubject subject;
-
-        public Dispatch(EventObject object, EventSubject subject) {
-            this.object = object;
-            this.subject = subject;
+    private DispatchQueue dispatchQueueForSubject(EventSubject subject, boolean create) {
+        synchronized (subjects) {
+            DispatchQueue listenersStore = (DispatchQueue) subjects.get(subject);
+            if (create && listenersStore == null) {
+                listenersStore = new DispatchQueue();
+                subjects.put(subject, listenersStore);
+            }
+            return listenersStore;
         }
     }
 
@@ -452,11 +356,20 @@ public class EventManager extends Object {
                     }
                 }
 
+                // dispatch outside of synchronized block
                 if (dispatch != null) {
-                    EventManager.this.dispatchEvent(dispatch);
+
+                    // this try/catch is needed to prevent DispatchThread
+                    // from dying on dispatch errors
+                    try {
+                        EventManager.this.dispatchEvent(dispatch);
+                    }
+                    catch (Throwable th) {
+                       // ignoring exception
+                       logObj.debug("Event dispatch error, ignoring.", Util.unwindException(th));
+                    }
                 }
             }
-
         }
     }
 }
