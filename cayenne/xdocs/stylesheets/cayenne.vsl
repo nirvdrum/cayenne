@@ -29,6 +29,8 @@
 <head>
         <title>$project.getChild("title").getText(): $root.getChild("title").getText()</title>
         <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+        <meta name="keywords" content="Object Relational Mapping framework for Java database applications, Java Development, Cayenne, OO-to-Relational mapping, Object-Oriented Software, OpenSource Development, WebObjects, EOF, Enterprise Objects Framework">
+        <meta name="description" content="Cayenne is an object-relational mapping Java framework. It is free and OpenSource, developed under apache license.">
         <link href="${relativePath}$css" rel="stylesheet">
 </head>
 
