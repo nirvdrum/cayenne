@@ -56,3 +56,5 @@ and other pitfalls as reported by jlint.
 14. Cleaned up the ant build files to better use property values instead of
 hardcoded file or directory names.
 
+15. Relationships between DataObjects in different DataContexts are prevented.
+
