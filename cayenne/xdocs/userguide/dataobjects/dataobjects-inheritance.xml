@@ -118,6 +118,14 @@ List employees = context.performQuery(query);
     	obtained via a relationship.
     	</panel>
     	</subsection>
+
+		<subsection name="8.7.3 Current Inheritance Limitations">
+		<p><strong>Custom Types used in subclasses:</strong></p>
+    	<p>As reported in <a target="_blank" href="http://objectstyle.org/jira/secure/ViewIssue.jspa?key=CAY-207">JIRA 
+		issue CAY-207</a>, SelectQueries performed using superclass as a root can't correctly resolve attributes
+		mapped in subclasses to non-standard (or custom) Java types. Here "standard" mapping means Java class to JDBC
+		type mapping defined in JDBC specification.</p>
+		</subsection>
     	</subsection>
     </section>
 </body>
