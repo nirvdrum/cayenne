@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
 import java.io.Serializable;
@@ -61,202 +61,223 @@ import java.util.List;
 
 /** Defines basic API of a generic data expression. */
 public abstract class Expression implements Serializable {
-    
-    /** Corresponds to SQL "A AND B" expression. */
-    public static final int AND = 0;
-    
-    /** Corresponds to SQL "A OR B" expression. */
-    public static final int OR = 1;
-    
-    /** Corresponds to SQL "NOT A" expression. */
-    public static final int NOT = 2;
-    
-    /** Corresponds to SQL "A = B" expression. */
-    public static final int EQUAL_TO = 3;
-    
-    /** Corresponds to SQL 'not equals' expression. 
-     *  Will be translated to an expression similar to <code>A != B</code> (or <code>A <> B</code>). */
-    public static final int NOT_EQUAL_TO = 4;
-    public static final int LESS_THAN = 5;
-    public static final int GREATER_THAN = 6;
-    public static final int LESS_THAN_EQUAL_TO = 7;
-    public static final int GREATER_THAN_EQUAL_TO = 8;
-    public static final int BETWEEN = 9;
-    public static final int IN = 10;
-    public static final int LIKE = 11;
-    public static final int LIKE_IGNORE_CASE = 12;
-    public static final int EXISTS = 15;
-    public static final int ADD = 16;
-    public static final int SUBTRACT = 17;
-    public static final int MULTIPLY = 18;
-    public static final int DIVIDE = 19;
-    public static final int NEGATIVE = 20;
-    public static final int POSITIVE = 21;
-    public static final int ALL = 22;
-    public static final int SOME = 23;
-    public static final int ANY = 24;
-    
-    /** Expression interpreted as raw SQL. 
-    * No translations will be done for this kind of expressions. */ 
-    public static final int RAW_SQL = 25;
-    
-    
-    /** 
-     * Expression describes a path relative to an ObjEntity.
-     * OBJ_PATH expression is resolved relative to some root ObjEntity. Path expression components
-     * are separated by "." (dot). Path can point to either one of these:
-     * <ul>
-     *    <li><i>An attribute of root ObjEntity.</i>
-     *    For entity Gallery OBJ_PATH expression "galleryName" will point to ObjAttribute "galleryName" 
-     *    <li><i>Another ObjEntity related to root ObjEntity via a chain of relationships.</i>
-     *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist" will point to ObjEntity "Artist" 
-     *    <li><i>ObjAttribute of another ObjEntity related to root ObjEntity via a chain of relationships.</i>
-     *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist.artistName" will point to ObjAttribute "artistName" 
-     * </ul>
-     */ 
-    public static final int OBJ_PATH = 26;
-    
-    
-    /** 
-     * Expression describes a path relative to a DbEntity.
-     * DB_PATH expression is resolved relative to some root DbEntity. 
-     * Path expression components are separated by "." (dot). Path can 
-     * point to either one of these:
-     * <ul>
-     *    <li><i>An attribute of root DbEntity.</i>
-     *    For entity GALLERY, DB_PATH expression "GALLERY_NAME" will point 
-     *    to a DbAttribute "GALLERY_NAME".
-     * 	  </li>
-     * 
-     *    <li><i>Another DbEntity related to root DbEntity via a chain of relationships.</i>
-     *    For entity GALLERY DB_PATH expression "paintingArray.toArtist" will point to 
-     *    DbEntity "ARTIST".
-     *    </li>
-     * 
-     *    <li><i>DbAttribute of another ObjEntity related to root DbEntity via a chain 
-     *    of relationships.</i>
-     *    For entity GALLERY DB_PATH expression "paintingArray.toArtist.ARTIST_NAME" will point 
-     *    to DbAttribute "ARTIST_NAME".
-     *    </li>
-     * </ul>
-     */ 
-    public static final int DB_PATH = 27;
-    
-    /** 
-     * Describes a table column name.
-     * DB_NAME expression is resolved relative to a root 
-     * DbEntity. 
-     * 
-     * @deprecated use DB_PATH instead
-     */ 
-    public static final int DB_NAME = DB_PATH;
-    
-    
-    
-    /** Interpreted as a comma-separated list of literals. */ 
-    public static final int LIST = 28;
-    /** Interpreted as a subquery within a parent query. */ 
-    public static final int SUBQUERY = 29;
-    /** Interpreted as an aggregate count function. */ 
-    public static final int COUNT = 30;
-    /** Interpreted as an aggregate avg function. */ 
-    public static final int AVG = 31;
-    /** Interpreted as an aggregate sum function. */ 
-    public static final int SUM = 32;
-    /** Interpreted as an aggregate max function. */ 
-    public static final int MAX = 33;
-    /** Interpreted as an aggregate min function. */ 
-    public static final int MIN = 34;
-    
-    protected int type;
-    
-    /** 
-     * Returns a type of expression. Most common types are defined 
-     * as public static fields of this interface.
-     */
+
+	/** Corresponds to SQL "A AND B" expression. */
+	public static final int AND = 0;
+
+	/** Corresponds to SQL "A OR B" expression. */
+	public static final int OR = 1;
+
+	/** Corresponds to SQL "NOT A" expression. */
+	public static final int NOT = 2;
+
+	/** Corresponds to SQL "A = B" expression. */
+	public static final int EQUAL_TO = 3;
+
+	/** Corresponds to SQL 'not equals' expression. 
+	 *  Will be translated to an expression similar to <code>A != B</code> (or <code>A <> B</code>). */
+	public static final int NOT_EQUAL_TO = 4;
+	public static final int LESS_THAN = 5;
+	public static final int GREATER_THAN = 6;
+	public static final int LESS_THAN_EQUAL_TO = 7;
+	public static final int GREATER_THAN_EQUAL_TO = 8;
+	public static final int BETWEEN = 9;
+	public static final int IN = 10;
+	public static final int LIKE = 11;
+	public static final int LIKE_IGNORE_CASE = 12;
+	public static final int EXISTS = 15;
+	public static final int ADD = 16;
+	public static final int SUBTRACT = 17;
+	public static final int MULTIPLY = 18;
+	public static final int DIVIDE = 19;
+	public static final int NEGATIVE = 20;
+	public static final int POSITIVE = 21;
+	public static final int ALL = 22;
+	public static final int SOME = 23;
+	public static final int ANY = 24;
+
+	/** Expression interpreted as raw SQL. 
+	* No translations will be done for this kind of expressions. */
+	public static final int RAW_SQL = 25;
+
+	/** 
+	 * Expression describes a path relative to an ObjEntity.
+	 * OBJ_PATH expression is resolved relative to some root ObjEntity. Path expression components
+	 * are separated by "." (dot). Path can point to either one of these:
+	 * <ul>
+	 *    <li><i>An attribute of root ObjEntity.</i>
+	 *    For entity Gallery OBJ_PATH expression "galleryName" will point to ObjAttribute "galleryName" 
+	 *    <li><i>Another ObjEntity related to root ObjEntity via a chain of relationships.</i>
+	 *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist" will point to ObjEntity "Artist" 
+	 *    <li><i>ObjAttribute of another ObjEntity related to root ObjEntity via a chain of relationships.</i>
+	 *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist.artistName" will point to ObjAttribute "artistName" 
+	 * </ul>
+	 */
+	public static final int OBJ_PATH = 26;
+
+	/** 
+	 * Expression describes a path relative to a DbEntity.
+	 * DB_PATH expression is resolved relative to some root DbEntity. 
+	 * Path expression components are separated by "." (dot). Path can 
+	 * point to either one of these:
+	 * <ul>
+	 *    <li><i>An attribute of root DbEntity.</i>
+	 *    For entity GALLERY, DB_PATH expression "GALLERY_NAME" will point 
+	 *    to a DbAttribute "GALLERY_NAME".
+	 * 	  </li>
+	 * 
+	 *    <li><i>Another DbEntity related to root DbEntity via a chain of relationships.</i>
+	 *    For entity GALLERY DB_PATH expression "paintingArray.toArtist" will point to 
+	 *    DbEntity "ARTIST".
+	 *    </li>
+	 * 
+	 *    <li><i>DbAttribute of another ObjEntity related to root DbEntity via a chain 
+	 *    of relationships.</i>
+	 *    For entity GALLERY DB_PATH expression "paintingArray.toArtist.ARTIST_NAME" will point 
+	 *    to DbAttribute "ARTIST_NAME".
+	 *    </li>
+	 * </ul>
+	 */
+	public static final int DB_PATH = 27;
+
+	/** 
+	 * Describes a table column name.
+	 * DB_NAME expression is resolved relative to a root 
+	 * DbEntity. 
+	 * 
+	 * @deprecated use DB_PATH instead
+	 */
+	public static final int DB_NAME = DB_PATH;
+
+	/** Interpreted as a comma-separated list of literals. */
+	public static final int LIST = 28;
+	/** Interpreted as a subquery within a parent query. */
+	public static final int SUBQUERY = 29;
+	/** Interpreted as an aggregate count function. */
+	public static final int COUNT = 30;
+	/** Interpreted as an aggregate avg function. */
+	public static final int AVG = 31;
+	/** Interpreted as an aggregate sum function. */
+	public static final int SUM = 32;
+	/** Interpreted as an aggregate max function. */
+	public static final int MAX = 33;
+	/** Interpreted as an aggregate min function. */
+	public static final int MIN = 34;
+
+	protected int type;
+
+	/** 
+	 * Returns a type of expression. Most common types are defined 
+	 * as public static fields of this interface.
+	 */
 	public int getType() {
-        return type;
-    }
+		return type;
+	}
 
 	public void setType(int type) {
-        this.type = type;
-    }
+		this.type = type;
+	}
 
-    /** 
-     * Creates a new expression that joins this object
-     * with another expression, using specified join type.
-     * It is very useful for incrementally building chained expressions,
-     * like long AND or OR statements. 
-     */
-    public Expression joinExp(int type, Expression exp) {
-         Expression join = ExpressionFactory.expressionOfType(type);
-         join.setOperand(0, this);
-         join.setOperand(1, exp);
-         return join;
-    }
-    
-    /**
-     * A shortcut for <code>joinExp(Expression.AND, exp)</code>.
-     */
-    public Expression andExp(Expression exp) {
-    	return joinExp(Expression.AND, exp);
-    }
-    
-    /**
-     * A shortcut for <code>joinExp(Expression.OR, exp)</code>.
-     */
-    public Expression orExp(Expression exp) {
-    	return joinExp(Expression.OR, exp);
-    }
-    
-    
-    /** 
-     * Returns a count of operands of this expression. In real life there are
-     * unary (count == 1), binary (count == 2) and ternary (count == 3) 
-     * expressions.
-     */
-    public abstract int getOperandCount();
-    
-    /** 
-     * Returns a value of operand at <code>index</code>. 
-     * Operand indexing starts at 0. 
-     */
-    public abstract Object getOperand(int index);
-    
-    
-    /** 
-     * Sets a value of operand at <code>index</code>. 
-     * Operand indexing starts at 0.
-     */
-    public abstract void setOperand(int index, Object value);
-    
-    /** 
-     * Method for in-memory evaluation of expressions. 
-     * 
-     * @return <code>true</code> if object matches the expression,
-     * <code>false</code> otherwise.
-     */
-    public boolean eval(Object o) {
-    	return new EvalExpression(this).evaluate(o);
-    }
-    
-    /**
-     * Returns a list of objects that match the expression.
-     */
-    public List filterObjects(List objects) {
-    	int size = (objects != null) ? objects.size() : 0;
-    	ArrayList filtered = new ArrayList(size);
-    	
-    	if(size > 0) {
-    		EvalExpression eval = new EvalExpression(this);
-    		for(int i = 0; i < size; i++) {
-    			Object o = objects.get(i);
-    			if(eval.evaluate(o)) {
-    				filtered.add(o);
-    			}
-    		}
-    	}
-    	
-        return filtered;   	
-    }
+	/** 
+	 * Creates a new expression that joins this object
+	 * with another expression, using specified join type.
+	 * It is very useful for incrementally building chained expressions,
+	 * like long AND or OR statements. 
+	 */
+	public Expression joinExp(int type, Expression exp) {
+		Expression join = ExpressionFactory.expressionOfType(type);
+		join.setOperand(0, this);
+		join.setOperand(1, exp);
+		return join;
+	}
+
+	/**
+	 * A shortcut for <code>joinExp(Expression.AND, exp)</code>.
+	 */
+	public Expression andExp(Expression exp) {
+		return joinExp(Expression.AND, exp);
+	}
+
+	/**
+	 * A shortcut for <code>joinExp(Expression.OR, exp)</code>.
+	 */
+	public Expression orExp(Expression exp) {
+		return joinExp(Expression.OR, exp);
+	}
+
+	/** 
+	 * Returns a count of operands of this expression. In real life there are
+	 * unary (count == 1), binary (count == 2) and ternary (count == 3) 
+	 * expressions.
+	 */
+	public abstract int getOperandCount();
+
+	/** 
+	 * Returns a value of operand at <code>index</code>. 
+	 * Operand indexing starts at 0. 
+	 */
+	public abstract Object getOperand(int index);
+
+	/** 
+	 * Sets a value of operand at <code>index</code>. 
+	 * Operand indexing starts at 0.
+	 */
+	public abstract void setOperand(int index, Object value);
+
+	/** 
+	 * Method for in-memory evaluation of expressions. 
+	 * 
+	 * @return <code>true</code> if object matches the expression,
+	 * <code>false</code> otherwise.
+	 */
+	public boolean eval(Object o) {
+		return new EvalExpression(this).evaluate(o);
+	}
+
+	/**
+	 * Returns a list of objects that match the expression.
+	 */
+	public List filterObjects(List objects) {
+		int size = (objects != null) ? objects.size() : 0;
+		ArrayList filtered = new ArrayList(size);
+
+		if (size > 0) {
+			EvalExpression eval = new EvalExpression(this);
+			for (int i = 0; i < size; i++) {
+				Object o = objects.get(i);
+				if (eval.evaluate(o)) {
+					filtered.add(o);
+				}
+			}
+		}
+
+		return filtered;
+	}
+
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buf.append("Expr.").append(type).append(" (").append(
+			getClass().getName()).append(
+			") [");
+			
+		for (int i = 0; i < getOperandCount(); i++) {
+			if (i > 0) {
+				buf.append(",");
+			}
+			Object op = getOperand(i);
+			if(op == null) {
+				buf.append("null");
+			}
+			if(op instanceof String) {
+				buf.append("'").append(op).append("'");
+			}
+			else {
+				buf.append(op.getClass().getName());
+			}
+		}
+		
+		buf.append("]");
+
+		return buf.toString();
+	}
 }

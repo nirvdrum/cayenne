@@ -220,13 +220,14 @@ public class SelectTranslator extends SelectQueryAssembler {
 		// append parent qualifier if any
 		if (parentQualifierStr != null) {
 			if (hasWhere) {
-				queryBuf.append(" AND ");
+				queryBuf.append(" AND (");
+				queryBuf.append(parentQualifierStr);
+				queryBuf.append(")");
 			} else {
 				hasWhere = true;
 				queryBuf.append(" WHERE ");
+				queryBuf.append(parentQualifierStr);
 			}
-
-			queryBuf.append(parentQualifierStr);
 		}
 
 		// append group by
@@ -248,16 +249,18 @@ public class SelectTranslator extends SelectQueryAssembler {
 		if (qualifierStr != null) {
 			if (hasGroupBy) {
 				queryBuf.append(" HAVING ");
+				queryBuf.append(qualifierStr);
 			} else {
 				if (hasWhere) {
-					queryBuf.append(" AND ");
+					queryBuf.append(" AND (");
+					queryBuf.append(qualifierStr);
+					queryBuf.append(")");
 				} else {
 					hasWhere = true;
 					queryBuf.append(" WHERE ");
+					queryBuf.append(qualifierStr);
 				}
 			}
-
-			queryBuf.append(qualifierStr);
 		}
 
 		// append prebuilt ordering

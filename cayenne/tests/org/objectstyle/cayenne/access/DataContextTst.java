@@ -63,9 +63,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
 import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import sun.security.krb5.internal.crypto.a1;
 
 public class DataContextTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
@@ -250,6 +251,43 @@ public class DataContextTst extends CayenneTestCase {
         ToManyList toMany = (ToManyList)a1.readPropertyDirectly("paintingArray");
         // assertTrue(!toMany.needsFetch());
 	}
+	
+	/** 
+	 * Test fetching query with multiple relationship
+	 * paths between the same 2 entities used in qualifier.
+	 */
+	public void testMultiObjRelFecth() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.setDistinct(true);
+		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
+		q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(4)));
+
+        q.setLoggingLevel(Level.WARN);
+		List results = ctxt.performQuery(q);
+        
+        assertEquals(2, results.size());
+	}
+	
+	/** 
+	 * Test fetching query with multiple relationship
+	 * paths between the same 2 entities used in qualifier.
+	 */
+	public void testMultiDbRelFecth() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("Painting");
+		q.setDistinct(true);
+		q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+		q.orQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
+
+        q.setLoggingLevel(Level.WARN);
+		List results = ctxt.performQuery(q);
+        
+        assertEquals(2, results.size());
+	}
+	
 	
 	/** 
 	 * Test that a to-one relationship is initialized.
