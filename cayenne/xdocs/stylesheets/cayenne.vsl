@@ -93,7 +93,7 @@
     <table cellpadding="2" cellspacing="0" border="0" width="80%">
     <tr>
 #if ($panel.getAttributeValue("name"))
-    <td colspan="2" bgcolor="$panelbg">$panel.getAttributeValue("name")</td></tr>
+    <td colspan="2" bgcolor="$panelbg"><strong>$panel.getAttributeValue("name")</strong></td></tr>
     <tr><td bgcolor="$panelbg" width="20">&nbsp;</td>
 #end
     <td bgcolor="$panelbg">$panel.getText()</td></tr></table>

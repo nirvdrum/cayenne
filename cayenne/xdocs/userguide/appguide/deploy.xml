@@ -71,11 +71,129 @@ Configuration conf = Configuration.getSharedConfig();
            </subsection>
            
            <subsection name="4.5.1 Web Applications" anchor="standalone">
-               <p></p>
-               <p>To Be Done</p>
+               <p>Though it is possible to use the procedure described for the standalone applications
+               when deploying an application in a web container, Cayenne provides a better way
+               to do that. Suggested way is to use <a href=
+               "../../api/org/objectstyle/cayenne/conf/ServletConfiguration.html"
+               >ServletConfiguration</a> subclass of Configuration. It does <code>cayenne.xml</code>
+               and datamap files lookup relative to the WEB-INF directory of a deployed application.
+               Since WEB-INF is a standard place to put configuration files, this approach makes
+               configuration cleaner and more maintainable.
+               <i>Note that it will NOT search the CLASSPATH for configuration files.</i>              
+               </p>
+               
+               <p>Suggested way to configure datasources is to use <a href=
+               "../../api/org/objectstyle/cayenne/conf/JNDIDataSourceFactory.html"
+               >JNDIDataSourceFactory</a> as a factory in <code>cayenne.xml</code> file
+               and rely on container to provide a datasource via JNDI. Of course using
+               DriverDataSourceFactory is also possible.</p>              
+
+               
+               <p>Another feature of ServletConfiguration that does not exist in a standalone 
+               configuration is the ability to automatically assign a DataContext object to every 
+               new HttpSession created within the application. If this feature is configured, a
+               user can access DataContext the using following code:
+               </p>
+               
+<source>
+import org.objectstyle.cayenne.conf.ServletConfiguration;
+import javax.servlet.http.HttpServletRequest;
+...
+
+// assume this exists
+HttpServletRequest r;
+
+// get session DataContext to perform database queries
+DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
+</source>
+                <panel name="Note:">
+                Automatic ServletConfiguration setup is possible only in containers that
+                implement Servlet Specification version 2.3 (such as Tomcat 4.0.x). 
+                Earilier versions of the spec (implemented by Tomcat 3.3 for instance)
+                don't have javax.servlet.http.HttpSessionListener
+                and javax.servlet.ServletContext listener interfaces needed for
+                this feature. When using an older container, a user will need to
+                set ServletConfiguration as a shared Configuration object herself.
+                Creation of a DataContext in the session will also be a responsibility of a user.
+                </panel>
+                
+                <p>Here is an extract from a sample web application deployment descriptor (web.xml file). 
+                It tells the container that ServletConfiguration class will serve as a listener
+                of session and context events. It also declares a JNDI resource named 
+                "jdbc/mydb" of type "javax.sql.DataSource". This should work with any container
+                compliant with Servlet Specification version 2.3.
+                </p>
+                
+<source>...
+
+&amp;lt;listener&amp;gt;
+   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.ServletConfiguration&amp;lt;/listener-class&amp;gt;
+&amp;lt;/listener&amp;gt; 
+
+...
+
+&amp;lt;resource-ref&amp;gt;
+   &amp;lt;res-ref-name&gt;jdbc/mydb&amp;lt;/res-ref-name&amp;gt;
+   &amp;lt;res-type&gt;javax.sql.DataSource&amp;lt;/res-type&amp;gt;
+   &amp;lt;res-auth&gt;Container&amp;lt;/res-auth&amp;gt;
+&amp;lt;/resource-ref&amp;gt;
+...</source>
+                
+             <p>For the users of Tomcat 4.0.x, here is a sample configuration of a single
+             web application context that makes a datasource available to this web application
+             under the JNDI name "jdbc/mydb". <i>Note that configuration
+             below is most certainly incompatible with other containers and will work with Tomcat
+             only.</i> This code may be inserted in $CATALINA_HOME/conf/server.xml file between 
+             the &lt;Host&gt;...&lt;/Host&gt; tags.
+             </p>
+<source>
+&amp;lt;Context path="/myapp" docBase="myapp" debug="1" reloadable="true" crossContext="true"&amp;gt;
+    &amp;lt;Logger className="org.apache.catalina.logger.FileLogger" 
+                   prefix="myapp-log." 
+                   suffix=".txt" 
+                   timestamp="true"/&amp;gt;
+   
+    &amp;lt;ResourceParams name="jdbc/mydb"&amp;gt;
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;factory&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;org.objectstyle.cayenne.conn.ContainerPoolFactory&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+            
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;username&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;user&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+            
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;password&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;bla-bla&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+                
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;driver&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;org.gjt.mm.mysql.Driver&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+            
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;url&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;jdbc:mysql://dbserver/mydb&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+            
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;min&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;1&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+            
+            &amp;lt;parameter&amp;gt;
+                &amp;lt;name&amp;gt;max&amp;lt;/name&amp;gt;
+                &amp;lt;value&amp;gt;3&amp;lt;/value&amp;gt;
+            &amp;lt;/parameter&amp;gt;
+    &amp;lt;/ResourceParams&amp;gt;
+&amp;lt;/Context&amp;gt;
+</source>
            </subsection>
            
-           
+      
         </subsection>
     </section>
 </body>
