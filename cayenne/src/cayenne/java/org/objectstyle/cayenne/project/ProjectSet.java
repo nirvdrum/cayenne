@@ -75,17 +75,17 @@ public class ProjectSet {
      * Returns the first project matching the name, if any.
      */
     public Project getProject(String name) {
-    	if(name == null) {
-    		return null;
-    	}
-    	
+        if (name == null) {
+            return null;
+        }
+
         synchronized (projects) {
             Iterator it = projects.iterator();
             while (it.hasNext()) {
-            	Project p = (Project)it.next();
-            	if(name.equals(p.getName())) {
-            		return p;
-            	}
+                Project p = (Project) it.next();
+                if (name.equals(p.getName())) {
+                    return p;
+                }
             }
         }
         return null;
@@ -102,6 +102,10 @@ public class ProjectSet {
     }
 
     public void removeProject(Project project) {
+        if (project == null) {
+            return;
+        }
+
         synchronized (projects) {
             projects.remove(project);
             if (project == currentProject) {
@@ -137,6 +141,10 @@ public class ProjectSet {
                 projects.add(currentProject);
             }
         }
+    }
+
+    public void removeCurrentProject() {
+        removeProject(currentProject);
     }
 
     /**

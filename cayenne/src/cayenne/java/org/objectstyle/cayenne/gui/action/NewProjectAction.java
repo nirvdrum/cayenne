@@ -160,7 +160,7 @@ public class NewProjectAction extends ProjectAction {
             }
 
             setMediator(Mediator.createMediator(GuiConfiguration.getGuiConfig()));
-            Editor.getFrame().projectOpened();
+            Editor.getFrame().projectOpened(projectFile);
 
             // Set title to contain proj file path
             Editor.getFrame().setProjectTitle(projectFile.getAbsolutePath());

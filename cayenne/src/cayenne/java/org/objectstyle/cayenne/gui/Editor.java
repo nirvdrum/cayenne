@@ -70,18 +70,63 @@ import java.util.Iterator;
 import java.util.Properties;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.ActionMap;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
-import org.objectstyle.cayenne.gui.action.*;
+import org.objectstyle.cayenne.gui.action.AddDataMapAction;
+import org.objectstyle.cayenne.gui.action.CayenneAction;
+import org.objectstyle.cayenne.gui.action.CreateAttributeAction;
+import org.objectstyle.cayenne.gui.action.CreateDataMapAction;
+import org.objectstyle.cayenne.gui.action.CreateDbEntityAction;
+import org.objectstyle.cayenne.gui.action.CreateDerivedDbEntityAction;
+import org.objectstyle.cayenne.gui.action.CreateDomainAction;
+import org.objectstyle.cayenne.gui.action.CreateNodeAction;
+import org.objectstyle.cayenne.gui.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.gui.action.CreateRelationshipAction;
+import org.objectstyle.cayenne.gui.action.DerivedEntitySyncAction;
+import org.objectstyle.cayenne.gui.action.GenerateDbAction;
+import org.objectstyle.cayenne.gui.action.ImportDbAction;
+import org.objectstyle.cayenne.gui.action.ImportEOModelAction;
+import org.objectstyle.cayenne.gui.action.InfoAction;
+import org.objectstyle.cayenne.gui.action.NewProjectAction;
+import org.objectstyle.cayenne.gui.action.ObjEntitySyncAction;
+import org.objectstyle.cayenne.gui.action.OpenProjectAction;
+import org.objectstyle.cayenne.gui.action.ProjectAction;
+import org.objectstyle.cayenne.gui.action.RemoveAction;
+import org.objectstyle.cayenne.gui.action.SaveAction;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DataMapDisplayListener;
+import org.objectstyle.cayenne.gui.event.DataMapEvent;
+import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DataNodeDisplayListener;
+import org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener;
+import org.objectstyle.cayenne.gui.event.DbEntityDisplayListener;
+import org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener;
+import org.objectstyle.cayenne.gui.event.DomainDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DomainDisplayListener;
+import org.objectstyle.cayenne.gui.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener;
+import org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener;
+import org.objectstyle.cayenne.gui.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.gui.util.RecentFileMenu;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectSet;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.objectstyle.cayenne.util.Preferences;
 
@@ -114,12 +159,14 @@ public class Editor
      * the project has unsaved changes. 
      */
     public static final String DIRTY_STRING = "* - ";
+    public static final String DEFAULT_PROJECT_NAME = "Cayenne Project";
 
     protected static Editor frame;
 
     protected EditorView view;
     protected Mediator mediator;
     protected ActionMap actionMap;
+    protected ProjectSet projects = new ProjectSet();
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
     // these all must be put in actions
@@ -179,6 +226,14 @@ public class Editor
         } catch (IOException ioex) {
             logObj.warn("Error setting logging.", ioex);
         }
+    }
+    
+    /**
+     * Returns a project that is currently a current project of an 
+     * Editor singleton instance.
+     */
+    public static Project getProject() {
+    	return getFrame().projects.getCurrentProject();
     }
 
     public Editor() {
@@ -403,6 +458,7 @@ public class Editor
         getContentPane().remove(view);
         view = null;
         setMediator(null);
+        projects.removeCurrentProject();
 
         disableMenu();
 
@@ -416,7 +472,9 @@ public class Editor
         setProjectTitle(null);
     }
 
-    public void projectOpened() {
+    public void projectOpened(File projectFile) {
+    	// create a new project
+    	projects.createProject(DEFAULT_PROJECT_NAME, projectFile, true);
         view = new EditorView(mediator);
         getContentPane().add(view, BorderLayout.CENTER);
 

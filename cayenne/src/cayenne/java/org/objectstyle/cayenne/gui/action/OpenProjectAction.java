@@ -157,7 +157,7 @@ public class OpenProjectAction extends ProjectAction {
 			GuiConfiguration.initSharedConfig(file);
 			setMediator(Mediator.createMediator(GuiConfiguration.getGuiConfig()));
 
-			Editor.getFrame().projectOpened();
+			Editor.getFrame().projectOpened(file);
 			Editor.getFrame().setProjectTitle(file.getAbsolutePath());
 
 		} catch (Exception ex) {
