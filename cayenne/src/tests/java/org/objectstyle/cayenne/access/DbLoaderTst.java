@@ -110,7 +110,6 @@ public class DbLoaderTst extends CayenneTestCase {
 			assertNotNull(dae);
 			assertEquals("ARTIST", dae.getName().toUpperCase());
 
-			// TODO: this seems to always fail, why?
 			assertTrue(
 				((DbAttribute) dae.getAttribute("ARTIST_ID")).isPrimaryKey());
 
