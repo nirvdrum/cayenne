@@ -364,6 +364,7 @@ public class SelectTranslator extends QueryAssembler {
     /**
      * Appends columns needed for object SelectQuery to the provided columns list.
      */
+    //  TODO: this whole method screams REFACTORING!!!
     List appendQueryColumns(List columns, SelectQuery query) {
 
         Set attributes = new HashSet();
@@ -467,9 +468,8 @@ public class SelectTranslator extends QueryAssembler {
                 String prefetch = (String) jointPrefetches.next();
 
                 // for each prefetch add all joins plus columns from the target entity
-
-                Expression dbPrefetch = oe.translateToDbPath(Expression
-                        .fromString(prefetch));
+                Expression prefetchExp = Expression.fromString(prefetch);
+                Expression dbPrefetch = oe.translateToDbPath(prefetchExp);
 
                 // find target entity
                 Iterator it = table.resolvePathComponents(dbPrefetch);
@@ -502,6 +502,41 @@ public class SelectTranslator extends QueryAssembler {
                     }
                 }
 
+                // go via target OE to make sure that Java types are mapped correctly...
+                ObjRelationship targetRel = (ObjRelationship) prefetchExp.evaluate(oe);
+                Iterator targetObjAttrs = targetRel
+                        .getTargetEntity()
+                        .getAttributes()
+                        .iterator();
+                while (targetObjAttrs.hasNext()) {
+                    ObjAttribute oa = (ObjAttribute) targetObjAttrs.next();
+                    Iterator dbPathIterator = oa.getDbPathIterator();
+                    while (dbPathIterator.hasNext()) {
+                        Object pathPart = dbPathIterator.next();
+                        if (pathPart instanceof DbRelationship) {
+                            DbRelationship rel = (DbRelationship) pathPart;
+                            dbRelationshipAdded(rel);
+                        }
+                        else if (pathPart instanceof DbAttribute) {
+                            DbAttribute attribute = (DbAttribute) pathPart;
+                            if (attribute == null) {
+                                throw new CayenneRuntimeException(
+                                        "ObjAttribute has no DbAttribute: "
+                                                + oa.getName());
+                            }
+
+                            if (!skipColumns.contains(attribute)) {
+                                appendColumn(columns,
+                                        oa,
+                                        attribute,
+                                        attributes,
+                                        dbPrefetch);
+                            }
+                        }
+                    }
+                }
+
+                // append remaining target attributes such as keys
                 Iterator targetAttributes = r
                         .getTargetEntity()
                         .getAttributes()
@@ -509,8 +544,6 @@ public class SelectTranslator extends QueryAssembler {
                 while (targetAttributes.hasNext()) {
                     DbAttribute attribute = (DbAttribute) targetAttributes.next();
                     if (!skipColumns.contains(attribute)) {
-                        // TODO: need to set correct Java type for the target entity
-                        // instead of relying on default...
                         appendColumn(columns, null, attribute, attributes, dbPrefetch);
                     }
                 }

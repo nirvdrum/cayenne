@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.sql.Timestamp;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,6 +67,9 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -134,6 +139,54 @@ public class JointPrefetchTst extends CayenneTestCase {
             Artist target = p.getToArtist();
             assertNotNull(target);
             assertEquals(PersistenceState.COMMITTED, target.getPersistenceState());
+        }
+    }
+
+    /**
+     * Tests that joined entities can have non-standard type mappings.
+     */
+    public void testJointPrefetchDataTypes() throws Exception {
+        // prepare... can't load from XML, as it doesn't yet support dates..
+        SQLTemplate artistSQL = new SQLTemplate(
+                Artist.class,
+                "insert into ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
+                        + "values (33001, 'a1', #bind($date 'TIMESTAMP'))",
+                false);
+        artistSQL.setParameters(Collections.singletonMap("date", new Timestamp(System
+                .currentTimeMillis())));
+        SQLTemplate paintingSQL = new SQLTemplate(
+                Painting.class,
+                "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
+                        + "VALUES (33001, 'p1', 33001, 1000)",
+                false);
+        DataContext context = createDataContext();
+
+        context.performNonSelectingQuery(artistSQL);
+        context.performNonSelectingQuery(paintingSQL);
+
+        // test
+        SelectQuery q = new SelectQuery(Painting.class);
+        q.addJointPrefetch(Painting.TO_ARTIST_PROPERTY);
+
+        ObjEntity artistE = getObjEntity("Artist");
+        ObjAttribute dateOfBirth = (ObjAttribute) artistE.getAttribute("dateOfBirth");
+        assertEquals("java.util.Date", dateOfBirth.getType());
+        dateOfBirth.setType("java.sql.Timestamp");
+        try {
+            List objects = context.performQuery(q);
+            assertEquals(1, objects.size());
+
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                Painting p = (Painting) it.next();
+                Artist a = p.getToArtist();
+                assertNotNull(a);
+                assertNotNull(a.getDateOfBirth());
+                assertSame(Timestamp.class, a.getDateOfBirth().getClass());
+            }
+        }
+        finally {
+            dateOfBirth.setType("java.util.Date");
         }
     }
 
