@@ -56,11 +56,16 @@
 
 package org.objectstyle.cayenne.dba.db2;
 
+import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Iterator;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.types.AbstractType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -86,6 +91,7 @@ test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
  * @author Holger Hoffstaette
  */
 public class DB2Adapter extends JdbcAdapter {
+    private static Logger logObj = Logger.getLogger(DB2Adapter.class);
 
     /**
      * Creates a DB2 specific PK Generator.
@@ -99,6 +105,9 @@ public class DB2Adapter extends JdbcAdapter {
 
         // create specially configured CharType handler
         map.registerType(new CharType(true, true));
+        
+        // configure boolean type to work with numeric columns
+        map.registerType(new DB2BooleanType());
     }
 
     /**
@@ -214,6 +223,41 @@ public class DB2Adapter extends JdbcAdapter {
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new DB2QualifierTranslator(queryAssembler, "RTRIM");
+    }
+    
+    final class DB2BooleanType extends AbstractType {
+        
+        public String getClassName() {
+            return Boolean.class.getName();
+        }
+
+        public Object materializeObject(ResultSet rs, int index, int type)
+            throws Exception {
+            boolean b = rs.getBoolean(index);
+            return (rs.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
+        }
+
+        public Object materializeObject(CallableStatement st, int index, int type)
+            throws Exception {
+            boolean b = st.getBoolean(index);
+            return (st.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
+        }
+
+        public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision)
+            throws Exception {
+
+            if (val != null) {
+                st.setInt(pos, ((Boolean) val).booleanValue() ? 1 : 0);
+            }
+            else {
+                st.setNull(pos, type);
+            }
+        }
     }
 
 }

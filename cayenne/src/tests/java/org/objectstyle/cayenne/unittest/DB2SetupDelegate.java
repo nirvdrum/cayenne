@@ -14,4 +14,8 @@ public class DB2SetupDelegate extends DatabaseSetupDelegate {
     public boolean supportsBinaryPK() {
         return false;
     }
+    
+    public boolean supportsLobs() {
+        return true;
+    }
 }

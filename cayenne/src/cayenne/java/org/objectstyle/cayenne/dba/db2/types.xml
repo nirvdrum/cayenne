@@ -15,7 +15,7 @@ IBM DB2 types mapping
        <db-type name="BLOB"/>
    </jdbc-type>
    <jdbc-type name="BIT">
-       <db-type name="BIT"/>
+       <db-type name="SMALLINT"/>
    </jdbc-type>
    <jdbc-type name="BLOB">
        <db-type name="BLOB"/>
@@ -24,7 +24,7 @@ IBM DB2 types mapping
        <db-type name="BOOLEAN"/>
    </jdbc-type>
    <jdbc-type name="CHAR">
-       <db-type name="CHARACTER"/>
+       <db-type name="CHAR"/>
    </jdbc-type>
    <jdbc-type name="CLOB">
        <db-type name="CLOB"/>
@@ -81,7 +81,7 @@ IBM DB2 types mapping
        <db-type name="TIMESTAMP"/>
    </jdbc-type>
    <jdbc-type name="TINYINT">
-       <db-type name="TINYINT"/>
+       <db-type name="SMALLINT"/>
    </jdbc-type>
    <jdbc-type name="VARBINARY">
        <db-type name="BLOB"/>
