@@ -169,6 +169,10 @@ public class CharType extends AbstractType {
 		}
 
 		int size = (int) clob.length();
+		if(size == 0) {
+			return "";
+		}
+		
 		int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
 
 		Reader in = clob.getCharacterStream();

@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.CayenneException;
 public class ByteArrayType extends AbstractType {
 
 	private static final int BUF_SIZE = 8 * 1024;
+	private static final byte[] EMPTY_BYTES = new byte[0];
 
 	protected boolean trimmingBytes;
 	protected boolean usingBlobs;
@@ -184,6 +185,10 @@ public class ByteArrayType extends AbstractType {
 		}
 
 		int size = (int) blob.length();
+		if(size == 0) {
+			return EMPTY_BYTES;
+		}
+		
 		int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
 		InputStream in = blob.getBinaryStream();
 		return (in != null)
