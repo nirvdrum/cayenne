@@ -324,7 +324,7 @@ public class DataContext implements QueryEngine, Serializable {
 		ObjEntity objEntity,
 		Map dataRow,
 		boolean refresh) {
-	
+
 		ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
 
 		// synchronized on objectstore, since read/write
@@ -853,7 +853,8 @@ public class DataContext implements QueryEngine, Serializable {
 			if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
 				throw new CayenneRuntimeException(
 					"Only one-step relationships are "
-						+ "supported at the moment, this will be fixed soon. Unsupported path : "
+						+ "supported at the moment, this will be fixed soon. "
+						+ "Unsupported path : "
 						+ prefetchKey);
 			}
 
@@ -864,19 +865,20 @@ public class DataContext implements QueryEngine, Serializable {
 
 				if (dest == null) {
 					continue;
-				} else if (dest instanceof DataObject) {
-					DataObject destDO = (DataObject) dest;
-					if (destDO.getPersistenceState()
-						== PersistenceState.HOLLOW) {
-						needPrefetch.add(destDO);
+				} else
+					if (dest instanceof DataObject) {
+						DataObject destDO = (DataObject) dest;
+						if (destDO.getPersistenceState()
+							== PersistenceState.HOLLOW) {
+							needPrefetch.add(destDO);
+						}
+					} else {
+						throw new CayenneRuntimeException(
+							"Invalid/unsupported prefetch key '"
+								+ prefetchKey
+								+ "'. Resulting object must be a DataObject, instead it was "
+								+ dest.getClass().getName());
 					}
-				} else {
-					throw new CayenneRuntimeException(
-						"Invalid/unsupported prefetch key '"
-							+ prefetchKey
-							+ "'. Resulting object must be a DataObject, instead it was "
-							+ dest.getClass().getName());
-				}
 			}
 
 			if (needPrefetch.size() > 0) {
@@ -894,10 +896,7 @@ public class DataContext implements QueryEngine, Serializable {
 				ObjRelationship rev = r.getReverseRelationship();
 
 				Expression inExp =
-					ExpressionFactory.binaryPathExp(
-						Expression.IN,
-						rev.getName(),
-						needPrefetch);
+					ExpressionFactory.inExp(rev.getName(), needPrefetch);
 				queries.add(
 					new SelectQuery(r.getTargetEntity().getName(), inExp));
 			}
@@ -1058,13 +1057,14 @@ public class DataContext implements QueryEngine, Serializable {
 		out.defaultWriteObject();
 		if (this.parent == null && this.lazyInitParentDomainName != null) {
 			out.writeObject(lazyInitParentDomainName);
-		} else if (this.parent instanceof DataDomain) {
-			DataDomain domain = (DataDomain) this.parent;
-			out.writeObject(domain.getName());
-		} else {
-			out.writeObject(this.parent);
-			//Hope that whatever this.parent is, that it is Serializable
-		}
+		} else
+			if (this.parent instanceof DataDomain) {
+				DataDomain domain = (DataDomain) this.parent;
+				out.writeObject(domain.getName());
+			} else {
+				out.writeObject(this.parent);
+				//Hope that whatever this.parent is, that it is Serializable
+			}
 
 		//For writing, just write the objects.  They will be serialized possibly
 		// as just objectIds... it's up to the object itself.  Reading will do magic
@@ -1079,15 +1079,16 @@ public class DataContext implements QueryEngine, Serializable {
 		if (value instanceof QueryEngine) {
 			//Must be a real QueryEngine object - use it
 			this.parent = (QueryEngine) value;
-		} else if (value instanceof String) {
-			//Must be the name of a DataDomain - use it
-			this.lazyInitParentDomainName = (String) value;
-		} else {
-			throw new CayenneRuntimeException(
-				"Parent attribute of DataContext was neither a QueryEngine nor "
-					+ "the name of a valid DataDomain:"
-					+ value);
-		}
+		} else
+			if (value instanceof String) {
+				//Must be the name of a DataDomain - use it
+				this.lazyInitParentDomainName = (String) value;
+			} else {
+				throw new CayenneRuntimeException(
+					"Parent attribute of DataContext was neither a QueryEngine nor "
+						+ "the name of a valid DataDomain:"
+						+ value);
+			}
 
 		// CayenneDataObjects have a transient datacontext
 		// because at deserialize time the datacontext may need to be different
@@ -1139,10 +1140,12 @@ public class DataContext implements QueryEngine, Serializable {
 			logObj.debug(
 				"This combination already deleted.. undeleting to simulate the insert");
 			flattenedDeletes.remove(info);
-		} else if (!flattenedInserts.contains(info)) {
-			logObj.debug("This combination is not currently inserted... ok");
-			flattenedInserts.add(info);
-		}
+		} else
+			if (!flattenedInserts.contains(info)) {
+				logObj.debug(
+					"This combination is not currently inserted... ok");
+				flattenedInserts.add(info);
+			}
 	}
 
 	public void registerFlattenedRelationshipDelete(
@@ -1167,11 +1170,12 @@ public class DataContext implements QueryEngine, Serializable {
 			logObj.debug(
 				"This combination already inserted..uninserting to simulate the delete");
 			flattenedInserts.remove(info);
-		} else if (!flattenedDeletes.contains(info)) { //Do not delete it twice
-			logObj.debug(
-				"This combination is not currently deleted... registering for deletes");
-			flattenedDeletes.add(info);
-		}
+		} else
+			if (!flattenedDeletes.contains(info)) { //Do not delete it twice
+				logObj.debug(
+					"This combination is not currently deleted... registering for deletes");
+				flattenedDeletes.add(info);
+			}
 	}
 
 	/**
@@ -1371,18 +1375,17 @@ public class DataContext implements QueryEngine, Serializable {
 					//The next few lines are basically a cut down/modified 
 					// version of objectFromDataRow that handles the oid swapping
 					// properly 
-					Map dataRow=(Map) it.next();
+					Map dataRow = (Map) it.next();
 					DataObject obj = registeredObject(this.oid);
-					snapshotManager.mergeObjectWithSnapshot(
-						ent,
-						obj,
-						dataRow);
+					snapshotManager.mergeObjectWithSnapshot(ent, obj, dataRow);
 					obj.fetchFinished();
 					//Swizzle object ids as the old "flattened" one isn't suitable for later
 					// identification of this object
-					ObjectId newOid=ent.objectIdFromSnapshot(dataRow);
+					ObjectId newOid = ent.objectIdFromSnapshot(dataRow);
 					obj.setObjectId(newOid);
-					DataContext.this.objectStore.changeObjectKey(this.oid, newOid);
+					DataContext.this.objectStore.changeObjectKey(
+						this.oid,
+						newOid);
 					result.add(obj);
 				}
 			}

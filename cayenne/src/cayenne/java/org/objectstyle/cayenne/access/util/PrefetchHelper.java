@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class PrefetchHelper {
 
     /**
-     * resolve a toOne relation for a list of objects
+     * Resolves a toOne relationship for a list of objects.
      * (performance tuning only)
      */
     public static void resolveToOneRelations(
@@ -106,11 +106,14 @@ public class PrefetchHelper {
     }
 
     /**
-     * resolve a toMany relation for a list of objects
+     * Resolves a toMany relation for a list of objects.
      * (performance tuning only)
-     * WARNING: this is a bit of a hack - it works for my
-     * toMany's, but it possibly doesn't work in all cases
-     * *** It definitly does not work for compound keys ***
+     * 
+     * <p>WARNING: this is a bit of a hack - it works for my
+     * toMany's, but it possibly doesn't work in all cases.</p>
+     * 
+     * 
+     * <p>*** It definitly does not work for compound keys ***</p>
      */
     public static void resolveToManyRelations(
         DataContext context,
