@@ -5,13 +5,21 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>January 5, 2003:</i></strong> <strong>Cayenne 1.0a5-1 Released.</strong></u></p>
+        <p><u><strong><i>February 2, 2003:</i></strong> <strong>Cayenne 1.0a6 Released.</strong></u></p>
         
-        <p>This is a bugfix release for Alpha 5. Upgrade is recommended, especially if Alpha 5
-        is used. See the release notes <a href="RELEASE-NOTES-1.0a5-1.txt">here</a>. 
+        <p>This is a major feature ehnancement in Cayenne. Also this may be the 
+        last Alpha release, as we are moving forward to Beta and final 1.0.
+        For details see the <a href="RELEASE-NOTES-1.0a6.txt">release notes</a>. 
         Download the release 
         	<a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
-        here</a>. 
+        here</a>. Among other things in this release:
+        <ul>
+        	<li>Cascading delete rules for relationships.</li>
+        	<li>Initial event-based notification mechanism.</li>
+        	<li>Parameterized queries - ultimate reusable queries.</li>
+        	<li>Simplified Expression API.</li>
+        	<li>"Cdeploy" - Ant task for library deployment.</li>
+        </ul>
         </p>
         
         <p><img src="images/other/nhl_logo.gif"/> 
