@@ -56,12 +56,33 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
-import org.apache.commons.collections.*;
-import org.objectstyle.ashwood.graph.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.ComparatorUtils;
+import org.objectstyle.ashwood.graph.CollectionFactory;
+import org.objectstyle.ashwood.graph.Digraph;
+import org.objectstyle.ashwood.graph.GraphUtils;
+import org.objectstyle.ashwood.graph.IndegreeTopologicalSort;
+import org.objectstyle.ashwood.graph.MapDigraph;
+import org.objectstyle.ashwood.graph.StrongConnection;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
  * PrimaryKeyGenerationSupport resolves primary key dependencies for entities

@@ -65,7 +65,6 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.collections.IteratorUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;

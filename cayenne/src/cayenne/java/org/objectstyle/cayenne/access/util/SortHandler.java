@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * Defines a set of sorting methods based on object dependencies. The actual
