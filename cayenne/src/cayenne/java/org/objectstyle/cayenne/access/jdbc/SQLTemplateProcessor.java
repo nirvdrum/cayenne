@@ -67,6 +67,7 @@ import org.apache.velocity.context.InternalContextAdapterImpl;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.RuntimeInstance;
+import org.apache.velocity.runtime.log.NullLogSystem;
 import org.apache.velocity.runtime.parser.ParseException;
 import org.apache.velocity.runtime.parser.node.SimpleNode;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -98,6 +99,10 @@ class SQLTemplateProcessor {
     private static void initVelocityRuntime() {
         // init static velocity engine
         sharedRuntime = new RuntimeInstance();
+
+        // set null logger
+        sharedRuntime.addProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM, new NullLogSystem());
+        
         sharedRuntime.addProperty(
             RuntimeConstants.RESOURCE_MANAGER_CLASS,
             SQLTemplateResourceManager.class.getName());

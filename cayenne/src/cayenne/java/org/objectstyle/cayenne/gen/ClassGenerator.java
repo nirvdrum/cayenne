@@ -67,6 +67,9 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.log.NullLogSystem;
+import org.apache.velocity.runtime.resource.loader.JarResourceLoader;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
@@ -111,21 +114,27 @@ public class ClassGenerator {
             return;
         }
 
+        // TODO: use an internal RuntimeInstance like SQLTemplateProcessor does...
+        
         try {
             String classLoaderUrl = ResourceLocator.classBaseUrl(cl);
 
             // use ClasspathResourceLoader for velocity templates lookup
             // if Cayenne URL is not null, load resource from this URL
             Properties props = new Properties();
+            
+            // set null logger
+            props.put(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, NullLogSystem.class
+                    .getName());
+
             String loaderProp = null;
             // init special loaders
             if (classLoaderUrl != null && classLoaderUrl.startsWith("jar:")) {
                 loaderProp = "jar";
-                props.put(
-                        "jar.resource.loader.class",
-                        "org.apache.velocity.runtime.resource.loader.JarResourceLoader");
+                props.put("jar.resource.loader.class", JarResourceLoader.class.getName());
                 props.put("jar.resource.loader.path", classLoaderUrl);
-            } else if (classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
+            }
+            else if (classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
                 loaderProp = "file";
                 props.put("file.resource.loader.path", classLoaderUrl.substring(5));
             }
@@ -138,9 +147,9 @@ public class ClassGenerator {
             }
 
             // use custom file loader
-            props.put(
-                    "file.resource.loader.class",
-                    "org.objectstyle.cayenne.gen.AbsFileResourceLoader");
+            props
+                    .put("file.resource.loader.class", AbsFileResourceLoader.class
+                            .getName());
 
             // always add Classpath loader for default templates
             loaderProp = (loaderProp != null) ? loaderProp + ",class" : "class";
