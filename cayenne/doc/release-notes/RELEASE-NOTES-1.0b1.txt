@@ -40,3 +40,7 @@ AbstractQuery.
 
 12. Removed GuiFacade from map package, instead created MapUtil
 in gui.util.
+
+13. DataMap XML format changes for derived entities
+and attributes (see data-map.dtd). Note: older data maps
+are 100% compatible with the new format
