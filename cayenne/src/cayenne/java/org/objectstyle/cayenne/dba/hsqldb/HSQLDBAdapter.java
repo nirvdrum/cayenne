@@ -130,6 +130,9 @@ public class HSQLDBAdapter extends JdbcAdapter {
 		buf.append(refBuf.toString());
 		buf.append(')');
 
+		// also make sure we delete dependent FKs
+		buf.append(" ON DELETE CASCADE");
+
 		return buf.toString();
 	}
 
