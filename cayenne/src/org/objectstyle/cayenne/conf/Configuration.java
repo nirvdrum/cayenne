@@ -157,8 +157,7 @@ public abstract class Configuration {
         if (in == null)
             throw new ConfigException("Domain configuration file \""
                                       + DOMAIN_FILE
-                                      + "\" is not found in CLASSPATH. Current CLASSPATH is: "
-                                      + System.getProperty("java.class.path"));
+                                      + "\" is not found.");
 
         DomainHelper helper = new DomainHelper(this);
         if(!helper.loadDomains(in)) {

@@ -61,9 +61,11 @@ import org.objectstyle.util.*;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.testui.*;
 import org.objectstyle.cayenne.conn.*;
+import org.objectstyle.cayenne.conf.*;
 import java.io.*;
 import java.net.*;
 import java.util.logging.*;
+import javax.sql.*;
 
 
 /** Creates database connection info to run tests.
@@ -84,16 +86,31 @@ public class ConnectionSetup implements TestConstants {
         this.allowGui = allowGui;
     }
 
-    public DataSourceInfo buildConnectionInfo() {
+    public DataSourceInfo buildConnectionInfo() throws Exception {
         return (interactive)
                ? getInfoInteractively()
                : getInfoFromFile();
     }
 
-    private DataSourceInfo getInfoFromFile() {
-        return null;
+
+    private DataSourceInfo getInfoFromFile() throws Exception {
+        DefaultConfiguration conf = new DefaultConfiguration();
+        DomainHelper helper = new DomainHelper(conf);
+        InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DOMAIN_FILE);
+        if(in == null)
+            throw new RuntimeException("Can't find '" + Configuration.DOMAIN_FILE + "'.");
+
+        DisconnectedFactory factory = new DisconnectedFactory();
+        if(!helper.loadDomains(in, factory))
+            throw new RuntimeException("Error loading configuration.");
+
+        DataSourceInfo dsi = factory.getDriverInfo();
+        DataDomain dom = (DataDomain)helper.getDomains().get(0);
+        dsi.setAdapterClass(dom.getDataNodes()[0].getAdapter().getClass().getName());
+        return dsi;
     }
-    
+
+
     private DataSourceInfo getInfoInteractively() {
         InteractiveLogin loginObj = (allowGui)
                                     ? TestLogin.getTestGuiLoginObject()
@@ -108,4 +125,28 @@ public class ConnectionSetup implements TestConstants {
         return loginObj.getDataSrcInfo();
     }
 
+
+    /** Creates pooled DataSource without actually creating
+      * database connections.*/
+    class DisconnectedFactory extends DriverDataSourceFactory {
+        public DisconnectedFactory() throws Exception {
+            super();
+        }
+
+        /** Make this method public. */
+        public DataSourceInfo getDriverInfo() {
+            return super.getDriverInfo();
+        }
+
+        public DataSource getDataSource(String location) throws Exception {
+            load(location);
+            return new PoolManager(getDriverInfo().getJdbcDriver(),
+                                   getDriverInfo().getDataSourceUrl(),
+                                   0,
+                                   0,
+                                   getDriverInfo().getUserName(),
+                                   getDriverInfo().getPassword());
+        }
+
+    }
 }

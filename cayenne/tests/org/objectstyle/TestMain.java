@@ -105,11 +105,18 @@ public class TestMain implements TestConstants {
         configureProps();
 
         // initialize shared resources
-        DataSourceInfo dsi = (xmlDataSource)
-                             ? new ConnectionSetup(false, false).buildConnectionInfo()
-                             : new ConnectionSetup(true, !noGui).buildConnectionInfo();
+        try {
+            DataSourceInfo dsi = (xmlDataSource)
+                                 ? new ConnectionSetup(false, false).buildConnectionInfo()
+                                 : new ConnectionSetup(true, !noGui).buildConnectionInfo();
 
-        resources.setSharedConnInfo(dsi);
+            resources.setSharedConnInfo(dsi);
+        }
+        catch(Exception ex) {
+            logObj.log(Level.SEVERE, "Can not load connection info.", ex);
+            System.exit(1);
+        }
+
         resources.setSharedConnection(openConnection());
         resources.setSharedDomain(createSharedDomain());
 

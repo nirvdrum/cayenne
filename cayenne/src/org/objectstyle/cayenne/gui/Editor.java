@@ -566,7 +566,7 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
     BrowseView treePanel;
     JPanel detailPanel = new JPanel();
     JPanel emptyPanel = new JPanel();
-    DomainDetailView domainView;
+    // DomainDetailView domainView;
     JPanel nodeView = new JPanel();
     JPanel dataMapView = new JPanel();
     ObjDetailView objDetailView;
@@ -588,8 +588,8 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
 
 		JPanel temp = new JPanel();
 		detailPanel.add(temp, EMPTY_VIEW);
-		domainView = new DomainDetailView(temp_mediator);
-		detailPanel.add(domainView, DOMAIN_VIEW);
+		//domainView = new DomainDetailView(temp_mediator);
+		//detailPanel.add(domainView, DOMAIN_VIEW);
 		
         objDetailView = new ObjDetailView(temp_mediator);
         detailPanel.add(objDetailView, OBJ_VIEW);
