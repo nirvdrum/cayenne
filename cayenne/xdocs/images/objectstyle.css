@@ -1,10 +1,10 @@
-  .body {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 10pt; letter-spacing: normal } 
-  .body-black {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#000000; font-size: 10pt; letter-spacing: normal }
-  .body-black:hover {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#000000; font-size: 10pt; letter-spacing: normal }
-  .body-white {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#ffffff; font-size: 10pt; letter-spacing: normal }
-  .small {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 10px; letter-spacing: normal }
+  .body {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 8pt; letter-spacing: normal } 
+  .body-black {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#000000; font-size: 8pt; letter-spacing: normal }
+  .body-black:hover {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#000000; font-size: 8pt; letter-spacing: normal }
+  .body-white {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#ffffff; font-size: 8pt; letter-spacing: normal }
+  .small {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 8px; letter-spacing: normal }
   .big {font-family: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 12pt }
-  .normal {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size:  11pt; letter-spacing: normal}
+  .normal {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size:  10pt; letter-spacing: normal}
   .normal-red {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#cc0000; font-size:  10pt; letter-spacing: normal}
   
   A  {
@@ -34,7 +34,7 @@
       BORDER-TOP: #000000 1px solid; 
       COLOR: #000000; 
       FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; 
-      FONT-SIZE: 10pt;
+      FONT-SIZE: 8pt;
      }
       
  .source { 
@@ -45,5 +45,5 @@
      BORDER-TOP: #999966 1px solid; 
      COLOR: #000000; 
      FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; 
-     FONT-SIZE: 10pt;
+     FONT-SIZE: 8pt;
     }

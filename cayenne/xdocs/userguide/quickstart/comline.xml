@@ -137,18 +137,20 @@ projectdir> %JAVA_HOME%\bin\java test.Main metro
 			</p>
 <source>
 WARN  QueryLogger: --- will run 1 query.
-WARN  QueryLogger: SELECT t0.GALLERY_NAME, t0.GALLERY_ID FROM GALLERY t0 WHERE UPPER(t0.GALLERY_NAME
-) LIKE UPPER(?) [params: '%metro%'] - prepared in 20 ms.
+WARN  QueryLogger: SELECT t0.GALLERY_NAME, t0.GALLERY_ID 
+FROM GALLERY t0 WHERE UPPER(t0.GALLERY_NAME) LIKE UPPER(?) 
+[params: '%metro%'] - prepared in 20 ms.
 WARN  QueryLogger: === returned 1 row. - took 0 ms.
 
 Found gallery 'The Metropolitan Museum of Art'.
 
 WARN  QueryLogger: --- will run 2 queries.
-WARN  QueryLogger: INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) VALUES (?, ?, ?) 
-[params: 320, NULL, 'Salvador Dali']
+WARN  QueryLogger: INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) 
+VALUES (?, ?, ?) [params: 320, NULL, 'Salvador Dali']
 WARN  QueryLogger: === updated 1 row.
-WARN  QueryLogger: INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) 
-VALUES (?, ?, ?, ?) [params: 320, 320, NULL, 'Sleep']
+WARN  QueryLogger: INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, 
+ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?, ?, ?, ?) 
+[params: 320, 320, NULL, 'Sleep']
 WARN  QueryLogger: === updated 1 row.
 WARN  QueryLogger: +++ transaction committed.
 </source>

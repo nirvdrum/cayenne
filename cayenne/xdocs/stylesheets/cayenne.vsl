@@ -1,10 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 
-#set ($centralWidth = "75%")
+#set ($centralWidth = "80%")
 #set ($rightWidth = "10%")
 #set ($rightBG = "${relativePath}/images/778899.gif")
 #if ($root.getChild("toc"))
-    #set ($centralWidth = "60%")
+    #set ($centralWidth = "65%")
     #set ($rightWidth = "25%")  
     #set ($rightBG = "${relativePath}/images/666633.gif")
 #end
@@ -23,7 +23,7 @@
 <br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tbody><tr>
-    <td width="20%" height="70" align="right" valign="top" background="${relativePath}/images/778899.gif">
+    <td width="15%" height="70" align="right" valign="top" background="${relativePath}/images/778899.gif">
        <a href="http://objectstyle.org/"><img border="0" src="${relativePath}/images/os_logo.gif" width="160" height="32"></a>
     </td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
@@ -34,7 +34,7 @@
     <td width="${rightWidth}" background="${rightBG}"> </td>
   </tr>
   <tr>
-    <td width="20%" valign="top" bgcolor="#778899"><table width="100%" border="0" cellspacing="10" cellpadding="0">
+    <td width="15%" valign="top" bgcolor="#778899"><table width="100%" border="0" cellspacing="10" cellpadding="0">
     <tbody>
       <tr>
         <td align="right" class="normal">
@@ -64,14 +64,14 @@ search          </form>          </td>
     #tableOfContents()
   </tr>  <tr>
 
-    <td width="20%" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
+    <td width="15%" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="1" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="1" height="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${rightWidth}" height="1" bgcolor="#333333"><img border="0" src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
   </tr>
   <tr>
-    <td width="20%"></td>
+    <td width="15%"></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" valign="top"><table width="100%" border="0" cellspacing="10" cellpadding="0" class="body-black">
       <tbody><tr>
@@ -293,6 +293,7 @@ $tag
       <tbody>
        	<tr>
        		<td align="left" class="normal">
+       		<strong class="body-white">Table of Contents:</strong><br>
          #set ($toc = $project.getChild($root.getChild("toc").getAttributeValue("name")))
          #foreach ( $item in $toc.getChildren())
     		#set ($name = $item.getAttributeValue("name"))
