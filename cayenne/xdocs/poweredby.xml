@@ -11,9 +11,21 @@
         <p>If your site or project uses Cayenne as its Object-Relational engine, 
         please drop a note to <a href="http://objectstyle.org/cayenne/lists.html">cayenne-user</a> 
         list or directly to "andrus at objectstyle.org". We are in the process of 
-        building success stories page where this information will be included.
+        building success stories page where this information will be included. Here is 
+        an incomplete list of sites that use Cayenne:
         </p>
         
+        <p><img src="images/other/nhl_logo.gif"/> 
+        <strong>National Hockey League</strong></p>
+        
+        <p>After the initial trial of Cayenne in October 2002, NHL
+        switched all their public applications running at <a href="http://www.nhl.com">NHL.com</a>
+        to use Cayenne. With the help from <a href="http://objectstyle.com">ObjectStyle</a> and 
+        <a href="http://www.centralparksoftware.com/">Central Park Software</a> the site was successfully
+        launched to production. Currently applications receive more than 5 million hits a day. 
+        </p>
+        
+        <subsection name="Cayenne Badges">
         <p>Also we developed a few web badges to enable you to endorse Cayenne technology.
         Help us to spread the word and promote Cayenne. If your site or project uses
         Cayenne, you may put one of the following badges on the site. Badge should be configured
@@ -49,6 +61,7 @@
 			height="45" 
 			border="0"&gt;&lt;/a&gt;
 		</p>
+		</subsection>
         </section>
     </body>
 </document>
