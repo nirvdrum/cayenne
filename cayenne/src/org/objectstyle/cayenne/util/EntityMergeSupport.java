@@ -130,16 +130,40 @@ public class EntityMergeSupport {
 	protected List getAttributesToAdd() {
 		ArrayList missing = new ArrayList();
         Iterator it = entity.getDbEntity().getAttributeList().iterator();
+        List rels = entity.getDbEntity().getRelationshipList();
+        
         while(it.hasNext()) {
-        	DbAttribute dba = (DbAttribute)it.next();
-        	// check if adding it makes sense at all
+        	DbAttribute dba = (DbAttribute)it.next();        	
+        	// already there
+        	if(entity.getAttributeForDbAttribute(dba) != null) {
+        		continue;
+        	}
+        	
+          	// check if adding it makes sense at all
         	if(dba.getName() == null || dba.isPrimaryKey()) {
         		continue;
         	}
         	
-        	if(entity.getAttributeForDbAttribute(dba) == null) {
-        		missing.add(dba);
+        	// check FK's 
+        	boolean isFK = false;
+        	Iterator rit = rels.iterator();
+        	while(!isFK && rit.hasNext()) {
+        		DbRelationship rel = (DbRelationship)rit.next();
+        		Iterator jit = rel.getJoins().iterator();
+        		while(jit.hasNext()) {
+        			DbAttributePair join = (DbAttributePair)jit.next();
+        			if(join.getSource() == dba) {
+        				isFK = true;
+        				break;
+        			}
+        		}
         	}
+        	
+        	if(isFK) {
+        		continue;
+        	}
+        	
+        	missing.add(dba);
         }
         
         return missing;
