@@ -53,43 +53,55 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.gui.util;
 
 import java.io.File;
 
-import junit.framework.TestCase;
+import javax.swing.filechooser.FileFilter;
 
 /**
+ * Filter that defines the rules for EOModel selection.
+ * This filter will only allow selection of the following 
+ * files/directories:
+ * <ul>
+ * 	 <li>Directories with name matching <code>*.eomodeld</code>
+ *   that contain <code>index.eomodeld</code>.</li>
+ *   <li><code>index.eomodeld</code> files contained within 
+ *   <code>*.eomodeld</code> directory.</li>
+ * </ul>
+ * 
  * @author Andrei Adamchik
  */
-public class EOModelFileFilterTst extends TestCase {
-	protected EOModelFileFilter filter;
+public class EOModelSelectFilter extends FileFilter {
+	/**
+	 * Accepts all directories and <code>*.eomodeld/index.eomodeld</code> files.
+	 *
+	 * @see EOModelSelectFilter#accept(File)
+	 */
+	public boolean accept(File f) {
+		if (f.isDirectory()) {
+			if (f.getName().endsWith(EOModelFileFilter.EOM_SUFFIX)
+				&& new File(f, EOModelFileFilter.EOM_INDEX).exists()) {
+
+				return true;
+			}
+		} else if (f.isFile()) {
+			File parent = f.getParentFile();
+			if (parent != null
+				&& parent.getName().endsWith(EOModelFileFilter.EOM_SUFFIX)
+				&& EOModelFileFilter.EOM_INDEX.equals(f.getName())) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
-	 * Constructor for EOModelFileFilterTst.
+	 * @see javax.swing.filechooser.FileFilter#getDescription()
 	 */
-	public EOModelFileFilterTst(String name) {
-		super(name);
-	}
-	
-	public void setUp() throws Exception {
-		filter = new EOModelFileFilter();
-	}
-	
-	public void testAcceptDir() throws Exception {
-		assertTrue(filter.accept(new File(".")));
-	}
-	
-	public void testRejectIndexEOM() throws Exception {
-		assertTrue(filter.accept(new File("index.eomodeld")));
-	}
-	
-	public void testAcceptIndexEOM() throws Exception {
-		assertTrue(filter.accept(new File("some.eomodeld/index.eomodeld")));
-	}
-	
-	public void testNoAcceptOther() throws Exception {
-		assertTrue(!filter.accept(new File("somefile.txt")));
+	public String getDescription() {
+		return "*" + EOModelFileFilter.EOM_SUFFIX;
 	}
 }
-

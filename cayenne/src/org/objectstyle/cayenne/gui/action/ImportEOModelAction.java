@@ -53,17 +53,22 @@
  * <http://objectstyle.org/>.
  *
  */
- 
+
 package org.objectstyle.cayenne.gui.action;
 
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
+import org.objectstyle.cayenne.gui.util.EOModelFileFilter;
+import org.objectstyle.cayenne.gui.util.EOModelSelectFilter;
 import org.objectstyle.util.Preferences;
 
 /**
@@ -72,6 +77,7 @@ import org.objectstyle.util.Preferences;
  * @author Andrei Adamchik
  */
 public class ImportEOModelAction extends CayenneAction {
+	protected JFileChooser eoModelChooser;
 
 	/**
 	 * Constructor for ImportEOModelAction.
@@ -86,34 +92,99 @@ public class ImportEOModelAction extends CayenneAction {
 	public void actionPerformed(ActionEvent event) {
 		importEOModel();
 	}
-	
+
 	/** 
 	 * Lets user select an EOModel, then imports it as a DataMap.
 	 */
 	protected void importEOModel() {
-       	String startDir = Preferences.getPreferences().getString(Preferences.LAST_DIR);
-       	JFileChooser fileChooser = Editor.getFrame().getFileChooser();
-       	
-     /*   try {
-            // Find index.eomodeld
-            File file = null;
-            fileChooser.setFileFilter(new ProjFileFilter());
-            fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            if (null != init_dir) {
-            	File init_dir_file = new File(init_dir);
-            	if (init_dir_file.exists())
-            		fileChooser.setCurrentDirectory(init_dir_file);
-            }
-            int ret_code = fileChooser.showOpenDialog(this);
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fileChooser.getSelectedFile();
-            openProject(file);
-        } catch (Exception e) {
-            System.out.println("Error loading project file, " + e.getMessage());
-            e.printStackTrace();
-        } */
+		JFileChooser fileChooser = getEOModelChooser();
+		int status = fileChooser.showOpenDialog(Editor.getFrame());
+
+		if (status == JFileChooser.APPROVE_OPTION) {
+			// save preferences
+			File file = fileChooser.getSelectedFile();
+			if (file.isFile()) {
+				file = file.getParentFile();
+			}
+
+			Preferences.getPreferences().setProperty(
+				Preferences.LAST_EOM_DIR,
+				file.getParent());
+
+			System.out.println("File: " + file);
+		}
+	}
+
+	/** 
+	 * Returns EOModel chooser.
+	 */
+	public JFileChooser getEOModelChooser() {
+
+		if (eoModelChooser == null) {
+			eoModelChooser = new EOModelChooser("Select EOModel");
+		}
+
+		String startDir =
+			Preferences.getPreferences().getString(Preferences.LAST_EOM_DIR);
+
+		if (startDir == null) {
+			startDir =
+				Preferences.getPreferences().getString(Preferences.LAST_DIR);
+		}
+
+		if (startDir != null) {
+			File startDirFile = new File(startDir);
+			if (startDirFile.exists()) {
+				eoModelChooser.setCurrentDirectory(startDirFile);
+			}
+		}
+
+		return eoModelChooser;
+	}
+
+	/** 
+	 * Custom file chooser that will pop up again if a bad directory is selected.
+	 */
+	class EOModelChooser extends JFileChooser {
+		protected FileFilter selectFilter;
+		protected JDialog cachedDialog;
+
+		public EOModelChooser(String title) {
+			super.setFileFilter(new EOModelFileFilter());
+			super.setDialogTitle(title);
+			super.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+
+			this.selectFilter = new EOModelSelectFilter();
+		}
+
+		public int showOpenDialog(Component parent) {
+			int status = super.showOpenDialog(parent);
+			if (status != JFileChooser.APPROVE_OPTION) {
+				cachedDialog = null;
+				return status;
+			}
+
+			// make sure invalid directory is not selected
+			File file = this.getSelectedFile();
+			if (selectFilter.accept(file)) {
+				cachedDialog = null;
+				return JFileChooser.APPROVE_OPTION;
+			} else {
+				if (file.isDirectory()) {
+					this.setCurrentDirectory(file);
+				}
+
+				return this.showOpenDialog(parent);
+			}
+		}
+
+		protected JDialog createDialog(Component parent)
+			throws HeadlessException {
+
+			if (cachedDialog == null) {
+				cachedDialog = super.createDialog(parent);
+			}
+			return cachedDialog;
+		}
 	}
 }
-

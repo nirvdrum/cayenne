@@ -81,6 +81,10 @@ public class Preferences extends ExtendedProperties {
 
 	/** The directory of the cayenne project edited last. */
 	public static final String LAST_DIR = "Editor.lastProject";
+	
+	/** The directory where the last EOModel was imported. */
+	public static final String LAST_EOM_DIR = "Editor.lastEOModel";
+	
 	/** List of the last 4 opened project files. */
 	public static final String LAST_PROJ_FILES = "Editor.lastSeveralProjectFiles";
 	/** The directory of the last generated classes. */

@@ -52,8 +52,8 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
+
 package org.objectstyle.cayenne.gui.util;
 
 import java.io.File;
@@ -61,30 +61,37 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 /**
- * FileFilter used with JFileChooser to select EOModels. 
- * This filter will only display directories and index.eomodeld
- * files.
+ * FileFilter used with JFileChooser to filter file view
+ * for EOModel selection. This filter will only display
+ * directories and index.eomodeld files.
  * 
  * @author Andrei Adamchik
  */
 public class EOModelFileFilter extends FileFilter {
-	public static final String EOM_INDEX = "index.eomodeld";
+	public static final String EOM_SUFFIX = ".eomodeld";
+	public static final String EOM_INDEX = "index" + EOM_SUFFIX;
 
 	/**
-	 * Accepts all directories and <code>index.eomodeld</code> files.
+	 * Accepts all directories and <code>*.eomodeld/index.eomodeld</code> files.
 	 * 
 	 * @see javax.swing.filechooser.FileFilter#accept(File)
 	 */
 	public boolean accept(File f) {
-		return f.isDirectory() || EOM_INDEX.equals(f.getName());
+		if (f.isDirectory()) {
+			return true;
+		}
+
+		File parent = f.getParentFile();
+		return parent != null
+			&& parent.getName().endsWith(EOM_SUFFIX)
+			&& EOM_INDEX.equals(f.getName());
 	}
 
 	/**
 	 * @see javax.swing.filechooser.FileFilter#getDescription()
 	 */
 	public String getDescription() {
-		return "Select EOModel";
+		return "*" + EOM_SUFFIX;
 	}
 
 }
-
