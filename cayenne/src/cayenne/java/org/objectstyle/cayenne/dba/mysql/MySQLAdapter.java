@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
  * DbAdapter implementation for <a href="http://www.mysql.com">MySQL RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developer.html#unit">connection 
+ * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection 
  * settings</a> to use with MySQL are shown below:
  * 
 <pre>

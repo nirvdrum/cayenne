@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 /**
  * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/">
  * HSQLDB RDBMS</a>. Sample <a target="_top" 
- * href="../../../../../../../developer.html#unit">connection 
+ * href="../../../../../../../developerguide/unit-tests.html">connection 
  * settings</a> to use with HSQLDB are shown below:
  * 
 <pre>

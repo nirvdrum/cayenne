@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 
 /**
  * DbAdapter implementation for <a href="http://www.postgresql.org">PostgreSQL RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developer.html#unit">connection 
+ * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection 
  * settings</a> to use with PostgreSQL are shown below:
  * 
 <pre>

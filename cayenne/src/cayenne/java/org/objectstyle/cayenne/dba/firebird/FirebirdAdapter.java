@@ -73,14 +73,14 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
  * DbAdapter implementation for <a href="http://www.firebirdsql.org">Firebird RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developer.html#unit">connection
+ * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection
  * settings</a> to use with Firebird are shown below:
  *
  * <pre>
  * test-firebird.cayenne.adapter = org.objectstyle.cayenne.dba.firebird.FirebirdAdapter
  * test-firebird.jdbc.username = sysdba
  * test-firebird.jdbc.password = masterkey
- * test-firebird.jdbc.url = jdbc:firebirdsql:[host[:port]/]<database>
+ * test-firebird.jdbc.url = jdbc:firebirdsql:[host[/port]/]<database>
  * test-firebird.jdbc.driver = org.firebirdsql.jdbc.FBDriver
  * </pre>
  *
