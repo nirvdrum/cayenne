@@ -52,75 +52,81 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.query;
 
 import junit.framework.TestCase;
 
-
 public class SelectQueryBasicsTst extends TestCase {
-    protected SelectQuery q;
-    
-    public SelectQueryBasicsTst(String name) {
-        super(name);
-    }
-    
-    public void setUp() throws java.lang.Exception {
-        q = new SelectQuery();
-    }
-    
-    public void testAddOrdering1() throws Exception {
-        Ordering ord = new Ordering();
-        q.addOrdering(ord);
-        assertEquals(1, q.getOrderingList().size());
-        assertSame(ord, q.getOrderingList().get(0));
-    }
-    
-    
-    public void testAddPrefetching() throws Exception {
-        String path = "a.b.c";
-        q.addPrefetch(path);
-        assertEquals(1, q.getPrefetchList().size());
-        assertSame(path, q.getPrefetchList().get(0));
-    }
-    
-    
-    public void testAddOrdering2() throws Exception {        
-        String path = "a.b.c";
-        q.addOrdering(path, Ordering.DESC);
-        assertEquals(1, q.getOrderingList().size());
-        
-        Ordering ord  = (Ordering)q.getOrderingList().get(0);
-        assertEquals(path, ord.getSortPathSpec());
-        assertEquals(Ordering.DESC, ord.isAscending());
-    }
-    
-    
-    public void testDistinct() throws Exception {
-    	assertTrue(!q.isDistinct());
-        q.setDistinct(true);
-        assertTrue(q.isDistinct());
-    }
-    
-    public void testFetchingDataRows() {
-    	assertTrue(!q.isFetchingDataRows());
-    	q.setFetchingDataRows(true);
-    	assertTrue(q.isFetchingDataRows());
-    }
-    
-    public void testQueryAttributes() throws Exception {
-    	assertEquals(0, q.getResultsDbAttributes().size());
-    	
-    	q.addResultDbAttribute("ARTIST_ID");
-    	assertEquals(1, q.getResultsDbAttributes().size());
-    	assertEquals("ARTIST_ID", q.getResultsDbAttributes().get(0));
-    }
-    
-    public void testUsingRootEntityAttributes() throws Exception {
-    	assertTrue(q.isUsingRootEntityAttributes());
-    	
-    	q.addResultDbAttribute("ARTIST_ID");
-    	assertTrue(!q.isUsingRootEntityAttributes());
-    }
+	protected SelectQuery q;
+
+	public SelectQueryBasicsTst(String name) {
+		super(name);
+	}
+
+	public void setUp() throws java.lang.Exception {
+		q = new SelectQuery();
+	}
+
+	public void testAddOrdering1() throws Exception {
+		Ordering ord = new Ordering();
+		q.addOrdering(ord);
+		assertEquals(1, q.getOrderingList().size());
+		assertSame(ord, q.getOrderingList().get(0));
+	}
+
+	public void testAddPrefetching() throws Exception {
+		String path = "a.b.c";
+		q.addPrefetch(path);
+		assertEquals(1, q.getPrefetchList().size());
+		assertSame(path, q.getPrefetchList().get(0));
+	}
+
+	public void testAddOrdering2() throws Exception {
+		String path = "a.b.c";
+		q.addOrdering(path, Ordering.DESC);
+		assertEquals(1, q.getOrderingList().size());
+
+		Ordering ord = (Ordering) q.getOrderingList().get(0);
+		assertEquals(path, ord.getSortPathSpec());
+		assertEquals(Ordering.DESC, ord.isAscending());
+	}
+
+	public void testDistinct() throws Exception {
+		assertTrue(!q.isDistinct());
+		q.setDistinct(true);
+		assertTrue(q.isDistinct());
+	}
+
+	public void testFetchingDataRows1() {
+		assertTrue(!q.isFetchingDataRows());
+		q.setFetchingDataRows(true);
+		assertTrue(q.isFetchingDataRows());
+	}
+
+	public void testFetchingDataRows2() {
+		assertTrue(!q.isFetchingDataRows());
+		q.addResultDbAttribute("ARTIST_ID");
+		assertTrue(q.isFetchingDataRows());
+
+        // this shouldn't have any effect, since custom attributes are fetched
+		q.setFetchingDataRows(false);
+		assertTrue(q.isFetchingDataRows());
+	}
+
+	public void testQueryAttributes() throws Exception {
+		assertEquals(0, q.getResultsDbAttributes().size());
+
+		q.addResultDbAttribute("ARTIST_ID");
+		assertEquals(1, q.getResultsDbAttributes().size());
+		assertEquals("ARTIST_ID", q.getResultsDbAttributes().get(0));
+	}
+
+	public void testUsingRootEntityAttributes() throws Exception {
+		assertTrue(!q.isFetchingCustAttributes());
+
+		q.addResultDbAttribute("ARTIST_ID");
+		assertTrue(q.isFetchingCustAttributes());
+	}
 }
