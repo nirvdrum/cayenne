@@ -5,6 +5,13 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
+        <p><u><strong><i>April 28, 2003:</i></strong> <strong>Cayenne Beta 2 Released.</strong></u></p>
+        
+        <p>Bugfix release. For details see the <a href="RELEASE-NOTES-1.0b2.txt">release notes</a>. 
+        Download the release <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
+        here</a>.
+        </p>
+
         <p><u><strong><i>April 19, 2003:</i></strong> <strong>Cayenne Beta Released.</strong></u></p>
         
         <p>This is both the first Beta release of Cayenne and a major feature enhancement.
