@@ -358,13 +358,12 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
         } catch (Exception e) {
-            System.out.println("Error loading project file, " + e.getMessage());
+            System.out.println("Error setting node file location, " + e.getMessage());
             e.printStackTrace();
         }
 	}
 	
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-		System.out.println("In currentDataNodeChanged() 1.0");
 		DataNode node = e.getDataNode();
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		oldName = node.getName();
@@ -377,7 +376,6 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		else populateDbAdapter("");
 		DataSourceInfo info = src.getDataSourceInfo();
 		populateDataSourceInfo(info);
-		System.out.println("In currentDataNodeChanged() 2.0");
 	}
 	
 	private void populateDbAdapter(String selected_class){

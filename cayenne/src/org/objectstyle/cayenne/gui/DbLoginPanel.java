@@ -165,7 +165,6 @@ public class DbLoginPanel extends JDialog implements ActionListener {
         gbl.setConstraints(unInput, cstr);
         panel.add(unInput);
 
-
         // password line
         JLabel pwdLabel = new JLabel("Password:");
         cstr.gridwidth = 1;
@@ -194,7 +193,6 @@ public class DbLoginPanel extends JDialog implements ActionListener {
         gbl.setConstraints(drInput, cstr);
         panel.add(drInput);
 
-
         // Database URL line
         JLabel urlLabel = new JLabel("Database URL:");
         cstr.gridwidth = 1;
@@ -208,7 +206,6 @@ public class DbLoginPanel extends JDialog implements ActionListener {
         cstr.anchor = GridBagConstraints.CENTER;
         gbl.setConstraints(urlInput, cstr);
         panel.add(urlInput);
-
 
         // Adapter class line
         JLabel adapterLabel = new JLabel("RDBMS Adapter:");

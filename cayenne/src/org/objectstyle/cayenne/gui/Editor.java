@@ -54,10 +54,12 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */ 
- 
+
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URL;
 import java.sql.*;
 import java.util.*;
 import javax.swing.*;
@@ -66,6 +68,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.commons.collections.ExtendedProperties;
 
+import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.conf.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
@@ -83,57 +86,54 @@ implements ActionListener
 , DomainDisplayListener, DataNodeDisplayListener, DataMapDisplayListener
 , ObjEntityDisplayListener, DbEntityDisplayListener
 {
-	/** Directory for preferences in User home. */
-	public static final String CAYENNE_PREF_DIR = "cayenne";
-	/** Name of the preferences file in the CAYENNE_PREF_DIR.
-	  * General standard for keys in the preferences:
-	  * Use class name (optionally with the package name) and 
-	  * the name of the field which uses this preference. */
-	public static final String CAYENNE_PREF = ".preferences";
-	/* Keys for the preference file. */
-	/** The directory of the cayenne project edited last. */
-	public static final String LAST_DIR = "Editor.lastProject";
 	
     EditorView view;
     Mediator mediator;
     /** The object last selected in BrowseView. */
     Object context;
 
-    JMenuBar  menuBar    = new JMenuBar();
-    JMenu  fileMenu    = new JMenu("File");
-    JMenuItem  createProjectMenu  = new JMenuItem("New Project");
-    JMenuItem createDomainMenu = new JMenuItem("New Domain");
-    JMenuItem createDataMapMenu = new JMenuItem("New Data Map");
-    JMenuItem createDataSourceMenu= new JMenuItem("New Data Source");
-    JMenuItem createObjEntityMenu = new JMenuItem("New Object Entity");
-    JMenuItem createDbEntityMenu = new JMenuItem("New DB Entity");
-    JMenuItem removeMenu = new JMenuItem("Remove");
-    JMenuItem  openProjectMenu  = new JMenuItem("Open Project");
-    JMenuItem  openDataMapMenu  = new JMenuItem("Open Data Map");
-    JMenuItem  closeProjectMenu  = new JMenuItem("Close Project");
-    JMenuItem saveMapMenu    = new JMenuItem("Save Current Map");
-    JMenuItem saveMapAsMenu    = new JMenuItem("Save Current Map As");
-    JMenuItem saveProjectMenu    = new JMenuItem("Save Project");
+    JMenuBar  menuBar    	= new JMenuBar();
+    JMenu  fileMenu    		= new JMenu("File");
+    JMenuItem  createProjectMenu  	= new JMenuItem("New Project");
+    JMenuItem createDomainMenu 		= new JMenuItem("New Domain");
+    JMenuItem createDataMapMenu 	= new JMenuItem("New Data Map");
+    JMenuItem createDataSourceMenu	= new JMenuItem("New Data Source");
+    JMenuItem createObjEntityMenu 	= new JMenuItem("New Object Entity");
+    JMenuItem createDbEntityMenu 	= new JMenuItem("New DB Entity");
+    JMenuItem removeMenu 			= new JMenuItem("Remove");
+    JMenuItem  openProjectMenu  	= new JMenuItem("Open Project");
+    JMenuItem  openDataMapMenu  	= new JMenuItem("Open Data Map");
+    JMenuItem  closeProjectMenu  	= new JMenuItem("Close Project");
+    JMenuItem saveMapMenu   		= new JMenuItem("Save Current Map");
+    JMenuItem saveMapAsMenu 		= new JMenuItem("Save Current Map As");
+    JMenuItem saveProjectMenu    	= new JMenuItem("Save Project");
     JMenuItem saveAllMenu   = new JMenuItem("Save All");
-    JMenuItem  exitMenu    = new JMenuItem("Exit");
-    JMenu  toolMenu   = new JMenu("Tools");
+    JMenuItem  exitMenu    	= new JMenuItem("Exit");
+    JMenu  toolMenu   		= new JMenu("Tools");
     JMenuItem importDbMenu  = new JMenuItem("Reverse engineer database");
     JMenuItem generateMenu  = new JMenuItem("Generate Classes");
+
+	JToolBar toolBar		= new JToolBar();
+	JButton  createDomainBtn;
+	JButton  createDataMapBtn;
+	JButton  createDataSourceBtn;
+	JButton  createObjEntityBtn;
+	JButton  createDbEntityBtn;
+	JButton	 removeBtn;
 
     //Create a file chooser
     final JFileChooser fileChooser   = new JFileChooser();
     XmlFilter xmlFilter    			 = new XmlFilter();
     
-    ExtendedProperties pref = new ExtendedProperties();
-
 	private static Editor frame;
 
     private Editor() {
         super("Cayenne Modeler");
 
         init();
-        loadPreferences();
 		disableMenu();
+        createDomainMenu.setEnabled(false);
+        createDomainBtn.setEnabled(false);
 
         createProjectMenu.addActionListener(this);
         createDomainMenu.addActionListener(this);
@@ -154,12 +154,19 @@ implements ActionListener
         importDbMenu.addActionListener(this);
         generateMenu.addActionListener(this);
 
+		createDomainBtn.addActionListener(this);
+		createDataMapBtn.addActionListener(this);
+		createDataSourceBtn.addActionListener(this);
+		createObjEntityBtn.addActionListener(this);
+		createDbEntityBtn.addActionListener(this);
+		removeBtn.addActionListener(this);
+	
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     	setSize(650, 550);
     	
     	this.addWindowListener(new WindowAdapter() {
     		public void windowClosing(WindowEvent e) {
-    			storePreferences();
+    			Preferences.getPreferences().storePreferences(Editor.this);
     		}
     	});
     }
@@ -170,68 +177,6 @@ implements ActionListener
 			frame = new Editor();
 		}
 		return frame;
-	}
-
-	public ExtendedProperties getPreferences() { return pref; }
-
-	private void loadPreferences() {
-		String home_dir = System.getProperty("user.home");
-		if (null == home_dir) {
-			JOptionPane.showMessageDialog(this
-							, "User home directory is not specified. "
-							+ " Loading from current directory");
-			home_dir = "";
-		}
-		String pref_dir = home_dir + File.separator + Editor.CAYENNE_PREF_DIR;
-		System.out.println("Editor::loadPreferences(), pref dir path is " + pref_dir);
-		File pref_dir_file = new File(pref_dir);
-		try {
-			if (!pref_dir_file.exists()) {
-				if (false == pref_dir_file.mkdir()) {
-					JOptionPane.showMessageDialog(this
-							, "Error creating preferences directory. ");
-					return;
-				}
-			}
-			String pref_file_name = pref_dir + File.separator + Editor.CAYENNE_PREF;
-			File pref_file = new File(pref_file_name);
-			if (!pref_file.exists()) {
-				if (false == pref_file.createNewFile()) {
-					JOptionPane.showMessageDialog(this
-							, "Error creating preferences file. ");
-					return;
-				}
-			}
-			pref.load(new FileInputStream(pref_file));
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(this
-							, "Error loading preferences. Preferences ignored. ");
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-	/** Store preferences (when the Editor window closes down). 
-	  * Preferences stored to User Home\cayenne\.preferences file. */
-	private void storePreferences() {
-		System.out.println("Storing preferences");
-		String home_dir = System.getProperty("user.home");
-		if (null == home_dir)
-			home_dir = "";
-		String pref_dir = home_dir + File.separator + Editor.CAYENNE_PREF_DIR 
-						+ File.separator + Editor.CAYENNE_PREF;
-		File pref_file = new File(pref_dir);
-		try {
-			if (!pref_file.exists()) {
-				System.out.println("Cannot save preferences - file " 
-									+ pref_dir + " does not exist");
-				return;
-			}
-			pref.save(new FileOutputStream(pref_file), "");
-		} catch (IOException e) {
-			System.out.println("Error saving preferences: " + e.getMessage());
-			e.printStackTrace();
-		}
 	}
 
     private void init() {
@@ -264,6 +209,51 @@ implements ActionListener
 
         toolMenu.add(importDbMenu);
         toolMenu.add(generateMenu);
+        
+        initToolBar();
+    }
+    
+    private void initToolBar() {
+    	String path = "org/objectstyle/gui/";
+    	
+    	ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
+    	URL url = cl.getResource(path + "images/domain24.jpg");
+        ImageIcon domainIcon = new ImageIcon(url);
+        createDomainBtn = new JButton(domainIcon);
+        createDomainBtn.setToolTipText("Create new domain");
+        toolBar.add(createDomainBtn);
+        
+    	url = cl.getResource(path + "images/node24.jpg");
+    	ImageIcon nodeIcon = new ImageIcon(url);
+    	createDataSourceBtn = new JButton(nodeIcon);
+    	createDataSourceBtn.setToolTipText("Create new data node");
+        toolBar.add(createDataSourceBtn);
+    	
+    	url = cl.getResource(path + "images/map24.jpg");
+    	ImageIcon mapIcon = new ImageIcon(url);
+    	createDataMapBtn = new JButton(mapIcon);
+    	createDataMapBtn.setToolTipText("Create new data map");
+        toolBar.add(createDataMapBtn);
+    	
+    	url = cl.getResource(path + "images/dbentity24.jpg");
+    	ImageIcon dbEntityIcon = new ImageIcon(url);
+    	createDbEntityBtn = new JButton(dbEntityIcon);
+    	createDbEntityBtn.setToolTipText("Create new db entity");
+        toolBar.add(createDbEntityBtn);
+    	
+    	url = cl.getResource(path + "images/objentity24.jpg");
+    	ImageIcon objEntityIcon = new ImageIcon(url);
+    	createObjEntityBtn = new JButton(objEntityIcon);
+    	createObjEntityBtn.setToolTipText("Create new obj entity");
+        toolBar.add(createObjEntityBtn);
+    	
+    	url = cl.getResource(path + "images/remove24.jpg");
+    	ImageIcon removeIcon = new ImageIcon(url);
+    	removeBtn = new JButton(removeIcon);
+    	removeBtn.setToolTipText("Remove current");
+        toolBar.add(removeBtn);
+    	
+    	getContentPane().add(toolBar, BorderLayout.NORTH);
     }
 
     public void actionPerformed(ActionEvent e) {
@@ -279,17 +269,17 @@ implements ActionListener
             saveMapAs(mediator.getCurrentDataMap());
         } else if (src == createProjectMenu) {
             createProject();
-        } else if (src == createDomainMenu) {
+        } else if (src == createDomainMenu || src == createDomainBtn) {
             createDomain();
-        } else if (src == createDataMapMenu) {
+        } else if (src == createDataMapMenu || src == createDataMapBtn) {
         	mediator.addDataMap(this, new DataMap(DataMapWrapper.sessionUniqueDomainName()));
-    	} else if (src == createDataSourceMenu) {
+    	} else if (src == createDataSourceMenu || src == createDataSourceBtn) {
     		createDataNode();
-        } else if (src == createObjEntityMenu) {
+        } else if (src == createObjEntityMenu || src == createObjEntityBtn) {
         	createObjEntity();
-        } else if (src == createDbEntityMenu) {
+        } else if (src == createDbEntityMenu || src == createDbEntityBtn) {
         	createDbEntity();
-        } else if (src == removeMenu) {
+        } else if (src == removeMenu || src == removeBtn) {
         	remove();
         } else if (src == saveMapMenu) {
             saveDataMap(mediator.getCurrentDataMap());
@@ -302,7 +292,7 @@ implements ActionListener
         } else if (src == generateMenu) {
             generateClasses();
         } else if (src == exitMenu) {
-        	storePreferences();
+        	Preferences.getPreferences().storePreferences(this);
             setVisible(false);
             dispose();
             System.exit(0);
@@ -338,7 +328,12 @@ implements ActionListener
         mediator = null;
         repaint();
         disableMenu();
+
+        createDomainMenu.setEnabled(false);
+        createDomainBtn.setEnabled(false);
         removeMenu.setText("Remove");
+        removeBtn.setToolTipText("Remove");
+
 	}
 
 	private void importDb() {
@@ -437,7 +432,8 @@ implements ActionListener
 	}
 
     private void createProject() {
-       	String init_dir = (String)getPreferences().getProperty(LAST_DIR);
+    	Preferences pref = Preferences.getPreferences();
+       	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
@@ -457,7 +453,7 @@ implements ActionListener
             if (!file.exists())
             	file.createNewFile();
             // Save dir path to the preferences
-            getPreferences().setProperty(LAST_DIR, file.getAbsolutePath());
+            pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
             // Create project file (cayenne.xml)
             File proj_file = new File(file.getAbsolutePath() 
             							+ File.separator 
@@ -488,7 +484,8 @@ implements ActionListener
 
     /** Open specified cayenne.xml file. */
     private void openProject() {
-       	String init_dir = (String)getPreferences().getProperty(LAST_DIR);
+    	Preferences pref = Preferences.getPreferences();
+       	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
@@ -505,7 +502,7 @@ implements ActionListener
                 return;
             file = fileChooser.getSelectedFile();
             // Save dir path to the preferences
-			getPreferences().setProperty(LAST_DIR, file.getParent());
+			pref.setProperty(Preferences.LAST_DIR, file.getParent());
 			System.out.println("File path is " + file.getAbsolutePath());
 			GuiConfiguration.initSharedConfig(file);
             GuiConfiguration config = GuiConfiguration.getGuiConfig();
@@ -529,8 +526,11 @@ implements ActionListener
         mediator.addDataMapDisplayListener(this);
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityDisplayListener(this);
+
         createDomainMenu.setEnabled(true);
+        createDomainBtn.setEnabled(true);
         closeProjectMenu.setEnabled(true);
+
         this.validate();
     }
 
@@ -807,18 +807,21 @@ implements ActionListener
 	public void currentDomainChanged(DomainDisplayEvent e){
 		enableDomainMenu();
 		removeMenu.setText("Remove Domain");
+		removeBtn.setToolTipText("Remove current domain");
 		context = e.getDomain();
 	}
 
 	public void currentDataNodeChanged(DataNodeDisplayEvent e){
 		enableDomainMenu();
 		removeMenu.setText("Remove Data Node");
+		removeBtn.setToolTipText("Remove curent data node");
 		context = e.getDataNode();
 	}
 
 	public void currentDataMapChanged(DataMapDisplayEvent e){
 		enableDataMapMenu();
 		removeMenu.setText("Remove Data Map");
+		removeBtn.setToolTipText("Remove current data map");
 		context = e.getDataMap();
 	}
 
@@ -826,6 +829,7 @@ implements ActionListener
    	{
 		enableDataMapMenu();
 		removeMenu.setText("Remove Obj Entity");
+		removeBtn.setToolTipText("Remove current obj entity");
 		context = e.getEntity();
    	}
 
@@ -834,6 +838,7 @@ implements ActionListener
    	{
 		enableDataMapMenu();
 		removeMenu.setText("Remove Db Entity");
+		removeBtn.setToolTipText("Remove current db entity");
 		context = e.getEntity();
    	}
 
@@ -842,7 +847,6 @@ implements ActionListener
       * The only menu-s never disabled are "New Project", "Open Project" 
       * and "Exit". */
     private void disableMenu() {
-        createDomainMenu.setEnabled(false);
         createDataMapMenu.setEnabled(false);
         createDataSourceMenu.setEnabled(false);
         createObjEntityMenu.setEnabled(false);
@@ -853,21 +857,35 @@ implements ActionListener
         saveMapMenu.setEnabled(false);
         saveMapAsMenu.setEnabled(false);
         saveAllMenu.setEnabled(false);
+        removeMenu.setEnabled(false);
 
         importDbMenu.setEnabled(false);
         generateMenu.setEnabled(false);
+
+        createDomainBtn.setEnabled(false);
+        createDataMapBtn.setEnabled(false);
+        createDataSourceBtn.setEnabled(false);
+        createObjEntityBtn.setEnabled(false);
+        createDbEntityBtn.setEnabled(false);
+        removeBtn.setEnabled(false);
+
     }
 
 	private void enableDomainMenu() {
 		disableMenu();
 		createDataMapMenu.setEnabled(true);
-        createDomainMenu.setEnabled(true);
 		createDataSourceMenu.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
         openDataMapMenu.setEnabled(true);
 	    saveProjectMenu.setEnabled(true);
 	    saveAllMenu.setEnabled(true);
         importDbMenu.setEnabled(true);
+        removeMenu.setEnabled(true);
+
+		createDataMapBtn.setEnabled(true);
+        createDomainBtn.setEnabled(true);
+		createDataSourceBtn.setEnabled(true);
+        removeBtn.setEnabled(true);
 	}
 	
 	private void enableDataMapMenu() {
@@ -878,6 +896,9 @@ implements ActionListener
         createObjEntityMenu.setEnabled(true);
         createDbEntityMenu.setEnabled(true);
         generateMenu.setEnabled(true);
+
+        createObjEntityBtn.setEnabled(true);
+        createDbEntityBtn.setEnabled(true);
 	}
 	
     public static void main(String[] args) 
