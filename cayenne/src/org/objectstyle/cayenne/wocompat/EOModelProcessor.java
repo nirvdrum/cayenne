@@ -60,6 +60,8 @@ import java.io.FileInputStream;
 import java.util.*;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.wocompat.parser.Parser;
 
@@ -107,8 +109,7 @@ public class EOModelProcessor {
 
     // map of EOModel flattened relationship info with ObjEntities as keys
     private HashMap flatRelationshipMap = new HashMap();
-    
-    
+
     public void reset() {
         attributeMap.clear();
         relationshipMap.clear();
@@ -158,6 +159,15 @@ public class EOModelProcessor {
             List rels = (List) relationshipMap.get(nextEnt);
             if (rels != null)
                 processEntityRelationships(dataMap, nextEnt, rels);
+        }
+
+        // do flattened relationships 
+        Iterator frelIt = flatRelationshipMap.keySet().iterator();
+        while (frelIt.hasNext()) {
+            ObjEntity nextEnt = (ObjEntity) frelIt.next();
+            List rels = (List) flatRelationshipMap.get(nextEnt);
+            if (rels != null)
+                processEntityFlatRelationships(dataMap, nextEnt, rels);
         }
 
         return dataMap;
@@ -234,13 +244,18 @@ public class EOModelProcessor {
         while (it.hasNext()) {
             Map relMap = (Map) it.next();
             String targetName = (String) relMap.get("destination");
-            
+
             // deal with flattened relationships later
-            if(targetName == null) {
-                flatRelationshipMap.put(src, relMap);
+            if (targetName == null) {
+                List flatRels = (List) flatRelationshipMap.get(src);
+                if (flatRels == null) {
+                    flatRels = new ArrayList();
+                    flatRelationshipMap.put(src, flatRels);
+                }
+                flatRels.add(relMap);
                 continue;
             }
-            
+
             String relName = (String) relMap.get("name");
             boolean toMany = "Y".equals(relMap.get("isToMany"));
             boolean toDependentPK = "Y".equals(relMap.get("propagatesPrimaryKey"));
@@ -280,6 +295,45 @@ public class EOModelProcessor {
                 DbAttributePair join = new DbAttributePair(srcAttr, targetAttr);
                 dbRel.addJoin(join);
             }
+        }
+    }
+
+    private void processEntityFlatRelationships(
+        DataMap map,
+        ObjEntity src,
+        List entRels) {
+        Iterator it = entRels.iterator();
+
+        while (it.hasNext()) {
+            Map relMap = (Map) it.next();
+            String targetPath = (String) relMap.get("definition");
+            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, targetPath);
+            Iterator path = src.resolvePathComponents(exp);
+            
+            ObjRelationship firstRel = null;
+            ObjRelationship lastRel = null;
+            while(path.hasNext()) {
+                lastRel = (ObjRelationship)path.next();
+                
+                if(firstRel == null) {
+                    firstRel = lastRel;
+                }
+            }
+
+            boolean toMany = firstRel.isToMany();
+            ObjEntity target = (ObjEntity)lastRel.getTargetEntity();
+            DbEntity dbSrc = src.getDbEntity();
+            DbEntity dbTarget = target.getDbEntity();
+
+            ObjRelationship rel = new ObjRelationship();
+            rel.setName((String) relMap.get("name"));
+            rel.setSourceEntity(src);
+            rel.setTargetEntity(target);
+            rel.setToMany(toMany);
+            src.addRelationship(rel);
+            
+            // right now we don't support ObjRelationships with multiple
+            // DbRelationships, so just ignore any DbRelationships
         }
     }
 }
