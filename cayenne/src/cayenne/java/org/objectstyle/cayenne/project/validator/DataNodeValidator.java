@@ -61,7 +61,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.FlatProjectView;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -78,7 +78,7 @@ public class DataNodeValidator extends TreeNodeValidator {
     }
 
     public void validateObject(Object[] path, Validator validator) {
-        DataNode node = (DataNode) ProjectTraversal.objectFromPath(path);
+        DataNode node = (DataNode) FlatProjectView.objectFromPath(path);
         validateName(node, path, validator);
         validateConnection(node, path, validator);
     }
@@ -112,7 +112,7 @@ public class DataNodeValidator extends TreeNodeValidator {
             return;
         }
 
-        DataDomain domain = (DataDomain) ProjectTraversal.objectParentFromPath(path);
+        DataDomain domain = (DataDomain) FlatProjectView.objectParentFromPath(path);
         if (domain == null) {
             return;
         }

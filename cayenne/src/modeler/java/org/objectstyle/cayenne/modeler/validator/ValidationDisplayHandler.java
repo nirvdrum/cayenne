@@ -60,14 +60,12 @@ import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.ProjectException;
-import org.objectstyle.cayenne.project.ProjectTraversal;
-import org.objectstyle.cayenne.project.validator.TreeNodeValidator;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /** 

@@ -85,58 +85,8 @@ public class ProjectTraversal {
 		return sharedInstance;
 	}
 	
-    /**
-     * Returns an object corresponding to the node represented
-     * by the path. This is the last object in the path.
-     */
-    public static Object objectFromPath(Object[] treeNodePath) {
-        if (treeNodePath == null) {
-            throw new NullPointerException("Null path to validated object.");
-        }
-
-        if (treeNodePath.length == 0) {
-            throw new ProjectException("Validation path is empty.");
-        }
-
-        // return last object
-        return treeNodePath[treeNodePath.length - 1];
-    }
-
-    /**
-     * Returns an object corresponding to the parent node 
-     * of the node represented by the path. This is the object 
-     * next to last object in the path.
-     */
-    public static Object objectParentFromPath(Object[] treeNodePath) {
-        if (treeNodePath == null) {
-            throw new NullPointerException("Null path to validated object.");
-        }
-
-        if (treeNodePath.length == 0) {
-            throw new ProjectException("Validation path is empty.");
-        }
-
-        // return next to last object
-        return (treeNodePath.length > 1) ? treeNodePath[treeNodePath.length - 2] : null;
-    }
-
-    /**
-     * Expands path array, appending a treeNode at the end.
-     */
-    public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
-        if (parentTreeNodePath == null || parentTreeNodePath.length == 0) {
-            return new Object[] { treeNode };
-        }
-
-        Object[] newPath = new Object[parentTreeNodePath.length + 1];
-        System.arraycopy(parentTreeNodePath, 0, newPath, 0, parentTreeNodePath.length);
-        newPath[parentTreeNodePath.length] = treeNode;
-        return newPath;
-    }
-
-
     public void addConfig(List list, Configuration config, Object[] path) {
-        Object[] configPath = buildPath(config, path);
+        Object[] configPath = FlatProjectView.buildPath(config, path);
         list.add(configPath);
         
         addDomains(list, config.getDomainList(), path);
@@ -146,7 +96,7 @@ public class ProjectTraversal {
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
-            Object[] domainPath = buildPath(domain, path);
+            Object[] domainPath = FlatProjectView.buildPath(domain, path);
             list.add(domainPath);
 
             addNodes(list, domain.getDataNodeList(), domainPath);
@@ -157,7 +107,7 @@ public class ProjectTraversal {
     public void addNodes(List list, List nodes, Object[] path) {
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
-            list.add(buildPath(it.next(), path));
+            list.add(FlatProjectView.buildPath(it.next(), path));
         }
     }
 
@@ -165,7 +115,7 @@ public class ProjectTraversal {
         Iterator it = maps.iterator();
         while (it.hasNext()) {
             DataMap map = (DataMap) it.next();
-            Object[] mapPath = buildPath(map, path);
+            Object[] mapPath = FlatProjectView.buildPath(map, path);
             list.add(mapPath);
 
             addEntities(list, map.getDbEntitiesAsList(), mapPath);
@@ -177,7 +127,7 @@ public class ProjectTraversal {
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             Entity ent = (Entity) it.next();
-            Object[] entPath = buildPath(ent, path);
+            Object[] entPath = FlatProjectView.buildPath(ent, path);
             list.add(entPath);
 
             addAttributes(list, ent.getAttributeList(), entPath);
@@ -188,14 +138,14 @@ public class ProjectTraversal {
     public void addAttributes(List list, List attributes, Object[] path) {
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
-            list.add(buildPath(it.next(), path));
+            list.add(FlatProjectView.buildPath(it.next(), path));
         }
     }
 
     public void addRelationships(List list, List relationships, Object[] path) {
         Iterator it = relationships.iterator();
         while (it.hasNext()) {
-            list.add(buildPath(it.next(), path));
+            list.add(FlatProjectView.buildPath(it.next(), path));
         }
     }
 }

@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.project.validator;
 
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.FlatProjectView;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -75,7 +75,7 @@ public class DbRelationshipValidator extends TreeNodeValidator {
      * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
      */
     public void validateObject(Object[] path, Validator validator) {
-        DbRelationship rel = (DbRelationship) ProjectTraversal.objectFromPath(path);
+        DbRelationship rel = (DbRelationship) FlatProjectView.objectFromPath(path);
         if (rel.getTargetEntity() == null) {
         	validator.registerError("DbRelationship has no target entity.", path);
         } else if (rel.getJoins().size() == 0) {

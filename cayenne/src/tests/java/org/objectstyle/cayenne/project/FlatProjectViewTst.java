@@ -55,31 +55,67 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.util.ArrayList;
-
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ProjectTraversalTst extends CayenneTestCase {
+public class FlatProjectViewTst extends CayenneTestCase {
 
     /**
-     * Constructor for ProjectTraversalTst.
-     * @param arg0
+     * Constructor for FlatProjectView.
+     * @param name
      */
-    public ProjectTraversalTst(String arg0) {
-        super(arg0);
+    public FlatProjectViewTst(String name) {
+        super(name);
     }
 
-    public void testAddConfig() throws Exception {
-    	ProjectConfiguration conf = new ProjectConfiguration(null);        
-        ProjectTraversal t = new ProjectTraversal();
-        ArrayList list = new ArrayList();
-        t.addConfig(list, conf, null);
-        
-        assertEquals(1, list.size());
-        assertTrue("Unexpected object: " + list.get(0), list.get(0) instanceof Object[]);
-        assertSame(conf, ((Object[])list.get(0))[0]);
+    public void testObjectFromPath1() throws Exception {
+        Object[] path = new Object[] { new Object(), new Object()};
+        assertSame(path[1], FlatProjectView.objectFromPath(path));
+    }
+
+    public void testObjectFromPath2() throws Exception {
+        Object[] path = new Object[] { new Object()};
+        assertSame(path[0], FlatProjectView.objectFromPath(path));
+    }
+
+    public void testObjectFromPath3() throws Exception {
+        Object[] path = new Object[] {};
+
+        try {
+            FlatProjectView.objectFromPath(path);
+            fail("Must throw exception on empty list");
+        } catch (ProjectException ex) {}
+    }
+
+    public void testBuildPath1() throws Exception {
+        Object obj1 = new Object();
+        Object[] path = FlatProjectView.buildPath(obj1, null);
+        assertNotNull(path);
+        assertEquals(1, path.length);
+        assertSame(obj1, path[0]);
+    }
+
+    public void testBuildPath2() throws Exception {
+        Object obj1 = new Object();
+        Object[] tstPath = new Object[] { new Object(), new Object()};
+
+        Object[] path = FlatProjectView.buildPath(obj1, tstPath);
+        assertNotNull(path);
+        assertEquals(3, path.length);
+        assertSame(obj1, path[2]);
+        assertSame(tstPath[1], path[1]);
+        assertSame(tstPath[0], path[0]);
+    }
+
+    public void testObjectParentFromPath1() throws Exception {
+        Object[] path = new Object[] { new Object(), new Object()};
+        assertSame(path[0], FlatProjectView.objectParentFromPath(path));
+    }
+
+    public void testObjectParentFromPath2() throws Exception {
+        Object[] path = new Object[] { new Object()};
+        assertNull(FlatProjectView.objectParentFromPath(path));
     }
 }

@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.project.validator;
 
 import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.FlatProjectView;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -72,7 +72,7 @@ public class ObjAttributeValidator extends TreeNodeValidator {
     }
 
     public void validateObject(Object[] path, Validator validator) {
-        ObjAttribute attribute = (ObjAttribute) ProjectTraversal.objectFromPath(path);
+        ObjAttribute attribute = (ObjAttribute) FlatProjectView.objectFromPath(path);
 
         // Must have name
         if (Util.isEmptyString(attribute.getName())) {

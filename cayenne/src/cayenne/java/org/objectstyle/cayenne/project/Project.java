@@ -195,7 +195,7 @@ public abstract class Project {
         Iterator nodes = treeNodes();
         while (nodes.hasNext()) {
             Object[] nodePath = (Object[]) nodes.next();
-            Object obj = ProjectTraversal.objectFromPath(nodePath);
+            Object obj = FlatProjectView.objectFromPath(nodePath);
             ProjectFile f = ProjectFile.projectFileForObject(this, obj);
 
             if (f != null) {
@@ -357,7 +357,7 @@ public abstract class Project {
         Iterator nodes = treeNodes();
         while (nodes.hasNext()) {
             Object[] nodePath = (Object[]) nodes.next();
-            Object obj = ProjectTraversal.objectFromPath(nodePath);
+            Object obj = FlatProjectView.objectFromPath(nodePath);
 
             ProjectFile existingFile = findFile(obj);
 

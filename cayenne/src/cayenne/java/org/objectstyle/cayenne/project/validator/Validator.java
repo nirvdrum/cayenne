@@ -61,7 +61,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /** 
  * Used for validating Cayenne projects.
