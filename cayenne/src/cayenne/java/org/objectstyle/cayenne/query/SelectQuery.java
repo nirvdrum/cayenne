@@ -281,6 +281,10 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     public void addPrefetches(List relPaths) {
         prefetches.addAll(relPaths);
     }
+    
+    public void clearPrefetches() {
+        prefetches.clear();
+    }
 
     /**
      * Returns <code>true</code> if this query 
