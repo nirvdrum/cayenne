@@ -79,216 +79,210 @@ import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
  * @author Andrei Adamchik
  */
 public class GenerateDbDialog
-	extends CayenneDialog
-	implements ActionListener, ItemListener {
-	static Logger logObj = Logger.getLogger(Editor.class.getName());
+    extends CayenneDialog
+    implements ActionListener, ItemListener {
+    static Logger logObj = Logger.getLogger(Editor.class.getName());
 
-	private static final int WIDTH = 380;
-	private static final int HEIGHT = 190;
+    private static final int WIDTH = 380;
+    private static final int HEIGHT = 190;
 
-	protected DataSourceInfo dsi;
-	protected DbAdapter adapter;
-	protected DbGenerator gen;
+    protected DataSourceInfo dsi;
+    protected DbAdapter adapter;
+    protected DbGenerator gen;
 
-	protected JTextArea sql;
-	protected JButton generate = new JButton("Generate");
-	protected JButton cancel = new JButton("Close");
-	protected JButton saveSql = new JButton("Save SQL");
+    protected JTextArea sql;
+    protected JButton generate = new JButton("Generate");
+    protected JButton cancel = new JButton("Close");
+    protected JButton saveSql = new JButton("Save SQL");
 
-	protected JCheckBox dropTables;
-	protected JCheckBox createTables;
-	protected JCheckBox createFK;
-	protected JCheckBox createPK;
-	protected JCheckBox dropPK;
+    protected JCheckBox dropTables;
+    protected JCheckBox createTables;
+    protected JCheckBox createFK;
+    protected JCheckBox createPK;
+    protected JCheckBox dropPK;
 
-	public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter) {
-		super(Editor.getFrame(), "Generate Database", true);
-		if (getMediator().getCurrentDataMap() == null) {
-			throw new IllegalStateException(
-				"Must have current data map to " + "allow db generation");
-		}
+    public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter, DbGenerator gen) {
+        super(Editor.getFrame(), "Generate Database", true);
+        
+        this.dsi = dsi;
+        this.adapter = adapter;
+        this.gen = gen;
 
-		this.dsi = dsi;
-		this.adapter = adapter;
-		this.gen = new DbGenerator(adapter, getMediator().getCurrentDataMap());
+        init();
 
-		init();
+        dropTables.addItemListener(this);
+        createTables.addItemListener(this);
+        createFK.addItemListener(this);
+        createPK.addItemListener(this);
+        dropPK.addItemListener(this);
 
-		dropTables.addItemListener(this);
-		createTables.addItemListener(this);
-		createFK.addItemListener(this);
-		createPK.addItemListener(this);
-		dropPK.addItemListener(this);
+        generate.addActionListener(this);
+        saveSql.addActionListener(this);
+        cancel.addActionListener(this);
 
-		generate.addActionListener(this);
-		saveSql.addActionListener(this);
-		cancel.addActionListener(this);
+        setSize(WIDTH, HEIGHT);
+        this.pack();
+        this.centerWindow();
+        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    }
 
-		setSize(WIDTH, HEIGHT);
-		this.pack();
-		this.centerWindow();
-		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-	}
-	
+    private void init() {
+        Container contentPane = this.getContentPane();
+        contentPane.setLayout(new BorderLayout());
 
-	private void init() {
-		Container contentPane = this.getContentPane();
-		contentPane.setLayout(new BorderLayout());
+        dropTables = new JCheckBox("Drop Tables");
+        dropTables.setSelected(gen.shouldDropTables());
 
-		dropTables = new JCheckBox("Drop Tables");
-		dropTables.setSelected(gen.shouldDropTables());
+        createTables = new JCheckBox("Create Tables");
+        createTables.setSelected(gen.shouldCreateTables());
 
-		createTables = new JCheckBox("Create Tables");
-		createTables.setSelected(gen.shouldCreateTables());
+        createFK = new JCheckBox("Create FK Support");
+        if (!adapter.supportsFkConstraints()) {
+            createFK.setEnabled(false);
+        } else {
+            createFK.setSelected(gen.shouldCreateFKConstraints());
+        }
 
-		createFK = new JCheckBox("Create FK Support");
-		if (!adapter.supportsFkConstraints()) {
-			createFK.setEnabled(false);
-		} else {
-			createFK.setSelected(gen.shouldCreateFKConstraints());
-		}
+        createPK = new JCheckBox("Create Primary Key Support");
+        createPK.setSelected(gen.shouldCreatePKSupport());
 
-		createPK = new JCheckBox("Create Primary Key Support");
-		createPK.setSelected(gen.shouldCreatePKSupport());
+        dropPK = new JCheckBox("Drop Primary Key Support");
+        dropPK.setSelected(gen.shouldDropPKSupport());
 
-		dropPK = new JCheckBox("Drop Primary Key Support");
-		dropPK.setSelected(gen.shouldDropPKSupport());
+        JPanel optionsPane =
+            PanelFactory.createForm(
+                new Component[] { dropTables, new JLabel(), dropPK },
+                new Component[] { createTables, createFK, createPK },
+                5,
+                5,
+                5,
+                5);
+        optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
+        contentPane.add(optionsPane, BorderLayout.NORTH);
 
-		JPanel optionsPane =
-			PanelFactory.createForm(
-				new Component[] { dropTables, new JLabel(), dropPK },
-				new Component[] { createTables, createFK, createPK },
-				5,
-				5,
-				5,
-				5);
-		optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
-		contentPane.add(optionsPane, BorderLayout.NORTH);
+        sql = new JTextArea();
+        sql.setRows(16);
+        sql.setColumns(40);
+        sql.setEditable(false);
+        sql.setLineWrap(true);
+        sql.setWrapStyleWord(true);
 
-		sql = new JTextArea();
-		sql.setRows(16);
-		sql.setColumns(40);
-		sql.setEditable(false);
-		sql.setLineWrap(true);
-		sql.setWrapStyleWord(true);
+        JScrollPane scrollPanel =
+            new JScrollPane(
+                sql,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JPanel sqlTextPanel = new JPanel(new BorderLayout());
+        sqlTextPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        sqlTextPanel.add(scrollPanel, BorderLayout.CENTER);
+        contentPane.add(sqlTextPanel, BorderLayout.CENTER);
 
-		JScrollPane scrollPanel =
-			new JScrollPane(
-				sql,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		JPanel sqlTextPanel = new JPanel(new BorderLayout());
-		sqlTextPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		sqlTextPanel.add(scrollPanel, BorderLayout.CENTER);
-		contentPane.add(sqlTextPanel, BorderLayout.CENTER);
+        JPanel btnPanel =
+            PanelFactory.createButtonPanel(new JButton[] { generate, saveSql, cancel });
+        contentPane.add(btnPanel, BorderLayout.SOUTH);
 
-		JPanel btnPanel =
-			PanelFactory.createButtonPanel(
-				new JButton[] { generate, saveSql, cancel });
-		contentPane.add(btnPanel, BorderLayout.SOUTH);
+        initStatements();
+    }
 
-		initStatements();
-	}
+    /** 
+     * Builds a list of SQL statements to run.
+     */
+    protected void initStatements() {
+        // convert them to string representation for display
+        StringBuffer buf = new StringBuffer();
+        Iterator it = gen.configuredStatements().iterator();
+        while (it.hasNext()) {
+            buf.append(it.next()).append("\n\n");
+        }
+        sql.setText(buf.toString());
+    }
 
-	/** 
-	 * Builds a list of SQL statements to run.
-	 */
-	protected void initStatements() {
-		// convert them to string representation for display
-		StringBuffer buf = new StringBuffer();
-		Iterator it = gen.configuredStatements().iterator();
-		while (it.hasNext()) {
-			buf.append(it.next()).append("\n\n");
-		}
-		sql.setText(buf.toString());
-	}
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+        if (generate == src) {
+            generateDBSchema();
+        } else if (src == saveSql) {
+            storeSQL();
+        } else if (cancel == src) {
+            setVisible(false);
+            dispose();
+        }
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		if (generate == src) {
-			generateDBSchema();
-		} else if (src == saveSql) {
-			storeSQL();
-		} else if (cancel == src) {
-			setVisible(false);
-			dispose();
-		}
-	}
+    protected void generateDBSchema() {
+        gen.setShouldDropTables(dropTables.isSelected());
 
-	protected void generateDBSchema() {
-		gen.setShouldDropTables(dropTables.isSelected());
+        try {
+            gen.runGenerator(dsi);
+            JOptionPane.showMessageDialog(this, "Generation Complete.");
 
-		try {
-			gen.runGenerator(dsi);
-			JOptionPane.showMessageDialog(this, "Generation Complete.");
+        } catch (Exception ex) {
+            if (ex instanceof SQLException) {
+                SQLException exception = (SQLException) ex;
+                while ((exception = exception.getNextException()) != null) {
+                    logObj.log(Level.INFO, "Nested exception", exception);
+                }
+            }
+            logObj.log(Level.INFO, "Main exception", ex);
 
-		} catch (Exception ex) {
-			if (ex instanceof SQLException) {
-				SQLException exception = (SQLException) ex;
-				while ((exception = exception.getNextException()) != null) {
-					logObj.log(Level.INFO, "Nested exception", exception);
-				}
-			}
-			logObj.log(Level.INFO, "Main exception", ex);
+            JOptionPane.showMessageDialog(
+                this,
+                "Error creating database - " + ex.getMessage());
+            return;
+        }
+    }
 
-			JOptionPane.showMessageDialog(
-				this,
-				"Error creating database - " + ex.getMessage());
-			return;
-		}
-	}
+    protected void storeSQL() {
+        String projDirStr = getMediator().getConfig().getProjDir();
+        File projDir = null;
+        if (projDirStr != null) {
+            projDir = new File(projDirStr);
+        }
 
-	protected void storeSQL() {
-		String projDirStr = getMediator().getConfig().getProjDir();
-		File projDir = null;
-		if (projDirStr != null) {
-			projDir = new File(projDirStr);
-		}
+        JFileChooser fc;
+        FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
+        fc = new JFileChooser(fileView);
+        fc.setDialogType(JFileChooser.SAVE_DIALOG);
+        fc.setDialogTitle("Create database");
+        if (null != projDir) {
+            fc.setCurrentDirectory(projDir);
+        }
 
-		JFileChooser fc;
-		FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
-		fc = new JFileChooser(fileView);
-		fc.setDialogType(JFileChooser.SAVE_DIALOG);
-		fc.setDialogTitle("Create database");
-		if (null != projDir) {
-			fc.setCurrentDirectory(projDir);
-		}
+        if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = fc.getSelectedFile();
+                FileWriter fw = new FileWriter(file);
+                PrintWriter pw = new PrintWriter(fw);
+                pw.print(sql.getText());
+                pw.flush();
+                pw.close();
+            } catch (IOException ex) {
+                logObj.error(ex);
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Error writing into file - " + ex.getMessage());
+            }
+        }
+    }
 
-		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			try {
-				File file = fc.getSelectedFile();
-				FileWriter fw = new FileWriter(file);
-				PrintWriter pw = new PrintWriter(fw);
-				pw.print(sql.getText());
-				pw.flush();
-				pw.close();
-			} catch (IOException ex) {
-				logObj.error(ex);
-				ex.printStackTrace();
-				JOptionPane.showMessageDialog(
-					this,
-					"Error writing into file - " + ex.getMessage());
-			}
-		}
-	}
+    /**
+     * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
+     */
+    public void itemStateChanged(ItemEvent e) {
+        if (e.getSource() == dropTables) {
+            gen.setShouldDropTables(dropTables.isSelected());
+        } else if (e.getSource() == createTables) {
+            gen.setShouldCreateTables(createTables.isSelected());
+        } else if (e.getSource() == createFK) {
+            gen.setShouldCreateFKConstraints(createFK.isSelected());
+        } else if (e.getSource() == createPK) {
+            gen.setShouldCreatePKSupport(createPK.isSelected());
+        } else if (e.getSource() == dropPK) {
+            gen.setShouldDropPKSupport(dropPK.isSelected());
+        }
 
-	/**
-	 * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
-	 */
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() == dropTables) {
-			gen.setShouldDropTables(dropTables.isSelected());
-		} else if (e.getSource() == createTables) {
-			gen.setShouldCreateTables(createTables.isSelected());
-		} else if (e.getSource() == createFK) {
-			gen.setShouldCreateFKConstraints(createFK.isSelected());
-		} else if (e.getSource() == createPK) {
-			gen.setShouldCreatePKSupport(createPK.isSelected());
-		} else if (e.getSource() == dropPK) {
-			gen.setShouldDropPKSupport(dropPK.isSelected());
-		}
-
-		initStatements();
-	}
+        initStatements();
+    }
 
 }

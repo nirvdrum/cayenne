@@ -74,256 +74,257 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class JdbcAdapter implements DbAdapter {
-	static Logger logObj = Logger.getLogger(JdbcAdapter.class.getName());
+    static Logger logObj = Logger.getLogger(JdbcAdapter.class.getName());
 
-	protected PkGenerator pkGenerator;
-	protected TypesHandler typesHandler;
-	protected ExtendedTypeMap typeConverter;
-	protected QualifierTranslatorFactory qualifierFactory;
+    protected PkGenerator pkGenerator;
+    protected TypesHandler typesHandler;
+    protected ExtendedTypeMap typeConverter;
+    protected QualifierTranslatorFactory qualifierFactory;
 
-	public JdbcAdapter() {
-		// create Pk generator
-		pkGenerator = createPkGenerator();
-		typesHandler = TypesHandler.getHandler(this.getClass());
-		typeConverter = new ExtendedTypeMap();
-		qualifierFactory = new QualifierTranslatorFactory();
-	}
+    public JdbcAdapter() {
+        // create Pk generator
+        pkGenerator = createPkGenerator();
+        typesHandler = TypesHandler.getHandler(this.getClass());
+        typeConverter = new ExtendedTypeMap();
+        qualifierFactory = new QualifierTranslatorFactory();
+    }
 
-	/** 
-	 * Creates and returns a primary key generator. This factory
-	 * method should be overriden by JdbcAdapter subclasses to
-	 * provide custom implementations of PKGenerator. 
-	 */
-	protected PkGenerator createPkGenerator() {
-		return new JdbcPkGenerator();
-	}
+    /** 
+     * Creates and returns a primary key generator. This factory
+     * method should be overriden by JdbcAdapter subclasses to
+     * provide custom implementations of PKGenerator. 
+     */
+    protected PkGenerator createPkGenerator() {
+        return new JdbcPkGenerator();
+    }
 
-	/** Returns primary key generator associated with this DbAdapter. */
-	public PkGenerator getPkGenerator() {
-		return pkGenerator;
-	}
+    /** Returns primary key generator associated with this DbAdapter. */
+    public PkGenerator getPkGenerator() {
+        return pkGenerator;
+    }
 
-	public QueryTranslator getQueryTranslator(Query query) throws Exception {
-		Class queryClass = queryTranslatorClass(query);
+    public QueryTranslator getQueryTranslator(Query query) throws Exception {
+        Class queryClass = queryTranslatorClass(query);
 
-		try {
-			QueryTranslator t = (QueryTranslator) queryClass.newInstance();
-			t.setQuery(query);
-			t.setAdapter(this);
-			return t;
-		} catch (Exception ex) {
-			throw new CayenneRuntimeException(
-				"Can't load translator class: " + queryClass);
-		}
-	}
+        try {
+            QueryTranslator t = (QueryTranslator) queryClass.newInstance();
+            t.setQuery(query);
+            t.setAdapter(this);
+            return t;
+        } catch (Exception ex) {
+            throw new CayenneRuntimeException(
+                "Can't load translator class: " + queryClass);
+        }
+    }
 
-	/** 
-	 * Returns a class of the query translator that
-	 * should be used to translate the query <code>q</code>
-	 * to SQL. Exists mainly for the benefit of subclasses
-	 * that can override this method providing their own translator.
-	 */
-	protected Class queryTranslatorClass(Query q) {
-		if (q == null) {
-			throw new NullPointerException("Null query.");
-		} else if (q instanceof SelectQuery) {
-			return SelectTranslator.class;
-		} else if (q instanceof UpdateQuery) {
-			return UpdateTranslator.class;
-		} else if (q instanceof InsertQuery) {
-			return InsertTranslator.class;
-		} else if (q instanceof DeleteQuery) {
-			return DeleteTranslator.class;
-		} else if (q instanceof SqlSelectQuery) {
-			return SqlSelectTranslator.class;
-		} else if (q instanceof SqlModifyQuery) {
-			return SqlModifyTranslator.class;
-		} else {
-			throw new CayenneRuntimeException(
-				"Unrecognized query class..." + q.getClass().getName());
-		}
-	}
+    /** 
+     * Returns a class of the query translator that
+     * should be used to translate the query <code>q</code>
+     * to SQL. Exists mainly for the benefit of subclasses
+     * that can override this method providing their own translator.
+     */
+    protected Class queryTranslatorClass(Query q) {
+        if (q == null) {
+            throw new NullPointerException("Null query.");
+        } else if (q instanceof SelectQuery) {
+            return SelectTranslator.class;
+        } else if (q instanceof UpdateQuery) {
+            return UpdateTranslator.class;
+        } else if (q instanceof InsertQuery) {
+            return InsertTranslator.class;
+        } else if (q instanceof DeleteQuery) {
+            return DeleteTranslator.class;
+        } else if (q instanceof SqlSelectQuery) {
+            return SqlSelectTranslator.class;
+        } else if (q instanceof SqlModifyQuery) {
+            return SqlModifyTranslator.class;
+        } else {
+            throw new CayenneRuntimeException(
+                "Unrecognized query class..." + q.getClass().getName());
+        }
+    }
 
-	/** Returns true. */
-	public boolean supportsFkConstraints() {
-		return true;
-	}
+    /** Returns true. */
+    public boolean supportsFkConstraints() {
+        return true;
+    }
 
-	/** 
-	 * Returns a SQL string to drop a table corresponding
-	 * to <code>ent</code> DbEntity. 
-	 */
-	public String dropTable(DbEntity ent) {
-		return "DROP TABLE " + ent.getName();
-	}
+    /** 
+     * Returns a SQL string to drop a table corresponding
+     * to <code>ent</code> DbEntity. 
+     */
+    public String dropTable(DbEntity ent) {
+        return "DROP TABLE " + ent.getName();
+    }
 
-	/** 
-	 * Returns a SQL string that can be used to create database table
-	 * corresponding to <code>ent</code> parameter. 
-	 */
-	public String createTable(DbEntity ent) {
-		// later we may support view creation
-		// for derived DbEntities
-		if (ent instanceof DerivedDbEntity) {
-			throw new CayenneRuntimeException(
-				"Can't create table for derived DbEntity '"
-					+ ent.getName()
-					+ "'.");
-		}
+    /** 
+     * Returns a SQL string that can be used to create database table
+     * corresponding to <code>ent</code> parameter. 
+     */
+    public String createTable(DbEntity ent) {
+        // later we may support view creation
+        // for derived DbEntities
+        if (ent instanceof DerivedDbEntity) {
+            throw new CayenneRuntimeException(
+                "Can't create table for derived DbEntity '" + ent.getName() + "'.");
+        }
 
-		StringBuffer buf = new StringBuffer();
-		buf.append("CREATE TABLE ").append(ent.getName()).append(" (");
+        StringBuffer buf = new StringBuffer();
+        buf.append("CREATE TABLE ").append(ent.getName()).append(" (");
 
-		// columns
-		Iterator it = ent.getAttributeList().iterator();
-		boolean first = true;
-		while (it.hasNext()) {
-			if (first) {
-				first = false;
-			} else {
-				buf.append(", ");
-			}
+        // columns
+        Iterator it = ent.getAttributeList().iterator();
+        boolean first = true;
+        while (it.hasNext()) {
+            if (first) {
+                first = false;
+            } else {
+                buf.append(", ");
+            }
 
-			DbAttribute at = (DbAttribute) it.next();
-			String type = this.externalTypesForJdbcType(at.getType())[0];
+            DbAttribute at = (DbAttribute) it.next();
 
-			buf.append(at.getName()).append(' ').append(type);
+            // attribute may not be fully valid, do a simple check
+            if (at.getType() == TypesMapping.NOT_DEFINED) {
+                throw new CayenneRuntimeException(
+                    "Undefined type for attribute '" + ent.getName() + "." + at.getName() + "'.");
+            }
 
-			// append size and precision (if applicable)
-			if (TypesMapping.supportsLength(at.getType())) {
-				int len = at.getMaxLength();
-				int prec =
-					TypesMapping.isDecimal(at.getType())
-						? at.getPrecision()
-						: -1;
+            String type = this.externalTypesForJdbcType(at.getType())[0];
 
-				// sanity check
-				if (prec > len) {
-					prec = -1;
-				}
+            buf.append(at.getName()).append(' ').append(type);
 
-				if (len > 0) {
-					buf.append('(').append(len);
+            // append size and precision (if applicable)
+            if (TypesMapping.supportsLength(at.getType())) {
+                int len = at.getMaxLength();
+                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
 
-					if (prec >= 0) {
-						buf.append(", ").append(prec);
-					}
+                // sanity check
+                if (prec > len) {
+                    prec = -1;
+                }
 
-					buf.append(')');
-				}
-			}
+                if (len > 0) {
+                    buf.append('(').append(len);
 
-			if (at.isMandatory())
-				buf.append(" NOT");
+                    if (prec >= 0) {
+                        buf.append(", ").append(prec);
+                    }
 
-			buf.append(" NULL");
-		}
+                    buf.append(')');
+                }
+            }
 
-		// primary key clause
-		Iterator pkit = ent.getPrimaryKey().iterator();
-		if (pkit.hasNext()) {
-			if (first)
-				first = false;
-			else
-				buf.append(", ");
+            if (at.isMandatory())
+                buf.append(" NOT");
 
-			buf.append("PRIMARY KEY (");
-			boolean firstPk = true;
-			while (pkit.hasNext()) {
-				if (firstPk)
-					firstPk = false;
-				else
-					buf.append(", ");
+            buf.append(" NULL");
+        }
 
-				DbAttribute at = (DbAttribute) pkit.next();
-				buf.append(at.getName());
-			}
-			buf.append(')');
-		}
-		buf.append(')');
-		return buf.toString();
-	}
+        // primary key clause
+        Iterator pkit = ent.getPrimaryKey().iterator();
+        if (pkit.hasNext()) {
+            if (first)
+                first = false;
+            else
+                buf.append(", ");
 
-	/** 
-	 * Returns a SQL string that can be used to create
-	 * a foreign key constraint for the relationship. 
-	 */
-	public String createFkConstraint(DbRelationship rel) {
-		StringBuffer buf = new StringBuffer();
-		StringBuffer refBuf = new StringBuffer();
+            buf.append("PRIMARY KEY (");
+            boolean firstPk = true;
+            while (pkit.hasNext()) {
+                if (firstPk)
+                    firstPk = false;
+                else
+                    buf.append(", ");
 
-		buf.append("ALTER TABLE ").append(
-			rel.getSourceEntity().getName()).append(
-			" ADD FOREIGN KEY (");
+                DbAttribute at = (DbAttribute) pkit.next();
+                buf.append(at.getName());
+            }
+            buf.append(')');
+        }
+        buf.append(')');
+        return buf.toString();
+    }
 
-		Iterator jit = rel.getJoins().iterator();
-		boolean first = true;
-		while (jit.hasNext()) {
-			DbAttributePair join = (DbAttributePair) jit.next();
-			if (!first) {
-				buf.append(", ");
-				refBuf.append(", ");
-			} else
-				first = false;
+    /** 
+     * Returns a SQL string that can be used to create
+     * a foreign key constraint for the relationship. 
+     */
+    public String createFkConstraint(DbRelationship rel) {
+        StringBuffer buf = new StringBuffer();
+        StringBuffer refBuf = new StringBuffer();
 
-			buf.append(join.getSource().getName());
-			refBuf.append(join.getTarget().getName());
-		}
+        buf.append("ALTER TABLE ").append(rel.getSourceEntity().getName()).append(
+            " ADD FOREIGN KEY (");
 
-		buf
-			.append(") REFERENCES ")
-			.append(rel.getTargetEntity().getName())
-			.append(" (")
-			.append(refBuf.toString())
-			.append(')');
-		return buf.toString();
-	}
+        Iterator jit = rel.getJoins().iterator();
+        boolean first = true;
+        while (jit.hasNext()) {
+            DbAttributePair join = (DbAttributePair) jit.next();
+            if (!first) {
+                buf.append(", ");
+                refBuf.append(", ");
+            } else
+                first = false;
 
-	public String[] externalTypesForJdbcType(int type) {
-		return typesHandler.externalTypesForJdbcType(type);
-	}
+            buf.append(join.getSource().getName());
+            refBuf.append(join.getTarget().getName());
+        }
 
-	/** Returns null - by default no operation sorter is used. */
-	public OperationSorter getOpSorter(DataNode node) {
-		return null;
-	}
+        buf
+            .append(") REFERENCES ")
+            .append(rel.getTargetEntity().getName())
+            .append(" (")
+            .append(refBuf.toString())
+            .append(')');
+        return buf.toString();
+    }
 
-	public ExtendedTypeMap getTypeConverter() {
-		return typeConverter;
-	}
+    public String[] externalTypesForJdbcType(int type) {
+        return typesHandler.externalTypesForJdbcType(type);
+    }
 
-	public QualifierTranslatorFactory getQualifierFactory() {
-		return qualifierFactory;
-	}
+    /** Returns null - by default no operation sorter is used. */
+    public OperationSorter getOpSorter(DataNode node) {
+        return null;
+    }
 
-	public DbAttribute buildAttribute(
-		String name,
-		int type,
-		int size,
-		int precision,
-		boolean allowNulls) {
+    public ExtendedTypeMap getTypeConverter() {
+        return typeConverter;
+    }
 
-		DbAttribute attr = new DbAttribute();
-		attr.setName(name);
-		attr.setType(type);
-		attr.setMandatory(!allowNulls);
+    public QualifierTranslatorFactory getQualifierFactory() {
+        return qualifierFactory;
+    }
 
-		if (size >= 0) {
-			attr.setMaxLength(size);
-		}
+    public DbAttribute buildAttribute(
+        String name,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls) {
 
-		if (precision >= 0) {
-			attr.setPrecision(precision);
-		}
+        DbAttribute attr = new DbAttribute();
+        attr.setName(name);
+        attr.setType(type);
+        attr.setMandatory(!allowNulls);
 
-		return attr;
-	}
+        if (size >= 0) {
+            attr.setMaxLength(size);
+        }
 
-	public String tableTypeForTable() {
-		return "TABLE";
-	}
+        if (precision >= 0) {
+            attr.setPrecision(precision);
+        }
 
-	public String tableTypeForView() {
-		return "VIEW";
-	}
+        return attr;
+    }
+
+    public String tableTypeForTable() {
+        return "TABLE";
+    }
+
+    public String tableTypeForView() {
+        return "VIEW";
+    }
 }
