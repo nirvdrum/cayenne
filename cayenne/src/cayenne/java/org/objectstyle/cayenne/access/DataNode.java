@@ -181,6 +181,9 @@ public class DataNode implements QueryEngine {
         }
     }
 
+    /**
+     * Returns DataSource used by this DataNode to obtain connections.
+     */
     public DataSource getDataSource() {
         return dataSource;
     }
@@ -255,7 +258,9 @@ public class DataNode implements QueryEngine {
     }
 
     /** 
-     * Runs queries using connection obtained from internal DataSource.
+     * Runs queries using Connection obtained from internal DataSource.
+     * Once Connection is obtained internally, it is added to the Transaction
+     * that will handle its closing.
      * 
      * @since 1.1 
      */
