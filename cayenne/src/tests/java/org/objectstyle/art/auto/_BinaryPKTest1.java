@@ -12,7 +12,7 @@ public class _BinaryPKTest1 extends org.objectstyle.cayenne.CayenneDataObject {
     public static final String NAME_PROPERTY = "name";
     public static final String BINARY_PKDETAILS_PROPERTY = "binaryPKDetails";
 
-    public static final String ID_PK_COLUMN = "ID";
+    public static final String BIN_ID_PK_COLUMN = "BIN_ID";
 
     public void setName(String name) {
         writeProperty("name", name);

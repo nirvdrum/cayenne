@@ -1,6 +1,8 @@
 package org.objectstyle.art;
 
-public class BitTest extends org.objectstyle.art.auto._BitTest {
+import org.objectstyle.art.auto._BitTest;
+
+public class BitTest extends _BitTest {
 
 }
 

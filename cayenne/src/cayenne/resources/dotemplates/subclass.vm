@@ -2,7 +2,11 @@
 package ${classGen.packageName};
 #end
 
-public class ${classGen.className} extends #if(${classGen.isUsingSuperPackage()})${classGen.superPackageName}.#end${classGen.superPrefix}${classGen.className} {
+#if( ${classGen.isUsingSuperPackage()} )
+import ${classGen.superPackageName}.${classGen.superPrefix}${classGen.className};
+#end
+
+public class ${classGen.className} extends ${classGen.superPrefix}${classGen.className} {
 
 }
 
