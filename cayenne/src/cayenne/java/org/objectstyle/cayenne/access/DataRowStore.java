@@ -225,6 +225,14 @@ public class DataRowStore implements Serializable {
             }
         }
     }
+    
+    public int size() {
+        return snapshots.size();
+    }
+    
+    public int maximumSize() {
+        return snapshots.getMaximumSize();
+    }
 
     /**
      * Shuts down any remote notification connections, and clears internal cache.

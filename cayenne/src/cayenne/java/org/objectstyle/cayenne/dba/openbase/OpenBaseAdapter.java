@@ -87,6 +87,8 @@ test-openbase.jdbc.driver = com.openbase.jdbc.ObDriver
  * 
  * @author <a href="mailto:mkienenb@alaska.net">Mike Kienenberger</a>
  * @author Andrei Adamchik
+ * 
+ * @since 1.1
  */
 public class OpenBaseAdapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(OpenBaseAdapter.class);
