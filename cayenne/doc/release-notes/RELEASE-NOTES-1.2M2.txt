@@ -19,6 +19,7 @@ Changes:
 - Thread-local static ClassLoader in Configuration.
 - Persistence by reachability (CAY-249, part 1)
 - Updated Expression BNF, replacing "scalarCharExpression" with "scalarExpression"
+- Unconditionally applying entity sorting on commit, even if DB does not support constraints.
 
 Bugs Fixed:
 
