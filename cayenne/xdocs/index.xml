@@ -5,6 +5,12 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
+        <p><u><strong><i>September 14:</i></strong> <strong>Cayenne 1.0a3-1 Released.</strong></u></p>
+        
+        <p>This is a point release that fixes some GUI bugs. Download the release 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from here</a>.
+        </p>
+        
         <p><u><strong><i>September 10:</i> Note To Cayenne Users - deprecated API removed.</strong></u></p>
         
         <p>
