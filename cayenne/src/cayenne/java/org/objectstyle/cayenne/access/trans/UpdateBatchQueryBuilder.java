@@ -71,40 +71,38 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
  */
 
 public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
-	public UpdateBatchQueryBuilder(DbAdapter adapter) {
-		this(adapter, null);
-	}
+    public UpdateBatchQueryBuilder(DbAdapter adapter) {
+        super(adapter);
+    }
 
-	public UpdateBatchQueryBuilder(DbAdapter adapter, String trimFunction) {
-		super(adapter, trimFunction);
-	}
+    public String createSqlString(BatchQuery batch) {
+        UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
+        String table = batch.getDbEntity().getFullyQualifiedName();
+        List idDbAttributes = updateBatch.getIdDbAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+        StringBuffer query = new StringBuffer("UPDATE ");
+        query.append(table).append(" SET ");
 
-	public String query(BatchQuery batch) {
-		UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
-		String table = batch.getDbEntity().getFullyQualifiedName();
-		List idDbAttributes = updateBatch.getIdDbAttributes();
-		List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
-		StringBuffer query = new StringBuffer("UPDATE ");
-		query.append(table).append(" SET ");
+        int len = updatedDbAttributes.size();
+        for (int i = 0; i < len; i++) {
+            if (i > 0) {
+                query.append(", ");
+            }
 
-		Iterator i = updatedDbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			query.append(attribute.getName()).append(" = ?");
-			if (i.hasNext())
-				query.append(", ");
-		}
+            DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
+            query.append(attribute.getName()).append(" = ?");
+        }
 
-		query.append(" WHERE ");
-		i = idDbAttributes.iterator();
-		while (i.hasNext()) {
-			DbAttribute attribute = (DbAttribute) i.next();
-			appendDbAttribute(query, attribute);
-			query.append(" = ?");
-			if (i.hasNext()) {
-				query.append(" AND ");
-			}
-		}
-		return query.toString();
-	}
+        query.append(" WHERE ");
+        Iterator i = idDbAttributes.iterator();
+        while (i.hasNext()) {
+            DbAttribute attribute = (DbAttribute) i.next();
+            appendDbAttribute(query, attribute);
+            query.append(" = ?");
+            if (i.hasNext()) {
+                query.append(" AND ");
+            }
+        }
+        return query.toString();
+    }
 }

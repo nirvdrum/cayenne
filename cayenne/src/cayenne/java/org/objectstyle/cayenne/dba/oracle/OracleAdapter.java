@@ -57,21 +57,27 @@
 package org.objectstyle.cayenne.dba.oracle;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -96,20 +102,37 @@ public class OracleAdapter extends JdbcAdapter {
     public static final String ORACLE_FLOAT = "FLOAT";
     public static final String ORACLE_BLOB = "BLOB";
     public static final String ORACLE_CLOB = "CLOB";
-    
+
     public static final String TRIM_FUNCTION = "RTRIM";
+    public static final String NEW_CLOB_FUNCTION = "EMPTY_CLOB()";
+    public static final String NEW_BLOB_FUNCTION = "EMPTY_BLOB()";
 
     protected static boolean initDone;
     protected static int oracleCursorType = Integer.MAX_VALUE;
+    protected static Method outputStreamFromBlobMethod;
+    protected static Method writerFromClobMethod;
+    protected static boolean supportsOracleLOB;
 
     protected static void initDriverInformation() {
         initDone = true;
-        
+
         // configure static information
         try {
             Class oraTypes = Class.forName("oracle.jdbc.driver.OracleTypes");
             Field cursorField = oraTypes.getField("CURSOR");
             oracleCursorType = cursorField.getInt(null);
+
+            outputStreamFromBlobMethod =
+                Class.forName("oracle.sql.BLOB").getMethod(
+                    "getBinaryOutputStream",
+                    new Class[0]);
+
+            writerFromClobMethod =
+                Class.forName("oracle.sql.CLOB").getMethod(
+                    "getCharacterOutputStream",
+                    new Class[0]);
+            supportsOracleLOB = true;
+
         } catch (Exception ex) {
             logObj.info(
                 "Error getting Oracle driver information, ignoring. "
@@ -117,6 +140,18 @@ public class OracleAdapter extends JdbcAdapter {
                 ex);
         }
     }
+    
+	public static Method getOutputStreamFromBlobMethod() {
+		return outputStreamFromBlobMethod;
+	}
+
+	public static boolean isSupportsOracleLOB() {
+		return supportsOracleLOB;
+	}
+
+	public static Method getWriterFromClobMethod() {
+		return writerFromClobMethod;
+	}
 
     /**
      * Returns an Oracle JDBC extension type defined in
@@ -127,10 +162,10 @@ public class OracleAdapter extends JdbcAdapter {
      * result in an exception.
      */
     public static int getOracleCursorType() {
-        if(!initDone) {
+        if (!initDone) {
             initDriverInformation();
         }
-        
+
         if (oracleCursorType == Integer.MAX_VALUE) {
             throw new CayenneRuntimeException(
                 "No information exists about oracle types. "
@@ -139,10 +174,10 @@ public class OracleAdapter extends JdbcAdapter {
 
         return oracleCursorType;
     }
-    
+
     public OracleAdapter() {
-    	// enable batch updates by default
-    	setSupportsBatchUpdates(true);
+        // enable batch updates by default
+        setSupportsBatchUpdates(true);
     }
 
     /**
@@ -157,9 +192,9 @@ public class OracleAdapter extends JdbcAdapter {
 
         // create specially configured ByteArrayType handler
         map.registerType(new ByteArrayType(true, true));
-        
+
         // override date handler with Oracle handler
-		map.registerType(new OracleUtilDateType());
+        map.registerType(new OracleUtilDateType());
     }
 
     /**
@@ -235,7 +270,9 @@ public class OracleAdapter extends JdbcAdapter {
      * Returns a trimming translator.
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
-        return new TrimmingQualifierTranslator(queryAssembler, OracleAdapter.TRIM_FUNCTION);
+        return new TrimmingQualifierTranslator(
+            queryAssembler,
+            OracleAdapter.TRIM_FUNCTION);
     }
 
     /**
@@ -247,4 +284,26 @@ public class OracleAdapter extends JdbcAdapter {
         return node;
     }
 
+    /**
+     * Implements special LOB handling in batches.
+     */
+    public boolean shouldRunBatchQuery(
+        DataNode node,
+        Connection con,
+        BatchQuery query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        // special handling for LOB updates
+        if (supportsOracleLOB && BatchQueryUtils.updatesLOBColumns(query)
+            && (node instanceof OracleDataNode)) {
+
+            OracleDataNode oracleNode = (OracleDataNode) node;
+            oracleNode.runBatchUpdateWithLOBColumns(con, query, delegate);
+
+            return false;
+        } else {
+            return super.shouldRunBatchQuery(node, con, query, delegate);
+        }
+    }
 }

@@ -71,14 +71,10 @@ import org.objectstyle.cayenne.query.BatchQuery;
 
 public class DeleteBatchQueryBuilder extends BatchQueryBuilder {
 	public DeleteBatchQueryBuilder(DbAdapter adapter) {
-		this(adapter, null);
+		super(adapter);
 	}
 	
-	public DeleteBatchQueryBuilder(DbAdapter adapter, String trimFunction) {
-		super(adapter, trimFunction);
-	}
-
-	public String query(BatchQuery batch) {
+	public String createSqlString(BatchQuery batch) {
 		String table = batch.getDbEntity().getFullyQualifiedName();
 		List dbAttributes = batch.getDbAttributes();
 		StringBuffer query = new StringBuffer("DELETE FROM ");

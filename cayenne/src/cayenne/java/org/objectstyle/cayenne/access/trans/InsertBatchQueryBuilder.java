@@ -64,8 +64,10 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- *
+ * Translator of InsertBatchQueries.
+ * 
  * @author Andriy Shapochka
+ * @author Andrei Adamchik
  */
 
 public class InsertBatchQueryBuilder extends BatchQueryBuilder {
@@ -73,7 +75,7 @@ public class InsertBatchQueryBuilder extends BatchQueryBuilder {
         super.setAdapter(adapter);
     }
 
-    public String query(BatchQuery batch) {
+    public String createSqlString(BatchQuery batch) {
         String table = batch.getDbEntity().getFullyQualifiedName();
         List dbAttributes = batch.getDbAttributes();
         StringBuffer query = new StringBuffer("INSERT INTO ");
@@ -81,13 +83,16 @@ public class InsertBatchQueryBuilder extends BatchQueryBuilder {
         for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
             DbAttribute attribute = (DbAttribute) i.next();
             query.append(attribute.getName());
-            if (i.hasNext())
+            if (i.hasNext()) {
                 query.append(", ");
+            }
         }
         query.append(") VALUES (");
         for (int i = 0; i < dbAttributes.size(); i++) {
-            if (i > 0)
+            if (i > 0) {
                 query.append(", ");
+            }
+
             query.append('?');
         }
         query.append(')');

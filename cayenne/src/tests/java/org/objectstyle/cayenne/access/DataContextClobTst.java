@@ -84,14 +84,14 @@ public class DataContextClobTst extends CayenneTestCase {
 		runWithClobSize(5);
 	}
 
-	/*public void test5KByteClob() throws Exception {
+public void test5KByteClob() throws Exception {
 		if (skipTests()) {
 			return;
 		}
 		runWithClobSize(5 * 1024);
 	}
 	
-	public void test1MBClob() throws Exception {
+	/*public void test1MBClob() throws Exception {
 		if (skipTests()) {
 			return;
 		}

@@ -72,17 +72,14 @@ public class BatchQueryBuilderTst extends TestCase {
 
 	public void testConstructor() throws Exception {
 		DbAdapter adapter = new JdbcAdapter();
-		String trimFunction = "testTrim";
-
 		BatchQueryBuilder builder =
-			new BatchQueryBuilder(adapter, trimFunction) {
-			public String query(BatchQuery batch) {
+			new BatchQueryBuilder(adapter) {
+			public String createSqlString(BatchQuery batch) {
 				return null;
 			}
 		};
 
 		assertSame(adapter, builder.getAdapter());
-		assertEquals(trimFunction, builder.getTrimFunction());
 	}
 
 	public void testAppendDbAttribute1() throws Exception {
@@ -90,11 +87,13 @@ public class BatchQueryBuilderTst extends TestCase {
 		String trimFunction = "testTrim";
 
 		BatchQueryBuilder builder =
-			new BatchQueryBuilder(adapter, trimFunction) {
-			public String query(BatchQuery batch) {
+			new BatchQueryBuilder(adapter) {
+			public String createSqlString(BatchQuery batch) {
 				return null;
 			}
 		};
+		
+		builder.setTrimFunction(trimFunction);
 
 		StringBuffer buf = new StringBuffer();
 		DbAttribute attr = new DbAttribute("testAttr", Types.CHAR, null);
@@ -110,8 +109,8 @@ public class BatchQueryBuilderTst extends TestCase {
 	public void testAppendDbAttribute2() throws Exception {
 		DbAdapter adapter = new JdbcAdapter();
 
-		BatchQueryBuilder builder = new BatchQueryBuilder(adapter, null) {
-			public String query(BatchQuery batch) {
+		BatchQueryBuilder builder = new BatchQueryBuilder(adapter) {
+			public String createSqlString(BatchQuery batch) {
 				return null;
 			}
 		};

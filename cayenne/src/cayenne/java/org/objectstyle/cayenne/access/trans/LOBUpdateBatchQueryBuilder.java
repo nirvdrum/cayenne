@@ -53,22 +53,55 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.access.trans;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class UpdateBatchQueryBuilderTst extends CayenneTestCase {
-	public void testConstructor() throws Exception {
-		DbAdapter adapter = new JdbcAdapter();
+public class LOBUpdateBatchQueryBuilder extends LOBBatchQueryBuilder {
 
-		UpdateBatchQueryBuilder builder =
-			new UpdateBatchQueryBuilder(adapter);
+    public LOBUpdateBatchQueryBuilder(DbAdapter adapter) {
+        super(adapter);
+    }
 
-		assertSame(adapter, builder.getAdapter());
-	}
+    public String createSqlString(BatchQuery batch) {
+        UpdateBatchQuery updateBatch = (UpdateBatchQuery) batch;
+        String table = batch.getDbEntity().getFullyQualifiedName();
+        List idDbAttributes = updateBatch.getIdDbAttributes();
+        List updatedDbAttributes = updateBatch.getUpdatedDbAttributes();
+        StringBuffer query = new StringBuffer("UPDATE ");
+        query.append(table).append(" SET ");
+
+        int len = updatedDbAttributes.size();
+        for (int i = 0; i < len; i++) {
+            if (i > 0) {
+                query.append(", ");
+            }
+
+            DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
+            query.append(attribute.getName()).append(" = ");
+            appendUpdatedParameter(query, attribute, batch.getObject(i));
+        }
+
+        query.append(" WHERE ");
+        Iterator i = idDbAttributes.iterator();
+        while (i.hasNext()) {
+            DbAttribute attribute = (DbAttribute) i.next();
+            appendDbAttribute(query, attribute);
+            query.append(" = ?");
+            if (i.hasNext()) {
+                query.append(" AND ");
+            }
+        }
+        return query.toString();
+    }
 }

@@ -73,79 +73,92 @@ import org.objectstyle.cayenne.query.BatchQuery;
  */
 
 public abstract class BatchQueryBuilder {
-	protected DbAdapter adapter;
-	protected String trimFunction;
+    protected DbAdapter adapter;
+    protected String trimFunction;
 
-	public BatchQueryBuilder() {
-	}
+    public BatchQueryBuilder() {
+    }
 
-	public BatchQueryBuilder(DbAdapter adapter, String trimFunction) {
-		this.adapter = adapter;
-		this.trimFunction = trimFunction;
-	}
+    public BatchQueryBuilder(DbAdapter adapter) {
+        this.adapter = adapter;
+    }
 
-	/**
-	 * Translates BatchQuery to parameterized SQL string.
-	 */
-	public abstract String query(BatchQuery batch);
+    /**
+     * Translates BatchQuery to parameterized SQL string.
+     * 
+     * @deprecated Since 1.0Beta3, createSqlString is used.
+     */
+    public String query(BatchQuery batch) {
+        return createSqlString(batch);
+    }
 
-	/**
-	 * Utility method used to append the name of the column to the query buffer.
-	 */
-	protected void appendDbAttribute(
-		StringBuffer buf,
-		DbAttribute dbAttribute) {
+    /**
+     * Translates BatchQuery into an SQL string formatted to use 
+     * in a PreparedStatement.
+     */
+    public abstract String createSqlString(BatchQuery batch);
 
-		// TODO: (Andrus) is there a need for trimming binary types?
-		boolean trim =
-			dbAttribute.getType() == Types.CHAR && trimFunction != null;
-		if (trim) {
-			buf.append(trimFunction).append('(');
-		}
+    /**
+     * Appends the name of the column to the query buffer. Subclasses use
+     * this method to append column names in the WHERE clause, i.e. for the 
+     * columns that are not being updated.
+     */
+    protected void appendDbAttribute(
+        StringBuffer buf,
+        DbAttribute dbAttribute) {
 
-		buf.append(dbAttribute.getName());
+        // TODO: (Andrus) is there a need for trimming binary types?
+        boolean trim =
+            dbAttribute.getType() == Types.CHAR && trimFunction != null;
+        if (trim) {
+            buf.append(trimFunction).append('(');
+        }
 
-		if (trim) {
-			buf.append(')');
-		}
-	}
+        buf.append(dbAttribute.getName());
 
-	public void setAdapter(DbAdapter adapter) {
-		this.adapter = adapter;
-	}
-	public DbAdapter getAdapter() {
-		return adapter;
-	}
+        if (trim) {
+            buf.append(')');
+        }
+    }
 
-	public String getTrimFunction() {
-		return trimFunction;
-	}
+    public void setAdapter(DbAdapter adapter) {
+        this.adapter = adapter;
+    }
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
 
-	public void setTrimFunction(String string) {
-		trimFunction = string;
-	}
+    public String getTrimFunction() {
+        return trimFunction;
+    }
+
+    public void setTrimFunction(String string) {
+        trimFunction = string;
+    }
 
     /**
      * Binds BatchQuery parameters to the PreparedStatement. 
      */
-	public void bindParameters(
-		PreparedStatement statement,
-		BatchQuery query,
-		List dbAttributes)
-		throws SQLException, Exception {
+    public void bindParameters(
+        PreparedStatement statement,
+        BatchQuery query,
+        List dbAttributes)
+        throws SQLException, Exception {
 
-		QueryLogger.logBatchQueryParameters(query.getLoggingLevel(), query);
+        QueryLogger.logBatchQueryParameters(query.getLoggingLevel(), query);
 
-		int attributeCount = dbAttributes.size();
-		for (int i = 0; i < attributeCount; i++) {
-			Object value = query.getObject(i);
-			DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
-			adapter.bindParameter(
-				statement,
-				value,
-				i + 1,
-				attribute.getType(),
-				attribute.getPrecision());
-		}
-	}
+        int attributeCount = dbAttributes.size();
+
+        for (int i = 0; i < attributeCount; i++) {
+            Object value = query.getObject(i);
+            DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
+            adapter.bindParameter(
+                statement,
+                value,
+                i + 1,
+                attribute.getType(),
+                attribute.getPrecision());
+
+        }
+    }
 }

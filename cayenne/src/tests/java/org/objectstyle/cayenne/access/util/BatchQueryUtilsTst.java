@@ -63,16 +63,16 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class BatchQueryUtilsTst extends CayenneTestCase {
-	public void testContainsLOBColumns() throws Exception {
+	public void testUpdatesLOBColumns() throws Exception {
 		DataMap map = getDomain().getMap("testmap");
 		assertTrue(
-			BatchQueryUtils.containsLOBColumns(
+			BatchQueryUtils.updatesLOBColumns(
 				new InsertBatchQuery(map.getDbEntity("BLOB_TEST"), 1)));
 		assertTrue(
-			BatchQueryUtils.containsLOBColumns(
+			BatchQueryUtils.updatesLOBColumns(
 				new InsertBatchQuery(map.getDbEntity("CLOB_TEST"), 1)));
 		assertFalse(
-			BatchQueryUtils.containsLOBColumns(
+			BatchQueryUtils.updatesLOBColumns(
 				new InsertBatchQuery(map.getDbEntity("ARTIST"), 1)));
 	}
 }

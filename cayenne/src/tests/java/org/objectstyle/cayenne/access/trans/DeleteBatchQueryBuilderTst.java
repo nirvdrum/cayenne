@@ -65,12 +65,10 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DeleteBatchQueryBuilderTst extends CayenneTestCase {
 	public void testConstructor() throws Exception {
 		DbAdapter adapter = new JdbcAdapter();
-		String trimFunction = "testTrim";
 
 		DeleteBatchQueryBuilder builder =
-			new DeleteBatchQueryBuilder(adapter, trimFunction);
+			new DeleteBatchQueryBuilder(adapter);
 
 		assertSame(adapter, builder.getAdapter());
-		assertEquals(trimFunction, builder.getTrimFunction());
 	}
 }

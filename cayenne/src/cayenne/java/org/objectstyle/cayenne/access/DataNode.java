@@ -446,6 +446,11 @@ public class DataNode implements QueryEngine {
 		OperationObserver delegate)
 		throws SQLException, Exception {
 
+		// check if adapter wants to run the query itself
+		if (!adapter.shouldRunBatchQuery(this, con, query, delegate)) {
+			return;
+		}
+
 		// create BatchInterpreter
 		// TODO: move all query translation logic to adapter.getQueryTranslator()
 		BatchQueryBuilder queryBuilder;
@@ -486,7 +491,7 @@ public class DataNode implements QueryEngine {
 		OperationObserver delegate)
 		throws SQLException, Exception {
 
-		String queryStr = queryBuilder.query(query);
+		String queryStr = queryBuilder.createSqlString(query);
 
 		// log batch SQL execution
 		QueryLogger.logQuery(
@@ -504,7 +509,7 @@ public class DataNode implements QueryEngine {
 				statement.addBatch();
 			}
 
-            // execute the whole batch
+			// execute the whole batch
 			int[] results = statement.executeBatch();
 			delegate.nextBatchCount(query, results);
 
@@ -529,7 +534,7 @@ public class DataNode implements QueryEngine {
 		OperationObserver delegate)
 		throws SQLException, Exception {
 
-		String queryStr = queryBuilder.query(query);
+		String queryStr = queryBuilder.createSqlString(query);
 
 		// log batch SQL execution
 		QueryLogger.logQuery(
@@ -556,7 +561,6 @@ public class DataNode implements QueryEngine {
 			}
 		}
 	}
-	
 
 	protected void runStoredProcedure(
 		Connection con,

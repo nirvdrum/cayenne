@@ -53,22 +53,49 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.access.trans;
 
+import java.util.Iterator;
+import java.util.List;
+
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class UpdateBatchQueryBuilderTst extends CayenneTestCase {
-	public void testConstructor() throws Exception {
-		DbAdapter adapter = new JdbcAdapter();
+public class LOBInsertBatchQueryBuilder extends LOBBatchQueryBuilder {
 
-		UpdateBatchQueryBuilder builder =
-			new UpdateBatchQueryBuilder(adapter);
+    public LOBInsertBatchQueryBuilder(DbAdapter adapter) {
+        super(adapter);
+    }
 
-		assertSame(adapter, builder.getAdapter());
-	}
+    public String createSqlString(BatchQuery batch) {
+        String table = batch.getDbEntity().getFullyQualifiedName();
+        List dbAttributes = batch.getDbAttributes();
+        StringBuffer query = new StringBuffer("INSERT INTO ");
+        query.append(table).append(" (");
+        for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
+            DbAttribute attribute = (DbAttribute) i.next();
+            query.append(attribute.getName());
+            if (i.hasNext()) {
+                query.append(", ");
+            }
+        }
+        query.append(") VALUES (");
+        for (int i = 0; i < dbAttributes.size(); i++) {
+            if (i > 0) {
+                query.append(", ");
+            }
+
+            appendUpdatedParameter(
+                query,
+                (DbAttribute) dbAttributes.get(i),
+                batch.getObject(i));
+        }
+        query.append(')');
+        return query.toString();
+    }
 }

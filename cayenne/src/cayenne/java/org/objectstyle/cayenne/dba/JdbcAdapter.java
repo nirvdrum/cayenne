@@ -56,12 +56,14 @@
 
 package org.objectstyle.cayenne.dba;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
 import org.objectstyle.cayenne.access.trans.FlattenedRelationshipDeleteTranslator;
@@ -84,6 +86,7 @@ import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
 import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
@@ -107,7 +110,6 @@ public class JdbcAdapter implements DbAdapter {
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
     protected boolean supportsBatchUpdates;
-    
 
     public JdbcAdapter() {
         // create Pk generator
@@ -157,7 +159,8 @@ public class JdbcAdapter implements DbAdapter {
             t.setQuery(query);
             t.setAdapter(this);
             return t;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new CayenneRuntimeException(
                 "Can't load translator class: " + queryClass);
         }
@@ -172,25 +175,35 @@ public class JdbcAdapter implements DbAdapter {
     protected Class queryTranslatorClass(Query q) {
         if (q == null) {
             throw new NullPointerException("Null query.");
-        } else if (q instanceof SelectQuery) {
+        }
+        else if (q instanceof SelectQuery) {
             return SelectTranslator.class;
-        } else if (q instanceof UpdateQuery) {
+        }
+        else if (q instanceof UpdateQuery) {
             return UpdateTranslator.class;
-        } else if (q instanceof FlattenedRelationshipInsertQuery) {
+        }
+        else if (q instanceof FlattenedRelationshipInsertQuery) {
             return FlattenedRelationshipInsertTranslator.class;
-        } else if (q instanceof InsertQuery) {
+        }
+        else if (q instanceof InsertQuery) {
             return InsertTranslator.class;
-        } else if (q instanceof FlattenedRelationshipDeleteQuery) {
+        }
+        else if (q instanceof FlattenedRelationshipDeleteQuery) {
             return FlattenedRelationshipDeleteTranslator.class;
-        } else if (q instanceof DeleteQuery) {
+        }
+        else if (q instanceof DeleteQuery) {
             return DeleteTranslator.class;
-        } else if (q instanceof SqlSelectQuery) {
+        }
+        else if (q instanceof SqlSelectQuery) {
             return SqlSelectTranslator.class;
-        } else if (q instanceof SqlModifyQuery) {
+        }
+        else if (q instanceof SqlModifyQuery) {
             return SqlModifyTranslator.class;
-        } else if (q instanceof ProcedureQuery) {
+        }
+        else if (q instanceof ProcedureQuery) {
             return ProcedureTranslator.class;
-        } else {
+        }
+        else {
             throw new CayenneRuntimeException(
                 "Unrecognized query class..." + q.getClass().getName());
         }
@@ -218,14 +231,11 @@ public class JdbcAdapter implements DbAdapter {
         // for derived DbEntities
         if (ent instanceof DerivedDbEntity) {
             throw new CayenneRuntimeException(
-                "Can't create table for derived DbEntity '"
-                    + ent.getName()
-                    + "'.");
+                "Can't create table for derived DbEntity '" + ent.getName() + "'.");
         }
 
         StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(
-            " (");
+        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
 
         // columns
         Iterator it = ent.getAttributes().iterator();
@@ -233,7 +243,8 @@ public class JdbcAdapter implements DbAdapter {
         while (it.hasNext()) {
             if (first) {
                 first = false;
-            } else {
+            }
+            else {
                 buf.append(", ");
             }
 
@@ -266,10 +277,7 @@ public class JdbcAdapter implements DbAdapter {
             // append size and precision (if applicable)
             if (TypesMapping.supportsLength(at.getType())) {
                 int len = at.getMaxLength();
-                int prec =
-                    TypesMapping.isDecimal(at.getType())
-                        ? at.getPrecision()
-                        : -1;
+                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
 
                 // sanity check
                 if (prec > len) {
@@ -289,7 +297,7 @@ public class JdbcAdapter implements DbAdapter {
 
             if (at.isMandatory()) {
                 buf.append(" NOT NULL");
-			}
+            }
         }
 
         // primary key clause
@@ -337,7 +345,8 @@ public class JdbcAdapter implements DbAdapter {
             if (!first) {
                 buf.append(", ");
                 refBuf.append(", ");
-            } else
+            }
+            else
                 first = false;
 
             buf.append(join.getSource().getName());
@@ -393,15 +402,13 @@ public class JdbcAdapter implements DbAdapter {
         return "VIEW";
     }
 
-
     /**
      * Creates and returns a default implementation of a qualifier translator.
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new QualifierTranslator(queryAssembler);
     }
-    
-    
+
     /**
      * Creates an instance of DataNode class.
      */
@@ -410,35 +417,43 @@ public class JdbcAdapter implements DbAdapter {
         node.setAdapter(this);
         return node;
     }
-    
-	public void bindParameter(
-		PreparedStatement statement,
-		Object object,
-		int pos,
-		int sqlType,
-		int precision)
-		throws SQLException, Exception {
-			
-		if (object == null){
-			statement.setNull(pos, sqlType);
-		}
-		else {
-			ExtendedType typeProcessor =
-				getExtendedTypes().getRegisteredType(object.getClass());
-			typeProcessor.setJdbcObject(
-				statement,
-				object,
-				pos,
-				sqlType,
-				precision);
-		}
-	}
 
-	public boolean supportsBatchUpdates() {
-		return this.supportsBatchUpdates;
-	}
-	
-	public void setSupportsBatchUpdates(boolean flag) {
-		this.supportsBatchUpdates = flag;
-	}
+    public void bindParameter(
+        PreparedStatement statement,
+        Object object,
+        int pos,
+        int sqlType,
+        int precision)
+        throws SQLException, Exception {
+
+        if (object == null) {
+            statement.setNull(pos, sqlType);
+        }
+        else {
+            ExtendedType typeProcessor =
+                getExtendedTypes().getRegisteredType(object.getClass());
+            typeProcessor.setJdbcObject(statement, object, pos, sqlType, precision);
+        }
+    }
+
+    public boolean supportsBatchUpdates() {
+        return this.supportsBatchUpdates;
+    }
+
+    public void setSupportsBatchUpdates(boolean flag) {
+        this.supportsBatchUpdates = flag;
+    }
+
+    /**
+     * Always returns <code>true</code>, letting DataNode
+     * to handle the query.
+     */
+    public boolean shouldRunBatchQuery(
+        DataNode node,
+        Connection con,
+        BatchQuery query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+        return true;
+    }
 }
