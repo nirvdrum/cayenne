@@ -80,6 +80,17 @@
 					ignoring their package.</td>
 					<td valign="top" align="center">No</td>
 				</tr>
+				<tr>
+					<td valign="top">encoding</td>
+					<td valign="top">Allows to specify generated file encoding 
+						if different from the default on current platform. 
+						Target encoding must be supported by the JVM running 
+						Ant build. Standard encodings supported by Java on all 
+						platforms are US-ASCII, ISO-8859-1, UTF-8, UTF-16BE, 
+						UTF-16LE, UTF-16. See Sun Java Docs for 
+						java.nio.charset.Charset for more information. </td>
+					<td valign="top" align="center">No</td>
+				</tr>
 			</table>
 			
 			<h3>Examples:</h3>

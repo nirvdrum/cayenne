@@ -64,6 +64,12 @@
 						certain data with a given DataContext. This was an 
 						frequently requested feature.</p>
 				</subsection>
+				<subsection name="1.1.8 Support For Custom Encoding Of Generated Java Files">
+					<p>Desired encoding for generated Java files can be 
+						specified in the Modeler in Preferences and as an 
+						"encoding" attribute of the cgen Ant task. This is helpful 
+						in cross-platform development situations.</p>
+				</subsection>
 			</subsection>
 		</section>
 	</body>
