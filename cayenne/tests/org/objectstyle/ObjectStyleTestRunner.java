@@ -63,7 +63,7 @@ import java.util.*;
 /** Special test runner to run batches of test suites. */
 public class ObjectStyleTestRunner extends junit.textui.TestRunner {
 
-    public static void runSingleTestCase(String caseClassName) {
+    public static boolean runSingleTestCase(String caseClassName) {
         ObjectStyleTestRunner tstRunner = new ObjectStyleTestRunner();
         try {
             TestSuite suite = new TestSuite();
@@ -74,9 +74,10 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         }
 
         tstRunner.printAll();
+        return !tstRunner.hasFailures();            
     }
 
-    public static void runTests() {
+    public static boolean runTests() {
         // configure test suites, run them independently
 
         ArrayList suites = new ArrayList();
@@ -99,12 +100,18 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
             tstRunner.runSuite((TestSuite)suites.get(i));
         }
         tstRunner.printAll();
+        return !tstRunner.hasFailures();            
     }
 
 
     protected ArrayList statsList = new ArrayList();
+    protected int failureCount;
+    protected int errorCount;
 
-
+    public boolean hasFailures() {
+        return errorCount + failureCount > 0;
+    }
+    
     public void printAll() {
         writer().println();
         writer().println();
@@ -113,8 +120,8 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
 
         Iterator it = statsList.iterator();
         int runCount = 0;
-        int failureCount = 0;
-        int errorCount = 0;
+        failureCount = 0;
+        errorCount = 0;
         long totalTime = 0;
         while(it.hasNext()) {
             SuiteStatistics stats = (SuiteStatistics)it.next();

@@ -105,6 +105,9 @@ public class ConnectionSetup implements TestConstants {
             throw new RuntimeException("Error loading configuration.");
 
         DataSourceInfo dsi = factory.getDriverInfo();
+        if(helper.getDomains().size() != 1)
+            throw new RuntimeException("Error loading configuration. Exactly one domain expected.");
+            
         DataDomain dom = (DataDomain)helper.getDomains().get(0);
         dsi.setAdapterClass(dom.getDataNodes()[0].getAdapter().getClass().getName());
         return dsi;

@@ -126,10 +126,14 @@ public class TestMain implements TestConstants {
 
 
         // run tests
+        boolean success = true;
         if(System.getProperty(TestMain.SINGLE_TEST_PROP) != null)
-            ObjectStyleTestRunner.runSingleTestCase(System.getProperty(SINGLE_TEST_PROP));
+            success = ObjectStyleTestRunner.runSingleTestCase(System.getProperty(SINGLE_TEST_PROP));
         else
-            ObjectStyleTestRunner.runTests();
+            success = ObjectStyleTestRunner.runTests();
+        
+        if(!success) 
+            System.exit(1);
     }
 
 

@@ -24,7 +24,7 @@ goto eof
 :run_tests
 mkdir "testrun"
 cd "testrun"
-%JAVA_HOME%\bin\java -jar %CAYENNE_HOME%\lib\cayenne_tests.jar %1 %2 %3
+%JAVA_HOME%\bin\java -jar %CAYENNE_HOME%\lib\cayenne_tests.jar %@
 cd ..
 
 
