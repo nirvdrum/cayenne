@@ -74,11 +74,22 @@
     </copy>
     
     <!-- Copy graphics files -->
-    <copy todir="${build}/classes/org/objectstyle/gui">
+    <copy todir="${build}/classes/org/objectstyle/cayenne/gui">
        <fileset dir="${src}/resources" >
           <include name="images/**/*.jpg"/>
           <include name="images/**/*.gif"/>
        </fileset>
     </copy>
+    
+     <!-- Copy properties -->
+    <copy todir="${build}/classes/org/objectstyle/cayenne/gui">
+       <fileset dir="${src}/resources" >
+           <include name="gui.properties"/>
+       </fileset>
+       <filterset>
+           <filter token="CAYENNE_VERSION" value="${project.version}" />
+       </filterset>
+    </copy>
+        
   </target>
 </project>

@@ -58,9 +58,10 @@ package org.objectstyle.cayenne.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.*;
@@ -90,6 +91,7 @@ implements ActionListener
 {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 
+    public static final String RESOURCE_PATH = "org/objectstyle/cayenne/gui/";
 	private static final String TITLE = "CayenneModeler";
 	/** To indicate in title that the proj is dirty. */
 	private static final String DIRTY_STRING = "* - ";
@@ -106,12 +108,7 @@ implements ActionListener
     JMenuItem saveMenu   		= new JMenuItem("Save");
     JMenuItem  exitMenu    		= new JMenuItem("Exit");
     ArrayList lastOpenProjMenus = new ArrayList();
-/*
-	JMenu editMenu			= new JMenu("Edit");
-	JMenuItem cutMenu		= new JMenu("Cut");
-	JMenuItem copyMenu		= new JMenu("Copy");
-	JMenuItem pasteMenu		= new JMenu("Paste");
-*/
+
 	JMenu projectMenu				= new JMenu("Project");
     JMenuItem createDomainMenu 		= new JMenuItem("Create Domain");
     JMenuItem createDataMapMenu 	= new JMenuItem("Create Data Map");
@@ -137,18 +134,30 @@ implements ActionListener
 	JButton  createObjEntityBtn;
 	JButton  createDbEntityBtn;
 	JButton	 removeBtn;
+	
+	Properties props;
 
-    //Create a file chooser
     final JFileChooser fileChooser   = new JFileChooser();
     XmlFilter xmlFilter    			 = new XmlFilter();
 
+    
 	private static Editor frame;
 
     private Editor() {
         super(TITLE);
 
 		frame = this;
-
+		
+		try {
+            props = loadProperties();
+            logObj.severe("props: " + props);
+		}
+		catch(IOException ioex) {
+			logObj.log(Level.SEVERE, "error", ioex);
+			// ignoring
+			props = new Properties();
+		}
+			
         init();
 		disableMenu();
 		closeProjectMenu.setEnabled(false);
@@ -197,6 +206,7 @@ implements ActionListener
     	});
     }
 
+ 
 
     private void init() {
         getContentPane().setLayout(new BorderLayout());
@@ -295,40 +305,38 @@ implements ActionListener
 
 
     private void initToolBar() {
-    	String path = "org/objectstyle/gui/";
-
     	ClassLoader cl = Editor.class.getClassLoader();        
-    	URL url = cl.getResource(path + "images/domain24.gif");
+    	URL url = cl.getResource(RESOURCE_PATH + "images/domain24.gif");
         ImageIcon domainIcon = new ImageIcon(url);
         createDomainBtn = new JButton(domainIcon);
         createDomainBtn.setToolTipText("Create new domain");
         toolBar.add(createDomainBtn);
 
-    	url = cl.getResource(path + "images/map24.gif");
+    	url = cl.getResource(RESOURCE_PATH + "images/map24.gif");
     	ImageIcon mapIcon = new ImageIcon(url);
     	createDataMapBtn = new JButton(mapIcon);
     	createDataMapBtn.setToolTipText("Create new data map");
         toolBar.add(createDataMapBtn);
 
-    	url = cl.getResource(path + "images/node24.gif");
+    	url = cl.getResource(RESOURCE_PATH + "images/node24.gif");
     	ImageIcon nodeIcon = new ImageIcon(url);
     	createDataSourceBtn = new JButton(nodeIcon);
     	createDataSourceBtn.setToolTipText("Create new data node");
         toolBar.add(createDataSourceBtn);
 
-    	url = cl.getResource(path + "images/objentity24.gif");
+    	url = cl.getResource(RESOURCE_PATH + "images/objentity24.gif");
     	ImageIcon objEntityIcon = new ImageIcon(url);
     	createObjEntityBtn = new JButton(objEntityIcon);
     	createObjEntityBtn.setToolTipText("Create new obj entity");
         toolBar.add(createObjEntityBtn);
 
-    	url = cl.getResource(path + "images/dbentity24.gif");
+    	url = cl.getResource(RESOURCE_PATH + "images/dbentity24.gif");
     	ImageIcon dbEntityIcon = new ImageIcon(url);
     	createDbEntityBtn = new JButton(dbEntityIcon);
     	createDbEntityBtn.setToolTipText("Create new db entity");
         toolBar.add(createDbEntityBtn);
 
-    	url = cl.getResource(path + "images/remove24.gif");
+    	url = cl.getResource(RESOURCE_PATH + "images/remove24.gif");
     	ImageIcon removeIcon = new ImageIcon(url);
     	removeBtn = new JButton(removeIcon);
     	removeBtn.setToolTipText("Remove current");
@@ -341,6 +349,28 @@ implements ActionListener
 	/** Singleton implementation of getting Editor window. */
 	public static Editor getFrame() {
 		return frame;
+	}
+	
+	private Properties loadProperties() throws IOException {
+		Properties props = new Properties();
+		InputStream in = this.getClass().getClassLoader().getResourceAsStream(RESOURCE_PATH + "gui.properties");
+		if(in != null) {
+			try {
+				props.load(in);
+			}
+		    finally {
+				in.close();
+			}
+		}
+		
+		return props;
+	}
+	
+	/**
+	 * Returns a property for <code>propName</code>.
+	 */
+	public String getProperty(String propName) {
+		return props.getProperty(propName);
 	}
 
 	/** Adds asterisk to the title of the window to indicate it is dirty. */

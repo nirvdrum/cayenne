@@ -76,6 +76,14 @@ public class AboutDialog extends JDialog implements ActionListener {
 	private static final int WIDTH = 523;
 	private static final int HEIGHT = 450;
 	private static String licenseString;
+	private static final String infoString =
+		"Copyright (c) 2002 The ObjectStyle Group"
+			+ " (http://www.objectstyle.org)\n"
+			+ "and individual authors of the software."
+			+ " All rights reserved.\n\n"
+			+ "This software is distributed free of charge under the terms\n"
+			+ "of The ObjectStyle Group license.\n"
+			+ "Click \"View License\" for more details.\n\n";
 
 	private boolean view_info = true;
 
@@ -88,17 +96,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 	JPanel infoPanel = new JPanel();
 	JTextArea licenceText = new JTextArea();
 
-	String info =
-		"Copyright (c) 2002 The ObjectStyle Group"
-			+ " (http://www.objectstyle.org)\n"
-			+ "and individual authors of the software."
-			+ " All rights reserved.\n\n"
-			+ "This software is distributed free of charge  under\n"
-			+ " the terms of The ObjectStyle Group license.\n"
-			+ "Click \"View License\" for more details.\n\n"
-			+ "Version 0.7 (alpha).";
-
-	public AboutDialog(JFrame frame) {
+	public AboutDialog(Editor frame) {
 		super(frame, "About CayenneModeler", true);
 		init();
 
@@ -113,8 +111,12 @@ public class AboutDialog extends JDialog implements ActionListener {
 		this.setVisible(true);
 	}
 
+	public Editor getParentEditor() {
+		return (Editor) super.getParent();
+	}
+
 	/** 
-	 * Reads Cayenne license from cayenne.jar file.
+	 * Reads Cayenne license from cayenne.jar file and returns it as a string.
 	 */
 	public static String getLicenseString() {
 		if (licenseString == null) {
@@ -131,14 +133,14 @@ public class AboutDialog extends JDialog implements ActionListener {
 
 					while ((line = in.readLine()) != null) {
 						// strip comments
-						if(line.startsWith("/*") || line.startsWith(" */")) {
+						if (line.startsWith("/*") || line.startsWith(" */")) {
 							continue;
 						}
-						
-						if(line.startsWith(" *")) {
+
+						if (line.startsWith(" *")) {
 							line = line.substring(2);
 						}
-						
+
 						buf.append(line).append('\n');
 					}
 
@@ -168,6 +170,15 @@ public class AboutDialog extends JDialog implements ActionListener {
 		return licenseString;
 	}
 
+
+    /**
+     * Builds CayenneModeler info string */
+	public String getInfoString() {
+		String version = getParentEditor().getProperty("cayenne.version");
+		String versionStr = (version != null) ? "Version " + version : "";
+		return infoString + versionStr;
+	}
+
 	/** Set up the graphical components. */
 	private void init() {
 		GridBagLayout layout = new GridBagLayout();
@@ -187,9 +198,9 @@ public class AboutDialog extends JDialog implements ActionListener {
 		Border border = BorderFactory.createEtchedBorder();
 
 		JPanel image_pane = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		String path = "org/objectstyle/gui/";
+
 		ClassLoader cl = AboutDialog.class.getClassLoader();
-		URL url = cl.getResource(path + "images/logo.jpg");
+		URL url = cl.getResource(Editor.RESOURCE_PATH + "images/logo.jpg");
 		ImageIcon logo_icon = new ImageIcon(url);
 		image = new JLabel(logo_icon);
 		image.setBorder(border);
@@ -198,7 +209,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 		getContentPane().add(image_pane);
 
 		infoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		JTextArea infoArea = new JTextArea(info);
+		JTextArea infoArea = new JTextArea(getInfoString());
 		infoPanel.setBorder(border);
 		infoArea.setEditable(false);
 		infoArea.setBackground(infoPanel.getBackground());
@@ -214,7 +225,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 
 		centerPanel.setLayout(cardLayout);
 		centerPanel.add(infoPanel, "Info");
-		centerPanel.add(temp, "Licence");
+		centerPanel.add(temp, "License");
 		c.gridy = 3;
 		c.gridheight = 5;
 		layout.setConstraints(centerPanel, c);
@@ -236,10 +247,10 @@ public class AboutDialog extends JDialog implements ActionListener {
 		} else {
 			if (view_info) {
 				view.setText("View Info");
-				cardLayout.show(centerPanel, "Licence");
+				cardLayout.show(centerPanel, "License");
 				view_info = false;
 			} else {
-				view.setText("View Licence");
+				view.setText("View License");
 				cardLayout.show(centerPanel, "Info");
 				view_info = true;
 			}

@@ -772,23 +772,21 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
     ImageIcon dbEntityIcon;
     ImageIcon objEntityIcon;
 
-    public BrowseViewRenderer() {
-    	String path = "org/objectstyle/gui/";
-    	
+    public BrowseViewRenderer() {    	
     	ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
-    	URL url = cl.getResource(path + "images/domain16.jpg");
+    	URL url = cl.getResource(Editor.RESOURCE_PATH + "images/domain16.jpg");
         domainIcon = new ImageIcon(url);
         
-    	url = cl.getResource(path + "images/node16.gif");
+    	url = cl.getResource(Editor.RESOURCE_PATH + "images/node16.gif");
     	nodeIcon = new ImageIcon(url);
     	
-    	url = cl.getResource(path + "images/map16.jpg");
+    	url = cl.getResource(Editor.RESOURCE_PATH + "images/map16.jpg");
     	mapIcon = new ImageIcon(url);
     	
-    	url = cl.getResource(path + "images/dbentity16.gif");
+    	url = cl.getResource(Editor.RESOURCE_PATH + "images/dbentity16.gif");
     	dbEntityIcon = new ImageIcon(url);
     	
-    	url = cl.getResource(path + "images/objentity16.jpg");
+    	url = cl.getResource(Editor.RESOURCE_PATH + "images/objentity16.jpg");
     	objEntityIcon = new ImageIcon(url);
     }
 
