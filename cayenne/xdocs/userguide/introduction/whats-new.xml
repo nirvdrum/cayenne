@@ -94,7 +94,16 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.11 Support for Shared Mapping Mamespace">
+            <subsection name="1.1.11 DataContext API for Running Parameterized Named Queries">
+            <p>DataContext now provides simple API to run SelectQuery, SQLTemplate and ProcedureQuery
+            by name if such queries are mapped via CayenneModeler:</p>
+            
+            <ul>
+            <li><a href="../datactxt/performquery.html">DataContext Query API Overview</a></li>
+            </ul>
+            </subsection>
+            
+            <subsection name="1.1.12 Support for Shared Mapping Namespace">
             <p>DataDomain now provides a shared mapping namespace. This means that all mapping 
             objects can reference other mapping objects outside their DataMaps. For example two DbEntities
             can be located in different DataMaps and still have relationships to each other.</p>
@@ -103,22 +112,22 @@
             can't have a "root"  from a different DataMap.</p>
             </subsection>
             
-            <subsection name="1.1.12 SnapshotEvents">
+            <subsection name="1.1.13 SnapshotEvents">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.13 DataContextDelegate">
+            <subsection name="1.1.14 DataContextDelegate">
             <p></p>
             </subsection>
             
-			<subsection name="1.1.14 Entity Restricting Qualifier ">
+			<subsection name="1.1.15 Entity Restricting Qualifier ">
             <p>ObjEntities now can hold a qualifier expression that is automatically appended to any 
             query qualifiers, thus creating a global data filter for a given entity. This feature is used for
             inheritance mapping, however it has nothing to do with inheritance as such and can be used
             all by itself.</p>
             </subsection>
             
-            <subsection name="1.1.15 Explicit Transaction API and Container Managed Transactions">
+            <subsection name="1.1.16 Explicit Transaction API and Container Managed Transactions">
             <p>Cayenne now supports container-managed transactions. As a result it can be used inside EJBs
             out of the box. It also allows a high degree of transactions customization. The following user guide 
             chapter explains Transactions design and behavior in details:</p>
@@ -128,7 +137,7 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.16 Various Performance Enhancements">
+            <subsection name="1.1.17 Various Performance Enhancements">
             <ul>
             	<li>Lazy Relationship Creation - when new objects are fetched, their relationships
             	are not initialized immediately; a Fault singleton is used isntead as a placeholder.
@@ -148,7 +157,7 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.17 DbAdapters for More Databases">
+            <subsection name="1.1.18 More Databases Have Custom DbAdapters">
             <p>Cayenne features new database adapters:</p>
             <ul>
             	<li>OpenBase Adapter</li>
@@ -156,17 +165,17 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.18 Support for To-One Relationships Not Pointing to a PK.">
+            <subsection name="1.1.19 Support for To-One Relationships Not Pointing to a PK.">
             <p>Added support for one-to-one relationships between PK and non-PK columns
             of related tables. In the past this could only be modeled as one-to-many. CayenneModeler
             will create UNIQUE constraint for a non-PK columns during schema generation.</p>
             </subsection>
             
-            <subsection name="1.1.19 New Default CayenneModeler Look and Feel">
+            <subsection name="1.1.20 New Default CayenneModeler Look and Feel">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.20 Support for Queries in CayenneModeler and DataMap DTD.">
+            <subsection name="1.1.21 Support for Queries in CayenneModeler and DataMap DTD.">
             <p>Queries are made first-class mapping objects. They can be modeled in CayenneModeler 
             and stored in DataMaps. Application code can then reuse such queries.
             </p>
@@ -177,29 +186,32 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.21 Non-refreshing Select Queries">
+            <subsection name="1.1.22 Non-refreshing Select Queries">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.22 CayenneModeler Support for Custom Class Templates.">
+            <subsection name="1.1.23 CayenneModeler Support for Custom Class Templates.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.23 CayenneModeler Support for UI Customizable Classpath for Jars.">
+            <subsection name="1.1.24 CayenneModeler Support for UI Customizable Classpath for Jars.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.24 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
+            <subsection name="1.1.25 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
             <p>A dialog used to select mapping of ObjRelationship to one DbRelationship (simple relationship)
             or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
             can be selected. This dialog has been completely redesigned to remove this limitation.</p>
             </subsection>
             
-            <subsection name="1.1.25 CayenneModeler Productivity Enhancements.">
+            <subsection name="1.1.26 CayenneModeler Productivity Enhancements.">
             <p>CayenneModeler now uses defaults where appropriate when working with mappings. This is
             to reduce manual operations. Some examples are:
             </p>
             <ul>
+            <li><a href="../../modelerguide/common-tasks/datamap-defaults.html">DataMap defaults</a> 
+            allow to specify default values for all entities in the DataMap, reducing typing.</li>
+            
             <li>When ObjRelationship target is selected, Modeler guesses underlying DbRelationship if
             source and target entities can be connected in one step.</li>
             </ul>

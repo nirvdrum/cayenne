@@ -6,8 +6,15 @@
     <section name="6. Using DataContext">
 	<subsection name="6.1 Obtaining DataContext">
 		<p>There are a few ways to get hold of a DataContext instance needed for 
-		database access in Cayenne.			
+		database access in Cayenne.	
 		</p>
+
+<panel name="Thread DataContext Note:">
+It should be possible to bind DataContext to a current thread, thus completely decoupling data 
+layer from the client-specific API, such as web applications. This option will be released as part 
+of Cayenne soon. Currently it should be easy to achieve the same functionality manually via 
+java.lang.ThreadLocal.
+</panel>
 		
 		<subsection name="6.1.1 Standalone Application">
 		<p>In a standalone application, new DataContext instance can be obtained 

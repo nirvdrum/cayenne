@@ -22,7 +22,7 @@ Transaction externalTransaction = Transaction.externalTransaction(null);
 Transaction.performQueries(ctxt, Collections.singletonList(query), resultsCollection);
 
 // process results
-List results = resultCollection.getFirstRows(query) as a shortcut
+List results = resultCollection.getFirstRows(query);
 ...
 </source>
 	</subsection>

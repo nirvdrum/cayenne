@@ -135,6 +135,7 @@
     		<item name="4.4 Generate Java Classes"  href="/modelerguide/common-tasks/generate-java.html"/>
     		<item name="4.5 Generate Database Schema"  href="/modelerguide/common-tasks/generate-db.html"/>
     		<item name="4.6 Generate Primary Key Support"  href="/modelerguide/common-tasks/pksupport.html"/>
+    		<item name="4.7 Setting DataMap Defaults"  href="/modelerguide/common-tasks/datamap-defaults.html"/>
     	</item>
     	
     	<item name="5. Modeling Database Layer"  href="/modelerguide/modeling-db-layer/index.html">
