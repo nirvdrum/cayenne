@@ -75,7 +75,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 	private static Logger logObj = Logger.getLogger(CayenneGeneratorTst.class);
 
 	private static final Perl5Util regexUtil = new Perl5Util();
-	private static final Project project = new Project();
+    private static final Project project = new Project();
 	private static final File baseDir = CayenneTestResources.getResources().getTestDir();
 	private static final File map = new File(baseDir, "antmap.xml");
 	private static final File template = new File(baseDir, "velotemplate.vm");

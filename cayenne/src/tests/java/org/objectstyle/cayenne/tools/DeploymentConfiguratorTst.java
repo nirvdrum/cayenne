@@ -55,12 +55,67 @@
  */
 package org.objectstyle.cayenne.tools;
 
+import java.io.File;
+import java.net.URL;
+
+import org.apache.log4j.Logger;
+import org.apache.tools.ant.Location;
+import org.apache.tools.ant.Project;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.project.DataNodeConfigInfo;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.ZipUtil;
 
 /**
  * @author Andrei Adamchik
  */
 public class DeploymentConfiguratorTst extends CayenneTestCase {
+    private static Logger logObj =
+        Logger.getLogger(DeploymentConfiguratorTst.class);
+
+    private static final File baseDir =
+        new File(CayenneTestResources.getResources().getTestDir(), "cdeploy");
+    private static File src = new File(baseDir, "cdeploy-test.jar");
+    private static File altFile = new File(baseDir, "alt-cayenne.xml");
+    private static File altNodeFile = new File(baseDir, "alt-node1.xml");
+
+    protected DeploymentConfigurator task;
+    protected Project project;
+    protected File dest;
+
+    static {
+        extractFiles();
+    }
+
+    private static void extractFiles() {
+        baseDir.mkdirs();
+
+        ResourceLocator locator = new ResourceLocator();
+        locator.setSkipAbsPath(true);
+        locator.setSkipClasspath(false);
+        locator.setSkipCurDir(true);
+        locator.setSkipHomeDir(true);
+
+        // Configuration superclass statically defines what
+        // ClassLoader to use for resources. This
+        // allows applications to control where resources
+        // are loaded from.
+        locator.setClassLoader(Configuration.getResourceLoader());
+
+        URL url1 =
+            locator.findResource("test-resources/cdeploy/cdeploy-test.jar");
+        Util.copy(url1, src);
+
+        URL url2 =
+            locator.findResource("test-resources/cdeploy/alt-cayenne.xml");
+        Util.copy(url2, altFile);
+
+        URL url3 = locator.findResource("test-resources/cdeploy/alt-node1.xml");
+        Util.copy(url3, altNodeFile);
+    }
 
     /**
      * Constructor for DeploymentConfiguratorTst.
@@ -69,9 +124,79 @@ public class DeploymentConfiguratorTst extends CayenneTestCase {
     public DeploymentConfiguratorTst(String name) {
         super(name);
     }
-    
-    public void testAltFile() throws Exception {
-    	
+
+    public void setUp() throws Exception {
+        // create test dir
+        File testDir = null;
+        for (int i = 1; i < 50; i++) {
+            File tmp = new File(baseDir, "test" + i);
+            if (!tmp.exists()) {
+                tmp.mkdirs();
+                testDir = tmp;
+                break;
+            }
+        }
+
+        project = new Project();
+        project.setBaseDir(testDir);
+
+        dest = new File(project.getBaseDir(), "test-out.jar");
+
+        task = new DeploymentConfigurator();
+        task.setProject(project);
+        task.setTaskName("Test");
+        task.setLocation(Location.UNKNOWN_LOCATION);
+        task.setSrc(src);
+        task.setDest(dest);
+
+        // assert setup success
+        assertTrue(testDir.isDirectory());
+        assertTrue(!dest.exists());
+        assertSame(dest, task.getInfo().getDestJar());
+        assertSame(src, task.getInfo().getSourceJar());
     }
 
+    public void testPassThrough() throws Exception {
+        // run task
+        task.execute();
+
+        // check results
+        assertTrue(dest.isFile());
+    }
+
+    public void testAltFile() throws Exception {
+        task.setAltProjectFile(altFile);
+
+        // run task
+        task.execute();
+
+        // check results
+        assertTrue(dest.isFile());
+
+        ZipUtil.unzip(dest, project.getBaseDir());
+        File newRoot = new File(project.getBaseDir(), "cayenne.xml");
+        assertTrue(newRoot.isFile());
+        assertEquals(altFile.length(), newRoot.length());
+    }
+
+    public void testAltNode() throws Exception {
+        DataNodeConfigInfo node = new DataNodeConfigInfo();
+        node.setName("node1");
+        node.setAdapter("non-existent-adapter");
+        
+        task.addNode(node);
+
+        // run task
+        task.execute();
+
+        // check results
+        assertTrue(dest.isFile());
+
+        ZipUtil.unzip(dest, project.getBaseDir());
+        File newRoot = new File(project.getBaseDir(), "cayenne.xml");
+        
+        String fileContents = Util.stringFromFile(newRoot);
+        assertTrue(fileContents.indexOf(node.getName()) >= 0);
+        assertTrue(fileContents.indexOf(node.getAdapter()) >= 0);
+    }
 }

@@ -74,6 +74,11 @@ import junit.framework.TestCase;
  */
 public class CayenneTestCase extends TestCase {
     private static Logger logObj = Logger.getLogger(CayenneTestCase.class);
+
+    static {
+        // init resources if needed
+        CayenneTestResources.init();
+    }
     
     /**
      * Constructor for CayenneTestCase.
@@ -81,9 +86,6 @@ public class CayenneTestCase extends TestCase {
      */
     public CayenneTestCase(String name) {
         super(name);
-        
-        // init resources if needed
-        CayenneTestResources.init();
     }
 
     /**
@@ -91,13 +93,15 @@ public class CayenneTestCase extends TestCase {
      * cases that perform file operations.
      */
     public File getTestDir() {
-    	return CayenneTestResources.getResources().getTestDir();
+        return CayenneTestResources.getResources().getTestDir();
     }
-    
+
     public File getTestResourceDir() {
-		return new File(new File(new File(new File("build"), "tests"), "deps"), "test-resources");
+        return new File(
+            new File(new File(new File("build"), "tests"), "deps"),
+            "test-resources");
     }
-    
+
     public Connection getConnection() {
         return CayenneTestResources.getResources().getSharedConnection();
     }
@@ -117,8 +121,8 @@ public class CayenneTestCase extends TestCase {
     public DataContext createDataContext() {
         return getDomain().createDataContext();
     }
-    
+
     public CayenneTestDatabaseSetup getDatabaseSetup() {
-    	return CayenneTestResources.getResources().getSharedDatabaseSetup();
-    } 
+        return CayenneTestResources.getResources().getSharedDatabaseSetup();
+    }
 }
