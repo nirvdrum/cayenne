@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.DataMap;
