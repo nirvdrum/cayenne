@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.dba.openbase;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.Iterator;
@@ -63,6 +64,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -101,6 +103,8 @@ public class OpenBaseAdapter extends JdbcAdapter {
         // Byte handling doesn't work on read... 
         // need special converter
         map.registerType(new OpenBaseByteType());
+        
+        map.registerType(new OpenBaseCharType());
     }
 
     public DbAttribute buildAttribute(
@@ -134,7 +138,7 @@ public class OpenBaseAdapter extends JdbcAdapter {
         // TODO: according to OpenBase docs views *ARE* supported.
         return null;
     }
-    
+
     /** 
      * Returns OpenBase-specific translator for queries.
      */
@@ -292,13 +296,37 @@ public class OpenBaseAdapter extends JdbcAdapter {
         OpenBaseByteType() {
             super(Byte.class.getName());
         }
-        
+
         public Object materializeObject(ResultSet rs, int index, int type)
             throws Exception {
 
             // read value as int, and then narrow it down
             int val = rs.getInt(index);
             return (rs.wasNull()) ? null : new Byte((byte) val);
+        }
+    }
+
+    static class OpenBaseCharType extends CharType {
+        OpenBaseCharType() {
+            super(false, true);
+        }
+
+        public void setJdbcObject(
+            PreparedStatement st,
+            Object val,
+            int pos,
+            int type,
+            int precision)
+            throws Exception {
+
+            // These to types map to "text"; and when setting "text" as object
+            // OB assumes that the object is the actula CLOB... weird
+            if (type == Types.CLOB || type == Types.LONGVARCHAR) {
+                st.setString(pos, (String) val);
+            }
+            else {
+                super.setJdbcObject(st, val, pos, type, precision);
+            }
         }
     }
 }

@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.openbase;
 
-import java.sql.Types;
-
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
@@ -103,34 +101,15 @@ public class OpenBaseQualifierTranslator extends QualifierTranslator {
         Expression parentExpression) {
 
         // Special handling of string matching is needed:
-        // 
-        //   1. Case-sensitive LIKE must be converted to [x][Y][z] format
-        //   2. When comparing to LOBs, we can't use a prepared statement parameter -
-        //      not sure if this an OpenBase bug, or simply their philosophy? But it is strange...
-        if (val instanceof String) {
-            String string = (String) val;
+        // Case-sensitive LIKE must be converted to [x][Y][z] format
+        if (val instanceof String
+            && (parentExpression.getType() == Expression.LIKE
+                || parentExpression.getType() == Expression.NOT_LIKE)) {
 
-            // convert pattern
-            if (parentExpression.getType() == Expression.LIKE
-                || parentExpression.getType() == Expression.NOT_LIKE) {
-                string = caseSensitiveLikePattern(string);
-            }
+            val = caseSensitiveLikePattern((String) val);
+        }
 
-            // see if we need to inline the pattern
-            if (attr != null
-                && (attr.getType() == Types.CLOB
-                    || attr.getType() == Types.BLOB
-                    || attr.getType() == Types.LONGVARCHAR
-                    || attr.getType() == Types.LONGVARBINARY)) {
-                buf.append('\'').append(string).append('\'');
-            }
-            else {
-                super.appendLiteralDirect(buf, string, attr, parentExpression);
-            }
-        }
-        else {
-            super.appendLiteralDirect(buf, val, attr, parentExpression);
-        }
+        super.appendLiteralDirect(buf, val, attr, parentExpression);
     }
 
     private String caseSensitiveLikePattern(String pattern) {
