@@ -19,3 +19,5 @@ Bug report number 760819:
 
 4. Changed SelectQuery.prefetches property to be a Collection instead of List (with internal
 implementation being a Set to ensure that no duplicates are used).
+
+5. Initial release of the DB2 adapter.
