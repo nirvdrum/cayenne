@@ -60,7 +60,31 @@ package org.objectstyle.cayenne;
  * 
  * @author Andrei Adamchik 
  */
-public interface PersistenceState {
+public class PersistenceState {
+
+    /** 
+     * Returns String label for persistence state. 
+     * Used for debugging. 
+     */
+    public static String persistenceStateName(int persistenceState) {
+        switch (persistenceState) {
+            case PersistenceState.TRANSIENT :
+                return "transient";
+            case PersistenceState.NEW :
+                return "new";
+            case PersistenceState.MODIFIED :
+                return "modified";
+            case PersistenceState.COMMITTED :
+                return "committed";
+            case PersistenceState.HOLLOW :
+                return "hollow";
+            case PersistenceState.DELETED :
+                return "deleted";
+            default :
+                return "unknown";
+        }
+    }
+
     /** Describes a state of an object not registered with DataContext,
      *  and therefore having no persistence features.
      */

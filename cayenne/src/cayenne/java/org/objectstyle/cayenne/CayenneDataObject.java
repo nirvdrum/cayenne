@@ -78,25 +78,12 @@ public class CayenneDataObject implements DataObject {
 
     /** 
      * Returns String label for persistence state. 
-     * Used for debugging. 
+     * Used for debugging.
+     *
+     * @deprecated use PersistenceState.persistenceStateName() instead.
      */
     public static String persistenceStateString(int persistenceState) {
-        switch (persistenceState) {
-            case PersistenceState.TRANSIENT :
-                return "transient";
-            case PersistenceState.NEW :
-                return "new";
-            case PersistenceState.MODIFIED :
-                return "modified";
-            case PersistenceState.COMMITTED :
-                return "committed";
-            case PersistenceState.HOLLOW :
-                return "hollow";
-            case PersistenceState.DELETED :
-                return "deleted";
-            default :
-                return "unknown";
-        }
+			return PersistenceState.persistenceStateName(persistenceState);
     }
 
     protected ObjectId objectId;
@@ -370,7 +357,7 @@ public class CayenneDataObject implements DataObject {
             .append("<oid: ")
             .append(objectId)
             .append("; state: ")
-            .append(persistenceStateString(persistenceState))
+            .append(PersistenceState.persistenceStateName(persistenceState))
             .append(">}\n");
         return buf;
     }
