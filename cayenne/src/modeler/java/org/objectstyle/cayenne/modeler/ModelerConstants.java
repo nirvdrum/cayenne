@@ -63,14 +63,17 @@ import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
  * @author Andrei Adamchik
  */
 public interface ModelerConstants {
+
     /** Defines path to the images. */
     public static final String RESOURCE_PATH = "org/objectstyle/cayenne/modeler/images/";
 
-    public static final String DEFAULT_MESSAGE_BUNDLE =
-        "org.objectstyle.cayenne.modeler.cayennemodeler-strings";
+    public static final String DEFAULT_MESSAGE_BUNDLE = "org.objectstyle.cayenne.modeler.cayennemodeler-strings";
 
     public static final String TITLE = "CayenneModeler";
     public static final String DEFAULT_LAF_NAME = PlasticXPLookAndFeel.class.getName();
-    public static final String DEFAULT_THEME_NAME = "Desert Blue";
+
+    // note that previous default - "Desert Blue" theme doesn't support Chinese and
+    // Japanese chars
+    public static final String DEFAULT_THEME_NAME = "Sky Bluer";
 
 }
