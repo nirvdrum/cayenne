@@ -5,39 +5,36 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne 1.0.3 Release</strong></u></p>
+        <p><u><i>[December 12, 2003]</i></u> <strong>ObjectStyle LLC. Launches a Website to Support Cayenne </strong></p>
+        <p><img align="left" hspace="3" src="images/other/objectstyle-llc-logo.gif"/>
+        ObjectStyle LLC., a company founded by two original Cayenne authors and current developers, launched its public website
+         dedicated to commercial support of Cayenne. Visit <a href="http://objectstyle.com">http://objectstyle.com</a> for 
+         details.<br/><br/>
+         </p>
+         
+         <p><u><i>[December 1, 2003]</i></u> <strong><font color="red">ObjectStyle.org Server has Become Collateral Damage In SPAM War</font></strong></p>
+         <p>ObjectStyle.org server appeared on the <a href="http://www.spamhaus.org/sbl/sbl.lasso?query=SBL12419">SpamHous.org block list</a>
+         as a result of another server on the same network being used by spammers. Until this is resolved, some users may not receive email from the mailing lists
+         and subscribe/unsubscribe. We will announce when the problem is resolved.
+         </p>
+         
+         <p><u><i>[November 1, 2003]</i></u> <strong>Cayenne in "The Best Freeware And Shareware" of DB Magazine, Japan</strong></p>
+         <p><img align="left" hspace="3" src="images/other/db-mag-cover-small.jpg"/> 
+         A December 2003 edition of the DB Magazine, a 250-page software tecnology magazine published in Japanese, includes 
+         Cayenne in the selection of "The Best Freeware &amp; Shareware". Cayenne 1.0 is also distributed on the CD that comes with the magazine.
+         <br/><br/><br/><br/>
+         </p>
+
         
-        <p>Cayenne 1.0.3 is 
-        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
-        download</a>. It fixes numerous bugs (including a few serious ones), and adds a few new features:</p>
-        <ul>
-        <li>Class generation via Modeler or Ant would create "public static final String" class variables
-        for all class property names, and also for the column names of the entity PK.</li>
-        <li>New API added to transfer objects between DataContexts.</li>
-        <li>Iterator over IncrementalFaultList is now "lazy", and will resolve objects one 
-        page at a time.</li>
-        </ul>
+        <p><u><i>[May 1 2003]</i></u> <strong>National Hockey League Switches to Cayenne</strong></p>
         
-        <p>Details can be found in the <a href="RELEASE-NOTES-1.0.3.txt">release notes</a>.
-        </p>
-        
-        <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne Examples 1.0.3 Release</strong></u></p>
-        
-        <p>Cayenne Examples 1.0.3 is 
-        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
-        download</a>. It contains new aggregate queries mapping example. Examples documentation is now a part
-        of the main Cayenne site. Details can be found in the <a href="RELEASE-NOTES-1.0.3.examples.txt">release notes</a>.
-        </p>
-        
-        <p><img src="images/other/nhl_logo.gif"/> 
-        <u><strong><i>May 1 2003:</i></strong> <strong>National 
-        Hockey League Switches to Cayenne</strong></u></p>
-        
-        <p>After the initial trial of Cayenne last October, NHL
+        <p><img align="left" hspace="3" src="images/other/nhl_logo.gif"/> 
+        After the initial trial of Cayenne last October, NHL
         switched all their public applications running at <a href="http://www.nhl.com">NHL.com</a>
         to use Cayenne. With the help from <a href="http://objectstyle.com">ObjectStyle</a> and 
         <a href="http://www.centralparksoftware.com/">Central Park Software</a> the site was successfully
         launched to production. Currently applications receive more than 5 million hits a day. 
+        <br/><br/>
         </p>
         
         <p><a href="news-archive.html"><strong>older news...</strong></a></p>

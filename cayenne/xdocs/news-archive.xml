@@ -4,6 +4,30 @@
 
     <body>        
         <section name="Cayenne News Archive">
+        <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne 1.0.3 Release</strong></u></p>
+        
+        <p>Cayenne 1.0.3 is 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
+        download</a>. It fixes numerous bugs (including a few serious ones), and adds a few new features:</p>
+        <ul>
+        <li>Class generation via Modeler or Ant would create "public static final String" class variables
+        for all class property names, and also for the column names of the entity PK.</li>
+        <li>New API added to transfer objects between DataContexts.</li>
+        <li>Iterator over IncrementalFaultList is now "lazy", and will resolve objects one 
+        page at a time.</li>
+        </ul>
+        
+        <p>Details can be found in the <a href="RELEASE-NOTES-1.0.3.txt">release notes</a>.
+        </p>
+        
+        <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne Examples 1.0.3 Release</strong></u></p>
+        
+        <p>Cayenne Examples 1.0.3 is 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
+        download</a>. It contains new aggregate queries mapping example. Examples documentation is now a part
+        of the main Cayenne site. Details can be found in the <a href="RELEASE-NOTES-1.0.3.examples.txt">release notes</a>.
+        </p>
+        
         <p><u><strong><i>October 27, 2003:</i></strong> <strong>Cayenne 1.0.2 Maintenance Release</strong></u></p>
         
         <p>Cayenne 1.0.2 is 
