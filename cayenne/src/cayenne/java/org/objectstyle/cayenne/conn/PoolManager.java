@@ -59,8 +59,7 @@ package org.objectstyle.cayenne.conn;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -70,8 +69,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
-import org.objectstyle.cayenne.util.RequestDequeue;
-import org.objectstyle.cayenne.util.RequestQueue;
+import org.apache.log4j.Logger;
 
 /**
  * PoolManager is a pooling DataSource impementation. 
@@ -83,13 +81,15 @@ import org.objectstyle.cayenne.util.RequestQueue;
  * @author Andrei Adamchik
  */
 public class PoolManager implements DataSource, ConnectionEventListener {
+    private static Logger logObj = Logger.getLogger(PoolManager.class);
+    
     /** 
      * Defines a maximum time in milliseconds that a connection
      * request could wait in the connection queue. After this period
      * expires, an exception will be thrown in the calling method.
      * In the future this parameter should be made configurable.
      */
-    public static final int MAX_QUEUE_WAIT = 30000;
+    public static final int MAX_QUEUE_WAIT = 20000;
 
     protected ConnectionPoolDataSource poolDataSource;
     protected int minConnections;
@@ -101,7 +101,8 @@ public class PoolManager implements DataSource, ConnectionEventListener {
 
     protected List unusedPool;
     protected List usedPool;
-    protected RequestQueue threadQueue;
+
+    private PoolMaintenanceThread poolResizeThread;
 
     /** 
      * Creates new PoolManager using org.objectstyle.cayenne.conn.PoolDataSource
@@ -116,14 +117,7 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         String password)
         throws SQLException {
 
-        this(
-            jdbcDriver,
-            dataSourceUrl,
-            minCons,
-            maxCons,
-            userName,
-            password,
-            null);
+        this(jdbcDriver, dataSourceUrl, minCons, maxCons, userName, password, null);
     }
 
     public PoolManager(
@@ -146,11 +140,10 @@ public class PoolManager implements DataSource, ConnectionEventListener {
             info.setPassword(password);
             logger.logPoolCreated(info);
         }
-        
+
         this.jdbcDriver = jdbcDriver;
         this.dataSourceUrl = dataSourceUrl;
-        DriverDataSource driverDS =
-            new DriverDataSource(jdbcDriver, dataSourceUrl);
+        DriverDataSource driverDS = new DriverDataSource(jdbcDriver, dataSourceUrl);
         driverDS.setLogger(logger);
         PoolDataSource poolDS = new PoolDataSource(driverDS);
         init(poolDS, minCons, maxCons, userName, password);
@@ -188,16 +181,12 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         // do sanity checks...
         if (maxConnections < 0) {
             throw new SQLException(
-                "Maximum number of connections can not be negative ("
-                    + maxCons
-                    + ").");
+                "Maximum number of connections can not be negative (" + maxCons + ").");
         }
 
         if (minConnections < 0) {
             throw new SQLException(
-                "Minimum number of connections can not be negative ("
-                    + minCons
-                    + ").");
+                "Minimum number of connections can not be negative (" + minCons + ").");
         }
 
         if (minConnections > maxConnections) {
@@ -211,18 +200,21 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         this.maxConnections = maxCons;
         this.poolDataSource = poolDataSource;
 
-        // init pool
-        threadQueue = new RequestQueue(-1, MAX_QUEUE_WAIT);
-        usedPool = Collections.synchronizedList(new ArrayList(maxConnections));
-        unusedPool =
-            Collections.synchronizedList(new ArrayList(maxConnections));
+        // init pool... use linked lists to use the queue in the FIFO manner
+        usedPool = new LinkedList();
+        unusedPool = new LinkedList();
         growPool(minConnections, userName, password);
+
+        startMaintenanceThread();
+    }
+    
+    protected void startMaintenanceThread() {
+        this.poolResizeThread = new PoolMaintenanceThread(this);
+        this.poolResizeThread.start();
     }
 
     /** Creates and returns new PooledConnection object. */
-    protected PooledConnection newPooledConnection(
-        String userName,
-        String password)
+    protected PooledConnection newPooledConnection(String userName, String password)
         throws SQLException {
         return (userName != null)
             ? poolDataSource.getPooledConnection(userName, password)
@@ -253,6 +245,16 @@ public class PoolManager implements DataSource, ConnectionEventListener {
             // remove connection from the list
             usedIterator.remove();
         }
+
+        this.poolResizeThread.dispose();
+        notifyAll();
+    }
+
+    /**
+     * @return true if at least one more connection can be added to the pool.
+     */
+    protected synchronized boolean canGrowPool() {
+        return getPoolSize() < maxConnections;
     }
 
     /** 
@@ -270,8 +272,7 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         int i = 0;
         int startPoolSize = getPoolSize();
         for (; i < addConnections && startPoolSize + i < maxConnections; i++) {
-            PooledConnection newConnection =
-                newPooledConnection(userName, password);
+            PooledConnection newConnection = newPooledConnection(userName, password);
             newConnection.addConnectionEventListener(this);
             unusedPool.add(newConnection);
         }
@@ -279,17 +280,20 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         return i;
     }
 
-    protected synchronized void shrinkPool(int closeConnections)
-        throws SQLException {
+    protected synchronized void shrinkPool(int closeConnections) {
+        
         int close =
-            unusedPool.size() < closeConnections
-                ? unusedPool.size()
-                : closeConnections;
+            unusedPool.size() < closeConnections ? unusedPool.size() : closeConnections;
         int lastInd = unusedPool.size() - close;
 
         for (int i = unusedPool.size() - 1; i >= lastInd; i--) {
             PooledConnection con = (PooledConnection) unusedPool.remove(i);
-            con.close();
+
+            try {
+                con.close();
+            } catch (SQLException ex) {
+                logObj.info("Error closing connection. Ignoring.", ex);
+            }
         }
     }
 
@@ -373,34 +377,44 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     }
 
     /** Returns connection from the pool. */
-    public Connection getConnection(String userName, String password)
+    public synchronized Connection getConnection(String userName, String password)
         throws SQLException {
 
-        // increase pool if needed
-        // if further increase is not possible
-        // (say we exceed the maximum number of connections)
-        // this will throw an SQL exception...
-        if (unusedPool.size() == 0) {
-            int size = growPool(1, userName, password);
+        // wait for returned connections or the maintenance thread 
+        // to bump the pool size...
 
-            // can't grow anymore, put on hold
-            if (size == 0) {
-                RequestDequeue result = threadQueue.queueThread();
-                if (result.isDequeueSuccess()) {
-                    return ((PooledConnection) result.getDequeueEventObject())
-                        .getConnection();
-                } else if (result.isQueueFull()) {
-                    throw new SQLException("Can't obtain connection. Too many requests waiting in the queue.");
-                } else {
-                    throw new SQLException("Can't obtain connection. Request timed out.");
+        if (unusedPool.size() == 0) {
+            // note that if we were woken up 
+            // before the full wait period expired, and no connections are
+            // available yet, go back to sleep. Otherwise we don't give a maintenance
+            // thread a chance to increase pool size
+            long waitTill =
+                System.currentTimeMillis()
+                + MAX_QUEUE_WAIT;
+
+            do {
+                // awake manager thread...
+                notifyAll();
+
+                try {
+                    wait(MAX_QUEUE_WAIT);
+                } catch (InterruptedException iex) {
+                    // ignoring
                 }
+
+            } while (unusedPool.size() == 0 && waitTill > System.currentTimeMillis());
+
+            if (unusedPool.size() == 0) {
+                throw new SQLException(
+                    "Can't obtain connection. Request timed out. Total used connections: "
+                        + usedPool.size());
             }
         }
 
-        int lastObjectInd = unusedPool.size() - 1;
-        PooledConnection pooledConn =
-            (PooledConnection) unusedPool.remove(lastObjectInd);
+        // get first connection... lets cycle them in FIFO manner
+        PooledConnection pooledConn = (PooledConnection) unusedPool.remove(0);
         usedPool.add(pooledConn);
+
         return pooledConn.getConnection();
     }
 
@@ -426,18 +440,16 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     public synchronized void connectionClosed(ConnectionEvent event) {
         // return connection to the pool
         PooledConnection closedConn = (PooledConnection) event.getSource();
-
+        
         // remove this connection from the list of connections
         // managed by this pool...
         int usedInd = usedPool.indexOf(closedConn);
         if (usedInd >= 0) {
+            usedPool.remove(usedInd);
+            unusedPool.add(closedConn);
 
-            // check connection request queue and assign connection to the
-            // first requestor in line
-            if (!threadQueue.dequeueFirst(closedConn)) {
-                usedPool.remove(usedInd);
-                unusedPool.add(closedConn);
-            }
+            // notify threads waiting for connections
+            notifyAll();
         }
         // else ....
         // other possibility is that this is a bad connection, so just ignore its closing event,
@@ -470,5 +482,71 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         // do not close connection,
         // let the code that catches the exception handle it
         // ....
+    }
+
+    static class PoolMaintenanceThread extends Thread {
+        protected boolean shouldDie;
+        protected PoolManager pool;
+        protected long lastClosed;
+
+        PoolMaintenanceThread(PoolManager pool) {
+            this.pool = pool;
+        }
+
+        public void run() {
+
+            // periodically wakes up to check if the pool should grow or shrink 
+            synchronized (pool) {
+                while (!shouldDie) {
+
+                    int unused = pool.getCurrentlyUnused();
+                    int used = pool.getCurrentlyInUse();
+                    int total = unused + used;
+
+                    // should grow
+                    if (unused == 0 || total < pool.minConnections) {
+                        try {
+                            int i = pool.growPool(1, pool.userName, pool.password);
+                            if (i > 0) {
+                                logObj.debug("Increased pool size by " + i + " to " + (total + i));
+                            }
+                        } catch (SQLException ex) {
+                            logObj.info(
+                                "Exception growing the pool, ignoring."
+                                    + ex.getMessage());
+                        }
+                    } else if (
+                        unused > 0
+                            && total
+                                > pool.minConnections
+                                    + 1
+                                    + (pool.maxConnections - pool.minConnections) / 2
+                            && lastClosed > System.currentTimeMillis() - 600000) {
+                        pool.shrinkPool(1);
+
+                        lastClosed = System.currentTimeMillis();
+                        logObj.debug("decreased pool size by one to " + (total - 1));
+                    }
+
+                    // notify waiting threads
+                    pool.notifyAll();
+
+                    try {
+                        // wait for really long time, since stuck threads
+                        // will send notify anyway
+                        pool.wait(60000);
+                    } catch (InterruptedException iex) {
+                        // ignore...
+                    }
+                }
+            }
+        }
+
+        /**
+         * Stops the thread.
+         */
+        public void dispose() {
+            shouldDie = true;
+        }
     }
 }
