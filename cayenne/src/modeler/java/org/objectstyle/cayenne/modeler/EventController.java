@@ -115,7 +115,6 @@ import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Query;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -213,7 +212,6 @@ public class EventController extends ModelerController {
         currentProcedure = null;
         currentProcedureParameter = null;
         currentQuery = null;
-        getTopModel().setSelectedPath(ProjectPath.EMPTY_PATH);
     }
 
     protected void refreshNamespace() {
@@ -375,7 +373,6 @@ public class EventController extends ModelerController {
         clearState();
 
         currentDomain = e.getDomain();
-        getTopModel().setSelectedPath(currentDomain);
 
         EventListener[] list = getListeners(DomainDisplayListener.class);
         debugEvent(e, list);

@@ -67,9 +67,9 @@ import org.objectstyle.cayenne.modeler.action.CreateDerivedDbEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -86,7 +86,6 @@ import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * A top level MVC model object in CayenneModeler.
@@ -94,11 +93,11 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class TopModel {
+
     public static final String STATUS_MESSAGE_KEY = "statusMessage";
 
     protected Project currentProject;
     protected String statusMessage;
-    protected ProjectPath selectedPath;
     protected ActionMap actionMap;
 
     /**
@@ -129,7 +128,7 @@ public class TopModel {
 
         CayenneAction saveAction = new SaveAction();
         actionMap.put(saveAction.getKey(), saveAction);
-        
+
         CayenneAction saveAsAction = new SaveAsAction();
         actionMap.put(saveAsAction.getKey(), saveAsAction);
 
@@ -162,7 +161,7 @@ public class TopModel {
 
         CayenneAction createSPAction = new CreateProcedureAction();
         actionMap.put(createSPAction.getKey(), createSPAction);
-        
+
         CayenneAction createQueryAction = new CreateQueryAction();
         actionMap.put(createQueryAction.getKey(), createQueryAction);
 
@@ -213,6 +212,7 @@ public class TopModel {
 
     /**
      * Returns the currentProject.
+     * 
      * @return Project
      */
     public Project getCurrentProject() {
@@ -220,14 +220,8 @@ public class TopModel {
     }
 
     /**
-     * Returns current project selection.
-     */
-    public ProjectPath getSelectedPath() {
-        return selectedPath;
-    }
-
-    /**
      * Returns the statusMessage.
+     * 
      * @return String
      */
     public String getStatusMessage() {
@@ -236,6 +230,7 @@ public class TopModel {
 
     /**
      * Sets the currentProject.
+     * 
      * @param currentProject The currentProject to set
      */
     public void setCurrentProject(Project currentProject) {
@@ -243,19 +238,8 @@ public class TopModel {
     }
 
     /**
-     * Sets the selectedPath.
-     * @param selectedPath The selectedPath to set
-     */
-    public void setSelectedPath(ProjectPath selectedPath) {
-        this.selectedPath = selectedPath;
-    }
-
-    public void setSelectedPath(Object obj) {
-        selectedPath = new ProjectPath(obj);
-    }
-
-    /**
      * Sets the statusMessage.
+     * 
      * @param statusMessage The statusMessage to set
      */
     public void setStatusMessage(String statusMessage) {
