@@ -76,7 +76,11 @@ public class MockupDataDomain extends DataDomain {
     protected QueryEngine engine;
 
     public MockupDataDomain(QueryEngine engine) {
-        super("test");
+        this("test", engine);
+    }
+
+    public MockupDataDomain(String name, QueryEngine engine) {
+        super(name);
         this.engine = engine;
         this.entityResolver = engine.getEntityResolver();
     }

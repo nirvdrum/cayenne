@@ -754,8 +754,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
 
     /**
      * "Dirty" remove of the DbEntity from the data map.
-     * 
-     * @deprecated Since 1.1 use {@link #removeDbEntity(String, boolean)}
      */
     public void removeDbEntity(String dbEntityName) {
         removeDbEntity(dbEntityName, false);
@@ -822,8 +820,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
 
     /**
      * "Dirty" remove of the ObjEntity from the data map.
-     * 
-     * @deprecated Since 1.1 use {@link #removeObjEntity(String, boolean)}
      */
     public void removeObjEntity(String objEntityName) {
         removeObjEntity(objEntityName, false);
