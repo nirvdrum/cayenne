@@ -61,7 +61,6 @@ import java.sql.*;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -121,7 +120,7 @@ public class ImportDbAction extends CayenneAction
 		                   				dsi.getUserName(),
 		                   				dsi.getPassword());
 			} catch (SQLException e) {
-				System.out.println(e.getMessage());
+				logObj.info(e.getMessage());
 				SQLException ex = e.getNextException();
 				if (ex != null) {
 					System.out.println(ex.getMessage());
@@ -138,7 +137,7 @@ public class ImportDbAction extends CayenneAction
 							, JOptionPane.ERROR_MESSAGE);
 				continue;
 			}
-		}// End while()
+		}
 
 		
 		List schemas;

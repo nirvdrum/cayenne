@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,24 +53,35 @@ package org.objectstyle.cayenne.gui.util;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.util;
 
-import java.io.*;
-import javax.swing.filechooser.*;
+import java.io.File;
 
-public class ProjFileFilter extends javax.swing.filechooser.FileFilter {
+import javax.swing.filechooser.FileFilter;
+
+/**
+ * FileFilter used to select Cayenne project files.
+ */
+public class ProjFileFilter extends FileFilter {
 	
 	public static final String PROJ_FILE_NAME = "cayenne.xml";
 	
-  	// Accept all directories and all xml.
+  	/**
+  	 * Accepts all directories and all cayenne.xml files.
+  	 */
   	public boolean accept(File f) {
-		if (f.isDirectory()) 
+		if (f.isDirectory()) {
 			return true;
-		if (f.getName().endsWith(PROJ_FILE_NAME))
+		}
+		if (f.getName().endsWith(PROJ_FILE_NAME)) {
   			return true;
+		}
     	return false;
 	}
 
-  	// The description of this filter
+  	/**
+  	 *  Returns description of this filter.
+  	 */
   	public String getDescription() {
     	return "Cayenne Project Files";
   	}

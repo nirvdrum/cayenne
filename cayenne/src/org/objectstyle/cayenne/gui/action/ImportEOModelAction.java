@@ -57,11 +57,17 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 
+import javax.swing.JFileChooser;
+
+import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.ProjFileFilter;
+import org.objectstyle.util.Preferences;
 
 /**
- * Action handler for WebObjects EOModel import.
+ * Action handler for WebObjects EOModel import function.
  * 
  * @author Andrei Adamchik
  */
@@ -78,8 +84,36 @@ public class ImportEOModelAction extends CayenneAction {
 	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent event) {
-		System.out.println("import eomodel");
+		importEOModel();
 	}
-
+	
+	/** 
+	 * Lets user select an EOModel, then imports it as a DataMap.
+	 */
+	protected void importEOModel() {
+       	String startDir = Preferences.getPreferences().getString(Preferences.LAST_DIR);
+       	JFileChooser fileChooser = Editor.getFrame().getFileChooser();
+       	
+     /*   try {
+            // Find index.eomodeld
+            File file = null;
+            fileChooser.setFileFilter(new ProjFileFilter());
+            fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            if (null != init_dir) {
+            	File init_dir_file = new File(init_dir);
+            	if (init_dir_file.exists())
+            		fileChooser.setCurrentDirectory(init_dir_file);
+            }
+            int ret_code = fileChooser.showOpenDialog(this);
+            if ( ret_code != JFileChooser.APPROVE_OPTION)
+                return;
+            file = fileChooser.getSelectedFile();
+            openProject(file);
+        } catch (Exception e) {
+            System.out.println("Error loading project file, " + e.getMessage());
+            e.printStackTrace();
+        } */
+	}
 }
 

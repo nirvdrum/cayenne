@@ -1,4 +1,3 @@
-package org.objectstyle;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,11 +53,11 @@ package org.objectstyle;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle;
+
+import java.util.*;
 
 import junit.framework.*;
-import junit.runner.*;
-import java.io.*;
-import java.util.*;
 
 /** Special test runner to run batches of test suites. */
 public class ObjectStyleTestRunner extends junit.textui.TestRunner {
@@ -85,6 +84,7 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         suites.add(org.objectstyle.util.AllTests.suite());
         suites.add(org.objectstyle.cayenne.AllTests.suite());
         suites.add(org.objectstyle.cayenne.gui.AllTests.suite());
+        suites.add(org.objectstyle.cayenne.gui.util.AllTests.suite());
         suites.add(org.objectstyle.cayenne.access.AllTests.suite());
         suites.add(org.objectstyle.cayenne.access.trans.AllTests.suite());
         suites.add(org.objectstyle.cayenne.access.types.AllTests.suite());

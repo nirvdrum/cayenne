@@ -384,6 +384,14 @@ implements ActionListener
 	public String getProperty(String propName) {
 		return props.getProperty(propName);
 	}
+	
+	/** 
+	 * Returns an instance of FileChooser used by all Modeler
+	 * components.
+	 */
+	public JFileChooser getFileChooser() {
+		return fileChooser;
+	}
 
 	/** Adds asterisk to the title of the window to indicate it is dirty. */
 	public void setDirty(boolean dirty_flag) {
@@ -658,7 +666,8 @@ implements ActionListener
             e.printStackTrace();
         }
     }
-    /** Open cayenne.xml file using file chooser. */
+    
+    /** Opens cayenne.xml file using file chooser. */
     private void openProject() {
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);

@@ -53,19 +53,39 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.gui;
+ package org.objectstyle.cayenne.gui.util;
 
-import junit.framework.TestSuite;
+import java.io.File;
 
-public class AllTests {
-    public static TestSuite suite() {
-        TestSuite suite = new TestSuite("GUI Package Tests");
+import junit.framework.TestCase;
 
-        // don't test GUI if no graphics environment present
-        if(!org.objectstyle.TestMain.noGui()) {
-            suite.addTestSuite(DbLoginPanelTst.class);
-            suite.addTestSuite(CommandLineLoginTst.class);
-        }
-        return suite;
-    }
+/**
+ * @author Andrei Adamchik
+ */
+public class EOModelFileFilterTst extends TestCase {
+	protected EOModelFileFilter filter;
+
+	/**
+	 * Constructor for EOModelFileFilterTst.
+	 */
+	public EOModelFileFilterTst(String name) {
+		super(name);
+	}
+	
+	public void setUp() throws Exception {
+		filter = new EOModelFileFilter();
+	}
+	
+	public void testAcceptDir() throws Exception {
+		assertTrue(filter.accept(new File(".")));
+	}
+	
+	public void testAcceptIndexEOM() throws Exception {
+		assertTrue(filter.accept(new File("index.eomodeld")));
+	}
+	
+	public void testNoAcceptOther() throws Exception {
+		assertTrue(!filter.accept(new File("somefile.txt")));
+	}
 }
+

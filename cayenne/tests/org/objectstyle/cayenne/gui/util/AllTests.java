@@ -53,18 +53,17 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.gui;
+package org.objectstyle.cayenne.gui.util;
 
 import junit.framework.TestSuite;
 
 public class AllTests {
     public static TestSuite suite() {
-        TestSuite suite = new TestSuite("GUI Package Tests");
+        TestSuite suite = new TestSuite("GUI Util Package Tests");
 
         // don't test GUI if no graphics environment present
         if(!org.objectstyle.TestMain.noGui()) {
-            suite.addTestSuite(DbLoginPanelTst.class);
-            suite.addTestSuite(CommandLineLoginTst.class);
+            suite.addTestSuite(EOModelFileFilterTst.class);
         }
         return suite;
     }

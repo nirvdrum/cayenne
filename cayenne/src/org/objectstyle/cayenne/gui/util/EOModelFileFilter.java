@@ -52,20 +52,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
+ */ 
+ 
+package org.objectstyle.cayenne.gui.util;
+
+import java.io.File;
+
+import javax.swing.filechooser.FileFilter;
+
+/**
+ * FileFilter used with JFileChooser to select EOModels. 
+ * This filter will only display directories and index.eomodeld
+ * files.
+ * 
+ * @author Andrei Adamchik
  */
-package org.objectstyle.cayenne.gui;
+public class EOModelFileFilter extends FileFilter {
+	public static final String EOM_INDEX = "index.eomodeld";
 
-import junit.framework.TestSuite;
+	/**
+	 * Accepts all directories and <code>index.eomodeld</code> files.
+	 * 
+	 * @see javax.swing.filechooser.FileFilter#accept(File)
+	 */
+	public boolean accept(File f) {
+		return f.isDirectory() || EOM_INDEX.equals(f.getName());
+	}
 
-public class AllTests {
-    public static TestSuite suite() {
-        TestSuite suite = new TestSuite("GUI Package Tests");
+	/**
+	 * @see javax.swing.filechooser.FileFilter#getDescription()
+	 */
+	public String getDescription() {
+		return "Select EOModel";
+	}
 
-        // don't test GUI if no graphics environment present
-        if(!org.objectstyle.TestMain.noGui()) {
-            suite.addTestSuite(DbLoginPanelTst.class);
-            suite.addTestSuite(CommandLineLoginTst.class);
-        }
-        return suite;
-    }
 }
+
