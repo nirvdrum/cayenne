@@ -56,26 +56,31 @@
 package org.objectstyle.cayenne.query;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * Helper class that holds parameters for classes implementing 
- * {@link GenericSelectQuery} interface.
+ * Helper class that holds parameters for classes implementing {@link GenericSelectQuery}
+ * interface.
  * 
  * @author Andrei Adamchik
  * @since 1.1
  */
 final class SelectExecutionProperties implements XMLSerializable, Serializable {
+
     int fetchLimit = GenericSelectQuery.FETCH_LIMIT_DEFAULT;
     int pageSize = GenericSelectQuery.PAGE_SIZE_DEFAULT;
     boolean fetchingDataRows = GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
     boolean refreshingObjects = GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
     boolean resolvingInherited = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
     String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
+    Set jointPrefetches;
 
     /**
      * Copies values of this object to another SelectQueryProperties object.
@@ -87,6 +92,8 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         anotherProperties.refreshingObjects = this.refreshingObjects;
         anotherProperties.resolvingInherited = this.resolvingInherited;
         anotherProperties.cachePolicy = this.cachePolicy;
+        anotherProperties.jointPrefetches = (this.jointPrefetches != null) ? new HashSet(
+                jointPrefetches) : null;
     }
 
     void initWithProperties(Map properties) {
@@ -97,34 +104,30 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
 
         Object fetchLimit = properties.get(GenericSelectQuery.FETCH_LIMIT_PROPERTY);
         Object pageSize = properties.get(GenericSelectQuery.PAGE_SIZE_PROPERTY);
-        Object refreshingObjects =
-            properties.get(GenericSelectQuery.REFRESHING_OBJECTS_PROPERTY);
-        Object fetchingDataRows =
-            properties.get(GenericSelectQuery.FETCHING_DATA_ROWS_PROPERTY);
+        Object refreshingObjects = properties
+                .get(GenericSelectQuery.REFRESHING_OBJECTS_PROPERTY);
+        Object fetchingDataRows = properties
+                .get(GenericSelectQuery.FETCHING_DATA_ROWS_PROPERTY);
 
-        Object resolvingInherited =
-            properties.get(GenericSelectQuery.RESOLVING_INHERITED_PROPERTY);
-        
+        Object resolvingInherited = properties
+                .get(GenericSelectQuery.RESOLVING_INHERITED_PROPERTY);
+
         Object cachePolicy = properties.get(GenericSelectQuery.CACHE_POLICY_PROPERTY);
 
         // init ivars from properties
-        this.fetchLimit =
-            (fetchLimit != null)
+        this.fetchLimit = (fetchLimit != null)
                 ? Integer.parseInt(fetchLimit.toString())
                 : GenericSelectQuery.FETCH_LIMIT_DEFAULT;
 
-        this.pageSize =
-            (pageSize != null)
+        this.pageSize = (pageSize != null)
                 ? Integer.parseInt(pageSize.toString())
                 : GenericSelectQuery.PAGE_SIZE_DEFAULT;
 
-        this.refreshingObjects =
-            (refreshingObjects != null)
+        this.refreshingObjects = (refreshingObjects != null)
                 ? "true".equalsIgnoreCase(refreshingObjects.toString())
                 : GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
 
-        this.fetchingDataRows =
-            (fetchingDataRows != null)
+        this.fetchingDataRows = (fetchingDataRows != null)
                 ? "true".equalsIgnoreCase(fetchingDataRows.toString())
                 : GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
 
@@ -139,21 +142,18 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
 
     public void encodeAsXML(XMLEncoder encoder) {
         if (refreshingObjects != GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT) {
-            encoder.printProperty(
-                GenericSelectQuery.REFRESHING_OBJECTS_PROPERTY,
-                refreshingObjects);
+            encoder.printProperty(GenericSelectQuery.REFRESHING_OBJECTS_PROPERTY,
+                    refreshingObjects);
         }
 
         if (fetchingDataRows != GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT) {
-            encoder.printProperty(
-                GenericSelectQuery.FETCHING_DATA_ROWS_PROPERTY,
-                fetchingDataRows);
+            encoder.printProperty(GenericSelectQuery.FETCHING_DATA_ROWS_PROPERTY,
+                    fetchingDataRows);
         }
 
         if (resolvingInherited != GenericSelectQuery.RESOLVING_INHERITED_DEFAULT) {
-            encoder.printProperty(
-                GenericSelectQuery.RESOLVING_INHERITED_PROPERTY,
-                resolvingInherited);
+            encoder.printProperty(GenericSelectQuery.RESOLVING_INHERITED_PROPERTY,
+                    resolvingInherited);
         }
 
         if (fetchLimit != GenericSelectQuery.FETCH_LIMIT_DEFAULT) {
@@ -163,16 +163,17 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         if (pageSize != GenericSelectQuery.PAGE_SIZE_DEFAULT) {
             encoder.printProperty(GenericSelectQuery.PAGE_SIZE_PROPERTY, pageSize);
         }
-        
-        if (cachePolicy != null && !GenericSelectQuery.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
+
+        if (cachePolicy != null
+                && !GenericSelectQuery.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
             encoder.printProperty(GenericSelectQuery.CACHE_POLICY_PROPERTY, cachePolicy);
         }
     }
-    
+
     String getCachePolicy() {
         return cachePolicy;
     }
-    
+
     void setCachePolicy(String policy) {
         this.cachePolicy = policy;
     }
@@ -215,5 +216,65 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
 
     void setResolvingInherited(boolean b) {
         resolvingInherited = b;
+    }
+
+    /**
+     * Returns a collection that internally stores join prefetches, creating it on demand.
+     * 
+     * @since 1.2
+     */
+    Collection nonNullJointPrefetches() {
+        if (jointPrefetches == null) {
+            jointPrefetches = new HashSet();
+        }
+
+        return jointPrefetches;
+    }
+
+    /**
+     * Returns a collection of joint prefetches.
+     * 
+     * @since 1.2
+     */
+    Collection getJointPrefetches() {
+        return (jointPrefetches != null) ? jointPrefetches : Collections.EMPTY_SET;
+    }
+
+    /**
+     * Adds a joint prefetch.
+     * 
+     * @since 1.2
+     */
+    void addJointPrefetch(String relationshipPath) {
+        nonNullJointPrefetches().add(relationshipPath);
+    }
+
+    /**
+     * Adds all joint prefetches from a provided collection.
+     * 
+     * @since 1.2
+     */
+    void addJointPrefetches(Collection relationshipPaths) {
+        nonNullJointPrefetches().addAll(relationshipPaths);
+    }
+
+    /**
+     * Clears all joint prefetches.
+     * 
+     * @since 1.2
+     */
+    void clearJointPrefetches() {
+        jointPrefetches = null;
+    }
+
+    /**
+     * Removes joint prefetch.
+     * 
+     * @since 1.2
+     */
+    void removeJointPrefetch(String relationshipPath) {
+        if (jointPrefetches != null) {
+            jointPrefetches.remove(relationshipPath);
+        }
     }
 }

@@ -91,7 +91,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     protected List customDbAttributes;
     protected List orderings;
     protected Set prefetches;
-    protected Set jointPrefetches;
     protected boolean distinct;
 
     protected Expression parentQualifier;
@@ -327,10 +326,6 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             query.addPrefetches(prefetches);
         }
         
-        if (jointPrefetches != null) {
-            query.addJointPrefetches(jointPrefetches);
-        }
-        
         if (orderings != null) {
             query.addOrderings(orderings);
         }
@@ -517,25 +512,12 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     }
     
     /**
-     * Returns a collection that internally stores join prefetches, creating it on demand.
-     * 
-     * @since 1.2
-     */
-    Collection nonNullJointPrefetches() {
-        if(jointPrefetches == null) {
-            jointPrefetches = new HashSet();
-        }
-        
-        return jointPrefetches;
-    }
-    
-    /**
      * Returns a collection of joint prefetches.
      * 
      * @since 1.2
      */
     public Collection getJointPrefetches() {
-        return (jointPrefetches != null) ? jointPrefetches : Collections.EMPTY_SET;
+        return selectProperties.getJointPrefetches();
     }
     
     /**
@@ -544,7 +526,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void addJointPrefetch(String relationshipPath) {
-        nonNullJointPrefetches().add(relationshipPath);
+        selectProperties.addJointPrefetch(relationshipPath);
     }
     
     /**
@@ -553,7 +535,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void addJointPrefetches(Collection relationshipPaths) {
-        nonNullJointPrefetches().addAll(relationshipPaths);
+        selectProperties.addJointPrefetches(relationshipPaths);
     }
     
     /**
@@ -562,7 +544,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void clearJointPrefetches() {
-        jointPrefetches = null;
+        selectProperties.clearJointPrefetches();
     }
     
     /**
@@ -571,9 +553,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.2
      */
     public void removeJointPrefetch(String relationshipPath) {
-        if (jointPrefetches != null) {
-            jointPrefetches.remove(relationshipPath);
-        }
+        selectProperties.removeJointPrefetch(relationshipPath);
     }
     
 

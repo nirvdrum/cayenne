@@ -120,6 +120,53 @@ public class JointPrefetchTst extends CayenneTestCase {
         }
     }
 
+    public void testJointPrefetchSQLTemplate() throws Exception {
+        createTestData("testJointPrefetch1");
+
+        // correctly naming columns is the key..
+        SQLTemplate q = new SQLTemplate(
+                Artist.class,
+                "SELECT distinct "
+                        + "#result('ESTIMATED_PRICE' 'BigDecimal' '' 'paintingArray.ESTIMATED_PRICE'), "
+                        + "#result('PAINTING_TITLE' 'String' '' 'paintingArray.PAINTING_TITLE'), "
+                        + "#result('GALLERY_ID' 'int' '' 'paintingArray.GALLERY_ID'), "
+                        + "#result('PAINTING_ID' 'int' '' 'paintingArray.PAINTING_ID'), "
+                        + "#result('ARTIST_NAME' 'String'), "
+                        + "#result('DATE_OF_BIRTH' 'java.util.Date'), "
+                        + "#result('t0.ARTIST_ID' 'int' '' 'ARTIST_ID') "
+                        + "FROM ARTIST t0, PAINTING t1 "
+                        + "WHERE t0.ARTIST_ID = t1.ARTIST_ID",
+                true);
+        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+        q.setFetchingDataRows(false);
+
+        DataContext context = createDataContext();
+
+        List objects = context.performQuery(q);
+
+        // without OUTER join we will get fewer objects...
+        assertEquals(2, objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Artist a = (Artist) it.next();
+            ToManyList list = (ToManyList) a.getPaintingArray();
+
+            assertNotNull(list);
+            assertFalse(list.needsFetch());
+            assertTrue(list.size() > 0);
+
+            Iterator children = list.iterator();
+            while (children.hasNext()) {
+                Painting p = (Painting) children.next();
+                assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+
+                // make sure properties are not null..
+                assertNotNull(p.getPaintingTitle());
+            }
+        }
+    }
+
     public void testJointPrefetchToOne() throws Exception {
         createTestData("testJointPrefetch1");
 
@@ -217,6 +264,8 @@ public class JointPrefetchTst extends CayenneTestCase {
             while (children.hasNext()) {
                 Painting p = (Painting) children.next();
                 assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+                // make sure properties are not null..
+                assertNotNull(p.getPaintingTitle());
             }
         }
     }

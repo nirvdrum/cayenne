@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -170,12 +169,14 @@ public class SelectObserver extends DefaultOperationObserver {
                     "Can't instantiate DataObjects from resutls. ObjEntity is undefined for query: "
                             + rootQuery);
         }
+        
+        boolean genericSelect = rootQuery instanceof GenericSelectQuery;
 
-        boolean refresh = (rootQuery instanceof GenericSelectQuery)
+        boolean refresh = genericSelect
                 ? ((GenericSelectQuery) rootQuery).isRefreshingObjects()
                 : true;
 
-        boolean resolveHierarchy = (rootQuery instanceof GenericSelectQuery)
+        boolean resolveHierarchy = genericSelect
                 ? ((GenericSelectQuery) rootQuery).isResolvingInherited()
                 : false;
 
@@ -185,9 +186,8 @@ public class SelectObserver extends DefaultOperationObserver {
         PrefetchResolver tree = new PrefetchResolver();
         tree.buildTree(entity, rootQuery, results);
 
-        // TODO: extend this to SQLTemplate
-        if (rootQuery instanceof SelectQuery) {
-            SelectQuery rootSelect = (SelectQuery) rootQuery;
+        if (genericSelect) {
+            GenericSelectQuery rootSelect = (GenericSelectQuery) rootQuery;
             Collection jointPrefetches = rootSelect.getJointPrefetches();
             if (!jointPrefetches.isEmpty()) {
                 FlatPrefetchTreeNode flatPrefetchTree = new FlatPrefetchTreeNode(
@@ -199,14 +199,12 @@ public class SelectObserver extends DefaultOperationObserver {
                         refresh,
                         resolveHierarchy);
 
-                List objects = flatPrefetchResolver.resolveObjectTree(
-                        flatPrefetchTree,
+                List objects = flatPrefetchResolver.resolveObjectTree(flatPrefetchTree,
                         getResults(rootQuery));
 
                 // attach normal prefetches to the list of main objects that is already
                 // resolved...
-                tree.resolveObjectTree(
-                        dataContext,
+                tree.resolveObjectTree(dataContext,
                         refresh,
                         resolveHierarchy,
                         objects,

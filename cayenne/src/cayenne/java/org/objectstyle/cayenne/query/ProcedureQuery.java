@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -410,5 +411,50 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public void setSelecting(boolean b) {
         selecting = b;
+    }
+    
+    /**
+     * Returns a collection of joint prefetches.
+     * 
+     * @since 1.2
+     */
+    public Collection getJointPrefetches() {
+        return selectProperties.getJointPrefetches();
+    }
+    
+    /**
+     * Adds a joint prefetch.
+     * 
+     * @since 1.2
+     */
+    public void addJointPrefetch(String relationshipPath) {
+        selectProperties.addJointPrefetch(relationshipPath);
+    }
+    
+    /**
+     * Adds all joint prefetches from a provided collection.
+     * 
+     * @since 1.2
+     */
+    public void addJointPrefetches(Collection relationshipPaths) {
+        selectProperties.addJointPrefetches(relationshipPaths);
+    }
+    
+    /**
+     * Clears all joint prefetches.
+     * 
+     * @since 1.2
+     */
+    public void clearJointPrefetches() {
+        selectProperties.clearJointPrefetches();
+    }
+    
+    /**
+     * Removes joint prefetch.
+     * 
+     * @since 1.2
+     */
+    public void removeJointPrefetch(String relationshipPath) {
+        selectProperties.removeJointPrefetch(relationshipPath);
     }
 }
