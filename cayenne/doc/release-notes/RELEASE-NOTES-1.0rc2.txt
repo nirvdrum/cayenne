@@ -1,0 +1,36 @@
+Cayenne Release Notes 1.0 (Release Candidate 2)
+                 Date: September 6, 2003
+         ============================================
+
+For the latest information go to the project web site at
+http://objectstyle.org/cayenne/
+
+
+Changes in this release:
+
+1. [BUG 743029] CayenneModeler had problems recognizing one-to-one relationships during
+   reverse engineering. Also "To Dep PK" flag was never set when appropriate. Both problems
+   are fixed.
+   
+2. [BUG 776375] Modifying values of HOLLOW objects was not handled correctly. Object wasn't 
+   refetched as it should've been.
+   
+3. [MODELER BUG 770803] Fixed navigating items that failed validation.
+
+4. [new] Generated classes with attributes named the same as Java keywords now work
+   correctly.
+
+5. Fixed committing flattened relationships.
+
+6. [MODELER BUG 768900] Added validation of DbEntities for schema generation.
+
+7. Updated documentation with Mac OS screenshots. Cleaned up old information in the  
+   "User Guide" design section.
+
+8. Fixed "Import EOModel" function to support EOPrototypes, recognize custom Java classes
+   and better report errors.
+   
+9. Removed all previously deprecated API.
+
+10. Initial support for FireBird database.
+   

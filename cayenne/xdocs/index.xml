@@ -5,31 +5,33 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>July 21, 2003:</i></strong> <strong>Cayenne Release Candidate is out.</strong></u></p>
+        <p><u><strong><i>September 6, 2003:</i></strong> <strong>Cayenne Release Candidate 2 is out</strong></u></p>
         
-        <p><a href="RELEASE-NOTES-1.0rc1.txt">Cayenne 1.0 Release Candidate</a> is available for download. 
-        Cayenne team is well on track to make a final release later this fall.
-        Download RC1 <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
+        <p><a href="RELEASE-NOTES-1.0rc2.txt">Cayenne 1.0 Release Candidate 2</a> is available for download.
+        Download RC2 <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
         here</a>.
         
         Changes in this release:
         <ul>
-        	<li>New website and documentation design, including contextual table of contents
-        	in all Guides.</li>
-        	<li>Initial DB2 support.</li>
-        	<li>Fixed a number of bugs related to refreshing and refetching objects.</li>
-        	<li>Fixed nasty bug in the Modeler that would delete entities when a user
-        	deletes entity attributes. <font color="red">For Beta 4 users CayenneModeler
-        	upgrade is required.</font></li>
+        	<li>All previously deprecated API is removed.</li>
+        	<li>Initial support for FireBird database.</li>
+        	<li>Fixed a number of bugs related to flattened relationships.</li>
+        	<li>Fixed a number of Modeler bugs.</li>
+        	<li>Updated and reworked documentation.</li>
         </ul>
+        </p>
         
-        <i>Note on deprecated API: The next release will most likely clean up all
-        the deprecated method and classes. Please update your code now.</i>
+        
+        <p>
+        <u><strong><i>July 2003:</i></strong> <strong>New Website Design</strong></u></p>
+        
+        <p>Many thanks to our graphic artist Anna Drapeza who created this elegant site design!
+        Sadly enough good artistic work is still a rare thing in the OpenSource world.
         </p>
         
         <p><img src="images/other/nhl_logo.gif"/> 
         <u><strong><i>May 1 2003:</i></strong> <strong>National 
-        Hockey League Switches to Cayenne.</strong></u></p>
+        Hockey League Switches to Cayenne</strong></u></p>
         
         <p>After the initial trial of Cayenne last October, NHL
         switched all their public applications running at <a href="http://www.nhl.com">NHL.com</a>
