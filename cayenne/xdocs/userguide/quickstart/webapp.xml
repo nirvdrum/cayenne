@@ -36,14 +36,58 @@
        		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
        		installation instructions</a>. In particular, JSDK 1.4 must be installed.
        		</p>
+       		
+       		<p>- Install a web container. This tutorial was tested with <a href=
+    		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.0.3.
+       		It should work with any other container that is compliant with Servlet 2.3
+       		specification (older containers should also work, but you will not be able
+       		to use some of ServletConfiguration features discussed below).</p>
     		
     		<p>- Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>)
     		anywhere in the filesystem. A new directory named <code>cayenne-web-app</code>
     		will be created. This directory is referred to as "project directory" further in 
     		this tutorial.</p>
     		
-    		<p>- Copy <code>cayenne.jar</code> to the <code>lib</code> subdirectory of 
+    		<p>- Copy <code>cayenne.jar</code> to the <code>WEB-INF/lib</code> subdirectory of 
     		the tutorial project directory.</p>
+    		
+    		<p>- Install Struts: 
+    		<ul>
+    		<li>Download Struts from <a href=
+    		"http://jakarta.apache.org/struts/index.html">Jakarta Struts site</a>, unpack it
+    		to any convenient directory.</li> 
+    		
+    		<li>Copy all JAR files distributed with Struts (located in <code>lib</code> subdirectory) to
+    		<code>WEB-INF/lib</code> subdirectory of the tutorial project. At the minimum these files
+    		are required:
+    			<ul>
+    		    	<li>commons-beanutils.jar</li>
+    		    	<li>commons-collections.jar</li>
+    		    	<li>commons-dbcp.jar</li>
+    		    	<li>commons-digester.jar</li>
+    		    	<li>commons-logging.jar</li>
+    		    	<li>commons-pool.jar</li>
+    		    	<li>commons-services.jar</li>
+    		    	<li>commons-validator.jar</li>
+    		    	<li>struts.jar</li>
+    			</ul>    		
+    		</li>
+    		
+    		<li>Copy the following Struts configuration files from Struts <code>lib</code> subdirectory 
+    		to <code>WEB-INF</code> subdirectory of the tutorial project:
+				<ul>
+    		    	<li>struts-bean.tld</li>
+    		    	<li>struts-html.tld</li>
+    		    	<li>struts-logic.tld</li>
+    		    	<li>struts-nested.tld</li>
+    		    	<li>struts-template.tld</li>
+    		    	<li>validator-rules.xml</li>
+    			</ul>    
+    		</li>
+    		</ul>
+    		
+    		Tutorial was testsed with Struts 1.1b1, earlier versions of Struts will most 
+    		likely require a different setup.</p>
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
@@ -55,6 +99,39 @@
     		In this case you may uncomment "DROP TABLE..." statements in the beginning
     		of this script to recreate tables from scratch.</p>
     	</subsection>
+    	
+    	<subsection name="3.2.4 Create Database Primary Key Support." anchor="4">
+    	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
+    	objects for primary key support by following these  
+    	<a href="../modeler/pksupport.html">instructions</a>. Skip this step if it was already 
+    	done for another tutorial.</p>
+    	</subsection>
+    	
+    	<subsection name="3.2.5 Generate Java Code for DataObjects" anchor="5">
+    		<p>Open <code>cayenne.xml</code> in CayenneModeler and generate Java classes 
+    		for DataObjects by going to <strong>"Tools -> Generate Classes"</strong> 
+    		and selecting the <strong><code>WEB-INF/classes</code></strong> under the tutorial 
+    		project directory in the opened popup:</p>
+    		<img src="/images/classgen.gif" width="546" height="489" border="0" align="middle"
+			alt="Generate Classes Dialog"/>
+			
+    		<p>Click <strong>"Generate"</strong> button. After the generation 
+    		is done, the following files should appear in the 
+    		<code><code>WEB-INF/classes/test</code></code> subdirectory of the 
+    		project directory:
+    		
+    		<ul>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/_Artist.java">_Artist.java</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/Artist.java">Artist.java</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/_Painting.java">_Painting.java</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/Painting.java">Painting.java</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/_Gallery.java">_Gallery.java</a></li>
+    			<li><a href="../../tutorial/cayenne-web-app/WEB-INF/classes/test/Gallery.java">Gallery.java</a></li>
+    		</ul>
+    		</p>    	
+    	</subsection>
+    	
+    	
     	</subsection>
     </section>
 </body>
