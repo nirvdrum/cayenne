@@ -136,7 +136,7 @@ public abstract class Relationship extends MapObject {
 			sb.append(src.getName());
 		}
 
-		sb.append("Target entity: ");
+		sb.append(" Target entity: ");
 		Entity target = getTargetEntity();
 		if (target == null)
 			sb.append("<null>");
