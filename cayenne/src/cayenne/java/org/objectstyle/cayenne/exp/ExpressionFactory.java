@@ -397,6 +397,27 @@ public class ExpressionFactory {
     }
 
     /**
+     * A convenience method to create an DB_PATH "not equal to" expression.
+     */
+    public static Expression noMatchDbExp(String pathSpec, Object value) {
+        return new ASTNotEqual(new ASTDbPath(pathSpec), value);
+    }
+    
+    /**
+     * A convenience shortcut for building IN DB expression.
+     */
+    public static Expression inDbExp(String pathSpec, Object[] values) {
+        return new ASTIn(new ASTDbPath(pathSpec), new ASTList(values));
+    }
+
+    /**
+     * A convenience shortcut for building IN DB expression.
+     */
+    public static Expression inDbExp(String pathSpec, Collection values) {
+        return new ASTIn(new ASTDbPath(pathSpec), new ASTList(values));
+    }
+    
+    /**
      * A convenience method to create an OBJ_PATH "equal to" expression.
      */
     public static Expression matchExp(String pathSpec, Object value) {
