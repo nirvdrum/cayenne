@@ -78,4 +78,6 @@ in a HOLLOW object that will be fully fetched when it is
 22. Made connection pool more robust performing automated reconnection on certain errors
 (works only on Oracle), lazy initial connection, and accurate connection events logging.
 
+23. ObjRelationship.isToMany is now derived directly from the underlying DbRelationship(s).  
+setIsToMany has been removed.  The toMany checkbox in modeller is now disabled (for ObjRelationship)
 
