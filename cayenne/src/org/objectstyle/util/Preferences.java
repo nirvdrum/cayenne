@@ -56,19 +56,19 @@ package org.objectstyle.util;
  *
  */ 
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import javax.swing.JOptionPane;
+import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import org.apache.commons.collections.ExtendedProperties;
 
 
-public class Preferences extends ExtendedProperties
-{
-
+public class Preferences extends ExtendedProperties {
+    static final Logger logObj = Logger.getLogger(Preferences.class.getName());
+    
 	/** Directory for preferences in User home. */
 	private static final String PREF_DIR = "cayenne";
 	/** Name of the preferences file in the CAYENNE_PREF_DIR.
@@ -107,7 +107,7 @@ public class Preferences extends ExtendedProperties
 	  * Preferences stored to User Home\cayenne\.preferences file. 
 	  * @param frame Used for JOptionPane dialogs. If null, default frame used.*/
 	public void storePreferences(JFrame frame) {
-		System.out.println("Storing preferences");
+		logObj.fine("Storing preferences");
 		String home_dir = System.getProperty("user.home");
 		if (null == home_dir)
 			home_dir = "";
@@ -116,14 +116,13 @@ public class Preferences extends ExtendedProperties
 		File pref_file = new File(pref_dir);
 		try {
 			if (!pref_file.exists()) {
-				System.out.println("Cannot save preferences - file " 
+				logObj.fine("Cannot save preferences - file " 
 									+ pref_dir + " does not exist");
 				return;
 			}
 			save(new FileOutputStream(pref_file), "");
 		} catch (IOException e) {
-			System.out.println("Error saving preferences: " + e.getMessage());
-			e.printStackTrace();
+			logObj.log(Level.INFO, "Error saving preferences: ", e.getMessage());
 		}
 	}
 	
@@ -139,7 +138,7 @@ public class Preferences extends ExtendedProperties
 			home_dir = "";
 		}
 		String pref_dir = home_dir + File.separator + PREF_DIR;
-		System.out.println("Preferences::loadPreferences(), pref dir path is " + pref_dir);
+		logObj.fine("Preferences dir path is " + pref_dir);
 		File pref_dir_file = new File(pref_dir);
 		try {
 			if (!pref_dir_file.exists()) {
