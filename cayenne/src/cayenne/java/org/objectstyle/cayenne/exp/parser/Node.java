@@ -6,7 +6,7 @@ package org.objectstyle.cayenne.exp.parser;
    machinery for constructing the parent and child relationships
    between nodes. */
 
-interface Node {
+public interface Node {
 
     /** This method is called after the node has been made the current
       node.  It indicates that child nodes can now be added to it. */

@@ -55,6 +55,8 @@
  */ 
 package org.objectstyle.cayenne.exp;
 
+import java.io.PrintWriter;
+
 /** 
  * Generic binary expression. Describes an expression in a 
  * form: "<code>leftoperand operation rightoperand</code>". 
@@ -99,5 +101,14 @@ public class BinaryExpression extends Expression {
         throw new IllegalArgumentException("Invalid operand index for BinaryExpression: " + index);
     }
     
-    
+    /**
+     * @since 1.1
+     */
+    public void encode(PrintWriter pw) {
+        // this class will be deprecated soon, so using
+        // a deprecated "toStringBuffer" is OK
+        StringBuffer buffer = new StringBuffer();
+        toStringBuffer(buffer);
+        pw.print(buffer.toString());
+    }
 }

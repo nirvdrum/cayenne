@@ -2,12 +2,19 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
+
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 
 /**
+ * Superclass of AST* expressions that implements Node interface defined
+ * by JavaCC framework.
+ * 
  * <p>Some parts of the parser are based on OGNL parser,
  * copyright (c) 2002, Drew Davidson and Luke Blanshard.</p>
+ * 
+ * @since 1.1
  */
 abstract class SimpleNode extends Expression implements Node {
     protected Node parent;
@@ -45,6 +52,46 @@ abstract class SimpleNode extends Expression implements Node {
      */
     public String expName() {
         return ExpressionParserTreeConstants.jjtNodeName[id];
+    }
+
+    /**
+     * Utility method that prints a string to the provided PrintWriter,
+     * escaping special characters.
+     */
+    protected void encodeString(PrintWriter pw, String source) {
+        int len = source.length();
+        for (int i = 0; i < len; i++) {
+            char c = source.charAt(i);
+
+            switch (c) {
+                case '\n' :
+                    pw.print("\\n");
+                    continue;
+                case '\r' :
+                    pw.print("\\r");
+                    continue;
+                case '\t' :
+                    pw.print("\\t");
+                    continue;
+                case '\b' :
+                    pw.print("\\b");
+                    continue;
+                case '\f' :
+                    pw.print("\\f");
+                    continue;
+                case '\\' :
+                    pw.print("\\\\");
+                    continue;
+                case '\'' :
+                    pw.print("\\'");
+                    continue;
+                case '\"' :
+                    pw.print("\\\"");
+                    continue;
+                default :
+                    pw.print(c);
+            }
+        }
     }
 
     /** 
@@ -88,21 +135,23 @@ abstract class SimpleNode extends Expression implements Node {
         }
     }
 
-    protected void toStringBuffer(StringBuffer buffer) {
-        buffer.append((parent == null) ? "" : "(");
+    public void encode(PrintWriter pw) {
+        pw.print((parent == null) ? "" : "(");
 
         if ((children != null) && (children.length > 0)) {
             for (int i = 0; i < children.length; ++i) {
                 if (i > 0) {
-                    buffer.append(' ').append(getExpressionOperator(i)).append(' ');
+                    pw.print(' ');
+                    pw.print(getExpressionOperator(i));
+                    pw.print(' ');
                 }
 
-                ((SimpleNode) children[i]).toStringBuffer(buffer);
+                ((SimpleNode) children[i]).encode(pw);
             }
         }
 
         if (parent != null) {
-            buffer.append(")");
+            pw.print(')');
         }
     }
 
@@ -114,9 +163,9 @@ abstract class SimpleNode extends Expression implements Node {
         // for the purpose of expression evaluation.
         return unwrapChild(child);
     }
-    
+
     protected Object unwrapChild(Node child) {
-        return(child instanceof ASTScalar) ? ((ASTScalar) child).getValue() : child;
+        return (child instanceof ASTScalar) ? ((ASTScalar) child).getValue() : child;
     }
 
     public int getOperandCount() {

@@ -2,6 +2,8 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
+
 import org.objectstyle.cayenne.exp.Expression;
 
 class ASTObjPath extends SimpleNode {
@@ -13,8 +15,8 @@ class ASTObjPath extends SimpleNode {
         super(p, id);
     }
 
-    protected void toStringBuffer(StringBuffer buf) {
-        buf.append(value);
+    public void encode(PrintWriter pw) {
+        pw.print(value);
     }
 
     public int getType() {

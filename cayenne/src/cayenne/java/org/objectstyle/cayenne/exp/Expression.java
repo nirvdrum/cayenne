@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.exp;
 
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -221,26 +223,26 @@ public abstract class Expression implements Serializable {
                 return "other";
         }
     }
-    
+
     public boolean equals(Object object) {
-        if(!(object instanceof Expression)) {
+        if (!(object instanceof Expression)) {
             return false;
         }
-        
-        Expression e = (Expression)object;
-        
-        if(e.getType() != getType() || e.getOperandCount() != getOperandCount()) {
+
+        Expression e = (Expression) object;
+
+        if (e.getType() != getType() || e.getOperandCount() != getOperandCount()) {
             return false;
         }
-        
+
         // compare operands
         int len = e.getOperandCount();
-        for(int i = 0; i < len; i++) {
-            if(!Util.nullSafeEquals(e.getOperand(i), getOperand(i))) {
+        for (int i = 0; i < len; i++) {
+            if (!Util.nullSafeEquals(e.getOperand(i), getOperand(i))) {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -325,7 +327,7 @@ public abstract class Expression implements Serializable {
     public Expression orExp(Expression exp) {
         return joinExp(Expression.OR, exp);
     }
-    
+
     /**
      * Returns a logical NOT of current expression.
      * 
@@ -387,12 +389,22 @@ public abstract class Expression implements Serializable {
 
         return filtered;
     }
+    
+    /**
+     * Stores a String representation of Expression using a provided
+     * PrintWriter.
+     * 
+     * @since 1.1
+     */
+    public abstract void encode(PrintWriter pw);
+    
 
     /**
      * Convenience method to log nested expressions. Used mainly for debugging.
      * Called from "toString".
      * 
-     * @param buf
+     * @deprecated Since 1.1 <code>encode</code> is used to recursively
+     * print expressions.
      */
     protected void toStringBuffer(StringBuffer buf) {
         for (int i = 0; i < getOperandCount(); i++) {
@@ -420,10 +432,12 @@ public abstract class Expression implements Serializable {
     }
 
     public String toString() {
-        StringBuffer buf = new StringBuffer("[");
-        toStringBuffer(buf);
-        buf.append("]");
-        return buf.toString();
+        StringWriter buffer = new StringWriter();
+        PrintWriter pw = new PrintWriter(buffer);
+        encode(pw);
+        pw.close();
+        buffer.flush();
+        return buffer.toString();
     }
 
     /**

@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.exp;
 
+import java.io.PrintWriter;
+
 /** 
  * Generic unary expression. 
  * Describes expression in a form: "<tt>operation operand</tt>". 
@@ -93,5 +95,16 @@ public class UnaryExpression extends Expression {
 
         throw new IllegalArgumentException(
             "Invalid operand index for UnaryExpression: " + index);
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public void encode(PrintWriter pw) {
+        // this class will be deprecated soon, so using
+        // a deprecated "toStringBuffer" is OK
+        StringBuffer buffer = new StringBuffer();
+        toStringBuffer(buffer);
+        pw.print(buffer.toString());
     }
 }

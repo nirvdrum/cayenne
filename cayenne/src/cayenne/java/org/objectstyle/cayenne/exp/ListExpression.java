@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.exp;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -145,5 +146,16 @@ public class ListExpression extends Expression {
         copy.appendOperand(exp);
 
         return copy;
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public void encode(PrintWriter pw) {
+        // this class will be deprecated soon, so using
+        // a deprecated "toStringBuffer" is OK
+        StringBuffer buffer = new StringBuffer();
+        toStringBuffer(buffer);
+        pw.print(buffer.toString());
     }
 }

@@ -2,6 +2,8 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
+
 class ASTScalar extends SimpleNode {
     public ASTScalar(int id) {
         super(id);
@@ -11,51 +13,15 @@ class ASTScalar extends SimpleNode {
         super(p, id);
     }
 
-    protected void toStringBuffer(StringBuffer buffer) {
+    public void encode(PrintWriter pw) {
         boolean quote = value instanceof String;
 
         if (quote) {
-            buffer.append('\"');
+            pw.print('\"');
         }
-        escapeString(buffer, String.valueOf(value));
+        encodeString(pw, String.valueOf(value));
         if (quote) {
-            buffer.append('\"');
-        }
-    }
-
-    private static void escapeString(StringBuffer buffer, String source) {
-        int len = source.length();
-        for (int i = 0; i < len; i++) {
-            char c = source.charAt(i);
-
-            switch (c) {
-                case '\n' :
-                    buffer.append("\\n");
-                    continue;
-                case '\r' :
-                    buffer.append("\\r");
-                    continue;
-                case '\t' :
-                    buffer.append("\\t");
-                    continue;
-                case '\b' :
-                    buffer.append("\\b");
-                    continue;
-                case '\f' :
-                    buffer.append("\\f");
-                    continue;
-                case '\\' :
-                    buffer.append("\\\\");
-                    continue;
-                case '\'' :
-                    buffer.append("\\'");
-                    continue;
-                case '\"' :
-                    buffer.append("\\\"");
-                    continue;
-                default :
-                    buffer.append(c);
-            }
+            pw.print('\"');
         }
     }
 }

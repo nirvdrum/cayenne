@@ -2,6 +2,8 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
+
 import org.objectstyle.cayenne.exp.Expression;
 
 class ASTNot extends SimpleNode {
@@ -17,8 +19,8 @@ class ASTNot extends SimpleNode {
         return Expression.NOT;
     }
 
-    protected void toStringBuffer(StringBuffer buf) {
-        buf.append("not ");
-        super.toStringBuffer(buf);
+    public void encode(PrintWriter pw) {
+        pw.print("not ");
+        super.encode(pw);
     }
 }

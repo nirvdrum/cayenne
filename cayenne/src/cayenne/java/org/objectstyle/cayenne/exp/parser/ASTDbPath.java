@@ -2,6 +2,8 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
+
 import org.objectstyle.cayenne.exp.Expression;
 
 class ASTDbPath extends SimpleNode {
@@ -13,8 +15,9 @@ class ASTDbPath extends SimpleNode {
         super(p, id);
     }
 
-    protected void toStringBuffer(StringBuffer buf) {
-        buf.append("db:").append(value);
+    public void encode(PrintWriter pw) {
+        pw.print("db:");
+        pw.print(value);
     }
 
     public int getType() {
@@ -24,12 +27,12 @@ class ASTDbPath extends SimpleNode {
     public int getOperandCount() {
         return 1;
     }
-    
+
     public Object getOperand(int index) {
-        if(index == 0) {
+        if (index == 0) {
             return value;
         }
-        
+
         throw new ArrayIndexOutOfBoundsException(index);
     }
 }

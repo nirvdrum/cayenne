@@ -1,4 +1,7 @@
 package org.objectstyle.cayenne.exp;
+
+import java.io.PrintWriter;
+
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -103,5 +106,16 @@ public class TernaryExpression extends Expression {
 
         throw new IllegalArgumentException(
             "Invalid operand index for TernaryExpression: " + index);
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public void encode(PrintWriter pw) {
+        // this class will be deprecated soon, so using
+        // a deprecated "toStringBuffer" is OK
+        StringBuffer buffer = new StringBuffer();
+        toStringBuffer(buffer);
+        pw.print(buffer.toString());
     }
 }

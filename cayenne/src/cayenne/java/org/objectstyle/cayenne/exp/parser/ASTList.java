@@ -2,6 +2,7 @@
 
 package org.objectstyle.cayenne.exp.parser;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,20 +26,21 @@ class ASTList extends SimpleNode {
         return ",";
     }
 
-    protected void toStringBuffer(StringBuffer buffer) {
-        buffer.append('(');
+    public void encode(PrintWriter pw) {
+        pw.print('(');
 
         if ((children != null) && (children.length > 0)) {
             for (int i = 0; i < children.length; ++i) {
                 if (i > 0) {
-                    buffer.append(getExpressionOperator(i)).append(' ');
+                    pw.print(getExpressionOperator(i));
+                    pw.print(' ');
                 }
 
-                ((SimpleNode) children[i]).toStringBuffer(buffer);
+                ((SimpleNode) children[i]).encode(pw);
             }
         }
 
-        buffer.append(')');
+        pw.print(')');
     }
 
     public int getOperandCount() {
