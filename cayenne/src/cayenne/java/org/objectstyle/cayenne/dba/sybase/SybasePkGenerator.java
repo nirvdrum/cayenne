@@ -166,32 +166,45 @@ public class SybasePkGenerator extends JdbcPkGenerator {
 	}
 
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
-        Connection con = node.getDataSource().getConnection();
+        Connection connection = node.getDataSource().getConnection();
         try {
-            CallableStatement st = con.prepareCall("{call auto_pk_for_table(?, ?)}");
+            CallableStatement statement = connection
+                    .prepareCall("{call auto_pk_for_table(?, ?)}");
             try {
-                st.setString(1, ent.getName());
-                st.setInt(2, super.getPkCacheSize());
-                ResultSet rs = st.executeQuery();
-                try {
-                    if (rs.next()) {
-                        return rs.getInt(1);
+                statement.setString(1, ent.getName());
+                statement.setInt(2, super.getPkCacheSize());
+
+                // can't use "executeQuery"
+                // per http://jtds.sourceforge.net/faq.html#expectingResultSet
+                statement.execute();
+                if (statement.getMoreResults()) {
+                    ResultSet rs = statement.getResultSet();
+
+                    try {
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                        }
+                        else {
+                            throw new CayenneRuntimeException(
+                                    "Error generating pk for DbEntity " + ent.getName());
+                        }
                     }
-                    else {
-                        throw new CayenneRuntimeException(
-                            "Error generating pk for DbEntity " + ent.getName());
+                    finally {
+                        rs.close();
                     }
                 }
-                finally {
-                    rs.close();
+                else {
+                    throw new CayenneRuntimeException("Error generating pk for DbEntity "
+                            + ent.getName()
+                            + ", no result set from stored procedure.");
                 }
             }
             finally {
-                st.close();
+                statement.close();
             }
         }
         finally {
-            con.close();
+            connection.close();
         }
     }
 

@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * SQLServer-specific DataNode implementation that handles certian issues like identity
+ * SQLServer-specific DataNode implementation that handles certain issues like identity
  * columns, etc.
  * 
  * @since 1.2
@@ -108,7 +108,9 @@ public class SQLServerDataNode extends DataNode {
             BatchQuery query,
             OperationObserver delegate) throws SQLException, Exception {
 
-        if (isIdentityInsert(query)) {
+        // this condition checks if identity coilumns are present in the query and adapter
+        // is not ready to process them... e.g. if we are using a MS driver...
+        if (expectsToOverrideIdentityColumns(query)) {
 
             String configSQL = "SET IDENTITY_INSERT "
                     + query.getDbEntity().getFullyQualifiedName()
@@ -138,7 +140,12 @@ public class SQLServerDataNode extends DataNode {
     /**
      * Returns whether a table has identity columns.
      */
-    protected boolean isIdentityInsert(BatchQuery query) {
+    protected boolean expectsToOverrideIdentityColumns(BatchQuery query) {
+        // jTDS driver supports identity columns, no need for tricks...
+        if (getAdapter().supportsGeneratedKeys()) {
+            return false;
+        }
+
         if (!(query instanceof InsertBatchQuery) || query.getDbEntity() == null) {
             return false;
         }

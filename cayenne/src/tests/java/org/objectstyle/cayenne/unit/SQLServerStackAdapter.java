@@ -66,7 +66,7 @@ public class SQLServerStackAdapter extends SybaseStackAdapter {
     public SQLServerStackAdapter(DbAdapter adapter) {
         super(adapter);
     }
-    
+
     public boolean handlesNullVsEmptyLOBs() {
         return true;
     }

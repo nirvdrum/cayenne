@@ -199,7 +199,7 @@ public class BatchAction extends BaseSQLAction {
      * Executes batch as individual queries over the same prepared statement.
      */
     protected void runAsIndividualQueries(
-            Connection con,
+            Connection connection,
             BatchQuery query,
             BatchQueryBuilder queryBuilder,
             OperationObserver delegate,
@@ -218,7 +218,9 @@ public class BatchAction extends BaseSQLAction {
         // run batch queries one by one
         query.reset();
 
-        PreparedStatement statement = con.prepareStatement(queryStr);
+        PreparedStatement statement = (generatesKeys) ? connection.prepareStatement(
+                queryStr,
+                Statement.RETURN_GENERATED_KEYS) : connection.prepareStatement(queryStr);
         try {
             while (query.next()) {
                 if (isLoggable) {
@@ -242,7 +244,7 @@ public class BatchAction extends BaseSQLAction {
                 }
 
                 delegate.nextCount(query, updated);
-                
+
                 if (generatesKeys) {
                     processGeneratedKeys(query, statement, delegate);
                 }
