@@ -6,6 +6,14 @@
         <!-- News section -->
         <section name="Cayenne News">
         
+         <p><u><i>[February 1, 2004]</i></u> <strong>Cayenne 1.1 Alpha Preview</strong></p>
+         <p>Cayenne 1.1-a-pre (Alpha Preview) is released. This is the first preview of the upcoming
+         1.1 release. It contains such new features as distributed caching, object validation, data views,
+         public transaction API, OpenBaseAdapter, etc. For details see <a href="RELEASE-NOTES-1.1a-pre.txt">release 
+         notes</a> and chapters 1.1 and 1.2 of the User Guide bundled with the release. 
+         Release can be downloaded from <a href="http://objectstyle.org/cayenne/download.html">here</a>.
+         </p>
+         
         <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
          <p>Cayenne 1.0.5 is released. It contains extended implementation of in-memory Expressions
          evaluation and numerous bug fixes. For details see <a href="RELEASE-NOTES-1.0.6.txt">Release notes</a>. 

@@ -5,7 +5,7 @@
     
     <menu name="ABOUT">
         <item name="Home"       href="/index.html"/>
-        <item name="Download"       href="/download.html"/>
+        <item name="Download"       href="http://objectstyle.org/cayenne/download.html"/>
         <item name="Contributors"   href="/contributors.html"/>
         <item name="How Can I Help" href="/how-can-i-help.html"/>
         <item name="Success Stories" href="/poweredby.html"/>
@@ -28,7 +28,7 @@
         <item name="Developer Guide"  href="/developerguide/index.html"/>
     </menu>
     
-    <toc-user-guide name="User Guide"  href="/userguide/index.html">
+    <toc-user-guide name="User Guide  - version 1.1"  href="/userguide/index.html">
     	<item name="1. Introduction"  href="/userguide/introduction/index.html">
     		<item name="1.1 What's New in 1.1"  href="/userguide/introduction/whats-new.html"/>
     		<item name="1.2 Acknowledgements"  href="/userguide/introduction/acknowledgements.html"/>
@@ -132,7 +132,7 @@
     </toc-user-guide>
 
     
-     <toc-modeler-guide name="CayenneModeler Guide"  href="/modelerguide/index.html">
+     <toc-modeler-guide name="CayenneModeler Guide  - version 1.1"  href="/modelerguide/index.html">
     	<item name="1. Introduction"  href="/modelerguide/modeler-intro/index.html">
     		<item name="1.1 Running CayenneModeler"  href="/modelerguide/modeler-intro/runmodeler.html"/>
     		<item name="1.2 What the Buttons Mean"  href="/modelerguide/modeler-intro/modelerconcepts.html"/>
@@ -178,7 +178,7 @@
     </toc-modeler-guide>
     
     
-    <toc-developer-guide name="Developer Guide"  href="/developerguide/index.html">
+    <toc-developer-guide name="Developer Guide  - version 1.1"  href="/developerguide/index.html">
         <item name="1. CVS Access"  href="/developerguide/cvs.html"/>
         <item name="2. Compiling Cayenne"  href="/developerguide/compile.html"/>
         <item name="3. Unit Tests"  href="/developerguide/unit-tests.html"/>

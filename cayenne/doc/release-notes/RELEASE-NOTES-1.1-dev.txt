@@ -6,13 +6,3 @@ For the latest information go to the project web site at
 http://objectstyle.org/cayenne/
 
 
-Changes Since last stable 1.0:
-
-1. QueryEngine.performQuery(Query, OperationObserver) is deprecated, since it is redundant.
-
-2. ContextSelectObserver is deprecated. Its functionality is now implemented in 
-the superclass.
-
-3. SnapshotManager is deprecated in favor of DataRowUtils that is used in a static fashion.
-
-4. Implemented open and extensible transaction API.
