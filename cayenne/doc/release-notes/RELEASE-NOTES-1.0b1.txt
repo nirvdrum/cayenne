@@ -54,3 +54,4 @@ exception cause properly.
 
 16. Ordering now supports DB_NAME expressions. As a result,
 setSortPathSpec and getSortPathSpec are deprecated.
+

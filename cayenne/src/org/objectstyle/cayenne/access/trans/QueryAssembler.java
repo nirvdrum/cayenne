@@ -1,3 +1,4 @@
+package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,7 +54,6 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.access.trans;
 
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -63,10 +63,8 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.*;
 
 /** Abstract superclass of Query translators.
  *  Defines callback methods for helper classes 

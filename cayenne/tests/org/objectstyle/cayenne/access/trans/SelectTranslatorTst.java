@@ -198,15 +198,12 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			assertTrue(sql.indexOf(" FROM ") > 0);
 			
 			// no WHERE clause
-			assertTrue("WHERE clause is expected", sql.indexOf(" WHERE ") > 0);
+			assertTrue("WHERE clause is NOT expected", sql.indexOf(" WHERE ") < 0);
 			
 			assertTrue("GROUP BY clause is expected", sql.indexOf(" GROUP BY ") > 0);
 			assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
 			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
-			assertTrue("Relationship join must be in WHERE", sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
-			assertTrue("Relationship join must be in WHERE", sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
-			assertTrue("Qualifier for related entity must be in WHERE", sql.indexOf("ARTIST_NAME =") > sql.indexOf(" WHERE "));
-			assertTrue("Qualifier for related entity must be in WHERE", sql.indexOf("ARTIST_NAME =") < sql.indexOf(" GROUP BY "));
+			assertTrue("Relationship join must be in HAVING", sql.indexOf("ARTIST_ID =") > sql.indexOf(" HAVING "));
 		} finally {
 			con.close();
 		}
