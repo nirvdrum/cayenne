@@ -60,6 +60,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.testdo.locking.RelLockingTest;
 import org.objectstyle.cayenne.testdo.locking.SimpleLockingTest;
 import org.objectstyle.cayenne.unit.LockingTestCase;
 
@@ -132,8 +133,8 @@ public class OptimisticLockingTst extends LockingTestCase {
         assertEquals(3, allObjects.size());
 
         SimpleLockingTest object1 = (SimpleLockingTest) allObjects.get(0);
-        SimpleLockingTest object2 = (SimpleLockingTest) allObjects.get(0);
-        SimpleLockingTest object3 = (SimpleLockingTest) allObjects.get(0);
+        SimpleLockingTest object2 = (SimpleLockingTest) allObjects.get(1);
+        SimpleLockingTest object3 = (SimpleLockingTest) allObjects.get(2);
 
         // change description and save... no optimistic lock failure expected... 
         object1.setDescription("first update for object1");
@@ -143,6 +144,38 @@ public class OptimisticLockingTst extends LockingTestCase {
 
         // TODO: it would be nice to pick inside DataContext to see that 3 batches where generated...
         // this requires refactoring of ContextCommit.
+    }
+
+    public void testLockingOnToOne() throws Exception {
+        createTestData("testLockingOnToOne");
+
+        List allObjects = context.performQuery(new SelectQuery(RelLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        RelLockingTest object = (RelLockingTest) allObjects.get(0);
+
+        // change name and save... no optimistic lock failure expected
+        object.setName("first update");
+        context.commitChanges();
+
+        // change relationship and save... no optimistic lock failure expected
+        SimpleLockingTest object1 =
+            (SimpleLockingTest) context.createAndRegisterNewObject(
+                SimpleLockingTest.class);
+        object.setToSimpleLockingTest(object1);
+        context.commitChanges();
+
+        // change row underneath, change description and save...  optimistic lock failure expected
+        createTestData("RelLockUpdate");
+        object.setName("third update");
+
+        try {
+            context.commitChanges();
+            fail("Optimistic lock failure expected.");
+        }
+        catch (OptimisticLockException ex) {
+            // optimistic lock failure expected...
+        }
     }
 
     public void testRetrieveFailedRow() throws Exception {

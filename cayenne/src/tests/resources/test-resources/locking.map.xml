@@ -5,6 +5,16 @@
 		<db-attribute name="DATE_LOCKING_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="NAME" type="VARCHAR" length="100"/>
 	</db-entity>
+	<db-entity name="LOCKING_HELPER">
+		<db-attribute name="LOCKING_HELPER_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
+		<db-attribute name="REL_LOCKING_TEST_ID" type="INTEGER"/>
+	</db-entity>
+	<db-entity name="REL_LOCKING_TEST">
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
+		<db-attribute name="REL_LOCKING_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="SIMPLE_LOCKING_TEST_ID" type="INTEGER"/>
+	</db-entity>
 	<db-entity name="SIMPLE_LOCKING_TEST">
 		<db-attribute name="DESCRIPTION" type="VARCHAR" length="200"/>
 		<db-attribute name="LOCKING_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -19,6 +29,12 @@
 		<obj-attribute name="dateLock" type="java.util.Date" lock="true" db-attribute-path="DATE_LOCK"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
+	<obj-entity name="LockingHelper" className="org.objectstyle.cayenne.testdo.locking.LockingHelper" dbEntityName="LOCKING_HELPER">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="RelLockingTest" className="org.objectstyle.cayenne.testdo.locking.RelLockingTest" lock-type="optimistic" dbEntityName="REL_LOCKING_TEST">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
 	<obj-entity name="SimpleLockingTest" className="org.objectstyle.cayenne.testdo.locking.SimpleLockingTest" lock-type="optimistic" dbEntityName="SIMPLE_LOCKING_TEST">
 		<obj-attribute name="description" type="java.lang.String" db-attribute-path="DESCRIPTION"/>
 		<obj-attribute name="name" type="java.lang.String" lock="true" db-attribute-path="NAME"/>
@@ -27,4 +43,25 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 		<obj-attribute name="timeLock" type="java.util.Date" lock="true" db-attribute-path="TIME_LOCK"/>
 	</obj-entity>
+	<db-relationship name="toRelLockingTest" source="LOCKING_HELPER" target="REL_LOCKING_TEST" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="REL_LOCKING_TEST_ID" target="REL_LOCKING_TEST_ID"/>
+	</db-relationship>
+	<db-relationship name="lockingHelpers" source="REL_LOCKING_TEST" target="LOCKING_HELPER" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="REL_LOCKING_TEST_ID" target="REL_LOCKING_TEST_ID"/>
+	</db-relationship>
+	<db-relationship name="toSimpleLockingTest" source="REL_LOCKING_TEST" target="SIMPLE_LOCKING_TEST" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="SIMPLE_LOCKING_TEST_ID" target="LOCKING_TEST_ID"/>
+	</db-relationship>
+	<db-relationship name="relaLockingTests" source="SIMPLE_LOCKING_TEST" target="REL_LOCKING_TEST" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="LOCKING_TEST_ID" target="SIMPLE_LOCKING_TEST_ID"/>
+	</db-relationship>
+	<obj-relationship name="toRelLockingTest" source="LockingHelper" target="RelLockingTest">
+		<db-relationship-ref source="LOCKING_HELPER" target="REL_LOCKING_TEST" name="toRelLockingTest"/>
+	</obj-relationship>
+	<obj-relationship name="lockingHelpers" source="RelLockingTest" target="LockingHelper" lock="true">
+		<db-relationship-ref source="REL_LOCKING_TEST" target="LOCKING_HELPER" name="lockingHelpers"/>
+	</obj-relationship>
+	<obj-relationship name="toSimpleLockingTest" source="RelLockingTest" target="SimpleLockingTest" lock="true">
+		<db-relationship-ref source="REL_LOCKING_TEST" target="SIMPLE_LOCKING_TEST" name="toSimpleLockingTest"/>
+	</obj-relationship>
 </data-map>
