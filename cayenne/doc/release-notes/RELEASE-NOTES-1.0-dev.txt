@@ -21,3 +21,6 @@ Bug report number 760819:
 implementation being a Set to ensure that no duplicates are used).
 
 5. Initial release of the DB2 adapter.
+
+6. Fixed terrible bug in the Modeler that would delete an entity during
+the attempt to delete an attribute.
