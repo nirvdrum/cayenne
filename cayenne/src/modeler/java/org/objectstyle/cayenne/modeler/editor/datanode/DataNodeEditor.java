@@ -68,6 +68,7 @@ import javax.swing.DefaultComboBoxModel;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DBCPDataSourceFactory;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -96,7 +97,7 @@ public class DataNodeEditor extends CayenneController {
 
     final static String[] standardDataSourceFactories = new String[] {
             DriverDataSourceFactory.class.getName(),
-            JNDIDataSourceFactory.class.getName()
+            JNDIDataSourceFactory.class.getName(), DBCPDataSourceFactory.class.getName()
     };
 
     protected DataNodeView view;
@@ -296,9 +297,10 @@ public class DataNodeEditor extends CayenneController {
         bindings[2] = builder.bindToComboSelection(view.getAdapters(), "adapterName");
 
         // one way bindings
-        builder.bindToAction(
-                view.getConfigLocalDataSources(),
-                "dataSourceConfigAction()");
+        builder
+                .bindToAction(
+                        view.getConfigLocalDataSources(),
+                        "dataSourceConfigAction()");
     }
 
     public void dataSourceConfigAction() {
@@ -368,6 +370,11 @@ public class DataNodeEditor extends CayenneController {
             }
             else if (JNDIDataSourceFactory.class.getName().equals(factoryName)) {
                 c = new JNDIDataSourceEditor(
+                        (ProjectController) getParent(),
+                        nodeChangeProcessor);
+            }
+            else if (DBCPDataSourceFactory.class.getName().equals(factoryName)) {
+                c = new DBCPDataSourceEditor(
                         (ProjectController) getParent(),
                         nodeChangeProcessor);
             }
