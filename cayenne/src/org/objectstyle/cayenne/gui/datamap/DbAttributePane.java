@@ -116,8 +116,20 @@ public class DbAttributePane
 	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == editParams) {
+			int row = table.getSelectedRow();
+			if (row >= 0) {
+				DbAttribute attr =
+					((DbAttributeTableModel) table.getModel()).getAttribute(
+						row);
+						
+				EditDerivedParamsDialog dialog =
+					new EditDerivedParamsDialog((DerivedDbAttribute)attr);
+				dialog.show();
+				dialog.dispose();
+			}
+		}
 	}
-
 
 	/**
 	 * @see javax.swing.event.TableModelListener#tableChanged(TableModelEvent)
@@ -125,11 +137,11 @@ public class DbAttributePane
 	public void tableChanged(TableModelEvent e) {
 		processExistingSelection();
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e) {
 		processExistingSelection();
 	}
-	
+
 	public void processExistingSelection() {
 		DbAttribute att = null;
 		if (table.getSelectedRow() >= 0) {
@@ -180,7 +192,7 @@ public class DbAttributePane
 	protected void rebuildTable(DbEntity ent) {
 		editParams.setVisible(ent instanceof DerivedDbEntity);
 		editParams.setEnabled(false);
-		
+
 		DbAttributeTableModel model =
 			(ent instanceof DerivedDbEntity)
 				? new DerivedDbAttributeTableModel(ent, mediator, this)
@@ -198,7 +210,7 @@ public class DbAttributePane
 		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());
 		comboBox.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
-		
+
 		table.getSelectionModel().addListSelectionListener(this);
 		model.addTableModelListener(this);
 	}

@@ -210,10 +210,9 @@ public class ObjRelationshipPane
 			db_rel_list = dg.getDbRelationshipList();
 		else if (ChooseDbRelationshipDialog.NEW == dg.getChoice())
 			db_rel_list = new ArrayList();
-		ResolveDbRelationshipDialog dialog;
-		dialog =
+			
+		ResolveDbRelationshipDialog dialog =
 			new ResolveDbRelationshipDialog(
-				mediator,
 				db_rel_list,
 				start,
 				end,

@@ -82,7 +82,6 @@ import org.objectstyle.cayenne.util.NamedObjectFactory;
 public class ResolveDbRelationshipDialog
 	extends CayenneDialog
 	implements ActionListener {
-	Mediator mediator;
 
 	private DataMap map;
 	private java.util.List originalList;
@@ -108,7 +107,6 @@ public class ResolveDbRelationshipDialog
 	private boolean cancelPressed;
 
 	public ResolveDbRelationshipDialog(
-		Mediator mediator,
 		java.util.List relationships,
 		DbEntity start,
 		DbEntity end,
@@ -116,8 +114,7 @@ public class ResolveDbRelationshipDialog
 
 		super(Editor.getFrame(), "", true);
 
-		this.mediator = mediator;
-		this.map = mediator.getCurrentDataMap();
+		this.map = getMediator().getCurrentDataMap();
 		this.originalList = relationships;
 		this.start = start;
 		this.end = end;
@@ -204,7 +201,7 @@ public class ResolveDbRelationshipDialog
 
 		// Attribute pane
 		DbAttributePairTableModel model =
-			new DbAttributePairTableModel(dbRel, mediator, this, true);
+			new DbAttributePairTableModel(dbRel, getMediator(), this, true);
 		table.setModel(model);
 		table.getSelectionModel().setSelectionMode(
 			ListSelectionModel.SINGLE_SELECTION);
@@ -216,14 +213,14 @@ public class ResolveDbRelationshipDialog
 		TableColumn col = table.getColumnModel().getColumn(0);
 		col.setMinWidth(150);
 		JComboBox comboBox =
-			new JComboBox(Util.getDbAttributeNames(mediator, start));
+			new JComboBox(Util.getDbAttributeNames(getMediator(), start));
 		comboBox.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 		col = table.getColumnModel().getColumn(1);
 		col.setMinWidth(150);
 		col = table.getColumnModel().getColumn(2);
 		col.setMinWidth(150);
-		comboBox = new JComboBox(Util.getDbAttributeNames(mediator, end));
+		comboBox = new JComboBox(Util.getDbAttributeNames(getMediator(), end));
 		comboBox.setEditable(false);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 		col = table.getColumnModel().getColumn(3);
@@ -253,8 +250,7 @@ public class ResolveDbRelationshipDialog
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		DbAttributePairTableModel model;
-		model = (DbAttributePairTableModel) table.getModel();
+		DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
 
 		if (src == add) {
 			model.addRow();
@@ -296,7 +292,7 @@ public class ResolveDbRelationshipDialog
 				dbRel,
 				name.getText());
 
-			mediator.fireDbRelationshipEvent(
+			getMediator().fireDbRelationshipEvent(
 				new RelationshipEvent(
 					this,
 					dbRel,
@@ -342,7 +338,7 @@ public class ResolveDbRelationshipDialog
 			}
 		}
 
-		mediator.fireDbRelationshipEvent(
+		getMediator().fireDbRelationshipEvent(
 			new RelationshipEvent(this, dbRel, dbRel.getSourceEntity()));
 		hide();
 	}

@@ -186,7 +186,6 @@ public class DbRelationshipPane
 		DataMap map = mediator.getCurrentDataMap();
 		ResolveDbRelationshipDialog dialog =
 			new ResolveDbRelationshipDialog(
-				mediator,
 				db_rel_list,
 				start,
 				end,
