@@ -54,104 +54,59 @@
  *
  */
 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.access.util;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.log4j.Level;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * OperationObserver that accumulates select query results provided 
- * by callback methods. Later the results can be retrieved
- * via different <code>getResults</code> methods. 
- * 
- * <p>This class can server as a helper for classes that work with 
- * DataNode directly, bypassing DataContext. Also it is used by DataContext
- * to implement "data rows" functionality - retrieving data without instantiating
- * and registering DataObjects.
- * </p>
- * 
- * <p>If exceptions happen during the execution, they are immediately rethrown.
- * </p>
- * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- * 
- *  @author Andrei Adamchik
+/**
+ * OperationObserver that is used to track the execution
+ * of SelectQueries with results returned as ResultIterator.
+ *  
+ * @author Andrei Adamchik
  */
-public class SelectObserver extends DefaultOperationObserver {
-	protected HashMap results = new HashMap();
-	protected int selectCount;
+public class IteratedSelectObserver extends DefaultOperationObserver {
+	protected ResultIterator resultIterator;
 
-	public SelectObserver() {}
-	
-	public SelectObserver(Level logLevel) {
-		super.setLoggingLevel(logLevel);
+	public boolean isIteratedResult() {
+		return true;
 	}
 
-	/** 
-	 * Returns a count of select queries that returned results
-	 * since the last time "clear" was called, or since this object
-	 * was created.
-	 */
-	public int getSelectCount() {
-		return selectCount;
-	}
-
-	/** 
-	 * Returns a list of result snapshots for the specified query,
-	 * or null if this query has never produced any results.
-	 */
-	public List getResults(Query q) {
-		return (List) results.get(q);
-	}
-
-	/** 
-	 * Returns query results accumulated during query execution with this
-	 * object as an operation observer. 
-	 */
-	public Map getResults() {
-		return results;
-	}
-
-	/** Clears fetched objects stored in an internal list. */
-	public void clear() {
-		selectCount = 0;
-		results.clear();
-	}
-
-	/** 
-	 * Stores all objects in <code>dataRows</code> in an internal
-	 * result list. 
-	 */
 	public void nextDataRows(Query query, List dataRows) {
-		super.nextDataRows(query, dataRows);
-		if (dataRows != null) {
-			results.put(query, dataRows);
+		throw new CayenneRuntimeException("Results unexpectedly returned as list.");
+	}
+
+	public void nextDataRows(Query q, ResultIterator it) {
+		super.nextDataRows(q, it);
+		resultIterator = it;
+	}
+
+	public ResultIterator getResultIterator() throws CayenneException {
+		if (super.hasExceptions()) {
+			StringWriter str = new StringWriter();
+			PrintWriter out = new PrintWriter(str);
+			super.printExceptions(out);
+
+			try {
+				out.close();
+				str.close();
+			} catch (IOException ioex) {
+				// this should never happen
+			}
+
+			throw new CayenneException(
+				"Error getting ResultIterator: " + str.getBuffer());
 		}
 
-		selectCount++;
+		return resultIterator;
 	}
 
-	/** 
-	 * Overrides superclass implementation to rethrow an exception
-	 *  immediately. 
-	 */
-	public void nextQueryException(Query query, Exception ex) {
-		super.nextQueryException(query, ex);
-		throw new CayenneRuntimeException("Query exception.", ex);
-	}
-
-	/** 
-	 * Overrides superclass implementation to rethrow an exception
-	 * immediately. 
-	 */
-	public void nextGlobalException(Exception ex) {
-		super.nextGlobalException(ex);
-		throw new CayenneRuntimeException("Global exception.", ex);
-	}
 }

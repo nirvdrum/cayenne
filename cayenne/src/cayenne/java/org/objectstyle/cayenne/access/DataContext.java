@@ -78,6 +78,8 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
+import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.exp.Expression;

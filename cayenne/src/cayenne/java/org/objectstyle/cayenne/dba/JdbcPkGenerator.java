@@ -63,7 +63,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DefaultOperationObserver;
-import org.objectstyle.cayenne.access.SelectObserver;
+import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
