@@ -65,6 +65,8 @@ import java.net.URL;
 import javax.swing.*;
 import javax.swing.border.Border;
 
+import org.objectstyle.cayenne.gui.action.CayenneAction;
+
 /** 
  * Displays the information about the licnese of Cayenne
  * and about CayenneModeler.
@@ -204,7 +206,7 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 		JPanel image_pane = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
 		ClassLoader cl = AboutDialog.class.getClassLoader();
-		URL url = cl.getResource(Editor.RESOURCE_PATH + "images/logo.jpg");
+		URL url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/logo.jpg");
 		ImageIcon logo_icon = new ImageIcon(url);
 		image = new JLabel(logo_icon);
 		image.setBorder(border);

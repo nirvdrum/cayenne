@@ -86,12 +86,12 @@ public class RemoveAction extends CayenneAction {
 		return "images/icon-trash.gif";
 	}
 	
-	public void performAction(ActionEvent e) {
-		remove();
-	}
-	
 	public KeyStroke getAcceleratorKey() {
 		return KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK);
+	}
+	
+	public void performAction(ActionEvent e) {
+		remove();
 	}
 
 	private void remove() {

@@ -150,6 +150,10 @@ public abstract class CayenneAction extends AbstractAction {
 	public Mediator getMediator() {
 		return Editor.getFrame().getMediator();
 	}
+	
+	public void setMediator(Mediator mediator) {
+		Editor.getFrame().setMediator(mediator);
+	}
 
 	/**
 	 * Internally calls <code>performAction</code>.
@@ -168,9 +172,7 @@ public abstract class CayenneAction extends AbstractAction {
 	 * to this action.
 	 */
 	public JMenuItem buildMenu() {
-		JMenuItem item = new JMenuItem(this);
-		item.setAccelerator((KeyStroke)getValue(Action.ACCELERATOR_KEY));
-		return item;
+		return new JMenuItem(this);
 	}
 
 	/**

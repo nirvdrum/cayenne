@@ -98,7 +98,6 @@ public class Editor
 		DbRelationshipDisplayListener {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 
-	public static final String RESOURCE_PATH = "org/objectstyle/cayenne/gui/";
 	private static final String TITLE = "CayenneModeler";
 
 	/** 
@@ -111,10 +110,8 @@ public class Editor
 	Mediator mediator;
 	ActionMap actionMap = new ActionMap();
 
-	JMenuBar menuBar = new JMenuBar();
 	JMenu fileMenu = new JMenu("File");
 	JMenuItem openProjectMenu = new JMenuItem("Open Project");
-	JMenuItem createProjectMenu = new JMenuItem("New Project");
 	JMenuItem closeProjectMenu = new JMenuItem("Close Project");
 	JMenuItem exitMenu = new JMenuItem("Exit");
 	ArrayList lastOpenProjMenus = new ArrayList();
@@ -150,6 +147,12 @@ public class Editor
 
 	private static Editor frame;
 
+	/** Singleton implementation of getting Editor window. */
+	public static Editor getFrame() {
+		return frame;
+	}
+	
+	
 	public Editor() {
 		super(TITLE);
 
@@ -181,6 +184,9 @@ public class Editor
 		// build action map
 		actionMap = new ActionMap();
 
+		CayenneAction newProjectAction = new NewProjectAction();
+		actionMap.put(newProjectAction.getKey(), newProjectAction);
+
 		CayenneAction createMapAction = new CreateDataMapAction();
 		actionMap.put(createMapAction.getKey(), createMapAction);
 
@@ -192,24 +198,26 @@ public class Editor
 
 		CayenneAction saveAction = new SaveAction();
 		actionMap.put(saveAction.getKey(), saveAction);
+
 	}
 
 	protected void init() {
 		getContentPane().setLayout(new BorderLayout());
 
 		// Setup menu bar
+		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
+
 		menuBar.add(fileMenu);
 		menuBar.add(projectMenu);
 		menuBar.add(toolMenu);
 		menuBar.add(helpMenu);
 
-		fileMenu.add(createProjectMenu);
+		fileMenu.add(getAction(NewProjectAction.ACTION_NAME).buildMenu());
 		fileMenu.add(openProjectMenu);
 		fileMenu.add(closeProjectMenu);
 		fileMenu.addSeparator();
-		fileMenu.add(
-			getAction(SaveAction.ACTION_NAME).buildMenu());
+		fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
 		fileMenu.addSeparator();
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenu);
@@ -224,8 +232,7 @@ public class Editor
 		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
 		projectMenu.add(synchObjEntityMenu);
 		projectMenu.addSeparator();
-		projectMenu.add(
-			getAction(RemoveAction.ACTION_NAME).buildMenu());
+		projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
 		toolMenu.add(importDbMenu);
 		toolMenu.add(importEOMMenu);
@@ -270,7 +277,6 @@ public class Editor
 		createDomainMenu.setEnabled(false);
 		createDomainBtn.setEnabled(false);
 
-		createProjectMenu.addActionListener(this);
 		createDomainMenu.addActionListener(this);
 		createDataSourceMenu.addActionListener(this);
 		createObjEntityMenu.addActionListener(this);
@@ -341,16 +347,12 @@ public class Editor
 	private void initToolBar() {
 		ClassLoader cl = Editor.class.getClassLoader();
 
-		ImageIcon newIcon =
-			new ImageIcon(
-				cl.getResource(RESOURCE_PATH + "images/icon-new.gif"));
-		JButton newBtn = new JButton(newIcon);
-		newBtn.setToolTipText("new project");
-		toolBar.add(newBtn);
+		toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
 
 		ImageIcon openIcon =
 			new ImageIcon(
-				cl.getResource(RESOURCE_PATH + "images/icon-open.gif"));
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-open.gif"));
 		JButton openBtn = new JButton(openIcon);
 		openBtn.setToolTipText("open project");
 		toolBar.add(openBtn);
@@ -358,13 +360,16 @@ public class Editor
 		toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
 		toolBar.addSeparator();
 
-		URL url = cl.getResource(RESOURCE_PATH + "images/icon-dom.gif");
+		URL url =
+			cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dom.gif");
 		ImageIcon domainIcon = new ImageIcon(url);
 		createDomainBtn = new JButton(domainIcon);
 		createDomainBtn.setToolTipText("create new domain");
 		toolBar.add(createDomainBtn);
 
-		url = cl.getResource(RESOURCE_PATH + "images/icon-node.gif");
+		url =
+			cl.getResource(
+				CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
 		ImageIcon nodeIcon = new ImageIcon(url);
 		createDataSourceBtn = new JButton(nodeIcon);
 		createDataSourceBtn.setToolTipText("create new data node");
@@ -372,13 +377,17 @@ public class Editor
 
 		toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
 
-		url = cl.getResource(RESOURCE_PATH + "images/icon-dbentity.gif");
+		url =
+			cl.getResource(
+				CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
 		ImageIcon dbEntityIcon = new ImageIcon(url);
 		createDbEntityBtn = new JButton(dbEntityIcon);
 		createDbEntityBtn.setToolTipText("create new db entity");
 		toolBar.add(createDbEntityBtn);
 
-		url = cl.getResource(RESOURCE_PATH + "images/icon-objentity.gif");
+		url =
+			cl.getResource(
+				CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
 		ImageIcon objEntityIcon = new ImageIcon(url);
 		createObjEntityBtn = new JButton(objEntityIcon);
 		createObjEntityBtn.setToolTipText("create new obj entity");
@@ -386,14 +395,17 @@ public class Editor
 
 		ImageIcon attrIcon =
 			new ImageIcon(
-				cl.getResource(RESOURCE_PATH + "images/icon-attribute.gif"));
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-attribute.gif"));
 		JButton attrBtn = new JButton(attrIcon);
 		attrBtn.setToolTipText("create attribute");
 		toolBar.add(attrBtn);
 
 		ImageIcon relIcon =
 			new ImageIcon(
-				cl.getResource(RESOURCE_PATH + "images/icon-relationship.gif"));
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH
+						+ "images/icon-relationship.gif"));
 		JButton relBtn = new JButton(relIcon);
 		relBtn.setToolTipText("create relationship");
 		toolBar.add(relBtn);
@@ -401,9 +413,42 @@ public class Editor
 		getContentPane().add(toolBar, BorderLayout.NORTH);
 	}
 
-	/** Singleton implementation of getting Editor window. */
-	public static Editor getFrame() {
-		return frame;
+    public void projectClosed() {
+    	reloadLastProjList();
+		getContentPane().remove(view);
+		view = null;
+		setMediator(null);
+
+		disableMenu();
+
+		closeProjectMenu.setEnabled(false);
+		createDomainMenu.setEnabled(false);
+		createDomainBtn.setEnabled(false);
+	
+		// Editor.getFrame().repaint();
+		Editor.getFrame().getAction(RemoveAction.ACTION_NAME).setName("Remove");
+		Editor.getFrame().setProjectTitle(null);
+    }
+    
+    public void projectOpened() {
+		view = new EditorView(mediator);
+		getContentPane().add(view, BorderLayout.CENTER);
+
+		mediator.addDomainDisplayListener(this);
+		mediator.addDataNodeDisplayListener(this);
+		mediator.addDataMapDisplayListener(this);
+		mediator.addObjEntityDisplayListener(this);
+		mediator.addDbEntityDisplayListener(this);
+		mediator.addObjAttributeDisplayListener(this);
+		mediator.addDbAttributeDisplayListener(this);
+		mediator.addObjRelationshipDisplayListener(this);
+		mediator.addDbRelationshipDisplayListener(this);
+
+		createDomainMenu.setEnabled(true);
+		createDomainBtn.setEnabled(true);
+		closeProjectMenu.setEnabled(true);
+
+		this.validate();
 	}
 
 	/**
@@ -413,7 +458,7 @@ public class Editor
 		Properties props = new Properties();
 		InputStream in =
 			this.getClass().getClassLoader().getResourceAsStream(
-				RESOURCE_PATH + "gui.properties");
+				CayenneAction.RESOURCE_PATH + "gui.properties");
 		if (in != null) {
 			try {
 				props.load(in);
@@ -458,28 +503,11 @@ public class Editor
 		}
 	}
 
-	/** Return false if cancel closing the window, true otherwise. */
-	private boolean checkSaveOnClose() {
-		if (mediator != null && mediator.isDirty()) {
-			int ret_code =
-				JOptionPane.showConfirmDialog(
-					this,
-					"You have unsaved data. " + "Do you want to save it?");
-			if (ret_code == JOptionPane.CANCEL_OPTION)
-				return false;
-			else if (ret_code == JOptionPane.YES_OPTION)
-				actionMap.get("SaveAll").actionPerformed(
-					new ActionEvent(
-						this,
-						ActionEvent.ACTION_PERFORMED,
-						"SaveAll"));
-		}
-		return true;
-	}
-
 	private void exitEditor() {
-		if (!checkSaveOnClose())
+		if (!((ProjectAction)getAction(NewProjectAction.ACTION_NAME)).checkSaveOnClose()) {
 			return;
+		}
+		
 		Preferences.getPreferences().storePreferences(Editor.this);
 		Editor.this.setVisible(false);
 		System.exit(0);
@@ -489,14 +517,10 @@ public class Editor
 		try {
 			Object src = e.getSource();
 
-			if (src == createProjectMenu) {
-				createProject();
-			} else if (src == openProjectMenu) {
+			if (src == openProjectMenu) {
 				openProject();
 			} else if (src == closeProjectMenu) {
-				closeProject();
-			} else if (src == createProjectMenu) {
-				createProject();
+				((ProjectAction)getAction(NewProjectAction.ACTION_NAME)).closeProject();
 			} else if (src == createDomainMenu || src == createDomainBtn) {
 				createDomain();
 			} else if (
@@ -568,30 +592,6 @@ public class Editor
 		dialog.dispose();
 	}
 
-	/** Returns true if successfully closed project, false otherwise. */
-	private boolean closeProject() {
-		if (!checkSaveOnClose()) {
-			return false;
-		}
-
-		reloadLastProjList();
-		getContentPane().remove(view);
-		view = null;
-		mediator = null;
-		repaint();
-		disableMenu();
-
-		closeProjectMenu.setEnabled(false);
-		createDomainMenu.setEnabled(false);
-		createDomainBtn.setEnabled(false);
-
-		getAction(RemoveAction.ACTION_NAME).setName("Remove");
-
-		// Take path of the proj away from the title
-		this.setTitle(TITLE);
-		return true;
-	}
-
 	private void createObjEntity() {
 		ObjEntity entity =
 			(ObjEntity) NamedObjectFactory.createObject(
@@ -627,68 +627,6 @@ public class Editor
 				mediator.getCurrentDataDomain()));
 	}
 
-	private void createProject() {
-		Preferences pref = Preferences.getPreferences();
-		String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
-		try {
-			// Get the project file name (always cayenne.xml)
-			boolean finished = false;
-			File file = null;
-			File proj_file = null;
-			while (!finished) {
-				fileChooser.setAcceptAllFileFilterUsed(false);
-				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				fileChooser.setDialogTitle("Choose project location");
-				if (null != init_dir) {
-					File init_dir_file = new File(init_dir);
-					if (init_dir_file.exists())
-						fileChooser.setCurrentDirectory(init_dir_file);
-				}
-				int ret_code = fileChooser.showSaveDialog(this);
-				if (ret_code != JFileChooser.APPROVE_OPTION)
-					return;
-				file = fileChooser.getSelectedFile();
-				if (!file.exists())
-					file.createNewFile();
-				proj_file = new File(file, ProjectFileFilter.PROJ_FILE_NAME);
-				if (proj_file.exists()) {
-					int ret =
-						JOptionPane.showConfirmDialog(
-							this,
-							"There is already "
-								+ "project in this folder. Overwrite?");
-					if (ret == JOptionPane.YES_OPTION) {
-						finished = true;
-					} else if (ret == JOptionPane.CANCEL_OPTION) {
-						return;
-					}
-				} else {
-					finished = true;
-				}
-			} // End while
-			// Save and close (if needed) currently open project.
-			if (mediator != null) {
-				if (false == closeProject())
-					return;
-			}
-			// Save dir path to the preferences
-			pref.setProperty(Preferences.LAST_DIR, file.getAbsolutePath());
-			try {
-				GuiConfiguration.initSharedConfig(proj_file, false);
-			} catch (ConfigException e) {
-				logObj.warning(e.getMessage());
-			}
-			GuiConfiguration config = GuiConfiguration.getGuiConfig();
-			Mediator mediator = Mediator.getMediator(config);
-			project(mediator);
-			// Set title to contain proj file path
-			this.setTitle(TITLE + " - " + proj_file.getAbsolutePath());
-		} catch (Exception e) {
-			System.out.println("Error loading project file, " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
 	private void openProject(String file_path) {
 		if (null == file_path || file_path.trim().length() == 0)
 			return;
@@ -706,8 +644,9 @@ public class Editor
 	private void openProject(File file) {
 		// Save and close (if needed) currently open project.
 		if (mediator != null) {
-			if (false == closeProject())
+			if (!((ProjectAction)getAction(NewProjectAction.ACTION_NAME)).closeProject()) {
 				return;
+			}
 		}
 		Preferences pref = Preferences.getPreferences();
 		String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
@@ -717,9 +656,8 @@ public class Editor
 			addToLastProjList(file.getAbsolutePath());
 			// Initialize gui configuration
 			GuiConfiguration.initSharedConfig(file);
-			GuiConfiguration config = GuiConfiguration.getGuiConfig();
-			Mediator mediator = Mediator.getMediator(config);
-			project(mediator);
+			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
+			projectOpened();
 			// Set title to contain proj file path
 			this.setTitle(TITLE + " - " + file.getAbsolutePath());
 
@@ -755,28 +693,6 @@ public class Editor
 		}
 	}
 
-	private void project(Mediator mediator) {
-		this.mediator = mediator;
-
-		view = new EditorView(mediator);
-		getContentPane().add(view, BorderLayout.CENTER);
-
-		mediator.addDomainDisplayListener(this);
-		mediator.addDataNodeDisplayListener(this);
-		mediator.addDataMapDisplayListener(this);
-		mediator.addObjEntityDisplayListener(this);
-		mediator.addDbEntityDisplayListener(this);
-		mediator.addObjAttributeDisplayListener(this);
-		mediator.addDbAttributeDisplayListener(this);
-		mediator.addObjRelationshipDisplayListener(this);
-		mediator.addDbRelationshipDisplayListener(this);
-
-		createDomainMenu.setEnabled(true);
-		createDomainBtn.setEnabled(true);
-		closeProjectMenu.setEnabled(true);
-
-		this.validate();
-	}
 
 	private void createDomain() {
 		DataDomain domain =
@@ -886,8 +802,8 @@ public class Editor
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(false);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(false);
 		getAction(AddDataMapAction.ACTION_NAME).setEnabled(false);
-        getAction(SaveAction.ACTION_NAME).setEnabled(false);
-        
+		getAction(SaveAction.ACTION_NAME).setEnabled(false);
+
 		createDataSourceMenu.setEnabled(false);
 		createObjEntityMenu.setEnabled(false);
 		createDbEntityMenu.setEnabled(false);
@@ -912,7 +828,7 @@ public class Editor
 
 		createDataSourceMenu.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
-        getAction(SaveAction.ACTION_NAME).setEnabled(true);
+		getAction(SaveAction.ACTION_NAME).setEnabled(true);
 		importDbMenu.setEnabled(true);
 		importEOMMenu.setEnabled(true);
 
@@ -963,5 +879,17 @@ public class Editor
 	 */
 	public Mediator getMediator() {
 		return mediator;
+	}
+
+	public void setMediator(Mediator mediator) {
+		this.mediator = mediator;
+	}
+
+	public void setProjectTitle(String projectPath) {
+		if (projectPath != null) {
+			this.setTitle(TITLE + " - " + projectPath);
+		} else {
+			this.setTitle(TITLE);
+		}
 	}
 }

@@ -67,6 +67,7 @@ import javax.swing.tree.*;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.gui.action.CayenneAction;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.map.*;
@@ -904,21 +905,21 @@ public class BrowseView
 		public BrowseViewRenderer() {
 			ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
 			URL url =
-				cl.getResource(Editor.RESOURCE_PATH + "images/icon-dom.gif");
+				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dom.gif");
 			domainIcon = new ImageIcon(url);
 
-			url = cl.getResource(Editor.RESOURCE_PATH + "images/icon-node.gif");
+			url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
 			nodeIcon = new ImageIcon(url);
 
-			url = cl.getResource(Editor.RESOURCE_PATH + "images/icon-datamap.gif");
+			url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-datamap.gif");
 			mapIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(Editor.RESOURCE_PATH + "images/icon-dbentity.gif");
+				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
 			dbEntityIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(Editor.RESOURCE_PATH + "images/icon-objentity.gif");
+				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
 			objEntityIcon = new ImageIcon(url);
 		}
 
