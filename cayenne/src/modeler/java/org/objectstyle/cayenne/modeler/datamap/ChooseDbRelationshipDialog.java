@@ -123,22 +123,58 @@ public class ChooseDbRelationshipDialog extends CayenneDialog implements ActionL
     private int choice = CANCEL;
 
     //Looks for a direct relationship from start to end.
-    //Then looks at the destination of each direct relationship from start, and follows any 
-    //direct relationships from *that* entity (using recursion).  seenEntities is always updated
-    // to ensure that loops do not occur
+    //Calls the recursive findBranchRelationship, to find all branches
+    //This method sets the root of findBranchRelationship, so that all
+    //branches from start are explored
     private List findRelationshipPath(
         DbEntity start,
+		DbEntity end) {
+			List paths = findBranchRelationshipPath(start, end, start, new HashSet(), "");
+			
+			//We just got every possible path from start to end.  Eliminate the
+			//absurd ones (any that are two nodes longer than the shortest path)
+			
+			//Loop to find the shortest path
+			int shortest = 1000000;
+			Iterator pathIt = paths.iterator();
+			while( pathIt.hasNext() ) {
+				List path = (List)pathIt.next();
+				if(path.size() < shortest) shortest = path.size();
+			}
+			//Loop again to remove paths more than two hops longer than shortest
+			pathIt = paths.iterator();
+			while( pathIt.hasNext() ) {
+				List path = (List)pathIt.next();
+				if( path.size() > (shortest + 2) ) pathIt.remove();
+			}
+			return paths;
+		}
+
+	//Starting from a particular root table, look at the destination of each direct 
+	//relationship of the root, and follow any direct relationships from *that* 
+	//entity (using recursion).  seenEntities is updated on recursive calls
+	//to ensure that loops do not occur.  However, seenEntities is cleared on
+	//the root call (because it is possible that only the first branch from 
+	//the root would be explored).
+	private List findBranchRelationshipPath(
+			DbEntity start,
         DbEntity end,
+			DbEntity root,
         Set seenEntities,
         String indent) {
         // Find matching relationship in the start DbEntity
         List result = new ArrayList();
-        //Ensure we never come "back" to this entity
-        seenEntities.add(start);
+			//Ensure we never come "back" to this entity (no effect on root call)
+			if( start != root ) seenEntities.add(start);
 
         Iterator iter = start.getRelationships().iterator();
         while (iter.hasNext()) {
             DbRelationship db_rel = (DbRelationship) iter.next();
+				//On root call, clear seenEntities to explore next branch
+				if(start == root) {
+					seenEntities = new HashSet();
+					seenEntities.add(root);
+				}
             if (db_rel.getTargetEntity() == end) {
                 List aList = new ArrayList();
                 aList.add(db_rel);
@@ -148,9 +184,10 @@ public class ChooseDbRelationshipDialog extends CayenneDialog implements ActionL
                 //Not a direct relationship... recurse, but don't come back to this entity
                 if (!seenEntities.contains(db_rel.getTargetEntity())) {
                     List deeperRels =
-                        this.findRelationshipPath(
+							this.findBranchRelationshipPath(
                             (DbEntity) db_rel.getTargetEntity(),
                             end,
+								root,
                             seenEntities,
                             indent + "  ");
 
@@ -171,8 +208,7 @@ public class ChooseDbRelationshipDialog extends CayenneDialog implements ActionL
     }
 
     private void populateRelationshipList(DbEntity startEntity, DbEntity endEntity) {
-        relList.addAll(
-            this.findRelationshipPath(startEntity, endEntity, new HashSet(), ""));
+        relList.addAll( this.findRelationshipPath(startEntity, endEntity) );
     }
 
     public ChooseDbRelationshipDialog(
