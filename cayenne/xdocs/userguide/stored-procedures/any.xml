@@ -28,7 +28,7 @@ DataContext ctxt;
 ProcedureQuery query = new ProcedureQuery("my_procedure");
 
 // Set "IN" parameter values
-query.addParam("paramter1", "abc");
+query.addParam("parameter1", "abc");
 query.addParam("parameter2", new Integer(3000));
 
 QueryResult resultsCollection = new QueryResult();
