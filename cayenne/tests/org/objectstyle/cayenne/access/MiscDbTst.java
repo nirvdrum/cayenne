@@ -94,5 +94,8 @@ public class MiscDbTst extends TestCase {
         catch(Exception ex) {
             conn.rollback();
         }
+        finally {
+            conn.close();
+        }
     }
 }

@@ -132,6 +132,13 @@ public abstract class QueryAssembler extends QueryTranslator {
      */
     public abstract String aliasForTable(DbEntity dbEnt);
 
+
+    /** Returns Connection object used by this assembler. */
+    public Connection getCon() {
+        return con;
+    }
+
+
     /** Returns QueryEngine used by this assembler. */
     public QueryEngine getEngine() {
         return engine;

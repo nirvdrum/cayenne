@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.query;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.access.*;
@@ -68,53 +68,60 @@ import java.net.*;
 
 public class SqlSelectQueryInContextTst extends SelectQueryBase {
     private static final int _artistCount = 10;
-    
+
     protected SqlSelectQuery q;
-    
+
     public SqlSelectQueryInContextTst(String name) {
         super(name);
     }
-    
+
     public void setUp() throws java.lang.Exception {
         super.setUp();
         q = new SqlSelectQuery();
     }
-    
+
     protected Query getQuery() {
         return q;
     }
-    
+
     public void testSelect1() throws java.lang.Exception {
-        
+
         q.setObjEntityName("Artist");
         q.setSqlString("select count(*)  from ARTIST");
         performQuery();
-        
+
         // check query results
         ArrayList objects = opObserver.objectsForQuery(q);
         assertNotNull(objects);
         assertEquals(1, objects.size());
-        Map countMap = (Map)objects.get(0);
+        Map countMap = (Map) objects.get(0);
         Object count = countMap.values().iterator().next();
-        assertEquals(_artistCount, ((Number)count).intValue());
+        assertEquals(_artistCount, ((Number) count).intValue());
     }
-    
-    
-    
+
     protected void populateTables() throws java.lang.Exception {
-        String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+        String insertArtist =
+            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
         Connection conn = org.objectstyle.TestMain.getSharedConnection();
-        PreparedStatement stmt = conn.prepareStatement(insertArtist);
-        long dateBase = System.currentTimeMillis();
-        
-        for(int i = 1; i <= _artistCount; i++) {
-            stmt.setInt(1, i);
-            stmt.setString(2, "artist" + i);
-            stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
-            stmt.executeUpdate();
+
+        try {
+            conn.setAutoCommit(false);
+            
+            PreparedStatement stmt = conn.prepareStatement(insertArtist);
+            long dateBase = System.currentTimeMillis();
+
+            for (int i = 1; i <= _artistCount; i++) {
+                stmt.setInt(1, i);
+                stmt.setString(2, "artist" + i);
+                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+                stmt.executeUpdate();
+            }
+
+            stmt.close();
+            conn.commit();
         }
-        
-        stmt.close();
-        conn.commit();
+        finally {
+            conn.close();
+        }
     }
 }

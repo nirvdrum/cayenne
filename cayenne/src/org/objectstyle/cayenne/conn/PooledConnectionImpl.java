@@ -105,6 +105,12 @@ public class PooledConnectionImpl implements PooledConnection {
     }
     
     public Connection getConnection() throws java.sql.SQLException {
+        // set autocommit to false to return connection
+        // always in consistent state
+        if(!connectionObj.getAutoCommit()) {
+            connectionObj.setAutoCommit(true);
+        }
+        
         return new ConnectionWrapper(connectionObj, this);
     }
     
@@ -139,7 +145,7 @@ public class PooledConnectionImpl implements PooledConnection {
         }
     }
     
-    /** This method creates and sends an event to listeners when a user closes
+    /** Creates and sends an event to listeners when a user closes
      *  java.sql.Connection object belonging to this PooledConnection.
      */
     protected void connectionClosedNotification() {

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import junit.runner.*;
@@ -63,21 +63,18 @@ import java.io.*;
 import org.objectstyle.util.*;
 import java.sql.*;
 
-
 public class TypesMappingTst extends TypesMappingBase {
-    
-    
+
     public TypesMappingTst(String name) {
         super(name);
     }
-    
-    
+
     public void testFuzzyDataType() throws java.lang.Exception {
-        assertNotNull(typeMap.getFuzzyDataType(Types.INTEGER));
+        assertNotNull(createTypesMapping().getFuzzyDataType(Types.INTEGER));
     }
-    
+
     public void testTypeInfo() throws java.lang.Exception {
-        
+        TypesMapping typeMap = createTypesMapping();
         // we can not make real assertions about database types,
         // since the test suite might be run on different databases
         // instead do some formal assertions
@@ -86,38 +83,42 @@ public class TypesMappingTst extends TypesMappingBase {
         assertTrue(typeMap.getDatabaseTypes(Types.CHAR).length > 0);
         // at least 1 date type should be there 
         assertTrue(
-        typeMap.getDatabaseTypes(Types.DATE).length > 0  ||
-        typeMap.getDatabaseTypes(Types.TIMESTAMP).length > 0
-        );
-   }
-   
-   public void testTypeInfoCompleteness() throws java.lang.Exception {
-       // check counts 
-       // since more then 1 database type can map to a single JDBC type
-       Connection conn = org.objectstyle.TestMain.getSharedConnection();
-       DatabaseMetaData md = conn.getMetaData();
-       ResultSet rs = md.getTypeInfo();
-       
-       int len = 0;
-       try {
-           while(rs.next()) {
-               len++;
-           }
-       }
-       finally {
-           rs.close();
-       }
-       
-       int actualLen = 0;
-       Iterator it = typeMap.databaseTypes.keySet().iterator();
-       while(it.hasNext()) {
-           ArrayList vals = (ArrayList)typeMap.databaseTypes.get(it.next());
-           actualLen += vals.size();
-       }
-       
-       // this is bad assertion, since due to some hacks 
-       // the same database types may map more then once,
-       // so we have to use <=
-       assertTrue(len <= actualLen);
+            typeMap.getDatabaseTypes(Types.DATE).length > 0
+                || typeMap.getDatabaseTypes(Types.TIMESTAMP).length > 0);
+    }
+
+    public void testTypeInfoCompleteness() throws java.lang.Exception {
+        // check counts 
+        // since more then 1 database type can map to a single JDBC type
+        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        int len = 0;
+        try {
+            DatabaseMetaData md = conn.getMetaData();
+            ResultSet rs = md.getTypeInfo();
+            try {
+                while (rs.next()) {
+                    len++;
+                }
+            }
+            finally {
+                rs.close();
+            }
+        }
+        finally {
+            conn.close();
+        }
+
+        int actualLen = 0;
+        TypesMapping map = createTypesMapping();
+        Iterator it = map.databaseTypes.keySet().iterator();
+        while (it.hasNext()) {
+            ArrayList vals = (ArrayList) map.databaseTypes.get(it.next());
+            actualLen += vals.size();
+        }
+
+        // this is bad assertion, since due to some hacks 
+        // the same database types may map more then once,
+        // so we have to use <=
+        assertTrue(len <= actualLen);
     }
 }

@@ -53,65 +53,82 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
+import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public class SelectTranslatorTst extends TestCase {
     static Logger logObj = Logger.getLogger(SelectTranslatorTst.class.getName());
 
-    protected SelectTranslator st;
     protected SelectQuery q;
 
     public SelectTranslatorTst(String name) {
         super(name);
     }
 
-
     protected void setUp() throws java.lang.Exception {
         q = new SelectQuery();
-        st = new SelectTranslator(
-        org.objectstyle.TestMain.getSharedDomain(), 
-        org.objectstyle.TestMain.getSharedConnection(), 
-        org.objectstyle.TestMain.getSharedNode().getAdapter(),
-        q);
     }
 
+    private SelectTranslator buildTranslator(Connection con)
+        throws java.lang.Exception {
+        return new SelectTranslator(
+            TestMain.getSharedDomain(),
+            con,
+            TestMain.getSharedNode().getAdapter(),
+            q);
+    }
 
     public void testCreateSqlString1() throws java.lang.Exception {
-        // query with qualifier and ordering
-        q.setObjEntityName("Artist");
-        q.setQualifier(ExpressionFactory.binaryExp(Expression.LIKE, "artistName", "a%"));
-        q.addOrdering("dateOfBirth", Ordering.ASC);
+        Connection con = TestMain.getSharedConnection();
 
-        String generatedSql = st.createSqlString();
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("Artist");
+            q.setQualifier(
+                ExpressionFactory.binaryExp(Expression.LIKE, "artistName", "a%"));
+            q.addOrdering("dateOfBirth", Ordering.ASC);
 
-        // do some simple assertions to make sure all parts are in
-        assertNotNull(generatedSql);
-        assertTrue(generatedSql.startsWith("SELECT "));
-        assertTrue(generatedSql.indexOf(" FROM ") > 0);
-        assertTrue(generatedSql.indexOf(" WHERE ") > generatedSql.indexOf(" FROM "));
-        assertTrue(generatedSql.indexOf(" ORDER BY ") > generatedSql.indexOf(" WHERE "));
+            String generatedSql = buildTranslator(con).createSqlString();
+
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT "));
+            assertTrue(generatedSql.indexOf(" FROM ") > 0);
+            assertTrue(generatedSql.indexOf(" WHERE ") > generatedSql.indexOf(" FROM "));
+            assertTrue(
+                generatedSql.indexOf(" ORDER BY ") > generatedSql.indexOf(" WHERE "));
+        }
+        finally {
+            con.close();
+        }
     }
 
-
     public void testCreateSqlString2() throws java.lang.Exception {
-        // query with "distinct" set
-        q.setObjEntityName("Artist");
-        q.setDistinct(true);
+        Connection con = TestMain.getSharedConnection();
+        try {
+            // query with "distinct" set
+            q.setObjEntityName("Artist");
+            q.setDistinct(true);
 
-        String generatedSql = st.createSqlString();
+            String generatedSql = buildTranslator(con).createSqlString();
 
-        // do some simple assertions to make sure all parts are in
-        assertNotNull(generatedSql);
-        assertTrue(generatedSql.startsWith("SELECT DISTINCT"));
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT DISTINCT"));
+        }
+        finally {
+            con.close();
+        }
     }
 }

@@ -80,19 +80,24 @@ public class DatabaseSetup {
     public void cleanTableData() throws Exception {
         Connection conn = TestMain.getSharedConnection();
 
-        if (conn.getAutoCommit()) {
-            conn.setAutoCommit(false);
-        }
+        try {
+            if (conn.getAutoCommit()) {
+                conn.setAutoCommit(false);
+            }
 
-        Statement stmt = conn.createStatement();
-        List list = dbEntitiesInInsertOrder();
-        ListIterator it = list.listIterator(list.size());
-        while (it.hasPrevious()) {
-            DbEntity ent = (DbEntity) it.previous();
-            String deleteSql = "DELETE FROM " + ent.getName();
-            int rowsDeleted = stmt.executeUpdate(deleteSql);
+            Statement stmt = conn.createStatement();
+            List list = dbEntitiesInInsertOrder();
+            ListIterator it = list.listIterator(list.size());
+            while (it.hasPrevious()) {
+                DbEntity ent = (DbEntity) it.previous();
+                String deleteSql = "DELETE FROM " + ent.getName();
+                int rowsDeleted = stmt.executeUpdate(deleteSql);
+            }
+            conn.commit();
         }
-        conn.commit();
+        finally {
+            conn.close();
+        }
 
         // lets recreate pk support, since there is no
         // generic way to reset pk info
@@ -106,47 +111,51 @@ public class DatabaseSetup {
         adapter.createAutoPkSupport(node);
     }
 
-
     /** Drops all test tables. */
     public void dropTestTables() throws Exception {
         Connection conn = TestMain.getSharedConnection();
-        DatabaseMetaData md = conn.getMetaData();
-        ResultSet tables = md.getTables(null, null, "%", null);
-        ArrayList allTables = new ArrayList();
-
-        while (tables.next()) {
-            // 'toUpperCase' is needed since most databases
-            // are case insensitive, and some will convert names to lower case (PostgreSQL)
-            String name = tables.getString("TABLE_NAME");
-            if (name != null)
-                allTables.add(name.toUpperCase());
-        }
-        tables.close();
-
-        // drop all tables in the map
         DataNode node = TestMain.getSharedNode();
         DbAdapter adapter = node.getAdapter();
-        
-        Statement stmt = conn.createStatement();
-        List list = dbEntitiesInInsertOrder();
-        ListIterator it = list.listIterator(list.size());
-        while (it.hasPrevious()) {
-            DbEntity ent = (DbEntity) it.previous();
-            if (!allTables.contains(ent.getName())) {
-                continue;
-            }
 
-            try {
-                String dropSql = adapter.dropTable(ent);
-                logObj.warning("Drop table: " + dropSql);
-                stmt.execute(dropSql);
+        try {
+            DatabaseMetaData md = conn.getMetaData();
+            ResultSet tables = md.getTables(null, null, "%", null);
+            ArrayList allTables = new ArrayList();
+
+            while (tables.next()) {
+                // 'toUpperCase' is needed since most databases
+                // are case insensitive, and some will convert names to lower case (PostgreSQL)
+                String name = tables.getString("TABLE_NAME");
+                if (name != null)
+                    allTables.add(name.toUpperCase());
             }
-            catch (SQLException sqe) {
-                logObj.log(
-                    Level.WARNING,
-                    "Can't drop table " + ent.getName() + ", ignoring...",
-                    sqe);
+            tables.close();
+
+            // drop all tables in the map
+            Statement stmt = conn.createStatement();
+            List list = dbEntitiesInInsertOrder();
+            ListIterator it = list.listIterator(list.size());
+            while (it.hasPrevious()) {
+                DbEntity ent = (DbEntity) it.previous();
+                if (!allTables.contains(ent.getName())) {
+                    continue;
+                }
+
+                try {
+                    String dropSql = adapter.dropTable(ent);
+                    logObj.warning("Drop table: " + dropSql);
+                    stmt.execute(dropSql);
+                }
+                catch (SQLException sqe) {
+                    logObj.log(
+                        Level.WARNING,
+                        "Can't drop table " + ent.getName() + ", ignoring...",
+                        sqe);
+                }
             }
+        }
+        finally {
+            conn.close();
         }
 
         // drop primary key support
@@ -156,13 +165,18 @@ public class DatabaseSetup {
     /** Creates all test tables in the database. */
     public void setupTestTables() throws Exception {
         Connection conn = TestMain.getSharedConnection();
-        Statement stmt = conn.createStatement();
 
-        Iterator it = tableCreateQueries();
-        while (it.hasNext()) {
-            String query = (String) it.next();
-            logObj.warning("Create table: " + query);
-            stmt.execute(query);
+        try {
+            Statement stmt = conn.createStatement();
+            Iterator it = tableCreateQueries();
+            while (it.hasNext()) {
+                String query = (String) it.next();
+                logObj.warning("Create table: " + query);
+                stmt.execute(query);
+            }
+        }
+        finally {
+            conn.close();
         }
 
         // create primary key support

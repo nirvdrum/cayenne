@@ -61,26 +61,25 @@ import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.util.Util;
 
-
 /** Keeps references to all the test resources needed by Test Cases.
   *
   * @author Andrei Adamchik */
 public class TestResources implements TestConstants {
 
     private DataSourceInfo sharedConnInfo;
-    private Connection sharedConn;
     private DataDomain sharedDomain;
     private DatabaseSetup sharedDatabaseSetup;
 
-
+    /** Unchecks connection from the pool. */
     public Connection getSharedConnection() {
-        return sharedConn;
+        try {
+            return getSharedNode().getDataSource().getConnection();
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RuntimeException("Error unchecking connection: " + ex);
+        }
     }
-
-    public void setSharedConnection(Connection sharedConn) {
-        this.sharedConn = sharedConn;
-    }
-
 
     public DataDomain getSharedDomain() {
         return sharedDomain;
@@ -94,15 +93,14 @@ public class TestResources implements TestConstants {
         return sharedDomain.getDataNodes()[0];
     }
 
-
     public DataSourceInfo getFreshConnInfo() throws java.lang.Exception {
-        return (DataSourceInfo)Util.cloneViaSerialization(sharedConnInfo);
+        return (DataSourceInfo) Util.cloneViaSerialization(sharedConnInfo);
     }
 
     public void setSharedConnInfo(DataSourceInfo dsi) {
         this.sharedConnInfo = dsi;
     }
-    
+
     /**
      * Gets the sharedDatabaseSetup.
      * @return Returns a DatabaseSetup

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import java.util.logging.*;
@@ -66,51 +66,71 @@ import org.objectstyle.cayenne.*;
 
 public class OrderingTranslatorTst extends TestCase {
     static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class.getName());
-    
+
     protected TstQueryAssembler qa;
     protected SelectQuery q;
-    
+
     public OrderingTranslatorTst(String name) {
         super(name);
     }
-    
-    
-    protected void setUp() throws java.lang.Exception {                
-        qa = TstQueryAssembler.assembler(org.objectstyle.TestMain.getSharedDomain(), Query.SELECT_QUERY);
-        q = (SelectQuery)qa.getQuery();
+
+    protected void setUp() throws java.lang.Exception {
+        qa =
+            TstQueryAssembler.assembler(
+                org.objectstyle.TestMain.getSharedDomain(),
+                Query.SELECT_QUERY);
+        q = (SelectQuery) qa.getQuery();
     }
-    
-    
+
     public void testDoTranslation1() throws java.lang.Exception {
-        TranslationTestCase tstCase = new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
-        q.setObjEntityName("Artist");
-        q.addOrdering("artistName", Ordering.ASC);
-        String orderBySql = new OrderingTranslator(qa).doTranslation();
-        
-        assertNotNull(orderBySql);
-        tstCase.assertTranslatedWell(orderBySql, true);
+        try {
+            TranslationTestCase tstCase =
+                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
+            q.setObjEntityName("Artist");
+            q.addOrdering("artistName", Ordering.ASC);
+            String orderBySql = new OrderingTranslator(qa).doTranslation();
+
+            assertNotNull(orderBySql);
+            tstCase.assertTranslatedWell(orderBySql, true);
+        }
+        finally {
+            qa.dispose();
+        }
     }
-    
-    
+
     public void testDoTranslation2() throws java.lang.Exception {
-        TranslationTestCase tstCase = new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME DESC");
-        q.setObjEntityName("Artist");
-        q.addOrdering("artistName", Ordering.DESC);
-        String orderBySql = new OrderingTranslator(qa).doTranslation();
-        
-        assertNotNull(orderBySql);
-        tstCase.assertTranslatedWell(orderBySql, true);
+        try {
+            TranslationTestCase tstCase =
+                new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME DESC");
+            q.setObjEntityName("Artist");
+            q.addOrdering("artistName", Ordering.DESC);
+            String orderBySql = new OrderingTranslator(qa).doTranslation();
+
+            assertNotNull(orderBySql);
+            tstCase.assertTranslatedWell(orderBySql, true);
+        }
+        finally {
+            qa.dispose();
+        }
     }
-    
-    
+
     public void testDoTranslation3() throws java.lang.Exception {
-        TranslationTestCase tstCase = new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
-        q.setObjEntityName("Artist");
-        q.addOrdering("artistName", Ordering.DESC);
-        q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
-        String orderBySql = new OrderingTranslator(qa).doTranslation();
-        
-        assertNotNull(orderBySql);
-        tstCase.assertTranslatedWell(orderBySql, true);
+        try {
+            TranslationTestCase tstCase =
+                new TranslationTestCase(
+                    "Artist",
+                    null,
+                    "<ta.>ARTIST_NAME DESC, <ta.>ESTIMATED_PRICE");
+            q.setObjEntityName("Artist");
+            q.addOrdering("artistName", Ordering.DESC);
+            q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
+            String orderBySql = new OrderingTranslator(qa).doTranslation();
+
+            assertNotNull(orderBySql);
+            tstCase.assertTranslatedWell(orderBySql, true);
+        }
+        finally {
+            qa.dispose();
+        }
     }
 }

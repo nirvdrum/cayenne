@@ -53,59 +53,71 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
 public class TestCaseDataFactory {
-    
-    public static void createArtistWithPainting(String artistName, String[] paintingNames, boolean paintingInfo) throws Exception {
-        String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-        
+
+    public static void createArtistWithPainting(
+        String artistName,
+        String[] paintingNames,
+        boolean paintingInfo)
+        throws Exception {
+        String insertArtist =
+            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+
         Connection conn = org.objectstyle.TestMain.getSharedConnection();
-        PreparedStatement stmt = conn.prepareStatement(insertArtist);
-        long dateBase = System.currentTimeMillis();
-        
-        stmt.setInt(1, 1);
-        stmt.setString(2, artistName);
-        stmt.setDate(3, new java.sql.Date(dateBase - 1000 * 60 * 60 * 24 * 365 * 30));
-        stmt.executeUpdate();
-        
-        
-        stmt.close();
-        conn.commit();
-        
-        String insertPt = "INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?,?,?,?)";
-        stmt = conn.prepareStatement(insertPt);
-        
-        int len = paintingNames.length;
-        if(len > 0) {
-            for(int i = 0; i < len; i++) {
-                stmt.setInt(1, i + 1);
-                stmt.setInt(2, 1);
-                stmt.setFloat(3, 1000 * i);
-                stmt.setString(4, paintingNames[i]);
-                stmt.executeUpdate();
-            }
+
+        try {   
+            conn.setAutoCommit(false);
+                     
+            PreparedStatement stmt = conn.prepareStatement(insertArtist);
+            long dateBase = System.currentTimeMillis();
+
+            stmt.setInt(1, 1);
+            stmt.setString(2, artistName);
+            stmt.setDate(3, new java.sql.Date(dateBase - 1000 * 60 * 60 * 24 * 365 * 30));
+            stmt.executeUpdate();
+
             stmt.close();
             conn.commit();
-            
-            if(paintingInfo) {
-                String insertPtI = "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?,?)";
-                stmt = conn.prepareStatement(insertPtI);
-                for(int i = 0; i < len; i++) {
+
+            String insertPt =
+                "INSERT INTO PAINTING (PAINTING_ID, ARTIST_ID, ESTIMATED_PRICE, PAINTING_TITLE) VALUES (?,?,?,?)";
+            stmt = conn.prepareStatement(insertPt);
+
+            int len = paintingNames.length;
+            if (len > 0) {
+                for (int i = 0; i < len; i++) {
                     stmt.setInt(1, i + 1);
-                    stmt.setString(2, "text: " + paintingNames[i]);
+                    stmt.setInt(2, 1);
+                    stmt.setFloat(3, 1000 * i);
+                    stmt.setString(4, paintingNames[i]);
                     stmt.executeUpdate();
                 }
-                
                 stmt.close();
                 conn.commit();
+
+                if (paintingInfo) {
+                    String insertPtI =
+                        "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?,?)";
+                    stmt = conn.prepareStatement(insertPtI);
+                    for (int i = 0; i < len; i++) {
+                        stmt.setInt(1, i + 1);
+                        stmt.setString(2, "text: " + paintingNames[i]);
+                        stmt.executeUpdate();
+                    }
+
+                    stmt.close();
+                    conn.commit();
+                }
+
             }
-            
         }
-        
+        finally {
+            conn.close();
+        }
     }
-    
 }

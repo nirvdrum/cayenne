@@ -71,7 +71,6 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoaderImpl;
 
-
 /**
  *  Root class of all test cases. When "main" is invoked, 
  *  it will configure database connection and call all package tests.
@@ -125,7 +124,6 @@ public class TestMain implements TestConstants {
             System.exit(1);
         }
 
-        resources.setSharedConnection(openConnection());
         resources.setSharedDomain(createSharedDomain());
         resources.setSharedDatabaseSetup(createDbSetup());
 
@@ -186,12 +184,7 @@ public class TestMain implements TestConstants {
             PoolDataSource poolDS =
                 new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
             DataSource ds =
-                new PoolManager(
-                    poolDS,
-                    dsi.getMinConnections(),
-                    dsi.getMaxConnections(),
-                    dsi.getUserName(),
-                    dsi.getPassword());
+                new PoolManager(poolDS, 1, 4, dsi.getUserName(), dsi.getPassword());
 
             // map
             String[] maps = new String[] { TEST_MAP_PATH };
@@ -210,30 +203,11 @@ public class TestMain implements TestConstants {
             DataDomain domain = new DataDomain("Shared Domain");
             domain.addNode(node);
             return domain;
-
         }
         catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Can not create shared domain.", ex);
             System.exit(1);
         }
-        return null;
-    }
-
-    /** If we can not connect to the database, quit the application. */
-    private static Connection openConnection() {
-        try {
-            DataSourceInfo dsi = resources.getFreshConnInfo();
-            Driver driver = (Driver) Class.forName(dsi.getJdbcDriver()).newInstance();
-            return DriverManager.getConnection(
-                dsi.getDataSourceUrl(),
-                dsi.getUserName(),
-                dsi.getPassword());
-        }
-        catch (java.lang.Exception ex) {
-            logObj.log(Level.SEVERE, "Can not connect to the database.", ex);
-            System.exit(1);
-        }
-        
         return null;
     }
 
@@ -248,7 +222,6 @@ public class TestMain implements TestConstants {
             System.exit(1);
         }
     }
-
 
     private static void configureProps() {
         // load user property overrides

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import junit.runner.*;
@@ -64,19 +64,20 @@ import org.objectstyle.util.*;
 import org.objectstyle.cayenne.map.*;
 import java.sql.*;
 
-
 public class TypesMappingBase extends TestCase {
-    protected TypesMapping typeMap;
-    
     public TypesMappingBase(String name) {
         super(name);
     }
-    
-    
-    public void setUp() throws java.lang.Exception {
+
+    protected TypesMapping createTypesMapping() throws Exception {
         Connection conn = org.objectstyle.TestMain.getSharedConnection();
-        DatabaseMetaData md = conn.getMetaData();
-        typeMap = new TypesMapping(md);
+
+        try {
+            DatabaseMetaData md = conn.getMetaData();
+            return new TypesMapping(md);
+        }
+        finally {
+            conn.close();
+        }
     }
-    
 }

@@ -200,7 +200,13 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     private void growPool(int addConnections, String userName, String password)
         throws SQLException {
         if (unusedPool.size() + usedPool.size() + addConnections > maxConnections) {
-            throw new SQLException("An attempt to open more connections then pool is allowed to handle.");
+            StringBuffer msg = new StringBuffer();
+            msg.append("An attempt to open more connections ")
+            .append("than pool is allowed to handle.")
+            .append("\n\tCurrent size: " + (unusedPool.size() + usedPool.size()))
+            .append("\n\tTrying to open: " + addConnections)
+            .append("\n\tMax allowed: " + maxConnections);
+            throw new SQLException(msg.toString());
         }
 
         for (int i = 0; i < addConnections; i++) {

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import java.util.logging.*;
@@ -73,57 +73,76 @@ public class QualifierTranslatorTst extends TestCase {
         super(name);
     }
 
-
     protected void setUp() throws java.lang.Exception {
-        qa = TstQueryAssembler.assembler(TestMain.getSharedDomain(), Query.SELECT_QUERY);
+        qa =
+            TstQueryAssembler.assembler(TestMain.getSharedDomain(), Query.SELECT_QUERY);
     }
 
-
     public void testNonQualifiedQuery() throws java.lang.Exception {
+        qa.dispose();
+        qa =
+            TstQueryAssembler.assembler(TestMain.getSharedDomain(), Query.INSERT_QUERY);
+
         try {
-            new QualifierTranslator(TstQueryAssembler.assembler(org.objectstyle.TestMain.getSharedDomain(), Query.INSERT_QUERY)).doTranslation();
+            new QualifierTranslator(qa).doTranslation();
             fail();
-        } catch(ClassCastException ccex) {
+        }
+        catch (ClassCastException ccex) {
             // exception expected
+        }
+        finally {
+            qa.dispose();
         }
     }
 
-
-    public void testNullQualifier() throws java.lang.Exception  {
-        assertNull(new QualifierTranslator(qa).doTranslation());
+    public void testNullQualifier() throws java.lang.Exception {
+        try {
+            assertNull(new QualifierTranslator(qa).doTranslation());
+        }
+        finally {
+            qa.dispose();
+        }
     }
-
 
     public void testUnary() throws java.lang.Exception {
         doExpressionTest(new TstUnaryExpSuite());
     }
 
-
     public void testBinary() throws java.lang.Exception {
         doExpressionTest(new TstBinaryExpSuite());
     }
-
 
     public void testTernary() throws java.lang.Exception {
         doExpressionTest(new TstTernaryExpSuite());
     }
 
+    private void doExpressionTest(TstExpressionSuite suite)
+        throws java.lang.Exception {
 
-    private void doExpressionTest(TstExpressionSuite suite) throws java.lang.Exception {
-        TstExpressionCase[] cases = suite.cases();
+        try {
+            TstExpressionCase[] cases = suite.cases();
 
-        int len = cases.length;
-        for(int i = 0;  i < len; i++) {
-            try {
-                ((QualifiedQuery)qa.getQuery()).setQualifier(cases[i].getCayenneExp());
-                ObjEntity ent = org.objectstyle.TestMain.getSharedDomain().lookupEntity(cases[i].getRootEntity());
-                assertNotNull(ent);
-                qa.getQuery().setObjEntityName(ent.getName());
-                cases[i].assertTranslatedWell(new QualifierTranslator(qa).doTranslation(), false);
-            } catch(Exception ex) {
-                System.out.println("Failed case: [" + i + "]: " + cases[i]);
-                throw ex;
+            int len = cases.length;
+            for (int i = 0; i < len; i++) {
+                try {
+                    ((QualifiedQuery) qa.getQuery()).setQualifier(cases[i].getCayenneExp());
+                    ObjEntity ent =
+                        org.objectstyle.TestMain.getSharedDomain().lookupEntity(
+                            cases[i].getRootEntity());
+                    assertNotNull(ent);
+                    qa.getQuery().setObjEntityName(ent.getName());
+                    cases[i].assertTranslatedWell(
+                        new QualifierTranslator(qa).doTranslation(),
+                        false);
+                }
+                catch (Exception ex) {
+                    System.out.println("Failed case: [" + i + "]: " + cases[i]);
+                    throw ex;
+                }
             }
+        }
+        finally {
+            qa.dispose();
         }
     }
 }

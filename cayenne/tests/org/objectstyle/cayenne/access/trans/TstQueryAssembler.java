@@ -55,13 +55,15 @@ package org.objectstyle.cayenne.access.trans;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.access.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
 
 
 
@@ -92,6 +94,10 @@ public class TstQueryAssembler extends QueryAssembler {
         q);
     }
 
+    public void dispose() throws SQLException {
+        super.getCon().close();
+    }
+    
     public void dbRelationshipAdded(DbRelationship dbRel) {
         dbRels.add(dbRel);
     }
