@@ -56,17 +56,21 @@ package org.objectstyle.cayenne.gui;
  */ 
 
 import java.awt.Component;
-import java.util.*;
-import java.io.*;
 import java.net.URL;
+import java.util.*;
+import java.util.logging.Logger;
+
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.*;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.map.*;
 
 
 /** Tree of domains, data maps, data nodes (sources) and entities. 
@@ -78,6 +82,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 , ObjEntityListener, ObjEntityDisplayListener
 , DbEntityListener, DbEntityDisplayListener
 {
+   static Logger logObj = Logger.getLogger(BrowseView.class.getName());
+ 
 	
 	private static final int DOMAIN_NODE = 1;
 	private static final int NODE_NODE = 2;
@@ -642,20 +648,21 @@ class BrowseViewRenderer extends DefaultTreeCellRenderer {
 
     public BrowseViewRenderer() {
     	String path = "org/objectstyle/gui/";
+    	
     	ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
-    	URL url = cl.getResource(path+"images/domain.jpg");
-    	if (null == url) {
-    		System.out.println("Cannot find domain.jpg");
-    		return;
-    	}
+    	URL url = cl.getResource(path + "images/domain16.jpg");
         domainIcon = new ImageIcon(url);
-    	url = cl.getResource(path+"images/node.jpg");
+        
+    	url = cl.getResource(path + "images/node16.jpg");
     	nodeIcon = new ImageIcon(url);
-    	url = cl.getResource(path+"images/map.jpg");
+    	
+    	url = cl.getResource(path + "images/map16.jpg");
     	mapIcon = new ImageIcon(url);
-    	url = cl.getResource(path+"images/dbentity.jpg");
+    	
+    	url = cl.getResource(path + "images/dbentity16.jpg");
     	dbEntityIcon = new ImageIcon(url);
-    	url = cl.getResource(path+"images/objentity.jpg");
+    	
+    	url = cl.getResource(path + "images/objentity16.jpg");
     	objEntityIcon = new ImageIcon(url);
     }
 
