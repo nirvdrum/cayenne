@@ -75,6 +75,7 @@ public class DbRelationshipPane extends JPanel
 implements ActionListener, DbEntityDisplayListener
 , DbEntityListener, DbRelationshipListener
 , ExistingSelectionProcessor, ListSelectionListener
+, TableModelListener
 {
 	static Logger logObj = Logger.getLogger(DbRelationshipPane.class.getName());
 
@@ -122,6 +123,20 @@ implements ActionListener, DbEntityDisplayListener
 	public void valueChanged(ListSelectionEvent e) {
 		processExistingSelection();
 	}
+	
+	public void tableChanged(TableModelEvent e) {
+		DbRelationship rel = null;
+		if (table.getSelectedRow() >= 0) {
+			DbRelationshipTableModel model;
+			model = (DbRelationshipTableModel)table.getModel();
+			rel = model.getRelationship(table.getSelectedRow());
+			if (rel.getTargetEntity() != null)
+				resolve.setEnabled(true);
+			else
+				resolve.setEnabled(false);
+		}
+	}
+
 
 	public void processExistingSelection()
 	{
@@ -130,7 +145,12 @@ implements ActionListener, DbEntityDisplayListener
 			DbRelationshipTableModel model;
 			model = (DbRelationshipTableModel)table.getModel();
 			rel = model.getRelationship(table.getSelectedRow());
-		}
+			if (rel.getTargetEntity() != null)
+				resolve.setEnabled(true);
+			else
+				resolve.setEnabled(false);
+		} else
+			resolve.setEnabled(false);
 		RelationshipDisplayEvent ev;
 		ev = new RelationshipDisplayEvent(this, rel
 				, mediator.getCurrentDbEntity()
@@ -179,6 +199,7 @@ implements ActionListener, DbEntityDisplayListener
 			return;
 		DbRelationshipTableModel model;
 		model = new DbRelationshipTableModel(entity, mediator, this);
+		model.addTableModelListener(this);
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);

@@ -74,6 +74,7 @@ public class ObjRelationshipPane extends JPanel
 implements ActionListener, ObjEntityDisplayListener
 , ObjEntityListener, ObjRelationshipListener
 , ExistingSelectionProcessor, ListSelectionListener
+, TableModelListener
 {
 	Mediator mediator;
 
@@ -116,6 +117,23 @@ implements ActionListener, ObjEntityDisplayListener
 		}
 	}
 
+	public void tableChanged(TableModelEvent e) {
+		ObjRelationship rel = null;
+		if (table.getSelectedRow() >= 0) {
+			ObjRelationshipTableModel model;
+			model = (ObjRelationshipTableModel)table.getModel();
+			rel = model.getRelationship(table.getSelectedRow());
+			if (rel.getTargetEntity() != null 
+				&& ((ObjEntity)rel.getSourceEntity()).getDbEntity() != null
+				&& ((ObjEntity)rel.getTargetEntity()).getDbEntity() != null)
+			{
+				resolve.setEnabled(true);
+			}
+			else
+				resolve.setEnabled(false);
+		}
+	}
+
 	public void processExistingSelection()
 	{
 		ObjRelationship rel = null;
@@ -123,7 +141,16 @@ implements ActionListener, ObjEntityDisplayListener
 			ObjRelationshipTableModel model;
 			model = (ObjRelationshipTableModel)table.getModel();
 			rel = model.getRelationship(table.getSelectedRow());
-		}
+			if (rel.getTargetEntity() != null 
+				&& ((ObjEntity)rel.getSourceEntity()).getDbEntity() != null
+				&& ((ObjEntity)rel.getTargetEntity()).getDbEntity() != null)
+			{
+				resolve.setEnabled(true);
+			}
+			else
+				resolve.setEnabled(false);
+		} else
+			resolve.setEnabled(false);
 		RelationshipDisplayEvent ev;
 		ev = new RelationshipDisplayEvent(this, rel
 				, mediator.getCurrentObjEntity(), mediator.getCurrentDataMap()
@@ -214,6 +241,7 @@ implements ActionListener, ObjEntityDisplayListener
 			return;
 		ObjRelationshipTableModel model;
 		model = new ObjRelationshipTableModel(entity,mediator, this);
+		model.addTableModelListener(this);
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);

@@ -191,7 +191,9 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		}
 		// If target column
 		else if (column == TARGET) {
-			String target_name = aValue.toString();
+			if (null == aValue)
+				return;
+			String target_name = aValue.toString();			
 			if (target_name == null)
 				target_name = "";
 			target_name = target_name.trim();
