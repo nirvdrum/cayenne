@@ -53,18 +53,43 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.validator;
+ package org.objectstyle.cayenne.modeler.util;
 
-import org.objectstyle.cayenne.project.*;
+import java.io.File;
 
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("GUI Validator Package Tests");
-		
-		// continue with noGUI tests
-		suite.addTestSuite(ValidationDisplayHandlerTst.class);
-		return suite;
+/**
+ * @author Andrei Adamchik
+ */
+public class ProjectFileFilterTst extends TestCase {
+	protected ProjectFileFilter filter;
+
+	/**
+	 * Constructor for ProjectFileFilterTst.
+	 */
+	public ProjectFileFilterTst(String name) {
+		super(name);
+	}
+	
+	public void setUp() throws Exception {
+		filter = new ProjectFileFilter();
+	}
+	
+	public void testAcceptDir() throws Exception {
+		assertTrue(filter.accept(new File(".")));
+	}
+	
+	public void testAcceptCayenneXml() throws Exception {
+		assertTrue(filter.accept(new File("cayenne.xml")));
+	}
+	
+	public void testRejectOther() throws Exception {
+		assertTrue(!filter.accept(new File("somefile.txt")));
+	}
+	
+	public void testRejectBadCayenneXml() throws Exception {
+		assertTrue(!filter.accept(new File("bad_cayenne.xml")));
 	}
 }
+

@@ -32,6 +32,10 @@
 		<pathelement path="build/modeler/classes"/>
     </path>
     
+    <path id="classpath-tests-modeler">
+		<path refid="classpath-tests"/>
+    </path>
+    
     <path id="classpath-performance">
 		<path refid="classpath-tests"/>
 		<pathelement path="build/tests/classes"/>

@@ -55,19 +55,31 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("GUI EVent Package Tests");
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DbAttribute;
 
-		suite.addTestSuite(ModelerEventTst.class);
-		suite.addTestSuite(DomainEventTst.class);
-		suite.addTestSuite(DataMapEventTst.class);
-		suite.addTestSuite(EntityEventTst.class);
-		suite.addTestSuite(AttributeEventTst.class);
-		suite.addTestSuite(RelationshipEventTst.class);
-		suite.addTestSuite(DomainDisplayEventTst.class);
-		return suite;
+/**
+ * @author Andrei Adamchik
+ */
+public class AttributeEventTst extends TestCase {
+
+	/**
+	 * Constructor for AttributeEventTst.
+	 * @param arg0
+	 */
+	public AttributeEventTst(String arg0) {
+		super(arg0);
+	}
+
+	public void testAttribute() throws Exception {
+		Object src = new Object();
+		Attribute a = new DbAttribute();
+		a.setName("xyz");
+		AttributeEvent e = new AttributeEvent(src, null, null);
+
+		e.setAttribute(a);
+		assertSame(a, e.getAttribute());
 	}
 }

@@ -55,30 +55,50 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.map.DbAttribute;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Entity;
 
 /**
  * @author Andrei Adamchik
  */
-public class AttributeEventTst extends CayenneTestCase {
+public class EntityEventTst extends TestCase {
 
 	/**
-	 * Constructor for AttributeEventTst.
+	 * Constructor for EntityEventTst.
 	 * @param arg0
 	 */
-	public AttributeEventTst(String arg0) {
+	public EntityEventTst(String arg0) {
 		super(arg0);
 	}
 
-	public void testAttribute() throws Exception {
-		Object src = new Object();
-		Attribute a = new DbAttribute();
-		a.setName("xyz");
-		AttributeEvent e = new AttributeEvent(src, null, null);
-
-		e.setAttribute(a);
-		assertSame(a, e.getAttribute());
-	}
+   public void testConstructor1() throws Exception {
+    	Object src = new Object();
+    	Entity d = new DbEntity("abc");
+    	EntityEvent e = new EntityEvent(src, d);
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getEntity());
+    }
+    
+    public void testConstructor2() throws Exception  {
+    	Object src = new Object();
+    	Entity d = new DbEntity("abc");
+    	EntityEvent e = new EntityEvent(src, d, "oldname");
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getEntity());
+    	assertEquals("oldname", e.getOldName());
+    }
+    
+    public void testEntity() throws Exception  {
+    	Object src = new Object();
+   	    Entity d = new DbEntity("abc");
+    	EntityEvent e = new EntityEvent(src, null);
+    	
+    	e.setEntity(d);
+    	assertSame(d, e.getEntity());
+    }
 }
+

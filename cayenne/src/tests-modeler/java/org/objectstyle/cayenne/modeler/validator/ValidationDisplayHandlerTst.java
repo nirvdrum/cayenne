@@ -53,50 +53,65 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+package org.objectstyle.cayenne.modeler.validator;
+
+import javax.swing.JFrame;
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
+ * JUnit tests for ValidationDisplayHandler class.
+ * 
  * @author Andrei Adamchik
  */
-public class DomainEventTst extends CayenneTestCase {
+public class ValidationDisplayHandlerTst extends TestCase {
 
 	/**
-	 * Constructor for DomainEventTst.
-	 * @param arg0
+	 * Constructor for ErrorMsgTst.
 	 */
-	public DomainEventTst(String arg0) {
-		super(arg0);
+	public ValidationDisplayHandlerTst(String name) {
+		super(name);
 	}
 
-    public void testConstructor1() throws Exception {
-    	Object src = new Object();
-    	DataDomain d = new DataDomain("abc");
-    	DomainEvent e = new DomainEvent(src, d);
-    	
-    	assertSame(src, e.getSource());
-    	assertSame(d, e.getDomain());
-    }
-    
-    public void testConstructor2() throws Exception  {
-    	Object src = new Object();
-    	DataDomain d = new DataDomain("abc");
-    	DomainEvent e = new DomainEvent(src, d, "oldname");
-    	
-    	assertSame(src, e.getSource());
-    	assertSame(d, e.getDomain());
-    	assertEquals("oldname", e.getOldName());
-    }
-    
-    public void testDomain() throws Exception  {
-    	Object src = new Object();
-   	    DataDomain d = new DataDomain("abc");
-    	DomainEvent e = new DomainEvent(src, null);
-    	
-    	e.setDomain(d);
-    	assertSame(d, e.getDomain());
-    }
-}
+	public void testMessage() throws Exception {
+		ValidationDisplayHandler msg = new ConcreteErrorMsg(null, ValidationDisplayHandler.ERROR, null);
 
+		String message = "abc";
+		assertNull(msg.getMessage());
+		msg.setMessage(message);
+		assertSame(message, msg.getMessage());
+	}
+
+	public void testSeverity() throws Exception {
+		ValidationDisplayHandler msg = new ConcreteErrorMsg(null, ValidationDisplayHandler.ERROR, null);
+
+		assertEquals(ValidationDisplayHandler.ERROR, msg.getSeverity());
+		msg.setSeverity(ValidationDisplayHandler.NO_ERROR);
+		assertEquals(ValidationDisplayHandler.NO_ERROR, msg.getSeverity());
+	}
+
+	public void testDomain() throws Exception {
+		ValidationDisplayHandler msg = new ConcreteErrorMsg(null, ValidationDisplayHandler.ERROR, null);
+
+		DataDomain dom = new DataDomain();
+		assertNull(msg.getDomain());
+		msg.setDomain(dom);
+		assertSame(dom, msg.getDomain());
+	}
+
+	class ConcreteErrorMsg extends ValidationDisplayHandler {
+		public ConcreteErrorMsg(
+			String message,
+			int severity,
+			DataDomain domain) {
+			super(new ValidationResult(severity, message, new Object[] {domain}));
+		}
+
+		public void displayField(Mediator mediator, JFrame frame) {
+		}
+	}
+}

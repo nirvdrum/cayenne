@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<!-- ========================================== -->
+<!-- CayenneModeler tests subproject buildfile. -->
+<!-- ========================================== -->
+<project name="cayenne-tests-modeler" default="test">
+	<property name="test.build" value="build/tests-modeler"/>
+	<property name="test.output" value="${test.build}/out"/>
+	<property name="test.report" value="${test.build}/report"/>
+	
+	<path id="classpath">
+		<fileset dir="otherlib">
+			<include name="*.jar"/>
+		</fileset>
+		<pathelement path="build/cayenne/classes"/>
+		<pathelement path="build/modeler/classes"/>
+		<pathelement path="build/tests-modeler/classes"/>
+    </path>  
+    
+	<target name="compile">
+		<ant antfile="build-subproj.xml" target="compile">
+			<property name="subproj" value="tests-modeler"/>
+		</ant>
+	</target>  
+  
+  
+    <!-- ============================================= -->
+    <!-- Runs and reports on tests.                    -->
+    <!-- ============================================= -->
+    <target name="test" depends="compile,unit-test,unit-test-report"/>    
+    
+    <!-- ============================================= -->
+    <!-- Runs Unit tests.                              -->
+    <!-- ============================================= -->
+    <target name="unit-test">
+        <delete>
+        	<fileset dir="${basedir}">
+        		<include name="${test.output}/**"/>
+        		<include name="${test.report}/**"/>
+        	</fileset>
+        </delete>
+        
+        <mkdir dir="${test.output}"/>
+        <mkdir dir="${test.report}"/>
+        
+        <junit fork="false" 
+               haltonfailure="no" 
+               errorProperty="test.modeler.failure"
+               failureProperty="test.modeler.failure">
+               
+            <classpath refid="classpath"/>
+            
+            <formatter type="xml" usefile="true"/>
+            <batchtest todir="${test.output}">
+                <fileset dir="${test.build}/classes">
+                    <include name="**/*Tst.class"/>
+                </fileset>
+            </batchtest>
+        </junit>
+        
+		<junitreport todir="${test.report}">
+			<fileset dir="${test.output}">
+				<include name="TEST-*.xml"/>
+			</fileset>
+			<report format="frames" todir="${test.report}"/>
+		</junitreport>
+    </target>
+    
+    <!-- ============================================= -->
+    <!-- Reports failures.                             -->
+    <!-- ============================================= -->
+    <target name="unit-test-report" depends="unit-test" if="test.modeler.failure">
+        <fail message="CayenneModeler tests failed, see files in ${test.output} for details"/>
+    </target>
+</project>
+

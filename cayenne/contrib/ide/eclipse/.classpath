@@ -4,6 +4,7 @@
     <classpathentry kind="src" path="src/modeler/java"/>
     <classpathentry kind="src" path="src/performance/java"/>
     <classpathentry kind="src" path="src/tests/java"/>
+    <classpathentry kind="src" path="src/tests-modeler/java"/>
     <classpathentry kind="src" path="src/tutorials/cayenne-cmd-app/java"/>
     <classpathentry kind="src" path="src/tutorials/cayenne-web-app/WEB-INF/classes"/>
     <classpathentry kind="src" path="src/tutorials/cayenne-tapestry-app/WEB-INF/classes"/>

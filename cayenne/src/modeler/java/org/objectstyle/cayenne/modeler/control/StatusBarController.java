@@ -62,7 +62,8 @@ import org.scopemvc.controller.basic.BasicController;
  * @author Andrei Adamchik
  */
 public class StatusBarController extends BasicController {
-
+    public static final String EVENT_MESSAGE_KEY = "eventMessage";
+    
     public void startup(StatusBarView view) {
         setView(view);
         setModel(new StatusBarModel());

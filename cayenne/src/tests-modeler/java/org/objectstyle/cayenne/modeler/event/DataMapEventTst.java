@@ -55,31 +55,49 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.Relationship;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * @author Andrei Adamchik
  */
-public class RelationshipEventTst extends CayenneTestCase {
+public class DataMapEventTst extends TestCase {
 
 	/**
-	 * Constructor for RelationshipEventTst.
+	 * Constructor for DataMapEventTst.
 	 * @param arg0
 	 */
-	public RelationshipEventTst(String arg0) {
+	public DataMapEventTst(String arg0) {
 		super(arg0);
 	}
 
-	public void testRelationship() throws Exception {
-		Object src = new Object();
-		Relationship r = new DbRelationship();
-		r.setName("xyz");
-		RelationshipEvent e = new RelationshipEvent(src, null, null);
-
-		e.setRelationship(r);
-		assertSame(r, e.getRelationship());
-	}
+   public void testConstructor1() throws Exception {
+    	Object src = new Object();
+    	DataMap d = new DataMap("abc");
+    	DataMapEvent e = new DataMapEvent(src, d);
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getDataMap());
+    }
+    
+    public void testConstructor2() throws Exception  {
+    	Object src = new Object();
+    	DataMap d = new DataMap("abc");
+    	DataMapEvent e = new DataMapEvent(src, d, "oldname");
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getDataMap());
+    	assertEquals("oldname", e.getOldName());
+    }
+    
+    public void testDataMap() throws Exception  {
+    	Object src = new Object();
+   	    DataMap d = new DataMap("abc");
+    	DataMapEvent e = new DataMapEvent(src, null);
+    	
+    	e.setDataMap(d);
+    	assertSame(d, e.getDataMap());
+    }
 }
 

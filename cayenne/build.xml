@@ -40,7 +40,8 @@
      *  7. doc        - builds Cayenne documentation including Javadocs.
      *  8. api        - builds Javdoc API documentation.
      *  9. javacc     - runs javacc
-     *  10. help      - prints this message
+     *  10. test      - runs JUnit tests
+     *  11. help      - prints this message
      *
      *
      * ENVIRONMENT:
@@ -89,6 +90,14 @@
 		<ant antfile="build-doc.xml" target="release-site"/>
     </target>
         
+    <!-- ========================================== -->
+    <!-- Builds all Cayenne Java subproject JARS.   -->
+    <!-- ========================================== -->
+    <target name="test">
+		<ant antfile="build-cayenne.xml" target="compile"/>
+		<ant antfile="build-modeler.xml" target="compile"/>
+		<ant antfile="build-tests-modeler.xml" target="test"/>
+    </target>
 
     <!-- ========================================== -->
     <!-- Builds all Cayenne Java subproject JARS.   -->

@@ -53,51 +53,43 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.modeler.util;
 
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.Entity;
+import java.io.File;
+
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class EntityEventTst extends CayenneTestCase {
+public class EOModelFileFilterTst extends TestCase {
+	protected EOModelFileFilter filter;
 
 	/**
-	 * Constructor for EntityEventTst.
-	 * @param arg0
+	 * Constructor for EOModelFileFilterTst.
 	 */
-	public EntityEventTst(String arg0) {
-		super(arg0);
+	public EOModelFileFilterTst(String name) {
+		super(name);
 	}
-
-   public void testConstructor1() throws Exception {
-    	Object src = new Object();
-    	Entity d = new DbEntity("abc");
-    	EntityEvent e = new EntityEvent(src, d);
-    	
-    	assertSame(src, e.getSource());
-    	assertSame(d, e.getEntity());
-    }
-    
-    public void testConstructor2() throws Exception  {
-    	Object src = new Object();
-    	Entity d = new DbEntity("abc");
-    	EntityEvent e = new EntityEvent(src, d, "oldname");
-    	
-    	assertSame(src, e.getSource());
-    	assertSame(d, e.getEntity());
-    	assertEquals("oldname", e.getOldName());
-    }
-    
-    public void testEntity() throws Exception  {
-    	Object src = new Object();
-   	    Entity d = new DbEntity("abc");
-    	EntityEvent e = new EntityEvent(src, null);
-    	
-    	e.setEntity(d);
-    	assertSame(d, e.getEntity());
-    }
+	
+	public void setUp() throws Exception {
+		filter = new EOModelFileFilter();
+	}
+	
+	public void testAcceptDir() throws Exception {
+		assertTrue(filter.accept(new File(".")));
+	}
+	
+	public void testRejectIndexEOM() throws Exception {
+		assertTrue(!filter.accept(new File("index.eomodeld")));
+	}
+	
+	public void testAcceptIndexEOM() throws Exception {
+		assertTrue(filter.accept(new File("some.eomodeld/index.eomodeld")));
+	}
+	
+	public void testRejectOther() throws Exception {
+		assertTrue(!filter.accept(new File("somefile.txt")));
+	}
 }
 

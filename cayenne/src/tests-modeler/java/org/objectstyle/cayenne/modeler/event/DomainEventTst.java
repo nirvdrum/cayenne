@@ -53,43 +53,51 @@
  * <http://objectstyle.org/>.
  *
  */
- package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.event;
 
-import java.io.File;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.access.DataDomain;
 
 /**
  * @author Andrei Adamchik
  */
-public class ProjectFileFilterTst extends CayenneTestCase {
-	protected ProjectFileFilter filter;
+public class DomainEventTst extends TestCase {
 
 	/**
-	 * Constructor for ProjectFileFilterTst.
+	 * Constructor for DomainEventTst.
+	 * @param arg0
 	 */
-	public ProjectFileFilterTst(String name) {
-		super(name);
+	public DomainEventTst(String arg0) {
+		super(arg0);
 	}
-	
-	public void setUp() throws Exception {
-		filter = new ProjectFileFilter();
-	}
-	
-	public void testAcceptDir() throws Exception {
-		assertTrue(filter.accept(new File(".")));
-	}
-	
-	public void testAcceptCayenneXml() throws Exception {
-		assertTrue(filter.accept(new File("cayenne.xml")));
-	}
-	
-	public void testRejectOther() throws Exception {
-		assertTrue(!filter.accept(new File("somefile.txt")));
-	}
-	
-	public void testRejectBadCayenneXml() throws Exception {
-		assertTrue(!filter.accept(new File("bad_cayenne.xml")));
-	}
+
+    public void testConstructor1() throws Exception {
+    	Object src = new Object();
+    	DataDomain d = new DataDomain("abc");
+    	DomainEvent e = new DomainEvent(src, d);
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getDomain());
+    }
+    
+    public void testConstructor2() throws Exception  {
+    	Object src = new Object();
+    	DataDomain d = new DataDomain("abc");
+    	DomainEvent e = new DomainEvent(src, d, "oldname");
+    	
+    	assertSame(src, e.getSource());
+    	assertSame(d, e.getDomain());
+    	assertEquals("oldname", e.getOldName());
+    }
+    
+    public void testDomain() throws Exception  {
+    	Object src = new Object();
+   	    DataDomain d = new DataDomain("abc");
+    	DomainEvent e = new DomainEvent(src, null);
+    	
+    	e.setDomain(d);
+    	assertSame(d, e.getDomain());
+    }
 }
 

@@ -55,27 +55,32 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.access.DataDomain;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 
 /**
  * @author Andrei Adamchik
  */
-public class DomainDisplayEventTst extends CayenneTestCase {
+public class RelationshipEventTst extends TestCase {
 
 	/**
-	 * Constructor for ModelerDisplayEventTst.
+	 * Constructor for RelationshipEventTst.
 	 * @param arg0
 	 */
-	public DomainDisplayEventTst(String arg0) {
+	public RelationshipEventTst(String arg0) {
 		super(arg0);
 	}
-	
-	public void testDomain() throws Exception {
-		DataDomain d = new DataDomain("abc");
-		DomainDisplayEvent e = new DomainDisplayEvent(new Object(), d);
-		assertSame(d, e.getDomain());
-	}
 
+	public void testRelationship() throws Exception {
+		Object src = new Object();
+		Relationship r = new DbRelationship();
+		r.setName("xyz");
+		RelationshipEvent e = new RelationshipEvent(src, null, null);
+
+		e.setRelationship(r);
+		assertSame(r, e.getRelationship());
+	}
 }
 

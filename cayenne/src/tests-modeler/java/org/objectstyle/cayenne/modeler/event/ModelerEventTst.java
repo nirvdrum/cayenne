@@ -53,43 +53,43 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.event;
 
-import java.io.File;
-
-import org.objectstyle.cayenne.CayenneTestCase;
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class EOModelFileFilterTst extends CayenneTestCase {
-	protected EOModelFileFilter filter;
+public class ModelerEventTst extends TestCase {
 
 	/**
-	 * Constructor for EOModelFileFilterTst.
+	 * Constructor for ModelerEventTst.
+	 * @param arg0
 	 */
-	public EOModelFileFilterTst(String name) {
-		super(name);
+	public ModelerEventTst(String arg0) {
+		super(arg0);
 	}
-	
-	public void setUp() throws Exception {
-		filter = new EOModelFileFilter();
-	}
-	
-	public void testAcceptDir() throws Exception {
-		assertTrue(filter.accept(new File(".")));
-	}
-	
-	public void testRejectIndexEOM() throws Exception {
-		assertTrue(!filter.accept(new File("index.eomodeld")));
-	}
-	
-	public void testAcceptIndexEOM() throws Exception {
-		assertTrue(filter.accept(new File("some.eomodeld/index.eomodeld")));
-	}
-	
-	public void testRejectOther() throws Exception {
-		assertTrue(!filter.accept(new File("somefile.txt")));
-	}
+
+    public void testConstructor1() throws Exception {
+    	Object src = new Object();
+    	ModelerEvent e = new ModelerEvent(src);
+    	assertSame(src, e.getSource());
+    }
+    
+    public void testConstructor2() throws Exception  {
+    	Object src = new Object();
+    	ModelerEvent e = new ModelerEvent(src, "oldname", "newname");
+    	assertSame(src, e.getSource());
+    	assertEquals("oldname", e.getOldName());
+    	assertEquals("newname", e.getNewName());
+    }
+    
+    public void testId() throws Exception  {
+    	ModelerEvent e = new ModelerEvent(new Object());
+    	assertEquals(ModelerEvent.CHANGE, e.getId());
+    	
+    	e.setId(ModelerEvent.ADD);
+    	assertEquals(ModelerEvent.ADD, e.getId());
+    }
 }
 

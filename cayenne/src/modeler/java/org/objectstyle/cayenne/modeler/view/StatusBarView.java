@@ -60,6 +60,7 @@ import java.awt.Font;
 
 import javax.swing.Box;
 
+import org.objectstyle.cayenne.modeler.control.StatusBarController;
 import org.scopemvc.view.swing.SLabel;
 import org.scopemvc.view.swing.SPanel;
 
@@ -67,7 +68,6 @@ import org.scopemvc.view.swing.SPanel;
  * @author Andrei Adamchik
  */
 public class StatusBarView extends SPanel {
-	public static final String EVENT_MESSAGE_KEY = "eventMessage";
 	
     public StatusBarView() {
     	init();
@@ -81,7 +81,7 @@ public class StatusBarView extends SPanel {
     	
     	SLabel label = new SLabel();
     	label.setFont(getFont().deriveFont(Font.PLAIN));
-    	label.setSelector(EVENT_MESSAGE_KEY);
+    	label.setSelector(StatusBarController.EVENT_MESSAGE_KEY);
     	add(label);
     }
 }

@@ -53,17 +53,30 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.event;
 
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("GUI Util Package Tests");
+import org.objectstyle.cayenne.access.DataDomain;
 
-		suite.addTestSuite(EOModelFileFilterTst.class);
-		suite.addTestSuite(ProjectFileFilterTst.class);
-		suite.addTestSuite(EntityWrapperTst.class);
-		return suite;
+/**
+ * @author Andrei Adamchik
+ */
+public class DomainDisplayEventTst extends TestCase {
+
+	/**
+	 * Constructor for ModelerDisplayEventTst.
+	 * @param arg0
+	 */
+	public DomainDisplayEventTst(String arg0) {
+		super(arg0);
 	}
+	
+	public void testDomain() throws Exception {
+		DataDomain d = new DataDomain("abc");
+		DomainDisplayEvent e = new DomainDisplayEvent(new Object(), d);
+		assertSame(d, e.getDomain());
+	}
+
 }
+
