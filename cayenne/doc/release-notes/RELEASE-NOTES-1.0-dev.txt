@@ -32,3 +32,9 @@ and deletes were failing. Bug report 730396:
 
 6. Added new method to DbAdapter: "bindParameter" to allow customization
 of PreparedStatements building.
+
+7. Deprecated Configuration.getResourceLoader(); this method will become 'protected'.
+Configuration customization should be done directly on the used subclass instead;
+appropriate methods have been added.
+
+8. Updated the User Guide to explain Configuration customizing.
