@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,8 +53,9 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.access;
 
-import junit.framework.*;
+import junit.framework.TestSuite;
 
 public class AllTests {
     public static TestSuite suite() {
@@ -68,7 +68,6 @@ public class AllTests {
         suite.addTestSuite(DataContextExtrasTst.class);
         suite.addTestSuite(ToManyListTst.class);
         suite.addTestSuite(DataSourceInfoTst.class);
-        suite.addTestSuite(MiscDbTst.class);
         return suite;
     }
 }
