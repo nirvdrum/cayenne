@@ -60,11 +60,17 @@ import java.awt.*;
 
 import javax.swing.*;
 
-/** Utility methods for laying out components on the panels.*/
+/** 
+ * Utility methods for laying out components on the panels.
+ * 
+ * @author Misha Shengaout
+ */
 public class PanelFactory
 {
-	/** Create panel with aligned labels on the right and fields on the left.
-	 *  Panel uses SpringLayout.*/
+	/** 
+	 * Create panel with aligned labels on the right and fields on the left.
+	 * Panel uses SpringLayout.
+	 */
     public static JPanel createForm(Component[] leftComponents,
                                         Component[] rightComponents,
                                         int initialX, int initialY,
@@ -174,9 +180,11 @@ public class PanelFactory
         return parent;
     }
     
-    /** Creates panel with table within scroll panel and buttons in the bottom.
-      * Also sets the resizing and selection policies of the table to
-      * AUTO_RESIZE_OFF and SINGLE_SELECTION respectively.*/
+    /** 
+     * Creates panel with table within scroll panel and buttons in the bottom.
+     * Also sets the resizing and selection policies of the table to
+     * AUTO_RESIZE_OFF and SINGLE_SELECTION respectively.
+     */
     public static JPanel createTablePanel(JTable table, JButton[] buttons) {
     	JPanel panel = new JPanel();
 		panel.setLayout(new BorderLayout(5, 5));

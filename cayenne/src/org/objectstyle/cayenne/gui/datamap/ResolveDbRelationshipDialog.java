@@ -55,8 +55,7 @@
  */ 
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
@@ -65,6 +64,7 @@ import javax.swing.*;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.map.*;
@@ -78,8 +78,8 @@ implements ActionListener
 	Mediator mediator;
 	
 	private DataMap map;
-	private List originalList;
-	private List dbRelList;
+	private java.util.List originalList;
+	private java.util.List dbRelList;
 	private DbEntity start;
 	private DbEntity end;
 	private DbRelationship dbRel;
@@ -87,10 +87,11 @@ implements ActionListener
 	private DbRelationship reverseDbRel;
 	private boolean isReverseDbRelNew = false;
 	
+	JLabel reverseNameLabel = new JLabel("Reverse Relationship:");
+	JLabel reverseCheckLabel = new JLabel("Create Reverse:");
 	JTextField name				= new JTextField(20);
-	JLabel reverseNameLabel 	= new JLabel("Reverse Relationship Name:");
 	JTextField reverseName 		= new JTextField(20);
-	JCheckBox  hasReverseDbRel 	= new JCheckBox("Create reverse relationship", false);
+	JCheckBox  hasReverseDbRel 	= new JCheckBox("", false);
 	JTable table		= new CayenneTable();
 	JButton add			= new JButton("Add");
 	JButton remove		= new JButton("Remove");
@@ -100,7 +101,7 @@ implements ActionListener
 
 	private boolean cancelPressed = false;
 
-	public ResolveDbRelationshipDialog(Mediator mediator, List db_rel_list
+	public ResolveDbRelationshipDialog(Mediator mediator, java.util.List db_rel_list
 	, DbEntity temp_start, DbEntity temp_end, boolean to_many)
 	{		
 		super(Editor.getFrame(), "", true);
@@ -128,10 +129,12 @@ implements ActionListener
 			dbRelList = new ArrayList(db_rel_list);
 			dbRel = (DbRelationship)dbRelList.get(0);
 			reverseDbRel = dbRel.getReverseRelationship();
-			if (null != reverseDbRel)
+			if (null != reverseDbRel) {
 				isReverseDbRelNew = false;
-			else 
+			}
+			else {
 				isReverseDbRelNew = true;
+			}
 			isDbRelNew = false;
 		}
 		
@@ -145,27 +148,21 @@ implements ActionListener
 	private void init() {
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		
-
-		JPanel temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		JLabel label = new JLabel("Name: ");
-		temp.add(label);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(name);
-		temp.add(Box.createHorizontalStrut(12));
-		temp.add(hasReverseDbRel);
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp);		
 		name.setText( (dbRel.getName() != null ? dbRel.getName() : "") );
 		
-		temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		reverseNameLabel.setLabelFor(reverseName);
-		temp.add(reverseNameLabel);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(reverseName);
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp);
+        Component[] left = new Component[] {
+			new JLabel("Relationship: "), reverseNameLabel, reverseCheckLabel
+		};
+
+		Component[] right = new Component[] {
+			name, reverseName, hasReverseDbRel
+		};
+
+        JPanel panel = new JPanel();
+		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
+		panel.add(PanelFactory.createForm(left, right, 5, 5, 5, 5));
+		getContentPane().add(panel);
+		
 
 		// If this is relationship of DbEntity to itself, disable 
 		// reverse relationship check box
@@ -175,6 +172,7 @@ implements ActionListener
 			reverseNameLabel.setEnabled(false);
 			hasReverseDbRel.setSelected(false);
 			hasReverseDbRel.setEnabled(false);
+			reverseCheckLabel.setEnabled(false);
 		}		
 		// If reverse relationship doesn't exist, deselect checkbox 
 		// and disable reverseName text field		
@@ -194,13 +192,12 @@ implements ActionListener
 		hasReverseDbRel.addActionListener(this);
 		
 		// Attribute pane
-		DbAttributePairTableModel model;
-		model = new DbAttributePairTableModel(dbRel, mediator, this, true);
+		DbAttributePairTableModel model = new DbAttributePairTableModel(dbRel, mediator, this, true);
 		table.setModel(model);
-		table.getSelectionModel().setSelectionMode(
-										ListSelectionModel.SINGLE_SELECTION);
-		// table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);		
+		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);		
 		JScrollPane scroll_pane = new JScrollPane(table);
+		scroll_pane.setPreferredSize(new Dimension(600, 100));
 		getContentPane().add(scroll_pane, BorderLayout.CENTER);
 
 		TableColumn col = table.getColumnModel().getColumn(0);
@@ -228,8 +225,8 @@ implements ActionListener
 				+ start.getName() + " and " + end.getName());
 		}
 		
-		temp = GUIUtil.createButtonPanel(new JButton[] {add, remove, save, cancel});
-		getContentPane().add(temp, BorderLayout.SOUTH);
+		JPanel buttons = GUIUtil.createButtonPanel(new JButton[] {add, remove, save, cancel});
+		getContentPane().add(buttons, BorderLayout.SOUTH);
 				
 		add.addActionListener(this);
 		remove.addActionListener(this);
