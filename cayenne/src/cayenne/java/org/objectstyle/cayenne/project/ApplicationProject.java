@@ -81,8 +81,8 @@ public class ApplicationProject extends Project {
     }
 
     /**
-    * @see org.objectstyle.cayenne.project.Project#postInit(File)
-    */
+     * Initializes internal <code>config</code> object and then calls super.
+     */
     protected void postInit(File projectFile) {
         try {
             config = new ProjectConfiguration(projectFile.getCanonicalFile());
@@ -90,14 +90,6 @@ public class ApplicationProject extends Project {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
         super.postInit(projectFile);
-    }
-
-    /**
-     * Method getMainProjectFile.
-     * @return File
-     */
-    public File getMainProjectFile() {
-        return config.getProjectFile();
     }
 
     /**

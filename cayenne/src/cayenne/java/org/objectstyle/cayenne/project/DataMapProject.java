@@ -56,11 +56,17 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DataMapException;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.xml.sax.InputSource;
 
 /**
  * Cayenne project that consists of a single DataMap.
@@ -77,13 +83,6 @@ public class DataMapProject extends Project {
      */
     public DataMapProject(File projectFile) {
         super(projectFile);
-    }
-
-    /**
-     * @see org.objectstyle.cayenne.project.Project#getMainProjectFile()
-     */
-    public File getMainProjectFile() {
-        return null;
     }
 
     /**
@@ -104,11 +103,28 @@ public class DataMapProject extends Project {
             null);
         return list.iterator();
     }
-    
+
     /**
      * @see org.objectstyle.cayenne.project.Project#getRootNode()
      */
     public Object getRootNode() {
         return map;
     }
+
+    /**
+    * Initializes internal <code>map</code> object and then calls super.
+    */
+    protected void postInit(File projectFile) {
+        try {
+            InputStream in = new FileInputStream(projectFile.getCanonicalFile());
+            map = new MapLoader().loadDataMap(new InputSource(in));
+        } catch (IOException e) {
+            throw new ProjectException("Error creating ApplicationProject.", e);
+        } catch (DataMapException dme) {
+            throw new ProjectException("Error creating ApplicationProject.", dme);
+        }
+        
+        super.postInit(projectFile);
+    }
+
 }

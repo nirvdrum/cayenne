@@ -172,7 +172,7 @@ public class OpenProjectAction extends ProjectAction {
             return false;
         }
         // perform upgrade
-        logObj.info("Will upgrade project " + project.getMainProjectFile());
+        logObj.info("Will upgrade project " + project.getMainFile());
         project.save();
         return true;
     }

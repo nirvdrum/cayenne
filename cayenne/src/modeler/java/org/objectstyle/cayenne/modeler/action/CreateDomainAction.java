@@ -91,7 +91,9 @@ public class CreateDomainAction extends CayenneAction {
     }
 
     protected void createDomain() {
+    	// only ApplicationProjects can have domains, so this cast is reasonable
         ApplicationProject project = (ApplicationProject) Editor.getProject();
+        
         Mediator mediator = getMediator();
         DataDomain domain =
             (DataDomain) NamedObjectFactory.createObject(

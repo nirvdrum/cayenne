@@ -99,7 +99,7 @@ public class SaveAction extends CayenneAction {
     protected void saveAll() throws Exception {
     	Project p = Editor.getProject();
         p.save();
-        Editor.getFrame().addToLastProjList(p.getMainProjectFile().getAbsolutePath());
+        Editor.getFrame().addToLastProjList(p.getMainFile().getAbsolutePath());
     }
 
     /**

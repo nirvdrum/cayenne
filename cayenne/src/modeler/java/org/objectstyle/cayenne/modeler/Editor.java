@@ -521,7 +521,7 @@ public class Editor
         enableProjectMenu();
         validate();
 
-        setProjectTitle(project.getMainProjectFile().getAbsolutePath());
+        setProjectTitle(project.getMainFile().getAbsolutePath());
 
         controller.handleControl(
             new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));

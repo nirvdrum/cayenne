@@ -73,17 +73,8 @@ public class TstProject extends Project {
      * @param projectFile
      */
     public TstProject(File projectFile) {
-        super(projectFile);
-        
+        super(projectFile);   
     }
-    
-    /**
-     * @see org.objectstyle.cayenne.project.Project#getMainProjectFile()
-     */
-    public File getMainProjectFile() {
-        return null;
-    }
-
 
     /**
      * @see org.objectstyle.cayenne.project.Project#checkForUpgrades()

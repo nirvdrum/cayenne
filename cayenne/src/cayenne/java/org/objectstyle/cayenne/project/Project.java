@@ -84,7 +84,6 @@ public abstract class Project {
 
     protected File projectDir;
     protected List files;
-    protected ProjectFile mainProjectFile;
     protected List upgradeMessages;
 
     /**
@@ -294,7 +293,10 @@ public abstract class Project {
     /**
      * Returns a main file associated with this project.
      */
-    public abstract File getMainProjectFile();
+    public File getMainFile() {
+    	ProjectFile f = ProjectFile.projectFileForObject(this, getRootNode());
+    	return (f != null) ? resolveFile(f.getLocation()) : null;
+    }
     
     /**
      * Returns the topmost object (node) on the project tree.
