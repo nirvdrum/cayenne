@@ -76,9 +76,6 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
         super();
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[])
-     */
     public void validateObject(Object[] path, Validator validator) {
         ObjRelationship rel = (ObjRelationship) ProjectTraversal.objectFromPath(path);
         if (Util.isEmptyString(rel.getName())) {

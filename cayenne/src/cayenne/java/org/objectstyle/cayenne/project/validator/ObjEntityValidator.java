@@ -74,9 +74,6 @@ public class ObjEntityValidator extends TreeNodeValidator {
         super();
     }
 
-    /**
-     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[])
-     */
     public void validateObject(Object[] path, Validator validator) {
         ObjEntity ent = (ObjEntity) ProjectTraversal.objectFromPath(path);
         validateName(ent, path, validator);

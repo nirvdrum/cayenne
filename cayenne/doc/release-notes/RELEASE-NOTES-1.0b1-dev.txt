@@ -23,5 +23,5 @@ Changes in this release:
 
 7. Refactored DataContext, removed unused methods
 
-8. Refactored util.Preferences into project.CayennePreferences and
+8. Refactored util.Preferences into gui.ModelerPreferences and
 project.CayenneUserDir
