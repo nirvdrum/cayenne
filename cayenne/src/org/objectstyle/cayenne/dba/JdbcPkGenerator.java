@@ -204,7 +204,8 @@ public class JdbcPkGenerator implements PkGenerator {
         node.performQuery(q, pr);
     }
 
-    /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
+    /** 
+     * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
      * to track the results of the execution.
      * 
      * @throws java.lang.Exception in case of query failure. */
@@ -284,8 +285,8 @@ public class JdbcPkGenerator implements PkGenerator {
 
     /**
      * Returns a size of the entity primary key cache.
-     * 20 is default, if cache size is set to a value
-     * less or equals than 1, no primary key caching is done.
+     * Default value is 20. If cache size is set to a value
+     * less or equals than "one", no primary key caching is done.
      */
     public int getPkCacheSize() {
         return pkCacheSize;
@@ -294,7 +295,15 @@ public class JdbcPkGenerator implements PkGenerator {
     /**
      * Sets the size of the entity primary key cache.
      * If <code>pkCacheSize</code> parameter is less than 1,
-     * cache size is set to 1.
+     * cache size is set to "one".
+     * 
+     * <p><i>Note that our tests show that setting primary key
+     * cache value to anything much bigger than 20 does not give 
+     * any significant performance increase. Therefore it does
+     * not make sense to use bigger values, since this may 
+     * potentially create big gaps in the database primary
+     * key sequences in cases like server crashes or restarts.
+     * </i></p>
      */
     public void setPkCacheSize(int pkCacheSize) {
         this.pkCacheSize = (pkCacheSize < 1) ? 1 : pkCacheSize;
