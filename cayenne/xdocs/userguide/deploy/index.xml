@@ -22,6 +22,12 @@ import org.objectstyle.cayenne.access.DataDomain;
 Configuration conf = Configuration.getSharedConfiguration();
 DataDomain domain = conf.getDomain();
 </source>
+<p> </p>
+<panel name="Spring Integration Note:">Spring Framework 
+	(http://www.springframework.org) is a popular configuration and deployment 
+	environment for all types of applications. Spring contains Cayenne 
+	integration classes since version 1.2. It works with Cayenne 1.1 or 
+	newer.</panel>
     </section>
 </body>
 </document>
