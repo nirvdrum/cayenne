@@ -226,6 +226,22 @@ public class DbLoader {
             tableNamePattern.replace('*', '%');
         }
 
+        if (logObj.isDebugEnabled()) {
+            logObj.debug(
+                "Read tables: catalog="
+                    + catalog
+                    + ", schema="
+                    + schemaPattern
+                    + ", tableNames="
+                    + tableNamePattern);
+
+            if (types != null && types.length > 0) {
+                for (int i = 0; i < types.length; i++) {
+                    logObj.debug("Read tables: table type=" + types[i]);
+                }
+            }
+        }
+
         ResultSet rs =
             getMetaData().getTables(
                 catalog,
