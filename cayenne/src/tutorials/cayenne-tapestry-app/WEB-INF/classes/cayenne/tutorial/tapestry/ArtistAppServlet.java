@@ -22,9 +22,8 @@ public class ArtistAppServlet extends ApplicationServlet {
         super.init(config);
         Configuration.setLoggingLevel(Level.WARN);
         
-        // [OPTIONAL STEP] Set up shared Cayenne configuration object
-        // to be org.objectstyle.cayenne.conf.BasicServletConfiguration
-        // to locate Cayenne config files under WEB-INF instead of CLASSPATH
-        ServletUtil.initializeConfiguration(config.getServletContext());
+        // [OPTIONAL STEP] Configure shared Cayenne configuration object
+        // to be able to locate XML config files under WEB-INF in addition to CLASSPATH
+        ServletUtil.initializeSharedConfiguration(config.getServletContext());
     }
 }
