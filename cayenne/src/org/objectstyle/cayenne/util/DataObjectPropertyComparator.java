@@ -55,60 +55,32 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.lang.reflect.Method;
 import java.util.Comparator;
 
+import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
- * Comparator that can compare Java beans based on a 
- * value of a property. Bean property must be readable
- * and its type must be an instance of Comparable. 
+ * Property comparator for CayenneDataObjects. Unlike a similar
+ * org.objectstyle.util.PropertyComparator class, this class
+ * allows nested properties. 
  * 
  * @author Andrei Adamchik
  */
-public class PropertyComparator implements Comparator {
-	protected Method getter;
+public class DataObjectPropertyComparator implements Comparator {
 	protected boolean ascending;
+	protected String propertyName;
 
-	public static String capitalize(String s) {
-		if (s.length() == 0) {
-			return s;
-		}
-		char chars[] = s.toCharArray();
-		chars[0] = Character.toUpperCase(chars[0]);
-		return new String(chars);
-	}
-
-	public static Method findReadMethod(String propertyName, Class beanClass) {
-		String base = capitalize(propertyName);
-
-		// find non-boolean property
-		try {
-			return beanClass.getMethod("get" + base, null);
-		} catch (Exception ex) {
-			// ignore, this might be a boolean property
-		}
-
-		try {
-			return beanClass.getMethod("is" + base, null);
-		} catch (Exception ex) {
-			// ran out of options
-			return null;
-		}
-	}
-
-	public PropertyComparator(String propertyName, Class beanClass) {
-		this(propertyName, beanClass, true);
-	}
-	
-	public PropertyComparator(String propertyName, Class beanClass, boolean ascending) {
-		getter = findReadMethod(propertyName, beanClass);
-		if (getter == null) {
-			throw new CayenneRuntimeException("No getter for " + propertyName);
-		}
-		
+	public DataObjectPropertyComparator(String propertyName, boolean ascending) {
 		this.ascending = ascending;
+		this.propertyName = propertyName;
+	}
+
+	/**
+	 * Constructor for DataObjectPropertyComparator.
+	 */
+	public DataObjectPropertyComparator() {
+		super();
 	}
 
 	/**
@@ -117,9 +89,8 @@ public class PropertyComparator implements Comparator {
 	public int compare(Object o1, Object o2) {
 		return (ascending) ? compareAsc(o1, o2) : compareAsc(o2, o1);
 	}
-	
+
 	protected int compareAsc(Object o1, Object o2) {
-		
 		if ((o1 == null && o2 == null) || o1 == o2) {
 			return 0;
 		} else if (o1 == null && o2 != null) {
@@ -128,13 +99,12 @@ public class PropertyComparator implements Comparator {
 			return 1;
 		}
 
-		try {
-			Comparable p1 = (Comparable) getter.invoke(o1, null);
-			Comparable p2 = (Comparable) getter.invoke(o2, null);
+		CayenneDataObject do1 = (CayenneDataObject) o1;
+		CayenneDataObject do2 = (CayenneDataObject) o2;
 
-			return (p1 == null) ? -1 : p1.compareTo(p2);
-		} catch (Exception ex) {
-			throw new CayenneRuntimeException("Error reading property.", ex);
-		}
+		Comparable p1 = (Comparable) do1.readNestedProperty(propertyName);
+		Comparable p2 = (Comparable) do2.readNestedProperty(propertyName);
+
+		return (p1 == null) ? -1 : p1.compareTo(p2);
 	}
 }
