@@ -115,7 +115,8 @@ public abstract class Configuration {
 	protected DataSourceFactory overrideFactory;
 	protected ConfigStatus loadStatus = new ConfigStatus();
 	protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
-	protected boolean ignoringLoadFailures = false;
+	protected boolean ignoringLoadFailures;
+    protected ConfigLoaderDelegate loaderDelegate;
     protected ConfigurationShutdownHook configurationShutdownHook = new ConfigurationShutdownHook();
 
 	/**
@@ -473,13 +474,19 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Returns a delegate used for controlling the loading of
-	 * configuration elements.
-	 * By default a {@link RuntimeLoadDelegate} is used.
+	 * Returns a delegate used for controlling the loading of configuration elements. 
 	 */
 	public ConfigLoaderDelegate getLoaderDelegate() {
-		return new RuntimeLoadDelegate(this, this.getLoadStatus(), Configuration.getLoggingLevel());
+		return loaderDelegate;
 	}
+    
+    /**
+     * @since 1.1
+     * @param loaderDelegate
+     */
+    public void setLoaderDelegate(ConfigLoaderDelegate loaderDelegate) {
+        this.loaderDelegate = loaderDelegate;
+    }
 
     /**
      * Shutdowns all owned domains. Invokes DataDomain.shutdown().

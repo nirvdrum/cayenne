@@ -67,34 +67,93 @@ import org.shiftone.cache.CacheManager;
 
 /**
  * @author Andrei Adamchik
+ */
+/**
+ * DataRowStore represents a cache of DataRows keyed by ObjectId. 
+ * 
+ * @author Andrei Adamchik
  * @since 1.1
  */
 public class DataRowStore implements Serializable {
     private static Logger logObj = Logger.getLogger(DataRowStore.class);
 
+    // default expiration time is 2 hours
+    public static final long SNAPSHOTS_EXPIRATION_DEFAULT = 2 * 60 * 60 * 1000;
+    public static final int SNAPSHOTS_CACHE_SIZE_DEFAULT = 10000;
+
+    public static final String SNAPSHOTS_EXPIRATION_PROPERTY =
+        "cayenne.datarowstore.snapshot.expiration";
+    public static final String SNAPSHOTS_CACHE_SIZE_PROPERTY =
+        "cayenne.datarowstore.snapshot.size";
+
     protected String name;
     protected Cache snapshots;
     protected boolean notifyingObjectStores;
 
-    /**
-	 * Creates new SnapshotCache, assigning it a specified name.
-	 */
     public DataRowStore(String name) {
+        this(name, Collections.EMPTY_MAP);
+    }
+
+    /**
+     * Creates new DataRowStore with a specified name and a set of properties. If no properties
+     * are defined, default values are used.
+     * 
+     * @param name DataRowStore name. Used to idenitfy this DataRowStore in events, etc. Can't be null.
+     * @param properties Properties map used to configure DataRowStore parameters. Can be null.
+     */
+    public DataRowStore(String name, Map properties) {
         if (name == null) {
             throw new IllegalArgumentException("SnapshotCache name can't be null.");
         }
 
         this.name = name;
 
-        // TODO: these values will be configurable
-        this.snapshots = CacheManager.getInstance().newCache(12 * 60 * 60 * 1000, 10000);
+        if (properties == null) {
+            properties = Collections.EMPTY_MAP;
+        }
+
+        long snapshotsExpiration = SNAPSHOTS_EXPIRATION_DEFAULT;
+        int snapshotsCacheSize = SNAPSHOTS_CACHE_SIZE_DEFAULT;
+
+        if (properties != null) {
+
+            Object value = properties.get(SNAPSHOTS_EXPIRATION_PROPERTY);
+            if (value instanceof Number) {
+                snapshotsExpiration = ((Number) value).longValue();
+            } else if (value instanceof String) {
+                try {
+                    snapshotsExpiration = Long.parseLong((String) value);
+                } catch (NumberFormatException ex) {
+                }
+            }
+
+            value = properties.get(SNAPSHOTS_CACHE_SIZE_PROPERTY);
+            if (value instanceof Number) {
+                snapshotsCacheSize = ((Number) value).intValue();
+            } else if (value instanceof String) {
+                try {
+                    snapshotsCacheSize = Integer.parseInt((String) value);
+                } catch (NumberFormatException ex) {
+                }
+            }
+        }
+
+        logObj.debug(
+            "Creating DataRowStore with snapshots expiration of "
+                + snapshotsExpiration
+                + " ms. and maximum cache size of "
+                + snapshotsCacheSize);
+
+        this.snapshots =
+            CacheManager.getInstance().newCache(snapshotsExpiration, snapshotsCacheSize);
     }
+    
 
     /**
-	 * Returns the name of this SnapshotCache. Name allows to create
-	 * EventSubjects for event notifications addressed to or sent from this
-	 * SnapshotCache.
-	 */
+     * Returns the name of this SnapshotCache. Name allows to create
+     * EventSubjects for event notifications addressed to or sent from this
+     * SnapshotCache.
+     */
     public String getName() {
         return name;
     }
@@ -104,19 +163,19 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-	 * Returns cached snapshot or null if no snapshot is currently cached for
-	 * the given ObjectId.
-	 */
+     * Returns cached snapshot or null if no snapshot is currently cached for
+     * the given ObjectId.
+     */
     public DataRow getCachedSnapshot(ObjectId oid) {
         return (DataRow) snapshots.getObject(oid);
     }
 
     /**
-	 * Returns a snapshot for ObjectId. If snapshot is currently cached, it is
-	 * returned. If not, a provided QueryEngine is used to fetch it from the
-	 * database. If there is no database row for a given id, an exception is
-	 * thrown.
-	 */
+     * Returns a snapshot for ObjectId. If snapshot is currently cached, it is
+     * returned. If not, a provided QueryEngine is used to fetch it from the
+     * database. If there is no database row for a given id, an exception is
+     * thrown.
+     */
     public DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
 
         // try cache
@@ -138,13 +197,11 @@ public class DataRowStore implements Serializable {
                     + ". Fetch matched "
                     + results.size()
                     + " objects.");
-        }
-        else if (results.size() == 0) {
+        } else if (results.size() == 0) {
             // oops, object was deleted
             throw new CayenneRuntimeException(
                 "No matching objects found for ObjectId " + oid);
-        }
-        else {
+        } else {
             DataRow snapshot = (DataRow) results.get(0);
             snapshots.addObject(oid, snapshot);
             return snapshot;
@@ -152,24 +209,24 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-	 * Returns EventSubject used by this SnapshotCache to notify of snapshot
-	 * changes.
-	 */
+     * Returns EventSubject used by this SnapshotCache to notify of snapshot
+     * changes.
+     */
     public EventSubject getSnapshotEventSubject() {
         return EventSubject.getSubject(this.getClass(), name);
     }
 
     /**
-	 * Unregisters an ObjectStore to stop receiving SnapshotChangeEvents.
-	 */
+     * Unregisters an ObjectStore to stop receiving SnapshotChangeEvents.
+     */
     public void stopReceivingSnapshotEvents(ObjectStore objectStore) {
         EventManager.getDefaultManager().removeListener(objectStore);
     }
 
     /**
-	 * Registers an ObjectStore to receive SnapshotChangeEvents. If <code>notifyingObjectStores</code>
-	 * property is false, this method skips the registration.
-	 */
+     * Registers an ObjectStore to receive SnapshotChangeEvents. If <code>notifyingObjectStores</code>
+     * property is false, this method skips the registration.
+     */
     public boolean startReceivingSnapshotEvents(ObjectStore objectStore) {
         if (!isNotifyingObjectStores()) {
             return false;
@@ -182,35 +239,34 @@ public class DataRowStore implements Serializable {
                 SnapshotEvent.class,
                 getSnapshotEventSubject(),
                 this);
-                logObj.debug("ObjectStore will listen for events: " + objectStore);
+            logObj.debug("ObjectStore will listen for events: " + objectStore);
             return true;
-        }
-        catch (NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             logObj.warn("Error adding listener.", e);
             throw new CayenneRuntimeException("Error adding listener.", e);
         }
     }
 
     /**
-	 * Expires and removes all stored snapshots without sending any
-	 * notification events.
-	 */
+     * Expires and removes all stored snapshots without sending any
+     * notification events.
+     */
     public void clear() {
         snapshots.clear();
     }
 
     /**
-	 * Evicts a snapshot from cache without generating any SnapshotEvents.
-	 */
+     * Evicts a snapshot from cache without generating any SnapshotEvents.
+     */
     public void forgetSnapshot(ObjectId id) {
         snapshots.remove(id);
     }
 
     /**
-	 * Processes changes made to snapshots. Modifies internal cache state, and
-	 * then sends the event to all listeners. Outgoing event will have a source
-	 * set ot this SnapshotCache.
-	 */
+     * Processes changes made to snapshots. Modifies internal cache state, and
+     * then sends the event to all listeners. Outgoing event will have a source
+     * set ot this SnapshotCache.
+     */
     public void processSnapshotChanges(
         Object source,
         Map updatedSnapshots,
@@ -218,12 +274,12 @@ public class DataRowStore implements Serializable {
 
         // update the internal cache, prepare snapshot event
         Map diffs = null;
-        
-        if(deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty()) {
+
+        if (deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty()) {
             logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
             return;
         }
-        
+
         synchronized (snapshots) {
 
             // DELETED: evict deleted snapshots
@@ -300,19 +356,19 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-	 * Creates a map that contains only the keys that have values that differ
-	 * in the registered snapshot for a given ObjectId and a given snapshot. It
-	 * is assumed that key sets are the same in both snapshots (since they
-	 * should represent the same entity data). Returns null if no
-	 * differences are found.
-	 */
+     * Creates a map that contains only the keys that have values that differ
+     * in the registered snapshot for a given ObjectId and a given snapshot. It
+     * is assumed that key sets are the same in both snapshots (since they
+     * should represent the same entity data). Returns null if no
+     * differences are found.
+     */
     protected DataRow buildSnapshotDiff(DataRow oldSnapshot, DataRow newSnapshot) {
         if (oldSnapshot == null) {
             return newSnapshot;
         }
 
         // build a diff...
-		DataRow diff = null;
+        DataRow diff = null;
 
         Iterator keys = oldSnapshot.keySet().iterator();
         while (keys.hasNext()) {
@@ -331,22 +387,22 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-	 * Returns a property that defines whether child ObjectStores are allowed
-	 * to register as SnapshotEventListeners. SnapshotEvents are still posted
-	 * via EventManager, even if this value is false. Rather this setting has
-	 * effect on {@link #startReceivingSnapshotEvents(ObjectStore) 
-	 * startReceivingSnapshotEvents(ObjectStore)} behavior.
-	 */
+     * Returns a property that defines whether child ObjectStores are allowed
+     * to register as SnapshotEventListeners. SnapshotEvents are still posted
+     * via EventManager, even if this value is false. Rather this setting has
+     * effect on {@link #startReceivingSnapshotEvents(ObjectStore) 
+     * startReceivingSnapshotEvents(ObjectStore)} behavior.
+     */
     public boolean isNotifyingObjectStores() {
         return notifyingObjectStores;
     }
 
     /**
-	 * Sets a property that defines whether child ObjectStores are allowed to
-	 * register as SnapshotEventListeners via
-	 * {@link #startReceivingSnapshotEvents(ObjectStore) 
-	 * startReceivingSnapshotEvents(ObjectStore)}
-	 */
+     * Sets a property that defines whether child ObjectStores are allowed to
+     * register as SnapshotEventListeners via
+     * {@link #startReceivingSnapshotEvents(ObjectStore) 
+     * startReceivingSnapshotEvents(ObjectStore)}
+     */
     public void setNotifyingObjectStores(boolean b) {
         notifyingObjectStores = b;
     }

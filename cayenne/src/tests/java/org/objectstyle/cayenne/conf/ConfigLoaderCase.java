@@ -60,9 +60,13 @@ import java.io.InputStream;
 
 import junit.framework.Assert;
 
+import org.apache.log4j.Logger;
+
 
 /** Test setup for a certain setup of domain configuration. */
 public class ConfigLoaderCase {
+    private static Logger logObj = Logger.getLogger(ConfigLoaderCase.class);
+    
     protected int failedMaps;
     protected int failedDataSources;
     protected int failedAdapters;
@@ -73,8 +77,11 @@ public class ConfigLoaderCase {
 
     /** Evaluates test case built from this object state. */
     public void test(ConfigLoader loader) throws Exception {
+        logObj.debug("Starting test");
         InputStream in = new ByteArrayInputStream(configInfo.getBytes());
+        logObj.debug("will load test");
         loader.loadDomains(in);
+        logObj.debug("finished load test");
         RuntimeLoadDelegate delegate = (RuntimeLoadDelegate)loader.getDelegate();
         Assert.assertEquals(totalDomains, delegate.getDomains().size());
         Assert.assertEquals(failedMaps, delegate.getStatus().getFailedMaps().size());

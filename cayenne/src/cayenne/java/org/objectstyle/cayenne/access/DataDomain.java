@@ -107,8 +107,14 @@ public class DataDomain implements QueryEngine {
     protected PrimaryKeyHelper primaryKeyHelper;
 
     protected DataRowStore snapshotCache;
-    
     protected TransactionDelegate transactionDelegate;
+    protected String name;
+
+    /**
+     * Properties configured for DataDomain. These include properties of the DataRowStore
+     * and remote notifications.
+     */
+    protected Map properties;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -120,17 +126,25 @@ public class DataDomain implements QueryEngine {
 
     /** Creates DataDomain and assigns it a <code>name</code>. */
     public DataDomain(String name) {
-        this.snapshotCache = new DataRowStore(name);
+        this(name, null);
+    }
+
+    public DataDomain(String name, Map properties) {
+        setName(name);
+        this.properties = (properties != null) ? properties : Collections.EMPTY_MAP;
     }
 
     /** Returns "name" property value. */
     public String getName() {
-        return this.snapshotCache.getName();
+        return name;
     }
 
     /** Sets "name" property to a new value. */
-    public void setName(String name) {
-        this.snapshotCache.setName(name);
+    public synchronized void setName(String name) {
+        this.name = name;
+        if (snapshotCache != null) {
+            this.snapshotCache.setName(name);
+        }
     }
 
     /**
@@ -150,12 +164,20 @@ public class DataDomain implements QueryEngine {
     public void setTransactionDelegate(TransactionDelegate transactionDelegate) {
         this.transactionDelegate = transactionDelegate;
     }
-    
-    public DataRowStore getSnapshotCache() {
+
+    /**
+     * Returns snapshots cache for this DataDomain, lazily initializing
+     * it on the first call.
+     */
+    public synchronized DataRowStore getSnapshotCache() {
+        if (snapshotCache == null) {
+            this.snapshotCache = new DataRowStore(name, properties);
+        }
         return snapshotCache;
     }
 
-    public void setSnapshotCache(DataRowStore snapshotCache) {
+    public synchronized void setSnapshotCache(DataRowStore snapshotCache) {
+        // TODO: shutdown any existing snapshot cache
         this.snapshotCache = snapshotCache;
     }
 
@@ -304,7 +326,7 @@ public class DataDomain implements QueryEngine {
     public DataContext createDataContext() {
         return new DataContext(this);
     }
-    
+
     /**
      * Creates an returns a new inactive transaction, serving as a factory method.
      * If there is a TransactionDelegate, adds the delegate to the newly
@@ -317,7 +339,6 @@ public class DataDomain implements QueryEngine {
         transaction.setDelegate(getTransactionDelegate());
         return transaction;
     }
-    
 
     /** 
      * Returns registered DataNode whose name matches <code>name</code> parameter. 
@@ -340,8 +361,7 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             this.reindexNodes();
             return (DataNode) nodesByEntityName.get(objEntityName);
-        }
-        else {
+        } else {
             return node;
         }
     }
@@ -407,8 +427,7 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             reindexNodes();
             return (DataNode) nodesByDbEntityName.get(dbEntityName);
-        }
-        else {
+        } else {
             return node;
         }
     }
@@ -429,8 +448,7 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             reindexNodes();
             return (DataNode) nodesByProcedureName.get(procedureName);
-        }
-        else {
+        } else {
             return node;
         }
     }
@@ -556,8 +574,7 @@ public class DataDomain implements QueryEngine {
             DataNode node = (DataNode) i.next();
             try {
                 node.shutdown();
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
             }
         }
     }

@@ -81,6 +81,7 @@ import org.apache.log4j.Logger;
  * with external agents.
  * 
  * @author Andrei Adamchik
+ * @since 1.1
  */
 public class JMSBridge extends EventBridge implements MessageListener {
     private static Logger logObj = Logger.getLogger(JMSBridge.class);
@@ -93,16 +94,18 @@ public class JMSBridge extends EventBridge implements MessageListener {
     protected TopicPublisher publisher;
     protected TopicSubscriber subscriber;
 
-
     public JMSBridge(EventSubject localSubject, String topicConnectionFactoryName) {
-        super(localSubject);
-        this.topicConnectionFactoryName = topicConnectionFactoryName;
+        this(
+            localSubject,
+            convertToExternalSubject(localSubject),
+            topicConnectionFactoryName);
     }
 
     public JMSBridge(
         EventSubject localSubject,
         String externalSubject,
         String topicConnectionFactoryName) {
+
         super(localSubject, externalSubject);
         this.topicConnectionFactoryName = topicConnectionFactoryName;
     }

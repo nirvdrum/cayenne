@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.event;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.javagroups.Channel;
@@ -69,23 +71,53 @@ import org.javagroups.blocks.PullPushAdapter;
  * communication software.
  * 
  * @author Andrei Adamchik
+ * @since 1.1
  */
 public class JavaGroupsBridge extends EventBridge implements MessageListener {
     private static Logger logObj = Logger.getLogger(JavaGroupsBridge.class);
 
-    protected byte[] state;
-    protected Channel channel;
-    protected PullPushAdapter adapter;
+    public static final String MCAST_ADDRESS_DEFAULT = "228.0.0.5";
+    public static final String MCAST_PORT_DEFAULT = "22222";
 
-    public JavaGroupsBridge(EventSubject localSubject) {
-        super(localSubject);
-    }
+    public static final String MCAST_ADDRESS_PROPERTY = "cayenne.javagroupsbridge.mcast.address";
+    public static final String MCAST_PORT_PROPERTY = "cayenne.javagroupsbridge.mcast.port";
 
-    public JavaGroupsBridge(EventSubject localSubject, String externalSubject) {
-        super(localSubject, externalSubject);
-    }
+    /**
+     * Defines a property for JavaGroups XML configuration file. Example file can be found at
+     * <a href="http://www.filip.net/javagroups/javagroups-protocol.xml">http://www.filip.net/javagroups/javagroups-protocol.xml</a>.
+     */
+    public static final String JGROUPS_CONFIG_URL_PROPERTY =
+        "javagroupsbridge.config.url";
 
     // TODO: Meaning of "state" in JGroups is not yet clear to me
+    protected byte[] state;
+
+    protected Channel channel;
+    protected PullPushAdapter adapter;
+    protected Map properties;
+
+    /**
+     * Creates new instance of JavaGroupsBridge.
+     * 
+     * @param localSubject an EventSubject for the local EventManager.
+     * @param properties a map of properties defining bridge configuration parameters. Supported 
+     * property values (also defined as static variables of JavaGroupsBridge): javagroupsbridge.mcast.address, 
+     * javagroupsbridge.mcast.port, javagroupsbridge.config.url.
+     */
+    public JavaGroupsBridge(EventSubject localSubject, Map properties) {
+        this(localSubject, convertToExternalSubject(localSubject), properties);
+    }
+
+    public JavaGroupsBridge(
+        EventSubject localSubject,
+        String externalSubject,
+        Map properties) {
+
+        super(localSubject, externalSubject);
+
+        // prevent any further checks for nulls
+        this.properties = (properties != null) ? properties : Collections.EMPTY_MAP;
+    }
 
     public byte[] getState() {
         return state;
@@ -101,6 +133,10 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
      */
     public void receive(Message message) {
         try {
+            if (logObj.isDebugEnabled()) {
+                logObj.debug("Received Message from: " + message.getSrc());
+            }
+
             CayenneEvent event = messageObjectToEvent((Serializable) message.getObject());
             if (event != null) {
                 if (logObj.isDebugEnabled()) {
@@ -116,27 +152,60 @@ public class JavaGroupsBridge extends EventBridge implements MessageListener {
     }
 
     protected void startupExternal() throws Exception {
-        // TODO: using default properties... need to do some
-        // *serious* research to figure out the best transport settings
+        // TODO: need to do more research to figure out the best default transport settings
+        // to avoid fragmentation, etc.
 
-        // at the very minumum we should allow configuring UDP port and address
-        channel = new JChannel();
+        // if config file is set as a property, use it, otherwise use a default
+        // set of properties, trying to configure multicast address and port
 
-    /*    channel.setOpt(Channel.VIEW, Boolean.FALSE);
-        channel.setOpt(Channel.SUSPECT, Boolean.FALSE);
-        channel.setOpt(Channel.BLOCK, Boolean.FALSE);
-        channel.setOpt(Channel.GET_STATE_EVENTS, Boolean.FALSE); */
+        String configURL = (String) properties.get(JGROUPS_CONFIG_URL_PROPERTY);
+        if (configURL != null) {
+            logObj.debug("creating channel with configuration from " + configURL);
+            channel = new JChannel(configURL);
+        } else {
+            String configString = buildConfigString(properties);
+            logObj.debug("creating channel with properties: " + configString);
+            channel = new JChannel(configString);
+        }
 
         // Important - discard messages from self
         channel.setOpt(Channel.LOCAL, Boolean.FALSE);
-        
-        logObj.info("connecting...");
         channel.connect(externalSubject);
-        logObj.info("connected...");
-        
+        logObj.debug("channel connected.");
+
         if (receivesExternalEvents()) {
             adapter = new PullPushAdapter(channel, this);
         }
+    }
+
+    /**
+     * Creates JavaGroups configuration String, obtgaining
+     * multicast port and address from properties if possible. 
+     */
+    protected String buildConfigString(Map properties) {
+        String address = (String) properties.get(MCAST_ADDRESS_PROPERTY);
+        if (address == null) {
+            address = MCAST_ADDRESS_DEFAULT;
+        }
+
+        String port = (String) properties.get(MCAST_PORT_PROPERTY);
+        if (port == null) {
+            port = MCAST_PORT_DEFAULT;
+        }
+
+        return "UDP(mcast_addr="
+            + address
+            + ";mcast_port="
+            + port
+            + ";ip_ttl=32):"
+            + "PING(timeout=3000;num_initial_members=6):"
+            + "FD(timeout=3000):"
+            + "VERIFY_SUSPECT(timeout=1500):"
+            + "pbcast.NAKACK(gc_lag=10;retransmit_timeout=600,1200,2400,4800):"
+            + "pbcast.STABLE(desired_avg_gossip=10000):"
+            + "FRAG:"
+            + "pbcast.GMS(join_timeout=5000;join_retry_timeout=2000;"
+            + "shun=true;print_local_addr=true)";
     }
 
     protected void shutdownExternal() throws Exception {

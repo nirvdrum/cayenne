@@ -18,14 +18,6 @@ public class ConfigLoaderTst extends CayenneTestCase {
             logObj.debug("Starting Case: " + aCase);
 
             Configuration conf = new EmptyConfiguration();
-            if (conf.canInitialize()) {
-				conf.initialize();
-				conf.didInitialize();
-            }
-            else {
-            	fail("Configuration refused to be initialized.");
-            }
-
             ConfigLoaderDelegate delegate = conf.getLoaderDelegate();
             ConfigLoader helper = new ConfigLoader(delegate);
             aCase.test(helper);

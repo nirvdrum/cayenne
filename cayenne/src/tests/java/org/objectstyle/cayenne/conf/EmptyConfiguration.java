@@ -63,18 +63,23 @@ import org.objectstyle.cayenne.access.DataDomain;
  */
 public class EmptyConfiguration extends DefaultConfiguration {
 
-	public EmptyConfiguration() {
-		super();
+    public EmptyConfiguration() {
+        super();
 
-		// add "test-resources" directory to CLASSPATH
-		this.addClassPath("test-resources");
+        // add "test-resources" directory to CLASSPATH
+        this.addClassPath("test-resources");
 
-		// ignore any loading failures
-		this.setIgnoringLoadFailures(true);
-	}
+        // ignore any loading failures
+        this.setIgnoringLoadFailures(true);
+        this.setLoaderDelegate(
+            new RuntimeLoadDelegate(
+                this,
+                this.getLoadStatus(),
+                Configuration.getLoggingLevel()));
+    }
 
-	public void addDomain(DataDomain domain) {
-		// noop
-	}
+    public void addDomain(DataDomain domain) {
+        // noop
+    }
 
 }
