@@ -59,11 +59,13 @@ package org.objectstyle.cayenne.gui;
 
 
 import java.awt.*;
-import java.util.*;
-import javax.swing.*;
 
+import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+
+import org.objectstyle.cayenne.gui.datamap.DbDetailView;
+import org.objectstyle.cayenne.gui.datamap.ObjDetailView;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.datamap.*;
 
 /** Panel for the Editor window. 
  *  @author Michael Misha Shengaout. */

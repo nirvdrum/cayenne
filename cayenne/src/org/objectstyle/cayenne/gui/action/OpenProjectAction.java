@@ -64,6 +64,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
@@ -151,6 +152,9 @@ public class OpenProjectAction extends ProjectAction {
 			Editor.getFrame().addToLastProjList(file.getAbsolutePath());
 
 			// Initialize gui configuration
+			// uncomment to debug GUI
+			// Configuration.setLogLevel(Level.SEVERE);
+			
 			GuiConfiguration.initSharedConfig(file);
 			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
 

@@ -249,28 +249,27 @@ public class DomainHelper {
 
 		Iterator iter = maps.iterator();
 		while (iter.hasNext()) {
-			StringBuffer buf = new StringBuffer();
 			DataMap map = (DataMap) iter.next();
 			List depMaps = map.getDependencies();
 
-			buf.append("\t<map name=\"").append(map.getName().trim());
-			buf.append("\" location=\"").append(map.getLocation().trim());
+			pw.print("\t<map name=\"" + map.getName().trim());
+			pw.print("\" location=\"" + map.getLocation().trim());
 
 			if (depMaps.size() == 0) {
-				buf.append("\"/>");
+				pw.println("\"/>");
 			} else {
-				buf.append("\">");
+				pw.println("\">");
 				Iterator dit = depMaps.iterator();
 				while (dit.hasNext()) {
 					DataMap dep = (DataMap) dit.next();
-					buf.append("\t\t<dep-map-ref name=\"").append(
-						dep.getName().trim()).append(
-						"\"/>");
+					pw.println(
+						"\t\t<dep-map-ref name=\""
+							+ dep.getName().trim()
+							+ "\"/>");
 				}
 
-				buf.append("</map>");
+				pw.println("\t</map>");
 			}
-			pw.println(buf.toString());
 		}
 
 		for (int i = 0; i < nodes.length; i++) {
@@ -483,14 +482,14 @@ public class DomainHelper {
 		protected ArrayList depMaps = new ArrayList();
 		protected String mapName;
 		protected String location;
-		
+
 		public MapHandler(XMLReader parser, ContentHandler parentHandler) {
 			super(parser, parentHandler);
 		}
 
 		public void init(String name, Attributes attrs, DataDomain domain)
 			throws SAXException {
-				this.domain = domain;
+			this.domain = domain;
 			mapName = attrs.getValue("", "name");
 			if (mapName == null) {
 				logObj.log(logLevel, "error: <map> without 'name'.");
@@ -515,7 +514,7 @@ public class DomainHelper {
 					+ location
 					+ "'>.");
 		}
-		
+
 		public void startElement(
 			String namespaceURI,
 			String localName,
@@ -539,9 +538,9 @@ public class DomainHelper {
 					locator);
 			}
 		}
-		
-	    protected void finished() {
-		    // do actual loading after all references are initialized
+
+		protected void finished() {
+			// do actual loading after all references are initialized
 			InputStream mapIn = config.getMapConfig(location);
 			if (mapIn == null) {
 				logObj.log(logLevel, "warning: map location not found.");
@@ -742,11 +741,12 @@ public class DomainHelper {
 			}
 		}
 	}
-	
-	
+
 	private class DepMapRefHandler extends AbstractHandler {
 
-		public DepMapRefHandler(XMLReader parser, ContentHandler parentHandler) {
+		public DepMapRefHandler(
+			XMLReader parser,
+			ContentHandler parentHandler) {
 			super(parser, parentHandler);
 		}
 

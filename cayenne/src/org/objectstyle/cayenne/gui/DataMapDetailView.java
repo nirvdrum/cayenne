@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,12 +53,14 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,8 +80,8 @@ import org.objectstyle.cayenne.map.DataMap;
  */
 public class DataMapDetailView
 	extends JPanel
-	implements DocumentListener, ActionListener, DataMapDisplayListener {
-		
+	implements DocumentListener, ActionListener, DataMapDisplayListener, ItemListener {
+
 	static Logger logObj = Logger.getLogger(DataMapDetailView.class.getName());
 
 	Mediator mediator;
@@ -92,13 +93,17 @@ public class DataMapDetailView
 	JLabel locationLabel;
 	JTextField location;
 	JButton fileBtn;
+	protected JPanel fileChooser;
+	protected JPanel depMapsPanel;
+
+	protected HashMap mapLookup = new HashMap();
 
 	/** Cludge to prevent marking map as dirty during initial load. */
-	private boolean ignoreChange = false;
+	private boolean ignoreChange;
 
-	public DataMapDetailView(Mediator temp_mediator) {
+	public DataMapDetailView(Mediator mediator) {
 		super();
-		mediator = temp_mediator;
+		this.mediator = mediator;
 		mediator.addDataMapDisplayListener(this);
 		// Create and layout components
 		init();
@@ -118,19 +123,18 @@ public class DataMapDetailView
 		location.setEditable(false);
 		fileBtn = new JButton("...");
 
-		JPanel fileChooser = this.formatFileChooser(location, fileBtn);
+		fileChooser = this.formatFileChooser(location, fileBtn);
 
-		Component[] left_comp = new Component[2];
-		left_comp[0] = nameLabel;
-		left_comp[1] = locationLabel;
+		Component[] leftComp = new Component[2];
+		leftComp[0] = nameLabel;
+		leftComp[1] = locationLabel;
 
-		Component[] right_comp = new Component[2];
-		right_comp[0] = name;
-		right_comp[1] = fileChooser;
+		Component[] rightComp = new Component[2];
+		rightComp[0] = name;
+		rightComp[1] = fileChooser;
 
-		JPanel temp =
-			PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
-		add(temp, BorderLayout.CENTER);
+		JPanel temp = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
+		add(temp, BorderLayout.NORTH);
 	}
 
 	private JPanel formatFileChooser(JTextField fld, JButton btn) {
@@ -154,8 +158,10 @@ public class DataMapDetailView
 	}
 
 	private void textFieldChanged(DocumentEvent e) {
-		if (ignoreChange)
+		if (ignoreChange) {
 			return;
+		}
+
 		DataMap map = mediator.getCurrentDataMap();
 		DataMapEvent event;
 		if (e.getDocument() == name.getDocument()) {
@@ -167,8 +173,7 @@ public class DataMapDetailView
 			event = new DataMapEvent(this, map, oldName);
 			mediator.fireDataMapEvent(event);
 			oldName = new_name;
-		} // End changedName
-		else if (e.getDocument() == location.getDocument()) {
+		} else if (e.getDocument() == location.getDocument()) {
 			if (map.getLocation().equals(location.getText()))
 				return;
 			map.setLocation(location.getText());
@@ -179,11 +184,10 @@ public class DataMapDetailView
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-
 		if (src == fileBtn) {
 			selectMapLocation();
 		}
-	} // End actionPerformed()
+	}
 
 	private void selectMapLocation() {
 		DataMap map = mediator.getCurrentDataMap();
@@ -233,13 +237,84 @@ public class DataMapDetailView
 
 	public void currentDataMapChanged(DataMapDisplayEvent e) {
 		DataMap map = e.getDataMap();
-		if (null == map)
+		if (null == map) {
 			return;
+		}
+
 		oldName = map.getName();
 		ignoreChange = true;
+		logObj.severe("set name to: " + oldName);
 		name.setText(oldName);
 		location.setText(map.getLocation());
 		ignoreChange = false;
+
+		if (depMapsPanel != null) {
+			remove(depMapsPanel);
+			depMapsPanel = null;
+		}
+
+		mapLookup.clear();
+
+		// add a list of dependencies
+		java.util.List maps = mediator.getCurrentDataDomain().getMapList();
+
+		if (maps.size() < 2) {
+			return;
+		}
+
+		Component[] leftComp = new Component[maps.size() - 1];
+		Component[] rightComp = new Component[maps.size() - 1];
+
+		Iterator it = maps.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			DataMap nextMap = (DataMap) it.next();
+			if (nextMap != map) {
+				JCheckBox check = new JCheckBox();
+				JLabel label = new JLabel(nextMap.getName());
+
+				check.addItemListener(this);
+				if (nextMap.dependsOn(map)) {
+					check.setEnabled(false);
+					label.setEnabled(false);
+				}
+
+				if (map.dependsOn(nextMap)) {
+					check.setSelected(true);
+				}
+
+				mapLookup.put(check, nextMap);
+				leftComp[i] = label;
+				rightComp[i] = check;
+				i++;
+			}
+		}
+
+		depMapsPanel = PanelFactory.createForm(leftComp, rightComp, 5, 5, 5, 5);
+		depMapsPanel.setBorder(
+			BorderFactory.createTitledBorder("Depends on DataMaps"));
+		add(depMapsPanel, BorderLayout.CENTER);
+		validate();
 	}
 
-} // End class DataMapDetailView
+	/**
+	 * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e) {
+		JCheckBox src = (JCheckBox) e.getSource();
+		DataMap map = (DataMap) mapLookup.get(src);
+
+		if (map != null) {
+			DataMap curMap = mediator.getCurrentDataMap();
+			logObj.severe(
+				"cur map: " + curMap.getName() + "; checked: " + map.getName());
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				curMap.addDependency(map);
+			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+				curMap.removeDependency(map);
+			}
+
+			mediator.fireDataMapEvent(new DataMapEvent(this, curMap));
+		}
+	}
+}

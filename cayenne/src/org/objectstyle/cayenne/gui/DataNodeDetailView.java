@@ -241,9 +241,7 @@ public class DataNodeDetailView
 		right_comp[5] = maxConnections;
 
 		temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
-		TitledBorder border;
-		border = BorderFactory.createTitledBorder("Data Source Info");
-		temp.setBorder(border);
+		temp.setBorder(BorderFactory.createTitledBorder("Data Source Info"));
 		constraints.gridheight = 2;
 		constraints.gridy = 1;
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
