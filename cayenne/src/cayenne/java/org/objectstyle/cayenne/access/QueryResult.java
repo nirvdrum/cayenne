@@ -103,6 +103,30 @@ public class QueryResult
         return (list != null) ? list : Collections.EMPTY_LIST;
     }
 
+	/**
+	* Returns the first update count for the query. This is a shortcut for
+	* <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
+	* Returns -1 if no update count is found for the query.
+	*/
+    public int getFirstUpdateCount(Query query)
+   {
+    List allResults = getResults(query);
+    int size = allResults.size();
+    if (size > 0)
+    {
+      Iterator it = allResults.iterator();
+      while (it.hasNext())
+      {
+        Object obj = it.next();
+        if (obj instanceof Number)
+        {
+          return ((Number)obj).intValue();
+        }
+      }
+    }
+	return -1;
+   }
+		 
     /**
      * Returns the first results for the query. This is a shortcut for
      * <code>(List)getRows(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
