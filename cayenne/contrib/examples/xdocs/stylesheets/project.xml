@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="Cayenne" href="http://objectstyle.org/cayenne/">
+
+    <title>Cayenne</title>
+    <author>Andrei Adamchik</author>
+    
+    <spacer href="/images/spacer.gif"/>
+    <logo href="/images/cayenne_logo.gif"/>
+    <oslogo href="/images/os_logo.gif"/>
+    <css href="/images/objectstyle.css"/>
+</project>
