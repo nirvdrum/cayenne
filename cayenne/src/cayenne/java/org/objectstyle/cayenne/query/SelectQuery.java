@@ -88,9 +88,10 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public static final String DISTINCT_PROPERTY = "cayenne.SelectQuery.distinct";
     public static final boolean DISTINCT_DEFAULT = false;
 
-    protected List customDbAttributes = new ArrayList();
-    protected List orderings = new ArrayList();
-    protected Set prefetches = new HashSet();
+    protected List customDbAttributes;
+    protected List orderings;
+    protected Set prefetches;
+    protected Set jointPrefetches;
     protected boolean distinct;
 
     protected Expression parentQualifier;
@@ -274,7 +275,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
             }
         }
 
-        // encode prefecthes
+        // encode prefetches
         if (prefetches != null && !prefetches.isEmpty()) {
             Iterator it = prefetches.iterator();
             while (it.hasNext()) {
@@ -288,6 +289,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                 encoder.println("</prefetch>");
             }
         }
+        
+        // TODO: encode join prefetches...
 
         encoder.indent(-1);
         encoder.println("</query>");
@@ -320,9 +323,21 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
         query.setParentQualifier(parentQualifier);
         query.setRoot(root);
 
-        query.addPrefetches(prefetches);
-        query.addOrderings(orderings);
-        query.addCustomDbAttributes(customDbAttributes);
+        if (prefetches != null) {
+            query.addPrefetches(prefetches);
+        }
+        
+        if (jointPrefetches != null) {
+            query.addJointPrefetches(jointPrefetches);
+        }
+        
+        if (orderings != null) {
+            query.addOrderings(orderings);
+        }
+
+        if (customDbAttributes != null) {
+            query.addCustomDbAttributes(customDbAttributes);
+        }
 
         // substitute qualifier parameters
         if (qualifier != null) {
@@ -350,14 +365,14 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * Adds ordering specification to this query orderings.
      */
     public void addOrdering(Ordering ordering) {
-        orderings.add(ordering);
+        nonNullOrderings().add(ordering);
     }
 
     /**
      * Adds a list of orderings.
      */
     public void addOrderings(List orderings) {
-        this.orderings.addAll(orderings);
+        nonNullOrderings().addAll(orderings);
     }
 
     /** Adds ordering specification to this query orderings. */
@@ -376,26 +391,36 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public void removeOrdering(Ordering ordering) {
-        this.orderings.remove(ordering);
+        if (orderings != null) {
+            orderings.remove(ordering);
+        }
     }
 
     /**
      * Returns a list of orderings used by this query.
      */
     public List getOrderings() {
-        return orderings;
+        return (orderings != null) ? orderings : Collections.EMPTY_LIST;
     }
 
+    /**
+     * Clears all configured orderings.
+     */
     public void clearOrderings() {
-        orderings.clear();
+        orderings = null;
     }
 
-    /** Returns true if this query returns distinct rows. */
+    /** 
+     * Returns true if this query returns distinct rows. 
+     */
     public boolean isDistinct() {
         return distinct;
     }
 
-    /** Sets <code>distinct</code> property. */
+    /**
+     * Sets <code>distinct</code> property that determines whether this query returns
+     * distinct row.
+     */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
@@ -406,7 +431,8 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public List getCustomDbAttributes() {
         // if query root is DbEntity, and no custom attributes
         // are defined, return DbEntity attributes.
-        if (customDbAttributes.size() == 0 && (getRoot() instanceof DbEntity)) {
+        if ((customDbAttributes == null || customDbAttributes.isEmpty())
+                && (getRoot() instanceof DbEntity)) {
             Collection attributes = ((DbEntity) getRoot()).getAttributes();
             List attributeNames = new ArrayList(attributes.size());
             Iterator it = attributes.iterator();
@@ -414,10 +440,13 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
                 DbAttribute attribute = (DbAttribute) it.next();
                 attributeNames.add(attribute.getName());
             }
+            
             return attributeNames;
         }
         else {
-            return customDbAttributes;
+            return (customDbAttributes != null)
+                    ? customDbAttributes
+                    : Collections.EMPTY_LIST;
         }
     }
 
@@ -427,11 +456,11 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * <code>PAINTING_ARRAY.PAINTING_ID</code>, etc.
      */
     public void addCustomDbAttribute(String attributePath) {
-        customDbAttributes.add(attributePath);
+        nonNullCustomDbAttributes().add(attributePath);
     }
 
     public void addCustomDbAttributes(List attrPaths) {
-        customDbAttributes.addAll(attrPaths);
+        nonNullCustomDbAttributes().addAll(attrPaths);
     }
 
     /**
@@ -444,28 +473,123 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * </p>
      */
     public boolean isFetchingCustomAttributes() {
-        return (getRoot() instanceof DbEntity) || customDbAttributes.size() > 0;
+        return (getRoot() instanceof DbEntity)
+                || (customDbAttributes != null && !customDbAttributes.isEmpty());
     }
-
+    
     /**
-     * Returns a list of relationships that must be prefetched as a part of this query.
+     * Returns a list that internally stores custom db attributes, creating it on demand.
+     * 
+     * @since 1.2
      */
-    public Collection getPrefetches() {
+    List nonNullCustomDbAttributes() {
+        if(customDbAttributes == null) {
+            customDbAttributes = new ArrayList();
+        }
+        
+        return customDbAttributes;
+    }
+    
+    /**
+     * Returns a list that internally stores orderings, creating it on demand.
+     * 
+     * @since 1.2
+     */
+    List nonNullOrderings() {
+        if(orderings == null) {
+            orderings = new ArrayList();
+        }
+        
+        return orderings;
+    }
+    
+    /**
+     * Returns a collection that internally stores prefetches, creating such collection on demand.
+     * 
+     * @since 1.2
+     */
+    Collection nonNullPrefetches() {
+        if(prefetches == null) {
+            prefetches = new HashSet();
+        }
+        
         return prefetches;
     }
+    
+    /**
+     * Returns a collection that internally stores join prefetches, creating it on demand.
+     * 
+     * @since 1.2
+     */
+    Collection nonNullJointPrefetches() {
+        if(jointPrefetches == null) {
+            jointPrefetches = new HashSet();
+        }
+        
+        return jointPrefetches;
+    }
+    
+    /**
+     * Returns a collection of joint prefetches.
+     * 
+     * @since 1.2
+     */
+    public Collection getJointPrefetches() {
+        return (jointPrefetches != null) ? jointPrefetches : Collections.EMPTY_SET;
+    }
+    
+    /**
+     * Adds a joint prefetch.
+     * 
+     * @since 1.2
+     */
+    public void addJointPrefetch(String relationshipPath) {
+        nonNullJointPrefetches().add(relationshipPath);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void addJointPrefetches(Collection relationshipPaths) {
+        nonNullJointPrefetches().addAll(relationshipPaths);
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void clearJointPrefetches() {
+        jointPrefetches = null;
+    }
+    
 
     /**
-     * Adds a relationship path. ObjRelationship names are separated by ".". to the list
-     * of relationship paths that should be prefetched when the query is executed.
+     * Returns a collection of String paths indicating relationships to objects that are
+     * prefetched together with this query.
      */
-    public void addPrefetch(String relPath) {
-        prefetches.add(relPath);
+    public Collection getPrefetches() {
+        return (prefetches != null) ? prefetches : Collections.EMPTY_SET;
     }
 
-    public void addPrefetches(Collection relPaths) {
-        prefetches.addAll(relPaths);
+    /**
+     * Adds a relationship path to the internal collection of paths that should be
+     * prefetched when the query is executed.
+     */
+    public void addPrefetch(String relationshipPath) {
+        nonNullPrefetches().add(relationshipPath);
     }
 
+    /**
+     * Adds all relationship paths in a collection to the internal collection of
+     * prefetched paths.
+     */
+    public void addPrefetches(Collection relationshipPaths) {
+        nonNullPrefetches().addAll(relationshipPaths);
+    }
+
+    
+    /**
+     * Clears all stored prefetch paths.
+     */
     public void clearPrefetches() {
         prefetches.clear();
     }
@@ -476,7 +600,9 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
      * @since 1.1
      */
     public void removePrefetch(String prefetch) {
-        this.prefetches.remove(prefetch);
+        if (prefetches != null) {
+            prefetches.remove(prefetch);
+        }
     }
 
     /**
