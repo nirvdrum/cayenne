@@ -57,43 +57,98 @@ package org.objectstyle.cayenne.gui.event;
 
 import java.util.EventObject;
 
-import org.objectstyle.cayenne.access.DataDomain;
-
-/** 
- * Holds events pertaining to Domain status change.
+/**
+ * Superclass of CayenneModeler events.
+ * 
+ * @author Andrei Adamchik
  */
-public class DomainEvent extends ModelerEvent {
-	protected DataDomain domain;
+public class ModelerEvent extends EventObject {
 
-	/** Creates a domain change event. */
-	public DomainEvent(Object src, DataDomain domain) {
-		super(src);
-		this.domain = domain;
-	}
+	/** Signifies a changed object. */
+	public static final int CHANGE = 1;
 
-	/** Creates a domain event of a specified type. */
-	public DomainEvent(Object src, DataDomain domain, int id) {
-		this(src, domain);
-		setId(id);
-	}
+	/** Signifies a new object. */
+	public static final int ADD = 2;
 
-	/** Creates a domain name change event.*/
-	public DomainEvent(Object src, DataDomain domain, String oldName) {
-		this(src, domain);	
-		setOldName(oldName);
-	}
+	/** Signifies a removed object. */
+	public static final int REMOVE = 3;
 
-	/** Returns domain object associated with this event. */
-	public DataDomain getDomain() {
-		return domain;
-	}
+	protected int id = CHANGE;
+	protected String oldName;
+	protected String newName;
 
 	/**
-	 * Sets domain object associated with this event.
+	 * Constructor for ModelerEvent.
 	 * 
-	 * @param domain The domain to set
+	 * @param source event source
 	 */
-	public void setDomain(DataDomain domain) {
-		this.domain = domain;
+	public ModelerEvent(Object source) {
+		super(source);
 	}
+	
+	/**
+	 * Constructor for ModelerEvent.
+	 * 
+	 * @param source event source
+	 */
+	public ModelerEvent(Object source, String oldName, String newName) {
+		super(source);
+		setOldName(oldName);
+		setNewName(newName);
+	}
+	
+	/**
+	 * Returns the id.
+	 * @return int
+	 */
+	public int getId() {
+		return id;
+	}
+
+
+	/**
+	 * Returns the newName.
+	 * @return String
+	 */
+	public String getNewName() {
+		return newName;
+	}
+
+
+	/**
+	 * Returns the oldName.
+	 * @return String
+	 */
+	public String getOldName() {
+		return oldName;
+	}
+
+
+	/**
+	 * Sets the id.
+	 * @param id The id to set
+	 */
+	public void setId(int id) {
+		this.id = id;
+	}
+
+
+	/**
+	 * Sets the newName.
+	 * @param newName The newName to set
+	 */
+	public void setNewName(String newName) {
+		this.newName = newName;
+	}
+
+
+	/**
+	 * Sets the oldName.
+	 * @param oldName The oldName to set
+	 */
+	public void setOldName(String oldName) {
+		this.oldName = oldName;
+	}
+
+
 }

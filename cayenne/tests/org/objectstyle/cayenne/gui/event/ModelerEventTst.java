@@ -55,45 +55,41 @@
  */
 package org.objectstyle.cayenne.gui.event;
 
-import java.util.EventObject;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.access.DataDomain;
-
-/** 
- * Holds events pertaining to Domain status change.
+/**
+ * @author Andrei Adamchik
  */
-public class DomainEvent extends ModelerEvent {
-	protected DataDomain domain;
-
-	/** Creates a domain change event. */
-	public DomainEvent(Object src, DataDomain domain) {
-		super(src);
-		this.domain = domain;
-	}
-
-	/** Creates a domain event of a specified type. */
-	public DomainEvent(Object src, DataDomain domain, int id) {
-		this(src, domain);
-		setId(id);
-	}
-
-	/** Creates a domain name change event.*/
-	public DomainEvent(Object src, DataDomain domain, String oldName) {
-		this(src, domain);	
-		setOldName(oldName);
-	}
-
-	/** Returns domain object associated with this event. */
-	public DataDomain getDomain() {
-		return domain;
-	}
+public class ModelerEventTst extends TestCase {
 
 	/**
-	 * Sets domain object associated with this event.
-	 * 
-	 * @param domain The domain to set
+	 * Constructor for ModelerEventTst.
+	 * @param arg0
 	 */
-	public void setDomain(DataDomain domain) {
-		this.domain = domain;
+	public ModelerEventTst(String arg0) {
+		super(arg0);
 	}
+
+    public void testConstructor1() throws Exception {
+    	Object src = new Object();
+    	ModelerEvent e = new ModelerEvent(src);
+    	assertSame(src, e.getSource());
+    }
+    
+    public void testConstructor2() throws Exception  {
+    	Object src = new Object();
+    	ModelerEvent e = new ModelerEvent(src, "oldname", "newname");
+    	assertSame(src, e.getSource());
+    	assertEquals("oldname", e.getOldName());
+    	assertEquals("newname", e.getNewName());
+    }
+    
+    public void testId() throws Exception  {
+    	ModelerEvent e = new ModelerEvent(new Object());
+    	assertEquals(ModelerEvent.CHANGE, e.getId());
+    	
+    	e.setId(ModelerEvent.ADD);
+    	assertEquals(ModelerEvent.ADD, e.getId());
+    }
 }
+
