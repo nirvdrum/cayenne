@@ -72,7 +72,6 @@ import javax.swing.KeyStroke;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.BrowserControl;
 
@@ -83,7 +82,6 @@ import org.objectstyle.cayenne.modeler.util.BrowserControl;
  * @author Andrei Adamchik
  */
 public class CayenneDialog extends JDialog implements HyperlinkListener {
-    private static Logger logObj = Logger.getLogger(CayenneDialog.class);
 
     public CayenneDialog() throws HeadlessException {
         super();

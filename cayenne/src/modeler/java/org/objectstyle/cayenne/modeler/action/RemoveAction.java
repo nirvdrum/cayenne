@@ -61,7 +61,6 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.Attribute;
@@ -99,7 +98,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class RemoveAction extends CayenneAction {
-    private static Logger logObj = Logger.getLogger(RemoveAction.class);
 
 	public static String getActionName() {
 		return "Remove";

@@ -71,7 +71,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JToolBar;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
@@ -146,8 +145,6 @@ public class CayenneModelerFrame
         DbRelationshipDisplayListener,
         ProcedureDisplayListener,
         ProcedureParameterDisplayListener {
-
-    private static Logger logObj = Logger.getLogger(CayenneModelerFrame.class);
 
     /** 
      * Label that indicates as a part of the title that

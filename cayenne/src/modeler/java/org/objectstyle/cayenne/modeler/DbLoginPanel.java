@@ -76,7 +76,6 @@ import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -89,7 +88,6 @@ import org.objectstyle.cayenne.modeler.util.PreferenceField;
  * @author Misha Shengauot
  */
 public class DbLoginPanel extends CayenneDialog implements ActionListener {
-    private static Logger logObj = Logger.getLogger(DbLoginPanel.class);
 
     protected DataSourceInfo dataSrcInfo;
 
