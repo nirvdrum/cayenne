@@ -328,7 +328,7 @@ public class SelectQuery
     }
 
     /**
-     * A shortcut for <code>queryWithParams(params, true)</code>.
+     * A shortcut for {@link #queryWithParams(Map, boolean)}.
      */
     public SelectQuery queryWithParameters(Map parameters) {
         return queryWithParameters(parameters, true);
@@ -339,7 +339,7 @@ public class SelectQuery
      * parameters to build the qualifier. 
      * 
      * @see org.objectstyle.cayenne.exp.Expression#expWithParameters(java.util.Map,
-     * boolean) Explanation on parameter substitution.
+     * boolean) parameter substitution.
      */
     public SelectQuery queryWithParameters(Map parameters, boolean pruneMissing) {
         // create a query replica

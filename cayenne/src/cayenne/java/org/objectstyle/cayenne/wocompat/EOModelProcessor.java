@@ -56,12 +56,14 @@
 
 package org.objectstyle.cayenne.wocompat;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
@@ -73,11 +75,13 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  *  Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
  */
 public class EOModelProcessor {
+    private static Logger logObj = Logger.getLogger(EOModelProcessor.class);
 
     /** Performs EOModel loading.  
      * 
@@ -97,7 +101,8 @@ public class EOModelProcessor {
      * is java client classes aware and the following processing will work with
      * Java client class settings of the EOModel.
      */
-    public DataMap loadEOModel(String path, boolean generateClientClass) throws Exception {
+    public DataMap loadEOModel(String path, boolean generateClientClass)
+        throws Exception {
         EOModelHelper helper = makeHelper(path, generateClientClass);
 
         // create empty map
@@ -128,7 +133,7 @@ public class EOModelProcessor {
             String name = (String) it.next();
             makeFlatRelationships(helper, dataMap.getObjEntity(name));
         }
-        
+
         // now create missing reverse DB (but not OBJ) relationships 
         // since Cayenne requires them
         it = helper.modelNames();
@@ -143,30 +148,33 @@ public class EOModelProcessor {
     /** 
      * @deprecated since 1.0.4 use {@link #makeHelper(String, boolean)}.
      */
-    protected EOModelHelper makeHelper(String path) throws Exception {    
+    protected EOModelHelper makeHelper(String path) throws Exception {
         return makeHelper(path, false);
     }
-    
+
     /**
      * Creates an returns new EOModelHelper to process EOModel.
      * Exists mostly for the benefit of subclasses. 
      */
-    protected EOModelHelper makeHelper(String path, boolean genereateClientClass) throws Exception {
+    protected EOModelHelper makeHelper(String path, boolean genereateClientClass)
+        throws Exception {
         return new EOModelHelper(path);
     }
-
 
     /**
      * @deprecated since 1.0.4 use {@link #makeEntity(EOModelHelper, String, boolean)}.
      */
-    protected ObjEntity makeEntity(EOModelHelper helper, String name) throws Exception {    
+    protected ObjEntity makeEntity(EOModelHelper helper, String name) throws Exception {
         return makeEntity(helper, name, false);
     }
-    
+
     /** 
      *  Creates and returns a new ObjEntity linked to a corresponding DbEntity.
      */
-    protected EOObjEntity makeEntity(EOModelHelper helper, String name, boolean generateClientClass) {
+    protected EOObjEntity makeEntity(
+        EOModelHelper helper,
+        String name,
+        boolean generateClientClass) {
         DataMap dataMap = helper.getDataMap();
 
         // create ObjEntity
@@ -179,7 +187,8 @@ public class EOModelProcessor {
             objEntity.setSuperClassName(helper.entityClass(parent, generateClientClass));
         }
         // add flag whether this entity is set as abstract in the model
-        objEntity.setIsAbstractEntity("Y".equals(helper.entityPListMap(name).get("isAbstractEntity")));
+        objEntity.setIsAbstractEntity(
+            "Y".equals(helper.entityPListMap(name).get("isAbstractEntity")));
         // create DbEntity...since EOF allows the same table to be 
         // associated with multiple EOEntities, check for name duplicates
         String dbEntityName = (String) helper.entityPListMap(name).get("externalName");
@@ -223,7 +232,8 @@ public class EOModelProcessor {
         List classProperties;
         if (objEntity.getIsClientEntity()) {
             classProperties = (List) entityPlistMap.get("clientClassProperties");
-        } else {
+        }
+        else {
             classProperties = (List) entityPlistMap.get("classProperties");
         }
 
@@ -245,20 +255,27 @@ public class EOModelProcessor {
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
             Map attrMap = (Map) it.next();
-            
-			String prototypeName = (String) attrMap.get("prototypeName");
-			Map prototypeAttrMap = helper.getPrototypeAttributeMapFor(prototypeName);
-			
-			String dbAttrName = (String) attrMap.get("columnName");
-            if (null == dbAttrName) dbAttrName = (String) prototypeAttrMap.get("columnName");
-			
+
+            String prototypeName = (String) attrMap.get("prototypeName");
+            Map prototypeAttrMap = helper.getPrototypeAttributeMapFor(prototypeName);
+
+            String dbAttrName = (String) attrMap.get("columnName");
+            if (null == dbAttrName)
+                dbAttrName = (String) prototypeAttrMap.get("columnName");
+
             String attrName = (String) attrMap.get("name");
-            if (null == attrName) attrName = (String) prototypeAttrMap.get("name");
-			
+            if (null == attrName)
+                attrName = (String) prototypeAttrMap.get("name");
+
             String attrType = (String) attrMap.get("valueClassName");
-            if (null == attrType) attrType = (String) prototypeAttrMap.get("valueClassName");
-			
-            String javaType = helper.javaTypeForEOModelerType(attrType);
+            if (null == attrType)
+                attrType = (String) prototypeAttrMap.get("valueClassName");
+
+            String valueType = (String) attrMap.get("valueType");
+            if (valueType == null)
+                valueType = (String) prototypeAttrMap.get("valueType");
+
+            String javaType = helper.javaTypeForEOModelerType(attrType, valueType);
             EODbAttribute dbAttr = null;
 
             if (dbAttrName != null && dbEntity != null) {
@@ -279,25 +296,27 @@ public class EOModelProcessor {
                 dbAttr.setEoAttributeName(attrName);
                 dbEntity.addAttribute(dbAttr);
 
-				Integer width = (Integer) attrMap.get("width");
-				if (null == width)  width = (Integer) prototypeAttrMap.get("width");
-				
-				if (width != null)
-					dbAttr.setMaxLength(width.intValue());
+                Integer width = (Integer) attrMap.get("width");
+                if (null == width)
+                    width = (Integer) prototypeAttrMap.get("width");
 
-				Integer scale = (Integer) attrMap.get("scale");
-				if (null == scale)  scale = (Integer) prototypeAttrMap.get("scale");
-				
-				if (scale != null)
-					dbAttr.setPrecision(scale.intValue());
+                if (width != null)
+                    dbAttr.setMaxLength(width.intValue());
+
+                Integer scale = (Integer) attrMap.get("scale");
+                if (null == scale)
+                    scale = (Integer) prototypeAttrMap.get("scale");
+
+                if (scale != null)
+                    dbAttr.setPrecision(scale.intValue());
 
                 if (primaryKeys.contains(attrName))
                     dbAttr.setPrimaryKey(true);
 
                 Object allowsNull = attrMap.get("allowsNull");
-				// TODO: Unclear that allowsNull should be inherited from EOPrototypes
-				// if (null == allowsNull)  allowsNull = prototypeAttrMap.get("allowsNull");;
-                 
+                // TODO: Unclear that allowsNull should be inherited from EOPrototypes
+                // if (null == allowsNull)  allowsNull = prototypeAttrMap.get("allowsNull");;
+
                 dbAttr.setMandatory(!"Y".equals(allowsNull));
             }
 
@@ -308,7 +327,8 @@ public class EOModelProcessor {
                 // if entity is readOnly
                 String entityReadOnlyString = (String) entityPlistMap.get("isReadOnly");
                 String attributeReadOnlyString = (String) attrMap.get("isReadOnly");
-                if ("Y".equals(entityReadOnlyString) || "Y".equals(attributeReadOnlyString)) {
+                if ("Y".equals(entityReadOnlyString)
+                    || "Y".equals(attributeReadOnlyString)) {
                     attr.setReadOnly(true);
                 }
 
@@ -401,7 +421,7 @@ public class EOModelProcessor {
             }
         }
     }
-    
+
     /** 
      * Create reverse DbRelationships that were not created so far, since 
      * Cayenne requires them.
@@ -409,13 +429,23 @@ public class EOModelProcessor {
      * @since 1.0.5
      */
     protected void makeReverseDbRelationships(DbEntity dbEntity) {
-        Iterator it = dbEntity.getRelationships().iterator();
+
+        // iterate over a copy of the collection, since in case of 
+        // reflexive relationships, we may modify source entity relationship map
+        Collection clone = new ArrayList(dbEntity.getRelationships());
+        Iterator it = clone.iterator();
         while (it.hasNext()) {
             DbRelationship relationship = (DbRelationship) it.next();
 
             if (relationship.getReverseRelationship() == null) {
                 DbRelationship reverse = relationship.createReverseRelationship();
-                reverse.setName(relationship.getName() + "Reverse");
+
+                String name =
+                    NamedObjectFactory.createName(
+                        DbRelationship.class,
+                        reverse.getSourceEntity(),
+                        relationship.getName() + "Reverse");
+                reverse.setName(name);
                 relationship.getTargetEntity().addRelationship(reverse);
             }
         }
@@ -477,13 +507,13 @@ public class EOModelProcessor {
 
                 flatRel.setTargetEntity((ObjEntity) potentialTargets.iterator().next());
                 e.addRelationship(flatRel);
-            } else {
+            }
+            else {
                 throw new CayenneRuntimeException("relationship in path was null!");
             }
         }
 
     }
-
 
     /** 
      *  Special DbAttribute subclass that stores extra info needed to work

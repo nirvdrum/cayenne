@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.dba;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,115 +81,146 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Andrei Adamchik
  */
 public class TypesHandler {
-	private static Logger logObj = Logger.getLogger(TypesHandler.class);
+    private static Logger logObj = Logger.getLogger(TypesHandler.class);
 
-	private static Map handlerMap = new HashMap();
+    private static Map handlerMap = new HashMap();
 
-	/** 
-	 * Returns TypesHandler using XML file located in the package of
-	 * <code>adapterClass</code>.
-	 */
-	public static TypesHandler getHandler(Class adapterClass) {
-		return getHandler(
-			Util.getPackagePath(adapterClass.getName()) + "/types.xml");
-	}
+    protected Map typesMap;
 
-	public static TypesHandler getHandler(String filePath) {
-		synchronized (handlerMap) {
-			TypesHandler handler = (TypesHandler) handlerMap.get(filePath);
+    /** 
+     * Returns TypesHandler using XML file located in the package of
+     * <code>adapterClass</code>.
+     * 
+     * @deprecated Since 1.1 use {@link #getHandler(URL)}
+     */
+    public static TypesHandler getHandler(Class adapterClass) {
+        return getHandler(Util.getPackagePath(adapterClass.getName()) + "/types.xml");
+    }
 
-			if (handler == null) {
-				handler = new TypesHandler(filePath);
-				handlerMap.put(filePath, handler);
-			}
+    /**
+     * @deprecated Since 1.1 use {@link #getHandler(URL)}
+     */
+    public static TypesHandler getHandler(String filePath) {
+        URL url = ResourceLocator.findURLInClasspath(filePath);
+        return getHandler(url);
+    }
 
-			return handler;
-		}
-	}
+    /**
+     * @since 1.1
+     */
+    public static TypesHandler getHandler(URL typesConfig) {
+        synchronized (handlerMap) {
+            TypesHandler handler = (TypesHandler) handlerMap.get(typesConfig);
 
-	protected Map typesMap;
+            if (handler == null) {
+                handler = new TypesHandler(typesConfig);
+                handlerMap.put(typesConfig, handler);
+            }
 
-	public TypesHandler(String typesConfigPath) {
-		InputStream in =
-			ResourceLocator.findResourceInClasspath(typesConfigPath);
+            return handler;
+        }
+    }
 
-		try {
-			XMLReader parser = Util.createXmlReader();
-			TypesParseHandler ph = new TypesParseHandler();
-			parser.setContentHandler(ph);
-			parser.setErrorHandler(ph);
-			parser.parse(new InputSource(in));
+    /**
+     * Creates new TypesHandler loading configuration info from the XML
+     * file specified as <code>typesConfigPath</code> parameter.
+     * 
+     * @deprecated Since 1.1 use {@link #TypesHandler(URL)}
+     */
+    public TypesHandler(String typesConfigPath) {
+        this(ResourceLocator.findURLInClasspath(typesConfigPath));
+    }
 
-			typesMap = ph.getTypes();
-		} catch (Exception ex) {
-			logObj.error(
-				"Error creating TypesHandler '" + typesConfigPath + "'.",
-				ex);
-			throw new CayenneRuntimeException("Error parsing types", ex);
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ioex) {
-			}
-		}
-	}
+    /**
+     * Creates new TypesHandler loading configuration info from the XML
+     * file specified as <code>typesConfigPath</code> parameter.
+     * 
+     * @since 1.1
+     */
+    public TypesHandler(URL typesConfig) {
+        try {
+            InputStream in = typesConfig.openStream();
 
-	public String[] externalTypesForJdbcType(int type) {
-		return (String[]) typesMap.get(new Integer(type));
-	}
+            try {
+                XMLReader parser = Util.createXmlReader();
+                TypesParseHandler ph = new TypesParseHandler();
+                parser.setContentHandler(ph);
+                parser.setErrorHandler(ph);
+                parser.parse(new InputSource(in));
 
-	/** 
-	 * TypesParseHandler is a helper class to process XML streams, 
-	 * creating DataDomain objects from configuration data.
-	 */ 
-	final class TypesParseHandler extends DefaultHandler {
-		private static final String JDBC_TYPE_TAG = "jdbc-type";
-		private static final String DB_TYPE_TAG = "db-type";
-		private static final String NAME_ATTR = "name";
+                typesMap = ph.getTypes();
+            }
+            catch (Exception ex) {
+                throw new CayenneRuntimeException(
+                    "Error creating TypesHandler '" + typesConfig + "'.",
+                    ex);
+            }
+            finally {
+                try {
+                    in.close();
+                }
+                catch (IOException ioex) {
+                }
+            }
+        }
+        catch (IOException ioex) {
+            throw new CayenneRuntimeException(
+                "Error opening config file '" + typesConfig + "'.",
+                ioex);
+        }
+    }
 
-		private Map types = new HashMap();
-		private List currentTypes = new ArrayList();
-		private int currentType = TypesMapping.NOT_DEFINED;
+    public String[] externalTypesForJdbcType(int type) {
+        return (String[]) typesMap.get(new Integer(type));
+    }
 
-		public Map getTypes() {
-			return types;
-		}
+    /** 
+     * Helper class to load types data from XML.
+     */
+    final class TypesParseHandler extends DefaultHandler {
+        private static final String JDBC_TYPE_TAG = "jdbc-type";
+        private static final String DB_TYPE_TAG = "db-type";
+        private static final String NAME_ATTR = "name";
 
-		public void startElement(
-			String namespaceURI,
-			String localName,
-			String qName,
-			Attributes atts)
-			throws SAXException {
-			if (JDBC_TYPE_TAG.equals(localName)) {
-				currentTypes.clear();
-				String strType = atts.getValue("", NAME_ATTR);
+        private Map types = new HashMap();
+        private List currentTypes = new ArrayList();
+        private int currentType = TypesMapping.NOT_DEFINED;
 
-				// convert to Types int value
-				try {
-					currentType =
-						Types.class.getDeclaredField(strType).getInt(null);
-				} catch (Exception ex) {
-					currentType = TypesMapping.NOT_DEFINED;
-					logObj.info("type not found: '" + strType + "', ignoring.");
-				}
-			} else if (DB_TYPE_TAG.equals(localName)) {
-				currentTypes.add(atts.getValue("", NAME_ATTR));
-			}
-		}
+        public Map getTypes() {
+            return types;
+        }
 
-		public void endElement(
-			String namespaceURI,
-			String localName,
-			String qName)
-			throws SAXException {
-			if (JDBC_TYPE_TAG.equals(localName)
-				&& currentType != TypesMapping.NOT_DEFINED) {
-				String[] typesAsArray = new String[currentTypes.size()];
-				types.put(
-					new Integer(currentType),
-					currentTypes.toArray(typesAsArray));
-			}
-		}
-	}
+        public void startElement(
+            String namespaceURI,
+            String localName,
+            String qName,
+            Attributes atts)
+            throws SAXException {
+            if (JDBC_TYPE_TAG.equals(localName)) {
+                currentTypes.clear();
+                String strType = atts.getValue("", NAME_ATTR);
+
+                // convert to Types int value
+                try {
+                    currentType = Types.class.getDeclaredField(strType).getInt(null);
+                }
+                catch (Exception ex) {
+                    currentType = TypesMapping.NOT_DEFINED;
+                    logObj.info("type not found: '" + strType + "', ignoring.");
+                }
+            }
+            else if (DB_TYPE_TAG.equals(localName)) {
+                currentTypes.add(atts.getValue("", NAME_ATTR));
+            }
+        }
+
+        public void endElement(String namespaceURI, String localName, String qName)
+            throws SAXException {
+            if (JDBC_TYPE_TAG.equals(localName)
+                && currentType != TypesMapping.NOT_DEFINED) {
+                String[] typesAsArray = new String[currentTypes.size()];
+                types.put(new Integer(currentType), currentTypes.toArray(typesAsArray));
+            }
+        }
+    }
 }

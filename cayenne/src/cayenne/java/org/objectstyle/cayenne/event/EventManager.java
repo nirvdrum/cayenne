@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Invocation;
@@ -216,12 +215,12 @@ public class EventManager extends Object {
             throw new IllegalArgumentException("Subject must not be null.");
         }
 
-        if (logObj.isDebugEnabled()) {
+       /* if (logObj.isDebugEnabled()) {
             String label =
                 (blocking) ? "adding listener: " : "adding non-blocking listener: ";
             String object = new ToStringBuilder(listener).toString();
             logObj.debug(label + object + "." + methodName);
-        }
+        } */
 
         try {
             Invocation invocation =
@@ -448,7 +447,6 @@ public class EventManager extends Object {
         DispatchThread(String name) {
             super(name);
             setDaemon(true);
-            logObj.debug("starting event dispatch thread: " + name);
         }
 
         public void run() {
@@ -468,7 +466,6 @@ public class EventManager extends Object {
                         }
                         catch (InterruptedException e) {
                             // ignore interrupts...
-                            logObj.info("DispatchThread was interrupted.", e);
                         }
                     }
                 }

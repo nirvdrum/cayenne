@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.dba;
 
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -94,10 +95,11 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * A generic DbAdapter implementation.
- * Can be used as a default adapter or as
+ * A generic DbAdapter implementation. Can be used as a default adapter or as
  * a superclass of a concrete adapter implementation.
  *
  * @author Andrei Adamchik
@@ -120,7 +122,7 @@ public class JdbcAdapter implements DbAdapter {
         this.setSupportsFkConstraints(true);
 
         this.pkGenerator = this.createPkGenerator();
-        this.typesHandler = TypesHandler.getHandler(this.getClass());
+        this.typesHandler = TypesHandler.getHandler(findAdapterResource("/types.xml"));
         this.extendedTypes = new ExtendedTypeMap();
         this.configureExtendedTypes(extendedTypes);
     }
@@ -131,6 +133,36 @@ public class JdbcAdapter implements DbAdapter {
      */
     public String getBatchTerminator() {
         return ";";
+    }
+
+    /**
+     * Locates and returns a named adapter resource. A resource can be an XML
+     * file, etc. 
+     * 
+     * <p>This implementation is based on the premise 
+     * that each adapter is located in its own Java package and all
+     * resources are in the same package as well. Resource lookup
+     * is recursive, so that if DbAdapter is a subclass of another
+     * adapter, parent adapter package is searched as a failover.</p>
+     * 
+     * @since 1.1
+     */
+    public URL findAdapterResource(String name) {
+        Class adapterClass = this.getClass();
+
+        while (adapterClass != null
+            && JdbcAdapter.class.isAssignableFrom(adapterClass)) {
+
+            String path = Util.getPackagePath(adapterClass.getName()) + name;
+            URL url = ResourceLocator.findURLInClasspath(path);
+            if (url != null) {
+                return url;
+            }
+
+            adapterClass = adapterClass.getSuperclass();
+        }
+
+        return null;
     }
 
     /**
@@ -165,7 +197,7 @@ public class JdbcAdapter implements DbAdapter {
     public PkGenerator getPkGenerator() {
         return pkGenerator;
     }
-    
+
     /**
      * Sets new primary key generator.
      * 

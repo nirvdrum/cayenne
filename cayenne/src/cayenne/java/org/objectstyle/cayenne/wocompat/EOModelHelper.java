@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.wocompat;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
@@ -83,8 +84,7 @@ public class EOModelHelper {
     protected Map entityClassIndex;
     protected Map entityClientClassIndex;
     protected DataMap dataMap;
-	private Map prototypeValues;
-
+    private Map prototypeValues;
 
     static {
         // configure locator 
@@ -123,7 +123,7 @@ public class EOModelHelper {
             Map entityPlistMap = entityPListMap(name);
             // get client class information
             Map internalInfo = (Map) entityPlistMap.get("internalInfo");
-            
+
             if (internalInfo != null) {
                 String clientClassName =
                     (String) internalInfo.get("_javaClientClassName");
@@ -131,50 +131,50 @@ public class EOModelHelper {
             }
         }
 
-
         it = modelIndex.iterator();
         while (it.hasNext()) {
             Map info = (Map) it.next();
             String name = (String) info.get("name");
             Map entityPlistMap = entityPListMap(name);
             List classProperties = (List) entityPlistMap.get("classProperties");
-            
+
             // get client class information
             Map internalInfo = (Map) entityPlistMap.get("internalInfo");
-            
+
             List clientClassProperties =
                 (internalInfo != null)
                     ? (List) internalInfo.get("_clientClassPropertyNames")
                     : null;
-                    
+
             // guard against no internal info and no client class properties
-            if(clientClassProperties == null) {
+            if (clientClassProperties == null) {
                 clientClassProperties = Collections.EMPTY_LIST;
             }
-                    
+
             // there is a bug in EOModeler it sometimes keeps outdated properties in
             // the client property list. This removes them
             clientClassProperties.retainAll(classProperties);
-            
+
             // remove all properties from the entity properties that are already defined in
             // a potential parent class.
             String parentEntity = (String) entityPlistMap.get("parent");
             while (parentEntity != null) {
                 Map parentEntityPListMap = entityPListMap(parentEntity);
-                List parentClassProps = (List) parentEntityPListMap.get("classProperties");
+                List parentClassProps =
+                    (List) parentEntityPListMap.get("classProperties");
                 classProperties.removeAll(parentClassProps);
                 // get client class information of parent
                 Map parentInternalInfo = (Map) parentEntityPListMap.get("internalInfo");
-                
+
                 if (parentInternalInfo != null) {
                     List parentClientClassProps =
                         (List) parentInternalInfo.get("_clientClassPropertyNames");
                     clientClassProperties.removeAll(parentClientClassProps);
                 }
-                
+
                 parentEntity = (String) parentEntityPListMap.get("parent");
             }
-            
+
             // put back processed properties to the map
             entityPlistMap.put("classProperties", classProperties);
             // add client classes directly for easier access
@@ -182,49 +182,117 @@ public class EOModelHelper {
         }
     }
 
-
     /** Performs Objective C data types conversion to Java types.
      * 
      *  @return String representation for Java type corresponding 
-     *  to String representation of Objective C type. 
+     *  to String representation of Objective C type.
+     * 
+     * @deprecated Since 1.1 use {@link javaTypeForEOModelerType(String,String)} to take "valueType"
+     * into account.
      */
     public String javaTypeForEOModelerType(String type) {
-        if (type == null) {
+        return javaTypeForEOModelerType(type, null);
+    }
+
+    /** 
+     * Performs Objective C data types conversion to Java types.
+     * 
+     * @since 1.1
+     * @return String representation for Java type corresponding 
+     * to String representation of Objective C type. 
+     */
+    public String javaTypeForEOModelerType(String valueClassName, String valueType) {
+        if (valueClassName == null) {
             return null;
         }
 
-        if (type.equals("NSString"))
-            return "java.lang.String";
-        if (type.equals("NSNumber"))
-            return "java.lang.Integer";
-        if (type.equals("NSCalendarDate"))
+        if (valueClassName.equals("NSString")) {
+            return String.class.getName();
+        }
+
+        if (valueClassName.equals("NSNumber")) {
+            Class numericClass = numericAttributeClass(valueType);
+            return (numericClass != null)
+                ? numericClass.getName()
+                : Number.class.getName();
+        }
+
+        if (valueClassName.equals("NSCalendarDate"))
             return "java.sql.Timestamp";
-        if (type.equals("NSDecimalNumber"))
-            return "java.math.BigDecimal";
-        if (type.equals("NSData"))
+
+        if (valueClassName.equals("NSDecimalNumber")) {
+            Class numericClass = numericAttributeClass(valueType);
+            return (numericClass != null)
+                ? numericClass.getName()
+                : BigDecimal.class.getName();
+        }
+
+        if (valueClassName.equals("NSData"))
             return "byte[]";
 
         // don't know what the class is mapped to... 
         // do some minimum sanity check and use as is
         try {
-            return Class.forName(type).getName();
-        } catch (ClassNotFoundException aClassNotFoundException) {
+            return Class.forName(valueClassName).getName();
+        }
+        catch (ClassNotFoundException aClassNotFoundException) {
             try {
-                return Class.forName("java.lang." + type).getName();
-            } catch (ClassNotFoundException anotherClassNotFoundException) {
+                return Class.forName("java.lang." + valueClassName).getName();
+            }
+            catch (ClassNotFoundException anotherClassNotFoundException) {
                 try {
-                    return Class.forName("java.util." + type).getName();
-                } catch (ClassNotFoundException yetAnotherClassNotFoundException) {
+                    return Class.forName("java.util." + valueClassName).getName();
+                }
+                catch (ClassNotFoundException yetAnotherClassNotFoundException) {
                     try {
                         return ClassLoader
                             .getSystemClassLoader()
-                            .loadClass(type)
+                            .loadClass(valueClassName)
                             .getName();
-                    } catch (ClassNotFoundException e) {
-                        throw new IllegalArgumentException("Unknown data type: " + type);
+                    }
+                    catch (ClassNotFoundException e) {
+                        throw new IllegalArgumentException(
+                            "Unknown data type: " + valueClassName);
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * @since 1.1
+     */
+    // TODO: create a lookup map, maybe XML-loaded...
+    protected Class numericAttributeClass(String valueType) {
+        if (valueType == null) {
+            return null;
+        }
+        else if ("b".equals(valueType)) {
+            return Byte.class;
+        }
+        else if ("s".equals(valueType)) {
+            return Short.class;
+        }
+        else if ("i".equals(valueType)) {
+            return Integer.class;
+        }
+        else if ("l".equals(valueType)) {
+            return Long.class;
+        }
+        else if ("f".equals(valueType)) {
+            return Float.class;
+        }
+        else if ("d".equals(valueType)) {
+            return Double.class;
+        }
+        else if ("B".equals(valueType)) {
+            return BigDecimal.class;
+        }
+        else if ("c".equals(valueType)) {
+            return Boolean.class;
+        }
+        else {
+            return null;
         }
     }
 
@@ -251,7 +319,8 @@ public class EOModelHelper {
             // no prototypes
             if (eoPrototypesEntityMap == null) {
                 prototypeValues = Collections.EMPTY_MAP;
-            } else {
+            }
+            else {
                 List eoPrototypeAttributes =
                     (List) eoPrototypesEntityMap.get("attributes");
 
@@ -301,15 +370,15 @@ public class EOModelHelper {
     public String entityClass(String entityName) {
         return entityClass(entityName, false);
     }
-    
+
     public String entityClass(String entityName, boolean getClientClass) {
         if (getClientClass) {
             return (String) entityClientClassIndex.get(entityName);
-        } else {
-        return (String) entityClassIndex.get(entityName);
+        }
+        else {
+            return (String) entityClassIndex.get(entityName);
+        }
     }
-    }
-
 
     /** Loads EOModel index and returns it as a map. */
     protected Map loadModelIndex() throws Exception {
@@ -317,7 +386,8 @@ public class EOModelHelper {
         try {
             plistParser.ReInit(indexIn);
             return (Map) plistParser.propertyList();
-        } finally {
+        }
+        finally {
             indexIn.close();
         }
     }
@@ -328,7 +398,8 @@ public class EOModelHelper {
         try {
             plistParser.ReInit(entIn);
             return (Map) plistParser.propertyList();
-        } finally {
+        }
+        finally {
             entIn.close();
         }
     }

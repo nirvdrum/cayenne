@@ -90,40 +90,37 @@ import org.objectstyle.cayenne.query.Query;
  */
 public interface DbAdapter {
 
-	public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
-	public static final String MYSQL =
-		"org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
-	public static final String ORACLE =
-		"org.objectstyle.cayenne.dba.oracle.OracleAdapter";
-	public static final String SYBASE =
-		"org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
-	public static final String POSTGRES =
-		"org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
-	public static final String HSQLDB =
-		"org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
-	public static final String DB2 =
-		"org.objectstyle.cayenne.dba.db2.DB2Adapter";
-	public static final String FIREBIRD =
-		"org.objectstyle.cayenne.dba.firebird.FirebirdAdapter";
+    public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
+    public static final String MYSQL = "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
+    public static final String ORACLE =
+        "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
+    public static final String SYBASE =
+        "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
+    public static final String POSTGRES =
+        "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+    public static final String HSQLDB =
+        "org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
+    public static final String DB2 = "org.objectstyle.cayenne.dba.db2.DB2Adapter";
+    public static final String FIREBIRD =
+        "org.objectstyle.cayenne.dba.firebird.FirebirdAdapter";
     public static final String OPENBASE =
-            "org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter";
+        "org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter";
 
-	/**
-	 * All available DbAdapter subclass names.
-	 */
-	public static final String[] availableAdapterClassNames =
-		new String[] {
-			DbAdapter.JDBC,
-			DbAdapter.DB2,
-			DbAdapter.FIREBIRD,
-			DbAdapter.HSQLDB,
-			DbAdapter.MYSQL,
-			DbAdapter.ORACLE,
-			DbAdapter.POSTGRES,
-			DbAdapter.SYBASE,
-            DbAdapter.OPENBASE
-		};
-    
+    /**
+     * All available DbAdapter subclass names.
+     */
+    public static final String[] availableAdapterClassNames =
+        new String[] {
+            DbAdapter.JDBC,
+            DbAdapter.DB2,
+            DbAdapter.FIREBIRD,
+            DbAdapter.HSQLDB,
+            DbAdapter.MYSQL,
+            DbAdapter.ORACLE,
+            DbAdapter.POSTGRES,
+            DbAdapter.SYBASE,
+            DbAdapter.OPENBASE };
+
     /**
      * Returns a String used to terminate a batch in command-line
      * tools. E.g. ";" on Oracle or "go" on Sybase.
@@ -132,16 +129,16 @@ public interface DbAdapter {
      */
     public String getBatchTerminator();
 
-	/**
-	 * Creates an returns a named instance of a DataNode. Sets node adapter to be this object.
-	 */
-	public DataNode createDataNode(String name);
+    /**
+     * Creates an returns a named instance of a DataNode. Sets node adapter to be this object.
+     */
+    public DataNode createDataNode(String name);
 
-	/** 
+    /** 
      * Returns true if a target database supports FK constraints. 
      */
-	public boolean supportsFkConstraints();
-    
+    public boolean supportsFkConstraints();
+
     /** 
      * Returns true if a target database supports UNIQUE constraints. 
      * 
@@ -149,24 +146,24 @@ public interface DbAdapter {
      */
     public boolean supportsUniqueConstraints();
 
-	/**
-	 * Returns <code>true</code> if the target database supports
-	 * batch updates.
-	 */
-	public boolean supportsBatchUpdates();
+    /**
+     * Returns <code>true</code> if the target database supports
+     * batch updates.
+     */
+    public boolean supportsBatchUpdates();
 
-	/**
-	 * Returns a SQL string that can be used to drop
-	 * a database table corresponding to <code>ent</code>
-	 * parameter.
-	 */
-	public String dropTable(DbEntity ent);
+    /**
+     * Returns a SQL string that can be used to drop
+     * a database table corresponding to <code>ent</code>
+     * parameter.
+     */
+    public String dropTable(DbEntity ent);
 
-	/**
-	 * Returns a SQL string that can be used to create database table
-	 * corresponding to <code>ent</code> parameter.
-	 */
-	public String createTable(DbEntity ent);
+    /**
+     * Returns a SQL string that can be used to create database table
+     * corresponding to <code>ent</code> parameter.
+     */
+    public String createTable(DbEntity ent);
 
     /**
      * Returns a DDL string to create a unique constraint over a set 
@@ -175,95 +172,97 @@ public interface DbAdapter {
      * @since 1.1
      */
     public String createUniqueConstraint(DbEntity source, Collection columns);
-    
-	/**
-	 *  Returns a SQL string that can be used to create
-	 * a foreign key constraint for the relationship.
-	 */
-	public String createFkConstraint(DbRelationship rel);
 
-	/**
-	 * Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
-	 * Valid types are defined in java.sql.Types.
-	 */
-	public String[] externalTypesForJdbcType(int type);
+    /**
+     *  Returns a SQL string that can be used to create
+     * a foreign key constraint for the relationship.
+     */
+    public String createFkConstraint(DbRelationship rel);
 
-	/**
-	 * Returns a map of ExtendedTypes that is used to translate values between
-	 * Java and JDBC layer.
-	 */
-	public ExtendedTypeMap getExtendedTypes();
+    /**
+     * Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
+     * Valid JDBC types are defined in java.sql.Types.
+     */
+    public String[] externalTypesForJdbcType(int type);
 
-	/**
-	 * Returns primary key generator associated with this DbAdapter.
-	 */
-	public PkGenerator getPkGenerator();
+    /**
+     * Returns a map of ExtendedTypes that is used to translate values between
+     * Java and JDBC layer.
+     * 
+     * @see org.objectstyle.cayenne.access.types.ExtendedType
+     */
+    public ExtendedTypeMap getExtendedTypes();
 
-	/**
-	 * Creates and returns a QueryTranslator appropriate for the
-	 * specified <code>query</code> parameter. Sets translator
-	 * "query" and "adapter" property.
-	 *
-	 * <p>This factory method allows subclasses to specify their
-	 * own translators that implement vendor-specific optimizations.
-	 * </p>
-	 */
-	public QueryTranslator getQueryTranslator(Query query) throws Exception;
+    /**
+     * Returns primary key generator associated with this DbAdapter.
+     */
+    public PkGenerator getPkGenerator();
 
-	public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler);
+    /**
+     * Creates and returns a QueryTranslator appropriate for the
+     * specified <code>query</code> parameter. Sets translator
+     * "query" and "adapter" property.
+     *
+     * <p>This factory method allows subclasses to specify their
+     * own translators that implement vendor-specific optimizations.
+     * </p>
+     */
+    public QueryTranslator getQueryTranslator(Query query) throws Exception;
 
-	/**
-	 * Creates and returns a DbAttribute based on supplied parameters
-	 * (usually obtained from database meta data).
-	 *
-	 * @param name database column name
-	 * @param typeName database specific type name, may be used as a hint to
-	 * determine the right JDBC type.
-	 * @param type JDBC column type
-	 * @param size database column size (ignored if less than zero)
-	 * @param precision database column precision (ignored if less than zero)
-	 * @param allowNulls database column nullable parameter
-	 */
-	public DbAttribute buildAttribute(
-		String name,
-		String typeName,
-		int type,
-		int size,
-		int precision,
-		boolean allowNulls);
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler);
 
-	/**
-	 * Binds an object value to PreparedStatement's numbered parameter.
-	 */
-	public void bindParameter(
-		PreparedStatement statement,
-		Object object,
-		int pos,
-		int sqlType,
-		int precision)
-		throws SQLException, Exception;
+    /**
+     * Creates and returns a DbAttribute based on supplied parameters
+     * (usually obtained from database meta data).
+     *
+     * @param name database column name
+     * @param typeName database specific type name, may be used as a hint to
+     * determine the right JDBC type.
+     * @param type JDBC column type
+     * @param size database column size (ignored if less than zero)
+     * @param precision database column precision (ignored if less than zero)
+     * @param allowNulls database column nullable parameter
+     */
+    public DbAttribute buildAttribute(
+        String name,
+        String typeName,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls);
 
-	/**
-	 * Returns the name of the table type (as returned by
-	 * <code>DatabaseMetaData.getTableTypes</code>) for a simple user table.
-	 */
-	public String tableTypeForTable();
+    /**
+     * Binds an object value to PreparedStatement's numbered parameter.
+     */
+    public void bindParameter(
+        PreparedStatement statement,
+        Object object,
+        int pos,
+        int sqlType,
+        int precision)
+        throws SQLException, Exception;
 
-	/**
-	 * Returns the name of the table type (as returned by
-	 * <code>DatabaseMetaData.getTableTypes</code>) for a view table.
-	 */
-	public String tableTypeForView();
+    /**
+     * Returns the name of the table type (as returned by
+     * <code>DatabaseMetaData.getTableTypes</code>) for a simple user table.
+     */
+    public String tableTypeForTable();
 
-	/**
-	 * Invoked by DataNode, allowing adapter to customize the execution 
-	 * path for the BatchQuery. If adapter returns <code>false</code>,
-	 * DataNode will not make any further attempts to run the query.
-	 */
-	public boolean shouldRunBatchQuery(
-		DataNode node,
-		Connection con,
-		BatchQuery query,
-		OperationObserver delegate)
-		throws SQLException, Exception;
+    /**
+     * Returns the name of the table type (as returned by
+     * <code>DatabaseMetaData.getTableTypes</code>) for a view table.
+     */
+    public String tableTypeForView();
+
+    /**
+     * Invoked by DataNode, allowing adapter to customize the execution 
+     * path for the BatchQuery. If adapter returns <code>false</code>,
+     * DataNode will not make any further attempts to run the query.
+     */
+    public boolean shouldRunBatchQuery(
+        DataNode node,
+        Connection con,
+        BatchQuery query,
+        OperationObserver delegate)
+        throws SQLException, Exception;
 }

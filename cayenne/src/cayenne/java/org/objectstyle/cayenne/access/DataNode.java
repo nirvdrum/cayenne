@@ -312,12 +312,9 @@ public class DataNode implements QueryEngine {
             try {
 
                 // figure out query type and call appropriate worker method
-
-                // 1. All kinds of SELECT
                 if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                     runSelect(connection, nextQuery, resultConsumer);
                 }
-                // 2. All kinds of MODIFY - INSERT, DELETE, UPDATE, UNKNOWN
                 else if (nextQuery instanceof BatchQuery) {
                     runBatchUpdate(connection, (BatchQuery) nextQuery, resultConsumer);
                 }
