@@ -56,15 +56,20 @@ package org.objectstyle.cayenne;
  */
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
 
 /**
+ * Implements helper methods that perform different query-related operations.
+ * <i>May be deprecated in the future, after its functionality is moved to the 
+ * places where it is used now.</i>
+ * 
+ * @author Andrei Adamchik
  *
  */
 public final class QueryHelper {
@@ -203,7 +208,12 @@ public final class QueryHelper {
             return null;
         }
 
-        return ExpressionFactory.binaryExp(Expression.EQUAL_TO, "a", "b");
+        ExpressionTranslator trans = new ExpressionTranslator(qual);
+        ExpressionTraversal parser = new ExpressionTraversal();
+        parser.setHandler(trans);
+        parser.traverseExpression(qual);
+        
+        return trans.getExp();
     }
 
     /** 
@@ -236,5 +246,40 @@ public final class QueryHelper {
                 oid.getIdSnapshot());
         sel.setQualifier(qualifierForDbMap(fkAttrs));
         return sel;
+    }
+    
+
+    static final class ExpressionTranslator extends TraversalHelper {
+        
+        protected Expression topExp;
+        protected Expression currentExp;
+        
+        public ExpressionTranslator(Expression e) {
+            topExp = createExpressionOfType(e);
+            currentExp = topExp;
+        }
+        
+        public Expression getExp() {
+            return topExp;
+        }
+        
+        
+        /** 
+         * Creates expression of the same type and same operands 
+         * as the original expression. Operands of the new expression
+         * are set to null.
+         */
+        public static Expression createExpressionOfType(Expression e)
+            throws ExpressionException {
+            try {
+                Expression exp = (Expression)e.getClass().newInstance();
+                exp.setType(e.getType());
+                return exp;
+            }
+            catch (Exception ex) {
+                logObj.log(Level.INFO, "Error instantiating expression.", ex);
+                throw new ExpressionException("Error instantiating expression.", ex);
+            }
+        }
     }
 }
