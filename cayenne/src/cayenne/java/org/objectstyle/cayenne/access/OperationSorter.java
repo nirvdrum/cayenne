@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.query.Query;
  * For instance it supports sorting of database operations to
  * satisfy database referential integrity consraints.
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik

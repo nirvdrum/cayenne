@@ -79,7 +79,7 @@ import org.objectstyle.cayenne.query.Query;
  * <p>If exceptions happen during the execution, they are immediately rethrown.
  * </p>
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  *  @author Andrei Adamchik

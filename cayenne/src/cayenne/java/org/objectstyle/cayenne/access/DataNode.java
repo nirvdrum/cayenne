@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.query.Query;
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
   *
-  * <p><i>For more information see <a href="../../../../../userguide/index.html"
+  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
   * target="_top">Cayenne User Guide.</a></i></p>
   * 
   * @author Andrei Adamchik

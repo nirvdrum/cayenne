@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.query.Query;
  * to the interested objects. This includes result counts, created objects, 
  * thrown exceptions, etc.</p>
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @see org.objectstyle.cayenne.access.QueryEngine

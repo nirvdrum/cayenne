@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.map.DbEntity;
  * Default implementation of ResultIterator interface. Serves as a 
  * factory that creates data rows from <code>java.sql.ResultSet</code>.
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik

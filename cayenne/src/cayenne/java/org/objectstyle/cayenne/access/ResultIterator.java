@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.DataObject;
  * checked exceptions. ResultIterators must be explicitly closed when the
  * user is done working with them.
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik

@@ -68,7 +68,7 @@ import java.util.List;
  * will generate consistently formatted logs that are easy to analyze
  * and turn on/off.</p>
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik

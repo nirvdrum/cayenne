@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.ObjectId;
  * <p>To retain guaranteed immutable reference to the list, 
  * application might use "List.toArray()" method.</p>
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik

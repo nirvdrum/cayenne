@@ -103,7 +103,7 @@ import org.objectstyle.cayenne.util.Util;
   * the datasource to the application code. Normal use pattern is to 
   * create DataContext in a session scope.
   *
-  * <p><i>For more information see <a href="../../../../../userguide/index.html"
+  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
   * target="_top">Cayenne User Guide.</a></i></p>
   * 
   * @author Andrei Adamchik

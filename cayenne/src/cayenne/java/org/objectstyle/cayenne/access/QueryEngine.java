@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.query.Query;
 /** 
  * Interface declares methods used to run Cayenne queries. 
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik

@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.query.Query;
  * <li>Storage of DataMaps
  * </ul>
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  *
  * @author Andrei Adamchik

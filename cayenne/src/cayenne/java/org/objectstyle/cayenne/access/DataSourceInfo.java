@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.util.Util;
 /** 
  * Helper JavaBean class that holds datasource login information. 
  * 
- * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  */
 public class DataSourceInfo implements Cloneable, java.io.Serializable {
