@@ -45,6 +45,7 @@
 	name CDATA #REQUIRED
 	className CDATA #REQUIRED
 	dbEntityName CDATA #REQUIRED
+	superClassName CDATA #IMPLIED
 	readOnly (true | false) "false"
 >
 
