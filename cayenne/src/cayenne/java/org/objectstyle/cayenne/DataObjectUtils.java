@@ -111,7 +111,10 @@ public final class DataObjectUtils {
         Map pk = id.getIdSnapshot();
 
         if (pk.size() != 1) {
-            throw new CayenneRuntimeException("Compund PK: " + id);
+            throw new CayenneRuntimeException("Expected single column PK, got "
+                    + pk.size()
+                    + " columns, ID: "
+                    + id);
         }
 
         Map.Entry pkEntry = (Map.Entry) pk.entrySet().iterator().next();
