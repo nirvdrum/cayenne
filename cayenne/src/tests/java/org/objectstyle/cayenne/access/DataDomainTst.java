@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -106,43 +105,6 @@ public class DataDomainTst extends CayenneTestCase {
 
         d1.removeMap(m1.getName());
         assertNull(d1.getMap(m1.getName()));
-    }
-
-    /**
-     * @deprecated Since 1.1 "dataNodeForObjEntity" is deprecated
-     */
-    public void testDataNodeForObjEntity() throws Exception {
-        DataDomain domain = new DataDomain("dom1");
-        assertNull(domain.getMap("map"));
-
-        DataMap map = new DataMap("map");
-        ObjEntity oe = new ObjEntity("a");
-        map.addObjEntity(oe);
-        DataNode node = new DataNode("1");
-        node.addDataMap(map);
-
-        domain.addNode(node);
-        assertNotNull(domain.dataNodeForObjEntity(oe));
-        assertSame(node, domain.dataNodeForObjEntity(oe));
-    }
-
-    /**
-     * @deprecated Since 1.1 "dataNodeForObjEntityName" is deprecated
-     */
-    public void testDataNodeForObjEntityName() throws Exception {
-        DataDomain domain = new DataDomain("dom1");
-        assertNull(domain.getMap("map"));
-
-        DataMap map = new DataMap("map");
-        ObjEntity oe = new ObjEntity("a");
-        oe.setClassName(Artist.class.getName());
-        map.addObjEntity(oe);
-        DataNode node = new DataNode("1");
-        node.addDataMap(map);
-
-        domain.addNode(node);
-        assertNotNull(domain.dataNodeForObjEntityName(oe.getName()));
-        assertSame(node, domain.dataNodeForObjEntityName(oe.getName()));
     }
 
     public void testReindexNodes() throws Exception {

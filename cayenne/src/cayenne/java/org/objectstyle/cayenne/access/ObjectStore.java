@@ -242,7 +242,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             object.setPersistenceState(PersistenceState.HOLLOW);
 
             // remove snapshot, but keep the object
-            removeSnapshot(object.getObjectId());
+            dataRowCache.forgetSnapshot(object.getObjectId());
 
             // remove cached changes
             indirectlyModifiedIds.remove(object.getObjectId());
@@ -493,7 +493,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             // deleted
             if (state == PersistenceState.DELETED) {
                 objects.remove();
-                removeSnapshot(id);
+                dataRowCache.forgetSnapshot(id);
                 object.setDataContext(null);
                 object.setPersistenceState(PersistenceState.TRANSIENT);
 
@@ -555,7 +555,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 object.setSnapshotVersion(dataRow.getVersion());
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 addObject(object);
-                removeObject(id);
+
+                objectMap.remove(id);
+                dataRowCache.forgetSnapshot(id);
             }
         }
 
@@ -577,32 +579,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.indirectlyModifiedIds.clear();
         this.flattenedDeletes.clear();
         this.flattenedInserts.clear();
-    }
-
-    /**
-     * Reregisters an object using a new id as a key. Returns the object if it is found,
-     * or null if it is not registered in the object store.
-     * 
-     * @deprecated Since 1.1 all methods for snapshot manipulation via ObjectStore are
-     *             deprecated due to architecture changes.
-     */
-    public synchronized DataObject changeObjectKey(ObjectId oldId, ObjectId newId) {
-        DataObject object = (DataObject) objectMap.remove(oldId);
-        if (object != null) {
-
-            Map snapshot = getDataRowCache().getCachedSnapshot(oldId);
-            objectMap.put(newId, object);
-
-            if (snapshot != null) {
-                getDataRowCache().processSnapshotChanges(
-                        this,
-                        Collections.singletonMap(newId, snapshot),
-                        Collections.singletonList(oldId),
-                        Collections.EMPTY_LIST);
-            }
-        }
-
-        return object;
     }
 
     public synchronized void addObject(DataObject obj) {
@@ -646,7 +622,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
             ObjectId oid = dataObj.getObjectId();
             objectMap.remove(oid);
-            removeSnapshot(oid);
+            dataRowCache.forgetSnapshot(oid);
 
             dataObj.setDataContext(null);
             dataObj.setObjectId(null);
@@ -662,26 +638,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public synchronized DataObject getObject(ObjectId id) {
         return (DataObject) objectMap.get(id);
-    }
-
-    /**
-     * @deprecated Since 1.1 all methods for snapshot manipulation via ObjectStore are
-     *             deprecated due to architecture changes.
-     */
-    public void addSnapshot(ObjectId id, Map snapshot) {
-        getDataRowCache().processSnapshotChanges(
-                this,
-                Collections.singletonMap(id, snapshot),
-                Collections.EMPTY_LIST,
-                Collections.EMPTY_LIST);
-    }
-
-    /**
-     * @deprecated Since 1.1 getCachedSnapshot(ObjectId) or
-     *             getSnapshot(ObjectId,QueryEngine) must be used.
-     */
-    public Map getSnapshot(ObjectId id) {
-        return getCachedSnapshot(id);
     }
 
     public synchronized DataRow getRetainedSnapshot(ObjectId oid) {
@@ -732,25 +688,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
         DataRow retained = getRetainedSnapshot(oid);
         return (retained != null) ? retained : getDataRowCache().getSnapshot(oid, engine);
-    }
-
-    /**
-     * @deprecated Since 1.1 all methods for snapshot manipulation via ObjectStore are
-     *             deprecated due to architecture changes.
-     */
-    public synchronized void removeObject(ObjectId id) {
-        if (id != null) {
-            objectMap.remove(id);
-            removeSnapshot(id);
-        }
-    }
-
-    /**
-     * @deprecated Since 1.1 all methods for snapshot manipulation via ObjectStore are
-     *             deprecated due to architecture changes.
-     */
-    public void removeSnapshot(ObjectId id) {
-        dataRowCache.forgetSnapshot(id);
     }
 
     /**

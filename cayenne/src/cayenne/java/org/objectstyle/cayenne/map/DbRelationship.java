@@ -100,15 +100,6 @@ public class DbRelationship extends Relationship {
     }
 
     /**
-     * @deprecated Since 1.1 use any other constructor.
-     */
-    public DbRelationship(DbEntity src, DbEntity target, DbAttributePair join) {
-        setSourceEntity(src);
-        setTargetEntity(target);
-        addJoin(join.toDbJoin(this));
-    }
-
-    /**
      * Prints itself as XML to the provided XMLEncoder.
      * 
      * @since 1.1
@@ -343,33 +334,11 @@ public class DbRelationship extends Relationship {
     /** 
      * Adds a join.
      * 
-     * @deprecated Since 1.1 use {@link #addJoin(DbJoin)}
-     */
-    public void addJoin(DbAttributePair join) {
-        if (join != null) {
-            addJoin(join.toDbJoin(this));
-        }
-    }
-
-    /** 
-     * Adds a join.
-     * 
      * @since 1.1
      */
     public void addJoin(DbJoin join) {
         if (join != null) {
             joins.add(join);
-        }
-    }
-
-    /** 
-     * Removes a join.
-     * 
-     * @deprecated Since 1.1 use {@link #removeJoin(DbJoin)}
-     */
-    public void removeJoin(DbAttributePair join) {
-        if (join != null) {
-            joins.remove(join.toDbJoin(this));
         }
     }
 

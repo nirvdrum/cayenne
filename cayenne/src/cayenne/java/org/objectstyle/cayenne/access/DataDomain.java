@@ -71,7 +71,6 @@ import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -493,13 +492,6 @@ public class DataDomain implements QueryEngine {
         return (DataNode) nodes.get(nodeName);
     }
 
-    /**
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
-     */
-    public synchronized DataNode dataNodeForObjEntityName(String objEntityName) {
-        ObjEntity objEntity = getEntityResolver().lookupObjEntity(objEntityName);
-        return (objEntity != null) ? dataNodeForObjEntity(objEntity) : null;
-    }
 
     /**
      * Updates internal index of DataNodes stored by the entity name.
@@ -519,14 +511,6 @@ public class DataDomain implements QueryEngine {
         }
     }
 
-    /** 
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
-     * queries are not necessarily based on an ObjEntity. Use 
-     * {@link ObjEntity#getDataMap()} to obtain DataMap from ObjEntity.
-     */
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return lookupDataNode(objEntity.getDataMap());
-    }
 
     /**
      * Returns a DataNode that should handle queries for all
@@ -545,37 +529,6 @@ public class DataDomain implements QueryEngine {
                 return node;
             }
         }
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
-     */
-    public DataNode dataNodeForDbEntity(DbEntity dbEntity) {
-        return this.lookupDataNode(dbEntity.getDataMap());
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
-     */
-    public DataNode dataNodeForDbEntityName(String dbEntityName) {
-        // this is not correct anyway - EntityResolver.lookupDbEntity uses ObjEntity name as key!!
-        DbEntity dbEntity = getEntityResolver().lookupDbEntity(dbEntityName);
-        return (dbEntity != null) ? dataNodeForDbEntity(dbEntity) : null;
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
-     */
-    public DataNode dataNodeForProcedure(Procedure procedure) {
-        return this.lookupDataNode(procedure.getDataMap());
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
-     */
-    public synchronized DataNode dataNodeForProcedureName(String procedureName) {
-        Procedure procedure = getEntityResolver().lookupProcedure(procedureName);
-        return (procedure != null) ? dataNodeForProcedure(procedure) : null;
     }
 
     /**
@@ -654,27 +607,19 @@ public class DataDomain implements QueryEngine {
             singleNode.performQueries(queries, resultConsumer, transaction);
         }
         else {
+            
+            // organize queries by node
             Iterator it = queries.iterator();
             Map queryMap = new HashMap();
-            // organize queries by node
             while (it.hasNext()) {
-                DataNode node = null;
                 Query nextQuery = (Query) it.next();
-
-                // try DbEntity root
-                DbEntity dbe = this.getEntityResolver().lookupDbEntity(nextQuery);
-                if (dbe != null) {
-                    node = this.dataNodeForDbEntity(dbe);
-                }
-                // try StoredProcedure root
-                else {
-                    Procedure procedure =
-                        this.getEntityResolver().lookupProcedure(nextQuery);
-                    if (procedure != null) {
-                        node = this.dataNodeForProcedure(procedure);
-                    }
+                DataMap dataMap = getEntityResolver().lookupDataMap(nextQuery);
+                if (dataMap == null) {
+                    throw new CayenneRuntimeException(
+                        "No DataMap found for query with root: " + nextQuery.getRoot());
                 }
 
+                DataNode node  = lookupDataNode(dataMap);
                 if (node == null) {
                     throw new CayenneRuntimeException(
                         "No suitable DataNode to handle query with root: "
@@ -686,6 +631,7 @@ public class DataDomain implements QueryEngine {
                     nodeQueries = new ArrayList();
                     queryMap.put(node, nodeQueries);
                 }
+                
                 nodeQueries.add(nextQuery);
             }
 
@@ -714,15 +660,6 @@ public class DataDomain implements QueryEngine {
                 ? Transaction.noTransaction()
                 : createTransaction();
         transaction.performQueries(this, queries, observer);
-    }
-
-    /** 
-     * Calls "performQueries()" wrapping a query argument into a list.
-     * 
-     * @deprecated Since 1.1 use {@link #performQueries(java.util.Collection,OperationObserver,Transaction)}
-     */
-    public void performQuery(Query query, OperationObserver operationObserver) {
-        this.performQueries(Collections.singletonList(query), operationObserver);
     }
 
     public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {

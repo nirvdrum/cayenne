@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -120,13 +119,6 @@ public class MockQueryEngine implements QueryEngine {
             Query query = (Query) it.next();
             resultConsumer.nextDataRows(query, (List) results.get(query));
         }
-    }
-
-    public void performQuery(Query query, OperationObserver resultConsumer) {
-    }
-
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return null;
     }
 
     public DataNode lookupDataNode(DataMap dataMap) {

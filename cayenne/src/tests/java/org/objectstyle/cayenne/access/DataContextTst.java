@@ -194,31 +194,6 @@ public class DataContextTst extends DataContextTestBase {
         return context.getParentDataDomain().createDataContext();
     }
 
-    /**
-     * @deprecated Since 1.1 "createpermId" is deprectated in the DataContext.
-     */
-    public void testCreatePermId1() throws Exception {
-        Artist artist = new Artist();
-        context.registerNewObject(artist);
-        ObjectId id = context.createPermId(artist);
-        assertNotNull(id);
-    }
-
-    /**
-     * @deprecated Since 1.1 "createpermId" is deprectated in the DataContext.
-     */
-    public void testCreatePermId2() throws Exception {
-        Artist artist = new Artist();
-        context.registerNewObject(artist);
-        ObjectId id1 = context.createPermId(artist);
-        ObjectId id2 = context.createPermId(artist);
-        //Must not fail on second call
-
-        assertNotNull(id1);
-        assertNotNull(id2);
-        assertEquals(id1, id2); //Must be the same,
-    }
-
     public void testCurrentSnapshot1() throws Exception {
         Artist artist = fetchArtist("artist1", false);
         Map snapshot = context.currentSnapshot(artist);

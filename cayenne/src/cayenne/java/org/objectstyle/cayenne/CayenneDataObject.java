@@ -260,14 +260,6 @@ public class CayenneDataObject implements DataObject {
         values.put(propName, val);
     }
 
-    /**
-     * @deprecated Since 1.0.1 this method is no longer needed, since
-     *             "readProperty(String)" supports to-one dependent targets.
-     */
-    public DataObject readToOneDependentTarget(String relName) {
-        return (DataObject) readProperty(relName);
-    }
-
     public void removeToManyTarget(String relName, DataObject value, boolean setReverse) {
 
         ObjRelationship relationship = this.getRelationshipNamed(relName);
@@ -329,15 +321,6 @@ public class CayenneDataObject implements DataObject {
         if (value != null && setReverse) {
             setReverseRelationship(relName, value);
         }
-    }
-
-    /**
-     * @deprecated Since 1.0.1 this method is no longer needed, since
-     *             "setToOneTarget(String, DataObject, boolean)" supports dependent
-     *             targets as well.
-     */
-    public void setToOneDependentTarget(String relName, DataObject val) {
-        setToOneTarget(relName, val, true);
     }
 
     public void setToOneTarget(
@@ -432,22 +415,6 @@ public class CayenneDataObject implements DataObject {
             else
                 val.setToOneTarget(revRel.getName(), null, false);
         }
-    }
-
-    /**
-     * @deprecated Since 1.1 use
-     *             getDataContext().getObjectStore().getSnapshot(this.getObjectId(),
-     *             getDataContext())
-     */
-    public Map getCommittedSnapshot() {
-        return dataContext.getObjectStore().getSnapshot(getObjectId(), dataContext);
-    }
-
-    /**
-     * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
-     */
-    public Map getCurrentSnapshot() {
-        return dataContext.currentSnapshot(this);
     }
 
     /**

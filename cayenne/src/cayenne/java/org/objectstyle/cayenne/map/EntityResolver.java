@@ -55,39 +55,73 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.collections.collection.CompositeCollection;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Represents a virtual shared namespace for zero or more DataMaps. 
- * EntityResolver is used by Cayenne runtime and in addition to 
- * EntityNamespace interface methods implements other convenience 
- * lookups, resolving entities for Queries, Java classes, etc. DataMaps 
+ * Represents a virtual shared namespace for zero or more DataMaps. EntityResolver is used
+ * by Cayenne runtime and in addition to EntityNamespace interface methods implements
+ * other convenience lookups, resolving entities for Queries, Java classes, etc. DataMaps
  * can be added or removed dynamically at runtime.
- * 
- * <p>EntityResolver is thread-safe.</p>
+ * <p>
+ * EntityResolver is thread-safe.
+ * </p>
  * 
  * @since 1.1 In 1.1 EntityResolver was moved from the access package.
  * @author Andrei Adamchik
  */
-public class EntityResolver
-    extends org.objectstyle.cayenne.access.EntityResolver
-    implements MappingNamespace {
-    // NOTE: this class explicitly overrides all superclass methods to avoid
-    // deprecation warnings all over the code.
+public class EntityResolver implements MappingNamespace {
 
+    private static final Logger logObj = Logger.getLogger(EntityResolver.class);
+
+    protected boolean indexedByClass;
+    protected Map queryCache;
+    protected Map dbEntityCache;
+    protected Map objEntityCache;
+    protected Map procedureCache;
+    protected List maps;
+    protected List mapsRef;
+    protected Map entityInheritanceCache;
+
+    /**
+     * Creates new EntityResolver.
+     */
     public EntityResolver() {
-        super();
+        this.indexedByClass = true;
+        this.maps = new ArrayList();
+        this.mapsRef = Collections.unmodifiableList(maps);
+        this.queryCache = new HashMap();
+        this.dbEntityCache = new HashMap();
+        this.objEntityCache = new HashMap();
+        this.procedureCache = new HashMap();
+        this.entityInheritanceCache = new HashMap();
     }
 
+    /**
+     * Creates new EntityResolver that indexes a collection of DataMaps.
+     */
     public EntityResolver(Collection dataMaps) {
-        super(dataMaps);
+        this();
+        this.maps.addAll(dataMaps); //Take a copy
+        this.constructCache();
     }
 
+    /**
+     * Returns all DbEntities.
+     */
     public Collection getDbEntities() {
         CompositeCollection c = new CompositeCollection();
         Iterator it = getDataMaps().iterator();
@@ -149,7 +183,6 @@ public class EntityResolver
     }
 
     public synchronized void addDataMap(DataMap map) {
-        // in addition to super logic, we must set parent namespace
         if (!maps.contains(map)) {
             maps.add(map);
             map.setNamespace(this);
@@ -157,71 +190,445 @@ public class EntityResolver
         }
     }
 
+    /**
+     * Removes all entity mappings from the cache. Cache can be rebuilt either explicitly
+     * by calling <code>constructCache</code>, or on demand by calling any of the
+     * <code>lookup...</code> methods.
+     */
     public synchronized void clearCache() {
-        super.clearCache();
+        queryCache.clear();
+        dbEntityCache.clear();
+        objEntityCache.clear();
+        procedureCache.clear();
+        entityInheritanceCache.clear();
     }
 
+    /**
+     * Creates caches of DbEntities by ObjEntity, DataObject class, and ObjEntity name
+     * using internal list of maps.
+     */
     protected synchronized void constructCache() {
-        super.constructCache();
+        clearCache();
+
+        // rebuild index
+        Iterator mapIterator = maps.iterator();
+        while (mapIterator.hasNext()) {
+            DataMap map = (DataMap) mapIterator.next();
+
+            // index ObjEntities
+            Iterator objEntities = map.getObjEntities().iterator();
+            while (objEntities.hasNext()) {
+                ObjEntity oe = (ObjEntity) objEntities.next();
+
+                // index by name
+                objEntityCache.put(oe.getName(), oe);
+
+                // index by class
+                String className = oe.getClassName();
+                if (indexedByClass && className != null) {
+                    Class entityClass;
+                    try {
+                        entityClass = Configuration.getResourceLoader().loadClass(
+                                className);
+                    }
+                    catch (ClassNotFoundException e) {
+                        // print a big warning and continue... DataMaps can contain all
+                        // kinds of garbage...
+                        logObj.warn("*** Class '"
+                                + className
+                                + "' not found in runtime. Ignoring.");
+                        continue;
+                    }
+
+                    if (objEntityCache.get(entityClass) != null) {
+                        throw new CayenneRuntimeException(getClass().getName()
+                                + ": More than one ObjEntity ("
+                                + oe.getName()
+                                + " and "
+                                + ((ObjEntity) objEntityCache.get(entityClass)).getName()
+                                + ") uses the class "
+                                + entityClass.getName());
+                    }
+
+                    objEntityCache.put(entityClass, oe);
+                    if (oe.getDbEntity() != null) {
+                        dbEntityCache.put(entityClass, oe.getDbEntity());
+                    }
+                }
+            }
+
+            // index ObjEntity inheritance
+            objEntities = map.getObjEntities().iterator();
+            while (objEntities.hasNext()) {
+                ObjEntity oe = (ObjEntity) objEntities.next();
+
+                // build inheritance tree... include nodes that
+                // have no children to avoid uneeded cache rebuilding on lookup...
+                EntityInheritanceTree node = (EntityInheritanceTree) entityInheritanceCache
+                        .get(oe.getName());
+                if (node == null) {
+                    node = new EntityInheritanceTree(oe);
+                    entityInheritanceCache.put(oe.getName(), node);
+                }
+
+                String superOEName = oe.getSuperEntityName();
+                if (superOEName != null) {
+                    EntityInheritanceTree superNode = (EntityInheritanceTree) entityInheritanceCache
+                            .get(superOEName);
+
+                    if (superNode == null) {
+                        // do direct entity lookup to avoid recursive cache rebuild
+                        ObjEntity superOE = (ObjEntity) objEntityCache.get(superOEName);
+                        if (superOE != null) {
+                            superNode = new EntityInheritanceTree(superOE);
+                            entityInheritanceCache.put(superOEName, superNode);
+                        }
+                        else {
+                            // bad mapping?
+                            logObj.debug("Invalid superEntity '"
+                                    + superOEName
+                                    + "' for entity '"
+                                    + oe.getName()
+                                    + "'");
+                            continue;
+                        }
+                    }
+
+                    superNode.addChildNode(node);
+                }
+            }
+
+            // index DbEntities
+            Iterator dbEntities = map.getDbEntities().iterator();
+            while (dbEntities.hasNext()) {
+                DbEntity de = (DbEntity) dbEntities.next();
+                dbEntityCache.put(de.getName(), de);
+            }
+
+            // index stored procedures
+            Iterator procedures = map.getProcedures().iterator();
+            while (procedures.hasNext()) {
+                Procedure proc = (Procedure) procedures.next();
+                procedureCache.put(proc.getName(), proc);
+            }
+
+            // index queries
+            Iterator queries = map.getQueries().iterator();
+            while (queries.hasNext()) {
+                Query query = (Query) queries.next();
+                String name = query.getName();
+                Object existingQuery = queryCache.put(name, query);
+
+                if (existingQuery != null && query != existingQuery) {
+                    throw new CayenneRuntimeException("More than one Query for name"
+                            + name);
+                }
+            }
+        }
     }
 
+    /**
+     * Returns a DataMap matching the name.
+     */
     public synchronized DataMap getDataMap(String mapName) {
-        return super.getDataMap(mapName);
-    }
+        if (mapName == null) {
+            return null;
+        }
 
-    public Collection getDataMaps() {
-        return super.getDataMaps();
-    }
+        Iterator it = maps.iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            if (mapName.equals(map.getName())) {
+                return map;
+            }
+        }
 
-    public synchronized DataMap lookupDataMap(Query q) {
-        return super.lookupDataMap(q);
-    }
-
-    public synchronized DbEntity lookupDbEntity(Class aClass) {
-        return super.lookupDbEntity(aClass);
-    }
-
-    public synchronized DbEntity lookupDbEntity(DataObject dataObject) {
-        return super.lookupDbEntity(dataObject);
-    }
-
-    public synchronized DbEntity lookupDbEntity(Query q) {
-        return super.lookupDbEntity(q);
-    }
-
-    public EntityInheritanceTree lookupInheritanceTree(ObjEntity entity) {
-        return super.lookupInheritanceTree(entity);
-    }
-
-    public synchronized ObjEntity lookupObjEntity(Class aClass) {
-        return super.lookupObjEntity(aClass);
-    }
-
-    public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
-        return super.lookupObjEntity(dataObject);
-    }
-
-    public synchronized ObjEntity lookupObjEntity(Query q) {
-        return super.lookupObjEntity(q);
-    }
-
-    public Procedure lookupProcedure(Query q) {
-        return super.lookupProcedure(q);
-    }
-
-    public synchronized void removeDataMap(DataMap map) {
-        super.removeDataMap(map);
+        return null;
     }
 
     public synchronized void setDataMaps(Collection maps) {
-        super.setDataMaps(maps);
+        this.maps.clear();
+        this.maps.addAll(maps);
+        clearCache();
+    }
+
+    /**
+     * Returns an unmodifiable collection of DataMaps.
+     */
+    public Collection getDataMaps() {
+        return mapsRef;
+    }
+
+    /**
+     * Searches for DataMap that holds Query root object.
+     */
+    public synchronized DataMap lookupDataMap(Query q) {
+        if (q.getRoot() instanceof DataMap) {
+            return (DataMap) q.getRoot();
+        }
+
+        DbEntity entity = lookupDbEntity(q);
+        if (entity != null) {
+            return entity.getDataMap();
+        }
+
+        // try procedure
+        Procedure procedure = lookupProcedure(q);
+        return (procedure != null) ? procedure.getDataMap() : null;
+    }
+
+    /**
+     * Looks in the DataMap's that this object was created with for the DbEntity that
+     * services the specified class
+     * 
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+    public synchronized DbEntity lookupDbEntity(Class aClass) {
+        if (!indexedByClass) {
+            throw new CayenneRuntimeException("Class index is disabled.");
+        }
+        return this._lookupDbEntity(aClass);
+    }
+
+    /**
+     * Looks in the DataMap's that this object was created with for the DbEntity that
+     * services the specified data Object
+     * 
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+    public synchronized DbEntity lookupDbEntity(DataObject dataObject) {
+        return this._lookupDbEntity(dataObject.getClass());
+    }
+
+    /**
+     * Looks up the DbEntity for the given query by using the query's getRoot method and
+     * passing to lookupDbEntity
+     * 
+     * @return the root DbEntity of the query
+     */
+    public synchronized DbEntity lookupDbEntity(Query q) {
+        Object root = q.getRoot();
+        if (root instanceof DbEntity) {
+            return (DbEntity) root;
+        }
+        else if (root instanceof Class) {
+            return this.lookupDbEntity((Class) root);
+        }
+        else if (root instanceof ObjEntity) {
+            return ((ObjEntity) root).getDbEntity();
+        }
+        else if (root instanceof String) {
+            ObjEntity objEntity = this.lookupObjEntity((String) root);
+            return (objEntity != null) ? objEntity.getDbEntity() : null;
+        }
+        else if (root instanceof DataObject) {
+            return this.lookupDbEntity((DataObject) root);
+        }
+        return null;
+    }
+
+    /**
+     * Returns EntityInheritanceTree representing inheritance hierarchy that starts with a
+     * given ObjEntity as root, and includes all its subentities. If ObjEntity has no
+     * known subentities, null is returned.
+     */
+    public EntityInheritanceTree lookupInheritanceTree(ObjEntity entity) {
+
+        EntityInheritanceTree tree = (EntityInheritanceTree) entityInheritanceCache
+                .get(entity.getName());
+
+        if (tree == null) {
+            // since we keep inheritance trees for all entities, null means
+            // unknown entity...
+
+            // rebuild cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            tree = (EntityInheritanceTree) entityInheritanceCache.get(entity.getName());
+        }
+
+        // don't return "trivial" trees
+        return (tree == null || tree.getChildrenCount() == 0) ? null : tree;
+    }
+
+    /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity that
+     * maps to the services the specified class
+     * 
+     * @return the required ObjEntity or null if there is none that matches the specifier
+     */
+    public synchronized ObjEntity lookupObjEntity(Class aClass) {
+        if (!indexedByClass) {
+            throw new CayenneRuntimeException("Class index is disabled.");
+        }
+
+        return this._lookupObjEntity(aClass);
+    }
+
+    /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity that
+     * services the specified data Object
+     * 
+     * @return the required ObjEntity, or null if none matches the specifier
+     */
+    public synchronized ObjEntity lookupObjEntity(DataObject dataObject) {
+        return this._lookupObjEntity(dataObject.getClass());
+    }
+
+    /**
+     * Looks up the ObjEntity for the given query by using the query's getRoot method and
+     * passing to lookupObjEntity
+     * 
+     * @return the root ObjEntity of the query
+     * @throws CayenneRuntimeException if the root of the query is a DbEntity (it is not
+     *             reliably possible to map from a DbEntity to an ObjEntity as a DbEntity
+     *             may be the source for multiple ObjEntities. It is not safe to rely on
+     *             such behaviour).
+     */
+    public synchronized ObjEntity lookupObjEntity(Query q) {
+
+        // a special case of ProcedureQuery ...
+        // TODO: should really come up with some generic way of doing this...
+        // e.g. all queries may separate the notion of root from the notion
+        // of result type
+
+        Object root = (q instanceof ProcedureQuery) ? ((ProcedureQuery) q)
+                .getResultClass(Configuration.getResourceLoader()) : q.getRoot();
+
+        if (root instanceof DbEntity) {
+            throw new CayenneRuntimeException(
+                    "Cannot safely resolve the ObjEntity for the query "
+                            + q
+                            + " because the root of the query is a DbEntity");
+        }
+        else if (root instanceof ObjEntity) {
+            return (ObjEntity) root;
+        }
+        else if (root instanceof Class) {
+            return this.lookupObjEntity((Class) root);
+        }
+        else if (root instanceof String) {
+            return this.lookupObjEntity((String) root);
+        }
+        else if (root instanceof DataObject) {
+            return this.lookupObjEntity((DataObject) root);
+        }
+
+        return null;
+    }
+
+    /**
+     * Looks in the DataMap's that this object was created with for the ObjEntity that
+     * maps to the services the class with the given name
+     * 
+     * @return the required ObjEntity or null if there is none that matches the specifier
+     */
+    public synchronized ObjEntity lookupObjEntity(String entityName) {
+        return this._lookupObjEntity(entityName);
+    }
+
+    public Procedure lookupProcedure(Query q) {
+        Object root = q.getRoot();
+        if (root instanceof Procedure) {
+            return (Procedure) root;
+        }
+        else if (root instanceof String) {
+            return this.lookupProcedure((String) root);
+        }
+        return null;
+    }
+
+    public Procedure lookupProcedure(String procedureName) {
+
+        Procedure result = (Procedure) procedureCache.get(procedureName);
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            result = (Procedure) procedureCache.get(procedureName);
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns a named query or null if no query exists for a given name.
+     */
+    public synchronized Query lookupQuery(String name) {
+        Query result = (Query) queryCache.get(name);
+
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            result = (Query) queryCache.get(name);
+        }
+        return result;
+    }
+
+    public synchronized void removeDataMap(DataMap map) {
+        if (maps.remove(map)) {
+            clearCache();
+        }
     }
 
     public boolean isIndexedByClass() {
-        return super.isIndexedByClass();
+        return indexedByClass;
     }
 
     public void setIndexedByClass(boolean b) {
-        super.setIndexedByClass(b);
+        indexedByClass = b;
+    }
+
+    /**
+     * Internal usage only - provides the type-unsafe implementation which services the
+     * four typesafe public lookupDbEntity methods Looks in the DataMap's that this object
+     * was created with for the ObjEntity that maps to the specified object. Object may be
+     * a Entity name, ObjEntity, DataObject class (Class object for a class which
+     * implements the DataObject interface), or a DataObject instance itself
+     * 
+     * @return the required DbEntity, or null if none matches the specifier
+     */
+    protected DbEntity _lookupDbEntity(Object object) {
+        if (object instanceof DbEntity) {
+            return (DbEntity) object;
+        }
+
+        DbEntity result = (DbEntity) dbEntityCache.get(object);
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            result = (DbEntity) dbEntityCache.get(object);
+        }
+        return result;
+    }
+
+    /**
+     * Internal usage only - provides the type-unsafe implementation which services the
+     * three typesafe public lookupObjEntity methods Looks in the DataMap's that this
+     * object was created with for the ObjEntity that maps to the specified object. Object
+     * may be a Entity name, DataObject instance or DataObject class (Class object for a
+     * class which implements the DataObject interface)
+     * 
+     * @return the required ObjEntity or null if there is none that matches the specifier
+     */
+    protected ObjEntity _lookupObjEntity(Object object) {
+        if (object instanceof ObjEntity) {
+            return (ObjEntity) object;
+        }
+
+        if (object instanceof DataObject) {
+            object = object.getClass();
+        }
+
+        ObjEntity result = (ObjEntity) objEntityCache.get(object);
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            result = (ObjEntity) objEntityCache.get(object);
+        }
+        return result;
     }
 }

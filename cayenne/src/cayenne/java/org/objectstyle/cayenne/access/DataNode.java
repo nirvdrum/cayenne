@@ -233,16 +233,6 @@ public class DataNode implements QueryEngine {
                 : NULL_SORTER;
     }
 
-    /** 
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
-     * queries are not necessarily based on an ObjEntity. Use 
-     * {@link ObjEntity#getDataMap()} to obtain DataMap from ObjEntity.
-     */
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        // we don't know any better than to return ourselves...
-        return this;
-    }
-
     /**
      * Returns a DataNode that should hanlde queries for all
      * DataMap components.
@@ -261,17 +251,6 @@ public class DataNode implements QueryEngine {
     public void performQueries(Collection queries, OperationObserver observer) {
         Transaction transaction = Transaction.internalTransaction(null);
         transaction.performQueries(this, queries, observer);
-    }
-
-    /** 
-     * Calls {@link #performQueries(Collection, OperationObserver)}" wrapping a query argument 
-     * into a list.
-     * 
-     * @deprecated Since 1.1 use performQueries(List, OperationObserver).
-     * This method is redundant and doesn't add value.
-     */
-    public void performQuery(Query query, OperationObserver operationObserver) {
-        this.performQueries(Collections.singletonList(query), operationObserver);
     }
 
     /** 
@@ -750,13 +729,6 @@ public class DataNode implements QueryEngine {
     public void setEntityResolver(
         org.objectstyle.cayenne.map.EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
-    }
-
-    /**
-     * @deprecated Since 1.1 use #getEntitySorter()
-     */
-    public org.objectstyle.cayenne.access.util.DependencySorter getDependencySorter() {
-        return entitySorter;
     }
 
     /**

@@ -59,8 +59,6 @@ package org.objectstyle.cayenne.access;
 import java.util.Collection;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
 
 
 /**
@@ -92,24 +90,7 @@ public interface QueryEngine {
      * @since 1.1 The signiture has changed from List to Collection.
      */
     public void performQueries(Collection queries, OperationObserver resultConsumer);
-
-    /**
-     * Executes a single query. Will notify <code>resultConsumer</code>
-     * about query progress and results.
-     *
-     * @deprecated Since 1.1 use {@link #performQueries(java.util.Collection,OperationObserver,Transaction)}
-     */
-    public void performQuery(Query query, OperationObserver resultConsumer);
-
-   	/** 
-     * Returns a DataNode that handles database operations for
-     * a specified <code>ObjEntity</code>.
-     * 
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
-     * queries are not necessarily based on an ObjEntity. Use 
-     * {@link ObjEntity#getDataMap()} to obtain DataMap from ObjEntity.
-     */
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity);
+ 
     
     /**
      * Returns a DataNode that should handle queries for all

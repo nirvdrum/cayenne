@@ -55,28 +55,20 @@
  */
 package org.objectstyle.cayenne.access.util;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.InsertQuery;
-import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
 
 /**
  * Implements helper methods that perform different query-related operations.
@@ -87,152 +79,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  *
  */
 public class QueryUtils {
-
-    /**
-     * @deprecated Since 1.1 Unused
-     */
-    private static Map putModifiedAttribute(Map aMap, String name, Object value) {
-        if (aMap == null) {
-            aMap = new HashMap();
-        }
-        aMap.put(name, value);
-        return aMap;
-    }
-
-    /**
-     * Returns a map of the properties of dataObject which have actually changed
-     * compared to the objects commited snapshot.  Actual change is determined
-     * by using equals() (true implies no change).
-     * Will return null if there are no changes
-     * 
-     * @deprecated Since 1.1 unused
-     */
-    public static Map updatedProperties(DataObject dataObject) {
-        // Lazily created to avoid creating too many unnecessary objects
-        Map result = null;
-
-        DataContext context = dataObject.getDataContext();
-        DataRow committedSnapshot =
-            context.getObjectStore().getSnapshot(dataObject.getObjectId(), context);
-        DataRow currentSnapshot = dataObject.getDataContext().currentSnapshot(dataObject);
-
-        Iterator it = currentSnapshot.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            Object newValue = currentSnapshot.get(attrName);
-
-            // if snapshot exists, compare old values and new values,
-            // only add attribute to the update clause if the value has changed
-            if (committedSnapshot != null) {
-                Object oldValue = committedSnapshot.get(attrName);
-                if (oldValue != null && !oldValue.equals(newValue)) {
-                    result = putModifiedAttribute(result, attrName, newValue);
-                }
-                else if (oldValue == null && newValue != null) {
-                    result = putModifiedAttribute(result, attrName, newValue);
-                }
-            }
-            // if no snapshot exists, just add the fresh value to update clause
-            else {
-                result = putModifiedAttribute(result, attrName, newValue);
-            }
-        }
-
-        // original snapshot can have extra keys that are missing in the
-        // current snapshot; process those
-        if (committedSnapshot != null) {
-            Iterator origit = committedSnapshot.keySet().iterator();
-            while (origit.hasNext()) {
-                String attrName = (String) origit.next();
-                if (currentSnapshot.containsKey(attrName))
-                    continue;
-
-                Object oldValue = committedSnapshot.get(attrName);
-                if (oldValue == null)
-                    continue;
-                result = putModifiedAttribute(result, attrName, null);
-            }
-        }
-        return result; //Might be null if nothing was actually changed
-    }
-
-    /** Returns an update query for the DataObject that can be used to commit
-     *  object state changes to the database. If no changes are found, null is returned.
-     *  
-     * @deprecated Unused since 1.1
-     */
-    public static UpdateQuery updateQuery(DataObject dataObject) {
-        UpdateQuery upd = new UpdateQuery();
-
-        ObjectId id = dataObject.getObjectId();
-        upd.setRoot(dataObject.getClass());
-        Map modifiedProperties = updatedProperties(dataObject);
-        if ((modifiedProperties != null) && (modifiedProperties.size() > 0)) {
-            Iterator keyIterator = modifiedProperties.keySet().iterator();
-            while (keyIterator.hasNext()) {
-                String key = (String) keyIterator.next();
-                upd.addUpdAttribute(key, modifiedProperties.get(key));
-            }
-            // set qualifier
-            upd.setQualifier(
-                ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-            return upd;
-        }
-
-        return null;
-    }
-
-    /** 
-     * Generates a delete query for a specified data object.
-     * 
-     * @deprecated Unused since 1.1
-     */
-    public static DeleteQuery deleteQuery(DataObject dataObject) {
-        DeleteQuery del = new DeleteQuery();
-        ObjectId id = dataObject.getObjectId();
-        del.setRoot(dataObject.getClass());
-        del.setQualifier(
-            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-        return del;
-    }
-
-    /** 
-     * Generates an insert query for a specified data object.
-     *
-     * @deprecated Unused since 1.1
-     */
-    public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
-        InsertQuery ins = new InsertQuery();
-        ins.setRoot(permId.getObjClass());
-        ins.setObjectSnapshot(objectSnapshot);
-        ins.setObjectId(permId);
-        return ins;
-    }
-
-    /**
-     * @deprecated Since 1.0.1 FlattenedObjectId is deprecated, so this 
-     * method is deprecated too.
-     */
-    public static SelectQuery selectObjectForFlattenedObjectId(
-        QueryEngine e,
-        org.objectstyle.cayenne.FlattenedObjectId oid) {
-        //Create a selectquery using the relationship name
-        // and source id snapshot of the FlattenedObjectId
-        SelectQuery sel = new SelectQuery();
-        sel.setRoot(oid.getObjClass());
-
-        DataObject sourceObject = oid.getSourceObject();
-        Expression sourceExpression =
-            ExpressionFactory.matchAllDbExp(
-                sourceObject.getObjectId().getIdSnapshot(),
-                Expression.EQUAL_TO);
-        ObjEntity ent = e.getEntityResolver().lookupObjEntity(sourceObject);
-
-        sel.setQualifier(
-            ent.translateToRelatedEntity(sourceExpression, oid.getRelationshipName()));
-
-        return sel;
-    }
 
     /** 
      * Creates and returns a select query that can be used to 
@@ -276,44 +122,7 @@ public class QueryUtils {
         return sel;
     }
 
-    /** 
-     * Creates and returns SelectQuery for a given SelectQuery and
-     * relationship prefetching path.
-     * 
-     * @deprecated Since 1.1 Use PrefetchSelectQuery constructor.
-     */
-    public static PrefetchSelectQuery selectPrefetchPath(
-        QueryEngine e,
-        SelectQuery q,
-        String prefetchPath) {
-        return new PrefetchSelectQuery(e.getEntityResolver(), q, prefetchPath);
-    }
-
-    /**
-     * Translates qualifier applicable for one ObjEntity into a
-     * qualifier for a related ObjEntity.
-     * @param ent the entity to which the original qualifier (<code>qual</code>) 
-     * applies
-     * @param qual the qualifier on <code>ent</code>
-     * @param relPath a relationship path from <code>ent</code> to some target entity
-     * @return Expression which, when applied to the target entity of relPath, 
-     * will give the union of the objects that would be obtained by following 
-     * relPath from all of the objects in <code>ent</code> that match <code>qual</code>
-     * 
-     * @deprecated Since 1.1 use Entity.translatedForRelatedEntity(Expression, String)
-     */
-    public static Expression transformQualifier(
-        ObjEntity ent,
-        Expression qual,
-        String relPath) {
-
-        if (qual == null) {
-            return null;
-        }
-
-        return ent.translateToRelatedEntity(qual, relPath);
-    }
-
+ 
     /**
      * Generates a SelectQuery that can be used to fetch 
      * relationship destination objects given a source object

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.art.GeneratedColumnDep;
 import org.objectstyle.art.GeneratedColumnTest;
 import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -98,5 +99,25 @@ public class IdentityColumnsTst extends CayenneTestCase {
         assertTrue(DataObjectUtils.intPKForObject(idObject1) >= 0);
         assertTrue(DataObjectUtils.intPKForObject(idObject2) >= 0);
         assertTrue(DataObjectUtils.intPKForObject(idObject3) >= 0);
+    }
+
+    public void testPropagateToDependent() throws Exception {
+        GeneratedColumnTest idObject = (GeneratedColumnTest) createDataContext()
+                .createAndRegisterNewObject(GeneratedColumnTest.class);
+        idObject.setName("aaa");
+
+        GeneratedColumnDep dependent = (GeneratedColumnDep) idObject
+                .getDataContext()
+                .createAndRegisterNewObject(GeneratedColumnDep.class);
+        dependent.setName("aaa");
+        dependent.setToMaster(idObject);
+
+        idObject.getDataContext().commitChanges();
+
+        // this will throw an exception if id wasn't generated
+        assertTrue(DataObjectUtils.intPKForObject(idObject) >= 0);
+        assertTrue(DataObjectUtils.intPKForObject(dependent) >= 0);
+        assertEquals(DataObjectUtils.intPKForObject(idObject), DataObjectUtils
+                .intPKForObject(dependent));
     }
 }

@@ -63,7 +63,6 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.MockQuery;
 
@@ -87,20 +86,6 @@ public class EntityResolverTst extends CayenneTestCase {
     }
 
     ////Test DbEntitylookups
-
-    /**
-     * @deprecated  Since 1.1
-     */
-    public void testLookupDbEntityByObjEntityName() throws Exception {
-        assertIsArtistDbEntity(resolver.lookupDbEntity("Artist"));
-    }
-
-    /**
-     * @deprecated  Since 1.1
-     */
-    public void testLookupDbEntityByObjEntity() throws Exception {
-        assertIsArtistDbEntity(resolver.lookupDbEntity(getObjEntity("Artist")));
-    }
 
     public void testLookupDbEntityByClass() throws Exception {
         assertIsArtistDbEntity(resolver.lookupDbEntity(Artist.class));
@@ -201,25 +186,6 @@ public class EntityResolverTst extends CayenneTestCase {
         m1.addObjEntity(oe2);
 
         assertSame(oe2, resolver.lookupObjEntity(String.class));
-    }
-
-    /**
-     * @deprecated since 1.1 lookupQuery is deprecated.
-     */
-    public void testLookupObjQuery() throws Exception {
-        // create a resolver with a single map
-        DataMap m1 = new DataMap();
-        ObjEntity oe1 = new ObjEntity("test1");
-        oe1.setClassName(Object.class.getName());
-        SelectQuery q = new SelectQuery(oe1);
-        m1.addObjEntity(oe1);
-        oe1.addQuery("abc", q);
-
-        List list = new ArrayList();
-        list.add(m1);
-        EntityResolver resolver = new EntityResolver(list);
-
-        assertSame(q, resolver.lookupQuery(Object.class, "abc"));
     }
 
     public void testGetQuery() throws Exception {

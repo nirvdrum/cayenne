@@ -239,7 +239,8 @@ class ContextCommit {
         EntitySorter sorter = commitHelper.getNode().getEntitySorter();
         sorter.sortDbEntities(dbEntities, false);
 
-        for (Iterator i = dbEntities.iterator(); i.hasNext();) {
+        Iterator i = dbEntities.iterator();
+        while (i.hasNext()) {
             DbEntity dbEntity = (DbEntity) i.next();
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
             InsertBatchQuery batch = new InsertBatchQuery(dbEntity, 27);

@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Map;
-
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
@@ -170,39 +168,11 @@ public interface DataObject extends java.io.Serializable {
     */
     public void writeProperty(String propName, Object val);
 
-    /**
-     * @deprecated Since 1.0.1 this method is no longer needed.
-     */
-    public DataObject readToOneDependentTarget(String relName);
-
     public void addToManyTarget(String relName, DataObject val, boolean setReverse);
 
     public void removeToManyTarget(String relName, DataObject val, boolean setReverse);
 
     public void setToOneTarget(String relName, DataObject val, boolean setReverse);
-
-    /**
-     * @deprecated Since 1.0.1 this method is no longer needed, since 
-     * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
-     * as well.
-     */
-    public void setToOneDependentTarget(String relName, DataObject val);
-
-    /**
-     * Returns a snapshot for this object corresponding to the state 
-     * of the database when object was last fetched or committed. 
-     * 
-     * @deprecated Since 1.1 use 
-     * getDataContext().getObjectStore().getSnapshot(this.getObjectId(), getDataContext())
-     */
-    public Map getCommittedSnapshot();
-
-    /**
-     * Returns a snapshot of object current values.
-     * 
-     * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
-     */
-    public Map getCurrentSnapshot();
 
     /**
      * Notification method called by DataContext after the object 

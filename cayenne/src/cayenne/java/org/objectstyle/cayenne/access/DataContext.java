@@ -63,7 +63,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -83,11 +82,9 @@ import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -302,25 +299,6 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataContext() {
         this(null, null);
-    }
-
-    /**
-     * Creates new DataContext and initializes it with the parent QueryEngine. Normally
-     * parent is an instance of DataDomain. DataContext will use parent to execute
-     * database queries, updates, and access mapping information.
-     * 
-     * @deprecated since 1.1 use {@link #DataContext(QueryEngine, ObjectStore)}
-     */
-    public DataContext(QueryEngine parent) {
-        setParent(parent);
-
-        DataRowStore snapshotCache = null;
-        if (parent instanceof DataDomain) {
-            snapshotCache = ((DataDomain) parent).getSharedSnapshotCache();
-        }
-
-        this.objectStore = new ObjectStore(snapshotCache);
-        this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
     }
 
     /**
@@ -588,15 +566,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Takes a snapshot of current object state.
-     * 
-     * @deprecated Since 1.1 use "currentSnapshot"
-     */
-    public Map takeObjectSnapshot(DataObject anObject) {
-        return currentSnapshot(anObject);
-    }
-
-    /**
      * Creates a list of DataObjects local to this DataContext from a list of DataObjects
      * coming from a different DataContext. Note that all objects in the source list must
      * be either in COMMITTED or in HOLLOW state.
@@ -790,59 +759,6 @@ public class DataContext implements QueryEngine, Serializable {
         return (DataObject) list.get(0);
     }
 
-    /**
-     * @deprecated Since 1.1 use {@link #objectFromDataRow(Class,DataRow,boolean)}.
-     */
-    public DataObject objectFromDataRow(String entityName, Map dataRow) {
-        // backwards compatibility... wrap this in a DataRow
-        if (!(dataRow instanceof DataRow)) {
-            dataRow = new DataRow(dataRow);
-        }
-
-        ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
-        List list = objectsFromDataRows(
-                ent,
-                Collections.singletonList(dataRow),
-                false,
-                false);
-        return (DataObject) list.get(0);
-    }
-
-    /**
-     * Use {@link #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
-     * objectFromDataRow(Class, DataRow, boolean)} instead.
-     * 
-     * @deprecated Since 1.1
-     */
-    public DataObject objectFromDataRow(ObjEntity objEntity, Map dataRow, boolean refresh) {
-
-        // backwards compatibility... wrap this in a DataRow
-        if (!(dataRow instanceof DataRow)) {
-            dataRow = new DataRow(dataRow);
-        }
-
-        List list = objectsFromDataRows(
-                objEntity,
-                Collections.singletonList(dataRow),
-                refresh,
-                false);
-        return (DataObject) list.get(0);
-    }
-
-    /**
-     * Creates and returns a read-only DataObject from a DataRow. Newly created object is
-     * registered with this DataContext.
-     * 
-     * @deprecated Since 1.1 use
-     *             {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}instead.
-     */
-    protected DataObject readOnlyObjectFromDataRow(
-            ObjEntity objEntity,
-            Map dataRow,
-            boolean refresh) {
-
-        return this.objectFromDataRow(objEntity, dataRow, refresh);
-    }
 
     /**
      * Instantiates new object and registers it with itself. Object class is determined
@@ -904,24 +820,6 @@ public class DataContext implements QueryEngine, Serializable {
         return dataObject;
     }
 
-    /**
-     * Registers a new object (that is not yet persistent) with itself.
-     * 
-     * @param dataObject new object that we want to make persistent.
-     * @param objEntityName a name of the ObjEntity in the map used to get persistence
-     *            information for this object.
-     * @deprecated since 1.1 this method is deprecated. It is misleading to think that
-     *             Cayenne supports more than one class per ObjEntity. Use
-     *             {@link #registerNewObject(DataObject)}instead.
-     */
-    public void registerNewObject(DataObject dataObject, String objEntityName) {
-        ObjEntity entity = getEntityResolver().lookupObjEntity(objEntityName);
-        if (entity == null) {
-            throw new IllegalArgumentException("Invalid ObjEntity name: " + objEntityName);
-        }
-
-        registerNewObjectWithEntity(dataObject, entity);
-    }
 
     /**
      * Registers a new object (that is not yet persistent) with itself.
@@ -963,30 +861,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * @deprecated Since 1.1, use
-     *             {@link #unregisterObjects(java.util.Collection) unregisterObjects(Collections.singletonList(dataObject))}
-     *             to invalidate a single object.
-     */
-    public void unregisterObject(DataObject dataObject) {
-        unregisterObjects(Collections.singletonList(dataObject));
-    }
-
-    /**
      * Unregisters a Collection of DataObjects from the DataContext and the underlying
      * ObjectStore. This operation also unsets DataContext and ObjectId for each object
      * and changes its state to TRANSIENT.
      */
     public void unregisterObjects(Collection dataObjects) {
         getObjectStore().objectsUnregistered(dataObjects);
-    }
-
-    /**
-     * @deprecated Since 1.1, use
-     *             {@link #invalidateObjects(java.util.Collection) invalidateObjects(Collections.singletonList(dataObject))}
-     *             to invalidate a single object.
-     */
-    public void invalidateObject(DataObject dataObject) {
-        invalidateObjects(Collections.singletonList(dataObject));
     }
 
     /**
@@ -1175,7 +1055,7 @@ public class DataContext implements QueryEngine, Serializable {
 
             // clean up any cached data for this object
             if (object != null) {
-                this.invalidateObject(object);
+                this.invalidateObjects(Collections.singleton(object));
             }
         }
 
@@ -1195,18 +1075,6 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         return (DataObject) results.get(0);
-    }
-
-    /**
-     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}since queries are not
-     *             necessarily based on an ObjEntity. Use {@link ObjEntity#getDataMap()}
-     *             to obtain DataMap from ObjEntity.
-     */
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        if (this.getParent() == null) {
-            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
-        }
-        return this.getParent().dataNodeForObjEntity(objEntity);
     }
 
     /**
@@ -1454,16 +1322,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Delegates query execution to parent QueryEngine.
-     * 
-     * @deprecated Since 1.1 use performQueries(List, OperationObserver). This method is
-     *             redundant and doesn't add value.
-     */
-    public void performQuery(Query query, OperationObserver operationObserver) {
-        this.performQueries(Collections.singletonList(query), operationObserver);
-    }
-
-    /**
      * Performs a single selecting query. If if query is a SelectQuery that require
      * prefetching relationships, will create additional queries to perform necessary
      * prefetching. Various query setting control the behavior of this method and the
@@ -1675,135 +1533,6 @@ public class DataContext implements QueryEngine, Serializable {
         return queries;
     }
 
-    /**
-     * Populates the <code>map</code> with ObjectId values from master objects related
-     * to this object.
-     */
-    private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
-        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(dataObject);
-        DbEntity dbEntity = objEntity.getDbEntity();
-
-        Iterator it = dbEntity.getRelationshipMap().values().iterator();
-        while (it.hasNext()) {
-            DbRelationship dbRel = (DbRelationship) it.next();
-            if (!dbRel.isToMasterPK()) {
-                continue;
-            }
-
-            ObjRelationship rel = objEntity.getRelationshipForDbRelationship(dbRel);
-            if (rel == null) {
-                continue;
-            }
-
-            DataObject targetDo = (DataObject) dataObject.readPropertyDirectly(rel
-                    .getName());
-            if (targetDo == null) {
-                // this is bad, since we will not be able to obtain PK in any other way
-                // throw an exception
-                throw new CayenneRuntimeException(
-                        "Null master object, can't create primary key.");
-            }
-
-            Map idMap = targetDo.getObjectId().getIdSnapshot();
-            if (idMap == null) {
-                // this is bad, since we will not be able to obtain PK in any other way
-                // provide a detailed error message
-                StringBuffer msg = new StringBuffer(
-                        "Can't create primary key, master object has no PK snapshot.");
-                msg.append("\nrelationship name: ").append(dbRel.getName()).append(
-                        ", src object: ").append(
-                        dataObject.getObjectId().getObjClass().getName()).append(
-                        ", target obj: ").append(
-                        targetDo.getObjectId().getObjClass().getName());
-                throw new CayenneRuntimeException(msg.toString());
-            }
-
-            map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
-        }
-    }
-
-    /**
-     * Creates permanent ObjectId for <code>anObject</code>. Object must already have a
-     * temporary ObjectId.
-     * <p>
-     * This method is called when we are about to save a new object to the database.
-     * Primary key columns are populated assigning values in the following sequence:
-     * <ul>
-     * <li>Object attribute values are used.</li>
-     * <li>Values from ObjectId's propagated from master relationshop are used. <i>If
-     * master object does not have a permanent id created yet, an exception is thrown.
-     * </i></li>
-     * <li>Values generated from the database provided by DbAdapter. <i>Autogeneration
-     * only works for a single column. If more than one column requires an autogenerated
-     * primary key, an exception is thrown </i></li>
-     * </ul>
-     * 
-     * @return Newly created ObjectId.
-     * @deprecated Since 1.1 this method is no longer used.
-     */
-    public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
-        ObjectId id = anObject.getObjectId();
-        if (!(id instanceof TempObjectId)) {
-            return id;
-            //If the id is not a temp, then it must be permanent. Return it and do
-            // nothing else
-        }
-
-        if (id.getReplacementId() != null) {
-            return id.getReplacementId();
-        }
-
-        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(id.getObjClass());
-        DbEntity dbEntity = objEntity.getDbEntity();
-        DataNode aNode = this.dataNodeForObjEntity(objEntity);
-
-        Map idMap = new HashMap();
-        // first get values delivered via relationships
-        appendPkFromMasterRelationships(idMap, anObject);
-
-        boolean autoPkDone = false;
-        Iterator it = dbEntity.getPrimaryKey().iterator();
-        while (it.hasNext()) {
-            DbAttribute attr = (DbAttribute) it.next();
-
-            // see if it is there already
-            if (idMap.get(attr.getName()) != null) {
-                continue;
-            }
-
-            // try object value as PK
-            ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(attr);
-            if (objAttr != null) {
-                idMap.put(attr.getName(), anObject
-                        .readPropertyDirectly(objAttr.getName()));
-                continue;
-            }
-
-            // run PK autogeneration
-            if (autoPkDone) {
-                throw new CayenneRuntimeException(
-                        "Primary Key autogeneration only works for a single attribute.");
-            }
-
-            try {
-                PkGenerator gen = aNode.getAdapter().getPkGenerator();
-                Object pk = gen.generatePkForDbEntity(aNode, objEntity.getDbEntity());
-                autoPkDone = true;
-                idMap.put(attr.getName(), pk);
-            }
-            catch (Exception ex) {
-                throw new CayenneRuntimeException("Error generating PK", ex);
-            }
-        }
-
-        ObjectId permId = new ObjectId(anObject.getClass(), idMap);
-
-        // note that object registration did not change (new id is not attached to
-        // context, only to temp. oid)
-        id.setReplacementId(permId);
-        return permId;
-    }
-
     // serialization support
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.defaultWriteObject();
@@ -1965,36 +1694,5 @@ public class DataContext implements QueryEngine, Serializable {
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
         }
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used in Cayenne. All flattened
-     *             relationship logic was moved to the ObjectStore
-     */
-    protected void clearFlattenedUpdateQueries() {
-        objectStore.flattenedDeletes.clear();
-        objectStore.flattenedInserts.clear();
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used in Cayenne. All flattened
-     *             relationship logic was moved to the ObjectStore
-     */
-    public void registerFlattenedRelationshipDelete(
-            DataObject source,
-            ObjRelationship relationship,
-            DataObject destination) {
-        objectStore.flattenedRelationshipUnset(source, relationship, destination);
-    }
-
-    /**
-     * @deprecated Since 1.1 this method is not used in Cayenne. All flattened
-     *             relationship logic was moved to the ObjectStore
-     */
-    public void registerFlattenedRelationshipInsert(
-            DataObject source,
-            ObjRelationship relationship,
-            DataObject destination) {
-        objectStore.flattenedRelationshipSet(source, relationship, destination);
     }
 }

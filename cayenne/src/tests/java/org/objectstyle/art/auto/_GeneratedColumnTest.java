@@ -8,6 +8,7 @@ package org.objectstyle.art.auto;
 public class _GeneratedColumnTest extends org.objectstyle.cayenne.CayenneDataObject {
 
     public static final String NAME_PROPERTY = "name";
+    public static final String TO_DEP_PROPERTY = "toDep";
 
     public static final String GENERATED_COLUMN_PK_COLUMN = "GENERATED_COLUMN";
 
@@ -17,6 +18,15 @@ public class _GeneratedColumnTest extends org.objectstyle.cayenne.CayenneDataObj
     public String getName() {
         return (String)readProperty("name");
     }
+    
+    
+    public void setToDep(org.objectstyle.art.GeneratedColumnDep toDep) {
+        setToOneTarget("toDep", toDep, true);
+    }
+
+    public org.objectstyle.art.GeneratedColumnDep getToDep() {
+        return (org.objectstyle.art.GeneratedColumnDep)readProperty("toDep");
+    } 
     
     
 }

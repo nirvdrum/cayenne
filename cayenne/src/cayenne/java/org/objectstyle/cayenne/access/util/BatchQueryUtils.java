@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.sql.Types;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -84,7 +83,6 @@ import org.objectstyle.cayenne.util.Util;
  *
  * @author Andriy Shapochka
  */
-
 public class BatchQueryUtils {
 
     private BatchQueryUtils() {
@@ -160,48 +158,23 @@ public class BatchQueryUtils {
     }
 
     /**
-     * @deprecated Since 1.1 use org.objectstyle.cayenne.util.Util.hashCode(Collectioin)
+     * Creates a snapshot of inserted columns for a given object.
      */
-    public static int hashCode(Collection c) {
-        return Util.hashCode(c);
-    }
-
-    /**
-     * @deprecated Unused since 1.1.
-     */
-    public static Map buildFlattenedSnapshot(
-        Map sourceId,
-        Map destinationId,
-        DbRelationship firstRelationship,
-        DbRelationship secondRelationship) {
-        Map snapshot = new HashMap(sourceId.size() + destinationId.size());
-        List joins = firstRelationship.getJoins();
-        for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-            DbJoin join = (DbJoin) joins.get(i);
-            snapshot.put(join.getTargetName(), sourceId.get(join.getSourceName()));
-        }
-
-        joins = secondRelationship.getJoins();
-        for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-            DbJoin join = (DbJoin) joins.get(i);
-            snapshot.put(join.getSourceName(), destinationId.get(join.getTargetName()));
-        }
-
-        return snapshot;
-    }
-
     public static Map buildSnapshotForInsert(
-        ObjEntity ent,
+        ObjEntity entity,
         DataObject o,
         DbRelationship masterDependentRel) {
+        
         boolean isMasterDbEntity = (masterDependentRel == null);
         Map map = new HashMap();
 
-        Map attrMap = ent.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
+        // add object attributes
+        Map attrMap = entity.getAttributeMap();
+        Iterator attributes = attrMap.entrySet().iterator();
+        while (attributes.hasNext()) {
+            Map.Entry entry = (Map.Entry) attributes.next();
+            String attrName = (String) entry.getKey();
+            ObjAttribute objAttr = (ObjAttribute) entry.getValue();
 
             if (isMasterDbEntity && !objAttr.isCompound()) {
                 map.put(objAttr.getDbAttributePath(), o.readPropertyDirectly(attrName));
@@ -213,52 +186,46 @@ public class BatchQueryUtils {
             }
         }
 
-        if (isMasterDbEntity) {
-            Map relMap = ent.getRelationshipMap();
-            Iterator itr = relMap.keySet().iterator();
-            while (itr.hasNext()) {
-                String relName = (String) itr.next();
-                ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+        // infer keys from relationships
+        Map relMap = entity.getRelationshipMap();
+        Iterator relationships = relMap.entrySet().iterator();
+        while (relationships.hasNext()) {
 
-                if (rel.isSourceIndependentFromTargetChange())
-                    continue;
+            Map.Entry entry = (Map.Entry) relationships.next();
+            String relName = (String) entry.getKey();
+            ObjRelationship rel = (ObjRelationship) entry.getValue();
 
-                DataObject target = (DataObject) o.readPropertyDirectly(relName);
-                if (target == null)
-                    continue;
-                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
-                Map idParts = target.getObjectId().getIdSnapshot();
-                // this may happen in uncommitted objects
-                if (idParts == null)
-                    continue;
-                Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-                map.putAll(fk);
+            if (rel.isSourceIndependentFromTargetChange()) {
+                continue;
             }
-        }
-        else {
-            Map relMap = ent.getRelationshipMap();
-            Iterator itr = relMap.keySet().iterator();
-            while (itr.hasNext()) {
-                String relName = (String) itr.next();
-                ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(1);
 
-                if (rel.isSourceIndependentFromTargetChange())
-                    continue;
-
-                DataObject target = (DataObject) o.readPropertyDirectly(relName);
-                if (target == null)
-                    continue;
-                if (dbRel.getSourceEntity() != masterDependentRel.getTargetEntity())
-                    continue;
-                Map idParts = target.getObjectId().getIdSnapshot();
-                // this may happen in uncommitted objects
-                if (idParts == null)
-                    continue;
-                Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-                map.putAll(fk);
+            DataObject target = (DataObject) o.readPropertyDirectly(relName);
+            if (target == null) {
+                continue;
             }
+
+            Map idParts = target.getObjectId().getIdSnapshot();
+            
+            // this may happen in uncommitted objects
+            if (idParts == null) {
+                continue;
+            }
+            
+            DbRelationship dbRel ;
+            if (isMasterDbEntity) {
+                dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+            }
+            else {
+                dbRel = (DbRelationship) rel.getDbRelationships().get(1);
+                if (dbRel.getSourceEntity() != masterDependentRel.getTargetEntity()) {
+                    continue;
+                }
+            }
+            
+            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+            map.putAll(fk);
         }
+     
 
         // process object id map
         // we should ignore any object id values if a corresponding attribute
