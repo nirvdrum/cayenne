@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 
 <!-- ================================================= -->
-<!--              Cayenne master build file.           -->
+<!--            Cayenne master build file.             -->
+<!-- Serves as a facade to a set of private buildfiles.-->
 <!-- ================================================= -->
-<project name="cayenne" default="dist" basedir=".">   
+<project name="cayenne" default="build" basedir=".">
+
     <!-- ============================================= -->
     <!-- Loads properties from default locations.      -->
     <!-- ============================================= -->
-    <property file="${user.home}/build.properties" />
     <property file="build.properties" />
+    <property file="${user.home}/build.properties" />
     <property file="default.properties" />
     
     
@@ -20,40 +22,24 @@
     <property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
 
 
-    <path id="classpath">
-    	<pathelement path="${ant.home}/lib/ant.jar"/>
-        <fileset dir="otherlib">
-            <include name="**.jar"/>
-        </fileset>
-    </path>
-
-
     <!-- ============================================= -->
     <!-- Prints help message describing build.xml use. -->
     <!-- ============================================= -->
-    <target name="help"
-        description="Prints help message.">
+    <target name="help">
         <echo>
      ******************************************************
      * TARGETS (also you can use "-projecthelp" ant flag 
      * to see targets):
-     *  1. dist       - (default target) creates Cayenne development, 
-     *                  distribution including all code dependencies.
-     *  2. dist-bin   - creates Cayenne binary distribution.
-     *  3. dist-src   - creates Cayenne source distribution.
-     *  4. jar-nodep  - creates "lean" Cayenne JAR file, 
-     *  5. jar        - creates full Cayenne JAR file, 
-     *                  including all dependencies.
-     *  6. jar-other  - creates optional Cayenne subproject jars. 
-     *  7. clean      - cleans temporary build and distribution 
-     *                  directories
-     *  8. doc        - builds Cayenne documentation including Javadocs.
-     *  9. api        - builds Javdoc API documentation.
-     *  10. compile_subprojects 
-     *                - builds subprojects
-     *  11. prepare   - creates directories needed for compilation and 
-     *                  distribution
-     *  12. help      - prints this message
+     *  1. release    - creates a full Cayenne distribution.
+     *  2. release-site
+     *                - creates a full Cayenne website distribution.
+     *  3. build      - (default target) builds all subproject JAR files.
+     *  4. clean      - cleans temporary build and distribution directories
+     *  5. clean-java - cleans all build directories, preserving the docs and such
+     *  5. doc        - builds Cayenne documentation including Javadocs.
+     *  6. api        - builds Javdoc API documentation.
+     *  7. javacc     - runs javacc
+     *  8. help       - prints this message
      *
      *
      * ENVIRONMENT:
@@ -61,194 +47,49 @@
      *  user.home = ${user.home}
      *  ant.home = ${ant.home}
      *  build.compiler = ${build.compiler}
-     *  java.class.path = ${java.class.path}
      ******************************************************
          </echo>
     </target>
 
 
     <!-- ============================================= -->
-    <!-- Deploys Cayenne web site in a local directory -->
+    <!-- Creates a full release of Cayenne.            -->
     <!-- ============================================= -->
-    <target name="deploy-web" depends="dist">
-		 <ant antfile="build-doc.xml" target="deploy-web"/>
-    </target>
-    
-    
-    <!-- ========================================== -->
-    <!-- Creates Cayenne distribution and build     -->
-    <!-- directories.                               -->
-    <!-- ========================================== -->
-    <target name="prepare">
-        <tstamp/>
-        <mkdir dir="${dist.base}"/>
-        <mkdir dir="${dist}"/>
-        <mkdir dir="${dist}/lib"/>
-        <mkdir dir="${dist}/bin"/>
-    </target>
-    
-
-    <!-- ========================================== -->
-    <!-- Creates full Cayenne distribution          -->
-    <!-- including source code.                     -->
-    <!-- ========================================== -->
-    <target name="dist-src" depends="dist,doc,api"
-        description="Creates Cayenne source distribution.">
-        <mkdir dir="${dist}/src"/>
-        
-        <mkdir dir="${dist}/src/cayenne"/>
-        <copy todir="${dist}/src/cayenne">
-            <fileset dir="src" includes="org/**"/>
-        </copy>
-        
-        <mkdir dir="${dist}/src/tests"/>
-        <copy todir="${dist}/src/tests">
-            <fileset dir="tests" includes="org/**"/>
-        </copy>
-        
-        <copy file="src/resources/scripts/build.xml.dist" tofile="${dist}/src/build.xml"/>
-
-        <tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar">
-            <tarfileset dir="${dist.base}">
-                <include name="${project.name}-${project.version}/**"/>
-            </tarfileset>
-        </tar>
+    <target name="release">
+		<ant antfile="build-doc.xml" target="dist-src"/>
+		<ant antfile="build-cayenne.xml" target="dist-src"/>
+		
+		<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
+		
+		<tar tarfile="${dist.base}/${project.name}-src-${project.version}.tar">
+			<tarfileset dir="${dist.base}">
+				<include name="${project.name}-${project.version}/**"/>
+			</tarfileset>
+		</tar>
         <gzip src="${dist.base}/${project.name}-src-${project.version}.tar" 
               zipfile="${dist.base}/${project.name}-src-${project.version}.tar.gz"/>  
         <delete file="${dist.base}/${project.name}-src-${project.version}.tar"/>
     </target>
-
-
-    <!-- ========================================== -->
-    <!-- Creates Cayenne binary distribution.       -->
-    <!-- ========================================== -->
-    <target name="dist-bin" depends="dist,doc,api"
-        description="Creates Cayenne binary distribution.">
-        <tar tarfile="${dist.base}/${project.name}-${project.version}.tar">
-            <tarfileset dir="${dist.base}">
-                <include name="${project.name}-${project.version}/**"/>
-            </tarfileset>
-        </tar>
-        <gzip src="${dist.base}/${project.name}-${project.version}.tar" 
-              zipfile="${dist.base}/${project.name}-${project.version}.tar.gz"/>  
-        <delete file="${dist.base}/${project.name}-${project.version}.tar"/>
-    </target>
-
-
-    <!-- ========================================== -->
-    <!-- Creates Cayenne development distribution.  -->
-    <!-- It does not include source  code or        -->
-    <!-- documentation.                             -->
-    <!-- ========================================== -->
-    <target name="dist" depends="prepare,compile_subprojects,jar,jar-other,jar-nodeps"
-        description="Creates Cayenne development, distribution including all code dependencies.">
-        <copy file="doc/LICENSE" todir="${dist}"/>
-
-        <copy todir="${dist}/bin" overwrite="true">
-            <fileset dir="src/bin" includes="*.bat,*.sh"/>
-            <fileset dir="tests" includes="*.bat,*.sh"/>
-        </copy>
-
-        <chmod perm="gu+x">
-            <fileset dir="${dist}/bin">
-                <include name="**/*.sh"/>
-            </fileset>
-        </chmod>
-    </target>
-
-    <!-- ========================================== -->
-    <!-- Build "lean" JAR file without dependencies.-->
-    <!-- ========================================== -->
-    <target name="jar-nodeps" depends="prepare,compile_subprojects">
-        <jar jarfile="${dist}/lib/cayenne-nodeps.jar">
-            <fileset dir="src/${build}/classes"/>
-            <fileset dir="src/${build}/templates"/>
-            <metainf dir="doc" includes="LICENSE"/>
-            <manifest>
-               <attribute name="Built-By" value="${user.name}"/>
-               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
-               <attribute name="Specification-Version" value="${project.name}"/>
-               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
-               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
-               <attribute name="Implementation-Version" value="${project.version}"/>
-               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
-            </manifest>
-        </jar>
-    </target>
-  
-  
-    <!-- ========================================== -->
-    <!-- Build "fat" JAR file with dependencies.    -->
-    <!-- ========================================== -->
-    <target name="jar" depends="prepare,compile_subprojects,prepare-dep">
-        <jar jarfile="${dist}/lib/cayenne.jar">
-            <fileset dir="src/${build}/classes"/>
-            <fileset dir="src/${build}/templates"/>
-            <fileset dir="src/${build}/unjar"/>
-            <metainf dir="doc">
-                <include name="LICENSE*"/>
-            </metainf>
-            
-            <manifest>
-               <attribute name="Built-By" value="${user.name}"/>
-               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
-               <attribute name="Specification-Version" value="${project.name}"/>
-               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
-               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
-               <attribute name="Implementation-Version" value="${project.version}-dep"/>
-               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
-            </manifest>
-        </jar>
-    </target>
-    
-    <target name="prepare-dep"> 
-    	<ant antfile="build-dep.xml" target="unjar"/>
-    </target>
-    
-
-
-    <!-- ========================================== -->
-    <!-- Build optional JAR files.                  -->
-    <!-- ========================================== -->
-    <target name="jar-other" depends="prepare,compile_subprojects">
-        <jar jarfile="${dist}/lib/cayenne-tests.jar" manifest="tests/MANIFEST.MF">
-            <fileset dir="tests/${build}/classes"/>
-            <metainf dir="doc" includes="LICENSE"/>
-        </jar>
-        
-        <!-- JUnit JAR is required for the tests to run. -->
-        <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
-        
-        <!-- Ant JAR is required for the Ant-specific tests to run. -->
-        <copy file="otherlib/ant.jar" todir="${dist}/lib"/>
-        
-        <!-- Servlet JAR is required to complie Cayenne from src distro. -->
-        <copy file="otherlib/servlet.jar" todir="${dist}/lib"/>
-    </target>
     
     
-    <!-- ========================================== -->
-    <!-- Creates performance testing JAR.           -->
-    <!-- ========================================== -->
-    <target name="build-perf" depends="prepare,jar,jar-other">
-        <ant dir="performance" target="compile"/>
-        
-        <jar jarfile="${dist}/lib/cayenne-perf.jar" manifest="performance/MANIFEST.MF">
-            <fileset dir="performance/${build}/classes"/>
-            <metainf dir="doc" includes="LICENSE"/>
-        </jar>
-        
-        <copy todir="${dist}/bin" overwrite="true">
-            <fileset dir="performance" includes="*.bat,*.sh"/>
-        </copy>
-
-        <chmod perm="gu+x">
-            <fileset dir="${dist}/bin">
-                <include name="**/*.sh"/>
-            </fileset>
-        </chmod>
-    </target>
     
+    <!-- ============================================= -->
+    <!-- Deploys Cayenne web site in a local directory -->
+    <!-- ============================================= -->
+    <target name="release-site">
+		<ant antfile="build-cayenne.xml" target="dist-src"/>
+		<ant antfile="build-tests.xml" target="dist-src"/>
+		<ant antfile="build-doc.xml" target="release-site"/>
+    </target>
+        
+
+    <!-- ========================================== -->
+    <!-- Builds all Cayenne Java subprojects.       -->
+    <!-- ========================================== -->
+    <target name="build">
+		<ant antfile="build-cayenne.xml" target="dist-bin"/>
+		<ant antfile="build-tests.xml" target="dist-bin"/>
+    </target>
 
 
     <!-- ========================================== -->
@@ -258,30 +99,21 @@
         <delete dir="${dist.base}"/>
     </target>
     
-    
-    <!-- ========================================== -->
-    <!-- Cleans Java build directories.             -->
-    <!-- ========================================== -->
     <target name="clean-java">
-        <ant dir="src" target="clean"/>
-        <ant dir="tests" target="clean"/>
-        <ant dir="performance" target="clean"/>
-    </target>
-
-    <!-- ========================================== -->
-    <!-- Compiles subprojects.                      -->
-    <!-- ========================================== -->
-    <target name="compile_subprojects">
-        <ant dir="src" target="compile"/>
-        <ant dir="tests" target="compile"/>
-    </target>
+        <delete dir="${build}"/>
+    </target>   
     
-    
+    <!-- ========================================== -->
+    <!-- Updates any code generated by JavaCC.      -->
+    <!-- ========================================== -->
+    <target name="javacc">
+        <ant antfile="build-cayenne.xml" target="javacc"/>
+    </target>
 
     <!-- ========================================== -->
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare">
+    <target name="doc">
         <ant antfile="build-doc.xml" target="doc"/>
     </target>
 
@@ -292,25 +124,9 @@
     <!-- some of the classes are generated on the   -->
     <!-- fly.                                       -->
     <!-- ========================================== -->
-    <target name="api" depends="prepare,compile_subprojects">
+    <target name="api">
         <ant antfile="build-doc.xml" target="api"/>
     </target>    
-    
-    
-    <!-- ========================================== -->
-    <!-- Release related targets.                   -->
-    <!-- ========================================== -->   
-    <target name="release-src" depends="prepare,release-notes,dist-src">
-    	<echo>Created ${project.version} release.</echo> 
-    </target>
-    
-    <target name="release-bin" depends="prepare,release-notes,dist-bin">
-    	<echo>Created ${project.version} release.</echo> 
-    </target>
-    
-    <target name="release-notes">
-    	<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
-    </target>
 </project>
 
 
