@@ -59,6 +59,9 @@ package org.objectstyle.cayenne.dba.db2;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
+import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -96,9 +99,9 @@ public class DB2Adapter extends JdbcAdapter {
 		super.configureExtendedTypes(map);
 
 		// create specially configured CharType handler
-		map.registerType(new CharType(true, false));
+		map.registerType(new CharType(true, true));
 	}
-	
+
 	/**
 	  * Returns a SQL string that can be used to create database table
 	  * corresponding to <code>ent</code> parameter.
@@ -201,5 +204,13 @@ public class DB2Adapter extends JdbcAdapter {
 		 buf.append(')');
 		 return buf.toString();
 	 }
+
+	/**
+	 * Returns a trimming translator.
+	 */
+	public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+		return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
+	}
+
 }
 
