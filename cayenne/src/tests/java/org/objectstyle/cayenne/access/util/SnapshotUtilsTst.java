@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.access.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,6 +61,8 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.access.Snapshot;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -69,7 +71,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 /**
  * @author Andrei Adamchik
  */
-public class SnapshotManagerTst extends DataContextTestBase {
+public class SnapshotUtilsTst extends DataContextTestBase {
     public void testMerge() throws Exception {
         String n1 = "changed";
         String n2 = "changed again";
@@ -81,7 +83,7 @@ public class SnapshotManagerTst extends DataContextTestBase {
         s2.put("ARTIST_NAME", n2);
         s2.put("DATE_OF_BIRTH", new java.util.Date());
         ObjEntity e = context.getEntityResolver().lookupObjEntity(a1);
-        SnapshotManager.mergeObjectWithSnapshot(e, a1, s2);
+		SnapshotUtils.mergeObjectWithSnapshot(e, a1, s2);
 
         // name was modified, so it should not change during merge
         assertEquals(n1, a1.getArtistName());
@@ -105,11 +107,11 @@ public class SnapshotManagerTst extends DataContextTestBase {
             "ARTIST_ID",
             painting.getToArtist().getObjectId().getValueForAttribute("ARTIST_ID"));
 
-        assertFalse(SnapshotManager.isToOneTargetModified(toArtist, painting, map));
+        assertFalse(SnapshotUtils.isToOneTargetModified(toArtist, painting, map));
 
         painting.setToArtist(artist);
 
-        assertTrue(SnapshotManager.isToOneTargetModified(toArtist, painting, map));
+        assertTrue(SnapshotUtils.isToOneTargetModified(toArtist, painting, map));
     }
 
     public void testIsJoinAttributesModified() throws Exception {
@@ -130,36 +132,34 @@ public class SnapshotManagerTst extends DataContextTestBase {
         Map same = new HashMap();
         same.put("ARTIST_ID", new Integer(1));
 
-        assertFalse(SnapshotManager.isJoinAttributesModified(toArtist, stored, same));
-
-        assertTrue(SnapshotManager.isJoinAttributesModified(toArtist, stored, nullified));
-
-        assertTrue(SnapshotManager.isJoinAttributesModified(toArtist, stored, updated));
+        assertFalse(SnapshotUtils.isJoinAttributesModified(toArtist, stored, same));
+        assertTrue(SnapshotUtils.isJoinAttributesModified(toArtist, stored, nullified));
+        assertTrue(SnapshotUtils.isJoinAttributesModified(toArtist, stored, updated));
     }
-
-    public void testObjectIdFromSnapshot() throws Exception {
-        Class entityClass = Number.class;
-        ObjEntity ent = new ObjEntity();
+    
+	public void testObjectIdFromSnapshot() throws Exception {
+		 Class entityClass = Number.class;
+		 ObjEntity ent = new ObjEntity();
         
-        DbAttribute at = new DbAttribute();
-        at.setName("xyz");
-        at.setPrimaryKey(true);
-        DbEntity dbe = new DbEntity("123");
-        dbe.addAttribute(at);
-        ent.setDbEntity(dbe);
-        ent.setName("456");
-        ent.setClassName(entityClass.getName());
+		 DbAttribute at = new DbAttribute();
+		 at.setName("xyz");
+		 at.setPrimaryKey(true);
+		 DbEntity dbe = new DbEntity("123");
+		 dbe.addAttribute(at);
+		 ent.setDbEntity(dbe);
+		 ent.setName("456");
+		 ent.setClassName(entityClass.getName());
 
-        // test same id created by different methods
-        Map map = new HashMap();
-        map.put(at.getName(), "123");
+		 // test same id created by different methods
+		 Snapshot map = new Snapshot(10);
+		 map.put(at.getName(), "123");
 
-        Map map2 = new HashMap();
-        map2.put(at.getName(), "123");
+		 Snapshot map2 = new Snapshot(10);
+		 map2.put(at.getName(), "123");
 
-        ObjectId ref = new ObjectId(entityClass, map);
-        ObjectId oid = SnapshotManager.objectIdFromSnapshot(ent, map2);
+		 ObjectId ref = new ObjectId(entityClass, map);
+		 ObjectId oid = SnapshotUtils.objectIdFromSnapshot(ent, map2);
 
-        assertEquals(ref, oid);
-    }
+		 assertEquals(ref, oid);
+	 }
 }

@@ -84,8 +84,7 @@ import org.objectstyle.cayenne.access.util.ResultDescriptor;
  * @author Andrei Adamchik
  */
 public class DefaultResultIterator implements ResultIterator {
-    private static Logger logObj =
-        Logger.getLogger(DefaultResultIterator.class);
+    private static Logger logObj = Logger.getLogger(DefaultResultIterator.class);
 
     // Connection information
     protected Connection connection;
@@ -104,6 +103,8 @@ public class DefaultResultIterator implements ResultIterator {
     protected boolean nextRow;
     protected int fetchedSoFar;
     protected int fetchLimit;
+
+    protected long fetchStartTimestamp;
 
     /**
      * Utility method to read stored procedure out parameters as a map. 
@@ -134,7 +135,7 @@ public class DefaultResultIterator implements ResultIterator {
                         jdbcTypes[index]);
                 dataRow.put(names[index], val);
             }
-            
+
             return dataRow;
         }
 
@@ -155,10 +156,8 @@ public class DefaultResultIterator implements ResultIterator {
         this.descriptor = descriptor;
         this.fetchLimit = fetchLimit;
 
-        this.mapCapacity =
-            (int) Math.ceil((descriptor.getNames().length) / 0.75);
-        this.idMapCapacity =
-            (int) Math.ceil((descriptor.getIdIndexes().length) / 0.75);
+        this.mapCapacity = (int) Math.ceil((descriptor.getNames().length) / 0.75);
+        this.idMapCapacity = (int) Math.ceil((descriptor.getIdIndexes().length) / 0.75);
 
         checkNextRow();
     }
@@ -169,8 +168,12 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected void checkNextRow() throws SQLException, CayenneException {
         nextRow = false;
-        if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit)
-            && resultSet.next()) {
+        if ((fetchLimit <= 0 || fetchedSoFar < fetchLimit) && resultSet.next()) {
+
+            if (fetchedSoFar == 0) {
+                fetchStartTimestamp = System.currentTimeMillis();
+            }
+
             nextRow = true;
             fetchedSoFar++;
         }
@@ -200,7 +203,8 @@ public class DefaultResultIterator implements ResultIterator {
             checkNextRow();
 
             return row;
-        } catch (SQLException sqex) {
+        }
+        catch (SQLException sqex) {
             throw new CayenneException("Exception reading ResultSet.", sqex);
         }
     }
@@ -217,7 +221,8 @@ public class DefaultResultIterator implements ResultIterator {
                 list.add(this.nextDataRow());
             }
             return list;
-        } finally {
+        }
+        finally {
             if (close) {
                 this.close();
             }
@@ -230,7 +235,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readDataRow() throws SQLException, CayenneException {
         try {
-            Map dataRow = new HashMap(mapCapacity, 0.75f);
+            Map dataRow = new Snapshot(mapCapacity, fetchStartTimestamp);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();
@@ -240,22 +245,19 @@ public class DefaultResultIterator implements ResultIterator {
             for (int i = 0; i < resultWidth; i++) {
                 // note: jdbc column indexes start from 1, not 0 unlike everywhere else
                 Object val =
-                    converters[i].materializeObject(
-                        resultSet,
-                        i + 1,
-                        jdbcTypes[i]);
+                    converters[i].materializeObject(resultSet, i + 1, jdbcTypes[i]);
                 dataRow.put(names[i], val);
             }
 
             return dataRow;
-        } catch (CayenneException cex) {
+        }
+        catch (CayenneException cex) {
             // rethrow unmodified
             throw cex;
-        } catch (Exception otherex) {
+        }
+        catch (Exception otherex) {
             logObj.warn("Error", otherex);
-            throw new CayenneException(
-                "Exception materializing column.",
-                otherex);
+            throw new CayenneException("Exception materializing column.", otherex);
         }
     }
 
@@ -266,7 +268,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     protected Map readIdRow() throws SQLException, CayenneException {
         try {
-            Map idRow = new HashMap(idMapCapacity, 0.75f);
+            Map idRow = new Snapshot(idMapCapacity, fetchStartTimestamp);
             ExtendedType[] converters = descriptor.getConverters();
             int[] jdbcTypes = descriptor.getJdbcTypes();
             String[] names = descriptor.getNames();
@@ -288,14 +290,14 @@ public class DefaultResultIterator implements ResultIterator {
             }
 
             return idRow;
-        } catch (CayenneException cex) {
+        }
+        catch (CayenneException cex) {
             // rethrow unmodified
             throw cex;
-        } catch (Exception otherex) {
+        }
+        catch (Exception otherex) {
             logObj.warn("Error", otherex);
-            throw new CayenneException(
-                "Exception materializing id column.",
-                otherex);
+            throw new CayenneException("Exception materializing id column.", otherex);
         }
     }
 
@@ -308,20 +310,23 @@ public class DefaultResultIterator implements ResultIterator {
         if (!isClosed) {
 
             nextRow = false;
+            fetchStartTimestamp = 0;
 
             StringWriter errors = new StringWriter();
             PrintWriter out = new PrintWriter(errors);
 
             try {
                 resultSet.close();
-            } catch (SQLException e1) {
+            }
+            catch (SQLException e1) {
                 out.println("Error closing ResultSet");
                 e1.printStackTrace(out);
             }
 
             try {
                 statement.close();
-            } catch (SQLException e2) {
+            }
+            catch (SQLException e2) {
                 out.println("Error closing PreparedStatement");
                 e2.printStackTrace(out);
             }
@@ -331,7 +336,8 @@ public class DefaultResultIterator implements ResultIterator {
             if (this.isClosingConnection()) {
                 try {
                     connection.close();
-                } catch (SQLException e3) {
+                }
+                catch (SQLException e3) {
                     out.println("Error closing Connection");
                     e3.printStackTrace(out);
                 }
@@ -340,7 +346,8 @@ public class DefaultResultIterator implements ResultIterator {
             try {
                 out.close();
                 errors.close();
-            } catch (IOException ioex) {
+            }
+            catch (IOException ioex) {
                 // this is totally unexpected,
                 // after all we are writing to the StringBuffer
                 // in the memory
@@ -348,8 +355,7 @@ public class DefaultResultIterator implements ResultIterator {
             StringBuffer buf = errors.getBuffer();
 
             if (buf.length() > 0) {
-                throw new CayenneException(
-                    "Error closing ResultIterator: " + buf);
+                throw new CayenneException("Error closing ResultIterator: " + buf);
             }
 
             isClosed = true;
@@ -382,7 +388,8 @@ public class DefaultResultIterator implements ResultIterator {
 
         try {
             checkNextRow();
-        } catch (SQLException sqex) {
+        }
+        catch (SQLException sqex) {
             throw new CayenneException("Exception reading ResultSet.", sqex);
         }
     }
@@ -405,7 +412,8 @@ public class DefaultResultIterator implements ResultIterator {
             checkNextRow();
 
             return row;
-        } catch (SQLException sqex) {
+        }
+        catch (SQLException sqex) {
             throw new CayenneException("Exception reading ResultSet.", sqex);
         }
     }

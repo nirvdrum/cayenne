@@ -167,7 +167,7 @@ public class SnapshotCache implements Serializable {
     }
 
     /**
-     * Processes a SnapshotEvent. Modifies internal cache state, and then
+     * Processes changes made to snapshots. Modifies internal cache state, and then
      * sends the event to all listeners. Outgoing event will have a source 
      * set ot this SnapshotCache.
      */

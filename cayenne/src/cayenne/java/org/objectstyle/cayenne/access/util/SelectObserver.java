@@ -66,7 +66,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -211,7 +210,7 @@ public class SelectObserver extends DefaultOperationObserver {
                 continue;
             }
 
-            SnapshotManager.mergePrefetchResultsRelationships(
+            SnapshotUtils.mergePrefetchResultsRelationships(
                 objects,
                 relationship,
                 nextObjects);

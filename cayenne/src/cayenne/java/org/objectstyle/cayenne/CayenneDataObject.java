@@ -68,8 +68,8 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
-import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.access.util.RelationshipFault;
+import org.objectstyle.cayenne.access.util.SnapshotUtils;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.util.PropertyComparator;
@@ -214,7 +214,7 @@ public class CayenneDataObject implements DataObject {
 
             if (snapshot != null) {
                 ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
-                SnapshotManager.refreshObjectWithSnapshot(entity, this, snapshot, true);
+                SnapshotUtils.refreshObjectWithSnapshot(entity, this, snapshot, true);
             }
             else {
                 dataContext.refetchObject(objectId);

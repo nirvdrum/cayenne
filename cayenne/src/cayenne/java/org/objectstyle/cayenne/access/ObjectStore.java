@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.access.util.SnapshotUtils;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -552,7 +553,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // merge objects with changes in event...
         logObj.debug("Processing snapshot event: " + event);
 
-        SnapshotManager.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
+		SnapshotUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
         
         // TODO: what should we do with deleted objects?
         // I suggest to turn them into TRANSIENT and notify a delegate...
