@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -76,7 +77,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -276,24 +277,14 @@ public class DbGenerator {
             return;
         }
 
-        PoolManager dataSource =
-            new PoolManager(
-                dsi.getJdbcDriver(),
-                dsi.getDataSourceUrl(),
-                dsi.getMinConnections(),
-                dsi.getMaxConnections(),
-                dsi.getUserName(),
-                dsi.getPassword());
+        Driver driver = (Driver) Class.forName(dsi.getJdbcDriver()).newInstance();
+        DataSource dataSource = new DriverDataSource(driver, dsi.getDataSourceUrl(), dsi
+                .getUserName(), dsi.getPassword());
 
-        try {
-            runGenerator(dataSource);
-        }
-        finally {
-            dataSource.dispose();
-        }
+        runGenerator(dataSource);
     }
 
-    /** 
+    /**
      * Main method to generate database objects out of the DataMap.
      */
     public void runGenerator(DataSource ds) throws Exception {
