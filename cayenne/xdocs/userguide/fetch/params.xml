@@ -19,7 +19,9 @@
     	query is created from the prototype. Each named parameter is an instance of <a href=
     	"../../api/cayenne/org/objectstyle/cayenne/exp/ExpressionParam.html">ExpressionParam</a>
     	class.
-		</p>             	
+		</p>
+		
+		<subsection name="7.5.1 Using Parameterized Queries.">                	
 	<p>Here is an example of building a prototype query:</p>
 <source>import java.util.List;
 import java.util.ArrayList;
@@ -87,6 +89,42 @@ SelectQuery query2 = proto.queryWithParams(params2);
 ... 
 
 </source>
+		</subsection>
+		
+		<subsection name="7.5.2 Assigning Parameterized Queries to Entities">
+		<p>Parameterized queries are true prototype objects. They do not contain
+		any contextual state information. Therefore they are suitable for the application-wide
+		reuse. To simplify lookup of specific queries, Cayenne provides API to create 
+		named queries associated with Entities in the DataMap. Queries can be 
+		easily organized, and later located by the code that uses them. An example of 
+		creating a named query is shown below. Such code is normally executed on application
+		startup, before any DataContexts are created.		
+		</p>
+<source>
+// this is a parameterized query initialized 
+// similar to the previous examples
+SelectQuery query; 
+
+...
+
+DataDomain domain = Configuration.getSharedConfig().getDomain();
+ObjEntity ent = domain.getEntityResolver().lookupObjEntity(query);
+ent.addQuery("MyQuery", query);
+</source>
+
+<p>Later, to find this query, called "MyQuery", the following code may be used 
+(assuming that the query fetches Artists):
+</p>
+<source>
+// assume this exists
+DataContext context; 
+
+...
+
+SelectQuery queryProto = context.getEntityResolver().lookupQuery(Artist.class, "MyQuery")
+</source>
+
+		</subsection>       
         </subsection>
     </section>
 </body>

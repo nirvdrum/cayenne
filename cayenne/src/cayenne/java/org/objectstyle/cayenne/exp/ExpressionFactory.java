@@ -424,7 +424,9 @@ public class ExpressionFactory {
     }
 
     /**
-     * An shortcut for <code>binaryPathExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+     * A convenience shortcut for <code>binaryPathExp(Expression.EQUAL_TO,
+     * pathSpec, value)
+     * </code>.
      */
     public static Expression matchExp(String pathSpec, Object value) {
         return binaryPathExp(Expression.EQUAL_TO, pathSpec, value);
