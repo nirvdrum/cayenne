@@ -283,13 +283,19 @@ public class DataNodeDetailView
 
         if (e.getDocument() == name.getDocument()) {
 
-            String new_name = name.getText();
+            String newName = name.getText();
             // If name hasn't changed, do nothing
-            if (oldName != null && new_name.equals(oldName))
+            if (oldName != null && oldName.equals(newName)) {
                 return;
-            node.setName(new_name);
+            }
+            
+            node.setName(newName);
+            
+            mediator.getCurrentDataDomain().removeDataNode(oldName);
+            mediator.getCurrentDataDomain().addNode(node);
+            
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node, oldName));
-            oldName = new_name;
+            oldName = newName;
 
         } else if (e.getDocument() == location.getDocument()) {
 

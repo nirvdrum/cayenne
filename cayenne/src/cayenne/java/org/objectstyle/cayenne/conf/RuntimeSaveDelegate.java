@@ -94,6 +94,17 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
         return domain;
     }
 
+    protected DataNode findNode(String domainName, String nodeName) {
+        DataDomain domain = findDomain(domainName);
+        DataNode node = domain.getNode(nodeName);
+        if (node == null) {
+            throw new IllegalArgumentException(
+                "Can't find DataNode: " + domainName + "." + nodeName);
+        }
+
+        return node;
+    }
+
     public Iterator dependentMapNames(String domainName, String mapName) {
         Transformer tr = new Transformer() {
             public Object transform(Object input) {
@@ -133,21 +144,16 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
     }
 
     public String nodeAdapterName(String domainName, String nodeName) {
-        DbAdapter adapter =
-        findDomain(domainName).getNode(nodeName).getAdapter();
+        DbAdapter adapter = findNode(domainName, nodeName).getAdapter();
         return (adapter != null) ? adapter.getClass().getName() : null;
     }
 
     public String nodeDataSourceName(String domainName, String nodeName) {
-        return findDomain(domainName)
-            .getNode(nodeName)
-            .getDataSourceLocation();
+        return findNode(domainName, nodeName).getDataSourceLocation();
     }
 
     public String nodeFactoryName(String domainName, String nodeName) {
-        return findDomain(domainName)
-            .getNode(nodeName)
-            .getDataSourceFactory();
+        return findNode(domainName, nodeName).getDataSourceFactory();
     }
 
     public Iterator nodeNames(String domainName) {
@@ -167,7 +173,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
                 return ((DataMap) input).getName();
             }
         };
-        List maps = findDomain(domainName).getNode(nodeName).getMapList();
+        List maps = findNode(domainName, nodeName).getMapList();
         return new TransformIterator(maps.iterator(), tr);
     }
 }
