@@ -17,7 +17,7 @@
     	
     	<ul>
     		<li><strong><a href=
-    		"http://objectstyle.org/cayenne/doc/tutorial/cayenne-tutorial-0.tar.gz">Download
+    		"http://objectstyle.org/cayenne/doc/tutorial/cayenne-cmd-app.tar.gz">Download
     		full tutorial source.</a></strong></li>
     	</ul>
     		
@@ -51,11 +51,11 @@
 # mkdir cayenne-tutorial
 # cd cayenne-tutorial
 </source>
-         <p>Unpack downloaded tutorial file (<code>cayenne-tutorial-0.tar.gz</code>) in this directory.</p>
+         <p>Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>) in this directory.</p>
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
-    		<p>Run the <a href="../../tutorial/0/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		<p>Run the <a href="../../tutorial/cayenne-cmd-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
     		script to create test tables. This script is tested on MySQL, 
     		but it should be easy to port to any other RDBMS.</p>
     	</subsection>
@@ -64,9 +64,9 @@
     		<p>Configuration files included in this tutorial are:
     		
     		<ul>
-    			<li><a href="../../tutorial/0/cayenne.xml">cayenne.xml</a></li>
-    			<li><a href="../../tutorial/0/datamap.xml">datamap.xml</a></li>
-    			<li><a href="../../tutorial/0/driverinfo.xml">driverinfo.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
     		Open <code>cayenne.xml</code> 
@@ -93,12 +93,12 @@
     		files that can be used with this tutorial can be found here:
     		
     		<ul>
-    			<li><a href="../../tutorial/0/test/_Artist.java">_Artist.java</a></li>
-    			<li><a href="../../tutorial/0/test/Artist.java">Artist.java</a></li>
-    			<li><a href="../../tutorial/0/test/_Painting.java">_Painting.java</a></li>
-    			<li><a href="../../tutorial/0/test/Painting.java">Painting.java</a></li>
-    			<li><a href="../../tutorial/0/test/_Gallery.java">_Gallery.java</a></li>
-    			<li><a href="../../tutorial/0/test/Gallery.java">Gallery.java</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/test/_Artist.java">_Artist.java</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/test/Artist.java">Artist.java</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/test/_Painting.java">_Painting.java</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/test/Painting.java">Painting.java</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/test/_Gallery.java">_Gallery.java</a></li>
+    			<li><a href="../../tutorial/cayenne-cmd-app/test/Gallery.java">Gallery.java</a></li>
     		</ul>
     		
     		Create a subdirectory called "test" under the project directory. Save the source code under
@@ -108,7 +108,7 @@
     	
     	<subsection name="3.2.6 Write Application Code" anchor="6">
     		<p>Create a simple application that uses Cayenne. Here is a sample Java class source code:
-    		<a href="../../tutorial/0/test/Main.java">Main.java</a>. Download it and save under "test" directory in project directory.</p>    	
+    		<a href="../../tutorial/cayenne-cmd-app/test/Main.java">Main.java</a>. Download it and save under "test" directory in project directory.</p>    	
     	</subsection>
     	
     	<subsection name="3.2.7 Compile and Run the Application" anchor="7">

@@ -70,7 +70,7 @@
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site in a local directory -->
     <!-- ============================================= -->
-    <target name="deploy-web">
+    <target name="deploy-web" depends="dist">
 		 <ant antfile="build-doc.xml" target="deploy-web"/>
     </target>
     
