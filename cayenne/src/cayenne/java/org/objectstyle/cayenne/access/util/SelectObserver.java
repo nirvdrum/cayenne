@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -155,6 +156,10 @@ public class SelectObserver extends DefaultOperationObserver {
       * is assumed to be the root query, and the rest are either independent queries or queries
       * prefetching relationships for the root query. 
       * 
+      * <p>If no results are found, an empty immutable list is returned. Most common case for this
+      * is when a delegate has blocked the query from execution.
+      * </p>
+      * 
       * <p>Side effect of this method call is that all data rows currently stored in this
       * SelectObserver are loaded as objects to a given DataContext (thus resolving
       * prefetched to-one relationships). Any to-many relationships for the root query
@@ -164,9 +169,7 @@ public class SelectObserver extends DefaultOperationObserver {
         List dataRows = getResults(rootQuery);
 
         if (dataRows == null) {
-            // Andrus: Maybe return null or an empty collection instead?
-            throw new IllegalArgumentException(
-                "Can't find results for query: " + rootQuery);
+            return Collections.EMPTY_LIST;
         }
 
         ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);

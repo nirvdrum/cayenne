@@ -117,10 +117,17 @@ public class DataContext implements QueryEngine, Serializable {
     // noop delegate 
     private static final DataContextDelegate defaultDelegate =
         new DataContextDelegate() {
+        
         public GenericSelectQuery willPerformSelect(
             DataContext context,
             GenericSelectQuery query) {
             return query;
+        }
+
+        public void snapshotChangedInDataRowStore(
+            DataObject object, 
+			DataRow snapshotInStore) {
+            // noop
         }
     };
 
@@ -254,8 +261,10 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Returns delegate instance if it is initialized, or a shared
      * noop implementation if not. 
+     * 
+     * @since 1.1
      */
-    private DataContextDelegate nonNullDelegate() {
+    DataContextDelegate nonNullDelegate() {
         return (delegate != null) ? delegate : DataContext.defaultDelegate;
     }
 

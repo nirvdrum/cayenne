@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
@@ -81,5 +82,13 @@ public interface DataContextDelegate {
      * @return the original or modified <code>GenericSelectQuery</code> or null to discard the query.
      */
 	public GenericSelectQuery willPerformSelect(DataContext context, GenericSelectQuery query);
+
+	/**
+	 * This method is invoked by DataObject's DataContext during commit, when it is detected
+	 * that a snapshot for object was modified in the underlying DataRowStore. It is invoked
+	 * for MODIFIED and DELETED objects about to be committed. Delegate can perform merging
+	 * of the snapshop, or abort commit by throwing an exception.
+	 */
+    public void snapshotChangedInDataRowStore(DataObject object, DataRow snapshotInStore);
 }
 

@@ -1,57 +1,45 @@
-/* ====================================================================
- *
- * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group
- * and individual authors of the software.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        ObjectStyle Group (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "ObjectStyle Group" and "Cayenne"
- *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact andrus@objectstyle.org.
- *
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    nor may "ObjectStyle" appear in their names without prior written
- *    permission of the ObjectStyle Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+/*
  * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the ObjectStyle Group.  For more
- * information on the ObjectStyle Group, please see
- * <http://objectstyle.org/>.
- *
+ * 
+ * The ObjectStyle Group Software License, Version 1.0
+ * 
+ * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
+ * software. All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 1.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. 2. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution. 3. The end-user documentation
+ * included with the redistribution, if any, must include the following
+ * acknowlegement: "This product includes software developed by the ObjectStyle
+ * Group (http://objectstyle.org/)." Alternately, this acknowlegement may
+ * appear in the software itself, if and wherever such third-party
+ * acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this
+ * software without prior written permission. For written permission, please
+ * contact andrus@objectstyle.org. 5. Products derived from this software may
+ * not be called "ObjectStyle" nor may "ObjectStyle" appear in their names
+ * without prior written permission of the ObjectStyle Group.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
+ * Group, please see <http://objectstyle.org/> .
+ *  
  */
 
 package org.objectstyle.cayenne.access;
@@ -66,6 +54,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.commons.collections.SequencedHashMap;
+import org.apache.commons.collections.iterators.IteratorChain;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
@@ -91,14 +80,13 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * ContextCommit implements DataContext commit logic. DataContext internally delegates
- * commit operations to an instance of ContextCommit. ContextCommit resolves 
- * primary key dependencies,
- * referential integrity dependencies (including multi-reflexive entities),
- * generates primary keys, creates batches for massive data modifications,
- * assigns operations to data nodes. It indirectly relies on graph
- * algorithms provided by ASHWOOD library.
- *
+ * ContextCommit implements DataContext commit logic. DataContext internally
+ * delegates commit operations to an instance of ContextCommit. ContextCommit
+ * resolves primary key dependencies, referential integrity dependencies
+ * (including multi-reflexive entities), generates primary keys, creates
+ * batches for massive data modifications, assigns operations to data nodes. It
+ * indirectly relies on graph algorithms provided by ASHWOOD library.
+ * 
  * @author Andriy Shapochka
  */
 
@@ -123,8 +111,8 @@ class ContextCommit {
     }
 
     /**
-     * Commits changes in the enclosed DataContext.
-     */
+	 * Commits changes in the enclosed DataContext.
+	 */
     void commit(Level logLevel) throws CayenneException {
         if (logLevel == null) {
             logLevel = QueryLogger.DEFAULT_LOG_LEVEL;
@@ -153,6 +141,8 @@ class ContextCommit {
             prepareDeleteQueries(nodeHelper);
         }
 
+        checkConcurrentModifications();
+
         ContextCommitObserver observer =
             new ContextCommitObserver(
                 logLevel,
@@ -172,14 +162,19 @@ class ContextCommit {
                 DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
                 List queries = nodeHelper.getQueries();
 
-                // Andrei: this check is needed, since if we run an empty query set,
-                // commit will not be executed, and this method will blow below.
+                // Andrei: this check is needed, since if we run an empty query
+                // set,
+                // commit will not be executed, and this method will blow
+                // below.
                 if (queries.size() > 0) {
                     nodeHelper.getNode().performQueries(queries, observer);
 
-                    // TODO: Andrei: should we reset observer commit status for each iteration?
-                    // Also we may add real distributed transactions support by adding
-                    // some kind of commit delegate that runs all queries, and only then
+                    // TODO: Andrei: should we reset observer commit status for
+                    // each iteration?
+                    // Also we may add real distributed transactions support by
+                    // adding
+                    // some kind of commit delegate that runs all queries, and
+                    // only then
                     // commits...
                     if (observer.isTransactionRolledback()) {
                         context.fireTransactionRolledback();
@@ -190,13 +185,47 @@ class ContextCommit {
                     }
                 }
             }
-            
+
             context.getObjectStore().objectsCommitted();
             context.fireTransactionCommitted();
         }
         finally {
             if (context.isTransactionEventsEnabled()) {
                 observer.unregisterFromDataContextEvents();
+            }
+        }
+    }
+
+    /**
+	 * Checks if any updated or deleted objects have been modified in the
+	 * underlying store. Ask delegate what to do about it.
+	 */
+    private void checkConcurrentModifications() {
+        DataContextDelegate delegate = context.getDelegate();
+        if (delegate == null) {
+            return;
+        }
+
+        DataRowStore store = context.getObjectStore().getDataRowCache();
+
+        IteratorChain it = new IteratorChain();
+        if (updObjects.size() > 0) {
+            it.addIterator(updObjects.iterator());
+        }
+
+        if (delObjects.size() > 0) {
+            it.addIterator(delObjects.iterator());
+        }
+
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+
+            // maybe opt for a cheaper "getCachedSnapshot" and treat nulls
+            // as "modification"? Ah... probably not.
+            DataRow snapshotInStore =
+                store.getSnapshot(object.getObjectId(), context.getParent());
+            if (object.getSnapshotVersion() != snapshotInStore.getVersion()) {
+                delegate.snapshotChangedInDataRowStore(object, snapshotInStore);
             }
         }
     }
@@ -370,19 +399,22 @@ class ContextCommit {
                             o,
                             masterDependentDbRel);
 
-                    // check whether MODIFIED object has real db-level modifications 
+                    // check whether MODIFIED object has real db-level
+                    // modifications
                     if (snapshot.isEmpty()) {
                         o.setPersistenceState(PersistenceState.COMMITTED);
                         continue;
                     }
 
-                    // after we filtered out "fake" modifications, check if an attempt is made to 
+                    // after we filtered out "fake" modifications, check if an
+                    // attempt is made to
                     // modify a read only entity
                     if (entity.isReadOnly()) {
                         throw attemptToCommitReadOnlyEntity(o.getClass(), entity);
                     }
 
-                    // Need to wrap snapshot keys to a TreeSet to ensure automatic ordering
+                    // Need to wrap snapshot keys to a TreeSet to ensure
+                    // automatic ordering
                     // so that we can build a valid hashcode
                     TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
                     Integer hashCode = new Integer(Util.hashCode(updatedAttributeNames));
@@ -410,7 +442,7 @@ class ContextCommit {
                                 idSnapshot,
                                 snapshot);
                         if (updId != null) {
-							o.getObjectId().setReplacementId(updId);
+                            o.getObjectId().setReplacementId(updId);
                         }
 
                         updObjects.add(o);
@@ -438,8 +470,8 @@ class ContextCommit {
     }
 
     /**
-     * Organizes committed objects by node, performs sorting operations.
-     */
+	 * Organizes committed objects by node, performs sorting operations.
+	 */
     private void categorizeObjects() throws CayenneException {
         this.nodeHelpers = new ArrayList();
 
@@ -509,9 +541,9 @@ class ContextCommit {
     }
 
     /**
-     * Performs classification of a DataObject for the DML operation.
-     * Throws CayenneRuntimeException if an object can't be classified. 
-     */
+	 * Performs classification of a DataObject for the DML operation. Throws
+	 * CayenneRuntimeException if an object can't be classified.
+	 */
     private void classifyByEntityAndNode(
         DataObject o,
         Map objectsByObjEntity,
