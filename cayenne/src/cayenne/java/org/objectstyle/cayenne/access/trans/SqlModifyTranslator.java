@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
  * Class works as a translator of raw SELECT queries to JDBC statements.
  * 
  * @deprecated Since 1.1. This translator was intended for SqlModifyQuery 
- * that is deprecated in favor of {@link SQLTemplate}.
+ * that is deprecated in favor of {@link org.objectstyle.cayenne.query.SQLTemplate}.
  */
 public class SqlModifyTranslator extends QueryAssembler {
 

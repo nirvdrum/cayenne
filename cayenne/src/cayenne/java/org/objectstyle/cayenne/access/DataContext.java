@@ -1230,14 +1230,28 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Performs a single database query that does not return the result.
-     * This is a shortcut for <code>performQueries(Collections.singletonList(query), 
-     * new QueryResult())</code>.
+     * Performs a single database query that does not select rows.
+     * Returns an array of update counts.
      * 
      * @since 1.1
      */
-    public void performNonSelectingQuery(Query query) {
-        performQueries(Collections.singletonList(query), new QueryResult());
+    public int[] performNonSelectingQuery(Query query) {
+        QueryResult result = new QueryResult();
+        performQueries(Collections.singletonList(query), result);
+        List updateCounts = result.getUpdates(query);
+        
+        if(updateCounts == null || updateCounts.isEmpty()) {
+            return new int[0];
+        }
+        
+        int len = updateCounts.size();
+        int[] counts = new int[len];
+        
+        for(int i = 0; i < len; i++) {
+            counts[i] = ((Number)updateCounts.get(i)).intValue();
+        }
+        
+        return counts;
     }
 
     /**

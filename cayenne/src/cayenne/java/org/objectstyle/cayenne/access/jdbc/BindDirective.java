@@ -109,7 +109,7 @@ public class BindDirective extends Directive {
 
     /**
      * Extracts the value of the object property to render and passes
-     * control to {@link #render(InternalContextAdapter, Writer, Object, Object, Object)} 
+     * control to {@link #render(InternalContextAdapter, Writer, ParameterBinding)} 
      * to do the actual rendering.
      */
     public boolean render(InternalContextAdapter context, Writer writer, Node node)

@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
  * Class works as a translator of raw SELECT queries to JDBC statements.
  *
  * @deprecated Since 1.1. This translator was intended for SqlSelectQuery 
- * that is deprecated in favor of {@link SQLTemplate}.
+ * that is deprecated in favor of {@link org.objectstyle.cayenne.query.SQLTemplate}.
  */
 public class SqlSelectTranslator
     extends QueryAssembler
