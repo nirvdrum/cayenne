@@ -9,7 +9,7 @@
 	<prev>/modelerguide/object-relational-modeling/no-existing-database.html</prev>
 </navigator>
 <body>
-        <section name="5. Generating Primary Key Support in the Database" anchor="pk">
+        <section name="4. Generating Primary Key Support in the Database" anchor="pk">
         	<p>One of Cayenne core features is automatic generation of the database primary
         	keys for the new objects. This requires a set of special database objects to
         	be present in the database. (Those are adapter specific and can be special lookup tables,

@@ -7,10 +7,10 @@
 <navigator>
 	<up>/modelerguide/index.html</up>
 	<prev>/modelerguide/index.html</prev>
-	<next>/modelerguide/runmodeler.html</next>
+	<next>/modelerguide/modeler-intro/runmodeler.html</next>
 </navigator>
 <body>
-   <section name="1. Introduction" anchor="intro">
+   <section name="1. Introduction">
             <p>Cayenne stores mapping and deployment information using a set of XML files with a predefined
             format. These files can be always edited by hand. But Cayenne goes beyond that. A
             standard distribution contains CayenneModeler - a Java Swing GUI application for 

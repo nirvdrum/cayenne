@@ -1,0 +1,117 @@
+<document>
+<title>CayenneModeler Guide - CayenneModeler Concepts</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/modelerguide/index.html</up>
+	<prev>/modelerguide/modeler-intro/runmodeler.html</prev>
+	<next>/modelerguide/object-relational-modeling/index.html</next>
+</navigator>
+<body>
+ <section name="1. Introduction">
+ 	<subsection name="1.2. What the Buttons Mean"> 
+ 		
+		<p><strong>Project:</strong> 
+		<img src="../../images/modeler/icon-new.gif" width="16" height="16"/>
+		<img src="../../images/modeler/icon-open.gif" width="16" height="16"/>
+		<img src="../../images/modeler/icon-save.gif" width="16" height="16"/>
+		</p>
+		
+		<p>
+		Cayenne Project is a logical deployment unit, that consists of a main project
+		file (called <code>cayenne.xml</code>) and zero or more DataNode (*.driver.xml)
+		and DataMap (*.map.xml) XML files. Project can be opened and edited in the CayenneModeler.
+		</p>
+		
+		
+		<p><strong>DataDomain:</strong>
+		<img src="../../images/modeler/icon-dom.gif" width="16" height="16"/> 
+		</p>
+		
+		<p>
+		Each DataDomain is an abstraction of a logical
+		data source, possibly spreading multiple physical databases.
+		<code>cayenne.xml</code> file lists DataDomains present in the project. 
+		Most projects will contain only a single domain.
+		</p>
+		
+		
+		<p><strong>DataNode:</strong>
+		<img src="../../images/modeler/icon-node.gif" width="16" height="16"/> 
+		</p>
+		
+		<p>
+		DataNode is an object that corresponds to a single physical data source, normally a database.
+		Currently there are two types of DataNodes:
+			    
+			<ul>
+				 <li>Based on DataSource obtained via JNDI from the container (e.g. a WebLogic or Tomcat server).</li>
+				 <li>Based on JDBC driver. In this case Cayenne provides its own connection pooling and other functions 
+				 expected from a DataSource.</li>
+			</ul>
+			
+		DataNode references zero or more DataMaps defined under DataDomain.
+		</p>
+		
+		
+		
+		<p><strong>DataMap:</strong>
+		<img src="../../images/modeler/icon-datamap.gif" width="16" height="16"/> 
+		</p>
+		
+		<p>
+		DataMap is a collection of Object/Relational mapping information linking Java object layer
+		with the relational database. DataMaps are created within DataDomains and can be later linked to DataNodes.
+		</p>
+		
+		
+		<p><strong>Entities:</strong>
+		<img src="../../images/modeler/icon-dbentity.gif" width="16" height="16"/>
+		<img src="../../images/modeler/icon-derived-dbentity.gif" width="16" height="16"/>
+		<img src="../../images/modeler/icon-objentity.gif" width="16" height="16"/> 
+		</p>
+		
+		<p>
+		There are two types of entities in Cayenne DataMaps: ObjEntities, reflecting the structure of the object layer, 
+		and DbEntities that describe database tables and views. In other words, ObjEntity is a descriptor of a persistent Java 
+		class, and DbEntity is a descriptor of a database table or view. Each ObjEntity is based on a DbEntity, but there can be DbEntities
+		that do not have a corresponding ObjEntity.
+		</p>
+		
+		<p>There is a special kind of DbEntity - DerivedDbEntity - that has limited capabilities of defining "virtual" 
+		database views.
+		</p>
+		
+
+		<p><strong>Attributes:</strong><img src="../../images/modeler/icon-attribute.gif" width="16" height="16"/>
+		</p>
+		
+		<p>
+		Attributes define simple data fields. ObjAttributes are descriptors for Java class
+		persistent properties, DbAttributes are descriptors for table or view columns. ObjAttributes
+		map to DbAttributes.
+		</p>
+		
+
+		<p><strong>Relationships:</strong>
+		<img src="../../images/modeler/icon-relationship.gif" width="16" height="16"/>
+				</p>
+		
+		<p>
+		Relationships define how different entities relate to each other. ObjRelationships describe
+		an association between two persistent Java classes (e.g. "Artist object has one or more Painting objects"), 
+		DbRelationships model the same
+		concept in the database world (Primary Key - Foreign Key association).
+		ObjRelationship consists of one or more DbRelationships.
+		</p>
+		</subsection>
+    </section>
+</body>
+</document>
+
+
+
+
+

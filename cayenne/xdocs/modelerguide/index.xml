@@ -1,25 +1,27 @@
 <document>
 <title>CayenneModeler Guide</title>
 <navigator>
-	<next>/modelerguide/intro.html</next>
+	<next>/modelerguide/modeler-intro/index.html</next>
 </navigator>
 <body>
     <section name="Table of Contents">        
         <ul>
-             <li><a href="intro.html">1. Introduction</a>
-             <br/></li>
-             <li><a href="runmodeler.html">2. Running CayenneModeler</a>
-             <br/></li>
-             <li><a href="modelerconcepts.html">3. CayenneModeler Concepts: What the Buttons Mean</a>
+             <li><a href="modeler-intro/index.html">1. Introduction</a>
+             <ul>
+                <li><a href="modeler-intro/runmodeler.html">1.1 Running CayenneModeler</a></li>
+                <li><a href="modeler-intro/modelerconcepts.html">1.2 What the Buttons Mean</a></li>
+             </ul>
              <br/></li>
              
-             <li><a href="object-relational-modeling/index.html">4. Approach to Object/Relational Modeling</a>
+             <li><a href="object-relational-modeling/index.html">2. Approach to Object/Relational Modeling</a>
              <ul>
-                <li><a href="object-relational-modeling/existing-database.html">4.1 Start with Existing Database</a></li>
-                <li><a href="object-relational-modeling/no-existing-database.html">4.2 Start from the O/R Model</a></li>
+                <li><a href="object-relational-modeling/existing-database.html">2.1 Start with Existing Database</a></li>
+                <li><a href="object-relational-modeling/no-existing-database.html">2.2 Start from the O/R Model</a></li>
             </ul><br/></li>
             
-             <li><a href="pksupport.html">5. Generating Primary Key Support in the Database</a>
+             <li><a href="pksupport.html">3. Generating Primary Key Support in the Database</a>
+             <ul>
+             </ul>
              <br/></li>
         </ul>
     </section>

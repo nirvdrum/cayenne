@@ -6,11 +6,11 @@
     </properties>
 <navigator>
 	<up>/modelerguide/index.html</up>
-	<prev>/modelerguide/modelerconcepts.html</prev>
+	<prev>/modelerguide/modeler-intro/modelerconcepts.html</prev>
 	<next>/modelerguide/object-relational-modeling/existing-database.html</next>
 </navigator>
 <body>
- 	 <section name="4. Approach to Object/Relational Modeling">
+ 	 <section name="3. Approach to Object/Relational Modeling">
 		<p>
 		
 		</p>

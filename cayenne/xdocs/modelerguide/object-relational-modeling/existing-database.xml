@@ -10,7 +10,7 @@
 	<next>/modelerguide/object-relational-modeling/no-existing-database.html</next>
 </navigator>
 <body>
- 	 <section name="4.1 Start With Existing Database">
+ 	 <section name="3.1 Start With Existing Database">
 		<ol>
 		<li>Do steps 1 through 6 of the previous section to create project and a domain.</li>
 		<li>Click Tools->Reverse Engineer Database.
