@@ -72,7 +72,20 @@ import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Engine to port data between two DataNodes.
+ * Engine to port data between two DataNodes. These nodes can potentially connect
+ * to databases from different vendors. The only assumption is that all of the 
+ * DbEntities (tables) being ported are present in both source and destination databases, 
+ * and are adequately described by Cayenne mapping. 
+ * 
+ * <p>DataPort implements a Cayenne-based algorithm to read data from one data node
+ * and write to another. It uses DataPortDelegate interface to decouple porting logic 
+ * from such things like filtering entities (include/exclude from port based on some criteria),
+ * logging the progress of port operation, qualifying the querie, etc. It is possible to build 
+ * various configurable interfaces to the this tool. E.g. Cayenne implements CayenneDataPort 
+ * Ant task.
+ * </p>
+ * 
+ * @author Andrei Adamchik
  */
 public class DataPort
 {
@@ -84,6 +97,10 @@ public class DataPort
   protected boolean cleaningDestination;
   protected DataPortDelegate delegate;
 
+  /**
+   * Creates new DataPort instance, initializing it 
+   * with a DataPortDelegate.  
+   */
   public DataPort(DataPortDelegate delegate)
   {
     super();
@@ -91,7 +108,9 @@ public class DataPort
   }
 
   /**
-   * Runs DataPort.
+   * Runs DataPort. The instance must be fully configured by the time this method
+   * is invoked, having its delegate, source and destinatio nodes, and a list of entities 
+   * set up. 
    */
   public void execute() throws Exception
   {
@@ -118,12 +137,13 @@ public class DataPort
       return;
     }
 
-    // create sorted copy of entities list
+    // sort entities for insertion
     List sorted = new ArrayList(entities);
     destinationNode.getDependencySorter().sortDbEntities(sorted, false);
 
     if (cleaningDestination)
     {
+      // reverse insertion order for deletion
       List entitiesInDeleteOrder = new ArrayList(sorted.size());
       entitiesInDeleteOrder.addAll(sorted);
       Collections.reverse(entitiesInDeleteOrder);
@@ -138,7 +158,10 @@ public class DataPort
    */
   protected void processDelete(List entities)
   {
-    // allow delegate to interfere
+    // Allow delegate to modify the list of entities
+    // any way it wants. For instance delegate may filter 
+    // or sort the list (though it doesn't have to, and can simply
+    // pass through the original list). 
     if (delegate != null)
     {
       entities = delegate.willCleanData(this, entities);
@@ -149,40 +172,49 @@ public class DataPort
       return;
     }
 
+    // Using QueryResult as observer for the data cleanup.
+    // This allows to collect query statistics and pass it to the delegate.
     QueryResult observer = new QueryResult();
+
+    // Delete data from entities one by one
     Iterator it = entities.iterator();
     while (it.hasNext())
     {
-	  observer.clear();
-	  
       DbEntity entity = (DbEntity) it.next();
       DeleteQuery query = new DeleteQuery();
+
+      // using DbEntity as a query root is unusual but will still work with Cayenne
       query.setRoot(entity);
 
-      // log execution
+      // notify delegate that delete is about to happen
       if (delegate != null)
       {
-        delegate.willCleanData(this, entity);
+        delegate.willCleanData(this, entity, query);
       }
 
+      // perform delete query
+      observer.clear();
       destinationNode.performQuery(query, observer);
 
+      // notify delegate that delete just happened
       if (delegate != null)
       {
-        List updates = observer.getUpdates(query);
-        int count = 0;
-        if (updates.size() > 0)
-        {
-          count = ((Number) updates.get(0)).intValue();
-        }
+        // observer will store query statistics
+        int count = observer.getFirstUpdateCount(query);
         delegate.didCleanData(this, entity, count);
       }
     }
   }
 
+  /**
+   * Reads source data from source, saving it to destination.
+   */
   protected void processInsert(List entities) throws Exception
   {
-    // allow delegate to interfere
+    // Allow delegate to modify the list of entities
+    // any way it wants. For instance delegate may filter 
+    // or sort the list (though it doesn't have to, and can simply
+    // pass through the original list). 
     if (delegate != null)
     {
       entities = delegate.willCleanData(this, entities);
@@ -194,13 +226,19 @@ public class DataPort
     }
 
     // Create an observer for to get the iterated result
+    // instead of getting each table as a list
     IteratedSelectObserver observer = new IteratedSelectObserver();
+
+    // Using QueryResult as observer for the data cleanup.
+    // This allows to collect query statistics and pass it to the delegate.
     QueryResult insertObserver = new QueryResult();
+
+    // process ordered list of entities one by one
     Iterator it = entities.iterator();
     while (it.hasNext())
     {
-	  insertObserver.clear();
-      
+      insertObserver.clear();
+
       DbEntity entity = (DbEntity) it.next();
 
       SelectQuery select = new SelectQuery();
@@ -210,10 +248,10 @@ public class DataPort
       sourceNode.performQuery(select, observer);
       ResultIterator result = observer.getResultIterator();
       InsertBatchQuery insert = new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
-      // determine logging level
+
       if (delegate != null)
       {
-        delegate.willPortEntity(this, entity);
+        delegate.willPortEntity(this, entity, select);
       }
 
       try
@@ -229,12 +267,7 @@ public class DataPort
 
         if (delegate != null)
         {
-          List inserts = insertObserver.getUpdates(insert);
-          int count = 0;
-          if (inserts.size() > 0)
-          {
-            count = ((Number) inserts.get(0)).intValue();
-          }
+          int count = insertObserver.getFirstUpdateCount(insert);
           delegate.didPortEntity(this, entity, count);
         }
       }
@@ -242,6 +275,7 @@ public class DataPort
       {
         try
         {
+          // don't forget to close ResultIterator
           result.close();
         }
         catch (CayenneException ex)
@@ -266,16 +300,26 @@ public class DataPort
     return destinationNode;
   }
 
+  /**
+   * Sets the initial list of entities to process. This list can
+   * be later modified by the delegate.
+   */
   public void setEntities(List entities)
   {
     this.entities = entities;
   }
 
+  /**
+   * Sets the DataNode serving as a source of the ported data.
+   */
   public void setSourceNode(DataNode sourceNode)
   {
     this.sourceNode = sourceNode;
   }
 
+  /**
+   * Sets the DataNode serving as a destination of the ported data.
+   */
   public void setDestinationNode(DataNode destinationNode)
   {
     this.destinationNode = destinationNode;
@@ -296,9 +340,13 @@ public class DataPort
     return cleaningDestination;
   }
 
-  public void setCleaningDestination(boolean deletingDestinationFirst)
+  /**
+   * Defines whether DataPort should delete all data from destination
+   * tables before doing the port. 
+   */
+  public void setCleaningDestination(boolean cleaningDestination)
   {
-    this.cleaningDestination = deletingDestinationFirst;
+    this.cleaningDestination = cleaningDestination;
   }
 
 }

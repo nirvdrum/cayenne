@@ -67,10 +67,14 @@ import org.objectstyle.cayenne.dataport.DataPort;
 import org.objectstyle.cayenne.dataport.DataPortDelegate;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * DataPortDelegate implementation that performs entity filtering and 
- * logging during the Ant CDataPort task execution.
+ * DataPortDelegate implementation that works in a context
+ * of Ant CayenneDataPort task execution, performing 
+ * entity filtering and logging functions.
+ * 
+ * @author Andrei Adamchik
  */
 public class AntDataPortDelegate implements DataPortDelegate
 {
@@ -273,9 +277,9 @@ public class AntDataPortDelegate implements DataPortDelegate
     return filterEntities(entities);
   }
 
-  public void willPortEntity(DataPort portTool, DbEntity entity)
+  public void willPortEntity(DataPort portTool, DbEntity entity, Query query)
   {
-    parentTask.log("  Next table '" + entity.getName() + "'");
+    parentTask.log("  Porting '" + entity.getName() + "'");
     lastEntity = entity;
     timestamp = System.currentTimeMillis();
   }
@@ -289,9 +293,10 @@ public class AntDataPortDelegate implements DataPortDelegate
         " in " + (System.currentTimeMillis() - timestamp) + " ms.";
     }
 
-    String label = (rowCount == 1) ? "1 row" : rowCount + " rows";
+    String label =
+      (rowCount == 1) ? "1 row transferred" : rowCount + " rows transferred";
     parentTask.log(
-      "  Ported " + label + " to " + entity.getName() + timestampLabel,
+      "  Done porting " + entity.getName() + ", " + label + timestampLabel,
       Project.MSG_VERBOSE);
   }
 
@@ -300,11 +305,9 @@ public class AntDataPortDelegate implements DataPortDelegate
     return filterEntities(entities);
   }
 
-  public void willCleanData(DataPort portTool, DbEntity entity)
+  public void willCleanData(DataPort portTool, DbEntity entity, Query query)
   {
-    parentTask.log(
-      "  Deleting data from " + entity.getName(),
-      Project.MSG_VERBOSE);
+    parentTask.log("  Deleting " + entity.getName(), Project.MSG_VERBOSE);
     lastEntity = entity;
     timestamp = System.currentTimeMillis();
   }
@@ -318,9 +321,10 @@ public class AntDataPortDelegate implements DataPortDelegate
         " in " + (System.currentTimeMillis() - timestamp) + " ms.";
     }
 
-    String label = (rowCount == 1) ? "1 row" : rowCount + " rows";
+    String label =
+      (rowCount == 1) ? "1 row deleted" : rowCount + " rows deleted";
     parentTask.log(
-      "  Deleted " + label + " from " + entity.getName() + timestampLabel,
+      "  Done deleting " + entity.getName() + ", " + label + timestampLabel,
       Project.MSG_VERBOSE);
   }
 }

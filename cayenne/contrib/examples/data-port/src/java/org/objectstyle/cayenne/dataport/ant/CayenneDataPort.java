@@ -70,9 +70,13 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.FileConfiguration;
 import org.objectstyle.cayenne.dataport.DataPort;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Ant frontend to DataPort class.
+ * Ant task implementing a frontend to DataPort allowing
+ * porting database data using Ant build scripts.
+ * 
+ * @author Andrei Adamchik
  */
 public class CayenneDataPort extends Task
 {
@@ -91,9 +95,9 @@ public class CayenneDataPort extends Task
     // suppress Cayenne logging
     // in the future do something smarter 
     // (like redirecting Log4J logging to the Ant log)
-	Configuration.setLoggingConfigured(true);
-	Logger.getRootLogger().removeAllAppenders();
-	Logger.getRootLogger().addAppender(new NullAppender());
+    Configuration.setLoggingConfigured(true);
+    Logger.getRootLogger().removeAllAppenders();
+    Logger.getRootLogger().addAppender(new NullAppender());
 
     FileConfiguration configuration = new FileConfiguration();
     configuration.addFilesystemPath(projectFile.getParentFile());
@@ -112,7 +116,7 @@ public class CayenneDataPort extends Task
       throw new BuildException(
         "destNode not found in the project: " + destNode);
     }
-    
+
     log("Porting from '" + srcNode + "' to '" + destNode + "'.");
 
     AntDataPortDelegate portDelegate =
@@ -129,7 +133,10 @@ public class CayenneDataPort extends Task
     }
     catch (Exception e)
     {
-      throw new BuildException("Error porting data: " + e.getMessage(), e);
+      Throwable topOfStack = Util.unwindException(e);
+      throw new BuildException(
+        "Error porting data: " + topOfStack.getMessage(),
+        topOfStack);
     }
   }
 

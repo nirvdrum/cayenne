@@ -58,10 +58,15 @@ package org.objectstyle.cayenne.dataport;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * Interface for callback and delegate methods allowing other classes
- * to control some aspects of data porting via DataPort.
+ * Interface for callback and delegate methods allowing implementing classes
+ * to control various aspects of data porting via DataPort. DataPort instance
+ * will invoke appropriate delegate methods during different stages of porting
+ * process.
+ * 
+ * @author Andrei Adamchik
  */
 public interface DataPortDelegate
 {
@@ -74,9 +79,11 @@ public interface DataPortDelegate
   /**
    * Invoked by DataPort right before the start of data port 
    * for a given entity. Allows delegate to handle such things like 
-   * logging, etc.
+   * logging, etc. Also makes it possible to
+   * alter the select query used to cleanup the data, e.g. set a limiting
+   * qualifier.
    */
-  public void willPortEntity(DataPort portTool, DbEntity entity);
+  public void willPortEntity(DataPort portTool, DbEntity entity, Query query);
 
   /**
    * Invoked by DataPort right after the end of data port 
@@ -94,9 +101,11 @@ public interface DataPortDelegate
   /**
    * Invoked by DataPort right before the start of data cleanup 
    * for a given entity. Allows delegate to handle such things like 
-   * logging, etc.
+   * logging, etc. Also makes it possible to
+   * alter the delete query used to cleanup the data, e.g. set a limiting
+   * qualifier.
    */
-  public void willCleanData(DataPort portTool, DbEntity entity);
+  public void willCleanData(DataPort portTool, DbEntity entity, Query query);
 
   /**
    * Invoked by DataPort right after the end of data cleanup 
