@@ -213,6 +213,7 @@ public class EventController extends ModelerController {
         currentDbRel = null;
         currentProcedure = null;
         currentProcedureParameter = null;
+        currentQuery = null;
         getTopModel().setSelectedPath(ProjectPath.EMPTY_PATH);
     }
 
@@ -255,7 +256,7 @@ public class EventController extends ModelerController {
     public Query getCurrentQuery() {
         return currentQuery;
     }
-    
+
     public Procedure getCurrentProcedure() {
         return currentProcedure;
     }
@@ -572,7 +573,7 @@ public class EventController extends ModelerController {
             }
         }
     }
-    
+
     /** 
      * Informs all listeners of the ProcedureEvent. 
      * Does not send the event to its originator. 
@@ -661,7 +662,7 @@ public class EventController extends ModelerController {
             listener.currentQueryChanged(e);
         }
     }
-    
+
     public void fireProcedureDisplayEvent(ProcedureDisplayEvent e) {
         if (currentProcedure == e.getProcedure())
             e.setProcedureChanged(false);
