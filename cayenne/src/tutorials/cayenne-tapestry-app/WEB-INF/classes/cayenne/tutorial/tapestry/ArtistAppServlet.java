@@ -10,7 +10,7 @@ import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import org.objectstyle.cayenne.conf.Configuration;
 
 /**
- * The main servlet class for the applicatoin. Links the 
+ * The main servlet class for the application. Links the 
  * servlet container with the artist application.
  * 
  * @author Eric Schneider
@@ -31,6 +31,6 @@ public class ArtistAppServlet extends ApplicationServlet {
         // [OPTIONAL STEP] Set up shared Cayenne configuration object
         // to be org.objectstyle.cayenne.conf.BasicServletConfiguration
         // to locate Cayenne config files under WEB-INF instead of CLASSPATH
-        BasicServletConfiguration.initConfig(config.getServletContext());
+        BasicServletConfiguration.initializeConfiguration(config.getServletContext());
     }
 }

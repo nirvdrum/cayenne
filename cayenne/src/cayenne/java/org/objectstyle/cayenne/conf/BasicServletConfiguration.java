@@ -79,9 +79,9 @@ public class BasicServletConfiguration extends Configuration {
 
     protected ServletContext servletContext;
 
-    public static BasicServletConfiguration initConfig(ServletContext ctxt) {
+    public static BasicServletConfiguration initializeConfiguration(ServletContext ctxt) {
         BasicServletConfiguration conf = new BasicServletConfiguration(ctxt);
-        Configuration.initializeSharedConfiguration(conf);
+        Configuration.setSharedConfiguration(conf);
         return conf;
     }
 

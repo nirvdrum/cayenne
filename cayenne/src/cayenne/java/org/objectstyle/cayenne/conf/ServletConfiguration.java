@@ -108,13 +108,13 @@ public class ServletConfiguration
     }
 
     /** Sets itself as a Cayenne shared Configuration object that can later
-      * be obtained by calling <code>Configuration.getSharedConfig()</code>.
+      * be obtained by calling <code>Configuration.getSharedConfiguration()</code>.
       * This method is a part of  ServletContextListener interface and is called
       * on application startup. */
     public void contextInitialized(ServletContextEvent sce) {
         this.servletContext = sce.getServletContext();
         servletContext.log("*************** app created");
-        Configuration.initializeSharedConfiguration(this);
+        Configuration.setSharedConfiguration(this);
     }
 
     /** Currently does nothing. <i>In the future it should close down
