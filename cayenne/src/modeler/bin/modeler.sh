@@ -68,6 +68,8 @@ if [ "$CLASSPATH" != "" ] ; then
 	OPTIONS="$OPTIONS$PATH_SEPARATOR$CLASSPATH"
 fi
 
+# Mac OS X Specific property - application name
+PROPERTIES="-Dcom.apple.mrj.application.apple.menu.about.name=CayenneModeler"
 
-$JAVACMD $OPTIONS $MAIN_CLASS $1 $2 $3 &
+$JAVACMD $OPTIONS $PROPERTIES $MAIN_CLASS $1 $2 $3 &
 

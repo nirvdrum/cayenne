@@ -65,9 +65,9 @@ import org.objectstyle.cayenne.modeler.dialog.AboutDialog;
  */
 public class AboutAction extends CayenneAction {
 
-	public static final String getActionName() {
-		return "About CayenneModeler";
-	}
+    public static final String getActionName() {
+        return "About CayenneModeler";
+    }
 
     /**
      * Constructor for AboutMenuAction.
@@ -81,6 +81,10 @@ public class AboutAction extends CayenneAction {
      * Displays About dialog.
      */
     public void performAction(ActionEvent e) {
+        showAboutDialog();
+    }
+
+    public void showAboutDialog() {
         new AboutDialog(CayenneModelerFrame.getFrame());
     }
 }

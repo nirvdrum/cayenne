@@ -98,6 +98,9 @@ public class Main {
             System.exit(1);
         }
 
+        // run Mac hooks
+        main.configureMacOSX();
+
         File projectFile = projectFileFromArgs(args);
         main.runModeler(projectFile);
     }
@@ -137,7 +140,8 @@ public class Main {
         try {
             Class.forName("javax.swing.SpringLayout");
             return true;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.fatal("CayenneModeler requires JDK 1.4.");
             logObj.fatal(
                 "Found : '"
@@ -153,6 +157,19 @@ public class Main {
                 "Unsupported JDK Version",
                 JOptionPane.ERROR_MESSAGE);
             return false;
+        }
+    }
+
+    protected void configureMacOSX() {
+        if (System.getProperty("os.name").toLowerCase().indexOf("mac") < 0) {
+            return;
+        }
+
+        try {
+            MacOSXSetup.configureMacOSX();
+        }
+        catch (Exception ex) {
+            // ignore... not a mac
         }
     }
 
@@ -206,7 +223,8 @@ public class Main {
                     p1.addAppender(
                         new FileAppender(layout, logfile.getCanonicalPath(), true));
                 }
-            } catch (IOException ioex) {
+            }
+            catch (IOException ioex) {
                 logObj.warn("Error setting logging.", ioex);
             }
         }
@@ -254,7 +272,8 @@ public class Main {
 
             // try to set set L&F
             UIManager.setLookAndFeel(lfName);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             logObj.warn(
                 "Could not set selected LookAndFeel '"
                     + lfName
@@ -270,10 +289,12 @@ public class Main {
 
             try {
                 UIManager.setLookAndFeel(lfName);
-            } catch (Exception retry) {
+            }
+            catch (Exception retry) {
                 // give up, continue as-is
             }
-        } finally {
+        }
+        finally {
             // remember L&F settings
             prefs.setProperty(
                 ModelerPreferences.EDITOR_LAFNAME,
