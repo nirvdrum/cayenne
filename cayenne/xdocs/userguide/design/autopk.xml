@@ -6,8 +6,8 @@
 	<next>/userguide/design/config.html</next>
 </navigator>
 <body>
-    <section name="3. Design">
-        <subsection name="3.6 Primary Key Generation" anchor="pk">
+    <section name="4. Design">
+        <subsection name="4.6 Primary Key Generation" anchor="pk">
             <p> To Be Done </p>
         </subsection>
     </section>

@@ -6,8 +6,8 @@
 	<next>/userguide/design/dataobj.html</next>
 </navigator>
 <body>
-    <section name="3. Design">
-        <subsection name="3.1 Object Relational Mapping" anchor="or_map">
+    <section name="4. Design">
+        <subsection name="4.1 Object Relational Mapping" anchor="or_map">
             <p>Normally mapping is done between Java class and a database table. This 
             way instance of such class (an object) will map to a single database row.
             Some properties of such object (properties in a "JavaBeans" sense) would map 

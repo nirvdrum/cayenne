@@ -9,10 +9,10 @@
 	<next>/userguide/appguide/exp.html</next>
 </navigator>    
 <body>
-    <section name="4. Writing Cayenne Applications">        
-        <subsection name="4.4 Using Cayenne" anchor="cayenne">
+    <section name="5. Writing Cayenne Applications">        
+        <subsection name="5.4 Using Cayenne" anchor="cayenne">
         
-            <subsection name="4.4.1 Getting DataContext" anchor="cayenne_dc">
+            <subsection name="5.4.1 Getting DataContext" anchor="cayenne_dc">
             <p>In a Cayenne application most of the database work is done via a 
             <a 
             href="../../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
@@ -50,7 +50,7 @@ DataContext ctxt = ServletConfiguration.getDefaultContext(session);
 </source>
             </subsection>
             
-            <subsection name="4.4.2 Fetching Objects" anchor="cayenne_fetch">
+            <subsection name="5.4.2 Fetching Objects" anchor="cayenne_fetch">
             <p>To fetch a list of objects matching a certain criteria, a SelectQuery
             object should be created. It can be executed using DataContext, bringing
             back a list of DataObjects:</p>
@@ -74,7 +74,7 @@ List realArt = ctxt.performQuery(q);
 </source>           
             </subsection>
             
-            <subsection name="4.4.3 Saving Modified Objects" anchor="cayenne_save">
+            <subsection name="5.4.3 Saving Modified Objects" anchor="cayenne_save">
             <p>Continuing the previous example, this section shows how to save changes made to
             DataObjects. Lets do the following operations: double the price of the first
             retrieved painting, add new painting that belongs to the same artist as the 

@@ -6,8 +6,8 @@
 	<next>/userguide/appguide/index.html</next>
 </navigator>
 <body>
-    <section name="3. Design">
-       <subsection name="3.7 Configuration" anchor="config">
+    <section name="4. Design">
+       <subsection name="4.7 Configuration" anchor="config">
             <p>Central piece in Cayenne configuration is 
             <a href="../../api/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
             class. It creates DataDomain objects used later to access the database. Database

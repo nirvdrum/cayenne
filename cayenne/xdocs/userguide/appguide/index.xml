@@ -12,8 +12,8 @@
 </navigator>
 
 <body>
-    <section name="4. Writing Cayenne Applications">
-        <subsection name="4.1 Introduction" anchor="intro">
+    <section name="5. Writing Cayenne Applications">
+        <subsection name="5.1 Introduction" anchor="intro">
             <p>The following steps are needed to write and deploy a Cayenne 
             application. <i>Each one of the steps is discussed in detail in the 
             following subsections.</i></p>

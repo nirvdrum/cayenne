@@ -25,39 +25,40 @@
                 <li><a href="install.html#tests">2.4 Unit Tests</a></li>
             </ul></li>
             
+            <li><a href="quickstart/index.html">3. Quick Start</a></li>
             
-            <li><a href="design/index.html">3. Design</a>
+            <li><a href="design/index.html">4. Design</a>
             <ul>
-                <li><a href="design/index.html#or_map">3.1 Object Relational Mapping</a></li>
-                <li><a href="design/dataobj.html#do">3.2 Data Objects</a></li>
-                <li><a href="design/access.html#access_classes">3.3 Access Classes</a></li>
-                <li><a href="design/datasrc.html#connect">3.4 Cayenne DataSource</a></li>
-                <li><a href="design/crossdb.html#crossdb">3.5 Cross-Database Issues</a></li>
-                <li><a href="design/autopk.html#pk">3.6 Primary Key Generation</a></li>
-                <li><a href="design/config.html#config">3.7 Configuration</a></li>
+                <li><a href="design/index.html#or_map">4.1 Object Relational Mapping</a></li>
+                <li><a href="design/dataobj.html#do">4.2 Data Objects</a></li>
+                <li><a href="design/access.html#access_classes">4.3 Access Classes</a></li>
+                <li><a href="design/datasrc.html#connect">4.4 Cayenne DataSource</a></li>
+                <li><a href="design/crossdb.html#crossdb">4.5 Cross-Database Issues</a></li>
+                <li><a href="design/autopk.html#pk">4.6 Primary Key Generation</a></li>
+                <li><a href="design/config.html#config">4.7 Configuration</a></li>
             </ul></li>
             
-            <li><a href="appguide/index.html">4. Writing Cayenne Applications</a>
+            <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>
             <ul>
-                <li><a href="appguide/index.html#intro">4.1 Introduction</a></li>
-                <li><a href="appguide/project.html#datamap">4.2 Cayenne Project</a></li>
-                <li><a href="appguide/javagen.html#javagen">4.3 Generating Java Classes</a></li>
-                <li><a href="appguide/cayenne.html#cayenne">4.4 Using Cayenne</a></li>
-                <li><a href="appguide/exp.html#exp">4.5 Expressions</a></li>
-                <li><a href="appguide/deploy.html#deploy">4.6 Deployment</a></li>
+                <li><a href="appguide/index.html#intro">5.1 Introduction</a></li>
+                <li><a href="appguide/project.html#datamap">5.2 Cayenne Project</a></li>
+                <li><a href="appguide/javagen.html#javagen">5.3 Generating Java Classes</a></li>
+                <li><a href="appguide/cayenne.html#cayenne">5.4 Using Cayenne</a></li>
+                <li><a href="appguide/exp.html#exp">5.5 Expressions</a></li>
+                <li><a href="appguide/deploy.html#deploy">5.6 Deployment</a></li>
             </ul></li>
             
-            <li><a href="modeler/index.html">5. CayenneModeler GUI Tool</a>
+            <li><a href="modeler/index.html">6. CayenneModeler GUI Tool</a>
             <ul>
-                <li><a href="modeler/index.html#intro">5.1 Introduction</a></li>
+                <li><a href="modeler/index.html#intro">6.1 Introduction</a></li>
             </ul></li>
             
-            <li><a href="webobjects.html">6. Cayenne and WebObjects</a>
+            <li><a href="webobjects.html">7. Cayenne and WebObjects</a>
             <ul>
-                <li><a href="webobjects.html#intro">6.1 Introduction</a></li>
-                <li><a href="webobjects.html#feature">6.2 Feature Comparison</a></li>
-                <li><a href="webobjects.html#together">6.3 Working Together</a></li>
-                <li><a href="webobjects.html#terms">6.4 Terms Translation</a></li>
+                <li><a href="webobjects.html#intro">7.1 Introduction</a></li>
+                <li><a href="webobjects.html#feature">7.2 Feature Comparison</a></li>
+                <li><a href="webobjects.html#together">7.3 Working Together</a></li>
+                <li><a href="webobjects.html#terms">7.4 Terms Translation</a></li>
             </ul></li>
         </ul>
     </section>

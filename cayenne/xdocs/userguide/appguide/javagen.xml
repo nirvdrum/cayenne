@@ -10,8 +10,8 @@
 	<next>/userguide/appguide/cayenne.html</next>
 </navigator>    
 <body>
-    <section name="4. Writing Cayenne Applications">        
-           <subsection name="4.3 Generating Java Classes" anchor="javagen">
+    <section name="5. Writing Cayenne Applications">        
+           <subsection name="5.3 Generating Java Classes" anchor="javagen">
             <p>Java classes can be generated from an existing DataMap using CayenneModeler
             tool or a special <a href="http://jakarat.apache.org/ant/">Ant</a> task, 
             <code>Cgen</code> (short for "Cayenne Class Generator"), implemented by <a href=
@@ -21,7 +21,7 @@
             how class generation can be done using GUI see 
             <a href="../modeler/index.html">CayenneModeler chapter</a>.</p>
             
-            <subsection name="4.3.1 Cgen (Cayenne Class Generator)" anchor="cayennegen">
+            <subsection name="5.3.1 Cgen (Cayenne Class Generator)" anchor="cayennegen">
 			<h3>Description</h3>
 			
 			<p><code>Cgen</code> is an Ant task that generates and maintains DataObjects

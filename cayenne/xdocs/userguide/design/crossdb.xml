@@ -6,8 +6,8 @@
 	<next>/userguide/design/autopk.html</next>
 </navigator>
 <body>
-    <section name="3. Design">
-        <subsection name="3.5 Cross-Database Issues" anchor="crossdb">
+    <section name="4. Design">
+        <subsection name="4.5 Cross-Database Issues" anchor="crossdb">
         	<p>JDBC specification was created by Sun to provide a uniform
         	way of connecting to relational databases from the Java code.
         	In theory this should allow Java developer to create database-aware
@@ -42,7 +42,7 @@
         	conjunction with JDBC.
         	</p>
         	
-        	<subsection name="3.5.1 DbAdapter Design Overview">
+        	<subsection name="4.5.1 DbAdapter Design Overview">
         	<p>DataNode (Cayenne access class closest to DataSource) always has a <a href=
         	"../../api/org/objectstyle/cayenne/dba/DbAdapter.html">DbAdapter</a>
         	object associated with it. DataNode delegates certain database-related functions
@@ -77,7 +77,7 @@
         	</subsection>
         	
         	
-        	<subsection name="3.5.2 Porting Cayenne to a new RDBMS">
+        	<subsection name="4.5.2 Porting Cayenne to a new RDBMS">
         	<p>To Be Done...</p>
         	</subsection>
         </subsection>

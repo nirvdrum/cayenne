@@ -6,8 +6,8 @@
 	<next>/userguide/design/crossdb.html</next>
 </navigator>
 <body>
-    <section name="3. Design">
-        <subsection name="3.4 Cayenne DataSource" anchor="connect">
+    <section name="4. Design">
+        <subsection name="4.4 Cayenne DataSource" anchor="connect">
         
         	<p>Cayenne is designed to work with any javax.sql.DataSource implementation. 
         	When Cayenne applications are deployed in containers (Web, EJB, etc.), DataSource

@@ -6,8 +6,8 @@
 	<next>/userguide/design/datasrc.html</next>
 </navigator>
 <body>
-    <section name="3. Design">
-            <subsection name="3.3 Access Classes" anchor="access_classes">
+    <section name="4. Design">
+            <subsection name="4.3 Access Classes" anchor="access_classes">
             <p>Cayenne database access module consists of a stack of objects, 
             all implementing <a href=
             "../../api/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine
