@@ -508,7 +508,11 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		while (maps.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode)maps.nextElement();
-			DataMapWrapper wrap = (DataMapWrapper)temp_node.getUserObject();
+			Object obj = temp_node.getUserObject();
+			// Skip Data Node-s under domain. Go only for DataMapWrappers.
+			if ( !(obj instanceof DataMapWrapper) )
+				continue;
+			DataMapWrapper wrap = (DataMapWrapper)obj;
 			if (wrap.getDataMap() == map)
 				return temp_node;
 		}
