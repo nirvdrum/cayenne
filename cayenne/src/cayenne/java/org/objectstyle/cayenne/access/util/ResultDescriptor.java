@@ -84,8 +84,6 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
  */
 public class ResultDescriptor {
 
-    private static final int[] emptyInt = new int[0];
-
     // indexed data
     protected String[] names;
     protected int[] jdbcTypes;
@@ -148,7 +146,7 @@ public class ResultDescriptor {
     }
 
     /**
-     * Creates and returns a ResultDescriptor for an array of DataColumnDescriptors.
+     * Creates and returns a ResultDescriptor for an array of ColumnDescriptors.
      * 
      * @since 1.1
      */
@@ -232,7 +230,7 @@ public class ResultDescriptor {
         if (!indexedIds) {
             synchronized (this) {
                 if (!indexedIds) {
-                    idIndexes = emptyInt;
+                    idIndexes = new int[0];
 
                     if (entity == null) {
                         return;
@@ -303,7 +301,7 @@ public class ResultDescriptor {
         }
 
         if (outWidth == 0) {
-            this.outParamIndexes = emptyInt;
+            this.outParamIndexes = new int[0];
         }
         else {
             this.outParamIndexes = new int[outWidth];
