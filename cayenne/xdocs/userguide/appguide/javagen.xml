@@ -48,14 +48,6 @@
 					<td valign="top" align="center">Yes</td>
 				</tr>
 				<tr>
-					<td valign="top">superDestDir</td>
-					<td valign="top">Destination directory for Java superclasses
-					<i>(ignoring their package names)</i>. If ommitted, "destDir" is used.
-					Ignored unless "makepairs" set to "true".
-					</td>
-					<td valign="top" align="center">No</td>
-				</tr>
-				<tr>
 					<td valign="top">overwrite</td>
 					<td valign="top">If set to "true", will overwrite older versions of
 					generated classes. Ignored unless makepairs is set to "false".</td>

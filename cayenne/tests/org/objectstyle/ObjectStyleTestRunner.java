@@ -69,12 +69,13 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
             TestSuite suite = new TestSuite();
             suite.addTestSuite(Class.forName(caseClassName));
             tstRunner.runSuite(suite);
-        } catch(Exception ex) {
+        }
+        catch (Exception ex) {
             throw new RuntimeException("Error running test suite.");
         }
 
         tstRunner.printAll();
-        return !tstRunner.hasFailures();            
+        return !tstRunner.hasFailures();
     }
 
     public static boolean runTests() {
@@ -94,15 +95,15 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         suites.add(org.objectstyle.cayenne.wocompat.AllTests.suite());
         suites.add(org.objectstyle.cayenne.exp.AllTests.suite());
         suites.add(org.objectstyle.cayenne.conf.AllTests.suite());
-
+        suites.add(org.objectstyle.cayenne.tools.AllTests.suite());
+        
         ObjectStyleTestRunner tstRunner = new ObjectStyleTestRunner();
-        for(int i = 0; i < suites.size(); i++) {
-            tstRunner.runSuite((TestSuite)suites.get(i));
+        for (int i = 0; i < suites.size(); i++) {
+            tstRunner.runSuite((TestSuite) suites.get(i));
         }
         tstRunner.printAll();
-        return !tstRunner.hasFailures();            
+        return !tstRunner.hasFailures();
     }
-
 
     protected ArrayList statsList = new ArrayList();
     protected int failureCount;
@@ -111,7 +112,7 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
     public boolean hasFailures() {
         return (errorCount + failureCount) > 0;
     }
-    
+
     public void printAll() {
         writer().println();
         writer().println();
@@ -123,8 +124,8 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         failureCount = 0;
         errorCount = 0;
         long totalTime = 0;
-        while(it.hasNext()) {
-            SuiteStatistics stats = (SuiteStatistics)it.next();
+        while (it.hasNext()) {
+            SuiteStatistics stats = (SuiteStatistics) it.next();
             writer().print("Suite: " + stats.suiteName);
             writer().println(" - " + elapsedTimeAsString(stats.elapsedTime) + " sec.");
             runCount += stats.result.runCount();
@@ -144,7 +145,6 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         writer().println();
     }
 
-
     public void runSuite(TestSuite suite) {
         TestResult result = createTestResult();
         result.addListener(this);
@@ -160,7 +160,6 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
         statsList.add(stats);
     }
 
-
     public void printErrors(TestResult result) {
         if (result.errorCount() != 0) {
             if (result.errorCount() == 1)
@@ -168,15 +167,14 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
             else
                 writer().println("There were " + result.errorCount() + " errors:");
 
-            int i= 1;
+            int i = 1;
             for (Enumeration e = result.errors(); e.hasMoreElements(); i++) {
-                TestFailure failure = (TestFailure)e.nextElement();
+                TestFailure failure = (TestFailure) e.nextElement();
                 writer().println(i + ") " + failure.failedTest());
                 writer().print(getFilteredTrace(failure.thrownException()));
             }
         }
     }
-
 
     public void printFailures(TestResult result) {
         if (result.failureCount() != 0) {
@@ -186,13 +184,12 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
                 writer().println("There were " + result.failureCount() + " failures:");
             int i = 1;
             for (Enumeration e = result.failures(); e.hasMoreElements(); i++) {
-                TestFailure failure= (TestFailure) e.nextElement();
+                TestFailure failure = (TestFailure) e.nextElement();
                 writer().print(i + ") " + failure.failedTest());
                 writer().print(getFilteredTrace(failure.thrownException()));
             }
         }
     }
-
 
     public void printHeader(TestResult result) {}
 

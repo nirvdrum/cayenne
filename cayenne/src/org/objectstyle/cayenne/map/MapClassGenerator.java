@@ -88,7 +88,6 @@ public abstract class MapClassGenerator {
         String pkgName,
         String className)
         throws Exception;
-        
 
     /** Closes writer after class code has been successfully written by ClassGenerator. */
     public abstract void closeWriter(Writer out) throws Exception;
@@ -149,14 +148,18 @@ public abstract class MapClassGenerator {
         }
     }
 
-    /** Runs class generation. Produces a single Java class for
-      * each ObjEntity in the map. Uses default Cayenne templates for classes. */
+    /** 
+     * Runs class generation. Produces a single Java class for
+     * each ObjEntity in the map. Uses default Cayenne templates for classes. 
+     */
     public void generateSingleClasses() throws Exception {
         generateSingleClasses(SINGLE_CLASS_TEMPLATE);
     }
 
-    /** Runs class generation. Produces a single Java class for
-      * each ObjEntity in the map. */
+    /** 
+     * Runs class generation. Produces a single Java class for
+     * each ObjEntity in the map. 
+     */
     public void generateSingleClasses(String classTemplate) throws Exception {
         ClassGenerator gen = new ClassGenerator(classTemplate);
 
@@ -180,28 +183,38 @@ public abstract class MapClassGenerator {
         ObjEntity entity,
         boolean superclass) {
 
+        // figure out generator properties
         String fullClassName = entity.getClassName();
         int i = fullClassName.lastIndexOf(".");
 
         String pkg = null;
+        String spkg = null;
         String cname = null;
 
         // dot in first or last position is invalid
-        if (i == 0 || i + 1 == fullClassName.length())
+        if (i == 0 || i + 1 == fullClassName.length()) {
             throw new CayenneRuntimeException("Invalid class mapping: " + fullClassName);
+        }
         else if (i < 0) {
             pkg = (superclass) ? superPkg : null;
+            spkg = (superclass) ? null : superPkg;
             cname = fullClassName;
         }
         else {
             cname = fullClassName.substring(i + 1);
             pkg =
                 (superclass && superPkg != null) ? superPkg : fullClassName.substring(0, i);
+                
+            spkg =
+                (!superclass && superPkg != null && !pkg.equals(superPkg)) ? superPkg : null;
         }
 
+        // init generator
         gen.setPackageName(pkg);
         gen.setClassName(cname);
+        gen.setSuperPackageName(spkg);
     }
+    
 
     /**
      * Returns "superPkg" property value -

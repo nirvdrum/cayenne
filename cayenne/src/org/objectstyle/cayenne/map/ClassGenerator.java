@@ -98,6 +98,7 @@ public class ClassGenerator {
     protected String className;
     protected String superPrefix;
     protected String prop;
+    protected String superPackageName;
 
 
     /** Loads Velocity template used for class generation. */
@@ -118,13 +119,34 @@ public class ClassGenerator {
     }
 
 
-    /** Returns Java package name of the class associated with this generator. */
+    /** 
+     * Returns Java package name of the class associated with 
+     * this generator. 
+     */
     public String getPackageName() {
         return packageName;
     }
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
+    
+    
+    /**
+     * Returns <code>superPackageName</code> property that defines
+     * a superclass's package name.
+     */
+    public String getSuperPackageName() {
+        return superPackageName;
+    }
+    
+    /**
+     * Sets <code>superPackageName</code> property that defines
+     * a superclass's package name.
+     */
+    public void setSuperPackageName(String superPackageName) {
+        this.superPackageName = superPackageName;
+    }
+    
 
     /** Returns class name (without a package)
       * of the class associated with this generator. */
@@ -168,10 +190,20 @@ public class ClassGenerator {
     }
 
 
-    /** Returns true if a class associated with this generator
-      * is located in a package. */
+    /** 
+     * Returns <code>true</code> if a class associated with 
+     * this generator  is located in a package.
+     */
     public boolean isUsingPackage() {
         return packageName != null;
+    }
+    
+    /** 
+     * Returns <code>true</code> if a superclass class associated with 
+     * this generator is located in a package.
+     */
+    public boolean isUsingSuperPackage() {
+        return superPackageName != null;
     }
 
 

@@ -236,6 +236,9 @@
         
         <!-- JUnit JAR is required for the tests to run. -->
         <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
+        
+        <!-- Ant JAR is required for the Ant-specific tests to run. -->
+        <copy file="${ant.home}/lib/ant.jar" todir="${dist}/lib"/>
     </target>
     
     

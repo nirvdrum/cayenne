@@ -71,7 +71,6 @@ import org.objectstyle.cayenne.map.*;
 public class CayenneGenerator extends Task {
     protected File map;
     protected File destDir;
-    protected File superDestDir;
     protected boolean overwrite;
     protected boolean usepkgpath = true;
     protected boolean makepairs = true;
@@ -152,6 +151,7 @@ public class CayenneGenerator extends Task {
         return new MapLoaderImpl().loadDataMap(in);
     }
 
+
     /** Validates atttribute combinatins. Throws BuildException if
      *  attributes are invalid. 
      */
@@ -180,16 +180,6 @@ public class CayenneGenerator extends Task {
             throw new BuildException("Can't read template from " + template);
         }
 
-        if (makepairs && superDestDir != null) {
-            if (!superDestDir.isDirectory()) {
-                throw new BuildException("'superDestDir' is not a directory.");
-            }
-
-            if (!superDestDir.canWrite()) {
-                throw new BuildException("Do not have write permissions for " + superDestDir);
-            }
-        }
-
         if (makepairs && supertemplate != null && !supertemplate.canRead()) {
             throw new BuildException("Can't read super template from " + supertemplate);
         }
@@ -208,13 +198,6 @@ public class CayenneGenerator extends Task {
      */
     public void setDestDir(File destDir) {
         this.destDir = destDir;
-    }
-
-    /**
-     * Sets the <code>superDestDir</code> property.
-     */
-    public void setSuperDestDir(File superDestDir) {
-        this.superDestDir = superDestDir;
     }
 
     /**
@@ -259,6 +242,7 @@ public class CayenneGenerator extends Task {
         this.superpkg = superpkg;
     }
 
+
     /** Concrete subclass of MapClassGenerator that performs the actual
       * class generation. */
     class AntClassGenerator extends MapClassGenerator {
@@ -278,14 +262,14 @@ public class CayenneGenerator extends Task {
                 : writerForClass(entity, pkgName, className);
         }
 
+
         private Writer writerForSuperclass(
             ObjEntity entity,
             String pkgName,
             String className)
             throws Exception {
 
-            File destFile = (superDestDir != null) ? superDestDir : destDir;
-            File dest = new File(destFile.getPath(), className + ".java");
+            File dest = new File(mkpath(destDir.getPath(), pkgName), className + ".java");
 
             // ignore newer files
             if (dest.exists()
@@ -296,6 +280,7 @@ public class CayenneGenerator extends Task {
             log("Generating class file: " + dest.getCanonicalPath());
             return new FileWriter(dest);
         }
+        
 
         private Writer writerForClass(
             ObjEntity entity,
@@ -303,7 +288,7 @@ public class CayenneGenerator extends Task {
             String className)
             throws Exception {
 
-            File dest = new File(destDir.getPath(), className + ".java");
+            File dest = new File(mkpath(destDir.getPath(), pkgName), className + ".java");
             if (dest.exists()) {
 
                 // no overwrite of subclasses
@@ -326,14 +311,16 @@ public class CayenneGenerator extends Task {
             return new FileWriter(dest);
         }
 
-        /** Returns a File object corresponding to a directory where files
+
+        /** 
+         *  Returns a File object corresponding to a directory where files
          *  that belong to <code>pkgName</code> package should reside. 
          *  Creates any missing diectories below <code>destDir</code>.
          */
         private File mkpath(String basePath, String pkgName) throws Exception {
             File dest = getProject().resolveFile(basePath);
 
-            if (pkgName == null) {
+            if (!usepkgpath || pkgName == null) {
                 return dest;
             }
 

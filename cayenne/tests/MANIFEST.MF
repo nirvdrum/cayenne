@@ -1,2 +1,2 @@
 Main-Class: org.objectstyle.TestMain
-Class-Path: cayenne.jar junit.jar
+Class-Path: cayenne.jar junit.jar ant.jar
