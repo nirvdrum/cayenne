@@ -547,7 +547,7 @@ implements ActionListener
 
 
 	private void createObjEntity() {
-		ObjEntity entity = EntityWrapper.createObjEntity();
+		ObjEntity entity = EntityWrapper.createObjEntity(mediator.getCurrentDataMap());
 		mediator.getCurrentDataMap().addObjEntity(entity);
 		mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
 		mediator.fireObjEntityDisplayEvent(
@@ -558,7 +558,7 @@ implements ActionListener
 	}
 
 	private void createDbEntity() {
-		DbEntity entity = EntityWrapper.createDbEntity();
+		DbEntity entity = EntityWrapper.createDbEntity(mediator.getCurrentDataMap());
 		mediator.getCurrentDataMap().addDbEntity(entity);
 		mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
 		mediator.fireDbEntityDisplayEvent(

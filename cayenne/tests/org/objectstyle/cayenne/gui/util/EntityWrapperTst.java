@@ -55,21 +55,52 @@
  */
 package org.objectstyle.cayenne.gui.util;
 
-import junit.framework.TestSuite;
+import junit.framework.TestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("GUI Util Package Tests");
+import org.objectstyle.cayenne.map.*;
 
-		// don't test GUI if no graphics environment present
-		if (!org.objectstyle.TestMain.noGui()) {
-			// put GUI widget tests here
-			// ....
-		}
 
-		suite.addTestSuite(EOModelFileFilterTst.class);
-		suite.addTestSuite(ProjectFileFilterTst.class);
-		suite.addTestSuite(EntityWrapperTst.class);
-		return suite;
+/**
+* @author Andrei Adamchik
+*/
+public class EntityWrapperTst extends TestCase {
+
+	/**
+	 * Constructor for EntityWrapperTst.
+	 */
+	public EntityWrapperTst(String name) {
+		super(name);
 	}
+	
+	public void testCreateDbEntity() throws Exception {
+		NameGenerator.resetCounters();
+		DbEntity refEnt = new DbEntity(NameGenerator.getDbEntityName());
+		DataMap map = new DataMap();
+		map.addDbEntity(refEnt);
+		
+		NameGenerator.resetCounters();
+		DbEntity ent = EntityWrapper.createDbEntity(map);
+		assertTrue(!refEnt.getName().equals(ent.getName()));
+	}
+	
+	
+	public void testCreateObjEntity() throws Exception {
+		NameGenerator.resetCounters();
+		ObjEntity refEnt = new ObjEntity(NameGenerator.getObjEntityName());
+		DataMap map = new DataMap();
+		map.addObjEntity(refEnt);
+		
+		NameGenerator.resetCounters();
+		ObjEntity ent = EntityWrapper.createObjEntity(map);
+		assertTrue(!refEnt.getName().equals(ent.getName()));
+	}
+	
+	public void testEntity() throws Exception {
+		ObjEntity ent = new ObjEntity("abc");
+		EntityWrapper wrap = new EntityWrapper(ent);
+		assertSame(ent, wrap.getEntity());
+	}
+
+
 }
+

@@ -122,11 +122,10 @@ public class Validator {
 			String name = domains[i].getName().trim();
 			if (name == null) {
 				name = "";
-			}
-			else {
+			} else {
 				name = name.trim();
 			}
-			
+
 			if (name.length() == 0) {
 				msg =
 					new DomainErrorMsg(
@@ -153,7 +152,7 @@ public class Validator {
 			if (errLevel > status) {
 				status = errLevel;
 			}
-			
+
 			// Validate data maps. If error level worse than current status,
 			// set status to new error level
 			List list = domains[i].getMapList();
@@ -200,8 +199,9 @@ public class Validator {
 			}
 
 			int temp_err_level = validateDataNode(domain, nodes[i]);
-			if (temp_err_level > status)
+			if (temp_err_level > status) {
 				status = temp_err_level;
+			}
 			name_map.put(name, nodes[i]);
 		} // End for()
 		return status;
@@ -258,99 +258,81 @@ public class Validator {
 			errMsg.add(msg);
 			status = ErrorMsg.ERROR;
 		}
-		/*
-		GuiDataSource ds = (GuiDataSource)node.getDataSource();
-		if (ds != null) {
-			if (ds.getDataSourceInfo().getJdbcDriver() == null 
-			|| ds.getDataSourceInfo().getJdbcDriver().trim().length() == 0)
-			{
-				String temp;
-				temp = "Need to specify Jdbc driver";
-				msg = new DataNodeErrorMsg(temp, ErrorMsg.WARNING, domain, node);
-				errMsg.add(msg);
-				if (status == ErrorMsg.NO_ERROR)
-					status = ErrorMsg.WARNING;
-			}
-		}
-		}*/
 		return status;
 	}
 
 	private int validateDataMaps(DataDomain domain, List maps) {
 		int status = ErrorMsg.NO_ERROR;
-		DataMapErrorMsg msg;
+
 		// Used to check for duplicate names
-		HashMap name_map = new HashMap();
+		HashMap nameMap = new HashMap();
 
 		Iterator iter = maps.iterator();
 		while (iter.hasNext()) {
 			DataMap map = (DataMap) iter.next();
 			String name = map.getName();
-			if (name == null)
-				name = "";
-			else
-				name = name.trim();
+			name = (name == null) ? "" : name.trim();
+
 			if (name.length() == 0) {
-				msg =
+				errMsg.add(
 					new DataMapErrorMsg(
 						"Data map has no name",
 						ErrorMsg.ERROR,
 						domain,
-						map);
-				errMsg.add(msg);
+						map));
 				status = ErrorMsg.ERROR;
-			} else if (name_map.containsKey(name)) {
-				msg =
+			} else if (nameMap.containsKey(name)) {
+				errMsg.add(
 					new DataMapErrorMsg(
 						"Duplicate data map name \"" + name + "\".",
 						ErrorMsg.ERROR,
 						domain,
-						map);
-				errMsg.add(msg);
+						map));
 				status = ErrorMsg.ERROR;
 			}
 
-			int temp_err_level = validateDataMap(domain, map);
-			if (temp_err_level > status)
-				status = temp_err_level;
-			name_map.put(name, map);
-		} // End for()
+			int errLevel = validateDataMap(domain, map);
+			if (errLevel > status) {
+				status = errLevel;
+			}
+
+			nameMap.put(name, map);
+		}
 		return status;
 	}
 
 	private int validateDataMap(DataDomain domain, DataMap map) {
 		int status = ErrorMsg.NO_ERROR;
-		DataMapErrorMsg msg;
 
 		// If directo factory, make sure the location is a valid file name.
 		String location = map.getLocation();
-		if (location == null)
-			location = "";
-		else
-			location = location.trim();
+		location = (location == null) ? "" : location.trim();
+
 		// Must have data map file name
 		if (location.length() == 0) {
-			msg =
+			errMsg.add(
 				new DataMapErrorMsg(
 					"Must specify valid Data Map file name",
 					ErrorMsg.ERROR,
 					domain,
-					map);
-			errMsg.add(msg);
+					map));
 			status = ErrorMsg.ERROR;
 		}
 
 		// Validate obj entities
 		ObjEntity[] entities = map.getObjEntities();
-		int temp_err_level = validateObjEntities(domain, map, entities);
-		if (temp_err_level > status)
-			status = temp_err_level;
+		int errLevel = validateObjEntities(domain, map, entities);
+		if (errLevel > status) {
+			status = errLevel;
+		}
 
 		// Validate db entities
-		DbEntity[] db_entities = map.getDbEntities();
-		temp_err_level = validateDbEntities(domain, map, db_entities);
-		if (temp_err_level > status)
-			status = temp_err_level;
+		DbEntity[] dbEntities = map.getDbEntities();
+		errLevel = validateDbEntities(domain, map, dbEntities);
+		if (errLevel > status) {
+			status = errLevel;
+		}
+
 		return status;
 	}
 
@@ -358,50 +340,84 @@ public class Validator {
 		DataDomain domain,
 		DataMap map,
 		ObjEntity[] entities) {
+
 		int status = ErrorMsg.NO_ERROR;
-		if (null == entities)
+		if (entities == null) {
 			return status;
-		EntityErrorMsg msg;
+		}
+
 		// Used to check for duplicate names
-		HashMap name_map = new HashMap();
+		HashMap nameMap = new HashMap();
 
 		for (int i = 0; i < entities.length; i++) {
+			
+			// validate name
 			String name = entities[i].getName();
-			if (name == null)
-				name = "";
-			else
-				name = name.trim();
+			name = (name == null) ? "" : name.trim();
 			if (name.length() == 0) {
-				msg =
+				errMsg.add(
 					new EntityErrorMsg(
 						"Entity has no name",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						entities[i]);
-				errMsg.add(msg);
+						entities[i]));
 				status = ErrorMsg.ERROR;
-			} else if (name_map.containsKey(name)) {
-				msg =
+			} else if (nameMap.containsKey(name)) {
+				errMsg.add(
 					new EntityErrorMsg(
 						"Duplicate entity name \"" + name + "\".",
 						ErrorMsg.ERROR,
 						domain,
 						map,
-						entities[i]);
-				errMsg.add(msg);
+						entities[i]));
 				status = ErrorMsg.ERROR;
 			}
-			name_map.put(name, map);
+			nameMap.put(name, map);
 
-			int temp_err_level =
+            // validate DbEntity presence
+            if(entities[i].getDbEntity() == null) {
+				errMsg.add(
+					new EntityErrorMsg(
+						"No DbEntity for ObjEntity \"" + name + "\".",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						entities[i]));
+						
+				if(status < ErrorMsg.WARNING) {
+					status = ErrorMsg.WARNING;
+				}
+            }
+            
+            // validate Java Class
+            String className = entities[i].getClassName();
+            if(className == null || className.trim().length() == 0) {
+				errMsg.add(
+					new EntityErrorMsg(
+						"No Java class for \"" + name + "\".",
+						ErrorMsg.WARNING,
+						domain,
+						map,
+						entities[i]));
+						
+				if(status < ErrorMsg.WARNING) {
+					status = ErrorMsg.WARNING;
+				}
+            }
+            
+			int errLevel =
 				validateObjAttributes(domain, map, entities[i]);
-			if (temp_err_level > status)
-				status = temp_err_level;
-			temp_err_level = validateObjRels(domain, map, entities[i]);
-			if (temp_err_level > status)
-				status = temp_err_level;
-		} // End for()
+			if (errLevel > status) {
+				status = errLevel;
+			}
+			
+			errLevel = validateObjRels(domain, map, entities[i]);
+			if (errLevel > status) {
+				status = errLevel;
+			}	
+		}
+		
 		return status;
 	}
 

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,44 +52,60 @@ package org.objectstyle.cayenne.gui.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.util;
 
 import org.objectstyle.cayenne.map.*;
 
-
-/** Wrapper for Entity. 
- *  Used to put entities into the JTree and any other place where 
- *  toString() method must return entity name.
- *  ALso provides GUI-specific utility methods for entities*/
-public class EntityWrapper{
+/** 
+ * Wrapper for Entity. 
+ * Used to put entities into the JTree and any other place where 
+ * toString() method must return entity name.
+ * Also provides GUI-specific utility methods for entities.
+ */
+public class EntityWrapper {
 	Entity entity = null;
-	
-	public EntityWrapper(Entity temp_entity){
-		entity = temp_entity;
-	}
-	
-	public String toString(){
-		if (null == entity)
-			return "";
-		return entity.getName();
+
+	public EntityWrapper(Entity entity) {
+		this.entity = entity;
 	}
 
-	public Entity getEntity() { return entity;}
-	
-	/** Create new ObjEntity and generate its name. 
-	  * Does not add it to the DataMap. */
-	public static ObjEntity createObjEntity()
-	{ return new ObjEntity(NameGenerator.getObjEntityName()); }
-	
-	/** Create new DbEntity and generate its name. 
-	  * Does not add it to the DataMap. */
-	public static DbEntity createDbEntity()
-	{ return new DbEntity(NameGenerator.getDbEntityName()); }
-	
-	public boolean equals(Object obj) {
-		if (null == obj)
-			return false;
-		return this.toString().equals(obj.toString());
+	public String toString() {
+		return (entity != null) ? entity.getName() : "";
 	}
-	
-}// End class EntityWrapper
+
+	public Entity getEntity() {
+		return entity;
+	}
+
+	/** 
+	 * Creates a new ObjEntity and generate its name. 
+	 * Does not add it to the DataMap. 
+	 */
+	public static ObjEntity createObjEntity(DataMap parentMap) {
+		String name = null;
+		do {
+			name = NameGenerator.getObjEntityName();
+		} while (parentMap.getObjEntity(name) != null);
+
+		return new ObjEntity(name);
+	}
+
+	/** 
+	 * Creates new DbEntity and generate its name. 
+	 * Does not add it to the DataMap. 
+	 */
+	public static DbEntity createDbEntity(DataMap parentMap) {
+		String name = null;
+		do {
+			name = NameGenerator.getDbEntityName();
+		} while (parentMap.getDbEntity(name) != null);
+
+		return new DbEntity(name);
+	}
+
+	public boolean equals(Object obj) {
+		return (obj != null) ? this.toString().equals(obj.toString()) : false;
+	}
+
+}

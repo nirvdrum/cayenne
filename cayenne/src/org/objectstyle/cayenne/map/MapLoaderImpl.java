@@ -362,8 +362,12 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			ObjEntity temp = (ObjEntity) iter.next();
 			out.print("\t<obj-entity name=\"");
 			out.print(temp.getName());
-			out.print("\" className=\"");
-			out.print(temp.getClassName());
+			
+			if(temp.getClassName() != null) {
+			    out.print("\" className=\"");
+			    out.print(temp.getClassName());
+			}
+			
 			out.print('\"');
 
 			if (temp.getDbEntity() != null) {

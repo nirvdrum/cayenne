@@ -165,7 +165,7 @@ implements DocumentListener, ActionListener
 
 	private void createDbEntity() {
 		// Create DbEntity and add it to DataMap
-		DbEntity entity = EntityWrapper.createDbEntity();
+		DbEntity entity = EntityWrapper.createDbEntity(mediator.getCurrentDataMap());
 		mediator.getCurrentObjEntity().setDbEntity(entity);
 		mediator.getCurrentDataMap().addDbEntity(entity);
 		EntityEvent event = new EntityEvent(this, mediator.getCurrentObjEntity());
@@ -200,7 +200,12 @@ implements DocumentListener, ActionListener
 			mediator.fireObjEntityEvent(event);
 		}
 		else if (doc == className.getDocument()) {
-			current_entity.setClassName(className.getText());
+			String classText = className.getText();
+			if(classText != null && classText.trim().length() == 0) {
+				classText = null;
+			}
+			
+			current_entity.setClassName(classText);
 			EntityEvent event = new EntityEvent(this, current_entity);
 			mediator.fireObjEntityEvent(event);
 		}

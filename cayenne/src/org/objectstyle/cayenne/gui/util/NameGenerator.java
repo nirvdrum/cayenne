@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,23 +52,32 @@ package org.objectstyle.cayenne.gui.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.gui.util;
 
+import org.objectstyle.cayenne.map.Entity;
 
-import org.objectstyle.cayenne.map.*;
-
-/** Class for generating "Untitled" names for Attributes and Relationships.
- *  Also does name verifications of the existing names. */
+/** 
+ * Class for generating "Untitled" names for Attributes and Relationships.
+ * Also does name verifications of the existing names. 
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public class NameGenerator {
-	private static int domainCounter = 1;
-	private static int dataMapCounter = 1;
-	private static int dataNodeCounter = 1;
-	private static int objEntityCounter = 1;
-	private static int dbEntityCounter = 1;
-	private static int objAttributeCounter = 1;
-	private static int dbAttributeCounter = 1;
-	private static int objRelationshipCounter = 1;
-	private static int dbRelationshipCounter = 1;
+	private static int domainCounter;
+	private static int dataMapCounter;
+	private static int dataNodeCounter;
+	private static int objEntityCounter;
+	private static int dbEntityCounter;
+	private static int objAttributeCounter;
+	private static int dbAttributeCounter;
+	private static int objRelationshipCounter;
+	private static int dbRelationshipCounter;
+	
+	static {
+		resetCounters();
+	}
 
 	public static String getDomainName() {
 		return "UntitledDomain" + domainCounter++;
@@ -91,7 +99,6 @@ public class NameGenerator {
 		return "UntitledDbEntity" + dbEntityCounter++;
 	}
 
-	
 	public static String getObjAttributeName() {
 		return "UntitledObjAttr" + objAttributeCounter++;
 	}
@@ -99,7 +106,6 @@ public class NameGenerator {
 	public static String getDbAttributeName() {
 		return "UntitledDbAttr" + dbAttributeCounter++;
 	}
-
 
 	public static String getObjRelationshipName() {
 		return "UntitledObjRel" + objRelationshipCounter++;
@@ -109,20 +115,20 @@ public class NameGenerator {
 		return "UntitledDbRel" + dbRelationshipCounter++;
 	}
 
-
-
 	/** Returns generated name for the ObjRelationships. 
 	  * For to-one case and entity name "xxxx" it generates name "toXxxx".
 	  * For to-many case and entity name "Xxxx" it generates name "xxxxArray". */
-	public static String getObjRelationshipName(Entity to_entity, boolean to_many) {
+	public static String getObjRelationshipName(
+		Entity to_entity,
+		boolean to_many) {
 		String name = to_entity.getName();
 		if (to_many) {
-			String lower_case_name = Character.toLowerCase(name.charAt(0)) 
-									+ name.substring(1);
+			String lower_case_name =
+				Character.toLowerCase(name.charAt(0)) + name.substring(1);
 			return lower_case_name + "Array";
 		} else {
-			String upper_case_name = Character.toUpperCase(name.charAt(0)) 
-									+ name.substring(1);
+			String upper_case_name =
+				Character.toUpperCase(name.charAt(0)) + name.substring(1);
 			return "to" + upper_case_name;
 		}
 	}
@@ -130,7 +136,9 @@ public class NameGenerator {
 	/** Returns generated name for the DbRelationships. 
 	  * For to-one case it generates name "TO_XXXX".
 	  * For to-many case it generates name "XXXX_ARRAY". */
-	public static String getDbRelationshipName(Entity to_entity, boolean to_many) {
+	public static String getDbRelationshipName(
+		Entity to_entity,
+		boolean to_many) {
 		String name = to_entity.getName();
 		if (to_many) {
 			return name + "_ARRAY";
@@ -139,6 +147,18 @@ public class NameGenerator {
 		}
 	}
 
-
-
-} 
+	/** 
+	 * Resets counters to their initial values.
+	 */
+	static void resetCounters() {
+		domainCounter = 1;
+		dataMapCounter = 1;
+		dataNodeCounter = 1;
+		objEntityCounter = 1;
+		dbEntityCounter = 1;
+		objAttributeCounter = 1;
+		dbAttributeCounter = 1;
+		objRelationshipCounter = 1;
+		dbRelationshipCounter = 1;
+	}
+}
