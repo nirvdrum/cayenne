@@ -67,9 +67,12 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.dialog.pref.GeneralPreferences;
 import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
+import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.pref.PreferenceDetail;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
 import org.scopemvc.controller.basic.BasicController;
@@ -156,16 +159,14 @@ public class ClassGeneratorController extends BasicController {
 
         // no destination folder
         if (outputDir == null) {
-            JOptionPane.showMessageDialog(
-                    (Component) this.getView(),
+            JOptionPane.showMessageDialog((Component) this.getView(),
                     "Select directory for source files.");
             return;
         }
 
         // no such folder
         if (!outputDir.exists() && !outputDir.mkdirs()) {
-            JOptionPane.showMessageDialog(
-                    (Component) this.getView(),
+            JOptionPane.showMessageDialog((Component) this.getView(),
                     "Can't create directory " + outputDir + ". Select a different one.");
             return;
         }
@@ -203,6 +204,20 @@ public class ClassGeneratorController extends BasicController {
 
         List selected = model.getSelectedEntities();
         DefaultClassGenerator generator = new DefaultClassGenerator(selected);
+
+        // configure encoding from preferences
+        Domain generatorPrefs = Application
+                .getInstance()
+                .getPreferenceDomain()
+                .getSubdomain(DefaultClassGenerator.class);
+
+        PreferenceDetail detail = generatorPrefs
+                .getDetail(GeneralPreferences.ENCODING_PREFERENCE, false);
+        if (detail != null) {
+            generator.setEncoding(detail
+                    .getProperty(GeneralPreferences.ENCODING_PREFERENCE));
+        }
+
         generator.setDestDir(outputDir);
         generator.setMakePairs(model.isPairs());
         generator.setSuperPkg(model.getSuperClassPackage());
@@ -211,15 +226,13 @@ public class ClassGeneratorController extends BasicController {
 
         try {
             generator.execute();
-            JOptionPane.showMessageDialog(
-                    (Component) this.getView(),
+            JOptionPane.showMessageDialog((Component) this.getView(),
                     "Class generation finished");
             shutdown();
         }
         catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(
-                    (Component) this.getView(),
+            JOptionPane.showMessageDialog((Component) this.getView(),
                     "Error generating classes - " + e.getMessage());
         }
     }
@@ -255,8 +268,7 @@ public class ClassGeneratorController extends BasicController {
 
     protected void chooseSuperclassTemplate() {
         ClassGeneratorModel model = (ClassGeneratorModel) getModel();
-        String template = chooseTemplate(
-                model.getCustomSuperclassTemplate(),
+        String template = chooseTemplate(model.getCustomSuperclassTemplate(),
                 "Select Custom Superclass Template");
 
         if (template != null) {
@@ -266,8 +278,7 @@ public class ClassGeneratorController extends BasicController {
 
     protected void chooseClassTemplate() {
         ClassGeneratorModel model = (ClassGeneratorModel) getModel();
-        String template = chooseTemplate(
-                model.getCustomClassTemplate(),
+        String template = chooseTemplate(model.getCustomClassTemplate(),
                 "Select Custom Class Template");
 
         if (template != null) {

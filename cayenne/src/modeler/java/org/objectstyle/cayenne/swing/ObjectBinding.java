@@ -58,22 +58,24 @@ package org.objectstyle.cayenne.swing;
 import java.awt.Component;
 
 /**
- * Defines API of a binding object that sites between a Swing widget and domain model,
- * synchronizing the values between the two.
+ * Defines API of a binding sitting between a Swing widget and domain model, synchronizing
+ * the values between the two. Parent part of the binding is called "context"as it is used
+ * as a context of binding expressions. Child of the binding is a bound component that is
+ * being synchronized with the context.
  * 
  * @author Andrei Adamchik
  */
 public interface ObjectBinding {
 
-    public Component getComponent();
+    Component getView();
 
-    public Object getContext();
+    Object getContext();
 
-    public void setContext(Object object);
+    void setContext(Object object);
 
-    public void updateView();
+    void updateView();
 
-    public BindingDelegate getDelegate();
+    BindingDelegate getDelegate();
 
-    public void setDelegate(BindingDelegate delegate);
+    void setDelegate(BindingDelegate delegate);
 }

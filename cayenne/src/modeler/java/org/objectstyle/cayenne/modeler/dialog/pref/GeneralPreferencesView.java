@@ -61,7 +61,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
@@ -71,18 +72,27 @@ public class GeneralPreferencesView extends JPanel {
 
     protected JTextField saveInterval;
     protected JLabel saveIntervalLabel;
+    protected EncodingSelectorView encodingSelector;
+    protected JLabel encodingSelectorLabel;
 
     public GeneralPreferencesView() {
         this.saveInterval = new JTextField();
+        this.encodingSelector = new EncodingSelectorView();
+        this.saveIntervalLabel = new JLabel("Preferences Save Interval (sec):");
+        this.encodingSelectorLabel = new JLabel("File Encoding:");
 
-        FormLayout layout = new FormLayout("pref, 3dlu, fill:50dlu", "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        FormLayout layout = new FormLayout(
+                "right:pref, 3dlu, 30dlu, 3dlu, fill:70dlu",
+                "p, 3dlu, p, 12dlu, p, 3dlu, fill:40dlu:grow");
+
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
-
-        builder.appendSeparator("General Preferences");
-        saveIntervalLabel = builder.append(
-                "Preferences Save Interval (sec.):",
-                saveInterval);
+        builder.addSeparator("General Preferences", cc.xywh(1, 1, 5, 1));
+        builder.add(saveIntervalLabel, cc.xy(1, 3));
+        builder.add(saveInterval, cc.xy(3, 3));
+        builder.add(encodingSelectorLabel, cc.xy(1, 5));
+        builder.add(encodingSelector, cc.xywh(3, 5, 3, 3));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.CENTER);
@@ -92,9 +102,15 @@ public class GeneralPreferencesView extends JPanel {
         super.setEnabled(b);
         saveInterval.setEnabled(b);
         saveIntervalLabel.setEnabled(b);
+        encodingSelector.setEnabled(b);
+        encodingSelectorLabel.setEnabled(b);
     }
 
     public JTextField getSaveInterval() {
         return saveInterval;
+    }
+
+    public EncodingSelectorView getEncodingSelector() {
+        return encodingSelector;
     }
 }

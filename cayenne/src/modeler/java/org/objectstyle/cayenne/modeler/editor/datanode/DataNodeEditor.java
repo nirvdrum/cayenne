@@ -127,7 +127,7 @@ public class DataNodeEditor extends CayenneController {
                     Object newValue) {
 
                 DataNodeEvent e = new DataNodeEvent(DataNodeEditor.this, node);
-                if (binding != null && binding.getComponent() == view.getDataNodeName()) {
+                if (binding != null && binding.getView() == view.getDataNodeName()) {
                     e.setOldName(oldValue != null ? oldValue.toString() : null);
                 }
 

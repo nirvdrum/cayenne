@@ -53,48 +53,64 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.swing;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
 
-import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
+ * A panel for file encoding selection.
+ * 
  * @author Andrei Adamchik
  */
-public class ActionBinding extends BindingBase {
+public class EncodingSelectorView extends JPanel {
 
-    protected Component view;
+    protected JRadioButton defaultEncoding;
+    protected JRadioButton otherEncoding;
+    protected JComboBox encodingChoices;
+    protected JLabel defaultEncodingLabel;
 
-    public ActionBinding(AbstractButton button, String propertyExpression) {
-        super(propertyExpression);
+    public EncodingSelectorView() {
+        this.defaultEncoding = new JRadioButton();
+        this.otherEncoding = new JRadioButton();
+        this.encodingChoices = new JComboBox();
+        this.defaultEncodingLabel = new JLabel();
 
-        button.addActionListener(new ActionListener() {
+        ButtonGroup group = new ButtonGroup();
+        group.add(defaultEncoding);
+        group.add(otherEncoding);
 
-            public void actionPerformed(ActionEvent e) {
-                fireAction();
-            }
-        });
+        FormLayout layout = new FormLayout("pref, 3dlu, pref", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
 
-        this.view = button;
+        builder.append(defaultEncoding, defaultEncodingLabel);
+        builder.append(otherEncoding, encodingChoices);
+
+        setLayout(new BorderLayout());
+        add(builder.getPanel());
     }
 
-    public Component getView() {
-        if (view == null) {
-            throw new BindingException("headless action");
-        }
-
-        return view;
+    public JRadioButton getDefaultEncoding() {
+        return defaultEncoding;
     }
 
-    public void updateView() {
-        // noop
+    public JLabel getDefaultEncodingLabel() {
+        return defaultEncodingLabel;
     }
 
-    protected void fireAction() {
-        // TODO: catch exceptions...
-        getValue();
+    public JComboBox getEncodingChoices() {
+        return encodingChoices;
+    }
+
+    public JRadioButton getOtherEncoding() {
+        return otherEncoding;
     }
 }

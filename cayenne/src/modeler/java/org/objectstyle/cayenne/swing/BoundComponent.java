@@ -56,45 +56,29 @@
 package org.objectstyle.cayenne.swing;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.AbstractButton;
+import java.beans.PropertyChangeListener;
 
 /**
+ * An API for a binding child that allows to establish bindings to custom Swing
+ * components.
+ * 
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class ActionBinding extends BindingBase {
+public interface BoundComponent {
 
-    protected Component view;
+    /**
+     * Processes value pushed from parent.
+     */
+    void bindingUpdated(String expression, Object newValue);
 
-    public ActionBinding(AbstractButton button, String propertyExpression) {
-        super(propertyExpression);
+    /**
+     * Adds a property change listener to be notified of property updates.
+     */
+    void addPropertyChangeListener(String expression, PropertyChangeListener listener);
 
-        button.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                fireAction();
-            }
-        });
-
-        this.view = button;
-    }
-
-    public Component getView() {
-        if (view == null) {
-            throw new BindingException("headless action");
-        }
-
-        return view;
-    }
-
-    public void updateView() {
-        // noop
-    }
-
-    protected void fireAction() {
-        // TODO: catch exceptions...
-        getValue();
-    }
+    /**
+     * Returns bound view component.
+     */
+    Component getView();
 }

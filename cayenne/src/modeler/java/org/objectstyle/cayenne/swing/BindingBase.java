@@ -138,6 +138,10 @@ public abstract class BindingBase implements ObjectBinding {
         this.delegate = delegate;
     }
 
+    /**
+     * Pushes a new value to the bound context. If binding delegate is set, notifies it
+     * delegate about the update.
+     */
     public void setValue(Object value) {
         if (context == null) {
             throw new BindingException("No context");
@@ -189,6 +193,9 @@ public abstract class BindingBase implements ObjectBinding {
         }
     }
 
+    /**
+     * Pulls bound value from the context.
+     */
     public Object getValue() {
         if (context == null) {
             throw new BindingException("No context");

@@ -55,14 +55,15 @@
  */
 package org.objectstyle.cayenne.swing;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
+ * A factory for a number of common bindings.
+ * 
  * @author Andrei Adamchik
  */
 public class BindingFactory {
@@ -74,11 +75,6 @@ public class BindingFactory {
         // init defaults...
         usingNullForEmptyStrings = true;
         checkingForValueChange = true;
-    }
-
-    public ObjectBinding bindToCheckbox(JCheckBox checkbox, String property) {
-        CheckboxBinding binding = new CheckboxBinding(checkbox, property);
-        return prepareBinding(binding);
     }
 
     public ObjectBinding bindToTable(
@@ -99,7 +95,28 @@ public class BindingFactory {
         return prepareBinding(binding);
     }
 
-    public ObjectBinding bindToButton(JButton button, String action) {
+    public ObjectBinding bindToProperty(
+            BoundComponent component,
+            String property,
+            String boundProperty) {
+        PropertyBinding binding = new PropertyBinding(component, property, boundProperty);
+        return prepareBinding(binding);
+    }
+
+    /**
+     * Binds to AbstractButton item state change events. Most common AbstractButton
+     * subclasses are JButton, JCheckBox, JRadioButton.
+     */
+    public ObjectBinding bindToStateChange(AbstractButton button, String property) {
+        ItemEventBinding binding = new ItemEventBinding(button, property);
+        return prepareBinding(binding);
+    }
+
+    /**
+     * Binds to AbstractButton action events. Most common AbstractButton subclasses are
+     * JButton, JCheckBox, JRadioButton.
+     */
+    public ObjectBinding bindToAction(AbstractButton button, String action) {
         ActionBinding binding = new ActionBinding(button, action);
         return prepareBinding(binding);
     }

@@ -50,7 +50,7 @@ public class TableBinding extends BindingBase {
         this.list = updateList();
     }
 
-    public Component getComponent() {
+    public Component getView() {
         return table;
     }
 

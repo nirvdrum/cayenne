@@ -62,6 +62,8 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -73,6 +75,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.swing.BoundComponent;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -80,12 +83,13 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public abstract class CayenneController {
+public abstract class CayenneController implements BoundComponent {
 
     private static final Logger logObj = Logger.getLogger(CayenneController.class);
 
     protected CayenneController parent;
     protected Application application;
+    protected PropertyChangeSupport propertyChangeSupport;
 
     public CayenneController(CayenneController parent) {
         this.application = (parent != null) ? parent.getApplication() : null;
@@ -104,6 +108,9 @@ public abstract class CayenneController {
         return parent;
     }
 
+    /**
+     * Returns the vie wassociated with this Controller.
+     */
     public abstract Component getView();
 
     /**
@@ -141,8 +148,7 @@ public abstract class CayenneController {
         th = Util.unwindException(th);
         logObj.info("Error in " + getClass().getName(), th);
 
-        JOptionPane.showMessageDialog(
-                getView(),
+        JOptionPane.showMessageDialog(getView(),
                 th.getMessage(),
                 title,
                 JOptionPane.ERROR_MESSAGE);
@@ -201,8 +207,7 @@ public abstract class CayenneController {
                 }
             }
         };
-        dialog.getRootPane().registerKeyboardAction(
-                closeAction,
+        dialog.getRootPane().registerKeyboardAction(closeAction,
                 escReleased,
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
     }
@@ -237,5 +242,38 @@ public abstract class CayenneController {
         }
 
         return null;
+    }
+
+    /**
+     * Fires property change event. Exists for the benefit of subclasses.
+     */
+    protected void firePropertyChange(
+            String propertyName,
+            Object oldValue,
+            Object newValue) {
+        if (propertyChangeSupport != null) {
+            propertyChangeSupport.firePropertyChange(propertyName, oldValue, newValue);
+        }
+    }
+
+    /**
+     * Adds a listener for property change events.
+     */
+    public void addPropertyChangeListener(
+            String expression,
+            PropertyChangeListener listener) {
+
+        if (propertyChangeSupport == null) {
+            propertyChangeSupport = new PropertyChangeSupport(this);
+        }
+
+        propertyChangeSupport.addPropertyChangeListener(expression, listener);
+    }
+
+    /**
+     * Default implementation is a noop. Override to handle parent binding updates.
+     */
+    public void bindingUpdated(String expression, Object newValue) {
+        // do nothing...
     }
 }

@@ -57,9 +57,12 @@ package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
 
+import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.pref.CayennePreferenceEditor;
 import org.objectstyle.cayenne.pref.CayennePreferenceService;
+import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.pref.PreferenceDetail;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
 import org.objectstyle.cayenne.swing.BindingBuilder;
 import org.objectstyle.cayenne.swing.ObjectBinding;
@@ -70,9 +73,14 @@ import org.objectstyle.cayenne.validation.ValidationException;
  */
 public class GeneralPreferences extends CayenneController {
 
+    public static final String ENCODING_PREFERENCE = "encoding";
+
     protected GeneralPreferencesView view;
     protected CayennePreferenceEditor editor;
+    protected PreferenceDetail classGeneratorPreferences;
+
     protected ObjectBinding saveIntervalBinding;
+    protected ObjectBinding encodingBinding;
 
     public GeneralPreferences(PreferenceDialog parentController) {
         super(parentController);
@@ -83,8 +91,9 @@ public class GeneralPreferences extends CayenneController {
             this.editor = (CayennePreferenceEditor) editor;
             this.view.setEnabled(true);
             initBindings();
-            
+
             saveIntervalBinding.updateView();
+            encodingBinding.updateView();
         }
         else {
             this.view.setEnabled(false);
@@ -96,13 +105,27 @@ public class GeneralPreferences extends CayenneController {
     }
 
     protected void initBindings() {
+        // init model objects
+        Domain classGeneratorDomain = editor.editableInstance(getApplication()
+                .getPreferenceDomain()).getSubdomain(DefaultClassGenerator.class);
+        this.classGeneratorPreferences = classGeneratorDomain
+                .getDetail(ENCODING_PREFERENCE, true);
+
+        // build child controllers...
+        EncodingSelector encodingSelector = new EncodingSelector(this, view
+                .getEncodingSelector());
+
+        // create bindings...
         BindingBuilder builder = new BindingBuilder(
                 getApplication().getBindingFactory(),
                 this);
 
-        this.saveIntervalBinding = builder.bindToTextField(
-                view.getSaveInterval(),
+        this.saveIntervalBinding = builder.bindToTextField(view.getSaveInterval(),
                 "timeInterval");
+
+        this.encodingBinding = builder.bindToProperty(encodingSelector,
+                "classGeneratorPreferences.property[\"encoding\"]",
+                EncodingSelector.ENCODING_PROPERTY_BINDING);
     }
 
     public double getTimeInterval() {
@@ -118,5 +141,9 @@ public class GeneralPreferences extends CayenneController {
         }
 
         this.editor.setSaveInterval(ms);
+    }
+
+    public PreferenceDetail getClassGeneratorPreferences() {
+        return classGeneratorPreferences;
     }
 }

@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.swing;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
+import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -77,6 +76,10 @@ public class BindingBuilder {
     protected Object context;
     protected Map actionsMap;
 
+    /**
+     * Constructs BindingBuilder with a BindingFactory and a root model object (or
+     * context) of the binding.
+     */
     public BindingBuilder(BindingFactory factory, Object context) {
         this.factory = factory;
         this.context = context;
@@ -86,6 +89,10 @@ public class BindingBuilder {
         return delegate;
     }
 
+    /**
+     * Sets BindingDelegate that will be assigned to all bindings created via this
+     * BindingBuilder.
+     */
     public void setDelegate(BindingDelegate delegate) {
         this.delegate = delegate;
     }
@@ -94,6 +101,10 @@ public class BindingBuilder {
         return context;
     }
 
+    /**
+     * Sets the context object that will be used by all bindings created via this
+     * BindingBuilder. Context is a root of the domain model for the given binding.
+     */
     public void setContext(Object context) {
         this.context = context;
     }
@@ -102,18 +113,32 @@ public class BindingBuilder {
         return factory;
     }
 
-    public ObjectBinding bindToCheckbox(JCheckBox checkbox, String property) {
-        ObjectBinding binding = factory.bindToCheckbox(checkbox, property);
+    /**
+     * Binds to an instance of BoundComponent.
+     * 
+     * @since 1.2
+     */
+    public ObjectBinding bindToProperty(
+            BoundComponent component,
+            String property,
+            String boundProperty) {
+        ObjectBinding binding = factory
+                .bindToProperty(component, property, boundProperty);
         return initBinding(binding, delegate);
     }
 
-    public ObjectBinding bindToCheckbox(JCheckBox checkbox, String property, String action) {
-        ObjectBinding binding = factory.bindToCheckbox(checkbox, property);
+    public ObjectBinding bindToStateChange(AbstractButton button, String property) {
+        ObjectBinding binding = factory.bindToStateChange(button, property);
+        return initBinding(binding, delegate);
+    }
+
+    public ObjectBinding bindToStateChangeAndAction(AbstractButton button, String property, String action) {
+        ObjectBinding binding = factory.bindToStateChange(button, property);
         return initBinding(binding, getActionDelegate(action));
     }
 
-    public ObjectBinding bindToAction(JButton button, String action) {
-        ObjectBinding binding = factory.bindToButton(button, action);
+    public ObjectBinding bindToAction(AbstractButton button, String action) {
+        ObjectBinding binding = factory.bindToAction(button, action);
         return initBinding(binding, delegate);
     }
 
@@ -126,8 +151,7 @@ public class BindingBuilder {
             JComboBox component,
             String property,
             String noSelectionValue) {
-        ObjectBinding binding = factory.bindToComboSelection(
-                component,
+        ObjectBinding binding = factory.bindToComboSelection(component,
                 property,
                 noSelectionValue);
         return initBinding(binding, delegate);
@@ -138,8 +162,7 @@ public class BindingBuilder {
             String property,
             String action,
             String noSelectionValue) {
-        ObjectBinding binding = factory.bindToComboSelection(
-                component,
+        ObjectBinding binding = factory.bindToComboSelection(component,
                 property,
                 noSelectionValue);
         return initBinding(binding, getActionDelegate(action));

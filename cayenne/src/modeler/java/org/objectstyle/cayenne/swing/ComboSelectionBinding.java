@@ -149,7 +149,7 @@ public class ComboSelectionBinding extends BindingBase {
         }
     }
 
-    public Component getComponent() {
+    public Component getView() {
         return comboBox;
     }
 

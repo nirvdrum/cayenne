@@ -142,24 +142,19 @@ public class DBGeneratorOptions extends CayenneController {
         sqlBinding = builder.bindToTextArea(view.getSql(), "textForSQL");
 
         optionBindings = new ObjectBinding[5];
-        optionBindings[0] = builder.bindToCheckbox(
-                view.getCreateFK(),
+        optionBindings[0] = builder.bindToStateChangeAndAction(view.getCreateFK(),
                 "generatorDefaults.createFK",
                 "refreshSQLAction()");
-        optionBindings[1] = builder.bindToCheckbox(
-                view.getCreatePK(),
+        optionBindings[1] = builder.bindToStateChangeAndAction(view.getCreatePK(),
                 "generatorDefaults.createPK",
                 "refreshSQLAction()");
-        optionBindings[2] = builder.bindToCheckbox(
-                view.getCreateTables(),
+        optionBindings[2] = builder.bindToStateChangeAndAction(view.getCreateTables(),
                 "generatorDefaults.createTables",
                 "refreshSQLAction()");
-        optionBindings[3] = builder.bindToCheckbox(
-                view.getDropPK(),
+        optionBindings[3] = builder.bindToStateChangeAndAction(view.getDropPK(),
                 "generatorDefaults.dropPK",
                 "refreshSQLAction()");
-        optionBindings[4] = builder.bindToCheckbox(
-                view.getDropTables(),
+        optionBindings[4] = builder.bindToStateChangeAndAction(view.getDropTables(),
                 "generatorDefaults.dropTables",
                 "refreshSQLAction()");
 
@@ -278,10 +273,10 @@ public class DBGeneratorOptions extends CayenneController {
                 JOptionPane.showMessageDialog(getView(), "Schema Generation Complete.");
             }
             else {
-                new ValidationResultBrowser(this).startupAction(
-                        "Schema Generation Complete",
-                        "Schema generation finished. The following problem(s) were ignored.",
-                        failures);
+                new ValidationResultBrowser(this)
+                        .startupAction("Schema Generation Complete",
+                                "Schema generation finished. The following problem(s) were ignored.",
+                                failures);
             }
         }
         catch (Throwable th) {

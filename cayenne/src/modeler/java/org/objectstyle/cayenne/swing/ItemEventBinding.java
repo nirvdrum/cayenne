@@ -56,45 +56,60 @@
 package org.objectstyle.cayenne.swing;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.AbstractButton;
 
 /**
+ * Binds a checkbox state to an int or boolean property.
+ * 
  * @author Andrei Adamchik
  */
-public class ActionBinding extends BindingBase {
+public class ItemEventBinding extends BindingBase {
 
-    protected Component view;
+    protected AbstractButton boundItem;
 
-    public ActionBinding(AbstractButton button, String propertyExpression) {
-        super(propertyExpression);
+    public ItemEventBinding(AbstractButton boundItem, String expression) {
+        super(expression);
+        this.boundItem = boundItem;
 
-        button.addActionListener(new ActionListener() {
+        boundItem.addItemListener(new ItemListener() {
 
-            public void actionPerformed(ActionEvent e) {
-                fireAction();
+            public void itemStateChanged(ItemEvent e) {
+                updateModel();
             }
         });
-
-        this.view = button;
     }
 
     public Component getView() {
-        if (view == null) {
-            throw new BindingException("headless action");
-        }
-
-        return view;
+        return boundItem;
     }
 
     public void updateView() {
-        // noop
+        Object value = getValue();
+        boolean b = false;
+
+        // convert to boolean
+        if (value != null) {
+            if (value instanceof Boolean) {
+                b = ((Boolean) value).booleanValue();
+            }
+            else if (value instanceof Number) {
+                b = ((Number) value).intValue() != 0;
+            }
+        }
+
+        modelUpdateDisabled = true;
+        try {
+            boundItem.setSelected(b);
+        }
+        finally {
+            modelUpdateDisabled = false;
+        }
     }
 
-    protected void fireAction() {
-        // TODO: catch exceptions...
-        getValue();
+    protected void updateModel() {
+        setValue(boundItem.isSelected() ? Boolean.TRUE : Boolean.FALSE);
     }
 }

@@ -156,7 +156,7 @@ public class TextBinding extends BindingBase {
     /**
      * Returns internal text component.
      */
-    public Component getComponent() {
+    public Component getView() {
         return textComponent;
     }
 
