@@ -183,6 +183,8 @@ public class Editor
             (screenSize.width - frameSize.width) / 2,
             (screenSize.height - frameSize.height) / 2);
         frame.setVisible(true);
+        
+        logObj.info("Started CayenneModeler.");
     }
 
     /** 
@@ -205,7 +207,7 @@ public class Editor
                     p1 = p2;
                 }
 
-                Layout layout = new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c{3}: %m%n");
+                Layout layout = new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
                 p1.removeAllAppenders();
                 p1.addAppender(
                     new FileAppender(layout, log.getCanonicalPath(), true));

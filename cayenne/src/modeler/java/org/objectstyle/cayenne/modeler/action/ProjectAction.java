@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.ModelerController;
@@ -68,6 +69,8 @@ import org.scopemvc.core.Control;
  * @author Andrei Adamchik
  */
 public class ProjectAction extends CayenneAction {
+	private static Logger logObj = Logger.getLogger(ProjectAction.class);
+	
     public static final String ACTION_NAME = "Close Project";
 
     public ProjectAction() {
@@ -97,6 +100,8 @@ public class ProjectAction extends CayenneAction {
 
         Editor.getFrame().getController().handleControl(
             new Control(ModelerController.PROJECT_CLOSED_ID));
+        
+        logObj.info("Closed project.");
         return true;
     }
 
