@@ -208,22 +208,13 @@ public class MapObjRelationshipModel extends BasicModel {
             // try to connect automatically, if we can't use dummy connector
 
             Entity source = (last == null) ? getStartEntity() : last.getTargetEntity();
+            Relationship anyConnector = source.getAnyRelationship(target);
             EntityRelationshipsModel connector = null;
-            Iterator it = source.getRelationships().iterator();
-            while (it.hasNext()) {
-                Relationship next = (Relationship) it.next();
 
-                // there is a naturally matching relationship, 
-                // use it to connect to the end
-                if (next.getTargetEntity() == target) {
-                    connector = new EntityRelationshipsModel(next);
-                    break;
-                }
-            }
-
-            if (connector == null) {
-                connector = new EntityRelationshipsModel(source, getEndEntity());
-            }
+            connector =
+                (anyConnector == null)
+                    ? new EntityRelationshipsModel(source, getEndEntity())
+                    : new EntityRelationshipsModel(anyConnector);
 
             dbRelationshipPath.makeActive(false);
             try {

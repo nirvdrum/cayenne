@@ -84,6 +84,16 @@
             or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
             can be selected. This dialog has been completely redesigned to remove this limitation.</p>
             </subsection>
+            
+            <subsection name="1.1.14 CayenneModeler Productivity Enhancements.">
+            <p>CayenneModeler now uses defaults where appropriate when working with mappings. This is
+            to reduce manual operations. Some examples are:
+            </p>
+            <ul>
+            <li>When ObjRelationship target is selected, Modeler guesses underlying DbRelationship if
+            source and target entities can be connected in one step.</li>
+            </ul>
+            </subsection>
         </subsection>
     </section>
 </body>

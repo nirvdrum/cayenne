@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.util.ArrayList;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -74,157 +76,165 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class ObjRelationshipTableModel extends CayenneTableModel {
-	// Columns
-	static final int REL_NAME = 0;
-	static final int REL_TARGET = 1;
-	static final int REL_CARDINALITY = 2;
-	static final int REL_DELETERULE = 3;
+    // Columns
+    static final int REL_NAME = 0;
+    static final int REL_TARGET = 1;
+    static final int REL_CARDINALITY = 2;
+    static final int REL_DELETERULE = 3;
 
-	protected ObjEntity entity;
+    protected ObjEntity entity;
 
-	public ObjRelationshipTableModel(
-			ObjEntity entity,
-			EventController mediator,
-			Object eventSource) {
-		super(mediator, eventSource, new ArrayList(entity.getRelationships()));
-		this.entity = entity;
-	}
-	
-	/**
-	 * Returns ObjRelationship class.
-	 */
-	public Class getElementsClass() {
-		return ObjRelationship.class;
-	}
+    public ObjRelationshipTableModel(
+        ObjEntity entity,
+        EventController mediator,
+        Object eventSource) {
+        super(mediator, eventSource, new ArrayList(entity.getRelationships()));
+        this.entity = entity;
+    }
 
-	public int getColumnCount() {
-	    return 4;
-	}
+    /**
+     * Returns ObjRelationship class.
+     */
+    public Class getElementsClass() {
+        return ObjRelationship.class;
+    }
 
-	public String getColumnName(int column) {
-		if (column == REL_NAME)
-			return "Name";
-		else if (column == REL_TARGET)
-			return "Target";
-		else if (column == REL_CARDINALITY)
-			return "To many";
-		else if (column == REL_DELETERULE)
-			return "Delete rule";
-		else
-			return "";
-	}
+    public int getColumnCount() {
+        return 4;
+    }
 
-	public Class getColumnClass(int col) {
-		switch (col) {
-			case REL_CARDINALITY :
-				return Boolean.class;
-			default :
-				return String.class;
-		}
-	}
+    public String getColumnName(int column) {
+        if (column == REL_NAME)
+            return "Name";
+        else if (column == REL_TARGET)
+            return "Target";
+        else if (column == REL_CARDINALITY)
+            return "To many";
+        else if (column == REL_DELETERULE)
+            return "Delete rule";
+        else
+            return "";
+    }
 
-	public ObjRelationship getRelationship(int row) {
-		return (row >= 0 && row < objectList.size())
-			? (ObjRelationship) objectList.get(row)
-			: null;
-	}
+    public Class getColumnClass(int col) {
+        switch (col) {
+            case REL_CARDINALITY :
+                return Boolean.class;
+            default :
+                return String.class;
+        }
+    }
 
-	public Object getValueAt(int row, int column) {
-		ObjRelationship rel = getRelationship(row);
-		// If name column
-		if (column == REL_NAME) {
-			return rel.getName();
-		// If target column
-		} else if (column == REL_TARGET) {
-			if (null == rel.getTargetEntity())
-				return null;
-			return rel.getTargetEntity().getName();
-		} else if (column == REL_CARDINALITY) {
-			return new Boolean(rel.isToMany());
-		} else if (column == REL_DELETERULE) {
-			return DeleteRule.deleteRuleName(rel.getDeleteRule());
-		} else {
-			return "";
-		}
-	}
+    public ObjRelationship getRelationship(int row) {
+        return (row >= 0 && row < objectList.size())
+            ? (ObjRelationship) objectList.get(row)
+            : null;
+    }
 
-	public void setUpdatedValueAt(Object aValue, int row, int column) {
-		ObjRelationship rel = getRelationship(row);
-		
-		// If name column
-		if (column == REL_NAME) {
-			String text = (String) aValue;
-			String old_name = rel.getName();
-			MapUtil.setRelationshipName(entity, rel, text);
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity, old_name);
-			mediator.fireObjRelationshipEvent(e);
-			fireTableCellUpdated(row, column);
-		}
-		// If target column
-		else if (column == REL_TARGET) {
-			if (null == aValue)
-				return;
-			String target_name = aValue.toString();
-			if (target_name == null)
-				target_name = "";
-			target_name = target_name.trim();
-			// If data hasn't changed, do nothing
-			if (rel.getTargetEntity() != null
-				&& target_name.equals(rel.getTargetEntity().getName())) {
-				return;
-			}
-			// Remove db relationship mappings.
-			rel.clearDbRelationships();
-			
-			// Set new target, if applicable
-			ObjEntity target = null;
-			if (!"".equals(target_name)) {
-				DataMap map = mediator.getCurrentDataMap();
-				target = map.getObjEntity(target_name, true);
-			}
-			
-			rel.setTargetEntity(target);
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-			mediator.fireObjRelationshipEvent(e);
-		} /*else if (column == REL_CARDINALITY) {
-			Boolean temp = (Boolean) aValue;
-			rel.setToMany(temp.booleanValue());
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-			mediator.fireObjRelationshipEvent(e);
-		}*/ else if (column == REL_DELETERULE) {
-			String temp = (String)aValue;
-			rel.setDeleteRule(DeleteRule.deleteRuleForName(temp));
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-			mediator.fireObjRelationshipEvent(e);
-		}
-		fireTableRowsUpdated(row, row);
-	} 
+    public Object getValueAt(int row, int column) {
+        ObjRelationship rel = getRelationship(row);
+        // If name column
+        if (column == REL_NAME) {
+            return rel.getName();
+            // If target column
+        }
+        else if (column == REL_TARGET) {
+            if (null == rel.getTargetEntity())
+                return null;
+            return rel.getTargetEntity().getName();
+        }
+        else if (column == REL_CARDINALITY) {
+            return new Boolean(rel.isToMany());
+        }
+        else if (column == REL_DELETERULE) {
+            return DeleteRule.deleteRuleName(rel.getDeleteRule());
+        }
+        else {
+            return "";
+        }
+    }
 
+    public void setUpdatedValueAt(Object aValue, int row, int column) {
+        ObjRelationship rel = getRelationship(row);
 
-	public void removeRow(int row) {
-		if (row < 0)
-			return;
-		Relationship rel = getRelationship(row);
-		RelationshipEvent e;
-		e = new RelationshipEvent(eventSource, rel, entity, RelationshipEvent.REMOVE);
-		mediator.fireObjRelationshipEvent(e);
-		objectList.remove(row);
-		entity.removeRelationship(rel.getName());
-		fireTableRowsDeleted(row, row);
-	}
+        // If name column
+        if (column == REL_NAME) {
+            String text = (String) aValue;
+            String old_name = rel.getName();
+            MapUtil.setRelationshipName(entity, rel, text);
+            RelationshipEvent e =
+                new RelationshipEvent(eventSource, rel, entity, old_name);
+            mediator.fireObjRelationshipEvent(e);
+            fireTableCellUpdated(row, column);
+        }
+        // If target column
+        else if (column == REL_TARGET) {
+            if (aValue == null) {
+                return;
+            }
 
-	/** Relationship just needs to be removed from the model. 
-	 *  It is already removed from the DataMap. */
-	void removeRelationship(Relationship rel) {
-		objectList.remove(rel);
-		fireTableDataChanged();
-	}
+            String targetName = aValue.toString().trim();
 
-	public boolean isCellEditable(int row, int col) {
-		if(col==REL_CARDINALITY) {
-			return false; //Cannot edit the toMany flag on an ObjRelationship
-		}
-		return true;
-	} 
+            // Remove db relationship mappings.
+            rel.clearDbRelationships();
+
+            // Set new target, if applicable
+            ObjEntity target = null;
+            if (!"".equals(targetName)) {
+                DataMap map = mediator.getCurrentDataMap();
+                target = map.getObjEntity(targetName, true);
+            }
+
+            rel.setTargetEntity(target);
+            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
+            mediator.fireObjRelationshipEvent(e);
+
+            // now try to connect DbEntities if we can do it in one step
+            if (target != null) {
+                DbEntity srcDB = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
+                DbEntity targetDB = target.getDbEntity();
+                if (srcDB != null && targetDB != null) {
+                    Relationship anyConnector = srcDB.getAnyRelationship(targetDB);
+                    if (anyConnector != null) {
+                        rel.addDbRelationship((DbRelationship) anyConnector);
+                    }
+                }
+            }
+
+        }
+        else if (column == REL_DELETERULE) {
+            String temp = (String) aValue;
+            rel.setDeleteRule(DeleteRule.deleteRuleForName(temp));
+            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
+            mediator.fireObjRelationshipEvent(e);
+        }
+        fireTableRowsUpdated(row, row);
+    }
+
+    public void removeRow(int row) {
+        if (row < 0)
+            return;
+        Relationship rel = getRelationship(row);
+        RelationshipEvent e;
+        e = new RelationshipEvent(eventSource, rel, entity, RelationshipEvent.REMOVE);
+        mediator.fireObjRelationshipEvent(e);
+        objectList.remove(row);
+        entity.removeRelationship(rel.getName());
+        fireTableRowsDeleted(row, row);
+    }
+
+    /** Relationship just needs to be removed from the model. 
+     *  It is already removed from the DataMap. */
+    void removeRelationship(Relationship rel) {
+        objectList.remove(rel);
+        fireTableDataChanged();
+    }
+
+    public boolean isCellEditable(int row, int col) {
+        if (col == REL_CARDINALITY) {
+            return false; //Cannot edit the toMany flag on an ObjRelationship
+        }
+        return true;
+    }
 
 }

@@ -201,6 +201,29 @@ public abstract class Entity extends MapObject {
     public Map getRelationshipMap() {
         return Collections.unmodifiableMap(relationships);
     }
+    
+    /**
+     * Returns a relationship that has a specified entity as a target.
+     * If there is more than one relationship for the same target,
+     * it is unpredictable which one will be returned.
+     * 
+     * @since 1.1
+     */
+    public Relationship getAnyRelationship(Entity targetEntity) {
+        Collection relationships = getRelationships();
+        if(relationships.isEmpty()) {
+            return null;
+        }
+        
+        Iterator it = relationships.iterator();
+        while(it.hasNext()) {
+            Relationship r = (Relationship)it.next();
+            if(r.getTargetEntity() == targetEntity) {
+                return r;
+            }
+        }
+        return null;
+    }
 
 	/**
 	 * Returns a collection of Relationships that exist in this entity.
