@@ -127,7 +127,8 @@ sub get_source() {
                 # cvs checkouts are unreliable...give it a few tries
 		for($i = 0; $i < 5; $i++) {
                 	$status = run_command(
-			"cvs" . 
+ 			"CVS_RSH=ssh ; " .
+			" cvs" . 
 			" -z3" .
 			" -q" .
 			" -d$opt_d" .
@@ -135,9 +136,9 @@ sub get_source() {
 			" -D" .
 			" \"1 minute ago\"" .
 			" cayenne");
+                    print_line("CVS checkout status: $status\n");
                     last unless $status;
-                    print_line("CVS checkout failed: $status\n");
-                    sleep 5;
+                    sleep 120;
                 }
 		die_with_email("CVS checkout failed, return status: $status, attempts: $i\n") if $status;
 	}
