@@ -107,13 +107,21 @@ public class ProjectTypeSelectControl extends BasicController {
 
     protected void doCreateAppProject() {
         Project project = new ApplicationProject(null);
-        Editor.getFrame().getController().projectOpened(project);
+
+        // send "Project Open" control to the main controller
+        Editor.getFrame().getController().handleControl(
+            new Control(ModelerController.PROJECT_OPENED_ID, project));
+
         shutdown();
     }
 
     protected void doCreateMapProject() {
         Project project = new DataMapProject(null);
-        Editor.getFrame().getController().projectOpened(project);
+
+        // send "Project Open" control to the main controller
+        Editor.getFrame().getController().handleControl(
+            new Control(ModelerController.PROJECT_OPENED_ID, project));
+
         shutdown();
     }
 }

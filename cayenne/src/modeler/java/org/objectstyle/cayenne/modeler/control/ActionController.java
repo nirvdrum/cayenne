@@ -79,7 +79,10 @@ public class ActionController extends ModelerController {
      * Performs control handling, invoking appropriate action method.
      */
     protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(PROJECT_CLOSED_ID)) {
+    	if (control.matchesID(PROJECT_OPENED_ID)) {
+            // do nothing for now...
+        }
+        else if (control.matchesID(PROJECT_CLOSED_ID)) {
             projectClosed();
         }
     }

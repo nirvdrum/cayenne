@@ -100,6 +100,7 @@ import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -145,6 +146,8 @@ public class EventController extends ModelerController {
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(PROJECT_CLOSED_ID)) {
             reset();
+        } else if (control.matchesID(PROJECT_OPENED_ID)) {
+            setDirty(((Project) control.getParameter()).isLocationUndefined());
         }
     }
 

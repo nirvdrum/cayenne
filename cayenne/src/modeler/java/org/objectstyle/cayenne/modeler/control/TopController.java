@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.Project;
-import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
@@ -69,6 +69,8 @@ import org.scopemvc.core.ControlException;
  * @author Andrei Adamchik
  */
 public class TopController extends ModelerController {
+	private static Logger logObj = Logger.getLogger(TopController.class);
+	
     protected StatusBarController statusController;
     protected EventController eventController;
     protected ActionController actionController;
@@ -106,7 +108,28 @@ public class TopController extends ModelerController {
         // --- update model
         getTopModel().setCurrentProject(null);
 
-        // --- propagate event to child controllers
+        // --- propagate control to child controllers
+        control.markUnmatched();
+        eventController.handleControl(control);
+        
+        control.markUnmatched();
+        actionController.handleControl(control);
+
+        control.markUnmatched();
+        statusController.handleControl(control);
+    }
+
+    protected void projectOpened(Control control) {
+        Project project = (Project) control.getParameter();
+
+        // update model
+        getTopModel().setCurrentProject(project);
+
+        // update main view
+        view.projectOpened();
+
+        // --- propagate control to child controllers
+      
         control.markUnmatched();
         eventController.handleControl(control);
 
@@ -117,33 +140,13 @@ public class TopController extends ModelerController {
         statusController.handleControl(control);
     }
 
-    public void projectOpened(Project project) {
-        // update model
-        getTopModel().setCurrentProject(project);
-
-        // update main view
-        view.projectOpened();
-
-        // update bottom status bar
-        if (project.isLocationUndefined()) {
-            eventController.setDirty(true);
-            statusController.handleControl(
-                new Control(TopModel.STATUS_MESSAGE_KEY, "New project created..."));
-        } else {
-            statusController.handleControl(
-                new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
-        }
-    }
-
     public void setStatusBarView(StatusBarView view) {
         statusController.setView(view);
     }
 
     protected void doHandleControl(Control control) throws ControlException {
-        // pass control to the child that knows how to handle it
-        if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
-            control.markUnmatched();
-            statusController.doHandleControl(control);
+        if (control.matchesID(PROJECT_OPENED_ID)) {
+            projectOpened(control);
         } else if (control.matchesID(PROJECT_CLOSED_ID)) {
             projectClosed(control);
         }

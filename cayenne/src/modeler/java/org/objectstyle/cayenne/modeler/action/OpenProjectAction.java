@@ -54,7 +54,6 @@
  *
  */
 package org.objectstyle.cayenne.modeler.action;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -66,36 +65,31 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
-
+import org.scopemvc.core.Control;
 /**
  * @author Andrei Adamchik
  */
-
 public class OpenProjectAction extends ProjectAction {
     private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
     public static final String ACTION_NAME = "Open Project";
-
     protected ProjectOpener fileChooser = new ProjectOpener();
-
     /**
      * Constructor for OpenProjectAction.
      */
     public OpenProjectAction() {
         super(ACTION_NAME);
     }
-
     public String getIconName() {
         return "icon-open.gif";
     }
-
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
     }
-
     /**
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
@@ -104,7 +98,6 @@ public class OpenProjectAction extends ProjectAction {
         if (getMediator() != null && !closeProject()) {
             return;
         }
-
         File f = null;
         if (e.getSource() instanceof RecentFileMenuItem) {
             RecentFileMenuItem menu = (RecentFileMenuItem) e.getSource();
@@ -143,7 +136,8 @@ public class OpenProjectAction extends ProjectAction {
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             } else {
-            	Editor.getFrame().getController().projectOpened(project);
+                Editor.getFrame().getController().handleControl(
+                    new Control(ModelerController.PROJECT_OPENED_ID, project));
             }
         } catch (Exception ex) {
             logObj.warn("Error loading project file.", ex);

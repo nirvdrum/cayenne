@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.modeler.control;
 
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
-import org.scopemvc.controller.basic.BasicController;
+import org.objectstyle.cayenne.project.Project;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
 
@@ -70,12 +70,32 @@ public class StatusBarController extends ModelerController {
         super(parent);
     }
 
+    /**
+     * Updates status bar depending on the type of control.
+     */
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(PROJECT_CLOSED_ID)) {
             doUpdate("Project Closed...");
+        } else if (control.matchesID(PROJECT_OPENED_ID)) {
+            projectOpened((Project) control.getParameter());
         }
     }
 
+    /**
+     * Processes project opening event.
+     */
+    protected void projectOpened(Project project) {
+        if (project.isLocationUndefined()) {
+            doUpdate("New project created...");
+        } else {
+            doUpdate("Project opened...");
+        }
+    }
+
+    /**
+     * Performs status bar update with a message.
+     * Message will dissappear in 6 seconds.
+     */
     protected void doUpdate(String message) {
         TopModel model = (TopModel) getModel();
         if (model == null) {
