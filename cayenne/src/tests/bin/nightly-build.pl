@@ -82,9 +82,10 @@ if($opt_u) {
 	die_with_email("Can't create release directory, return status: $status\n") if $status;
 	
 	# Upload test results no matter what
-	my $test_reports = "$cayenne_src/cayenne/build/tests/report/nightly-test";
+	my $test_reports = "build/tests/report/nightly-test";
         my $upload_dir = "www.objectstyle.org:$rel_path/$year-$mon-$mday";
-	run_command("rsync -rlt -e ssh --delete --exclude *.xml $test_reports $upload_dir/");
+	run_command("chmod -R 755 $test_reports");
+	run_command("rsync -rltp -e ssh --delete --exclude='*.xml' $test_reports/ $upload_dir/reports");
 	
 
 	# Upload build if it succeeded
@@ -134,7 +135,7 @@ sub get_source() {
 
 sub run_command() {
 	my $command = shift;
-	print_line("==== $command\n");
+	print_line("# $command\n");
 	return system("$command >> $out_file 2>&1");
 }
 
