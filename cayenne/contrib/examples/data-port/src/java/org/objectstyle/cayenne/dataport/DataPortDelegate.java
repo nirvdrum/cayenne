@@ -68,49 +68,48 @@ import org.objectstyle.cayenne.query.Query;
  * 
  * @author Andrei Adamchik
  */
-public interface DataPortDelegate
-{
-  /**
-   * Allows delegate to sort or otherwise alter a list of DbEntities
-   * right before the port starts.
-   */
-  public List willPortEntities(DataPort portTool, List entities);
+public interface DataPortDelegate {
+    /**
+     * Allows delegate to sort or otherwise alter a list of DbEntities
+     * right before the port starts.
+     */
+    public List willPortEntities(DataPort portTool, List entities);
 
-  /**
-   * Invoked by DataPort right before the start of data port 
-   * for a given entity. Allows delegate to handle such things like 
-   * logging, etc. Also makes it possible to
-   * alter the select query used to cleanup the data, e.g. set a limiting
-   * qualifier.
-   */
-  public void willPortEntity(DataPort portTool, DbEntity entity, Query query);
+    /**
+     * Invoked by DataPort right before the start of data port 
+     * for a given entity. Allows delegate to handle such things like 
+     * logging, etc. Also makes it possible to
+     * alter the select query used to cleanup the data, e.g. set a limiting
+     * qualifier.
+     */
+    public void willPortEntity(DataPort portTool, DbEntity entity, Query query);
 
-  /**
-   * Invoked by DataPort right after the end of data port 
-   * for a given entity. Allows delegate to handle such things like 
-   * logging, etc.
-   */
-  public void didPortEntity(DataPort portTool, DbEntity entity, int rowCount);
+    /**
+     * Invoked by DataPort right after the end of data port 
+     * for a given entity. Allows delegate to handle such things like 
+     * logging, etc.
+     */
+    public void didPortEntity(DataPort portTool, DbEntity entity, int rowCount);
 
-  /**
-   * Allows delegate to sort or otherwise alter a list of DbEntities
-   * right before data cleanup starts.
-   */
-  public List willCleanData(DataPort portTool, List entities);
+    /**
+     * Allows delegate to sort or otherwise alter a list of DbEntities
+     * right before data cleanup starts.
+     */
+    public List willCleanData(DataPort portTool, List entities);
 
-  /**
-   * Invoked by DataPort right before the start of data cleanup 
-   * for a given entity. Allows delegate to handle such things like 
-   * logging, etc. Also makes it possible to
-   * alter the delete query used to cleanup the data, e.g. set a limiting
-   * qualifier.
-   */
-  public void willCleanData(DataPort portTool, DbEntity entity, Query query);
+    /**
+     * Invoked by DataPort right before the start of data cleanup 
+     * for a given entity. Allows delegate to handle such things like 
+     * logging, etc. Also makes it possible to
+     * alter the delete query used to cleanup the data, e.g. set a limiting
+     * qualifier.
+     */
+    public void willCleanData(DataPort portTool, DbEntity entity, Query query);
 
-  /**
-   * Invoked by DataPort right after the end of data cleanup 
-   * for a given entity. Allows delegate to handle such things like 
-   * logging, etc.
-   */
-  public void didCleanData(DataPort portTool, DbEntity entity, int rowCount);
+    /**
+     * Invoked by DataPort right after the end of data cleanup 
+     * for a given entity. Allows delegate to handle such things like 
+     * logging, etc.
+     */
+    public void didCleanData(DataPort portTool, DbEntity entity, int rowCount);
 }

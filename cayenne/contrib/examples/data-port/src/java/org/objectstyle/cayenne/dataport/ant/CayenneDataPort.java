@@ -78,153 +78,131 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneDataPort extends Task
-{
-  protected File projectFile;
-  protected String maps;
-  protected String srcNode;
-  protected String destNode;
-  protected String includeTables;
-  protected String excludeTables;
-  protected boolean cleanDest = true;
+public class CayenneDataPort extends Task {
+    protected File projectFile;
+    protected String maps;
+    protected String srcNode;
+    protected String destNode;
+    protected String includeTables;
+    protected String excludeTables;
+    protected boolean cleanDest = true;
 
-  public void execute() throws BuildException
-  {
-    validateParameters();
+    public void execute() throws BuildException {
+        validateParameters();
 
-    // suppress Cayenne logging
-    // in the future do something smarter 
-    // (like redirecting Log4J logging to the Ant log)
-    Configuration.setLoggingConfigured(true);
-    Logger.getRootLogger().removeAllAppenders();
-    Logger.getRootLogger().addAppender(new NullAppender());
+        // suppress Cayenne logging
+        // in the future do something smarter 
+        // (like redirecting Log4J logging to the Ant log)
+        Configuration.setLoggingConfigured(true);
+        Logger.getRootLogger().removeAllAppenders();
+        Logger.getRootLogger().addAppender(new NullAppender());
 
-    FileConfiguration configuration = new FileConfiguration();
-    configuration.addFilesystemPath(projectFile.getParentFile());
-    Configuration.initializeSharedConfiguration(configuration);
+        FileConfiguration configuration = new FileConfiguration();
+        configuration.addFilesystemPath(projectFile.getParentFile());
+        Configuration.initializeSharedConfiguration(configuration);
 
-    // perform project validation
-    DataNode source = findNode(configuration, srcNode);
-    if (source == null)
-    {
-      throw new BuildException("srcNode not found in the project: " + srcNode);
+        // perform project validation
+        DataNode source = findNode(configuration, srcNode);
+        if (source == null) {
+            throw new BuildException(
+                "srcNode not found in the project: " + srcNode);
+        }
+
+        DataNode destination = findNode(configuration, destNode);
+        if (destination == null) {
+            throw new BuildException(
+                "destNode not found in the project: " + destNode);
+        }
+
+        log("Porting from '" + srcNode + "' to '" + destNode + "'.");
+
+        AntDataPortDelegate portDelegate =
+            new AntDataPortDelegate(this, maps, includeTables, excludeTables);
+        DataPort dataPort = new DataPort(portDelegate);
+        dataPort.setEntities(getAllEntities(source));
+        dataPort.setCleaningDestination(cleanDest);
+        dataPort.setSourceNode(source);
+        dataPort.setDestinationNode(destination);
+
+        try {
+            dataPort.execute();
+        } catch (Exception e) {
+            Throwable topOfStack = Util.unwindException(e);
+            throw new BuildException(
+                "Error porting data: " + topOfStack.getMessage(),
+                topOfStack);
+        }
     }
 
-    DataNode destination = findNode(configuration, destNode);
-    if (destination == null)
-    {
-      throw new BuildException(
-        "destNode not found in the project: " + destNode);
+    protected DataNode findNode(Configuration configuration, String name) {
+        Iterator domains = configuration.getDomains().iterator();
+        while (domains.hasNext()) {
+            DataDomain domain = (DataDomain) domains.next();
+            DataNode node = domain.getNode(name);
+            if (node != null) {
+                return node;
+            }
+        }
+
+        return null;
     }
 
-    log("Porting from '" + srcNode + "' to '" + destNode + "'.");
+    protected List getAllEntities(DataNode node) {
+        List allEntities = new ArrayList();
 
-    AntDataPortDelegate portDelegate =
-      new AntDataPortDelegate(this, maps, includeTables, excludeTables);
-    DataPort dataPort = new DataPort(portDelegate);
-    dataPort.setEntities(getAllEntities(source));
-    dataPort.setCleaningDestination(cleanDest);
-    dataPort.setSourceNode(source);
-    dataPort.setDestinationNode(destination);
+        Iterator maps = node.getDataMaps().iterator();
+        while (maps.hasNext()) {
+            DataMap map = (DataMap) maps.next();
+            allEntities.addAll(map.getDbEntities());
+        }
 
-    try
-    {
-      dataPort.execute();
-    }
-    catch (Exception e)
-    {
-      Throwable topOfStack = Util.unwindException(e);
-      throw new BuildException(
-        "Error porting data: " + topOfStack.getMessage(),
-        topOfStack);
-    }
-  }
-
-  protected DataNode findNode(Configuration configuration, String name)
-  {
-    Iterator domains = configuration.getDomains().iterator();
-    while (domains.hasNext())
-    {
-      DataDomain domain = (DataDomain) domains.next();
-      DataNode node = domain.getNode(name);
-      if (node != null)
-      {
-        return node;
-      }
+        return allEntities;
     }
 
-    return null;
-  }
+    protected void validateParameters() throws BuildException {
+        if (projectFile == null) {
+            throw new BuildException("Required 'projectFile' parameter is missing.");
+        }
 
-  protected List getAllEntities(DataNode node)
-  {
-    List allEntities = new ArrayList();
+        if (!projectFile.exists()) {
+            throw new BuildException(
+                "'projectFile' does not exist: " + projectFile);
+        }
 
-    Iterator maps = node.getDataMaps().iterator();
-    while (maps.hasNext())
-    {
-      DataMap map = (DataMap) maps.next();
-      allEntities.addAll(map.getDbEntities());
+        if (srcNode == null) {
+            throw new BuildException("Required 'srcNode' parameter is missing.");
+        }
+
+        if (destNode == null) {
+            throw new BuildException("Required 'destNode' parameter is missing.");
+        }
     }
 
-    return allEntities;
-  }
-
-  protected void validateParameters() throws BuildException
-  {
-    if (projectFile == null)
-    {
-      throw new BuildException("Required 'projectFile' parameter is missing.");
+    public void setDestNode(String destNode) {
+        this.destNode = destNode;
     }
 
-    if (!projectFile.exists())
-    {
-      throw new BuildException("'projectFile' does not exist: " + projectFile);
+    public void setExcludeTables(String excludeTables) {
+        this.excludeTables = excludeTables;
     }
 
-    if (srcNode == null)
-    {
-      throw new BuildException("Required 'srcNode' parameter is missing.");
+    public void setIncludeTables(String includeTables) {
+        this.includeTables = includeTables;
     }
 
-    if (destNode == null)
-    {
-      throw new BuildException("Required 'destNode' parameter is missing.");
+    public void setMaps(String maps) {
+        this.maps = maps;
     }
-  }
 
-  public void setDestNode(String destNode)
-  {
-    this.destNode = destNode;
-  }
+    public void setProjectFile(File projectFile) {
+        this.projectFile = projectFile;
+    }
 
-  public void setExcludeTables(String excludeTables)
-  {
-    this.excludeTables = excludeTables;
-  }
+    public void setSrcNode(String srcNode) {
+        this.srcNode = srcNode;
+    }
 
-  public void setIncludeTables(String includeTables)
-  {
-    this.includeTables = includeTables;
-  }
-
-  public void setMaps(String maps)
-  {
-    this.maps = maps;
-  }
-
-  public void setProjectFile(File projectFile)
-  {
-    this.projectFile = projectFile;
-  }
-
-  public void setSrcNode(String srcNode)
-  {
-    this.srcNode = srcNode;
-  }
-
-  public void setCleanDest(boolean flag)
-  {
-    this.cleanDest = flag;
-  }
+    public void setCleanDest(boolean flag) {
+        this.cleanDest = flag;
+    }
 }

@@ -87,287 +87,251 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * 
  * @author Andrei Adamchik
  */
-public class DataPort
-{
-  public static final int INSERT_BATCH_SIZE = 1000;
+public class DataPort {
+    public static final int INSERT_BATCH_SIZE = 1000;
 
-  protected DataNode sourceNode;
-  protected DataNode destinationNode;
-  protected List entities;
-  protected boolean cleaningDestination;
-  protected DataPortDelegate delegate;
+    protected DataNode sourceNode;
+    protected DataNode destinationNode;
+    protected List entities;
+    protected boolean cleaningDestination;
+    protected DataPortDelegate delegate;
 
-  /**
-   * Creates new DataPort instance, initializing it 
-   * with a DataPortDelegate.  
-   */
-  public DataPort(DataPortDelegate delegate)
-  {
-    super();
-    this.delegate = delegate;
-  }
-
-  /**
-   * Runs DataPort. The instance must be fully configured by the time this method
-   * is invoked, having its delegate, source and destinatio nodes, and a list of entities 
-   * set up. 
-   */
-  public void execute() throws Exception
-  {
-    // sanity check
-    if (sourceNode == null)
-    {
-      throw new CayenneException("Can't port data, source node is null.");
+    /**
+     * Creates new DataPort instance, initializing it 
+     * with a DataPortDelegate.  
+     */
+    public DataPort(DataPortDelegate delegate) {
+        super();
+        this.delegate = delegate;
     }
 
-    if (destinationNode == null)
-    {
-      throw new CayenneException("Can't port data, destination node is null.");
+    /**
+     * Runs DataPort. The instance must be fully configured by the time this method
+     * is invoked, having its delegate, source and destinatio nodes, and a list of entities 
+     * set up. 
+     */
+    public void execute() throws Exception {
+        // sanity check
+        if (sourceNode == null) {
+            throw new CayenneException("Can't port data, source node is null.");
+        }
+
+        if (destinationNode == null) {
+            throw new CayenneException("Can't port data, destination node is null.");
+        }
+
+        // the simple equality check may actually detect problems with misconfigred nodes
+        // it is not as dumb as it may look at first
+        if (sourceNode == destinationNode) {
+            throw new CayenneException("Can't port data, source and target nodes are the same.");
+        }
+
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
+
+        // sort entities for insertion
+        List sorted = new ArrayList(entities);
+        destinationNode.getDependencySorter().sortDbEntities(sorted, false);
+
+        if (cleaningDestination) {
+            // reverse insertion order for deletion
+            List entitiesInDeleteOrder = new ArrayList(sorted.size());
+            entitiesInDeleteOrder.addAll(sorted);
+            Collections.reverse(entitiesInDeleteOrder);
+            processDelete(entitiesInDeleteOrder);
+        }
+
+        processInsert(sorted);
     }
 
-    // the simple equality check may actually detect problems with misconfigred nodes
-    // it is not as dumb as it may look at first
-    if (sourceNode == destinationNode)
-    {
-      throw new CayenneException("Can't port data, source and target nodes are the same.");
+    /**
+     * Cleans up destination tables data.
+     */
+    protected void processDelete(List entities) {
+        // Allow delegate to modify the list of entities
+        // any way it wants. For instance delegate may filter 
+        // or sort the list (though it doesn't have to, and can simply
+        // pass through the original list). 
+        if (delegate != null) {
+            entities = delegate.willCleanData(this, entities);
+        }
+
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
+
+        // Using QueryResult as observer for the data cleanup.
+        // This allows to collect query statistics and pass it to the delegate.
+        QueryResult observer = new QueryResult();
+
+        // Delete data from entities one by one
+        Iterator it = entities.iterator();
+        while (it.hasNext()) {
+            DbEntity entity = (DbEntity) it.next();
+            DeleteQuery query = new DeleteQuery();
+
+            // using DbEntity as a query root is unusual but will still work with Cayenne
+            query.setRoot(entity);
+
+            // notify delegate that delete is about to happen
+            if (delegate != null) {
+                delegate.willCleanData(this, entity, query);
+            }
+
+            // perform delete query
+            observer.clear();
+            destinationNode.performQuery(query, observer);
+
+            // notify delegate that delete just happened
+            if (delegate != null) {
+                // observer will store query statistics
+                int count = observer.getFirstUpdateCount(query);
+                delegate.didCleanData(this, entity, count);
+            }
+        }
     }
 
-    if (entities == null || entities.isEmpty())
-    {
-      return;
-    }
+    /**
+     * Reads source data from source, saving it to destination.
+     */
+    protected void processInsert(List entities) throws Exception {
+        // Allow delegate to modify the list of entities
+        // any way it wants. For instance delegate may filter 
+        // or sort the list (though it doesn't have to, and can simply
+        // pass through the original list). 
+        if (delegate != null) {
+            entities = delegate.willCleanData(this, entities);
+        }
 
-    // sort entities for insertion
-    List sorted = new ArrayList(entities);
-    destinationNode.getDependencySorter().sortDbEntities(sorted, false);
+        if (entities == null || entities.isEmpty()) {
+            return;
+        }
 
-    if (cleaningDestination)
-    {
-      // reverse insertion order for deletion
-      List entitiesInDeleteOrder = new ArrayList(sorted.size());
-      entitiesInDeleteOrder.addAll(sorted);
-      Collections.reverse(entitiesInDeleteOrder);
-      processDelete(entitiesInDeleteOrder);
-    }
+        // Create an observer for to get the iterated result
+        // instead of getting each table as a list
+        IteratedSelectObserver observer = new IteratedSelectObserver();
 
-    processInsert(sorted);
-  }
+        // Using QueryResult as observer for the data cleanup.
+        // This allows to collect query statistics and pass it to the delegate.
+        QueryResult insertObserver = new QueryResult();
 
-  /**
-   * Cleans up destination tables data.
-   */
-  protected void processDelete(List entities)
-  {
-    // Allow delegate to modify the list of entities
-    // any way it wants. For instance delegate may filter 
-    // or sort the list (though it doesn't have to, and can simply
-    // pass through the original list). 
-    if (delegate != null)
-    {
-      entities = delegate.willCleanData(this, entities);
-    }
-
-    if (entities == null || entities.isEmpty())
-    {
-      return;
-    }
-
-    // Using QueryResult as observer for the data cleanup.
-    // This allows to collect query statistics and pass it to the delegate.
-    QueryResult observer = new QueryResult();
-
-    // Delete data from entities one by one
-    Iterator it = entities.iterator();
-    while (it.hasNext())
-    {
-      DbEntity entity = (DbEntity) it.next();
-      DeleteQuery query = new DeleteQuery();
-
-      // using DbEntity as a query root is unusual but will still work with Cayenne
-      query.setRoot(entity);
-
-      // notify delegate that delete is about to happen
-      if (delegate != null)
-      {
-        delegate.willCleanData(this, entity, query);
-      }
-
-      // perform delete query
-      observer.clear();
-      destinationNode.performQuery(query, observer);
-
-      // notify delegate that delete just happened
-      if (delegate != null)
-      {
-        // observer will store query statistics
-        int count = observer.getFirstUpdateCount(query);
-        delegate.didCleanData(this, entity, count);
-      }
-    }
-  }
-
-  /**
-   * Reads source data from source, saving it to destination.
-   */
-  protected void processInsert(List entities) throws Exception
-  {
-    // Allow delegate to modify the list of entities
-    // any way it wants. For instance delegate may filter 
-    // or sort the list (though it doesn't have to, and can simply
-    // pass through the original list). 
-    if (delegate != null)
-    {
-      entities = delegate.willCleanData(this, entities);
-    }
-
-    if (entities == null || entities.isEmpty())
-    {
-      return;
-    }
-
-    // Create an observer for to get the iterated result
-    // instead of getting each table as a list
-    IteratedSelectObserver observer = new IteratedSelectObserver();
-
-    // Using QueryResult as observer for the data cleanup.
-    // This allows to collect query statistics and pass it to the delegate.
-    QueryResult insertObserver = new QueryResult();
-
-    // process ordered list of entities one by one
-    Iterator it = entities.iterator();
-    while (it.hasNext())
-    {
-      insertObserver.clear();
-
-      DbEntity entity = (DbEntity) it.next();
-
-      SelectQuery select = new SelectQuery();
-      select.setRoot(entity);
-      select.setFetchingDataRows(true);
-
-      sourceNode.performQuery(select, observer);
-      ResultIterator result = observer.getResultIterator();
-      InsertBatchQuery insert = new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
-
-      if (delegate != null)
-      {
-        delegate.willPortEntity(this, entity, select);
-      }
-
-      try
-      {
-        int count = 0;
-
-        // Split insertions into the same table into batches of 1000. 
-        // This will allow to process tables of arbitrary big size
-        // without running out of memory. 
-        int currentRow = 0;
-
-        while (result.hasNextRow())
-        {
-          if (currentRow > 0 && currentRow % INSERT_BATCH_SIZE == 0)
-          {
-            // end of the batch detected... commit and start a new insert query
-            destinationNode.performQuery(insert, insertObserver);
-            insert = new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
-            count += insertObserver.getFirstUpdateCount(insert);
+        // process ordered list of entities one by one
+        Iterator it = entities.iterator();
+        while (it.hasNext()) {
             insertObserver.clear();
-          }
 
-          currentRow++;
+            DbEntity entity = (DbEntity) it.next();
 
-          Map nextRow = result.nextDataRow();
-          insert.add(nextRow);
-        }
+            SelectQuery select = new SelectQuery();
+            select.setRoot(entity);
+            select.setFetchingDataRows(true);
 
-        // commit last batch if needed
-        if (insert.size() > 0)
-        {
-          destinationNode.performQuery(insert, insertObserver);
-          count += insertObserver.getFirstUpdateCount(insert);
-        }
+            sourceNode.performQuery(select, observer);
+            ResultIterator result = observer.getResultIterator();
+            InsertBatchQuery insert =
+                new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
 
-        if (delegate != null)
-        {
-          delegate.didPortEntity(this, entity, count);
+            if (delegate != null) {
+                delegate.willPortEntity(this, entity, select);
+            }
+
+            try {
+                int count = 0;
+
+                // Split insertions into the same table into batches of 1000. 
+                // This will allow to process tables of arbitrary big size
+                // without running out of memory. 
+                int currentRow = 0;
+
+                while (result.hasNextRow()) {
+                    if (currentRow > 0
+                        && currentRow % INSERT_BATCH_SIZE == 0) {
+                        // end of the batch detected... commit and start a new insert query
+                        destinationNode.performQuery(insert, insertObserver);
+                        insert =
+                            new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
+                        count += insertObserver.getFirstUpdateCount(insert);
+                        insertObserver.clear();
+                    }
+
+                    currentRow++;
+
+                    Map nextRow = result.nextDataRow();
+                    insert.add(nextRow);
+                }
+
+                // commit last batch if needed
+                if (insert.size() > 0) {
+                    destinationNode.performQuery(insert, insertObserver);
+                    count += insertObserver.getFirstUpdateCount(insert);
+                }
+
+                if (delegate != null) {
+                    delegate.didPortEntity(this, entity, count);
+                }
+            } finally {
+                try {
+                    // don't forget to close ResultIterator
+                    result.close();
+                } catch (CayenneException ex) {
+                }
+            }
         }
-      }
-      finally
-      {
-        try
-        {
-          // don't forget to close ResultIterator
-          result.close();
-        }
-        catch (CayenneException ex)
-        {
-        }
-      }
     }
-  }
 
-  public List getEntities()
-  {
-    return entities;
-  }
+    public List getEntities() {
+        return entities;
+    }
 
-  public DataNode getSourceNode()
-  {
-    return sourceNode;
-  }
+    public DataNode getSourceNode() {
+        return sourceNode;
+    }
 
-  public DataNode getDestinationNode()
-  {
-    return destinationNode;
-  }
+    public DataNode getDestinationNode() {
+        return destinationNode;
+    }
 
-  /**
-   * Sets the initial list of entities to process. This list can
-   * be later modified by the delegate.
-   */
-  public void setEntities(List entities)
-  {
-    this.entities = entities;
-  }
+    /**
+     * Sets the initial list of entities to process. This list can
+     * be later modified by the delegate.
+     */
+    public void setEntities(List entities) {
+        this.entities = entities;
+    }
 
-  /**
-   * Sets the DataNode serving as a source of the ported data.
-   */
-  public void setSourceNode(DataNode sourceNode)
-  {
-    this.sourceNode = sourceNode;
-  }
+    /**
+     * Sets the DataNode serving as a source of the ported data.
+     */
+    public void setSourceNode(DataNode sourceNode) {
+        this.sourceNode = sourceNode;
+    }
 
-  /**
-   * Sets the DataNode serving as a destination of the ported data.
-   */
-  public void setDestinationNode(DataNode destinationNode)
-  {
-    this.destinationNode = destinationNode;
-  }
+    /**
+     * Sets the DataNode serving as a destination of the ported data.
+     */
+    public void setDestinationNode(DataNode destinationNode) {
+        this.destinationNode = destinationNode;
+    }
 
-  public DataPortDelegate getDelegate()
-  {
-    return delegate;
-  }
+    public DataPortDelegate getDelegate() {
+        return delegate;
+    }
 
-  public void setDelegate(DataPortDelegate delegate)
-  {
-    this.delegate = delegate;
-  }
+    public void setDelegate(DataPortDelegate delegate) {
+        this.delegate = delegate;
+    }
 
-  public boolean isCleaningDestination()
-  {
-    return cleaningDestination;
-  }
+    public boolean isCleaningDestination() {
+        return cleaningDestination;
+    }
 
-  /**
-   * Defines whether DataPort should delete all data from destination
-   * tables before doing the port. 
-   */
-  public void setCleaningDestination(boolean cleaningDestination)
-  {
-    this.cleaningDestination = cleaningDestination;
-  }
+    /**
+     * Defines whether DataPort should delete all data from destination
+     * tables before doing the port. 
+     */
+    public void setCleaningDestination(boolean cleaningDestination) {
+        this.cleaningDestination = cleaningDestination;
+    }
 
 }
