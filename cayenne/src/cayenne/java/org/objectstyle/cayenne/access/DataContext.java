@@ -476,18 +476,15 @@ public class DataContext implements QueryEngine, Serializable {
      * of DataObjects coming from a different DataContext. Note that all objects
      * in the source list must be either in COMMITTED or in HOLLOW state.
      * 
-     * @since 1.1
+     * @since 1.0.3
      */
     public List localObjects(List objects) {
-        
         List localObjects = new ArrayList(objects.size());
-        Class objectClass = null;
-        ObjEntity entity = null;
-        
+
         Iterator it = objects.iterator();
         while (it.hasNext()) {
             DataObject object = (DataObject) it.next();
-            
+
             // sanity check
             if (object.getPersistenceState() != PersistenceState.COMMITTED
                 && object.getPersistenceState() != PersistenceState.HOLLOW) {
@@ -498,23 +495,12 @@ public class DataContext implements QueryEngine, Serializable {
                             object.getPersistenceState())
                         + "', ObjectId: "
                         + object.getObjectId());
-            }      
-              
-            DataObject localObject;
-
-            if (object.getDataContext() != this) {
-                Class currentClass = object.getObjectId().getObjClass();
-                if (entity == null || currentClass != objectClass) {
-                    entity = getEntityResolver().lookupObjEntity(currentClass);
-                    objectClass = currentClass;
-                }
-                
-                DataRow snapshot = getObjectStore().getSnapshot(object.getObjectId(), this);
-                localObject = objectFromDataRow(entity, snapshot, true);
-            } else {
-                localObject = object;
             }
 
+            DataObject localObject =
+                (object.getDataContext() != this)
+                    ? registeredObject(object.getObjectId())
+                    : object;
             localObjects.add(localObject);
         }
 

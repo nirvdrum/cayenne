@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Gallery;
@@ -67,15 +68,17 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataContextTst extends DataContextTestBase {
+    private static Logger logObj = Logger.getLogger(DataContextTst.class);
     
     public void testLocalObjects() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
 
-        DataContext altContext = createDataContext();
+        DataContext altContext = createAltContext();
 
         List altArtists = altContext.localObjects(artists);
         assertNotNull(altArtists);
@@ -101,7 +104,7 @@ public class DataContextTst extends DataContextTestBase {
         Artist a = (Artist)artists.get(0);
         a.setArtistName("new name");
 
-        DataContext altContext = createDataContext();
+        DataContext altContext = createAltContext();
         try {
             altContext.localObjects(Collections.singletonList(a));
             fail("Shouldn't allow transfers of modified objects.");
@@ -109,6 +112,47 @@ public class DataContextTst extends DataContextTestBase {
         catch(CayenneRuntimeException ex) {
             // expected
         }
+    }
+    
+    public void testLocalObjectsFaulting() throws Exception {
+        List artists = context.performQuery(new SelectQuery(Artist.class));
+        Artist a = (Artist) artists.get(0);
+
+        DataContext altContext = createAltContext();
+        List altArtists = altContext.localObjects(Collections.singletonList(a));
+        Artist altA = (Artist) altArtists.get(0);
+
+        assertEquals(PersistenceState.HOLLOW, altA.getPersistenceState());
+        assertEquals(a.getObjectId(), altA.getObjectId());
+        
+        DataRow snapshot = context.getObjectStore().getDataRowCache().getCachedSnapshot(a.getObjectId());
+        DataRow altSnapshot = altContext.getObjectStore().getDataRowCache().getCachedSnapshot(altA.getObjectId());
+        assertNotNull(altSnapshot);
+        assertSame(snapshot, altSnapshot);
+
+        // try to read a property and make sure it does not
+        // create a query, but rather uses the snapshot
+
+        DataContextDelegate delegate = new DataContextDelegate() {
+            public GenericSelectQuery willPerformSelect(
+                DataContext context,
+                GenericSelectQuery query) {
+                fail("Attempt to resolve object via query instead of snapshot");
+                return null;
+            }
+            public void snapshotChangedInDataRowStore(
+                DataObject object,
+                DataRow snapshotInStore) {
+            }
+        };
+        
+        altContext.setDelegate(delegate);
+        altA.getArtistName();
+    }
+    
+    private DataContext createAltContext() {
+        // can't use super.createdataContext(), since it would clean up the cache
+        return context.getParentDataDomain().createDataContext();
     }
 
     public void testCreatePermId1() throws Exception {
