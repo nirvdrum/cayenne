@@ -81,15 +81,9 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
     public static final String IN_PARAMETER = "IN";
     public static final String OUT_PARAMETER = "OUT";
     public static final String IN_OUT_PARAMETER = "INOUT";
-    public static final String VOID_PARAMETER = "VOID";
 
     public static final String[] PARAMETER_DIRECTION_NAMES =
-        new String[] {
-            "",
-            IN_PARAMETER,
-            OUT_PARAMETER,
-            IN_OUT_PARAMETER,
-            VOID_PARAMETER };
+        new String[] { "", IN_PARAMETER, OUT_PARAMETER, IN_OUT_PARAMETER };
 
     private static final int[] PARAMETER_INDEXES =
         new int[] {
@@ -208,9 +202,6 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
         else if (ProcedureParameterTableModel.IN_OUT_PARAMETER.equals(direction)) {
             parameter.setDirection(ProcedureParameter.IN_OUT_PARAMETER);
         }
-        else if (ProcedureParameterTableModel.VOID_PARAMETER.equals(direction)) {
-            parameter.setDirection(ProcedureParameter.VOID_PARAMETER);
-        }
         else {
             parameter.setDirection(-1);
         }
@@ -289,8 +280,6 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
                 return ProcedureParameterTableModel.OUT_PARAMETER;
             case ProcedureParameter.IN_OUT_PARAMETER :
                 return ProcedureParameterTableModel.IN_OUT_PARAMETER;
-            case ProcedureParameter.VOID_PARAMETER :
-                return ProcedureParameterTableModel.VOID_PARAMETER;
             default :
                 return "";
         }

@@ -67,11 +67,6 @@ public class ProcedureParameter extends MapObject {
     public static final int IN_PARAMETER = 1;
     public static final int OUT_PARAMETER = 2;
 
-    /** 
-     * Defines a stored procedure parameter with unknown direction.
-     */
-    public static final int VOID_PARAMETER = 4;
-
     protected int direction = -1;
 
     // The length of CHAR or VARCHAR or max num of digits for DECIMAL.
@@ -147,8 +142,7 @@ public class ProcedureParameter extends MapObject {
     public void setDirection(int direction) {
         if (direction != IN_PARAMETER
             && direction != OUT_PARAMETER
-            && direction != IN_OUT_PARAMETER
-            && direction != VOID_PARAMETER) {
+            && direction != IN_OUT_PARAMETER) {
             throw new IllegalArgumentException("Unknown parameter type: " + direction);
         }
 

@@ -96,7 +96,6 @@ public class ProcedureTranslator
     }
 
     private static NotInParam OUT_PARAM = new NotInParam("[OUT]");
-    private static NotInParam VOID_PARAM = new NotInParam("[VOID]");
 
     protected List callParams;
     protected List values;
@@ -225,9 +224,6 @@ public class ProcedureTranslator
 
             if (param.getDirection() == ProcedureParameter.OUT_PARAMETER) {
                 values.add(OUT_PARAM);
-            }
-            else if (param.getDirection() == ProcedureParameter.VOID_PARAMETER) {
-                values.add(VOID_PARAM);
             }
             else {
                 values.add(queryValues.get(param.getName()));
