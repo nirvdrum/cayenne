@@ -1084,6 +1084,9 @@ public class DataContext implements QueryEngine, Serializable {
                     + value);
         }
 
+        // initialized new relationship datasource
+        this.relationshipDataSource = new RelationshipDataSource(this);
+
         // CayenneDataObjects have a transient datacontext
         // because at deserialize time the datacontext may need to be different
         // than the one at serialize time (for programmer defined reasons).
@@ -1100,9 +1103,6 @@ public class DataContext implements QueryEngine, Serializable {
                 obj.setDataContext(this);
             }
         }
-
-        // initialized new snapshot manager
-        this.relationshipDataSource = new RelationshipDataSource(this);
     }
 
     public EntityResolver getEntityResolver() {

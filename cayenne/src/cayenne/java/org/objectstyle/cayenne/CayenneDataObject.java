@@ -509,11 +509,12 @@ public class CayenneDataObject implements DataObject {
         out.writeInt(persistenceState);
 
         switch (persistenceState) {
-            //New, modified or transient - write the whole shebang
-            //The other states (committed, hollow, deleted) all need just ObjectId
+            //New, modified or transient or deleted - write the whole shebang
+            //The other states (committed, hollow) all need just ObjectId
             case PersistenceState.TRANSIENT :
             case PersistenceState.NEW :
             case PersistenceState.MODIFIED :
+			case PersistenceState.DELETED :
                 out.writeObject(props);
                 break;
         }
@@ -529,11 +530,11 @@ public class CayenneDataObject implements DataObject {
             case PersistenceState.TRANSIENT :
             case PersistenceState.NEW :
             case PersistenceState.MODIFIED :
+			case PersistenceState.DELETED :
                 props = (Map) in.readObject();
                 break;
             case PersistenceState.COMMITTED :
             case PersistenceState.HOLLOW :
-            case PersistenceState.DELETED :
                 this.persistenceState = PersistenceState.HOLLOW;
                 //props will be populated when required (readProperty called)
                 props = new HashMap();
@@ -541,7 +542,8 @@ public class CayenneDataObject implements DataObject {
         }
 
         this.objectId = (ObjectId) in.readObject();
-        // dataContext will be set *IFF* the datacontext it came from is also
-        // deserialized.  Setting of datacontext is handled by the datacontext itself
+        
+        // DataContext will be set *IF* the DataContext it came from is also
+        // deserialized.  Setting of DataContext is handled by the DataContext itself
     }
 }

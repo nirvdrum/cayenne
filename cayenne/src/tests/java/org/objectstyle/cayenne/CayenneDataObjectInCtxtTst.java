@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     protected DataContext ctxt;
 
-    public void setUp() throws java.lang.Exception {
+    public void setUp() throws Exception {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();
 

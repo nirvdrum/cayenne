@@ -79,7 +79,7 @@ public class ToManyList implements List, Serializable {
     private ObjectId srcObjectId;
     private String relName;
     private List objectList;
-    private ToManyListDataSource listDataSource;
+    private transient ToManyListDataSource listDataSource;
     
     /** Creates ToManyList. */
     public ToManyList(ToManyListDataSource listDataSource, ObjectId srcObjectId, String relName) {
