@@ -78,6 +78,14 @@
         <mkdir dir="${dist}/doc"/>
         <mkdir dir="${dist}/doc/grammar"/>
         <mkdir dir="${dist}/doc/dtd"/>
+        
+        <!-- Assemble project.xml -->
+        <loadfile property="project.toc" srcFile="xdocs/stylesheets/toc.xml"/>
+        <copy tofile="build/project.xml" file="xdocs/stylesheets/project.xml">
+        	<filterset>
+				<filter token="TOC" value="${project.toc}"/>
+			</filterset>
+        </copy>
     </target>    
 
 
@@ -115,7 +123,7 @@
         <!-- Build site -->
         <anakia basedir="xdocs" destdir="${dist}/doc"
              extension=".html" style="cayenne.vsl"
-             projectFile="stylesheets/project.xml"
+             projectFile="../build/project.xml"
              excludes="**/stylesheets/**"
              includes="**/*.xml"
              lastModifiedCheck="true"
