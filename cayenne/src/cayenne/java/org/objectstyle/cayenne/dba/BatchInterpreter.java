@@ -61,6 +61,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -77,61 +78,64 @@ import org.objectstyle.cayenne.query.BatchQuery;
  */
 
 public class BatchInterpreter {
-  private DbAdapter adapter;
-  private BatchQueryBuilder queryBuilder;
+    private static Logger logObj = Logger.getLogger(BatchInterpreter.class);
 
-  public void setAdapter(DbAdapter adapter) {
-    this.adapter = adapter;
-  }
-  public DbAdapter getAdapter() {
-    return adapter;
-  }
-  public BatchQueryBuilder getQueryBuilder() {
-    return queryBuilder;
-  }
-  public void setQueryBuilder(BatchQueryBuilder queryBuilder) {
-    this.queryBuilder = queryBuilder;
-  }
+    private DbAdapter adapter;
+    private BatchQueryBuilder queryBuilder;
 
-  public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
-    List dbAttributes = batch.getDbAttributes();
-    int attributeCount = dbAttributes.size();
-    int[] attributeTypes = new int[attributeCount];
-    int[] attributeScales = new int[attributeCount];
-    for (int i = 0; i < attributeCount; i++) {
-      DbAttribute attribute = (DbAttribute)dbAttributes.get(i);
-      attributeTypes[i] = attribute.getType();
-      attributeScales[i] = attribute.getPrecision();
+    public void setAdapter(DbAdapter adapter) {
+        this.adapter = adapter;
     }
-    String query = queryBuilder.query(batch);
-    PreparedStatement st = null;
-    ExtendedTypeMap typeConverter = adapter.getTypeConverter();
-    try {
-      st = connection.prepareStatement(query);
-      batch.reset();
-      while (batch.next()) {
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
+    public BatchQueryBuilder getQueryBuilder() {
+        return queryBuilder;
+    }
+    public void setQueryBuilder(BatchQueryBuilder queryBuilder) {
+        this.queryBuilder = queryBuilder;
+    }
+
+    public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
+        List dbAttributes = batch.getDbAttributes();
+        int attributeCount = dbAttributes.size();
+        int[] attributeTypes = new int[attributeCount];
+        int[] attributeScales = new int[attributeCount];
         for (int i = 0; i < attributeCount; i++) {
-          Object value = batch.getObject(i);
-          int type = attributeTypes[i];
-          if (value == null) st.setNull(i + 1, type);
-          else {
-            ExtendedType map = typeConverter.getRegisteredType(value.getClass().getName());
-            Object jdbcValue = (map == null) ? value : map.toJdbcObject(value, type);
-            st.setObject(i + 1, jdbcValue, type, attributeScales[i]);
-          }
+            DbAttribute attribute = (DbAttribute)dbAttributes.get(i);
+            attributeTypes[i] = attribute.getType();
+            attributeScales[i] = attribute.getPrecision();
         }
-        st.addBatch();
-      }
-      return st.executeBatch();
-    } catch (SQLException e) {
-      throw e;
-    } catch (CayenneException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new CayenneException(e);
-    } finally {
-      try {if (st != null) st.close();}
-      catch (Exception e) {}
+        String query = queryBuilder.query(batch);
+        PreparedStatement st = null;
+        ExtendedTypeMap typeConverter = adapter.getTypeConverter();
+        try {
+            st = connection.prepareStatement(query);
+            batch.reset();
+            while (batch.next()) {
+                for (int i = 0; i < attributeCount; i++) {
+                    Object value = batch.getObject(i);
+                    int type = attributeTypes[i];
+                    if (value == null) st.setNull(i + 1, type);
+                    else {
+                        ExtendedType map = typeConverter.getRegisteredType(value.getClass().getName());
+                        Object jdbcValue = (map == null) ? value : map.toJdbcObject(value, type);
+                        st.setObject(i + 1, jdbcValue, type, attributeScales[i]);
+                    }
+                }
+                st.addBatch();
+            }
+            return st.executeBatch();
+        } catch (SQLException e) {
+            throw e;
+        } catch (CayenneException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CayenneException(e);
+        } finally {
+            try {if (st != null) st.close();}
+            catch (Exception e) {}
+        }
     }
-  }
 }
+

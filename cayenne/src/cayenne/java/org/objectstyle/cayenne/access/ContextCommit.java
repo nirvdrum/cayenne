@@ -71,6 +71,7 @@ import java.util.TreeSet;
 import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.collections.SequencedHashMap;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -104,6 +105,8 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  */
 
 class ContextCommit {
+    private static Logger logObj = Logger.getLogger(ContextCommit.class);
+
     private DataContext context;
     private Level logLevel;
     private Map newObjectsByObjEntity;
@@ -263,6 +266,9 @@ class ContextCommit {
                 objects = sorter.sort(objects, entity);
             InsertBatchQuery batch =
                 new InsertBatchQuery(entity.getDbEntity(), objects.size());
+            if (logObj.isDebugEnabled())
+                logObj.debug("Creating InsertBatchQuery for DbEntity " + entity.getDbEntity().getName());
+
             for (Iterator j = objects.iterator(); j.hasNext();) {
                 DataObject o = (DataObject) j.next();
                 batch.add(context.takeObjectSnapshot(o));
@@ -292,6 +298,8 @@ class ContextCommit {
                 objects = sorter.sort(objects, entity);
             DeleteBatchQuery batch =
                 new DeleteBatchQuery(entity.getDbEntity(), objects.size());
+            if (logObj.isDebugEnabled())
+                logObj.debug("Creating DeleteBatchQuery for DbEntity " + entity.getDbEntity().getName());
             for (ListIterator j = objects.listIterator(objects.size());
                 j.hasPrevious();
                 ) {
@@ -334,6 +342,8 @@ class ContextCommit {
                             entity.getDbEntity(),
                             new ArrayList(snapshot.keySet()),
                             10);
+                    if (logObj.isDebugEnabled())
+                        logObj.debug("Creating UpdateBatchQuery for DbEntity " + entity.getDbEntity().getName());
                     batches.put(hashCode, batch);
                 }
                 Map idSnapshot = o.getObjectId().getIdSnapshot();
@@ -503,6 +513,8 @@ class ContextCommit {
 			InsertBatchQuery relationInsertQuery = (InsertBatchQuery)batchesByDbEntity.get(flattenedEntity);
 			if (relationInsertQuery == null) {
 				relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
+                if (logObj.isDebugEnabled())
+                    logObj.debug("Creating InsertBatchQuery for DbEntity " + flattenedEntity.getName());
 				batchesByDbEntity.put(flattenedEntity, relationInsertQuery);
 			}
 			DataObject destination = info.getDestination();
@@ -539,6 +551,8 @@ class ContextCommit {
 			DeleteBatchQuery relationDeleteQuery = (DeleteBatchQuery)batchesByDbEntity.get(flattenedEntity);
 			if (relationDeleteQuery == null) {
 				relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
+                if (logObj.isDebugEnabled())
+                    logObj.debug("Creating DeleteBatchQuery for DbEntity " + flattenedEntity.getName());
 				batchesByDbEntity.put(flattenedEntity, relationDeleteQuery);
 			}
 

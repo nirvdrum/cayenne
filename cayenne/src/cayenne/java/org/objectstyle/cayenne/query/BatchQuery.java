@@ -74,6 +74,7 @@ public abstract class BatchQuery extends AbstractQuery {
 
   public BatchQuery(DbEntity dbEntity) {
     metadata = dbEntity;
+    setRoot(metadata);
   }
 
   public DbEntity getMetadata() {
