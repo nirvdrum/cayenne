@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.conf.FileConfiguration;
 public class ProjectConfiguration extends FileConfiguration {
 
 	/**
-	 * @HH todo
+	 * @see FileConfiguration(File)
 	 */
     public ProjectConfiguration(File projectFile) {
     	super(projectFile);
@@ -96,7 +96,7 @@ public class ProjectConfiguration extends FileConfiguration {
     /**
      * @see org.objectstyle.cayenne.conf.Configuration#getOverrideFactory()
      */
-    public DataSourceFactory getOverrideFactory() {
+    public DataSourceFactory getDataSourceFactory() {
         try {
             return new ProjectDataSourceFactory(this.getProjectDirectory());
         } catch (Exception e) {
