@@ -62,12 +62,10 @@ import java.sql.SQLException;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * A descriptor of a ResultSet column.
@@ -82,7 +80,7 @@ public class ColumnDescriptor {
 
     // identifies column in result set
     protected String name;
-    protected String namePrefix;
+    protected String qualifiedColumnName;
 
     // identifies column in a DataRow
     protected String label;
@@ -102,12 +100,22 @@ public class ColumnDescriptor {
     }
 
     /**
+     * Creates a ColumnDescriptor from Cayenne ObjAttribute and DbAttribute.
+     * 
+     * @deprecated since 1.2 use constructor with column alias parameter.
+     */
+    public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
+        this(objAttribute, dbAttribute, null);
+    }
+
+    /**
      * Creates a ColumnDescriptor from Cayenne DbAttribute.
      * 
      * @since 1.2
      */
-    public ColumnDescriptor(DbAttribute attribute) {
+    public ColumnDescriptor(DbAttribute attribute, String columnAlias) {
         this.name = attribute.getName();
+        this.qualifiedColumnName = attribute.getAliasedName(columnAlias);
         this.label = name;
         this.jdbcType = attribute.getType();
         this.primaryKey = attribute.isPrimaryKey();
@@ -120,10 +128,11 @@ public class ColumnDescriptor {
     }
 
     /**
-     * Creates a ColumnDescriptor from Cayenne ObjAttribute and DbAttribute.
+     * @since 1.2
      */
-    public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
-        this(dbAttribute);
+    public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute,
+            String columnAlias) {
+        this(dbAttribute, columnAlias);
         this.label = objAttribute.getDbAttributePath();
         this.javaClass = objAttribute.getType();
     }
@@ -135,6 +144,7 @@ public class ColumnDescriptor {
      */
     public ColumnDescriptor(ProcedureParameter parameter) {
         this.name = parameter.getName();
+        this.qualifiedColumnName = name;
         this.label = name;
         this.jdbcType = parameter.getType();
         this.javaClass = getDefaultJavaClass(parameter.getMaxLength(), parameter
@@ -161,6 +171,7 @@ public class ColumnDescriptor {
         }
 
         this.name = name;
+        this.qualifiedColumnName = name;
         this.label = name;
         this.jdbcType = metaData.getColumnType(position);
         this.javaClass = getDefaultJavaClass(metaData.getColumnDisplaySize(position),
@@ -179,9 +190,13 @@ public class ColumnDescriptor {
         }
 
         ColumnDescriptor rhs = (ColumnDescriptor) o;
-        return new EqualsBuilder().append(name, rhs.name).append(namePrefix,
-                rhs.namePrefix).append(procedureName, rhs.procedureName).append(label,
-                rhs.label).append(tableName, rhs.tableName).isEquals();
+        return new EqualsBuilder()
+                .append(name, rhs.name)
+                .append(qualifiedColumnName, rhs.qualifiedColumnName)
+                .append(procedureName, rhs.procedureName)
+                .append(label, rhs.label)
+                .append(tableName, rhs.tableName)
+                .isEquals();
     }
 
     /**
@@ -190,7 +205,7 @@ public class ColumnDescriptor {
     public int hashCode() {
         return new HashCodeBuilder(23, 43)
                 .append(name)
-                .append(namePrefix)
+                .append(qualifiedColumnName)
                 .append(procedureName)
                 .append(tableName)
                 .append(label)
@@ -202,7 +217,7 @@ public class ColumnDescriptor {
      */
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this);
-        builder.append("namePrefix", getNamePrefix());
+        builder.append("namePrefix", getQualifiedColumnName());
         builder.append("name", getName());
         builder.append("label", getLabel());
         builder.append("tableName", getTableName());
@@ -222,24 +237,12 @@ public class ColumnDescriptor {
     }
 
     /**
-     * Builds column name combining the prefix and name. If no name exists, throws a
-     * CayenneRuntimeException.
+     * Returns "qualifiedColumnName" property.
      * 
      * @since 1.2
      */
     public String getQualifiedColumnName() {
-        if (Util.isEmptyString(name)) {
-            throw new CayenneRuntimeException(
-                    "Can't build column name - 'name'must be set.");
-        }
-
-        StringBuffer buffer = new StringBuffer();
-        if (!Util.isEmptyString(namePrefix)) {
-            buffer.append(namePrefix).append('.');
-        }
-
-        buffer.append(name);
-        return buffer.toString();
+        return qualifiedColumnName != null ? qualifiedColumnName : name;
     }
 
     public int getJdbcType() {
@@ -316,19 +319,10 @@ public class ColumnDescriptor {
     }
 
     /**
-     * Returns prefix used to name the column in a query. Such as "t0" or "tablex", etc.
-     * 
      * @since 1.2
      */
-    public String getNamePrefix() {
-        return namePrefix;
-    }
-
-    /**
-     * @since 1.2
-     */
-    public void setNamePrefix(String namePrefix) {
-        this.namePrefix = namePrefix;
+    public void setQualifiedColumnName(String namePrefix) {
+        this.qualifiedColumnName = namePrefix;
     }
 
     /**

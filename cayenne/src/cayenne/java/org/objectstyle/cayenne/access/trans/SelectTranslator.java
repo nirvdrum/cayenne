@@ -537,7 +537,7 @@ public class SelectTranslator extends QueryAssembler {
                         + customAttributes.get(i));
             }
 
-            columns.add(new ColumnDescriptor(attribute));
+            columns.add(new ColumnDescriptor(attribute, null));
         }
 
         return columns;
@@ -551,9 +551,11 @@ public class SelectTranslator extends QueryAssembler {
             Expression dbPath) {
 
         if (skipSet.add(attribute)) {
+            String alias = aliasForTable((DbEntity) attribute.getEntity());
             ColumnDescriptor column = (objAttribute != null) ? new ColumnDescriptor(
                     objAttribute,
-                    attribute) : new ColumnDescriptor(attribute);
+                    attribute,
+                    alias) : new ColumnDescriptor(attribute, alias);
 
             // used for joint prefetches
             if (dbPath != null) {
@@ -561,7 +563,6 @@ public class SelectTranslator extends QueryAssembler {
                 column.setLabel(path + '.' + attribute.getName());
             }
 
-            column.setNamePrefix(aliasForTable((DbEntity) attribute.getEntity()));
             columns.add(column);
         }
     }

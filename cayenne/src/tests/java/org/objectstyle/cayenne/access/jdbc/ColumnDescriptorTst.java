@@ -80,23 +80,6 @@ public class ColumnDescriptorTst extends TestCase {
         assertEquals("abc", column.getLabel());
     }
 
-    public void testQualifiedColumnName() {
-        ColumnDescriptor column = new ColumnDescriptor();
-        try {
-            column.getQualifiedColumnName();
-            fail("column has no name.. should have thrown an exception");
-        }
-        catch (CayenneRuntimeException ex) {
-            // expected
-        }
-
-        column.setName("name");
-        assertEquals("name", column.getQualifiedColumnName());
-
-        column.setNamePrefix("prefix");
-        assertEquals("prefix.name", column.getQualifiedColumnName());
-    }
-
     public void testDbAttributeConstructor() {
         DbEntity entity = new DbEntity("entity");
         DbAttribute a = new DbAttribute();
@@ -106,9 +89,9 @@ public class ColumnDescriptorTst extends TestCase {
 
         entity.addAttribute(a);
 
-        ColumnDescriptor column = new ColumnDescriptor(a);
+        ColumnDescriptor column = new ColumnDescriptor(a, null);
         assertEquals("name", column.getName());
-        assertNull(column.getNamePrefix());
+        assertEquals("name", column.getQualifiedColumnName());
         assertEquals("entity", column.getTableName());
         assertEquals(String.class.getName(), column.getJavaClass());
         assertEquals("name", column.getLabel());
@@ -118,20 +101,20 @@ public class ColumnDescriptorTst extends TestCase {
     public void testEquals() {
         ColumnDescriptor column1 = new ColumnDescriptor();
         column1.setName("n1");
-        column1.setNamePrefix("np1");
+        column1.setQualifiedColumnName("np1");
         column1.setTableName("t1");
         // type should be ignored in the comparison
         column1.setJdbcType(Types.VARCHAR);
 
         ColumnDescriptor column2 = new ColumnDescriptor();
         column2.setName("n1");
-        column2.setNamePrefix("np1");
+        column2.setQualifiedColumnName("np1");
         column2.setTableName("t1");
         column2.setJdbcType(Types.BOOLEAN);
 
         ColumnDescriptor column3 = new ColumnDescriptor();
         column3.setName("n1");
-        column3.setNamePrefix("np3");
+        column3.setQualifiedColumnName("np3");
         column3.setTableName("t1");
 
         assertEquals(column1, column2);
@@ -142,20 +125,20 @@ public class ColumnDescriptorTst extends TestCase {
     public void testHashCode() {
         ColumnDescriptor column1 = new ColumnDescriptor();
         column1.setName("n1");
-        column1.setNamePrefix("np1");
+        column1.setQualifiedColumnName("np1");
         column1.setTableName("t1");
         // type should be ignored in the comparison
         column1.setJdbcType(Types.VARCHAR);
 
         ColumnDescriptor column2 = new ColumnDescriptor();
         column2.setName("n1");
-        column2.setNamePrefix("np1");
+        column2.setQualifiedColumnName("np1");
         column2.setTableName("t1");
         column2.setJdbcType(Types.BOOLEAN);
 
         ColumnDescriptor column3 = new ColumnDescriptor();
         column3.setName("n1");
-        column3.setNamePrefix("np3");
+        column3.setQualifiedColumnName("np3");
         column3.setTableName("t1");
 
         assertEquals(column1.hashCode(), column2.hashCode());
