@@ -23,21 +23,20 @@
         </p>
         
         <p>If you want to become a contributor, first you should probably subscribe to 
-        <a href="http://objectstyle.org/developer/mailinglists.html">Cayenne Developer Mailing List.</a>
-        to see what issues are discussed and to communicate with the project team.</p>
-        
-        <p>Normally code and documentation contributions are made via patches sent
-        to developer list. 
+        <a href="http://objectstyle.org/cayenne/lists.html">Cayenne Developer Mailing List.</a>
+        to see what issues are discussed and to communicate with the project team.
+        Normally code and documentation contributions are made via patches sent
+        to developer list. If your contributions are significant and you are willing 
+        to join the core team, current committers can vote to give you CVS write access 
+        and other committer rights.
         A good discussion on how to create and submit code patches is located at 
         <a href="http://jakarta.apache.org/site/source.html">Jakarta Apache</a> site.
         You can use all these hints as related to Cayenne.
         </p>
-        </section>
- 
-        <!-- Tasks section -->
-        <section name="Tasks">
-            <p>For the latest list of tasks visit our 
-            <a href="http://sourceforge.net/pm/?group_id=48132">task tracker</a>.</p>       
+        
+        <p>For the latest list of tasks that Cayenne team is working on visit our 
+        <a href="http://sourceforge.net/pm/?group_id=48132">task tracker</a>.
+        </p> 
         </section>
     </body>
 </document>

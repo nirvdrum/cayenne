@@ -13,20 +13,14 @@
             <panel name="Note:">Source distribution is "binary + source", and consists 
             of a full binary package and an extra "src" subdirectory.</panel>
             
-            <p>Depending on what kind of user you are, there are the folowing types of 
-            download packages (can be both source and binary).
+            <p>The following types of downloads are available (can be both source and binary).
             
             <ul>
-                <li>Release Builds</li>
-                <li>Milestone Builds</li>
+                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132">Release Builds</a></li>
                 <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a> 
                 (note that usually only about 7 latest nightly builds are available, older ones are 
                 automatically deleted from the archive)</li>
             </ul>            
-            </p>
-
-            <p>Release download site is located at 
-            <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">download site</a>.
             </p>
         </section>
     </body>

@@ -9,15 +9,20 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><i>March 18:</i> <strong>Cayenne CVS is migrated to SourceForge.net.</strong> 
-        Be aware that the old CVS server is no longer accessible. Go to
-        <a href="http://objectstyle.org/cayenne/developer.html">this page</a> for the new CVS instructions.</p>
-        
-        <p><i>March 16:</i> <strong>Cayenne at SourceForge and Freashmeat.</strong> Cayenne is still hosted 
+        <p><strong><font size="+2"><i>June 16:</i> <font color="red">Cayenne Alpha1 Is Out.</font></font></strong> 
+        Download now the first "official" Cayenne release. Source and binary packages
+        can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
+        Release notes are located <a href="RELEASE-NOTES-1.0a1.txt">here</a>.
+        </p>
+              
+        <p><i>March 16:</i> <strong>Cayenne at SourceForge and Freashmeat.</strong> 
+        Cayenne is still hosted 
         at objectstyle.org, but we also registered the project at 
-        <a href="http://sourceforge.net/projects/cayenne/">SourceForge.net</a>. Bug tracking, CVS and downloads 
+        <a href="http://sourceforge.net/projects/cayenne/">SourceForge.net</a>. 
+        Bug tracking, CVS and downloads 
         will be performed from SourceForge. Also Cayenne is registered at
-        <a href="http://freshmeat.net/projects/cayenne/">Freshmeat.net</a> to make release announcements.</p>
+        <a href="http://freshmeat.net/projects/cayenne/">Freshmeat.net</a> to make 
+        release announcements.</p>
         </section>
         
         <!-- Welcome section -->
@@ -43,17 +48,10 @@
         
         <!-- Status section -->
         <section name="Status and History">
-        <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in Atlanta, USA. 
-        Working prototype was ready
-        in July. Current version is based on that prototype and is under active development 
-        since December 2001. At this moment Cayenne is already a usable tool. Certain things need to
-        be finished and cleaned up to make ALPHA release. But you are welcome to grab a 
-        <a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">nightly 
-        build</a> or a milestone release of Cayenne today.</p>
-        
-        <p>For the latest status update you can visit our 
-        <a href="status.html">status page</a>.
-        </p>
+        <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in 
+        Atlanta, USA. Current version is based on that original idea and is under active 
+        development since December 2001. Current Cayenne version is 1.0a1 (alpha).
+        It can be downloaded from <a href="download.html">here</a>.</p>
         </section>
     </body>
 </document>

@@ -289,6 +289,10 @@
             <fileset dir="doc">
                <include name="LICENSE*"/>
             </fileset>
+            
+            <fileset dir="doc/release-notes">
+               <include name="RELEASE-NOTES-*.txt"/>
+            </fileset>
         </copy>
 
         <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
@@ -375,7 +379,11 @@
     <!-- ========================================== -->
     <!-- Release related targets.                   -->
     <!-- ========================================== -->   
-    <target name="release" depends="prepare,release-notes,dist-src">
+    <target name="release-src" depends="prepare,release-notes,dist-src">
+    	<echo>Created ${project.version} release.</echo> 
+    </target>
+    
+    <target name="release-bin" depends="prepare,release-notes,dist-bin">
     	<echo>Created ${project.version} release.</echo> 
     </target>
     
