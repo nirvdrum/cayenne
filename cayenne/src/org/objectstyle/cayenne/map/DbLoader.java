@@ -56,11 +56,13 @@ package org.objectstyle.cayenne.map;
  */
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
 import org.objectstyle.util.NameConverter;
 
 /** Utility class that does reverse engineering of the database. 
@@ -304,17 +306,21 @@ public class DbLoader {
 
                 String attName = NameConverter.undescoredToJava(dbAtt.getName(), false);
                 String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
-                if (type == null || type.trim().length() == 0) {
-                	System.out.println("DbLoader::loadObjEntities(), Entity " 
+                
+                if(logObj.isLoggable(Level.FINER)) {
+                    if (type == null || type.trim().length() == 0) {
+                	    logObj.finer("DbLoader::loadObjEntities(), Entity " 
                 				+ dbEntity.getName() + ", attribute " + attName 
                 				+ " db type " + dbAtt.getType());
-                }
+                    }
                 
-                if (dbAtt.getType() == Types.CLOB) {
-                	System.out.println("DbLoader::loadObjEntities(), Entity " 
+                    if (dbAtt.getType() == Types.CLOB) {
+                	    logObj.finer("DbLoader::loadObjEntities(), Entity " 
                 				+ dbEntity.getName() + ", attribute " + attName 
                 				+ " type " + type);
+                    }
                 }
+                
                 ObjAttribute objAtt = new ObjAttribute(attName, type, objEntity);
                 objAtt.setDbAttribute(dbAtt);
                 objEntity.addAttribute(objAtt);
