@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -149,13 +150,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * Updates underlying SnapshotCache. If <code>refresh</code> is true,
      * all snapshots in <code>snapshots</code> will be loaded into SnapshotCache,
      * regardless of the existing cache state. If <code>refresh</code> is false,
-     * only missing snapshots are loaded.
+     * only missing snapshots are loaded. This method is normally called by Cayenne
+     * internally to synchronized snapshots of recently fetched objects.
+     * 
+     * @param objects a list of object whose snapshots need to be updated in the SnapshotCache
+     * @param snapshots a list of snapshots. Must be the same size and use the same order as 
+     * <code>objects</code> list.
+     * @param refresh controls whether existing cached snapshots should be replaced with
+     * the new ones.
      */
     public synchronized void snapshotsUpdatedForObjects(
         List objects,
         List snapshots,
         boolean refresh) {
-        	
+
         // sanity check
         if (objects.size() != snapshots.size()) {
             throw new IllegalArgumentException(
@@ -169,7 +177,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         int size = objects.size();
         for (int i = 0; i < size; i++) {
             DataObject object = (DataObject) objects.get(i);
-     
+
             // add snapshots if refresh is forced, or if a snapshot is missing
             if (refresh || getSnapshot(object.getObjectId()) == null) {
                 addSnapshot(object.getObjectId(), (Map) snapshots.get(i));
@@ -177,8 +185,67 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
     }
 
+    /**
+     * Processes internal objects after the parent DataContext was committed.
+     * Changes object persistence state and handles snapshot updates.
+     */
     public synchronized void objectsCommitted() {
+        Iterator objects = this.getObjectIterator();
+        List modifiedIds = null;
 
+        while (objects.hasNext()) {
+            DataObject object = (DataObject) objects.next();
+            int state = object.getPersistenceState();
+            ObjectId id = object.getObjectId();
+
+            if (id.getReplacementId() != null) {
+                if (modifiedIds == null) {
+                    modifiedIds = new ArrayList();
+                }
+
+                modifiedIds.add(id);
+
+                // postpone processing of objects tha require an id change
+                continue;
+            }
+
+            // inserted will all have replacement ids, so do not check for inserts here
+            // ...
+
+            // deleted
+            if (state == PersistenceState.DELETED) {
+				objects.remove();
+				removeSnapshot(id);
+                object.setDataContext(null);
+                object.setPersistenceState(PersistenceState.TRANSIENT);
+            }
+            // modified
+            else if (state == PersistenceState.MODIFIED) {
+                addSnapshot(id, object.getDataContext().takeObjectSnapshot(object));
+                object.setPersistenceState(PersistenceState.COMMITTED);
+            }
+        }
+
+        // process id replacements
+        if (modifiedIds != null) {
+            Iterator ids = modifiedIds.iterator();
+            while (ids.hasNext()) {
+                ObjectId id = (ObjectId) ids.next();
+                DataObject object = getObject(id);
+
+                if (object == null) {
+                    throw new CayenneRuntimeException("No object for id: " + id);
+                }
+
+                object.setObjectId(id.getReplacementId());
+                object.setPersistenceState(PersistenceState.COMMITTED);
+                addObject(object);
+                addSnapshot(
+                    id.getReplacementId(),
+                    object.getDataContext().takeObjectSnapshot(object));
+                removeObject(id);
+            }
+        }
     }
 
     /**
@@ -218,6 +285,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
      */
     public synchronized void startTrackingNewObjects() {
+        // TODO: something like shared DataContext or nested DataContext
+        // would hopefully obsolete this feature...
         newObjectMap = new HashMap();
     }
 
@@ -232,6 +301,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
      */
     public synchronized void unregisterNewObjects() {
+        // TODO: something like shared DataContext or nested DataContext
+        // would hopefully obsolete this feature...
 
         Iterator it = newObjectMap.values().iterator();
 
@@ -284,26 +355,22 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * Returns an iterator over the registered objects.
-     * 
-     * <p><i>Caller should synchronize on the instance of ObjectStore
-     * while iterating over the list.</i></p>
      */
-    public Iterator getObjectIterator() {
+    public synchronized Iterator getObjectIterator() {
         return objectMap.values().iterator();
     }
 
     /**
      * Returns <code>true</code> if there are any modified,
-     * deleted or new objects registered with this DataContext,
+     * deleted or new objects registered with this ObjectStore,
      * <code>false</code> otherwise.
-     * 
-     * <p><i>
-     * This implementation is rather naive and would scan all registered
-     * objects. A better implementation based on catching context events
-     * may be needed.</i></p>
      */
     public synchronized boolean hasChanges() {
-        Iterator it = objectMap.values().iterator();
+
+        // TODO: This implementation is rather naive and would scan all registered
+        // objects. Any better ideas? Catching events or something....
+
+        Iterator it = getObjectIterator();
         while (it.hasNext()) {
             DataObject dobj = (DataObject) it.next();
             int state = dobj.getPersistenceState();

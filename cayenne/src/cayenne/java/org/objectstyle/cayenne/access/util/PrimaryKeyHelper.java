@@ -97,248 +97,235 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  */
 
 public class PrimaryKeyHelper {
-	private Map indexedDbEntities;
-	private QueryEngine queryEngine;
-	private DbEntityComparator dbEntityComparator;
-	private ObjEntityComparator objEntityComparator;
+    private Map indexedDbEntities;
+    private QueryEngine queryEngine;
+    private DbEntityComparator dbEntityComparator;
+    private ObjEntityComparator objEntityComparator;
 
-	public PrimaryKeyHelper(QueryEngine queryEngine) {
-		this.queryEngine = queryEngine;
-		init();
-		dbEntityComparator = new DbEntityComparator();
-		objEntityComparator = new ObjEntityComparator();
-	}
+    public PrimaryKeyHelper(QueryEngine queryEngine) {
+        this.queryEngine = queryEngine;
+        init();
+        dbEntityComparator = new DbEntityComparator();
+        objEntityComparator = new ObjEntityComparator();
+    }
 
-	public void reset() {
-		init();
-	}
+    public void reset() {
+        init();
+    }
 
-	public Comparator getDbEntityComparator() {
-		return dbEntityComparator;
-	}
+    public Comparator getDbEntityComparator() {
+        return dbEntityComparator;
+    }
 
-	public Comparator getObjEntityComparator() {
-		return objEntityComparator;
-	}
+    public Comparator getObjEntityComparator() {
+        return objEntityComparator;
+    }
 
-	public void createPermIdsForObjEntity(
-		ObjEntity objEntity,
-		List dataObjects)
-		throws CayenneException {
-			
-		if (dataObjects.isEmpty()) {
-			return;
-		}
+    public void createPermIdsForObjEntity(ObjEntity objEntity, List dataObjects)
+        throws CayenneException {
 
-		TempObjectId tempId =
-			(TempObjectId) ((DataObject) dataObjects.get(0)).getObjectId();
+        if (dataObjects.isEmpty()) {
+            return;
+        }
 
-		DbEntity dbEntity = objEntity.getDbEntity();
-		DataNode owner = queryEngine.dataNodeForObjEntity(objEntity);
-		if (owner == null) {
-			throw new CayenneRuntimeException("No suitable DataNode to handle primary key generation.");
-		}
-		  
-		PkGenerator pkGenerator = owner.getAdapter().getPkGenerator();
-		List pkAttributes = dbEntity.getPrimaryKey();
+        DbEntity dbEntity = objEntity.getDbEntity();
+        DataNode owner = queryEngine.dataNodeForObjEntity(objEntity);
+        if (owner == null) {
+            throw new CayenneRuntimeException("No suitable DataNode to handle primary key generation.");
+        }
 
-		HashMap idMap = null;
-		boolean pkFromMaster = true;
-		for (Iterator i = dataObjects.iterator(); i.hasNext();) {
+        PkGenerator pkGenerator = owner.getAdapter().getPkGenerator();
+        List pkAttributes = dbEntity.getPrimaryKey();
 
-			DataObject object = (DataObject) i.next();
-			ObjectId id = object.getObjectId();
-			if (!(id instanceof TempObjectId)) {
-				continue; //with next loop
-				//If the id is not a temp, then it must be permanent.  Do nothing else
-			}
-			
-			tempId = (TempObjectId) id;
-			if (tempId.getPermId() != null) {
-				continue;
-				//An id already exists... nothing further required (definitely do not create another)
-			}
-			
-			idMap = new HashMap(idMap != null ? idMap.size() : 1);
-			
-			// first get values delivered via relationships
-			if (pkFromMaster)
-				pkFromMaster =
-					appendPkFromMasterRelationships(
-						idMap,
-						object,
-						objEntity,
-						dbEntity);
-						
-			boolean autoPkDone = false;
-			Iterator it = pkAttributes.iterator();
-			while (it.hasNext()) {
-				DbAttribute dbAttr = (DbAttribute) it.next();
-				String dbAttrName = dbAttr.getName();
-				if (idMap.containsKey(dbAttrName)) {
-					continue;
-				}
-				
-				ObjAttribute objAttr =
-					objEntity.getAttributeForDbAttribute(dbAttr);
-				if (objAttr != null) {
-					idMap.put(
-						dbAttrName,
-						object.readPropertyDirectly(objAttr.getName()));
-					continue;
-				}
-				
-				if (autoPkDone) {
-					throw new CayenneException("Primary Key autogeneration only works for a single attribute.");
-				}
-				
-				// finally, use database generation mechanism
-				try {
-					Object pkValue =
-						pkGenerator.generatePkForDbEntity(owner, dbEntity);
-					idMap.put(dbAttrName, pkValue);
-					autoPkDone = true;
-				} catch (Exception ex) {
-					throw new CayenneException(
-						"Error generating PK: " + ex.getMessage(),
-						ex);
-				}
-			}
-			
-			// create permanent ObjectId and attach it to the temporary id
-			tempId.setPermId(new ObjectId(tempId.getObjClass(), idMap));
-		}
-	}
+        HashMap idMap = null;
+        boolean pkFromMaster = true;
+        for (Iterator i = dataObjects.iterator(); i.hasNext();) {
 
-	private boolean appendPkFromMasterRelationships(
-		Map map,
-		DataObject dataObject,
-		ObjEntity objEntity,
-		DbEntity dbEntity)
-		throws CayenneException {
-		boolean useful = false;
-		Iterator it = dbEntity.getRelationshipMap().values().iterator();
-		while (it.hasNext()) {
-			DbRelationship dbRel = (DbRelationship) it.next();
-			if (!dbRel.isToMasterPK())
-				continue;
+            DataObject object = (DataObject) i.next();
+            ObjectId id = object.getObjectId();
+            if (!(id instanceof TempObjectId)) {
+                continue; //with next loop
+                //If the id is not a temp, then it must be permanent.  Do nothing else
+            }
 
-			ObjRelationship rel =
-				objEntity.getRelationshipForDbRelationship(dbRel);
-			if (rel == null)
-				continue;
+            if (id.getReplacementId() != null) {
+                continue;
+                //An id already exists... nothing further required (definitely do not create another)
+            }
 
-			DataObject targetDo =
-				(DataObject) dataObject.readPropertyDirectly(rel.getName());
+            idMap = new HashMap(idMap != null ? idMap.size() : 1);
 
-			if (targetDo == null)
-				throw new CayenneException("Null master object, can't create primary key for: "
-											+ dataObject.getClass() + "." + dbRel.getName());
+            // first get values delivered via relationships
+            if (pkFromMaster)
+                pkFromMaster =
+                    appendPkFromMasterRelationships(idMap, object, objEntity, dbEntity);
 
-			ObjectId targetKey = targetDo.getObjectId();
-			Map idMap = targetKey.getIdSnapshot();
-			if (idMap == null)
-				throw new CayenneException(
-					noMasterPkMsg(
-						objEntity.getName(),
-						targetKey.getObjClass().toString(),
-						dbRel.getName()));
-			map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
-			useful = true;
-		}
-		return useful;
-	}
+            boolean autoPkDone = false;
+            Iterator it = pkAttributes.iterator();
+            while (it.hasNext()) {
+                DbAttribute dbAttr = (DbAttribute) it.next();
+                String dbAttrName = dbAttr.getName();
+                if (idMap.containsKey(dbAttrName)) {
+                    continue;
+                }
 
-	private String noMasterPkMsg(String src, String dst, String rel) {
-		StringBuffer msg =
-			new StringBuffer("Can't create primary key, master object has no PK snapshot.");
-		msg
-			.append("\nrelationship name: ")
-			.append(rel)
-			.append(", src object: ")
-			.append(src)
-			.append(", target obj: ")
-			.append(dst);
-		return msg.toString();
-	}
+                ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(dbAttr);
+                if (objAttr != null) {
+                    idMap.put(dbAttrName, object.readPropertyDirectly(objAttr.getName()));
+                    continue;
+                }
 
-	private List collectAllDbEntities() {
-		List entities = new ArrayList(32);
-		for (Iterator i = queryEngine.getDataMaps().iterator(); i.hasNext();) {
-			entities.addAll(((DataMap)i.next()).getDbEntities());
-		}
-		return entities;
-	}
+                if (autoPkDone) {
+                    throw new CayenneException("Primary Key autogeneration only works for a single attribute.");
+                }
 
-	private void init() {
-		List dbEntitiesToResolve = collectAllDbEntities();
-		Digraph pkDependencyGraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
-		indexedDbEntities = new HashMap(dbEntitiesToResolve.size());
-		for (Iterator i = dbEntitiesToResolve.iterator(); i.hasNext();) {
-			DbEntity origin = (DbEntity) i.next();
-			for (Iterator j = origin.getRelationships().iterator(); j.hasNext();) {
-				DbRelationship relation = (DbRelationship) j.next();
-				if (relation.isToDependentPK()) {
-					DbEntity dst = (DbEntity) relation.getTargetEntity();
-					if (origin.equals(dst)) {
-						continue;
-					}
-					pkDependencyGraph.putArc(origin, dst, Boolean.TRUE);
-				}
-			}
-		}
-		int index = 0;
-		for (Iterator i = dbEntitiesToResolve.iterator(); i.hasNext();) {
-			DbEntity entity = (DbEntity) i.next();
-			if (!pkDependencyGraph.containsVertex(entity)) {
-				indexedDbEntities.put(entity, new Integer(index++));
-			}
-		}
-		boolean acyclic = GraphUtils.isAcyclic(pkDependencyGraph);
-		if (acyclic) {
-			IndegreeTopologicalSort sorter =
-				new IndegreeTopologicalSort(pkDependencyGraph);
-			while (sorter.hasNext())
-				indexedDbEntities.put(sorter.next(), new Integer(index++));
-		} else {
-			StrongConnection contractor =
-				new StrongConnection(
-					pkDependencyGraph,
-					CollectionFactory.ARRAYLIST_FACTORY);
-			Digraph contractedDigraph =
-				new MapDigraph(MapDigraph.HASHMAP_FACTORY);
-			contractor.contract(
-				contractedDigraph,
-				CollectionFactory.ARRAYLIST_FACTORY);
-			IndegreeTopologicalSort sorter =
-				new IndegreeTopologicalSort(contractedDigraph);
-			while (sorter.hasNext()) {
-				Collection component = (Collection) sorter.next();
-				for (Iterator i = component.iterator(); i.hasNext();)
-					indexedDbEntities.put(i.next(), new Integer(index++));
-			}
-		}
-	}
+                // finally, use database generation mechanism
+                try {
+                    Object pkValue = pkGenerator.generatePkForDbEntity(owner, dbEntity);
+                    idMap.put(dbAttrName, pkValue);
+                    autoPkDone = true;
+                }
+                catch (Exception ex) {
+                    throw new CayenneException(
+                        "Error generating PK: " + ex.getMessage(),
+                        ex);
+                }
+            }
 
-	private class DbEntityComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			if (o1.equals(o2)) {
-				return 0;
-			}
-			Integer index1 = (Integer) indexedDbEntities.get(o1);
-			Integer index2 = (Integer) indexedDbEntities.get(o2);
-			return ComparatorUtils.NATURAL_COMPARATOR.compare(index1, index2);
-		}
-	}
+            // create permanent ObjectId and attach it to the temporary id
+            id.setReplacementId(new ObjectId(id.getObjClass(), idMap));
+        }
+    }
 
-	private class ObjEntityComparator implements Comparator {
-		public int compare(Object o1, Object o2) {
-			if (o1.equals(o2)) {
-				return 0;
-			}
-			DbEntity e1 = ((ObjEntity) o1).getDbEntity();
-			DbEntity e2 = ((ObjEntity) o2).getDbEntity();
-			return dbEntityComparator.compare(e1, e2);
-		}
-	}
+    private boolean appendPkFromMasterRelationships(
+        Map map,
+        DataObject dataObject,
+        ObjEntity objEntity,
+        DbEntity dbEntity)
+        throws CayenneException {
+        boolean useful = false;
+        Iterator it = dbEntity.getRelationshipMap().values().iterator();
+        while (it.hasNext()) {
+            DbRelationship dbRel = (DbRelationship) it.next();
+            if (!dbRel.isToMasterPK())
+                continue;
+
+            ObjRelationship rel = objEntity.getRelationshipForDbRelationship(dbRel);
+            if (rel == null)
+                continue;
+
+            DataObject targetDo =
+                (DataObject) dataObject.readPropertyDirectly(rel.getName());
+
+            if (targetDo == null)
+                throw new CayenneException(
+                    "Null master object, can't create primary key for: "
+                        + dataObject.getClass()
+                        + "."
+                        + dbRel.getName());
+
+            ObjectId targetKey = targetDo.getObjectId();
+            Map idMap = targetKey.getIdSnapshot();
+            if (idMap == null)
+                throw new CayenneException(
+                    noMasterPkMsg(
+                        objEntity.getName(),
+                        targetKey.getObjClass().toString(),
+                        dbRel.getName()));
+            map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
+            useful = true;
+        }
+        return useful;
+    }
+
+    private String noMasterPkMsg(String src, String dst, String rel) {
+        StringBuffer msg =
+            new StringBuffer("Can't create primary key, master object has no PK snapshot.");
+        msg
+            .append("\nrelationship name: ")
+            .append(rel)
+            .append(", src object: ")
+            .append(src)
+            .append(", target obj: ")
+            .append(dst);
+        return msg.toString();
+    }
+
+    private List collectAllDbEntities() {
+        List entities = new ArrayList(32);
+        for (Iterator i = queryEngine.getDataMaps().iterator(); i.hasNext();) {
+            entities.addAll(((DataMap) i.next()).getDbEntities());
+        }
+        return entities;
+    }
+
+    private void init() {
+        List dbEntitiesToResolve = collectAllDbEntities();
+        Digraph pkDependencyGraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
+        indexedDbEntities = new HashMap(dbEntitiesToResolve.size());
+        for (Iterator i = dbEntitiesToResolve.iterator(); i.hasNext();) {
+            DbEntity origin = (DbEntity) i.next();
+            for (Iterator j = origin.getRelationships().iterator(); j.hasNext();) {
+                DbRelationship relation = (DbRelationship) j.next();
+                if (relation.isToDependentPK()) {
+                    DbEntity dst = (DbEntity) relation.getTargetEntity();
+                    if (origin.equals(dst)) {
+                        continue;
+                    }
+                    pkDependencyGraph.putArc(origin, dst, Boolean.TRUE);
+                }
+            }
+        }
+        int index = 0;
+        for (Iterator i = dbEntitiesToResolve.iterator(); i.hasNext();) {
+            DbEntity entity = (DbEntity) i.next();
+            if (!pkDependencyGraph.containsVertex(entity)) {
+                indexedDbEntities.put(entity, new Integer(index++));
+            }
+        }
+        boolean acyclic = GraphUtils.isAcyclic(pkDependencyGraph);
+        if (acyclic) {
+            IndegreeTopologicalSort sorter =
+                new IndegreeTopologicalSort(pkDependencyGraph);
+            while (sorter.hasNext())
+                indexedDbEntities.put(sorter.next(), new Integer(index++));
+        }
+        else {
+            StrongConnection contractor =
+                new StrongConnection(
+                    pkDependencyGraph,
+                    CollectionFactory.ARRAYLIST_FACTORY);
+            Digraph contractedDigraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
+            contractor.contract(contractedDigraph, CollectionFactory.ARRAYLIST_FACTORY);
+            IndegreeTopologicalSort sorter =
+                new IndegreeTopologicalSort(contractedDigraph);
+            while (sorter.hasNext()) {
+                Collection component = (Collection) sorter.next();
+                for (Iterator i = component.iterator(); i.hasNext();)
+                    indexedDbEntities.put(i.next(), new Integer(index++));
+            }
+        }
+    }
+
+    private class DbEntityComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            if (o1.equals(o2)) {
+                return 0;
+            }
+            Integer index1 = (Integer) indexedDbEntities.get(o1);
+            Integer index2 = (Integer) indexedDbEntities.get(o2);
+            return ComparatorUtils.NATURAL_COMPARATOR.compare(index1, index2);
+        }
+    }
+
+    private class ObjEntityComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            if (o1.equals(o2)) {
+                return 0;
+            }
+            DbEntity e1 = ((ObjEntity) o1).getDbEntity();
+            DbEntity e2 = ((ObjEntity) o2).getDbEntity();
+            return dbEntityComparator.compare(e1, e2);
+        }
+    }
 }

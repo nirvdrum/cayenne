@@ -80,6 +80,7 @@ public class ObjectId implements Serializable {
 	// Values: database values of the corresponding attribute
 	protected Map objectIdKeys;
 	protected Class objectClass;
+	protected ObjectId replacementId;
 	
 	/**
 	 * Convenience constructor for entities that have a 
@@ -188,4 +189,16 @@ public class ObjectId implements Serializable {
 		return objectClass;
 	}
 
+	/**
+	 * Returns a replacement ObjectId associated with this id. Replacement ObjectId is either a
+	 * permananent ObjectId for an uncommitted object or a new id for object whose id
+	 * depends on its relationships.
+	 */
+	public ObjectId getReplacementId() {
+		return replacementId;
+	}
+
+	public void setReplacementId(ObjectId replacementId) {
+		this.replacementId = replacementId;
+	}
 }

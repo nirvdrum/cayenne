@@ -1027,12 +1027,14 @@ public class DataContext implements QueryEngine, Serializable {
             return id;
             //If the id is not a temp, then it must be permanent.  Return it and do nothing else
         }
-        TempObjectId tempId = (TempObjectId) id;
-        if (tempId.getPermId() != null) {
-            return tempId.getPermId();
+        
+    
+        if (id.getReplacementId() != null) {
+            return id.getReplacementId();
         }
+        
         ObjEntity objEntity =
-            this.getEntityResolver().lookupObjEntity(tempId.getObjClass());
+            this.getEntityResolver().lookupObjEntity(id.getObjClass());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = this.dataNodeForObjEntity(objEntity);
 
@@ -1078,7 +1080,7 @@ public class DataContext implements QueryEngine, Serializable {
         ObjectId permId = new ObjectId(anObject.getClass(), idMap);
 
         // note that object registration did not change (new id is not attached to context, only to temp. oid)
-        tempId.setPermId(permId);
+		id.setReplacementId(permId);
         return permId;
     }
 

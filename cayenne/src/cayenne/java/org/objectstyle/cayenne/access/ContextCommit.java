@@ -73,7 +73,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
@@ -115,7 +114,6 @@ class ContextCommit {
     private List objEntitiesToDelete;
     private List objEntitiesToUpdate;
     private List nodeHelpers;
-    private Map updatedIds;
     private List insObjects; //event support
     private List delObjects; //event support
     private List updObjects; //event support
@@ -137,7 +135,6 @@ class ContextCommit {
         createPrimaryKeys();
         categorizeFlattenedInsertsAndCreateBatches();
         categorizeFlattenedDeletesAndCreateBatches();
-        updatedIds = new SequencedHashMap();
 
         insObjects = new ArrayList();
         delObjects = new ArrayList();
@@ -180,7 +177,7 @@ class ContextCommit {
                 if (queries.size() > 0) {
                     nodeHelper.getNode().performQueries(queries, observer);
 
-                    // Andrei: should we reset observer commit status for each iteration?
+                    // TODO: Andrei: should we reset observer commit status for each iteration?
                     // Also we may add real distributed transactions support by adding
                     // some kind of commit delegate that runs all queries, and only then
                     // commits...
@@ -193,75 +190,15 @@ class ContextCommit {
                     }
                 }
 
-                postprocess(nodeHelper);
+              //  postprocess(nodeHelper);
             }
+            
+            context.getObjectStore().objectsCommitted();
             context.fireTransactionCommitted();
         }
         finally {
             if (context.isTransactionEventsEnabled()) {
                 observer.unregisterFromDataContextEvents();
-            }
-        }
-    }
-
-    /**
-     * Performs necessary changes to objects after they are committed for a
-     * particular DataNode.
-     */
-    private void postprocess(DataNodeCommitHelper nodeHelper) {
-        ObjectStore objectStore = context.getObjectStore();
-        Collection entitiesForNode = nodeHelper.getObjEntitiesForInsert();
-
-        // postprocess inserted objects in context
-        for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
-            ObjEntity entity = (ObjEntity) i.next();
-            Collection objects =
-                (Collection) newObjectsByObjEntity.get(entity.getClassName());
-            for (Iterator j = objects.iterator(); j.hasNext();) {
-                DataObject o = (DataObject) j.next();
-                TempObjectId tempId = (TempObjectId) o.getObjectId();
-                ObjectId permId = tempId.getPermId();
-                objectStore.changeObjectKey(tempId, permId);
-                o.setObjectId(permId);
-                Map snapshot = context.takeObjectSnapshot(o);
-                objectStore.addSnapshot(permId, snapshot);
-                o.setPersistenceState(PersistenceState.COMMITTED);
-            }
-        }
-
-        // postprocess deleted objects in context
-        entitiesForNode = nodeHelper.getObjEntitiesForDelete();
-        for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
-            ObjEntity entity = (ObjEntity) i.next();
-            Collection objects =
-                (Collection) objectsToDeleteByObjEntity.get(entity.getClassName());
-            for (Iterator j = objects.iterator(); j.hasNext();) {
-                DataObject o = (DataObject) j.next();
-                ObjectId anId = o.getObjectId();
-                objectStore.removeObject(anId);
-                o.setPersistenceState(PersistenceState.TRANSIENT);
-                o.setDataContext(null);
-            }
-        }
-
-        // postprocess updated objects in context
-        entitiesForNode = nodeHelper.getObjEntitiesForUpdate();
-
-        for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
-            ObjEntity entity = (ObjEntity) i.next();
-            Collection objects =
-                (Collection) objectsToUpdateByObjEntity.get(entity.getClassName());
-            for (Iterator j = objects.iterator(); j.hasNext();) {
-                DataObject o = (DataObject) j.next();
-                ObjectId oldId = o.getObjectId();
-                ObjectId newId = (ObjectId) updatedIds.get(oldId);
-                Map snapshot = context.takeObjectSnapshot(o);
-                objectStore.addSnapshot(oldId, snapshot);
-                if (newId != null) {
-                    objectStore.changeObjectKey(oldId, newId);
-                    o.setObjectId(newId);
-                }
-                o.setPersistenceState(PersistenceState.COMMITTED);
             }
         }
     }
@@ -475,7 +412,7 @@ class ContextCommit {
                                 idSnapshot,
                                 snapshot);
                         if (updId != null) {
-                            updatedIds.put(o.getObjectId(), updId);
+							o.getObjectId().setReplacementId(updId);
                         }
 
                         updObjects.add(o);
