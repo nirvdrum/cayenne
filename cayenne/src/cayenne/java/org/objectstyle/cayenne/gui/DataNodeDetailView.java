@@ -473,10 +473,18 @@ public class DataNodeDetailView
 
             // If it is set, use path striped of proj dir and following separator
             // If proj dir not set, use absolute location.
-            String relLocation =
-                (projDirStr == null)
-                    ? newFileLocation
-                    : newFileLocation.substring(projDirStr.length() + 1);
+            String relLocation = null;
+            
+            if(projDirStr == null) {
+            	relLocation = newFileLocation;
+            }
+            else if(!newFileLocation.startsWith(projDirStr)) {
+            	logObj.info("Location was selected that is not the child of project directory, ignore.");
+            	return;
+            }
+            else {
+            	relLocation = newFileLocation.substring(projDirStr.length() + 1);
+            }
 
             if (relLocation.equals(node.getDataSourceLocation())) {
                 return;
