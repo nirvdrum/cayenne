@@ -82,7 +82,7 @@
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site in a local directory -->
     <!-- ============================================= -->
-    <target name="release-site">
+    <target name="release-site" depends="nositedir">
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-modeler.xml" target="dist-src"/>
 		<ant antfile="build-tests.xml" target="dist-src"/>
@@ -164,7 +164,11 @@
     <target name="api">
 		<ant antfile="build-cayenne.xml" target="api"/>
 		<ant antfile="build-modeler.xml" target="api"/>
-    </target>    
+    </target>  
+    
+    <target name="nositedir" unless="site.dir">
+    	<fail>"site.dir" must be defined.</fail>
+    </target>  
 </project>
 
 
