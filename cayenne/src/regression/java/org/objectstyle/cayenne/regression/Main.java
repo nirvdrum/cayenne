@@ -12,6 +12,13 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 
+/**
+ * Main configures and runs regression tests defined in RandomDomainBuilder and
+ * DataModificationRobot. It is responsible for performance metering as well.
+ *
+ * @author Andriy Shapochka
+ */
+
 public class Main {
   public static void main(String[] args) {
     //QueryLogger.setLoggingLevel(Level.ALL);

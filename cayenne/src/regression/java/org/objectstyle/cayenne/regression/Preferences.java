@@ -4,24 +4,12 @@ import java.io.*;
 import org.apache.commons.collections.*;
 import org.apache.commons.lang.*;
 
-/*
-cayenne.project=d:\temp\project1\cayenne.xml
-cayenne.schema=TEST
-test.workdir=d:\temp\schema
-test.schemadir_prefix=tst
-test.table_count=20
-test.seed=100
-test.new_objects_per_table=10
-test.delete_objects_per_table=5
-test.max_references_per_table=3
-test.max_foreign_keys_per_table=3
-test.loop_count=10
-test.max_loops_per_table=3
-test.record_all=yes
-test.out=test_log.txt
-test.schema_count=1
-test.commits_per_schema=1
-*/
+/**
+ * Preferences reads test configuration files (Apache ExtendedProperties format).
+ * For more information see the sample configuration files.
+ *
+ * @author Andriy Shapochka
+ */
 
 public class Preferences {
   private java.io.File cayenneProject;

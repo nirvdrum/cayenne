@@ -4,6 +4,14 @@ import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.ClassGen;
 
+/**
+ * DOStubClassLoader is a simple class loader to generate new types of DataObjects
+ * (new classes) at runtime. This behavior is needed to trick Cayenne algorithms
+ * based on usage of Classes of DataObject descendants for identifiers.
+ *
+ * @author Andriy Shapochka
+ */
+
 class DOStubClassLoader extends ClassLoader {
   private String superClassName = "org.objectstyle.cayenne.CayenneDataObject";
 

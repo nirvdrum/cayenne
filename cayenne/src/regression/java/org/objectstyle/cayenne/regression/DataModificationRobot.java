@@ -21,6 +21,19 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
+/**
+ * DataModificationRobot performs randomized inserts/deletes/updates of
+ * data objects in a data context. Usually it works in conjuction with
+ * RandomDomainBuilder but can be used independently for suitable schemas
+ * This class works for any kind of DataObjects and tests not only basic
+ * create/delete object but also referential integrity dependencies
+ * (multi-reflexive too). It always tries to generate correct data, therefore
+ * possible commit failures mostly point out problems with the Cayenne commit
+ * algorithms.
+ *
+ * @author Andriy Shapochka
+ */
+
 public class DataModificationRobot {
   private DataContext context;
   private Roulette insertionRandomizer;
@@ -119,7 +132,7 @@ public class DataModificationRobot {
       for (ArcIterator j = graph.incomingIterator(vertex); j.hasNext();) {
         j.next();
         String relName = (String)relIt.next();
-        
+
         // Andrus: this line performs an assignment to the variable that
         // is never used. Commented out for this reason
         // Object origin = j.getOrigin();

@@ -12,6 +12,16 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.*;
 import org.objectstyle.cayenne.dba.*;
 
+/**
+ * RandomDomainBuilder uses ASHWOOD utilities and algorithms to build complex
+ * randomized Oracle schemas with referential constraints, pk dependencies,
+ * automatic key generation. It also builds the corresponding DataMaps and
+ * attaches them to preconfigured DataNodes and DataDomains.
+ * DataModificationRobot operates on these schemas.
+ *
+ * @author Andriy Shapochka
+ */
+
 public class RandomDomainBuilder {
   private DataDomain domain;
   private RandomSchema randomSchema = new RandomSchema();
