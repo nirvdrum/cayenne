@@ -173,14 +173,21 @@ public class RandomDomainBuilder {
     DataNode[] nodes = domain.getDataNodes();
     if (nodes == null || nodes.length == 0) throw new CayenneException("No data nodes configured.");
     DataNode node = nodes[0];
+    Digraph refDigraph = randomSchema.getSchemaGraph();
     List tables = randomSchema.getTables();
     Map sequencesByTable = randomSchema.getSequencesByTable();
     DataMap dataMap = new DataMap("DataMap-" + StringUtils.defaultString(randomSchema.getSchemaName()));
     List objEntities = new ArrayList(tables.size());
     objEntitiesByTable = new HashMap(tables.size());
+    Map tablesToFlatten = new HashMap();
     for (Iterator i = tables.iterator(); i.hasNext();) {
       Table table = (Table)i.next();
       DbEntity dbEntity = createDbEntity(table, (Sequence)sequencesByTable.get(table));
+      if (refDigraph.outgoingSize(table) == 0 && refDigraph.incomingSize(table) == 2) {
+          tablesToFlatten.put(table, dbEntity);
+          dataMap.addDbEntity(dbEntity);
+          continue;
+      }
       ObjEntity objEntity = createObjEntity(dbEntity);
       objEntities.add(objEntity);
       objEntitiesByTable.put(table, objEntity);
@@ -193,13 +200,24 @@ public class RandomDomainBuilder {
       entity.setParent(dataMap);
       dataMap.addObjEntity(entity);
     }
-    Digraph refDigraph = randomSchema.getSchemaGraph();
+    Set usedFlattenedTables = new HashSet();
     for (Iterator i = tables.iterator(); i.hasNext();) {
       Table pkTable = (Table)i.next();
       for (ArcIterator j = refDigraph.outgoingIterator(pkTable); j.hasNext();) {
         j.next();
         Table fkTable = (Table)j.getDestination();
-        createRelationship(pkTable, fkTable);
+        if (!tablesToFlatten.containsKey(fkTable)) createRelationship(pkTable, fkTable);
+        else if (usedFlattenedTables.add(fkTable)) {
+            ArcIterator masterIt = refDigraph.incomingIterator(fkTable);
+            masterIt.next();
+            Table master1 = (Table)masterIt.getOrigin();
+            masterIt.next();
+            Table master2 = (Table)masterIt.getOrigin();
+            flattenRelationship(master1,
+                                master2,
+                                fkTable,
+                                (DbEntity)tablesToFlatten.get(fkTable));
+        }
       }
     }
 
@@ -285,6 +303,7 @@ public class RandomDomainBuilder {
 
         ObjRelationship objForwardRel = new ObjRelationship(forwardRelation.getName());
         objForwardRel.addDbRelationship(forwardRelation);
+        if (forwardRelation.isToDependentPK()) objForwardRel.setDeleteRule(DeleteRule.DENY);
         objForwardRel.setToMany(forwardRelation.isToMany());
         objForwardRel.setSourceEntity(pkObjEntity);
         objForwardRel.setTargetEntity(fkObjEntity);
@@ -298,6 +317,75 @@ public class RandomDomainBuilder {
         //return;
       }
     }
+  }
+
+  private void flattenRelationship(Table master1, Table master2, Table flattenedTable, DbEntity flattenedEntity) {
+      ObjEntity pk1ObjEntity = (ObjEntity)objEntitiesByTable.get(master1);
+      ObjEntity pk2ObjEntity = (ObjEntity)objEntitiesByTable.get(master2);
+      DbEntity pk1Entity = pk1ObjEntity.getDbEntity();
+      DbEntity pk2Entity = pk2ObjEntity.getDbEntity();
+      Collection foreignKeys = flattenedTable.getForeignKeys();
+      Collection primaryKeys = flattenedTable.getPrimaryKeys();
+      ForeignKey fk = null;
+
+      //master1 <-> flattened
+      for (Iterator i = foreignKeys.iterator(); i.hasNext();) {
+          fk = (ForeignKey)i.next();
+          if (fk.getPkTableName().equals(master1.getName())) break;
+      }
+      DbRelationship firstRelation = new DbRelationship(pk1Entity.getName() + '_' + flattenedEntity.getName() + '_' + fk.getName());
+      firstRelation.setToMany(true);
+      firstRelation.setToDependentPK(true);
+      firstRelation.setSourceEntity(pk1Entity);
+      firstRelation.setTargetEntity(flattenedEntity);
+      pk1Entity.addRelationship(firstRelation);
+      DbRelationship firstBackwardRelation = new DbRelationship(flattenedEntity.getName() + '_' + fk.getName() + '_' + pk1Entity.getName());
+      firstBackwardRelation.setToMany(false);
+      firstBackwardRelation.setSourceEntity(flattenedEntity);
+      firstBackwardRelation.setTargetEntity(pk1Entity);
+      flattenedEntity.addRelationship(firstBackwardRelation);
+      DbAttribute pkAtt = (DbAttribute)pk1Entity.getAttribute(fk.getPkColumnName());
+      DbAttribute fkAtt = (DbAttribute)flattenedEntity.getAttribute(fk.getColumnName());
+      firstRelation.addJoin(new DbAttributePair(pkAtt, fkAtt));
+      firstBackwardRelation.addJoin(new DbAttributePair(fkAtt, pkAtt));
+
+      //master2 <-> flattened
+      for (Iterator i = foreignKeys.iterator(); i.hasNext();) {
+          fk = (ForeignKey)i.next();
+          if (fk.getPkTableName().equals(master2.getName())) break;
+      }
+      DbRelationship secondRelation = new DbRelationship(pk2Entity.getName() + '_' + flattenedEntity.getName() + '_' + fk.getName());
+      secondRelation.setToMany(true);
+      secondRelation.setToDependentPK(true);
+      secondRelation.setSourceEntity(pk2Entity);
+      secondRelation.setTargetEntity(flattenedEntity);
+      pk2Entity.addRelationship(secondRelation);
+      DbRelationship secondBackwardRelation = new DbRelationship(flattenedEntity.getName() + '_' + fk.getName() + '_' + pk2Entity.getName());
+      secondBackwardRelation.setToMany(false);
+      secondBackwardRelation.setSourceEntity(flattenedEntity);
+      secondBackwardRelation.setTargetEntity(pk2Entity);
+      flattenedEntity.addRelationship(secondBackwardRelation);
+      pkAtt = (DbAttribute)pk2Entity.getAttribute(fk.getPkColumnName());
+      fkAtt = (DbAttribute)flattenedEntity.getAttribute(fk.getColumnName());
+      secondRelation.addJoin(new DbAttributePair(pkAtt, fkAtt));
+      secondBackwardRelation.addJoin(new DbAttributePair(fkAtt, pkAtt));
+
+      //master1 <-> master2
+      ObjRelationship objForwardRel = new ObjRelationship(firstRelation.getName() + '_' + secondBackwardRelation.getName());
+      objForwardRel.setToMany(true);
+      objForwardRel.addDbRelationship(firstRelation);
+      objForwardRel.addDbRelationship(secondBackwardRelation);
+      objForwardRel.setSourceEntity(pk1ObjEntity);
+      objForwardRel.setTargetEntity(pk2ObjEntity);
+      pk1ObjEntity.addRelationship(objForwardRel);
+
+      ObjRelationship objBackwardRel = new ObjRelationship(secondRelation.getName() + '_' + firstBackwardRelation.getName());
+      objBackwardRel.setToMany(true);
+      objBackwardRel.addDbRelationship(secondRelation);
+      objBackwardRel.addDbRelationship(firstBackwardRelation);
+      objBackwardRel.setSourceEntity(pk2ObjEntity);
+      objBackwardRel.setTargetEntity(pk1ObjEntity);
+      pk2ObjEntity.addRelationship(objBackwardRel);
   }
 
   private ObjEntity createObjEntity(DbEntity dbEntity) {
