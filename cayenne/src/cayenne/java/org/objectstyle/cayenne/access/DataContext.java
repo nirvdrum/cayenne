@@ -63,6 +63,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -190,6 +191,13 @@ public class DataContext implements QueryEngine, Serializable {
     protected ObjectStore objectStore;
 
     protected transient QueryEngine parent;
+    
+    /**
+     * Stores user defined properties associated with this DataContext.
+     * 
+     * @since 1.2
+     */
+    protected Map userProperties;
 
     /**
      * Stores the name of parent DataDomain. Used to defer initialization of the parent
@@ -335,6 +343,43 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
     }
+    
+    /**
+     * Returns a map of user-defined properties associated with this DataContext.
+     * 
+     * @since 1.2
+     */
+    protected Map getUserProperties() {
+        // do lazy init..
+        // as not all users will take advantage of properties, creating the
+        // map on demand to keep DataContext lean...
+        if (userProperties == null) {
+            userProperties = new HashMap();
+        }
+
+        return userProperties;
+    }
+    
+    /**
+     * Returns a user-defined property previously set via 'setUserProperty'. Note that it
+     * is a caller responsibility to synchronize access to properties.
+     * 
+     * @since 1.2
+     */
+    public Object getUserProperty(String key) {
+        return getUserProperties().get(key);
+    }
+
+    /**
+     * Sets a user-defined property. Note that it is a caller responsibility to
+     * synchronize access to properties.
+     * 
+     * @since 1.2
+     */
+    public void setUserProperty(String key, Object value) {
+        getUserProperties().put(key, value);
+    }
+    
 
     /**
      * Returns parent QueryEngine object. In most cases returned object is an instance of

@@ -58,6 +58,12 @@
 						support all types of relationships including 
 						flattened.</p>
 				</subsection>
+				<subsection name="1.1.7 DataContext User Properties Map">
+					<p>DataContext now maintains an internal map of 
+						user-defined values. This allows users to associate 
+						certain data with a given DataContext. This was an 
+						frequently requested feature.</p>
+				</subsection>
 			</subsection>
 		</section>
 	</body>

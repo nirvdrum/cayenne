@@ -13,6 +13,7 @@ Changes:
 - support for "joint" prefetches in SelectQuery and SQLTemplate
 - SQLTemplate support for explicit DataRow columns naming that is different from SQL
   (via forth parameter in the #result directive)
+- support for DataContext "userProperties" map
 
 Bugs Fixed:
 

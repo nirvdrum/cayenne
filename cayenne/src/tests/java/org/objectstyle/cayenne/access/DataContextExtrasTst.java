@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -75,51 +76,65 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-/** 
- * "Lightweight" test cases for DataContext. These
- * tests do not require any additional database setup.
+/**
+ * "Lightweight" test cases for DataContext. These tests do not require any additional
+ * database setup.
  * 
  * @author Andrei Adamchik
  */
 public class DataContextExtrasTst extends CayenneTestCase {
 
-    protected DataContext context;
+    public void testUserPropertiesLazyInit() {
+        DataContext context = createDataContext();
+        assertNull(context.userProperties);
 
-    protected void setUp() throws Exception {
-        super.setUp();
+        Map properties = context.getUserProperties();
+        assertNotNull(properties);
+        assertSame(properties, context.getUserProperties());
+    }
 
-        deleteTestData();
-        context = createDataContext();
+    public void testUserProperties() {
+        DataContext context = createDataContext();
+
+        assertNull(context.getUserProperty("ABC"));
+        Object object = new Object();
+
+        context.setUserProperty("ABC", object);
+        assertSame(object, context.getUserProperty("ABC"));
     }
 
     public void testTransactionEventsEnabled() {
+        DataContext context = createDataContext();
         context.setTransactionEventsEnabled(false);
         assertFalse(context.isTransactionEventsEnabled());
         context.setTransactionEventsEnabled(true);
         assertTrue(context.isTransactionEventsEnabled());
     }
 
-    public void testHasChangesNew() throws Exception {
+    public void testHasChangesNew() {
+        DataContext context = createDataContext();
         assertTrue("No changes expected in context", !context.hasChanges());
         context.createAndRegisterNewObject("Artist");
-        assertTrue(
-            "Object added to context, expected to report changes",
-            context.hasChanges());
+        assertTrue("Object added to context, expected to report changes", context
+                .hasChanges());
     }
 
-    public void testCreateAndRegisterNewObject() throws Exception {
+    public void testCreateAndRegisterNewObject() {
+        DataContext context = createDataContext();
         Artist a1 = (Artist) context.createAndRegisterNewObject("Artist");
         assertTrue(context.getObjectStore().getObjects().contains(a1));
         assertTrue(context.newObjects().contains(a1));
     }
 
-    public void testCreateAndRegisterNewObjectWithClass() throws Exception {
+    public void testCreateAndRegisterNewObjectWithClass() {
+        DataContext context = createDataContext();
         Artist a1 = (Artist) context.createAndRegisterNewObject(Artist.class);
         assertTrue(context.getObjectStore().getObjects().contains(a1));
         assertTrue(context.newObjects().contains(a1));
     }
 
-    public void testIdObjectFromDataRow() throws Exception {
+    public void testIdObjectFromDataRow() {
+        DataContext context = createDataContext();
         DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100000));
         DataObject obj = context.objectFromDataRow(Artist.class, row, false);
@@ -130,7 +145,8 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
     }
 
-    public void testPartialObjectFromDataRow() throws Exception {
+    public void testPartialObjectFromDataRow() {
+        DataContext context = createDataContext();
         DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(100001));
         row.put("ARTIST_NAME", "ArtistXYZ");
@@ -141,7 +157,8 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertNotNull(context.getObjectStore().getSnapshot(obj.getObjectId(), context));
     }
 
-    public void testFullObjectFromDataRow() throws Exception {
+    public void testFullObjectFromDataRow() {
+        DataContext context = createDataContext();
         DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(123456));
         row.put("ARTIST_NAME", "ArtistXYZ");
@@ -154,13 +171,15 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertEquals("ArtistXYZ", obj.getArtistName());
     }
 
-    public void testCommitChangesError() throws Exception {
+    public void testCommitChangesError() {
+        DataContext context = createDataContext();
 
         // setup mockup PK generator that will blow on PK request
         // to emulate an exception
         PkGenerator newGenerator = new JdbcPkGenerator() {
+
             public Object generatePkForDbEntity(DataNode node, DbEntity ent)
-                throws Exception {
+                    throws Exception {
                 throw new CayenneRuntimeException("Synthetic error....");
             }
         };
@@ -183,13 +202,16 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
     }
 
-    /** 
-     * Testing behavior of Cayenne when a database exception
-     * is thrown in SELECT query.
+    /**
+     * Testing behavior of Cayenne when a database exception is thrown in SELECT query.
      */
-    public void testSelectException() throws Exception {
-        SQLTemplate q =
-            new SQLTemplate(Artist.class, "SELECT * FROM NON_EXISTENT_TABLE", true);
+    public void testSelectException() {
+        DataContext context = createDataContext();
+
+        SQLTemplate q = new SQLTemplate(
+                Artist.class,
+                "SELECT * FROM NON_EXISTENT_TABLE",
+                true);
 
         // disable logging for thrown exceptions
         Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
@@ -208,7 +230,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testEntityResolver() {
-        org.objectstyle.cayenne.map.EntityResolver er = context.getEntityResolver();
-        assertNotNull(er);
+        DataContext context = createDataContext();
+        assertNotNull(context.getEntityResolver());
     }
 }
