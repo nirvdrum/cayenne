@@ -1,5 +1,8 @@
 <document>
 <title>User Guide</title>
+<navigator>
+	<next>/userguide/intro.html</next>
+</navigator>
 <body>
     <section name="Table of Contents">
         <p><i>Please note that User Guide is still under development. Additions, fixes
@@ -23,7 +26,7 @@
             </ul></li>
             
             
-            <li><a href="design.html">3. Design</a>
+            <li><a href="design/index.html">3. Design</a>
             <ul>
                 <li><a href="design/index.html#or_map">3.1 Object Relational Mapping</a></li>
                 <li><a href="design/dataobj.html#do">3.2 Data Objects</a></li>

@@ -1,5 +1,11 @@
 <document>
 <title>User Guide - Introduction</title>
+
+<navigator>
+	<up>/userguide/index.html</up>
+	<next>/userguide/install.html</next>
+</navigator>
+
 <body>
     <section name="1. Introduction" toc="/userguide/index.html">
     

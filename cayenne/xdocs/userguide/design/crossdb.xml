@@ -1,5 +1,10 @@
 <document>
 <title>User Guide - Design</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/design/datasrc.html</prev>
+	<next>/userguide/design/autopk.html</next>
+</navigator>
 <body>
     <section name="3. Design" toc="/userguide/index.html">
         <subsection name="3.5 Cross-Database Issues" anchor="crossdb">

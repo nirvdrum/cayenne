@@ -51,11 +51,18 @@
             </td>
             
             <!-- CONTENT SECTION -->
-            <td align="left" valign="top">
+            <td align="left" valign="top">            
+    		#if( $root.getChild("navigator") )
+    			#navigator( $root.getChild("navigator") )
+    		#end
+    		
             #set ($allSections = $root.getChild("body").getChildren("section"))
             #foreach ( $section in $allSections )
                 #section ($section)
             #end
+            #if( $root.getChild("navigator") )
+    			#navigator( $root.getChild("navigator") )
+    		#end
             </td>
         </tr>
         
@@ -87,6 +94,18 @@
 
 
 ## Velocity Macros
+#macro ( navigator $nav)
+<table width="100%" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="small-black" align="right">
+			#if ($nav.getChild("prev"))<a href='$relativePath$nav.getChild("prev").getText()'><img border="0" src="$relativePath/images/left-arrow.gif"></a>#end
+			#if ($nav.getChild("up"))<a href='$relativePath$nav.getChild("up").getText()'><img border="0" src="$relativePath/images/up-arrow.gif"></a>#end
+			#if ($nav.getChild("next"))<a href='$relativePath$nav.getChild("next").getText()'><img border="0" src="$relativePath/images/right-arrow.gif"></a>#end
+		</td>
+		<td width="10">&nbsp;</td>
+	</tr>
+</table>
+#end
 
 #macro ( panel $panel)
 <div align="center">
@@ -229,6 +248,7 @@
     </table>
 #end
 
+    
 #macro ( section $section)
     #if( $section.getAttributeValue("anchor") )
     <a name="$section.getAttributeValue("anchor")"></a>
@@ -239,10 +259,6 @@
                     <table width="100%" cellpadding="0" cellspacing="0">
                     <tr><td class="section-title">
                     $section.getAttributeValue("name")
-#if( $section.getAttributeValue("toc") )
-                #set ($toc = "table of contents...")
-                <td class="small-black" align="right" valign="bottom">#projectanchor($toc $section.getAttributeValue("toc"))</td>
-#end
                 </td></tr></table>
                 </td>
         </tr>
