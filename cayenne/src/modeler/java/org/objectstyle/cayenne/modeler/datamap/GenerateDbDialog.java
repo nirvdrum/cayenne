@@ -101,8 +101,8 @@ public class GenerateDbDialog
     implements ActionListener, ItemListener {
     private static Logger logObj = Logger.getLogger(Editor.class);
 
-    private static final int WIDTH = 380;
-    private static final int HEIGHT = 190;
+    private static final int GENERATEDB_WIDTH = 380;
+    private static final int GENERATEDB_HEIGHT = 190;
 
     protected DataSourceInfo dsi;
     protected DbAdapter adapter;
@@ -138,7 +138,7 @@ public class GenerateDbDialog
         saveSql.addActionListener(this);
         cancel.addActionListener(this);
 
-        setSize(WIDTH, HEIGHT);
+        setSize(GENERATEDB_WIDTH, GENERATEDB_HEIGHT);
         this.pack();
         this.centerWindow();
         this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);

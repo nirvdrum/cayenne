@@ -92,8 +92,8 @@ import org.objectstyle.cayenne.modeler.util.ModelerStrings;
  * @author Andrei Adamchik
  */
 public class AboutDialog extends CayenneDialog implements ActionListener {
-	private static final int WIDTH = 523;
-	private static final int HEIGHT = 450;
+	private static final int ABOUT_WIDTH = 523;
+	private static final int ABOUT_HEIGHT = 450;
 	private static String licenseString;
 
 	private boolean view_info = true;
@@ -114,7 +114,7 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 		ok.addActionListener(this);
 		view.addActionListener(this);
 
-		setSize(WIDTH, HEIGHT);
+		setSize(ABOUT_WIDTH, ABOUT_HEIGHT);
 		setResizable(false);
 		this.centerWindow();
 		this.getContentPane().doLayout();

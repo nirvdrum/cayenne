@@ -24,8 +24,8 @@ public class YesNoToAllDialog extends JDialog implements ActionListener
 	public static final int NO_TO_ALL 	= 3;
 	public static final int CANCEL 		= 4;
 	
-	private static final int WIDTH  = 380;
-	private static final int HEIGHT = 150;
+	private static final int YN_WIDTH  = 380;
+	private static final int YN_HEIGHT = 150;
 
 	JButton yes = new JButton("Yes");
 	JButton yesToAll = new JButton("Yes to all");
@@ -67,16 +67,16 @@ public class YesNoToAllDialog extends JDialog implements ActionListener
 		if (Editor.getFrame() != null) {
 			point = Editor.getFrame().getLocationOnScreen();
 			int width = Editor.getFrame().getWidth();
-			int x = (width - WIDTH)/2;
+			int x = (width - YN_WIDTH)/2;
 			int height = Editor.getFrame().getHeight();
-			int y = (height - HEIGHT)/2;
+			int y = (height - YN_HEIGHT)/2;
 			point.setLocation(point.x + x, point.y + y);
 		} else {        
         	point = new Point(250, 250);
         }
 		setLocation(point);
 		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-		this.setSize(WIDTH, HEIGHT);
+		this.setSize(YN_WIDTH, YN_HEIGHT);
         setVisible(true);
 	}
 	
