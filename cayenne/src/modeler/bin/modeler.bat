@@ -11,6 +11,15 @@ rem -------------------------------------------------------------------
 rem  Variables:
 rem -------------------------------------------------------------------
 
+rem -------------------------------------------------------------------
+rem  Known problems:
+rem
+rem  If you get an "Out Of Environment Space" error under win9x,
+rem  try replacing reference to MAIN_CLASS, JAVACMD, and DEFAULT_CLASSPATH
+rem  with the literal contents of those values,
+rem  or raise your default environment space from 256 characters to 4096 characters.
+rem -------------------------------------------------------------------
+
 set MAIN_CLASS=org.objectstyle.cayenne.modeler.Main
 
 
@@ -34,6 +43,18 @@ set JAVACMD=%JAVA_HOME%\bin\javaw
 set DEFAULT_CLASSPATH=%CAYENNE_HOME%\lib\modeler\cayenne-modeler.jar
 
 :run_modeler
+
+if "%os%" == "" goto win9x
+goto winNT
+
+:win9x
+start "%JAVACMD%" -cp "%DEFAULT_CLASSPATH%" %MAIN_CLASS% %*
+goto end
+
+:winNT
 start "CayenneModeler" "%JAVACMD%" -cp "%DEFAULT_CLASSPATH%" %MAIN_CLASS% %*
+goto end
+
+:end 
 
 :eof
