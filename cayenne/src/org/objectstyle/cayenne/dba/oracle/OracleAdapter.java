@@ -53,14 +53,30 @@ package org.objectstyle.cayenne.dba.oracle;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+import java.util.HashMap;
+
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
 public class OracleAdapter extends JdbcAdapter {
-    
+    protected HashMap sorters = new HashMap();
+
+    public OperationSorter getOpSorter(DataNode node) {
+        synchronized (sorters) {
+            OperationSorter sorter = (OperationSorter) sorters.get(node);
+            if (sorter == null) {
+                sorter = new OperationSorter(node, node.getDataMaps());
+                sorters.put(node, sorter);
+            }
+            return sorter;
+        }
+    }
+
     /** Returns a query string to drop a table corresponding
       * to <code>ent</code> DbEntity. Changes superclass behavior
       * to drop all related foreign key constraints. */
@@ -68,4 +84,3 @@ public class OracleAdapter extends JdbcAdapter {
         return "DROP TABLE " + ent.getName() + " CASCADE CONSTRAINTS";
     }
 }
-
