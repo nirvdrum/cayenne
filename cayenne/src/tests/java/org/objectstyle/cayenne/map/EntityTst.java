@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
@@ -188,5 +189,26 @@ public class EntityTst extends CayenneTestCase {
         assertNotNull(next);
         assertFalse(it.hasNext());
         assertSame(galleryEnt.getAttribute("galleryName"), next);
+    }
+
+    public void testRemoveAttribute() {
+        Entity entity = new Entity() {
+            protected void validateQueryRoot(Query query) {
+            }
+        };
+
+        entity.setName("test");
+        ObjAttribute attribute1 = new ObjAttribute("a1");
+        ObjAttribute attribute2 = new ObjAttribute("a2");
+
+        entity.addAttribute(attribute1);
+        entity.addAttribute(attribute2);
+
+        Collection attributes = entity.getAttributes();
+        assertEquals(2, attributes.size());
+
+        entity.removeAttribute("a1");
+        attributes = entity.getAttributes();
+        assertEquals(1, attributes.size());
     }
 }
