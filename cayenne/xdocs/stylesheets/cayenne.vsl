@@ -15,7 +15,7 @@
     #set ($subbannerfg = "#ffffff")
     #set ($tablethbg = "#cccccc")
     #set ($tabletdbg = "#eeeeee")
-    #set ($panelbg = "#ffff99")
+    #set ($panelbg = "#becece")
     
     #set ($spacer = $project.getChild("spacer").getAttributeValue("href"))
     #set ($logo = $project.getChild("logo").getAttributeValue("href"))
@@ -117,13 +117,14 @@
 #macro ( panel $panel)
 <div align="center">
 <p>
-    <table cellpadding="2" cellspacing="0" border="0" width="80%">
+    <table cellpadding="1" cellspacing="0" border="0" width="85%" bgcolor="#000000">
+    <tr><td><table bgcolor="$panelbg" cellpadding="2" cellspacing="0" border="0" width="100%">
     <tr>
 #if ($panel.getAttributeValue("name"))
     <td colspan="2" bgcolor="$panelbg" align="left"><strong>$panel.getAttributeValue("name")</strong></td></tr>
     <tr><td bgcolor="$panelbg" width="20" align="left">&nbsp;</td>
 #end
-    <td bgcolor="$panelbg" align="left">$panel.getText()</td></tr></table>
+    <td bgcolor="$panelbg" align="left">$panel.getText()</td></tr></table></td></tr></table>
 </p>
 </div>
 #end
@@ -219,9 +220,10 @@ $tag
 #macro ( source $value)
 <div align="left">
 <p>
-    <table cellpadding="2" cellspacing="0" border="0"><tr><td bgcolor="$tabletdbg">
+    <table cellpadding="1" cellspacing="0" border="0" width="85%" bgcolor="#000000">
+    <tr><td><table cellpadding="2" cellspacing="0" border="0" width="100%"><tr><td bgcolor="$tabletdbg">
     <pre>$value.getText()</pre>
-    </td></tr></table>
+    </td></tr></table></td></tr></table>
 </p>
 </div>
 #end
