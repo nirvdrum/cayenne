@@ -1,0 +1,177 @@
+package org.objectstyle.cayenne.gui.datamap;
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */ 
+
+
+import java.awt.*;
+import java.util.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.text.*;
+
+import org.objectstyle.cayenne.gui.PanelFactory;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.util.*;
+
+/** Detail view of the ObjEntity properties. 
+ * @author Michael Misha Shengaout */
+public class DbEntityPane extends JPanel
+implements DocumentListener, ActionListener, DbEntityDisplayListener
+{
+	Mediator mediator;
+	
+	JLabel		nameLabel;
+	JTextField	name;
+	String		oldName;
+	JLabel		catalogLabel;
+	JTextField	catalog;
+	JLabel		schemaLabel;
+	JTextField	schema;
+	JButton 	remove;
+	
+	public DbEntityPane(Mediator temp_mediator) {
+		super();		
+		mediator = temp_mediator;		
+		mediator.addDbEntityDisplayListener(this);
+		// Create and layout components
+		init();
+		// Add listeners
+		name.getDocument().addDocumentListener(this);
+		catalog.getDocument().addDocumentListener(this);
+		schema.getDocument().addDocumentListener(this);
+		remove.addActionListener(this);
+	}
+
+	private void init(){
+		SpringLayout layout = new SpringLayout();
+		this.setLayout(layout);
+
+		nameLabel 	= new JLabel("Entity name: ");
+		name 		= new JTextField(20);
+		catalogLabel= new JLabel("Catalog: ");
+		catalog 	= new JTextField(20);
+		schemaLabel	= new JLabel("Schema: ");
+		schema 		= new JTextField(20);
+
+		Component[] left_comp = new Component[3];
+		left_comp[0] = nameLabel;
+		left_comp[1] = catalogLabel;
+		left_comp[2] = schemaLabel;
+		Component[] right_comp = new Component[3];
+		right_comp[0] = name;
+		right_comp[1] = catalog;
+		right_comp[2] = schema;
+		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
+		Spring pad = Spring.constant(5);
+		Spring ySpring = pad;
+		add(temp);
+		SpringLayout.Constraints cons = layout.getConstraints(temp);
+		cons.setY(ySpring);
+		cons.setX(pad);
+
+		remove = new JButton("Remove");
+		JPanel button_panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		button_panel.add(remove);
+		add(button_panel);
+		ySpring = Spring.sum(Spring.sum(ySpring, pad), cons.getConstraint("South"));
+		cons = layout.getConstraints(button_panel);
+		cons.setY(ySpring);
+		cons.setX(pad);
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		Object src = e.getSource();
+		if (src == remove) {
+			mediator.removeDbEntity(this, mediator.getCurrentDbEntity());
+		}
+	}
+
+	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }
+	public void changedUpdate(DocumentEvent e) { textFieldChanged(e); }
+	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
+
+	private void textFieldChanged(DocumentEvent e) {
+		Document doc = e.getDocument();
+		DataMap map = mediator.getCurrentDataMap();
+		DbEntity current_entity = mediator.getCurrentDbEntity();
+		if (doc == name.getDocument()) {
+			// Change the name of the current db entity
+			GuiFacade.setDbEntityName(map, (DbEntity)current_entity, name.getText());
+			// Make sure new name is sent out to all listeners.
+			EntityEvent event = new EntityEvent(this, current_entity, oldName);
+			oldName = name.getText();
+			mediator.fireDbEntityEvent(event);
+		}
+		else if (doc == catalog.getDocument()) {
+			current_entity.setCatalog(catalog.getText());
+		}
+		else if (doc == schema.getDocument()) {
+			current_entity.setSchema(schema.getText());
+		}
+	}
+	
+	public void currentDbEntityChanged(EntityDisplayEvent e) {
+		DbEntity entity = (DbEntity)e.getEntity();
+		if (null == entity) 
+			return;
+		name.setText(entity.getName());
+		oldName = entity.getName();
+		catalog.setText(entity.getCatalog() != null ? entity.getCatalog() : "");
+		schema.setText(entity.getSchema() != null ? entity.getSchema() : "");
+	}	
+}

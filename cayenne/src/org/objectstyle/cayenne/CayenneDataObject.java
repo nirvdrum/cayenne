@@ -1,0 +1,316 @@
+package org.objectstyle.cayenne;
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */ 
+
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.map.*;
+import java.lang.ref.*;
+import java.util.*;
+import java.util.logging.*;
+import org.objectstyle.util.*;
+
+
+/**
+ * Suggested superclass of Cayenne persistent objects. 
+ *
+ * <p>This implementation of DataObject will use WeakReferences in to-many relationships. This will allow
+ * to clean up memory when needed, while still be preserving the ability to access data on the
+ * other side of the relationship.. To-one relationships are implemented without using WeakReferneces
+ * for access speed (since savings in memory are much smaller then in case of "to-many").</p>
+ */
+public class CayenneDataObject implements DataObject {
+    static Logger logObj = Logger.getLogger(CayenneDataObject.class.getName());
+
+    // used for dependent to one relationships
+    // to indicate that destination relationship was fetched and is null
+    private static final CayenneDataObject nullValue = new CayenneDataObject();
+
+    /** Returns string label for persistence state. Useful for debugging. */
+    public static String persistenceStateString(int persistenceState) {
+        switch(persistenceState) {
+        case PersistenceState.TRANSIENT:
+            return "transient";
+        case PersistenceState.NEW:
+            return "new";
+        case PersistenceState.MODIFIED:
+            return "modified";
+        case PersistenceState.COMMITTED:
+            return "committed";
+        case PersistenceState.HOLLOW:
+            return "hollow";
+        case PersistenceState.DELETED:
+            return "deleted";
+        default:
+            return "unknown";
+        }
+    }
+
+    protected ObjectId objectId;
+    protected transient int persistenceState = PersistenceState.TRANSIENT;
+    protected transient DataContext dataContext;
+    protected HashMap props = new HashMap();
+
+
+    /** Returns a data context this object is registered with, or null
+     * if this object has no associated DataContext */
+    public DataContext getDataContext() {
+        return dataContext;
+    }
+
+    public void setDataContext(DataContext ctxt) {
+        dataContext = ctxt;
+    }
+
+    public ObjectId getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
+    }
+
+    public int getPersistenceState() {
+        return persistenceState;
+    }
+
+    public void setPersistenceState(int newState) {
+        persistenceState = newState;
+    }
+
+
+    protected Object readProperty(String propName) {
+        if(persistenceState == PersistenceState.HOLLOW)
+            dataContext.refetchObject(objectId);
+
+        return readPropertyDirectly(propName);
+    }
+
+    public final Object readPropertyDirectly(String propName) {
+        return props.get(propName);
+    }
+
+
+    protected void writeProperty(String propName, Object val) {
+        if(persistenceState == PersistenceState.COMMITTED)
+            persistenceState = PersistenceState.MODIFIED;
+
+        writePropertyDirectly(propName, val);
+    }
+
+    public final void writePropertyDirectly(String propName, Object val) {
+        props.put(propName, val);
+    }
+
+    public DataObject readToOneDependentTarget(String relName) {
+        Object toOneTarget = readProperty(relName);
+
+        // known to be NULL
+        if(toOneTarget == nullValue)
+            return null;
+
+        // known to be NOT NULL
+        if(toOneTarget != null)
+            return (DataObject)toOneTarget;
+
+
+        // need to fetch
+        SelectQuery sel = dataContext.getQueryHelper().selectRelationshipObjects(objectId, relName);
+        List results = dataContext.performQuery(sel);
+
+        // unexpected
+        if(results.size() > 1)
+            throw new CayenneRuntimeException("error retrieving 'to one' target, found " + results.size());
+
+        // null target
+        if(results.size() == 0) {
+            writePropertyDirectly(relName, nullValue);
+            return null;
+        }
+
+        // found a valid object
+
+        DataObject dobj = (DataObject)results.get(0);
+        writePropertyDirectly(relName, dobj);
+        return dobj;
+    }
+
+    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
+        List relList = (List)readProperty(relName);
+        relList.remove(val);
+
+        if(val != null && setReverse)
+            unsetReverseRelationship(relName, val);
+    }
+
+    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
+        List relList = (List)readProperty(relName);
+        relList.add(val);
+
+        if(val != null && setReverse)
+            setReverseRelationship(relName, val);
+    }
+
+    public void setToOneDependentTarget(String relName, DataObject val) {
+        if(val == null)
+            val = nullValue;
+
+        setToOneTarget(relName, val, true);
+    }
+
+    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
+        DataObject oldTarget = (DataObject)readPropertyDirectly(relName);
+        if(oldTarget == val)
+            return;
+
+        if(setReverse) {
+            // unset old reverse relationship
+            if(oldTarget != null)
+                unsetReverseRelationship(relName, oldTarget);
+
+            // set new reverse relationship
+            if(val != null)
+                setReverseRelationship(relName, val);
+        }
+
+        writeProperty(relName, val);
+    }
+
+
+    /** Initializes reverse relationship from object <code>val</code> to this object.
+      * @param relName name of relationship from this object to <code>val</code>. */
+    protected void setReverseRelationship(String relName, DataObject val) {
+        ObjRelationship rel = (ObjRelationship)dataContext.lookupEntity(objectId.getObjEntityName()).getRelationship(relName);
+        ObjRelationship revRel =  rel.getReverseRelationship();
+        if(revRel != null) {
+            if(revRel.isToMany())
+                val.addToManyTarget(revRel.getName(), this, false);
+            else
+                val.setToOneTarget(revRel.getName(), this, false);
+        }
+    }
+
+    /** Remove current object from reverse relationship of object <code>val</code> to this object.
+      * @param relName name of relationship from this object to <code>val</code>. */
+    protected void unsetReverseRelationship(String relName, DataObject val) {
+        ObjRelationship rel = (ObjRelationship)dataContext.lookupEntity(objectId.getObjEntityName()).getRelationship(relName);
+        ObjRelationship revRel = rel.getReverseRelationship();
+        if(revRel != null) {
+            if(revRel.isToMany())
+                val.removeToManyTarget(revRel.getName(), this, false);
+            else if(revRel.isToDependentEntity())
+                val.setToOneTarget(revRel.getName(), nullValue, false);
+            else
+                val.setToOneTarget(revRel.getName(), null, false);
+        }
+    }
+
+
+    public Map getCommittedSnapshot() {
+        return dataContext.getCommittedSnapshot(this);
+    }
+
+    public Map getCurrentSnapshot() {
+        return dataContext.takeObjectSnapshot(this);
+    }
+
+
+
+    /** A variation of  "toString" method, that may be more efficient in some cases.
+     *  For example when printing a list of objects into the same String. */
+    public StringBuffer toStringBuffer(StringBuffer buf, boolean fullDesc) {
+        // log all properties
+        buf.append('{');
+
+        if(fullDesc)
+            appendProperties(buf);
+
+        buf.append("<oid: ")
+        .append(objectId)
+        .append("; state: ")
+        .append(persistenceStateString(persistenceState))
+        .append(">}\n");
+        return buf;
+    }
+
+    protected void appendProperties(StringBuffer buf) {
+        buf.append("[");
+        Iterator it = props.keySet().iterator();
+        while(it.hasNext()) {
+            Object key = it.next();
+            buf.append('\t').append(key).append(" => ");
+            Object val = props.get(key);
+
+            if(val instanceof CayenneDataObject) {
+                ((CayenneDataObject)val).toStringBuffer(buf, false);
+            } else if(val instanceof List) {
+                buf.append('(')
+                .append(val.getClass().getName())
+                .append(')');
+            } else
+                buf.append(val);
+
+            buf.append('\n');
+        }
+
+        buf.append("]");
+    }
+
+
+    public String toString() {
+        return toStringBuffer(new StringBuffer(), true).toString();
+    }
+}

@@ -1,0 +1,20 @@
+<!ELEMENT project (map+, domain+)>
+
+<!ELEMENT map>
+<!ATTLIST map
+	name CDATA #REQUIRED
+	location CDATA #REQUIRED
+>
+
+<!ELEMENT domain (datanode+)>
+<!ATTLIST domain
+	name CDATA #REQUIRED
+	defaultFlag CDATA #IMPLIED
+>
+
+<!ELEMENT datanode (datamap+)>
+<!ATTLIST datanode
+	name CDATA #REQUIRED
+	location CDATA #REQUIRED
+>
+<!ELEMENT datamap (#PCDATA)>

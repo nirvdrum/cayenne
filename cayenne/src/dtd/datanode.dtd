@@ -1,0 +1,18 @@
+<!ELEMENT datanode (jdbcDriver)>
+
+<!ELEMENT jdbcDriver (driverClass, connectionPool, url, loginInfo)>
+
+<!ELEMENT driverClass (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+
+<!ELEMENT connectionPool (min, max)>
+<!ATTLIST connectionPool
+	min CDATA #IMPLIED
+	max CDATA #IMPLIED
+>
+
+<!ELEMENT loginInfo>
+<!ATTLIST loginInfo
+	username CDATA #IMPLIED
+	password CDATA #IMPLIED
+>

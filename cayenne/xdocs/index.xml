@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<document>
+    <title>Overview</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+        <!-- News section -->
+        <section name="Cayenne News">
+        <p><i>March 16:</i> Cayenne at SourceForge and Freashmeat. Cayenne is still hosted 
+        at objectstyle.org, but we also registered the project at 
+        <a href="http://sourceforge.net/projects/cayenne/">SourceForge.net</a>. Bug tracking, CVS and downloads 
+        will be performed from SourceForge. Also to make release announcements, Cayenne is registered at
+        <a href="http://freshmeat.net/projects/cayenne/">Freshmeat.net</a>.</p>
+        </section>
+        
+        <!-- Welcome section -->
+        <section name="Welcome to Cayenne">
+        <p>Welcome to Cayenne. Our goal is to provide Java developers with opensource 
+        tools to access relational databases in a an object-oriented way.</p>
+        
+        <p>Cayenne includes a framework that adds persistence features to Java objects.
+        It allows mapping classes to database tables. Queries and updates (including 
+        atomic updates of all modified objects) are done with a single method call. 
+        This is a big advantage over writing SQL code in your Java program.
+        Cayenne also provides GUI mapping tool (called CayenneModeler) to reverse-enginner 
+        RDBMS schema and create "data maps" - XML files that contain mapping 
+        between the database and Java classes. CayenneModeler can also generate 
+        Java classes source code to use in your Java application.</p>
+        
+        
+        <p>Cayenne is an opensource project and therefore encourages developer and user 
+        community to participate in development, testing and writing documentation.
+        This way we can produce a better product that will benefit its contributors
+        as well as everybody else.</p>
+        </section>
+        
+        <!-- Status section -->
+        <section name="Status and History">
+        <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in Atlanta. 
+        Working prototype was ready
+        in July. Current version is based on that prototype and is under active development 
+        since December 2001. Right now Cayenne is already a usable tool. Certain things need to
+        be finished and cleaned up to make ALPHA release. But you are welcome to grab a nightly 
+        build or a milestone release of Cayenne already.</p>
+        </section>
+    </body>
+</document>

@@ -1,0 +1,204 @@
+package org.objectstyle.cayenne.access;
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */ 
+
+import org.objectstyle.util.*;
+
+/** Helper JavaBean class that holds datasource login information. */
+public class DataSourceInfo implements Cloneable, java.io.Serializable {
+    protected String userName;
+    protected String password;
+    protected String jdbcDriver;
+    protected String dataSourceUrl;
+    protected String adapterClass;
+    protected int minConnections = 1;
+    protected int maxConnections = 1;
+
+
+    public boolean equals(Object obj) {
+        if(obj == this)
+            return true;
+
+        if(obj == null)
+            return false;
+
+        if(obj.getClass() != this.getClass())
+            return false;
+
+        DataSourceInfo dsi = (DataSourceInfo)obj;
+        if(!Util.nullSafeEquals(this.userName, dsi.userName))
+            return false;
+
+        if(!Util.nullSafeEquals(this.password, dsi.password))
+            return false;
+
+        if(!Util.nullSafeEquals(this.jdbcDriver, dsi.jdbcDriver))
+            return false;
+
+        if(!Util.nullSafeEquals(this.dataSourceUrl, dsi.dataSourceUrl))
+            return false;
+
+        if(!Util.nullSafeEquals(this.adapterClass, dsi.adapterClass))
+            return false;
+
+        if(this.minConnections != dsi.minConnections)
+            return false;
+
+        if(this.maxConnections != dsi.maxConnections)
+            return false;
+
+        return true;
+    }
+
+
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("[")
+        .append(this.getClass().getName())
+        .append(":")
+        .append("\n   user name: ")
+        .append(userName)
+        .append("\n   password: ");
+
+        if(password == null)
+            buf.append("null");
+        else
+            buf.append("**********");
+
+
+        buf.append("\n   driver: ")
+        .append(jdbcDriver)
+        .append("\n   db adapter class: ")
+        .append(adapterClass)
+        .append("\n   url: ")
+        .append(dataSourceUrl)
+        .append("\n   min. connections: ")
+        .append(minConnections)
+        .append("\n   max. connections: ")
+        .append(maxConnections)
+        .append("\n]");
+
+
+        return buf.toString();
+    }
+
+    public String getAdapterClass() {
+        return adapterClass;
+    }
+
+    public void setAdapterClass(String adapterClass) {
+        this.adapterClass = adapterClass;
+    }
+
+    public void setMinConnections(int minConnections) {
+        this.minConnections = minConnections;
+    }
+
+    public int getMinConnections() {
+        return minConnections;
+    }
+
+
+
+    public void setMaxConnections(int maxConnections) {
+        this.maxConnections = maxConnections;
+    }
+
+    public int getMaxConnections() {
+        return maxConnections;
+    }
+
+
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+
+
+    public void setJdbcDriver(String jdbcDriver) {
+        this.jdbcDriver = jdbcDriver;
+    }
+
+    public String getJdbcDriver() {
+        return jdbcDriver;
+    }
+
+
+
+    public void setDataSourceUrl(String dataSourceUrl) {
+        this.dataSourceUrl = dataSourceUrl;
+    }
+
+    public String getDataSourceUrl() {
+        return dataSourceUrl;
+    }
+
+}

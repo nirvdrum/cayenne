@@ -1,0 +1,36 @@
+This is a project structure for cayenne project tree. Ant build files (build.xml) 
+would support this structure.
+
+
+Developer machine view (if developers have IDE-specific files, they should not be checked in to CVS):
+ 
+   -- cayenne/		
+      -- bin/				# common binaries, scripts - put this in the path
+      					# NOT IN CVS! Distribution directory only.
+      -- lib/				# Cayenne istribution library
+      					# NOT IN CVS! Distribution directory only.
+      -- otherlib/			# 3-rd party Java libraries go in to this directory
+      -- doc/				# Documentation 
+      -- src/				# main source tree
+         -- build.xml	    # main project build file...   
+         -- build/		    # NOT IN CVS! Temporary build directory.
+         -- org/
+            -- objectstyle/
+               -- cayenne/
+                  -- other_packages/ 
+      -- tests/				# unit tests source tree
+          -- build.xml		# tests subproject build file...   
+          -- org/
+             -- objectstyle/
+                -- cayenne/
+                   -- other_packages/ 
+      -- build.xml			# master build file...   
+     
+     
+Notes:
+
+Another way of looking at this structure is that "src" is a main project source, 
+"tests" is a subproject. The same format can be used to create other subprojects 
+as well.
+
+

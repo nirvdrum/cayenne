@@ -1,0 +1,140 @@
+package org.objectstyle.cayenne.access.trans;
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */ 
+
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.*;
+import java.util.*;
+import java.sql.*;
+import java.util.logging.*;
+
+
+/** Class implements default translation mechanism of org.objectstyle.cayenne.query.UpdateQuery
+ *  objects to SQL UPDATE statements. */
+public class UpdateTranslator extends QueryAssembler {
+    static Logger logObj = Logger.getLogger(UpdateTranslator.class.getName());
+
+    public UpdateTranslator(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
+        super(engine, con, adapter, query);
+    }
+
+    public String aliasForTable(DbEntity dbEnt) {
+        throw new RuntimeException("aliases not supported");
+    }
+
+
+    public void dbRelationshipAdded(DbRelationship dbRel) {
+        throw new RuntimeException("db relationships not supported");
+    }
+
+
+    /** Method that converts an update query into SQL string */
+    public String createSqlString() throws Exception {
+        StringBuffer queryBuf = new StringBuffer();
+        queryBuf.append("UPDATE ");
+
+        // 1. append table name
+        DbEntity dbEnt = getRootEntity().getDbEntity();
+        queryBuf.append(dbEnt.getName());
+
+        // 2. build "set ..." clause
+        buildSetClause(queryBuf, (UpdateQuery)query);
+
+
+        // 3. build qualifier
+        String qualifierStr = new QualifierTranslator(this).doTranslation();
+        if(qualifierStr != null)
+            queryBuf.append(" WHERE ").append(qualifierStr);
+
+
+        return queryBuf.toString();
+    }
+
+
+    /** Translate updated values and relationships into
+     *  "SET ATTR1 = Val1, ..." SQL statement.
+     */
+    private void buildSetClause(StringBuffer queryBuf, UpdateQuery query) {
+        Map updAttrs = query.getUpdAttributes();
+        // set of keys.. each key is supposed to be ObjAttribute
+        Iterator attrIt  = updAttrs.keySet().iterator();
+
+        if(!attrIt.hasNext())
+            throw new CayenneRuntimeException("Nothing to update.");
+
+
+        DbEntity dbEnt = getRootEntity().getDbEntity();
+        queryBuf.append(" SET ");
+
+        // append updated attribute values
+        boolean appendedSomething = false;
+
+        // now process other attrs in the loop
+        while(attrIt.hasNext()) {
+            String nextKey = (String)attrIt.next();
+            Object attrVal = updAttrs.get(nextKey);
+
+            if(appendedSomething)
+                queryBuf.append(", ");
+
+            queryBuf.append(nextKey).append(" = ?");
+            super.addToParamList((DbAttribute)dbEnt.getAttribute(nextKey), attrVal);
+            appendedSomething = true;
+        }
+    }
+}

@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<document>
+    <title>Contributors</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+        <!-- Contributors section -->
+        <section name="Cayenne Contributors">
+
+            <p>The people listed below have made significant contributions to Cayenne.
+            If you would like to contribute to Cayenne, please go to 
+            <a href="todo.html">this page</a>. There you will find areas that 
+            require help. If you have your own ideas, please feel free to suggest them 
+            on the mailing list.</p>
+
+            <subsection name="Core Team">
+            <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+            </tr>
+            <tr>
+                <td>Andrei Adamchik</td>
+                <td>andrus at objectstyle dot org</td>
+                <td>Original idea, most of the framework code</td>
+            </tr>
+            <tr>
+                <td>Michael Shengaout</td>
+                <td>mshenga at pobox dot org</td>
+                <td>Original idea, GUI tools, map package</td>
+            </tr>
+            </table>
+            </subsection>
+            
+            
+            <subsection name="Contributors">   
+            <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+            </tr>
+            <tr>
+                <td>Andriy Shapochka</td>
+                <td>andriy at logical dash process dot com</td>
+                <td>Original design, early expressions and GUI code</td>
+            </tr>
+            <tr>
+                <td>David Cooper</td>
+                <td>snowbladin at yahoo dot com</td>
+                <td>Site and logos design</td>
+            </tr>
+           <tr>
+                <td>Anton Apolit</td>
+                <td>anton at logical dash process dot com</td>
+                <td>GUI code</td>
+            </tr>
+             <tr>
+                <td>Maria Vashkevich</td>
+                <td>m dot vashkevich at zaval dot org</td>
+                <td>Original Cayenne logo idea</td>
+            </tr>
+            </table>
+            </subsection>
+        </section>
+    </body>
+</document>
+

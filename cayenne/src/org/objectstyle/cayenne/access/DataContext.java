@@ -1,0 +1,759 @@
+
+package org.objectstyle.cayenne.access;
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */ 
+
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.util.*;
+import java.util.logging.*;
+import java.util.*;
+import java.io.*;
+
+
+public class DataContext implements QueryEngine {
+    static Logger logObj = Logger.getLogger(DataContext.class.getName());
+    
+    protected DataDomain domain;
+    protected HashMap registeredMap = new HashMap();
+    protected HashMap committedSnapshots = new HashMap();
+    protected QueryHelper queryHelper = new QueryHelper(this);
+    protected RelationshipDataSource relDataSource = new RelationshipDataSource();
+    
+    
+    public DataContext() {
+        this(null);
+    }
+    
+    public DataContext(DataDomain domain) {
+        this.domain = domain;
+    }
+    
+    /** Returns an object used to build queries within this context */
+    public QueryHelper getQueryHelper() {
+        return queryHelper;
+    }
+    
+    /** Returns parent domain object. */
+    public DataDomain getDomain() {
+        return domain;
+    }
+    
+    /** Returns a list of objects that are registered
+    *  with this DataContext (including objects in all states
+    *  described in PersistenceState interface, except for transient). */
+    public Collection registeredObjects() {
+        return registeredMap.values();
+    }
+    
+    
+    /** Filter array of registered objects to return objects in a certian state */
+    public Collection objectsInState(int state) {
+        ArrayList filteredObjects = new ArrayList();
+        Iterator it = registeredMap.values().iterator();
+        
+        while(it.hasNext()) {
+            DataObject nextObj = (DataObject)it.next();
+            if(nextObj.getPersistenceState() == state)
+                filteredObjects.add(nextObj);
+        }
+        
+        return filteredObjects;
+    }
+    
+    
+    /** Returns a list of objects that are registered
+     *  with this DataContext and have a state PersistenceState.NEW
+     */
+    public Collection newObjects() {
+        return objectsInState(PersistenceState.NEW);
+    }
+    
+    
+    
+    /** Returns a list of objects that are registered
+     *  with this DataContext and have a state PersistenceState.DELETED
+     */
+    public Collection deletedObjects() {
+        return objectsInState(PersistenceState.DELETED);
+    }
+    
+    
+    /** Returns a list of objects that are registered
+     *  with this DataContext and have a state PersistenceState.MODIFIED
+     */
+    public Collection modifiedObjects() {
+        return objectsInState(PersistenceState.MODIFIED);
+    }
+    
+    /** Returns an object for given ObjectId. If object is not registered 
+     * with this context, new object is created and registered. */
+    public DataObject registeredObject(ObjectId oid) {
+        DataObject obj = (DataObject)registeredMap.get(oid);
+        if(obj == null) {
+            try {
+                obj = (DataObject)Class.forName(lookupEntity(oid.getObjEntityName()).getClassName()).newInstance();
+            }
+            catch(Exception ex) {
+                throw new CayenneRuntimeException("Error creating object.", ex);
+            }
+            
+            obj.setObjectId(oid);
+            obj.setPersistenceState(PersistenceState.HOLLOW);
+            obj.setDataContext(this);
+            registeredMap.put(oid, obj);        
+        }
+        
+        return obj;
+    }
+    
+    
+    /** Replaces all object attribute values with snapshot values. */
+    void refreshObjectWithSnapshot(DataObject anObject, Map snapshot) {        
+        ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
+        
+        Map attrMap = ent.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while(it.hasNext()) {
+            String attrName = (String)it.next();
+            ObjAttribute attr = (ObjAttribute)attrMap.get(attrName);
+            anObject.writePropertyDirectly(attrName, snapshot.get(attr.getDbAttribute().getName()));
+        }   
+        
+        Iterator rit = ent.getRelationshipList().iterator();
+        while(rit.hasNext()) {
+            ObjRelationship rel = (ObjRelationship)rit.next();
+            if(rel.isToMany()) {
+                // "to many" relationships have no information to collect from snapshot
+                // rather we need to check if a relationship list exists, if not -
+                // create an empty one.
+                
+                ToManyList relList = new ToManyList(relDataSource, anObject.getObjectId(), rel.getName());
+                anObject.writePropertyDirectly(rel.getName(), relList);
+                continue;
+            }
+            
+            DbRelationship dbRel = (DbRelationship)rel.getDbRelationshipList().get(0);
+            
+            // dependent to one relationship is optional and can be null.
+            if(dbRel.isToDependentPK())
+                continue;
+                
+            Map destMap = dbRel.targetPkSnapshotWithSrcSnapshot(snapshot);
+            if(destMap == null)
+                continue;
+            
+            ObjectId destId = new ObjectId(rel.getTargetEntity().getName(), destMap);
+            anObject.writePropertyDirectly(rel.getName(), registeredObject(destId));
+        }
+        anObject.setPersistenceState(PersistenceState.COMMITTED);
+    }
+    
+    
+    /** Merge (a potentially modified object) with a provided snapshot values. */
+    void mergeObjectWithSnapshot(DataObject anObject, Map snapshot) {
+        if(anObject.getPersistenceState() == PersistenceState.HOLLOW) {
+            refreshObjectWithSnapshot(anObject, snapshot);
+            return;
+        }
+        
+        Map oldSnap = getCommittedSnapshot(anObject);
+        ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
+        
+        Map attrMap = ent.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while(it.hasNext()) {
+            String attrName = (String)it.next();
+            ObjAttribute attr = (ObjAttribute)attrMap.get(attrName);
+            String dbAttrName = attr.getDbAttribute().getName();
+            
+            Object curVal = anObject.readPropertyDirectly(attrName);
+            Object oldVal = oldSnap.get(dbAttrName);
+            Object newVal = snapshot.get(dbAttrName);
+            
+            // if value not modified, update it from snapshot, 
+            // otherwise leave it alone
+            // use reference comparison to detect modifications for speed
+            // this is possible since changing the value even to an equivalent one is 
+            // technically a modfication.... 
+            if(curVal == oldVal) {
+                if((newVal != null && !newVal.equals(curVal))
+                    || (curVal != null && !curVal.equals(newVal)))
+                    
+                    anObject.writePropertyDirectly(attrName, newVal);
+            }
+        }
+    }
+    
+    /** Takes a snapshot of current object state. */
+    public Map takeObjectSnapshot(DataObject anObject) {
+        HashMap map = new HashMap();
+        
+        ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
+        Map attrMap = ent.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while(it.hasNext()) {
+            String attrName = (String)it.next();
+            DbAttribute dbAttr = ((ObjAttribute)attrMap.get(attrName)).getDbAttribute();
+            map.put(dbAttr.getName(), anObject.readPropertyDirectly(attrName));
+        }
+        
+        Map relMap = ent.getRelationshipMap();
+        Iterator itr = relMap.keySet().iterator();
+        while(itr.hasNext()) {
+            String relName = (String)itr.next();
+            ObjRelationship rel = (ObjRelationship)relMap.get(relName);
+            if(rel.isToMany())
+                continue;
+            
+            if(rel.isToDependentEntity())
+                continue;
+            
+            DataObject target = (DataObject)anObject.readPropertyDirectly(relName);
+            if(target == null)
+                continue;
+            
+            DbRelationship dbRel = (DbRelationship)rel.getDbRelationshipList().get(0);
+            Map idParts = target.getObjectId().getIdSnapshot();
+            
+            // this may happen in uncommitted objects
+            if(idParts == null)
+                continue;
+            
+            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+            map.putAll(fk);
+        }
+        
+        // process object id map
+        // we should ignore any object id values if a corresponding attribute
+        // is a part of relationship "toMasterPK", since those values have been 
+        // set above when db relationships where processed.                
+        Map thisIdParts = anObject.getObjectId().getIdSnapshot();
+        if(thisIdParts != null) {
+            // put only thise that do not exist in the map
+            Iterator itm = thisIdParts.keySet().iterator();
+            while(itm.hasNext()) {
+                Object nextKey = itm.next();
+                if(!map.containsKey(nextKey))
+                map.put(nextKey, thisIdParts.get(nextKey));
+            }
+        }
+        return map;
+    }
+    
+    
+    private DataObject registerFetchedSnapshot(ObjEntity objEntity, Map objectSnapshot, boolean refresh) {
+        ObjectId anId = objEntity.objectIdFromSnapshot(objectSnapshot);
+        
+        // this will create a HOLLOW object if it is not registered yet
+        DataObject obj = registeredObject(anId);
+        
+        if(refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {            
+            // we are asked to refresh an existing object with new values
+            mergeObjectWithSnapshot(obj, objectSnapshot);
+            committedSnapshots.put(anId, objectSnapshot);
+        }
+        
+        return obj;
+    }
+    
+   /** Return a snapshot of all object persistent field values as of last
+    *  commit or fetch operation.
+    *
+    *  @return a map of object values with DbAttribute names as keys 
+    *  corresponding to the latest value read from or committed to the database. */
+    public Map getCommittedSnapshot(DataObject dataObject) {
+        return (Map)committedSnapshots.get(dataObject.getObjectId());
+    }
+    
+    /** Instantiates new object and registers it with itself. Object class
+     * is determined from ObjEntity. Object class must have a default constructor. */
+    public DataObject createAndRegisterNewObject(String objEntityName) {
+        String objClassName = lookupEntity(objEntityName).getClassName();
+        DataObject dobj = null;
+        try {
+             dobj = (DataObject)Class.forName(objClassName).newInstance();
+        }
+        catch(Exception ex) {
+            throw new CayenneRuntimeException("Error instantiating object.", ex); 
+        }
+        
+        registerNewObject(dobj, objEntityName);
+        return dobj; 
+    }
+
+    /** Registers new object (that is not persistent yet) with itself.
+     *
+     * @param dataObject new object that we want to make persistent.
+     * @param objEntityName a name of the ObjEntity in the map used to get 
+     *  persistence information for this object.
+     */
+    public void registerNewObject(DataObject dataObject, String objEntityName) {
+        // set "to many" relationship arrays
+        
+        TempObjectId tempId = new TempObjectId(objEntityName);
+        dataObject.setObjectId(tempId);
+        
+        ObjEntity ent = lookupEntity(objEntityName);
+        Iterator it = ent.getRelationshipList().iterator();
+        while(it.hasNext()) {
+            ObjRelationship rel = (ObjRelationship)it.next();
+            if(rel.isToMany()) {
+                ToManyList relList = new ToManyList(relDataSource, tempId, rel.getName());
+                dataObject.writePropertyDirectly(rel.getName(), relList);
+            } 
+        }
+        
+        dataObject.setPersistenceState(PersistenceState.NEW);
+        registeredMap.put(tempId, dataObject);
+        dataObject.setDataContext(this);
+    }
+    
+   /** Notifies data context that a registered object need to be deleted on
+    *  next commit.
+    *
+    * @param deleteObject data object that we want to delete.
+    */
+    public void deleteObject(DataObject deleteObject) {
+        deleteObject.setPersistenceState(PersistenceState.DELETED);
+    }
+    
+    
+    /** Refetches object data for ObjectId. For example, this method is used internally by Cayenne
+     *  to resolve objects in PersistenceState.HOLLOW or just to refresh certain objects. */
+    public DataObject refetchObject(ObjectId oid) {
+        SelectQuery sel = queryHelper.selectObjectForId(oid);
+        List results = this.performQuery(sel);        
+        if(results.size() != 1)
+            throw new CayenneRuntimeException("One and only one object can match object id, found " + results.size());
+        
+        return (DataObject)results.get(0);
+    }
+    
+    /** Check what objects have changed in the context. Generate appropriate
+     *  insert, update and delete queries to commit their state to the database. */
+    public void commitChanges() throws CayenneRuntimeException {
+        commitChanges(null);
+    }
+    
+    /** Check what objects have changed in the context. Generate appropriate
+     *  insert, update and delete queries to commit their state to the database. 
+     *  @param logLevel if logLevel is higher or equals to the level set for 
+     *  org.objectstyle.cayenne.access.QueryLogger, query execution will be logged. */
+    public void commitChanges(Level logLevel) throws CayenneRuntimeException {
+        ArrayList queryList = new ArrayList();
+        ArrayList updObjects = new ArrayList();
+        ArrayList delObjects = new ArrayList();
+        ArrayList insObjects = new ArrayList();
+        HashMap updatedIds = new HashMap();
+        
+        Iterator it = registeredMap.values().iterator();
+        while(it.hasNext()) {
+            DataObject nextObject = (DataObject)it.next();
+            int objectState = nextObject.getPersistenceState();
+            
+            // 1. deal with inserts
+            if(objectState == PersistenceState.NEW) {
+                // create permanent object id
+                // it will be attached to temp. id till the transaction is committed
+                ObjectId permId = createPermId(nextObject);
+                insObjects.add(nextObject);
+            }
+            // 2. deal with deletes
+            else if(objectState == PersistenceState.DELETED) {
+                queryList.add(queryHelper.deleteQuery(nextObject));
+                delObjects.add(nextObject);
+            }
+            // 3. deal with updates
+            else if(objectState == PersistenceState.MODIFIED) {
+                UpdateQuery updateQuery = queryHelper.updateQuery(nextObject);
+                if(updateQuery != null) {
+                    queryList.add(updateQuery);
+                    updObjects.add(nextObject);
+                    
+                    ObjectId updId = updatedId(nextObject.getObjectId(), updateQuery);
+                    if(updId != null)
+                        updatedIds.put(nextObject.getObjectId(), updId);
+                }
+                else
+                    // object was not really modified,
+                    // put this object back in unmodified state right away
+                    nextObject.setPersistenceState(PersistenceState.COMMITTED);
+            }
+        }
+        
+        // now when all inserted objects got their id's, 
+        // lets build insert queries
+        if(insObjects.size() > 0) {
+            Iterator insIt = insObjects.iterator();
+            while(insIt.hasNext()) {
+                DataObject nextObject = (DataObject)insIt.next();
+                queryList.add(queryHelper.insertQuery(takeObjectSnapshot(nextObject), nextObject.getObjectId()));
+            }
+        }
+
+        
+        if(queryList.size() > 0) {
+            CommitProcessor result = new CommitProcessor(logLevel, insObjects, updObjects, delObjects);
+            domain.performQueries(queryList, result);
+            if(!result.isTransactionCommitted())
+                throw new CayenneRuntimeException("Error committing transaction.");
+            else if(result.isTransactionRolledback()) 
+                throw new CayenneRuntimeException("Transaction was rolledback.");
+            
+            Iterator idIt = updatedIds.keySet().iterator();
+            while(idIt.hasNext()) {
+                ObjectId oldId = (ObjectId)idIt.next();
+                ObjectId newId = (ObjectId)updatedIds.get(oldId);
+                DataObject obj = (DataObject)registeredMap.remove(oldId);
+                Object snapshot = committedSnapshots.remove(obj.getObjectId());
+                
+                obj.setObjectId(newId);
+                
+                committedSnapshots.put(newId, snapshot);
+                registeredMap.put(newId, obj);
+                
+            }
+        }
+    }
+    
+    
+    /** Performs a single database select query. */
+    public List performQuery(SelectQuery query) {
+        return performQuery(query, (Level)null);
+    }
+    
+    /** Performs a single database select query. */
+    public List performQuery(SelectQuery query, Level logLevel) {
+        SelectProcessor result = new SelectProcessor(logLevel);
+        domain.performQuery(query, result);
+        return result.getLastResult();
+    }
+    
+    
+    /** Delegates queries execution to parent DataDomain. */
+    public void performQueries(List queries, OperationObserver resultConsumer) {
+        domain.performQueries(queries, resultConsumer);
+    }
+    
+    
+    /** Delegates query execution to parent DataDomain. */
+    public void performQuery(Query query, OperationObserver resultConsumer) {
+        domain.performQuery(query, resultConsumer);
+    }    
+    
+    /** Delegates entity name resolution to parent DataDomain. */
+   	public ObjEntity lookupEntity(String objEntityName) {
+        return domain.lookupEntity(objEntityName);
+    }
+    
+    // returns ObjectId if id needs to be updated 
+    // after UpdateQuery is committed,
+    // or null, if current id is good enough
+    private ObjectId updatedId(ObjectId id, UpdateQuery upd) {
+        Map idMap = id.getIdSnapshot();
+        
+        Map updAttrs = upd.getUpdAttributes();
+        Iterator it = updAttrs.keySet().iterator();
+        
+        HashMap newIdMap = null;
+        while(it.hasNext()) {
+            Object key = it.next();
+            if(!idMap.containsKey(key))
+                continue;
+            
+            if(newIdMap == null)
+                newIdMap = new HashMap(idMap);
+            
+            newIdMap.put(key, updAttrs.get(key));
+        }
+        
+        return (newIdMap != null) ? new ObjectId(id.getObjEntityName(), newIdMap) : null;
+    }
+    
+    private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
+        ObjEntity objEntity = getDomain().lookupEntity(dataObject.getObjectId().getObjEntityName());
+        DbEntity dbEntity = objEntity.getDbEntity();
+        
+        Iterator it = dbEntity.getRelationshipMap().values().iterator();
+        while(it.hasNext()) {
+            DbRelationship dbRel = (DbRelationship)it.next();
+            if(!dbRel.isToMasterPK())
+                continue;
+            
+            
+            ObjRelationship rel = objEntity.getRelationshipForDbRelationship(dbRel);
+            if(rel == null)
+                continue;
+            
+            DataObject targetDo = (DataObject)dataObject.readPropertyDirectly(rel.getName());
+            if(targetDo == null)
+                // this is bad, since we will not be able to obtain PK in any other way
+                // throw an exception
+                throw new CayenneRuntimeException("Null master object, can't create primary key.");
+            
+            Map idMap = targetDo.getObjectId().getIdSnapshot();
+            if(idMap == null)
+                // this is bad, since we will not be able to obtain PK in any other way
+                // throw an exception
+                throw new CayenneRuntimeException("Master object has no PK snapshot, can't create primary key.");
+            
+            
+            map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));            
+        }
+    }
+    
+    /** This method is called when we are about to save a new object to the database.
+     *  It will try to use values from the object where possible, if pk attributes
+     *  are not included in the class, it will call DataNode pk generator to
+     *  provide a primary key from the database.
+     *  Note that at maximum 1 primary key attribute will be fetched from the database.
+     */
+    public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
+        TempObjectId tempId = (TempObjectId)anObject.getObjectId();
+        ObjEntity objEntity = getDomain().lookupEntity(tempId.getObjEntityName());
+        DbEntity dbEntity = objEntity.getDbEntity();
+        DataNode aNode = domain.dataNodeForObjEntity(objEntity);
+        
+        HashMap idMap = new HashMap();
+        // first get values delivered via relationships
+        appendPkFromMasterRelationships(idMap, anObject);
+        
+        boolean autoPkDone = false;
+        Iterator it = dbEntity.getPrimaryKey().iterator();
+        while(it.hasNext()) {
+            DbAttribute attr = (DbAttribute)it.next();
+            
+            // see if it is there already
+            if(idMap.get(attr.getName()) != null)
+                continue;
+            
+            // try object value as PK
+            ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(attr);
+            if(objAttr != null) {
+                idMap.put(attr.getName(), anObject.readPropertyDirectly(objAttr.getName()));
+                continue;
+            }
+            
+            
+            // run PK autogeneration
+            if(autoPkDone)
+                throw new CayenneRuntimeException("Primary Key autogeneration only works for a single attribute.");
+            
+            try {
+                DbAdapter dba = aNode.getAdapter();
+                Object pk = dba.generatePkForDbEntity(aNode, objEntity.getDbEntity());
+                autoPkDone = true;                
+                idMap.put(attr.getName(), pk);
+            }
+            catch(Exception ex) {
+                throw new CayenneRuntimeException("Error generating PK", ex);
+            }
+        }
+        
+        ObjectId permId = new ObjectId(objEntity.getName(), idMap);
+        
+        // note that object registration did not changed (new id is not attached to context, only to temp. oid)
+        tempId.setPermId(permId);
+        return permId;
+    }
+    
+    
+    /** OperationObserver for update, insert and delete queries. It
+     *  establishes transaction for the whole execution batch.
+     *  If transaction succeeds, it updates the state of all objects
+     *  accordingly.
+     */
+    class CommitProcessor extends DefaultOperationObserver {
+        private List updObjects;
+        private List delObjects;
+        private List insObjects;
+        
+        private Level logLevel;
+        
+
+        public CommitProcessor(Level logLevel, List insObjects, List updObjects, List delObjects) {
+            this.logLevel = (logLevel != null) 
+            ? logLevel 
+            : DefaultOperationObserver.DEFAULT_LOG_LEVEL; 
+            
+            this.insObjects = insObjects;
+            this.updObjects = updObjects;
+            this.delObjects = delObjects;
+        }
+        
+        public Level queryLogLevel() {
+            return logLevel;
+        }
+        
+        public boolean useAutoCommit() {
+            return false;
+        }
+        
+        /** Update the state of all objects we were synchronizing
+         *  in this transaction.
+         */
+        public void transactionCommitted() {
+            super.transactionCommitted();
+            
+            Iterator insIt = insObjects.iterator();
+            while(insIt.hasNext()) {
+                // replace temp id's w/perm.
+                DataObject nextObject = (DataObject)insIt.next();
+                TempObjectId tempId = (TempObjectId)nextObject.getObjectId();
+                ObjectId permId = tempId.getPermId();
+                registeredMap.remove(tempId);
+                nextObject.setObjectId(permId);
+                
+                Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
+                committedSnapshots.put(permId, snapshot);
+                registeredMap.put(permId, nextObject);
+                
+                nextObject.setPersistenceState(PersistenceState.COMMITTED);
+            }
+            
+            Iterator delIt = delObjects.iterator();
+            while(delIt.hasNext()) {
+                DataObject nextObject = (DataObject)delIt.next();
+                ObjectId anId = nextObject.getObjectId();
+                registeredMap.remove(anId);
+                committedSnapshots.remove(anId);
+                nextObject.setPersistenceState(PersistenceState.TRANSIENT);
+                nextObject.setDataContext(null);
+            }
+            
+            Iterator updIt = updObjects.iterator();
+            while(updIt.hasNext()) {
+                DataObject nextObject = (DataObject)updIt.next();
+                // refresh this object's snapshot, check if id data has changed
+                Map snapshot = DataContext.this.takeObjectSnapshot(nextObject);
+                
+                DataContext.this.committedSnapshots.put(nextObject.getObjectId(), snapshot);
+                nextObject.setPersistenceState(PersistenceState.COMMITTED);
+            }
+        }
+        
+        
+        public void nextQueryException(Query query, Exception ex) {
+            super.nextQueryException(query, ex);
+            throw new CayenneRuntimeException("Raising from query exception.", ex);
+        }
+        
+        
+        public void nextGlobalException(Exception ex) {
+            super.nextGlobalException(ex);
+            ex.printStackTrace();
+            throw new CayenneRuntimeException("Raising from underlyingQueryEngine exception.", ex);
+        }
+        
+        
+        /** Will do query sorting to try to satisfy DB ref. integrity rules */
+        public List orderQueries(DataNode aNode, List queryList) {
+            OperationSorter sorter = aNode.getAdapter().getOpSorter(aNode);
+            return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
+        }
+    }
+    
+    
+    
+    /** OperationObserver for select queries. Will register bacthes of fetched objects
+     *  with this DataContext
+     */
+    class SelectProcessor extends DefaultOperationObserver {
+        private List lastResult;
+        private Level logLevel;
+        
+        SelectProcessor(Level logLevel) {
+            this.logLevel = (logLevel != null) 
+            ? logLevel 
+            : DefaultOperationObserver.DEFAULT_LOG_LEVEL; 
+        }
+        
+        public Level queryLogLevel() {
+            return logLevel;
+        }
+        
+        public List getLastResult() {
+            return lastResult;
+        }
+        
+        /** Register newly fetched objects with parent instance of DataContext */
+        public void nextSnapshots(Query query, List resultSnapshots) {
+            lastResult = new ArrayList();
+            if(resultSnapshots != null && resultSnapshots.size() > 0) {
+                ObjEntity ent = DataContext.this.lookupEntity(query.getObjEntityName());
+                Iterator it = resultSnapshots.iterator();
+                while(it.hasNext()) {
+                    lastResult.add(DataContext.this.registerFetchedSnapshot(ent, (Map)it.next(), true));
+                }
+            }
+        }
+    }
+    
+    class RelationshipDataSource implements ToManyListDataSource {
+        public void updateListData(ToManyList list) {
+            if(list.getSrcObjectId().isTemporary()) 
+                list.setObjectList(new ArrayList());
+            else {
+                SelectQuery sel = queryHelper.selectRelationshipObjects(list.getSrcObjectId(), list.getRelName());
+                List results = performQuery(sel);
+                list.setObjectList(results);
+            }
+        }
+    }
+}
+

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<driver class="org.gjt.mm.mysql.Driver">
+    <connectionPool min="1" max="1"/>        
+    <url value="jdbc:mysql://noise/cayenne"/>
+</driver>
+
+

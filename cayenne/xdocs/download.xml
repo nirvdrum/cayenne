@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<document>
+    <title>Downloads</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+        <!-- Contributors section -->
+        <section name="Downloads">
+            <p>Cayenne can be downloaded either as binary or as source distribution. 
+            Depending on what kind of user you are, there are the folowing types of 
+            download packages (can be both source and binary).
+            
+            <ul>
+                <li>Release Builds</li>
+                <li>Milestone Builds</li>
+                <li>Nightly Builds</li>
+            </ul>            
+            </p>
+
+            <p>These releases can be obtained from our 
+            <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">download site</a>.
+            </p>
+        </section>
+    </body>
+</document>
+

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<document>
+    <title>Downloads</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+        <!-- CVS section -->
+        <section name="CVS Access">
+            <p>To get the source code, set up your machine for CVS and get CVS/SSH account 
+            by following instructions on <a href="http://objectstyle.org/developer/cvs.html">this page</a>. 
+            Root project module name is "cayenne". To do a check out type from the command line 
+            (or do whatever is needed in your graphic tool):</p>
+
+            <source>cvs -z 5 co cayenne</source>
+        </section>
+        
+        <!-- Compile section -->
+        <section name="Compiling Cayenne">
+            <p>To compile Cayenne, run ant (must be version 1.4.1 or higher) on the main buildfile:</p>
+            <source>cd cayenne
+ant</source>
+
+            <p>To run unit tests do the following (commands are given for UNIX, on Windows do something similar):</p>
+            <source>export CAYENNE_HOME=`pwd`/dist/cayenne
+$CAYENNE_HOME/bin/runtests.sh</source>
+        </section>
+    </body>
+</document>
+

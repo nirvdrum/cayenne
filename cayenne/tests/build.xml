@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<project name="cayenne_tests_sub" default="compile">
+  <property name="src" value="." />
+
+  <target name="clean">
+    <delete dir="${build}" />
+  </target>
+  
+  <target name="prepare">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}/classes" />
+  </target>
+  
+  <target name="compile" depends="prepare">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}/classes">
+         <classpath>
+           <fileset dir="${basedir}/..">
+               <include name="otherlib/**/*.jar"/>
+           </fileset>
+           <pathelement location="${basedir}/../src/build/classes"/>
+         </classpath>
+    </javac>
+    
+
+    
+    <!-- copy resources -->
+    <copy todir="${build}/classes">
+        <fileset dir=".">
+            <include name="config_files/**"/>
+            <include name="test_resources/**"/>
+        </fileset>
+    </copy>
+
+  </target>
+</project>

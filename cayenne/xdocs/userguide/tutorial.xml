@@ -1,0 +1,37 @@
+<document>
+<title>User Guide - Tutorial</title>
+<body>
+		<h1>Cayenne Tutorial</h1>
+		<p>After successfully installing Cayenne, you may want to write your first cayenne application. This tutorial shows a simple step-by-step example of how Cayenne can be used to create database Java applications. These are the steps to follow:</p>
+		<dl>
+			<dt><a href="#create_db">1. Create Database Tables</a></dt>
+			<dt><a href="#create_data_map">2. Create DataMap</a></dt>
+			<dt><a href="#generate_classes">3. Generate Java Classes</a></dt>
+			<dt><a href="#create_app">4. Create Test Java Application</a></dt>
+		</dl>
+		<p></p>
+		<h3></h3>
+		<h3><a name="create_db"></a>1. Create Database Tables</h3>
+		<p>Here is a schema of a sample database that we use to create our first cayenne application:</p>
+		<p></p>
+		<p><img src="images/schema.jpg" border="0" alt="Art Catalog Schema"/></p>
+		<p></p>
+		<p></p>
+		<p></p>
+		<h3><a name="create_data_map"></a>2. Create DataMap</h3>
+		<p>DataMap is an XML file that describes how database tables map to 
+        Java classes in your Cayenne application. It allows Cayenne to 
+        convert JDBS result sets to DataObjects as well as 
+        to automatically create SQL UPDATE, INSERT and DELETE
+        statements based on DataObjects state. In the future Cayenne will have 
+        GUI tools to create DataMaps. For this tutorial a ready-to-go
+        DataMap is provided <a href="code/artmap.xml">here</a>.</p>
+		<p></p>
+		<h3><a name="generate_classes"></a>3. Generate Java Classes</h3>
+		<p>TBD</p>
+		<p></p>
+		<h3><a name="create_app"></a>4. Create Test Java Application</h3>
+		<p>Lets create a simple Swing application that inserts objects into the database and then fetches them back and displays to the user. Then the user can update objects and save his changes.</p>
+
+</body>
+</document>

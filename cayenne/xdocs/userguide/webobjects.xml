@@ -1,0 +1,70 @@
+<document>
+<title>User Guide - Cayenne and WebObjects</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+    
+<body>
+    <section name="4. Cayenne and WebObjects">
+        <subsection name="4.1 Introduction" anchor="intro">
+            <p>For those who have never heard what WebObjects is, here is a little
+            introduction. WebObjects is one of the first and one of the best
+            web application development frameworks. It was created by NeXT (now
+            Apple) in the mid 90's and from the very beginning captured the essense 
+            of web application development needs. There are two areas of WebObjects 
+            strength: presentation layer and database access layer.
+            It hasn't been surpassed in both of these areas even now.
+            Surprisingly, main reason for that is its relative obscurity.</p>
+            
+            <p>Mainstream Java world went the hard way and invented a lot of
+            different solutions to solve 2 basic issues mentioned above: presentation
+            (servlets, JSP) and database access (JDBC). "Standard" Java technologies 
+            can get the job done. The only thing they lack is convenience and 
+            elegance of WebObjects. In short, there is a hard way to do things and there
+            is a WebObjects way.</p>
+            
+            <p>If want to learn more about WebObjects, go to <a href="http://webobjects.com">
+            webobjects.com</a>.</p>
+            
+            <p>So, how is Cayenne related to that? Cayenne's goal was to fill one of the 
+            gaps that mainstream Java world has. Namely object-oriented database access.
+            We used patterns found in WebObjects data layer (EOF) and combined it with 
+            the latest Java technologies to create an opensource database solution
+            for any kind of Java applications.</p>
+        </subsection>
+        
+        <subsection name="4.2 Feature Comparison" anchor="feature">
+            <p> To Be Done </p>
+        </subsection>
+        
+        <subsection name="4.3 Working Together" anchor="together">
+            <p> To Be Done </p>
+        </subsection>
+        
+        <subsection name="4.4 Terms Translation" anchor="terms">
+            <p>Some design patterns used in Cayenne may be familiar to EOF folk. 
+            This section is intended to make Cayenne understanding 
+            easier if you have WebObjects/EOF background. Below Cayenne 
+            terms are defined in WebObjects terms whenever it is possible.</p>
+            
+            <p><cite>DataNode</cite> : EOAdaptor</p>
+            <p><cite>DataDomain</cite> : EOObjectStoreCoordinator</p>
+            <p><cite>DataContext</cite> : EOEditingContext</p>
+            <p><cite>DataObjec</cite>t : EOEnterpriseObject</p>
+            <p><cite>DataMap</cite> : EOModel</p>
+            <p><cite>ObjEntity + DbEntity</cite> : EOEntity</p>
+            <p><cite>ObjRelationship + DbRelationship</cite> : EORelationship</p>
+            <p><cite>ObjAttribute + DbAttribute</cite> : EOAttribute</p>
+            <p><cite>SelectQuery</cite> : EOFetchSpecification</p>
+            <p><cite>InsertQuery, DeleteQuery, UpdateQuery</cite> :
+            no WebObjects analogue, closest thing is 
+            com.webobjects.eoaccess.EODatabaseOperation</p>
+            <p><cite>Expression </cite>: EOQualifier</p>
+        </subsection>
+    </section>
+
+
+
+</body>
+</document>

@@ -1,0 +1,12 @@
+<!ELEMENT datadomains (domain+)>
+<!ELEMENT domain (datanode+)>
+<!ATTLIST domain
+	name CDATA #REQUIRED
+	defaultFlag CDATA #IMPLIED
+>
+<!ELEMENT datanode (nodeConfigUrl, mapConfigUrl+)>
+<!ATTLIST datanode
+	name CDATA #REQUIRED
+>
+<!ELEMENT nodeConfigUrl (#PCDATA)>
+<!ELEMENT mapConfigUrl  (#PCDATA)>

@@ -1,0 +1,54 @@
+<!ELEMENT data-map (db-entity+, obj-entity*, db-relationship*, obj-relationship*)>
+<!ELEMENT db-entity (db-attribute+)>
+<!ATTLIST db-entity
+	name CDATA #REQUIRED
+	schema CDATA #IMPLIED
+	catalog CDATA #IMPLIED
+>
+<!ELEMENT db-attribute EMPTY>
+<!ATTLIST db-attribute
+	name CDATA #REQUIRED
+	isPrimaryKey (true | false) "false"
+	isMandatory (true | false) "false"
+	type (CHAR | VARCHAR | LONGVARCHAR | NUMERIC | DECIMAL | BIT | TINYINT | SMALLINT | MONEY | SMALLMONEY | INTEGER | BIGINT | REAL | FLOAT | DOUBLE | BINARY | VARBINARY | LONGVARBINARY | DATE | TIME | TIMESTAMP) "VARCHAR"
+	length CDATA #IMPLIED
+	precision CDATA #IMPLIED
+>
+<!ELEMENT obj-entity (obj-attribute+)>
+<!ATTLIST obj-entity
+	name CDATA #REQUIRED
+	className CDATA #REQUIRED
+	dbEntityName CDATA #IMPLIED
+>
+<!ELEMENT obj-attribute EMPTY>
+<!ATTLIST obj-attribute
+	name CDATA #REQUIRED
+	db-attribute-name CDATA #IMPLIED
+	type CDATA #REQUIRED
+>
+<!ELEMENT obj-relationship (db-relationship-ref*)>
+<!ATTLIST obj-relationship
+	name CDATA #REQUIRED
+	source CDATA #REQUIRED
+	target CDATA #REQUIRED
+	toMany (true | false) "false"
+>
+<!ELEMENT db-relationship-ref EMPTY>
+<!ATTLIST db-relationship-ref
+	source CDATA #REQUIRED
+	target CDATA #REQUIRED
+	name   CDATA #REQUIRED
+>
+<!ELEMENT db-relationship (db-attribute-pair+)>
+<!ATTLIST db-relationship
+	source CDATA #REQUIRED
+	target CDATA #REQUIRED
+	toMany (true | false) "false"
+	toDependentPK (true | false) "false"
+	name CDATA #REQUIRED
+>
+<!ELEMENT db-attribute-pair EMPTY>
+<!ATTLIST db-attribute-pair
+	source CDATA #REQUIRED
+	target CDATA #REQUIRED
+>

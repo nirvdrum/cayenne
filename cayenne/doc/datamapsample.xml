@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XML Spy v3.5 NT (http://www.xmlspy.com) by Michael
+Shengaout (Reusable Software Components, LLC.) -->
+<!DOCTYPE data-map SYSTEM "http://objectstyle.org/dtd/datamap.dtd">
+<data-map>
+  <db-entity name="GALLERY">
+    <db-attribute isPrimaryKey="true" name="GALLERY_ID" type=
+    "INTEGER" isMandatory="true"/>
+    <db-attribute name="GALLERY_NAME" type="VARCHAR"
+    length="100" isMandatory="true"/>
+  </db-entity>
+  <db-entity name="EXHIBIT">
+    <db-attribute name="EXHIBIT_ID" type="INTEGER"
+    isMandatory="true" isPrimaryKey="true"/>
+    <db-attribute name="GALLERY_ID" type="INTEGER"
+    isMandatory="true"/>
+    <db-attribute name="OPENING_DATE" type="DATE"
+    isMandatory="true"/>
+    <db-attribute name="CLOSING_DATE" type="DATE"
+    isMandatory="true"/>
+  </db-entity>
+  <db-entity name="ARTIST">
+    <db-attribute name="ARTIST_ID" type="INTEGER" isMandatory=
+    "true" isPrimaryKey="true"/>
+    <db-attribute name="ARTIST_NAME" type="VARCHAR" length=
+    "255" isMandatory="true"/>
+    <db-attribute name="DATE_OF_BIRTH" type="DATE"/>
+  </db-entity>
+  <db-entity name="ARTIST_EXHIBIT">
+    <db-attribute name="ARTIST_ID" type="INTEGER" isMandatory=
+    "true" isPrimaryKey="true"/>
+    <db-attribute name="EXHIBIT_ID" type="INTEGER"
+    isMandatory="true" isPrimaryKey="true"/>
+  </db-entity>
+  <db-entity name="PAINTING">
+    <db-attribute name="PAINTING_ID" type="INTEGER"
+    isMandatory="true" isPrimaryKey="true"/>
+    <db-attribute name="GALLERY_ID" type="INTEGER"
+    isMandatory="true"/>
+    <db-attribute name="ARTIST_ID" type="INTEGER" isMandatory=
+    "true"/>
+    <db-attribute name="ESTIMATED_PRICE" type="DECIMAL"/>
+  </db-entity>
+  <db-entity name="PAINTING_INFO">
+    <db-attribute name="PAINTING_ID" type="INTEGER"
+    isMandatory="true" isPrimaryKey="true"/>
+    <db-attribute name="TEXT_REVIEW" type="CHAR"/>
+    <db-attribute name="IMAGE_BLOB" type="BINARY"/>
+  </db-entity>
+  <!-- OBJECT ENTITIES
+  -->
+  <obj-entity name="Gallery" className="org.objectstyle.art.Gallery">
+    <obj-attribute name="galleryName" type="java.lang.String"/>
+  </obj-entity>
+  <obj-entity name="Exhibit" className="org.objectstyle.art.Exhibit">
+    <obj-attribute name="openingDate" type="java.util.Date"/>
+    <obj-attribute name="closingDate" type="java.util.Date"/>
+  </obj-entity>
+  <obj-entity name="Artist" className="org.objectstyle.art.Artist">
+    <obj-attribute name="name" type="java.lang.String"/>
+    <obj-attribute name="dob" type="java.util.Date"/>
+  </obj-entity>
+  <obj-entity name="Painting" className="org.objectstyle.art.Painting">
+    <obj-attribute name="price" type="java.math.BigDecimal"/>
+  </obj-entity>
+  <obj-entity name="PaintingInfo" className=
+  "org.objectstyle.art.PaintingInfo">
+    <obj-attribute name="textReview" type="java.lang.String"/>
+    <obj-attribute name="imageBlob" type="byte[]"/>
+  </obj-entity>
+  <!-- DB RELATIONSHIPS -->
+  <db-relationship source="ARTIST" target="ARTIST_EXHIBIT">
+    <db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+  </db-relationship>
+  <db-relationship source="ARTIST_EXHIBIT" target="ARTIST">
+    <db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+  </db-relationship>
+  <db-relationship source="ARTIST_EXHIBIT" target="EXHIBIT">
+    <db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
+  </db-relationship>
+  <db-relationship source="EXHIBIT" target="ARTIST_EXHIBIT">
+    <db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
+  </db-relationship>
+  <db-relationship source="GALLERY" target="EXHIBIT">
+    <db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"
+    />
+  </db-relationship>
+  <db-relationship source="EXHIBIT" target="GALLERY">
+    <db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"
+    />
+  </db-relationship>
+  <db-relationship source="GALLERY" target="PAINTING">
+    <db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"
+    />
+  </db-relationship>
+  <db-relationship source="PAINTING" target="GALLERY">
+    <db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"
+    />
+  </db-relationship>
+  <db-relationship source="ARTIST" target="PAINTING">
+    <db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+  </db-relationship>
+  <db-relationship source="PAINTING" target="ARTIST">
+    <db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+  </db-relationship>
+  <db-relationship source="PAINTING" target="PAINTING_INFO">
+    <db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"
+    />
+  </db-relationship>
+  <db-relationship source="PAINTING_INFO" target="PAINTING">
+    <db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"
+    />
+  </db-relationship>
+  <!-- OBJ RELATIONSHIPS -->
+  <obj-relationship name="dummy" source="Artist" target="Exhibit" toMany="true">
+    <db-relationship-ref source="ARTIST" target=
+    "ARTIST_EXHIBIT"/>
+    <db-relationship-ref source="ARTIST_EXHIBIT" target=
+    "EXHIBIT"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Exhibit" target="Artist" toMany="true">
+    <db-relationship-ref source="EXHIBIT" target=
+    "ARTIST_EXHIBIT"/>
+    <db-relationship-ref source="ARTIST_EXHIBIT" target=
+    "ARTIST"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Gallery" target="Exhibit" toMany="true">
+    <db-relationship-ref source="GALLERY" target="EXHIBIT"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Exhibit" target="Gallery">
+    <db-relationship-ref source="EXHIBIT" target="GALLERY"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Gallery" target="Painting" toMany="true">
+    <db-relationship-ref source="GALLERY" target="PAINTING"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Painting" target="Gallery">
+    <db-relationship-ref source="PAINTING" target="GALLERY"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Artist" target="Painting" toMany="true">
+    <db-relationship-ref source="ARTIST" target="PAINTING"/>
+  </obj-relationship>
+  <obj-relationship name="dummy" source="Painting" target="Artist">
+    <db-relationship-ref source="PAINTING" target="ARTIST"/>
+  </obj-relationship>
+</data-map>
+

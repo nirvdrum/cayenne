@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+   DataNode access file containing usernames and passwords for data nodes
+   Default name in real projects is ".cayennepass.xml"
+-->
+
+<datanodeAccess>
+    <datanode name="ora1">
+       <loginInfo userName="dbUser1" password="pass" />
+     </datanode>
+    <datanode name="syb2">
+       <loginInfo userName="dbUser2" password="pass" />
+     </datanode>
+     <datanode name="ora3">
+       <loginInfo userName="dbUser3" password="pass" />
+     </datanode>
+</datanodeAccess>
+

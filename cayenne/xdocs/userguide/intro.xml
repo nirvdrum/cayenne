@@ -1,0 +1,57 @@
+<document>
+<title>User Guide - Introduction</title>
+<body>
+    <section name="1. Introduction">
+    
+		<subsection name="1.1 About Cayenne" anchor="about">
+            <p>Cayenne is a free Java object-relational (O/R) persistence framework.
+            Its goal is to provide Java developers with commercial quality opensource
+            tools to work with relational databases in an object-oriented way.
+           </p>
+
+            <p>Usually, a persistence framework creates
+            an interface from your program to the relational database. Such interface
+            make database access more "transparent", since it is based on object concepts 
+            rather than thinly wrapped SQL. Cayenne provides this and more. First,
+            "transparent" does not mean that you can't do what you used to do with SQL. 
+            You still can. Also Cayenne includes GUI tool to automate and streamline most 
+            mapping tasks. Cayenne allows tying multiple database
+			into what looks to the application like a single data source. Cayenne
+			allows issuing a direct SQL query, calling stored procedures, setting
+			the automatic primary key generation, caching policy, integrating
+			with EJB-s, and other things. Some of the ideas used in Cayenne
+			have been inspired by the persistence mechanism of NeXT' (and now
+			Apple's) WebObjects application server.
+            </p>
+            
+            <p>Cayenne may help to reduce the development time in any project with
+			the frequently changed business requirements and as a result
+			database structure; it is very useful in the projects where data
+			comes from the multiple databases. Even if the database structure
+			doesn't change frequently, it will help to reduce the development time
+			for writing data retrieval and saving logic.
+            </p>
+            
+            <p>Cayenne is the tool created by the programmer community for the
+			programmer community. Though it will eventually be a very easy tool
+			to use, it is not an easy tool to create. If you can think of the feature,
+			which would improve it, please let us know - we will be glad to
+			incorporate it in the future versions. But if you are a seasoned
+			programmer willing to commit your time and energy for something
+			which will benefit thousands of people, we will be particularly glad to
+			hear from you.
+            </p>
+        </subsection>
+        
+        <subsection name="1.2 Contributors" anchor="contrib">
+            <p>Latest list of contributors is located <a href="../contributors.html">here</a>.</p>
+        </subsection>
+        
+        <subsection name="1.3 License" anchor="license">
+            <p>This software is distributed and should be used on terms of Apache software license. 
+            In short, it is free of charge, and unrestricted for commercial use as well. Full license text
+            can be found <a href="../LICENSE">here</a>.</p>
+        </subsection>
+    </section>
+</body>
+</document>

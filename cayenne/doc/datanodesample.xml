@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- 
+    Node connection info is specified either through "datasource" tag, or
+    "jdbcDriver" tag. To demonstrate this, 2 data nodes are shown. In a 
+    valid configuration file only one data node can be described 
+-->
+
+<!-- 
+    DataSource does its own pooling - app server scenario 
+-->
+<datanode>
+    <factoryClass>org.objectstyle.cayenne.access.DataNodeFactoryImpl</factoryClass>
+    <datasource>
+        <url>jdbc/db1</url>
+        <loginInfo userName="dbUser" password="pass" />
+    </datasource>
+</datanode>
+
+<!-- 
+    We are doing pooling ourselves with varying levels of 
+    help from the driver.
+-->
+<datanode>
+    <factoryClass>org.objectstyle.cayenne.access.DataNodeFactoryImpl</factoryClass>
+    <queryTranslator>org.objectstyle.cayenne.access.sql.JdbcQueryTranslator</queryTranslator>
+  <pkGenerator>org.objectstyle.cayenne.access.sql.PkGenerator</pkGenerator>
+    <!-- 
+     JDBC vendor might have DataSource implementations of its own...
+     We will use them if we can.
+    -->
+     
+    <jdbcDriver>
+        <driverClass>com.bla.bla.Driver</driverClass>
+        <datasourceClass>com.bla.bla.DataSource</datasourceClass>
+        <pooledDatasourceClass>com.bla.bla.PooledDataSource</pooledDatasourceClass>
+        <connectionPool min="2" max="5"/>        
+        <url>jdbc/db1</url>
+        <loginInfo userName="dbUser" password="pass" />
+    </jdbcDriver>
+</datanode>
+
+

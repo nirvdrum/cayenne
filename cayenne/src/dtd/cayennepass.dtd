@@ -1,0 +1,12 @@
+<!ELEMENT datanodeAccess (datanode+)>
+
+<!ELEMENT datanode (loginInfo)>
+<!ATTLIST datanode
+	name CDATA #REQUIRED
+>
+
+<!ELEMENT loginInfo>
+<!ATTLIST loginInfo
+	username CDATA #IMPLIED
+	password CDATA #IMPLIED
+>
