@@ -59,6 +59,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -114,57 +115,63 @@ public abstract class Fault implements Serializable {
          */
         public Object resolveFault(DataObject sourceObject, String relationshipName) {
             DataContext context = sourceObject.getDataContext();
+            EntityResolver resolver = context.getEntityResolver();
 
-            ObjEntity entity = context.getEntityResolver().lookupObjEntity(sourceObject);
-            ObjRelationship rel =
+            ObjEntity entity = resolver.lookupObjEntity(sourceObject);
+            ObjRelationship relationship =
                 (ObjRelationship) entity.getRelationship(relationshipName);
 
             // create HOLLOW object if we can, or do a fetch if we can't
-            ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
+            // criteria that requires fully resolving an object are:
 
-            // handle regular to-one relationship
+            // 1. Target ObjectId can't be fully expressed using the values 
+            //    from source object snapshot or
+            // 2. Target object has subclasses, and it is not clear which class
+            //    ro instantiate.
 
-            // dependent to one relationship is optional
-            // use fault, since we do not know whether it is null or not...
-            if (!rel.isSourceIndependentFromTargetChange()) {
-                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+            ObjEntity targetEntity = (ObjEntity) relationship.getTargetEntity();
+            if (relationship.isSourceIndependentFromTargetChange()
+                || resolver.lookupInheritanceTree(targetEntity) != null) {
 
-                Class targetClass =
-                    targetEntity.getJavaClass(Configuration.getResourceLoader());
-                ObjectId id =
-                    context
-                        .getObjectStore()
-                        .getSnapshot(sourceObject.getObjectId(), context)
-                        .createTargetObjectId(targetClass, dbRel);
-                return (id != null) ? context.registeredObject(id) : null;
+                // TODO: stop using selecteRelationshipObjects, since it performs
+                // extra lookups for objects that have been resolved here
+
+                // can't create HOLLOW, do a fetch
+                SelectQuery select =
+                    QueryUtils.selectRelationshipObjects(
+                        context,
+                        sourceObject,
+                        relationshipName);
+                select.setFetchLimit(2);
+
+                List objects = context.performQuery(select);
+
+                if (objects.isEmpty()) {
+                    return null;
+                }
+                else if (objects.size() == 1) {
+                    return objects.get(0);
+                }
+                else {
+                    throw new CayenneRuntimeException(
+                        "Error resolving to-one fault. "
+                            + "More than one object found. "
+                            + "Fault entity: "
+                            + targetEntity.getName());
+                }
             }
 
-            // TODO: stop using selecteRelationshipObjects, since it performs
-            // extra lookups for objects that have been resolved here
-
-            // can't create HOLLOW, do a fetch
-            SelectQuery select =
-                QueryUtils.selectRelationshipObjects(
-                    context,
-                    sourceObject,
-                    relationshipName);
-            select.setFetchLimit(2);
-
-            List objects = context.performQuery(select);
-
-            if (objects.isEmpty()) {
-                return null;
-            }
-            else if (objects.size() == 1) {
-                return (DataObject) objects.get(0);
-            }
-            else {
-                throw new CayenneRuntimeException(
-                    "Error resolving to-one fault. "
-                        + "More than one object found. "
-                        + "Fault entity: "
-                        + targetEntity.getName());
-            }
+            // return HOLLOW
+            DbRelationship dbRel =
+                (DbRelationship) relationship.getDbRelationships().get(0);
+            Class targetClass =
+                targetEntity.getJavaClass(Configuration.getResourceLoader());
+            ObjectId id =
+                context
+                    .getObjectStore()
+                    .getSnapshot(sourceObject.getObjectId(), context)
+                    .createTargetObjectId(targetClass, dbRel);
+            return (id != null) ? context.registeredObject(id) : null;
         }
 
     }

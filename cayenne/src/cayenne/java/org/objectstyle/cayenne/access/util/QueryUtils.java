@@ -360,8 +360,10 @@ public class QueryUtils {
             buf.append(reverse.getName());
         }
 
-        SelectQuery sel = new SelectQuery(destEnt);
-        sel.setQualifier(ExpressionFactory.matchDbExp(buf.toString(), source));
-        return sel;
+        SelectQuery select = new SelectQuery(destEnt);
+        select.setQualifier(ExpressionFactory.matchDbExp(buf.toString(), source));
+        // resolve inheritance
+        select.setResolvingInherited(true);
+        return select;
     }
 }

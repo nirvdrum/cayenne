@@ -350,7 +350,8 @@ public class EntityResolver {
 
     /**
      * Returns EntityInheritanceTree representing inheritance hierarchy 
-     * of an ObjEntity.
+     * that includes a give ObjEntity as root, and all its subentities.
+     * If ObjEntity has no known subentities, null is returned.
      * 
      * @since 1.1
      */
