@@ -224,16 +224,22 @@ public class DbEntityPane
 			DbEntity current = mediator.getCurrentDbEntity();
 
 			if (current instanceof DerivedDbEntity) {
+				DerivedDbEntity derived = (DerivedDbEntity) current;
 				String name = (String) parentEntities.getSelectedItem();
 
 				DbEntity ent =
 					(name != null && name.trim().length() > 0)
 						? mediator.getCurrentDataMap().getDbEntity(name, true)
 						: null;
-				((DerivedDbEntity) current).setParentEntity(ent);
 
-				EntityEvent event = new EntityEvent(this, current);
-				mediator.fireDbEntityEvent(event);
+				if (ent != derived.getParentEntity()) {
+					derived.setParentEntity(ent);
+					derived.resetToParentView();
+					MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
+
+					EntityEvent event = new EntityEvent(this, current);
+					mediator.fireDbEntityEvent(event);
+				}
 			}
 
 		} else if (parentLabel == e.getSource()) {

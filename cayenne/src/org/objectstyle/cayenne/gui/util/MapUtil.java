@@ -121,6 +121,12 @@ public class MapUtil {
 		rel.setName(newName);
 		entity.addRelationship(rel);
 	}
+	
+	
+	public void setParentEntity(DerivedDbEntity derived, DbEntity parent) {
+		
+	}
+	
 
 	/**
 	 * Cleans any mappings of ObjEntities, ObjAttributes, 
