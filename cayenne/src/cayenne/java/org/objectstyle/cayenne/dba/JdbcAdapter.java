@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
 import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
+import org.objectstyle.cayenne.access.trans.*;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
@@ -98,10 +99,10 @@ import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
-/** 
- * A generic DbAdapter implementation. 
+/**
+ * A generic DbAdapter implementation.
  * Can be used as a default adapter or as
- * a superclass of a concrete adapter implementation.  
+ * a superclass of a concrete adapter implementation.
  *
  * @author Andrei Adamchik
  */
@@ -112,6 +113,9 @@ public class JdbcAdapter implements DbAdapter {
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap typeConverter;
     protected QualifierTranslatorFactory qualifierFactory;
+    protected BatchInterpreter insertBatchInterpreter;
+    protected BatchInterpreter deleteBatchInterpreter;
+    protected BatchInterpreter updateBatchInterpreter;
 
     public JdbcAdapter() {
         // create Pk generator
@@ -121,10 +125,10 @@ public class JdbcAdapter implements DbAdapter {
         qualifierFactory = new QualifierTranslatorFactory();
     }
 
-    /** 
+    /**
      * Creates and returns a primary key generator. This factory
      * method should be overriden by JdbcAdapter subclasses to
-     * provide custom implementations of PKGenerator. 
+     * provide custom implementations of PKGenerator.
      */
     protected PkGenerator createPkGenerator() {
         return new JdbcPkGenerator();
@@ -149,7 +153,7 @@ public class JdbcAdapter implements DbAdapter {
         }
     }
 
-    /** 
+    /**
      * Returns a class of the query translator that
      * should be used to translate the query <code>q</code>
      * to SQL. Exists mainly for the benefit of subclasses
@@ -185,17 +189,17 @@ public class JdbcAdapter implements DbAdapter {
         return true;
     }
 
-    /** 
+    /**
      * Returns a SQL string to drop a table corresponding
-     * to <code>ent</code> DbEntity. 
+     * to <code>ent</code> DbEntity.
      */
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getFullyQualifiedName();
     }
 
-    /** 
+    /**
      * Returns a SQL string that can be used to create database table
-     * corresponding to <code>ent</code> parameter. 
+     * corresponding to <code>ent</code> parameter.
      */
     public String createTable(DbEntity ent) {
         // later we may support view creation
@@ -301,9 +305,9 @@ public class JdbcAdapter implements DbAdapter {
         return buf.toString();
     }
 
-    /** 
+    /**
      * Returns a SQL string that can be used to create
-     * a foreign key constraint for the relationship. 
+     * a foreign key constraint for the relationship.
      */
     public String createFkConstraint(DbRelationship rel) {
         StringBuffer buf = new StringBuffer();
@@ -382,5 +386,32 @@ public class JdbcAdapter implements DbAdapter {
 
     public String tableTypeForView() {
         return "VIEW";
+    }
+
+    public BatchInterpreter getInsertBatchInterpreter() {
+      if (insertBatchInterpreter == null) {
+        insertBatchInterpreter = new BatchInterpreter();
+        insertBatchInterpreter.setAdapter(this);
+        insertBatchInterpreter.setQueryBuilder(new InsertBatchQueryBuilder(this));
+      }
+      return insertBatchInterpreter;
+    }
+
+    public BatchInterpreter getDeleteBatchInterpreter() {
+      if (deleteBatchInterpreter == null) {
+        deleteBatchInterpreter = new BatchInterpreter();
+        deleteBatchInterpreter.setAdapter(this);
+        deleteBatchInterpreter.setQueryBuilder(new DeleteBatchQueryBuilder(this));
+      }
+      return deleteBatchInterpreter;
+    }
+
+    public BatchInterpreter getUpdateBatchInterpreter() {
+      if (updateBatchInterpreter == null) {
+        updateBatchInterpreter = new BatchInterpreter();
+        updateBatchInterpreter.setAdapter(this);
+        updateBatchInterpreter.setQueryBuilder(new UpdateBatchQueryBuilder(this));
+      }
+      return updateBatchInterpreter;
     }
 }

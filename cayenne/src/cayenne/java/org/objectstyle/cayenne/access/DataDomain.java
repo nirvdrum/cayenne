@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -73,16 +73,16 @@ import org.objectstyle.cayenne.query.Query;
 /**
  * DataDomain is Cayenne "router". It has zero or more DataNodes that work
  * with data sources. For each query coming to DataDomain, an appropriate node
- * is selected and query is forwarded to this node. This way DataDomain creates 
- * single data source abstraction hiding multiple physical data sources from the 
+ * is selected and query is forwarded to this node. This way DataDomain creates
+ * single data source abstraction hiding multiple physical data sources from the
  * user.
- * 
+ *
  * Other functions of DataDomain are:
  * <ul>
  * <li>Factory of DataContexts
  * <li>Storage of DataMaps
  * </ul>
- * 
+ *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  *
@@ -102,7 +102,7 @@ public class DataDomain implements QueryEngine {
 	protected Map maps = Collections.synchronizedMap(new HashMap());
 
 	/** Stores mapping of data nodes to ObjEntity names.
-	  * Its goal is to speed up lookups for data operation 
+	  * Its goal is to speed up lookups for data operation
 	  * switching. */
 	protected Map nodesByEntityName = Collections.synchronizedMap(new HashMap());
 
@@ -137,7 +137,7 @@ public class DataDomain implements QueryEngine {
 		return (DataMap) maps.get(mapName);
 	}
 
-	/** 
+	/**
 	 * Unregisters DataMap matching <code>name</code> parameter.
 	 * Also removes map from any child DataNodes that use it.
 	 */
@@ -236,6 +236,10 @@ public class DataDomain implements QueryEngine {
 			dataNodes.clear();
 			nodesByEntityName.clear();
             nodesByDbEntityName.clear();
+            if (entityResolver != null) {
+              entityResolver.clearCache();
+              entityResolver = null;
+            }
 		}
 	}
 
@@ -278,7 +282,7 @@ public class DataDomain implements QueryEngine {
 		return (DataNode) dataNodes.get(nodeName);
 	}
 
-	/** 
+	/**
 	 * Returns DataNode that should handle database operations for
 	 * a specified <code>objEntityName</code>. Method is synchronized
 	 * since it can potentially update the index of DataNodes.
@@ -329,15 +333,15 @@ public class DataDomain implements QueryEngine {
 		}
 	}
 
-	/** 
+	/**
 	 * Returns DataNode that should handle database operations for
-	 * a specified <code>objEntity</code>. 
+	 * a specified <code>objEntity</code>.
 	 */
 	public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
 		return dataNodeForObjEntityName(objEntity.getName());
 	}
 
-	/** Returns ObjEntity whose name matches <code>name</code> parameter. 
+	/** Returns ObjEntity whose name matches <code>name</code> parameter.
      * @deprecated use getEntityResolver.lookupObjEntity()*/
 	public ObjEntity lookupEntity(String objEntityName) {
 		return this.getEntityResolver().lookupObjEntity(objEntityName);
@@ -348,7 +352,7 @@ public class DataDomain implements QueryEngine {
 	}
 
 	public synchronized DataNode dataNodeForDbEntityName(String dbEntityName) {
-	
+
         DataNode node = (DataNode) nodesByDbEntityName.get(dbEntityName);
 
         // if lookup fails, it may mean that internal index
@@ -359,11 +363,11 @@ public class DataDomain implements QueryEngine {
             return (DataNode) nodesByDbEntityName.get(dbEntityName);
         } else {
             return node;
-        }		
+        }
 	}
 
-	/** 
-	 * Returns a DataMap that contains DbEntity matching the 
+	/**
+	 * Returns a DataMap that contains DbEntity matching the
 	 * <code>entityName</code> parameter.
 	 */
 	public DataMap getMapForDbEntity(String dbEntityName) {
@@ -378,7 +382,7 @@ public class DataDomain implements QueryEngine {
 	}
 
 	/**
-	 * Returns a DataMap that contains ObjEntity matching the 
+	 * Returns a DataMap that contains ObjEntity matching the
 	 * <code>entityName</code> parameter.
 	 */
 	public DataMap getMapForObjEntity(String objEntityName) {
@@ -446,4 +450,12 @@ public class DataDomain implements QueryEngine {
 		}
 		return entityResolver;
 	}
+
+    public Iterator dataMapIterator() {
+      return maps.values().iterator();
+    }
+
+    public void clearDataMaps() {
+      maps.clear();
+    }
 }

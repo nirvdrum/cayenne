@@ -56,74 +56,72 @@
 
 package org.objectstyle.cayenne.dba;
 
-import java.util.List;
+import java.util.*;
+import java.sql.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.query.*;
 
-/**
- * Defines methods to support automatic primary key generation.
- *
- * @author Andrei Adamchik
- */
-public interface PkGenerator {
+public class BatchInterpreter {
+  private DbAdapter adapter;
+  private BatchQueryBuilder queryBuilder;
 
-    /**
-     * Generates necessary database objects to provide automatic primary
-     * key support.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities that require primary key autogeneration support
-     */
-    public void createAutoPk(DataNode node, List dbEntities) throws Exception;
+  public void setAdapter(DbAdapter adapter) {
+    this.adapter = adapter;
+  }
+  public DbAdapter getAdapter() {
+    return adapter;
+  }
+  public BatchQueryBuilder getQueryBuilder() {
+    return queryBuilder;
+  }
+  public void setQueryBuilder(BatchQueryBuilder queryBuilder) {
+    this.queryBuilder = queryBuilder;
+  }
 
-    /**
-     * Returns a list of SQL strings needed to generates
-     * database objects to provide automatic primary support
-     * for the list of entities. No actual database operations
-     * are performed.
-     */
-    public List createAutoPkStatements(List dbEntities);
-
-
-    /**
-     * Drops any common database objects associated with automatic primary
-     * key generation process. This may be lookup tables, special stored
-     * procedures or sequences.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities whose primary key autogeneration support
-     * should be dropped.
-     */
-    public void dropAutoPk(DataNode node, List dbEntities) throws Exception;
-
-
-    /**
-     * Returns SQL string needed to drop database objects associated
-     * with automatic primary key generation. No actual database
-     * operations are performed.
-     */
-    public List dropAutoPkStatements(List dbEntities);
-
-
-
-    /**
-     * Generates new (unique and non-repeating) primary key for specified
-     * DbEntity.
-     *
-     *  @param ent DbEntity for which automatic PK is generated.
-     */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
-        throws Exception;
-
-
-    /**
-     * Returns SQL string that can generate new (unique and non-repeating)
-     * primary key for specified DbEntity. No actual database operations
-     * are performed.
-     */
-    public String generatePkForDbEntityString(DbEntity ent);
-
-    public void reset();
-
+  public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
+    List dbAttributes = batch.getDbAttributes();
+    int attributeCount = dbAttributes.size();
+    int[] attributeTypes = new int[attributeCount];
+    int[] attributeScales = new int[attributeCount];
+    for (int i = 0; i < attributeCount; i++) {
+      DbAttribute attribute = (DbAttribute)dbAttributes.get(i);
+      attributeTypes[i] = attribute.getType();
+      attributeScales[i] = attribute.getPrecision();
+    }
+    String query = queryBuilder.query(batch);
+    PreparedStatement st = null;
+    ExtendedTypeMap typeConverter = adapter.getTypeConverter();
+    try {
+      st = connection.prepareStatement(query);
+      batch.reset();
+      while (batch.next()) {
+        for (int i = 0; i < attributeCount; i++) {
+          Object value = batch.getObject(i);
+          int type = attributeTypes[i];
+          if (value == null) st.setNull(i + 1, type);
+          else {
+            ExtendedType map = typeConverter.getRegisteredType(value.getClass().getName());
+            Object jdbcValue = (map == null) ? value : map.toJdbcObject(value, type);
+            st.setObject(i + 1, jdbcValue, type, attributeScales[i]);
+          }
+        }
+        st.addBatch();
+      }
+      return st.executeBatch();
+    } catch (SQLException e) {
+      throw e;
+    } catch (CayenneException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new CayenneException(e);
+    } finally {
+      try {if (st != null) st.close();}
+      catch (Exception e) {}
+    }
+  }
 }

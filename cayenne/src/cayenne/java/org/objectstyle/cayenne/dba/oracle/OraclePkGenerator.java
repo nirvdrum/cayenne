@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -68,24 +68,24 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.*;
 
-/** 
- * Sequence-based primary key generator implementation for Oracle. 
- * Uses Oracle sequences to generate primary key values. This approach is 
+/**
+ * Sequence-based primary key generator implementation for Oracle.
+ * Uses Oracle sequences to generate primary key values. This approach is
  * at least 50% faster when tested with Oracle compared to the lookup table
  * approach.
- * 
- * <p>When using Cayenne key caching mechanism, make sure that sequences in 
- * the database have "INCREMENT BY" greater or equal to OraclePkGenerator 
+ *
+ * <p>When using Cayenne key caching mechanism, make sure that sequences in
+ * the database have "INCREMENT BY" greater or equal to OraclePkGenerator
  * "pkCacheSize" property value. If this is not the case, you will need to
  * adjust PkGenerator value accordingly. For example when sequence is
  * incremented by 1 each time, use the following code:</p>
- * 
+ *
  * <pre>
  * dataNode.getAdapter().getPkGenerator().setPkCacheSize(1);
  * </pre>
- * 
+ *
  * @author Andrei Adamchik
  */
 public class OraclePkGenerator extends JdbcPkGenerator {
@@ -152,9 +152,9 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         return buf.toString();
     }
 
-    /** 
-     * Returns a SQL string needed to drop any database objects associated 
-     * with automatic primary key generation process for a specific DbEntity. 
+    /**
+     * Returns a SQL string needed to drop any database objects associated
+     * with automatic primary key generation process for a specific DbEntity.
      */
     protected String dropSequenceString(DbEntity ent) {
         StringBuffer buf = new StringBuffer();
@@ -162,41 +162,48 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         return buf.toString();
     }
 
-    /** 
+    /**
      * Generates primary key by calling Oracle sequence corresponding to the
      * <code>dbEntity</code>. Executed SQL looks like this:
-     * 
+     *
      * <pre>
      * SELECT pk_table_name.nextval FROM DUAL
      * </pre>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent)
-        throws Exception {
+		throws Exception {
+
+        DbKeyGenerator pkGenerator = ent.getPrimaryKeyGenerator();
+        String pkGeneratingSequenceName;
+        if (pkGenerator != null &&
+            DbKeyGenerator.ORACLE_TYPE.equals(pkGenerator.getGeneratorType()) &&
+            pkGenerator.getGeneratorName() != null)
+            pkGeneratingSequenceName = pkGenerator.getGeneratorName();
+        else pkGeneratingSequenceName = sequenceName(ent);
 
         Connection con = node.getDataSource().getConnection();
         try {
-            Statement st = con.createStatement();
+          Statement st = con.createStatement();
+          try {
+            ResultSet rs = st.executeQuery( "SELECT "
+                + pkGeneratingSequenceName
+                + ".nextval FROM DUAL");
             try {
-                ResultSet rs =
-                    st.executeQuery(
-                        "SELECT "
-                            + sequenceName(ent)
-                            + ".nextval FROM DUAL");
-                try {
-                    if (!rs.next()) {
-                        throw new CayenneRuntimeException(
-                            "Error generating pk for DbEntity "
-                                + ent.getName());
-                    }
-                    return rs.getInt(1);
-                } finally {
-                    rs.close();
-                }
+              //Object pk = null;
+              if (!rs.next()) {
+                throw new CayenneRuntimeException(
+                    "Error generating pk for DbEntity "
+                    + ent.getName());
+              }
+              return rs.getInt(1);
             } finally {
-                st.close();
+              rs.close();
             }
+          } finally {
+            st.close();
+          }
         } finally {
-            con.close();
+          con.close();
         }
     }
 
@@ -211,13 +218,13 @@ public class OraclePkGenerator extends JdbcPkGenerator {
 
         return seqName;
     }
-    
+
     protected String stripSchemaName(String sequenceName) {
     	int ind = sequenceName.indexOf('.');
     	return (ind >= 0) ? sequenceName.substring(ind + 1) : sequenceName;
     }
 
-    /** 
+    /**
      * Fetches a list of existing sequences that might match Cayenne
      * generated ones.
      */

@@ -54,76 +54,62 @@
  *
  */
 
-package org.objectstyle.cayenne.dba;
-
-import java.util.List;
-
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DbEntity;
+package org.objectstyle.cayenne.map;
 
 /**
- * Defines methods to support automatic primary key generation.
- *
- * @author Andrei Adamchik
+ * @author Andriy Shapochka
  */
-public interface PkGenerator {
 
-    /**
-     * Generates necessary database objects to provide automatic primary
-     * key support.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities that require primary key autogeneration support
-     */
-    public void createAutoPk(DataNode node, List dbEntities) throws Exception;
+public class DbKeyGenerator extends MapObject {
+  public static final String ORACLE_TYPE = "ORACLE";
+  public static final String NAMED_SEQUENCE_TABLE_TYPE = "NAMED_SEQUENCE_TABLE";
 
-    /**
-     * Returns a list of SQL strings needed to generates
-     * database objects to provide automatic primary support
-     * for the list of entities. No actual database operations
-     * are performed.
-     */
-    public List createAutoPkStatements(List dbEntities);
+  private String generatorType;
+  private Integer keyCacheSize;
+  private String generatorName;
 
+  public DbKeyGenerator() {
+  }
 
-    /**
-     * Drops any common database objects associated with automatic primary
-     * key generation process. This may be lookup tables, special stored
-     * procedures or sequences.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities whose primary key autogeneration support
-     * should be dropped.
-     */
-    public void dropAutoPk(DataNode node, List dbEntities) throws Exception;
+  public DbEntity getDbEntity() {
+    return (DbEntity) getParent();
+  }
 
-
-    /**
-     * Returns SQL string needed to drop database objects associated
-     * with automatic primary key generation. No actual database
-     * operations are performed.
-     */
-    public List dropAutoPkStatements(List dbEntities);
-
-
-
-    /**
-     * Generates new (unique and non-repeating) primary key for specified
-     * DbEntity.
-     *
-     *  @param ent DbEntity for which automatic PK is generated.
-     */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
-        throws Exception;
-
-
-    /**
-     * Returns SQL string that can generate new (unique and non-repeating)
-     * primary key for specified DbEntity. No actual database operations
-     * are performed.
-     */
-    public String generatePkForDbEntityString(DbEntity ent);
-
-    public void reset();
-
+  public void setDbEntity(DbEntity entity) {
+    setParent(entity);
+  }
+  public void setGeneratorType(String generatorType) {
+    this.generatorType = generatorType;
+    if (this.generatorType != null) {
+      this.generatorType = this.generatorType.trim().toUpperCase();
+      if (!(ORACLE_TYPE.equals(this.generatorType) || NAMED_SEQUENCE_TABLE_TYPE.equals(this.generatorType)))
+        this.generatorType = null;
+    }
+  }
+  public String getGeneratorType() {
+    return generatorType;
+  }
+  public void setKeyCacheSize(Integer keyCacheSize) {
+    this.keyCacheSize = keyCacheSize;
+    if (this.keyCacheSize != null && this.keyCacheSize.intValue() < 1) {
+      this.keyCacheSize = null;
+    }
+  }
+  public Integer getKeyCacheSize() {
+    return keyCacheSize;
+  }
+  public void setGeneratorName(String generatorName) {
+    this.generatorName = generatorName;
+    if (this.generatorName != null) {
+      this.generatorName = this.generatorName.trim();
+      if (this.generatorName.length() == 0)
+        this.generatorName = null;
+    }
+  }
+  public String getGeneratorName() {
+    return generatorName;
+  }
+  public String toString() {
+    return "{Type="+generatorType+", Name="+generatorName+", Cache="+keyCacheSize+"}";
+  }
 }

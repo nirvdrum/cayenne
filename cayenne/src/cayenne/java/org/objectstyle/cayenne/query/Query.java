@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -59,17 +59,21 @@ import org.apache.log4j.Level;
 
 /**
  * Generic query interface.
- * 
+ *
  * @author Andrei Adamchik
  */
 public interface Query {
 	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
-	
+
 	public static final int SELECT_QUERY = 1;
 	public static final int INSERT_QUERY = 2;
 	public static final int UPDATE_QUERY = 3;
 	public static final int DELETE_QUERY = 4;
 	public static final int UNKNOWN_QUERY = 5;
+    public static final int INSERT_BATCH_QUERY = 6;
+    public static final int UPDATE_BATCH_QUERY = 7;
+	public static final int DELETE_BATCH_QUERY = 8;
+
 
 	/**
 	 * Returns the <code>logLevel</code> property of this query.
@@ -77,32 +81,32 @@ public interface Query {
 	 * to log execution with a certain priority.
 	 */
 	public Level getLoggingLevel();
-	
+
 	public void setLoggingLevel(Level level);
 
-	/** Returns the name of root ObjEntity associated with the query. 
+	/** Returns the name of root ObjEntity associated with the query.
 	 * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
 	 * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
 	public String getObjEntityName();
-	
-    /** Sets the name of root ObjEntity associated with the query. 
+
+    /** Sets the name of root ObjEntity associated with the query.
      * @deprecated use setRoot instead
      * */
 	public void setObjEntityName(String name);
-	
-	/** 
-	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY, 
-	 * UPDATE_QUERY, DELETE_QUERY  
+
+	/**
+	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY,
+	 * UPDATE_QUERY, DELETE_QUERY
 	 */
     public int getQueryType();
-    
+
     /**
 	 * Returns the root object of this query.  Might be a String, ObjEntity, DbEntity or Class,
 	 * depending on the query in question
 	 * @return Object
 	 */
 	public Object getRoot();
-	
+
 	/**
 	 * Sets the root of the query
 	 * @param value The new root

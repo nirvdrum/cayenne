@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -61,24 +61,26 @@ import java.util.List;
 
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * A DbEntity is a mapping descriptor that defines a structure of a database table. 
- * 
+/**
+ * A DbEntity is a mapping descriptor that defines a structure of a database table.
+ *
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
 public class DbEntity extends Entity {
     protected String catalog;
     protected String schema;
+    private DbKeyGenerator primaryKeyGenerator;
+
 
     /**
-     * Creates an unnamed DbEntity. 
+     * Creates an unnamed DbEntity.
      */
     public DbEntity() {
     }
 
     /**
-     * Creates a named DbEntity. 
+     * Creates a named DbEntity.
      */
     public DbEntity(String name) {
         setName(name);
@@ -91,42 +93,42 @@ public class DbEntity extends Entity {
         return (schema != null) ? schema + '.' + getName() : getName();
     }
 
-    /** 
+    /**
      * Returns database schema of this table.
-     * 
+     *
      * @return table's schema, null if not set.
      */
     public String getSchema() {
         return schema;
     }
 
-    /** 
+    /**
      * Sets the database schema name of the table described
-     * by this DbEntity. 
+     * by this DbEntity.
      */
     public void setSchema(String schema) {
         this.schema = schema;
     }
 
-    /** 
+    /**
      * Returns the catalog name of the table described
-     * by this DbEntity. 
+     * by this DbEntity.
      */
     public String getCatalog() {
         return catalog;
     }
 
-    /** 
+    /**
      * Sets the catalog name of the table described
-     * by this DbEntity. 
+     * by this DbEntity.
      */
     public void setCatalog(String catalog) {
         this.catalog = catalog;
     }
 
-    /** 
+    /**
      * Returns a list of DbAttributes representing the primary
-     * key of the table described by this DbEntity. 
+     * key of the table described by this DbEntity.
      */
     public List getPrimaryKey() {
         List list = new ArrayList();
@@ -172,7 +174,7 @@ public class DbEntity extends Entity {
     /**
      * Removes attribute from the entity, removes any relationship
      * joins containing this attribute.
-     * 
+     *
      * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
      */
     public void removeAttribute(String attrName) {
@@ -209,4 +211,14 @@ public class DbEntity extends Entity {
             throw new IllegalArgumentException("Wrong query root for DbEntity: " + query.getRoot());
         }
     }
+
+    public void setPrimaryKeyGenerator(DbKeyGenerator primaryKeyGenerator) {
+      this.primaryKeyGenerator = primaryKeyGenerator;
+      if (primaryKeyGenerator != null)
+        primaryKeyGenerator.setDbEntity(this);
+    }
+    public DbKeyGenerator getPrimaryKeyGenerator() {
+      return primaryKeyGenerator;
+    }
+
 }

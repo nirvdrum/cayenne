@@ -53,77 +53,63 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.query;
 
-package org.objectstyle.cayenne.dba;
+import java.util.*;
+import org.apache.commons.collections.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
 
-import java.util.List;
+public class InsertBatchQuery extends BatchQuery {
+  private List dataObjectSnapshots;
+  private List dbAttributes;
+  private Iterator snapshotIterator = IteratorUtils.EMPTY_ITERATOR;
+  private Map currentSnapshot = Collections.EMPTY_MAP;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DbEntity;
+  public InsertBatchQuery(DbEntity objectEntity, int batchCapacity) {
+    super(objectEntity);
+    dataObjectSnapshots = new ArrayList(batchCapacity);
+    prepareMetadata();
+  }
 
-/**
- * Defines methods to support automatic primary key generation.
- *
- * @author Andrei Adamchik
- */
-public interface PkGenerator {
+  public void reset() {
+    snapshotIterator = dataObjectSnapshots.iterator();
+    currentSnapshot = Collections.EMPTY_MAP;
+  }
 
-    /**
-     * Generates necessary database objects to provide automatic primary
-     * key support.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities that require primary key autogeneration support
-     */
-    public void createAutoPk(DataNode node, List dbEntities) throws Exception;
+  public boolean next() {
+    if (!snapshotIterator.hasNext()) return false;
+    currentSnapshot = (Map)snapshotIterator.next();
+    currentSnapshot = (currentSnapshot != null ? currentSnapshot : Collections.EMPTY_MAP);
+    return true;
+  }
 
-    /**
-     * Returns a list of SQL strings needed to generates
-     * database objects to provide automatic primary support
-     * for the list of entities. No actual database operations
-     * are performed.
-     */
-    public List createAutoPkStatements(List dbEntities);
+  public Object getObject(int dbAttributeIndex) {
+    DbAttribute attribute = (DbAttribute)dbAttributes.get(dbAttributeIndex);
+    return currentSnapshot.get(attribute.getName());
+  }
 
+  public void add(Map dataObjectSnapshot) {
+    dataObjectSnapshots.add(dataObjectSnapshot);
+  }
 
-    /**
-     * Drops any common database objects associated with automatic primary
-     * key generation process. This may be lookup tables, special stored
-     * procedures or sequences.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities whose primary key autogeneration support
-     * should be dropped.
-     */
-    public void dropAutoPk(DataNode node, List dbEntities) throws Exception;
+  public int size() {
+    return dataObjectSnapshots.size();
+  }
 
+  public boolean isEmpty() {
+    return dataObjectSnapshots.isEmpty();
+  }
 
-    /**
-     * Returns SQL string needed to drop database objects associated
-     * with automatic primary key generation. No actual database
-     * operations are performed.
-     */
-    public List dropAutoPkStatements(List dbEntities);
+  public List getDbAttributes() {
+    return Collections.unmodifiableList(dbAttributes);
+  }
 
+  private void prepareMetadata() {
+    dbAttributes = metadata.getAttributeList();
+  }
 
-
-    /**
-     * Generates new (unique and non-repeating) primary key for specified
-     * DbEntity.
-     *
-     *  @param ent DbEntity for which automatic PK is generated.
-     */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
-        throws Exception;
-
-
-    /**
-     * Returns SQL string that can generate new (unique and non-repeating)
-     * primary key for specified DbEntity. No actual database operations
-     * are performed.
-     */
-    public String generatePkForDbEntityString(DbEntity ent);
-
-    public void reset();
-
+  public int getQueryType() {
+    return Query.INSERT_BATCH_QUERY;
+  }
 }

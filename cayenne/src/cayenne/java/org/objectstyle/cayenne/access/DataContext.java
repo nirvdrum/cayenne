@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -67,6 +67,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.*;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneDataObject;
@@ -104,13 +105,13 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 
-/** User-level Cayenne access class. Provides isolated object view of 
-  * the datasource to the application code. Normal use pattern is to 
+/** User-level Cayenne access class. Provides isolated object view of
+  * the datasource to the application code. Normal use pattern is to
   * create DataContext in a session scope.
   *
   * <p><i>For more information see <a href="../../../../../../userguide/index.html"
   * target="_top">Cayenne User Guide.</a></i></p>
-  * 
+  *
   * @author Andrei Adamchik
   */
 public class DataContext implements QueryEngine, Serializable {
@@ -134,8 +135,8 @@ public class DataContext implements QueryEngine, Serializable {
     private Map flattenedDeletes = new HashMap();
 
     protected transient QueryEngine parent;
-    // When deserialized, the parent domain name is stored in 
-    // this variable until the parent is actually needed.  This helps 
+    // When deserialized, the parent domain name is stored in
+    // this variable until the parent is actually needed.  This helps
     // avoid an issue with certain servlet engines (e.g. Tomcat) where
     // HttpSessions with DataContext's are deserialized at startup
     // before the configuration has been read.
@@ -144,10 +145,12 @@ public class DataContext implements QueryEngine, Serializable {
     protected transient ObjectStore objectStore;
     protected transient SnapshotManager snapshotManager;
 
+    protected transient PrimaryKeyGenerationSupport keyGenerator;
+
     /**
-     * Convenience method to create a new instance of 
+     * Convenience method to create a new instance of
      * DataContext based on default domain. If more
-     * than one domain exists, createDataContext(String) 
+     * than one domain exists, createDataContext(String)
      * must be used.
      */
     public static DataContext createDataContext() {
@@ -155,7 +158,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Convenience method to create a new instance of 
+     * Convenience method to create a new instance of
      * DataContext based on a named domain.
      * If there is no domain matching the name,
      * an exception is thrown.
@@ -174,15 +177,15 @@ public class DataContext implements QueryEngine, Serializable {
         this(null);
     }
 
-    /** 
+    /**
      * Creates new DataContext and initializes it
-     * with the parent QueryEngine. Normally parent is an 
+     * with the parent QueryEngine. Normally parent is an
      * instance of DataDomain. DataContext will use parent
-     * to execute database queries, updates, and access 
+     * to execute database queries, updates, and access
      * DataMap objects.
      */
     public DataContext(QueryEngine parent) {
-        this.parent = parent;
+        setParent(parent);
         this.objectStore = new ObjectStore();
         this.snapshotManager =
             new SnapshotManager(new RelationshipDataSource(this));
@@ -205,6 +208,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void setParent(QueryEngine parent) {
         this.parent = parent;
+        createKeyGenerator();
     }
 
     public SnapshotManager getSnapshotManager() {
@@ -218,12 +222,12 @@ public class DataContext implements QueryEngine, Serializable {
         return objectStore;
     }
 
-    /** 
+    /**
      * Returns a collection of objects that are registered
      * with this DataContext, regardless of their persistence state.
      * Collection is returned by copy and can be modified by caller.
-     * 
-     * @deprecated (Since 1.0 Alpha 4) 
+     *
+     * @deprecated (Since 1.0 Alpha 4)
      * Use DataContext.getObjectStore().getObjects() instead
      */
     public Collection registeredObjects() {
@@ -239,12 +243,12 @@ public class DataContext implements QueryEngine, Serializable {
         return objectStore.hasChanges();
     }
 
-    /** 
-     * Returns a subset of registered objects that are in a 
+    /**
+     * Returns a subset of registered objects that are in a
      * certian persistence state. Collection is returned by
      * copy.
-     * 
-     * @deprecated (Since 1.0 Alpha 4) 
+     *
+     * @deprecated (Since 1.0 Alpha 4)
      * Use DataContext.getObjectStore().objectsInState(int) instead
      */
     public Collection objectsInState(int state) {
@@ -272,10 +276,10 @@ public class DataContext implements QueryEngine, Serializable {
         return objectStore.objectsInState(PersistenceState.MODIFIED);
     }
 
-    /** 
-     * Returns an object for a given ObjectId. 
-     * If object is not registered with this context, 
-     * a "hollow" object fault is created, registered and returned to the caller. 
+    /**
+     * Returns an object for a given ObjectId.
+     * If object is not registered with this context,
+     * a "hollow" object fault is created, registered and returned to the caller.
      */
     public DataObject registeredObject(ObjectId oid) {
         // must synchronize on ObjectStore since we must read and write atomically
@@ -322,11 +326,11 @@ public class DataContext implements QueryEngine, Serializable {
         return snapshotManager.takeObjectSnapshot(ent, anObject);
     }
 
-    /** 
+    /**
      * Creates and returns a DataObject from a data row (snapshot).
      * Newly created object is registered with this DataContext.
-     * 
-     * <p>Internally this method calls 
+     *
+     * <p>Internally this method calls
      * <code>objectFromDataRow(ObjEntity, Map, boolean)</code>
      * with <code>false</code> "refersh" parameter.</p>
      */
@@ -337,7 +341,7 @@ public class DataContext implements QueryEngine, Serializable {
             : objectFromDataRow(ent, dataRow, false);
     }
 
-    /** 
+    /**
      * Creates and returns a DataObject from a data row (snapshot).
      * Newly created object is registered with this DataContext.
      */
@@ -370,7 +374,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** 
+    /**
      * Creates and returns a read-only DataObject from a data row (snapshot).
      * Newly created object is registered with this DataContext.
      */
@@ -393,22 +397,22 @@ public class DataContext implements QueryEngine, Serializable {
         return obj;
     }
 
-    /** 
+    /**
      * Returns a snapshot of all object persistent field values as of last
      * commit or fetch operation.
      *
-     * @return a map of object values with DbAttribute names as keys 
-     * corresponding to the latest value read from or committed to the database. 
-     * 
+     * @return a map of object values with DbAttribute names as keys
+     * corresponding to the latest value read from or committed to the database.
+     *
      * @deprecated use getObjectStore().getCommittedSnapshot(ObjectId) instead.
      */
     public Map getCommittedSnapshot(DataObject dataObject) {
         return objectStore.getSnapshot(dataObject.getObjectId());
     }
 
-    /** 
+    /**
      * Instantiates new object and registers it with itself. Object class
-     * is determined from ObjEntity. Object class must have a default constructor. 
+     * is determined from ObjEntity. Object class must have a default constructor.
      */
     public DataObject createAndRegisterNewObject(String objEntityName) {
         String objClassName =
@@ -432,7 +436,7 @@ public class DataContext implements QueryEngine, Serializable {
     /** Registers a new object (that is not yet persistent) with itself.
      *
      * @param dataObject new object that we want to make persistent.
-     * @param objEntityName a name of the ObjEntity in the map used to get 
+     * @param objEntityName a name of the ObjEntity in the map used to get
      *  persistence information for this object.
      */
     public void registerNewObject(
@@ -471,7 +475,7 @@ public class DataContext implements QueryEngine, Serializable {
      * and change its state to TRANSIENT.
      */
     public void unregisterObject(DataObject dataObj) {
-        // we don't care about objects that are not ours    		
+        // we don't care about objects that are not ours
         if (dataObj.getDataContext() != this) {
             return;
         }
@@ -487,12 +491,12 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * "Invalidates" a DataObject, changing it to a HOLLOW state.
      * This would remove object's snapshot
-     * and change its state to HOLLOW. 
+     * and change its state to HOLLOW.
      * On the next access to this object, it will be refeched.
      */
     public void invalidateObject(DataObject dataObj) {
-        // we don't care about objects that are not ours    
-        // we don't care about uncommitted objects		
+        // we don't care about objects that are not ours
+        // we don't care about uncommitted objects
         if (dataObj.getDataContext() != this
             || dataObj.getPersistenceState() == PersistenceState.NEW) {
             return;
@@ -501,7 +505,7 @@ public class DataContext implements QueryEngine, Serializable {
         dataObj.setPersistenceState(PersistenceState.HOLLOW);
     }
 
-    /** 
+    /**
      * Notifies data context that a registered object need to be deleted on
      * next commit.
      *
@@ -511,7 +515,7 @@ public class DataContext implements QueryEngine, Serializable {
     public void deleteObject(DataObject anObject) {
         if (anObject.getPersistenceState() == PersistenceState.DELETED) {
             //Drop out... we might be about to get into a horrible
-            // recursive loop due to CASCADE delete rules.  
+            // recursive loop due to CASCADE delete rules.
             // Assume that everything must have been done correctly already
             // and *don't* do it again
             return;
@@ -522,7 +526,7 @@ public class DataContext implements QueryEngine, Serializable {
         // recursion, and the "deleted" state is the best way we have of noticing that and bailing out (see above)
         int oldState = anObject.getPersistenceState();
 
-        //TODO - figure out what to do when an object is still in 
+        //TODO - figure out what to do when an object is still in
         //PersistenceState.NEW (unregister maybe?)
         anObject.setPersistenceState(PersistenceState.DELETED);
 
@@ -634,13 +638,13 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** 
-     * Refetches object data for ObjectId. This method is used 
-     * internally by Cayenne to resolve objects in state 
+    /**
+     * Refetches object data for ObjectId. This method is used
+     * internally by Cayenne to resolve objects in state
      * <code>PersistenceState.HOLLOW</code>. It can also be used
-     * to refresh certain objects. 
-     * 
-     * @throws CayenneRuntimeException if object id doesn't match 
+     * to refresh certain objects.
+     *
+     * @throws CayenneRuntimeException if object id doesn't match
      * any records, or if there is more than one object is fetched.
      */
     public DataObject refetchObject(ObjectId oid) {
@@ -662,7 +666,7 @@ public class DataContext implements QueryEngine, Serializable {
         return (DataObject) results.get(0);
     }
 
-    /** 
+    /**
      * Rollsback any changes that have occurred to objects
      * registered with this data context.
      */
@@ -680,7 +684,7 @@ public class DataContext implements QueryEngine, Serializable {
                     	objectsToUnregister.add(thisObject);
                         break;
                     case PersistenceState.DELETED :
-                        //Do the same as for modified... deleted is only a persistence state, so 
+                        //Do the same as for modified... deleted is only a persistence state, so
                         // rolling the object back will set the state to committed
                     case PersistenceState.MODIFIED :
                         ObjEntity oe =
@@ -698,12 +702,12 @@ public class DataContext implements QueryEngine, Serializable {
             for(int i=0; i<objectsToUnregister.size(); i++) {
 				this.unregisterObject((DataObject)objectsToUnregister.get(i));
             }
- 
+
         }
 
     }
 
-    /** 
+    /**
      * Synchronizes object graph with the database. Executes needed
      * insert, update and delete queries (generated internally).
      */
@@ -711,12 +715,12 @@ public class DataContext implements QueryEngine, Serializable {
         commitChanges((Level) null);
     }
 
-    /** 
+    /**
      * Synchronizes object graph with the database. Executes needed
      * insert, update and delete queries (generated internally).
-     * 
-     * @param logLevel if logLevel is higher or equals to the level 
-     * set for QueryLogger, statements execution will be logged. 
+     *
+     * @param logLevel if logLevel is higher or equals to the level
+     * set for QueryLogger, statements execution will be logged.
      */
     public void commitChanges(Level logLevel) throws CayenneRuntimeException {
         // are we set up properly?
@@ -767,7 +771,7 @@ public class DataContext implements QueryEngine, Serializable {
         // will nullify fk's before the other object is deleted (causing grief with integrity constraints
         // where the fk exists and points to a non-existent record).  Then flattened deletes,
         // because nothing typically relies on those records (no constraints will hurt), then
-        // other deletions.  Inserts follow, and finally flattenedInserts.  
+        // other deletions.  Inserts follow, and finally flattenedInserts.
         // Inserts/Deletes could probably be swapped (untested), but flattened inserts
         // must definitely come last, to ensure that the rows they point to are all inserted and ready.
 
@@ -803,9 +807,9 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        //Flattened relationship deletes happen *before* all other deletes, to be 
-        //sure that if they link to any other records that should be deleted, that 
-        // the deletions happen in the correct order (link records first, 
+        //Flattened relationship deletes happen *before* all other deletes, to be
+        //sure that if they link to any other records that should be deleted, that
+        // the deletions happen in the correct order (link records first,
         // then linked-to records)
         queryList.addAll(this.getFlattenedDeleteQueries());
         if (delObjects.size() > 0) {
@@ -817,7 +821,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
 
         }
-        // prepare inserts (create id's, build queries) 
+        // prepare inserts (create id's, build queries)
         if (insObjects.size() > 0) {
             // create insert queries
             Iterator insIt = insObjects.iterator();
@@ -842,7 +846,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        //Flattened relationship inserts happen *after* all other inserts, to be 
+        //Flattened relationship inserts happen *after* all other inserts, to be
         //sure that the records they are linking to have already been inserted
         queryList.addAll(this.getFlattenedInsertQueries());
 
@@ -926,9 +930,9 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** 
-     * Performs a single database select query. 
-     * 
+    /**
+     * Performs a single database select query.
+     *
      * @return A list of DataObjects or a list of data rows
      * depending on the value returned by <code>query.isFetchingDataRows()</code>.
      */
@@ -950,9 +954,9 @@ public class DataContext implements QueryEngine, Serializable {
         return observer.getResults((Query) query);
     }
 
-    /** 
+    /**
      * Performs a single database select query returning result as a ResultIterator.
-     * Returned ResultIterator will provide access to "data rows" 
+     * Returned ResultIterator will provide access to "data rows"
      * - maps with database data that can be used to create DataObjects.
      */
     public ResultIterator performIteratedQuery(GenericSelectQuery query)
@@ -972,10 +976,10 @@ public class DataContext implements QueryEngine, Serializable {
         return this.getParent().dataNodeForObjEntity(objEntity);
     }
 
-    /** 
+    /**
      * Delegates queries execution to parent QueryEngine. If there are select
      * queries that require prefetching relationships, will create additional
-     * queries to perform necessary prefetching. 
+     * queries to perform necessary prefetching.
      */
     public void performQueries(
         List queries,
@@ -1022,9 +1026,9 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Performs prefetching. Prefetching would resolve a set of relationships
-     * for a list of DataObjects in the most optimized way (preferrably in 
+     * for a list of DataObjects in the most optimized way (preferrably in
      * a single query per relationship).
-     * 
+     *
      * <p><i>Currently supports only "one-step" to one relationships. This is an
      * arbitrary limitation and will be removed soon.</i></p>
      */
@@ -1112,7 +1116,7 @@ public class DataContext implements QueryEngine, Serializable {
         this.performQueries(qWrapper, resultConsumer);
     }
 
-    /** Delegates entity name resolution to parent QueryEngine. 
+    /** Delegates entity name resolution to parent QueryEngine.
      * @deprecated use getEntityResolver.lookupObjEntity()
      */
     public ObjEntity lookupEntity(String objEntityName) {
@@ -1120,9 +1124,9 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Returns ObjectId if id needs to be updated 
+     * Returns ObjectId if id needs to be updated
      * after UpdateQuery is committed,
-     * or null, if current id is good enough. 
+     * or null, if current id is good enough.
      */
     private ObjectId updatedId(ObjectId id, UpdateQuery upd) {
         Map idMap = id.getIdSnapshot();
@@ -1147,9 +1151,9 @@ public class DataContext implements QueryEngine, Serializable {
             : null;
     }
 
-    /** 
-     *  Populates the <code>map</code> with ObjectId values from master objects 
-     *  related to this object. 
+    /**
+     *  Populates the <code>map</code> with ObjectId values from master objects
+     *  related to this object.
      */
     private void appendPkFromMasterRelationships(
         Map map,
@@ -1199,7 +1203,7 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** 
+    /**
      * Creates permanent ObjectId's for the list of new objects.
      */
     private void createPermIds(List objects) {
@@ -1210,22 +1214,22 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /** Creates permanent ObjectId for <code>anObject</code>.
-     *  Object must already have a temporary ObjectId. 
-     * 
-     *  <p>This method is called when we are about to save a new object to 
+     *  Object must already have a temporary ObjectId.
+     *
+     *  <p>This method is called when we are about to save a new object to
      *  the database. Primary key columns are populated assigning values
      *  in the following sequence:
      *  <ul>
      *     <li>Object attribute values are used.</li>
-     *     <li>Values from ObjectId's propagated from master relationshop 
-     *     are used. <i>If master object does not have a permanent id 
+     *     <li>Values from ObjectId's propagated from master relationshop
+     *     are used. <i>If master object does not have a permanent id
      *     created yet, an exception is thrown.</i></li>
-     *     <li>Values generated from the database provided by DbAdapter. 
+     *     <li>Values generated from the database provided by DbAdapter.
      *     <i>Autogeneration only works for a single column. If more than
-     *     one column requires an autogenerated primary key, an exception is 
+     *     one column requires an autogenerated primary key, an exception is
      *     thrown</i></li>
      *   </ul>
-     * 
+     *
      *   @return Newly created ObjectId.
      */
     public ObjectId createPermId(DataObject anObject)
@@ -1292,8 +1296,8 @@ public class DataContext implements QueryEngine, Serializable {
 
     private void writeObject(ObjectOutputStream out) throws IOException {
         // If the "parent" of this datacontext is a DataDomain, then just write the
-        // name of it.  Then when deser happens, we can get back the DataDomain by name, 
-        // from the shared configuration (which will either load it if need be, or return 
+        // name of it.  Then when deser happens, we can get back the DataDomain by name,
+        // from the shared configuration (which will either load it if need be, or return
         // an existing one.
         out.defaultWriteObject();
         if (this.parent == null && this.lazyInitParentDomainName != null) {
@@ -1506,6 +1510,23 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void setTransactionEventsEnabled(boolean onOrOff) {
         this.postDataContextTransactionEvents = onOrOff;
+    }
+
+    public Iterator dataMapIterator() {
+      return (parent != null ? parent.dataMapIterator() : IteratorUtils.EMPTY_ITERATOR);
+    }
+
+    private void createKeyGenerator() {
+      keyGenerator = (parent != null ? new PrimaryKeyGenerationSupport(this) : null);
+    }
+
+    PrimaryKeyGenerationSupport getKeyGenerator() {
+      return keyGenerator;
+    }
+
+    public void commit(Level logLevel) throws CayenneException {
+      ContextCommit worker = new ContextCommit(this);
+      worker.commit(logLevel);
     }
 
 }

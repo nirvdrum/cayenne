@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -66,20 +66,20 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * Defines API needed to handle differences between various 
- * databases accessed via JDBC. Implementing classed are 
- * intended to be pluggable database-specific adapters. 
- * DbAdapter-based architecture is introduced to solve the 
+/**
+ * Defines API needed to handle differences between various
+ * databases accessed via JDBC. Implementing classed are
+ * intended to be pluggable database-specific adapters.
+ * DbAdapter-based architecture is introduced to solve the
  * following problems:
- * 
+ *
  * <ul>
  * <li>Make Cayenne code independent from SQL syntax differences
  * between different RDBMS.
  * <li>Allow for vendor-specific tuning of JDBC access.
  * </ul>
  *
- * @author Andrei Adamchik 
+ * @author Andrei Adamchik
  */
 public interface DbAdapter {
 
@@ -96,86 +96,90 @@ public interface DbAdapter {
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
 
-    /** 
+    /**
      * Returns a SQL string that can be used to drop
-     * a database table corresponding to <code>ent</code> 
-     * parameter. 
+     * a database table corresponding to <code>ent</code>
+     * parameter.
      */
     public String dropTable(DbEntity ent);
 
-    /** 
+    /**
      * Returns a SQL string that can be used to create database table
-	 * corresponding to <code>ent</code> parameter. 
+	 * corresponding to <code>ent</code> parameter.
 	 */
 	public String createTable(DbEntity ent);
-		
+
     /**
      *  Returns a SQL string that can be used to create
-     * a foreign key constraint for the relationship. 
+     * a foreign key constraint for the relationship.
      */
     public String createFkConstraint(DbRelationship rel);
 
-    /** 
+    /**
      * Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
-     * Valid types are defined in java.sql.Types. 
+     * Valid types are defined in java.sql.Types.
      */
     public String[] externalTypesForJdbcType(int type);
-    
-    /** 
+
+    /**
      * Returns a map of type converters (ExtendedType objects)
-     * that can be used to translate between simple Java types 
+     * that can be used to translate between simple Java types
      * and JDBC formats.
      */
     public ExtendedTypeMap getTypeConverter();
 
-    /** 
+    /**
      * Returns an operation sorter or null if no sorting
      * is required. Operation sorter is needed for databases
      * (like Sybase) that do not have deferred constraint checking
-     * and need appropriate operation ordering within transactions. 
+     * and need appropriate operation ordering within transactions.
      */
     public OperationSorter getOpSorter(DataNode node);
 
-    /** 
-     * Returns primary key generator associated with this DbAdapter. 
+    /**
+     * Returns primary key generator associated with this DbAdapter.
      */
     public PkGenerator getPkGenerator();
 
 
-    /** 
-     * Creates and returns a QueryTranslator appropriate for the 
+    /**
+     * Creates and returns a QueryTranslator appropriate for the
      * specified <code>query</code> parameter. Sets translator
      * "query" and "adapter" property.
-     * 
+     *
      * <p>This factory method allows subclasses to specify their
      * own translators that implement vendor-specific optimizations.
      * </p>
      */
     public QueryTranslator getQueryTranslator(Query query) throws Exception;
-    
+
     public QualifierTranslatorFactory getQualifierFactory();
-    
+
     /**
-     * Creates and returns a DbAttribute based on supplied parameters 
+     * Creates and returns a DbAttribute based on supplied parameters
      * (usually obtained from database meta data).
-     * 
+     *
      * @param name database column name
      * @param type JDBC column type
      * @param size database column size (ignored if less than zero)
      * @param precision database column precision (ignored if less than zero)
      * @param allowNulls database column nullable parameter
-     */ 
+     */
     public DbAttribute buildAttribute(String name, int type, int size, int precision, boolean allowNulls);
-    
-    /** 
-     * Returns the name of the table type (as returned by 
+
+    /**
+     * Returns the name of the table type (as returned by
      * <code>DatabaseMetaData.getTableTypes</code>) for a simple user table.
      */
     public String tableTypeForTable();
-    
-    /** 
-     * Returns the name of the table type (as returned by 
+
+    /**
+     * Returns the name of the table type (as returned by
      * <code>DatabaseMetaData.getTableTypes</code>) for a view table.
      */
     public String tableTypeForView();
+
+    public BatchInterpreter getInsertBatchInterpreter();
+    public BatchInterpreter getDeleteBatchInterpreter();
+    public BatchInterpreter getUpdateBatchInterpreter();
 }

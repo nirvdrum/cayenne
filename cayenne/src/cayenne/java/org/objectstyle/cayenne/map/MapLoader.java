@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -81,12 +81,13 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-/** 
- * Default MapLoader. Its responsibilities include reading DataMaps 
+/**
+ * Default MapLoader. Its responsibilities include reading DataMaps
  * from XML files and saving DataMap objects back to XML.
- * 
+ *
  * @author Misha Shengaout
  * @author Andrei Adamchik
+ * @author Andriy Shapochka
  */
 public class MapLoader extends DefaultHandler {
     private static volatile Logger logObj = Logger.getLogger(MapLoader.class);
@@ -105,6 +106,12 @@ public class MapLoader extends DefaultHandler {
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    public static final String DB_KEY_GENERATOR_TAG = "db-key-generator";
+    public static final String DB_GENERATOR_TYPE_TAG = "db-generator-type";
+    public static final String DB_GENERATOR_NAME_TAG = "db-generator-name";
+    public static final String DB_KEY_CACHE_SIZE_TAG = "db-key-cache-size";
+
+
     /* Reading from XML */
     private DataMap dataMap;
     private DbEntity dbEntity;
@@ -114,6 +121,10 @@ public class MapLoader extends DefaultHandler {
     private DbAttribute attrib;
     private Map dbRelationshipMap;
 
+    private String currentTag;
+    private StringBuffer charactersBuffer;
+
+
     /* Saving to XML */
     private List objRelationships;
     private List dbRelationships;
@@ -121,7 +132,7 @@ public class MapLoader extends DefaultHandler {
 
     /**
      * Returns <code>true</code> if this relationship's <code>toDependentPk</code>
-     * property can be potentially set to <code>true</code>. 
+     * property can be potentially set to <code>true</code>.
      * This means that destination and
      * source attributes are primary keys of their corresponding entities.
      */
@@ -184,8 +195,8 @@ public class MapLoader extends DefaultHandler {
         return dataMap;
     }
 
-    /** 
-     * Creates, configures and returns ResourceLocator object used 
+    /**
+     * Creates, configures and returns ResourceLocator object used
      * to lookup DataMap files.
      */
     protected ResourceLocator configLocator() {
@@ -195,16 +206,16 @@ public class MapLoader extends DefaultHandler {
         locator.setSkipCurDir(false);
         locator.setSkipHomeDir(false);
 
-        // Configuration superclass statically defines what 
+        // Configuration superclass statically defines what
         // ClassLoader to use for resources. This
-        // allows applications to control where resources 
+        // allows applications to control where resources
         // are loaded from.
         locator.setClassLoader(Configuration.getResourceLoader());
 
         return locator;
     }
 
-    /** 
+    /**
      * Loads the array a DataMap for the map file URI.
      * This is a convenience method that would resolve string URI
      * to InputSource and then call <code>loadDataMap</code>.
@@ -236,6 +247,8 @@ public class MapLoader extends DefaultHandler {
         String q_name,
         Attributes atts)
         throws SAXException {
+
+        rememberCurrentTag(local_name);
         if (local_name
             .equals(DATA_MAP_TAG)) {} else if (local_name
             .equals(DB_ENTITY_TAG)) {
@@ -258,6 +271,14 @@ public class MapLoader extends DefaultHandler {
             processStartObjRelationship(atts);
         } else if (local_name.equals(DB_RELATIONSHIP_REF_TAG)) {
             processStartDbRelationshipRef(atts);
+        } else if (local_name.equals(DB_KEY_GENERATOR_TAG)) {
+            processStartDbKeyGenerator(atts);
+        } else if (local_name.equals(DB_GENERATOR_TYPE_TAG)) {
+            charactersBuffer = new StringBuffer();
+        } else if (local_name.equals(DB_GENERATOR_NAME_TAG)) {
+            charactersBuffer = new StringBuffer();
+        } else if (local_name.equals(DB_KEY_CACHE_SIZE_TAG)) {
+            charactersBuffer = new StringBuffer();
         }
     }
 
@@ -277,7 +298,16 @@ public class MapLoader extends DefaultHandler {
             processEndDbRelationship();
         } else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
             processEndObjRelationship();
+        } else if (local_name.equals(DB_KEY_GENERATOR_TAG)) {
+        } else if (local_name.equals(DB_GENERATOR_TYPE_TAG)) {
+          processEndDbGeneratorType();
+        } else if (local_name.equals(DB_GENERATOR_NAME_TAG)) {
+          processEndDbGeneratorName();
+        } else if (local_name.equals(DB_KEY_CACHE_SIZE_TAG)) {
+          processEndDbKeyCacheSize();
         }
+        resetCurrentTag();
+        charactersBuffer = null;
     }
 
     public void warning(SAXParseException e) throws SAXException {
@@ -350,6 +380,7 @@ public class MapLoader extends DefaultHandler {
             out.println('>');
 
             storeDbAttribute(out, dbe);
+            storeDbKeyGenerator(out, dbe.getPrimaryKeyGenerator());
             out.println("\t</db-entity>");
             dbRelationships.addAll(dbe.getRelationshipList());
         }
@@ -484,6 +515,30 @@ public class MapLoader extends DefaultHandler {
         out.println("/>");
     }
 
+    private void storeDbKeyGenerator(PrintWriter out, DbKeyGenerator pkGenerator) {
+      if (pkGenerator == null) return;
+      String type = pkGenerator.getGeneratorType();
+      if (type == null) return;
+      String name = pkGenerator.getGeneratorName();
+      Integer cacheSize = pkGenerator.getKeyCacheSize();
+      out.println("\t\t<" + DB_KEY_GENERATOR_TAG + '>');
+      out.print("\t\t\t<" + DB_GENERATOR_TYPE_TAG + '>');
+      out.print(type);
+      out.println("</" + DB_GENERATOR_TYPE_TAG + '>');
+      if (name != null) {
+        out.print("\t\t\t<" + DB_GENERATOR_NAME_TAG + '>');
+        out.print(name);
+        out.println("</" + DB_GENERATOR_NAME_TAG + '>');
+      }
+      if (cacheSize != null) {
+        out.print("\t\t\t<" + DB_KEY_CACHE_SIZE_TAG + '>');
+        out.print(cacheSize);
+        out.println("</" + DB_KEY_CACHE_SIZE_TAG + '>');
+      }
+      out.println("\t\t</" + DB_KEY_GENERATOR_TAG + '>');
+    }
+
+
     private void storeObjEntities(PrintWriter out, DataMap map) {
         Iterator iter = sortedObjEntities(map).iterator();
         while (iter.hasNext()) {
@@ -499,7 +554,7 @@ public class MapLoader extends DefaultHandler {
             if (temp.isReadOnly()) {
                 out.print("\" readOnly=\"true");
             }
-            
+
             out.print('\"');
 
             if (temp.getDbEntity() != null) {
@@ -513,7 +568,7 @@ public class MapLoader extends DefaultHandler {
 				out.print(temp.getSuperClassName());
 				out.print("\"");
 			}
-			
+
             out.println('>');
             storeObjAttribute(out, temp);
 
@@ -643,7 +698,7 @@ public class MapLoader extends DefaultHandler {
         while (iter.hasNext()) {
             DbAttributePair pair = (DbAttributePair) iter.next();
 
-            // sanity check 
+            // sanity check
             if (pair.getSource() == null) {
                 throw new DataMapException(
                     "DbAttributePair has no source attribute. Relationship name: "
@@ -758,10 +813,16 @@ public class MapLoader extends DefaultHandler {
         }
     }
 
+    private void processStartDbKeyGenerator(Attributes atts) throws SAXException {
+      DbKeyGenerator pkGenerator = new DbKeyGenerator();
+      dbEntity.setPrimaryKeyGenerator(pkGenerator);
+    }
+
+
     private void processStartObjEntity(Attributes atts) {
         objEntity = new ObjEntity(atts.getValue("", "name"));
         objEntity.setClassName(atts.getValue("", "className"));
-		
+
         String readOnly = atts.getValue("", "readOnly");
         objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
 
@@ -770,7 +831,7 @@ public class MapLoader extends DefaultHandler {
             DbEntity db_temp = dataMap.getDbEntity(temp);
             objEntity.setDbEntity(db_temp);
         }
-        
+
 		temp=atts.getValue("", "superClassName");
 		if( null != temp) {
 			objEntity.setSuperClassName(temp);
@@ -957,7 +1018,7 @@ public class MapLoader extends DefaultHandler {
                     + " Unable to parse target. Attributes:\n"
                     + printAttributes(atts).toString());
         }
-        
+
         int deleteRule;
 		String deleteRuleName=atts.getValue("", "deleteRule");
 		if(null==deleteRuleName) {
@@ -965,7 +1026,7 @@ public class MapLoader extends DefaultHandler {
 		} else {
 			deleteRule=DeleteRule.deleteRuleForName(deleteRuleName);
 		}
-		
+
         objRelationship = new ObjRelationship(source, target, to_many);
         objRelationship.setName(name);
         objRelationship.setDeleteRule(deleteRule);
@@ -978,6 +1039,34 @@ public class MapLoader extends DefaultHandler {
 
     private void processEndDbEntity() {
         dbEntity = null;
+    }
+
+    private void processEndDbGeneratorType() {
+      if (dbEntity == null) return;
+      DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
+      if (pkGenerator == null) return;
+      pkGenerator.setGeneratorType(charactersBuffer.toString());
+      if (pkGenerator.getGeneratorType() == null) {
+        dbEntity.setPrimaryKeyGenerator(null);
+      }
+    }
+
+    private void processEndDbGeneratorName() {
+      if (dbEntity == null) return;
+      DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
+      if (pkGenerator == null) return;
+      pkGenerator.setGeneratorName(charactersBuffer.toString());
+    }
+
+    private void processEndDbKeyCacheSize() {
+      if (dbEntity == null) return;
+      DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
+      if (pkGenerator == null) return;
+      try {
+        pkGenerator.setKeyCacheSize(new Integer(charactersBuffer.toString().trim()));
+      } catch (Exception ex) {
+        pkGenerator.setKeyCacheSize(null);
+      }
     }
 
     private void processEndObjEntity() {
@@ -993,7 +1082,7 @@ public class MapLoader extends DefaultHandler {
                     + "': 'toDependentPK' is incorrectly set to true, unsetting...");
             dbRelationship.setToDependentPK(false);
         }
-        
+
         dbRelationship = null;
     }
 
@@ -1065,6 +1154,20 @@ public class MapLoader extends DefaultHandler {
         List list = new ArrayList(rels);
         Collections.sort(list, new PropertyComparator("name", Relationship.class));
         return list;
+    }
+
+    public void characters(char[] text, int start, int length) throws org.xml.sax.SAXException {
+      if (charactersBuffer != null) {
+        charactersBuffer.append(text, start, length);
+      }
+    }
+
+    private void rememberCurrentTag(String tag) {
+      currentTag = tag;
+    }
+
+    private void resetCurrentTag() {
+      currentTag = null;
     }
 }
 

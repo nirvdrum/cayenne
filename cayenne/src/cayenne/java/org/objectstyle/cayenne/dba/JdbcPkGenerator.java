@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -77,15 +77,15 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
-/** 
+/**
  * Default primary key generator implementation. Uses a lookup table named
- * "AUTO_PK_SUPPORT" to search and increment primary keys for tables.  
- * 
+ * "AUTO_PK_SUPPORT" to search and increment primary keys for tables.
+ *
  * @author Andrei Adamchik
  */
 public class JdbcPkGenerator implements PkGenerator {
@@ -135,9 +135,9 @@ public class JdbcPkGenerator implements PkGenerator {
 		return list;
 	}
 
-	/** 
-	 * Drops table named "AUTO_PK_SUPPORT" if it exists in the 
-	 * database. 
+	/**
+	 * Drops table named "AUTO_PK_SUPPORT" if it exists in the
+	 * database.
 	 */
 	public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
 		if (autoPkTableExists(node)) {
@@ -213,7 +213,7 @@ public class JdbcPkGenerator implements PkGenerator {
 		return "DROP TABLE AUTO_PK_SUPPORT";
 	}
 
-	/** 
+	/**
 	 * Checks if AUTO_PK_TABLE already exists in the database.
 	 */
 	protected boolean autoPkTableExists(DataNode node) throws SQLException {
@@ -235,15 +235,15 @@ public class JdbcPkGenerator implements PkGenerator {
 		return exists;
 	}
 
-	/** 
-	 * Runs JDBC update over a Connection obtained from DataNode. 
+	/**
+	 * Runs JDBC update over a Connection obtained from DataNode.
 	 * Returns a number of objects returned from update.
-	 * 
-	 * @throws SQLException in case of query failure. 
+	 *
+	 * @throws SQLException in case of query failure.
 	 */
 	public int runUpdate(DataNode node, String sql) throws SQLException {
 		QueryLogger.logQuery(QueryLogger.getLoggingLevel(), sql, Collections.EMPTY_LIST);
-		
+
 		Connection con = node.getDataSource().getConnection();
 		try {
 			Statement upd = con.createStatement();
@@ -257,10 +257,10 @@ public class JdbcPkGenerator implements PkGenerator {
 		}
 	}
 
-	/** 
+	/**
 	 * Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
 	 * to track the results of the execution.
-	 * 
+	 *
 	 * @throws java.lang.Exception in case of query failure. */
 	protected List runSelect(DataNode node, String sql) throws Exception {
 		SqlSelectQuery q = new SqlSelectQuery();
@@ -279,42 +279,47 @@ public class JdbcPkGenerator implements PkGenerator {
 	}
 
 	/**
-	 * <p>Generates new (unique and non-repeating) primary key for specified 
+	 * <p>Generates new (unique and non-repeating) primary key for specified
 	 * dbEntity.</p>
 	 *
-	 * <p>This implementation is naive and can have problems with high 
-	 * volume databases, when multiple applications can use this to get 
-	 * a primary key value. There is a possiblity that 2 clients will 
-	 * recieve the same value of primary key. So database specific 
+	 * <p>This implementation is naive and can have problems with high
+	 * volume databases, when multiple applications can use this to get
+	 * a primary key value. There is a possiblity that 2 clients will
+	 * recieve the same value of primary key. So database specific
 	 * implementations should be created for cleaner approach (like Oracle
 	 * sequences, for example).</p>
 	 */
-	public Object generatePkForDbEntity(DataNode node, DbEntity ent) throws Exception {
 
-		PkRange r = (PkRange) pkCache.get(ent.getName());
-		if (r == null || r.isExhausted()) {
-			int val = pkFromDatabase(node, ent);
+    public Object generatePkForDbEntity(DataNode node, DbEntity ent) throws Exception {
+        DbKeyGenerator pkGenerator = ent.getPrimaryKeyGenerator();
+        int cacheSize;
+        if (pkGenerator != null && pkGenerator.getKeyCacheSize() != null)
+          cacheSize = pkGenerator.getKeyCacheSize().intValue();
+        else cacheSize = pkCacheSize;
+        PkRange r = (PkRange) pkCache.get(ent.getName());
+        if (r == null || r.isExhausted()) {
+            int val = pkFromDatabase(node, ent);
 
-			if (pkCacheSize == 1) {
-				return new Integer(val);
-			}
+            if (cacheSize == 1) {
+                return new Integer(val);
+            }
 
-			r = new PkRange(val, val + pkCacheSize - 1);
-			pkCache.put(ent.getName(), r);
-		}
+            r = new PkRange(val, val + cacheSize - 1);
+            pkCache.put(ent.getName(), r);
+        }
 
-		return r.getNextPrimaryKey();
+        return r.getNextPrimaryKey();
 	}
 
-	/** 
-	 * Performs primary key generation ignoring cache. Generates 
+	/**
+	 * Performs primary key generation ignoring cache. Generates
 	 * a range of primary keys as specified by
-	 * "pkCacheSize" bean property. 
-	 * 
-	 * <p>This method is called internally from "generatePkForDbEntity" 
-	 * and then generated range of key values is saved in cache for 
-	 * performance. Subclasses that implement different primary key 
-	 * generation solutions should override this method, 
+	 * "pkCacheSize" bean property.
+	 *
+	 * <p>This method is called internally from "generatePkForDbEntity"
+	 * and then generated range of key values is saved in cache for
+	 * performance. Subclasses that implement different primary key
+	 * generation solutions should override this method,
 	 * not "generatePkForDbEntity".</p>
 	 */
 	protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
@@ -322,13 +327,13 @@ public class JdbcPkGenerator implements PkGenerator {
 		// run queries via DataNode to utilize its transactional behavior
 		List queries = new ArrayList(2);
 
-		// 1. prepare select 
+		// 1. prepare select
 		SqlSelectQuery sel = new SqlSelectQuery(ent, pkSelectString(ent.getName()));
 		sel.setObjDescriptors(objDesc);
 		sel.setResultDescriptors(resultDesc);
 		queries.add(sel);
 
-		// 2. prepare update 
+		// 2. prepare update
 		queries.add(new SqlModifyQuery(ent, pkUpdateString(ent.getName())));
 
 		PkRetrieveProcessor observer = new PkRetrieveProcessor(ent.getName());
@@ -354,11 +359,11 @@ public class JdbcPkGenerator implements PkGenerator {
 	 * Sets the size of the entity primary key cache.
 	 * If <code>pkCacheSize</code> parameter is less than 1,
 	 * cache size is set to "one".
-	 * 
+	 *
 	 * <p><i>Note that our tests show that setting primary key
-	 * cache value to anything much bigger than 20 does not give 
+	 * cache value to anything much bigger than 20 does not give
 	 * any significant performance increase. Therefore it does
-	 * not make sense to use bigger values, since this may 
+	 * not make sense to use bigger values, since this may
 	 * potentially create big gaps in the database primary
 	 * key sequences in cases like application crashes or restarts.
 	 * </i></p>
@@ -427,4 +432,8 @@ public class JdbcPkGenerator implements PkGenerator {
 			throw new CayenneRuntimeException("Error generating PK.", ex);
 		}
 	}
+
+    public void reset() {
+      pkCache.clear();
+    }
 }

@@ -54,76 +54,54 @@
  *
  */
 
-package org.objectstyle.cayenne.dba;
+package org.objectstyle.cayenne.query;
 
-import java.util.List;
+import java.util.*;
+import org.apache.commons.lang.builder.*;
+import org.objectstyle.cayenne.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DbEntity;
+public class BatchUtils {
 
-/**
- * Defines methods to support automatic primary key generation.
- *
- * @author Andrei Adamchik
- */
-public interface PkGenerator {
+  private BatchUtils() {
+  }
 
-    /**
-     * Generates necessary database objects to provide automatic primary
-     * key support.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities that require primary key autogeneration support
-     */
-    public void createAutoPk(DataNode node, List dbEntities) throws Exception;
+  public static Map buildSnapshotForUpdate(DataObject o) {
+    Map committedSnapshot = o.getCommittedSnapshot();
+    Map currentSnapshot = o.getCurrentSnapshot();
+    Map snapshot = null;
+    if (committedSnapshot == null || committedSnapshot.isEmpty()) {
+      snapshot = Collections.unmodifiableMap(currentSnapshot);
+      return snapshot;
+    } else snapshot = new HashMap(currentSnapshot.size());
+    Iterator it = currentSnapshot.entrySet().iterator();
+    while (it.hasNext()) {
+      Map.Entry entry = (Map.Entry)it.next();
+      String attrName = (String)entry.getKey();
+      Object newValue = entry.getValue();
+      // if snapshot exists, compare old values and new values,
+      // only add attribute to the update clause if the value has changed
+      Object oldValue = committedSnapshot.get(attrName);
+      if ((newValue == null && oldValue != null) ||
+          (newValue != null && !newValue.equals(oldValue))) snapshot.put(attrName, newValue);
+    }
 
-    /**
-     * Returns a list of SQL strings needed to generates
-     * database objects to provide automatic primary support
-     * for the list of entities. No actual database operations
-     * are performed.
-     */
-    public List createAutoPkStatements(List dbEntities);
+    // original snapshot can have extra keys that are missing in current snapshot
+    // process those
+    Iterator origit = committedSnapshot.entrySet().iterator();
+    while (origit.hasNext()) {
+      Map.Entry entry = (Map.Entry)origit.next();
+      String attrName = (String) entry.getKey();
+      Object oldValue = entry.getValue();
+      if (oldValue == null || currentSnapshot.containsKey(attrName)) continue;
+      snapshot.put(attrName, null);
+    }
 
+    return Collections.unmodifiableMap(snapshot);
+  }
 
-    /**
-     * Drops any common database objects associated with automatic primary
-     * key generation process. This may be lookup tables, special stored
-     * procedures or sequences.
-     *
-     * @param node node that provides access to a DataSource.
-     * @param dbEntities a list of entities whose primary key autogeneration support
-     * should be dropped.
-     */
-    public void dropAutoPk(DataNode node, List dbEntities) throws Exception;
-
-
-    /**
-     * Returns SQL string needed to drop database objects associated
-     * with automatic primary key generation. No actual database
-     * operations are performed.
-     */
-    public List dropAutoPkStatements(List dbEntities);
-
-
-
-    /**
-     * Generates new (unique and non-repeating) primary key for specified
-     * DbEntity.
-     *
-     *  @param ent DbEntity for which automatic PK is generated.
-     */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
-        throws Exception;
-
-
-    /**
-     * Returns SQL string that can generate new (unique and non-repeating)
-     * primary key for specified DbEntity. No actual database operations
-     * are performed.
-     */
-    public String generatePkForDbEntityString(DbEntity ent);
-
-    public void reset();
-
+  public static int hashCode(Collection c) {
+    HashCodeBuilder builder = new HashCodeBuilder();
+    for (Iterator i = c.iterator(); i.hasNext();) builder.append(i.next());
+    return builder.toHashCode();
+  }
 }

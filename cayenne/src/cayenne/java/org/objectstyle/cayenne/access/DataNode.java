@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -61,25 +61,29 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.collections.*;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.dba.BatchInterpreter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
   *
   * <p><i>For more information see <a href="../../../../../../userguide/index.html"
   * target="_top">Cayenne User Guide.</a></i></p>
-  * 
+  *
   * @author Andrei Adamchik
   */
 public class DataNode implements QueryEngine {
@@ -93,6 +97,7 @@ public class DataNode implements QueryEngine {
     protected String dataSourceLocation;
     protected String dataSourceFactory;
     protected EntityResolver entityResolver = new EntityResolver();
+    protected RefIntegritySupport refIntegritySupport;
 
     /** Creates unnamed DataNode */
     public DataNode() {}
@@ -143,7 +148,7 @@ public class DataNode implements QueryEngine {
      */
     public DataMap[] getDataMaps() {
         // Andrus: this should probably be deprecated eventually,
-        // since it is redundant with "getMapList"	
+        // since it is redundant with "getMapList"
         List maps = entityResolver.getDataMapsList();
         DataMap[] mapsArray = new DataMap[maps.size()];
         return (DataMap[]) maps.toArray(mapsArray);
@@ -161,10 +166,11 @@ public class DataNode implements QueryEngine {
             }
         }
 
-        setDataMaps(dataMaps);
+        setDataMaps(mapsList);
     }
 
     public void setDataMaps(List dataMaps) {
+        refIntegritySupport = null;
         entityResolver.setDataMaps(dataMaps);
     }
 
@@ -173,12 +179,14 @@ public class DataNode implements QueryEngine {
      */
     public void addDataMap(DataMap map) {
         entityResolver.addDataMap(map);
+        refIntegritySupport = null;
     }
 
     public void removeDataMap(String mapName) {
         DataMap map = entityResolver.getDataMap(mapName);
         if (map != null) {
             entityResolver.removeDataMap(map);
+            refIntegritySupport = null;
         }
     }
 
@@ -202,7 +210,7 @@ public class DataNode implements QueryEngine {
 
     // other methods
 
-    /** 
+    /**
      * Returns this object if it can hanle queries for
      * <code>objEntity</code>, returns null otherwise.
      */
@@ -256,6 +264,22 @@ public class DataNode implements QueryEngine {
 
                 // catch exceptions for each individual query
                 try {
+                    BatchInterpreter interpreter = null;
+                    switch (nextQuery.getQueryType()) {
+                      case Query.INSERT_BATCH_QUERY:
+                        interpreter = getAdapter().getInsertBatchInterpreter();
+                        break;
+                      case Query.UPDATE_BATCH_QUERY:
+                        interpreter = getAdapter().getUpdateBatchInterpreter();
+                        break;
+                      case Query.DELETE_BATCH_QUERY:
+                        interpreter = getAdapter().getDeleteBatchInterpreter();
+                        break;
+                    }
+                    if (interpreter != null) {
+                      int[] results = interpreter.execute((BatchQuery)nextQuery, con);
+                      continue;
+                    }
                     // translate query
                     QueryTranslator transl = getAdapter().getQueryTranslator(nextQuery);
                     transl.setEngine(this);
@@ -344,7 +368,7 @@ public class DataNode implements QueryEngine {
         }
     }
 
-    /** 
+    /**
      * Executes prebuilt SELECT PreparedStatement.
      */
     protected void runSelect(
@@ -371,8 +395,8 @@ public class DataNode implements QueryEngine {
         observer.nextDataRows(transl.getQuery(), resultRows);
     }
 
-    /** 
-     * Executes prebuilt SELECT PreparedStatement and returns 
+    /**
+     * Executes prebuilt SELECT PreparedStatement and returns
      * result to an observer as a ResultIterator.
      */
     protected void runIteratedSelect(
@@ -398,7 +422,7 @@ public class DataNode implements QueryEngine {
         }
     }
 
-    /** 
+    /**
      * Executes prebuilt UPDATE, DELETE or INSERT PreparedStatement.
      */
     protected void runUpdate(
@@ -430,5 +454,21 @@ public class DataNode implements QueryEngine {
      */
     public EntityResolver getEntityResolver() {
         return entityResolver;
+    }
+
+    public Iterator dataMapIterator() {
+      return IteratorUtils.arrayIterator(getDataMaps());
+    }
+
+    public void resetReferentialIntegritySupport() throws CayenneException {
+      if (refIntegritySupport == null) {
+        if (adapter.supportsFkConstraints())
+          refIntegritySupport = new RefIntegritySupport(this);
+      } else refIntegritySupport.reset(this);
+    }
+
+    public RefIntegritySupport getReferentialIntegritySupport() throws CayenneException {
+      if (refIntegritySupport == null) resetReferentialIntegritySupport();
+      return refIntegritySupport;
     }
 }
