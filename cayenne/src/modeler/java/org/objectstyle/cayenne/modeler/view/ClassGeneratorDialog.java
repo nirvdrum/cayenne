@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.view;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 
@@ -104,6 +105,8 @@ public class ClassGeneratorDialog extends SPanel {
 
         // build entity table
         STable table = new ClassGeneratorTable();
+        table.setRowHeight(25);
+        table.setRowMargin(3);
         ClassGeneratorModel model = new ClassGeneratorModel(table);
         model.setSelector("entities");
         model.setColumnNames(new String[] { "Entity", "Class", "Generate", "Problems" });
@@ -118,7 +121,7 @@ public class ClassGeneratorDialog extends SPanel {
 
         // make sure that long columns are not squeezed
         table.getColumnModel().getColumn(1).setMinWidth(100);
-        table.getColumnModel().getColumn(3).setMinWidth(150);
+        table.getColumnModel().getColumn(3).setMinWidth(250);
 
         // build superclass package
         JLabel superClassPackageLabel =
@@ -226,6 +229,8 @@ public class ClassGeneratorDialog extends SPanel {
     }
 
     class ClassGeneratorTable extends STable {
+        protected final Dimension preferredSize = new Dimension(500, 300);
+
         protected DefaultTableCellRenderer problemRenderer;
 
         public ClassGeneratorTable() {
@@ -239,6 +244,10 @@ public class ClassGeneratorDialog extends SPanel {
             return (model.isEnabledRow(row))
                 ? super.getCellRenderer(row, column)
                 : problemRenderer;
+        }
+
+        public Dimension getPreferredScrollableViewportSize() {
+            return preferredSize;
         }
     }
 

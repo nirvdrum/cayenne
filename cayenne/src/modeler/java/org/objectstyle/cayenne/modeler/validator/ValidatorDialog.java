@@ -58,30 +58,30 @@ package org.objectstyle.cayenne.modeler.validator;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
@@ -107,32 +107,62 @@ public class ValidatorDialog
     protected JTable messages;
     protected JButton closeBtn;
 
-    public static void showDialog(
+    public static synchronized void showDialog(
         Editor editor,
         EventController mediator,
         Validator val) {
 
-        ValidatorDialog open = instance;
-
-        if (open != null) {
-            open.dispose();
-        }
-
+        closeValidationDialog();
         instance = new ValidatorDialog(editor, mediator, val);
+    }
+
+    public static synchronized void showDialog(
+        Editor editor,
+        EventController mediator,
+        Validator val,
+        String message) {
+
+        closeValidationDialog();
+        instance = new ValidatorDialog(editor, mediator, val, message);
+    }
+
+    public static synchronized void showValidationSuccess(
+        Editor editor,
+        EventController mediator,
+        Validator val) {
+        closeValidationDialog();
+        JOptionPane.showMessageDialog(
+            Editor.getFrame(),
+            "Project passed validation successfully.");
+    }
+
+    protected static synchronized void closeValidationDialog() {
+        if (instance != null) {
+            instance.dispose();
+        }
+        instance = null;
     }
 
     protected ValidatorDialog(
         Editor editor,
         EventController mediator,
         Validator validator) {
-        super(editor, "Validation Errors", false);
+        this(editor, mediator, validator, "Validation Problems");
+    }
+
+    protected ValidatorDialog(
+        Editor editor,
+        EventController mediator,
+        Validator validator,
+        String warning) {
+        super(editor, warning, false);
         this.mediator = mediator;
         this.validator = validator;
 
         init();
 
-        messages.getSelectionModel().addListSelectionListener(this);
-        closeBtn.addActionListener(this);
+        this.messages.getSelectionModel().addListSelectionListener(this);
+        this.closeBtn.addActionListener(this);
 
         this.pack();
         this.centerWindow();
@@ -143,44 +173,38 @@ public class ValidatorDialog
     protected void init() {
         getContentPane().setLayout(new BorderLayout());
 
-        JPanel messagePanel = new JPanel();
-        messagePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
-        String msg =
-            (validator.getMaxSeverity() < ValidationInfo.ERROR)
-                ? "Saved project with validation warnings."
-                : "Validation errors. Project can not be saved.";
-        JLabel label = CayenneWidgetFactory.createLabel(msg);
+        JLabel description =
+            CayenneWidgetFactory.createLabel(
+                "Click on any row below to go to the object that has a validation problem.");
+        description.setFont(description.getFont().deriveFont(10));
+        description.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
-        messagePanel.add(label);
-        getContentPane().add(messagePanel, BorderLayout.NORTH);
+        getContentPane().add(description, BorderLayout.NORTH);
 
         ValidatorTableModel model =
             new ValidatorTableModel(validator.validationResults());
         messages = new ValidatorTable(model);
         messages.setRowHeight(25);
         messages.setRowMargin(3);
-        messages.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         messages.setCellSelectionEnabled(false);
         messages.setRowSelectionAllowed(true);
-        TableColumn col = messages.getColumnModel().getColumn(0);
-        col.setPreferredWidth(50);
-        col = messages.getColumnModel().getColumn(1);
-        col.setPreferredWidth(220);
+        messages.getColumnModel().getColumn(0).setPreferredWidth(100);
+        messages.getColumnModel().getColumn(1).setPreferredWidth(400);
 
-        //Create the scroll pane and add the table to it. 
-        JScrollPane scrollPane = new JScrollPane(messages);
-        getContentPane().add(scrollPane, BorderLayout.CENTER);
-
+        JButton revalidateBtn =
+            new JButton(Editor.getFrame().getAction(ValidateAction.ACTION_NAME));
+        revalidateBtn.setText("Refresh");
         closeBtn = new JButton("Close");
         JPanel panel =
-            PanelFactory.createButtonPanel(new JButton[] { closeBtn });
-        getContentPane().add(panel, BorderLayout.SOUTH);
+            PanelFactory.createTablePanel(
+                messages,
+                new JButton[] { revalidateBtn, closeBtn });
+        getContentPane().add(panel, BorderLayout.CENTER);
     }
 
     public void valueChanged(ListSelectionEvent e) {
         if (messages.getSelectedRow() >= 0) {
-            ValidatorTableModel model =
-                (ValidatorTableModel) messages.getModel();
+            ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
             ValidationInfo obj = model.getValue(messages.getSelectedRow());
             ValidationDisplayHandler.getErrorMsg(obj).displayField(
                 mediator,
@@ -194,6 +218,8 @@ public class ValidatorDialog
     }
 
     class ValidatorTable extends JTable {
+        protected final Dimension preferredSize = new Dimension(500, 300);
+
         protected CellRenderer errorRenderer;
         protected CellRenderer errorMsgRenderer;
 
@@ -223,6 +249,11 @@ public class ValidatorDialog
                 ? ((column == 0) ? errorRenderer : errorMsgRenderer)
                 : ((column == 0) ? warnRenderer : warnMsgRenderer);
         }
+
+        public Dimension getPreferredScrollableViewportSize() {
+            return preferredSize;
+        }
+
     }
 
     class ValidatorTableModel extends AbstractTableModel {
@@ -256,9 +287,11 @@ public class ValidatorDialog
                     return "ERROR";
                 else
                     return "WARNING";
-            } else if (col == 1) {
+            }
+            else if (col == 1) {
                 return msg.getMessage();
-            } else
+            }
+            else
                 return "";
         }
 

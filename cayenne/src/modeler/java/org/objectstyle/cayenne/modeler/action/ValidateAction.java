@@ -67,17 +67,19 @@ import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /**
+ * UI action that performs full project validation.
+ * 
  * @author Craig Miskell
  */
 public class ValidateAction extends CayenneAction {
-	public static final String ACTION_NAME = "Validate";
+	public static final String ACTION_NAME = "Validate Project";
 
 	public ValidateAction() {
 		super(ACTION_NAME);
 	}
 
 	/**
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(java.awt.event.ActionEvent)
+	 * Validates project for possible conflits and incomplete mappings.
 	 */
 	public void performAction(ActionEvent e) {
 		EventController mediator = getMediator();
@@ -88,7 +90,9 @@ public class ValidateAction extends CayenneAction {
 		if (validationCode >= ValidationDisplayHandler.WARNING) {
 			ValidatorDialog.showDialog(Editor.getFrame(), mediator, val);
 		}
-
+		else {
+			ValidatorDialog.showValidationSuccess(Editor.getFrame(), mediator, val);
+		}
 	}
 	
 	/**
@@ -103,5 +107,4 @@ public class ValidateAction extends CayenneAction {
 		Project project = (Project)path.firstInstanceOf(Project.class);
 		return project != null;
 	}
-
 }

@@ -42,7 +42,7 @@ public class ClassGeneratorController extends BasicController {
         ObjEntity selectedEntity) {
         	
         // validate entities
-        Validator validator = new Validator(project);
+        Validator validator = project.getValidator();
         validator.validate();
 
         ClassGeneratorModel model =

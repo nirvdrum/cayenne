@@ -437,7 +437,6 @@ public class Editor
         fileMenu.add(getAction(ProjectAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
         fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
-        fileMenu.add(getAction(ValidateAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();
@@ -446,6 +445,8 @@ public class Editor
         fileMenu.addSeparator();
         fileMenu.add(getAction(ExitAction.ACTION_NAME).buildMenu());
 
+		projectMenu.add(getAction(ValidateAction.ACTION_NAME).buildMenu());
+		projectMenu.addSeparator();
         projectMenu.add(getAction(CreateDomainAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());

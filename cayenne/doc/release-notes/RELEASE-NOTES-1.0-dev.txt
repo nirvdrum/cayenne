@@ -27,3 +27,5 @@ the attempt to delete an attribute.
 
 7. New site and documentation Look and Feel, including right-side table of contents for 
 all "Guides".
+
+8. "Validate" Menu is moved to "Project" from "File"
