@@ -181,6 +181,92 @@
 			supplier   	"Logical View::org.objectstyle.cayenne.access::DataContext"
 			quidu      	"3CCF36A8003E"
 			client_cardinality 	(value cardinality "0..n"))))
+	    (object Association "$UNNAMED$29"
+		quid       	"3CDE7B6502B1"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$30"
+			quid       	"3CDE7B6603D4"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::Relationship"
+			quidu      	"3CDE7AE8021B"
+			client_cardinality 	(value cardinality "0..n")
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$31"
+			quid       	"3CDE7B6603DE"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::Entity"
+			quidu      	"3CDE7AE000F7")))
+	    (object Association "$UNNAMED$32"
+		quid       	"3CDE7B6A011D"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$33"
+			quid       	"3CDE7B6A03BC"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::Attribute"
+			quidu      	"3CDE7AF10065"
+			client_cardinality 	(value cardinality "1..n")
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$34"
+			quid       	"3CDE7B6A03C6"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::Entity"
+			quidu      	"3CDE7AE000F7")))
+	    (object Association "$UNNAMED$35"
+		quid       	"3CDE7BF800C7"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$36"
+			quid       	"3CDE7BFA0160"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::ObjRelationship"
+			quidu      	"3CDE7BD30092"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$37"
+			quid       	"3CDE7BFA016A"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::ObjEntity"
+			quidu      	"3CDE7BC20142")))
+	    (object Association "$UNNAMED$38"
+		quid       	"3CDE7BFD0291"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$39"
+			quid       	"3CDE7BFE024C"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::ObjAttribute"
+			quidu      	"3CDE7BE80178"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$40"
+			quid       	"3CDE7BFE024E"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::ObjEntity"
+			quidu      	"3CDE7BC20142")))
+	    (object Association "$UNNAMED$41"
+		quid       	"3CDE7CDA00C2"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$42"
+			quid       	"3CDE7CDB020E"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::DbEntity"
+			quidu      	"3CDE7C9602EB"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$43"
+			quid       	"3CDE7CDB0222"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::ObjEntity"
+			quidu      	"3CDE7BC20142")))
+	    (object Association "$UNNAMED$44"
+		quid       	"3CDE7D34025C"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$45"
+			quid       	"3CDE7D35014F"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::DbAttribute"
+			quidu      	"3CDE7D2202BA"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$46"
+			quid       	"3CDE7D350159"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::DbEntity"
+			quidu      	"3CDE7C9602EB")))
+	    (object Association "$UNNAMED$47"
+		quid       	"3CDE7D570357"
+		roles      	(list role_list
+		    (object Role "$UNNAMED$48"
+			quid       	"3CDE7D580146"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::DbRelationship"
+			quidu      	"3CDE7D4F03BA"
+			is_navigable 	TRUE)
+		    (object Role "$UNNAMED$49"
+			quid       	"3CDE7D580150"
+			supplier   	"Logical View::org.objectstyle.cayenne.map::DbEntity"
+			quidu      	"3CDE7C9602EB")))
 	    (object Class_Category "org.objectstyle.cayenne.conn"
 		quid       	"3CCECE4703B7"
 		exportControl 	"Public"
@@ -387,6 +473,74 @@
 				quid       	"3CCF3B92032C"
 				supplier   	"Logical View::org.objectstyle.cayenne.dba::PkGenerator"
 				quidu      	"3CCF36E40199"))))
+		logical_presentations 	(list unit_reference_list))
+	    (object Class_Category "org.objectstyle.cayenne.map"
+		quid       	"3CDE7ACB02F5"
+		exportControl 	"Public"
+		logical_models 	(list unit_reference_list
+		    (object Class "Entity"
+			quid       	"3CDE7AE000F7"
+			stereotype 	"abstract"
+			operations 	(list Operations
+			    (object Operation "getName"
+				quid       	"3CDE7D0E0302"
+				concurrency 	"Sequential"
+				opExportControl 	"Public"
+				uid        	0)))
+		    (object Class "Relationship"
+			quid       	"3CDE7AE8021B"
+			stereotype 	"abstract")
+		    (object Class "Attribute"
+			quid       	"3CDE7AF10065"
+			stereotype 	"abstract")
+		    (object Class "ObjEntity"
+			quid       	"3CDE7BC20142"
+			superclasses 	(list inheritance_relationship_list
+			    (object Inheritance_Relationship
+				quid       	"3CDE7BCC0182"
+				supplier   	"Logical View::org.objectstyle.cayenne.map::Entity"
+				quidu      	"3CDE7AE000F7"))
+			operations 	(list Operations
+			    (object Operation "getClassName"
+				quid       	"3CDE7CFA00A0"
+				concurrency 	"Sequential"
+				opExportControl 	"Public"
+				uid        	0)))
+		    (object Class "ObjRelationship"
+			quid       	"3CDE7BD30092"
+			superclasses 	(list inheritance_relationship_list
+			    (object Inheritance_Relationship
+				quid       	"3CDE7BDE0156"
+				supplier   	"Logical View::org.objectstyle.cayenne.map::Relationship"
+				quidu      	"3CDE7AE8021B")))
+		    (object Class "ObjAttribute"
+			quid       	"3CDE7BE80178"
+			superclasses 	(list inheritance_relationship_list
+			    (object Inheritance_Relationship
+				quid       	"3CDE7BF20155"
+				supplier   	"Logical View::org.objectstyle.cayenne.map::Attribute"
+				quidu      	"3CDE7AF10065")))
+		    (object Class "DbEntity"
+			quid       	"3CDE7C9602EB"
+			superclasses 	(list inheritance_relationship_list
+			    (object Inheritance_Relationship
+				quid       	"3CDE7D690096"
+				supplier   	"Logical View::org.objectstyle.cayenne.map::Entity"
+				quidu      	"3CDE7AE000F7")))
+		    (object Class "DbAttribute"
+			quid       	"3CDE7D2202BA"
+			superclasses 	(list inheritance_relationship_list
+			    (object Inheritance_Relationship
+				quid       	"3CDE7D49019E"
+				supplier   	"Logical View::org.objectstyle.cayenne.map::Attribute"
+				quidu      	"3CDE7AF10065")))
+		    (object Class "DbRelationship"
+			quid       	"3CDE7D4F03BA"
+			superclasses 	(list inheritance_relationship_list
+			    (object Inheritance_Relationship
+				quid       	"3CDE7D5B0349"
+				supplier   	"Logical View::org.objectstyle.cayenne.map::Relationship"
+				quidu      	"3CDE7AE8021B"))))
 		logical_presentations 	(list unit_reference_list)))
 	logical_presentations 	(list unit_reference_list
 	    (object ClassDiagram "Cayenne DataSource"
@@ -809,7 +963,7 @@
 			vertices   	(list Points
 			    (1712, 800)
 			    (1394, 800)
-			    (1397, 660))
+			    (1401, 501))
 			line_style 	0)
 		    (object AttachView "" @21
 			stereotype 	TRUE
@@ -930,7 +1084,37 @@
 			    label      	"Implementation of DbAdapter optimized for Oracle RDBMS")
 			width      	394
 			height     	150)
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataNode" @29
+		    (object ClassView "Class" "Logical View::java.sql::Connection" @29
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(256, 480)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@29
+			    location   	(255, 588)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	510
+			    justify    	0
+			    label      	"Connection")
+			icon       	"Interface"
+			icon_style 	"Icon"
+			fill_color 	13434879
+			quidu      	"3CCECF5B001A"
+			width      	58
+			height     	58
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataNode" @30
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
@@ -945,7 +1129,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@29
+			    Parent_View 	@30
 			    location   	(96, 65)
 			    fill_color 	13434879
 			    nlines     	1
@@ -956,7 +1140,7 @@
 			fill_color 	16771297
 			quidu      	"3CCF368E0290"
 			compartment 	(object Compartment
-			    Parent_View 	@29
+			    Parent_View 	@30
 			    location   	(96, 171)
 			    font       	(object Font
 				size       	10
@@ -974,36 +1158,6 @@
 			    max_width  	366)
 			width      	594
 			height     	278
-			annotation 	8
-			autoResize 	TRUE)
-		    (object ClassView "Class" "Logical View::java.sql::Connection" @30
-			ShowCompartmentStereotypes 	TRUE
-			IncludeAttribute 	TRUE
-			IncludeOperation 	TRUE
-			location   	(256, 480)
-			font       	(object Font
-			    size       	10
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			label      	(object ItemLabel
-			    Parent_View 	@30
-			    location   	(255, 588)
-			    anchor_loc 	1
-			    nlines     	2
-			    max_width  	510
-			    justify    	0
-			    label      	"Connection")
-			icon       	"Interface"
-			icon_style 	"Icon"
-			fill_color 	13434879
-			quidu      	"3CCECF5B001A"
-			width      	58
-			height     	58
 			annotation 	8
 			autoResize 	TRUE)
 		    (object AssociationViewNew "$UNNAMED$12" @31
@@ -1027,7 +1181,7 @@
 				line_color 	3342489
 				quidu      	"3CCF3969009C"
 				client     	@31
-				supplier   	@30
+				supplier   	@29
 				line_style 	0)
 			    (object RoleView "$UNNAMED$14" @33
 				Parent_View 	@31
@@ -1036,71 +1190,9 @@
 				line_color 	3342489
 				quidu      	"3CCF396900A6"
 				client     	@31
-				supplier   	@29
+				supplier   	@30
 				line_style 	0)))
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::DbAdapter" @34
-			ShowCompartmentStereotypes 	TRUE
-			IncludeAttribute 	TRUE
-			IncludeOperation 	TRUE
-			location   	(912, 192)
-			font       	(object Font
-			    size       	10
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			label      	(object ItemLabel
-			    Parent_View 	@34
-			    location   	(911, 300)
-			    anchor_loc 	1
-			    nlines     	2
-			    max_width  	567
-			    justify    	0
-			    label      	"DbAdapter")
-			icon       	"Interface"
-			icon_style 	"Icon"
-			fill_color 	16771297
-			quidu      	"3CCF36B4008C"
-			width      	58
-			height     	58
-			annotation 	8
-			autoResize 	TRUE)
-		    (object AssociationViewNew "$UNNAMED$9" @35
-			location   	(782, 192)
-			font       	(object Font
-			    size       	10
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			stereotype 	TRUE
-			quidu      	"3CCF37B302A5"
-			roleview_list 	(list RoleViews
-			    (object RoleView "$UNNAMED$10" @36
-				Parent_View 	@35
-				location   	(-34, -48)
-				stereotype 	TRUE
-				line_color 	3342489
-				quidu      	"3CCF37B4015C"
-				client     	@35
-				supplier   	@34
-				line_style 	0)
-			    (object RoleView "$UNNAMED$11" @37
-				Parent_View 	@35
-				location   	(-34, -48)
-				stereotype 	TRUE
-				line_color 	3342489
-				quidu      	"3CCF37B40166"
-				client     	@35
-				supplier   	@29
-				line_style 	0)))
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::PkGenerator" @38
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::PkGenerator" @34
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
@@ -1115,7 +1207,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@38
+			    Parent_View 	@34
 			    location   	(1855, 300)
 			    anchor_loc 	1
 			    nlines     	2
@@ -1130,6 +1222,68 @@
 			height     	58
 			annotation 	8
 			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::DbAdapter" @35
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(912, 192)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@35
+			    location   	(911, 300)
+			    anchor_loc 	1
+			    nlines     	2
+			    max_width  	567
+			    justify    	0
+			    label      	"DbAdapter")
+			icon       	"Interface"
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CCF36B4008C"
+			width      	58
+			height     	58
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$9" @36
+			location   	(782, 192)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CCF37B302A5"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$10" @37
+				Parent_View 	@36
+				location   	(-34, -48)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CCF37B4015C"
+				client     	@36
+				supplier   	@35
+				line_style 	0)
+			    (object RoleView "$UNNAMED$11" @38
+				Parent_View 	@36
+				location   	(-34, -48)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CCF37B40166"
+				client     	@36
+				supplier   	@30
+				line_style 	0)))
 		    (object AssociationViewNew "$UNNAMED$15" @39
 			location   	(1383, 192)
 			font       	(object Font
@@ -1151,7 +1305,7 @@
 				line_color 	3342489
 				quidu      	"3CCF3AE80223"
 				client     	@39
-				supplier   	@38
+				supplier   	@34
 				line_style 	0)
 			    (object RoleView "$UNNAMED$17" @41
 				Parent_View 	@39
@@ -1160,49 +1314,9 @@
 				line_color 	3342489
 				quidu      	"3CCF3AE8022E"
 				client     	@39
-				supplier   	@34
+				supplier   	@35
 				line_style 	0)))
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::JdbcAdapter" @42
-			ShowCompartmentStereotypes 	TRUE
-			IncludeAttribute 	TRUE
-			IncludeOperation 	TRUE
-			location   	(768, 656)
-			font       	(object Font
-			    size       	10
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			label      	(object ItemLabel
-			    Parent_View 	@42
-			    location   	(514, 582)
-			    fill_color 	13434879
-			    nlines     	1
-			    max_width  	508
-			    justify    	0
-			    label      	"JdbcAdapter")
-			icon_style 	"Icon"
-			fill_color 	16771297
-			quidu      	"3CCF36BB0276"
-			width      	526
-			height     	172
-			annotation 	8
-			autoResize 	TRUE)
-		    (object RealizeView "" @43
-			stereotype 	TRUE
-			quidu      	"3CCF37E600AA"
-			client     	@42
-			supplier   	@34
-			line_style 	0)
-		    (object AttachView "" @44
-			stereotype 	TRUE
-			client     	@27
-			supplier   	@42
-			line_style 	0)
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::JdbcPkGenerator" @45
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::JdbcPkGenerator" @42
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
@@ -1217,25 +1331,65 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@45
-			    location   	(1314, 582)
+			    Parent_View 	@42
+			    location   	(1300, 581)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	508
+			    max_width  	536
 			    justify    	0
 			    label      	"JdbcPkGenerator")
 			icon_style 	"Icon"
 			fill_color 	16771297
 			quidu      	"3CCF36C30047"
-			width      	526
-			height     	172
+			width      	554
+			height     	174
 			annotation 	8
 			autoResize 	TRUE)
-		    (object RealizeView "" @46
+		    (object RealizeView "" @43
 			stereotype 	TRUE
 			quidu      	"3CCF3B3001CD"
-			client     	@45
-			supplier   	@38
+			client     	@42
+			supplier   	@34
+			line_style 	0)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba::JdbcAdapter" @44
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(768, 656)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@44
+			    location   	(500, 581)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	536
+			    justify    	0
+			    label      	"JdbcAdapter")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CCF36BB0276"
+			width      	554
+			height     	174
+			annotation 	8
+			autoResize 	TRUE)
+		    (object RealizeView "" @45
+			stereotype 	TRUE
+			quidu      	"3CCF37E600AA"
+			client     	@44
+			supplier   	@35
+			line_style 	0)
+		    (object AttachView "" @46
+			stereotype 	TRUE
+			client     	@27
+			supplier   	@44
 			line_style 	0)
 		    (object AssociationViewNew "$UNNAMED$18" @47
 			location   	(1167, 656)
@@ -1258,7 +1412,7 @@
 				line_color 	3342489
 				quidu      	"3CCF3B37006E"
 				client     	@47
-				supplier   	@45
+				supplier   	@42
 				line_style 	0)
 			    (object RoleView "$UNNAMED$20" @49
 				Parent_View 	@47
@@ -1267,49 +1421,9 @@
 				line_color 	3342489
 				quidu      	"3CCF3B370078"
 				client     	@47
-				supplier   	@42
+				supplier   	@44
 				line_style 	0)))
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba.oracle::OracleAdapter" @50
-			ShowCompartmentStereotypes 	TRUE
-			IncludeAttribute 	TRUE
-			IncludeOperation 	TRUE
-			location   	(768, 1120)
-			font       	(object Font
-			    size       	10
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			label      	(object ItemLabel
-			    Parent_View 	@50
-			    location   	(464, 1046)
-			    fill_color 	13434879
-			    nlines     	1
-			    max_width  	608
-			    justify    	0
-			    label      	"OracleAdapter")
-			icon_style 	"Icon"
-			fill_color 	16771297
-			quidu      	"3CCF380903AD"
-			width      	626
-			height     	172
-			annotation 	8
-			autoResize 	TRUE)
-		    (object InheritView "" @51
-			stereotype 	TRUE
-			quidu      	"3CCF381401A0"
-			client     	@50
-			supplier   	@42
-			line_style 	0)
-		    (object AttachView "" @52
-			stereotype 	TRUE
-			client     	@28
-			supplier   	@50
-			line_style 	0)
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba.oracle::OraclePkGenerator" @53
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba.oracle::OraclePkGenerator" @50
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
@@ -1324,20 +1438,60 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@53
-			    location   	(1552, 1046)
+			    Parent_View 	@50
+			    location   	(1535, 1045)
 			    fill_color 	13434879
 			    nlines     	1
-			    max_width  	608
+			    max_width  	642
 			    justify    	0
 			    label      	"OraclePkGenerator")
 			icon_style 	"Icon"
 			fill_color 	16771297
 			quidu      	"3CCF3B80000F"
-			width      	626
-			height     	172
+			width      	660
+			height     	174
 			annotation 	8
 			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.dba.oracle::OracleAdapter" @51
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(768, 1120)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@51
+			    location   	(447, 1045)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	642
+			    justify    	0
+			    label      	"OracleAdapter")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CCF380903AD"
+			width      	660
+			height     	174
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @52
+			stereotype 	TRUE
+			quidu      	"3CCF381401A0"
+			client     	@51
+			supplier   	@44
+			line_style 	0)
+		    (object AttachView "" @53
+			stereotype 	TRUE
+			client     	@28
+			supplier   	@51
+			line_style 	0)
 		    (object AssociationViewNew "$UNNAMED$21" @54
 			location   	(1311, 1120)
 			font       	(object Font
@@ -1368,7 +1522,7 @@
 				line_color 	3342489
 				quidu      	"3CCF3B8C012F"
 				client     	@54
-				supplier   	@53
+				supplier   	@50
 				line_style 	0)
 			    (object RoleView "$UNNAMED$22" @56
 				Parent_View 	@54
@@ -1377,7 +1531,7 @@
 				line_color 	3342489
 				quidu      	"3CCF3B8C0131"
 				client     	@54
-				supplier   	@50
+				supplier   	@51
 				line_style 	0)))
 		    (object NoteView @57
 			location   	(1424, 1328)
@@ -1401,7 +1555,7 @@
 		    (object AttachView "" @58
 			stereotype 	TRUE
 			client     	@57
-			supplier   	@53
+			supplier   	@50
 			line_style 	0)
 		    (object NoteView @59
 			location   	(1488, 880)
@@ -1424,14 +1578,14 @@
 			height     	144)
 		    (object AttachView "" @60
 			stereotype 	TRUE
-			client     	@45
+			client     	@42
 			supplier   	@59
 			line_style 	0)
 		    (object RealizeView "" @61
 			stereotype 	TRUE
 			quidu      	"3CCF3B92032C"
-			client     	@53
-			supplier   	@38
+			client     	@50
+			supplier   	@34
 			line_style 	0)))
 	    (object ClassDiagram "AccessLayer"
 		quid       	"3CCF461001E4"
@@ -1442,7 +1596,26 @@
 		origin_x   	497
 		origin_y   	0
 		items      	(list diagram_item_list
-		    (object ClassView "Class" "Logical View::java.sql::Connection" @62
+		    (object NoteView @62
+			location   	(1552, 1136)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@62
+			    location   	(1364, 1076)
+			    nlines     	3
+			    max_width  	340
+			    label      	"JDBC Connection to RDBMS")
+			width      	400
+			height     	132)
+		    (object ClassView "Class" "Logical View::java.sql::Connection" @63
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
@@ -1457,7 +1630,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@62
+			    Parent_View 	@63
 			    location   	(991, 1292)
 			    anchor_loc 	1
 			    nlines     	2
@@ -1472,29 +1645,10 @@
 			height     	58
 			annotation 	8
 			autoResize 	TRUE)
-		    (object NoteView @63
-			location   	(1552, 1136)
-			font       	(object Font
-			    size       	8
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			label      	(object ItemLabel
-			    Parent_View 	@63
-			    location   	(1364, 1076)
-			    nlines     	3
-			    max_width  	340
-			    label      	"JDBC Connection to RDBMS")
-			width      	400
-			height     	132)
 		    (object AttachView "" @64
 			stereotype 	TRUE
-			client     	@63
-			supplier   	@62
+			client     	@62
+			supplier   	@63
 			line_style 	0)
 		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataNode" @65
 			ShowCompartmentStereotypes 	TRUE
@@ -1625,55 +1779,9 @@
 				line_color 	3342489
 				quidu      	"3CCF3969009C"
 				client     	@66
-				supplier   	@62
+				supplier   	@63
 				line_style 	0)))
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataContext" @71
-			ShowCompartmentStereotypes 	TRUE
-			IncludeAttribute 	TRUE
-			IncludeOperation 	TRUE
-			location   	(992, 192)
-			font       	(object Font
-			    size       	10
-			    face       	"Arial"
-			    bold       	FALSE
-			    italics    	FALSE
-			    underline  	FALSE
-			    strike     	FALSE
-			    color      	0
-			    default_color 	TRUE)
-			label      	(object ItemLabel
-			    Parent_View 	@71
-			    location   	(719, 88)
-			    fill_color 	13434879
-			    nlines     	1
-			    max_width  	546
-			    justify    	0
-			    label      	"DataContext")
-			icon_style 	"Icon"
-			fill_color 	16771297
-			quidu      	"3CCF36A8003E"
-			compartment 	(object Compartment
-			    Parent_View 	@71
-			    location   	(719, 193)
-			    font       	(object Font
-				size       	10
-				face       	"Arial"
-				bold       	FALSE
-				italics    	FALSE
-				underline  	FALSE
-				strike     	FALSE
-				color      	0
-				default_color 	TRUE)
-			    icon_style 	"Icon"
-			    fill_color 	13434879
-			    anchor     	2
-			    nlines     	2
-			    max_width  	359)
-			width      	564
-			height     	232
-			annotation 	8
-			autoResize 	TRUE)
-		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataDomain" @72
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataDomain" @71
 			ShowCompartmentStereotypes 	TRUE
 			IncludeAttribute 	TRUE
 			IncludeOperation 	TRUE
@@ -1688,7 +1796,7 @@
 			    color      	0
 			    default_color 	TRUE)
 			label      	(object ItemLabel
-			    Parent_View 	@72
+			    Parent_View 	@71
 			    location   	(719, 424)
 			    fill_color 	13434879
 			    nlines     	1
@@ -1699,7 +1807,7 @@
 			fill_color 	16771297
 			quidu      	"3CCF369C02D6"
 			compartment 	(object Compartment
-			    Parent_View 	@72
+			    Parent_View 	@71
 			    location   	(719, 529)
 			    font       	(object Font
 				size       	10
@@ -1719,7 +1827,7 @@
 			height     	232
 			annotation 	8
 			autoResize 	TRUE)
-		    (object AssociationViewNew "$UNNAMED$23" @73
+		    (object AssociationViewNew "$UNNAMED$23" @72
 			location   	(992, 715)
 			font       	(object Font
 			    size       	10
@@ -1733,8 +1841,8 @@
 			stereotype 	TRUE
 			quidu      	"3CCF467303C7"
 			roleview_list 	(list RoleViews
-			    (object RoleView "$UNNAMED$24" @74
-				Parent_View 	@73
+			    (object RoleView "$UNNAMED$24" @73
+				Parent_View 	@72
 				location   	(432, -5)
 				font       	(object Font
 				    size       	10
@@ -1748,11 +1856,11 @@
 				stereotype 	TRUE
 				line_color 	3342489
 				quidu      	"3CCF467701BA"
-				client     	@73
+				client     	@72
 				supplier   	@65
 				line_style 	0
-				label      	(object SegLabel @75
-				    Parent_View 	@74
+				label      	(object SegLabel @74
+				    Parent_View 	@73
 				    location   	(1046, 778)
 				    font       	(object Font
 					size       	10
@@ -1772,15 +1880,61 @@
 				    pctDist    	0.900000
 				    height     	54
 				    orientation 	0))
-			    (object RoleView "$UNNAMED$25" @76
-				Parent_View 	@73
+			    (object RoleView "$UNNAMED$25" @75
+				Parent_View 	@72
 				location   	(432, -5)
 				stereotype 	TRUE
 				line_color 	3342489
 				quidu      	"3CCF467701C4"
-				client     	@73
-				supplier   	@72
+				client     	@72
+				supplier   	@71
 				line_style 	0)))
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.access::DataContext" @76
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(992, 192)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@76
+			    location   	(719, 88)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	546
+			    justify    	0
+			    label      	"DataContext")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CCF36A8003E"
+			compartment 	(object Compartment
+			    Parent_View 	@76
+			    location   	(719, 193)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	2
+			    max_width  	359)
+			width      	564
+			height     	232
+			annotation 	8
+			autoResize 	TRUE)
 		    (object AssociationViewNew "$UNNAMED$26" @77
 			location   	(992, 359)
 			font       	(object Font
@@ -1811,7 +1965,7 @@
 				line_color 	3342489
 				quidu      	"3CCF467F0298"
 				client     	@77
-				supplier   	@72
+				supplier   	@71
 				line_style 	0
 				label      	(object SegLabel @79
 				    Parent_View 	@78
@@ -1850,7 +2004,7 @@
 				line_color 	3342489
 				quidu      	"3CCF467F029A"
 				client     	@77
-				supplier   	@71
+				supplier   	@76
 				line_style 	0
 				label      	(object SegLabel @81
 				    Parent_View 	@80
@@ -1923,13 +2077,13 @@
 		    (object RealizeView "" @83
 			stereotype 	TRUE
 			quidu      	"3CCF46B902D7"
-			client     	@72
+			client     	@71
 			supplier   	@82
 			line_style 	0)
 		    (object RealizeView "" @84
 			stereotype 	TRUE
 			quidu      	"3CCF46BD030F"
-			client     	@71
+			client     	@76
 			supplier   	@82
 			line_style 	0)
 		    (object NoteView @85
@@ -1954,7 +2108,7 @@
 		    (object AttachView "" @86
 			stereotype 	TRUE
 			client     	@85
-			supplier   	@72
+			supplier   	@71
 			line_style 	0)
 		    (object NoteView @87
 			location   	(1600, 880)
@@ -2002,7 +2156,7 @@
 		    (object AttachView "" @90
 			stereotype 	TRUE
 			client     	@89
-			supplier   	@71
+			supplier   	@76
 			line_style 	0)
 		    (object RealizeView "" @91
 			stereotype 	TRUE
@@ -2012,8 +2166,682 @@
 			vertices   	(list Points
 			    (709, 926)
 			    (334, 925)
-			    (333, 484))
-			line_style 	0)))))
+			    (333, 325))
+			line_style 	0)))
+	    (object ClassDiagram "Map"
+		quid       	"3CDE7AFD0199"
+		title      	"Map"
+		zoom       	100
+		max_height 	28350
+		max_width  	21600
+		origin_x   	0
+		origin_y   	0
+		items      	(list diagram_item_list
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::Relationship" @92
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(704, 288)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@92
+			    location   	(445, 237)
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"Relationship")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@92
+			    location   	(445, 186)
+			    anchor     	10
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"<<abstract>>")
+			icon_style 	"Icon"
+			quidu      	"3CDE7AE8021B"
+			width      	536
+			height     	228
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::Entity" @93
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1520, 288)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@93
+			    location   	(1241, 194)
+			    nlines     	1
+			    max_width  	558
+			    justify    	0
+			    label      	"Entity")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@93
+			    location   	(1241, 143)
+			    anchor     	10
+			    nlines     	1
+			    max_width  	558
+			    justify    	0
+			    label      	"<<abstract>>")
+			icon_style 	"Icon"
+			quidu      	"3CDE7AE000F7"
+			compartment 	(object Compartment
+			    Parent_View 	@93
+			    location   	(1241, 298)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    anchor     	2
+			    nlines     	2
+			    max_width  	276)
+			width      	576
+			height     	314
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$29" @94
+			location   	(1101, 288)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7B6502B1"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$30" @95
+				Parent_View 	@94
+				location   	(605, 64)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7B6603D4"
+				client     	@94
+				supplier   	@92
+				line_style 	0
+				label      	(object SegLabel @96
+				    Parent_View 	@95
+				    location   	(1042, 336)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    anchor     	2
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	15
+				    justify    	0
+				    label      	"0..n"
+				    pctDist    	0.459679
+				    height     	48
+				    orientation 	0))
+			    (object RoleView "$UNNAMED$31" @97
+				Parent_View 	@94
+				location   	(605, 64)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7B6603DE"
+				client     	@94
+				supplier   	@93
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::Attribute" @98
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(736, 560)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@98
+			    location   	(477, 509)
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"Attribute")
+			stereotype 	(object ItemLabel
+			    Parent_View 	@98
+			    location   	(477, 458)
+			    anchor     	10
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"<<abstract>>")
+			icon_style 	"Icon"
+			quidu      	"3CDE7AF10065"
+			width      	536
+			height     	228
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$32" @99
+			location   	(1117, 426)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7B6A011D"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$33" @100
+				Parent_View 	@99
+				location   	(653, 202)
+				font       	(object Font
+				    size       	10
+				    face       	"Arial"
+				    bold       	FALSE
+				    italics    	FALSE
+				    underline  	FALSE
+				    strike     	FALSE
+				    color      	0
+				    default_color 	TRUE)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7B6A03BC"
+				client     	@99
+				supplier   	@98
+				line_style 	0
+				label      	(object SegLabel @101
+				    Parent_View 	@100
+				    location   	(1034, 513)
+				    font       	(object Font
+					size       	10
+					face       	"Arial"
+					bold       	FALSE
+					italics    	FALSE
+					underline  	FALSE
+					strike     	FALSE
+					color      	0
+					default_color 	TRUE)
+				    anchor     	2
+				    anchor_loc 	1
+				    nlines     	1
+				    max_width  	15
+				    justify    	0
+				    label      	"1..n"
+				    pctDist    	0.900000
+				    height     	54
+				    orientation 	0))
+			    (object RoleView "$UNNAMED$34" @102
+				Parent_View 	@99
+				location   	(653, 202)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7B6A03C6"
+				client     	@99
+				supplier   	@93
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::ObjRelationship" @103
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(576, 816)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@103
+			    location   	(317, 742)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"ObjRelationship")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CDE7BD30092"
+			width      	536
+			height     	172
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::ObjAttribute" @104
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(576, 1024)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@104
+			    location   	(317, 950)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	518
+			    justify    	0
+			    label      	"ObjAttribute")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CDE7BE80178"
+			width      	536
+			height     	172
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::ObjEntity" @105
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1216, 848)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@105
+			    location   	(937, 734)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	558
+			    justify    	0
+			    label      	"ObjEntity")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CDE7BC20142"
+			compartment 	(object Compartment
+			    Parent_View 	@105
+			    location   	(937, 839)
+			    font       	(object Font
+				size       	10
+				face       	"Arial"
+				bold       	FALSE
+				italics    	FALSE
+				underline  	FALSE
+				strike     	FALSE
+				color      	0
+				default_color 	TRUE)
+			    icon_style 	"Icon"
+			    fill_color 	13434879
+			    anchor     	2
+			    nlines     	2
+			    max_width  	397)
+			width      	576
+			height     	252
+			annotation 	8
+			autoResize 	TRUE)
+		    (object InheritView "" @106
+			stereotype 	TRUE
+			quidu      	"3CDE7BCC0182"
+			client     	@105
+			supplier   	@93
+			line_style 	0)
+		    (object AssociationViewNew "$UNNAMED$35" @107
+			location   	(885, 831)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7BF800C7"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$36" @108
+				Parent_View 	@107
+				location   	(-651, 623)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7BFA0160"
+				client     	@107
+				supplier   	@103
+				line_style 	0)
+			    (object RoleView "$UNNAMED$37" @109
+				Parent_View 	@107
+				location   	(-651, 623)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7BFA016A"
+				client     	@107
+				supplier   	@105
+				line_style 	0)))
+		    (object AssociationViewNew "$UNNAMED$38" @110
+			location   	(885, 937)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7BFD0291"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$39" @111
+				Parent_View 	@110
+				location   	(-651, 729)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7BFE024C"
+				client     	@110
+				supplier   	@104
+				line_style 	0)
+			    (object RoleView "$UNNAMED$40" @112
+				Parent_View 	@110
+				location   	(-651, 729)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7BFE024E"
+				client     	@110
+				supplier   	@105
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::DbAttribute" @113
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(848, 1680)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@113
+			    location   	(569, 1598)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	558
+			    justify    	0
+			    label      	"DbAttribute")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CDE7D2202BA"
+			width      	576
+			height     	188
+			annotation 	8
+			autoResize 	TRUE)
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::DbEntity" @114
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(1520, 1424)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@114
+			    location   	(1241, 1342)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	558
+			    justify    	0
+			    label      	"DbEntity")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CDE7C9602EB"
+			width      	576
+			height     	188
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$41" @115
+			location   	(1375, 1151)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7CDA00C2"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$42" @116
+				Parent_View 	@115
+				location   	(-913, 687)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7CDB020E"
+				client     	@115
+				supplier   	@114
+				line_style 	0)
+			    (object RoleView "$UNNAMED$43" @117
+				Parent_View 	@115
+				location   	(-913, 687)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7CDB0222"
+				client     	@115
+				supplier   	@105
+				line_style 	0)))
+		    (object AssociationViewNew "$UNNAMED$44" @118
+			location   	(1184, 1551)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7D34025C"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$45" @119
+				Parent_View 	@118
+				location   	(-1072, 207)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7D35014F"
+				client     	@118
+				supplier   	@113
+				line_style 	0)
+			    (object RoleView "$UNNAMED$46" @120
+				Parent_View 	@118
+				location   	(-1072, 207)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7D350159"
+				client     	@118
+				supplier   	@114
+				line_style 	0)))
+		    (object ClassView "Class" "Logical View::org.objectstyle.cayenne.map::DbRelationship" @121
+			ShowCompartmentStereotypes 	TRUE
+			IncludeAttribute 	TRUE
+			IncludeOperation 	TRUE
+			location   	(848, 1424)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@121
+			    location   	(569, 1342)
+			    fill_color 	13434879
+			    nlines     	1
+			    max_width  	558
+			    justify    	0
+			    label      	"DbRelationship")
+			icon_style 	"Icon"
+			fill_color 	16771297
+			quidu      	"3CDE7D4F03BA"
+			width      	576
+			height     	188
+			annotation 	8
+			autoResize 	TRUE)
+		    (object AssociationViewNew "$UNNAMED$47" @122
+			location   	(1183, 1424)
+			font       	(object Font
+			    size       	10
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			stereotype 	TRUE
+			quidu      	"3CDE7D570357"
+			roleview_list 	(list RoleViews
+			    (object RoleView "$UNNAMED$48" @123
+				Parent_View 	@122
+				location   	(-1073, 80)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7D580146"
+				client     	@122
+				supplier   	@121
+				line_style 	0)
+			    (object RoleView "$UNNAMED$49" @124
+				Parent_View 	@122
+				location   	(-1073, 80)
+				stereotype 	TRUE
+				line_color 	3342489
+				quidu      	"3CDE7D580150"
+				client     	@122
+				supplier   	@114
+				line_style 	0)))
+		    (object InheritView "" @125
+			stereotype 	TRUE
+			quidu      	"3CDE7D690096"
+			client     	@114
+			supplier   	@93
+			line_style 	0)
+		    (object NoteView @126
+			location   	(2016, 528)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@126
+			    location   	(1759, 459)
+			    nlines     	3
+			    max_width  	478
+			    label      	"Abstract Mapping. Describes main classes in the mapping - entities, relationships, attributes.")
+			width      	538
+			height     	150)
+		    (object NoteView @127
+			location   	(2032, 864)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@127
+			    location   	(1779, 792)
+			    nlines     	3
+			    max_width  	471
+			    label      	"Java Mapping Layer. Describes DataObject classes and how they map to the database layer.")
+			width      	531
+			height     	156)
+		    (object NoteView @128
+			location   	(2048, 1248)
+			font       	(object Font
+			    size       	8
+			    face       	"Arial"
+			    bold       	FALSE
+			    italics    	FALSE
+			    underline  	FALSE
+			    strike     	FALSE
+			    color      	0
+			    default_color 	TRUE)
+			label      	(object ItemLabel
+			    Parent_View 	@128
+			    location   	(1785, 1179)
+			    nlines     	3
+			    max_width  	490
+			    label      	"Database mapping layer. Describes database schema.")
+			width      	550
+			height     	150)))))
     root_subsystem 	(object SubSystem "Component View"
 	quid       	"3CCECD530138"
 	physical_models 	(list unit_reference_list)

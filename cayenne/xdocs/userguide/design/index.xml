@@ -38,7 +38,29 @@
             <p>The above statement doesn't mean that Caynne would automatically poll the database for 
             the updated data, or automatically save the data. This would have killed the performance 
             of the application and made it unpredictable. Instead Java application is always in full 
-            control of these operations.</p>            
+            control of these operations.</p>
+            
+            <p>The following diagram shows how mapping is organized in Cayenne:
+            </p>
+            
+            <img src="/images/map-class.gif" alt="Cayenne Map Class Diagram"/> 
+            
+            <p>Cayenne mapping is implemented as 2 layers: database layer and Java layer. 
+            Java layer uses database layer to tie Java classes to the database
+            tables. Main benefit of using 2 mapping layers is loose coupling of database metadata 
+            information and Java class information. For instance, database layer may describe the 
+            full structure of the database to allow database schema generation, while Java layer would
+            only map to a subset of tables. Another case is when a relationship between Java classes
+            spans a chain of relationships between database tables. This mapping scenario will be supported
+            by Cayenne in the future.
+            </p>  
+            
+            <p>Cayenne organizes mapping information into <a href=
+            "../../api/org/objectstyle/cayenne/map/DataMap.html">DataMap's</a>. Normally a DataMap is
+            saved in XML format. Other formats are also possible. For instance Cayenne can create DataMaps
+            using WebObjects EOModel format. 
+            Normally DataMaps are created and maintained using CayenneModeler GUI tool.
+            </p>
         </subsection>
     </section>
 </body>
