@@ -87,7 +87,7 @@
     		file in CayenneModeler and make the following changes:
     		<ul>
     			<li>if the database used is NOT MySQL, choose an adapter for the appropriate database.</li>
-    			<li><code>driverinfo.xml</code> must be modified to reflect connection and
+    			<li><code>datanode.driver.xml</code> must be modified to reflect connection and
     			driver information of the test database.  Do this by editing the Data Source Info section of data node properties page</li>
     		</ul>         	
     		</p>

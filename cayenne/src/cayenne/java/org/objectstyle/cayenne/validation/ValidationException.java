@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.validation;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
+ * An exception thrown on unsuccessful validation.
+ * 
  * @author Fabricio Voznika
  * @since 1.1
  */

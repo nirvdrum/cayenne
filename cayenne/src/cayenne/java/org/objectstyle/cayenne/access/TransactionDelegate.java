@@ -58,9 +58,10 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 
 /**
- * Allows customizing Cayenne transaction behavior. 
+ * Defines callback methods for customizing Cayenne transaction behavior. 
  *  
  * @author Andrei Adamchik
+ * @since 1.1
  */
 public interface TransactionDelegate {
 

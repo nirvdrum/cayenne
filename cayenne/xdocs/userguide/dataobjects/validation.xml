@@ -21,7 +21,7 @@
     		<li>Relying on database validation for things like mandatory properties, 
     		etc., would result in errors that are meaningless or extremely hard to decode in the application context.</li>
     		<li>Application validation partially addresses shortcomings of databases that do not support real 
-    		transactions (e.g. MySQL). Validatrion would trap the whole class of errors that would otherwise result in 
+    		transactions (e.g. MySQL). Validation would trap the whole class of errors that would otherwise result in 
     		failure halfway through the commit, leaving database in inconsistent state.</li>
     		<li>Automating of the business objects validation takes away some burden from the UI that now has 
     		fewer things to track.</li>
@@ -43,7 +43,7 @@
 			</li>
 			
 			<li><code>public void <b>validateForDelete</b>(ValidationResult validationResult)</code><br/>
-			These method does nothing by default and exists merely for overriding.
+			This method does nothing by default and exists merely for overriding.
 			<p></p>
 			</li>
 			

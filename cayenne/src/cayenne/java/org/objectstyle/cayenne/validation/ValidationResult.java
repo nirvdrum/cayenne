@@ -67,13 +67,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 /**
- * Contains a set of <code>ValidationFailures</code> occured in a given context. All failures are kept in 
- * the same order they were added.
+ * Represents a result of a validation execution. Contains a set of failures ({@link ValidationFailure}) 
+ * occured in a given context. All failures are kept in the same order they were added.
  *
- * Note to developers:<br>
+ * <i><p>Note to developers:</p>
+ * <p>
  * Failures are stored in a map indexed by source and property name. As most of the times a pair (source, property) will
  * only one failure, the failure itself is stored as the value. When more than one failure is added to the same pair,
- * a list is created to hold all failures, maintaining the order which they were added.
+ * a list is created to hold all failures, maintaining the order which they were added.</p></i>
  *
  * @author Fabricio Voznika
  * @since 1.1

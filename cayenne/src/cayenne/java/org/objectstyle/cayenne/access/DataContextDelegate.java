@@ -89,10 +89,17 @@ public interface DataContextDelegate {
 	 * Invoked by parent DataContext whenever an object change is detected.
      * This can be a change to the object snapshot, or a modification of an "independent"
      * relationship not resulting in a snapshot change. In the later case snapshot
-     * argument may be null.
+     * argument may be null. If a delegate returns <code>true</code>, ObjectStore 
+     * will attempt to merge the changes into an object.
 	 */
     public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore);
     
+    /**
+     * Called after a successful merging of external changes to an object. 
+     * If previosly a delegate returned <code>false</code> from
+     * {@link #shouldMergeChanges(DataObject, DataRow)}, this method
+     * is not invoked, since changes were not merged.
+     */
     public void finishedMergeChanges(DataObject object);
     
     /**
@@ -103,10 +110,17 @@ public interface DataContextDelegate {
      * To block this behavior, delegate should return <code>false</code>, and
      * possibly do its own processing.
      * 
-     * @param object
+     * @param object DataObject that was deleted externally and is still present
+     * in the ObjectStore associated with the delegate.
      */
     public boolean shouldProcessDelete(DataObject object);
     
+    /**
+     * Called after a successful processing of externally deleted object. 
+     * If previosly a delegate returned <code>false</code> from
+     * {@link #shouldProcessDelete(DataObject)}, this method
+     * is not invoked, since no processing was done.
+     */
     public void finishedProcessDelete(DataObject object);
 }
 

@@ -7,9 +7,9 @@
 	<subsection name="6.5 Using DataContextDelegate">
 		<p>DataContext supports runtime customization via a <a href=
 		"../../api/cayenne/org/objectstyle/cayenne/access/DataContextDelegate.html">DataContextDelegate 
-		interface</a>. User can implement a delegate in any way she wants, and set it on a DataContext
+		interface</a>. A user can assign a custom delegate instance to a DataContext
 		by calling <code>DataContext.setDelegate(..)</code>. Delegate is optional, and if it is not set, DataContext
-		would display its default behavior. If a delegate is set, DataContext consults with it at some critical points 
+		would go on with its default behavior. If a delegate is set, DataContext consults with it at some critical points 
 		in the normal flow execution. A delegate can modify the flow, abort an operation, modify objects 
 		participating in an operation,  or perform any other tasks it deems necessary. 
 		</p>
