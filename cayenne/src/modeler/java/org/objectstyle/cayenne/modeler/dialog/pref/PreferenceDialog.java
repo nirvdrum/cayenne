@@ -67,7 +67,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.objectstyle.cayenne.modeler.pref.ComponentGeometry;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;
 import org.objectstyle.cayenne.pref.PreferenceException;

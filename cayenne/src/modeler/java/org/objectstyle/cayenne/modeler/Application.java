@@ -96,8 +96,8 @@ import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
-import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.DomainPreference;
 import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceEditor;
@@ -105,6 +105,7 @@ import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceService;
 import org.objectstyle.cayenne.pref.PreferenceService;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.swing.BindingFactory;
 import org.scopemvc.controller.basic.ViewContext;
 import org.scopemvc.controller.swing.SwingContext;
 import org.scopemvc.core.View;
@@ -140,6 +141,7 @@ public class Application {
     protected File initialProject;
     protected String name;
     protected String preferencesDB;
+    protected BindingFactory bindingFactory;
 
     public static Application getInstance() {
         return instance;
@@ -152,10 +154,7 @@ public class Application {
     }
 
     public static Project getProject() {
-        return getInstance()
-                .getFrameController()
-                .getProjectController()
-                .getProject();
+        return getInstance().getFrameController().getProjectController().getProject();
     }
 
     public Application(File initialProject) {
@@ -210,6 +209,7 @@ public class Application {
         initPreferences();
         initClassLoader();
         initActions();
+        this.bindingFactory = new BindingFactory();
 
         // ...Scope
 
@@ -226,6 +226,10 @@ public class Application {
 
         // open up
         frameController.startupAction();
+    }
+
+    public BindingFactory getBindingFactory() {
+        return bindingFactory;
     }
 
     /**

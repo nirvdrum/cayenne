@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -73,7 +73,6 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.objectstyle.cayenne.modeler.util.PreferenceField;
 
 /**
  * Utility class to create standard Swing widgets following

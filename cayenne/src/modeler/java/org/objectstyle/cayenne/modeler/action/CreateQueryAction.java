@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.query.QueryTypeController;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 
 /**
  * @since 1.1

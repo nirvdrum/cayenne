@@ -60,7 +60,7 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -82,7 +82,7 @@ public class DerivedEntitySyncAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         DerivedDbEntity ent = (DerivedDbEntity) getProjectController().getCurrentDbEntity();

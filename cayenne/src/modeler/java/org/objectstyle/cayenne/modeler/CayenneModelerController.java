@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
 import org.objectstyle.cayenne.modeler.pref.ComponentGeometry;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.Project;

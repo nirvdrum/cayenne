@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.pref.PreferenceDialog;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 
 /**
  * @author Andrei Adamchik

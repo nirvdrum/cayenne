@@ -84,7 +84,6 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
-import org.objectstyle.cayenne.modeler.swing.CellRenderers;
 
 /**
  * A simple non-editable tree browser with multiple columns 

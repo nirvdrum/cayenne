@@ -67,7 +67,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.objectstyle.cayenne.modeler.FileClassLoadingService;
 import org.objectstyle.cayenne.modeler.pref.FSPath;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceDetail;

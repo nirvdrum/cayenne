@@ -60,7 +60,7 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
 

@@ -60,7 +60,7 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.classgen.ClassGeneratorController;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -80,7 +80,7 @@ public class GenerateClassesAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         generateClasses();

@@ -62,7 +62,7 @@ import javax.swing.JComponent;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.pref.CayennePreferenceEditor;
 import org.objectstyle.cayenne.pref.CayennePreferenceService;
 import org.objectstyle.cayenne.pref.PreferenceEditor;

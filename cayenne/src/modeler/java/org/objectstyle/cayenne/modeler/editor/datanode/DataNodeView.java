@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,82 +53,87 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.editor.datanode;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
+import java.awt.CardLayout;
+import java.awt.Component;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.SwingConstants;
+import javax.swing.JTextField;
 
-import org.scopemvc.view.awt.AWTUtilities;
-
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * A dialog rendering a progress bar. It is normally controlled by a subclass of
- * LongRunningTask.
- * 
- * @author Andrei Adamchik
+ * A panel for DataNode configuration.
  */
-public class ProgressDialog extends JDialog {
+public class DataNodeView extends JPanel {
 
-    protected JProgressBar progressBar;
-    protected JLabel statusLabel;
-    protected JButton cancelButton;
+    protected JTextField dataNodeName;
+    protected JComboBox factories;
+    protected JPanel dataSourceDetail;
+    protected CardLayout dataSourceDetailLayout;
+    protected JComboBox adapters;
 
-    public ProgressDialog(JFrame parent, String title, String message) {
-        super(parent, title);
-        init(message);
-    }
+    protected Component defaultDatasourceView;
 
-    private void init(String message) {
-        progressBar = new JProgressBar();
-        statusLabel = new JLabel(message, SwingConstants.LEFT);
-        JLabel messageLabel = new JLabel(message, SwingConstants.LEFT);
-        cancelButton = new JButton("Cancel");
+    public DataNodeView() {
+
+        // create widgets
+        this.dataNodeName = new JTextField();
+
+        this.factories = new JComboBox();
+        this.factories.setEditable(true);
+
+        this.adapters = new JComboBox();
+        this.adapters.setEditable(true);
+
+        this.dataSourceDetailLayout = new CardLayout();
+        this.dataSourceDetail = new JPanel(dataSourceDetailLayout);
+
+        this.defaultDatasourceView = new JPanel();
+        dataSourceDetail.add(defaultDatasourceView, "default");
 
         // assemble
-        CellConstraints cc = new CellConstraints();
-        FormLayout layout = new FormLayout("fill:max(250dlu;pref)", "p, 3dlu, p, 3dlu, p");
-        PanelBuilder builder = new PanelBuilder(layout);
-        builder.setDefaultDialogBorder();
 
-        builder.add(messageLabel, cc.xy(1, 1));
-        builder.add(progressBar, cc.xy(1, 3));
-        builder.add(statusLabel, cc.xy(1, 5));
+        DefaultFormBuilder topPanelBuilder = new DefaultFormBuilder(new FormLayout(
+                "right:80dlu, 3dlu, fill:200dlu",
+                ""));
+        topPanelBuilder.setDefaultDialogBorder();
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttons.add(cancelButton);
+        topPanelBuilder.appendSeparator("DataNode Configuration");
+        topPanelBuilder.append("DataNode Name:", dataNodeName);
+        topPanelBuilder.append("DB Adapter:", adapters);
+        topPanelBuilder.append("DataSource Factory:", factories);
 
-        Container root = getContentPane();
-        root.setLayout(new BorderLayout(5, 5));
-
-        root.add(builder.getPanel(), BorderLayout.CENTER);
-        root.add(buttons, BorderLayout.SOUTH);
-
-        setResizable(false);
-        pack();
-        AWTUtilities.centreOnWindow(getOwner(), this);
+        setLayout(new BorderLayout());
+        add(topPanelBuilder.getPanel(), BorderLayout.NORTH);
+        add(dataSourceDetail, BorderLayout.CENTER);
     }
 
-    public JButton getCancelButton() {
-        return cancelButton;
+    public JComboBox getAdapters() {
+        return adapters;
     }
 
-    public JLabel getStatusLabel() {
-        return statusLabel;
+    public JTextField getDataNodeName() {
+        return dataNodeName;
     }
 
-    public JProgressBar getProgressBar() {
-        return progressBar;
+    public JPanel getDataSourceDetail() {
+        return dataSourceDetail;
+    }
+
+    public CardLayout getDataSourceDetailLayout() {
+        return dataSourceDetailLayout;
+    }
+
+    public Component getDefaultDatasourceView() {
+        return defaultDatasourceView;
+    }
+
+    public JComboBox getFactories() {
+        return factories;
     }
 }

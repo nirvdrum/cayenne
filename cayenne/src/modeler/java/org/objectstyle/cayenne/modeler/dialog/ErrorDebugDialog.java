@@ -74,8 +74,8 @@ import javax.swing.JTextArea;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
-import org.objectstyle.cayenne.modeler.swing.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
+import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.util.UIStrings;
 

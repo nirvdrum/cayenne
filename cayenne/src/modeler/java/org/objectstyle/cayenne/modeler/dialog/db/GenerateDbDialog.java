@@ -89,8 +89,8 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
-import org.objectstyle.cayenne.modeler.swing.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
+import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.util.Util;
 
 /**

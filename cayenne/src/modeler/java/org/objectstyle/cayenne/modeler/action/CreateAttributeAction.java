@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 

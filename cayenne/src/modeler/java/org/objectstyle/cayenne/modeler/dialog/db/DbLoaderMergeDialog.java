@@ -68,8 +68,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
-import org.objectstyle.cayenne.modeler.swing.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
+import org.objectstyle.cayenne.modeler.util.PanelFactory;
 
 /**
  * @author Andrei Adamchik

@@ -118,7 +118,7 @@ import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.modeler.pref.DataNodeDefaults;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.query.Query;

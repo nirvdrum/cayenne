@@ -67,6 +67,7 @@ import javax.swing.JSplitPane;
 
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ProjectTreeView;
+import org.objectstyle.cayenne.modeler.editor.datanode.DataNodeEditor;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
@@ -141,8 +142,8 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
         Component domainView = new DataDomainView(eventController);
         detailPanel.add(new JScrollPane(domainView), DOMAIN_VIEW);
 
-        Component nodeView = new DataNodeView(eventController);
-        detailPanel.add(new JScrollPane(nodeView), NODE_VIEW);
+        DataNodeEditor nodeController = new DataNodeEditor(eventController);
+        detailPanel.add(new JScrollPane(nodeController.getView()), NODE_VIEW);
 
         Component dataMapView = new DataMapView(eventController);
         detailPanel.add(new JScrollPane(dataMapView), DATA_MAP_VIEW);

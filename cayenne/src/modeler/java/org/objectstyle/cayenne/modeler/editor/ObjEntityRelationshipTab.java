@@ -90,11 +90,11 @@ import org.objectstyle.cayenne.modeler.dialog.objentity.ObjRelationshipInfoContr
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.modeler.swing.CayenneTable;
-import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.CellRenderers;
-import org.objectstyle.cayenne.modeler.swing.PanelFactory;
-import org.objectstyle.cayenne.modeler.swing.UIUtil;
+import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.util.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /**
  * Displays ObjRelationships for the edited ObjEntity.

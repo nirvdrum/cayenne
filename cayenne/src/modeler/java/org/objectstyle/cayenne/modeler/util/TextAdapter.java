@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -82,7 +82,7 @@ public abstract class TextAdapter {
     protected Color errorColor;
     protected JTextComponent textComponent;
     protected String defaultToolTip;
-    protected boolean documentEventsDisabled;
+    protected boolean modelUpdateDisabled;
 
     public TextAdapter(JTextField textField) {
         this(textField, true, false, true);
@@ -141,7 +141,7 @@ public abstract class TextAdapter {
                 }
 
                 void verifyTextChange(DocumentEvent e) {
-                    if (!documentEventsDisabled) {
+                    if (!modelUpdateDisabled) {
                         updateModel();
                     }
                 }
@@ -165,13 +165,13 @@ public abstract class TextAdapter {
      * Sets the text of the underlying text field.
      */
     public void setText(String text) {
-        documentEventsDisabled = true;
+        modelUpdateDisabled = true;
         try {
             clear();
             textComponent.setText(text);
         }
         finally {
-            documentEventsDisabled = false;
+            modelUpdateDisabled = false;
         }
     }
 

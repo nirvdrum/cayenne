@@ -80,7 +80,7 @@ import javax.swing.text.JTextComponent;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;

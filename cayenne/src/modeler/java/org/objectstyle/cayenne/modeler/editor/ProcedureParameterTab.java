@@ -81,10 +81,10 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
-import org.objectstyle.cayenne.modeler.swing.CayenneTable;
-import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.PanelFactory;
-import org.objectstyle.cayenne.modeler.swing.UIUtil;
+import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 
 /**
  * @author Andrei Adamchik

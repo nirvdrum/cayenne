@@ -77,8 +77,8 @@ import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**

@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.db.DbLoaderHelper;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
 

@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;

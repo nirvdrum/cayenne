@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.pref.PreferenceEditor;

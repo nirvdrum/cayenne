@@ -84,9 +84,9 @@ import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
-import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
-import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.swing.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.PanelFactory;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 import org.objectstyle.cayenne.project.validator.Validator;
 

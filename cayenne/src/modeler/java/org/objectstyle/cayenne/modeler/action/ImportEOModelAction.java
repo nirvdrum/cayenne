@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;

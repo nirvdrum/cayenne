@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -91,7 +91,7 @@ public class CreateRelationshipAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.util.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         ObjEntity objEnt = getProjectController().getCurrentObjEntity();

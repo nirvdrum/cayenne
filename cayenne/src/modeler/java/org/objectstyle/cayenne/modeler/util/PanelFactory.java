@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.BorderLayout;
 import java.awt.Component;

@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.swing.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
 

@@ -117,7 +117,7 @@ import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 
 /**

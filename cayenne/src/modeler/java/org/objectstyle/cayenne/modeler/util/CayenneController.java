@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
 import java.awt.Dimension;

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Rectangle;
 

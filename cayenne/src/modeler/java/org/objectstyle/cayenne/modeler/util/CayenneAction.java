@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler.swing;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.event.ActionEvent;
 
@@ -68,7 +68,6 @@ import javax.swing.KeyStroke;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 
