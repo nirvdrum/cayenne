@@ -30,15 +30,14 @@
         	
         	<img src="/images/conn-chart.gif" alt="DataSource Implementation Chart"/>
         	
-        	<p>Normally all access to the database is done via 
-			<a href="../../api/org/objectstyle/cayenne/conn/PoolManager.html">PoolManager</a>
-        	class that internally uses 
+        	<p>Normally instances of <a href=
+        	"../../api/org/objectstyle/cayenne/conn/PoolManager.html">PoolManager</a>
+        	class serve as a publicly accessible DataSource objects. They use 
         	<a href="../../api/org/objectstyle/cayenne/conn/PoolDataSource.html">PoolDataSource</a>
-            as a factory of PooledConnections. Each 
+            internally as a factory of PooledConnections. Each 
         	<a href="../../api/org/objectstyle/cayenne/conn/PooledConnectionImpl.html">PooledConnectionImpl</a> 
-        	produces a JDBC connection object that is used to connect to the database.
-        	JDBC connections produced by PooledConnectionImpl are returned to the user 
-			as   
+        	produces a JDBC Connection object that is used to connect to the database.
+        	JDBC Connections are returned to the user as   
         	<a href="../../api/org/objectstyle/cayenne/conn/ConnectionWrapper.html">ConnectionWrapper</a> 
         	objects that delegate all database operations to the underlying connection 
         	and notify parent PooledConnection about SQLExceptions.	

@@ -2,8 +2,49 @@
 <title>User Guide - Design</title>
 <body>
     <section name="3. Design" toc="/userguide/index.html">
-        <subsection name="3.5 Cross-database Issues" anchor="crossdb">
+        <subsection name="3.5 Cross-Database Issues" anchor="crossdb">
+        	<p>JDBC specification was created by Sun to provide a uniform
+        	way of connecting to relational databases from the Java code.
+        	In theory this should allow Java developer to create database-aware
+        	code that is portable across RDBMS vendors. In reality this is only partially 
+        	true. While providing universal connectivity, JDBC doesn't handle
+        	certain portability issues. The following problems 
+        	remain when developing with JDBC:</p>
+        	
+        	<ul>
+        		<li>There is no fully standard-compliant databases (even though all
+        		of them claim to be). Certain "standard" features may not be implemented
+        		in some RDBMS.
+        		</li>
+        		<li>SQL syntax may vary across RDBMS. Things like outer join queries,
+        		database objects creation, BLOB handling, etc. are handled differently
+        		by different vendors. 
+        		</li>
+        		<li>Vendors provide their own extensions of SQL and JDBC functionality.
+        		Taking advantage of these extensions and creating portable code at the 
+        		same time is not a trivial task.
+        		</li>
+        	</ul>
+        	
+        	<p>
+        	This becomes even a bigger problem in a generic product like Cayenne that should
+        	support any database. Therefore Cayenne provides <a href=
+        	"../../api/org/objectstyle/cayenne/dba/package-overview.html">DbAdapter 
+        	architecture</a> as a way of handling database differences. It works in 
+        	conjunction with JDBC. 
+        	</p>
+        	
+        	<subsection name="3.5.1 DbAdapter Design Overview">
         	<p>To Be Done...</p>
+        	</subsection>
+        	
+        	<subsection name="3.5.2 Primary Key Generation">
+        	<p>To Be Done...</p>
+        	</subsection>
+        	
+        	<subsection name="3.5.3 Porting Cayenne to a new RDBMS">
+        	<p>To Be Done...</p>
+        	</subsection>
         </subsection>
     </section>
 </body>
