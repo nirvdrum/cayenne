@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.control;
 
 import java.util.EventListener;
+import java.util.EventObject;
 
 import javax.swing.event.EventListenerList;
 
@@ -82,6 +83,7 @@ import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.DomainListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ObjAttributeListener;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
@@ -170,6 +172,7 @@ public class EventController extends ModelerController {
             addObjRelationshipDisplayListener(Editor.getFrame());
             addDbRelationshipDisplayListener(Editor.getFrame());
             addProcedureDisplayListener(Editor.getFrame());
+            addProcedureParameterDisplayListener(Editor.getFrame());
         }
     }
 
@@ -350,8 +353,8 @@ public class EventController extends ModelerController {
         currentDomain = e.getDomain();
         getTopModel().setSelectedPath(currentDomain);
 
-        EventListener[] list;
-        list = getListeners(DomainDisplayListener.class);
+        EventListener[] list = getListeners(DomainDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DomainDisplayListener temp = (DomainDisplayListener) list[i];
             temp.currentDomainChanged(e);
@@ -367,6 +370,7 @@ public class EventController extends ModelerController {
         setDirty(true);
 
         EventListener[] list = getListeners(DomainListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DomainListener temp = (DomainListener) list[i];
             switch (e.getId()) {
@@ -384,7 +388,6 @@ public class EventController extends ModelerController {
                         "Invalid DomainEvent type: " + e.getId());
             }
         }
-
     }
 
     public void fireDataNodeDisplayEvent(DataNodeDisplayEvent e) {
@@ -394,6 +397,7 @@ public class EventController extends ModelerController {
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
         EventListener[] list = getListeners(DataNodeDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ((DataNodeDisplayListener) list[i]).currentDataNodeChanged(e);
         }
@@ -402,8 +406,8 @@ public class EventController extends ModelerController {
     /** Informs all listeners of the DataNodeEvent. 
       * Does not send the event to its originator. */
     public void fireDataNodeEvent(DataNodeEvent e) {
-        EventListener[] list;
-        list = getListeners(DataNodeListener.class);
+        EventListener[] list = getListeners(DataNodeListener.class);
+        debugEvent(e, list);
 
         // FIXME: "dirty" flag and other procesisng is
         // done in the loop. Loop should only care about 
@@ -428,6 +432,7 @@ public class EventController extends ModelerController {
                         "Invalid DataNodeEvent type: " + e.getId());
             }
         }
+
     }
 
     public void fireDataMapDisplayEvent(DataMapDisplayEvent e) {
@@ -437,18 +442,20 @@ public class EventController extends ModelerController {
         currentMap = e.getDataMap();
         currentDomain = e.getDomain();
         currentNode = e.getDataNode();
-        EventListener[] list;
-        list = getListeners(DataMapDisplayListener.class);
+        EventListener[] list = getListeners(DataMapDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DataMapDisplayListener temp = (DataMapDisplayListener) list[i];
             temp.currentDataMapChanged(e);
-        } // End for()
+        }
+
     }
 
     /** Informs all listeners of the DataMapEvent. 
       * Does not send the event to its originator. */
     public void fireDataMapEvent(DataMapEvent e) {
         EventListener[] list = getListeners(DataMapListener.class);
+        debugEvent(e, list);
 
         for (int i = 0; i < list.length; i++) {
             DataMapListener temp = (DataMapListener) list[i];
@@ -476,8 +483,8 @@ public class EventController extends ModelerController {
       * Does not send the event to its originator. */
     public void fireObjEntityEvent(EntityEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(ObjEntityListener.class);
+        EventListener[] list = getListeners(ObjEntityListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ObjEntityListener temp = (ObjEntityListener) list[i];
             switch (e.getId()) {
@@ -501,8 +508,8 @@ public class EventController extends ModelerController {
       * Does not send the event to its originator. */
     public void fireDbEntityEvent(EntityEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(DbEntityListener.class);
+        EventListener[] list = getListeners(DbEntityListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DbEntityListener temp = (DbEntityListener) list[i];
             switch (e.getId()) {
@@ -528,8 +535,8 @@ public class EventController extends ModelerController {
      */
     public void fireProcedureEvent(ProcedureEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(ProcedureListener.class);
+        EventListener[] list = getListeners(ProcedureListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ProcedureListener listener = (ProcedureListener) list[i];
             switch (e.getId()) {
@@ -555,8 +562,7 @@ public class EventController extends ModelerController {
        */
     public void fireProcedureParameterEvent(ProcedureParameterEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(ProcedureParameterListener.class);
+        EventListener[] list = getListeners(ProcedureParameterListener.class);
         for (int i = 0; i < list.length; i++) {
             ProcedureParameterListener listener = (ProcedureParameterListener) list[i];
             switch (e.getId()) {
@@ -585,8 +591,8 @@ public class EventController extends ModelerController {
         currentMap = e.getDataMap();
 
         currentObjEntity = (ObjEntity) e.getEntity();
-        EventListener[] list;
-        list = getListeners(ObjEntityDisplayListener.class);
+        EventListener[] list = getListeners(ObjEntityDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ObjEntityDisplayListener temp = (ObjEntityDisplayListener) list[i];
             temp.currentObjEntityChanged(e);
@@ -604,6 +610,7 @@ public class EventController extends ModelerController {
         currentProcedure = e.getProcedure();
 
         EventListener[] list = getListeners(ProcedureDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ProcedureDisplayListener listener = (ProcedureDisplayListener) list[i];
             listener.currentProcedureChanged(e);
@@ -622,10 +629,13 @@ public class EventController extends ModelerController {
         currentProcedureParameter = e.getProcedureParameter();
 
         EventListener[] list = getListeners(ProcedureParameterDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
-			ProcedureParameterDisplayListener listener = (ProcedureParameterDisplayListener) list[i];
+            ProcedureParameterDisplayListener listener =
+                (ProcedureParameterDisplayListener) list[i];
             listener.currentProcedureParameterChanged(e);
         }
+
     }
 
     public void fireDbEntityDisplayEvent(EntityDisplayEvent e) {
@@ -636,8 +646,8 @@ public class EventController extends ModelerController {
         currentNode = e.getDataNode();
         currentMap = e.getDataMap();
         currentDbEntity = (DbEntity) e.getEntity();
-        EventListener[] list;
-        list = getListeners(DbEntityDisplayListener.class);
+        EventListener[] list = getListeners(DbEntityDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DbEntityDisplayListener temp = (DbEntityDisplayListener) list[i];
             temp.currentDbEntityChanged(e);
@@ -647,8 +657,8 @@ public class EventController extends ModelerController {
     /** Notifies all listeners of the change(add, remove) and does the change.*/
     public void fireDbAttributeEvent(AttributeEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(DbAttributeListener.class);
+        EventListener[] list = getListeners(DbAttributeListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DbAttributeListener temp = (DbAttributeListener) list[i];
             switch (e.getId()) {
@@ -673,24 +683,24 @@ public class EventController extends ModelerController {
         clearState();
         // Must follow DbEntityDisplayEvent, 
         // as it resets curr Attr and Rel values to null.
-        currentDbAttr = (DbAttribute) e.getAttribute();
+        this.currentDbAttr = (DbAttribute) e.getAttribute();
         this.currentDbEntity = (DbEntity) e.getEntity();
         this.currentMap = e.getDataMap();
         this.currentDomain = e.getDomain();
-        EventListener[] list;
-        list = getListeners(DbAttributeDisplayListener.class);
+
+        EventListener[] list = getListeners(DbAttributeDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DbAttributeDisplayListener temp = (DbAttributeDisplayListener) list[i];
             temp.currentDbAttributeChanged(e);
-        } // End for()
-        currentDbAttr = (DbAttribute) e.getAttribute();
+        }
     }
 
     /** Notifies all listeners of the change (add, remove) and does the change.*/
     public void fireObjAttributeEvent(AttributeEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(ObjAttributeListener.class);
+        EventListener[] list = getListeners(ObjAttributeListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ObjAttributeListener temp = (ObjAttributeListener) list[i];
             switch (e.getId()) {
@@ -706,20 +716,20 @@ public class EventController extends ModelerController {
                 default :
                     throw new IllegalArgumentException(
                         "Invalid AttributeEvent type: " + e.getId());
-            } // End switch
-        } // End for()
+            }
+        }
     }
 
     public void fireObjAttributeDisplayEvent(AttributeDisplayEvent e) {
         this.fireObjEntityDisplayEvent(e);
         // Must follow ObjEntityDisplayEvent, 
         // as it resets curr Attr and Rel values to null.
-        currentObjAttr = (ObjAttribute) e.getAttribute();
+        this.currentObjAttr = (ObjAttribute) e.getAttribute();
         this.currentObjEntity = (ObjEntity) e.getEntity();
         this.currentMap = e.getDataMap();
         this.currentDomain = e.getDomain();
-        EventListener[] list;
-        list = getListeners(ObjAttributeDisplayListener.class);
+        EventListener[] list = getListeners(ObjAttributeDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             ObjAttributeDisplayListener temp = (ObjAttributeDisplayListener) list[i];
             temp.currentObjAttributeChanged(e);
@@ -729,8 +739,8 @@ public class EventController extends ModelerController {
     /** Notifies all listeners of the change(add, remove) and does the change.*/
     public void fireDbRelationshipEvent(RelationshipEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(DbRelationshipListener.class);
+        EventListener[] list = getListeners(DbRelationshipListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DbRelationshipListener temp = (DbRelationshipListener) list[i];
             switch (e.getId()) {
@@ -760,19 +770,20 @@ public class EventController extends ModelerController {
         // Must follow DbEntityDisplayEvent, 
         // as it resets curr Attr and Rel values to null.
         currentDbRel = (DbRelationship) e.getRelationship();
-        EventListener[] list;
-        list = getListeners(DbRelationshipDisplayListener.class);
+        EventListener[] list = getListeners(DbRelationshipDisplayListener.class);
+        debugEvent(e, list);
         for (int i = 0; i < list.length; i++) {
             DbRelationshipDisplayListener temp = (DbRelationshipDisplayListener) list[i];
             temp.currentDbRelationshipChanged(e);
-        } // End for()
+        }
     }
 
     /** Notifies all listeners of the change(add, remove) and does the change.*/
     public void fireObjRelationshipEvent(RelationshipEvent e) {
         setDirty(true);
-        EventListener[] list;
-        list = getListeners(ObjRelationshipListener.class);
+        EventListener[] list = getListeners(ObjRelationshipListener.class);
+        debugEvent(e, list);
+
         for (int i = 0; i < list.length; i++) {
             ObjRelationshipListener temp = (ObjRelationshipListener) list[i];
             switch (e.getId()) {
@@ -802,14 +813,14 @@ public class EventController extends ModelerController {
         this.currentObjEntity = (ObjEntity) e.getEntity();
         this.currentMap = e.getDataMap();
         this.currentDomain = e.getDomain();
-        EventListener[] list;
-        list = getListeners(ObjRelationshipDisplayListener.class);
+        EventListener[] list = getListeners(ObjRelationshipDisplayListener.class);
+        debugEvent(e, list);
+
         for (int i = 0; i < list.length; i++) {
             ObjRelationshipDisplayListener temp =
                 (ObjRelationshipDisplayListener) list[i];
             temp.currentObjRelationshipChanged(e);
-        } // End for()
-
+        }
     }
 
     public void addDataMap(Object src, DataMap wrap) {
@@ -825,6 +836,7 @@ public class EventController extends ModelerController {
     }
 
     private void addListener(Class aClass, EventListener listener) {
+        // make sure we do 
         listenerList.add(aClass, listener);
     }
 
@@ -836,6 +848,60 @@ public class EventController extends ModelerController {
         if (this.dirty != dirty) {
             this.dirty = dirty;
             Editor.getFrame().setDirty(dirty);
+        }
+    }
+
+    protected void debugEvent(EventObject event, EventListener[] listeners) {
+        if (logObj.isDebugEnabled()) {
+            int listenerCount = (listeners != null) ? listeners.length : -1;
+            String className = event.getClass().getName();
+            int dot = className.lastIndexOf('.');
+            if (dot >= 0) {
+                className = className.substring(dot);
+            }
+
+            String source = event.getSource().getClass().getName();
+
+            String listenerString =
+                (listenerCount == 1) ? "1 listener" : listenerCount + " listeners";
+
+            String eventLabel;
+
+            if (event instanceof MapEvent) {
+                MapEvent mapEvent = (MapEvent) event;
+                switch (mapEvent.getId()) {
+                    case MapEvent.ADD :
+                        eventLabel = "ADD";
+                        break;
+                    case MapEvent.REMOVE :
+                        eventLabel = "REMOVE";
+                        break;
+                    default :
+                        eventLabel = "CHANGE";
+                }
+            }
+            else {
+                eventLabel = "DISPLAY";
+            }
+            logObj.debug(
+                "--- ["
+                    + eventLabel
+                    + ": "
+                    + className
+                    + " to "
+                    + listenerString
+                    + ", source: "
+                    + source
+                    + "]");
+
+            for (int i = 0; i < listenerCount; i++) {
+                String listenerName = listeners[i].getClass().getName();
+                int listenerDot = listenerName.lastIndexOf('.');
+                if (listenerDot >= 0) {
+                    listenerName = listenerName.substring(listenerDot);
+                }
+                logObj.debug(" {listener: " + listenerName + "}");
+            }
         }
     }
 }

@@ -123,6 +123,8 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
@@ -151,7 +153,8 @@ public class Editor
         DbAttributeDisplayListener,
         ObjRelationshipDisplayListener,
         DbRelationshipDisplayListener,
-        ProcedureDisplayListener {
+        ProcedureDisplayListener,
+        ProcedureParameterDisplayListener {
     private static Logger logObj = Logger.getLogger(Editor.class);
 
     /** 
@@ -568,6 +571,13 @@ public class Editor
         enableDbEntityMenu();
         if (e.getAttribute() != null) {
             getAction(RemoveAction.ACTION_NAME).setName("Remove DbAttribute");
+        }
+    }
+
+    public void currentProcedureParameterChanged(ProcedureParameterDisplayEvent e) {
+        enableProcedureMenu();
+        if (e.getProcedureParameter() != null) {
+            getAction(RemoveAction.ACTION_NAME).setName("Remove Procedure Parameter");
         }
     }
 
