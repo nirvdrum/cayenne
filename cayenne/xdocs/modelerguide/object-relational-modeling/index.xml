@@ -15,7 +15,7 @@
 		development team may encounter on a typical O/R project. Lets assume an 
 		imaginary company called "Some Company" that sells services to consumers as its
 		main business, but also sells consumer products, and works with business customers.
-		Ther are a number of project teams working on a set of Object/Relational projects.
+		There are a number of project teams working on a set of Object/Relational projects.
 		</p>
 		
 		<p><strong>Project 1: Java Interface to an Existing Database</strong></p>
