@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */ 
+package org.objectstyle.cayenne.util;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -61,10 +61,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import junit.framework.TestCase;
 
 
-public class UtilTst extends CayenneTestCase {
+public class UtilTst extends TestCase {
     private File fTmpFileInCurrentDir;
     private String fTmpFileName;
     private File fTmpFileCopy;

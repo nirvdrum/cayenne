@@ -2,12 +2,12 @@ package org.objectstyle.cayenne.util;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ZipUtilTst extends CayenneTestCase {
+public class ZipUtilTst extends BasicTestCase {
 
     public void testUnzip() throws Exception {
         File jar = new File(getTestResourcesDir(), "jar-test.jar");

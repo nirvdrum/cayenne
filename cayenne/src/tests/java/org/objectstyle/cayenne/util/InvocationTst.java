@@ -60,10 +60,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import junit.framework.Assert;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
-
-public class InvocationTst extends CayenneTestCase {
+public class InvocationTst extends TestCase {
 	private String _methodName = "myListenerMethod";
 
 	public void testEqualsReflexive() throws NoSuchMethodException {

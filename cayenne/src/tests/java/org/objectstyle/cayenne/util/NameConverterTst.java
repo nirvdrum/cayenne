@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.util;
 
 import junit.framework.TestCase;
 

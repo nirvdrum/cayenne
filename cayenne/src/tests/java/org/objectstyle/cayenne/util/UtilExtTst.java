@@ -55,10 +55,11 @@
  */
 package org.objectstyle.cayenne.util;
 
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import junit.framework.TestCase;
 
-public class UtilExtTst extends CayenneTestCase {
+import org.objectstyle.cayenne.CayenneException;
+
+public class UtilExtTst extends TestCase {
 
 	public void testPackagePath1() throws java.lang.Exception {
 		String expectedPath = "org/objectstyle/cayenne/util";

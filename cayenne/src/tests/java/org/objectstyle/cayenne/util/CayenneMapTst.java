@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class CayenneMapTst extends CayenneTestCase {
+public class CayenneMapTst extends TestCase {
 
 	protected CayenneMapEntry makeEntry() {
 		return new CayenneMapEntry() {

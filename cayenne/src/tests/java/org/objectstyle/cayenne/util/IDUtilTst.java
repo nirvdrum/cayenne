@@ -1,12 +1,13 @@
 package org.objectstyle.cayenne.util;
 
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.access.types.ByteArrayTypeTst;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class IDUtilTst extends CayenneTestCase {
+public class IDUtilTst extends TestCase {
 
     public void testPseudoUniqueByteSequence1() throws Exception {
         try {
