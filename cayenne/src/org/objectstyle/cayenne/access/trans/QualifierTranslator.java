@@ -74,6 +74,10 @@ public class QualifierTranslator
     private ExpressionTraversal treeWalker = new ExpressionTraversal();
     private StringBuffer qualBuf = new StringBuffer();
 
+    public QualifierTranslator() {
+        this(null);
+    }
+
     public QualifierTranslator(QueryAssembler queryAssembler) {
         super(queryAssembler);
         treeWalker.setHandler(this);

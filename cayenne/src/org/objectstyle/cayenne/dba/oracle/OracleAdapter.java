@@ -77,8 +77,10 @@ public class OracleAdapter extends JdbcAdapter {
     public OracleAdapter() {
         super();
         typeConverter.registerType(new CharType());
+        qualifierFactory.setTranslatorClass(
+            "org.objectstyle.cayenne.dba.oracle.OracleQualifierTranslator");
     }
-    
+
     /** 
      * Creates and returns a primary key generator. 
      * Overrides superclass implementation to return an
@@ -106,10 +108,9 @@ public class OracleAdapter extends JdbcAdapter {
         return "DROP TABLE " + ent.getName() + " CASCADE CONSTRAINTS";
     }
 
- 
     /** Returns Oracle-specific classes for SELECT queries. */
     protected Class queryTranslatorClass(Query q) {
-        if(q instanceof SelectQuery) {
+        if (q instanceof SelectQuery) {
             return OracleSelectTranslator.class;
         }
         else {

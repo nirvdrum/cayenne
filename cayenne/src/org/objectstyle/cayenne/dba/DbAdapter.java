@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.dba;
 
 import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -131,4 +132,6 @@ public interface DbAdapter {
      * </p>
      */
     public QueryTranslator getQueryTranslator(Query query) throws Exception;
+    
+    public QualifierTranslatorFactory getQualifierFactory();
 }

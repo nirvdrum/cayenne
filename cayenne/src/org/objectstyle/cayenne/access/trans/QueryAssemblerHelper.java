@@ -69,6 +69,8 @@ public abstract class QueryAssemblerHelper {
 
     protected QueryAssembler queryAssembler;
 
+    public QueryAssemblerHelper() {}
+    
     /** Creates QueryAssemblerHelper. Sets queryAssembler property. */
     public QueryAssemblerHelper(QueryAssembler queryAssembler) {
         this.queryAssembler = queryAssembler;
@@ -77,6 +79,10 @@ public abstract class QueryAssemblerHelper {
     /** Returns parent QueryAssembler that uses this helper. */
     public QueryAssembler getQueryAssembler() {
         return queryAssembler;
+    }
+    
+    public void setQueryAssembler(QueryAssembler queryAssembler) {
+        this.queryAssembler = queryAssembler;
     }
 
     /** Translates the part of parent translator's query that is supported 

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -69,127 +69,125 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class CayenneDataObjectInCtxtTst extends TestCase {
-    static Logger logObj = Logger.getLogger(CayenneDataObjectInCtxtTst.class.getName());
+    static Logger logObj =
+        Logger.getLogger(CayenneDataObjectInCtxtTst.class.getName());
 
     protected DataContext ctxt;
-    
+
     public CayenneDataObjectInCtxtTst(String name) {
         super(name);
     }
-    
+
     public void setUp() throws java.lang.Exception {
-        TestMain.getSharedDatabaseSetup().cleanTableData();        
+        TestMain.getSharedDatabaseSetup().cleanTableData();
         DataDomain dom = TestMain.getSharedDomain();
         dom.getDataNodes()[0].createPkSupportForMapEntities();
         ctxt = TestMain.getSharedDomain().createDataContext();
     }
-    
-    
-    
+
     public void testSetObjectId() throws Exception {
-        CayenneDataObject o1 = new CayenneDataObject();        
+        CayenneDataObject o1 = new CayenneDataObject();
         assertNull(o1.getObjectId());
-        
+
         ctxt.registerNewObject(o1, "Artist");
         assertNotNull(o1.getObjectId());
     }
-    
-    
-    
+
     public void testStateTransToNew() throws Exception {
         Artist o1 = new Artist();
         assertEquals(PersistenceState.TRANSIENT, o1.getPersistenceState());
-        
+
         ctxt.registerNewObject(o1, "Artist");
         assertEquals(PersistenceState.NEW, o1.getPersistenceState());
     }
-    
-    
+
     public void testStateNewToCommitted() throws Exception {
-        Artist o1 = new Artist();    
+        Artist o1 = new Artist();
         o1.setArtistName("a");
-        
+
         ctxt.registerNewObject(o1, "Artist");
         assertEquals(PersistenceState.NEW, o1.getPersistenceState());
-        
+
         ctxt.commitChanges();
         assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
     }
-    
-    
-    
+
     public void testStateCommittedToModified() throws Exception {
-        Artist o1 = new Artist();    
+        Artist o1 = new Artist();
         o1.setArtistName("a");
-        ctxt.registerNewObject(o1, "Artist");        
+        ctxt.registerNewObject(o1, "Artist");
         ctxt.commitChanges();
         assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
-        
+
         o1.setArtistName(o1.getArtistName() + "_1");
         assertEquals(PersistenceState.MODIFIED, o1.getPersistenceState());
     }
-    
-    
+
     public void testStateModifiedToCommitted() throws Exception {
-        Artist o1 = newSavedArtist();    
+        Artist o1 = newSavedArtist();
         o1.setArtistName(o1.getArtistName() + "_1");
         assertEquals(PersistenceState.MODIFIED, o1.getPersistenceState());
-        
-        
+
         ctxt.commitChanges();
         assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
     }
-    
-    
+
     public void testStateCommittedToDeleted() throws Exception {
-        Artist o1 = new Artist();    
+        Artist o1 = new Artist();
         o1.setArtistName("a");
-        ctxt.registerNewObject(o1, "Artist");        
-        ctxt.commitChanges();        
+        ctxt.registerNewObject(o1, "Artist");
+        ctxt.commitChanges();
         assertEquals(PersistenceState.COMMITTED, o1.getPersistenceState());
-        
+
         ctxt.deleteObject(o1);
         assertEquals(PersistenceState.DELETED, o1.getPersistenceState());
     }
-    
-    
+
     public void testStateDeletedToTransient() throws Exception {
-        Artist o1 = newSavedArtist();               
+        Artist o1 = newSavedArtist();
         ctxt.deleteObject(o1);
         assertEquals(PersistenceState.DELETED, o1.getPersistenceState());
-        
-        ctxt.commitChanges();                
+
+        ctxt.commitChanges();
         assertEquals(PersistenceState.TRANSIENT, o1.getPersistenceState());
         assertTrue(!ctxt.registeredObjects().contains(o1));
         assertNull(o1.getDataContext());
     }
-    
-    
-    
-    
+
     public void testSetDataContext() throws Exception {
         CayenneDataObject o1 = new CayenneDataObject();
         assertNull(o1.getDataContext());
-        
+
         ctxt.registerNewObject(o1, "Artist");
         assertSame(ctxt, o1.getDataContext());
     }
-    
-    
+
     public void testFetchByAttr() throws Exception {
         String artistName = "artist with one painting";
-        TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {}, false);
-        
-        SelectQuery q = new SelectQuery("Artist", ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName));
-        Artist o1 = (Artist)ctxt.performQuery(q).get(0);  
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] {},
+            false);
+
+        SelectQuery q =
+            new SelectQuery(
+                "Artist",
+                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName));
+
+        List artists = ctxt.performQuery(q);
+        assertEquals(1, artists.size());
+        Artist o1 = (Artist) artists.get(0);
         assertNotNull(o1);
         assertEquals(artistName, o1.getArtistName());
     }
-    
+
     public void testUniquing() throws Exception {
         String artistName = "unique artist with no paintings";
-        TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {}, false);
-        
+        TestCaseDataFactory.createArtistWithPainting(
+            artistName,
+            new String[] {},
+            false);
+
         Artist a1 = fetchArtist(artistName);
         Artist a2 = fetchArtist(artistName);
 
@@ -198,33 +196,43 @@ public class CayenneDataObjectInCtxtTst extends TestCase {
         assertEquals(1, ctxt.registeredObjects().size());
         assertSame(a1, a2);
     }
-    
-    
+
     private Artist newSavedArtist() {
-        Artist o1 = new Artist();    
+        Artist o1 = new Artist();
         o1.setArtistName("a");
         o1.setDateOfBirth(new java.util.Date());
-        ctxt.registerNewObject(o1, "Artist");        
-        ctxt.commitChanges();     
+        ctxt.registerNewObject(o1, "Artist");
+        ctxt.commitChanges();
         return o1;
     }
-    
+
     private Artist fetchArtist(String name) {
-        SelectQuery q = new SelectQuery("Artist", ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", name));
+        SelectQuery q =
+            new SelectQuery(
+                "Artist",
+                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", name));
         List ats = ctxt.performQuery(q);
-        return (ats.size() > 0) ? (Artist)ats.get(0) : null;
+        return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }
-    
+
     private Painting fetchPainting(String name) {
-        SelectQuery q = new SelectQuery("Painting", ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingTitle", name));
+        SelectQuery q =
+            new SelectQuery(
+                "Painting",
+                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingTitle", name));
         List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (Painting)pts.get(0) : null;
+        return (pts.size() > 0) ? (Painting) pts.get(0) : null;
     }
-    
+
     private PaintingInfo fetchPaintingInfo(String name) {
-        SelectQuery q = new SelectQuery("PaintingInfo", ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "painting.paintingTitle", name));
+        SelectQuery q =
+            new SelectQuery(
+                "PaintingInfo",
+                ExpressionFactory.binaryPathExp(
+                    Expression.EQUAL_TO,
+                    "painting.paintingTitle",
+                    name));
         List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (PaintingInfo)pts.get(0) : null;
+        return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
     }
 }
-

@@ -139,7 +139,7 @@ public class SelectTranslator extends SelectQueryAssembler {
         buildColumnList();
 
         // build WHERE
-        String qualifierStr = new QualifierTranslator(this).doTranslation();
+        String qualifierStr = adapter.getQualifierFactory().createTranslator(this).doTranslation();
 
         // build ORDER BY,
         String orderByStr = new OrderingTranslator(this).doTranslation();

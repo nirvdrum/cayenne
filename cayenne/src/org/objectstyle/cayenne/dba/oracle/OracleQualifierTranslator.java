@@ -54,71 +54,42 @@
  *
  */
 
-package org.objectstyle.cayenne.access.trans;
+package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
+import java.sql.Types;
 
-import org.objectstyle.TestMain;
-import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.*;
 
-public class TstQueryAssembler extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(TstQueryAssembler.class.getName());
+/** 
+ * Sequence-based primary key generator implementation for Oracle. 
+ * Uses Oracle sequences to generate primary key values. This approach is 
+ * at least 50% faster when tested with Oracle compared to the lookup table
+ * approach.
+ * 
+ * <p>When using Cayenne key caching mechanism, make sure that sequences in 
+ * the database have "INCREMENT BY" greater or equal to OraclePkGenerator 
+ * "pkCacheSize" property value. If this is not the case, you will need to
+ * adjust PkGenerator value accordingly. For example when sequence is
+ * incremented by 1 each time, use the following code:</p>
+ * 
+ * <pre>
+ * dataNode.getAdapter().getPkGenerator().setPkCacheSize(1);
+ * </pre>
+ * 
+ * @author Andrei Adamchik
+ */
+public class OracleQualifierTranslator extends QualifierTranslator {
 
-    protected ArrayList dbRels = new ArrayList();
-
-    public static TstQueryAssembler assembler(QueryEngine e, int qType) {
-        switch (qType) {
-            case Query.INSERT_QUERY :
-                return new TstQueryAssembler(e, new InsertQuery());
-            case Query.DELETE_QUERY :
-                return new TstQueryAssembler(e, new DeleteQuery());
-            case Query.SELECT_QUERY :
-                return new TstQueryAssembler(e, new SelectQuery());
-            case Query.UPDATE_QUERY :
-                return new TstQueryAssembler(e, new UpdateQuery());
-            default :
-                throw new RuntimeException("Unknown query type: " + qType);
+    protected void processColumn(StringBuffer buf, DbAttribute dbAttr) {
+        if (dbAttr.getType() == Types.CHAR) {
+            buf.append("TRIM(TRAILING FROM ");
+            super.processColumn(buf, dbAttr);
+            buf.append(')');
         }
-    }
-
-    public TstQueryAssembler(QueryEngine e, Query q) {
-        super.setAdapter(TestMain.getSharedNode().getAdapter());
-        super.setCon(TestMain.getSharedConnection());
-        super.setEngine(e);
-        super.setQuery(q);
-    }
-
-    public void dispose() throws SQLException {
-        super.getCon().close();
-    }
-
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        dbRels.add(dbRel);
-    }
-
-    public String aliasForTable(DbEntity dbEnt) {
-        return "ta";
-    }
-
-    public boolean supportsTableAliases() {
-        return true;
-    }
-
-    public String createSqlString() {
-        return "SELECT * FROM ARTIST";
-    }
-
-    public List getAttributes() {
-        return attributes;
-    }
-
-    public List getValues() {
-        return values;
+        else {
+            super.processColumn(buf, dbAttr);
+        }
     }
 }

@@ -56,69 +56,42 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
-import org.objectstyle.TestMain;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.*;
+/** 
+ * Factory that produces QualifierTranslator objects.
+ *
+ * @author Andrei Adamchik  
+ */
+public class QualifierTranslatorFactory {
+    private static final String DEFAULT_TRANSLATOR =
+        "org.objectstyle.cayenne.access.trans.QualifierTranslator";
+    protected String translatorClass = DEFAULT_TRANSLATOR;
 
-public class TstQueryAssembler extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(TstQueryAssembler.class.getName());
+    /** Factory method. */
+    public QualifierTranslator createTranslator(QueryAssembler qa) {
+        try {
+            QualifierTranslator trans =
+                (QualifierTranslator) Class.forName(translatorClass).newInstance();
 
-    protected ArrayList dbRels = new ArrayList();
-
-    public static TstQueryAssembler assembler(QueryEngine e, int qType) {
-        switch (qType) {
-            case Query.INSERT_QUERY :
-                return new TstQueryAssembler(e, new InsertQuery());
-            case Query.DELETE_QUERY :
-                return new TstQueryAssembler(e, new DeleteQuery());
-            case Query.SELECT_QUERY :
-                return new TstQueryAssembler(e, new SelectQuery());
-            case Query.UPDATE_QUERY :
-                return new TstQueryAssembler(e, new UpdateQuery());
-            default :
-                throw new RuntimeException("Unknown query type: " + qType);
+            trans.setQueryAssembler(qa);
+            return trans;
+        }
+        catch (Exception ex) {
+            throw new CayenneRuntimeException("Error creating translator.", ex);
         }
     }
 
-    public TstQueryAssembler(QueryEngine e, Query q) {
-        super.setAdapter(TestMain.getSharedNode().getAdapter());
-        super.setCon(TestMain.getSharedConnection());
-        super.setEngine(e);
-        super.setQuery(q);
+    public String getTranslatorClass() {
+        return translatorClass;
     }
 
-    public void dispose() throws SQLException {
-        super.getCon().close();
+    public void setTranslatorClass(String translatorClass) {
+        if (translatorClass == null) {
+            this.translatorClass = DEFAULT_TRANSLATOR;
+        }
+
+        this.translatorClass = translatorClass;
     }
 
-    public void dbRelationshipAdded(DbRelationship dbRel) {
-        dbRels.add(dbRel);
-    }
-
-    public String aliasForTable(DbEntity dbEnt) {
-        return "ta";
-    }
-
-    public boolean supportsTableAliases() {
-        return true;
-    }
-
-    public String createSqlString() {
-        return "SELECT * FROM ARTIST";
-    }
-
-    public List getAttributes() {
-        return attributes;
-    }
-
-    public List getValues() {
-        return values;
-    }
 }

@@ -101,7 +101,7 @@ public class UpdateTranslator extends QueryAssembler {
 
 
         // 3. build qualifier
-        String qualifierStr = new QualifierTranslator(this).doTranslation();
+        String qualifierStr = adapter.getQualifierFactory().createTranslator(this).doTranslation();
         if(qualifierStr != null)
             queryBuf.append(" WHERE ").append(qualifierStr);
 

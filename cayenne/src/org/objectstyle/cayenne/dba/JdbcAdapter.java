@@ -78,12 +78,14 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap typeConverter;
+    protected QualifierTranslatorFactory qualifierFactory;
 
     public JdbcAdapter() {
         // create Pk generator
         pkGenerator = createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
         typeConverter = new ExtendedTypeMap();
+        qualifierFactory = new QualifierTranslatorFactory();
     }
 
     /** 
@@ -204,4 +206,8 @@ public class JdbcAdapter implements DbAdapter {
     public ExtendedTypeMap getTypeConverter() {
         return typeConverter;
     }
+ 
+     public QualifierTranslatorFactory getQualifierFactory() {
+         return qualifierFactory ;
+     }
 }

@@ -81,4 +81,5 @@ public abstract class SelectQueryAssembler extends QueryAssembler {
      * for values in the ResultSet.
      */
     public abstract String[] getResultTypes(ResultSet rs);
+    
 }
