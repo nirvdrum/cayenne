@@ -134,22 +134,62 @@ public class Validator
 			factory = "";
 		else factory = factory.trim();
 		// If direct factory, make sure the location is a valid file name.
-		if (factory.equals(DataSourceFactory.DIRECT_FACTORY)) {
+		if (factory.length() == 0) {
+			String temp;
+			temp = "Must select factory to use to get to data source.";
+			msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
+			errMsg.add(msg);
+			status = ErrorMsg.ERROR;
+		}
+		else if ( factory.equals(DataSourceFactory.DIRECT_FACTORY)) {
 			String location = node.getDataSourceLocation();
 			if (location == null)
 				location = "";
 			else location = location.trim();
 			if (location.length() == 0) {
 				String temp;
-				temp = "Must specify valid Data Node file name when using data"
-					 	+" source factory " + DataSourceFactory.DIRECT_FACTORY;
+				temp = "Must specify file name for Data Node Location";
 				msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
 				errMsg.add(msg);
 				status = ErrorMsg.ERROR;
-			} else {
-				
 			}
 		}
+		else if ( factory.equals(DataSourceFactory.JNDI_FACTORY)) {
+			String location = node.getDataSourceLocation();
+			if (location == null)
+				location = "";
+			else location = location.trim();
+			if (location.length() == 0) {
+				String temp;
+				temp = "Must specify valid Data Source location";
+				msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+		}
+		
+		if (node.getAdapter() == null) {
+			String temp;
+			temp = "Must specify DB query adapter.";
+			msg = new DataNodeErrorMsg(temp, ErrorMsg.ERROR, domain, node);
+			errMsg.add(msg);
+			status = ErrorMsg.ERROR;
+		}
+		/*
+		GuiDataSource ds = (GuiDataSource)node.getDataSource();
+		if (ds != null) {
+			if (ds.getDataSourceInfo().getJdbcDriver() == null 
+			|| ds.getDataSourceInfo().getJdbcDriver().trim().length() == 0)
+			{
+				String temp;
+				temp = "Need to specify Jdbc driver";
+				msg = new DataNodeErrorMsg(temp, ErrorMsg.WARNING, domain, node);
+				errMsg.add(msg);
+				if (status == ErrorMsg.NO_ERROR)
+					status = ErrorMsg.WARNING;
+			}
+		}
+		}*/
 		return status;
 	}
 	
