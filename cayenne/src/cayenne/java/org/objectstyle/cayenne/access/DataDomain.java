@@ -394,35 +394,36 @@ public class DataDomain implements QueryEngine {
         maps.clear();
     }
 
-    /** Adds new DataNode to this domain. */
-    public void addNode(DataNode node) {
-        synchronized (nodes) {
-            // add node to name->node map
-            nodes.put(node.getName(), node);
+    /** 
+     * Adds new DataNode. 
+     */
+    public synchronized void addNode(DataNode node) {
 
-            // add node to "ent name->node" map
-            Iterator nodeMaps = node.getDataMaps().iterator();
-            while (nodeMaps.hasNext()) {
-                DataMap map = (DataMap) nodeMaps.next();
-                this.addMap(map);
+        // add node to name->node map
+        nodes.put(node.getName(), node);
 
-                Iterator entities = map.getObjEntities().iterator();
-                while (entities.hasNext()) {
-                    ObjEntity e = (ObjEntity) entities.next();
-                    this.nodesByEntityName.put(e.getName(), node);
-                }
+        // add node to "ent name->node" map
+        Iterator nodeMaps = node.getDataMaps().iterator();
+        while (nodeMaps.hasNext()) {
+            DataMap map = (DataMap) nodeMaps.next();
+            this.addMap(map);
 
-                entities = map.getDbEntities().iterator();
-                while (entities.hasNext()) {
-                    DbEntity e = (DbEntity) entities.next();
-                    this.nodesByDbEntityName.put(e.getName(), node);
-                }
+            Iterator entities = map.getObjEntities().iterator();
+            while (entities.hasNext()) {
+                ObjEntity e = (ObjEntity) entities.next();
+                this.nodesByEntityName.put(e.getName(), node);
+            }
 
-                Iterator procedures = map.getProcedures().iterator();
-                while (procedures.hasNext()) {
-                    Procedure proc = (Procedure) procedures.next();
-                    this.nodesByProcedureName.put(proc.getName(), node);
-                }
+            entities = map.getDbEntities().iterator();
+            while (entities.hasNext()) {
+                DbEntity e = (DbEntity) entities.next();
+                this.nodesByDbEntityName.put(e.getName(), node);
+            }
+
+            Iterator procedures = map.getProcedures().iterator();
+            while (procedures.hasNext()) {
+                Procedure proc = (Procedure) procedures.next();
+                this.nodesByProcedureName.put(proc.getName(), node);
             }
         }
     }
