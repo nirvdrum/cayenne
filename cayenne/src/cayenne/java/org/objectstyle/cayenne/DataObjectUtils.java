@@ -61,12 +61,9 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A collection of utility methods to work with DataObjects.
@@ -269,27 +266,12 @@ public final class DataObjectUtils {
             return object;
         }
 
-        // not found, fetch it...
-        SelectQuery query = new SelectQuery(id.getObjClass(), ExpressionFactory
-                .matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+        // look in shared cache...
+        DataRow row = context.getObjectStore().getSnapshot(id, context);
 
-        // just in case
-        query.setFetchLimit(2);
-
-        List objects = context.performQuery(query);
-
-        if (objects.size() == 0) {
-            return null;
-        }
-        else if (objects.size() == 1) {
-            return (DataObject) objects.get(0);
-        }
-        else {
-            throw new CayenneRuntimeException(
-                    "More than one row was fetched for id '"
-                            + id
-                            + "'. This indicates either a database integrity problem or incorrect PK mapping.");
-        }
+        return (row != null)
+                ? context.objectFromDataRow(id.getObjClass(), row, false)
+                : null;
     }
 
     static ObjectId buildId(DataContext context, String objEntityName, Object pk) {

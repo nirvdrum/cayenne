@@ -77,6 +77,15 @@ public class DataObjectUtilsTst extends CayenneTestCase {
         deleteTestData();
     }
 
+    public void testNoObjectForPK() throws Exception {
+        createTestData("testObjectForPKInt");
+        DataContext context = createDataContext();
+
+        // use bogus non-existent PK
+        DataObject object = DataObjectUtils.objectForPK(context, Artist.class, 44001);
+        assertNull(object);
+    }
+
     public void testObjectForPKObjectId() throws Exception {
         createTestData("testObjectForPKInt");
         DataContext context = createDataContext();
