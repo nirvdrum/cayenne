@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.gui.util.*;
  * @author Misha Shengaout
  */
 public class AddDataMapAction extends CayenneAction {
-	public static final String ACTION_NAME = "AddDataMap";
+	public static final String ACTION_NAME = "Link DataMap to Node";
 
 	public AddDataMapAction() {
 		super(ACTION_NAME);

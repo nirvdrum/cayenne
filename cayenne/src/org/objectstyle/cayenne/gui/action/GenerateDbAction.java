@@ -88,7 +88,7 @@ import org.objectstyle.cayenne.gui.validator.*;
  */
 public class GenerateDbAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(GenerateDbAction.class.getName());
-	public static final String ACTION_NAME = "GenerateDb";
+	public static final String ACTION_NAME = "Generate Database Schema";
 		
 	public GenerateDbAction() {
 		super(ACTION_NAME);

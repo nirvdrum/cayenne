@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.gui.validator.*;
 public class SaveAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(SaveAction.class.getName());
 
-	public static final String ACTION_NAME = "SaveAll";
+	public static final String ACTION_NAME = "Save";
 		
 	public SaveAction() {
 		super(ACTION_NAME);
@@ -105,13 +105,8 @@ public class SaveAction extends CayenneAction {
 			iter = mediator.getDirtyDataNodes().iterator();
 			while (iter.hasNext()) {
 				DataNode node = (DataNode)iter.next();
-				logObj.fine("Editor::saveAll(), node name "
-									+ node.getName() + ", factory "
-									+ node.getDataSourceFactory());
 				// If using direct connection, save into separate file
 				if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
-					logObj.fine("Editor::saveAll(), saving node name "
-									+ node.getName());
 					saveDataNode(node);
 				}
 			}// End saving DataNode-s

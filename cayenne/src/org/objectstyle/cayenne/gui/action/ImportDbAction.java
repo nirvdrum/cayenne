@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.map.DbLoader;
  */
 public class ImportDbAction extends CayenneAction {
 	static Logger logObj = Logger.getLogger(ImportDbAction.class.getName());
-	public static final String ACTION_NAME = "ImportDb";
+	public static final String ACTION_NAME = "Reengineer Database Schema";
 		
 	public ImportDbAction() {
 		super(ACTION_NAME);

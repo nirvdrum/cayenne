@@ -84,7 +84,7 @@ public class ImportEOModelAction extends CayenneAction {
 	static Logger logObj =
 		Logger.getLogger(ImportEOModelAction.class.getName());
 
-	public static final String ACTION_NAME = "ImportEOModel";
+	public static final String ACTION_NAME = "Import EOModel";
 
 	protected JFileChooser eoModelChooser;
 

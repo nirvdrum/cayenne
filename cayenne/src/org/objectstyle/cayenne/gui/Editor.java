@@ -125,7 +125,6 @@ public class Editor
 	JMenuItem createDataSourceMenu = new JMenuItem("Create Data Source");
 	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
 	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
-	JMenuItem addDataMapMenu = new JMenuItem("Link Data Map to Node");
 	JMenuItem synchObjEntityMenu = new JMenuItem("Synchronize with DbEntity");
 
 	JMenu toolMenu = new JMenu("Tools");
@@ -167,7 +166,7 @@ public class Editor
 
 		initEmptyActions();
 
-		// these are legacey methods being refactored out
+		// these are legacy methods being refactored out
 		init();
 		initActions();
 	}
@@ -188,6 +187,9 @@ public class Editor
 
 		CayenneAction removeAction = new RemoveAction();
 		actionMap.put(removeAction.getKey(), removeAction);
+		
+		CayenneAction addMapToNodeAction = new AddDataMapAction();
+		actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
 	}
 
 	protected JMenuItem buildMenu(String actionKey, KeyStroke stroke) {
@@ -227,7 +229,7 @@ public class Editor
 		projectMenu.add(createObjEntityMenu);
 		projectMenu.add(createDbEntityMenu);
 		projectMenu.addSeparator();
-		projectMenu.add(addDataMapMenu);
+		projectMenu.add(buildMenu(AddDataMapAction.ACTION_NAME, null));
 		projectMenu.add(synchObjEntityMenu);
 		projectMenu.addSeparator();
 		projectMenu.add(
@@ -257,9 +259,6 @@ public class Editor
 	protected void initActions() {
 		// create and assign actions
 
-		CayenneAction addMapAction = new AddDataMapAction();
-		actionMap.put(addMapAction.getKey(), addMapAction);
-		addDataMapMenu.addActionListener(addMapAction);
 
 		CayenneAction saveAction = new SaveAction();
 		actionMap.put(saveAction.getKey(), saveAction);
@@ -910,11 +909,12 @@ public class Editor
 	private void disableMenu() {
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(false);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(false);
-
+        getAction(AddDataMapAction.ACTION_NAME).setEnabled(false);
+        
 		createDataSourceMenu.setEnabled(false);
 		createObjEntityMenu.setEnabled(false);
 		createDbEntityMenu.setEnabled(false);
-		addDataMapMenu.setEnabled(false);
+		
 		synchObjEntityMenu.setEnabled(false);
  
 		saveMenu.setEnabled(false);
@@ -964,7 +964,7 @@ public class Editor
 
 	private void enableDataNodeMenu() {
 		enableDomainMenu();
-		addDataMapMenu.setEnabled(true);
+		getAction(AddDataMapAction.ACTION_NAME).setEnabled(true);
 	}
 
 	public static void main(String[] args) {
