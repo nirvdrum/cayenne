@@ -70,10 +70,14 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
 
 /**
  * A simple non-editable tree browser with multiple columns 
@@ -84,9 +88,13 @@ import org.apache.log4j.Logger;
  * 
  * <p>
  * MultiColumnBrowser starts at the root of the tree
- * and automatcially expands to the right as navigation goes deeper. 
+ * and automatically expands to the right as navigation goes deeper. 
  * MultiColumnBrowser uses the same TreeModel as a regular JTree 
  * for its navigation model.
+ * </p>
+ * 
+ * <p>
+ * Users are notified of selection changes via a TreeSelectionEvents.
  * </p>
  * 
  * @since 1.1
@@ -94,6 +102,8 @@ import org.apache.log4j.Logger;
  */
 public class MultiColumnBrowser extends JPanel {
     private static Logger logObj = Logger.getLogger(MultiColumnBrowser.class);
+    private static final EventSubject treeSelectionSubject =
+        EventSubject.getSubject(MultiColumnBrowser.class, "TreeSelectionEvent");
 
     public static final int DEFAULT_MIN_COLUMNS_COUNT = 3;
 
@@ -127,6 +137,15 @@ public class MultiColumnBrowser extends JPanel {
         this.renderer = renderer;
 
         initView();
+    }
+
+    public void addTreeSelectionListener(TreeSelectionListener listener) {
+        EventManager.getDefaultManager().addListener(
+            listener,
+            "valueChanged",
+            TreeSelectionEvent.class,
+            treeSelectionSubject,
+            this);
     }
 
     /**
@@ -349,6 +368,10 @@ public class MultiColumnBrowser extends JPanel {
             lastPanel.setRootNode(selectedNode);
             scrollToColumn(panelIndex);
         }
+
+        TreeSelectionEvent e =
+            new TreeSelectionEvent(this, new TreePath(selectionPath), false, null, null);
+        EventManager.getDefaultManager().postEvent(e, treeSelectionSubject);
     }
 
     /** 

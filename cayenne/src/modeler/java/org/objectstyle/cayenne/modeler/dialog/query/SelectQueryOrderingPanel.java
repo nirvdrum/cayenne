@@ -57,13 +57,23 @@ package org.objectstyle.cayenne.modeler.dialog.query;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
+import org.scopemvc.core.Selector;
+import org.scopemvc.view.swing.SAction;
+import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SPanel;
+import org.scopemvc.view.swing.STable;
+import org.scopemvc.view.swing.STableModel;
 
 /**
  * A panel for configuring SelectQuery ordering.
@@ -72,18 +82,46 @@ import org.scopemvc.view.swing.SPanel;
  * @author Andrei Adamchik
  */
 public class SelectQueryOrderingPanel extends SPanel {
+    private static Logger logObj = Logger.getLogger(SelectQueryOrderingPanel.class);
+    
     private static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
+    private static final Dimension TABLE_DIM = new Dimension(460, 100);
 
     protected MultiColumnBrowser browser;
+    protected STable orderingsTable;
 
     public SelectQueryOrderingPanel() {
         initView();
+        initController();
     }
 
     private void initView() {
         // create widgets
+        SButton addButton =
+            new SButton(new SAction(SelectQueryController.ADD_ORDERING_CONTROL));
+        addButton.setEnabled(true);
+
+        SButton removeButton =
+            new SButton(new SAction(SelectQueryController.REMOVE_ORDERING_CONTROL));
+        removeButton.setEnabled(true);
+
         browser = new MultiColumnBrowser();
         browser.setPreferredColumnSize(BROWSER_CELL_DIM);
+
+        orderingsTable = new OrderingsTable();
+        STableModel orderingsTableModel = new STableModel(orderingsTable);
+        orderingsTableModel.setSelector(OrderingsModel.ORDERINGS_SELECTOR);
+        orderingsTableModel.setColumnNames(
+            new String[] { "Path", "Direction", "Case Sensitive" });
+        orderingsTableModel.setColumnSelectors(
+            new Selector[] {
+                OrderingsModel.ORDERING_SPEC_SELECTOR,
+                OrderingsModel.ORDERING_SPEC_SELECTOR,
+                OrderingsModel.ORDERING_SPEC_SELECTOR });
+
+        orderingsTable.setModel(orderingsTableModel);
+        //   orderingsTable.setSelectionSelector(
+        //     ObjRelationshipInfoModel.SELECTED_PATH_COMPONENT_SELECTOR);
 
         // assemble
         setLayout(new BorderLayout());
@@ -94,18 +132,51 @@ public class SelectQueryOrderingPanel extends SPanel {
                 JScrollPane.VERTICAL_SCROLLBAR_NEVER,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         add(scroller, BorderLayout.NORTH);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttons.add(addButton);
+        buttons.add(removeButton);
+        add(buttons, BorderLayout.CENTER);
+        add(new JScrollPane(orderingsTable), BorderLayout.SOUTH);
+    }
+
+    private void initController() {
+        setSelector(SelectQueryModel.ORDERINGS_SELECTOR);
+
+        browser.addTreeSelectionListener(new TreeSelectionListener() {
+            public void valueChanged(TreeSelectionEvent e) {
+                Object[] path = e.getPath() != null ? e.getPath().getPath() : null;
+                ((OrderingsModel) getBoundModel()).setCurrentPath(path);
+            }
+        });
     }
 
     public void setBoundModel(Object model) {
         super.setBoundModel(model);
-
+        
+        Object submodel = getShownModel();
+        
+        logObj.warn("B model: " + submodel);
+        
         // init root icon
-        if (model instanceof QueryModel) {
-            Object root = ((QueryModel) model).getRoot();
+        if (submodel instanceof OrderingsModel) {
+            Object root = ((OrderingsModel) submodel).getRoot();
             if (root instanceof Entity) {
                 EntityTreeModel treeModel = new EntityTreeModel((Entity) root);
+                logObj.warn("model: " + treeModel);
                 browser.setModel(treeModel);
             }
+        }
+    }
+
+    final class OrderingsTable extends STable {
+        OrderingsTable() {
+            setRowHeight(25);
+            setRowMargin(3);
+        }
+
+        public Dimension getPreferredScrollableViewportSize() {
+            return TABLE_DIM;
         }
     }
 }

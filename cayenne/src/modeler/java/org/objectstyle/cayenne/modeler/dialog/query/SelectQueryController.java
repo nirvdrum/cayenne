@@ -83,6 +83,12 @@ public class SelectQueryController extends BasicController {
 
     public static final String SAVE_CONTROL = "cayenne.modeler.selectQuery.save.button";
 
+    public static final String ADD_ORDERING_CONTROL =
+        "cayenne.modeler.selectQuery.addOrdering.button";
+
+    public static final String REMOVE_ORDERING_CONTROL =
+        "cayenne.modeler.selectQuery.removeOrdering.button";
+
     protected EventController mediator;
     protected boolean modified;
     protected boolean renamed;

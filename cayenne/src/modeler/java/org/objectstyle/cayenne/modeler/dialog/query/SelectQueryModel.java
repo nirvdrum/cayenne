@@ -77,6 +77,7 @@ public class SelectQueryModel extends QueryModel {
     public static final Selector FETCHING_DATA_ROWS_SELECTOR =
         Selector.fromString("fetchingDataRows");
     public static final Selector DISTINCT_SELECTOR = Selector.fromString("distinct");
+    public static final Selector ORDERINGS_SELECTOR = Selector.fromString("orderings");
 
     protected Expression qualifier;
     protected int fetchLimit;
@@ -84,8 +85,8 @@ public class SelectQueryModel extends QueryModel {
     protected boolean refreshingObjects;
     protected boolean fetchingDataRows;
     protected boolean distinct;
-    protected List orderings;
     protected List prefetches;
+    protected OrderingsModel orderings;
 
     public SelectQueryModel(Query query) {
         super(query);
@@ -107,7 +108,7 @@ public class SelectQueryModel extends QueryModel {
         this.fetchingDataRows = selectQuery.isFetchingDataRows();
         this.qualifier = selectQuery.getQualifier();
 
-        this.orderings = new ArrayList(selectQuery.getOrderings());
+        this.orderings = new OrderingsModel(selectQuery);
         this.prefetches = new ArrayList(selectQuery.getPrefetches());
     }
 
@@ -122,11 +123,11 @@ public class SelectQueryModel extends QueryModel {
         selectQuery.setFetchingDataRows(fetchingDataRows);
         selectQuery.setDistinct(distinct);
 
-        selectQuery.clearOrderings();
-        selectQuery.addOrderings(orderings);
-
         selectQuery.clearPrefetches();
         selectQuery.addPrefetches(prefetches);
+
+        // update with submodel changes 
+        orderings.updateQuery();
     }
 
     public boolean isDistinct() {
@@ -193,5 +194,9 @@ public class SelectQueryModel extends QueryModel {
             this.refreshingObjects = refreshingObjects;
             fireModelChange(VALUE_CHANGED, REFRESHING_OBJECTS_SELECTOR);
         }
+    }
+
+    public OrderingsModel getOrderings() {
+        return orderings;
     }
 }

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.IntIndexSelector;
 import org.scopemvc.core.ModelChangeEvent;
@@ -127,7 +127,7 @@ public class ObjRelationshipInfoModel extends BasicModel {
             }
         }
 
-        Collections.sort(objectTargets, new PropertyComparator("name", ObjEntity.class));
+        Collections.sort(objectTargets, Comparators.getNamedObjectComparator());
 
         // validate -
         // current limitation is that an ObjRelationship must have source 

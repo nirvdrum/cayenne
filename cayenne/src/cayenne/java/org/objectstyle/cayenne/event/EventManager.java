@@ -67,6 +67,7 @@ import java.util.WeakHashMap;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Invocation;
 import org.objectstyle.cayenne.util.Util;
 
@@ -230,7 +231,7 @@ public class EventManager extends Object {
             dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
         }
         catch (NoSuchMethodException nsm) {
-            throw new RuntimeException(nsm.getMessage());
+            throw new CayenneRuntimeException("Error adding listener, method name: " + methodName, nsm);
         }
     }
 
