@@ -206,43 +206,44 @@ public class DomainHelper {
     }
 
 
-	/** Saves domains into the specified file. 
-	  * Assumes that the maps have already been saved.*/
-	public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
-		pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-		pw.println("<domains>");
-		for (int i = 0; i < domains.length; i++) {
-			storeDomains(pw, domains[i]);
-		}
-		pw.println("</domains>");
-	}
-	
-	private static void storeDomains(PrintWriter pw, DataDomain domain) {
-		DataNode[] nodes = domain.getDataNodes();
-		List maps = domain.getMapList();
-		pw.println("<domain name=\"" + domain.getName() + "\">");
-		Iterator iter = maps.iterator();
-		while(iter.hasNext()) {
-			StringBuffer buf = new StringBuffer();
-			DataMap map = (DataMap)iter.next();
-			buf.append("\t <map name=\"").append(map.getName());
-			buf.append(" \" location=\"").append(map.getLocation());
-			buf.append("\"/> ");
-			pw.println(buf.toString());
-		}// End while()
-		
-		for (int i = 0; i < nodes.length; i++) {
-			pw.println("\t<node name=\"" + nodes[i].getName() + "\"" );
-			pw.println("\t\t datasource=\""+ nodes[i].getDataSourceLocation() + "\"");
-			pw.println("\t\t factory=\""+ nodes[i].getDataSourceFactory() + "\">");	
-			DataMap[] map_arr = nodes[i].getDataMaps();
-			for (int j = 0; map_arr != null && j < map_arr.length; j++) {
-				pw.println("\t\t\t<map-ref name=\"" + map_arr[j].getName() + "\"/>");
-			}
-			pw.println("\t </node>");
-		}
-		pw.println("</domain>");
-	}
+    /** Saves domains into the specified file.
+      * Assumes that the maps have already been saved.*/
+    public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
+        pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        pw.println("<domains>");
+        for (int i = 0; i < domains.length; i++) {
+            storeDomains(pw, domains[i]);
+        }
+        pw.println("</domains>");
+    }
+
+
+    private static void storeDomains(PrintWriter pw, DataDomain domain) {
+        DataNode[] nodes = domain.getDataNodes();
+        List maps = domain.getMapList();
+        pw.println("<domain name=\"" + domain.getName() + "\">");
+        Iterator iter = maps.iterator();
+        while(iter.hasNext()) {
+            StringBuffer buf = new StringBuffer();
+            DataMap map = (DataMap)iter.next();
+            buf.append("\t <map name=\"").append(map.getName());
+            buf.append(" \" location=\"").append(map.getLocation());
+            buf.append("\"/> ");
+            pw.println(buf.toString());
+        }// End while()
+
+        for (int i = 0; i < nodes.length; i++) {
+            pw.println("\t<node name=\"" + nodes[i].getName() + "\"" );
+            pw.println("\t\t datasource=\""+ nodes[i].getDataSourceLocation() + "\"");
+            pw.println("\t\t factory=\""+ nodes[i].getDataSourceFactory() + "\">");
+            DataMap[] map_arr = nodes[i].getDataMaps();
+            for (int j = 0; map_arr != null && j < map_arr.length; j++) {
+                pw.println("\t\t\t<map-ref name=\"" + map_arr[j].getName() + "\"/>");
+            }
+            pw.println("\t </node>");
+        }
+        pw.println("</domain>");
+    }
 
 
     // SAX handlers start below
@@ -251,16 +252,16 @@ public class DomainHelper {
      * Handler for the root element. Its only child must be the "domains" element.
      */
     private class RootHandler extends DefaultHandler {
-       /**
-         * Sets the locator in the project helper for future reference.
-         * 
-         * @param locator The locator used by the parser.
-         *                Will not be <code>null</code>.
-         */
+        /**
+          * Sets the locator in the project helper for future reference.
+          * 
+          * @param locator The locator used by the parser.
+          *                Will not be <code>null</code>.
+          */
         public void setDocumentLocator(Locator locator) {
             DomainHelper.this.locator = locator;
         }
-        
+
         /**
          * Handles the start of a datadomains element. A domains handler is created
          * and initialised with the element name and attributes.
@@ -367,14 +368,14 @@ public class DomainHelper {
             try {
                 map = loader.loadDataMap(new InputSource(mapIn));
             } catch (DataMapException dmex) {
-                logObj.log(Level.INFO, "Error loading map", dmex);
+                logObj.log(Level.FINE, "Error loading map", dmex);
                 failedMaps.put(mapName, location);
                 return;
             }
 
             map.setName(mapName);
             map.setLocation(location);
-            domain.addMap(map); 
+            domain.addMap(map);
         }
     }
 
@@ -432,7 +433,7 @@ public class DomainHelper {
 
                 node.setDataSource(localFactory.getDataSource(dataSrcLocation));
             } catch (Exception ex) {
-                logObj.log(Level.INFO, "Error loading DataSource", ex);
+                logObj.log(Level.FINE, "Error loading DataSource", ex);
                 failedDataSources.put(nodeName, dataSrcLocation);
             }
 

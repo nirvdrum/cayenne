@@ -9,8 +9,11 @@
     <body>
         <!-- Contributors section -->
         <section name="Downloads">
-            <p>Cayenne can be downloaded either as binary or as source distribution. 
-            Depending on what kind of user you are, there are the folowing types of 
+            <p>Cayenne can be downloaded either as binary or as source distribution.</p> 
+            <panel name="Note:">Source distribution is "binary + source", and consists 
+            of a full binary package and an extra "src" subdirectory.</panel>
+            
+            <p>Depending on what kind of user you are, there are the folowing types of 
             download packages (can be both source and binary).
             
             <ul>

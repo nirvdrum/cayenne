@@ -68,6 +68,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         buildCase1();
         buildCase2();
         buildCase3();
+        buildCase4();
     }
 
     private void buildCase1() {
@@ -111,6 +112,28 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
 
         DomainHelperCase aCase = new DomainHelperCase();
         aCase.setConfigInfo(buf.toString());
+        aCase.setTotalDomains(1);
+        cases.add(aCase);
+    }
+    
+    
+    private void buildCase4() {
+        StringBuffer buf = new StringBuffer();
+        buf.append("<?xml version='1.0' encoding='utf-8'?>")
+        .append("\n<domains>")
+        .append("\n   <domain name='domain1'>")
+        .append("\n        <map name='m1' location='test_resources/testmap.xml'/>")
+        .append("\n        <node name='db1' datasource='node.xml'")
+        .append("\n              factory='org.objectstyle.cayenne.conf.DriverDataSourceFactory'")
+        .append("\n              adapter='org.objectstyle.cayenne.dba.mysql.MySQLAdapter'>")
+        .append("\n        </node>")
+        .append("\n   </domain>")
+        .append("\n </domains>");
+
+
+        DomainHelperCase aCase = new DomainHelperCase();
+        aCase.setConfigInfo(buf.toString());
+        aCase.setFailedDataSources(1);
         aCase.setTotalDomains(1);
         cases.add(aCase);
     }

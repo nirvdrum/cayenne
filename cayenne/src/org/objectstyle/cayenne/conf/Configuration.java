@@ -139,9 +139,11 @@ public abstract class Configuration {
                                       + "\" is not found in CLASSPATH. Current CLASSPATH is: "
                                       + System.getProperty("java.class.path"));
 
-        DomainHelper helper = new DomainHelper(this);
-        if(!helper.loadDomains(in))
+        DomainHelper helper = new DomainHelper(this);        
+        if(!helper.loadDomains(in)) {
             throw new ConfigException("Failed to load domain and/or its maps/nodes.");
+        }
+        
         Iterator it = helper.getDomains().iterator();
         while(it.hasNext()) {
             addDomain((DataDomain)it.next());            
