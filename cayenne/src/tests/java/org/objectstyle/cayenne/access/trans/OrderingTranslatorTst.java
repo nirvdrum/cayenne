@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import org.apache.log4j.Logger;
-
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.TranslationTestCase;
-import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class OrderingTranslatorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class.getName());

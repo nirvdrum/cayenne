@@ -55,16 +55,12 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.project.validator.Validator;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.project.validator.*;
 
 /**
  * Describes a model of Cayenne project. Project is a set of 

@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.access.types;
  *
  */
 
-import java.sql.ResultSet;
-import java.sql.Types;
+import java.sql.*;
 
 public class UtilDateType implements ExtendedType {
     public String getClassName() {

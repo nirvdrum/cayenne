@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.objectstyle.cayenne.project.FlatProjectView;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.*;
 
 /**
  * ValidationResult encapsulates information about a single node validation

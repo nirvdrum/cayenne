@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
 
 /**
  * Interface that defines API of a generic SELECT query 

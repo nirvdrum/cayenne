@@ -55,19 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
+import java.io.*;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DataMapException;
-import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
-import org.xml.sax.InputSource;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
+import org.xml.sax.*;
 
 /**
  * Cayenne project that consists of a single DataMap.

@@ -55,12 +55,7 @@ package org.objectstyle.cayenne.modeler.util;
  *
  */ 
 
-import java.io.*;
-import java.util.*;
-import javax.swing.JOptionPane;
-import org.xml.sax.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
 
 
 /** Adds name and i/o to DataMap.

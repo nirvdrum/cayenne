@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.util.Util;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.util.*;
 
 /** 
  * An ObjectId is a class that uniquely identifies a 
@@ -98,7 +95,7 @@ public class ObjectId implements Serializable {
 	 */
 	public ObjectId(Class objClass,  String keyName, Object id) {
 		this.objClass = objClass;
-		HashMap keys = new HashMap();
+		Map keys = new HashMap();
 		keys.put(keyName, id);
 		setIdKeys(keys);
 	}

@@ -56,31 +56,14 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.map.TableInfo;
-import org.objectstyle.cayenne.util.NameConverter;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 
 /** Utility class that does reverse engineering of the database. 
   * It can create DataMaps using database meta data obtained via JDBC driver.
@@ -94,7 +77,7 @@ public class DbLoader {
     public static final String WILDCARD = "%";
 
     /** List of db entities to process.*/
-    private ArrayList dbEntityList = new ArrayList();
+    private List dbEntityList = new ArrayList();
 
     /** Creates default name for loaded relationship */
     private static String defaultDbRelName(String dstName, boolean toMany) {
@@ -150,7 +133,7 @@ public class DbLoader {
      * @return List with the catalog names, empty Array if none found.
      */
     public List getCatalogs() throws SQLException {
-        ArrayList catalogs = new ArrayList();
+        List catalogs = new ArrayList();
         ResultSet rs = getMetaData().getCatalogs();
         while (rs.next()) {
             String catalog_name = rs.getString(1);
@@ -166,7 +149,7 @@ public class DbLoader {
      * @return List with the schema names, empty Array if none found.
      */
     public List getSchemas() throws SQLException {
-        ArrayList schemas = new ArrayList();
+        List schemas = new ArrayList();
         ResultSet rs = getMetaData().getSchemas();
         while (rs.next()) {
             String schema_name = rs.getString(1);
@@ -183,7 +166,7 @@ public class DbLoader {
      * @return List of Strings, empty array if nothing found. 
      */
     public List getTableTypes() throws SQLException {
-        ArrayList types = new ArrayList();
+        List types = new ArrayList();
         ResultSet rs = getMetaData().getTableTypes();
         while (rs.next()) {
             types.add(rs.getString("TABLE_TYPE").trim());
@@ -210,7 +193,7 @@ public class DbLoader {
         String[] types)
         throws SQLException {
 
-        ArrayList tables = new ArrayList();
+        List tables = new ArrayList();
         if (null == schemaPattern || schemaPattern.equals("")) {
             schemaPattern = WILDCARD;
         } else if (schemaPattern.indexOf('*') >= 0) {
@@ -509,7 +492,7 @@ public class DbLoader {
         String tableType = adapter.tableTypeForTable();
 
         // use types that are not null
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         if (viewType != null) {
             list.add(viewType);
         }

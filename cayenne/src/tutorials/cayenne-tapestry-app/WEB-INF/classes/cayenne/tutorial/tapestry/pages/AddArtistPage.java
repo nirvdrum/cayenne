@@ -1,10 +1,10 @@
 package cayenne.tutorial.tapestry.pages;
 
-import net.sf.tapestry.IRequestCycle;
-import org.objectstyle.cayenne.access.DataContext;
+import cayenne.tutorial.tapestry.*;
+import cayenne.tutorial.tapestry.domain.*;
 
-import cayenne.tutorial.tapestry.Visit;
-import cayenne.tutorial.tapestry.domain.Artist;
+import net.sf.tapestry.*;
+import org.objectstyle.cayenne.access.*;
 
 /**
  * @author Eric Schneider

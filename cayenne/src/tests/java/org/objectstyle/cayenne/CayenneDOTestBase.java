@@ -55,21 +55,13 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import java.util.List;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.Exhibit;
-import org.objectstyle.art.Gallery;
-import org.objectstyle.art.Painting;
-import org.objectstyle.art.PaintingInfo;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class CayenneDOTestBase extends CayenneTestCase {    

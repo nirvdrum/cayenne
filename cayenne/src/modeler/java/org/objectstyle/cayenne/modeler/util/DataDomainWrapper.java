@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.modeler.util;
  *
  */ 
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataDomain;
 
 
 /** Wrapper for DataDomain. 

@@ -55,8 +55,9 @@ package org.objectstyle.art;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
 import java.util.*;
+
+import org.objectstyle.cayenne.*;
 
 
 public class Gallery extends CayenneDataObject {

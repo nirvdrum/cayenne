@@ -57,15 +57,15 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
 import java.util.EventObject;
-import org.apache.log4j.Logger;
 
 import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.event.*;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
+
+import org.apache.log4j.Logger;
 
 /**  
  * Common superclass of tables used in Cayenne. Contains some common configuration

@@ -56,14 +56,12 @@
 
 package org.objectstyle.cayenne;
 
-import java.util.List;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
 
 public class DOPrefetchTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(DOPrefetchTst.class.getName());

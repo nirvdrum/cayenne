@@ -1,23 +1,17 @@
 package action;
 
-import java.util.List;
+import java.util.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-import org.apache.log4j.Level;
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
-import webtest.Artist;
-import webtest.Painting;
+import org.apache.log4j.*;
+import org.apache.struts.action.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
+import webtest.*;
 
-import formbean.PaintingForm;
+import formbean.*;
 
 public final class SavePaintingAction extends Action {
 

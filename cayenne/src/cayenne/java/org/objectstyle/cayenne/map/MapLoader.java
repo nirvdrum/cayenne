@@ -55,29 +55,15 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.util.PropertyComparator;
-import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.util.Util;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.util.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 /** 
  * Default MapLoader. Its responsibilities include reading DataMaps 
@@ -110,12 +96,12 @@ public class MapLoader extends DefaultHandler {
     private DbRelationship dbRelationship;
     private ObjRelationship objRelationship;
     private DbAttribute attrib;
-    private HashMap dbRelationshipMap;
+    private Map dbRelationshipMap;
 
     /* Saving to XML */
-    private ArrayList objRelationships;
-    private ArrayList dbRelationships;
-    private ArrayList dbRelationshipRefs;
+    private List objRelationships;
+    private List dbRelationships;
+    private List dbRelationshipRefs;
 
     /**
      * Returns <code>true</code> if this relationship's <code>toDependentPk</code>
@@ -999,7 +985,7 @@ public class MapLoader extends DefaultHandler {
 
     protected List sortedRegularDbEntities(DataMap map) {
         Iterator it = map.getDbEntitiesAsList().iterator();
-        ArrayList derived = new ArrayList();
+        List derived = new ArrayList();
         while (it.hasNext()) {
             Object ent = it.next();
             if (!(ent instanceof DerivedDbEntity)) {
@@ -1014,7 +1000,7 @@ public class MapLoader extends DefaultHandler {
 
     protected List sortedDerivedDbEntities(DataMap map) {
         Iterator it = map.getDbEntitiesAsList().iterator();
-        ArrayList derived = new ArrayList();
+        List derived = new ArrayList();
         while (it.hasNext()) {
             Object ent = it.next();
             if (ent instanceof DerivedDbEntity) {
@@ -1028,25 +1014,25 @@ public class MapLoader extends DefaultHandler {
     }
 
     protected List sortedObjEntities(DataMap map) {
-        ArrayList list = new ArrayList(map.getObjEntitiesAsList());
+        List list = new ArrayList(map.getObjEntitiesAsList());
         Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
         return list;
     }
 
     protected List sortedAttributes(Entity ent) {
-        ArrayList list = new ArrayList(ent.getAttributeList());
+        List list = new ArrayList(ent.getAttributeList());
         Collections.sort(list, new PropertyComparator("name", Attribute.class));
         return list;
     }
 
     protected List sortedRelationships(Entity ent) {
-        ArrayList list = new ArrayList(ent.getRelationshipList());
+        List list = new ArrayList(ent.getRelationshipList());
         Collections.sort(list, new PropertyComparator("name", Relationship.class));
         return list;
     }
 
     protected List sortedRelationships(List rels) {
-        ArrayList list = new ArrayList(rels);
+        List list = new ArrayList(rels);
         Collections.sort(list, new PropertyComparator("name", Relationship.class));
         return list;
     }

@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import org.apache.log4j.Logger;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -68,16 +67,16 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 
  * Detail view of the DbEntity attributes. 

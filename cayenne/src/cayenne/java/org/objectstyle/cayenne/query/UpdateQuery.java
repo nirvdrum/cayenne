@@ -56,17 +56,16 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
 
 /** Object encapsulating an UPDATE statement. Note that updated attributes
  *  are expressed in terms of DbAttribute names.  */
 public class UpdateQuery extends QualifiedQuery {
     
-    protected HashMap updAttributes = new HashMap();
+    protected Map updAttributes = new HashMap();
     
     /** Creates empty UpdateQuery. */
     public UpdateQuery() {}

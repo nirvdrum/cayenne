@@ -55,17 +55,13 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Abstract superclass of Query translators.
@@ -76,13 +72,13 @@ public abstract class QueryAssembler extends QueryTranslator {
     static Logger logObj = Logger.getLogger(QueryAssembler.class.getName());
 
     /** PreparedStatement values. */
-    protected ArrayList values = new ArrayList();
+    protected List values = new ArrayList();
 
     /** 
      * PreparedStatement attributes matching entries in <code>values</code> 
      * list. 
      */
-    protected ArrayList attributes = new ArrayList();
+    protected List attributes = new ArrayList();
 
     /** Processes a join being added. */
     public abstract void dbRelationshipAdded(DbRelationship dbRel);

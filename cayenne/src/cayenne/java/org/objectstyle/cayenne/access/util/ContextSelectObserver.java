@@ -55,15 +55,12 @@
  */
 package org.objectstyle.cayenne.access.util;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * ContextSelectObserver is a SelectObserver that would 
@@ -88,7 +85,7 @@ public class ContextSelectObserver extends SelectObserver {
      * parent DataContext.
      */
     public void nextDataRows(Query query, List dataRows) {
-        ArrayList result = new ArrayList();
+        List result = new ArrayList();
         if (dataRows != null && dataRows.size() > 0) {
             ObjEntity ent = context.getEntityResolver().lookupObjEntity(query);
             Iterator it = dataRows.iterator();

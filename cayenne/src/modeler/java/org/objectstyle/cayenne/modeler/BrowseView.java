@@ -62,6 +62,7 @@ import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
@@ -76,31 +77,10 @@ import javax.swing.tree.TreePath;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DataMapEvent;
-import org.objectstyle.cayenne.modeler.event.DataMapListener;
-import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.event.DataNodeListener;
-import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DbEntityListener;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
-import org.objectstyle.cayenne.modeler.event.DomainEvent;
-import org.objectstyle.cayenne.modeler.event.DomainListener;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
+import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
 
 /** 
@@ -374,7 +354,7 @@ public class BrowseView
         }
     }
 
-    private ArrayList getNodesWithMap(DataMap map) {
+    private List getNodesWithMap(DataMap map) {
         return null;
     }
 
@@ -755,7 +735,7 @@ public class BrowseView
     /** Gets array of the user objects ending with this and starting with one under root. 
       * That is the array of actual objects rather than wrappers.*/
     private Object[] getUserObjects(DefaultMutableTreeNode node) {
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         while (!node.isRoot()) {
             list.add(0, node.getUserObject());
             node = (DefaultMutableTreeNode) node.getParent();

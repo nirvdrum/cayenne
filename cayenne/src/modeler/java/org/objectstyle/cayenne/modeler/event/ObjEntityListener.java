@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** For managing the changes in the ObjEntity */
 public interface ObjEntityListener extends EventListener
@@ -72,3 +71,4 @@ public interface ObjEntityListener extends EventListener
 	public void objEntityRemoved(EntityEvent e);
 	
 }
+

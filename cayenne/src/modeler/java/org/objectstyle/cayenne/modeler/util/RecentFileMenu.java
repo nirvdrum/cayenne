@@ -60,8 +60,8 @@ import java.util.Vector;
 
 import javax.swing.JMenu;
 
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 
 /**

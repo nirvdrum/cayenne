@@ -1,7 +1,6 @@
 package org.objectstyle.cayenne.query;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.*;
 
 /* ====================================================================
  * 

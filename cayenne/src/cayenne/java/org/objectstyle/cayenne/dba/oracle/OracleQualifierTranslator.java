@@ -56,12 +56,10 @@
 
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.Types;
+import java.sql.*;
 
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Sequence-based primary key generator implementation for Oracle. 

@@ -56,25 +56,19 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.InsertQuery;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class TstQueryAssembler extends QueryAssembler {
     static Logger logObj = Logger.getLogger(TstQueryAssembler.class.getName());
 
-    protected ArrayList dbRels = new ArrayList();
+    protected List dbRels = new ArrayList();
 
     public static TstQueryAssembler assembler(QueryEngine e, int qType) {
         switch (qType) {

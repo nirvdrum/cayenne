@@ -69,15 +69,14 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.modeler.CayenneActionPanel;
-import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.CayenneCellEditor;
-import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.modeler.CayenneActionPanel;
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 
  * Displays DbRelationship's for the current DbEntity. 

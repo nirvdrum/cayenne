@@ -56,9 +56,9 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * Defines a set of callback methods for a QueryEngine to notify interested 

@@ -1,7 +1,9 @@
 package org.objectstyle.cayenne.modeler.event;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
 
 public class RelationshipDisplayEvent extends EntityDisplayEvent
 {

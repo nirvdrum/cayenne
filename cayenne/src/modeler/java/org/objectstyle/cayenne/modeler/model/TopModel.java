@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.modeler.model;
 
 import org.objectstyle.cayenne.project.Project;
-import org.scopemvc.core.ModelChangeTypes;
-import org.scopemvc.core.Selector;
 
 /**
  * A top level MVC model object in CayenneModeler.

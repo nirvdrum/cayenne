@@ -57,9 +57,10 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.AttributeEvent;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**

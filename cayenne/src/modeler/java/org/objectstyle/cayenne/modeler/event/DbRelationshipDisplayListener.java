@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** Used to display DbRelationship. */
 public interface DbRelationshipDisplayListener extends EventListener
@@ -64,3 +63,4 @@ public interface DbRelationshipDisplayListener extends EventListener
 	/** Display specified DbRelationship. */
 	public void currentDbRelationshipChanged(RelationshipDisplayEvent e);
 }
+

@@ -55,10 +55,10 @@
  */
 package org.objectstyle.cayenne.conn;
 
-import java.sql.Connection;
+import java.sql.*;
 
-import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class PoolManagerTst extends CayenneTestCase {
 

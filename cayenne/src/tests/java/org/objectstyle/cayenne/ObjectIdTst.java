@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.HashMap;
+import java.util.*;
 
-import org.apache.log4j.Logger;
+import org.apache.log4j.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class ObjectIdTst extends CayenneTestCase {
@@ -88,7 +88,7 @@ public class ObjectIdTst extends CayenneTestCase {
 
 	public void testEquals2() throws Exception {
 		Class class1=Number.class;
-		HashMap hm = new HashMap();
+		Map hm = new HashMap();
 		ObjectId oid1 = new ObjectId(class1, hm);
 		ObjectId oid2 = new ObjectId(class1, hm);
 		assertEquals(oid1, oid2);
@@ -98,10 +98,10 @@ public class ObjectIdTst extends CayenneTestCase {
 		Class class1=Number.class;
 		String pknm = "xyzabc";
 
-		HashMap hm1 = new HashMap();
+		Map hm1 = new HashMap();
 		hm1.put(pknm, "123");
 
-		HashMap hm2 = new HashMap();
+		Map hm2 = new HashMap();
 		hm2.put(pknm, "123");
 
 		ObjectId oid1 = new ObjectId(class1, hm1);
@@ -113,7 +113,7 @@ public class ObjectIdTst extends CayenneTestCase {
 		Class class1=Number.class;
 		String pknm = "xyzabc";
 
-		HashMap hm1 = new HashMap();
+		Map hm1 = new HashMap();
 		hm1.put(pknm, new Integer(1000));
 
 		ObjectId ref = new ObjectId(class1, hm1);
@@ -127,11 +127,11 @@ public class ObjectIdTst extends CayenneTestCase {
 	public void testEquals5() throws Exception {
 		Class class1=Number.class;
 
-		HashMap hm1 = new HashMap();
+		Map hm1 = new HashMap();
 		hm1.put("key1",  new Integer(1));
 		hm1.put("key2",  new Integer(11));
 
-		HashMap hm2 = new HashMap();
+		Map hm2 = new HashMap();
 		hm2.put("key1", new Integer(11));
 		hm2.put("key2",  new Integer(1));
 
@@ -141,16 +141,16 @@ public class ObjectIdTst extends CayenneTestCase {
 	}
 
 	public void testIdAsMapKey() throws Exception {
-		HashMap map = new HashMap();
+		Map map = new HashMap();
 		Object o1 = new Object();
 
 		Class class1=Number.class;
 		String pknm = "xyzabc";
 
-		HashMap hm1 = new HashMap();
+		Map hm1 = new HashMap();
 		hm1.put(pknm, "123");
 
-		HashMap hm2 = new HashMap();
+		Map hm2 = new HashMap();
 		hm2.put(pknm, "123");
 
 		ObjectId oid1 = new ObjectId(class1, hm1);
@@ -172,10 +172,10 @@ public class ObjectIdTst extends CayenneTestCase {
 	public void testNotEqual2() throws Exception {
 		Class class1=Number.class;
 
-		HashMap hm1 = new HashMap();
+		Map hm1 = new HashMap();
 		hm1.put("pk1", "123");
 
-		HashMap hm2 = new HashMap();
+		Map hm2 = new HashMap();
 		hm2.put("pk2", "123");
 
 		ObjectId oid1 = new ObjectId(class1, hm1);

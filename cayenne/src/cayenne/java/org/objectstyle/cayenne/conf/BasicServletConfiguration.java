@@ -55,12 +55,9 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.InputStream;
+import java.io.*;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-
-import org.objectstyle.cayenne.access.DataContext;
+import javax.servlet.*;
 
 /**
   * BasicServletConfiguration is a Configuration that uses ServletContext 

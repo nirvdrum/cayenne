@@ -55,13 +55,10 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.io.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DomainHelper;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.*;
 
 /**
  * DataNodeFile is a ProjectFile abstraction of the 

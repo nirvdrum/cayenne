@@ -56,16 +56,13 @@
 package org.objectstyle.cayenne.util;
 
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.*;
 
-import org.apache.log4j.Logger;
-import org.apache.oro.text.perl.Perl5Util;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
+import org.apache.log4j.*;
+import org.apache.oro.text.perl.*;
+import org.xml.sax.*;
 
 /**
  *  Utility methods sink.

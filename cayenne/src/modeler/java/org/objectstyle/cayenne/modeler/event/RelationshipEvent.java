@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import java.util.EventObject;
-
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
 

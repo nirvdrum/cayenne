@@ -57,11 +57,12 @@
 package org.objectstyle.cayenne.modeler.validator;
 
 import javax.swing.JFrame;
-import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
+
+import junit.framework.TestCase;
 
 /**
  * JUnit tests for ValidationDisplayHandler class.

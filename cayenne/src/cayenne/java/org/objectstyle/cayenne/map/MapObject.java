@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.util.CayenneMapEntry;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * Superclass of DataMap objects. Provides a default implementation

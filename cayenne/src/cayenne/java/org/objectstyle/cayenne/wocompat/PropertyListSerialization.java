@@ -56,12 +56,10 @@
 package org.objectstyle.cayenne.wocompat;
 
 import java.io.*;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.wocompat.parser.Parser;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.wocompat.parser.*;
 
 /**
  * A <b>PropertyListSerialization</b> is a utility class 

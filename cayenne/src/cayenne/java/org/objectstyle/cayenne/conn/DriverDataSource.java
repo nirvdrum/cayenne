@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conn;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,12 +54,12 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+package org.objectstyle.cayenne.conn;
 
-import javax.sql.DataSource;
+import java.io.*;
+import java.sql.*;
+
+import javax.sql.*;
 
 /**
  * DriverDataSource is a simple DataSource implementation

@@ -56,13 +56,17 @@
 
 package org.objectstyle.cayenne.modeler.util;
 
-import java.util.*;
-import org.apache.log4j.Logger;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.ComboBoxEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 
 public class PreferenceField extends JComboBox {

@@ -56,9 +56,9 @@
 package org.objectstyle.cayenne.perform.test;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
+import org.objectstyle.art.*;
 
 /**
  * @author Andrei Adamchik
@@ -87,7 +87,7 @@ public class ReopenedSmallSelectTest extends SmallSelectTest {
 						st.executeQuery(
 							"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
 					try {
-						ArrayList artists = new ArrayList();
+						List artists = new ArrayList();
 						while (rs.next()) {
 							Artist artist = new Artist();
 							artist.setArtistName(rs.getString(2));

@@ -3,9 +3,12 @@ package org.objectstyle.cayenne.modeler.util;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Point;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.*;
-import javax.swing.border.*;
+import javax.swing.border.Border;
+
 import org.objectstyle.cayenne.modeler.Editor;
 
 public class YesNoToAllDialog extends JDialog implements ActionListener

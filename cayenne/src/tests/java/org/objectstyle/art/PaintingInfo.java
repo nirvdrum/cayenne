@@ -55,10 +55,8 @@ package org.objectstyle.art;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
-import java.util.*;
-import java.math.BigDecimal;
 import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
 
 
 public class PaintingInfo extends CayenneDataObject {

@@ -55,12 +55,10 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import java.io.InputStream;
-
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.*;
 
 /**
   * ServletConfiguration is a Configuration that uses ServletContext to locate resources. 

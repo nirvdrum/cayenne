@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.util.List;
+import java.util.*;
 
-import junit.framework.TestCase;
+import org.apache.commons.collections.*;
+import org.objectstyle.cayenne.access.*;
 
-import org.apache.commons.collections.ExtendedProperties;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import junit.framework.*;
 
 /**
  * @author Andrei Adamchik

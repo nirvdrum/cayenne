@@ -56,11 +56,9 @@
 
 package org.objectstyle.cayenne.project.validator;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.*;
 
 /** 
  * Used for validating Cayenne projects.

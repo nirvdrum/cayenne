@@ -55,15 +55,22 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.modeler.*;
+import org.objectstyle.cayenne.modeler.CayenneDialog;
+import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.PanelFactory;
 
 /** 
  * Dialog that allows to select schema of the database. 

@@ -65,11 +65,13 @@ import java.util.Iterator;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.modeler.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.modeler.CayenneDialog;
+import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.map.*;
 
 /**
  * Dialog window that alows selecting DbAttributes 

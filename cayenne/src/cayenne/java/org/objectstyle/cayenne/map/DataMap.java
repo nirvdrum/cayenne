@@ -55,17 +55,10 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.util.CayenneMap;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * DataMap is a central class in Cayenne Object Relational mapping design.
@@ -86,7 +79,7 @@ public class DataMap {
 	/** 
 	 * Contains a list of DataMaps that are used by this map.
 	 */
-	protected ArrayList dependencies = new ArrayList();
+	protected List dependencies = new ArrayList();
 
 	/** 
 	 * ObjEntities representing the data object classes.
@@ -288,7 +281,7 @@ public class DataMap {
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
 	 */
 	public List getObjEntitiesAsList(boolean includeDeps) {
-		ArrayList ents = new ArrayList(objEntityMap.values());
+		List ents = new ArrayList(objEntityMap.values());
 
 		if (includeDeps) {
 			Iterator it = dependencies.iterator();
@@ -313,7 +306,7 @@ public class DataMap {
 	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
 	 */
 	public List getDbEntitiesAsList(boolean includeDeps) {
-		ArrayList ents = new ArrayList(dbEntityMap.values());
+		List ents = new ArrayList(dbEntityMap.values());
 
 		if (includeDeps) {
 			Iterator it = dependencies.iterator();
@@ -330,7 +323,7 @@ public class DataMap {
 	 * Returns a list of DbEntity names.
 	 */
 	public List getDbEntityNames(boolean includeDeps) {
-		ArrayList ents = new ArrayList(dbEntityMap.keySet());
+		List ents = new ArrayList(dbEntityMap.keySet());
 
 		if (includeDeps) {
 			Iterator it = dependencies.iterator();
@@ -397,7 +390,7 @@ public class DataMap {
 	 * Returns a list of ObjEntities mapped to this DbEntity.
 	 */
 	public List getMappedEntities(DbEntity dbEntity) {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 
 		if (dbEntity == null) {
 			return null;

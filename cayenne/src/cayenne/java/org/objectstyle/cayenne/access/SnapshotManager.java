@@ -55,20 +55,11 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * SnapshotManager handles snapshot (data row) operations on objects.
@@ -202,7 +193,7 @@ public class SnapshotManager {
      * Takes a snapshot of current object state. 
      */
     public Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
-        HashMap map = new HashMap();
+        Map map = new HashMap();
 
         Map attrMap = ent.getAttributeMap();
         Iterator it = attrMap.keySet().iterator();

@@ -1,6 +1,6 @@
 package cayenne.tutorial.tapestry.domain;
 
-import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.*;
 
 /**
  * @author Eric Schneider

@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.access.trans.*;
 
 public class DefaultResultIteratorTst extends IteratorTestBase {
     protected DefaultResultIterator it;

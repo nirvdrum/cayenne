@@ -56,7 +56,7 @@
  
 package org.objectstyle.cayenne.project;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.*;
 
 /**
  * Runtime exception thrown on various errors within project model.

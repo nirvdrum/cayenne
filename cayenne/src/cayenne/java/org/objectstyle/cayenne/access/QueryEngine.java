@@ -55,10 +55,10 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 
 /** 

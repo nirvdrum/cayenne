@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** For managing the changes in the DbRelationship. */
 public interface DbRelationshipListener extends EventListener
@@ -69,3 +68,4 @@ public interface DbRelationshipListener extends EventListener
 	public void dbRelationshipRemoved(RelationshipEvent e);
 	
 }
+

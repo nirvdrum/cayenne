@@ -55,19 +55,13 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import java.io.File;
-import java.sql.Types;
+import java.io.*;
+import java.sql.*;
 
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.project.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik

@@ -55,10 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
+
+import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik

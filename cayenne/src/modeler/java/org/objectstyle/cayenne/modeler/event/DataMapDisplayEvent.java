@@ -55,11 +55,9 @@ package org.objectstyle.cayenne.modeler.event;
  *
  */
 
-import java.util.*;
-
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * Represents a display event of a DataMap.

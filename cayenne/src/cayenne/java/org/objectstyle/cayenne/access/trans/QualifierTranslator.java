@@ -55,18 +55,12 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.Iterator;
-import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionTraversal;
-import org.objectstyle.cayenne.exp.TraversalHandler;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.QualifiedQuery;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** Translates query qualifier to SQL. Used as a helper
  *  class by query translators. */

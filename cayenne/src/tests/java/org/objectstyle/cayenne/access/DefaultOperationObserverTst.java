@@ -56,10 +56,9 @@
 
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Level;
-
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik

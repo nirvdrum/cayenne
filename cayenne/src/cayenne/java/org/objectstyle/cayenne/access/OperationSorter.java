@@ -56,12 +56,11 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.*;
-import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * Class provides a set of sorting utilities for Cayenne.
@@ -81,7 +80,7 @@ public class OperationSorter {
 	
 	/** Creates new OperationSorter based on all entities in DataMap array*/
 	public OperationSorter(QueryEngine queryEngine, DataMap[] maps) {
-		ArrayList entities = new ArrayList();
+		List entities = new ArrayList();
 		int len = (maps == null) ? 0 : maps.length;
 
 		// copy all entities to the list ignoring the order

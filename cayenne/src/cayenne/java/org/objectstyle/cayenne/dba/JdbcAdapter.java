@@ -56,13 +56,13 @@
 
 package org.objectstyle.cayenne.dba;
 
-import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.access.trans.*;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.access.types.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.*;
 

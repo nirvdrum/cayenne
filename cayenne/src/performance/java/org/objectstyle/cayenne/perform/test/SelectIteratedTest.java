@@ -55,9 +55,7 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
-import java.util.List;
-
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * @author Andrei Adamchik

@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.Entity;
 
 /** 
  * Wrapper for Entity. 

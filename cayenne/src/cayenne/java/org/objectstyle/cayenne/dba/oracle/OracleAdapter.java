@@ -56,25 +56,21 @@
 
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.Types;
-import java.util.HashMap;
-import org.apache.log4j.Logger;
+import java.sql.*;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.access.types.CharType;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
 public class OracleAdapter extends JdbcAdapter {
     static Logger logObj = Logger.getLogger(OracleAdapter.class.getName());
 
-    protected HashMap sorters = new HashMap();
+    protected Map sorters = new HashMap();
 
     public OracleAdapter() {
         super();

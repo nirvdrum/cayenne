@@ -55,20 +55,12 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * DataDomain is Cayenne "router". It has zero or more DataNodes that work
@@ -186,7 +178,7 @@ public class DataDomain implements QueryEngine {
 
 	/** Returns a list of registered DataMap objects. */
 	public List getMapList() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 
 		synchronized (maps) {
 			Iterator it = maps.keySet().iterator();
@@ -202,7 +194,7 @@ public class DataDomain implements QueryEngine {
 	 * List is returned by copy.
 	 */
 	public List getDataNodeList() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 
 		synchronized (dataNodes) {
 			Iterator it = dataNodes.keySet().iterator();
@@ -395,7 +387,7 @@ public class DataDomain implements QueryEngine {
 	/** Analyzes each query and sends it to appropriate DataNode for execution. */
 	public void performQueries(List queries, OperationObserver resultCons) {
 		Iterator it = queries.iterator();
-		HashMap queryMap = new HashMap();
+		Map queryMap = new HashMap();
 		// organize queries by node
 		while (it.hasNext()) {
 			Query nextQ = (Query) it.next();
@@ -406,7 +398,7 @@ public class DataDomain implements QueryEngine {
 					"No suitable DataNode to handle entity '" + dbe.getName() + "'.");
 			}
 
-			ArrayList nodeQueries = (ArrayList) queryMap.get(aNode);
+			List nodeQueries = (List) queryMap.get(aNode);
 			if (nodeQueries == null) {
 				nodeQueries = new ArrayList();
 				queryMap.put(aNode, nodeQueries);

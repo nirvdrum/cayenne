@@ -55,9 +55,10 @@ package org.objectstyle.cayenne.modeler;
  *
  */ 
 
-import javax.swing.event.ListDataListener;
-import javax.swing.*;
-import java.util.*;
+import java.util.List;
+
+import javax.swing.AbstractListModel;
+import javax.swing.ListModel;
 
 /**
  * @author Andriy Shapochka

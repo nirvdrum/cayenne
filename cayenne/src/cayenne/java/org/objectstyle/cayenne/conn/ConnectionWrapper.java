@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conn;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,16 +53,10 @@ package org.objectstyle.cayenne.conn;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conn;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 /**
  * <p>ConnectionWrapper is a <code>java.sql.Connection</code> implementation that 

@@ -59,9 +59,9 @@ package org.objectstyle.cayenne.modeler.validator;
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**

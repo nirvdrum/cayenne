@@ -56,24 +56,17 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import javax.sql.DataSource;
+import javax.sql.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
@@ -154,7 +147,7 @@ public class DataNode implements QueryEngine {
      * @deprecated Use setDataMaps(List) instead.
      */
     public void setDataMaps(DataMap[] dataMaps) {
-        ArrayList mapsList = new ArrayList();
+        List mapsList = new ArrayList();
 
         if (dataMaps != null) {
             for (int i = 0; i < dataMaps.length; i++) {
@@ -420,7 +413,7 @@ public class DataNode implements QueryEngine {
     }
 
     public void performQuery(Query query, OperationObserver opObserver) {
-        ArrayList qWrapper = new ArrayList(1);
+        List qWrapper = new ArrayList(1);
         qWrapper.add(query);
         this.performQueries(qWrapper, opObserver);
     }

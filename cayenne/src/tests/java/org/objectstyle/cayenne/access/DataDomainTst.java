@@ -55,10 +55,8 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * DataDomain unit tests.

@@ -55,17 +55,12 @@ package org.objectstyle.cayenne.access.trans;
  *
  */
 
-import java.sql.Connection;
-import java.util.Iterator;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.UpdateQuery;
+import org.objectstyle.cayenne.query.*;
 
 /** Class implements default translation mechanism of 
   * org.objectstyle.cayenne.query.UpdateQuery

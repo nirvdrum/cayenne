@@ -55,14 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.KeyStroke;
+import java.util.List;
 
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -88,7 +84,7 @@ public class ModelerUtil {
      * current ObjEntity. 
      */
     public static String[] getDbAttributeNames(EventController mediator, DbEntity entity) {
-        java.util.List list = entity.getAttributeList();
+        List list = entity.getAttributeList();
         int list_size = list.size() + 1;
         String[] arr = new String[list_size];
         arr[0] = "";
@@ -103,7 +99,7 @@ public class ModelerUtil {
 
     public static String[] getRegisteredTypeNames() {
         Iterator it = DefaultType.defaultTypes();
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         while (it.hasNext()) {
             list.add(it.next());
         }

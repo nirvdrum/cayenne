@@ -55,15 +55,14 @@
  */ 
 package org.objectstyle.cayenne.modeler.datamap;
 
-import java.util.*;
-import javax.swing.*;
-import javax.swing.table.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
+import javax.swing.table.AbstractTableModel;
+
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.*;
+import org.objectstyle.cayenne.modeler.control.EventController;
 
 
 /** Model for editing DbAttributePair-s. Changes in the join attributes

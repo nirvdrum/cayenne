@@ -55,12 +55,9 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 
-import org.apache.commons.collections.FastTreeMap;
+import org.apache.commons.collections.*;
 
 /**
  * A <code>CayenneMap</code> is a specialized double-linked 

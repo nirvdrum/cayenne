@@ -55,11 +55,9 @@
  */ 
 package org.objectstyle.cayenne.exp;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.*;
 
 
 public class ExpressionFactoryExtrasTst extends CayenneTestCase {
@@ -98,7 +96,7 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
         
         // check for N in (1..3)
         for(int n = 1; n <= 3; n++) {
-            HashMap map = new HashMap();
+            Map map = new HashMap();
             
             // populate map
             for(int i = 1; i <= n; i++) {

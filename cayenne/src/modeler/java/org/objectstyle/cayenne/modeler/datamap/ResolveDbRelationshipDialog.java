@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -64,12 +67,14 @@ import java.util.Iterator;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.modeler.*;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.util.*;
-import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.modeler.CayenneDialog;
+import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** 

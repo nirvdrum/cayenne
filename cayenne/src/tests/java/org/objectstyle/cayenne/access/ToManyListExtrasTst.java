@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik

@@ -56,17 +56,17 @@ package org.objectstyle.cayenne.modeler;
  */ 
 
 
-import java.awt.*;
-import java.util.*;
-import java.awt.event.*;
+import java.awt.Component;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.*;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DomainEvent;
 
 /** 
  * Detail view of the Data Domain

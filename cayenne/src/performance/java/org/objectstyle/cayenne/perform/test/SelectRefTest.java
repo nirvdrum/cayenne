@@ -57,10 +57,10 @@
 package org.objectstyle.cayenne.perform.test;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.perform.CayennePerformanceTest;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.perform.*;
 
 /**
  * @author Andrei Adamchik
@@ -94,7 +94,7 @@ public class SelectRefTest extends CayennePerformanceTest {
 						"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST");
 
 				try {
-					ArrayList artists = new ArrayList();
+					List artists = new ArrayList();
 					while (rs.next()) {
 						Artist artist = new Artist();
 						artist.setArtistName(rs.getString(2));

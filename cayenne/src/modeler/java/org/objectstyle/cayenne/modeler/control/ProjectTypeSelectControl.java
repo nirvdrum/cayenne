@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler.control;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
-import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.view.ProjectTypeSelectDialog;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;

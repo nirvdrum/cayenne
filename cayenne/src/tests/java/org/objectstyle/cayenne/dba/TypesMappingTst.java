@@ -56,8 +56,7 @@
 package org.objectstyle.cayenne.dba;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 public class TypesMappingTst extends TypesMappingBase {
 
@@ -108,7 +107,7 @@ public class TypesMappingTst extends TypesMappingBase {
         TypesMapping map = createTypesMapping();
         Iterator it = map.databaseTypes.keySet().iterator();
         while (it.hasNext()) {
-            ArrayList vals = (ArrayList) map.databaseTypes.get(it.next());
+            List vals = (List) map.databaseTypes.get(it.next());
             actualLen += vals.size();
         }
 

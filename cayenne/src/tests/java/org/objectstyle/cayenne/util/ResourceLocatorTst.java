@@ -55,11 +55,9 @@ package org.objectstyle.cayenne.util;
  *
  */
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStream;
+import java.io.*;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.*;
 
 public class ResourceLocatorTst extends CayenneTestCase {
     private File fTmpFileInCurrentDir;

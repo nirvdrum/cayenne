@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.dba;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class PkGeneratorTst extends CayenneTestCase {
     protected PkGenerator pkGen;
@@ -76,13 +76,13 @@ public class PkGeneratorTst extends CayenneTestCase {
         node = getDomain().getDataNodes()[0];
         pkGen = node.getAdapter().getPkGenerator();
         paintEnt = node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         list.add(paintEnt);
         pkGen.createAutoPk(node, list);
     }
 
     public void testGeneratePkForDbEntity() throws java.lang.Exception {
-        ArrayList pkList = new ArrayList();
+        List pkList = new ArrayList();
 
         for (int i = 0; i < 6; i++) {
             Object pk = pkGen.generatePkForDbEntity(node, paintEnt);

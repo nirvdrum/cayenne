@@ -55,19 +55,10 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.*;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -140,9 +131,7 @@ public class ObjectStore implements Serializable {
      * List is returned by copy and can be modified by the caller.
      */
     public synchronized List getObjects() {
-        ArrayList registered = null;
-        registered = new ArrayList(objectMap.values());
-        return registered;
+        return new ArrayList(objectMap.values());
     }
 
     /**
@@ -185,7 +174,7 @@ public class ObjectStore implements Serializable {
      * copy.
      */
     public synchronized List objectsInState(int state) {
-        ArrayList filteredObjects = new ArrayList();
+        List filteredObjects = new ArrayList();
 
         Iterator it = objectMap.values().iterator();
         while (it.hasNext()) {

@@ -55,13 +55,12 @@ package org.objectstyle.cayenne;
  *
  */
 
-import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.*;
 
+import org.apache.log4j.*;
 import org.objectstyle.art.*;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
 
 public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 	static Logger logObj = Logger.getLogger(CayenneDataObjectRelTst.class.getName());

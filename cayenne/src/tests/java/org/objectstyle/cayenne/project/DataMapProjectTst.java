@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.util.Iterator;
+import java.io.*;
+import java.util.*;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik

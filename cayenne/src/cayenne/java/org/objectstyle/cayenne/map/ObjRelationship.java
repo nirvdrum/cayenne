@@ -55,12 +55,9 @@
  */ 
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.*;
 
 /** Metadata for the navigational association between the data objects.
  *  For example, if class "Employee" you may need to get to the department
@@ -129,7 +126,7 @@ public class ObjRelationship extends Relationship {
         Entity src = getSourceEntity();
 
         // reverse the list
-        ArrayList reversed = new ArrayList();
+        List reversed = new ArrayList();
         Iterator rit = getDbRelationshipList().iterator();
         while(rit.hasNext()) {
             DbRelationship rel = (DbRelationship)rit.next();

@@ -55,17 +55,13 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.sql.Types;
-import java.util.Iterator;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class DbLoaderTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());

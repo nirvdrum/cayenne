@@ -55,14 +55,11 @@ package org.objectstyle.cayenne.util;
  *
  */ 
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import org.apache.log4j.Logger;
+import java.io.*;
+import java.net.*;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.unittest.*;
 
 
 public class UtilTst extends CayenneTestCase {

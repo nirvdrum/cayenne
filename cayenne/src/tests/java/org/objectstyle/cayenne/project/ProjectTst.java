@@ -55,19 +55,12 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.project.validator.Validator;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.project.validator.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik
@@ -106,7 +99,7 @@ public class ProjectTst extends CayenneTestCase {
     }
 
     public void testProcessSave() throws Exception {
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         SaveEmulator file = new SaveEmulator(false);
         list.add(file);
         list.add(file);
@@ -118,7 +111,7 @@ public class ProjectTst extends CayenneTestCase {
     }
 
     public void testProcessSaveFail() throws Exception {
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         SaveEmulator file = new SaveEmulator(true);
         list.add(file);
 

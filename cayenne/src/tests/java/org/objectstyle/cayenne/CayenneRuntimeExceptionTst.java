@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 
 import org.objectstyle.cayenne.unittest.*;
 

@@ -56,14 +56,12 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.SelectObserver;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.util.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * DataNode test cases.

@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.HashMap;
+import java.util.*;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik
@@ -93,7 +93,7 @@ public class CayenneMapTst extends CayenneTestCase {
 	public void testConstructor1() throws Exception {
 		Object o1 = new Object();
 		String k1 = "123";
-		HashMap map = new HashMap();
+		Map map = new HashMap();
 		map.put(k1, o1);
 		CayenneMap cm = new CayenneMap(null, map);
 		assertSame(o1, cm.get(k1));
@@ -103,7 +103,7 @@ public class CayenneMapTst extends CayenneTestCase {
 		Object parent = new Object();
 		CayenneMapEntry o1 = makeEntry();
 		String k1 = "123";
-		HashMap map = new HashMap();
+		Map map = new HashMap();
 		map.put(k1, o1);
 		CayenneMap cm = new CayenneMap(parent, map);
 		assertSame(o1, cm.get(k1));

@@ -55,14 +55,12 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * Translates query ordering to SQL. 

@@ -56,50 +56,17 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.QueryHelper;
-import org.objectstyle.cayenne.TempObjectId;
-import org.objectstyle.cayenne.access.util.ContextCommitObserver;
-import org.objectstyle.cayenne.access.util.ContextSelectObserver;
-import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
-import org.objectstyle.cayenne.access.util.RelationshipDataSource;
-import org.objectstyle.cayenne.access.util.SelectObserver;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
-import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
-import org.objectstyle.cayenne.util.Util;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.util.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** User-level Cayenne access class. Provides isolated object view of 
   * the datasource to the application code. Normal use pattern is to 
@@ -112,8 +79,8 @@ import org.objectstyle.cayenne.util.Util;
   */
 public class DataContext implements QueryEngine, Serializable {
     static Logger logObj = Logger.getLogger(DataContext.class.getName());
-	private HashMap flattenedInserts = new HashMap();
-	private HashMap flattenedDeletes = new HashMap();
+	private Map flattenedInserts = new HashMap();
+	private Map flattenedDeletes = new HashMap();
 
     protected transient QueryEngine parent;
     protected transient ObjectStore objectStore;
@@ -476,12 +443,12 @@ public class DataContext implements QueryEngine, Serializable {
      * set for QueryLogger, statements execution will be logged. 
      */
     public void commitChanges(Level logLevel) throws CayenneRuntimeException {
-        ArrayList queryList = new ArrayList();
-        ArrayList rawUpdObjects = new ArrayList();
-        ArrayList updObjects = new ArrayList();
-        ArrayList delObjects = new ArrayList();
-        ArrayList insObjects = new ArrayList();
-        HashMap updatedIds = new HashMap();
+        List queryList = new ArrayList();
+        List rawUpdObjects = new ArrayList();
+        List updObjects = new ArrayList();
+        List delObjects = new ArrayList();
+        List insObjects = new ArrayList();
+        Map updatedIds = new HashMap();
 
         synchronized (objectStore) {
             Iterator it = objectStore.getObjectIterator();
@@ -694,7 +661,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         int prefetchSize = prefetches.size();
         int objectsSize = objects.size();
-        ArrayList queries = new ArrayList(prefetchSize);
+        List queries = new ArrayList(prefetchSize);
         ObjEntity oe = this.getEntityResolver().lookupObjEntity(query);
 
         for (int i = 0; i < prefetchSize; i++) {
@@ -706,7 +673,7 @@ public class DataContext implements QueryEngine, Serializable {
                         + prefetchKey);
             }
 
-            ArrayList needPrefetch = new ArrayList();
+            List needPrefetch = new ArrayList();
             for (int j = 0; j < objectsSize; j++) {
                 CayenneDataObject obj = (CayenneDataObject) objects.get(j);
                 Object dest = obj.readNestedProperty(prefetchKey);
@@ -758,7 +725,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     /** Delegates query execution to parent QueryEngine. */
     public void performQuery(Query query, OperationObserver resultConsumer) {
-        ArrayList qWrapper = new ArrayList(1);
+        List qWrapper = new ArrayList(1);
         qWrapper.add(query);
         this.performQueries(qWrapper, resultConsumer);
     }
@@ -781,7 +748,7 @@ public class DataContext implements QueryEngine, Serializable {
         Map updAttrs = upd.getUpdAttributes();
         Iterator it = updAttrs.keySet().iterator();
 
-        HashMap newIdMap = null;
+        Map newIdMap = null;
         while (it.hasNext()) {
             Object key = it.next();
             if (!idMap.containsKey(key))
@@ -886,7 +853,7 @@ public class DataContext implements QueryEngine, Serializable {
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = parent.dataNodeForObjEntity(objEntity);
 
-        HashMap idMap = new HashMap();
+        Map idMap = new HashMap();
         // first get values delivered via relationships
         appendPkFromMasterRelationships(idMap, anObject);
 
@@ -1003,8 +970,8 @@ public class DataContext implements QueryEngine, Serializable {
    	
    	public void registerFlattenedRelationshipInsert(DataObject source, String relName, DataObject destination) {
 		//Register this combination (so we can remove it later if an insert occurs before commit)
-		HashMap insertsForObject = (HashMap) flattenedInserts.get(source);
-		HashMap deletesForObject = (HashMap) flattenedDeletes.get(source);
+		Map insertsForObject = (Map) flattenedInserts.get(source);
+		Map deletesForObject = (Map) flattenedDeletes.get(source);
 
 		List insertedObjsForRel = (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
 		List deletedObjsForRel = (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
@@ -1027,8 +994,8 @@ public class DataContext implements QueryEngine, Serializable {
 
 	public void registerFlattenedRelationshipDelete(DataObject source, String relName, DataObject destination) {
 		//Register this combination (so we can remove it later if an insert occurs before commit)
-		HashMap insertsForObject = (HashMap) flattenedInserts.get(source);
-		HashMap deletesForObject = (HashMap) flattenedDeletes.get(source);
+		Map insertsForObject = (Map) flattenedInserts.get(source);
+		Map deletesForObject = (Map) flattenedDeletes.get(source);
 
 		List insertedObjsForRel = (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
 		List deletedObjsForRel = (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
@@ -1055,14 +1022,14 @@ public class DataContext implements QueryEngine, Serializable {
 	 * @return List a list of Query objects to be performed
 	 */
 	public List getFlattenedUpdateQueries() {
-		ArrayList result=new ArrayList();
+		List result=new ArrayList();
 		int i;
 		Iterator objectIterator;
 		
 		objectIterator=flattenedInserts.keySet().iterator();
 		while(objectIterator.hasNext()) {
 			DataObject sourceObject=(DataObject)objectIterator.next();
-			HashMap insertsForObject=(HashMap)flattenedInserts.get(sourceObject);
+			Map insertsForObject=(Map)flattenedInserts.get(sourceObject);
 			Iterator relNameIterator=insertsForObject.keySet().iterator();
 			while(relNameIterator.hasNext()) {
 				String relName=(String)relNameIterator.next();
@@ -1076,7 +1043,7 @@ public class DataContext implements QueryEngine, Serializable {
 		objectIterator=flattenedDeletes.keySet().iterator();
 		while(objectIterator.hasNext()) {
 			DataObject sourceObject=(DataObject)objectIterator.next();
-			HashMap deletesForObject=(HashMap)flattenedDeletes.get(sourceObject);
+			Map deletesForObject=(Map)flattenedDeletes.get(sourceObject);
 			Iterator relNameIterator=deletesForObject.keySet().iterator();
 			while(relNameIterator.hasNext()) {
 				String relName=(String)relNameIterator.next();

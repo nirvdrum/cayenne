@@ -55,10 +55,10 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
 
 /** Describes insert database operation.
  * InsertQuery is initialized with object values snapshot and ObjectId. */

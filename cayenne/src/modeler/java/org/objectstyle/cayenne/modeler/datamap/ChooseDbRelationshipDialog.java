@@ -60,18 +60,9 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -113,7 +104,7 @@ implements ActionListener {
 	private DbEntity start;
 	private DbEntity end;
 	private List dbRels;
-	private ArrayList relList = new ArrayList();
+	private List relList = new ArrayList();
 	
 	JComboBox relSelect	= new JComboBox();
 	JButton select		= new JButton("Select");
@@ -246,7 +237,7 @@ implements ActionListener {
 	public java.util.List getDbRelationshipList() {
 		if (getChoice() != SELECT && getChoice() != EDIT)
 			return null;
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		if (dbRels != null)
 			list.addAll(dbRels);
 		return list;

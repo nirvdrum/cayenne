@@ -55,17 +55,11 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.util.CayenneMap;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.util.*;
 
 /** 
  * An Entity is an abstract descriptor for an entity mapping concept.
@@ -150,7 +144,7 @@ public abstract class Entity extends MapObject {
 
 	/** Returns a list of Relationship's that exist in this entity. */
 	public List getRelationshipList() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = relationships.keySet().iterator();
 		while (it.hasNext()) {
 			list.add(relationships.get(it.next()));
@@ -166,7 +160,7 @@ public abstract class Entity extends MapObject {
 
 	/** Returns entity attributes as a list. */
 	public List getAttributeList() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = attributes.keySet().iterator();
 		while (it.hasNext()) {
 			list.add(attributes.get(it.next()));

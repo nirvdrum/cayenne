@@ -55,13 +55,12 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import org.apache.log4j.Logger;
+import java.sql.*;
 
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.dba.*;
 
 /**
  * ResultIterator that supports fetch limit.

@@ -55,19 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * A CayenneDataObject is a default implementation of DataObject interface.
@@ -108,7 +102,7 @@ public class CayenneDataObject implements DataObject {
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
     protected transient DataContext dataContext;
-    protected HashMap props = new HashMap();
+    protected Map props = new HashMap();
 
     /** Returns a data context this object is registered with, or null
      * if this object has no associated DataContext */
@@ -437,7 +431,7 @@ public class CayenneDataObject implements DataObject {
             case PersistenceState.TRANSIENT :
             case PersistenceState.NEW :
             case PersistenceState.MODIFIED :
-                props = (HashMap) in.readObject();
+                props = (Map) in.readObject();
                 break;
             case PersistenceState.COMMITTED :
             case PersistenceState.HOLLOW :

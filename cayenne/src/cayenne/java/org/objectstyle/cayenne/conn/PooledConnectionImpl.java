@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conn;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,16 +54,14 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
+package org.objectstyle.cayenne.conn;
 
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
-import javax.sql.PooledConnection;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
+import javax.sql.*;
+
+import org.apache.log4j.*;
 
 /**
  * PooledConnectionImpl is an implementation of a pooling wrapper 
@@ -78,7 +75,7 @@ public class PooledConnectionImpl implements PooledConnection {
     static Logger logObj = Logger.getLogger(PooledConnectionImpl.class.getName());
 
     private Connection connectionObj;
-    private ArrayList connectionEventListeners;
+    private List connectionEventListeners;
     private boolean hadErrors;
 
     /** Creates new PooledConnection */

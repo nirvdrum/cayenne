@@ -56,20 +56,19 @@ package org.objectstyle.cayenne;
  */ 
 
 import java.util.*;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
-import junit.framework.Assert;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.query.*;
 
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
-import org.objectstyle.cayenne.query.Query;
+import junit.framework.*;
 
 /** Helper class to process test queries results. */
 public class TestOperationObserver extends DefaultOperationObserver {
     static Logger logObj = Logger.getLogger(TestOperationObserver.class.getName());
     
-    protected HashMap resultObjs = new HashMap();
-    protected HashMap resultCounts = new HashMap();
+    protected Map resultObjs = new HashMap();
+    protected Map resultCounts = new HashMap();
     
     
     public void assertAllExceptions() {
@@ -88,8 +87,8 @@ public class TestOperationObserver extends DefaultOperationObserver {
     }
     
     
-    public ArrayList objectsForQuery(Query q) {
-        return (ArrayList)resultObjs.get(q);
+    public List objectsForQuery(Query q) {
+        return (List)resultObjs.get(q);
     }
     
     

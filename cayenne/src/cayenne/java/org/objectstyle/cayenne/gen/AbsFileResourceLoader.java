@@ -57,9 +57,9 @@ package org.objectstyle.cayenne.gen;
 
 import java.io.*;
 
-import org.apache.commons.collections.ExtendedProperties;
-import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
+import org.apache.commons.collections.*;
+import org.apache.velocity.exception.*;
+import org.apache.velocity.runtime.resource.loader.*;
 
 /**
  * Special resource loader that allows loading files

@@ -57,8 +57,11 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
 
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.map.*;
 
 /**
  * @author Andrei Adamchik

@@ -55,10 +55,9 @@ package org.objectstyle.cayenne.query;
  *
  */
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.*;
 
-import org.objectstyle.art.Artist;
+import org.objectstyle.art.*;
 
 public class SqlModifyQueryInContextTst extends SelectQueryBase {
     private static final int _artistCount = 2;

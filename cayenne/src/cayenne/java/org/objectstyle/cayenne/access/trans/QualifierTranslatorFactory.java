@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.*;
 
 /** 
  * Factory that produces QualifierTranslator objects.

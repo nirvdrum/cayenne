@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.*;
 import java.util.*;
-import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Sequence-based primary key generator implementation for Oracle. 
@@ -102,7 +102,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
 	}
 
 	public List createAutoPkStatements(List dbEntities) {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = dbEntities.iterator();
 		while (it.hasNext()) {
 			DbEntity ent = (DbEntity) it.next();
@@ -126,7 +126,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
 	}
 
 	public List dropAutoPkStatements(List dbEntities) {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = dbEntities.iterator();
 		while (it.hasNext()) {
 			DbEntity ent = (DbEntity) it.next();

@@ -55,27 +55,17 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.math.BigDecimal;
+import java.math.*;
 import java.sql.Connection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.ArtistAssets;
-import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.ArtistPaintingCounts;
-import org.objectstyle.art.Painting;
-import org.objectstyle.art.SubPainting;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class SelectTranslatorTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(SelectTranslatorTst.class.getName());

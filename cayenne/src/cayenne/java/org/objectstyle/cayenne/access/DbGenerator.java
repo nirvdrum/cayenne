@@ -58,13 +58,13 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.*;
 import java.util.*;
-import org.apache.log4j.Level;
 
-import javax.sql.DataSource;
+import javax.sql.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.conn.*;
+import org.objectstyle.cayenne.dba.*;
 import org.objectstyle.cayenne.map.*;
 
 /** Utility class that does forward engineering of the database.
@@ -81,9 +81,9 @@ public class DbGenerator {
 	protected DataNode node;
 	protected DataMap map;
 
-	protected HashMap dropTables;
-	protected HashMap createTables;
-	protected HashMap createFK;
+	protected Map dropTables;
+	protected Map createTables;
+	protected Map createFK;
 	protected List createPK;
 	protected List dropPK;
 
@@ -162,7 +162,7 @@ public class DbGenerator {
 	 * should be executed with the current configuration.
 	 */
 	public List configuredStatements() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		List orderedEnts = dbEntitiesInInsertOrder();
 
 		if (shouldDropTables) {
@@ -320,7 +320,7 @@ public class DbGenerator {
 			throw new CayenneRuntimeException("FK constraints are not supported by adapter.");
 		}
 
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = dbEnt.getRelationshipList().iterator();
 		while (it.hasNext()) {
 			DbRelationship rel = (DbRelationship) it.next();
@@ -341,7 +341,7 @@ public class DbGenerator {
 		// read a list of tables
 		DatabaseMetaData md = con.getMetaData();
 		ResultSet rs = md.getTables(null, null, "%", null);
-		ArrayList tables = new ArrayList();
+		List tables = new ArrayList();
 		try {
 			while (rs.next()) {
 				tables.add(rs.getString("TABLE_NAME").toLowerCase());
@@ -351,7 +351,7 @@ public class DbGenerator {
 		}
 
 		// find tables that are in the map but not in the database
-		ArrayList missing = new ArrayList();
+		List missing = new ArrayList();
 		Iterator it = map.getDbEntitiesAsList().iterator();
 		while (it.hasNext()) {
 			DbEntity e = (DbEntity) it.next();

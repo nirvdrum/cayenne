@@ -55,15 +55,11 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.exp.*;
 
 public class SelectQueryTst extends SelectQueryBase {
     private static final int _artistCount = 20;
@@ -78,7 +74,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(7, objects.size());
     }
@@ -88,7 +84,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -98,7 +94,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -109,7 +105,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -124,7 +120,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(1, objects.size());
     }
@@ -141,7 +137,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -158,7 +154,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        ArrayList objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }

@@ -56,11 +56,8 @@
 
 package org.objectstyle.cayenne.query;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class SelectQueryBasicsTst extends CayenneTestCase {
     protected SelectQuery q;

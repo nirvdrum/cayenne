@@ -55,13 +55,9 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.*;
 
 /**
  * A DbRelationship is a descriptor of a database inter-table relationship
@@ -210,7 +206,7 @@ public class DbRelationship extends Relationship {
 		if (isToMany())
 			throw new CayenneRuntimeException("Only 'to one' relationships support this method.");
 
-		HashMap idMap = new HashMap();
+		Map idMap = new HashMap();
 		int len = joins.size();
 		int nulls = 0;
 		for (int i = 0; i < len; i++) {
@@ -242,7 +238,7 @@ public class DbRelationship extends Relationship {
 		if (isToMany())
 			throw new CayenneRuntimeException("Only 'to one' relationships support this method.");
 
-		HashMap idMap = new HashMap();
+		Map idMap = new HashMap();
 		int len = joins.size();
 		for (int i = 0; i < len; i++) {
 			DbAttributePair join = (DbAttributePair) joins.get(i);

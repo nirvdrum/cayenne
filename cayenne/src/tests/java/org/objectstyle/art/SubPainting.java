@@ -55,7 +55,7 @@ package org.objectstyle.art;
  *
  */ 
 
-import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.*;
 
 public class SubPainting extends CayenneDataObject {
     public void setPaintingTitle(String paintingTitle) {

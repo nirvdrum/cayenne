@@ -304,7 +304,7 @@ public class TypesMapping {
             }
         }
 
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         for (int i = 0; i < len; i++) {
             if (maxPrec == alts[i].precision) {
                 list.add(alts[i]);
@@ -364,7 +364,7 @@ public class TypesMapping {
     // non-static code
     // *************************************************************
 
-    protected HashMap databaseTypes = new HashMap();
+    protected Map databaseTypes = new HashMap();
 
     public TypesMapping(DatabaseMetaData metaData) throws SQLException {
         // map database types to standard JDBC types
@@ -378,7 +378,7 @@ public class TypesMapping {
                 info.precision = rs.getLong("PRECISION");
 
                 Integer key = new Integer(info.jdbcType);
-                ArrayList infos = (ArrayList) databaseTypes.get(key);
+                List infos = (List) databaseTypes.get(key);
 
                 if (infos == null) {
                     infos = new ArrayList();
@@ -397,8 +397,8 @@ public class TypesMapping {
         // 1. swap TIMESTAMP - DATE
         Integer ts = new Integer(Types.TIMESTAMP);
         Integer dt = new Integer(Types.DATE);
-        ArrayList tsInfo = (ArrayList) databaseTypes.get(ts);
-        ArrayList dtInfo = (ArrayList) databaseTypes.get(dt);
+        List tsInfo = (List) databaseTypes.get(ts);
+        List dtInfo = (List) databaseTypes.get(dt);
 
         if (tsInfo != null && dtInfo == null)
             databaseTypes.put(dt, tsInfo);
@@ -409,8 +409,8 @@ public class TypesMapping {
         // 2. Swap CLOB - LONGVARCHAR
         Integer clob = new Integer(Types.CLOB);
         Integer lvc = new Integer(Types.LONGVARCHAR);
-        ArrayList clobInfo = (ArrayList) databaseTypes.get(clob);
-        ArrayList lvcInfo = (ArrayList) databaseTypes.get(lvc);
+        List clobInfo = (List) databaseTypes.get(clob);
+        List lvcInfo = (List) databaseTypes.get(lvc);
 
         if (clobInfo != null && lvcInfo == null)
             databaseTypes.put(lvc, clobInfo);
@@ -421,8 +421,8 @@ public class TypesMapping {
         // 2. Swap BLOB - LONGVARBINARY
         Integer blob = new Integer(Types.BLOB);
         Integer lvb = new Integer(Types.LONGVARBINARY);
-        ArrayList blobInfo = (ArrayList) databaseTypes.get(blob);
-        ArrayList lvbInfo = (ArrayList) databaseTypes.get(lvb);
+        List blobInfo = (List) databaseTypes.get(blob);
+        List lvbInfo = (List) databaseTypes.get(lvb);
 
         if (blobInfo != null && lvbInfo == null)
             databaseTypes.put(lvb, blobInfo);
@@ -434,7 +434,7 @@ public class TypesMapping {
     /** Returns name of data type in a database described by this object corresponding
      *  to a standard JDBC data type defined in java.sql.Types */
     public String[] getDatabaseTypes(int jdbcType) {
-        ArrayList infos = (ArrayList) databaseTypes.get(new Integer(jdbcType));
+        List infos = (List) databaseTypes.get(new Integer(jdbcType));
         if (infos == null || infos.size() == 0)
             return emptyArray;
 
@@ -453,7 +453,7 @@ public class TypesMapping {
         if (jdbcType == NOT_DEFINED)
             return null;
 
-        ArrayList alts = (ArrayList) databaseTypes.get(new Integer(jdbcType));
+        List alts = (List) databaseTypes.get(new Integer(jdbcType));
         if (alts == null)
             return null;
 

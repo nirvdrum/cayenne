@@ -55,7 +55,7 @@ package org.objectstyle.art;
  *
  */ 
 
-import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.*;
 
 /**
  * This class exists solely to enable testing of arbitrary superclasses for ObjEntities.  

@@ -55,13 +55,9 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.*;
 
 /** 
  * ObjEntity is a mapping descriptor for a DataObject Java class. 
@@ -162,7 +158,7 @@ public class ObjEntity extends Entity {
 	 * CayenneRuntimeException is thrown. 
 	 */
 	public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-		HashMap idMap = new HashMap();
+		Map idMap = new HashMap();
 		Iterator it = getDbEntity().getPrimaryKey().iterator();
 		while (it.hasNext()) {
 			DbAttribute attr = (DbAttribute) it.next();

@@ -55,37 +55,19 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-import javax.sql.DataSource;
+import javax.sql.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DataMapException;
-import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.util.AbstractHandler;
-import org.objectstyle.cayenne.util.Util;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.project.*;
+import org.objectstyle.cayenne.util.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 /**
  * Assists Configuration object in loading DataDomain configuration files.
@@ -109,11 +91,11 @@ public class DomainHelper {
 	private MapLoader loader;
 	private XMLReader parser;
 	private Locator locator;
-	private ArrayList domains;
-	private HashMap failedMaps;
-	private HashMap failedAdapters;
-	private HashMap failedDataSources;
-	private ArrayList failedMapRefs;
+	private List domains;
+	private Map failedMaps;
+	private Map failedAdapters;
+	private Map failedDataSources;
+	private List failedMapRefs;
 
 	/** 
 	 * If set, <code>factory</code> will override
@@ -496,7 +478,7 @@ public class DomainHelper {
 
 	private class MapHandler extends AbstractHandler {
 		protected DataDomain domain;
-		protected ArrayList depMaps = new ArrayList();
+		protected List depMaps = new ArrayList();
 		protected String mapName;
 		protected String location;
 

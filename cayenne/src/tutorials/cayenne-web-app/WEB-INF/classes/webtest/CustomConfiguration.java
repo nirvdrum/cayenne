@@ -1,8 +1,7 @@
 package webtest;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.conf.*;
 
 /** 
  * Special subclass of ServletConfiguration that enables 

@@ -60,20 +60,21 @@ import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.io.File;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DataMapEvent;
 import org.objectstyle.cayenne.modeler.util.EOModelFileFilter;
 import org.objectstyle.cayenne.modeler.util.EOModelSelectFilter;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 
 /**

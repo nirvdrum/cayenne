@@ -55,12 +55,11 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
 
 /**
  * Describes a database SELECT statement in object terms.
@@ -76,9 +75,9 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
 
-	protected ArrayList custDbAttributes = new ArrayList();
-	protected ArrayList orderings = new ArrayList();
-	protected ArrayList prefetches = new ArrayList();
+	protected List custDbAttributes = new ArrayList();
+	protected List orderings = new ArrayList();
+	protected List prefetches = new ArrayList();
 	protected boolean distinct;
 	protected boolean fetchingDataRows;
 	protected int fetchLimit;

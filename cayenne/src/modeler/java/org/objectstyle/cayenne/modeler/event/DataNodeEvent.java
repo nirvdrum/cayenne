@@ -55,9 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.event;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataNode;
 
 /** 
  * Represents events resulted from DataNode changes 

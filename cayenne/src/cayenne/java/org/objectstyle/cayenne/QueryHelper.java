@@ -55,28 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.exp.ExpressionTraversal;
-import org.objectstyle.cayenne.exp.TraversalHelper;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.query.DeleteQuery;
-import org.objectstyle.cayenne.query.InsertQuery;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.UpdateQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * Implements helper methods that perform different query-related operations.
@@ -298,8 +283,8 @@ public final class QueryHelper {
 	}
 
 	static final class ExpressionTranslator extends TraversalHelper {
-		protected HashMap expMap = new HashMap();
-		protected HashMap expFill = new HashMap();
+		protected Map expMap = new HashMap();
+		protected Map expFill = new HashMap();
 		protected String relPath;
 		protected String relDbPath;
 		protected String prependObjPath;

@@ -56,32 +56,19 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.*;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.ArtistAssets;
-import org.objectstyle.art.Gallery;
-import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TestOperationObserver;
-import org.objectstyle.cayenne.access.util.SelectObserver;
-import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
+import org.apache.log4j.*;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.util.*;
+import org.objectstyle.cayenne.conn.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class DataContextTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
@@ -386,17 +373,17 @@ public class DataContextTst extends CayenneTestCase {
 		SelectQuery q2 = new SelectQuery();
 		q2.setRoot(Gallery.class);
 
-		ArrayList qs = new ArrayList();
+		List qs = new ArrayList();
 		qs.add(q1);
 		qs.add(q2);
 		ctxt.performQueries(qs, opObserver);
 
 		// check query results
-		ArrayList o1 = opObserver.objectsForQuery(q1);
+		List o1 = opObserver.objectsForQuery(q1);
 		assertNotNull(o1);
 		assertEquals(artistCount, o1.size());
 
-		ArrayList o2 = opObserver.objectsForQuery(q2);
+		List o2 = opObserver.objectsForQuery(q2);
 		assertNotNull(o2);
 		assertEquals(galleryCount, o2.size());
 	}
@@ -415,7 +402,7 @@ public class DataContextTst extends CayenneTestCase {
 	public void testPerformQuery() throws Exception {
 		SelectQuery query = new SelectQuery("Artist");
 		ctxt.performQuery(query, opObserver);
-		ArrayList objects = opObserver.objectsForQuery(query);
+		List objects = opObserver.objectsForQuery(query);
 
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());

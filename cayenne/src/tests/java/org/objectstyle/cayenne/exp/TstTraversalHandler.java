@@ -56,13 +56,14 @@ package org.objectstyle.cayenne.exp;
  */ 
 
 import java.util.*;
+
 import junit.framework.*;
 
 
 /** Class that collects statistics of expression traversal. It is both traversal 
  *  engine and traversal handler. */
 public class TstTraversalHandler extends ExpressionTraversal implements TraversalHandler {
-    protected ArrayList treeFlatView = new ArrayList();
+    protected List treeFlatView = new ArrayList();
     protected int children;
     protected int unaryNodes;
     protected int binaryNodes;
@@ -83,7 +84,7 @@ public class TstTraversalHandler extends ExpressionTraversal implements Traversa
     }
     
     
-    public ArrayList getTreeFlatView() {
+    public List getTreeFlatView() {
         return treeFlatView;
     }
     

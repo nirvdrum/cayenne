@@ -55,17 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.art.oneway.Gallery;
-import org.objectstyle.art.oneway.Painting;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
-import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
+import org.objectstyle.art.oneway.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik

@@ -55,21 +55,14 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.ConfigException;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.util.CayenneMap;
-import org.objectstyle.cayenne.util.ResourceLocator;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * This class is an entry point to Cayenne. It loads all 
@@ -310,7 +303,7 @@ public abstract class Configuration {
 
 	/** Returns a list of registered DataDomain objects. */
 	public List getDomainList() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = dataDomains.keySet().iterator();
 		while (it.hasNext()) {
 			list.add(dataDomains.get(it.next()));

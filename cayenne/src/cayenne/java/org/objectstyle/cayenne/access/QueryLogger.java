@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.List;
+import java.util.*;
 
 /** 
  * A QueryLogger is intended to log special events during query exectutions.

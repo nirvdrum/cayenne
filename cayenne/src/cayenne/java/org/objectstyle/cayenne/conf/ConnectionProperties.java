@@ -55,21 +55,13 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
-import org.apache.commons.collections.ExtendedProperties;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.project.CayenneUserDir;
+import org.apache.commons.collections.*;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.project.*;
 
 /**
  * ConnectionProperties handles a set of DataSourceInfo objects 

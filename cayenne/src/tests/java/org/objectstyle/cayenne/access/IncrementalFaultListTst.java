@@ -55,14 +55,12 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik

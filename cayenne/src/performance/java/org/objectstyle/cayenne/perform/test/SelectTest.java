@@ -56,11 +56,9 @@
 
 package org.objectstyle.cayenne.perform.test;
 
-import java.util.List;
-
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.perform.CayennePerformanceTest;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.perform.*;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * @author Andrei Adamchik

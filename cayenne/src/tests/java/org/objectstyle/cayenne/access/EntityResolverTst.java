@@ -1,13 +1,10 @@
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver resolver;
@@ -83,7 +80,7 @@ public class EntityResolverTst extends CayenneTestCase {
     public void testGetDataMapList() throws Exception {
         DataMap m1 = new DataMap();
         DataMap m2 = new DataMap();
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         list.add(m1);
         list.add(m2);
 
@@ -118,7 +115,7 @@ public class EntityResolverTst extends CayenneTestCase {
         ObjEntity oe1 = new ObjEntity("test");
         oe1.setClassName(Object.class.getName());
         m1.addObjEntity(oe1);
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         list.add(m1);
         EntityResolver resolver = new EntityResolver(list);
 
@@ -137,7 +134,7 @@ public class EntityResolverTst extends CayenneTestCase {
         ObjEntity oe1 = new ObjEntity("test1");
         oe1.setClassName(Object.class.getName());
         m1.addObjEntity(oe1);
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
         list.add(m1);
         EntityResolver resolver = new EntityResolver(list);
 

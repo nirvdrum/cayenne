@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** Used to display ObjAttribute. */
 public interface ObjAttributeDisplayListener extends EventListener

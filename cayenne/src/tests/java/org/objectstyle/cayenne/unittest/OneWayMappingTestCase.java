@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.unittest;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.*;
 
 /**
  * @author Andrei Adamchik

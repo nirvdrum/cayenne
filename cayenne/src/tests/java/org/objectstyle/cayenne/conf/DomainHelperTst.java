@@ -55,11 +55,10 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 
-import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * Test cases for DomainHelper class.

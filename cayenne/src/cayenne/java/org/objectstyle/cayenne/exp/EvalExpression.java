@@ -55,12 +55,11 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import java.util.ArrayList;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.apache.commons.beanutils.PropertyUtils;
-import org.objectstyle.cayenne.util.Util;
+import org.apache.commons.beanutils.*;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * Class that performs in-memory Cayenne expressions evaluation.
@@ -105,7 +104,7 @@ public class EvalExpression extends ExpressionTraversal {
 	}
 
 	class EvalHandler extends TraversalHelper {
-		protected ArrayList stack = new ArrayList(20);
+		protected List stack = new ArrayList(20);
 		protected Object obj;
 
 		public boolean getMatch() {

@@ -55,24 +55,14 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbAttributePair;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * Class that serves as a translator of SELECT queries to JDBC statements.
@@ -82,11 +72,11 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class SelectTranslator extends SelectQueryAssembler {
     static Logger logObj = Logger.getLogger(SelectTranslator.class.getName());
 
-    private final HashMap aliasLookup = new HashMap();
-    private final ArrayList columnList = new ArrayList();
-    private final ArrayList tableList = new ArrayList();
-    private final ArrayList aliasList = new ArrayList();
-    private final ArrayList dbRelList = new ArrayList();
+    private final Map aliasLookup = new HashMap();
+    private final List columnList = new ArrayList();
+    private final List tableList = new ArrayList();
+    private final List aliasList = new ArrayList();
+    private final List dbRelList = new ArrayList();
     private List groupByList;
     private int aliasCounter;
 

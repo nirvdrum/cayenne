@@ -55,17 +55,16 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
-import org.apache.log4j.Logger;
-
 import javax.swing.JOptionPane;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
  * Model for DbEntity attributes. Allows adding/removing 

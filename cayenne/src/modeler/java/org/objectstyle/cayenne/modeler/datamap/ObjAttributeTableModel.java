@@ -56,14 +56,12 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import org.apache.log4j.Logger;
-
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 
 /** 
  * Model for the Object Entity attributes and for Obj to 

@@ -55,13 +55,15 @@ package org.objectstyle.cayenne.modeler.datamap;
  *
  */ 
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.modeler.control.*;
+import java.awt.BorderLayout;
+
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.*;
 
 /** 
   * @author Michael Misha Shengaout

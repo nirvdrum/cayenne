@@ -59,26 +59,20 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataMapEvent;
-import org.objectstyle.cayenne.map.DataMap;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo
@@ -102,7 +96,7 @@ public class DataMapDetailView
     protected JTextField location;
     protected JPanel depMapsPanel;
 
-    protected HashMap mapLookup = new HashMap();
+    protected Map mapLookup = new HashMap();
 
     /** Cludge to prevent marking map as dirty during initial load. */
     private boolean ignoreChange;
@@ -166,7 +160,7 @@ public class DataMapDetailView
             }
 
             // must fully relink renamed map
-            ArrayList nodes = new ArrayList();
+            List nodes = new ArrayList();
             Iterator allNodes = domain.getDataNodeList().iterator();
             while (allNodes.hasNext()) {
                 DataNode node = (DataNode) allNodes.next();

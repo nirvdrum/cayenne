@@ -1,13 +1,12 @@
 package action;
 
-import org.apache.log4j.Level;
+import javax.servlet.http.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.log4j.*;
 import org.apache.struts.action.*;
-import webtest.Gallery;
-import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.*;
+import webtest.*;
+
 import formbean.*;
 
 public final class SaveGalleryAction extends Action {

@@ -55,11 +55,10 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;
@@ -78,7 +77,7 @@ public class DbRelationshipTst extends CayenneTestCase {
     }
     
     public void testSrcFkSnapshotWithTargetSnapshot() throws Exception {
-        HashMap map = new HashMap();
+        Map map = new HashMap();
         Integer id = new Integer(44);
         map.put("GALLERY_ID", id);
         

@@ -56,19 +56,14 @@
 
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.lang.reflect.Method;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.List;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import java.lang.reflect.*;
+import java.sql.*;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.ObjAttribute;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Select translator that implements Oracle-specific optimizations.

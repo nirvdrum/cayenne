@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import junit.framework.TestCase;
-
 import org.objectstyle.cayenne.map.ObjEntity;
+
+import junit.framework.TestCase;
 
 
 /**

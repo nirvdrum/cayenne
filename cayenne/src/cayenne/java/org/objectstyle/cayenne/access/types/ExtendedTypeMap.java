@@ -57,7 +57,8 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.util.*;
-import org.apache.log4j.Logger;
+
+import org.apache.log4j.*;
 
 /** Handles both standard Java class mapping to JDBC types as well as
   * custom mapping.
@@ -74,7 +75,7 @@ import org.apache.log4j.Logger;
 public class ExtendedTypeMap {
     static Logger logObj = Logger.getLogger(ExtendedTypeMap.class.getName());
 
-    protected HashMap typeMap = new HashMap();
+    protected Map typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();
 
 

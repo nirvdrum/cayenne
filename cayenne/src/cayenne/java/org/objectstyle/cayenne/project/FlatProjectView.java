@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * FlatProjectView converts a project tree into a list of nodes,
@@ -79,7 +78,7 @@ public class FlatProjectView {
      * Returns flat tree view.
      */
     public List flattenProjectTree(Object rootNode) {
-        ArrayList nodes = new ArrayList();
+        List nodes = new ArrayList();
         TraversalHelper helper = new TraversalHelper(nodes);
         new ProjectTraversal(helper).traverse(rootNode);        
         return nodes;

@@ -55,12 +55,11 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.HashMap;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.dba.*;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -88,7 +87,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public abstract class NamedObjectFactory {
-	private static final HashMap factories = new HashMap();
+	private static final Map factories = new HashMap();
 
 	static {
 		factories.put(DataMap.class, new DataMapFactory());

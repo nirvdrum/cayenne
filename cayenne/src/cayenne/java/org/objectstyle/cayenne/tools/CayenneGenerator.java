@@ -55,20 +55,14 @@ package org.objectstyle.cayenne.tools;
  *
  */
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.gen.AntClassGenerator;
-import org.objectstyle.cayenne.gen.ClassGenerator;
-import org.objectstyle.cayenne.gen.DefaultClassGenerator;
-import org.objectstyle.cayenne.gen.GenMapLoader;
-import org.objectstyle.cayenne.map.DataMap;
-import org.xml.sax.InputSource;
+import org.apache.tools.ant.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.gen.*;
+import org.objectstyle.cayenne.map.*;
+import org.xml.sax.*;
 
 /** 
  * Ant task to perform class generation from data map. 
@@ -140,7 +134,7 @@ public class CayenneGenerator extends Task {
 	 * dependencies. If no dependencies found, returns empty array.
 	 */
 	protected List loadDependencies() throws Exception {
-		ArrayList deps = new ArrayList();
+		List deps = new ArrayList();
 
 		if (mapDeps != null && mapDeps.length > 0) {
 			GenMapLoader loader = new GenMapLoader();

@@ -59,17 +59,12 @@ package org.objectstyle.cayenne.dba;
 import java.sql.*;
 import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
-import org.objectstyle.cayenne.access.util.SelectObserver;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.util.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * Default primary key generator implementation. Uses a lookup table named
@@ -86,7 +81,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	private static final DbAttribute[] resultDesc =
 		new DbAttribute[] { new DbAttribute(NEXT_ID, Types.INTEGER, null)};
 
-	protected HashMap pkCache = new HashMap();
+	protected Map pkCache = new HashMap();
 	protected int pkCacheSize = 20;
 
 
@@ -110,7 +105,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	}
 
 	public List createAutoPkStatements(List dbEntities) {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 
 		list.add(pkTableCreateString());
 		list.add(pkDeleteString(dbEntities));
@@ -135,7 +130,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	}
 
 	public List dropAutoPkStatements(List dbEntities) {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		list.add(dropAutoPkString());
 		return list;
 	}
@@ -307,7 +302,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
 
 		// run queries via DataNode to utilize its transactional behavior
-		ArrayList queries = new ArrayList(2);
+		List queries = new ArrayList(2);
 
 		// 1. prepare select 
 		SqlSelectQuery sel = new SqlSelectQuery(ent, pkSelectString(ent.getName()));

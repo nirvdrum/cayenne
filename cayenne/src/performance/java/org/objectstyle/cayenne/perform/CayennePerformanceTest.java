@@ -56,12 +56,10 @@
 
 package org.objectstyle.cayenne.perform;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.*;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.perform.PerformanceTest;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.perform.*;
 
 /**
  * @author Andrei Adamchik

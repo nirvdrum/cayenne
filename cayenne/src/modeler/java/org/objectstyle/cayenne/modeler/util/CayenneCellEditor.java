@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.util.EventObject;
+
 import javax.swing.DefaultCellEditor;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;

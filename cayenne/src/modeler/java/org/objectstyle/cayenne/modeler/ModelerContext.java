@@ -55,15 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.Container;
 import java.awt.Window;
 
-import javax.swing.JDialog;
 import javax.swing.JRootPane;
-import javax.swing.WindowConstants;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.scopemvc.controller.basic.ViewContext;
 import org.scopemvc.controller.swing.SwingContext;
 import org.scopemvc.core.View;

@@ -55,12 +55,10 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
+import org.objectstyle.art.*;
 
 public class SqlSelectQueryInContextTst extends SelectQueryBase {
 	private static final int _artistCount = 10;
@@ -87,7 +85,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 		performQuery();
 
 		// check query results
-		ArrayList objects = opObserver.objectsForQuery(q);
+		List objects = opObserver.objectsForQuery(q);
 		assertNotNull(objects);
 		assertEquals(1, objects.size());
 		Map countMap = (Map) objects.get(0);
@@ -103,7 +101,7 @@ public class SqlSelectQueryInContextTst extends SelectQueryBase {
 		performQuery();
 
 		// check query results
-		ArrayList objects = opObserver.objectsForQuery(q);
+		List objects = opObserver.objectsForQuery(q);
 		assertNotNull(objects);
 		assertEquals(5, objects.size());
 	}

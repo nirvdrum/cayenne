@@ -55,26 +55,16 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
 
 /**
  * Default implementation of ResultIterator interface. Serves as a 
@@ -123,7 +113,7 @@ public class DefaultResultIterator implements ResultIterator {
         resultSize = rowDescriptor.length;
         
         // this list will hold positions of PK atributes
-        ArrayList idIndexList = new ArrayList(resultSize);
+        List idIndexList = new ArrayList(resultSize);
 
         converters = new ExtendedType[resultSize];
         ExtendedTypeMap typeMap = adapter.getTypeConverter();
@@ -200,7 +190,7 @@ public class DefaultResultIterator implements ResultIterator {
      * this iterator. 
      */
     public List dataRows() throws CayenneException {
-        ArrayList list = new ArrayList();
+        List list = new ArrayList();
 
         try {
             while (this.hasNextRow()) {

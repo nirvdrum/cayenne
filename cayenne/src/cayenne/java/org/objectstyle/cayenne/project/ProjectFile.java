@@ -55,15 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.util.Util;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * ProjectFile is an adapter from an object in Cayenne project

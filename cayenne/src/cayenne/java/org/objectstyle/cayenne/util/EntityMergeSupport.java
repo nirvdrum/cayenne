@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.util;
 
 import java.util.*;
 
-import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.dba.*;
 import org.objectstyle.cayenne.map.*;
 
 /**
@@ -132,7 +132,7 @@ public class EntityMergeSupport {
 	 * are missing from the ObjEntity.
 	 */
 	protected List getAttributesToAdd() {
-		ArrayList missing = new ArrayList();
+		List missing = new ArrayList();
 		Iterator it = entity.getDbEntity().getAttributeList().iterator();
 		List rels = entity.getDbEntity().getRelationshipList();
 
@@ -174,7 +174,7 @@ public class EntityMergeSupport {
 	}
 
 	protected List getRelationshipsToAdd() {
-		ArrayList missing = new ArrayList();
+		List missing = new ArrayList();
 		Iterator it = entity.getDbEntity().getRelationshipList().iterator();
 		while (it.hasNext()) {
 			DbRelationship dbrel = (DbRelationship) it.next();

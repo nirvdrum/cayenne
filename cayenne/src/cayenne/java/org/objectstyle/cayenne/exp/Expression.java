@@ -55,9 +55,8 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 /** Defines basic API of a generic data expression. */
 public abstract class Expression implements Serializable {
@@ -239,7 +238,7 @@ public abstract class Expression implements Serializable {
 	 */
 	public List filterObjects(List objects) {
 		int size = (objects != null) ? objects.size() : 0;
-		ArrayList filtered = new ArrayList(size);
+		List filtered = new ArrayList(size);
 
 		if (size > 0) {
 			EvalExpression eval = new EvalExpression(this);

@@ -55,8 +55,8 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /** Test cases for DbGenerator.
   *

@@ -56,15 +56,11 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * Simple implementation of OperationObserver interface. 
@@ -82,8 +78,8 @@ public class DefaultOperationObserver implements OperationObserver {
 
 	public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
 
-	protected ArrayList globalExceptions = new ArrayList();
-	protected HashMap queryExceptions = new HashMap();
+	protected List globalExceptions = new ArrayList();
+	protected Map queryExceptions = new HashMap();
 	protected boolean transactionCommitted;
 	protected boolean transactionRolledback;
 	protected Level loggingLevel = DEFAULT_LOG_LEVEL;
@@ -126,7 +122,7 @@ public class DefaultOperationObserver implements OperationObserver {
 	}
 
 	/** Returns a list of exceptions that occured during data operation run by query. */
-	public HashMap getQueryExceptions() {
+	public Map getQueryExceptions() {
 		return queryExceptions;
 	}
 

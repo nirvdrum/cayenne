@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conn;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,14 +54,14 @@ package org.objectstyle.cayenne.conn;
  *
  */ 
 
-import java.io.PrintWriter;
-import java.sql.SQLException;
+package org.objectstyle.cayenne.conn;
 
-import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
-import javax.sql.PooledConnection;
+import java.io.*;
+import java.sql.*;
 
-import org.apache.log4j.Logger;
+import javax.sql.*;
+
+import org.apache.log4j.*;
 
 /**
  * <p>PoolDataSource allows to generate pooled connections.</p>

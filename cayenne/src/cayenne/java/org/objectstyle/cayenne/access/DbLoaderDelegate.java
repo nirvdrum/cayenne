@@ -55,9 +55,8 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.map.*;
 
 /**
  * DbLoaderDelegate defines an API for DbLoader to notify the

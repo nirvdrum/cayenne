@@ -1,8 +1,8 @@
 package cayenne.tutorial.tapestry.domain;
 
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.*;
 
 /**
  * @author Eric Schneider

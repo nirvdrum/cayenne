@@ -1,17 +1,14 @@
 package cayenne.tutorial.tapestry.pages;
 
-import java.util.List;
+import java.util.*;
 
-import net.sf.tapestry.IRequestCycle;
-import net.sf.tapestry.RequestCycleException;
-import net.sf.tapestry.html.BasePage;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.query.Ordering;
-import org.objectstyle.cayenne.query.SelectQuery;
+import cayenne.tutorial.tapestry.*;
+import cayenne.tutorial.tapestry.domain.*;
 
-import cayenne.tutorial.tapestry.Visit;
-import cayenne.tutorial.tapestry.domain.Artist;
-import cayenne.tutorial.tapestry.domain.Painting;
+import net.sf.tapestry.*;
+import net.sf.tapestry.html.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * @author Eric Schneider

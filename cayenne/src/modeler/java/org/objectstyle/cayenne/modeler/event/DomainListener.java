@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** For managing the changes in the Domain */
 public interface DomainListener extends EventListener
@@ -69,3 +68,4 @@ public interface DomainListener extends EventListener
 	public void domainRemoved(DomainEvent e);
 	
 }
+

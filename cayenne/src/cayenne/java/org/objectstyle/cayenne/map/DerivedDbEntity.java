@@ -55,12 +55,9 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.*;
 
 /**
  * DbEntity subclass that is based on another DbEntity
@@ -173,7 +170,7 @@ public class DerivedDbEntity extends DbEntity {
 	 * Returns attributes used in GROUP BY as an unmodifiable list.
 	 */
 	public List getGroupByAttributes() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = super.getAttributeList().iterator();
 		while(it.hasNext()) {
 			DerivedDbAttribute attr = (DerivedDbAttribute)it.next();

@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** Used when the current ObjEntity has changed. */
 public interface ObjEntityDisplayListener extends EventListener
@@ -64,3 +63,4 @@ public interface ObjEntityDisplayListener extends EventListener
 	/** Current obj entity used as a model has changed.*/
 	public void currentObjEntityChanged(EntityDisplayEvent e);
 }
+

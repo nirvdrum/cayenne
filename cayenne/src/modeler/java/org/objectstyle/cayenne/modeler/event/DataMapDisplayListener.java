@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 
-import java.util.*;
+import java.util.EventListener;
 
 public interface DataMapDisplayListener extends EventListener
 {

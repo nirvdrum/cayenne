@@ -55,9 +55,9 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.*;
 
 public class DbEntityTst extends CayenneTestCase {
     protected DbEntity ent;

@@ -1,7 +1,6 @@
 package org.objectstyle.art;
 
 import java.util.*;
-import org.objectstyle.cayenne.*;
 
 public class Artist extends org.objectstyle.cayenne.CayenneDataObject {
 

@@ -55,10 +55,10 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.HashMap;
+import java.util.*;
 
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class ObjEntityTst extends CayenneTestCase {
 	protected ObjEntity ent;
@@ -119,10 +119,10 @@ public class ObjEntityTst extends CayenneTestCase {
 		ent.setClassName(entityClass.getName());
 
 		// test same id created by different methods
-		HashMap map = new HashMap();
+		Map map = new HashMap();
 		map.put(at.getName(), "123");
 
-		HashMap map2 = new HashMap();
+		Map map2 = new HashMap();
 		map2.put(at.getName(), "123");
 
 		ObjectId ref = new ObjectId(entityClass, map);

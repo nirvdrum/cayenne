@@ -1,7 +1,6 @@
 package org.objectstyle.art;
 
-import java.util.List;
-import org.objectstyle.cayenne.*;
+import java.util.*;
 
 public class ArtGroup extends org.objectstyle.cayenne.CayenneDataObject {
 

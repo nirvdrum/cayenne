@@ -55,14 +55,11 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import javax.naming.*;
+import javax.sql.*;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.sql.DataSource;
-
-import org.objectstyle.cayenne.access.QueryLogger;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
 
 
 /** Looks up DataSource objects via JNDI.

@@ -55,9 +55,7 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import org.apache.log4j.*;
-import java.util.*;
+
 
 
 public class TstTernaryExpSuite extends TstExpressionSuite {

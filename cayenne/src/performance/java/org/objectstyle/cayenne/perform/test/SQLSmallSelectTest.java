@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
-import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * @author Andrei Adamchik

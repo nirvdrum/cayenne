@@ -55,11 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjAttribute;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Allows to send "raw" SQL select statements to the database 

@@ -55,15 +55,12 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.List;
-import org.apache.log4j.Logger;
+import java.util.*;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.Gallery;
-import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.apache.log4j.*;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.query.*;
 
 public class CDOMany2OneTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(CDOMany2OneTst.class.getName());

@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.*;
 
 
 /**

@@ -55,10 +55,10 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.InputStream;
+import java.io.*;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.unittest.*;
 
 
 public class ConfigurationTst extends CayenneTestCase {

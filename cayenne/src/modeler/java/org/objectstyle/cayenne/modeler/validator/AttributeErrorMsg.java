@@ -58,13 +58,12 @@ package org.objectstyle.cayenne.modeler.validator;
 
 import javax.swing.JFrame;
 
-import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**

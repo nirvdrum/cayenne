@@ -55,16 +55,11 @@
  */
 package org.objectstyle.cayenne.wocompat;
 
-import java.io.*;
-import java.net.URL;
 import java.util.*;
 
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
  *  Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.

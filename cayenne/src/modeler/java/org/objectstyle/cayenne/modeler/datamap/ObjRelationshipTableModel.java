@@ -55,18 +55,15 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
-import java.util.*;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import javax.swing.*;
-import javax.swing.table.*;
-
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.modeler.control.*;
-import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.util.MapUtil;
 
 /** 
  * Table model to display ObjRelationships. 

@@ -56,7 +56,6 @@ package org.objectstyle.art;
  */ 
 
 import org.objectstyle.cayenne.*;
-import java.util.*;
 
 
 public class ArtistExhibit extends CayenneDataObject {

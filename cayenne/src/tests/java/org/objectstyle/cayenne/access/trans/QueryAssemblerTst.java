@@ -55,12 +55,10 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.unittest.*;
 
 public class QueryAssemblerTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(QueryAssemblerTst.class.getName());

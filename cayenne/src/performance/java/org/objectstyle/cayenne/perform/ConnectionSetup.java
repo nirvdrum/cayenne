@@ -55,19 +55,15 @@ package org.objectstyle.cayenne.perform;
  *
  */
 
-import java.io.InputStream;
+import java.io.*;
 
-import javax.sql.DataSource;
+import javax.sql.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.conf.DomainHelper;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.util.ResourceLocator;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.conn.*;
+import org.objectstyle.cayenne.util.*;
 
 
 /** Creates database connection info to run tests.

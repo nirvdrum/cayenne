@@ -55,11 +55,10 @@
  */ 
 package org.objectstyle.cayenne.map;
 
-import java.util.Iterator;
+import java.util.*;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.unittest.*;
 
 
 public class EntityTst extends CayenneTestCase {

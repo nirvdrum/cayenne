@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.modeler.event;
  */ 
 
 import java.util.EventListener;
-import org.objectstyle.cayenne.map.*;
 
 /** Used to display DbAttribute. */
 public interface DbAttributeDisplayListener extends EventListener
@@ -64,3 +63,4 @@ public interface DbAttributeDisplayListener extends EventListener
 	/** Display specified db attribute.*/
 	public void currentDbAttributeChanged(AttributeDisplayEvent e);
 }
+

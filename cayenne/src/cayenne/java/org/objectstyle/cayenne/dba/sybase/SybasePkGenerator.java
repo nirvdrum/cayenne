@@ -58,12 +58,12 @@ package org.objectstyle.cayenne.dba.sybase;
 
 import java.sql.*;
 import java.util.*;
-import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.map.DbEntity;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Primary key generator implementation for Sybase. Uses a lookup table named
@@ -158,7 +158,7 @@ public class SybasePkGenerator extends JdbcPkGenerator {
     }
     
     public List dropAutoPkStatements(List dbEntities) {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		list.add(safePkProcDrop());
 		list.add(safePkTableDrop());
 		return list;

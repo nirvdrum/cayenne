@@ -55,9 +55,8 @@
  */
 package org.objectstyle.cayenne.gen;
 
-import org.objectstyle.cayenne.map.MapLoader;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
+import org.objectstyle.cayenne.map.*;
+import org.xml.sax.*;
 
 /**
  * MapLoader customized for class generation. Will skip 

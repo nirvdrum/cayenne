@@ -56,13 +56,9 @@
 
 package org.objectstyle.cayenne.perform.test;
 
-import java.sql.Connection;
-import java.sql.Statement;
-
-import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.perform.CayennePerformanceTest;
-import org.objectstyle.cayenne.perform.PerformMain;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.perform.*;
 
 
 /** Simple performance test. Performs an insert of 1000 rows to the database, 

@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.dba.*;
 
 /** 
  * A DbAttribute defines a descriptor for a single database table column.

@@ -55,13 +55,11 @@
  */
 package org.objectstyle.cayenne.dba.sybase;
 
-import java.util.HashMap;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.access.types.CharType;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.types.*;
+import org.objectstyle.cayenne.dba.*;
 
 /** 
  * DbAdapter implementation for 
@@ -70,7 +68,7 @@ import org.objectstyle.cayenne.dba.PkGenerator;
  * @author Andrei Adamchik
  */
 public class SybaseAdapter extends JdbcAdapter {
-    protected HashMap sorters = new HashMap();
+    protected Map sorters = new HashMap();
 
     public SybaseAdapter() {
         super();

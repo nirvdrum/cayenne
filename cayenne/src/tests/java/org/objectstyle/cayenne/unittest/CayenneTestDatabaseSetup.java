@@ -55,26 +55,13 @@
  */
 package org.objectstyle.cayenne.unittest;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import java.sql.*;
+import java.util.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DbGenerator;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
 
 /**
  * @author Andrei Adamchik
@@ -140,7 +127,7 @@ public class CayenneTestDatabaseSetup {
 		try {
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet tables = md.getTables(null, null, "%", null);
-			ArrayList allTables = new ArrayList();
+			List allTables = new ArrayList();
 
 			while (tables.next()) {
 				// 'toUpperCase' is needed since most databases
@@ -231,7 +218,7 @@ public class CayenneTestDatabaseSetup {
 
 	/** Returns iterator of preprocessed table create queries */
 	public Iterator tableCreateQueries() throws Exception {
-		ArrayList queries = new ArrayList();
+		List queries = new ArrayList();
 		DbAdapter adapter = resources.getSharedNode().getAdapter();
 		DbGenerator gen = new DbGenerator(adapter, map);
 

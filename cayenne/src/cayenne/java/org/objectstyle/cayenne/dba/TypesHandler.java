@@ -55,19 +55,15 @@
  */
 package org.objectstyle.cayenne.dba;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.log4j.Logger;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
 
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.util.*;
 import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.util.Util;
+import org.xml.sax.helpers.*;
 
 
 /** Provides JDBC-RDBMS types mapping. Loads types info from a xml file.
@@ -77,7 +73,7 @@ import org.objectstyle.cayenne.util.Util;
 public class TypesHandler {
     static Logger logObj = Logger.getLogger(TypesHandler.class);
 
-    private static HashMap handlerMap = new HashMap();
+    private static Map handlerMap = new HashMap();
 
     /** Returns TypesHandler using XML file located in the package
       * of <code>adapterClass</code>. */
@@ -99,7 +95,7 @@ public class TypesHandler {
     }
 
 
-    protected HashMap typesMap;
+    protected Map typesMap;
 
     public TypesHandler(String typesConfigPath) {
         InputStream in = ResourceLocator.findResourceInClasspath(typesConfigPath);
@@ -134,12 +130,12 @@ public class TypesHandler {
         private static final String DB_TYPE_TAG = "db-type";
         private static final String NAME_ATTR = "name";
 
-        private HashMap types = new HashMap();
-        private ArrayList currentTypes = new ArrayList();
+        private Map types = new HashMap();
+        private List currentTypes = new ArrayList();
         private int currentType = TypesMapping.NOT_DEFINED;
 
 
-        public HashMap getTypes() {
+        public Map getTypes() {
             return types;
         }
 

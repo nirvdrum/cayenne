@@ -55,9 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /** 
  * A DbEntity is a mapping descriptor that defines a structure of a database table. 
@@ -126,7 +124,7 @@ public class DbEntity extends Entity {
 	 * key of the table described by this DbEntity. 
 	 */
 	public List getPrimaryKey() {
-		ArrayList list = new ArrayList();
+		List list = new ArrayList();
 		Iterator it = this.getAttributeList().iterator();
 		while (it.hasNext()) {
 			DbAttribute dba = (DbAttribute) it.next();

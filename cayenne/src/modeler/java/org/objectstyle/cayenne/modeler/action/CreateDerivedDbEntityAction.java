@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.modeler.action;
 
 import javax.swing.Action;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**

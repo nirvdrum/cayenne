@@ -55,12 +55,9 @@
  */ 
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.art.Artist;
-import org.objectstyle.art.Exhibit;
-import org.objectstyle.art.Gallery;
-import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.art.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.unittest.*;
 
 
 public class ObjRelationshipTst extends CayenneTestCase {

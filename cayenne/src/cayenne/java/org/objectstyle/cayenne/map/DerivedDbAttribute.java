@@ -55,9 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * A DerivedDbAttribute is a DbAttribute that resolves to an SQL expression based on 
@@ -79,7 +77,7 @@ public class DerivedDbAttribute extends DbAttribute {
 	public static final String ATTRIBUTE_TOKEN = "%@";
 
 	protected String expressionSpec;
-	protected ArrayList params = new ArrayList();
+	protected List params = new ArrayList();
 	protected boolean groupBy;
 
 	/**

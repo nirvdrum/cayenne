@@ -55,15 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.*;
 
 /**
  * @author Andrei Adamchik

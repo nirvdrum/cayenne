@@ -55,21 +55,20 @@ package org.objectstyle.cayenne.access.types;
  *
  */
 
-import java.lang.reflect.Method;
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import org.apache.log4j.Logger;
+import java.lang.reflect.*;
+import java.sql.*;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.dba.TypesMapping;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.dba.*;
 
 
 /** Handles Java types mapped to JDBC types in JDBC sepcification. */
 public class DefaultType implements ExtendedType {
     static Logger logObj = Logger.getLogger(DefaultType.class.getName());
 
-    private static final HashMap readMethods = new HashMap();
+    private static final Map readMethods = new HashMap();
     private static Method readObjectMethod;
 
     static {

@@ -55,12 +55,9 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Layout;
+import org.apache.log4j.*;
 
 /**
  * File logging handler used by CayenneModeler. Intersepts all calls

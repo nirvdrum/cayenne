@@ -56,14 +56,12 @@
 
 package org.objectstyle.cayenne.access.util;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.apache.log4j.Level;
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DefaultOperationObserver;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * OperationObserver that accumulates select query results provided 
@@ -85,7 +83,7 @@ import org.objectstyle.cayenne.query.Query;
  *  @author Andrei Adamchik
  */
 public class SelectObserver extends DefaultOperationObserver {
-	protected HashMap results = new HashMap();
+	protected Map results = new HashMap();
 	protected int selectCount;
 
 	public SelectObserver() {}

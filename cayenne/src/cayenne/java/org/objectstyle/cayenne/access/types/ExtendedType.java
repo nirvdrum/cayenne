@@ -56,7 +56,7 @@ package org.objectstyle.cayenne.access.types;
  */ 
 
 
-import java.sql.ResultSet;
+import java.sql.*;
 
 
 /** 

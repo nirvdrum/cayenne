@@ -55,10 +55,9 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.*;
 
-import junit.framework.Assert;
+import junit.framework.*;
 
 
 /** Test setup for a certain setup of domain configuration. */

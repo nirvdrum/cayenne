@@ -55,9 +55,7 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class CayenneDataObjectTst extends CayenneTestCase {

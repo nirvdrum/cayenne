@@ -55,14 +55,11 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
+import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.util.*;
 
 
 /** 

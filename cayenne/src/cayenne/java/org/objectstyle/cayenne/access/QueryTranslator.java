@@ -55,20 +55,12 @@ package org.objectstyle.cayenne.access;
  *
  */
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.ArrayList;
+import java.sql.*;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * Defines API for translation Cayenne queries to JDBC

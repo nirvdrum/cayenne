@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.dba.postgres;
  *
  */ 
 
-import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.dba.*;
 
 /** DbAdapter implementation for <a href="http://postgresql.org">PostgreSQL RDBMS</a>. */
 public class PostgresAdapter extends JdbcAdapter {

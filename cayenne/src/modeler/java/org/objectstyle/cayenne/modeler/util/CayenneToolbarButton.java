@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import javax.swing.Action;
 import javax.swing.JButton;
 

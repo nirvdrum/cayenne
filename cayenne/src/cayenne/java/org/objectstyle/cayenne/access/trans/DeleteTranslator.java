@@ -55,14 +55,8 @@ package org.objectstyle.cayenne.access.trans;
  *
  */
 
-import java.sql.Connection;
-import org.apache.log4j.Logger;
-
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.map.*;
 
 /** Class implements default translation mechanism of org.objectstyle.cayenne.query.DeleteQuery
  *  objects to SQL DELETE statements.

@@ -1,5 +1,3 @@
-package org.objectstyle.cayenne.conn;
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -61,15 +59,14 @@ package org.objectstyle.cayenne.conn;
  * copyright (c) 1999-2002 The Apache Software Foundation. 
  *
  */
+package org.objectstyle.cayenne.conn;
 
-import org.apache.log4j.Logger;
-import java.util.Hashtable;
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.NamingException;
-import javax.naming.Reference;
-import javax.naming.RefAddr;
-import javax.naming.spi.ObjectFactory;
+import java.util.*;
+
+import javax.naming.*;
+import javax.naming.spi.*;
+
+import org.apache.log4j.*;
 
 
 /**

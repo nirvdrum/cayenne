@@ -57,10 +57,10 @@
 package org.objectstyle.cayenne.dba;
 
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.access.trans.*;
+import org.objectstyle.cayenne.access.types.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.*;
 
 /** 
  * Defines API needed to handle differences between various 

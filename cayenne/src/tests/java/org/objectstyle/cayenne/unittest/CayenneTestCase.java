@@ -55,16 +55,13 @@
  */
 package org.objectstyle.cayenne.unittest;
 
-import java.io.File;
-import java.sql.Connection;
+import java.io.*;
+import java.sql.*;
 
-import junit.framework.TestCase;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.access.*;
 
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
+import junit.framework.*;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared

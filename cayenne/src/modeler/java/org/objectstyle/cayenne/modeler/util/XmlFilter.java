@@ -55,8 +55,7 @@ package org.objectstyle.cayenne.modeler.util;
  *
  */ 
 
-import java.io.*;
-import javax.swing.filechooser.*;
+import java.io.File;
 
 public class XmlFilter extends javax.swing.filechooser.FileFilter {
   	// Accept all directories and all xml.

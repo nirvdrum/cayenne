@@ -55,8 +55,6 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import org.apache.log4j.*;
 import java.util.*;
 
 
@@ -69,7 +67,7 @@ public class TstBinaryExpSuite extends TstExpressionSuite {
     
     /** Cayenne syntax: "toGallery.galleryName in ('g1', 'g2', g3')" */
     private static TstExpressionCase buildIn1() {   
-        ArrayList in =  new ArrayList();
+        List in =  new ArrayList();
         in.add("g1");
         in.add("g2");
         in.add("g3");

@@ -56,15 +56,14 @@
 
 package org.objectstyle.perform;
 
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * @author Andrei Adamchik
  */
 public class PerformanceTestRunner {
 	protected ResultRenderer renderer;
-	protected HashMap resultCache = new HashMap();
+	protected Map resultCache = new HashMap();
 
 	/**
 	 * Constructor for PerformanceTestRunner.

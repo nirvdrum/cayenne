@@ -304,7 +304,7 @@ public class ExpressionFactory {
 	 * objects, or ClassCastException is thrown. OR is used to join pair binary expressions.
 	 */
 	public static Expression matchAnyDbExp(Map map, int pairType) {
-		ArrayList pairs = new ArrayList();
+		List pairs = new ArrayList();
 
 		Iterator it = map.keySet().iterator();
 		while (it.hasNext()) {
@@ -325,7 +325,7 @@ public class ExpressionFactory {
 	 * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
 	 */
 	public static Expression matchAllDbExp(Map map, int pairType) {
-		ArrayList pairs = new ArrayList();
+		List pairs = new ArrayList();
 
 		Iterator it = map.keySet().iterator();
 		while (it.hasNext()) {
@@ -345,7 +345,7 @@ public class ExpressionFactory {
 	 * objects, or ClassCastException is thrown. OR is used to join pair binary expressions.
 	 */
 	public static Expression matchAnyExp(Map map, int pairType) {
-		ArrayList pairs = new ArrayList();
+		List pairs = new ArrayList();
 
 		Iterator it = map.keySet().iterator();
 		while (it.hasNext()) {
@@ -365,7 +365,7 @@ public class ExpressionFactory {
 	 * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
 	 */
 	public static Expression matchAllExp(Map map, int pairType) {
-		ArrayList pairs = new ArrayList();
+		List pairs = new ArrayList();
 
 		Iterator it = map.keySet().iterator();
 		while (it.hasNext()) {

@@ -55,11 +55,9 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.*;
 
 /**
  * Property comparator for CayenneDataObjects. Unlike a similar

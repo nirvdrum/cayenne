@@ -55,15 +55,11 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import java.util.List;
+import java.util.*;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.project.FlatProjectView;
-import org.objectstyle.cayenne.project.ProjectTraversal;
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.project.*;
+import org.objectstyle.cayenne.util.*;
 
 /**
  * @author Andrei Adamchik

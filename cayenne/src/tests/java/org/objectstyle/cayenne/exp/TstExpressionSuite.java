@@ -55,13 +55,11 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import org.apache.log4j.*;
 import java.util.*;
 
 
 public abstract class TstExpressionSuite {
-    private ArrayList cases = new ArrayList();
+    private List cases = new ArrayList();
     
     public TstExpressionCase[] cases() {
         TstExpressionCase[] exps = new TstExpressionCase[cases.size()];

@@ -55,16 +55,12 @@ package org.objectstyle.cayenne.access.trans;
  *
  */
 
-import java.sql.Connection;
 import java.util.*;
-import org.apache.log4j.Logger;
 
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.dba.DbAdapter;
+import org.apache.log4j.*;
+import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.InsertQuery;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.*;
 
 /** Class implements default translation mechanism of org.objectstyle.cayenne.query.InsertQuery
   * objects to SQL INSERT statements. Note that in order for this query to execute successfully,
@@ -75,7 +71,7 @@ import org.objectstyle.cayenne.query.Query;
 public class InsertTranslator extends QueryAssembler {
 	static Logger logObj = Logger.getLogger(InsertTranslator.class.getName());
 
-	protected ArrayList columnList = new ArrayList();
+	protected List columnList = new ArrayList();
 
 	public String aliasForTable(DbEntity dbEnt) {
 		throw new RuntimeException("aliases not supported");

@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.File;
+import java.io.*;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.unittest.*;
 
 /**
  * @author Andrei Adamchik
