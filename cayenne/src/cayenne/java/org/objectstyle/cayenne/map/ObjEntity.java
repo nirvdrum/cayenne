@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.collections.Transformer;
 import org.objectstyle.cayenne.CayenneException;
@@ -85,6 +88,8 @@ public class ObjEntity extends Entity {
     protected String superClassName;
     protected String className;
     protected DbEntity dbEntity;
+    protected String superEntityName;
+    protected Expression qualifier;
     protected boolean readOnly;
 
     public ObjEntity() {
@@ -104,6 +109,12 @@ public class ObjEntity extends Entity {
     public void encodeAsXML(XMLEncoder encoder) {
         encoder.print("<obj-entity name=\"");
         encoder.print(getName());
+
+        if (getSuperEntityName() != null) {
+            encoder.print(" superEntityName=\"");
+            encoder.print(getSuperEntityName());
+            encoder.print("\"");
+        }
 
         if (getClassName() != null) {
             encoder.print("\" className=\"");
@@ -130,7 +141,15 @@ public class ObjEntity extends Entity {
 
         encoder.println('>');
         encoder.indent(1);
+
+        if (qualifier != null) {
+            encoder.print("<qualifier>");
+            qualifier.encodeAsXML(encoder);
+            encoder.println("</qualifier>");
+        }
+
         encoder.print(getAttributeMap());
+
         encoder.indent(-1);
         encoder.println("</obj-entity>");
     }
@@ -153,42 +172,205 @@ public class ObjEntity extends Entity {
         }
     }
 
-    /** Returns the name of the corresponding data object class */
+    /**
+     * Returns a qualifier that imposes a limit on what objects
+     * belong to this entity.
+     * 
+     * @since 1.1
+     */
+    public Expression getQualifier() {
+        return qualifier;
+    }
+
+    /**
+     * Returns an entity name for a parent entity in the inheritance hierarchy.
+     * 
+     * @since 1.1
+     */
+    public String getSuperEntityName() {
+        return superEntityName;
+    }
+
+    /**
+     * Sets a qualifier that imposes a limit on what objects
+     * belong to this entity.
+     * 
+     * @since 1.1
+     */
+    public void setQualifier(Expression expression) {
+        qualifier = expression;
+    }
+
+    /**
+     * Sets an entity name for a parent entity in the inheritance hierarchy.
+     * 
+     * @since 1.1
+     */
+    public void setSuperEntityName(String string) {
+        superEntityName = string;
+    }
+
+    /** 
+     * Returns the name of the corresponding data object class 
+     */
     public String getClassName() {
         return className;
     }
 
-    /** Sets the name of the data object class described by this obj entity*/
+    /** 
+     * Sets the name of the data object class described by this obj entity.
+     */
     public void setClassName(String className) {
         this.className = className;
     }
+
     /**
-     *
-     * Returns the fully qualified name of the super class of the data object class for this entity
-     * Used in the modeller and in class generation only, not at "runtime"
-     * @return String
+     * Returns a fully-qualified name of the super class of the DataObject class.
+     * This value is used as a hint for class generation.
      */
     public String getSuperClassName() {
         return superClassName;
     }
 
     /**
-     * Sets the name of the super class of the data object class for this entity
-     * Used in the modeller and in class generation only, not at "runtime"
-     * @param superClassName fully qualified class namee
+     * Sets a fully-qualified name of the super class of the DataObject class.
+     * This value is used as a hint for class generation.
      */
     public void setSuperClassName(String parentClassName) {
         this.superClassName = parentClassName;
     }
 
-    /** Returns a DbEntity that this ObjEntity is mapped to. */
+    /**
+     * Returns a "super" entity in the entity inheritance hierarchy.
+     * 
+     * @since 1.1
+     */
+    public ObjEntity getSuperEntity() {
+        return (superEntityName != null)
+            ? getDataMap().getObjEntity(superEntityName)
+            : null;
+    }
+
+    /** 
+     * Returns a DbEntity associated with this ObjEntity. 
+     */
     public DbEntity getDbEntity() {
         return dbEntity;
     }
 
-    /** Sets the DbEntity used by this ObjEntity. */
+    /** 
+     * Sets the DbEntity used by this ObjEntity. 
+     */
     public void setDbEntity(DbEntity dbEntity) {
+        if (superEntityName != null) {
+            throw new UnsupportedOperationException("Setting DBEntity is not allowed in inherited entities.");
+        }
+
         this.dbEntity = dbEntity;
+    }
+
+    /**
+     * Returns a named attribute that either belongs to this ObjEntity or is
+     * inherited. Returns null if no matching attribute is found.
+     */
+    public Attribute getAttribute(String name) {
+        Attribute attribute = super.getAttribute(name);
+        if (attribute != null) {
+            return attribute;
+        }
+
+        if (superEntityName == null) {
+            return null;
+        }
+
+        ObjEntity superEntity = getSuperEntity();
+        return (superEntity != null) ? superEntity.getAttribute(name) : null;
+    }
+
+    /**
+     * Returns a SortedMap of all attributes that either belong to this ObjEntity 
+     * or inherited.
+     */
+    public SortedMap getAttributeMap() {
+        if (superEntityName == null) {
+            return super.getAttributeMap();
+        }
+
+        SortedMap attributeMap = new TreeMap();
+        appendAttributes(attributeMap);
+        return attributeMap;
+    }
+
+    /**
+     * Recursively appends all attributes in the entity inheritance hierarchy.
+     */
+    final void appendAttributes(Map map) {
+        map.putAll(super.getAttributeMap());
+
+        ObjEntity superEntity = getSuperEntity();
+        if (superEntity != null) {
+            superEntity.appendAttributes(map);
+        }
+    }
+
+    /**
+     * Returns a Collection of all attributes that either belong to 
+     * this ObjEntity or inherited.
+     */
+    public Collection getAttributes() {
+        if (superEntityName == null) {
+            return super.getAttributes();
+        }
+
+        return getAttributeMap().values();
+    }
+
+    /**
+     * Returns a named Relationship that either belongs to this ObjEntity or is
+     * inherited. Returns null if no matching attribute is found.
+     */
+    public Relationship getRelationship(String name) {
+        Relationship relationship = super.getRelationship(name);
+        if (relationship != null) {
+            return relationship;
+        }
+
+        if (superEntityName == null) {
+            return null;
+        }
+
+        ObjEntity superEntity = getSuperEntity();
+        return (superEntity != null) ? superEntity.getRelationship(name) : null;
+    }
+
+    public SortedMap getRelationshipMap() {
+        if (superEntityName == null) {
+            return super.getRelationshipMap();
+        }
+
+        SortedMap relationshipMap = new TreeMap();
+        appendRelationships(relationshipMap);
+        return relationshipMap;
+    }
+
+    /**
+     * Recursively appends all relationships in the entity inheritance hierarchy.
+     */
+    final void appendRelationships(Map map) {
+        map.putAll(super.getRelationshipMap());
+
+        ObjEntity superEntity = getSuperEntity();
+        if (superEntity != null) {
+            superEntity.appendRelationships(map);
+        }
+    }
+
+    public Collection getRelationships() {
+        if (superEntityName == null) {
+            return super.getRelationships();
+        }
+
+        return getRelationshipMap().values();
     }
 
     /**

@@ -58,7 +58,7 @@ Defines an ObjEntity - a metadata element describing a persistent Java
 class. Since 1.1 allows "superEntityName" to specify a parent in the inheritance
 hierarchy.
 -->
-<!ELEMENT obj-entity (obj-attribute+)>
+<!ELEMENT obj-entity (qualifier?, obj-attribute+)>
 <!ATTLIST obj-entity
 	name CDATA #REQUIRED
 	className CDATA #REQUIRED

@@ -302,7 +302,13 @@ public class SelectObserver extends DefaultOperationObserver {
                 // add prefetch queries to the tree
                 if (query instanceof PrefetchSelectQuery) {
                     PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
-                    addChildWithPath(entity, prefetchQuery.getPrefetchPath(), dataRows);
+
+                    if (prefetchQuery.getRootQuery() == rootQuery) {
+                        addChildWithPath(
+                            entity,
+                            prefetchQuery.getPrefetchPath(),
+                            dataRows);
+                    }
                 }
             }
         }
