@@ -79,159 +79,160 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class PooledConnectionImpl implements PooledConnection {
-    private static Logger logObj = Logger.getLogger(PooledConnectionImpl.class);
+	private static Logger logObj = Logger.getLogger(PooledConnectionImpl.class);
 
-    private Connection connectionObj;
-    private List connectionEventListeners;
-    private boolean hadErrors;
-    private DataSource connectionSource;
-    private String userName;
-    private String password;
- 
+	private Connection connectionObj;
+	private List connectionEventListeners;
+	private boolean hadErrors;
+	private DataSource connectionSource;
+	private String userName;
+	private String password;
 
-    protected PooledConnectionImpl() {
-        this.connectionEventListeners =
-            Collections.synchronizedList(new ArrayList(10));
-    }
+	protected PooledConnectionImpl() {
+		this.connectionEventListeners =
+			Collections.synchronizedList(new ArrayList(10));
+	}
 
-    /** Creates new PooledConnection */
-    public PooledConnectionImpl(
-        DataSource connectionSource,
-        String userName,
-        String password)
-        throws SQLException {
+	/** Creates new PooledConnection */
+	public PooledConnectionImpl(
+		DataSource connectionSource,
+		String userName,
+		String password)
+		throws SQLException {
 
-        this();
+		this();
 
-        this.connectionSource = connectionSource;
-        this.userName = userName;
-        this.password = password;
+		this.connectionSource = connectionSource;
+		this.userName = userName;
+		this.password = password;
 
-    }
+	}
 
-    public void reconnect() throws SQLException {
-        if (connectionObj != null) {
-            try {
-                connectionObj.close();
-            } catch (SQLException ex) {
-                // ignore exception, since connection is expected
-                // to be in a bad state
-            } finally {
-                connectionObj = null;
-            }
-        }
+	public void reconnect() throws SQLException {
+		if (connectionObj != null) {
+			try {
+				connectionObj.close();
+			} catch (SQLException ex) {
+				// ignore exception, since connection is expected
+				// to be in a bad state
+			} finally {
+				connectionObj = null;
+			}
+		}
 
-        connectionObj =
-            (userName != null)
-                ? connectionSource.getConnection(userName, password)
-                : connectionSource.getConnection();
-    }
+		connectionObj =
+			(userName != null)
+				? connectionSource.getConnection(userName, password)
+				: connectionSource.getConnection();
+	}
 
-    public void addConnectionEventListener(ConnectionEventListener listener) {
-        synchronized (connectionEventListeners) {
-            if (!connectionEventListeners.contains(listener))
-                connectionEventListeners.add(listener);
-        }
-    }
+	public void addConnectionEventListener(ConnectionEventListener listener) {
+		synchronized (connectionEventListeners) {
+			if (!connectionEventListeners.contains(listener))
+				connectionEventListeners.add(listener);
+		}
+	}
 
-    public void removeConnectionEventListener(ConnectionEventListener listener) {
-        synchronized (connectionEventListeners) {
-            connectionEventListeners.remove(listener);
-        }
-    }
+	public void removeConnectionEventListener(ConnectionEventListener listener) {
+		synchronized (connectionEventListeners) {
+			connectionEventListeners.remove(listener);
+		}
+	}
 
-    public void close() throws SQLException {
+	public void close() throws SQLException {
 
-        synchronized (connectionEventListeners) {
-            // remove all listeners
-            connectionEventListeners.clear();
-        }
+		synchronized (connectionEventListeners) {
+			// remove all listeners
+			connectionEventListeners.clear();
+		}
 
-        try {
-            connectionObj.close();
-        } finally {
-            connectionObj = null;
-        }
-    }
+		if (connectionObj != null) {
+			try {
+				connectionObj.close();
+			} finally {
+				connectionObj = null;
+			}
+		}
+	}
 
-    public Connection getConnection() throws SQLException {
-        if (connectionObj == null) {
-            reconnect();
-        }
+	public Connection getConnection() throws SQLException {
+		if (connectionObj == null) {
+			reconnect();
+		}
 
-        // set autocommit to false to return connection
-        // always in consistent state
-        if (!connectionObj.getAutoCommit()) {
+		// set autocommit to false to return connection
+		// always in consistent state
+		if (!connectionObj.getAutoCommit()) {
 
-            try {
-                connectionObj.setAutoCommit(true);
-            } catch (SQLException sqlEx) {
-                // try applying Sybase patch
-                ConnectionWrapper.sybaseAutoCommitPatch(
-                    connectionObj,
-                    sqlEx,
-                    true);
-            }
-        }
+			try {
+				connectionObj.setAutoCommit(true);
+			} catch (SQLException sqlEx) {
+				// try applying Sybase patch
+				ConnectionWrapper.sybaseAutoCommitPatch(
+					connectionObj,
+					sqlEx,
+					true);
+			}
+		}
 
-        connectionObj.clearWarnings();
-        return new ConnectionWrapper(connectionObj, this);
-    }
+		connectionObj.clearWarnings();
+		return new ConnectionWrapper(connectionObj, this);
+	}
 
-    protected void returnConnectionToThePool() throws SQLException {
-        // do not return to pool bad connections
-        if (hadErrors)
-            close();
-        else
-            // notify the listeners that connection is no longer used by application...
-            this.connectionClosedNotification();
-    }
+	protected void returnConnectionToThePool() throws SQLException {
+		// do not return to pool bad connections
+		if (hadErrors)
+			close();
+		else
+			// notify the listeners that connection is no longer used by application...
+			this.connectionClosedNotification();
+	}
 
-    /** This method creates and sents an event to listeners when an error occurs in the
-     *  underlying connection. Listeners can have special logic to
-     *  analyze the error and do things like closing this PooledConnection
-     *  (if the error is fatal), etc...
-     */
-    public void connectionErrorNotification(SQLException exception) {
-        // hint for later to avoid returning bad connections to the pool
-        hadErrors = true;
+	/** This method creates and sents an event to listeners when an error occurs in the
+	 *  underlying connection. Listeners can have special logic to
+	 *  analyze the error and do things like closing this PooledConnection
+	 *  (if the error is fatal), etc...
+	 */
+	public void connectionErrorNotification(SQLException exception) {
+		// hint for later to avoid returning bad connections to the pool
+		hadErrors = true;
 
-        if (logObj.isDebugEnabled()) {
-            logObj.debug(
-                "Child connection error, retiring pooled connection.",
-                exception);
-        }
+		if (logObj.isDebugEnabled()) {
+			logObj.debug(
+				"Child connection error, retiring pooled connection.",
+				exception);
+		}
 
-        synchronized (connectionEventListeners) {
-            if (connectionEventListeners.size() == 0)
-                return;
+		synchronized (connectionEventListeners) {
+			if (connectionEventListeners.size() == 0)
+				return;
 
-            ConnectionEvent closedEvent = new ConnectionEvent(this, exception);
-            Iterator listeners = connectionEventListeners.iterator();
-            while (listeners.hasNext()) {
-                ConnectionEventListener nextListener =
-                    (ConnectionEventListener) listeners.next();
-                nextListener.connectionErrorOccurred(closedEvent);
-            }
-        }
-    }
+			ConnectionEvent closedEvent = new ConnectionEvent(this, exception);
+			Iterator listeners = connectionEventListeners.iterator();
+			while (listeners.hasNext()) {
+				ConnectionEventListener nextListener =
+					(ConnectionEventListener) listeners.next();
+				nextListener.connectionErrorOccurred(closedEvent);
+			}
+		}
+	}
 
-    /** Creates and sends an event to listeners when a user closes
-     *  java.sql.Connection object belonging to this PooledConnection.
-     */
-    protected void connectionClosedNotification() {
-        synchronized (connectionEventListeners) {
-            if (connectionEventListeners.size() == 0)
-                return;
+	/** Creates and sends an event to listeners when a user closes
+	 *  java.sql.Connection object belonging to this PooledConnection.
+	 */
+	protected void connectionClosedNotification() {
+		synchronized (connectionEventListeners) {
+			if (connectionEventListeners.size() == 0)
+				return;
 
-            ConnectionEvent closedEvent = new ConnectionEvent(this);
-            Iterator listeners = connectionEventListeners.iterator();
+			ConnectionEvent closedEvent = new ConnectionEvent(this);
+			Iterator listeners = connectionEventListeners.iterator();
 
-            while (listeners.hasNext()) {
-                ConnectionEventListener nextListener =
-                    (ConnectionEventListener) listeners.next();
-                nextListener.connectionClosed(closedEvent);
-            }
-        }
-    }
+			while (listeners.hasNext()) {
+				ConnectionEventListener nextListener =
+					(ConnectionEventListener) listeners.next();
+				nextListener.connectionClosed(closedEvent);
+			}
+		}
+	}
 }
