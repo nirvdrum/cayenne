@@ -57,12 +57,14 @@ package org.objectstyle.cayenne.gui.validator;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -97,7 +99,7 @@ public class ValidatorDialog
     public static final Color ERROR_COLOR = new Color(255, 100, 100);
 
     protected Mediator mediator;
-    protected List validationObjects;
+    protected Validator validator;
     protected JTable messages;
     protected JButton closeBtn;
 
@@ -112,10 +114,10 @@ public class ValidatorDialog
         instance = new ValidatorDialog(editor, mediator, val);
     }
 
-    protected ValidatorDialog(Editor editor, Mediator mediator, Validator val) {
+    protected ValidatorDialog(Editor editor, Mediator mediator, Validator validator) {
         super(editor, "Validation Errors", false);
         this.mediator = mediator;
-        this.validationObjects = val.validationResults();
+        this.validator = validator;
 
         init();
 
@@ -131,7 +133,18 @@ public class ValidatorDialog
     protected void init() {
         getContentPane().setLayout(new BorderLayout());
 
-        ValidatorTableModel model = new ValidatorTableModel(validationObjects);
+        JPanel messagePanel = new JPanel();
+        messagePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
+        String msg =
+            (validator.getMaxSeverity() < ValidationResult.ERROR)
+                ? "Saved project with validation warnings."
+                : "Validation errors. Project can not be saved.";
+        JLabel label = new JLabel(msg);
+        messagePanel.add(label);
+        getContentPane().add(messagePanel, BorderLayout.NORTH);
+
+        ValidatorTableModel model =
+            new ValidatorTableModel(validator.validationResults());
         messages = new ValidatorTable(model);
         messages.setRowHeight(25);
         messages.setRowMargin(3);
@@ -184,11 +197,12 @@ public class ValidatorDialog
          * @see javax.swing.JTable#getCellRenderer(int, int)
          */
         public TableCellRenderer getCellRenderer(int row, int column) {
-            if(row < 0 || row >= validationObjects.size()) {
-            	return super.getCellRenderer(row, column);
+            if (row < 0 || row >= validator.validationResults().size()) {
+                return super.getCellRenderer(row, column);
             }
-         
-            ValidationResult rowObj = (ValidationResult) validationObjects.get(row);
+
+            ValidationResult rowObj =
+                (ValidationResult) validator.validationResults().get(row);
             return (rowObj.getSeverity() == ValidationResult.ERROR)
                 ? errorRenderer
                 : warnRenderer;
