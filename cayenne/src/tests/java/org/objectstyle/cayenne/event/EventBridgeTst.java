@@ -63,44 +63,84 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class EventBridgeTst extends CayenneTestCase {
 
-    public void testInstall() throws Exception {
-        TestBridge bridge = new TestBridge();
-        EventSubject subject =
-            EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+    public void testConstructor() throws Exception {
+        EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+        String external = "externalSubject";
+        TestBridge bridge = new TestBridge(local, external);
 
-        try {
-            bridge.install(subject, "testInstall:externalSubject");
-
-            assertEquals(subject, bridge.getLocalSubject());
-            assertEquals("testInstall:externalSubject", bridge.getExternalSubject());
-        }
-        finally {
-            bridge.uninstall();
-        }
+        assertEquals(local, bridge.getLocalSubject());
+        assertEquals(external, bridge.getExternalSubject());
     }
 
-    public void testLocalEvents() throws Exception {
-        TestBridge bridge = new TestBridge();
-        EventSubject subject =
-            EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+    public void testStartup() throws Exception {
+        EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+        String external = "externalSubject";
+        TestBridge bridge = new TestBridge(local, external);
 
-        try {
-            bridge.install(subject, "testInstall:externalSubject");
-            SnapshotEvent event = new SnapshotEvent(this, this, null, null);
+        EventManager manager = new EventManager();
+        bridge.startup(manager);
 
-            EventManager.getDefaultManager().postEvent(event, subject);
-            assertSame(event, bridge.lastLocalEvent);
-        }
-        finally {
-            bridge.uninstall();
-        }
+        assertSame(manager, bridge.eventManager);
+        assertEquals(1, bridge.startupCalls);
+        assertEquals(0, bridge.shutdownCalls);
+
+        // try startup again
+        EventManager newManager = new EventManager();
+        bridge.startup(newManager);
+
+        assertSame(newManager, bridge.eventManager);
+        assertEquals(2, bridge.startupCalls);
+        assertEquals(1, bridge.shutdownCalls);
+    }
+
+    public void testShutdown() throws Exception {
+        EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+        String external = "externalSubject";
+        TestBridge bridge = new TestBridge(local, external);
+
+        EventManager manager = new EventManager();
+        bridge.startup(manager);
+        bridge.shutdown();
+
+        assertNull(bridge.eventManager);
+        assertEquals(1, bridge.startupCalls);
+        assertEquals(1, bridge.shutdownCalls);
+    }
+
+    public void testSendExternalEvent() throws Exception {
+        EventSubject local = EventSubject.getSubject(EventBridgeTst.class, "testInstall");
+        String external = "externalSubject";
+        TestBridge bridge = new TestBridge(local, external);
+
+        EventManager manager = EventManager.getDefaultManager();
+        bridge.startup(manager);
+
+        SnapshotEvent event = new SnapshotEvent(this, this, null, null);
+
+		manager.postEvent(event, local);
+        assertSame(event, bridge.lastLocalEvent);
+
     }
 
     class TestBridge extends EventBridge {
         CayenneEvent lastLocalEvent;
+        int startupCalls;
+        int shutdownCalls;
 
-        protected void sendRemoteEvent(CayenneEvent event) {
+        public TestBridge(EventSubject localSubject, String externalSubject) {
+            super(localSubject, externalSubject);
+        }
+
+        public void sendExternalEvent(CayenneEvent event) {
             lastLocalEvent = event;
+        }
+
+        protected void shutdownExternal() throws Exception {
+            shutdownCalls++;
+        }
+
+        protected void startupExternal() throws Exception {
+            startupCalls++;
         }
     }
 }

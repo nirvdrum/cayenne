@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.event;
 
 import java.util.EventListener;
 
-import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * A bridge between Cayenne EventManager and other possible event sources.
@@ -68,9 +68,9 @@ import org.objectstyle.cayenne.CayenneException;
  * subject - to work with an external events interface.
  * 
  * <p>Application can register multiple EventBridge instances with EventManager using
- * static <code>install</code> method. "Outgoing" events will trigger 
- * <code>processOutgoingEvent</code> method. "Incoming" events will be posted under 
- * specified subject via EventManager.</p>
+ * <code>EventManager.addBridge()</code> method. "Local" events will trigger 
+ * <code>onLocalEvent()</code> method. It is a responsibility of the subclass to
+ * call <code>onExternalEvent()</code> after an "external" events is received.</p>
  * 
  * <p>If a subclass needs to prepare itself to receive incoming events it should
  * override <code>init()</code> method.</p>
@@ -85,6 +85,12 @@ import org.objectstyle.cayenne.CayenneException;
 public abstract class EventBridge implements EventListener {
     protected String externalSubject;
     protected EventSubject localSubject;
+    protected EventManager eventManager;
+
+    public EventBridge(EventSubject localSubject, String externalSubject) {
+        this.localSubject = localSubject;
+        this.externalSubject = externalSubject;
+    }
 
     /**
      * Returns a String subject used to post distributed events.
@@ -101,59 +107,82 @@ public abstract class EventBridge implements EventListener {
     }
 
     /**
-     * Installs itself as the bridge between local VM shared EventManager 
-     * and remote event mechanism.  Override this method, calling "super" first, 
-     * if a concrete implementation needs special setup to start accepting 
-     * external events.
+     * Sets up this EventBridge to receive local events from the instance of
+     * EventManager. Internally calls "startupExternal".
      */
-    public void install(EventSubject localSubject, String externalSubject)
-        throws CayenneException {
+    public void startup(EventManager eventManager) throws Exception {
+        // uninstall old event manager
+        if (this.eventManager != null) {
+            // maybe leave external interface open?
+            // on the other hand, the approach below is probably cleaner
+            // since nothing is known about the previous state
+            shutdown();
+        }
 
-        this.externalSubject = externalSubject;
-        this.localSubject = localSubject;
+        if (eventManager == null) {
+            throw new NullPointerException("'eventManager' can't be null.");
+        }
+
+        this.eventManager = eventManager;
 
         try {
-            EventManager.getDefaultManager().addListener(
+            eventManager.addListener(
                 this,
-                "processOutgoingEvent",
+                "onLocalEvent",
                 CayenneEvent.class,
                 localSubject);
         }
-        catch (NoSuchMethodException e) {
-            // this shouldn't happen
-            throw new CayenneException(
-                "Error registering EventBridge of class '"
-                    + this.getClass().getName()
-                    + "'.",
-                e);
+        catch (NoSuchMethodException ex) {
+            // this should never happen
+            throw new CayenneRuntimeException("Can't install EventBridge.");
         }
+
+        startupExternal();
     }
 
-    public void uninstall() {
-        EventManager.getDefaultManager().removeListener(this);
+    /**
+      * Starts the external interface of the EventBridge.
+      */
+    protected abstract void startupExternal() throws Exception;
+
+    /**
+     * Stops receiving events on both local and external interfaces.
+     */
+    public void shutdown() throws Exception {
+        this.eventManager.removeListener(this);
+        this.eventManager = null;
+
+        shutdownExternal();
     }
+
+    /**
+     * Shuts down the external interface of the EventBridge, cleaning up
+     * and releasing any resources used to communicate external events.
+     */
+    protected abstract void shutdownExternal() throws Exception;
 
     /**
      * Helper method for sucblasses to post an event obtained from a remote source.
+     * Subclasses do not have to use this method, but they probably should for consistency.
      */
-    protected void postLocalEvent(CayenneEvent event) {
-        EventManager.getDefaultManager().postEvent(event, localSubject);
-    }
-
-    /**
-     * Sends a distributed event via mechanism implemented by a concrete
-     * subclass of DistributedNotificationAdapter.
-     */
-    public void processOutgoingEvent(CayenneEvent event) {
-        if (event.getSource() == this) {
-            return;
+    public void onExternalEvent(CayenneEvent event) {
+        if (eventManager != null) {
+            eventManager.postEvent(event, localSubject);
         }
-
-        sendRemoteEvent(event);
+        else {
+            throw new IllegalStateException(
+                "Can't post events. EventBridge was not started properly. "
+                    + "EventManager is null.");
+        }
     }
 
     /**
-     * Sends a distributed event. Mechanism is implementation dependent. 
+     * Invoked by local EventManager when a local event of interest occurred.
+     * Internally delegates to "sendExternalEvent" abstract method.
      */
-    protected abstract void sendRemoteEvent(CayenneEvent event);
+    public void onLocalEvent(CayenneEvent event) throws Exception {
+        sendExternalEvent(event);
+    }
+
+    protected abstract void sendExternalEvent(CayenneEvent localEvent) throws Exception;
 }
