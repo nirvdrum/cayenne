@@ -117,78 +117,93 @@ class ContextCommit {
         if (logLevel == null) {
             logLevel = QueryLogger.DEFAULT_LOG_LEVEL;
         }
+
         this.logLevel = logLevel;
 
-        categorizeObjects();
-        createPrimaryKeys();
-        categorizeFlattenedInsertsAndCreateBatches();
-        categorizeFlattenedDeletesAndCreateBatches();
+        // synchronize on both object store and underlying DataRowStore
+        synchronized (context.getObjectStore()) {
+            synchronized (context.getObjectStore().getDataRowCache()) {
 
-        insObjects = new ArrayList();
-        delObjects = new ArrayList();
-        updObjects = new ArrayList();
+                categorizeObjects();
+                createPrimaryKeys();
+                categorizeFlattenedInsertsAndCreateBatches();
+                categorizeFlattenedDeletesAndCreateBatches();
 
-        for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
-            DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
-            prepareInsertQueries(nodeHelper);
-            prepareFlattenedQueries(nodeHelper, nodeHelper.getFlattenedInsertQueries());
+                insObjects = new ArrayList();
+                delObjects = new ArrayList();
+                updObjects = new ArrayList();
 
-            prepareUpdateQueries(nodeHelper);
-
-            //Side effect - fills updObjects
-            prepareFlattenedQueries(nodeHelper, nodeHelper.getFlattenedDeleteQueries());
-
-            prepareDeleteQueries(nodeHelper);
-        }
-
-        ContextCommitObserver observer =
-            new ContextCommitObserver(
-                logLevel,
-                context,
-                insObjects,
-                updObjects,
-                delObjects);
-
-        if (context.isTransactionEventsEnabled()) {
-            observer.registerForDataContextEvents();
-        }
-
-        try {
-            context.fireWillCommit();
-
-            observer.getTransaction().begin();
-
-            try {
                 for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
                     DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
-                    List queries = nodeHelper.getQueries();
+                    prepareInsertQueries(nodeHelper);
+                    prepareFlattenedQueries(
+                        nodeHelper,
+                        nodeHelper.getFlattenedInsertQueries());
 
-                    if (queries.size() > 0) {
-                        // note: observer throws on error
-                        nodeHelper.getNode().performQueries(queries, observer);
+                    prepareUpdateQueries(nodeHelper);
+
+                    //Side effect - fills updObjects
+                    prepareFlattenedQueries(
+                        nodeHelper,
+                        nodeHelper.getFlattenedDeleteQueries());
+
+                    prepareDeleteQueries(nodeHelper);
+                }
+
+                ContextCommitObserver observer =
+                    new ContextCommitObserver(
+                        logLevel,
+                        context,
+                        insObjects,
+                        updObjects,
+                        delObjects);
+
+                if (context.isTransactionEventsEnabled()) {
+                    observer.registerForDataContextEvents();
+                }
+
+                try {
+                    context.fireWillCommit();
+
+                    observer.getTransaction().begin();
+
+                    try {
+                        for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
+                            DataNodeCommitHelper nodeHelper =
+                                (DataNodeCommitHelper) i.next();
+                            List queries = nodeHelper.getQueries();
+
+                            if (queries.size() > 0) {
+                                // note: observer throws on error
+                                nodeHelper.getNode().performQueries(queries, observer);
+                            }
+                        }
+
+                        // commit
+                        observer.getTransaction().commit();
+
+                    }
+                    catch (Throwable th) {
+                        try {
+                            // rollback
+                            observer.getTransaction().rollback();
+                        }
+                        catch (Throwable rollbackTh) {
+                            // ignoring...
+                        }
+
+                        context.fireTransactionRolledback();
+                        throw new CayenneException("Transaction was rolledback.");
+                    }
+
+                    context.getObjectStore().objectsCommitted();
+                    context.fireTransactionCommitted();
+                }
+                finally {
+                    if (context.isTransactionEventsEnabled()) {
+                        observer.unregisterFromDataContextEvents();
                     }
                 }
-
-                // commit
-                observer.getTransaction().commit();
-
-            } catch (Throwable th) {
-                try {
-                    // rollback
-                    observer.getTransaction().rollback();
-                } catch (Throwable rollbackTh) {
-                    // ignoring...
-                }
-
-                context.fireTransactionRolledback();
-                throw new CayenneException("Transaction was rolledback.");
-            }
-
-            context.getObjectStore().objectsCommitted();
-            context.fireTransactionCommitted();
-        } finally {
-            if (context.isTransactionEventsEnabled()) {
-                observer.unregisterFromDataContextEvents();
             }
         }
     }

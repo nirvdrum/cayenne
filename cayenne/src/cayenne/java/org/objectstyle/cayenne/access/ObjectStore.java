@@ -171,6 +171,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * cache is configured to allow ObjectStores to receive such events.
      */
     public void setDataRowCache(DataRowStore snapshotCache) {
+        if(snapshotCache == this.dataRowCache) {
+            return;
+        }
+        
         if (this.dataRowCache != null) {
             EventManager.getDefaultManager().removeListener(
                 this,

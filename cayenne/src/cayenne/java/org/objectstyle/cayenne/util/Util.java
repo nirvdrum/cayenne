@@ -84,6 +84,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.log4j.Logger;
 import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -96,6 +97,8 @@ import org.xml.sax.XMLReader;
  * @author Andrei Adamchik
  */
 public class Util {
+    private static Logger logObj = Logger.getLogger(Util.class);
+    
     private static final Perl5Util regexUtil = new Perl5Util();
 
     /**
@@ -303,8 +306,17 @@ public class Util {
         out.writeObject(obj);
         out.close();
 
-        ObjectInputStream in =
-            new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+        byte[] data = bytes.toByteArray();
+
+        if (logObj.isDebugEnabled()) {
+            logObj.debug(
+                "Serialized size (bytes) of "
+                    + obj.getClass().getName()
+                    + ": "
+                    + data.length);
+        }
+
+        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(data));
         Object objCopy = in.readObject();
         in.close();
         return objCopy;
