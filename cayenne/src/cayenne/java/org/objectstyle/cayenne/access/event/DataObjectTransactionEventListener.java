@@ -56,7 +56,9 @@
 
 package org.objectstyle.cayenne.access.event;
 
-public interface DataObjectTransactionEventListener {
+import java.util.EventListener;
+
+public interface DataObjectTransactionEventListener extends EventListener {
 	public void willCommit();
 	public void didCommit();
 }
