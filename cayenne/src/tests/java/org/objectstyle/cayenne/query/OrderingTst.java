@@ -69,7 +69,7 @@ public class OrderingTst extends CayenneTestCase {
         Ordering ord = new Ordering();
         assertNull(ord.getSortSpec());
 
-        ord.setSortSpec(pathSpec);
+        ord.setSortSpecString(pathSpec);
         assertEquals(pathSpec, ord.getSortSpec().getOperand(0));
     }
 
@@ -86,17 +86,17 @@ public class OrderingTst extends CayenneTestCase {
     }
 
     public void testCaseInsensitive1() throws Exception {
-        Ordering ord = new Ordering("", Ordering.ASC, true);
+        Ordering ord = new Ordering("M", Ordering.ASC, true);
         assertTrue(ord.isCaseInsensitive());
     }
 
     public void testCaseInsensitive2() throws Exception {
-        Ordering ord = new Ordering("", Ordering.ASC, false);
+        Ordering ord = new Ordering("N", Ordering.ASC, false);
         assertFalse(ord.isCaseInsensitive());
     }
 
     public void testAsending2() throws Exception {
-        Ordering ord = new Ordering("", Ordering.DESC);
+        Ordering ord = new Ordering("K", Ordering.DESC);
         assertEquals(Ordering.DESC, ord.isAscending());
     }
 
@@ -119,28 +119,27 @@ public class OrderingTst extends CayenneTestCase {
     public void testCompare2() throws Exception {
         // compare on non-persistent property
         TestBean t1 = new TestBean(1000);
-		TestBean t2 = new TestBean(2000);
-		TestBean t3 = new TestBean(2000);
+        TestBean t2 = new TestBean(2000);
+        TestBean t3 = new TestBean(2000);
 
         Ordering ordering = new Ordering("integer", Ordering.ASC);
         assertTrue(ordering.compare(t1, t2) < 0);
         assertTrue(ordering.compare(t2, t1) > 0);
         assertTrue(ordering.compare(t2, t3) == 0);
     }
-    
-	public void testOrderList() throws Exception {
-		// compare on non-persistent property
-		List list = new ArrayList(3);
-		
-		list.add(new TestBean(5));
-		list.add(new TestBean(2));
-		list.add(new TestBean(3));
 
-		new Ordering("integer", Ordering.ASC).orderList(list);
-		assertEquals(2, ((TestBean)list.get(0)).getInteger().intValue());
-		assertEquals(3, ((TestBean)list.get(1)).getInteger().intValue());
-		assertEquals(5, ((TestBean)list.get(2)).getInteger().intValue());
-	}
+    public void testOrderList() throws Exception {
+        // compare on non-persistent property
+        List list = new ArrayList(3);
+
+        list.add(new TestBean(5));
+        list.add(new TestBean(2));
+        list.add(new TestBean(3));
+
+        new Ordering("integer", Ordering.ASC).orderList(list);
+        assertEquals(2, ((TestBean) list.get(0)).getInteger().intValue());
+        assertEquals(3, ((TestBean) list.get(1)).getInteger().intValue());
+        assertEquals(5, ((TestBean) list.get(2)).getInteger().intValue());
+    }
 
 }
-
