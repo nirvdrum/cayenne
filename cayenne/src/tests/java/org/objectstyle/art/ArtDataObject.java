@@ -1,4 +1,3 @@
-package org.objectstyle.art;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.art;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.art;
 
 import org.objectstyle.cayenne.CayenneDataObject;
 
