@@ -100,6 +100,8 @@ public interface DbAdapter {
 		"org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
 	public static final String HSQLDB =
 		"org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
+	public static final String DB2 =
+		"org.objectstyle.cayenne.dba.db2.DB2Adapter";
 
 	/**
 	 * All available DbAdapter subclass names.
@@ -107,6 +109,7 @@ public interface DbAdapter {
 	public static final String[] availableAdapterClassNames =
 		new String[] {
 			DbAdapter.JDBC,
+			DbAdapter.DB2,
 			DbAdapter.HSQLDB,
 			DbAdapter.MYSQL,
 			DbAdapter.ORACLE,
