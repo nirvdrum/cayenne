@@ -1,10 +1,10 @@
 .medium-menu {
 	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif;
 }
-.medium-menu A:link, a:visited {
+.medium-menu A:link, .medium-menu a:visited {
 	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
 }
-.medium-menu A:hover, A:active {
+.medium-menu A:hover, .medium-menu A:active {
 	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
 }
 .medium-menu A {
@@ -18,10 +18,10 @@
 .normal-menu {
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif;
 }
-.normal-menu A:link, A:visited {
+.normal-menu A:link, .normal-menu A:visited {
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
 }
-.normal-menu A:hover, A:active {
+.normal-menu A:hover, .normal-menu A:active {
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
 }
 
