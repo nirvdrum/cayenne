@@ -55,8 +55,8 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-
 import java.io.Writer;
+import java.net.URL;
 import java.util.Properties;
 
 import org.apache.velocity.Template;
@@ -66,7 +66,6 @@ import org.apache.velocity.context.Context;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
-
 /** Generates Java class source code using VTL (Velocity template engine) based on
   * template and ObjEntity.
   *
@@ -75,21 +74,56 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 public class ClassGenerator {
     static {
         try {
+            String classLoaderUrl = cayenneClassUrl();
+
             // use ClasspathResourceLoader for velocity templates lookup
+            // if Cayenne URL is not null, load resource from this URL
             Properties props = new Properties();
-            props.put("resource.loader", "class");
-            props.put("class.resource.loader.class",
-                      "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+
+            if (classLoaderUrl != null && classLoaderUrl.startsWith("jar:")) {
+                props.put("resource.loader", "jar");
+                props.put(
+                    "jar.resource.loader.class",
+                    "org.apache.velocity.runtime.resource.loader.JarResourceLoader");
+                props.put("jar.resource.loader.path", classLoaderUrl);
+            }
+            else if (classLoaderUrl != null && classLoaderUrl.startsWith("file:")) {
+                props.put("resource.loader", "file");
+                props.put(
+                    "file.resource.loader.class",
+                    "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+                props.put("file.resource.loader.path", classLoaderUrl);
+            }
+            else {
+                props.put("resource.loader", "class");
+                props.put(
+                    "class.resource.loader.class",
+                    "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+            }
+            
             Velocity.init(props);
-        } catch(Exception ex) {
+        }
+        catch (Exception ex) {
             throw new CayenneRuntimeException("Can't initialize VTL", ex);
         }
     }
 
+    /** Returns a URL String from which this class was loaded. */
+    private static String cayenneClassUrl() {
+        String pathToClass =
+            ClassGenerator.class.getName().replace('.', '/') + ".class";
+        URL selfUrl =
+            ClassGenerator.class.getClassLoader().getSystemResource(pathToClass);
+        if (selfUrl == null) {
+            return null;
+        }
+
+        String urlString = selfUrl.toExternalForm();
+        return urlString.substring(0, urlString.length() - pathToClass.length());
+    }
 
     protected Template classTemplate;
     protected Context velCtxt;
-
 
     protected ObjEntity entity;
 
@@ -100,16 +134,12 @@ public class ClassGenerator {
     protected String prop;
     protected String superPackageName;
 
-
     /** Loads Velocity template used for class generation. */
-    public ClassGenerator(String template)
-    throws Exception {
+    public ClassGenerator(String template) throws Exception {
         velCtxt = new VelocityContext();
         velCtxt.put("classGen", this);
-        classTemplate = Velocity.getTemplate(template)
-                        ;
+        classTemplate = Velocity.getTemplate(template);
     }
-
 
     /** Generates code for <code>entity</code> ObjEntity. Source code is written to
       * <code>out</code> Writer.*/
@@ -117,7 +147,6 @@ public class ClassGenerator {
         this.entity = entity;
         classTemplate.merge(velCtxt, out);
     }
-
 
     /** 
      * Returns Java package name of the class associated with 
@@ -129,8 +158,7 @@ public class ClassGenerator {
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
-    
-    
+
     /**
      * Returns <code>superPackageName</code> property that defines
      * a superclass's package name.
@@ -138,7 +166,7 @@ public class ClassGenerator {
     public String getSuperPackageName() {
         return superPackageName;
     }
-    
+
     /**
      * Sets <code>superPackageName</code> property that defines
      * a superclass's package name.
@@ -146,7 +174,6 @@ public class ClassGenerator {
     public void setSuperPackageName(String superPackageName) {
         this.superPackageName = superPackageName;
     }
-    
 
     /** Returns class name (without a package)
       * of the class associated with this generator. */
@@ -156,7 +183,6 @@ public class ClassGenerator {
     public void setClassName(String className) {
         this.className = className;
     }
-
 
     public void setSuperPrefix(String superPrefix) {
         this.superPrefix = superPrefix;
@@ -168,7 +194,6 @@ public class ClassGenerator {
         return superPrefix;
     }
 
-
     /** Sets current class property name. This method
       * is calledduring template parsing for each of the 
       * class properties. */
@@ -179,16 +204,14 @@ public class ClassGenerator {
         return prop;
     }
 
-
     /** Returns current property name with capitalized first letter */
     public String getCappedProp() {
-        if(prop == null || prop.length() == 0)
+        if (prop == null || prop.length() == 0)
             return prop;
 
         char c = Character.toUpperCase(prop.charAt(0));
         return (prop.length() == 1) ? Character.toString(c) : c + prop.substring(1);
     }
-
 
     /** 
      * Returns <code>true</code> if a class associated with 
@@ -197,7 +220,7 @@ public class ClassGenerator {
     public boolean isUsingPackage() {
         return packageName != null;
     }
-    
+
     /** 
      * Returns <code>true</code> if a superclass class associated with 
      * this generator is located in a package.
@@ -205,7 +228,6 @@ public class ClassGenerator {
     public boolean isUsingSuperPackage() {
         return superPackageName != null;
     }
-
 
     /** Returns entity for the class associated with this generator. */
     public ObjEntity getEntity() {
