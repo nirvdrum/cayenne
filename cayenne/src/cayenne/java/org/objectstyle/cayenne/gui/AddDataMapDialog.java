@@ -68,7 +68,6 @@ import javax.swing.*;
 import org.apache.commons.collections.ExtendedProperties;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.CayennePreferences;
 import org.objectstyle.cayenne.gui.util.*;
 
 

@@ -63,11 +63,11 @@ import org.apache.log4j.Logger;
 import javax.swing.JFileChooser;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.project.CayennePreferences;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**
@@ -106,8 +106,8 @@ public class CreateDataMapAction extends CayenneAction {
 
     /** Returns location relative to Project or null if nothing selected. */
     static String getMapLocation(Mediator mediator) {
-        CayennePreferences pref = CayennePreferences.getPreferences();
-        String init_dir = (String) pref.getProperty(CayennePreferences.LAST_DIR);
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
         // Data map file
         File file = null;
 

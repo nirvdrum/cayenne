@@ -65,12 +65,12 @@ import javax.swing.KeyStroke;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.ErrorDebugDialog;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.cayenne.gui.util.RecentFileMenuItem;
-import org.objectstyle.cayenne.project.CayennePreferences;
 
 /**
  * @author Andrei Adamchik
@@ -114,8 +114,8 @@ public class OpenProjectAction extends ProjectAction {
 
 	/** Opens cayenne.xml file using file chooser. */
 	protected void openProject() {
-		CayennePreferences pref = CayennePreferences.getPreferences();
-		String init_dir = (String) pref.getProperty(CayennePreferences.LAST_DIR);
+		ModelerPreferences pref = ModelerPreferences.getPreferences();
+		String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
 		try {
 			// Get the project file name (always cayenne.xml)
 			File file = null;
@@ -143,10 +143,10 @@ public class OpenProjectAction extends ProjectAction {
 		if (getMediator() != null && !closeProject()) {
 			return;
 		}
-		CayennePreferences pref = CayennePreferences.getPreferences();
+		ModelerPreferences pref = ModelerPreferences.getPreferences();
 		try {
 			// Save dir path to the preferences
-			pref.setProperty(CayennePreferences.LAST_DIR, file.getParent());
+			pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
 			Editor.getFrame().addToLastProjList(file.getAbsolutePath());
 
 			// Initialize gui configuration

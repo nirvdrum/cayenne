@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.gui;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,26 +62,25 @@ import java.io.IOException;
 
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.project.CayenneUserDir;
 
 /** 
- * CayennePreferences class supports persistent user preferences. 
- * Preferences are saved in the user home directory in "<code>.cayenne</code>" 
- * subdirectory.
+ * ModelerPreferences class supports persistent user preferences. 
+ * Preferences are saved in the user home directory in 
+ * "<code>$HOME/.cayenne/modeler.preferences</code>" file.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class CayennePreferences extends ExtendedProperties {
-    static final Logger logObj = Logger.getLogger(CayennePreferences.class.getName());
+public class ModelerPreferences extends ExtendedProperties {
+    static final Logger logObj = Logger.getLogger(ModelerPreferences.class.getName());
 
     /** 
-     * Name of the preferences file in the CAYENNE_PREF_DIR.
-     * General standard for keys in the preferences:
-     * Use class name (optionally with the package name) and 
-     * the name of the field which uses this preference. */
+     * Name of the preferences file.
+     */
     public static final String PREF = "modeler.preferences";
 
-    /* Keys for the preference file. */
+    // Keys for the preference file.
 
     /** The directory of the cayenne project edited last. */
     public static final String LAST_DIR = "Editor.lastProject";
@@ -103,16 +102,16 @@ public class CayennePreferences extends ExtendedProperties {
     /** RDBMS Adapter */
     public static final String RDBMS_ADAPTER = "DbLoginPanel.adapterInput";
 
-    protected static CayennePreferences sharedInstance;
+    protected static ModelerPreferences sharedInstance;
 
-    protected CayennePreferences() {}
+    protected ModelerPreferences() {}
 
     /**
      * Returns Cayenne preferences singleton.
      */
-    public static CayennePreferences getPreferences() {
+    public static ModelerPreferences getPreferences() {
         if (sharedInstance == null) {
-            sharedInstance = new CayennePreferences();
+            sharedInstance = new ModelerPreferences();
             sharedInstance.loadPreferences();
         }
         

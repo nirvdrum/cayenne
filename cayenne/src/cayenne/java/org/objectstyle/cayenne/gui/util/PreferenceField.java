@@ -63,7 +63,7 @@ import javax.swing.*;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import org.objectstyle.cayenne.project.CayennePreferences;
+import org.objectstyle.cayenne.gui.ModelerPreferences;
 
 public class PreferenceField extends JComboBox {
 	static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
@@ -88,7 +88,7 @@ public class PreferenceField extends JComboBox {
 		this.key = key;
 		setEditable(true);
 		setSelectedIndex(-1);
-		CayennePreferences pref = CayennePreferences.getPreferences();
+		ModelerPreferences pref = ModelerPreferences.getPreferences();
 		this.initValues = initValues;
 		Vector v = new Vector(initValues);
 
@@ -157,7 +157,7 @@ public class PreferenceField extends JComboBox {
         Object[] items = getItems();
 	    Arrays.sort(items);
 	    
-		CayennePreferences pref = CayennePreferences.getPreferences();
+		ModelerPreferences pref = ModelerPreferences.getPreferences();
 		pref.remove(key);
 		
 		int size = items.length;

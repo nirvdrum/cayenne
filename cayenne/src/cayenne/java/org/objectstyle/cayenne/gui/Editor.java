@@ -125,7 +125,6 @@ import org.objectstyle.cayenne.gui.util.XmlFilter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.project.CayennePreferences;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectSet;
@@ -447,8 +446,8 @@ public class Editor
 
     /** Adds path to the list of last opened projects in preferences. */
     public void addToLastProjList(String path) {
-        CayennePreferences pref = CayennePreferences.getPreferences();
-        Vector arr = pref.getVector(CayennePreferences.LAST_PROJ_FILES);
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        Vector arr = pref.getVector(ModelerPreferences.LAST_PROJ_FILES);
         // Add proj path to the preferences
         // Prevent duplicate entries.
         if (arr.contains(path)) {
@@ -460,10 +459,10 @@ public class Editor
             arr.remove(arr.size() - 1);
         }
 
-        pref.remove(CayennePreferences.LAST_PROJ_FILES);
+        pref.remove(ModelerPreferences.LAST_PROJ_FILES);
         Iterator iter = arr.iterator();
         while (iter.hasNext()) {
-            pref.addProperty(CayennePreferences.LAST_PROJ_FILES, iter.next());
+            pref.addProperty(ModelerPreferences.LAST_PROJ_FILES, iter.next());
         }
     }
 
@@ -568,7 +567,7 @@ public class Editor
             return;
         }
 
-        CayennePreferences.getPreferences().storePreferences();
+        ModelerPreferences.getPreferences().storePreferences();
         Editor.this.setVisible(false);
         System.exit(0);
     }

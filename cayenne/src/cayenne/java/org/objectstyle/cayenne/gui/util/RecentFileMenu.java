@@ -60,9 +60,9 @@ import java.util.Vector;
 
 import javax.swing.JMenu;
 
+import org.objectstyle.cayenne.gui.ModelerPreferences;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.action.OpenProjectAction;
-import org.objectstyle.cayenne.project.CayennePreferences;
 
 /**
  * Menu that contains a list of previously used files.
@@ -92,8 +92,8 @@ public class RecentFileMenu extends JMenu {
 	 * CayenneModeler properences.
 	 */
 	public void rebuildFromPreferences() {
-		CayennePreferences pref = CayennePreferences.getPreferences();		
-		Vector arr = pref.getVector(CayennePreferences.LAST_PROJ_FILES);
+		ModelerPreferences pref = ModelerPreferences.getPreferences();		
+		Vector arr = pref.getVector(ModelerPreferences.LAST_PROJ_FILES);
 		while (arr.size() > 4) {
 			arr.remove(arr.size() - 1);
 		}
