@@ -17,10 +17,12 @@
         	Cayenne distribution provides run scripts to start modeler on
         	Windows
         	and UNIX platforms. To take advantage of these scripts, user must
-        	set
-        	CAYENNE_HOME and JAVA_HOME environment variables as described in the
-        	<a href="../userguide/install/install.html#inst">installation section</a>. To run
-        	CayenneModeler use the following commands. Windows:
+        	set CAYENNE_HOME <i>(optional)</i> 
+        	and JAVA_HOME environment variables as described in the
+        	<a href="../userguide/install/install.html#inst">installation section</a>.</p>
+        	
+        	<p>To run CayenneModeler, simply doubleclick the appropriate file.
+        	To run them from the command line, use the following commands. Windows:
         	</p>
 
         	<source>%CAYENNE_HOME%\bin\modeler.bat</source>

@@ -45,17 +45,20 @@
             <p>To take advantage of the scripts located in the <code>bin</code>
             directory of Cayenne, set the following environment variables:
             <ul>
-                <li><code>CAYENNE_HOME</code> - should point to
-                the directory created when your unpacked Cayenne distribution in the previous 
-                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
-                    
                 <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
                 It may already exist in the environment.</li>
+                
+                <li><code>CAYENNE_HOME</code> <i>(optional)</i> - should point to
+                the directory created when your unpacked Cayenne distribution in the previous 
+                steps. (Directory named like <code>cayenne-[release-suffix]</code>). If CAYENNE_HOME
+                is undefined, scripts can still guess it as long as they are run from their own directory
+                (<code>cayenne-[release-suffix]/bin/</code>)</li>
+                    
+
             </ul>
             
-            <i>Note that these variables are only necessary to use the scripts
-            that run unit tests and start CayenneModeler. 
-            They are probably not needed on a deployment machine.</i>
+            <i>Note that these variables are only necessary to use the scripts in the <code>bin</code>
+            directory. They are not needed on a deployment machine.</i>
             </p>
         </subsection>
  	</section>
