@@ -14,6 +14,13 @@
         
         <section name="Project News">
         
+        <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
+		<p><img align="left" hspace="3" src="images/other/javaworld-200409.gif"/>
+		Cayenne sure gets some press coverage in Japan lately. A September edition of JavaWorld Japan has 
+		a big article on Cayenne, including a sample Tapestry application
+		(pp. 94-112, Cayenne 1.0.7 is used). Big thanks to Manabu Yoneyama for sending me a copy of the magazine.
+		<br/><br/><br/><br/></p>
+		
 		<p><u><i>[July 25, 2004]</i></u> <strong>Cayenne 1.1 Beta 2</strong></p>
 		<p>Download Cayenne Beta 2 from <a href="http://prdownloads.sourceforge.net/cayenne/cayenne-1.1B2.tar.gz">here</a>.</p>
 		<p>This Beta release introduces thread-bound DataContext, improves connection pool reconnect feature,
