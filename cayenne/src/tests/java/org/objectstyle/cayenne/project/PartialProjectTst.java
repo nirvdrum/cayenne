@@ -95,7 +95,7 @@ public class PartialProjectTst extends CayenneTestCase {
     public void testParentFile() throws Exception {
         assertEquals(
             testProjectFile.getParentFile().getCanonicalFile(),
-            project.getProjectDir().getCanonicalFile());
+            project.getProjectDirectory().getCanonicalFile());
     }
 
     public void testProjectFile() throws Exception {
