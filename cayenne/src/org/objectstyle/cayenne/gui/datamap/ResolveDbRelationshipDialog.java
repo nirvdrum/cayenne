@@ -93,9 +93,9 @@ implements ActionListener
 	JTable table		= new CayenneTable();
 	JButton add			= new JButton("Add");
 	JButton remove		= new JButton("Remove");
-	JButton save		= new JButton("");
+	JButton save		= new JButton("Save");
 	JButton cancel		= new JButton("Cancel");
-	JButton reset		= new JButton("New");
+	//JButton reset		= new JButton("New");
 	private boolean cancelPressed = false;
 
 	public ResolveDbRelationshipDialog(Mediator temp_mediator, List db_rel_list
@@ -225,22 +225,22 @@ implements ActionListener
 		temp.add(Box.createHorizontalGlue());
 		// Make label for save button Create or Update
 		if (isDbRelNew) {
-			save.setText("Create");
+//			save.setText("Create");
 			setTitle("Create relationship between table " 
 				+ start.getName() + " and " + end.getName());
 		}
 		else {
 			setTitle("Change relationship between table " 
 				+ start.getName() + " and " + end.getName());
-			save.setText("Update");
+//			save.setText("Update");
 		}
 		temp.add(save);		
 		temp.add(Box.createRigidArea(new Dimension(6, 0)));
 		temp.add(Box.createHorizontalGlue());
 		temp.add(cancel);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(reset);
+//		temp.add(Box.createRigidArea(new Dimension(6, 0)));
+//		temp.add(Box.createHorizontalGlue());
+//		temp.add(reset);
 		temp.add(Box.createHorizontalGlue());
 		getContentPane().add(temp, BorderLayout.SOUTH);
 				
@@ -248,7 +248,7 @@ implements ActionListener
 		remove.addActionListener(this);
 		save.addActionListener(this);
 		cancel.addActionListener(this);
-		reset.addActionListener(this);
+//		reset.addActionListener(this);
 	}// End init()
 	
 	
