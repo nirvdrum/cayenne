@@ -176,8 +176,14 @@ public class ObjEntity extends Entity {
 
 			idMap.put(attr.getName(), val);
 		}
-
-		ObjectId id = new ObjectId(this.getName(), idMap);		
+		
+		Class objClass;
+		try {
+			objClass = Class.forName(this.getClassName());
+		} catch (ClassNotFoundException e) {
+			throw new CayenneRuntimeException("Failed to load class for name "+this.getClassName()+" because "+e.getMessage());
+		}
+		ObjectId id = new ObjectId(objClass, idMap);		
 		return id;
 	}
 

@@ -399,8 +399,8 @@ public class OperationSorter {
 		}
 
 		private DbEntity lookupEntity(DataObject o) {
-			String name = o.getObjectId().getObjEntityName();
-			return o.getDataContext().getEntityResolver().lookupDbEntity(name);
+			Class aClass = o.getObjectId().getObjClass();
+			return o.getDataContext().getEntityResolver().lookupDbEntity(aClass);
 		}
 	}
 }

@@ -164,7 +164,7 @@ public final class QueryHelper {
 	 */
 	public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
 		InsertQuery ins = new InsertQuery();
-		ins.setRoot(permId.getObjEntityName());
+		ins.setRoot(permId.getObjClass());
 		ins.setObjectSnapshot(objectSnapshot);
 		ins.setObjectId(permId);
 		return ins;
@@ -176,7 +176,7 @@ public final class QueryHelper {
 	 */
 	public static SelectQuery selectObjectForId(ObjectId oid) {
 		SelectQuery sel = new SelectQuery();
-		sel.setRoot(oid.getObjEntityName());
+		sel.setRoot(oid.getObjClass());
 		sel.setQualifier(ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
 		return sel;
 	}
@@ -193,7 +193,7 @@ public final class QueryHelper {
 		}
 		
 		SelectQuery sel = new SelectQuery();
-		sel.setRoot(((ObjectId)oids.get(1)).getObjEntityName());
+		sel.setRoot(((ObjectId)oids.get(1)).getObjClass());
 		
 		Iterator it = oids.iterator();
 		
@@ -275,7 +275,7 @@ public final class QueryHelper {
 		ObjectId oid,
 		String relName) {
 		SelectQuery sel = new SelectQuery();
-		ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjEntityName());
+		ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjClass());
 		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
 		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
 		sel.setRoot(destEnt);

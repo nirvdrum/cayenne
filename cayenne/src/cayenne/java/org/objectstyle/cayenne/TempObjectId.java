@@ -68,8 +68,8 @@ import java.util.Map;
 public class TempObjectId extends ObjectId {
 	private ObjectId permId;
 
-	public TempObjectId(String objEntityName) {
-		super(objEntityName, null);
+	public TempObjectId(Class objClass) {
+		super(objClass, null);
 	}
 
 	/** 

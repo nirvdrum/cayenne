@@ -68,34 +68,34 @@ public class ObjectIdTst extends CayenneTestCase {
 	}
 
 	public void testObjEntityName() throws Exception {
-		String nm = "12345";
-		ObjectId oid = new ObjectId(nm, null);
-		assertEquals(nm, oid.getObjEntityName());
+		Class class1=Number.class;
+		ObjectId oid = new ObjectId(class1, null);
+		assertEquals(class1, oid.getObjClass());
 	}
 
 	public void testEquals0() throws Exception {
-		String nm = "12345";
-		ObjectId oid1 = new ObjectId(nm, null);
+		Class class1=Number.class;
+		ObjectId oid1 = new ObjectId(class1, null);
 		assertEquals(oid1, oid1);
 	}
 
 	public void testEquals1() throws Exception {
-		String nm = "12345";
-		ObjectId oid1 = new ObjectId(nm, null);
-		ObjectId oid2 = new ObjectId(nm, null);
+		Class class1=Number.class;
+		ObjectId oid1 = new ObjectId(class1, null);
+		ObjectId oid2 = new ObjectId(class1, null);
 		assertEquals(oid1, oid2);
 	}
 
 	public void testEquals2() throws Exception {
-		String nm = "12345";
+		Class class1=Number.class;
 		HashMap hm = new HashMap();
-		ObjectId oid1 = new ObjectId(nm, hm);
-		ObjectId oid2 = new ObjectId(nm, hm);
+		ObjectId oid1 = new ObjectId(class1, hm);
+		ObjectId oid2 = new ObjectId(class1, hm);
 		assertEquals(oid1, oid2);
 	}
 
 	public void testEquals3() throws Exception {
-		String nm = "12345";
+		Class class1=Number.class;
 		String pknm = "xyzabc";
 
 		HashMap hm1 = new HashMap();
@@ -104,20 +104,20 @@ public class ObjectIdTst extends CayenneTestCase {
 		HashMap hm2 = new HashMap();
 		hm2.put(pknm, "123");
 
-		ObjectId oid1 = new ObjectId(nm, hm1);
-		ObjectId oid2 = new ObjectId(nm, hm2);
+		ObjectId oid1 = new ObjectId(class1, hm1);
+		ObjectId oid2 = new ObjectId(class1, hm2);
 		assertEquals(oid1, oid2);
 	}
 
 	public void testEquals4() throws Exception {
-		String nm = "12345";
+		Class class1=Number.class;
 		String pknm = "xyzabc";
 
 		HashMap hm1 = new HashMap();
 		hm1.put(pknm, new Integer(1000));
 
-		ObjectId ref = new ObjectId(nm, hm1);
-		ObjectId oid = new ObjectId(nm, pknm, 1000);
+		ObjectId ref = new ObjectId(class1, hm1);
+		ObjectId oid = new ObjectId(class1, pknm, 1000);
 		assertEquals(ref, oid);
 	}
 
@@ -125,7 +125,7 @@ public class ObjectIdTst extends CayenneTestCase {
      * This is a test case reproducing conditions for the bug "8458963".
      */
 	public void testEquals5() throws Exception {
-		String nm = "12345";
+		Class class1=Number.class;
 
 		HashMap hm1 = new HashMap();
 		hm1.put("key1",  new Integer(1));
@@ -135,8 +135,8 @@ public class ObjectIdTst extends CayenneTestCase {
 		hm2.put("key1", new Integer(11));
 		hm2.put("key2",  new Integer(1));
 
-		ObjectId ref = new ObjectId(nm, hm1);
-		ObjectId oid = new ObjectId(nm, hm2);
+		ObjectId ref = new ObjectId(class1, hm1);
+		ObjectId oid = new ObjectId(class1, hm2);
 		assertTrue(!ref.equals(oid));
 	}
 
@@ -144,7 +144,7 @@ public class ObjectIdTst extends CayenneTestCase {
 		HashMap map = new HashMap();
 		Object o1 = new Object();
 
-		String nm = "12345";
+		Class class1=Number.class;
 		String pknm = "xyzabc";
 
 		HashMap hm1 = new HashMap();
@@ -153,24 +153,24 @@ public class ObjectIdTst extends CayenneTestCase {
 		HashMap hm2 = new HashMap();
 		hm2.put(pknm, "123");
 
-		ObjectId oid1 = new ObjectId(nm, hm1);
-		ObjectId oid2 = new ObjectId(nm, hm2);
+		ObjectId oid1 = new ObjectId(class1, hm1);
+		ObjectId oid2 = new ObjectId(class1, hm2);
 
 		map.put(oid1, o1);
 		assertSame(o1, map.get(oid2));
 	}
 
 	public void testNotEqual1() throws Exception {
-		String nm1 = "12345";
-		String nm2 = "abcdef";
+		Class class1=Number.class;
+		Class class2=Boolean.class;
 
-		ObjectId oid1 = new ObjectId(nm1, null);
-		ObjectId oid2 = new ObjectId(nm2, null);
+		ObjectId oid1 = new ObjectId(class1, null);
+		ObjectId oid2 = new ObjectId(class2, null);
 		assertTrue(!oid1.equals(oid2));
 	}
 
 	public void testNotEqual2() throws Exception {
-		String nm = "12345";
+		Class class1=Number.class;
 
 		HashMap hm1 = new HashMap();
 		hm1.put("pk1", "123");
@@ -178,8 +178,8 @@ public class ObjectIdTst extends CayenneTestCase {
 		HashMap hm2 = new HashMap();
 		hm2.put("pk2", "123");
 
-		ObjectId oid1 = new ObjectId(nm, hm1);
-		ObjectId oid2 = new ObjectId(nm, hm2);
+		ObjectId oid1 = new ObjectId(class1, hm1);
+		ObjectId oid2 = new ObjectId(class1, hm2);
 		assertTrue(!oid1.equals(oid2));
 	}
 }

@@ -330,7 +330,7 @@ public class CayenneDataObject implements DataObject {
      * to <code>val</code>. 
      */
     protected void setReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjEntityName()).getRelationship(relName);
+        ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjClass()).getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
             if (revRel.isToMany())
@@ -343,7 +343,7 @@ public class CayenneDataObject implements DataObject {
     /** Remove current object from reverse relationship of object <code>val</code> to this object.
       * @param relName name of relationship from this object to <code>val</code>. */
     protected void unsetReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjEntityName()).getRelationship(relName);
+        ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjClass()).getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
             if (revRel.isToMany())

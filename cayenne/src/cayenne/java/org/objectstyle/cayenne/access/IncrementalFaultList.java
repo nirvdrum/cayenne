@@ -469,7 +469,7 @@ public class IncrementalFaultList implements List {
             return -1;
         }
 
-        if (!dataObj.getObjectId().getObjEntityName().equals(rootEntity.getName())) {
+        if (!dataObj.getObjectId().getObjClass().getName().equals(rootEntity.getClassName())) {
             return -1;
         }
 
@@ -518,7 +518,7 @@ public class IncrementalFaultList implements List {
             return -1;
         }
 
-        if (!dataObj.getObjectId().getObjEntityName().equals(rootEntity.getName())) {
+        if (!dataObj.getObjectId().getObjClass().getName().equals(rootEntity.getClassName())) {
             return -1;
         }
 

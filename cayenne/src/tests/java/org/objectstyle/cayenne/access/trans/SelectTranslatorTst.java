@@ -152,7 +152,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
      * Tests query creation with relationship from derived entity.
      */
     public void testCreateSqlString3() throws Exception {
-        ObjectId id = new ObjectId("Artist", "ARTIST_ID", 35);
+        ObjectId id = new ObjectId(Artist.class, "ARTIST_ID", 35);
         Artist a1 = (Artist) createDataContext().registeredObject(id);
         Connection con = getSharedConnection();
 

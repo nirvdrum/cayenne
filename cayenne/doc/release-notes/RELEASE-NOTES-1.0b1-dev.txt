@@ -38,3 +38,7 @@ cayenne will automatically add/remove the link records.   In that case, there is
 have an ObjEntity for the link record, and this is in fact discouraged.  All other flattened
 relationships are set "readOnly" and cannot be modified.
 
+9. Changed ObjectId to use a Class instead of the name of the ObjEntity.  Removed
+getObjEntityName() as a consequence
+
+ 

@@ -108,6 +108,7 @@ public class ObjEntityTst extends CayenneTestCase {
 	}
 
 	public void testObjectIdFromSnapshot() throws Exception {
+		Class entityClass=Number.class;
 		DbAttribute at = new DbAttribute();
 		at.setName("xyz");
 		at.setPrimaryKey(true);
@@ -115,6 +116,7 @@ public class ObjEntityTst extends CayenneTestCase {
 		dbe.addAttribute(at);
 		ent.setDbEntity(dbe);
 		ent.setName("456");
+		ent.setClassName(entityClass.getName());
 
 		// test same id created by different methods
 		HashMap map = new HashMap();
@@ -123,7 +125,7 @@ public class ObjEntityTst extends CayenneTestCase {
 		HashMap map2 = new HashMap();
 		map2.put(at.getName(), "123");
 
-		ObjectId ref = new ObjectId(ent.getName(), map);
+		ObjectId ref = new ObjectId(entityClass, map);
 		ObjectId oid = ent.objectIdFromSnapshot(map2);
 
 		assertEquals(ref, oid);

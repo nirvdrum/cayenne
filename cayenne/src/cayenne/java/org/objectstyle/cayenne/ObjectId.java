@@ -82,22 +82,22 @@ public class ObjectId implements Serializable {
 	// Keys: DbAttribute objects;
 	// Values database values of the corresponding attribute
 	protected Map idKeys;
-	protected String objEntityName;
-
+	protected Class objClass;
+	
 	/**
 	 * Convenience constructor for entities that have a 
 	 * single Integer as their id.
 	 */
-	public ObjectId(String objEntityName, String keyName, int id) {
-		this(objEntityName, keyName, new Integer(id));
+	public ObjectId(Class objClass, String keyName, int id) {
+		this(objClass, keyName, new Integer(id));
 	}
 
 	/**
 	 * Convenience constructor for entities that have a 
 	 * single column as their id.
 	 */
-	public ObjectId(String objEntityName, String keyName, Object id) {
-		this.objEntityName = objEntityName;
+	public ObjectId(Class objClass,  String keyName, Object id) {
+		this.objClass = objClass;
 		HashMap keys = new HashMap();
 		keys.put(keyName, id);
 		setIdKeys(keys);
@@ -105,8 +105,8 @@ public class ObjectId implements Serializable {
 
 
 	/** Creates new ObjectId */
-	public ObjectId(String objEntityName, Map idKeys) {
-		this.objEntityName = objEntityName;
+	public ObjectId(Class objClass, Map idKeys) {
+		this.objClass = objClass;
 		setIdKeys(idKeys);
 	}
 
@@ -124,7 +124,9 @@ public class ObjectId implements Serializable {
 		}
 
 		ObjectId id = (ObjectId) object;
-		return objEntityName.equals(id.objEntityName) && Util.nullSafeEquals(id.idKeys, this.idKeys);
+		//CTM Use the class name because two objectid's should be equal even if their objClass'es were loaded
+		// by different class loaders.
+		return objClass.getName().equals(id.objClass.getName()) && Util.nullSafeEquals(id.idKeys, this.idKeys);
 	}
 
 	/** Returns a map of id components. 
@@ -141,11 +143,6 @@ public class ObjectId implements Serializable {
 		return idKeys.get(attrName);
 	}
 
-	/** Returns a name of ObjEntity for the object identified by this id. */
-	public String getObjEntityName() {
-		return objEntityName;
-	}
-
     /**
      * Always returns <code>false</code>.
      */
@@ -154,7 +151,7 @@ public class ObjectId implements Serializable {
 	}
 
 	public String toString() {
-		StringBuffer buf = new StringBuffer(objEntityName);
+		StringBuffer buf = new StringBuffer(objClass.getName());
 		if (isTemporary())
 			buf.append(" (temp)");
 		buf.append(": ");
@@ -176,6 +173,16 @@ public class ObjectId implements Serializable {
      */
     public int hashCode() {
     	int mapHash = (idKeys != null) ? idKeys.hashCode() : 0;
-        return objEntityName.hashCode() + mapHash;
+ 		//CTM Use the class name because we don't care about classes from different class loaders being "different"
+        return objClass.getName().hashCode() + mapHash;
     }
+    
+	/**
+	 * Returns the class of object that this ObjectId is acting for
+	 * @return Class
+	 */
+	public Class getObjClass() {
+		return objClass;
+	}
+
 }

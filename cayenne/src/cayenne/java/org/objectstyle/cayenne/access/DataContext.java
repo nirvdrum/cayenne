@@ -224,11 +224,9 @@ public class DataContext implements QueryEngine, Serializable {
             DataObject obj = objectStore.getObject(oid);
             if (obj == null) {
                 try {
-                    obj =
-                        newDataObject(
-                            lookupEntity(oid.getObjEntityName()).getClassName());
-                } catch (Exception ex) {
-                    String entity = (oid != null) ? oid.getObjEntityName() : null;
+                    obj = newDataObject(oid.getObjClass().getName());
+              } catch (Exception ex) {
+                    String entity = (oid != null) ? getEntityResolver().lookupObjEntity(oid.getObjClass()).getName() :null;
                     throw new CayenneRuntimeException(
                         "Error creating object for entity '" + entity + "'.",
                         ex);
@@ -256,7 +254,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     /** Takes a snapshot of current object state. */
     public Map takeObjectSnapshot(DataObject anObject) {
-        ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
+        ObjEntity ent = getEntityResolver().lookupObjEntity(anObject.getClass());
         return snapshotManager.takeObjectSnapshot(ent, anObject);
     }
 
@@ -364,7 +362,7 @@ public class DataContext implements QueryEngine, Serializable {
      *  persistence information for this object.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
-        TempObjectId tempId = new TempObjectId(objEntityName);
+        TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
 
         ObjEntity ent = lookupEntity(objEntityName);
@@ -570,10 +568,10 @@ public class DataContext implements QueryEngine, Serializable {
      * mapped to a "read-only" entity.
      */
     private void filterReadOnly(DataObject dataObj) throws CayenneRuntimeException {
-        String name = dataObj.getObjectId().getObjEntityName();
-        if (lookupEntity(name).isReadOnly()) {
+    	ObjEntity oe=getEntityResolver().lookupObjEntity(dataObj.getClass());
+        if (oe.isReadOnly()) {
             throw new CayenneRuntimeException(
-                "Attempt to commit a read-only object, " + name + ".");
+                "Attempt to commit a read-only object, " + oe.getName() + ".");
         }
     }
 
@@ -781,7 +779,7 @@ public class DataContext implements QueryEngine, Serializable {
             newIdMap.put(key, updAttrs.get(key));
         }
 
-        return (newIdMap != null) ? new ObjectId(id.getObjEntityName(), newIdMap) : null;
+        return (newIdMap != null) ? new ObjectId(id.getObjClass(), newIdMap) : null;
     }
 
     /** 
@@ -823,9 +821,9 @@ public class DataContext implements QueryEngine, Serializable {
                     .append("\nrelationship name: ")
                     .append(dbRel.getName())
                     .append(", src object: ")
-                    .append(dataObject.getObjectId().getObjEntityName())
+                    .append(dataObject.getObjectId().getObjClass().getName())
                     .append(", target obj: ")
-                    .append(targetDo.getObjectId().getObjEntityName());
+                    .append(targetDo.getObjectId().getObjClass().getName());
                 throw new CayenneRuntimeException(msg.toString());
             }
 
@@ -863,7 +861,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
         TempObjectId tempId = (TempObjectId) anObject.getObjectId();
-        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(tempId.getObjEntityName());
+        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(tempId.getObjClass());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = parent.dataNodeForObjEntity(objEntity);
 
@@ -905,7 +903,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        ObjectId permId = new ObjectId(objEntity.getName(), idMap);
+        ObjectId permId = new ObjectId(anObject.getClass(), idMap);
 
         // note that object registration did not changed (new id is not attached to context, only to temp. oid)
         tempId.setPermId(permId);

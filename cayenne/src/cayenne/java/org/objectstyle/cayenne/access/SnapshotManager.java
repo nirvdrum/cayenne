@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
@@ -133,7 +134,14 @@ public class SnapshotManager {
                 continue;
             }
 
-            ObjectId destId = new ObjectId(rel.getTargetEntity().getName(), destMap);
+			ObjEntity targetEntity=(ObjEntity)rel.getTargetEntity();
+			Class targetClass;
+			try {
+				targetClass = Class.forName(targetEntity.getClassName());
+			} catch (ClassNotFoundException e) {
+				throw new CayenneRuntimeException("Failed to load class for name "+targetEntity.getClassName()+" because "+e.getMessage());
+			}
+            ObjectId destId = new ObjectId(targetClass, destMap);
             anObject.writePropertyDirectly(
                 rel.getName(),
                 context.registeredObject(destId));
