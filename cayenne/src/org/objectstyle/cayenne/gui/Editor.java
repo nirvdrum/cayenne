@@ -853,6 +853,7 @@ implements ActionListener
 		closeProjectMenu.setEnabled(true);
 	    saveMenu.setEnabled(true);
         importDbMenu.setEnabled(true);
+        importEOMMenu.setEnabled(true);
         removeMenu.setEnabled(true);
 
 		createDataMapBtn.setEnabled(true);

@@ -54,11 +54,9 @@
  *
  */
  
- package org.objectstyle.cayenne.gui.action;
+package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
-
-import javax.swing.Icon;
 
 import org.objectstyle.cayenne.gui.event.Mediator;
 
@@ -80,6 +78,7 @@ public class ImportEOModelAction extends CayenneAction {
 	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent event) {
+		System.out.println("import eomodel");
 	}
 
 }
