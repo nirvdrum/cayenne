@@ -32,7 +32,7 @@ public class AddGalleryPage extends EditorPage {
 		Visit visit = (Visit) this.getPage().getVisit();
 		DataContext ctxt = visit.getDataContext();
 
-		ctxt.registerNewObject(gallery, "Gallery");
+		ctxt.registerNewObject(gallery);
 
 		// commit to the database
 		ctxt.commitChanges();

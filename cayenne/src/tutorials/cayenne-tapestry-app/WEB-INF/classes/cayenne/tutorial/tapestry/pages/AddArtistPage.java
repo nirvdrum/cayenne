@@ -42,7 +42,7 @@ public class AddArtistPage extends EditorPage {
 		if (getHasErrorMessage())
 			return;
 		
-		ctxt.registerNewObject(artist, "Artist");
+		ctxt.registerNewObject(artist);
 
 		// commit to the database
 		ctxt.commitChanges();

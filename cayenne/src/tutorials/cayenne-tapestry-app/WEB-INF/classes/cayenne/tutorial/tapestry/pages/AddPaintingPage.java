@@ -36,7 +36,7 @@ public class AddPaintingPage extends EditorPage {
 		Visit visit = (Visit) this.getPage().getVisit();
 		DataContext ctxt = visit.getDataContext();
 		
-		ctxt.registerNewObject(painting, "Painting");
+		ctxt.registerNewObject(painting);
 
 		artist.addToPaintingArray(painting);
 
