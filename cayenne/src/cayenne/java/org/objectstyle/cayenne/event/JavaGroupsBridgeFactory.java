@@ -96,7 +96,7 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
     public EventBridge createEventBridge(EventSubject localSubject, Map properties) {
         try {
             // sniff JavaGroups presence
-            Class.forName("org.javagroups.Channel");
+            Class.forName("org.jgroups.Channel");
             return createJavaGroupsBridge(localSubject, properties);
         } catch (Exception ex) {
             // recover from no JavaGroups
@@ -106,7 +106,7 @@ public class JavaGroupsBridgeFactory implements EventBridgeFactory {
 
     private EventBridge createNoopBridge() {
         logObj.warn(
-            "*** Remote events disabled. Reason: JavaGroups is not available. Download JavaGroups from http://www.jgroups.org/");
+            "*** Remote events disabled. Reason: JGroups is not available. Download JGroups from http://www.jgroups.org/");
         return new NoopEventBridge();
     }
 
