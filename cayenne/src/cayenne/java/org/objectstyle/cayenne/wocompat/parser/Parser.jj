@@ -235,7 +235,6 @@ Object leaf() :
 HashMap dictionary() : 
 { 
 	HashMap h;
-	Object key, val;
 }
 {
 	"{"  {h = new HashMap(); }

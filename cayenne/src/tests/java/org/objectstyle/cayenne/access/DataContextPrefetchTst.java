@@ -1,5 +1,4 @@
-/*
- * ====================================================================
+/* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/

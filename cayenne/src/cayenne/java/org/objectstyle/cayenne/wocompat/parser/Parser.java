@@ -152,7 +152,6 @@ public static void main(String args[]) {
 
   final public HashMap dictionary() throws ParseException {
         HashMap h;
-        Object key, val;
     jj_consume_token(10);
               h = new HashMap();
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
