@@ -55,10 +55,15 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.*;
-import org.apache.commons.collections.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.IteratorUtils;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 
 public class UpdateBatchQuery extends BatchQuery {
   private List dataObjectIds;

@@ -60,12 +60,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.collections.*;
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
@@ -75,8 +75,8 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
@@ -277,7 +277,7 @@ public class DataNode implements QueryEngine {
                         break;
                     }
                     if (interpreter != null) {
-                      int[] results = interpreter.execute((BatchQuery)nextQuery, con);
+                      interpreter.execute((BatchQuery)nextQuery, con);
                       continue;
                     }
                     // translate query

@@ -56,27 +56,29 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.query.*;
+import java.util.Iterator;
+import java.util.List;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 public class DeleteBatchQueryBuilder extends BatchQueryBuilder {
-  public DeleteBatchQueryBuilder(DbAdapter adapter) {
-    super.setAdapter(adapter);
-  }
-
-  public String query(BatchQuery batch) {
-    DeleteBatchQuery deleteBatch = (DeleteBatchQuery)batch;
-    String table = batch.getMetadata().getFullyQualifiedName();
-    List dbAttributes = batch.getDbAttributes();
-    StringBuffer query = new StringBuffer("DELETE FROM ");
-    query.append(table).append(" WHERE ");
-    for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
-      DbAttribute attribute = (DbAttribute)i.next();
-      query.append(attribute.getName()).append(" = ?");
-      if (i.hasNext()) query.append(" AND ");
+    public DeleteBatchQueryBuilder(DbAdapter adapter) {
+        super.setAdapter(adapter);
     }
-    return query.toString();
-  }
+
+    public String query(BatchQuery batch) {
+        String table = batch.getMetadata().getFullyQualifiedName();
+        List dbAttributes = batch.getDbAttributes();
+        StringBuffer query = new StringBuffer("DELETE FROM ");
+        query.append(table).append(" WHERE ");
+        for (Iterator i = dbAttributes.iterator(); i.hasNext();) {
+            DbAttribute attribute = (DbAttribute) i.next();
+            query.append(attribute.getName()).append(" = ?");
+            if (i.hasNext())
+                query.append(" AND ");
+        }
+        return query.toString();
+    }
 }

@@ -56,10 +56,12 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.query.*;
+import java.util.Iterator;
+import java.util.List;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 public class InsertBatchQueryBuilder extends BatchQueryBuilder {
   public InsertBatchQueryBuilder(DbAdapter adapter) {
@@ -67,7 +69,6 @@ public class InsertBatchQueryBuilder extends BatchQueryBuilder {
   }
 
   public String query(BatchQuery batch) {
-    InsertBatchQuery insertBatch = (InsertBatchQuery)batch;
     String table = batch.getMetadata().getFullyQualifiedName();
     List dbAttributes = batch.getDbAttributes();
     StringBuffer query = new StringBuffer("INSERT INTO ");

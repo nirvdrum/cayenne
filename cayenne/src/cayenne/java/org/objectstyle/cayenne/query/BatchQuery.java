@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
+import java.util.List;
+
+import org.objectstyle.cayenne.map.DbEntity;
 
 public abstract class BatchQuery extends AbstractQuery {
   protected DbEntity metadata;
