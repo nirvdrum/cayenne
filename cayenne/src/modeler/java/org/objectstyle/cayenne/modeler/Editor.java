@@ -80,14 +80,14 @@ public class Editor extends CayenneModelerFrame {
      * $HOME/.cayenne/modeler.log.
      */
     public static void configureLogging() {
-        Main.configureLogging();
+        new Main().configureLogging();
     }
 
     /** 
      * Returns a file correspinding to $HOME/.cayenne/modeler.log
      */
     public static File getLogFile() {
-        return Main.getLogFile();
+        return new Main().getLogFile();
     }
 
     public Editor() {}
