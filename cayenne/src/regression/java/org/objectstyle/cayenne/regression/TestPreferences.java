@@ -94,4 +94,16 @@ public class TestPreferences extends Preferences {
     public DataSourceInfo getConnectionInfo() {
         return connectionInfo;
     }
+    
+    protected boolean init(ExtendedProperties conf) {
+        boolean flag = super.init(conf);
+        
+        // change schema to the login name
+        if(schema == null && connectionInfo != null) {
+            schema = connectionInfo.getUserName();
+        }
+        
+        return flag;
+    }
+
 }

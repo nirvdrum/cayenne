@@ -35,7 +35,6 @@
 			<jvmarg value="-Xmx60m"/>
 			
 			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
-			<sysproperty key="cayenne.schema" value="TEST"/>			
 		</java>
 	</target>
 	

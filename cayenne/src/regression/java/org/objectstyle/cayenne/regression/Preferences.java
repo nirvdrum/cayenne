@@ -75,7 +75,7 @@ import org.apache.commons.lang.SystemUtils;
 public class Preferences {
     private File cayenneProject;
     private File workDirectory = new File(SystemUtils.JAVA_IO_TMPDIR);
-    private String schema;
+    protected String schema;
     private String schemaDirPrefix = "schema";
     private int tableCount = 20;
     private long seed = System.currentTimeMillis();
