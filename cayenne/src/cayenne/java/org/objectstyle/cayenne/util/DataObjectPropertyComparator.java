@@ -56,9 +56,10 @@
 package org.objectstyle.cayenne.util;
 
 import java.util.Comparator;
+import java.util.List;
 
 import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.Ordering;
 
 /**
  * Property comparator for CayenneDataObjects. Unlike a similar
@@ -68,43 +69,42 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrei Adamchik
  */
 public class DataObjectPropertyComparator implements Comparator {
-	protected boolean ascending;
-	protected String propertyName;
+    protected Ordering[] orderings;
 
-	public DataObjectPropertyComparator(String propertyName, boolean ascending) {
-		this.ascending = ascending;
-		this.propertyName = propertyName;
-	}
+    /**
+     * Constructor for DataObjectPropertyComparator.
+     */
+    public DataObjectPropertyComparator() {
+        super();
+    }
 
-	/**
-	 * Constructor for DataObjectPropertyComparator.
-	 */
-	public DataObjectPropertyComparator() {
-		super();
-	}
+    public DataObjectPropertyComparator(String propertyName, boolean ascending) {
+        orderings = new Ordering[1];
+        orderings[0] = new Ordering(propertyName, ascending);
+    }
 
-	/**
-	 * @see java.util.Comparator#compare(Object, Object)
-	 */
-	public int compare(Object o1, Object o2) {
-		return (ascending) ? compareAsc(o1, o2) : compareAsc(o2, o1);
-	}
+    /**
+     * Constructor ListSorter.
+     * @param orderings
+     */
+    public DataObjectPropertyComparator(List orderingsList) {
+        super();
+        int i;
+        orderings = new Ordering[orderingsList.size()];
+        for (i = 0; i < orderingsList.size(); i++) {
+            orderings[i] = (Ordering) orderingsList.get(i);
+        }
+    }
 
-	protected int compareAsc(Object o1, Object o2) {
-		if ((o1 == null && o2 == null) || o1 == o2) {
-			return 0;
-		} else if (o1 == null && o2 != null) {
-			return -1;
-		} else if (o1 != null && o2 == null) {
-			return 1;
-		}
-
-		CayenneDataObject do1 = (CayenneDataObject) o1;
-		CayenneDataObject do2 = (CayenneDataObject) o2;
-
-		Comparable p1 = (Comparable) do1.readNestedProperty(propertyName);
-		Comparable p2 = (Comparable) do2.readNestedProperty(propertyName);
-
-		return (p1 == null) ? -1 : p1.compareTo(p2);
-	}
+    public int compare(Object o1, Object o2) {
+        int i = 0;
+        int result = 0;
+        
+        //Evaluate each ordering until one returns non-zero.  If all return 0, all are equal
+        //As soon as one returns non-equal, return that value (all lower orderings are irrelevant)
+        while ((i < orderings.length) && (result == 0)) {
+            result = orderings[i++].compare(o1, o2);
+        }
+        return result;
+    }
 }

@@ -60,9 +60,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneDataObject;
-import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
 
 
 /** 
@@ -91,7 +91,7 @@ public class Ordering implements Comparator {
      */
     public static void orderList(List objects, List orderings) {
         checkObjectsClass(objects);
-        Collections.sort(objects, new Ordering.ListSorter(orderings));
+        Collections.sort(objects, new DataObjectPropertyComparator(orderings));
     }
 
     public Ordering() {}
@@ -231,33 +231,6 @@ public class Ordering implements Comparator {
             return compareResult;
         } else {
             return -compareResult;
-        }
-    }
-
-    public static class ListSorter implements Comparator {
-        private Ordering[] orderings;
-        /**
-         * Constructor ListSorter.
-         * @param orderings
-         */
-        public ListSorter(List orderingsList) {
-            super();
-            int i;
-            orderings = new Ordering[orderingsList.size()];
-            for (i = 0; i < orderingsList.size(); i++) {
-                orderings[i] = (Ordering) orderingsList.get(i);
-            }
-        }
-
-        public int compare(Object o1, Object o2) {
-            int i = 0;
-            int result = 0;
-            //Evaluate each ordering until one returns non-zero.  If all return 0, all are equal
-            //As soon as one returns non-equal, return that value (all lower orderings are irrelevant)
-            while ((i < orderings.length) && (result == 0)) {
-                result = orderings[i++].compare(o1, o2);
-            }
-            return result;
         }
     }
 }
