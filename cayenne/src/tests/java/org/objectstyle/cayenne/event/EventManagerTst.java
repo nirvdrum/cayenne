@@ -263,6 +263,13 @@ public class EventManagerTst
 		Assert.assertEquals(false, _eventManager.removeListener(this));
 	}
 
+	public void testRemoveSpecificSender() throws NoSuchMethodException {
+		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
+		_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject, this);
+		Assert.assertTrue(_eventManager.removeListener(this, subject, this));
+		Assert.assertEquals(false, _eventManager.removeListener(this));
+	}
+
 	public void testRemoveAll() throws NoSuchMethodException {
 		EventSubject subject1 = EventSubject.getSubject(this.getClass(), "XXX1");
 		EventSubject subject2 = EventSubject.getSubject(this.getClass(), "XXX2");

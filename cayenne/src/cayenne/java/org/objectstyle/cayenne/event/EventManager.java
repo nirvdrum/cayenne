@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.apache.commons.collections.iterators.SingletonIterator;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Invocation;
 
@@ -196,13 +197,40 @@ public class EventManager extends Object {
 	 */
 	synchronized public boolean removeListener(EventListener listener,
 												EventSubject subject) {
+		return this.removeListener(listener, subject, null);
+	}
+
+	/**
+	 * Unregister the specified listener for the events about the given subject
+	 * and the given sender.
+	 * 
+	 * @param listener the object to be unregistered
+	 * @param subject the subject from which the listener is to be unregistered
+	 * @param sender the object whose events the listener was interested in;
+	 * <code>null</code> means 'any sender'.
+	 * @return <code>true</code> if <code>listener</code> could be removed for
+	 * the given subject, else returns <code>false</code>.
+	 */
+	synchronized public boolean removeListener(EventListener listener,
+												EventSubject subject,
+												Object sender) {
 		boolean didRemove = false;
 
 		if ((listener != null) && (subject != null)) {
 			Map subjectQueues = this.invocationQueuesForSubject(subject);
 			if (subjectQueues != null) {
+				Iterator queueIter;
+				
+				// remove only listeners for sender?
+				if (sender != null) {
+					Set senderQueue = this.invocationQueueForSubjectAndSender(subject, sender);
+					queueIter = new SingletonIterator(senderQueue);
+				}
+				else {
+					queueIter = subjectQueues.values().iterator();
+				}
+
 				// iterate over all invocation queues for this subject
-				Iterator queueIter = subjectQueues.values().iterator();
 				while (queueIter.hasNext()) {
 					Set invocations = (Set)queueIter.next();
 					if ((invocations != null) && (invocations.isEmpty() == false)) {
@@ -219,7 +247,7 @@ public class EventManager extends Object {
 				}
 			}
 		}
-
+	
 		return didRemove;
 	}
 
