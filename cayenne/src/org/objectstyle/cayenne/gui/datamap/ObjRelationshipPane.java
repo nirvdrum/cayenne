@@ -210,7 +210,7 @@ public class ObjRelationshipPane
 			db_rel_list = dg.getDbRelationshipList();
 		else if (ChooseDbRelationshipDialog.NEW == dg.getChoice())
 			db_rel_list = new ArrayList();
-			
+
 		ResolveDbRelationshipDialog dialog =
 			new ResolveDbRelationshipDialog(
 				db_rel_list,
@@ -250,10 +250,17 @@ public class ObjRelationshipPane
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		if (e.getSource() == this)
 			return;
+
 		ObjEntity entity = (ObjEntity) e.getEntity();
-		if (null == entity || e.isEntityChanged() == false)
-			return;
-		rebuildTable(entity);
+		if (entity != null && e.isEntityChanged()) {
+			rebuildTable(entity);
+		}
+		
+		// if an entity was selected on a tree, 
+		// unselect currently selected row
+		if (e.isUnselectAttributes()) {
+			table.clearSelection();
+		}
 	}
 
 	/** Create DefaultComboBoxModel with all obj entity names. */
@@ -284,14 +291,15 @@ public class ObjRelationshipPane
 	public void objRelationshipChanged(RelationshipEvent e) {
 		table.select(e.getRelationship());
 	}
-	
+
 	public void objRelationshipAdded(RelationshipEvent e) {
 		rebuildTable((ObjEntity) e.getEntity());
 		table.select(e.getRelationship());
 	}
 
-	public void objRelationshipRemoved(RelationshipEvent e) {		
-		ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
+	public void objRelationshipRemoved(RelationshipEvent e) {
+		ObjRelationshipTableModel model =
+			(ObjRelationshipTableModel) table.getModel();
 		int ind = model.getObjectList().indexOf(e.getRelationship());
 		model.removeRelationship(e.getRelationship());
 		table.select(ind);

@@ -111,7 +111,8 @@ public class ObjAttributePane
 	public void processExistingSelection() {
 		ObjAttribute rel = null;
 		if (table.getSelectedRow() >= 0) {
-			ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
+			ObjAttributeTableModel model =
+				(ObjAttributeTableModel) table.getModel();
 			rel = model.getAttribute(table.getSelectedRow());
 		}
 		AttributeDisplayEvent ev;
@@ -138,8 +139,9 @@ public class ObjAttributePane
 		table.select(e.getAttribute());
 	}
 
-	public void objAttributeRemoved(AttributeEvent e) {		
-		ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
+	public void objAttributeRemoved(AttributeEvent e) {
+		ObjAttributeTableModel model =
+			(ObjAttributeTableModel) table.getModel();
 		int ind = model.getObjectList().indexOf(e.getAttribute());
 		model.removeRow(e.getAttribute());
 		table.select(ind);
@@ -157,11 +159,17 @@ public class ObjAttributePane
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		if (e.getSource() == this)
 			return;
-		ObjEntity entity = (ObjEntity) e.getEntity();
-		if (null == entity || e.isEntityChanged() == false)
-			return;
 
-		rebuildTable(entity);
+		ObjEntity entity = (ObjEntity) e.getEntity();
+		if (entity != null && e.isEntityChanged()) {
+			rebuildTable(entity);
+		}
+
+		// if an entity was selected on a tree, 
+		// unselect currently selected row
+		if (e.isUnselectAttributes()) {
+			table.clearSelection();
+		}
 	}
 
 	protected void rebuildTable(ObjEntity ent) {
@@ -177,16 +185,16 @@ public class ObjAttributePane
 	protected void setUpTableStructure(
 		ObjAttributeTableModel model,
 		ObjEntity entity) {
-			
+
 		TableColumn col = table.getColumnModel().getColumn(model.OBJ_ATTRIBUTE);
 		col.setMinWidth(150);
 		col = table.getColumnModel().getColumn(model.OBJ_ATTRIBUTE_TYPE);
 		col.setMinWidth(150);
-		
+
 		JComboBox combo = new JComboBox(Util.getRegisteredTypeNames());
 		combo.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(combo));
-		
+
 		// If DbEntity is specified, display Database info as well.
 		if (entity.getDbEntity() != null) {
 			col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE);
@@ -208,17 +216,18 @@ public class ObjAttributePane
 		if (e.getSource() == this) {
 			return;
 		}
-		
-		ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
+
+		ObjAttributeTableModel model =
+			(ObjAttributeTableModel) table.getModel();
 		if (model.getDbEntity() != ((ObjEntity) e.getEntity()).getDbEntity()) {
 			model.resetDbEntity();
 			setUpTableStructure(model, (ObjEntity) e.getEntity());
 		}
 	}
-	
+
 	public void objEntityAdded(EntityEvent e) {
 	}
-	
+
 	public void objEntityRemoved(EntityEvent e) {
 	}
 

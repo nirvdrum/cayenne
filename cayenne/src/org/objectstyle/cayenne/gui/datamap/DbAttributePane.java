@@ -60,15 +60,23 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Logger;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /** 
  * Detail view of the DbEntity attributes. 
@@ -83,8 +91,7 @@ public class DbAttributePane
 		ListSelectionListener,
 		DbAttributeListener,
 		ExistingSelectionProcessor,
-		ActionListener
- {
+		ActionListener {
 
 	static Logger logObj = Logger.getLogger(DbAttributePane.class.getName());
 
@@ -146,16 +153,15 @@ public class DbAttributePane
 			att = model.getAttribute(table.getSelectedRow());
 			editParams.setEnabled(att instanceof DerivedDbAttribute);
 		}
-		
-		
-		mediator.fireDbAttributeDisplayEvent(new AttributeDisplayEvent(
+
+		mediator.fireDbAttributeDisplayEvent(
+			new AttributeDisplayEvent(
 				this,
 				att,
 				mediator.getCurrentDbEntity(),
 				mediator.getCurrentDataMap(),
 				mediator.getCurrentDataDomain()));
 	}
-	
 
 	public void dbAttributeChanged(AttributeEvent e) {
 		table.select(e.getAttribute());
@@ -177,6 +183,12 @@ public class DbAttributePane
 		DbEntity entity = (DbEntity) e.getEntity();
 		if (entity != null && e.isEntityChanged()) {
 			rebuildTable(entity);
+		}
+
+		// if an entity was selected on a tree, 
+		// unselect currently selected row
+		if (e.isUnselectAttributes()) {
+			table.clearSelection();
 		}
 	}
 

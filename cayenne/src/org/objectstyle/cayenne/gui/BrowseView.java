@@ -56,20 +56,29 @@
 package org.objectstyle.cayenne.gui;
 
 import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
-import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+import javax.swing.ImageIcon;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.tree.*;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.action.CayenneAction;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.DataDomainWrapper;
+import org.objectstyle.cayenne.gui.util.DataMapWrapper;
+import org.objectstyle.cayenne.gui.util.DataNodeWrapper;
+import org.objectstyle.cayenne.gui.util.EntityWrapper;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -82,7 +91,6 @@ import org.objectstyle.cayenne.map.*;
 public class BrowseView
 	extends JScrollPane
 	implements
-		TreeSelectionListener,
 		DomainDisplayListener,
 		DomainListener,
 		DataMapDisplayListener,
@@ -114,7 +122,21 @@ public class BrowseView
 		setViewportView(browseTree);
 		browseTree.setCellRenderer(new BrowseViewRenderer());
 		load();
-		browseTree.addTreeSelectionListener(this);
+
+		// listen for mouse events
+		MouseListener ml = new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				int selRow = browseTree.getRowForLocation(e.getX(), e.getY());
+				if (selRow != -1) {
+					if (e.getClickCount() >= 1) {
+						processSelection(
+							browseTree.getPathForLocation(e.getX(), e.getY()));
+					}
+				}
+			}
+		};
+		browseTree.addMouseListener(ml);
+
 		mediator.addDomainListener(this);
 		mediator.addDomainDisplayListener(this);
 		mediator.addDataNodeListener(this);
@@ -159,23 +181,21 @@ public class BrowseView
 	}
 
 	private DefaultMutableTreeNode loadDomain(DataDomain temp_domain) {
-		DefaultMutableTreeNode domain_ele;
-		domain_ele =
+		DefaultMutableTreeNode domain_ele =
 			new DefaultMutableTreeNode(
 				new DataDomainWrapper(temp_domain),
 				true);
 		List map_list = temp_domain.getMapList();
 		Iterator map_iter = map_list.iterator();
 		while (map_iter.hasNext()) {
-			DefaultMutableTreeNode map_ele;
-			map_ele = loadMap((DataMap) map_iter.next());
+			DefaultMutableTreeNode map_ele = loadMap((DataMap) map_iter.next());
 			domain_ele.add(map_ele);
-		} // End maps
+		}
 		DataNode[] nodes = temp_domain.getDataNodes();
 		for (int node_count = 0; node_count < nodes.length; node_count++) {
 			DefaultMutableTreeNode node_ele = loadNode(nodes[node_count]);
 			domain_ele.add(node_ele);
-		} // End for(data nodes)
+		}
 		return domain_ele;
 	}
 
@@ -212,7 +232,7 @@ public class BrowseView
 		for (int j = 0; j < maps.length; j++) {
 			DefaultMutableTreeNode map_ele = loadMap(maps[j]);
 			node_ele.add(map_ele);
-		} // End for(maps)
+		}
 		return node_ele;
 	}
 
@@ -288,7 +308,7 @@ public class BrowseView
 		if (e.getSource() == this) {
 			return;
 		}
-		
+
 		DefaultMutableTreeNode treeNode = getDomainNode(e.getDomain());
 		if (treeNode != null) {
 			removeNode(treeNode);
@@ -298,7 +318,8 @@ public class BrowseView
 	public void dataNodeChanged(DataNodeEvent e) {
 		if (e.getSource() == this)
 			return;
-		DefaultMutableTreeNode node = getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
+		DefaultMutableTreeNode node =
+			getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
 		if (null != node) {
 			model.nodeChanged(node);
 			DataMap[] maps = e.getDataNode().getDataMaps();
@@ -317,7 +338,7 @@ public class BrowseView
 							found = true;
 							break;
 						}
-					} // End for(j)
+					}
 					if (false == found) {
 						DefaultMutableTreeNode map_ele = loadMap(maps[i]);
 						model.insertNodeInto(
@@ -345,14 +366,15 @@ public class BrowseView
 					if (!found) {
 						logObj.fine(
 							"About to remove map " + wrap + " from node");
-                        removeNode(child);
+						removeNode(child);
 						break;
 					}
 				} // End for(j)
 			}
 
-		} // End if node found
+		}
 	}
+
 	public void dataNodeAdded(DataNodeEvent e) {
 		if (e.getSource() == this)
 			return;
@@ -364,17 +386,17 @@ public class BrowseView
 		node = loadNode(e.getDataNode());
 		model.insertNodeInto(node, parent, parent.getChildCount());
 	}
-	
+
 	public void dataNodeRemoved(DataNodeEvent e) {
 		if (e.getSource() == this) {
 			return;
 		}
-		
+
 		DefaultMutableTreeNode treeNode =
 			getDataSourceNode(mediator.getCurrentDataDomain(), e.getDataNode());
 		if (treeNode != null) {
-            removeNode(treeNode);
-		}		
+			removeNode(treeNode);
+		}
 	}
 
 	public void dataMapChanged(DataMapEvent e) {
@@ -397,31 +419,32 @@ public class BrowseView
 		node = loadMap(e.getDataMap());
 		model.insertNodeInto(node, parent, parent.getChildCount());
 	}
-	
+
 	public void dataMapRemoved(DataMapEvent e) {
 		if (e.getSource() == this) {
 			return;
 		}
-		
+
 		DataMap map = e.getDataMap();
 		DataDomain domain = mediator.getCurrentDataDomain();
 		DefaultMutableTreeNode treeNode = getMapNode(domain, map);
 		if (treeNode != null) {
 			removeNode(treeNode);
 		}
-		
+
 		// Clean up map from the nodes
 		DataNode[] nodes = domain.getDataNodes();
 		for (int i = 0; i < nodes.length; i++) {
 			DataMap[] maps = nodes[i].getDataMaps();
 			for (int j = 0; j < maps.length; j++) {
 				if (maps[j] == map) {
-					DefaultMutableTreeNode mapNode = getMapNode(domain, nodes[i], map);
+					DefaultMutableTreeNode mapNode =
+						getMapNode(domain, nodes[i], map);
 					if (null != mapNode) {
 						model.removeNodeFromParent(mapNode);
 					}
-				} 
-			} 
+				}
+			}
 		}
 	}
 
@@ -535,7 +558,7 @@ public class BrowseView
 				e.getEntity());
 
 		if (treeNode != null) {
-            removeNode(treeNode);
+			removeNode(treeNode);
 		}
 
 		// remove from DataMap *reference* tree
@@ -556,10 +579,10 @@ public class BrowseView
 	 * Selects a new node adjacent to the currently selected node instead.
 	 */
 	protected void removeNode(DefaultMutableTreeNode toBeRemoved) {
-		
+
 		// lookup for the new selected node
 		if (currentNode == toBeRemoved) {
-			
+
 			// first search siblings
 			DefaultMutableTreeNode newSelection = toBeRemoved.getNextSibling();
 			if (newSelection == null) {
@@ -567,7 +590,8 @@ public class BrowseView
 
 				// try parent
 				if (newSelection == null) {
-					newSelection = (DefaultMutableTreeNode)toBeRemoved.getParent();
+					newSelection =
+						(DefaultMutableTreeNode) toBeRemoved.getParent();
 
 					// search the whole tree
 					if (newSelection == null) {
@@ -584,7 +608,7 @@ public class BrowseView
 			currentNode = newSelection;
 			showNode(currentNode);
 		}
-		
+
 		// remove this node
 		model.removeNodeFromParent(toBeRemoved);
 	}
@@ -723,25 +747,25 @@ public class BrowseView
 	}
 
 	/** 
-	 * Called when different node is selected. 
-	 * Changes current node and causes reloading of the 
-	 * corresponding detail view by calling fireEntityDisplayEvent(). 
+	 * Processes node selection regardless of wether 
+	 * a new node was selected, or an already selected node
+	 * was clicked again. Normally called from event listener
+	 * methods.
 	 */
-	public void valueChanged(TreeSelectionEvent e) {
-		TreePath path = e.getNewLeadSelectionPath();
+	public void processSelection(TreePath path) {
 		if (path == null) {
 			return;
 		}
 
 		currentNode = (DefaultMutableTreeNode) path.getLastPathComponent();
-		
+
 		Object[] data = getUserObjects(currentNode);
 		if (data.length == 0) {
 			// this should clear the right-side panel
 			mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, null));
 			return;
 		}
-		
+
 		Object obj = data[data.length - 1];
 		if (obj instanceof DataDomain) {
 			mediator.fireDomainDisplayEvent(
@@ -769,42 +793,27 @@ public class BrowseView
 						(DataDomain) data[data.length - 2],
 						(DataNode) obj));
 			}
-		} else if (obj instanceof ObjEntity) {
+		} else if (obj instanceof Entity) {
+			EntityDisplayEvent e =
+				new EntityDisplayEvent(this, (Entity) obj, false);
+			e.setUnselectAttributes(true);
 			if (data.length == 4) {
-				mediator.fireObjEntityDisplayEvent(
-					new EntityDisplayEvent(
-						this,
-						(Entity) obj,
-						(DataMap) data[data.length - 2],
-						(DataNode) data[data.length - 3],
-						(DataDomain) data[data.length - 4]));
+				e.setDataMap((DataMap) data[data.length - 2]);
+				e.setDomain((DataDomain) data[data.length - 4]);
+				e.setNode((DataNode) data[data.length - 3]);
 			} else if (data.length == 3) {
-				mediator.fireObjEntityDisplayEvent(
-					new EntityDisplayEvent(
-						this,
-						(Entity) obj,
-						(DataMap) data[data.length - 2],
-						(DataDomain) data[data.length - 3]));
+				e.setDataMap((DataMap) data[data.length - 2]);
+				e.setDomain((DataDomain) data[data.length - 3]);
+
 			}
-		} else if (obj instanceof DbEntity) {
-			if (data.length == 4) {
-				mediator.fireDbEntityDisplayEvent(
-					new EntityDisplayEvent(
-						this,
-						(Entity) obj,
-						(DataMap) data[data.length - 2],
-						(DataNode) data[data.length - 3],
-						(DataDomain) data[data.length - 4]));
-			} else if (data.length == 3) {
-				mediator.fireDbEntityDisplayEvent(
-					new EntityDisplayEvent(
-						this,
-						(Entity) obj,
-						(DataMap) data[data.length - 2],
-						(DataDomain) data[data.length - 3]));
+
+			if (obj instanceof ObjEntity) {
+				mediator.fireObjEntityDisplayEvent(e);
+			} else if (obj instanceof DbEntity) {
+				mediator.fireDbEntityDisplayEvent(e);
 			}
 		}
-	} // End valueChanged()
+	}
 
 	/** Gets array of the user objects ending with this and starting with one under root. 
 	  * That is the array of actual objects rather than wrappers.*/
@@ -906,26 +915,34 @@ public class BrowseView
 		public BrowseViewRenderer() {
 			ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
 			URL url =
-				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dom.gif");
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-dom.gif");
 			domainIcon = new ImageIcon(url);
 
-			url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
+			url =
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
 			nodeIcon = new ImageIcon(url);
 
-			url = cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-datamap.gif");
+			url =
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-datamap.gif");
 			mapIcon = new ImageIcon(url);
 
 			url =
-				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
 			dbEntityIcon = new ImageIcon(url);
-			
+
 			url =
-				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-derived-dbentity.gif");
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH
+						+ "images/icon-derived-dbentity.gif");
 			derivedDbEntityIcon = new ImageIcon(url);
 
-
 			url =
-				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
+				cl.getResource(
+					CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
 			objEntityIcon = new ImageIcon(url);
 		}
 
@@ -960,11 +977,9 @@ public class BrowseView
 				EntityWrapper wrap = (EntityWrapper) obj;
 				if (wrap.getEntity() instanceof DerivedDbEntity) {
 					setIcon(derivedDbEntityIcon);
-				}
-				else if (wrap.getEntity() instanceof DbEntity) {
+				} else if (wrap.getEntity() instanceof DbEntity) {
 					setIcon(dbEntityIcon);
-				}
-				else if (wrap.getEntity() instanceof ObjEntity) {
+				} else if (wrap.getEntity() instanceof ObjEntity) {
 					setIcon(objEntityIcon);
 				}
 			}

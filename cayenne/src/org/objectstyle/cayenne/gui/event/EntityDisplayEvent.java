@@ -53,80 +53,172 @@ package org.objectstyle.cayenne.gui.event;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 
+/** 
+ * This event is sent when the current entity has model changed.
+ * It will trigger reloading of detail views of entities.
+ */
+public class EntityDisplayEvent extends EventObject {
+	protected Entity entity;
+	protected DataMap dataMap;
+	protected DataDomain domain;
+	protected DataNode node;
 
-/** Current Entity model changed.
-  * Reloading of detail views of DataMapEditor 
-  * will be done using this eventt. */
-public class EntityDisplayEvent extends EventObject
-{
-	private Entity entity;
-	private DataMap dataMap;
-	private DataDomain domain;
-	private DataNode node;
 	/** Reset the tab display to tab 0 */
-	private boolean tabReset = false;
+	protected boolean tabReset = false;
+
 	/** True if different from current entity */
-	boolean entityChanged = true;
-	
-	/**  */
-	private EntityDisplayEvent(Object src, Entity temp_entity)
-	{
-		this (src, temp_entity, false);
+	protected boolean entityChanged = true;
+
+	protected boolean unselectAttributes;
+
+	public EntityDisplayEvent(Object src, Entity temp_entity) {
+		this(src, temp_entity, false);
 	}
-	
-	private EntityDisplayEvent(Object src, Entity temp_entity
-	, boolean temp_reset) {
+
+	public EntityDisplayEvent(Object src, Entity entity, boolean tabReset) {
 		super(src);
-		entity = temp_entity;
-		tabReset = temp_reset;
+		this.entity = entity;
+		this.tabReset = tabReset;
 	}
 
-	public EntityDisplayEvent (Object src, Entity temp_entity
-	, DataMap data_map, DataDomain temp_domain) 
-	{
-		this(src, temp_entity, data_map, temp_domain, false);
+	public EntityDisplayEvent(
+		Object src,
+		Entity entity,
+		DataMap dataMap,
+		DataDomain domain) {
+		this(src, entity, dataMap, domain, false);
 	}
 
-	public EntityDisplayEvent (Object src, Entity temp_entity
-	, DataMap data_map, DataDomain temp_domain, boolean temp_reset) 
-	{
-		this(src, temp_entity, temp_reset);
-		dataMap = data_map;
-		domain = temp_domain;
+	public EntityDisplayEvent(
+		Object src,
+		Entity entity,
+		DataMap dataMap,
+		DataDomain tempDomain,
+		boolean tabReset) {
+			
+		this(src, entity, tabReset);
+		this.dataMap = dataMap;
+		this.domain = domain;
 	}
-	
 
-	
-	public EntityDisplayEvent (Object src, Entity temp_entity
-	, DataMap data_map, DataNode temp_node, DataDomain temp_domain)
-	{
-		this(src, temp_entity, data_map, temp_domain);
-		node = temp_node;
-	}	
+	public EntityDisplayEvent(
+		Object src,
+		Entity entity,
+		DataMap dataMap,
+		DataNode node,
+		DataDomain domain) {
+			
+		this(src, entity, dataMap, domain);
+		this.node = node;
+	}
 
 	/** Get [new current] entity (obj or db). */
-	public Entity getEntity() {return entity;}
+	public Entity getEntity() {
+		return entity;
+	}
 
 	/** Get dataMap. */
-	public DataMap getDataMap() {return dataMap;}
+	public DataMap getDataMap() {
+		return dataMap;
+	}
 
 	/** Get domain for this data map. */
-	public DataDomain getDomain() {return domain;}
+	public DataDomain getDomain() {
+		return domain;
+	}
 
 	/** Get data node (data source) associated with this data map. */
-	public DataNode getDataNode() {return node;}
-	
-	public boolean isTabReset() { return tabReset;}
-	
+	public DataNode getDataNode() {
+		return node;
+	}
+
+	public boolean isTabReset() {
+		return tabReset;
+	}
+
 	/** True if entity different from current entity. */
-	public boolean isEntityChanged() {return entityChanged;}
-	public void setEntityChanged(boolean temp) {entityChanged = temp;}
+	public boolean isEntityChanged() {
+		return entityChanged;
+	}
+	public void setEntityChanged(boolean temp) {
+		entityChanged = temp;
+	}
+
+	/**
+	 * Returns the unselectAttributes.
+	 * @return boolean
+	 */
+	public boolean isUnselectAttributes() {
+		return unselectAttributes;
+	}
+
+	/**
+	 * Sets the unselectAttributes.
+	 * @param unselectAttributes The unselectAttributes to set
+	 */
+	public void setUnselectAttributes(boolean unselectAttributes) {
+		this.unselectAttributes = unselectAttributes;
+	}
+
+	/**
+	 * Returns the node.
+	 * @return DataNode
+	 */
+	public DataNode getNode() {
+		return node;
+	}
+
+
+	/**
+	 * Sets the dataMap.
+	 * @param dataMap The dataMap to set
+	 */
+	public void setDataMap(DataMap dataMap) {
+		this.dataMap = dataMap;
+	}
+
+
+	/**
+	 * Sets the domain.
+	 * @param domain The domain to set
+	 */
+	public void setDomain(DataDomain domain) {
+		this.domain = domain;
+	}
+
+
+	/**
+	 * Sets the entity.
+	 * @param entity The entity to set
+	 */
+	public void setEntity(Entity entity) {
+		this.entity = entity;
+	}
+
+
+	/**
+	 * Sets the node.
+	 * @param node The node to set
+	 */
+	public void setNode(DataNode node) {
+		this.node = node;
+	}
+
+
+	/**
+	 * Sets the tabReset.
+	 * @param tabReset The tabReset to set
+	 */
+	public void setTabReset(boolean tabReset) {
+		this.tabReset = tabReset;
+	}
+
 
 }

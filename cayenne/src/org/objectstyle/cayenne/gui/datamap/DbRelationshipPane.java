@@ -199,9 +199,15 @@ public class DbRelationshipPane
 	/** Loads obj relationships into table. */
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
 		DbEntity entity = (DbEntity) e.getEntity();
-		if (null == entity || !e.isEntityChanged())
-			return;
-		rebuildTable(entity);
+		if (entity != null && e.isEntityChanged()) {
+			rebuildTable(entity);
+		}
+
+		// if an entity was selected on a tree, 
+		// unselect currently selected row
+		if (e.isUnselectAttributes()) {
+			table.clearSelection();
+		}
 	}
 
 	protected void rebuildTable(DbEntity dbEnt) {
@@ -262,7 +268,8 @@ public class DbRelationshipPane
 	}
 
 	public void dbRelationshipRemoved(RelationshipEvent e) {
-		DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
+		DbRelationshipTableModel model =
+			(DbRelationshipTableModel) table.getModel();
 		int ind = model.getObjectList().indexOf(e.getRelationship());
 		model.removeRelationship(e.getRelationship());
 		table.select(ind);
