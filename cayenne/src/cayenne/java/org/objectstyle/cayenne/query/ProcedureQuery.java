@@ -124,7 +124,13 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * Creates a ProcedureQuery based on a stored procedure.
+     * Creates a ProcedureQuery based on a stored procedure. 
+     * 
+     * <p>Performance Note: with current EntityResolver implementation it is preferrable
+     * to use Procedure object instead of String as a query root. String root can cause
+     * unneeded EntityResolver reindexing on every call. See this mailing list thread:
+     * <a href="http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html">
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html</a></p>
      * 
      * @param procedureName A name of the stored procedure. For this query to work, a
      *            procedure with this name must be mapped in Cayenne.
@@ -145,6 +151,12 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
+     * <p>Performance Note: with current EntityResolver implementation it is preferrable
+     * to use Procedure object instead of String as a query root. String root can cause
+     * unneeded EntityResolver reindexing on every call. See this mailing list thread:
+     * <a href="http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html">
+     * http://objectstyle.org/cayenne/lists/cayenne-user/2005/01/0109.html</a></p>
+     * 
      * @since 1.1
      */
     public ProcedureQuery(String procedureName, Class resultType) {
