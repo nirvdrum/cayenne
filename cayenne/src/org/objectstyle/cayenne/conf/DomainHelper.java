@@ -69,6 +69,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.util.AbstractHandler;
@@ -260,10 +261,21 @@ public class DomainHelper {
 
         for (int i = 0; i < nodes.length; i++) {
             pw.println("\t<node name=\"" + nodes[i].getName().trim() + "\"" );
-            pw.println("\t\t datasource=\""+ nodes[i].getDataSourceLocation().trim() + "\"");
+            String datasource = nodes[i].getDataSourceLocation();
+            if (null != datasource) 
+            	datasource = datasource.trim();
+            else 
+            	datasource = "";
+            pw.println("\t\t datasource=\""+ datasource + "\"");
             if (nodes[i].getAdapter() != null)
             	pw.println("\t\t adapter=\""+ nodes[i].getAdapter().getClass().getName() + "\"");
-            pw.println("\t\t factory=\""+ nodes[i].getDataSourceFactory() + "\">");
+            else 
+            	pw.println("\t\t adapter=\"\"");
+            String factory = nodes[i].getDataSourceFactory();
+            if (null != factory)
+            	factory = factory.trim();
+            else factory = "";
+            pw.println("\t\t factory=\""+ factory + "\">");
             DataMap[] map_arr = nodes[i].getDataMaps();
             for (int j = 0; map_arr != null && j < map_arr.length; j++) {
                 pw.println("\t\t\t<map-ref name=\"" + map_arr[j].getName().trim() + "\"/>");
@@ -273,6 +285,20 @@ public class DomainHelper {
         pw.println("</domain>");
     }
 
+
+	public static void storeDataNode(PrintWriter pw, DataSourceInfo info) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("<driver class=\"" + info.getJdbcDriver() + "\">");
+		buf.append("\n\t<url value=\"" + info.getDataSourceUrl() + "\"/>");
+		buf.append("\n\t<connectionPool min=\"" + info.getMinConnections() + "\" max=\""
+					+ info.getMaxConnections() + "\" />");
+		if (info.getUserName() != null && info.getPassword() != null)
+		{
+			buf.append("\n\t<login userName=\"" + info.getUserName() 
+					+ "\" password=\"" + info.getPassword() + "\" />");
+		}
+		buf.append("\n</driver>");
+	}
 
     // SAX handlers start below
 

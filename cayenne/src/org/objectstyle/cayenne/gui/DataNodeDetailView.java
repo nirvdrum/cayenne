@@ -269,18 +269,21 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		
 		if (src == factory) {
 			String ele = (String)factory.getModel().getSelectedItem();
-			if (null != ele) {
+			if (null != ele && ele.trim().length() > 0) {
 				if (ele.equals(DataSourceFactory.DIRECT_FACTORY))
 					fileBtn.setEnabled(true);
 				else 
 					fileBtn.setEnabled(false);
 				mediator.getCurrentDataNode().setDataSourceFactory(ele);
 			}
+			else 
+				mediator.getCurrentDataNode().setDataSourceFactory(null);
 		} else if (src == adapter) {
 			String ele = (String)adapter.getModel().getSelectedItem();
 			DbAdapter adapt = null; 
 			try {
-				adapt = (DbAdapter)Class.forName(ele).getDeclaredConstructors()[0].newInstance(new Object[0]);
+				if (ele != null && ele.trim().length() > 0)
+					adapt = (DbAdapter)Class.forName(ele).getDeclaredConstructors()[0].newInstance(new Object[0]);
 			} catch (Exception ex) {
 				System.out.println(ex.getMessage());
 				ex.printStackTrace();
@@ -352,7 +355,10 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		name.setText(oldName);
 		location.setText(node.getDataSourceLocation());
 		populateFactory(node.getDataSourceFactory());
-		populateDbAdapter(node.getAdapter().getClass().getName().trim());
+		DbAdapter adapter = node.getAdapter();
+		if (null != adapter)
+			populateDbAdapter(adapter.getClass().getName().trim());
+		else populateDbAdapter("");
 		DataSourceInfo info = src.getDataSourceInfo();
 		populateDataSourceInfo(info);
 		System.out.println("In currentDataNodeChanged() 2.0");
