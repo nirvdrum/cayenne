@@ -216,7 +216,7 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
-    protected Object readProperty(String propName) {
+    public Object readProperty(String propName) {
         resolveFault();
 
         Object object = readPropertyDirectly(propName);
@@ -234,7 +234,7 @@ public class CayenneDataObject implements DataObject {
         return values.get(propName);
     }
 
-    protected void writeProperty(String propName, Object val) {
+    public void writeProperty(String propName, Object val) {
         resolveFault();
 
         // 1. retain object snapshot to allow clean changes tracking

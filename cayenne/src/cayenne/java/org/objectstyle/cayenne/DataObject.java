@@ -125,7 +125,7 @@ public interface DataObject extends java.io.Serializable {
      * Property path (or nested property) is a 
      * dot-separated path used to traverse object relationships until the final object 
      * is found. If a null object found while traversing path, null is returned. If a 
-     * list is encountered in the middle of the path, CayenneRuntimeException is thrown. 
+     * list is encountered in the middle of the path, CayenneRuntimeException is thrown.
      * Unlike {@link #readPropertyDirectly(String)}, this method will resolve an object
      * if it is HOLLOW.
      *
@@ -155,6 +155,20 @@ public interface DataObject extends java.io.Serializable {
      *
      */
     public Object readNestedProperty(String path);
+    
+    /**
+    * Returns a value of the property identified by propName. Resolves faults if needed.
+    * This method can safely be used instead of or in addition to the auto-generated property
+    * accessors in subclasses of CayenneDataObject.
+    */
+    public Object readProperty(String propName);
+
+    /**
+    * Sets the property with the name propName to the new value val. Resolves faults if needed
+    * This method can safely be used instead of or in addition to the auto-generated property
+    * modifiers in subclasses of CayenneDataObject.
+    */
+    public void writeProperty(String propName, Object val);
 
     /**
      * @deprecated Since 1.0.1 this method is no longer needed.
