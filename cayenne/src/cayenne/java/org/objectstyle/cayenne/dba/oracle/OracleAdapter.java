@@ -56,8 +56,11 @@
 
 package org.objectstyle.cayenne.dba.oracle;
 
+import java.lang.reflect.Field;
 import java.sql.Types;
 
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
@@ -87,9 +90,52 @@ test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
 </pre>
  */
 public class OracleAdapter extends JdbcAdapter {
+    private static Logger logObj = Logger.getLogger(OracleAdapter.class);
+
     public static final String ORACLE_FLOAT = "FLOAT";
     public static final String ORACLE_BLOB = "BLOB";
     public static final String ORACLE_CLOB = "CLOB";
+
+    protected static boolean initDone;
+    protected static int oracleCursorType = Integer.MAX_VALUE;
+
+    protected static void initDriverInformation() {
+        initDone = true;
+        
+        // configure static information
+        try {
+            Class oraTypes = Class.forName("oracle.jdbc.driver.OracleTypes");
+            Field cursorField = oraTypes.getField("CURSOR");
+            oracleCursorType = cursorField.getInt(null);
+        } catch (Exception ex) {
+            logObj.info(
+                "Error getting Oracle driver information, ignoring. "
+                    + "Note that certain adapter features will not work.",
+                ex);
+        }
+    }
+
+    /**
+     * Returns an Oracle JDBC extension type defined in
+     * oracle.jdbc.driver.OracleTypes.CURSOR. This value is determined
+     * from Oracle driver classes via reflection in runtime, so that
+     * Cayenne code has no compile dependency on the driver. This means
+     * that calling this method when the driver is not available will
+     * result in an exception.
+     */
+    public static int getOracleCursorType() {
+        if(!initDone) {
+            initDriverInformation();
+        }
+        
+        if (oracleCursorType == Integer.MAX_VALUE) {
+            throw new CayenneRuntimeException(
+                "No information exists about oracle types. "
+                    + "Check that Oracle JDBC driver is available to the application.");
+        }
+
+        return oracleCursorType;
+    }
 
     /**
      * Installs appropriate ExtendedTypes as converters for passing values
@@ -173,7 +219,6 @@ public class OracleAdapter extends JdbcAdapter {
             return super.queryTranslatorClass(q);
         }
     }
-
 
     /**
      * Returns a trimming translator.
