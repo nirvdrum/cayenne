@@ -169,8 +169,14 @@ public class ImportDbAction extends AbstractAction
 			map = mediator.getCurrentDataMap();
 			if (map != null )
 				loader.loadDataMapFromDB(schema_name, null, map);
-			else
+			else {
 				map = loader.createDataMapFromDB(schema_name);
+				String relative_loc;
+				relative_loc = CreateDataMapAction.getMapLocation(mediator);
+				if (null == relative_loc)
+					return;
+				map.setLocation(relative_loc);
+			}
 		} catch (SQLException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(Editor.getFrame()
@@ -192,6 +198,10 @@ public class ImportDbAction extends AbstractAction
 		}
 	}
 
+	private void getMapLocation(DataMap map) {
+		
+	}
+	
 	
 	public void actionPerformed(ActionEvent e) {
 		importDb();

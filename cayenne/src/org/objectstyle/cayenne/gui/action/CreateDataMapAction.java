@@ -97,6 +97,16 @@ public class CreateDataMapAction extends AbstractAction
 			addDataMap();
 			return;
 		}
+		String relative_location = getMapLocation(mediator);
+		if (null == relative_location)
+			return;
+		DataMap map = new DataMap(NameGenerator.getDataMapName());
+		map.setLocation(relative_location);
+		mediator.addDataMap(this, map);
+	}
+	
+	/** Returns location relative to Project or null if nothing selected. */
+	static String getMapLocation(Mediator mediator) {
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
        	// Data map file
@@ -122,7 +132,7 @@ public class CreateDataMapAction extends AbstractAction
             }
             int ret_code = fc.showSaveDialog(Editor.getFrame());
             if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
+                return relative_location;
             file = fc.getSelectedFile();
             if (!file.exists())
             	file.createNewFile();
@@ -138,9 +148,7 @@ public class CreateDataMapAction extends AbstractAction
             System.out.println("Error creating data map file, " + e.getMessage());
             e.printStackTrace();
         }
-		DataMap map = new DataMap(NameGenerator.getDataMapName());
-		map.setLocation(relative_location);
-		mediator.addDataMap(this, map);
+        return relative_location;
 	}
 	
 	public void actionPerformed(ActionEvent e) {
