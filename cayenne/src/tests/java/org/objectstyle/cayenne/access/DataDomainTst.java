@@ -108,6 +108,9 @@ public class DataDomainTst extends CayenneTestCase {
         assertNull(d1.getMap(m1.getName()));
     }
 
+    /**
+     * @deprecated Since 1.1 "dataNodeForObjEntity" is deprecated
+     */
     public void testDataNodeForObjEntity() throws Exception {
         DataDomain domain = new DataDomain("dom1");
         assertNull(domain.getMap("map"));

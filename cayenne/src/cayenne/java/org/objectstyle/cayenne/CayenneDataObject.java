@@ -562,7 +562,7 @@ public class CayenneDataObject implements DataObject {
         ObjEntity objEntity = getDataContext().getEntityResolver().lookupObjEntity(this);
         ExtendedTypeMap types =
             getDataContext()
-                .dataNodeForObjEntity(objEntity)
+                .lookupDataNode(objEntity.getDataMap())
                 .getAdapter()
                 .getExtendedTypes();
 

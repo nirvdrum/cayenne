@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collection;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
@@ -103,8 +104,19 @@ public interface QueryEngine {
    	/** 
      * Returns a DataNode that handles database operations for
      * a specified <code>ObjEntity</code>.
+     * 
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
+     * queries are not necessarily based on an ObjEntity.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity);
+    
+    /**
+     * Returns a DataNode that should hanlde queries for all
+     * DataMap components.
+     * 
+     * @since 1.1
+     */
+    public DataNode lookupDataNode(DataMap dataMap);
 
     /**
      * Returns a resolver for this query engine that is capable of resolving

@@ -554,7 +554,7 @@ class ContextCommit {
             (Collection) objectsByObjEntity.get(objEntityClass.getName());
         if (objectsForObjEntity == null) {
             objEntities.add(entity);
-            DataNode responsibleNode = context.dataNodeForObjEntity(entity);
+            DataNode responsibleNode = context.lookupDataNode(entity.getDataMap());
 
             DataNodeCommitHelper commitHelper =
                 DataNodeCommitHelper.getHelperForNode(nodeHelpers, responsibleNode);
@@ -580,7 +580,7 @@ class ContextCommit {
             Map sourceId = source.getObjectId().getIdSnapshot();
             ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
 
-            DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+            DataNode responsibleNode = context.lookupDataNode(sourceEntity.getDataMap());
             DataNodeCommitHelper commitHelper =
                 DataNodeCommitHelper.getHelperForNode(nodeHelpers, responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
@@ -628,7 +628,7 @@ class ContextCommit {
                 continue;
 
             ObjEntity sourceEntity = context.getEntityResolver().lookupObjEntity(source);
-            DataNode responsibleNode = context.dataNodeForObjEntity(sourceEntity);
+            DataNode responsibleNode = context.lookupDataNode(sourceEntity.getDataMap());
             DataNodeCommitHelper commitHelper =
                 DataNodeCommitHelper.getHelperForNode(nodeHelpers, responsibleNode);
             Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();

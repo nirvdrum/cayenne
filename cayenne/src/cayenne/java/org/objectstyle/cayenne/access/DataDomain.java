@@ -520,6 +520,9 @@ public class DataDomain implements QueryEngine {
     /**
      * Returns DataNode that should handle database operations for
      * a specified <code>objEntity</code>.
+     * 
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
+     * queries are not necessarily based on an ObjEntity.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         return lookupDataNode(objEntity.getDataMap());

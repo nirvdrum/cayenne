@@ -129,7 +129,7 @@ public class PrimaryKeyHelper {
         }
 
         DbEntity dbEntity = objEntity.getDbEntity();
-        DataNode owner = queryEngine.dataNodeForObjEntity(objEntity);
+        DataNode owner = queryEngine.lookupDataNode(objEntity.getDataMap());
         if (owner == null) {
             throw new CayenneRuntimeException("No suitable DataNode to handle primary key generation.");
         }

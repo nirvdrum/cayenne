@@ -74,9 +74,9 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
@@ -88,6 +88,7 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -1190,12 +1191,30 @@ public class DataContext implements QueryEngine, Serializable {
         return observer.getResultIterator();
     }
 
-    /** Delegates node lookup to parent QueryEngine. */
+    /** 
+     * Delegates node lookup to parent QueryEngine.
+     * 
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
+     * queries are not necessarily based on an ObjEntity.
+     */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
         return this.getParent().dataNodeForObjEntity(objEntity);
+    }
+    
+    /**
+     * Returns a DataNode that should hanlde queries for all
+     * DataMap components.
+     * 
+     * @since 1.1
+     */
+    public DataNode lookupDataNode(DataMap dataMap) {
+        if (this.getParent() == null) {
+            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+        }
+        return this.getParent().lookupDataNode(dataMap);
     }
 
     /** 

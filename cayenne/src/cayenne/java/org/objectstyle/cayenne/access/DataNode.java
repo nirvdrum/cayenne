@@ -215,9 +215,24 @@ public class DataNode implements QueryEngine {
     /**
      * Returns this object if it can handle queries for <code>objEntity</code>,
      * returns null otherwise.
+     * 
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
+     * queries are not necessarily based on an ObjEntity.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null)
+            ? this
+            : null;
+    }
+    
+    /**
+     * Returns a DataNode that should hanlde queries for all
+     * DataMap components.
+     * 
+     * @since 1.1
+     */
+    public DataNode lookupDataNode(DataMap dataMap) {
+        return (getEntityResolver().getDataMap(dataMap.getName()) == dataMap)
             ? this
             : null;
     }
