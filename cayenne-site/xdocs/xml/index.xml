@@ -13,20 +13,8 @@
         </section>
         
         <section name="Project News">
-       	<p><u><i>[November 21, 2004]</i></u> <strong>Cayenne 1.2 M1</strong></p>
-		<p>The first 1.2 milestone is out. It is a first step towards full support of 
-		auto-increment (aka "identity") columns. This release allows Cayenne to work
-		with existing database schemas that use such columns. Also M1 contains all
-		the bug fixes ported from 1.1 and a few fixes of its own.
-		For details see <a href="release-notes/RELEASE-NOTES-1.2M1.txt">release
-		notes</a> and <a href="upgrade/UPGRADE-1.2M1.txt">upgrade instructions</a>.
-		</p>
-        <p><u><i>[November 20, 2004]</i></u> <strong>Cayenne 1.1 RC3</strong></p>
-		<p>1.1 Release Candidate 3 is available for download. A number of new bugs were reported
-		since RC2, so it was decided to make another candidate release. 
-		For details see <a href="release-notes/RELEASE-NOTES-1.1RC3.txt">release
-		notes</a> and <a href="upgrade/UPGRADE-1.1RC3.txt">upgrade instructions</a>.
-		</p>
+           <p><u><i>[December 6, 2004]</i></u> <strong>Cayenne 1.1 Final Release</strong></p>
+		<p>Cayenne 1.1 Final is <a href="download.html">available for download</a>.</p>
 
         <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
 		<p><img align="left" hspace="3" src="images/other/javaworld-200409.gif"/>
