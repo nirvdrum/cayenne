@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Iterator;
+
 import org.objectstyle.TestMain;
+import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -115,5 +118,48 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     	list.readUpToObject(6);
     	assertEquals(2, list.getPagesRead());
     } 
+    
+    public void testGet() throws Exception {
+    	Artist a = (Artist)list.get(6);
+    	
+    	assertNotNull(a);
+    	assertEquals(2, list.getPagesRead());
+    	assertTrue(a != list.get(7));
+    	assertEquals(2, list.getPagesRead());
+    } 
+    
+    public void testRemove1() throws Exception {
+    	// remove from faulted
+    	list.readAll();
+    	try {
+    		list.remove(2);
+    		fail("Remove shouldn't be supported.");
+    	}
+    	catch(UnsupportedOperationException ex) {
+    		//exception expected
+    	}
+    }
+    
+    public void testRemove2() throws Exception {
+    	// remove from unfaulted
+    	try {
+    		list.remove(2);
+    		fail("Remove shouldn't be supported.");
+    	}
+    	catch(UnsupportedOperationException ex) {
+    		//exception expected
+    	}
+    }
+    
+    public void testIterator() throws Exception {
+    	Iterator it = list.iterator();
+    	assertNotNull(it);
+    	
+    	assertTrue(!list.isFullyResolved());
+    	
+    	assertTrue(it.hasNext());
+    	assertNotNull(it.next());
+    	assertTrue(!list.isFullyResolved());
+    }
 }
 

@@ -57,7 +57,10 @@ package org.objectstyle.cayenne.access;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -67,28 +70,29 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
- * An immutable list implementation that would internally populate itself 
- * with database data only when it is needed. IncrementalFaultList has
- * an internal page size. On creation list would only read the first "page". 
+ * An immutable non-synchronized list implementation that would internally 
+ * populate itself with database data only when it is needed. 
+ * IncrementalFaultList has an internal page size. On creation list 
+ * would only read the first "page". 
  * On access to a list element, it will make sure that all pages from
  * the first one to the one containing requested object are resolved. Pages are indexed
  * starting from zero and up.
  * 
- * <i>Note that some operations on the list would cause the whole list 
- * to be faulted. For instance, calling <code>size()</code> method.</i>
+ * <p>Note that some operations on the list would cause the whole list 
+ * to be faulted. For instance, calling <code>size()</code>, 
+ * <code>contains()</code>, <code>indexOf()</code> method.</p>
  * 
  * @author Andrei Adamchik
  */
 public class IncrementalFaultList extends AbstractList {
-	static Logger logObj = Logger.getLogger(IncrementalFaultList.class.getName());
-	
+    static Logger logObj = Logger.getLogger(IncrementalFaultList.class.getName());
+
     protected int pagesRead;
     protected int pageSize;
     protected List elements;
     protected DataContext dataContext;
     protected GenericSelectQuery query;
     protected boolean fullyResolved;
-    
 
     public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
         if (query.getPageSize() <= 0) {
@@ -110,6 +114,10 @@ public class IncrementalFaultList extends AbstractList {
     public int getPagesRead() {
         return pagesRead;
     }
+    
+    public int getObjectsRead() {
+    	return pagesRead * pageSize;
+    }
 
     /**
      * Completely resolves all list objects.
@@ -118,7 +126,7 @@ public class IncrementalFaultList extends AbstractList {
         if (fullyResolved) {
             return;
         }
-        
+
         readPageInterval(pagesRead, Integer.MAX_VALUE);
     }
 
@@ -141,11 +149,11 @@ public class IncrementalFaultList extends AbstractList {
      * method is successfully called, the list is guaranteed to have
      * first <code>pageIndex</code> pages resolved.
      */
-    public void readUpToPage(int pageIndex) {    	
+    public void readUpToPage(int pageIndex) {
         if (fullyResolved || pageIndex <= pagesRead) {
             return;
         }
-        
+
         readPageInterval(pagesRead, pageIndex);
     }
 
@@ -154,10 +162,10 @@ public class IncrementalFaultList extends AbstractList {
      * up to but not including <code>toIndex</code>.
      */
     protected void readPageInterval(int fromIndex, int toIndex) {
-    	if(fromIndex >= toIndex) {
-    		return;
-    	}
-    	
+        if (fromIndex >= toIndex) {
+            return;
+        }
+
         int readFrom = fromIndex * pageSize;
         int readTo = toIndex * pageSize;
 
@@ -169,7 +177,7 @@ public class IncrementalFaultList extends AbstractList {
                 // skip through read
                 for (int i = 0; i < readFrom; i++) {
                     if (!it.hasNextRow()) {
-                    	// results ended before we need to read anything
+                        // results ended before we need to read anything
                         fullyResolved = true;
                         pagesRead = pageIndex(i) + 1;
                         return;
@@ -193,10 +201,10 @@ public class IncrementalFaultList extends AbstractList {
                     elements.add(dataContext.objectFromDataRow(ent, row, true));
                 }
                 pagesRead = toIndex;
-                
+
                 // check if coincidentally we read the whole thing 
                 if (!it.hasNextRow()) {
-                	fullyResolved = true;
+                    fullyResolved = true;
                 }
 
             } finally {
@@ -220,10 +228,10 @@ public class IncrementalFaultList extends AbstractList {
      * @see java.util.List#get(int)
      */
     public Object get(int index) {
-    	if(!fullyResolved && pageIndex(index) <= pagesRead) {
-    		readUpToObject(index);
-    	}
-    	
+        if (!fullyResolved && pageIndex(index) <= pagesRead) {
+            readUpToObject(index);
+        }
+
         return elements.get(index);
     }
 
@@ -268,5 +276,84 @@ public class IncrementalFaultList extends AbstractList {
      */
     public int getPageSize() {
         return pageSize;
+    }
+
+    /**
+     * @see java.util.List#listIterator()
+     */
+    public ListIterator listIterator() {
+        throw new UnsupportedOperationException("'listIterator' is not supported.");
+    }
+
+    /**
+     * @see java.util.List#listIterator(int)
+     */
+    public ListIterator listIterator(int index) {
+        throw new UnsupportedOperationException("'listIterator' is not supported.");
+    }
+
+    /**
+     * @see java.util.Collection#iterator()
+     */
+    public Iterator iterator() {
+        return new FaultIterator(elements);
+    }
+
+    /**
+     * Removes all elements from the list. Subscequent calls
+     * to <code>isFullyResolved</code> will return <code>true</code>.
+     * 
+     * @see java.util.Collection#clear()
+     */
+    public void clear() {
+        elements.clear();
+        pagesRead = 0;
+        fullyResolved = true;
+    }
+
+    /**
+     * Iterator that avoids calling <code>size()</code>
+     * to allow incremental resolution of the objects on the list.
+     */
+    class FaultIterator implements Iterator {
+        private int cursor;
+        private List list;
+        private boolean hasNext;
+
+        private FaultIterator(List list) {
+            this.list = list;
+        }
+        
+        /**
+        * @see java.util.Iterator#hasNext()
+        */
+        public boolean hasNext() {
+        	if(isFullyResolved()) {
+        		return cursor < list.size();
+        	}
+        	
+        	if(cursor >= getObjectsRead()) {
+        		// read objects till cursor
+        		readUpToObject(cursor);
+        	}
+        	
+            return cursor < getObjectsRead();
+        }
+
+        /**
+         * @see java.util.Iterator#next()
+         */
+        public Object next() {
+            Object obj = list.get(cursor);
+            cursor++;
+            return obj;
+        }
+
+        /**
+         * @see java.util.Iterator#remove()
+         */
+        public void remove() {
+            throw new UnsupportedOperationException("'remove' is not supported.");
+        }
     }
 }
