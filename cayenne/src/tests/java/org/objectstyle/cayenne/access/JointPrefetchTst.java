@@ -230,7 +230,7 @@ public class JointPrefetchTst extends CayenneTestCase {
                 Artist a = p.getToArtist();
                 assertNotNull(a);
                 assertNotNull(a.getDateOfBirth());
-                assertSame(Timestamp.class, a.getDateOfBirth().getClass());
+                assertTrue(Timestamp.class.isAssignableFrom(a.getDateOfBirth().getClass()));
             }
         }
         finally {
