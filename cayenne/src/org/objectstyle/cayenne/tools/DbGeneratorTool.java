@@ -91,8 +91,9 @@ public class DbGeneratorTool {
             }
             
             DbAdapter adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
-            new DbGenerator(conn, adapter).createTables(map, true);
-            conn.close();
+            DbGenerator gen = new DbGenerator(conn, adapter);
+            gen.createTables(map, true);
+            gen.dispose();
             
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -55,11 +55,11 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-import java.util.*;
-import java.util.logging.*;
-import junit.framework.*;
-import org.objectstyle.*;
-import java.sql.*;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
 
 
 /** Test cases for DbGenerator.

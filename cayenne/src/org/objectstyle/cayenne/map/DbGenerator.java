@@ -217,6 +217,18 @@ public class DbGenerator {
         return list;
     }
 
+    /** Closes database connection. If connection was obtained
+     *  via Cayenne, this will return connection to the pool. This method
+     *  must be called when DbGenerator is no longer needed, in cases when
+     *  connection was obtained from the pool. Otherwise 
+     *  pooled connection will stay tied up and unavailable to other
+     *  connection pool users.
+     */
+    public void dispose() throws SQLException {
+        con.close();
+    }
+    
+    
     /** Returns a subset of DbEntities from the <code>map</code>
      *  that have no corresponding database tables. 
      * 
