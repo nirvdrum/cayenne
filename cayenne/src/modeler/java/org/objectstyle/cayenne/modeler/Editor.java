@@ -69,6 +69,7 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
 import org.apache.log4j.FileAppender;
@@ -176,7 +177,19 @@ public class Editor
             Class.forName("javax.swing.SpringLayout");
         } catch (Exception ex) {
             logObj.fatal("CayenneModeler requires JDK 1.4.");
-            logObj.fatal("Found : '" + System.getProperty("java.version") + "' at " + System.getProperty("java.home"));
+            logObj.fatal(
+                "Found : '"
+                    + System.getProperty("java.version")
+                    + "' at "
+                    + System.getProperty("java.home"));
+
+            JOptionPane.showMessageDialog(
+                null,
+                "Unsupported JDK at "
+                    + System.getProperty("java.home")
+                    + ". Set JAVA_HOME to the JDK1.4 location.",
+                "Unsupported JDK Version",
+                JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
 
