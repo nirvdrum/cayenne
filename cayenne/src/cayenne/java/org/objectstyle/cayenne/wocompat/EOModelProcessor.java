@@ -153,7 +153,14 @@ public class EOModelProcessor {
         while (it.hasNext()) {
             String name = (String) it.next();
             // create and register entity
-            EOObjEntity e = makeEntity(helper, name, generateClientClass);
+            makeEntity(helper, name, generateClientClass);
+        }
+        
+        // after all entities are loaded, process attributes
+        it = helper.modelNames();
+        while (it.hasNext()) {
+            String name = (String) it.next();
+            EOObjEntity e = (EOObjEntity) dataMap.getObjEntity(name);
             // process entity attributes
             makeAttributes(helper, e);
         }
