@@ -263,9 +263,14 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         return unusedPool.size();
     }
 
-    /** Returns connection from the pool. */
+    /** 
+     * Returns connection from the pool using internal values of user name
+     * and password. Eqivalent to calling: 
+     * 
+     * <p><code>ds.getConnection(ds.getUserName(), ds.getPassword())</code></p> 
+     */
     public synchronized Connection getConnection() throws SQLException {
-        return getConnection(null, null);
+        return getConnection(userName, password);
     }
 
     /** Returns connection from the pool. */
