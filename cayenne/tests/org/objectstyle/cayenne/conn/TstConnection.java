@@ -55,12 +55,7 @@ package org.objectstyle.cayenne.conn;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
+
 
 
 public class TstConnection extends ConnectionWrapper {

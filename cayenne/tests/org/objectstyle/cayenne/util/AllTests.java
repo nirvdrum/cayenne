@@ -55,10 +55,7 @@ package org.objectstyle.cayenne.util;
  *
  */ 
 
-import org.objectstyle.util.*;
-
-import junit.framework.*;
-import junit.runner.*;
+import junit.framework.TestSuite;
 
 public class AllTests {
 	public static TestSuite suite() {

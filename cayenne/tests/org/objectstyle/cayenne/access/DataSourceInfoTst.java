@@ -55,14 +55,9 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
+import junit.framework.TestCase;
 
-import org.objectstyle.cayenne.util.*;
-import org.objectstyle.util.*;
+import org.objectstyle.cayenne.util.Util;
 
 
 public class DataSourceInfoTst extends TestCase {

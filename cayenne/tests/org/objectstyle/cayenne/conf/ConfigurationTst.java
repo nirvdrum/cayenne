@@ -55,11 +55,10 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
+import java.io.InputStream;
+
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.access.DataDomain;
 
 

@@ -55,16 +55,10 @@ package org.objectstyle.cayenne.query;
  *
  */
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.map.*;
-import java.sql.*;
-import java.net.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class SqlSelectQueryInContextTst extends SelectQueryBase {
     private static final int _artistCount = 10;

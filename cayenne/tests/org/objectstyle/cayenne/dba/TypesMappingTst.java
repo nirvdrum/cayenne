@@ -55,13 +55,9 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class TypesMappingTst extends TypesMappingBase {
 

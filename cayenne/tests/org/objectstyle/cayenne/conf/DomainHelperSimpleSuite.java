@@ -55,11 +55,6 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.access.DataDomain;
-
 
 /** Runs multiple domain config cases. */
 public class DomainHelperSimpleSuite extends DomainHelperSuite {

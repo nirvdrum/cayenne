@@ -55,14 +55,14 @@
  */
 package org.objectstyle.cayenne.gui;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.*;
 import java.io.*;
+import java.util.Iterator;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.conf.DefaultConfiguration;
+import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
  * Subclass of Configuration that uses System CLASSPATH to locate resources.

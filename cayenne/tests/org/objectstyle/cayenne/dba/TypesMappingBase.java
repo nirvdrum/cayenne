@@ -55,14 +55,10 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.map.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+
+import junit.framework.TestCase;
 
 public class TypesMappingBase extends TestCase {
     public TypesMappingBase(String name) {

@@ -55,12 +55,7 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.access.DataDomain;
+
 
 /** Configuration object used for tests that does not require "cayenne.xml". */
 public class EmptyConfiguration extends DefaultConfiguration {

@@ -61,14 +61,12 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
-import org.xml.sax.*;
-import org.xml.sax.helpers.DefaultHandler;
-
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.*;
-import org.objectstyle.util.*;
+import org.xml.sax.*;
+import org.xml.sax.helpers.DefaultHandler;
 
 /** 
  * Creates DataSource objects from XML configuration files that
