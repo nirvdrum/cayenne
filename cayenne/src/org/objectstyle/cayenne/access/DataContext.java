@@ -362,6 +362,8 @@ public class DataContext implements QueryEngine {
 		while (itr.hasNext()) {
 			String relName = (String) itr.next();
 			ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+		
+			// to-many will be handled on the other side
 			if (rel.isToMany()) {
 				continue;
 			}

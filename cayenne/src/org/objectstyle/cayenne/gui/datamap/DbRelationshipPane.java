@@ -173,8 +173,10 @@ public class DbRelationshipPane
 
 	private void resolveRelationship() {
 		int row = table.getSelectedRow();
-		if (-1 == row)
+		if (row < 0) {
 			return;
+		}
+		
 		// Get DbRelationship
 		DbRelationshipTableModel model =
 			(DbRelationshipTableModel) table.getModel();
@@ -182,13 +184,13 @@ public class DbRelationshipPane
 		DbEntity start = (DbEntity) rel.getSourceEntity();
 		DbEntity end = (DbEntity) rel.getTargetEntity();
 
-		java.util.List db_rel_list = new ArrayList();
-		db_rel_list.add(rel);
+		java.util.List dbRelList = new ArrayList();
+		dbRelList.add(rel);
 
 		DataMap map = mediator.getCurrentDataMap();
 		ResolveDbRelationshipDialog dialog =
 			new ResolveDbRelationshipDialog(
-				db_rel_list,
+				dbRelList,
 				start,
 				end,
 				rel.isToMany());

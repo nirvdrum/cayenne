@@ -274,8 +274,9 @@ public class CayenneDataObject implements DataObject {
 
     public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
         DataObject oldTarget = (DataObject)readPropertyDirectly(relName);
-        if(oldTarget == val)
+        if(oldTarget == val) {
             return;
+        }
 
         if(setReverse) {
             // unset old reverse relationship

@@ -70,10 +70,7 @@ import org.objectstyle.cayenne.map.*;
  */
 public class MapUtil {
 
-	public static void setObjEntityName(
-		DataMap map,
-		ObjEntity entity,
-		String new_name) {
+	public static void setObjEntityName(DataMap map, ObjEntity entity, String new_name) {
 		String old_name = entity.getName();
 		// If name hasnt change, just return
 		if (old_name != null && old_name.equals(new_name)) {
@@ -84,10 +81,7 @@ public class MapUtil {
 		map.addObjEntity(entity);
 	}
 
-	public static void setDbEntityName(
-		DataMap map,
-		DbEntity entity,
-		String new_name) {
+	public static void setDbEntityName(DataMap map, DbEntity entity, String new_name) {
 		String old_name = entity.getName();
 		// If name hasnt change, just return
 		if (old_name != null && old_name.equals(new_name)) {
@@ -121,12 +115,8 @@ public class MapUtil {
 		rel.setName(newName);
 		entity.addRelationship(rel);
 	}
-	
-	
-	public void setParentEntity(DerivedDbEntity derived, DbEntity parent) {
-		
-	}
-	
+
+	public void setParentEntity(DerivedDbEntity derived, DbEntity parent) {}
 
 	/**
 	 * Cleans any mappings of ObjEntities, ObjAttributes, 
@@ -162,8 +152,7 @@ public class MapUtil {
 			while (rels.hasNext()) {
 				ObjRelationship rel = (ObjRelationship) rels.next();
 
-				Iterator dbRels =
-					new ArrayList(rel.getDbRelationshipList()).iterator();
+				Iterator dbRels = new ArrayList(rel.getDbRelationshipList()).iterator();
 				while (dbRels.hasNext()) {
 					DbRelationship dbRel = (DbRelationship) dbRels.next();
 					Entity srcEnt = dbRel.getSourceEntity();
@@ -204,5 +193,21 @@ public class MapUtil {
 			obj_rel.clearDbRelationships();
 		}
 		entity.setDbEntity(null);
+	}
+
+	/**
+	 * Returns true if this relationship's "toDepPK" flag can be potentially
+	 * set to true.
+	 */
+	public static boolean isValidForDepPk(DbRelationship rel) {
+		Iterator it = rel.getJoins().iterator();
+		while (it.hasNext()) {
+			DbAttributePair join = (DbAttributePair) it.next();
+			if (!join.getTarget().isPrimaryKey() || !join.getSource().isPrimaryKey()) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

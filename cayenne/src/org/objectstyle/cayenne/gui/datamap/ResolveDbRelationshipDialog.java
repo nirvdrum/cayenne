@@ -150,8 +150,7 @@ public class ResolveDbRelationshipDialog
 
 	/** Set up the graphical components. */
 	private void init() {
-		getContentPane().setLayout(
-			new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
 		if (!isReverseDbRelNew) {
 			reverseCheckLabel.setText("Update Reverse:");
@@ -191,8 +190,7 @@ public class ResolveDbRelationshipDialog
 				reverseNameLabel,
 				reverseCheckLabel };
 
-		Component[] right =
-			new Component[] { name, reverseName, hasReverseDbRel };
+		Component[] right = new Component[] { name, reverseName, hasReverseDbRel };
 
 		JPanel panel = new JPanel();
 		panel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -203,8 +201,7 @@ public class ResolveDbRelationshipDialog
 		DbAttributePairTableModel model =
 			new DbAttributePairTableModel(dbRel, getMediator(), this, true);
 		table.setModel(model);
-		table.getSelectionModel().setSelectionMode(
-			ListSelectionModel.SINGLE_SELECTION);
+		table.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JScrollPane scroll_pane = new JScrollPane(table);
 		scroll_pane.setPreferredSize(new Dimension(600, 100));
@@ -226,12 +223,10 @@ public class ResolveDbRelationshipDialog
 		col = table.getColumnModel().getColumn(3);
 		col.setMinWidth(150);
 
-		setTitle(
-			"DbRelationship Info: " + start.getName() + " to " + end.getName());
+		setTitle("DbRelationship Info: " + start.getName() + " to " + end.getName());
 
 		JPanel buttons =
-			PanelFactory.createButtonPanel(
-				new JButton[] { add, remove, save, cancel });
+			PanelFactory.createButtonPanel(new JButton[] { add, remove, save, cancel });
 		getContentPane().add(buttons, BorderLayout.SOUTH);
 
 		add.addActionListener(this);
@@ -250,8 +245,7 @@ public class ResolveDbRelationshipDialog
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		DbAttributePairTableModel model =
-			(DbAttributePairTableModel) table.getModel();
+		DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
 
 		if (src == add) {
 			model.addRow();
@@ -288,25 +282,15 @@ public class ResolveDbRelationshipDialog
 	private void save() {
 		if (!name.getText().equals(dbRel.getName())) {
 			String oldName = dbRel.getName();
-			MapUtil.setRelationshipName(
-				dbRel.getSourceEntity(),
-				dbRel,
-				name.getText());
+			MapUtil.setRelationshipName(dbRel.getSourceEntity(), dbRel, name.getText());
 
 			getMediator().fireDbRelationshipEvent(
-				new RelationshipEvent(
-					this,
-					dbRel,
-					dbRel.getSourceEntity(),
-					oldName));
+				new RelationshipEvent(this, dbRel, dbRel.getSourceEntity(), oldName));
 		}
 
-		DbAttributePairTableModel model =
-			(DbAttributePairTableModel) table.getModel();
+		DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
 		if (model.getRowCount() == 0) {
-			JOptionPane.showMessageDialog(
-				Editor.getFrame(),
-				"Enter join attributes ");
+			JOptionPane.showMessageDialog(Editor.getFrame(), "Enter join attributes ");
 			table.requestFocus(true);
 			return;
 		}
@@ -314,7 +298,6 @@ public class ResolveDbRelationshipDialog
 		try {
 			model.commit();
 		} catch (DataMapException e) {
-			System.out.println(e.getMessage());
 			e.printStackTrace();
 			return;
 		}
@@ -322,6 +305,12 @@ public class ResolveDbRelationshipDialog
 		// If new DbRelationship was created, add it to the source.
 		if (isDbRelNew) {
 			start.addRelationship(dbRel);
+		}
+
+		// check "to dep pk" setting,
+		// maybe this is no longer valid
+		if (dbRel.isToDependentPK() && !MapUtil.isValidForDepPk(dbRel)) {
+			dbRel.setToDependentPK(false);
 		}
 
 		// If new reverse DbRelationship was created, add it to the target
