@@ -295,13 +295,75 @@ public class ExpressionFactory {
 		exp.setOperand(2, thirdOperand);
 		return exp;
 	}
+	
+	/** 
+	 * Creates an expression that matches any of the key-values pairs in <code>map</code>.
+	 * 
+	 * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
+	 * Key is considered to be a DB_PATH expression. Therefore all keys must be java.lang.String
+	 * objects, or ClassCastException is thrown. OR is used to join pair binary expressions.
+	 */
+	public static Expression matchAnyDbExp(Map map, int pairType) {
+		ArrayList pairs = new ArrayList();
 
-	/** Creates an expression that matches all key-values pairs in <code>map</code>.
-	  * 
-	  * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
-	  * Key is considered to be a OBJ_PATH expression. Therefore all keys must be java.lang.String
-	  * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
-	  */
+		Iterator it = map.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
+			Object value = map.get(key);
+			pairs.add(binaryDbPathExp(pairType, key, value));
+		}
+
+		return joinExp(Expression.OR, pairs);
+	}
+	
+	
+	/** 
+	 * Creates an expression that matches all key-values pairs in <code>map</code>.
+	 * 
+	 * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
+	 * Key is considered to be a DB_PATH expression. Therefore all keys must be java.lang.String
+	 * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
+	 */
+	public static Expression matchAllDbExp(Map map, int pairType) {
+		ArrayList pairs = new ArrayList();
+
+		Iterator it = map.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
+			Object value = map.get(key);
+			pairs.add(binaryDbPathExp(pairType, key, value));
+		}
+
+		return joinExp(Expression.AND, pairs);
+	}
+	
+	/** 
+	 * Creates an expression that matches any of the key-values pairs in the <code>map</code>.
+	 * 
+	 * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
+	 * Key is considered to be a OBJ_PATH expression. Therefore all keys must be java.lang.String
+	 * objects, or ClassCastException is thrown. OR is used to join pair binary expressions.
+	 */
+	public static Expression matchAnyExp(Map map, int pairType) {
+		ArrayList pairs = new ArrayList();
+
+		Iterator it = map.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
+			Object value = map.get(key);
+			pairs.add(binaryPathExp(pairType, key, value));
+		}
+
+		return joinExp(Expression.OR, pairs);
+	}
+	
+	/** 
+	 * Creates an expression that matches all key-values pairs in <code>map</code>.
+	 * 
+	 * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
+	 * Key is considered to be a OBJ_PATH expression. Therefore all keys must be java.lang.String
+	 * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
+	 */
 	public static Expression matchAllExp(Map map, int pairType) {
 		ArrayList pairs = new ArrayList();
 
