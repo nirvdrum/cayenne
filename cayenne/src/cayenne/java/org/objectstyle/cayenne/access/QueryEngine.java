@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.util.Collection;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 
 
 /**
@@ -104,7 +105,7 @@ public interface QueryEngine {
      * Returns a resolver for this query engine that is capable of resolving
      * between classes, entity names, and obj/db entities
      */
-    public org.objectstyle.cayenne.map.EntityResolver getEntityResolver();
+    public EntityResolver getEntityResolver();
 
 	/** 
 	 * Returns a collection of DataMaps associated with this QueryEngine.
