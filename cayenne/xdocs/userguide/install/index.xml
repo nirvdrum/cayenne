@@ -56,7 +56,7 @@
             	<li><a href="../appguide/javagen.html#javagen"><code>cgen</code> Ant task</a>
             	for class generation. An alternative to <code>cgen</code> is to use CayenneModeler 
             	GUI tool.</li>
-            	<li><a href="#compile">Building Cayenne from source</a>, for instance when 
+            	<li><a href="compile.html">Building Cayenne from source</a>, for instance when 
             	changing Cayenne source code to customize it for your project.</li>
 			</ul>
 			</p>
