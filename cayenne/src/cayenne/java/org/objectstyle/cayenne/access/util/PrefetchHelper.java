@@ -95,6 +95,7 @@ public class PrefetchHelper {
             DataObject sourceObject = (DataObject) objects.get(i);
             DataObject targetObject =
                 (DataObject) sourceObject.readPropertyDirectly(relName);
+            
             ObjectId oid = targetObject.getObjectId();
             oids.add(oid);
         }

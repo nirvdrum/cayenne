@@ -126,8 +126,6 @@ public class DataContext implements QueryEngine, Serializable {
 	// enable/disable event handling for individual instances
 	private boolean postDataContextTransactionEvents;
 
-	//private Map flattenedInserts = new HashMap();
-	//private Map flattenedDeletes = new HashMap();
 	private List flattenedInserts = new ArrayList();
 	private List flattenedDeletes = new ArrayList();
 

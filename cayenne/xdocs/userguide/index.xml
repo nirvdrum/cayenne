@@ -55,7 +55,7 @@
             
             <li><a href="fetch/index.html"><strong>7. Using SelectQueries</strong></a>
             <ul>
-                <li><a href="fetch/selectQuery.html">7.1 SelectQuery</a></li>
+                <li><a href="fetch/selectquery.html">7.1 SelectQuery</a></li>
                 <li><a href="fetch/exp.html">7.2 Qualifier Expressions</a></li>
                 <li><a href="fetch/orderings.html">7.3 Using Orderings</a></li>
                 <li><a href="fetch/other.html">7.4 Controlling SelectQuery Behavior</a></li>

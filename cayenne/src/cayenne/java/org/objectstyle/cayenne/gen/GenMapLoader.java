@@ -63,6 +63,10 @@ import org.xml.sax.SAXException;
  * MapLoader customized for class generation. Will skip 
  * lots of DataMap information irrelevant for class generation.
  * 
+ * @deprecated  Since 1.0Beta2 GenMapLoader can not be used, since it does not
+ * recognize toMany ObjRelationships due to the shortcuts that it takes. Superclass MapLoader
+ * must be used instead.
+ * 
  * @author Andrei Adamchik
  */
 public class GenMapLoader extends MapLoader {
