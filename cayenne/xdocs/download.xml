@@ -10,9 +10,13 @@
         <!-- Contributors section -->
         <section name="Downloads">
             <ul>
-                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=185830">Latest 
-                Stable Release</a><br/><br/>
+                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=193736">Latest 
+                Stable Release</a>
                 </li>
+                 <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=183082">Latest 
+                Cayenne Examples</a><br/><br/>
+                </li>
+                
                 <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132">Release Builds</a></li>
                 <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
             </ul>
@@ -22,6 +26,11 @@
             code. Use them at your own risk. Note that usually only about 7 latest nightly builds 
             are available, older ones are automatically deleted from the archive.
             </p>
+            
+            <panel name="Cayenne Examples Note:">
+            Cayenne Examples documentation is bundled with Cayenne and is available on the website.
+            But examples code should be downloaded separately, following the link above.
+            </panel>
         </section>
     </body>
 </document>

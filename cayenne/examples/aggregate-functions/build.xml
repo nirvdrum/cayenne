@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<project name="aggegate-functions" default="dist" basedir=".">
+	<property file="build.properties"/>
+	<property file="default.properties"/>
+	
+	<property name="dist" value="${dist.base}"/>
+	<property name="jar.name" value="${project.name}.jar"/>
+
+	<path id="classpath">
+		<fileset dir="${cayenne.root}">
+			<include name="**/cayenne.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="dist" depends="prepare,compile,jar">
+		<copy todir="${dist}/lib" flatten="true">
+			<fileset dir="${cayenne.root}">
+				<include name="**/cayenne.jar"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="prepare">
+		<mkdir dir="classes"/>
+		<mkdir dir="${dist}/lib"/>
+	</target>
+	
+	<target name="compile" depends="prepare">
+		<javac srcdir="src" destdir="classes">
+			<classpath refid="classpath"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="prepare,compile,include-driver,exclude-driver">
+        	<jar jarfile="${dist}/lib/${jar.name}">
+ 			<fileset dir="classes"/>
+			<fileset dir="src">
+				<exclude name="**/*.java"/>
+			</fileset>
+			
+			<manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+               <attribute name="Main-Class" value="${main.class}"/>
+               <attribute name="Class-Path" value="${example.deps}"/>
+            </manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist.base}"/>
+		<delete dir="classes"/>
+	</target>
+	
+	<target name="include-driver" if="driver.jar">
+		<property name="example.deps" value="${driver.jar} cayenne.jar"/>
+	</target>
+	
+	<target name="exclude-driver" unless="driver.jar">
+		<property name="example.deps" value="cayenne.jar"/>
+	</target>
+ </project>

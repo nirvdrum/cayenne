@@ -33,17 +33,18 @@
      *
      *  1. release      - creates a full Cayenne distribution.
      *  2. release-site - creates a full Cayenne website distribution.
-     *  3. build        - (default target) builds all subproject JAR files.
-     *  4. compile      - compiles all subprojects source files.
-     *  5. clean        - cleans temporary build and distribution directories
-     *  6. clean-java   - cleans all build directories, preserving the docs and such
-     *  7. doc          - builds Cayenne documentation including Javadocs.
-     *  8. api          - builds Javdoc API documentation.
-     *  9. javacc       - runs javacc
-     * 10. test         - runs JUnit tests
-     * 11. performance  - runs performance tests
-     * 12. regression   - runs regression test application
-     * 13. help         - prints this message
+     *  3. examples     - creates a full cayenne-examples distribution.
+     *  4. build        - (default target) builds all subproject JAR files.
+     *  5. compile      - compiles all subprojects source files.
+     *  6. clean        - cleans temporary build and distribution directories
+     *  7. clean-java   - cleans all build directories, preserving the docs and such
+     *  8. doc          - builds Cayenne documentation including Javadocs.
+     *  9. api          - builds Javdoc API documentation.
+     * 10. javacc       - runs javacc
+     * 11. test         - runs JUnit tests
+     * 12. performance  - runs performance tests
+     * 13. regression   - runs regression test application
+     * 14. help         - prints this message
      *
      *
      * ENVIRONMENT:
@@ -197,6 +198,14 @@
 		<ant antfile="build-modeler.xml" target="api"/>
 		<ant antfile="build-dvmodeler.xml" target="api"/>
     </target>  
+
+     <!-- ========================================== -->
+     <!-- Build cayenne-examples.tar.gz              -->
+     <!-- ========================================== -->
+     <target name="examples">
+        <ant antfile="build-examples.xml"/>
+     </target>
+
     
     <target name="nositedir" unless="site.dir">
     	<fail>"site.dir" must be defined.</fail>

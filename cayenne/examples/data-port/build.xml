@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<project name="aggegate-functions" default="dist" basedir=".">
+	<property file="build.properties"/>
+	<property file="default.properties"/>
+	
+	<property name="dist" value="${dist.base}"/>
+	<property name="jar.name" value="${project.name}.jar"/>
+
+	<path id="classpath">
+		<fileset dir="${cayenne.root}">
+			<include name="**/cayenne.jar"/>
+		</fileset>
+	</path>
+	
+	<target name="dist" depends="prepare,compile,jar"/>
+
+	<target name="prepare">
+		<mkdir dir="classes"/>
+		<mkdir dir="${dist}/lib"/>
+	</target>
+	
+	<target name="compile" depends="prepare">
+		<javac srcdir="src" destdir="classes">
+			<classpath refid="classpath"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="prepare,compile">
+        <jar jarfile="${dist}/lib/${jar.name}">
+ 			<fileset dir="classes"/>
+			<fileset dir="src">
+				<exclude name="**/*.java"/>
+			</fileset>
+			
+			<manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+            </manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${dist.base}"/>
+		<delete dir="classes"/>
+	</target>
+ </project>
