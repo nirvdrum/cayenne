@@ -52,20 +52,24 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.map.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the ObjRelationship. */
-public interface ObjRelationshipListener extends EventListener
-{
-	/** Relationship property changed. */
-	public void objRelationshipChanged(RelationshipEvent e);
-	/** Relationship has been created/added.*/
-	public void objRelationshipAdded(RelationshipEvent e);
-	/** Relationship has been removed.*/
-	public void objRelationshipRemoved(RelationshipEvent e);
-	
+/** 
+ * Defines a listener for ObjRelationship modification events. 
+ */
+public interface ObjRelationshipListener extends EventListener {
+
+    /** Relationship property changed. */
+    public void objRelationshipChanged(RelationshipEvent e);
+
+    /** Relationship has been created/added. */
+    public void objRelationshipAdded(RelationshipEvent e);
+
+    /** Relationship has been removed. */
+    public void objRelationshipRemoved(RelationshipEvent e);
+
 }
 

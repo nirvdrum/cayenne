@@ -52,23 +52,28 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.map.event;
 
 import java.util.EventListener;
 
-/** For managing the changes in the DbEntity */
-public interface DbEntityListener extends EventListener
-{
-	/** Entity property changed. 
-	  * May be name, attribute or relationship added or removed, etc. 
-	  * Attribute and relationship property changes are handled in
-	  * respective listeners. */
-	public void dbEntityChanged(EntityEvent e);
-	/** New entity has been created/added.*/
-	public void dbEntityAdded(EntityEvent e);
-	/** Entity has been removed.*/
-	public void dbEntityRemoved(EntityEvent e);
-	
+/** 
+ * Defines a listener for DbEntity modification events. 
+ */
+public interface DbEntityListener extends EventListener {
+
+    /**
+     * Entity property changed. May be name, attribute or relationship added or removed,
+     * etc. Attribute and relationship property changes are handled in respective
+     * listeners.
+     */
+    public void dbEntityChanged(EntityEvent e);
+
+    /** New entity has been created/added. */
+    public void dbEntityAdded(EntityEvent e);
+
+    /** Entity has been removed. */
+    public void dbEntityRemoved(EntityEvent e);
+
 }
 
