@@ -96,18 +96,19 @@ public class CreateRelationshipAction extends CayenneAction {
 	public void createObjRelationship(ObjEntity objEnt) {
 		Mediator mediator = getMediator();
 
-		ObjAttribute attr =
-			(ObjAttribute) NamedObjectFactory.createObject(
-				ObjAttribute.class,
+		ObjRelationship rel =
+			(ObjRelationship) NamedObjectFactory.createObject(
+				ObjRelationship.class,
 				objEnt);
-		objEnt.addAttribute(attr);
-		mediator.fireObjAttributeEvent(
-			new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
-
-		mediator.fireObjAttributeDisplayEvent(
-			new AttributeDisplayEvent(
+		rel.setSourceEntity(objEnt);
+		objEnt.addRelationship(rel);
+		
+		mediator.fireObjRelationshipEvent(
+			new RelationshipEvent(this, rel, objEnt, RelationshipEvent.ADD));
+		mediator.fireObjRelationshipDisplayEvent(
+			new RelationshipDisplayEvent(
 				this,
-				attr,
+				rel,
 				objEnt,
 				mediator.getCurrentDataMap(),
 				mediator.getCurrentDataDomain()));

@@ -194,22 +194,6 @@ class ObjRelationshipTableModel extends CayenneTableModel {
 		fireTableRowsUpdated(row, row);
 	} // End setValueAt()
 
-	/** Don't allow adding more than one new attributes. 
-	 * @return true if new row was added, false if not. */
-	public boolean addRow() {
-		ObjRelationship temp =
-			(ObjRelationship) NamedObjectFactory.createObject(
-				ObjRelationship.class,
-				entity);
-		temp.setSourceEntity(entity);
-		RelationshipEvent e;
-		e = new RelationshipEvent(eventSource, temp, entity, RelationshipEvent.ADD);
-		objectList.add(temp);
-		entity.addRelationship(temp);
-		mediator.fireObjRelationshipEvent(e);
-		fireTableDataChanged();
-		return true;
-	}
 
 	public void removeRow(int row) {
 		if (row < 0)

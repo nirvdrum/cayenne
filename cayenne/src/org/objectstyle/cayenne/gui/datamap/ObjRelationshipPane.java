@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,8 +52,8 @@ package org.objectstyle.cayenne.gui.datamap;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -71,51 +70,53 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
 
-/** Displays ObjRelationship-s for the current obj entity. 
-  * @author Michael Misha Shengaout*/
-public class ObjRelationshipPane extends JPanel
-implements ActionListener, ObjEntityDisplayListener
-, ObjEntityListener, ObjRelationshipListener
-, ExistingSelectionProcessor, ListSelectionListener
-, TableModelListener
-{
+/** 
+ * Displays ObjRelationships for the current obj entity. 
+ * 
+ * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
+ */
+public class ObjRelationshipPane
+	extends JPanel
+	implements
+		ActionListener,
+		ObjEntityDisplayListener,
+		ObjEntityListener,
+		ObjRelationshipListener,
+		ExistingSelectionProcessor,
+		ListSelectionListener,
+		TableModelListener {
 	Mediator mediator;
 
-	JTable 		table;
-	JButton 	add;
-	JButton 	resolve;
-	
+	JTable table;
+	JButton resolve;
+
 	public ObjRelationshipPane(Mediator temp_mediator) {
 		super();
-		mediator = temp_mediator;		
+		mediator = temp_mediator;
 		mediator.addObjEntityDisplayListener(this);
 		mediator.addObjEntityListener(this);
 		mediator.addObjRelationshipListener(this);
 		// Set up graphical components
 		init();
 		// Add listeners		
-		add.addActionListener(this);
 		resolve.addActionListener(this);
 	}
 
-	private void init()
-	{
+	private void init() {
 		this.setLayout(new BorderLayout());
 		table = new CayenneTable();
-		add = new JButton("Add");
-		resolve	= new JButton("Database Mapping");
-		JPanel panel = PanelFactory.createTablePanel(table
-							, new JButton[]{add, resolve});
+		resolve = new JButton("Database Mapping");
+		JPanel panel =
+			PanelFactory.createTablePanel(table, new JButton[] { resolve });
 		add(panel, BorderLayout.CENTER);
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		ObjRelationshipTableModel model;
-		model = (ObjRelationshipTableModel)table.getModel();
-		if (src == add) {
-			model.addRow();
-		} else if (src == resolve) {
+		model = (ObjRelationshipTableModel) table.getModel();
+		if (src == resolve) {
 			resolveRelationship();
 		}
 	}
@@ -124,40 +125,39 @@ implements ActionListener, ObjEntityDisplayListener
 		ObjRelationship rel = null;
 		if (table.getSelectedRow() >= 0) {
 			ObjRelationshipTableModel model;
-			model = (ObjRelationshipTableModel)table.getModel();
+			model = (ObjRelationshipTableModel) table.getModel();
 			rel = model.getRelationship(table.getSelectedRow());
-			if (rel.getTargetEntity() != null 
-				&& ((ObjEntity)rel.getSourceEntity()).getDbEntity() != null
-				&& ((ObjEntity)rel.getTargetEntity()).getDbEntity() != null)
-			{
+			if (rel.getTargetEntity() != null
+				&& ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
+				&& ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
 				resolve.setEnabled(true);
-			}
-			else
+			} else
 				resolve.setEnabled(false);
 		}
 	}
 
-	public void processExistingSelection()
-	{
+	public void processExistingSelection() {
 		ObjRelationship rel = null;
 		if (table.getSelectedRow() >= 0) {
 			ObjRelationshipTableModel model;
-			model = (ObjRelationshipTableModel)table.getModel();
+			model = (ObjRelationshipTableModel) table.getModel();
 			rel = model.getRelationship(table.getSelectedRow());
-			if (rel.getTargetEntity() != null 
-				&& ((ObjEntity)rel.getSourceEntity()).getDbEntity() != null
-				&& ((ObjEntity)rel.getTargetEntity()).getDbEntity() != null)
-			{
+			if (rel.getTargetEntity() != null
+				&& ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
+				&& ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
 				resolve.setEnabled(true);
-			}
-			else
+			} else
 				resolve.setEnabled(false);
 		} else
 			resolve.setEnabled(false);
 		RelationshipDisplayEvent ev;
-		ev = new RelationshipDisplayEvent(this, rel
-				, mediator.getCurrentObjEntity(), mediator.getCurrentDataMap()
-				, mediator.getCurrentDataDomain());
+		ev =
+			new RelationshipDisplayEvent(
+				this,
+				rel,
+				mediator.getCurrentObjEntity(),
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireObjRelationshipDisplayEvent(ev);
 	}
 
@@ -165,35 +165,36 @@ implements ActionListener, ObjEntityDisplayListener
 		processExistingSelection();
 	}
 
-
-
 	private void stopEditing() {
 		// Stop whatever editing may be taking place
 		int col_index = table.getEditingColumn();
-		if (col_index >=0) {
+		if (col_index >= 0) {
 			TableColumn col = table.getColumnModel().getColumn(col_index);
 			col.getCellEditor().stopCellEditing();
 		}
 	}
-	
-
 
 	private void resolveRelationship() {
 		int row = table.getSelectedRow();
 		if (-1 == row)
 			return;
 		ObjRelationshipTableModel model;
-		model = (ObjRelationshipTableModel)table.getModel();
+		model = (ObjRelationshipTableModel) table.getModel();
 		ObjRelationship rel = model.getRelationship(row);
-		DbEntity start 	= ((ObjEntity)rel.getSourceEntity()).getDbEntity();
-		DbEntity end 	= ((ObjEntity)rel.getTargetEntity()).getDbEntity();
+		DbEntity start = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
+		DbEntity end = ((ObjEntity) rel.getTargetEntity()).getDbEntity();
 		java.util.List db_rel_list = rel.getDbRelationshipList();
 		DataMap map = mediator.getCurrentDataMap();
 
 		// Choose the relationship to resolve this obj relationship
 		ChooseDbRelationshipDialog dg;
-		dg = new ChooseDbRelationshipDialog(mediator.getCurrentDataMap()
-									, db_rel_list, start, end, rel.isToMany());
+		dg =
+			new ChooseDbRelationshipDialog(
+				mediator.getCurrentDataMap(),
+				db_rel_list,
+				start,
+				end,
+				rel.isToMany());
 		dg.setVisible(true);
 		if (ChooseDbRelationshipDialog.CANCEL == dg.getChoice())
 			return;
@@ -210,44 +211,115 @@ implements ActionListener, ObjEntityDisplayListener
 		else if (ChooseDbRelationshipDialog.NEW == dg.getChoice())
 			db_rel_list = new ArrayList();
 		ResolveDbRelationshipDialog dialog;
-		dialog = new ResolveDbRelationshipDialog(mediator, db_rel_list
-											, start, end, rel.isToMany());
+		dialog =
+			new ResolveDbRelationshipDialog(
+				mediator,
+				db_rel_list,
+				start,
+				end,
+				rel.isToMany());
 		dialog.setVisible(true);
 		// If user pressed "Save"
 		if (!dialog.isCancelPressed())
 			copyDbRelationship(rel, dialog.getDbRelList());
 		dialog.dispose();
 	}
-	
+
 	/** Set obj relationship to db relationships resolution.
 	  * Clear old db relationships and put new ones in their place.*/
-	private void copyDbRelationship (ObjRelationship rel, java.util.List list) {
+	private void copyDbRelationship(ObjRelationship rel, java.util.List list) {
 		rel.removeAllDbRelationships();
 		if (list == null) {
 			return;
 		}
-		
+
 		// Add DbRelationship to the ObjRedlationship list.
 		Iterator iter = list.iterator();
 		while (iter.hasNext()) {
-			DbRelationship db_rel = (DbRelationship)iter.next();
+			DbRelationship db_rel = (DbRelationship) iter.next();
 			rel.addDbRelationship(db_rel);
 		}
-		
-		mediator.fireObjRelationshipEvent(new RelationshipEvent(Editor.getFrame(), rel, rel.getSourceEntity()));
-	}
 
-	
+		mediator.fireObjRelationshipEvent(
+			new RelationshipEvent(
+				Editor.getFrame(),
+				rel,
+				rel.getSourceEntity()));
+	}
 
 	/** Loads obj relationships into table. */
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		if (e.getSource() == this)
 			return;
-		ObjEntity entity = (ObjEntity)e.getEntity();
+		ObjEntity entity = (ObjEntity) e.getEntity();
 		if (null == entity || e.isEntityChanged() == false)
 			return;
+		rebuildTable(entity);
+	}
+
+	/** Create DefaultComboBoxModel with all obj entity names. */
+	private DefaultComboBoxModel createComboModel() {
+		DataMap map = mediator.getCurrentDataMap();
+		Vector elements = new Vector();
+		java.util.List obj_entities = map.getObjEntitiesAsList();
+		Iterator iter = obj_entities.iterator();
+		while (iter.hasNext()) {
+			ObjEntity entity = (ObjEntity) iter.next();
+			String name = entity.getName();
+			elements.add(name);
+		} // End while()
+
+		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
+		return model;
+	}
+
+	public void objEntityChanged(EntityEvent e) {
+	}
+	public void objEntityAdded(EntityEvent e) {
+		reloadEntityList(e);
+	}
+	public void objEntityRemoved(EntityEvent e) {
+		reloadEntityList(e);
+	}
+
+	public void objRelationshipChanged(RelationshipEvent e) {
+	}
+	public void objRelationshipAdded(RelationshipEvent e) {
+		rebuildTable((ObjEntity) e.getEntity());
+	}
+
+	public void objRelationshipRemoved(RelationshipEvent e) {
 		ObjRelationshipTableModel model;
-		model = new ObjRelationshipTableModel(entity,mediator, this);
+		model = (ObjRelationshipTableModel) table.getModel();
+		model.removeRelationship(e.getRelationship());
+	}
+
+	/** Refresh the list of obj entities (targets). 
+	  * Also refresh the table in case some obj relationships were deleted.*/
+	private void reloadEntityList(EntityEvent e) {
+		if (e.getSource() == this)
+			return;
+		// If current model added/removed, do nothing.
+		if (mediator.getCurrentObjEntity() == e.getEntity())
+			return;
+		// If this is just loading new currentObjEntity, do nothing
+		if (mediator.getCurrentObjEntity() == null)
+			return;
+		TableColumn col;
+		col =
+			table.getColumnModel().getColumn(
+				ObjRelationshipTableModel.REL_TARGET);
+		DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
+		JComboBox combo = (JComboBox) editor.getComponent();
+		combo.setModel(createComboModel());
+		ObjRelationshipTableModel model;
+		model = (ObjRelationshipTableModel) table.getModel();
+		model.fireTableDataChanged();
+	}
+
+	protected void rebuildTable(ObjEntity ent) {
+		ObjRelationshipTableModel model =
+			new ObjRelationshipTableModel(ent, mediator, this);
 		model.addTableModelListener(this);
 		table.setModel(model);
 		table.setRowHeight(25);
@@ -266,57 +338,4 @@ implements ActionListener, ObjEntityDisplayListener
 		col.setMinWidth(150);
 		table.getSelectionModel().addListSelectionListener(this);
 	}
-	
-	/** Create DefaultComboBoxModel with all obj entity names. */
-	private DefaultComboBoxModel createComboModel() {
-		DataMap map = mediator.getCurrentDataMap();
-		Vector elements = new Vector();
-		java.util.List obj_entities = map.getObjEntitiesAsList();
-		Iterator iter = obj_entities.iterator();
-		while(iter.hasNext()){
-			ObjEntity entity  = (ObjEntity)iter.next();
-			String name = entity.getName();
-			elements.add(name);
-		}// End while()
-
-		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
-		return model;
-	}
-
-	public void objEntityChanged(EntityEvent e){}
-	public void objEntityAdded(EntityEvent e)
-	{ reloadEntityList(e); }
-	public void objEntityRemoved(EntityEvent e)
-	{ reloadEntityList(e); }
-
-	public void objRelationshipChanged(RelationshipEvent e){}
-	public void objRelationshipAdded(RelationshipEvent e){}
-	public void objRelationshipRemoved(RelationshipEvent e){
-		ObjRelationshipTableModel model;
-		model = (ObjRelationshipTableModel)table.getModel();
-		model.removeRelationship(e.getRelationship());
-	}
-
-
-
-	/** Refresh the list of obj entities (targets). 
-	  * Also refresh the table in case some obj relationships were deleted.*/
-	private void reloadEntityList(EntityEvent e) {
-		if (e.getSource() == this)
-			return;
-		// If current model added/removed, do nothing.
-		if (mediator.getCurrentObjEntity() == e.getEntity())
-			return;
-		// If this is just loading new currentObjEntity, do nothing
-		if (mediator.getCurrentObjEntity() == null)
-			return;
-		TableColumn col;
-		col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
-		DefaultCellEditor editor = (DefaultCellEditor)col.getCellEditor();
-		JComboBox combo = (JComboBox)editor.getComponent();
-		combo.setModel(createComboModel());
-		ObjRelationshipTableModel model;
-		model = (ObjRelationshipTableModel)table.getModel();
-		model.fireTableDataChanged();
-	}	
 }
