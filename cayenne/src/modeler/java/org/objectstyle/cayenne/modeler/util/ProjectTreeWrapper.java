@@ -55,91 +55,75 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
 
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.ProjectTraversalHandler;
 
 /**
- * Specialized tree object that can render Cayenne project trees.
+ * ProjectTreeWrapper is a helper that wraps Cayenne project trees into
+ * Swing DefaultMutableTreeNode objects.
  * 
  * @author Andrei Adamchik
  */
-public class ProjectTree extends JTree {
-    static Logger logObj = Logger.getLogger(ProjectTree.class);
+public class ProjectTreeWrapper {
+	protected static ProjectTreeWrapper instance = new ProjectTreeWrapper();
+	
+	/**
+	 * Returns shared instance.
+	 */
+	public static ProjectTreeWrapper getInstance() {
+		return instance;
+	}
 
     /**
-     * Constructor for ProjectTree.
+     * Creates a ProjectTree wrapping Cayenne project.
      */
-    public ProjectTree(Project project) {
-        // build model
-        DefaultMutableTreeNode root =
-            ProjectTreeWrapper.getInstance().wrapProject(project);
-        setModel(new DefaultTreeModel(root));
- 
-        // hide root
-        setRootVisible(false);
+    public DefaultMutableTreeNode wrapProject(Project project) {
+    	TraversalHelper helper = new TraversalHelper();
+    	new ProjectTraversal(helper).traverse(project.getRootNode());
+    	return helper.getRootNode();
+    }
+
+    class TraversalHelper implements ProjectTraversalHandler {
+        protected DefaultMutableTreeNode rootNode;
+        protected Map nodesMap;
+
+        public TraversalHelper() {
+            this.nodesMap = new HashMap();
+        }
         
-        // expand top level
-        getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        Enumeration level = root.children();
-        while (level.hasMoreElements()) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) level.nextElement();
-            TreePath path = new TreePath(node.getPath());
-            expandPath(path);
-        }
-    }
-
-    /**
-     * Returns a "name" property of the tree node.
-     */
-    public String convertValueToText(
-        Object value,
-        boolean selected,
-        boolean expanded,
-        boolean leaf,
-        int row,
-        boolean hasFocus) {
-
-        // unwrap
-        while (value instanceof DefaultMutableTreeNode) {
-            value = ((DefaultMutableTreeNode) value).getUserObject();
+        public DefaultMutableTreeNode getRootNode() {
+        	return rootNode;
         }
 
-        // String - just return it
-        if (value instanceof String) {
-            return value.toString();
+        public void projectNode(Object[] nodePath) {
+        	Object parent = ProjectTraversal.objectParentFromPath(nodePath);
+        	Object nodeObj = ProjectTraversal.objectFromPath(nodePath);
+        	DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
+        	
+        	if(parent == null) {
+        		rootNode = node;
+        	}
+        	else {
+        		DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode)nodesMap.get(parent);
+        		nodeParent.add(node);
+        	}
+        	
+        	nodesMap.put(nodeObj, node);            
         }
 
-        // configuration - root node
-        if (value instanceof Configuration) {
-            return "";
+        public boolean shouldReadChildren(Object node, Object[] parentPath) {
+            return (node instanceof Configuration)
+                || (node instanceof DataDomain)
+                || (node instanceof DataMap);
         }
-
-        // read name property
-        try {
-            return (value != null)
-                ? String.valueOf(PropertyUtils.getProperty(value, "name"))
-                : "";
-
-        } catch (Exception e) {
-            String objectClass =
-                (value == null) ? "(unknown)" : value.getClass().getName();
-            logObj.warn("Exception reading property 'name', class " + objectClass, e);
-            return "";
-        }
-
-    }
-
-    public String getName() {
-        return "";
     }
 }

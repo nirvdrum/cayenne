@@ -137,18 +137,22 @@ public class BrowseView
     private static final int DB_ENTITY_NODE = 5;
 
     protected Mediator mediator;
-    protected ProjectTree browseTree = new ProjectTree();
+    protected ProjectTree browseTree;
     protected DefaultMutableTreeNode rootNode;
     protected DefaultMutableTreeNode currentNode;
 
     protected DefaultTreeModel model;
 
-    public BrowseView(Mediator data_map_editor) {
+    public BrowseView(Mediator mediator) {
         super();
-        mediator = data_map_editor;
-        setViewportView(browseTree);
+        this.mediator = mediator;
+
+        browseTree = new ProjectTree(Editor.getProject());
         browseTree.setCellRenderer(new BrowseViewRenderer());
-        load(Editor.getProject());
+        setViewportView(browseTree);
+        
+        model = (DefaultTreeModel)browseTree.getModel();
+        rootNode = (DefaultMutableTreeNode) model.getRoot();
 
         // listen for mouse events
         MouseListener ml = new MouseAdapter() {
@@ -185,40 +189,6 @@ public class BrowseView
         mediator.addDbEntityDisplayListener(this);
     }
 
-    /** Traverses domains, nodes, maps and entities and populates tree.
-     */
-    private void load(Project p) {
-        rootNode =
-            new DefaultMutableTreeNode(
-                ((ApplicationProject) Editor.getProject()).getConfig(),
-                true);
-        // create tree model with root objects
-        model = new DefaultTreeModel(rootNode);
-        // Populate obj tree
-        DataDomain[] temp_domains =
-            ((ApplicationProject) Editor.getProject()).getDomains();
-        for (int i = 0; i < temp_domains.length; i++) {
-            DefaultMutableTreeNode domain_ele;
-            domain_ele = loadDomain(temp_domains[i]);
-            rootNode.add(domain_ele);
-        } // End for(data domains)
-
-        // Put models into trees.
-        browseTree.setModel(model);
-        browseTree.setRootVisible(false);
-        // Set selection policy (one at a time) and add listeners
-        browseTree.getSelectionModel().setSelectionMode(
-            TreeSelectionModel.SINGLE_TREE_SELECTION);
-        Enumeration level = rootNode.children();
-        if (null == level)
-            return;
-        while (level.hasMoreElements()) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) level.nextElement();
-            TreePath path = new TreePath(node.getPath());
-            browseTree.expandPath(path);
-        } // End level
-    }
-
     private DefaultMutableTreeNode loadDomain(DataDomain domain) {
         // wrap in a tree node
         DefaultMutableTreeNode domainTreeNode = new DefaultMutableTreeNode(domain, true);
@@ -230,7 +200,7 @@ public class BrowseView
         }
         Iterator nodeIt = domain.getDataNodeList().iterator();
         while (nodeIt.hasNext()) {
-            DefaultMutableTreeNode nodeTreeNode = loadNode((DataNode)nodeIt.next());
+            DefaultMutableTreeNode nodeTreeNode = loadNode((DataNode) nodeIt.next());
             domainTreeNode.add(nodeTreeNode);
         }
         return domainTreeNode;
@@ -238,15 +208,14 @@ public class BrowseView
 
     private DefaultMutableTreeNode loadMap(DataMap map) {
         DefaultMutableTreeNode mapTreeNode = new DefaultMutableTreeNode(map, true);
-        
+
         Iterator oeIt = map.getObjEntitiesAsList().iterator();
         while (oeIt.hasNext()) {
             Entity entity = (Entity) oeIt.next();
-            DefaultMutableTreeNode oeTreeNode =
-                new DefaultMutableTreeNode(entity, false);
+            DefaultMutableTreeNode oeTreeNode = new DefaultMutableTreeNode(entity, false);
             mapTreeNode.add(oeTreeNode);
-        } 
-                
+        }
+
         List db_entities = map.getDbEntitiesAsList();
         Iterator db_iter = db_entities.iterator();
         while (db_iter.hasNext()) {
@@ -255,7 +224,7 @@ public class BrowseView
             db_entity_ele = new DefaultMutableTreeNode(entity, false);
             mapTreeNode.add(db_entity_ele);
         }
-        
+
         return mapTreeNode;
     }
 

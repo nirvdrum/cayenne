@@ -101,11 +101,11 @@ public class ProjectTraversal {
      */
     public static Object objectFromPath(Object[] treeNodePath) {
         if (treeNodePath == null) {
-            throw new NullPointerException("Null path to validated object.");
+            throw new NullPointerException("Null path to object.");
         }
 
         if (treeNodePath.length == 0) {
-            throw new ProjectException("Validation path is empty.");
+            throw new ProjectException("Path is empty.");
         }
 
         // return last object
@@ -119,11 +119,11 @@ public class ProjectTraversal {
      */
     public static Object objectParentFromPath(Object[] treeNodePath) {
         if (treeNodePath == null) {
-            throw new NullPointerException("Null path to validated object.");
+            throw new NullPointerException("Null path to object.");
         }
 
         if (treeNodePath.length == 0) {
-            throw new ProjectException("Validation path is empty.");
+            throw new ProjectException("Path is empty.");
         }
 
         // return next to last object
