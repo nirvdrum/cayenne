@@ -248,6 +248,20 @@ public class DataContext implements QueryEngine, Serializable {
         awakeFromDeserialization();
         return parent;
     }
+    
+    /**
+     * <i>Note: currently nested DataContexts are not supported,
+     * so this method simply calls "getParent()". Using this method is preferrable
+     * to calling "getParent()" directly and casting it to DataDomain.
+     * 
+     * @return DataDomain that is a direct or indirect parent
+     * of this DataContext.
+     * 
+     * @since 1.1
+     */
+    public DataDomain getParentDataDomain() {
+        return (DataDomain)getParent();
+    }
 
     /**
      * Sets parent QueryEngine of this DataContext.

@@ -117,13 +117,19 @@ public interface OperationObserver extends OperationHints {
     /** 
      * Invoked when a batch of queries was processed as a single transaction,
      * and this transaction was successfully committed.
+     * 
+     * @deprecated since 1.1, "transactionRolledback" is no longer called, instead
+     * a TransactionDelegate is notified.
      */
     public void transactionCommitted();
     
     
     /** 
      * Invoked when a batch of queries was processed as a single transaction,
-     *  and this transaction was failed and was rolled back. 
+     *  and this transaction was failed and was rolled back.
+     * 
+     * @deprecated since 1.1, "transactionRolledback" is no longer called, instead
+     * a TransactionDelegate is notified.
      */
     public void transactionRolledback();
     

@@ -94,7 +94,12 @@ public class ContextCommitObserver
         List insObjects,
         List updObjects,
         List delObjects) {
+            
         super.setLoggingLevel(logLevel);
+        
+        // when committing a DataContext, transaction is mandatory
+        super.setTransaction(context.getParentDataDomain().createTransaction());
+        
         this.context = context;
         this.insObjects = insObjects;
         this.updObjects = updObjects;
@@ -119,6 +124,9 @@ public class ContextCommitObserver
         }
     }
 
+    /**
+     * @deprecated Since 1.1 this method is no longer used by Cayenne.
+     */
     public boolean useAutoCommit() {
         return false;
     }

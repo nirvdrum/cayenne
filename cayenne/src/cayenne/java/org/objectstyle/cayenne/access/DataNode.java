@@ -206,8 +206,7 @@ public class DataNode implements QueryEngine {
         // control from the user, maybe via ContextCommitObserver?
         if (adapter != null && adapter.supportsFkConstraints()) {
             this.dependencySorter = new DefaultSorter(this);
-        }
-        else {
+        } else {
             this.dependencySorter = NullSorter.NULL_SORTER;
         }
     }
@@ -224,19 +223,20 @@ public class DataNode implements QueryEngine {
             : null;
     }
 
-	/** 
-	 * Calls "performQueries()" wrapping a query argument into a list.
-	 * 
-	 * @deprecated Since 1.1 use performQueries(List, OperationObserver).
-	 * This method is redundant and doesn't add value.
-	 */
-	public void performQuery(Query query, OperationObserver operationObserver) {
-	   this.performQueries(Collections.singletonList(query), operationObserver);
-	}
+    /** 
+     * Calls "performQueries()" wrapping a query argument into a list.
+     * 
+     * @deprecated Since 1.1 use performQueries(List, OperationObserver).
+     * This method is redundant and doesn't add value.
+     */
+    public void performQuery(Query query, OperationObserver operationObserver) {
+        this.performQueries(Collections.singletonList(query), operationObserver);
+    }
 
     /** Run multiple queries using one of the pooled connections. */
     public void performQueries(List queries, OperationObserver opObserver) {
         Level logLevel = opObserver.getLoggingLevel();
+        Transaction transaction = opObserver.getTransaction();
 
         int listSize = queries.size();
         QueryLogger.logQueryStart(logLevel, listSize);
@@ -244,9 +244,9 @@ public class DataNode implements QueryEngine {
             return;
         }
 
-        Connection con = null;
-        boolean usesAutoCommit = opObserver.useAutoCommit();
+        Connection connection = null;
         boolean rolledBackFlag = false;
+        boolean commitExplicitly = false;
 
         try {
             // check for invalid iterated query
@@ -257,9 +257,14 @@ public class DataNode implements QueryEngine {
             }
 
             // check out connection, create statement
-            con = this.getDataSource().getConnection();
-            if (con.getAutoCommit() != usesAutoCommit) {
-                con.setAutoCommit(usesAutoCommit);
+            connection = this.getDataSource().getConnection();
+            if (transaction != null) {
+                if (connection.getAutoCommit()) {
+                    connection.setAutoCommit(false);
+                }
+                transaction.addConnection(connection);
+            } else {
+                commitExplicitly = !connection.getAutoCommit();
             }
 
             for (int i = 0; i < listSize; i++) {
@@ -273,7 +278,7 @@ public class DataNode implements QueryEngine {
                     // 1. All kinds of SELECT
                     if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                         boolean isIterated = opObserver.isIteratedResult();
-                        Connection localCon = con;
+                        Connection localCon = connection;
 
                         if (isIterated) {
                             // if ResultIterator is returned to the user,
@@ -281,7 +286,7 @@ public class DataNode implements QueryEngine {
                             // exception handling, and other housekeeping.
                             // trick "finally" to avoid closing connection here
                             // it will be closed by the ResultIterator
-                            con = null;
+                            connection = null;
                         }
 
                         runSelect(localCon, nextQuery, opObserver);
@@ -290,33 +295,34 @@ public class DataNode implements QueryEngine {
                     else {
 
                         if (nextQuery instanceof BatchQuery) {
-                            runBatchUpdate(con, (BatchQuery) nextQuery, opObserver);
-                        }
-                        else if (nextQuery instanceof ProcedureQuery) {
-                            runStoredProcedure(con, nextQuery, opObserver);
-                        }
-                        else {
-                            runUpdate(con, nextQuery, opObserver);
+                            runBatchUpdate(
+                                connection,
+                                (BatchQuery) nextQuery,
+                                opObserver);
+                        } else if (nextQuery instanceof ProcedureQuery) {
+                            runStoredProcedure(connection, nextQuery, opObserver);
+                        } else {
+                            runUpdate(connection, nextQuery, opObserver);
                         }
                     }
 
-                }
-                catch (Exception queryEx) {
+                } catch (Exception queryEx) {
                     QueryLogger.logQueryError(logLevel, queryEx);
 
                     // notify consumer of the exception,
                     // stop running further queries
                     opObserver.nextQueryException(nextQuery, queryEx);
 
-                    if (!usesAutoCommit) {
-                        // rollback transaction
+                    // rollback transaction
+                    rolledBackFlag = true;
+
+                    if (transaction != null) {
+                        transaction.setRollbackOnly();
+                    } else if (commitExplicitly) {
                         try {
-                            rolledBackFlag = true;
-                            con.rollback();
+                            connection.rollback();
                             QueryLogger.logRollbackTransaction(logLevel);
-                            opObserver.transactionRolledback();
-                        }
-                        catch (SQLException sqlEx) {
+                        } catch (SQLException sqlEx) {
                             QueryLogger.logQueryError(logLevel, sqlEx);
                             opObserver.nextQueryException(nextQuery, sqlEx);
                         }
@@ -327,10 +333,9 @@ public class DataNode implements QueryEngine {
             }
 
             // commit transaction if needed
-            if (!rolledBackFlag && !usesAutoCommit) {
-                con.commit();
+            if (!rolledBackFlag && commitExplicitly) {
+                connection.commit();
                 QueryLogger.logCommitTransaction(logLevel);
-                opObserver.transactionCommitted();
             }
 
         }
@@ -338,27 +343,29 @@ public class DataNode implements QueryEngine {
         catch (Exception globalEx) {
             QueryLogger.logQueryError(logLevel, globalEx);
 
-            if (!usesAutoCommit && con != null) {
+            if (connection != null) {
                 // rollback failed transaction
                 rolledBackFlag = true;
 
-                try {
-                    con.rollback();
-                    QueryLogger.logRollbackTransaction(logLevel);
-                    opObserver.transactionRolledback();
-                }
-                catch (SQLException ex) {
-                    // do nothing....
+                if (transaction != null) {
+                    transaction.setRollbackOnly();
+                } else if (commitExplicitly) {
+                    try {
+                        connection.rollback();
+                        QueryLogger.logRollbackTransaction(logLevel);
+                    } catch (SQLException ex) {
+                        // do nothing....
+                    }
                 }
             }
 
             opObserver.nextGlobalException(globalEx);
-        }
-        finally {
+        } finally {
             try {
                 // return connection to the pool if it was checked out
-                if (con != null) {
-                    con.close();
+                // and not under transaction control
+                if (transaction == null && connection != null) {
+                    connection.close();
                 }
             }
             // finally catch connection closing exceptions...
@@ -405,13 +412,11 @@ public class DataNode implements QueryEngine {
                 System.currentTimeMillis() - t1);
 
             delegate.nextDataRows(query, resultRows);
-        }
-        else {
+        } else {
             try {
                 it.setClosingConnection(true);
                 delegate.nextDataRows(transl.getQuery(), it);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 it.close();
                 throw ex;
             }
@@ -437,8 +442,7 @@ public class DataNode implements QueryEngine {
 
             // send results back to consumer
             delegate.nextCount(transl.getQuery(), count);
-        }
-        finally {
+        } finally {
             prepStmt.close();
         }
     }
@@ -478,8 +482,7 @@ public class DataNode implements QueryEngine {
         // run batch
         if (adapter.supportsBatchUpdates()) {
             runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
-        }
-        else {
+        } else {
             runBatchUpdateAsIndividualQueries(con, query, queryBuilder, delegate);
         }
     }
@@ -527,12 +530,10 @@ public class DataNode implements QueryEngine {
             if (isLoggable) {
                 QueryLogger.logUpdateCount(logLevel, statement.getUpdateCount());
             }
-        }
-        finally {
+        } finally {
             try {
                 statement.close();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
             }
         }
     }
@@ -579,12 +580,10 @@ public class DataNode implements QueryEngine {
                     QueryLogger.logUpdateCount(logLevel, updated);
                 }
             }
-        }
-        finally {
+        } finally {
             try {
                 statement.close();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
             }
         }
     }
@@ -626,8 +625,7 @@ public class DataNode implements QueryEngine {
                     assembler.getResultDescriptor(rs),
                     (GenericSelectQuery) query,
                     delegate);
-            }
-            else {
+            } else {
                 int updateCount = statement.getUpdateCount();
                 if (updateCount == -1) {
                     break;
@@ -690,13 +688,11 @@ public class DataNode implements QueryEngine {
                 System.currentTimeMillis() - t1);
 
             delegate.nextDataRows(query, resultRows);
-        }
-        else {
+        } else {
             try {
                 resultReader.setClosingConnection(true);
                 delegate.nextDataRows(query, resultReader);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 resultReader.close();
                 throw ex;
             }
@@ -721,10 +717,9 @@ public class DataNode implements QueryEngine {
         DataSource ds = getDataSource();
         try {
             if (ds instanceof PoolManager) {
-                ((PoolManager)ds).dispose();
+                ((PoolManager) ds).dispose();
             }
-        }
-        catch (SQLException ex) {
+        } catch (SQLException ex) {
         }
     }
 }

@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002-2003 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002-2003 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -52,52 +52,27 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Level;
+import java.sql.Connection;
 
 /**
- * 
- * Defines an API that allows QueryEngine to obtain information about 
- * query execution. Defines query running strategies, logging, etc. 
- * 
+ * Allows customizing Cayenne transaction behavior. 
+ *  
  * @author Andrei Adamchik
  */
-public interface OperationHints {
-    
-    /** 
-     * Returns a log level level that should be used when 
-     * logging query execution. 
-     */ 
-    public Level getLoggingLevel();
-    
-    /** <p>DataNode executing a list of statements will consult OperationHints
-     *  about transactional behavior by calling this method.</p>
-     * 
-     *  <ul>
-     *  	<li>If this method returns true, each statement in a batch will be run as a separate 
-     *  transaction.</li>
-     *  	<li>If this method returns false, the whole batch will be wrapped in a transaction.</li>
-     *  </ul>
-     * 
-     * @deprecated Since 1.1 this method is no longer called and is therefore meaningless.
-     */
-    public boolean useAutoCommit();
-    
-    
-    /** 
-     * Returns <code>true</code> to indicate that any results of a select operation
-     * should be returned as a ResultIterator. <code>false</code> is returned when the
-     * results are expected as a list.
-     */
-    public boolean isIteratedResult();
-    
-    /**
-     * @return Transaction object assocaited with this operation, or null if
-     * no transactional control is used.
-     */
-    public Transaction getTransaction();
+public interface TransactionDelegate {
+   
+   public boolean willCommit(Transaction transaction);
+   
+   public boolean willMarkAsRollbackOnly(Transaction transaction);
+   
+   public boolean willRollback(Transaction transaction);
+   
+   public boolean didCommit(Transaction transaction);
+   
+   public boolean didRollback(Transaction transaction);
+   
+   public boolean willAddConnection(Transaction transaction, Connection connection);
 }
-

@@ -107,6 +107,8 @@ public class DataDomain implements QueryEngine {
     protected PrimaryKeyHelper primaryKeyHelper;
 
     protected DataRowStore snapshotCache;
+    
+    protected TransactionDelegate transactionDelegate;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -131,6 +133,21 @@ public class DataDomain implements QueryEngine {
         this.snapshotCache.setName(name);
     }
 
+    /**
+     * @since 1.1
+     * @return TransactionDelegate associated with this DataDomain, or null if no delegate exist.
+     */
+    public TransactionDelegate getTransactionDelegate() {
+        return transactionDelegate;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setDelegate(TransactionDelegate transactionDelegate) {
+        this.transactionDelegate = transactionDelegate;
+    }
+    
     public DataRowStore getSnapshotCache() {
         return snapshotCache;
     }
@@ -284,9 +301,24 @@ public class DataDomain implements QueryEngine {
     public DataContext createDataContext() {
         return new DataContext(this);
     }
+    
+    /**
+     * Creates an returns a new inactive transaction, serving as a factory method.
+     * If there is a TransactionDelegate, adds the delegate to the newly
+     * created Transaction.
+     * 
+     * @since 1.1
+     */
+    public Transaction createTransaction() {
+        Transaction transaction = new Transaction();
+        transaction.setDelegate(getTransactionDelegate());
+        return transaction;
+    }
+    
 
-    /** Returns registered DataNode whose name matches
-      * <code>name</code> parameter. */
+    /** 
+     * Returns registered DataNode whose name matches <code>name</code> parameter. 
+     */
     public DataNode getNode(String nodeName) {
         return (DataNode) nodes.get(nodeName);
     }

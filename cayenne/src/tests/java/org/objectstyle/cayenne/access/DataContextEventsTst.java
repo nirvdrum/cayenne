@@ -126,6 +126,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
             fail("No exception on saving invalid data.");
         } catch (CayenneRuntimeException ex) {
             // exception expected
+            ex.printStackTrace();
         }
 
         assertTrue(artist.receivedWillCommit());

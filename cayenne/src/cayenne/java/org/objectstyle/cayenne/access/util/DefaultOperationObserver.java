@@ -67,6 +67,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.ResultIterator;
+import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -88,12 +89,26 @@ public class DefaultOperationObserver implements OperationObserver {
 
     protected List globalExceptions = new ArrayList();
     protected Map queryExceptions = new HashMap();
-    protected boolean transactionCommitted;
-    protected boolean transactionRolledback;
     protected Level loggingLevel = DEFAULT_LOG_LEVEL;
+    protected Transaction transaction;
 
     /**
-     * Prints the information about query and global exceptions. */
+     * @since 1.1
+     */
+    public Transaction getTransaction() {
+        return transaction;
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    /**
+     * Prints the information about query and global exceptions. 
+     */
     public void printExceptions(PrintWriter out) {
         if (globalExceptions.size() > 0) {
             if (globalExceptions.size() == 1) {
@@ -140,12 +155,20 @@ public class DefaultOperationObserver implements OperationObserver {
         return globalExceptions.size() > 0 || queryExceptions.size() > 0;
     }
 
+    /**
+     * @return always returns false.
+     * @deprecated since 1.1 this is deprecated
+     */
     public boolean isTransactionCommitted() {
-        return transactionCommitted;
+        return false;
     }
 
+    /**
+     * @return always returns false.
+     * @deprecated since 1.1 this is deprecated
+     */
     public boolean isTransactionRolledback() {
-        return transactionRolledback;
+        return false;
     }
 
     /**
@@ -193,18 +216,25 @@ public class DefaultOperationObserver implements OperationObserver {
         globalExceptions.add(Util.unwindException(ex));
     }
 
+    /**
+     * @deprecated since 1.1
+     */
     public void transactionCommitted() {
-        logObj.debug("transaction committed");
-        transactionCommitted = true;
+        // noop
     }
 
+    /**
+      * @deprecated since 1.1
+      */
     public void transactionRolledback() {
-        logObj.debug("*** transaction rolled back");
-        transactionRolledback = true;
+        // noop
     }
 
-    /** Returns <code>true</code> so that individual queries are executed in separate
-     *  transactions. */
+    /** 
+     * Returns <code>true</code> so that individual queries are executed in separate transactions. 
+     * 
+     * @deprecated Since 1.1 this method is no longer used by Cayenne.
+     */
     public boolean useAutoCommit() {
         return true;
     }

@@ -156,38 +156,37 @@ class ContextCommit {
         try {
             context.fireWillCommit();
 
-            for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
-                DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
-                List queries = nodeHelper.getQueries();
+            observer.getTransaction().begin();
 
-                // Andrei: this check is needed, since if we run an empty query
-                // set,
-                // commit will not be executed, and this method will blow
-                // below.
-                if (queries.size() > 0) {
-                    nodeHelper.getNode().performQueries(queries, observer);
+            try {
+                for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
+                    DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
+                    List queries = nodeHelper.getQueries();
 
-                    // TODO: Andrei: should we reset observer commit status for
-                    // each iteration?
-                    // Also we may add real distributed transactions support by
-                    // adding
-                    // some kind of commit delegate that runs all queries, and
-                    // only then
-                    // commits...
-                    if (observer.isTransactionRolledback()) {
-                        context.fireTransactionRolledback();
-                        throw new CayenneException("Transaction was rolledback.");
-                    }
-                    else if (!observer.isTransactionCommitted()) {
-                        throw new CayenneException("Error committing transaction.");
+                    if (queries.size() > 0) {
+                        // note: observer throws on error
+                        nodeHelper.getNode().performQueries(queries, observer);
                     }
                 }
+
+                // commit
+                observer.getTransaction().commit();
+
+            } catch (Throwable th) {
+                try {
+                    // rollback
+                    observer.getTransaction().rollback();
+                } catch (Throwable rollbackTh) {
+                    // ignoring...
+                }
+
+                context.fireTransactionRolledback();
+                throw new CayenneException("Transaction was rolledback.");
             }
 
             context.getObjectStore().objectsCommitted();
             context.fireTransactionCommitted();
-        }
-        finally {
+        } finally {
             if (context.isTransactionEventsEnabled()) {
                 observer.unregisterFromDataContextEvents();
             }
@@ -332,11 +331,11 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-                    
-					// check if object was modified from underneath and consult the delegate
-					// if this is the case...
-					checkConcurrentModifications(o);
-					
+
+                    // check if object was modified from underneath and consult the delegate
+                    // if this is the case...
+                    checkConcurrentModifications(o);
+
                     Map id = o.getObjectId().getIdSnapshot();
                     if (id != null && !id.isEmpty()) {
                         if (!isMasterDbEntity && masterDependentDbRel != null)
@@ -383,11 +382,11 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-                    
+
                     // check if object was modified from underneath and consult the delegate
                     // if this is the case...
-					checkConcurrentModifications(o);
-                    
+                    checkConcurrentModifications(o);
+
                     Map snapshot =
                         BatchQueryUtils.buildSnapshotForUpdate(
                             entity,
