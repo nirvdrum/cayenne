@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.access.util.DefaultSorter;
 import org.objectstyle.cayenne.access.util.DependencySorter;
+import org.objectstyle.cayenne.access.util.NullSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -96,9 +97,9 @@ public class DataNode implements QueryEngine {
     protected String dataSourceLocation;
     protected String dataSourceFactory;
     protected EntityResolver entityResolver = new EntityResolver();
-    protected DependencySorter dependencySorter;
+    protected DependencySorter dependencySorter = NullSorter.NULL_SORTER;
 
-    /** Creates unnamed DataNode */
+    /** Creates unnamed DataNode. */
     public DataNode() {
     	this(null);
     }
@@ -106,7 +107,6 @@ public class DataNode implements QueryEngine {
     /** Creates DataNode and assigns <code>name</code> to it. */
     public DataNode(String name) {
         this.name = name;
-        this.dependencySorter = new DefaultSorter(this);
     }
 
     // setters/getters
@@ -194,6 +194,19 @@ public class DataNode implements QueryEngine {
 
     public void setAdapter(DbAdapter adapter) {
         this.adapter = adapter;
+        
+        // update sorter
+        
+        // TODO: since sorting may be disabled even for databases
+        // that enforce constraints, in cases when constraints are
+        // defined as deferrable, this may need more fine grained 
+        // control from the user, maybe via ContextCommitObserver?  
+        if(adapter != null && adapter.supportsFkConstraints()) {
+            this.dependencySorter = new DefaultSorter(this);
+        }
+        else {
+            this.dependencySorter = NullSorter.NULL_SORTER;
+        }
     }
 
     // other methods
