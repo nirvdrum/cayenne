@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.util.EntityMergeSupport;
  * @author Andrei Adamchik
  */
 public class EntitySynchAction extends CayenneAction {
-	public static final String ACTION_NAME = "Synch ObjEntity with DbEntity";
+	public static final String ACTION_NAME = "Sync ObjEntity with DbEntity";
 
 	public EntitySynchAction() {
 		super(ACTION_NAME);

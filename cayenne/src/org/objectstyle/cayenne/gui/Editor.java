@@ -106,7 +106,7 @@ public class Editor
 	 */
 	private static final String DIRTY_STRING = "* - ";
 
-	protected EditorView view;
+	private EditorView view;
 	protected Mediator mediator;
 	protected ActionMap actionMap;
 
@@ -116,9 +116,6 @@ public class Editor
 
 	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
 	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
-
-	JMenuItem importDbMenu = new JMenuItem("Reverse Engineer Database");
-	JMenuItem importEOMMenu = new JMenuItem("Import EOModel");
 	JMenuItem generateMenu = new JMenuItem("Generate Classes");
 	JMenuItem generateDbMenu = new JMenuItem("Generate Database");
 	JMenuItem setPackageMenu =
@@ -203,6 +200,12 @@ public class Editor
 		
 		CayenneAction entSynchAction = new EntitySynchAction();
 		actionMap.put(entSynchAction.getKey(), entSynchAction);
+		
+		CayenneAction importDbAction = new ImportDbAction();
+		actionMap.put(importDbAction.getKey(), importDbAction);
+		
+		CayenneAction importEOModelAction = new ImportEOModelAction();
+		actionMap.put(importEOModelAction.getKey(), importEOModelAction);
 	}
 
 	protected void init() {
@@ -247,8 +250,8 @@ public class Editor
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
-		toolMenu.add(importDbMenu);
-		toolMenu.add(importEOMMenu);
+		toolMenu.add(getAction(ImportDbAction.ACTION_NAME).buildMenu());
+		toolMenu.add(getAction(ImportEOModelAction.ACTION_NAME).buildMenu());
 		toolMenu.addSeparator();
 		toolMenu.add(generateMenu);
 		toolMenu.add(generateDbMenu);
@@ -268,13 +271,7 @@ public class Editor
 
 	protected void initActions() {
 		// create and assign actions
-		CayenneAction importDbAction = new ImportDbAction();
-		actionMap.put(importDbAction.getKey(), importDbAction);
-		importDbMenu.addActionListener(importDbAction);
 
-		CayenneAction importEOModelAction = new ImportEOModelAction();
-		actionMap.put(importEOModelAction.getKey(), importEOModelAction);
-		importEOMMenu.addActionListener(importEOModelAction);
 
 		CayenneAction genDbAction = new GenerateDbAction();
 		actionMap.put(genDbAction.getKey(), genDbAction);
@@ -383,6 +380,7 @@ public class Editor
 
 	public void projectClosed() {
 		recentFileMenu.rebuildFromPreferences();
+		
 		getContentPane().remove(view);
 		view = null;
 		setMediator(null);
@@ -396,9 +394,9 @@ public class Editor
 
 		// repaint is needed, since there is a trace from menu left on the screen
 		repaint();
-
 		setProjectTitle(null);
 	}
+	
 
 	public void projectOpened() {
 		view = new EditorView(mediator);
@@ -666,9 +664,8 @@ public class Editor
 		createDbEntityMenu.setEnabled(false);
 
 		getAction(EntitySynchAction.ACTION_NAME).setEnabled(false);
-
-		importDbMenu.setEnabled(false);
-		importEOMMenu.setEnabled(false);
+		getAction(ImportDbAction.ACTION_NAME).setEnabled(false);
+		getAction(ImportEOModelAction.ACTION_NAME).setEnabled(false);
 		generateMenu.setEnabled(false);
 		generateDbMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);
@@ -684,10 +681,9 @@ public class Editor
 		getAction(RemoveAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
         getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
-
 		closeProjectMenu.setEnabled(true);
-		importDbMenu.setEnabled(true);
-		importEOMMenu.setEnabled(true);
+		getAction(ImportDbAction.ACTION_NAME).setEnabled(true);
+		getAction(ImportEOModelAction.ACTION_NAME).setEnabled(true);
 	}
 
 	private void enableDataMapMenu() {
