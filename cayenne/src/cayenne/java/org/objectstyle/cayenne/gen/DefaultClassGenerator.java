@@ -195,6 +195,10 @@ public class DefaultClassGenerator extends MapClassGenerator {
         return (outFile != null) ? new FileWriter(outFile) : null;
     }
 
+    /**
+     * Returns a target file where a generated superclass must be saved. If null is returned,
+     * class shouldn't be generated.
+     */
     protected File fileForSuperclass(String pkgName, String className) throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
@@ -210,6 +214,10 @@ public class DefaultClassGenerator extends MapClassGenerator {
         return dest;
     }
 
+    /**
+     * Returns a target file where a generated class must be saved. If null is returned,
+     * class shouldn't be generated.
+     */
     protected File fileForClass(String pkgName, String className) throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");

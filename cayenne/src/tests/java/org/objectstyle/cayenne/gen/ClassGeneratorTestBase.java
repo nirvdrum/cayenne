@@ -49,75 +49,29 @@
  */
 package org.objectstyle.cayenne.gen;
 
+import java.io.StringWriter;
+
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
- * ClassGenerator tests that are not template-specific.
- * 
- * @author Andrei Adamchik
+ * Superclass of ClassGenerator tests.
  */
-public class ClassGeneratorTst extends BasicTestCase {
+public abstract class ClassGeneratorTestBase extends BasicTestCase {
 
     protected ClassGenerator cgen;
 
     protected void setUp() throws Exception {
         super.setUp();
-        cgen = new ClassGenerator(MapClassGenerator.SUBCLASS_TEMPLATE);
+        cgen = createGenerator();
     }
 
-    public void testFormatVariableName() {
-        assertEquals("abc", cgen.formatVariableName("abc"));
+    protected abstract ClassGenerator createGenerator() throws Exception;
 
-        assertEquals("_abstract", cgen.formatVariableName("abstract"));
-        assertEquals("_finally", cgen.formatVariableName("finally"));
+    protected String generatedString(ObjEntity entity) throws Exception {
+        StringWriter writer = new StringWriter();
+        cgen.generateClass(writer, entity);
+        return writer.toString();
     }
 
-    public void testClassName() throws Exception {
-        String className = "aaa";
-        cgen.setClassName(className);
-        assertEquals(className, cgen.getClassName());
-    }
-
-    public void testSuperPrefix() throws Exception {
-        String prefix = "pr_";
-        cgen.setSuperPrefix(prefix);
-        assertEquals(prefix, cgen.getSuperPrefix());
-    }
-
-    public void testPackageName() throws Exception {
-        assertFalse(cgen.isUsingPackage());
-        String pkgName = "aaa.org";
-        cgen.setPackageName(pkgName);
-        assertEquals(pkgName, cgen.getPackageName());
-        assertTrue(cgen.isUsingPackage());
-    }
-
-    public void testSuperClassName() throws Exception {
-        cgen.setSuperClassName("super!!!");
-        assertEquals("super!!!", cgen.getSuperClassName());
-    }
-
-    public void testContainingListProperties() throws Exception {
-        cgen.entity = new ObjEntity("test");
-
-        assertFalse(cgen.isContainingListProperties());
-
-        ObjRelationship toOne = new ObjRelationship("toone");
-        cgen.entity.addRelationship(toOne);
-        assertFalse(toOne.isToMany());
-        assertFalse(cgen.isContainingListProperties());
-
-        ObjRelationship toMany = new ObjRelationship("tomany") {
-
-            public boolean isToMany() {
-                return true;
-            }
-        };
-        
-        cgen.entity.addRelationship(toMany);
-        assertTrue(toMany.isToMany());
-        assertTrue(cgen.isContainingListProperties());
-    }
 }

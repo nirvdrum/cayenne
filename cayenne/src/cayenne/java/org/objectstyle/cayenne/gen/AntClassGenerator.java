@@ -54,51 +54,54 @@
  * <http://objectstyle.org/>.
  */
 
-
 package org.objectstyle.cayenne.gen;
 
 import java.io.File;
 
 import org.apache.tools.ant.Task;
 
-/** 
-  * Ant-specific extension of DefaultClassGenerator that provides logging
-  * functions. 
-  * 
-  * @author Andrei Adamchik
-  */
+/**
+ * Ant-specific extension of DefaultClassGenerator that provides logging
+ * functions.
+ * 
+ * @author Andrei Adamchik
+ */
 public class AntClassGenerator extends DefaultClassGenerator {
+
     protected Task parentTask;
-    
-    
+
     protected File fileForSuperclass(String pkgName, String className)
-        throws Exception {
+            throws Exception {
 
         File outFile = super.fileForSuperclass(pkgName, className);
         if (outFile != null) {
             parentTask.log("Generating superclass file: " + outFile.getCanonicalPath());
         }
+        
         return outFile;
     }
 
     protected File fileForClass(String pkgName, String className)
-        throws Exception {
+            throws Exception {
 
         File outFile = super.fileForClass(pkgName, className);
         if (outFile != null) {
-            parentTask.log("Generating class file: " + outFile.getCanonicalPath());
+            parentTask.log("Generating class file: "
+                    + outFile.getCanonicalPath());
         }
         return outFile;
     }
-
 
     public Task getParentTask() {
         return parentTask;
     }
 
-
+    /**
+     * Sets the Ant task that uses this generator.
+     * 
+     * @param parentTask An Ant task that provides Ant context to this generator.
+     */
     public void setParentTask(Task parentTask) {
         this.parentTask = parentTask;
     }
-
 }

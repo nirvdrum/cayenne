@@ -65,13 +65,14 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-/** 
- * Generates Java classes source code using VTL (Velocity template engine) for
- * the ObjEntities in the DataMap. This class is abstract and does not deal with 
- * filesystem issues directly. Concrete subclasses should provide ways to store
- * generated files by implementing "openWriter" and "closeWriter" methods.
+/**
+ * Generates Java source code for ObjEntities in the DataMap. This class is
+ * abstract and does not deal with filesystem issues directly. Concrete
+ * subclasses should provide ways to store generated files by implementing
+ * {@link #openWriter(ObjEntity, String, String)} and
+ * {@link #closeWriter(Writer)}methods.
  * 
- * @author Andrei Adamchik 
+ * @author Andrei Adamchik
  */
 public abstract class MapClassGenerator {
 
@@ -105,36 +106,41 @@ public abstract class MapClassGenerator {
         return SUPERCLASS_TEMPLATE;
     }
 
-    /** Provides child ClassGenerator with a Writer object
-      * to store generated source code of the Java class corresponding 
-      * to the <code>entity</code> parameter. 
-      * 
-      * @return Writer to store generated class source code or
-      * null if this class generation should be skipped. 
-      */
+    /**
+     * Creates a Writer to output source code for a given ObjEntity and Java
+     * class.
+     * 
+     * @return Writer to store generated class source code or null if this class
+     *         generation should be skipped.
+     */
     public abstract Writer openWriter(
         ObjEntity entity,
         String pkgName,
         String className)
         throws Exception;
 
-    /** Closes writer after class code has been successfully written by ClassGenerator. */
+    /**
+     * Closes writer after class code has been successfully written by
+     * ClassGenerator.
+     */
     public abstract void closeWriter(Writer out) throws Exception;
 
-    /** Runs class generation. Produces a pair of Java classes for
-      * each ObjEntity in the map. Uses default Cayenne templates for classes. */
+    /**
+     * Runs class generation. Produces a pair of Java classes for each ObjEntity
+     * in the map. Uses default Cayenne templates for classes.
+     */
     public void generateClassPairs() throws Exception {
         generateClassPairs(SUBCLASS_TEMPLATE, SUPERCLASS_TEMPLATE, SUPERCLASS_PREFIX);
     }
 
-    /** 
-      * Runs class generation. Produces a pair of Java classes for
-      * each ObjEntity in the map. This allows developers to use generated 
-      * <b>subclass</b> for their custom code, while generated <b>superclass</b>
-      * will contain Cayenne code. Superclass will be generated in the same package, 
-      * its class name will be derived from the class name by adding a 
-      * <code>superPrefix</code>. 
-      */
+    /**
+     * Runs class generation. Produces a pair of Java classes for each ObjEntity
+     * in the map. This allows developers to use generated <b>subclass </b> for
+     * their custom code, while generated <b>superclass </b> will contain
+     * Cayenne code. Superclass will be generated in the same package, its class
+     * name will be derived from the class name by adding a
+     * <code>superPrefix</code>.
+     */
     public void generateClassPairs(
         String classTemplate,
         String superTemplate,
