@@ -9,6 +9,13 @@
     <body>
         <!-- Contributors section -->
         <section name="Downloads">
+        	<ul>
+                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=95005">Latest 
+                release link</a>
+                </li>
+            </ul>
+            <hr/>
+        	
             <p>Cayenne can be downloaded either as binary or as source distribution.</p> 
             <panel name="Note:">Source distribution is "binary + source", and consists 
             of a full binary package and an extra "src" subdirectory.</panel>
