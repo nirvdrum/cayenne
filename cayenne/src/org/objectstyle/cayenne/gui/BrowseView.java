@@ -774,13 +774,13 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
     	URL url = cl.getResource(path + "images/domain16.jpg");
         domainIcon = new ImageIcon(url);
         
-    	url = cl.getResource(path + "images/node16.jpg");
+    	url = cl.getResource(path + "images/node16.gif");
     	nodeIcon = new ImageIcon(url);
     	
     	url = cl.getResource(path + "images/map16.jpg");
     	mapIcon = new ImageIcon(url);
     	
-    	url = cl.getResource(path + "images/dbentity16.jpg");
+    	url = cl.getResource(path + "images/dbentity16.gif");
     	dbEntityIcon = new ImageIcon(url);
     	
     	url = cl.getResource(path + "images/objentity16.jpg");
