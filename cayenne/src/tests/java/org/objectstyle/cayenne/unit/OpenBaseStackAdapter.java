@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
+import java.util.Collection;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -69,7 +70,7 @@ public class OpenBaseStackAdapter extends AccessStackAdapter {
         super(adapter);
     }
     
-    public void willDropTables(Connection conn, DataMap map) throws Exception {
+    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop) throws Exception {
         // avoid dropping constraints...  
     }
 

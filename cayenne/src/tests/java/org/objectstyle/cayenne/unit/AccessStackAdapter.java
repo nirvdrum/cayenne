@@ -99,10 +99,11 @@ public class AccessStackAdapter {
     /**
      * Drops all table constraints.
      */
-    public void willDropTables(Connection conn, DataMap map) throws Exception {
+    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop)
+        throws Exception {
 
         if (adapter.supportsFkConstraints()) {
-            Map constraintsMap = getConstraints(conn, map);
+            Map constraintsMap = getConstraints(conn, map, tablesToDrop);
 
             Iterator it = constraintsMap.entrySet().iterator();
             while (it.hasNext()) {
@@ -118,8 +119,8 @@ public class AccessStackAdapter {
                 while (cit.hasNext()) {
                     Object constraint = cit.next();
                     StringBuffer drop = new StringBuffer();
-                    drop.append("alter table ").append(tableName).append(
-                        " drop constraint ").append(
+                    drop.append("ALTER TABLE ").append(tableName).append(
+                        " DROP CONSTRAINT ").append(
                         constraint);
                     executeDDL(conn, drop.toString());
                 }
@@ -211,13 +212,18 @@ public class AccessStackAdapter {
      * Returns a map of database constraints with DbEntity names used as keys,
      * and Collections of constraint names as values.
      */
-    protected Map getConstraints(Connection conn, DataMap map) throws SQLException {
+    protected Map getConstraints(Connection conn, DataMap map, Collection includeTables)
+        throws SQLException {
         Map constraintMap = new HashMap();
 
         DatabaseMetaData metadata = conn.getMetaData();
-        Iterator it = map.getDbEntities().iterator();
+        Iterator it = includeTables.iterator();
         while (it.hasNext()) {
-            DbEntity entity = (DbEntity) it.next();
+            String name = (String) it.next();
+            DbEntity entity = map.getDbEntity(name);
+            if (entity == null) {
+                continue;
+            }
 
             // Get all constraints for the table
             ResultSet rs =

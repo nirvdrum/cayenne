@@ -1,6 +1,7 @@
 package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
+import java.util.Collection;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -16,7 +17,7 @@ public class DB2StackAdapter extends AccessStackAdapter {
         super(adapter);
     }
     
-    public void willDropTables(Connection conn, DataMap map) throws Exception {
+    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop) throws Exception {
         // avoid dropping constraints...  
     }
 

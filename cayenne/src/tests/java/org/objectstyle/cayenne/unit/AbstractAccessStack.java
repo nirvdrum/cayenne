@@ -214,8 +214,6 @@ public abstract class AbstractAccessStack {
         List list = dbEntitiesInInsertOrder(node, map);
 
         try {
-            getAdapter(node).willDropTables(conn, map);
-
             DatabaseMetaData md = conn.getMetaData();
             ResultSet tables = md.getTables(null, null, "%", null);
             List allTables = new ArrayList();
@@ -229,6 +227,8 @@ public abstract class AbstractAccessStack {
             }
             tables.close();
 
+            getAdapter(node).willDropTables(conn, map, allTables);
+
             // drop all tables in the map
             Statement stmt = conn.createStatement();
 
@@ -241,7 +241,7 @@ public abstract class AbstractAccessStack {
 
                 try {
                     String dropSql = node.getAdapter().dropTable(ent);
-                    logObj.info("Drop table: " + dropSql);
+                    logObj.info(dropSql);
                     stmt.execute(dropSql);
                 }
                 catch (SQLException sqe) {

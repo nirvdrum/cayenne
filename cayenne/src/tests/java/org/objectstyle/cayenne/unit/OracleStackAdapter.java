@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.unit;
 import java.sql.Connection;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -88,7 +89,7 @@ public class OracleStackAdapter extends AccessStackAdapter {
         return true;
     }
 
-    public void willDropTables(Connection conn, DataMap map) throws Exception {
+    public void willDropTables(Connection conn, DataMap map, Collection tablesToDrop) throws Exception {
         // avoid dropping constraints...  
     }
 
