@@ -64,6 +64,9 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -104,7 +107,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 	
 	public DbLoginPanel(Editor frame) {
 		super(frame, "Driver And Login Information", true);
-		setResizable(false);
+		this.setResizable(false);
 
 		Container pane = this.getContentPane();
 		pane.setLayout(new BorderLayout());
@@ -120,6 +123,15 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 		JPanel buttonsPanel = initButtons();
 		this.getRootPane().setDefaultButton(ok);
 		pane.add(buttonsPanel, BorderLayout.SOUTH);
+
+		// closing the window means "Cancel"
+		WindowListener l = new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				ActionEvent ae = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, COMMAND_CANCEL);
+				DbLoginPanel.this.actionPerformed(ae);
+			}
+		};
+		this.addWindowListener(l);
 
 		this.pack();
 		this.centerWindow();
@@ -273,9 +285,10 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 			urlInput.storePreferences();
 			adapterInput.storePreferences();
 			ModelerPreferences.getPreferences().storePreferences();
-		} else if (e.getSource() == cancel) {
-			setDataSrcInfo(null);
+		} else if (e.getActionCommand().equals(COMMAND_CANCEL)) {
+			this.setDataSrcInfo(null);
 		}
 		this.hide();
 	}
+
 }
