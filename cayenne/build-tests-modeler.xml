@@ -15,7 +15,7 @@
 			<include name="${junit.jar}"/>
 		</fileset>
 	   	<fileset dir="${ant.home}/lib">
-			<include name="ant.jar"/>
+			<include name="ant*.jar"/>
 			<include name="optional.jar"/>
 		</fileset>
 		<fileset dir="${dist}/lib">
