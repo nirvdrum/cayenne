@@ -392,6 +392,9 @@ public class DataDomain implements QueryEngine {
 		while (it.hasNext()) {
 			Query nextQ = (Query) it.next();
 			DbEntity dbe=this.getEntityResolver().lookupDbEntity(nextQ);
+			if(dbe==null) {
+				throw new CayenneRuntimeException("Could not find DbEntity for query with root :"+nextQ.getRoot());
+			}
 			DataNode aNode = this.dataNodeForDbEntity(dbe);
 			if (aNode == null) {
 				throw new CayenneRuntimeException(
