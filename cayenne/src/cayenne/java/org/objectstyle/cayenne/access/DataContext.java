@@ -122,10 +122,10 @@ public class DataContext implements QueryEngine, Serializable {
         EventSubject.getSubject(DataContext.class, "DataContextDidRollback");
 
     // event posting default for new DataContexts
-    private static boolean postDataContextTransactionEventsDefault = false;
+    private static boolean transactionEventsEnabledDefault;
 
     // enable/disable event handling for individual instances
-    private boolean postDataContextTransactionEvents;
+    private boolean transactionEventsEnabled;
 
     private List flattenedInserts = new ArrayList();
     private List flattenedDeletes = new ArrayList();
@@ -180,7 +180,7 @@ public class DataContext implements QueryEngine, Serializable {
         setParent(parent);
         this.objectStore = new ObjectStore();
         this.relationshipDataSource = new RelationshipDataSource(this);
-        this.setTransactionEventsEnabled(postDataContextTransactionEventsDefault);
+        this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
     }
 
     /** Returns parent QueryEngine object. */
@@ -1182,19 +1182,19 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Sets default for posting transaction events by new DataContexts.
      */
-    public static void setTransactionEventsEnabledDefault(boolean onOrOff) {
-        postDataContextTransactionEventsDefault = onOrOff;
+    public static void setTransactionEventsEnabledDefault(boolean flag) {
+        transactionEventsEnabledDefault = flag;
     }
 
     /**
      * Enable/disable posting of transaction events by this DataContext.
      */
-    public void setTransactionEventsEnabled(boolean onOrOff) {
-        this.postDataContextTransactionEvents = onOrOff;
+    public void setTransactionEventsEnabled(boolean flag) {
+        this.transactionEventsEnabled = flag;
     }
 
     public boolean isTransactionEventsEnabled() {
-        return this.postDataContextTransactionEvents;
+        return this.transactionEventsEnabled;
     }
 
     public Collection getDataMaps() {
@@ -1203,7 +1203,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     void fireWillCommit() {
         // post event: WILL_COMMIT
-        if (this.postDataContextTransactionEvents) {
+        if (this.transactionEventsEnabled) {
             EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.WILL_COMMIT);
@@ -1212,7 +1212,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     void fireTransactionRolledback() {
         // post event: DID_ROLLBACK
-        if ((this.postDataContextTransactionEvents)) {
+        if ((this.transactionEventsEnabled)) {
             EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_ROLLBACK);
@@ -1221,7 +1221,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     void fireTransactionCommitted() {
         // post event: DID_COMMIT
-        if ((this.postDataContextTransactionEvents)) {
+        if ((this.transactionEventsEnabled)) {
             EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);

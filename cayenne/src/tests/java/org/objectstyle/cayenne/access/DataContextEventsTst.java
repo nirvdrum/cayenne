@@ -88,6 +88,8 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     }
 
     public void testDataContext() throws Exception {
+        assertTrue(context.isTransactionEventsEnabled());
+        
         assertFalse(context.hasChanges());
         assertFalse(artist.receivedWillCommit());
         assertFalse(artist.receivedDidCommit());

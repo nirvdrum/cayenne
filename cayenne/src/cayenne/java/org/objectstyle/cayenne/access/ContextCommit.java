@@ -159,8 +159,8 @@ class ContextCommit {
             prepareDeleteQueries(nodeHelper);
         }
 
-        CommitObserver observer =
-            new CommitObserver(logLevel, context, insObjects, updObjects, delObjects);
+        ContextCommitObserver observer =
+            new ContextCommitObserver(logLevel, context, insObjects, updObjects, delObjects);
 
         if (context.isTransactionEventsEnabled()) {
             observer.registerForDataContextEvents();
@@ -729,22 +729,6 @@ class ContextCommit {
             newIdMap.put(key, updAttrs.get(key));
         }
         return (newIdMap != null) ? new ObjectId(objEntityClass, newIdMap) : null;
-    }
-
-    private class CommitObserver extends ContextCommitObserver {
-        private CommitObserver(
-            Level logLevel,
-            DataContext context,
-            List insObjects,
-            List updObjects,
-            List delObjects) {
-            super(logLevel, context, insObjects, updObjects, delObjects);
-        }
-
-        public void transactionCommitted() {
-            logObj.debug("transaction committed");
-            transactionCommitted = true;
-        }
     }
 
     private void groupObjEntitiesBySpannedDbEntities(

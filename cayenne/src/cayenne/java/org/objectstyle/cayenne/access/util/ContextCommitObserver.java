@@ -60,16 +60,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.event.DataContextTransactionEventListener;
 import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
@@ -127,53 +121,6 @@ public class ContextCommitObserver
 
     public boolean useAutoCommit() {
         return false;
-    }
-
-    /** Update the state of all objects we were synchronizing
-     *  in this transaction.
-     */
-    public void transactionCommitted() {
-        super.transactionCommitted();
-
-        Iterator insIt = insObjects.iterator();
-        ObjectStore objectStore = context.getObjectStore();
-
-        synchronized (objectStore) {
-            while (insIt.hasNext()) {
-
-                // replace temp id's w/perm.
-                DataObject nextObject = (DataObject) insIt.next();
-                TempObjectId tempId = (TempObjectId) nextObject.getObjectId();
-                ObjectId permId = tempId.getPermId();
-
-                objectStore.changeObjectKey(tempId, permId);
-                nextObject.setObjectId(permId);
-                Map snapshot = context.takeObjectSnapshot(nextObject);
-                objectStore.addSnapshot(permId, snapshot);
-
-                nextObject.setPersistenceState(PersistenceState.COMMITTED);
-            }
-        }
-
-        Iterator delIt = delObjects.iterator();
-        while (delIt.hasNext()) {
-            DataObject nextObject = (DataObject) delIt.next();
-            ObjectId anId = nextObject.getObjectId();
-
-            objectStore.removeObject(anId);
-            nextObject.setPersistenceState(PersistenceState.TRANSIENT);
-            nextObject.setDataContext(null);
-        }
-
-        Iterator updIt = updObjects.iterator();
-        while (updIt.hasNext()) {
-            DataObject nextObject = (DataObject) updIt.next();
-            // refresh this object's snapshot, check if id data has changed
-            Map snapshot = context.takeObjectSnapshot(nextObject);
-
-            objectStore.addSnapshot(nextObject.getObjectId(), snapshot);
-            nextObject.setPersistenceState(PersistenceState.COMMITTED);
-        }
     }
 
     public void nextQueryException(Query query, Exception ex) {

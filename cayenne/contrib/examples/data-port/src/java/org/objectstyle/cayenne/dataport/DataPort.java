@@ -189,7 +189,7 @@ public class DataPort {
 
             // perform delete query
             observer.clear();
-            destinationNode.performQuery(query, observer);
+            destinationNode.performQueries(Collections.singletonList(query), observer);
 
             // notify delegate that delete just happened
             if (delegate != null) {
@@ -241,7 +241,7 @@ public class DataPort {
             select.setRoot(entity);
             select.setFetchingDataRows(true);
 
-            sourceNode.performQuery(select, observer);
+            sourceNode.performQueries(Collections.singletonList(select), observer);
             ResultIterator result = observer.getResultIterator();
             InsertBatchQuery insert =
                 new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
@@ -261,7 +261,7 @@ public class DataPort {
                     if (currentRow > 0
                         && currentRow % INSERT_BATCH_SIZE == 0) {
                         // end of the batch detected... commit and start a new insert query
-                        destinationNode.performQuery(insert, insertObserver);
+                        destinationNode.performQueries(Collections.singletonList(insert), insertObserver);
                         insert =
                             new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
                         insertObserver.clear();
@@ -275,7 +275,7 @@ public class DataPort {
 
                 // commit remaining batch if needed
                 if (insert.size() > 0) {
-                    destinationNode.performQuery(insert, insertObserver);
+                    destinationNode.performQueries(Collections.singletonList(insert), insertObserver);
                 }
 
                 if (delegate != null) {

@@ -88,6 +88,13 @@ public class DataContextExtrasTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         ctxt = createDataContext();
     }
+    
+    public void testTransactionEventsEnabled() {
+        ctxt.setTransactionEventsEnabled(false);
+        assertFalse(ctxt.isTransactionEventsEnabled());
+        ctxt.setTransactionEventsEnabled(true);
+        assertTrue(ctxt.isTransactionEventsEnabled());
+    }
 
     public void testHasChangesNew() throws Exception {
         assertTrue("No changes expected in context", !ctxt.hasChanges());
