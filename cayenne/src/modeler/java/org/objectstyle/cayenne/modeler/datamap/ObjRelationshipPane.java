@@ -183,6 +183,9 @@ public class ObjRelationshipPane
                 resolve.setEnabled(true);
             } else
                 resolve.setEnabled(false);
+
+            // scroll table
+            table.scroll(table.getSelectedRow(), 0);
         } else
             resolve.setEnabled(false);
 

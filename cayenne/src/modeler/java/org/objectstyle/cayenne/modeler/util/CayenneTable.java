@@ -56,11 +56,14 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
@@ -75,96 +78,135 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class CayenneTable extends JTable {
-	private static Logger logObj = Logger.getLogger(CayenneTable.class);
+    private static Logger logObj = Logger.getLogger(CayenneTable.class);
 
-	protected void createDefaultEditors() {
-		super.createDefaultEditors();
-		DefaultCellEditor temp = new DefaultCellEditor(new JTextField());
-		setDefaultEditor(Object.class, temp);
-		setDefaultEditor(String.class, temp);
-	}
+    protected void createDefaultEditors() {
+        super.createDefaultEditors();
+        DefaultCellEditor temp = new DefaultCellEditor(new JTextField());
+        setDefaultEditor(Object.class, temp);
+        setDefaultEditor(String.class, temp);
+    }
 
-	public CayenneTableModel getCayenneModel() {
-		return (CayenneTableModel) getModel();
-	}
+    public CayenneTableModel getCayenneModel() {
+        return (CayenneTableModel) getModel();
+    }
 
-	public void select(Object row) {
-		if (row == null) {
-			return;
-		}
+    public void select(Object row) {
+        if (row == null) {
+            return;
+        }
 
-		CayenneTableModel model = getCayenneModel();
-		int ind = model.getObjectList().indexOf(row);
+        CayenneTableModel model = getCayenneModel();
+        int ind = model.getObjectList().indexOf(row);
 
-		if (ind >= 0) {
-			getSelectionModel().setSelectionInterval(ind, ind);
-		}
-	}
+        if (ind >= 0) {
+            getSelectionModel().setSelectionInterval(ind, ind);
+        }
+    }
 
-	public void select(int index) {
-		CayenneTableModel model = getCayenneModel();
-		if (index >= model.getObjectList().size()) {
-			index = model.getObjectList().size() - 1;
-		}
+    public void select(int index) {
+        CayenneTableModel model = getCayenneModel();
+        if (index >= model.getObjectList().size()) {
+            index = model.getObjectList().size() - 1;
+        }
 
-		if (index >= 0) {
-			getSelectionModel().setSelectionInterval(index, index);
-		}
-	}
+        if (index >= 0) {
+            getSelectionModel().setSelectionInterval(index, index);
+        }
+    }
 
-	/**
-	 * @see javax.swing.event.CellEditorListener#editingStopped(ChangeEvent)
-	 */
-	public void editingStopped(ChangeEvent e) {
-		super.editingStopped(e);
+    /**
+     * @see javax.swing.event.CellEditorListener#editingStopped(ChangeEvent)
+     */
+    public void editingStopped(ChangeEvent e) {
+        super.editingStopped(e);
 
-		// only go down one row if we are editing text
-		int row = getSelectedRow();
-		if (row >= 0
-			&& this.getRowCount() > 0
-			&& getSelectedTextComponent() != null) {
-			row++;
+        // only go down one row if we are editing text
+        int row = getSelectedRow();
+        if (row >= 0
+            && this.getRowCount() > 0
+            && getSelectedTextComponent() != null) {
+            row++;
 
-			if (row >= this.getRowCount()) {
-				row = 0;
-			}
-			select(row);
-		}
-	}
+            if (row >= this.getRowCount()) {
+                row = 0;
+            }
+            select(row);
+        }
+    }
 
-	public JTextComponent getSelectedTextComponent() {
-		int row = getSelectedRow();
-		int column = getSelectedColumn();
-		if (row < 0 || column < 0) {
-			return null;
-		}
+    public JTextComponent getSelectedTextComponent() {
+        int row = getSelectedRow();
+        int column = getSelectedColumn();
+        if (row < 0 || column < 0) {
+            return null;
+        }
 
-		TableCellEditor editor =
-			this.getCellEditor(row, column);
-		if (editor instanceof DefaultCellEditor) {
-			Component comp = ((DefaultCellEditor) editor).getComponent();
-			if (comp instanceof JTextComponent) {
-				return (JTextComponent) comp;
-			}
-		}
-		return null;
-	}
+        TableCellEditor editor = this.getCellEditor(row, column);
+        if (editor instanceof DefaultCellEditor) {
+            Component comp = ((DefaultCellEditor) editor).getComponent();
+            if (comp instanceof JTextComponent) {
+                return (JTextComponent) comp;
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * @see javax.swing.JTable#editCellAt(int, int, EventObject)
-	 */
-	public boolean editCellAt(int row, int column, EventObject e) {
-		boolean edit = super.editCellAt(row, column, e);
+    /**
+     * @see javax.swing.JTable#editCellAt(int, int, EventObject)
+     */
+    public boolean editCellAt(int row, int column, EventObject e) {
+        boolean edit = super.editCellAt(row, column, e);
 
-		if (edit) {
-			JTextComponent t = getSelectedTextComponent();
-			if (t != null) {
-				if (!t.isFocusOwner()) {
-					t.requestFocus();
-				}
-				t.setCaretPosition(t.getDocument().getLength());
-			}
-		}
-		return edit;
-	}
+        if (edit) {
+            JTextComponent t = getSelectedTextComponent();
+            if (t != null) {
+                if (!t.isFocusOwner()) {
+                    t.requestFocus();
+                }
+                t.setCaretPosition(t.getDocument().getLength());
+            }
+        }
+        return edit;
+    }
+
+    /**
+     * Scrolls view if it is located in a JViewport, so that the specified cell
+     * is displayed in the center.
+     */
+    public void scroll(int rowIndex, int vColIndex) {
+        if (!(getParent() instanceof JViewport)) {
+            return;
+        }
+
+        JViewport viewport = (JViewport) getParent();
+        Rectangle rect = getCellRect(rowIndex, vColIndex, true);
+        Rectangle viewRect = viewport.getViewRect();
+
+        if (viewRect.intersects(rect)) {
+            return;
+        }
+
+        // Translate the cell location so that it is relative
+        // to the view, assuming the northwest corner of the
+        // view is (0,0).
+        rect.setLocation(rect.x - viewRect.x, rect.y - viewRect.y);
+
+        // Calculate location of rect if it were at the center of view
+        int centerX = (viewRect.width - rect.width) / 2;
+        int centerY = (viewRect.height - rect.height) / 2;
+
+        // Fake the location of the cell so that scrollRectToVisible
+        // will move the cell to the center
+        if (rect.x < centerX) {
+            centerX = -centerX;
+        }
+        if (rect.y < centerY) {
+            centerY = -centerY;
+        }
+        rect.translate(centerX, centerY);
+
+        // Scroll the area into view.
+        viewport.scrollRectToVisible(rect);
+    }
 }

@@ -171,6 +171,9 @@ public class DbAttributePane
                 (DbAttributeTableModel) table.getModel();
             att = model.getAttribute(table.getSelectedRow());
             editParams.setEnabled(att instanceof DerivedDbAttribute);
+            
+            // scroll table
+            table.scroll(table.getSelectedRow(), 0);
         }
 
         mediator.fireDbAttributeDisplayEvent(

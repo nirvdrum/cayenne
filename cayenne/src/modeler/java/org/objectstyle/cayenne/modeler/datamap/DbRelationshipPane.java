@@ -105,10 +105,9 @@ public class DbRelationshipPane
         TableModelListener {
     private static Logger logObj = Logger.getLogger(DbRelationshipPane.class);
 
-    EventController mediator;
-
-    CayenneTable table;
-    JButton resolve;
+    protected EventController mediator;
+    protected CayenneTable table;
+    protected JButton resolve;
 
     public DbRelationshipPane(EventController temp_mediator) {
         super();
@@ -188,6 +187,9 @@ public class DbRelationshipPane
                 resolve.setEnabled(true);
             else
                 resolve.setEnabled(false);
+            
+            // scroll table
+            table.scroll(table.getSelectedRow(), 0);
         } else
             resolve.setEnabled(false);
 

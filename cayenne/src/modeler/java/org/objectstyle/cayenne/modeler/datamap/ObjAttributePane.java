@@ -124,7 +124,8 @@ public class ObjAttributePane
             return;
         }
 
-        ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
+        ObjAttributeTableModel model =
+            (ObjAttributeTableModel) table.getModel();
         java.util.List attrs = model.getObjectList();
         int attrPos = attrs.indexOf(attr);
         if (attrPos >= 0) {
@@ -138,6 +139,9 @@ public class ObjAttributePane
             ObjAttributeTableModel model =
                 (ObjAttributeTableModel) table.getModel();
             rel = model.getAttribute(table.getSelectedRow());
+
+            // scroll table
+            table.scroll(table.getSelectedRow(), 0);
         }
         AttributeDisplayEvent ev =
             new AttributeDisplayEvent(

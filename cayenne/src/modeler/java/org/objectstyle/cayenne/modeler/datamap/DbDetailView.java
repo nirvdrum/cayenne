@@ -136,7 +136,7 @@ public class DbDetailView
         Relationship rel = e.getRelationship();
         if (rel instanceof DbRelationship) {
             relationshipsPanel.selectRelationship((DbRelationship) rel);
-        }
+        } 
 
         // Display relationship tab
         tab.setSelectedIndex(2);
