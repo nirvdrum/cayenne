@@ -32,8 +32,8 @@
             	Engine</a>, version 1.3</li>
 				<li><a href="http://jakarta.apache.org/oro/">Jakarta ORO Regular Expressions 
 				package</a> <i>(also bundled with Velocity)</i></li>
-				<li><a href="http://jakarta.apache.org/oro/">Jakarta Log4J 
-				package</a>, version 1.2.7</li>
+				<li><a href="http://jakarta.apache.org/log4j/">Jakarta Log4J 
+				package</a>, version 1.2.8</li>
 			</ul>
             
             If bundled Cayenne dependencies conflict with other packages installed
