@@ -653,9 +653,11 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-      * @deprecated Since 1.1 use {@link 
+      * Use {@link 
       * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
       * objectFromDataRow(Class, DataRow, boolean)}.
+      * 
+      * @deprecated Since 1.1
       */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
         // backwards compatibility... wrap this in a DataRow
@@ -669,10 +671,12 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-      * @deprecated Since 1.1 use {@link 
-      * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
-      * objectFromDataRow(Class, DataRow, boolean)}.
-      */
+     * Use {@link 
+     * #objectFromDataRow(Class,org.objectstyle.cayenne.DataRow,boolean)
+     * objectFromDataRow(Class, DataRow, boolean)} instead.
+     * 
+     * @deprecated Since 1.1
+     */
     public DataObject objectFromDataRow(
         ObjEntity objEntity,
         Map dataRow,
@@ -690,11 +694,12 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Creates and returns a read-only DataObject from a data row (snapshot).
-     * Newly created object is registered with this DataContext.
-     * 
-     * @deprecated Since 1.1 This method is not used in Cayenne anymore. Use
-     * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
+     * Newly created object is registered with this DataContext. This method is not
+     * used in Cayenne anymore. Use
+     * {@link #objectsFromDataRows(org.objectstyle.cayenne.map.ObjEntity,java.util.List,boolean)
      * objectsFromDataRows(ObjEntity, List, boolean)} instead.
+     * 
+     * @deprecated Since 1.1 
      */
     protected DataObject readOnlyObjectFromDataRow(
         ObjEntity objEntity,
@@ -1305,6 +1310,8 @@ public class DataContext implements QueryEngine, Serializable {
      *   </ul>
      *
      *   @return Newly created ObjectId.
+     * 
+     * @deprecated Since 1.1 this method is no longer used.
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
         ObjectId id = anObject.getObjectId();

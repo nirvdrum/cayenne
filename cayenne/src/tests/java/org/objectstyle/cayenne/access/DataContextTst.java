@@ -155,6 +155,9 @@ public class DataContextTst extends DataContextTestBase {
         return context.getParentDataDomain().createDataContext();
     }
 
+    /**
+     * @deprecated Since 1.1 "createpermId" is deprectated in the DataContext.
+     */
     public void testCreatePermId1() throws Exception {
         Artist artist = new Artist();
         context.registerNewObject(artist);
@@ -162,6 +165,9 @@ public class DataContextTst extends DataContextTestBase {
         assertNotNull(id);
     }
 
+    /**
+     * @deprecated Since 1.1 "createpermId" is deprectated in the DataContext.
+     */
     public void testCreatePermId2() throws Exception {
         Artist artist = new Artist();
         context.registerNewObject(artist, "Artist");
