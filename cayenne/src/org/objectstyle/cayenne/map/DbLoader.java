@@ -183,15 +183,16 @@ public class DbLoader {
 
 
     /** Loads dbEntities for the specified tables.
+     * 
      *  @param map DataMap to be populated with DbEntities. Presumed not to
      *             have duplicate entries for the specified tables.
      *             If null, a new DataMap is created
      *  @param tables The list of TableInfo object
      *              for which DbEntities must be created.
-     *  @return DataMap populated with DbEntities. */
+     * 
+     *  @return DataMap populated with DbEntities. 
+     */
     public void loadDbEntities(DataMap map, ArrayList tables) throws SQLException {
-        if (null == map)
-            map = new DataMap("Untitled Map");
         Iterator iter = tables.iterator();
         while (iter.hasNext()) {
             TableInfo table = (TableInfo)iter.next();
@@ -209,6 +210,7 @@ public class DbLoader {
                 String columnName = rs.getString("COLUMN_NAME");
                 int columnType = rs.getInt("DATA_TYPE");
                 int columnSize = rs.getInt("COLUMN_SIZE");
+                
                 // FIXME!!! Meed to ignore this param for the param types
                 // for which it is not applicable
                 int decimalDigits = rs.getInt("DECIMAL_DIGITS");
