@@ -53,44 +53,32 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.testui;
 
-package org.objectstyle.cayenne.gui.util;
+import java.io.IOException;
+import java.util.Properties;
 
-import java.awt.*;
-
-import javax.swing.*;
+import org.objectstyle.cayenne.gui.Editor;
 
 /**
- * Collection of GUI utility methods that didn't fit anywhere else.
+ * Subclass of CayenneModeler Editor frame with 
+ * most of the functionality disabled. Used for testing only.
  * 
  * @author Andrei Adamchik
  */
-public class GUIUtil {
-	
-	/** 
-	 * Centers a window on the screen. 
+public class TestEditorFrame extends Editor {
+
+	/**
+	 * Constructor for TestEditorFrame.
 	 */
-	public static void centerWindow(Window win) {
-		int width = win.getWidth();
-		int height = win.getHeight();
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		int x = (screen.width - width) / 2;
-		int y = (screen.height - height) / 2;
-		win.setBounds(x, y, width, height);
+	public TestEditorFrame() {
+		super();
 	}
 	
-	/** 
-	 * Creates and returns a panel with right-centered buttons.
-	 */
-	public static JPanel createButtonPanel(JButton[] buttons) {
-		JPanel panel = new JPanel();
-		panel.setBorder(BorderFactory.createEmptyBorder(3, 20, 3, 7));
-		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		
-		for(int i = 0; i < buttons.length; i++) {
-			panel.add(buttons[i]);
-		}
-		
-		return panel;
-	}
+	protected void init() { }
+    protected void postInit() { }
+    protected Properties loadProperties() throws IOException {
+    	return null;
+    }
 }
+

@@ -66,7 +66,6 @@ import javax.swing.text.Keymap;
 
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.gui.util.GUIUtil;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
 import org.objectstyle.util.Preferences;
 
@@ -76,7 +75,7 @@ import org.objectstyle.util.Preferences;
  * @author Andrei Adamchik
  * @author Misha Shengauot
  */
-public class DbLoginPanel extends JDialog implements ActionListener {
+public class DbLoginPanel extends CayenneDialog implements ActionListener {
 	static Logger logObj = Logger.getLogger(DbLoginPanel.class.getName());
 
 	protected DataSourceInfo dataSrcInfo;
@@ -90,7 +89,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 	protected JButton ok;
 	protected JButton cancel;
 
-	public DbLoginPanel(JFrame frame) {
+	public DbLoginPanel(Editor frame) {
 		super(frame, "Driver And Login Information", true);
 		setResizable(false);
 
@@ -110,9 +109,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		pane.add(buttonsPanel, BorderLayout.SOUTH);
 
 		this.pack();
-
-		// center the dialog on the screen
-		GUIUtil.centerWindow(this);
+		this.centerWindow();
 	}
 
 	protected void disableVKEvents(JTextComponent txtField) {
@@ -209,7 +206,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		ok.addActionListener(this);
 		cancel.addActionListener(this);
 
-		return GUIUtil.createButtonPanel(new JButton[] { ok, cancel });
+		return PanelFactory.createButtonPanel(new JButton[] { ok, cancel });
 	}
 
 	protected JPanel initMessagePanel() {

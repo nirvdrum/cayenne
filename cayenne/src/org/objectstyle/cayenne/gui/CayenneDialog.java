@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.gui;
 
-import javax.swing.JDialog;
+import java.awt.*;
+
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
@@ -67,10 +69,24 @@ import org.objectstyle.cayenne.gui.util.BrowserControl;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneDialog extends JDialog implements HyperlinkListener {
+public class CayenneDialog extends JDialog implements HyperlinkListener {	
+	
 	public CayenneDialog(Editor frame, String title, boolean modal) {
 		super(frame, title, modal);
 	}
+	
+	/** 
+	 * Centers this dialog on the screen. 
+	 */
+	public void centerWindow() {
+		int width = this.getWidth();
+		int height = this.getHeight();
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screen.width - width) / 2;
+		int y = (screen.height - height) / 2;
+		this.setBounds(x, y, width, height);
+	}
+	
 
 	public Editor getParentEditor() {
 		return (Editor) super.getParent();
@@ -84,4 +100,6 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
 			BrowserControl.displayURL(event.getURL().toExternalForm());
 		}
 	}
+	
+	
 }

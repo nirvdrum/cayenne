@@ -58,21 +58,22 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.PanelFactory;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.CayenneTable;
+import org.objectstyle.cayenne.gui.util.NameGenerator;
 import org.objectstyle.cayenne.map.*;
 
 /** 
  * Edit DbRelationship and DbAttributePair-s for this DbRelationship.
  * Also allows specifying the reverse relationship. */
-public class ResolveDbRelationshipDialog extends JDialog
+public class ResolveDbRelationshipDialog extends CayenneDialog
 implements ActionListener
 {
 	Mediator mediator;
@@ -99,7 +100,7 @@ implements ActionListener
 	JButton cancel		= new JButton("Cancel");
 
 
-	private boolean cancelPressed = false;
+	private boolean cancelPressed;
 
 	public ResolveDbRelationshipDialog(Mediator mediator, java.util.List db_rel_list
 	, DbEntity temp_start, DbEntity temp_end, boolean to_many)
@@ -141,7 +142,7 @@ implements ActionListener
 		init();
 		
 		this.pack();
-        GUIUtil.centerWindow(this);
+        this.centerWindow();
 	}
 	
 	/** Set up the graphical components. */
@@ -225,7 +226,7 @@ implements ActionListener
 				+ start.getName() + " and " + end.getName());
 		}
 		
-		JPanel buttons = GUIUtil.createButtonPanel(new JButton[] {add, remove, save, cancel});
+		JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {add, remove, save, cancel});
 		getContentPane().add(buttons, BorderLayout.SOUTH);
 				
 		add.addActionListener(this);

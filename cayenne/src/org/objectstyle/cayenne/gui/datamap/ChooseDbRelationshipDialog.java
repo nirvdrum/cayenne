@@ -58,34 +58,37 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.*;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.PanelFactory;
-import org.objectstyle.cayenne.gui.util.GUIUtil;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.util.RelationshipWrapper;
 import org.objectstyle.cayenne.map.*;
 
-/** 	Used to select the DbRelationship for ObjRelationship mapping. 
- *  	Allows selecting the relaitonship, canceling, edit the relationship and
- *  create new relationship. It is needed for the
- *  cases when there is more than one DbRelationship between start and
- *  end entities, like in the case when the DbRelationship starts and
- *  ends in the same DbEntity.
- *  	The choice is returned in getChoice() method. If choice is SELECT or EDIT,
- *  the selected DbRelationship may be retrieved by getDbRelationship(),
- *  which will return the list with one DbRelationship. List is used for the
- *  future expansion, when one ObjRelaitonship will be mapped for 
- *  multiple DbRelaitonship-s. If user clicks SELECT and no relationship is selected,
+/** 
+ * Used to select the DbRelationship for ObjRelationship mapping. 
+ * Allows selecting the relationship, canceling, edit the relationship and
+ * create new relationship. It is needed for the
+ * cases when there is more than one DbRelationship between start and
+ * end entities, like in the case when the DbRelationship starts and
+ * ends in the same DbEntity.
+ * 
+ * <p>The choice is returned in getChoice() method. If choice is SELECT or EDIT,
+ * the selected DbRelationship may be retrieved by getDbRelationship(),
+ * which will return the list with one DbRelationship. List is used for the
+ * future expansion, when one ObjRelaitonship will be mapped for 
+ * multiple DbRelaitonship's.</p>
  *  
- *  Existing mapping for this ObjRelationship is pre-selected in the combo box.
- *  Combo box contains the DbRelaitonship-s between the start and  end DbEntity-s
+ * <p>Existing mapping for this ObjRelationship is pre-selected in the combo box.
+ * Combo box contains the DbRelaitonship-s between the start and  end DbEntity's</p>
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
  */
-public class ChooseDbRelationshipDialog extends JDialog
-implements ActionListener
-{
+public class ChooseDbRelationshipDialog extends CayenneDialog
+implements ActionListener {
 	public static final int SELECT 	= 0;
 	public static final int CANCEL 	= 1;
 	public static final int NEW		= 2;
@@ -130,7 +133,7 @@ implements ActionListener
 		init();
 		
 		this.pack();
-        GUIUtil.centerWindow(this);
+        this.centerWindow();
 
 		select.addActionListener(this);
 		cancel.addActionListener(this);
@@ -161,7 +164,7 @@ implements ActionListener
 		relSelect.setModel(model);
 		
 		
-		JPanel buttons = GUIUtil.createButtonPanel(new JButton[] {select, cancel, create, edit});		
+		JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {select, cancel, create, edit});		
 		
 		Component[] left = new Component[] {
 			new JLabel("Relationships: "), new JLabel()

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,14 +53,15 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui;
 
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.gui.util.*;
-import javax.swing.*;
-import java.awt.*;
-import java.io.*;
-import java.util.logging.*;
+import java.io.IOException;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.gui.util.CmdPasswordField;
+import org.objectstyle.cayenne.gui.util.CmdTextField;
 
 
 /** Class that can collect login information via GUI or command line interface.  */
@@ -156,7 +156,7 @@ public abstract class InteractiveLogin {
     
     protected static class GuiLogin extends InteractiveLogin {
         public void collectLoginInfo() {
-            JFrame frame = new JFrame("Hidden Login Frame");
+            Editor frame = new Editor();
             DbLoginPanel loginPanel = new DbLoginPanel(frame);
             loginPanel.setDataSrcInfo(dataSrcInfo);
             frame.pack();

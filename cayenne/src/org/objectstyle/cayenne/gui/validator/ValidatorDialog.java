@@ -66,10 +66,8 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.gui.CayenneDialog;
-import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.GUIUtil;
 
 /** 
  * Dialog for displaying validation errors.
@@ -103,7 +101,7 @@ public class ValidatorDialog
 		closeBtn.addActionListener(this);
 
         this.pack();
-        GUIUtil.centerWindow(this);	
+        this.centerWindow();	
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setVisible(true);
 	}
@@ -128,10 +126,8 @@ public class ValidatorDialog
 		JScrollPane scrollPane = new JScrollPane(messages);
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.CENTER));
-		closeBtn = new JButton("Close");
-		panel.add(closeBtn);
+        closeBtn = new JButton("Close");
+		JPanel panel = PanelFactory.createButtonPanel(new JButton[] {closeBtn});
 		getContentPane().add(panel, BorderLayout.SOUTH);
 	}
 

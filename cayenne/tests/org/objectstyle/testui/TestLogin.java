@@ -1,4 +1,3 @@
-package org.objectstyle.testui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,19 +53,22 @@ package org.objectstyle.testui;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.testui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.regex.*;
-import javax.swing.*;
-import java.awt.event.*;
-import org.objectstyle.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.gui.*;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+
+import org.objectstyle.TestConstants;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.gui.InteractiveLogin;
 
 /** Login handler used for unit tests.
   *
@@ -96,7 +98,7 @@ public class TestLogin extends InteractiveLogin implements TestConstants {
 
 
     public void collectLoginInfo() {
-        JFrame frame = new JFrame("Hidden Login Frame");
+        TestEditorFrame frame = new TestEditorFrame();
         final TestLoginPanel loginPanel = new TestLoginPanel(frame);
         loginPanel.setDataSrcInfo(dataSrcInfo);
 

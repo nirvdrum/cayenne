@@ -63,9 +63,7 @@ import java.util.List;
 
 import javax.swing.*;
 
-import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.PanelFactory;
-import org.objectstyle.cayenne.gui.util.GUIUtil;
+import org.objectstyle.cayenne.gui.*;
 
 /** 
  * Dialog that allows to select schema of the database. 
@@ -73,7 +71,7 @@ import org.objectstyle.cayenne.gui.util.GUIUtil;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ChooseSchemaDialog extends JDialog implements ActionListener {
+public class ChooseSchemaDialog extends CayenneDialog implements ActionListener {
 	public static final int SELECT = 0;
 	public static final int CANCEL = 1;
 
@@ -102,7 +100,7 @@ public class ChooseSchemaDialog extends JDialog implements ActionListener {
         this.pack();
         
 		// display dialog in the center
-		GUIUtil.centerWindow(this);
+		this.centerWindow();
 	}
 
 	/** Sets up the graphical components. */
@@ -114,7 +112,7 @@ public class ChooseSchemaDialog extends JDialog implements ActionListener {
         schemaSelect.setBackground(Color.WHITE);
         
         // add buttons
-		JPanel buttons = GUIUtil.createButtonPanel(new JButton[] {select, cancel});
+		JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {select, cancel});
 		
 		Component[] left = new Component[] {
 			new JLabel("Schemas: "), new JLabel()

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,21 +53,19 @@ package org.objectstyle.cayenne.gui;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.gui;
 
-import junit.framework.*;
-import junit.runner.*;
-import javax.swing.text.*;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.testui.TestEditorFrame;
 
 public class DbLoginPanelTst extends TestCase {
     static Logger logObj = Logger.getLogger(DbLoginPanelTst.class.getName());
 
-    protected JFrame frame;
+    protected TestEditorFrame frame;
     protected DbLoginPanel loginPanel;
 
     public DbLoginPanelTst(String name) {
@@ -76,7 +73,7 @@ public class DbLoginPanelTst extends TestCase {
     }
 
     protected void setUp() throws java.lang.Exception {
-        frame = new JFrame("Hidden Login Frame");
+        frame = new TestEditorFrame();
         loginPanel = new DbLoginPanel(frame);
         frame.pack();
         loginPanel.pack();

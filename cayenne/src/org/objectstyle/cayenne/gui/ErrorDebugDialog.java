@@ -62,9 +62,6 @@ import java.awt.event.ActionListener;
 import java.io.*;
 
 import javax.swing.*;
-import javax.swing.text.html.HTMLDocument;
-
-import org.objectstyle.cayenne.gui.util.GUIUtil;
 
 /**
  * Displays unexpected CayenneModeler exceptions.
@@ -135,12 +132,12 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 		close = new JButton("Close");
 		close.addActionListener(this);
 		pane.add(
-			GUIUtil.createButtonPanel(new JButton[] { close }),
+			PanelFactory.createButtonPanel(new JButton[] { close }),
 			BorderLayout.SOUTH);
 
 		// prepare to display
 		this.pack();
-		GUIUtil.centerWindow(this);
+		this.centerWindow();
 	}
 
 	protected void setThrowable(Throwable throwable) {

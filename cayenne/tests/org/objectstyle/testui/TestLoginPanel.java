@@ -62,6 +62,7 @@ import java.util.Iterator;
 import javax.swing.*;
 
 import org.objectstyle.cayenne.gui.DbLoginPanel;
+import org.objectstyle.cayenne.gui.Editor;
 
 
 /** Login panel that allows to quickly switch databases. */
@@ -69,7 +70,7 @@ public class TestLoginPanel extends DbLoginPanel {
 
     protected JComboBox dbCfgList;
 
-    public TestLoginPanel(JFrame frame) {
+    public TestLoginPanel(Editor frame) {
         super(frame);
     }
 

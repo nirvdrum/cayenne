@@ -65,8 +65,6 @@ import java.net.URL;
 import javax.swing.*;
 import javax.swing.border.Border;
 
-import org.objectstyle.cayenne.gui.util.GUIUtil;
-
 /** 
  * Displays the information about the licnese of Cayenne
  * and about CayenneModeler.
@@ -108,8 +106,7 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 
 		setSize(WIDTH, HEIGHT);
 		setResizable(false);
-		GUIUtil.centerWindow(this);
-
+		this.centerWindow();
 		this.getContentPane().doLayout();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setVisible(true);

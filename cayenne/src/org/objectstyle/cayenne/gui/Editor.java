@@ -155,7 +155,7 @@ public class Editor
 
 	private static Editor frame;
 
-	private Editor() {
+	public Editor() {
 		super(TITLE);
 
 		frame = this;
@@ -169,55 +169,10 @@ public class Editor
 		}
 
 		init();
-		disableMenu();
-		closeProjectMenu.setEnabled(false);
-		createDomainMenu.setEnabled(false);
-		createDomainBtn.setEnabled(false);
-
-		createProjectMenu.addActionListener(this);
-		createDomainMenu.addActionListener(this);
-		createDataMapMenu.addActionListener(this);
-		createDataSourceMenu.addActionListener(this);
-		createObjEntityMenu.addActionListener(this);
-		createDbEntityMenu.addActionListener(this);
-		addDataMapMenu.addActionListener(this);
-		removeMenu.addActionListener(this);
-		removeMenu.setAccelerator(
-			KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
-		openProjectMenu.addActionListener(this);
-		openProjectMenu.setAccelerator(
-			KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-		closeProjectMenu.addActionListener(this);
-		saveMenu.addActionListener(this);
-		saveMenu.setAccelerator(
-			KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
-		exitMenu.addActionListener(this);
-
-		importDbMenu.addActionListener(this);
-		importEOMMenu.addActionListener(this);
-		generateMenu.addActionListener(this);
-		generateDbMenu.addActionListener(this);
-		setPackageMenu.addActionListener(this);
-		aboutMenu.addActionListener(this);
-
-		createDomainBtn.addActionListener(this);
-		createDataMapBtn.addActionListener(this);
-		createDataSourceBtn.addActionListener(this);
-		createObjEntityBtn.addActionListener(this);
-		createDbEntityBtn.addActionListener(this);
-		removeBtn.addActionListener(this);
-
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		setSize(650, 550);
-
-		this.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				exitEditor();
-			}
-		});
+		postInit();
 	}
 
-	private void init() {
+	protected void init() {
 		getContentPane().setLayout(new BorderLayout());
 
 		// Setup menu bar
@@ -264,6 +219,55 @@ public class Editor
 		Image icon = Toolkit.getDefaultToolkit().createImage(url);
 		this.setIconImage(icon);
 		*/
+	}
+	
+	protected void postInit() {
+		disableMenu();
+		closeProjectMenu.setEnabled(false);
+		createDomainMenu.setEnabled(false);
+		createDomainBtn.setEnabled(false);
+
+		createProjectMenu.addActionListener(this);
+		createDomainMenu.addActionListener(this);
+		createDataMapMenu.addActionListener(this);
+		createDataSourceMenu.addActionListener(this);
+		createObjEntityMenu.addActionListener(this);
+		createDbEntityMenu.addActionListener(this);
+		addDataMapMenu.addActionListener(this);
+		removeMenu.addActionListener(this);
+		removeMenu.setAccelerator(
+			KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
+		openProjectMenu.addActionListener(this);
+		openProjectMenu.setAccelerator(
+			KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+		closeProjectMenu.addActionListener(this);
+		saveMenu.addActionListener(this);
+		saveMenu.setAccelerator(
+			KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		exitMenu.addActionListener(this);
+
+		importDbMenu.addActionListener(this);
+		importEOMMenu.addActionListener(this);
+		generateMenu.addActionListener(this);
+		generateDbMenu.addActionListener(this);
+		setPackageMenu.addActionListener(this);
+		aboutMenu.addActionListener(this);
+
+		createDomainBtn.addActionListener(this);
+		createDataMapBtn.addActionListener(this);
+		createDataSourceBtn.addActionListener(this);
+		createObjEntityBtn.addActionListener(this);
+		createDbEntityBtn.addActionListener(this);
+		removeBtn.addActionListener(this);
+
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setSize(650, 550);
+
+		this.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				exitEditor();
+			}
+		});
 	}
 
 	private void initAction() {
@@ -363,7 +367,7 @@ public class Editor
 	/**
 	 * Reads properties from file "gui.properties" bundled with Cayenne.
 	 */
-	private Properties loadProperties() throws IOException {
+	protected Properties loadProperties() throws IOException {
 		Properties props = new Properties();
 		InputStream in =
 			this.getClass().getClassLoader().getResourceAsStream(
