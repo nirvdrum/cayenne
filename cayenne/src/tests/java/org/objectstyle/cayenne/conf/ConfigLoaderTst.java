@@ -16,8 +16,8 @@ public class ConfigLoaderTst extends CayenneTestCase {
         while (it.hasNext()) {
             ConfigLoaderCase aCase = (ConfigLoaderCase) it.next();
             logObj.debug("Starting Case: " + aCase);
-            ConfigLoader helper =
-                new ConfigLoader(new EmptyConfiguration().getLoaderDelegate());
+            ConfigLoaderDelegate delegate = new EmptyConfiguration().getLoaderDelegate();
+            ConfigLoader helper = new ConfigLoader(delegate);
             aCase.test(helper);
         }
     }
