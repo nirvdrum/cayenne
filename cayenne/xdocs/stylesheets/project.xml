@@ -30,9 +30,4 @@
         <item name="Bugs"  href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068"/>
         <item name="Mailing Lists"  href="http://objectstyle.org/cayenne/lists.html"/>
     </menu>
-    
-    <menu name="Other">
-        <item name="Search"         href="http://objectstyle.org/cgi-bin/htsearch"/>
-    </menu>
-
 </project>
