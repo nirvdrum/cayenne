@@ -64,6 +64,7 @@ import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
@@ -200,14 +201,21 @@ public class DataNode implements QueryEngine {
 
 		int listSize = queries.size();
 		QueryLogger.logQueryStart(logLevel, listSize);
-		if (listSize == 0)
+		if (listSize == 0) {
 			return;
+		}
 
 		Connection con = null;
 		boolean usesAutoCommit = opObserver.useAutoCommit();
 		boolean rolledBackFlag = false;
 
 		try {
+			
+			// check for invalid iterated query
+			if (opObserver.isIteratedResult() && listSize > 1) {
+				throw new CayenneException("Iterated queries are not allowed in a batch. Batch size: " + listSize);
+			}
+
 			// check out connection, create statement
 			con = this.getDataSource().getConnection();
 			if (con.getAutoCommit() != usesAutoCommit) {
@@ -217,7 +225,7 @@ public class DataNode implements QueryEngine {
 			// give a chance to order queries
 			queries = opObserver.orderQueries(this, queries);
 
-			// just in case recheck list size....
+			// just in case, recheck list size....
 			listSize = queries.size();
 
 			for (int i = 0; i < listSize; i++) {
@@ -236,7 +244,7 @@ public class DataNode implements QueryEngine {
 					// if ResultIterator is returned to the user,
 					// DataNode is not responsible for closing the connections
 					// exception handling, and other housekeeping
-					if (opObserver.iteratedResult()) {
+					if (opObserver.isIteratedResult()) {
 						// trick "finally" to avoid closing connection here
 						// it will be closed by the ResultIterator
 						con = null;
@@ -322,10 +330,11 @@ public class DataNode implements QueryEngine {
 		throws Exception {
 
 		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-		DefaultResultIterator it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+		DefaultResultIterator it =
+			new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
-        // note that we don't need to close ResultIterator
-        // since "dataRows" will do it internally
+		// note that we don't need to close ResultIterator
+		// since "dataRows" will do it internally
 		List resultRows = it.dataRows();
 		QueryLogger.logSelectCount(observer.queryLogLevel(), resultRows.size());
 		observer.nextDataRows(transl.getQuery(), resultRows);

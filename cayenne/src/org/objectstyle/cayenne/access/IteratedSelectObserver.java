@@ -52,41 +52,57 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.access;
 
-import java.util.logging.Level;
+import java.io.*;
+import java.util.List;
+
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * 
- * Defines an API that allows QueryEngine to obtain information about 
- * query execution. Defines query running strategies, logging, etc. 
- * 
+ * OperationObserver that is used to track the execution
+ * of SelectQueries whose results are returned as ResultIterator.
+ *  
  * @author Andrei Adamchik
  */
-public interface OperationHints {
-	
-    /** Returns a log level level that should be used when logging query execution. */ 
-    public Level queryLogLevel();
-    
-    /** <p>DataNode executing a list of statements will consult OperationHints
-     *  about transactional behavior by calling this method.</p>
-     * 
-     *  <ul>
-     *  	<li>If this method returns true, each statement in a batch will be run as a separate 
-     *  transaction.</li>
-     *  	<li>If this method returns false, the whole batch will be wrapped in a transaction.</li>
-     *  </ul>
-     */
-    public boolean useAutoCommit();
-    
-    
-    /** 
-     * Returns <code>true</code> to indicate that any results of a select operation
-     * should be returned as a ResultIterator. <code>false</code> is returned when the
-     * results are expected as a list.
-     */
-    public boolean isIteratedResult();
-}
+public class IteratedSelectObserver extends DefaultOperationObserver {
+	protected ResultIterator resultIterator;
 
+	public boolean isIteratedResult() {
+		return true;
+	}
+
+	public void nextDataRows(Query query, List dataRows) {
+		throw new CayenneRuntimeException("Results unexpectedly returned as list.");
+	}
+
+	public void nextDataRows(Query q, ResultIterator it) {
+		super.nextDataRows(q, it);
+		resultIterator = it;
+	}
+
+	public ResultIterator getResultIterator() throws CayenneException {
+		if (super.hasExceptions()) {
+			StringWriter str = new StringWriter();
+			PrintWriter out = new PrintWriter(str);
+			super.printExceptions(out);
+
+			try {
+				out.close();
+				str.close();
+			} catch (IOException ioex) {
+				// this should never happen
+			}
+
+			throw new CayenneException(
+				"Error getting ResultIterator: " + str.getBuffer());
+		}
+
+		return resultIterator;
+	}
+
+}

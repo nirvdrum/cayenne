@@ -56,7 +56,11 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.logging.Level;
+
 import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
@@ -75,10 +79,29 @@ public class DefaultOperationObserverTst extends TestCase {
 		observer = new DefaultOperationObserver();
 	}
 
-    public void testIteratedResult() throws Exception {
-    	assertTrue(!observer.iteratedResult());
-    	
-    	observer.setIteratedResult(true);
-    	assertTrue(observer.iteratedResult());
-    }
+	public void testHasExceptions1() throws Exception {
+		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
+		DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+
+		try {
+			assertTrue(!observer.hasExceptions());
+			observer.nextGlobalException(new Exception());
+			assertTrue(observer.hasExceptions());
+		} finally {
+			DefaultOperationObserver.logObj.setLevel(oldLevel);
+		}
+	}
+
+	public void testHasExceptions2() throws Exception {
+		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
+		DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+
+		try {
+			assertTrue(!observer.hasExceptions());
+			observer.nextQueryException(new SelectQuery(), new Exception());
+			assertTrue(observer.hasExceptions());
+		} finally {
+			DefaultOperationObserver.logObj.setLevel(oldLevel);
+		}
+	}
 }

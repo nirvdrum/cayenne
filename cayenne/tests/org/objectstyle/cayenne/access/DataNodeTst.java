@@ -56,9 +56,14 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
  * DataNode test cases.
@@ -82,10 +87,11 @@ public class DataNodeTst extends IteratorTestBase {
 				DataContextTst.artistCount,
 				observer.getResults(transl.getQuery()).size());
 		} finally {
+			// avoid double closing of the statement
+			st = null;
 			cleanup();
 		}
 	}
-
 
 	public void testRunIteratedSelect() throws Exception {
 		IteratedObserver observer = new IteratedObserver();
@@ -93,8 +99,31 @@ public class DataNodeTst extends IteratorTestBase {
 		init();
 		node.runIteratedSelect(observer, st, transl);
 		assertEquals(DataContextTst.artistCount, observer.getResultCount());
-		
+
 		// no cleanup is needed, since observer will close the iterator
+	}
+
+	public void testFailIterated() throws Exception {
+		// must fail multiple queries when one of them is iterated
+		IteratedObserver observer = new IteratedObserver();
+
+		List queries = new ArrayList();
+		queries.add(new SelectQuery("Artist"));
+		queries.add(new SelectQuery("Artist"));
+
+		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
+		DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
+
+		try {
+			TestMain.getSharedNode().performQueries(queries, observer);
+
+			assertEquals(0, observer.getResultCount());
+			assertTrue(
+				"Iterated queries are not allowed in batches.",
+				observer.hasExceptions());
+		} finally {
+			DefaultOperationObserver.logObj.setLevel(oldLevel);
+		}
 	}
 
 	protected DataNode newDataNode() {
@@ -110,6 +139,10 @@ public class DataNodeTst extends IteratorTestBase {
 
 	class IteratedObserver extends DefaultOperationObserver {
 		protected int count;
+
+		public boolean isIteratedResult() {
+			return true;
+		}
 
 		public void nextDataRows(Query q, ResultIterator it) {
 			super.nextDataRows(q, it);
