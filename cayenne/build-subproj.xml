@@ -81,6 +81,12 @@
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
 			<arg value="${parser.dir}/${parser.base}.jj"/>
 		</java>
+
+		<java dir="${basedir}" fork="true" classname="jjdoc" failonerror="true">
+			<classpath refid="javacc-classpath"/>
+			<arg value="-OUTPUT_FILE:${parser.dir}/${parser.base}.html"/>
+			<arg value="${parser.dir}/${parser.base}.jj"/>
+		</java>
 	</target>
 	
 	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">	
