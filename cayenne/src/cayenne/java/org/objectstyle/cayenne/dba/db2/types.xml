@@ -51,10 +51,10 @@ IBM DB2 types mapping
        <db-type name="JAVA_OBJECT"/>
    </jdbc-type>
    <jdbc-type name="LONGVARBINARY">
-       <db-type name="LONGVARBINARY"/>
+       <db-type name="BLOB"/>
    </jdbc-type>
    <jdbc-type name="LONGVARCHAR">
-       <db-type name="LONGVARCHAR"/>
+       <db-type name="LONG VARCHAR"/>
    </jdbc-type>
    <jdbc-type name="NUMERIC">
        <db-type name="NUMERIC"/>
