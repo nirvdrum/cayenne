@@ -4,9 +4,7 @@
 <body>
     <section name="3. Quick Start">
     	<subsection name="3.2 Command-Line Tutorial">    	
-    	<p>This section shows how to write a simple command-line application
-    	using Cayenne. For a more detailed discussion read <a href="../appguide/index.html">"Writing 
-    	Cayenne Applications"</a> section.</p>
+    	<p>This section shows how to write a simple command-line application using Cayenne.</p>
     	
     	<panel name="Note:">
     		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
