@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-# NOTE: Until SourceForge installs a modern version of Python on the cvs
+#  NOTE: Until SourceForge installs a modern version of Python on the cvs
 # servers, this script MUST be compatible with Python 1.5.2.
 
 """Complicated notification for CVS checkins.
