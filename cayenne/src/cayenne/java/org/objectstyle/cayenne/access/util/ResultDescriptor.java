@@ -59,6 +59,8 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -83,8 +85,7 @@ public class ResultDescriptor {
 
     // unindexed data
     protected List dbAttributes;
-    protected List explicitJavaTypes;
-    protected boolean usingDefaultJavaTypes;
+    protected List javaTypes;
     protected DataNode node;
     protected ObjEntity rootEntity;
 
@@ -103,21 +104,9 @@ public class ResultDescriptor {
         this.rootEntity = rootEntity;
     }
 
-    public void useJavaTypes(List javaTypes) {
+    public void setJavaTypes(List javaTypes) {
         this.dirty = true;
-        this.explicitJavaTypes = javaTypes;
-    }
-
-    public void useDefaultJavaTypes() {
-        this.dirty = true;
-        this.usingDefaultJavaTypes = true;
-        this.explicitJavaTypes = null;
-    }
-
-    public void useJavaTypesFromMapping() {
-        this.dirty = true;
-        this.usingDefaultJavaTypes = false;
-        this.explicitJavaTypes = null;
+        this.javaTypes = javaTypes;
     }
 
     public synchronized void index() {
@@ -130,8 +119,7 @@ public class ResultDescriptor {
             throw new IllegalArgumentException("DbAttributes list is null.");
         }
 
-        if (explicitJavaTypes != null
-            && explicitJavaTypes.size() != dbAttributes.size()) {
+        if (javaTypes != null && javaTypes.size() != dbAttributes.size()) {
             throw new IllegalArgumentException("DbAttributes and Java type arrays must have the same size.");
         }
 
@@ -161,11 +149,11 @@ public class ResultDescriptor {
                     name = objAttr.getDbAttributePath();
                 }
             }
-            
-            if(name == null) {
-            	name = attr.getName();
+
+            if (name == null) {
+                name = attr.getName();
             }
-            
+
             names[i] = name;
         }
 
@@ -179,25 +167,84 @@ public class ResultDescriptor {
             }
         }
 
-        // initialize type converters
-        if (explicitJavaTypes != null) {
+        // initialize type converters, must do after everything else,
+        // since this may depend on some of the indexed data
+        if (javaTypes != null) {
             initConvertersFromJavaTypes();
-        } else if (usingDefaultJavaTypes) {
-            initDefaultConverters();
-        } else {
+        } else if (rootEntity != null) {
             initConvertersFromMapping();
+        } else {
+            initDefaultConverters();
         }
 
         this.dirty = false;
     }
 
     protected void initConvertersFromJavaTypes() {
+        this.converters = new ExtendedType[resultWidth];
+
+        ExtendedTypeMap map = node.getAdapter().getExtendedTypes();
+
+        for (int i = 0; i < resultWidth; i++) {
+            converters[i] = map.getRegisteredType((String) javaTypes.get(i));
+        }
     }
 
     protected void initDefaultConverters() {
+        this.converters = new ExtendedType[resultWidth];
+        ExtendedTypeMap map = node.getAdapter().getExtendedTypes();
+
+        for (int i = 0; i < resultWidth; i++) {
+            String javaType = TypesMapping.getJavaBySqlType(jdbcTypes[i]);
+            converters[i] = map.getRegisteredType(javaType);
+        }
     }
 
     protected void initConvertersFromMapping() {
+    	// assert that we have all the data
+		if (dbAttributes == null) {
+		   throw new IllegalArgumentException("DbAttributes list is null.");
+	    }
+	    
+		if (rootEntity == null) {
+		   throw new IllegalArgumentException("Root ObjEntity is null.");
+		}
+    	
+        this.converters = new ExtendedType[resultWidth];
+        ExtendedTypeMap map = node.getAdapter().getExtendedTypes();
+
+        for (int i = 0; i < resultWidth; i++) {
+            String javaType = null;
+            DbAttribute attr = (DbAttribute) dbAttributes.get(i);
+            ObjAttribute objAttr = rootEntity.getAttributeForDbAttribute(attr);
+            if (objAttr != null) {
+                javaType = objAttr.getDbAttributePath();
+            }
+            else {
+            	javaType = TypesMapping.getJavaBySqlType(attr.getType());
+            }
+
+            converters[i] = map.getRegisteredType(javaType);
+        }
     }
 
+    public ExtendedType[] getConverters() {
+        return converters;
+    }
+
+    public int[] getIdIndexes() {
+        return idIndexes;
+    }
+
+    public int[] getJdbcTypes() {
+        return jdbcTypes;
+    }
+
+    public String[] getNames() {
+        return names;
+    }
+
+    public int getResultWidth() {
+        return resultWidth;
+    }
 }
