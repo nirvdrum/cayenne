@@ -4,78 +4,31 @@
 <body>
     <section name="8. Working with DataObjects">
     	<subsection name="8.6 Handling Inheritance">
-    	<p>Persistent objects can form an inheritance hierarchy, mapping to the same base table, as
-    	described in the Modeler Guide. DataObjects that use inheritance do not differ too much from
-    	"regular" DataObjects, however there are a few things to keep in mind when working with such objects.
-    	
+    	<p>"Inheritance" is an Object Oriented concept absent in traditional RDBMS. Cayenne however allows to
+    	map a hierarchical class tree to a single base table (so called "single table inheritance"). Such mapping
+    	is described in detail in the Modeler Guide. The idea of single table inheritance
+    	is that a "class" of a database row is determined from the values in one or more columns of the base table.
+    	These columns are called "class designator columns".
     	</p>
     	
-    	<subsection name="8.6.1 Inheritance and SelectQueries">
-    	<p>
-    	Consider the following class hierarchy also used in the Modeler Guide example: 
-    	</p>
+		<panel name="Initial Values of the Classs Designator Columns">Assigning correct values to the 
+		"class designator columns" mentioned above is one task that is not yet automated in Cayenne 
+		and requires user code in the DataObject, as discussed in the next subsection. In the future versions 
+		this will likely be handled in the mapping and completely outside of the Java classes, 
+		so the advise below will become obsolete.</panel>
+    	
+		<subsection name="8.6.1 Inheritance and new DataObjects">
+		<p>Consider the following class hierarchy (also used in the Modeler Guide example): </p>
     	<img src="/images/modelerguide/inheritance-diagram.jpg" width="300" height="249"/>
     	
-    	<p>Executing a SelectQuery with Employee class as root will potentially return a mix of 
-    	Employees and Managers (who are also Employees of course), but no CustomerContact objects:</p>
-    	
-<source>DataContext context;
-...
-SelectQuery query = new SelectQuery(Employee.class);
-List employees = context.performQuery(query);
- 
-// employees list will contain "regular" employees and managers
-Iterator it = employees.iterator();
-while(it.hasNext()) {
-   Employee e = (Employee) it.next();
-   if(e instanceof Manager) {
-   	// do something with manager...
-   }
-}</source>
- 
- 		<p>The need to determine the correct class for each fetched database row makes 
- 		queries on entities that use inheritance somewhat slower than the regular queries. 
- 		If the application doesn't care about subclasses below the query root class, such 
- 		queries can be optimized by explicitly turning off inheritance resolution. If this is done,
- 		the example above will return all Managers as instances of Employee superclass:</p>
- <source>DataContext context;
-...
-SelectQuery query = new SelectQuery(Employee.class);
- 
-// *** explicitly turn off inheritance resolution
-query.setResolvingInherited(false);
- 
-List employees = context.performQuery(query);
- 
-// employees list will contain no Manager instances...
-// all Managers will be returned as regular Employees</source>
- 
- 		<p> </p>  	
-    	<panel name="Relationship Note:">Whenever an object is obtained via a relationship, 
-    	it is always fully resolved to the lowest possible subclass in an entity inheritance tree.
-    	</panel>
-    	<p> </p>
-    	<panel name="Warning:">Use "setResolvingInherited(false)" with caution, and only if you never
-    	plan to work with subclasses. The downside of it is that the DataContext may end up with two
-    	objects pointing to the same database row, thus violating uniquing principle. For instance
-    	in the example above this may happen if at a later time user decides to fetch Managers directly,
-    	or if a Manager is returned from a relationship.
-    	</panel>
-    	</subsection>
-    	
-		<subsection name="8.6.2 Inheritance and new DataObjects">
-    	<p>Assigning correct property values to the new DataObjects in the inheritance hierarchy,
-    	that will later define the "class" of the database row, is one task that is not currently automated 
-    	in Cayenne and requires manual coding. In the future versions of Cayenne such properties will 
-    	likely be handled in the mapping outside of Java classes, and the advise below will be obsolete.</p>
-    	
-    	<p>In the example above AbstractPerson may have a property called "personType" that 
-    	designates the type of person in the database. In Java this property is rather meanigless,
-    	since person type is defined already by the Java class, however we still have to keep it around
-    	for the sake of database consistency.  The only time when you need to care about 
-    	such "class designator" properties is when the object is created and registered with DataContext.
-    	One way to do it is to override "setPersistenceState(..)" method on each DataObject class in the 
-    	inheritance hierarchy:
+    	<p>If a class designator column is "PERSON_TYPE", AbstractPerson class should define an attribute 
+    	(for instance called "personType") that maps to PERSON_TYPE. This attribute
+    	is redundant and meanigless in Java, since person type is defined already by the Java class of the object, 
+    	however we still have to keep it around so that when the new objects are saved, correct PERSON_TYPE data is
+    	stored in the database. Currently it is a developer responsibility to set "personType" value (or values of any 
+    	other attributes that map to "class designator columns") when the new object is registered with DataContext. 
+    	One way to take care of this is to override "setPersistenceState(..)" method on each DataObject class in 
+    	the inheritance hierarchy to catch when the object is registered with DataContext:
     	</p>
 <source>public class Employee extends _Employee {
     public void setPersistenceState(int state) {
@@ -112,6 +65,57 @@ public class CustomerContact extends _CustomerContact {
     }
 ...
 }</source>
+    	</subsection>
+    	
+    	<subsection name="8.6.2 Inheritance and SelectQueries">
+    	<p>When performing SelectQuery on a table that maps to inheritance hierarchy, Cayenne will
+    	only return rows that belong to root class of the query and all its subclasses. No superclasses or
+    	objects from parallel inheritance branches will be returned. For example executing a SelectQuery 
+    	with Employee class as root will potentially return a mix of 
+    	Employees and Managers (who are also Employees of course), but no CustomerContact objects:</p>
+    	
+<source>DataContext context;
+...
+SelectQuery query = new SelectQuery(Employee.class);
+List employees = context.performQuery(query);
+ 
+// employees list will contain "regular" employees and managers
+Iterator it = employees.iterator();
+while(it.hasNext()) {
+   Employee e = (Employee) it.next();
+   if(e instanceof Manager) {
+   	// do something with manager...
+   }
+}</source>
+ 
+ 		<p>The need to determine the correct class for each fetched database row makes 
+ 		queries on entities that use inheritance less efficient than the regular queries. 
+ 		If an application doesn't care about the query root class subclasses, the 
+ 		query can be optimized by explicitly turning off inheritance resolution. If this is done,
+ 		the example above will return all Managers as instances of Employee class, not Manager class:</p>
+ <source>DataContext context;
+...
+SelectQuery query = new SelectQuery(Employee.class);
+ 
+// *** explicitly turn off inheritance resolution
+query.setResolvingInherited(false);
+ 
+List employees = context.performQuery(query);
+ 
+// employees list will contain no Manager instances...
+// all Managers will be returned as regular Employees</source>
+ 
+ 		<p> </p>  	
+    	<panel name="Relationship Note:">Whenever an object is obtained via a relationship, 
+    	it is always fully resolved to the lowest possible subclass in an entity inheritance tree.
+    	</panel>
+    	<p> </p>
+    	<panel name="Warning:">Use "setResolvingInherited(false)" with caution, and only if you never
+    	plan to work with subclasses. The downside of it is that the DataContext may end up with two
+    	objects pointing to the same database row, thus violating uniquing principle. With the above example, 
+    	this may happen if at a later time user decides to fetch Managers directly, or if a Manager object is
+    	obtained via a relationship.
+    	</panel>
     	</subsection>
     	</subsection>
     </section>
