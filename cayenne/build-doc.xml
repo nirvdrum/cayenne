@@ -184,6 +184,7 @@
                     destdir="${dist}/doc/api"
                     author="true"
                     use="true"
+                    splitindex="true"
                     windowtitle="Cayenne API">
             <!-- Exclude PostgreSQL for the interim release -->
             <excludepackage name="org.objectstyle.cayenne.dba.postgres"/>
