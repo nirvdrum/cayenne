@@ -61,14 +61,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -86,9 +83,7 @@ import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.gui.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.gui.event.DataNodeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
-import org.objectstyle.cayenne.gui.util.SaveHandler;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 
 /** 
