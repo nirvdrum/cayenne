@@ -92,11 +92,9 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     protected Configuration parentConfiguration;
 
     /**
-     * Default constructor
-     * @throws Exception
+     * Creates new DriverDataSourceFactory.
      */
     public DriverDataSourceFactory() throws Exception {
-        super();
         this.parser = Util.createXmlReader();
     }
 
@@ -125,17 +123,10 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         ConnectionEventLogger logger = new ConnectionEventLogger(Level.INFO);
         
         try {
-            PoolManager pm =
-                new PoolManager(
-                    driverInfo.getJdbcDriver(),
-                    driverInfo.getDataSourceUrl(),
-                    driverInfo.getMinConnections(),
-                    driverInfo.getMaxConnections(),
-                    driverInfo.getUserName(),
-                    driverInfo.getPassword(),
-                    logger);
-
-            return pm;
+            return new PoolManager(driverInfo.getJdbcDriver(), driverInfo
+                    .getDataSourceUrl(), driverInfo.getMinConnections(), driverInfo
+                    .getMaxConnections(), driverInfo.getUserName(), driverInfo
+                    .getPassword(), logger);
         } catch (Exception ex) {
             QueryLogger.logConnectFailure(logLevel, ex);
             throw ex;
