@@ -1,0 +1,23 @@
+<document>
+<title>Frequently Asked Questions: Installation</title>
+
+<body>
+    <section name="FAQ: Installation">
+    	<subsection name="I installed Cayenne in $JRE_HOME/lib/ext and now I am getting strange errors. What's wrong?" 
+    	anchor="ext_dir">
+    	
+    	<p>In the very early Alpha releases of Cayenne we recommended $JRE_HOME/lib/ext
+    	as one of the places where Cayenne can be installed. This recommendation IS NO LONGER VALID. 
+    	Here is an extract from the current installation procedure:</p>
+
+		<p><i>It is NOT recommended putting Cayenne JAR files under JRE extensions directory 
+		($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext), though it will probably work in some cases. 
+		The reason for that is that classes loaded from extensions directory have their own ClassLoader 
+		and can't directly access resources associated with other ClassLoaders. Cayenne allows to 
+		"bootstrap" other ClassLoaders for the purpose of resource lookup, but this requires extra 
+		code and doesn't solve all problems.</i>
+    	</p>
+    	</subsection>
+    </section>
+</body>
+</document>

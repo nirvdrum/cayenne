@@ -1,0 +1,67 @@
+<document>
+<title>Frequently Asked Questions: Develop with Cayenne</title>
+
+<body>
+    <section name="FAQ: Develop with Cayenne">
+		<subsection name="When I start my application, Cayenne immediately connects to the database. How about lazy connection that happens on the first database call?" 
+		anchor="lazy_connection">
+    	
+    	<p>This question implies that you are not using a container-provided 
+    	DataSource, and rather use DriverDataSource to connect to the database 
+    	using a JDBC driver. Fix is simple - in the modeler set "minimum 
+    	connections" for all Data Nodes to zero, maximum - to 1 or 
+    	bigger number. This will ensure that no connections are created on 
+    	startup until the first query is executed.
+    	</p>
+    	</subsection>
+    	
+        <subsection name="I am getting exceptions similar to 'Error generating PK' or 'No suitable DataNode to handle entity 'XYZ'." 
+		anchor="a">
+    	
+    	<p>Likely cause of these errors is that one of your Cayenne DataMaps is not 
+    	linked to any DataNodes. This is pending a better, more intuitive GUI. 
+    	For now you should do the following:
+    	<ul>
+    		<li>Open project in the CayenneModeler</li>
+   			<li>Select data node in the bottom of the project tree on the left.</li>
+			<li>Go to menu "Project" -> "Link DataMap to Node"<br/><br/>
+				<img src="../images/link-node.gif" width="553" height="466" border="0" align="middle"
+				alt="Link DataMap"/><br/><br/>
+			</li>
+			<li>Select appropriate DataMap</li>
+   			<li>Save the project.</li>
+    	</ul>
+    	</p>
+    	</subsection>
+    	
+    	<subsection name="I reverse-engineered my Oracle database. Why is that all FLOAT columns are not showing properly?" 
+		anchor="float">
+    	
+    	<p>This seems to be a problem with Oracle JDBC driver. It's connection.getMetadata().getColumns() 
+    	returns FLOAT type as Types.OTHER. Depending on the version of Cayenne you are using, 
+    	you will see it in the modeler as "OTHER" or just as an empty type. If there is a 
+    	solution to this problem, please post it on Cayenne developer mailing list.
+    	</p>
+    	</subsection>
+    	
+    	<subsection name="How do I log an output of a single query.?" 
+		anchor="log_query">
+    	
+    	<p>Cayenne logging system is based on Jakarta 
+    	<a href="http://jakarta.apache.org/log4j/">Log4J</a> package.
+    	To increase logging level of the execution of a 
+    	single select query do something like this:</p>
+
+<source>
+  SelectQuery selectQuery = ...;
+  selectQuery.setLoggingLevel(org.apache.log4j.Level.WARN);
+  List objects = dataContext.performQuery(selectQuery);
+</source>
+		<p>To increase logging level of a commit execution do this:</p>
+<source>
+  dataContext.commitChanges(org.apache.log4j.Level.WARN);
+</source>
+    	</subsection>
+    </section>
+</body>
+</document>

@@ -1,0 +1,30 @@
+<document>
+<title>Frequently Asked Questions: Cayenne Design</title>
+
+<body>
+    <section name="FAQ: Cayenne Design">
+ 		<subsection name="Why do application objects have to extend 'CayenneDataObject?'? What about an arbitrary Java class persistence?" 
+		anchor="inheritance">
+    	
+    	<p>First, strictly speaking persistence classes do not have to extend 
+    	a specific class. Rather they need to implement 'DataObject' interface. CayenneDataObject
+    	is a convenience implementation of a superclass.</p>
+    	
+    	<p>DataObjects in Cayenne are managed by DataContext. While it is relatively easy 
+    	to do the introspection and discover set and get methods of an arbitrary class, 
+    	tracking object changes becomes real hard if they do not notify DataContext
+    	when they change. And inspecting *ALL* objects for changes on commit seems like
+    	an expensive operation to perform. So a certain object/container contract is unavoidable. 
+    	'DataObject' interface is such a contract.
+    	</p>
+    	
+    	<p>Alternatively it should be possible to implement JDO-like solutions 
+    	with runtime bytecode manipulation. But this does seem rather dubious, so
+    	the immediate design philosophy is to make DataObject a simpler interface to 
+    	implement. But of course we would like to discuss alternatives. Use cayenne-devel
+    	mailing list for such discussion.
+    	</p>  
+    	</subsection>
+    </section>
+</body>
+</document>

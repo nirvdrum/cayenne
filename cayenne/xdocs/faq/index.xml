@@ -1,0 +1,31 @@
+<document>
+<title>Frequently Asked Questions</title>
+
+<body>
+    <section name="Cayenne FAQ">
+    	<p> This is a list of Cayenne Frequently Asked Questions.
+    	If you have a question not answered here, feel free to ask it on 
+    	<a href="http://objectstyle.org/cayenne/lists.html">cayenne-user</a> 
+    	mailing list.
+    		<ul>
+    			<li><a href="general.html">General</a>
+    				<ul>
+    				</ul>
+    			</li>
+    			<li><a href="install.html">Installation</a>
+    				<ul>
+    				</ul>
+    			</li>
+    			<li><a href="develop.html">Develop with Cayenne</a>
+    				<ul>
+    				</ul>
+    			</li>
+    			<li><a href="design.html">Cayenne Design</a>
+    				<ul>
+    				</ul>
+    			</li>
+    		</ul>
+		</p>
+    </section>
+</body>
+</document>

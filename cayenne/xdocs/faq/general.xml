@@ -1,0 +1,39 @@
+<document>
+<title>Frequently Asked Questions: General</title>
+
+<body>
+    <section name="FAQ: General">
+    
+    	<subsection name="Where do I get help with Cayenne?" anchor="free_help">
+    	
+    	<p>Free Cayenne support is provided by its authors and Cayenne user 
+    	community via cayenne-user mailing list. For details how to 
+    	subscribe and for earlier archives, go to 
+    	<a href="http://objectstyle.org/cayenne/lists.html">http://objectstyle.org/cayenne/lists.html</a>.
+    	</p>
+    	</subsection>
+    	
+   		<subsection name="How do I report a bug that I found in Cayenne?" anchor="bug_reports">
+    	<p>Cayenne is using SourceForge bug tracking system. Go to 
+    	<a href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068">http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068</a> 
+    	to submit Cayenne-related bugs. Reporting bugs is the most valuable contribution 
+    	Cayenne users can provide for the development team.
+    	</p>
+    	</subsection>
+    	
+   		<subsection name="How does Cayenne compare to XYZ O/R tool?" anchor="comparison">
+    	<p>There is a growing Wiki page at <a 
+    	href="http://c2.com/cgi-bin/wiki?ObjectRelationalToolComparison">http://c2.com/cgi-bin/wiki?ObjectRelationalToolComparison</a>
+    	originally started by Cayenne team. Please go there for such information, and to participate in building the comparison.
+    	</p>
+    	</subsection>
+
+  		<subsection name="What License covers Cayenne source?" anchor="license">
+    	<p>This is a recast Apache (or BSD) license. In short - source code is avaliable, 
+    	modifications are allowed, modifications and products built with Cayenne can be 
+    	distributed unrestricted. The only requirement - give Cayenne authors a written 
+    	credit when using Cayenne in a derivative work.</p>
+    	</subsection>
+    </section>
+</body>
+</document>
