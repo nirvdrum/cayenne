@@ -4,11 +4,21 @@
 <body>
     <section name="1. Introduction">     
         <subsection name="1.1 What's New in 1.1">
-        	<p>This page lists all new features and changes relevant to Cayenne users, that were introduced 
-        	in 1.1 release:</p>
+        	<p>Cayenne version 1.1 introduces a large number of new features and enhancements
+        	over 1.0. This chapter lists most of them, providing the links to more detailed 
+        	information about each feature.</p>
         	
-        	<subsection name="1.1.1 Additions to cayenne.xml Format.">
-            <p>Be careful - saving Cayenne projects with Modeler 1.1 will render them uneditable with Modeler 1.0.</p>
+        	<subsection name="1.1.1 DTD Additions.">
+        	<p>"cayenne.xml" and "*.map.xml" file formats were updated to support new features. 1.1 DTD files
+        	are located here:</p>
+        	
+        	<ul>
+           	 	<li><a href="../../dtd/cayenne-project-1_1.dtd">cayenne-project-1_1.dtd</a></li>
+            	<li><a href="../../dtd/cayenne-data-map-1_1.dtd">cayenne-data-map-1_1.dtd</a></li>
+            </ul>
+            
+            <p>Upgrade Warning: be careful - saving projects with CayenneModeler v.1.1 will render them uneditable 
+            with CayenneModeler v.1.0.</p>
             </subsection>
             
         	<subsection name="1.1.2 Advanced Local and Distributed Caching">

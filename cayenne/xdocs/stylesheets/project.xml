@@ -82,6 +82,7 @@
     		<item name="7.5 Parameterized Queries"  href="/userguide/fetch/params.html"/>
     		<item name="7.6 Using Raw SQL"  href="/userguide/fetch/raw.html"/>
     		<item name="7.7 Modifying Database Directly"  href="/userguide/fetch/dml.html"/>
+    		<item name="7.8 Queries Stored in DataMap"  href="/userguide/fetch/datamap-queries.html"/>
     	</item>
     	
     	<item name="8. Working with DataObjects"  href="/userguide/dataobjects/index.html">
@@ -170,13 +171,15 @@
     		<item name="6.4 Delete Rules" href="/modelerguide/modeling-object-layer/delete-rules.html"/>
     	</item>
     	
-    	<item name="7. Configuring Deployment Settings"  href="/modelerguide/configure-deployment/index.html">
-    		<item name="7.1 Configuring Object Validation" href="/modelerguide/configure-deployment/configure-validation.html"/>
-    		<item name="7.2 Configuring Transactional Behavio" href="/modelerguide/configure-deployment/configure-transactions.html"/>
-    		<item name="7.3 Configuring Caching Behavior" href="/modelerguide/configure-deployment/configure-cache.html"/>    	
+    	<item name="7. Modeling Queries"  href="/modelerguide/modeling-queries/index.html"/>
+    	
+    	<item name="8. Configuring Deployment Settings"  href="/modelerguide/configure-deployment/index.html">
+    		<item name="8.1 Configuring Object Validation" href="/modelerguide/configure-deployment/configure-validation.html"/>
+    		<item name="8.2 Configuring Transactional Behavio" href="/modelerguide/configure-deployment/configure-transactions.html"/>
+    		<item name="8.3 Configuring Caching Behavior" href="/modelerguide/configure-deployment/configure-cache.html"/>    	
     	</item>
     	
-    	<item name="8. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
+    	<item name="9. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
     </toc-modeler-guide>
     
     
