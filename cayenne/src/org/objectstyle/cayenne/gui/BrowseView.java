@@ -901,6 +901,7 @@ public class BrowseView
 		ImageIcon mapIcon;
 		ImageIcon dbEntityIcon;
 		ImageIcon objEntityIcon;
+		ImageIcon derivedDbEntityIcon;
 
 		public BrowseViewRenderer() {
 			ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
@@ -917,6 +918,11 @@ public class BrowseView
 			url =
 				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
 			dbEntityIcon = new ImageIcon(url);
+			
+			url =
+				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-derived-dbentity.gif");
+			derivedDbEntityIcon = new ImageIcon(url);
+
 
 			url =
 				cl.getResource(CayenneAction.RESOURCE_PATH + "images/icon-objentity.gif");
@@ -952,10 +958,15 @@ public class BrowseView
 				setIcon(mapIcon);
 			} else if (obj instanceof EntityWrapper) {
 				EntityWrapper wrap = (EntityWrapper) obj;
-				if (wrap.getEntity() instanceof DbEntity)
+				if (wrap.getEntity() instanceof DerivedDbEntity) {
+					setIcon(derivedDbEntityIcon);
+				}
+				else if (wrap.getEntity() instanceof DbEntity) {
 					setIcon(dbEntityIcon);
-				else if (wrap.getEntity() instanceof ObjEntity)
+				}
+				else if (wrap.getEntity() instanceof ObjEntity) {
 					setIcon(objEntityIcon);
+				}
 			}
 			return this;
 		}
