@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.io.File;
-
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;

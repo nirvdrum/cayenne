@@ -1,7 +1,6 @@
 package org.objectstyle.cayenne.util;
 
 import java.io.File;
-import java.util.zip.ZipFile;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 

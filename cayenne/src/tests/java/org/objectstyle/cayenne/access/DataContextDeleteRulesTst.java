@@ -59,7 +59,6 @@ import java.util.Date;
 
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
-import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
 import org.objectstyle.art.DeleteRuleTest1;
 import org.objectstyle.art.DeleteRuleTest2;
