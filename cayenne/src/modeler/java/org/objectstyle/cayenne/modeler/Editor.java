@@ -164,7 +164,6 @@ public class Editor
     protected static Editor frame;
 
     protected EditorView view;
-    protected EventController mediator;
     protected ActionMap actionMap;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
@@ -475,9 +474,6 @@ public class Editor
             view = null;
         }
 
-        mediator.reset();
-        controller.getTopModel().setCurrentProject(null);
-
         disableMenu();
 
         closeProjectMenu.setEnabled(false);
@@ -485,27 +481,25 @@ public class Editor
         getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
 
-        controller.handleControl(
-            new Control(TopModel.STATUS_MESSAGE_KEY, "Project closed..."));
-
         // repaint is needed, since there is a trace from menu left on the screen
         repaint();
         updateTitle();
     }
 
-    public void projectOpened(Project project) {    	
-        view = new EditorView(mediator);
+    public void projectOpened() {
+    	EventController evController = controller.getEventController(); 	
+        view = new EditorView(evController);
         getContentPane().add(view, BorderLayout.CENTER);
 
-        mediator.addDomainDisplayListener(this);
-        mediator.addDataNodeDisplayListener(this);
-        mediator.addDataMapDisplayListener(this);
-        mediator.addObjEntityDisplayListener(this);
-        mediator.addDbEntityDisplayListener(this);
-        mediator.addObjAttributeDisplayListener(this);
-        mediator.addDbAttributeDisplayListener(this);
-        mediator.addObjRelationshipDisplayListener(this);
-        mediator.addDbRelationshipDisplayListener(this);
+        evController.addDomainDisplayListener(this);
+        evController.addDataNodeDisplayListener(this);
+        evController.addDataMapDisplayListener(this);
+        evController.addObjEntityDisplayListener(this);
+        evController.addDbEntityDisplayListener(this);
+        evController.addObjAttributeDisplayListener(this);
+        evController.addDbAttributeDisplayListener(this);
+        evController.addObjRelationshipDisplayListener(this);
+        evController.addDbRelationshipDisplayListener(this);
 
         enableProjectMenu();
         validate();
@@ -565,7 +559,7 @@ public class Editor
     }
 
     private void setPackageName() {
-        DataMap map = mediator.getCurrentDataMap();
+        DataMap map = controller.getEventController().getCurrentDataMap();
         if (map == null) {
             return;
         }
@@ -593,12 +587,12 @@ public class Editor
             }
             entities[i].setClassName(package_name + name);
         }
-        mediator.fireDataMapEvent(new DataMapEvent(this, map));
+        controller.getEventController().fireDataMapEvent(new DataMapEvent(this, map));
     }
 
     private void generateClasses() {
         GenerateClassDialog dialog;
-        dialog = new GenerateClassDialog(this, mediator);
+        dialog = new GenerateClassDialog(this, controller.getEventController());
         dialog.show();
         dialog.dispose();
     }
@@ -709,7 +703,7 @@ public class Editor
     }
 
     private void enableDataMapMenu() {
-        if (mediator.getCurrentDataNode() != null)
+        if (controller.getEventController().getCurrentDataNode() != null)
             enableDataNodeMenu();
         else
             enableDomainMenu();
@@ -735,7 +729,7 @@ public class Editor
         getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
         getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
 
-        if (mediator.getCurrentDbEntity() instanceof DerivedDbEntity) {
+        if (controller.getEventController().getCurrentDbEntity() instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
         }
     }
@@ -743,17 +737,6 @@ public class Editor
     private void enableDataNodeMenu() {
         enableDomainMenu();
         getAction(AddDataMapAction.ACTION_NAME).setEnabled(true);
-    }
-
-    /**
-     * Returns current CayenneModeler mediator.
-     */
-    public EventController getMediator() {
-        return mediator;
-    }
-
-    public void setMediator(EventController mediator) {
-        this.mediator = mediator;
     }
 
     public void updateTitle() {

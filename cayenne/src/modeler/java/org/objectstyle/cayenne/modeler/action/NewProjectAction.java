@@ -85,12 +85,13 @@ public class NewProjectAction extends ProjectAction {
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK);
     }
+    
     /**
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         // Save and close (if needed) currently open project.
-        if (getMediator() != null && !closeProject()) {
+        if (getTopModel().getCurrentProject() != null && !closeProject()) {
             return;
         }
 

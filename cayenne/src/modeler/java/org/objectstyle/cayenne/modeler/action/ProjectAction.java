@@ -83,7 +83,7 @@ public abstract class ProjectAction extends CayenneAction {
 
         // later may create an event, right now notify frame
         // directly
-        Editor.getFrame().projectClosed();
+        Editor.getFrame().getController().projectClosed();
         return true;
     }
 

@@ -107,6 +107,6 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
 	 * Returns current CayenneModeler mediator.
 	 */
 	public EventController getMediator() {
-		return getParentEditor().getMediator();
+		return getParentEditor().getController().getEventController();
 	}
 }

@@ -80,22 +80,35 @@ public class TopController extends BasicController {
      */
     public TopController(Editor view) {
         this.view = view;
-        
+
         TopModel model = new TopModel();
         statusController = new StatusBarController(model);
         eventController = new EventController(model);
         setModel(model);
-        
-        view.setMediator(eventController);
+    }
+
+    public void projectClosed() {
+        // reset controllers
+        eventController.reset();
+
+        // clear view
+        view.projectClosed();
+
+        // clear model
+        getTopModel().setCurrentProject(null);
+
+        // update status bar
+        statusController.handleControl(
+            new Control(TopModel.STATUS_MESSAGE_KEY, "Project closed..."));
     }
 
     public void projectOpened(Project project) {
-    	// update model
+        // update model
         getTopModel().setCurrentProject(project);
-        
+
         // update main view
-        view.projectOpened(project);
-        
+        view.projectOpened();
+
         // update bottom status bar
         if (project.isLocationUndefined()) {
             eventController.setDirty(true);
@@ -121,5 +134,9 @@ public class TopController extends BasicController {
             control.markUnmatched();
             statusController.doHandleControl(control);
         }
+    }
+
+    public EventController getEventController() {
+        return eventController;
     }
 }
