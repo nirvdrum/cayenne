@@ -551,12 +551,7 @@ public class Editor
 	}
 
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
-		if (e.getEntity() instanceof DerivedDbEntity) {
-			enableDerivedDbEntityMenu();
-		} else {
-			enableDbEntityMenu();
-		}
-
+		enableDbEntityMenu();
 		getAction(RemoveAction.ACTION_NAME).setName("Remove DbEntity");
 	}
 
@@ -659,11 +654,10 @@ public class Editor
 		enableDataMapMenu();
 		getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
-	}
 
-	private void enableDerivedDbEntityMenu() {
-		enableDbEntityMenu();
-		getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
+		if (mediator.getCurrentDbEntity() instanceof DerivedDbEntity) {
+			getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
+		}
 	}
 
 	private void enableDataNodeMenu() {

@@ -59,6 +59,7 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.swing.*;
@@ -143,6 +144,8 @@ public class EditDerivedParamsDialog
 		for (int i = 0; i < attrs.size(); i++) {
 			names[i + 1] = ((Attribute) attrs.get(i)).getName();
 		}
+		
+		Arrays.sort(names);
 
 		JComboBox comboBox = new JComboBox(names);
 		comboBox.setEditable(false);
