@@ -135,13 +135,17 @@ public class PkGenerator {
         }
     }
 
+
     /** Performs necessary database operations to do primary key generation
      *  for a particular DbEntity. This may require a prior call 
      *  to <code>createAutoPkSupport<code> method.
      * 
-     *  <p>This operation is unsafe in a sense that it will populate lookup tables
-     *  with "1" instead of looking for the correct value. <i>Safe implementation
-     *  is pending.</i></p>
+     * <p>This operation is "safe" in that it won't override any existing values.</p>
+     * 
+     *  <p>This operation may produce incorrect results if there is already data
+     *  in the tables, since it will populate lookup tables
+     *  with "1" instead of looking for the correct value. 
+     * <i>Better implementation is pending.</i></p>
      *
      *  @param node node that provides connection layer for PkGenerator.
      *  @param dbEntity DbEntity that needs an auto PK support
@@ -149,27 +153,33 @@ public class PkGenerator {
     public void createAutoPkSupportForDbEntity(DataNode node, DbEntity dbEntity)
         throws Exception {
 
-        // delete existing record
+        // check for existing record
+        boolean shouldInsert = true;
         StringBuffer buf = new StringBuffer();
         buf
-            .append("DELETE FROM AUTO_PK_SUPPORT ")
+            .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT ")
             .append("WHERE TABLE_NAME = '")
             .append(dbEntity.getName())
             .append('\'');
-            
-        runSchemaUpdate(node, buf.toString());
 
-        // create new one
-        buf.setLength(0);
-        buf
-            .append("INSERT INTO AUTO_PK_SUPPORT (TABLE_NAME, NEXT_ID) ")
-            .append("VALUES ('")
-            .append(dbEntity.getName())
-            .append("', 1)");
+        List rows = runSelect(node, buf.toString());
+        if(rows.size() > 0) {
+            shouldInsert = false;
+        }
+
+        // create new one if needed
+        if (shouldInsert) {
             
-        runSchemaUpdate(node, buf.toString());
+            buf.setLength(0);
+            buf
+                .append("INSERT INTO AUTO_PK_SUPPORT (TABLE_NAME, NEXT_ID) ")
+                .append("VALUES ('")
+                .append(dbEntity.getName())
+                .append("', 1)");
+
+            runSchemaUpdate(node, buf.toString());
+        }
     }
-    
 
     /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
      * to track the results of the execution.
@@ -183,6 +193,19 @@ public class PkGenerator {
         node.performQuery(q, pr);
     }
 
+
+    /** Creates and executes SqlModifyQuery using inner class PkSchemaProcessor
+     * to track the results of the execution.
+     * 
+     * @throws java.lang.Exception in case of query failure. */
+    private List runSelect(DataNode node, String sql) throws Exception {
+        SqlSelectQuery q = new SqlSelectQuery();
+        q.setSqlString(sql);
+
+        SelectOperationObserver observer = new SelectOperationObserver();
+        node.performQuery(q, observer);
+        return observer.getResults();
+    }
 
     /**
      *  <p>Generate new (unique and non-repeating) primary key for specified dbEntity.</p>
