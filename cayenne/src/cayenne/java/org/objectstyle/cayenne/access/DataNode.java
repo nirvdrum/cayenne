@@ -295,6 +295,7 @@ public class DataNode implements QueryEngine {
                             QueryLogger.logRollbackTransaction(logLevel);
                             opObserver.transactionRolledback();
                         } catch (SQLException sqlEx) {
+                            QueryLogger.logQueryError(logLevel, sqlEx);
                             opObserver.nextQueryException(nextQuery, sqlEx);
                         }
                     }

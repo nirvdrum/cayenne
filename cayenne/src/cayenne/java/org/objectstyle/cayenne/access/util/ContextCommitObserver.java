@@ -124,9 +124,6 @@ public class ContextCommitObserver
 				}
 			}
         }
-
-        // register myself for events sent by DataContext
-        this.registerForDataContextEvents();
     }
 
     public boolean useAutoCommit() {
@@ -200,7 +197,7 @@ public class ContextCommitObserver
         return (sorter != null) ? sorter.sortedQueries(queryList) : queryList;
     }
 
-	protected void registerForDataContextEvents() {
+	public void registerForDataContextEvents() {
 		try {
 			EventManager mgr = EventManager.getDefaultManager();
 			mgr.addListener(this, DataContextEvent.class, "dataContextWillCommit", DataContext.WILL_COMMIT); 
@@ -214,7 +211,7 @@ public class ContextCommitObserver
 		}
 	}
 
-	protected void unregisterFromDataContextEvents() {
+	public void unregisterFromDataContextEvents() {
 		EventManager mgr = EventManager.getDefaultManager();
 		mgr.removeListener(this, DataContext.WILL_COMMIT); 
 		mgr.removeListener(this, DataContext.DID_COMMIT);
@@ -233,12 +230,9 @@ public class ContextCommitObserver
 		while (iter.hasNext()) {
 			((DataObjectTransactionEventListener)iter.next()).didCommit();
 		}
-
-		this.unregisterFromDataContextEvents();
 	}
 
 	public void dataContextDidRollback(DataContextEvent event) {
-		this.unregisterFromDataContextEvents();		
-	}
 
+	}
 }
