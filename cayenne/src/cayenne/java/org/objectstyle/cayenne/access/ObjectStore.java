@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.access.util.QueryUtils;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.event.EventManager;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -116,36 +116,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public ObjectStore(DataRowStore dataRowCache) {
         this();
         setDataRowCache(dataRowCache);
-    }
-
-    /**
-     * Synchronizes the state of registered DataObjects with the current state
-     * of parent DataRowStore.
-     * 
-     * @since 1.1
-     */
-    public synchronized void synchronizeWithCache(boolean refetchMissingSnapshots) {
-        Iterator objects = this.getObjectIterator();
-        while (objects.hasNext()) {
-            DataObject nextObject = (DataObject) objects.next();
-            ObjectId oid = nextObject.getObjectId();
-
-            DataRow snapshot =
-                (refetchMissingSnapshots)
-                    ? getSnapshot(oid, nextObject.getDataContext())
-                    : getCachedSnapshot(oid);
-
-            if (snapshot == null
-                || snapshot.getVersion() == nextObject.getSnapshotVersion()) {
-                continue;
-            }
-
-            ObjEntity entity =
-                nextObject.getDataContext().getEntityResolver().lookupObjEntity(
-                    nextObject);
-            DataRowUtils.mergeObjectWithSnapshot(entity, nextObject, snapshot);
-            nextObject.setSnapshotVersion(snapshot.getVersion());
-        }
     }
 
     /**
@@ -202,13 +172,24 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      */
     public void setDataRowCache(DataRowStore snapshotCache) {
         if (this.dataRowCache != null) {
-            this.dataRowCache.stopReceivingSnapshotEvents(this);
+            EventManager.getDefaultManager().removeListener(
+                this,
+                dataRowCache.getSnapshotEventSubject(),
+                dataRowCache);
         }
 
         this.dataRowCache = snapshotCache;
 
         if (snapshotCache != null) {
-            snapshotCache.startReceivingSnapshotEvents(this);
+            // setting itself as non-blocking listener,
+            // since event sending thread will likely be locking sender's
+            // ObjectStore and snapshot cache itself.
+            EventManager.getDefaultManager().addNonBlockingListener(
+                this,
+                "snapshotsChanged",
+                SnapshotEvent.class,
+                snapshotCache.getSnapshotEventSubject(),
+                snapshotCache);
         }
     }
 

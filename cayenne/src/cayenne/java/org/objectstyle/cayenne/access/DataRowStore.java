@@ -97,8 +97,6 @@ public class DataRowStore implements Serializable {
         "cayenne.DataRowStore.snapshot.expiration";
     public static final String SNAPSHOT_CACHE_SIZE_PROPERTY =
         "cayenne.DataRowStore.snapshot.size";
-    public static final String OBJECT_STORE_NOTIFICATION_PROPERTY =
-        "cayenne.DataRowStore.ObjectStore.notify";
     public static final String REMOTE_NOTIFICATION_PROPERTY =
         "cayenne.DataRowStore.remote.notify";
     public static final String EVENT_BRIDGE_FACTORY_PROPERTY =
@@ -109,7 +107,6 @@ public class DataRowStore implements Serializable {
     // default expiration time is 2 hours
     public static final long SNAPSHOT_EXPIRATION_DEFAULT = 2 * 60 * 60;
     public static final int SNAPSHOT_CACHE_SIZE_DEFAULT = 10000;
-    public static final boolean OBJECT_STORE_NOTIFICATION_DEFAULT = true;
     public static final boolean REMOTE_NOTIFICATION_DEFAULT = false;
 
     // use String for class name, since JavaGroups may not be around,
@@ -119,7 +116,6 @@ public class DataRowStore implements Serializable {
 
     protected String name;
     protected Cache snapshots;
-    protected boolean notifyingObjectStores;
     protected boolean notifyingRemoteListeners;
     protected EventBridge remoteNotificationsHandler;
 
@@ -168,11 +164,6 @@ public class DataRowStore implements Serializable {
                 REMOTE_NOTIFICATION_PROPERTY,
                 REMOTE_NOTIFICATION_DEFAULT);
 
-        boolean notifyObjectStores =
-            propertiesWrapper.getBoolean(
-                OBJECT_STORE_NOTIFICATION_PROPERTY,
-                OBJECT_STORE_NOTIFICATION_DEFAULT);
-
         String eventBridgeFactory =
             propertiesWrapper.getString(
                 EVENT_BRIDGE_FACTORY_PROPERTY,
@@ -196,11 +187,6 @@ public class DataRowStore implements Serializable {
                     + notifyRemote);
             logObj.debug(
                 "DataRowStore property "
-                    + OBJECT_STORE_NOTIFICATION_PROPERTY
-                    + " = "
-                    + notifyObjectStores);
-            logObj.debug(
-                "DataRowStore property "
                     + EVENT_BRIDGE_FACTORY_PROPERTY
                     + " = "
                     + eventBridgeFactory);
@@ -208,7 +194,6 @@ public class DataRowStore implements Serializable {
 
         // init ivars from properties
         this.notifyingRemoteListeners = notifyRemote;
-        this.notifyingObjectStores = notifyObjectStores;
         this.snapshots =
             new LruCacheFactory().newInstance(
                 snapshotsExpiration * 1000,
@@ -315,32 +300,6 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Unregisters an ObjectStore to stop receiving SnapshotChangeEvents.
-     */
-    public void stopReceivingSnapshotEvents(ObjectStore objectStore) {
-        EventManager.getDefaultManager().removeListener(objectStore);
-    }
-
-    /**
-     * Registers an ObjectStore to receive SnapshotChangeEvents. If <code>notifyingObjectStores</code>
-     * property is false, this method skips the registration.
-     */
-    public boolean startReceivingSnapshotEvents(ObjectStore objectStore) {
-        if (!isNotifyingObjectStores()) {
-            return false;
-        }
-
-        EventManager.getDefaultManager().addListener(
-            objectStore,
-            "snapshotsChanged",
-            SnapshotEvent.class,
-            getSnapshotEventSubject(),
-            this);
-        logObj.debug("ObjectStore will listen for events: " + objectStore);
-        return true;
-    }
-
-    /**
      * Expires and removes all stored snapshots without sending any
      * notification events.
      */
@@ -432,28 +391,23 @@ public class DataRowStore implements Serializable {
                 }
             }
 
-        }
+            // do not send bogus events... e.g. inserted objects are not counted
+            if ((diffs != null && !diffs.isEmpty())
+                || (deletedSnapshotIds != null && !deletedSnapshotIds.isEmpty())) {
+                SnapshotEvent event =
+                    new SnapshotEvent(this, source, diffs, deletedSnapshotIds);
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug("postSnapshotsChangeEvent: " + event);
+                }
 
-        // do not send bogus events... e.g. inserted objects are not counted
-        if ((diffs != null && !diffs.isEmpty())
-            || (deletedSnapshotIds != null && !deletedSnapshotIds.isEmpty())) {
-            SnapshotEvent event =
-                new SnapshotEvent(this, source, diffs, deletedSnapshotIds);
-            if (logObj.isDebugEnabled()) {
-                logObj.debug("postSnapshotsChangeEvent: " + event);
+                // notify listeners
+
+                // send synchronously, relying on listeners to 
+                // register as "non-blocking" if needed.
+                EventManager.getDefaultManager().postEvent(
+                    event,
+                    getSnapshotEventSubject());
             }
-
-            // notify listeners
-
-            // IMPORTANT: do this asynchronously, since there is a
-            // good chance of deadlocking when notifying object stores
-            // that are themselves waiting to obtain the lock on this DataRowStore,
-            // and are already being locked by calling threads
-
-            // downside of asynchronous post is ambiguity on the receiving end...
-            EventManager.getDefaultManager().postNonBlockingEvent(
-                event,
-                getSnapshotEventSubject());
         }
     }
 
@@ -494,26 +448,5 @@ public class DataRowStore implements Serializable {
 
     public void setNotifyingRemoteListeners(boolean notifyingRemoteListeners) {
         this.notifyingRemoteListeners = notifyingRemoteListeners;
-    }
-
-    /**
-     * Returns a property that defines whether child ObjectStores are allowed
-     * to register as SnapshotEventListeners. SnapshotEvents are still posted
-     * via EventManager, even if this value is false. Rather this setting has
-     * effect on {@link #startReceivingSnapshotEvents(ObjectStore) 
-     * startReceivingSnapshotEvents(ObjectStore)} behavior.
-     */
-    public boolean isNotifyingObjectStores() {
-        return notifyingObjectStores;
-    }
-
-    /**
-     * Sets a property that defines whether child ObjectStores are allowed to
-     * register as SnapshotEventListeners via
-     * {@link #startReceivingSnapshotEvents(ObjectStore) 
-     * startReceivingSnapshotEvents(ObjectStore)}
-     */
-    public void setNotifyingObjectStores(boolean b) {
-        notifyingObjectStores = b;
     }
 }

@@ -226,22 +226,37 @@ public class DataContext implements QueryEngine, Serializable {
      * association with a DataDomain. 
      */
     public DataContext() {
-        this(null);
+        this(null, null);
     }
 
     /**
      * Creates new DataContext and initializes it with the parent QueryEngine. 
      * Normally parent is an instance of DataDomain. DataContext will use parent
      * to execute database queries, updates, and access mapping information.
+     * 
+     * @deprecated since 1.1 use {@link #DataContext(QueryEngine, DataRowStore)}
      */
     public DataContext(QueryEngine parent) {
         setParent(parent);
 
         DataRowStore snapshotCache = null;
-        if (parent != null) {
-            snapshotCache = ((DataDomain) parent).getSnapshotCache();
+        if (parent instanceof DataDomain) {
+            snapshotCache = ((DataDomain) parent).getSharedSnapshotCache();
         }
 
+        this.objectStore = new ObjectStore(snapshotCache);
+        this.relationshipDataSource = new RelationshipDataSource(this);
+        this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
+    }
+    
+    /**
+     * @since 1.1
+     * @param parent
+     * @param snapshotCache
+     */
+    public DataContext(QueryEngine parent, DataRowStore snapshotCache) {
+        setParent(parent);
+        
         this.objectStore = new ObjectStore(snapshotCache);
         this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
@@ -259,7 +274,7 @@ public class DataContext implements QueryEngine, Serializable {
 
             if (parent instanceof DataDomain) {
                 this.objectStore.setDataRowCache(
-                    ((DataDomain) parent).getSnapshotCache());
+                    ((DataDomain) parent).getSharedSnapshotCache());
             }
         }
     }

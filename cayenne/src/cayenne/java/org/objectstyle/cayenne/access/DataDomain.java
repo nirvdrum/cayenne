@@ -88,11 +88,15 @@ import org.objectstyle.cayenne.query.Query;
 public class DataDomain implements QueryEngine {
     private static Logger logObj = Logger.getLogger(DataDomain.class);
 
+    public static final String SHARED_CACHE_ENABLED_PROPERTY = "cayenne.DataDomain.sharedCache";
+    public static final boolean SHARED_CACHE_ENABLED_DEFAULT = true;
+    
+
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
     protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
     protected Collection nodesRef = Collections.unmodifiableCollection(nodes.values());
-    
+
     /**
      * Properties configured for DataDomain. These include properties of the DataRowStore
      * and remote notifications.
@@ -110,12 +114,11 @@ public class DataDomain implements QueryEngine {
     protected Map nodesByProcedureName = Collections.synchronizedMap(new HashMap());
 
     protected EntityResolver entityResolver;
-
     protected PrimaryKeyHelper primaryKeyHelper;
-
-    protected DataRowStore snapshotCache;
+    protected DataRowStore sharedSnapshotCache;
     protected TransactionDelegate transactionDelegate;
     protected String name;
+    protected boolean sharedCacheEnabled;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -130,17 +133,48 @@ public class DataDomain implements QueryEngine {
         this(name, null);
     }
 
+    /**
+     * Creates new DataDomain.
+     * 
+     * @param name DataDomain name. Domain can be located using its name in the
+     * Configuration object.
+     * @param properties A Map containing domain configuration properties.
+     */
     public DataDomain(String name, Map properties) {
         setName(name);
-        
+        initFromProperties(properties);
+    }
+    
+    /**
+     * @since 1.1
+     */
+    protected void initFromProperties(Map properties) {
         // create map with predictable modification and synchronization behavior
         Map localMap = new HashMap();
-        if(properties != null) {
+        if (properties != null) {
             localMap.putAll(properties);
         }
-        
+
         this.properties = localMap;
+
+        Object sharedCacheEnabled = localMap.get(SHARED_CACHE_ENABLED_PROPERTY);
+
+        if (logObj.isDebugEnabled()) {
+            logObj.debug(
+                "DataDomain property "
+                    + SHARED_CACHE_ENABLED_PROPERTY
+                    + " = "
+                    + sharedCacheEnabled);
+
+        }
+
+        // init ivars from properties
+        this.sharedCacheEnabled =
+            (sharedCacheEnabled != null)
+                ? "true".equalsIgnoreCase(sharedCacheEnabled.toString())
+                : SHARED_CACHE_ENABLED_DEFAULT;
     }
+
 
     /** Returns "name" property value. */
     public String getName() {
@@ -150,11 +184,24 @@ public class DataDomain implements QueryEngine {
     /** Sets "name" property to a new value. */
     public synchronized void setName(String name) {
         this.name = name;
-        if (snapshotCache != null) {
-            this.snapshotCache.setName(name);
+        if (sharedSnapshotCache != null) {
+            this.sharedSnapshotCache.setName(name);
         }
     }
-    
+
+    /**
+     * Returns <code>true</code> if DataContexts produced by this DataDomain
+     * are using shared DataRowStore. Returns <code>false</code> if each
+     * DataContext would work with its own DataRowStore.
+     */
+    public boolean isSharedCacheEnabled() {
+        return sharedCacheEnabled;
+    }
+
+    public void setSharedCacheEnabled(boolean sharedCacheEnabled) {
+        this.sharedCacheEnabled = sharedCacheEnabled;
+    }
+
     /**
      * @since 1.1
      * @return a Map of properties for this DataDomain. There is no guarantees
@@ -186,20 +233,20 @@ public class DataDomain implements QueryEngine {
      * Returns snapshots cache for this DataDomain, lazily initializing
      * it on the first call.
      */
-    public synchronized DataRowStore getSnapshotCache() {
-        if (snapshotCache == null) {
-            this.snapshotCache = new DataRowStore(name, properties);
+    public synchronized DataRowStore getSharedSnapshotCache() {
+        if (sharedSnapshotCache == null) {
+            this.sharedSnapshotCache = new DataRowStore(name, properties);
         }
 
-        return snapshotCache;
+        return sharedSnapshotCache;
     }
 
-    public synchronized void setSnapshotCache(DataRowStore snapshotCache) {
-        if (this.snapshotCache != snapshotCache) {
-            if(this.snapshotCache != null) {
-                this.snapshotCache.shutdown();
+    public synchronized void setSharedSnapshotCache(DataRowStore snapshotCache) {
+        if (this.sharedSnapshotCache != snapshotCache) {
+            if (this.sharedSnapshotCache != null) {
+                this.sharedSnapshotCache.shutdown();
             }
-            this.snapshotCache = snapshotCache;
+            this.sharedSnapshotCache = snapshotCache;
         }
     }
 
@@ -344,9 +391,26 @@ public class DataDomain implements QueryEngine {
         }
     }
 
-    /** Creates and returns new DataContext. */
+    /** 
+     * Creates and returns a new DataContext. 
+     */
     public DataContext createDataContext() {
-        return new DataContext(this);
+       return createDataContext(isSharedCacheEnabled());
+    }
+    
+    
+    /**
+     * @since 1.1
+     */
+    public DataContext createDataContext(boolean useSharedCache) {
+        // for new dataRowStores use the same name for all stores
+        // it makes it easier to track the event subject
+        DataRowStore snapshotCache =
+            (useSharedCache)
+                ? getSharedSnapshotCache()
+                : new DataRowStore(name, properties);
+
+        return new DataContext(this, snapshotCache);
     }
 
     /**
@@ -383,7 +447,8 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             this.reindexNodes();
             return (DataNode) nodesByEntityName.get(objEntityName);
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -449,7 +514,8 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             reindexNodes();
             return (DataNode) nodesByDbEntityName.get(dbEntityName);
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -470,7 +536,8 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             reindexNodes();
             return (DataNode) nodesByProcedureName.get(procedureName);
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -591,14 +658,15 @@ public class DataDomain implements QueryEngine {
      * Shutdowns all owned data nodes. Invokes DataNode.shutdown().
      */
     public void shutdown() {
-        this.snapshotCache.shutdown();
-        
+        this.sharedSnapshotCache.shutdown();
+
         Collection dataNodes = getDataNodes();
         for (Iterator i = dataNodes.iterator(); i.hasNext();) {
             DataNode node = (DataNode) i.next();
             try {
                 node.shutdown();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
             }
         }
     }

@@ -43,18 +43,14 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 
 /**
@@ -71,9 +67,6 @@ public class DataContextDelegateTst extends MultiContextTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        // disable ObjectStore events
-        context.getParentDataDomain().getSnapshotCache().setNotifyingObjectStores(false);
-
         // prepare a single gallery record
         gallery = (Gallery) context.createAndRegisterNewObject("Gallery");
         gallery.setGalleryName("version1");
@@ -83,6 +76,11 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("version1");
         context.commitChanges();
+    }
+
+    public DataContext createDataContext() {
+        // create datacontext with local cache
+        return getDomain().createDataContext(false);
     }
 
     /**
@@ -146,52 +144,6 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         catch (RuntimeException rex) {
             // commit aborted, exception expected
         }
-    }
-
-    /**
-     * Test that "snapshotChangedInDataRow" method can change snapshots,
-     * affecting UPDATE behavior.
-     */
-    public void testSnapshotChangedInDataRow3() throws Exception {
-        // prepare a second context
-        DataContext altContext = mirrorDataContext(context);
-        TestDelegate altDelegate = new TestDelegate();
-        altContext.setDelegate(altDelegate);
-
-        Artist altArtist =
-            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
-        assertNotNull(altArtist);
-
-        // update.. first make sure that ALT is not hollow
-        altArtist.getArtistName();
-
-        artist.setDateOfBirth(CayenneTestCase.stripTime(new Date()));
-        context.commitChanges();
-
-        assertNull(altArtist.getDateOfBirth());
-
-        // test behavior on commit when snapshot has changed underneath
-        altDelegate.setOverridesConcurrentModifictions(true);
-
-        altArtist.setArtistName("version2");
-        altContext.commitChanges();
-
-        // assert new snapshot ... must have null dob
-        ObjectId oid = artist.getObjectId();
-        DataRow snapshot =
-            context.getObjectStore().getDataRowCache().getCachedSnapshot(oid);
-        assertNull(snapshot.get("DATE_OF_BIRTH"));
-        assertEquals("version2", snapshot.get("ARTIST_NAME"));
-
-        // fetch fresh artist as DataRow to bypass caches... date of birth must be null
-        SelectQuery query = QueryUtils.selectObjectForId(oid);
-        query.setFetchingDataRows(true);
-
-        List artists = context.performQuery(query);
-        assertEquals(1, artists.size());
-        DataRow artistRow = (DataRow) artists.get(0);
-        assertNull(artistRow.get("DATE_OF_BIRTH"));
-        assertEquals("version2", artistRow.get("ARTIST_NAME"));
     }
 
     public void testWillPerformSelect1() throws Exception {

@@ -145,10 +145,10 @@ public abstract class CayenneTestCase extends TestCase {
     public DataContext createDataContext() {
         // remove listeners for snapshot events
         EventManager.getDefaultManager().removeAllListeners(
-            getDomain().getSnapshotCache().getSnapshotEventSubject());
+            getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
 
         // clear cache...
-        getDomain().getSnapshotCache().clear();
+        getDomain().getSharedSnapshotCache().clear();
         return getDomain().createDataContext();
     }
 

@@ -217,8 +217,8 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         // test versions assigned on fetch... clean up domain cache
         // before doing it
         EventManager.getDefaultManager().removeAllListeners(
-            getDomain().getSnapshotCache().getSnapshotEventSubject());
-        getDomain().getSnapshotCache().clear();
+            getDomain().getSharedSnapshotCache().getSnapshotEventSubject());
+        getDomain().getSharedSnapshotCache().clear();
         this.context = getDomain().createDataContext();
 
         List artists = context.performQuery(new SelectQuery(Artist.class));

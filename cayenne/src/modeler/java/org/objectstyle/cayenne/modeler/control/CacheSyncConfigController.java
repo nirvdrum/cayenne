@@ -323,6 +323,11 @@ public class CacheSyncConfigController
         existingCards.put(CacheSyncTypesModel.CUSTOM_FACTORY_LABEL, customFactoryPanel);
         topView.addCard(customFactoryPanel, CacheSyncTypesModel.CUSTOM_FACTORY_LABEL);
 
+     
+        if(factory == null) {
+           factory = DataRowStore.EVENT_BRIDGE_FACTORY_DEFAULT;       
+        }
+
         // display the right initial card
         // can't call "changeConfigView", since it will reset custom factories..
         Object model = buildModel(factory);

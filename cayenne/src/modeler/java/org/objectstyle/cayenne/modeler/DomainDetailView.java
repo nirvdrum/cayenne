@@ -101,7 +101,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
     protected JTextField name;
     protected JTextField cacheSize;
     protected JTextField cacheExpiration;
-    protected JCheckBox localUpdates;
+    protected JCheckBox sharedCache;
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
 
@@ -121,7 +121,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         this.name = CayenneWidgetFactory.createTextField();
         this.cacheSize = CayenneWidgetFactory.createTextField(10);
         this.cacheExpiration = CayenneWidgetFactory.createTextField(10);
-        this.localUpdates = new JCheckBox();
+        this.sharedCache = new JCheckBox();
         this.remoteUpdates = new JCheckBox();
         this.configRemoteUpdates = new JButton("Configure");
         configRemoteUpdates.setEnabled(false);
@@ -139,7 +139,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         builder.appendSeparator("Cache Configuration");
         builder.append("Max. Number of Objects:", cacheSize, 3);
         builder.append("Entry Expiration, sec.:", cacheExpiration, 3);
-        builder.append("Local Change Notifications:", localUpdates, 3);
+        builder.append("Use Shared Cache:", sharedCache, 3);
         builder.append(
             "Remote Change Notifications:",
             remoteUpdates,
@@ -158,13 +158,25 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         cacheExpiration.setInputVerifier(inputCheck);
 
         // add action listener to checkboxes
-        localUpdates.addActionListener(new ActionListener() {
+        sharedCache.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String value = localUpdates.isSelected() ? "true" : "false";
+                String value = sharedCache.isSelected() ? "true" : "false";
                 setDomainProperty(
-                    DataRowStore.OBJECT_STORE_NOTIFICATION_PROPERTY,
+                    DataDomain.SHARED_CACHE_ENABLED_PROPERTY,
                     value,
-                    Boolean.toString(DataRowStore.OBJECT_STORE_NOTIFICATION_DEFAULT));
+                    Boolean.toString(DataDomain.SHARED_CACHE_ENABLED_DEFAULT));
+
+                // turning off shared cache should result in disabling remote events
+
+                remoteUpdates.setEnabled(sharedCache.isSelected());
+
+                if (!sharedCache.isSelected()) {
+                    // uncheck remote updates... 
+                    remoteUpdates.setSelected(false);
+                }
+
+                // depending on final remote updates status change button status
+                configRemoteUpdates.setEnabled(remoteUpdates.isSelected());
             }
         });
 
@@ -260,17 +272,17 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
                 DataRowStore.SNAPSHOT_EXPIRATION_PROPERTY,
                 Long.toString(DataRowStore.SNAPSHOT_EXPIRATION_DEFAULT)));
 
-        localUpdates.setSelected(
+        sharedCache.setSelected(
             getDomainBooleanProperty(
-                DataRowStore.OBJECT_STORE_NOTIFICATION_PROPERTY,
-                Boolean.toString(DataRowStore.OBJECT_STORE_NOTIFICATION_DEFAULT)));
+                DataDomain.SHARED_CACHE_ENABLED_PROPERTY,
+                Boolean.toString(DataDomain.SHARED_CACHE_ENABLED_DEFAULT)));
 
         remoteUpdates.setSelected(
             getDomainBooleanProperty(
                 DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
                 Boolean.toString(DataRowStore.REMOTE_NOTIFICATION_DEFAULT)));
-
-        configRemoteUpdates.setEnabled(remoteUpdates.isSelected());
+        remoteUpdates.setEnabled(sharedCache.isSelected());
+        configRemoteUpdates.setEnabled(remoteUpdates.isEnabled() && remoteUpdates.isSelected());
     }
 
     class FieldVerifier extends InputVerifier {

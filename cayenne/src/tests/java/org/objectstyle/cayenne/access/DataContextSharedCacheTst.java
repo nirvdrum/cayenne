@@ -50,8 +50,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
-import org.objectstyle.cayenne.unittest.ThreadedTestHelper;
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * @author Andrei Adamchik
@@ -74,62 +72,6 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         return context.getObjectStore().getDataRowCache();
     }
 
-    public void testUpdatePropagationViaEvents() throws Exception {
-        // turn on the events
-        getDomain().getSnapshotCache().setNotifyingObjectStores(true);
-
-        try {
-            // prepare a second context
-            DataContext altContext = mirrorDataContext(context);
-            final Artist altArtist =
-                (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
-            assertNotNull(altArtist);
-            assertFalse(altArtist == artist);
-            assertEquals(artist.getArtistName(), altArtist.getArtistName());
-
-            // test update propagation
-            artist.setArtistName("version2");
-            context.commitChanges();
-
-            ThreadedTestHelper helper = new ThreadedTestHelper() {
-                protected void assertResult() throws Exception {
-                    assertEquals(artist.getArtistName(), altArtist.getArtistName());
-                }
-            };
-            helper.assertWithTimeout(5000);
-
-        }
-        finally {
-            // reset shared settings to default
-            getDomain().getSnapshotCache().setNotifyingObjectStores(false);
-        }
-    }
-
-    public void testUpdatePropagationViaExplicitSync() throws Exception {
-
-        // prepare a second context
-        DataContext altContext = mirrorDataContext(context);
-        Artist altArtist =
-            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
-        assertNotNull(altArtist);
-        assertFalse(altArtist == artist);
-
-        assertEquals(artist.getArtistName(), altArtist.getArtistName());
-
-        // test update propagation
-        artist.setArtistName("version2");
-        context.commitChanges();
-
-        // before sync
-        assertFalse(
-            Util.nullSafeEquals(artist.getArtistName(), altArtist.getArtistName()));
-
-        altContext.getObjectStore().synchronizeWithCache(true);
-
-        // after sync
-        // TODO: uncomment this test when the feature is implemented
-        assertEquals(artist.getArtistName(), altArtist.getArtistName());
-    }
 
     public void testCommitUpdateWithExternallyUpdatedSnapshot1() throws Exception {
         // prepare a second context
