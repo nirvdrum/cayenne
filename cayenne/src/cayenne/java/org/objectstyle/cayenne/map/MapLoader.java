@@ -78,7 +78,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Andrei Adamchik
  */
 public class MapLoader extends DefaultHandler {
-	static Logger logObj = Logger.getLogger(MapLoader.class.getName());
+	static Logger logObj = Logger.getLogger(MapLoader.class);
 
 	public static final String DATA_MAP_TAG = "data-map";
 	public static final String DB_ENTITY_TAG = "db-entity";
@@ -568,7 +568,7 @@ public class MapLoader extends DefaultHandler {
 		} // End while()
 	}
 
-	private void storeDbRelationships(PrintWriter out) {
+	private void storeDbRelationships(PrintWriter out) throws DataMapException {
 		Iterator iter = sortedRelationships(dbRelationships).iterator();
 		while (iter.hasNext()) {
 			DbRelationship temp = (DbRelationship) iter.next();
@@ -592,10 +592,25 @@ public class MapLoader extends DefaultHandler {
 		}
 	}
 
-	private void storeDbAttributePair(PrintWriter out, DbRelationship db_rel) {
-		Iterator iter = db_rel.getJoins().iterator();
+	private void storeDbAttributePair(PrintWriter out, DbRelationship dbRel) throws DataMapException {
+		Iterator iter = dbRel.getJoins().iterator();
 		while (iter.hasNext()) {
 			DbAttributePair pair = (DbAttributePair) iter.next();
+			
+			 // sanity check 
+            if (pair.getSource() == null) {
+                throw new DataMapException(
+                    "DbAttributePair has no source attribute. Relationship name: "
+                        + dbRel.getName());
+            }
+            
+            if (pair.getTarget() == null) {
+                throw new DataMapException(
+                    "DbAttributePair has no target attribute. Relationship name: "
+                        + dbRel.getName());
+            }
+            
+            
 			out.print("\t\t<");
 			out.print(DB_ATTRIBUTE_PAIR_TAG);
 			out.print(" source=\"");

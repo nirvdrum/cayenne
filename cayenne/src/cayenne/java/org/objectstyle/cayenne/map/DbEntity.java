@@ -146,4 +146,37 @@ public class DbEntity extends Entity {
 
 		return sb.toString();
 	}
+	
+    /**
+     * Removes attribute from the entity, removes any relationship
+     * joins containing this attribute.
+     * 
+     * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
+     */
+    public void removeAttribute(String attrName) {
+    	Attribute attr = getAttribute(attrName);
+    	if(attr == null) {
+    		return;
+    	}
+    	
+    	DataMap map = getDataMap();
+    	if(map != null) {
+    		DbEntity[] ents = map.getDbEntities();
+    		for(int i = 0; i < ents.length; i++) {
+    			Iterator it = ents[i].getRelationshipList().iterator();
+    			while(it.hasNext()) {
+    				DbRelationship rel = (DbRelationship)it.next();
+    				Iterator joins = rel.getJoins().iterator();
+    				while(joins.hasNext()) {
+    					DbAttributePair join = (DbAttributePair)joins.next();
+    					if(join.getSource() == attr || join.getTarget() == attr) {
+    						joins.remove();
+    					}
+    				}
+    			}    			
+    		}
+    	}
+    	    	
+        super.removeAttribute(attrName);
+    }
 }

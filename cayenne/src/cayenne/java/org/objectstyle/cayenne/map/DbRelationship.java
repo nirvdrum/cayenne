@@ -164,6 +164,10 @@ public class DbRelationship extends Relationship {
 		toDependentPK = flag;
 	}
 
+    /**
+     * Returns a list of joins. List is returned by reference, so 
+     * any modifications of the list will affect this relationship.
+     */
 	public List getJoins() {
 		return joins;
 	}

@@ -53,55 +53,60 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 
-
 public class DbEntityTst extends CayenneTestCase {
     protected DbEntity ent;
-
 
     public DbEntityTst(String name) {
         super(name);
     }
 
-
     public void setUp() throws Exception {
         ent = new DbEntity();
     }
 
-
+    public void testConstructor1() throws Exception {
+    	ent = new DbEntity();
+    	assertNull(ent.getName());
+    }
+    
+    public void testConstructor2() throws Exception {
+    	ent = new DbEntity("abc");
+    	assertEquals("abc", ent.getName());
+    }
+    
     public void testCatalog() throws Exception {
         String tstName = "tst_name";
         ent.setCatalog(tstName);
         assertEquals(tstName, ent.getCatalog());
     }
 
-
     public void testSchema() throws Exception {
         String tstName = "tst_name";
         ent.setSchema(tstName);
         assertEquals(tstName, ent.getSchema());
     }
-    
+
     public void testFullyQualifiedName() throws Exception {
         String tstName = "tst_name";
         String schemaName = "tst_schema_name";
         ent.setName(tstName);
-        
+
         assertEquals(tstName, ent.getName());
         assertEquals(tstName, ent.getFullyQualifiedName());
-        
+
         ent.setSchema(schemaName);
-        
+
         assertEquals(tstName, ent.getName());
         assertEquals(schemaName + "." + tstName, ent.getFullyQualifiedName());
     }
 
-    public void testGetPrimaryKey() throws Exception  {
+    public void testGetPrimaryKey() throws Exception {
         DbAttribute a1 = new DbAttribute();
         a1.setName("a1");
         a1.setPrimaryKey(false);
@@ -111,10 +116,50 @@ public class DbEntityTst extends CayenneTestCase {
         a2.setName("a2");
         a2.setPrimaryKey(true);
         ent.addAttribute(a2);
-        
+
         List pk = ent.getPrimaryKey();
         assertNotNull(pk);
         assertEquals(1, pk.size());
         assertSame(a2, pk.get(0));
+    }
+
+    public void testRemovAttribute() throws Exception {
+        DataMap map = new DataMap("map");
+        ent.setName("ent");
+        map.addDbEntity(ent);
+       
+        DbAttribute a1 = new DbAttribute();
+        a1.setName("a1");
+        a1.setPrimaryKey(false);
+        ent.addAttribute(a1);
+
+        DbEntity otherEntity = new DbEntity("22ent1");
+        assertNotNull(otherEntity.getName());
+        map.addDbEntity(otherEntity);
+        DbAttribute a11 = new DbAttribute();
+        a11.setName("a11");
+        a11.setPrimaryKey(false);
+        otherEntity.addAttribute(a11);
+
+        DbRelationship rel = new DbRelationship("relfrom");
+        ent.addRelationship(rel);
+        rel.setTargetEntity(otherEntity);
+        rel.addJoin(new DbAttributePair(a1, a11));
+
+        DbRelationship rel1 = new DbRelationship("relto");
+        otherEntity.addRelationship(rel1);
+        rel1.setTargetEntity(ent);
+        rel1.addJoin(new DbAttributePair(a11, a1));
+
+        // check that the test case is working
+        assertSame(a1, ent.getAttribute(a1.getName()));
+        assertSame(rel, ent.getRelationship(rel.getName()));
+
+        // test removal
+        ent.removeAttribute(a1.getName());
+
+        assertNull(ent.getAttribute(a1.getName()));
+        assertEquals(0, rel1.getJoins().size());
+        assertEquals(0, rel.getJoins().size());
     }
 }
