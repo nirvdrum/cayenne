@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne;
 
 import java.util.Map;
 
@@ -61,16 +61,8 @@ import org.objectstyle.cayenne.access.DataContext;
 
 /** 
  * Defines basic methods for a persistent object in Cayenne.
- *
- * <p>For better control over serialization of DataObjects, 
- * implement <code>private void writeObject(ObjectOutputStream s)</code>
- * and <code>private void readObject(ObjectInputStream s)</code> methods. 
- * For details see <a href=
- * "http://java.sun.com/docs/books/tutorial/essential/io/providing.html">this 
- * tutorial</a> from Sun.
  * 
  * @author Andrei Adamchik
- *
  */
 public interface DataObject extends java.io.Serializable {
     
