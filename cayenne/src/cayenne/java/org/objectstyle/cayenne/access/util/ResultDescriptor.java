@@ -55,9 +55,10 @@
  */
 package org.objectstyle.cayenne.access.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -66,7 +67,9 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * Contains information about the ResultSet used to process fetched rows.
+ * Contains information about the ResultSet used to process fetched rows. 
+ * ResultDescriptor is initialized by calling various "add*" methods, after that
+ * it must be indexed by calling "index".
  * 
  * @author Andrei Adamchik
  */
@@ -80,46 +83,43 @@ public class ResultDescriptor {
     protected int resultWidth;
     protected int[] idIndexes;
 
-    // indicates that reindexing is required
-    protected boolean dirty;
-
     // unindexed data
-    protected List dbAttributes;
-    protected List javaTypes;
-    protected DataNode node;
+    protected List dbAttributes = new ArrayList();
+    protected List javaTypes = new ArrayList();
+    protected ExtendedTypeMap typesMapping;
     protected ObjEntity rootEntity;
 
-    public ResultDescriptor(DataNode node) {
-        this.node = node;
-        this.dirty = true;
-    }
-
-    public void setDbAttributes(List dbAttributes) {
-        this.dirty = true;
-        this.dbAttributes = dbAttributes;
-    }
-
-    public void setRootEntity(ObjEntity rootEntity) {
-        this.dirty = true;
+    public ResultDescriptor(
+        ExtendedTypeMap typesMapping,
+        ObjEntity rootEntity) {
+        this.typesMapping = typesMapping;
         this.rootEntity = rootEntity;
     }
 
-    public void setJavaTypes(List javaTypes) {
-        this.dirty = true;
-        this.javaTypes = javaTypes;
+    public void addDbAttributes(Collection dbAttributes) {
+        this.dbAttributes.addAll(dbAttributes);
     }
 
-    public synchronized void index() {
-        if (!dirty) {
-            return;
-        }
+    public void addDbAttribute(DbAttribute attr) {
+        this.dbAttributes.add(attr);
+    }
+
+    public void addJavaTypes(Collection javaTypes) {
+        this.javaTypes.addAll(javaTypes);
+    }
+
+    public void addJavaType(String javaType) {
+        this.javaTypes.add(javaType);
+    }
+
+    public void index() {
 
         // assert validity
-        if (dbAttributes == null) {
-            throw new IllegalArgumentException("DbAttributes list is null.");
+        if (dbAttributes.size() == 0) {
+            throw new IllegalArgumentException("No DbAttributes specified.");
         }
 
-        if (javaTypes != null && javaTypes.size() != dbAttributes.size()) {
+        if (javaTypes.size() > 0 && javaTypes.size() != dbAttributes.size()) {
             throw new IllegalArgumentException("DbAttributes and Java type arrays must have the same size.");
         }
 
@@ -169,49 +169,43 @@ public class ResultDescriptor {
 
         // initialize type converters, must do after everything else,
         // since this may depend on some of the indexed data
-        if (javaTypes != null) {
+        if (javaTypes.size() > 0) {
             initConvertersFromJavaTypes();
         } else if (rootEntity != null) {
             initConvertersFromMapping();
         } else {
             initDefaultConverters();
         }
-
-        this.dirty = false;
     }
 
     protected void initConvertersFromJavaTypes() {
         this.converters = new ExtendedType[resultWidth];
 
-        ExtendedTypeMap map = node.getAdapter().getExtendedTypes();
-
         for (int i = 0; i < resultWidth; i++) {
-            converters[i] = map.getRegisteredType((String) javaTypes.get(i));
+            converters[i] = typesMapping.getRegisteredType((String) javaTypes.get(i));
         }
     }
 
     protected void initDefaultConverters() {
         this.converters = new ExtendedType[resultWidth];
-        ExtendedTypeMap map = node.getAdapter().getExtendedTypes();
 
         for (int i = 0; i < resultWidth; i++) {
             String javaType = TypesMapping.getJavaBySqlType(jdbcTypes[i]);
-            converters[i] = map.getRegisteredType(javaType);
+            converters[i] = typesMapping.getRegisteredType(javaType);
         }
     }
 
     protected void initConvertersFromMapping() {
-    	// assert that we have all the data
-		if (dbAttributes == null) {
-		   throw new IllegalArgumentException("DbAttributes list is null.");
-	    }
-	    
-		if (rootEntity == null) {
-		   throw new IllegalArgumentException("Root ObjEntity is null.");
-		}
-    	
+        // assert that we have all the data
+        if (dbAttributes.size() == 0) {
+            throw new IllegalArgumentException("DbAttributes list is empty.");
+        }
+
+        if (rootEntity == null) {
+            throw new IllegalArgumentException("Root ObjEntity is null.");
+        }
+
         this.converters = new ExtendedType[resultWidth];
-        ExtendedTypeMap map = node.getAdapter().getExtendedTypes();
 
         for (int i = 0; i < resultWidth; i++) {
             String javaType = null;
@@ -219,12 +213,11 @@ public class ResultDescriptor {
             ObjAttribute objAttr = rootEntity.getAttributeForDbAttribute(attr);
             if (objAttr != null) {
                 javaType = objAttr.getDbAttributePath();
-            }
-            else {
-            	javaType = TypesMapping.getJavaBySqlType(attr.getType());
+            } else {
+                javaType = TypesMapping.getJavaBySqlType(attr.getType());
             }
 
-            converters[i] = map.getRegisteredType(javaType);
+            converters[i] = typesMapping.getRegisteredType(javaType);
         }
     }
 
