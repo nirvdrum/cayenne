@@ -112,15 +112,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 	 * cache entry has expired or replaced with a newer version. Retained
 	 * snapshots are evicted when an object is committed or rolled back.
 	 * 
+	 * <p>Committing modified objects comparing them with retained snapshots 
+	 * instead of the currently cached snapshots would allow to resolve certain
+	 * conflicts during concurrent modification of <strong>different attributes</code>
+	 * of the same objects by different DataContexts. 
+	 * </p>
+	 * 
 	 * @since 1.1
 	 */
     public synchronized void retainSnapshot(DataObject dataObject) {
         ObjectId oid = dataObject.getObjectId();
         DataRow snapshot = getCachedSnapshot(oid);
 
-        // if cached snapshot is newer or absent, use snapshot built from
-        // object
-        if (snapshot == null) {
+        // if cached snapshot is different or absent, use snapshot built from object
+        if (snapshot == null || snapshot.getVersion() != dataObject.getSnapshotVersion()) {
             snapshot =
                 (DataRow) dataObject.getDataContext().takeObjectSnapshot(dataObject);
         }
@@ -326,7 +331,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     (DataRow) object.getDataContext().takeObjectSnapshot(object);
 
                 modifiedSnapshots.put(id, dataRow);
-
+				dataRow.setReplacesVersion(object.getSnapshotVersion());
+                
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 object.setSnapshotVersion(dataRow.getVersion());
             }
@@ -362,6 +368,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 DataRow dataRow =
                     (DataRow) object.getDataContext().takeObjectSnapshot(object);
                 modifiedSnapshots.put(id.getReplacementId(), dataRow);
+				dataRow.setReplacesVersion(object.getSnapshotVersion());
 
                 // fix object state
                 object.setObjectId(id.getReplacementId());

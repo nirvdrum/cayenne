@@ -58,10 +58,12 @@ package org.objectstyle.cayenne.access;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.cayenne.DataObject;
+
 /**
- * Snapshot is a map that holds values retrieved from the database for a 
- * given query row. Snapshots are used to cache database data, and as a reference
- * point for tracking DataObject changes.
+ * DataRow is a map that holds values retrieved from the database for a 
+ * given query row. DataRows are used to cache database data snapshots, 
+ * and as a reference point for tracking DataObject changes.
  * 
  * @author Andrei Adamchik
  * @since 1.1
@@ -74,11 +76,11 @@ public class DataRow extends HashMap {
 	// "volatile" is supposed to ensure consistency in read and increment operations;
 	// is this universally true?
 	
-	// start with Long.MIN_VALUE + 1, since Long.MIN_VALUE is used as a default
-	// by DataObjects that have no snapshot version info.
-	private static volatile long currentVersion = Long.MIN_VALUE + 1;
+	// make sure the starting value is different from DataObject default version value
+	private static volatile long currentVersion = DataObject.DEFAULT_VERSION + 1;
 	
     protected long version = currentVersion++;
+    protected long replacesVersion = DataObject.DEFAULT_VERSION;
 
     public DataRow(Map map) {
     	super(map);
@@ -90,5 +92,13 @@ public class DataRow extends HashMap {
 
     public long getVersion() {
         return version;
+    }
+    
+    public long getReplacesVersion() {
+        return replacesVersion;
+    }
+
+    public void setReplacesVersion(long replacesVersion) {
+        this.replacesVersion = replacesVersion;
     }
 }
