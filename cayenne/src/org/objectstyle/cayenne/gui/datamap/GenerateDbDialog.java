@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.gui.datamap;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -66,7 +65,9 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DbGenerator;
+import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
@@ -85,7 +86,7 @@ public class GenerateDbDialog
 	private static final int WIDTH = 380;
 	private static final int HEIGHT = 190;
 
-	protected Connection conn;
+	protected DataSourceInfo dsi;
 	protected DbAdapter adapter;
 	protected DbGenerator gen;
 
@@ -97,15 +98,17 @@ public class GenerateDbDialog
 	protected JCheckBox dropTables;
 	protected JCheckBox createTables;
 	protected JCheckBox createFK;
+	protected JCheckBox createPK;
+	protected JCheckBox dropPK;
 
-	public GenerateDbDialog(Connection conn, DbAdapter adapter) {
+	public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter) {
 		super(Editor.getFrame(), "Generate Database", true);
 		if (getMediator().getCurrentDataMap() == null) {
 			throw new IllegalStateException(
 				"Must have current data map to " + "allow db generation");
 		}
 
-		this.conn = conn;
+		this.dsi = dsi;
 		this.adapter = adapter;
 		this.gen = new DbGenerator(adapter, getMediator().getCurrentDataMap());
 
@@ -114,6 +117,8 @@ public class GenerateDbDialog
 		dropTables.addItemListener(this);
 		createTables.addItemListener(this);
 		createFK.addItemListener(this);
+		createPK.addItemListener(this);
+		dropPK.addItemListener(this);
 
 		generate.addActionListener(this);
 		saveSql.addActionListener(this);
@@ -123,7 +128,6 @@ public class GenerateDbDialog
 		this.pack();
 		this.centerWindow();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.setVisible(true);
 	}
 
 	private void init() {
@@ -143,10 +147,16 @@ public class GenerateDbDialog
 			createFK.setSelected(gen.shouldCreateFKConstraints());
 		}
 
+		createPK = new JCheckBox("Create Primary Key Support");
+		createPK.setSelected(gen.shouldCreatePKSupport());
+
+		dropPK = new JCheckBox("Drop Primary Key Support");
+		dropPK.setSelected(gen.shouldDropPKSupport());
+
 		JPanel optionsPane =
 			PanelFactory.createForm(
-				new Component[] { dropTables, new JLabel()},
-				new Component[] { createTables, createFK },
+				new Component[] { dropTables, new JLabel(), dropPK },
+				new Component[] { createTables, createFK, createPK },
 				5,
 				5,
 				5,
@@ -208,14 +218,15 @@ public class GenerateDbDialog
 		gen.setShouldDropTables(dropTables.isSelected());
 
 		try {
-			gen.runGenerator(conn);
+			gen.runGenerator(dsi);
 			JOptionPane.showMessageDialog(this, "Generation Complete.");
 
-		} catch (SQLException ex) {
-
-			SQLException exception = ex;
-			while ((exception = exception.getNextException()) != null) {
-				logObj.log(Level.INFO, "Nested exception", exception);
+		} catch (Exception ex) {
+			if (ex instanceof SQLException) {
+				SQLException exception = (SQLException) ex;
+				while ((exception = exception.getNextException()) != null) {
+					logObj.log(Level.INFO, "Nested exception", exception);
+				}
 			}
 			logObj.log(Level.INFO, "Main exception", ex);
 
@@ -266,14 +277,17 @@ public class GenerateDbDialog
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() == dropTables) {
 			gen.setShouldDropTables(dropTables.isSelected());
-			initStatements();
 		} else if (e.getSource() == createTables) {
 			gen.setShouldCreateTables(createTables.isSelected());
-			initStatements();
 		} else if (e.getSource() == createFK) {
 			gen.setShouldCreateFKConstraints(createFK.isSelected());
-			initStatements();
+		} else if (e.getSource() == createPK) {
+			gen.setShouldCreatePKSupport(createPK.isSelected());
+		} else if (e.getSource() == dropPK) {
+			gen.setShouldDropPKSupport(dropPK.isSelected());
 		}
+
+		initStatements();
 	}
 
 }

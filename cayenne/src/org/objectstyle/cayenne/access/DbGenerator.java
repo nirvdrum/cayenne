@@ -60,9 +60,11 @@ import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
 
+import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.*;
 
 /** Utility class that does forward engineering of the database.
@@ -76,12 +78,14 @@ import org.objectstyle.cayenne.map.*;
  */
 public class DbGenerator {
 
-    protected DataNode node;
+	protected DataNode node;
 	protected DataMap map;
 
 	protected HashMap dropTables;
 	protected HashMap createTables;
 	protected HashMap createFK;
+	protected List createPK;
+	protected List dropPK;
 
 	protected boolean shouldDropTables;
 	protected boolean shouldCreateTables;
@@ -92,10 +96,9 @@ public class DbGenerator {
 	/** Creates and initializes new DbGenerator. */
 	public DbGenerator(DbAdapter adapter, DataMap map) {
 		this.map = map;
-	    this.node = new DataNode("internal");
+		this.node = new DataNode("internal");
 		node.setAdapter(adapter);
 		node.addDataMap(map);
-		
 
 		resetToDefaults();
 		buildStatements();
@@ -119,8 +122,9 @@ public class DbGenerator {
 		createTables = new HashMap();
 		createFK = new HashMap();
 
-        DbAdapter adapter = getAdapter();
-		Iterator it = map.getDbEntitiesAsList().iterator();
+		DbAdapter adapter = getAdapter();
+		List dbEntities = map.getDbEntitiesAsList();
+		Iterator it = dbEntities.iterator();
 		boolean supportsFK = adapter.supportsFkConstraints();
 		while (it.hasNext()) {
 			DbEntity dbe = (DbEntity) it.next();
@@ -137,6 +141,9 @@ public class DbGenerator {
 				createFK.put(name, createFkConstraintsQueries(dbe));
 			}
 		}
+
+		dropPK = adapter.getPkGenerator().dropAutoPkStatements(dbEntities);
+		createPK = adapter.getPkGenerator().createAutoPkStatements(dbEntities);
 	}
 
 	/** Returns DbAdapter associated with this DbGenerator. */
@@ -155,7 +162,7 @@ public class DbGenerator {
 		if (shouldDropTables) {
 			ListIterator it = orderedEnts.listIterator(orderedEnts.size());
 			while (it.hasPrevious()) {
-				DbEntity ent = (DbEntity)it.previous();
+				DbEntity ent = (DbEntity) it.previous();
 				list.add(dropTables.get(ent.getName()));
 			}
 		}
@@ -163,75 +170,132 @@ public class DbGenerator {
 		if (shouldCreateTables) {
 			Iterator it = orderedEnts.iterator();
 			while (it.hasNext()) {
-				DbEntity ent = (DbEntity)it.next();
+				DbEntity ent = (DbEntity) it.next();
 				list.add(createTables.get(ent.getName()));
 			}
 		}
 
-		if (shouldCreateFKConstraints && getAdapter().supportsFkConstraints()) {
+		if (shouldCreateFKConstraints
+			&& getAdapter().supportsFkConstraints()) {
 			Iterator it = orderedEnts.iterator();
 			while (it.hasNext()) {
-				DbEntity ent = (DbEntity)it.next();
+				DbEntity ent = (DbEntity) it.next();
 				List fks = (List) createFK.get(ent.getName());
 				list.addAll(fks);
 			}
 		}
 
+		if (shouldDropPKSupport) {
+			list.addAll(dropPK);
+		}
+
+		if (shouldCreatePKSupport) {
+			list.addAll(createPK);
+		}
+
 		return list;
+	}
+
+	/**
+	 * Creates a temporary DataSource out of DataSourceInfo and
+	 * invokes <code>public void runGenerator(DataSource ds)</code>.
+	 */
+	public void runGenerator(DataSourceInfo dsi) throws Exception {
+		PoolManager dataSource =
+			new PoolManager(
+				dsi.getJdbcDriver(),
+				dsi.getDataSourceUrl(),
+				dsi.getMinConnections(),
+				dsi.getMaxConnections(),
+				dsi.getUserName(),
+				dsi.getPassword());
+				
+		try {
+			runGenerator(dataSource);
+		} finally {
+			dataSource.dispose();
+		}
 	}
 
 	/** 
 	 * Main method to generate database objects out of the DataMap.
 	 */
-	public void runGenerator(Connection con) throws SQLException {
-		DatabaseMetaData meta = con.getMetaData();
-		List nonExistent = filterNonExistentTables(con);
-		Statement stmt = con.createStatement();
-		
+	public void runGenerator(DataSource ds) throws Exception {
+		Connection con = ds.getConnection();
 		List orderedEnts = dbEntitiesInInsertOrder();
-		
+
 		try {
-			if (shouldDropTables) {
-				ListIterator it = orderedEnts.listIterator(orderedEnts.size());
-				while (it.hasPrevious()) {
-					DbEntity ent = (DbEntity)it.previous();
+			DatabaseMetaData meta = con.getMetaData();
+			List nonExistent = filterNonExistentTables(con);
+			Statement stmt = con.createStatement();
 
-					// check if this table even exists
-					if (!nonExistent.contains(ent.getName())) {
-						executeStatement((String) dropTables.get(ent.getName()), stmt);
-					}
-				}
-			}
+			try {
+				if (shouldDropTables) {
+					ListIterator it =
+						orderedEnts.listIterator(orderedEnts.size());
+					while (it.hasPrevious()) {
+						DbEntity ent = (DbEntity) it.previous();
 
-			if (shouldCreateTables) {
-				Iterator it = orderedEnts.iterator();
-				while (it.hasNext()) {
-					DbEntity ent = (DbEntity)it.next();
-
-					// only create missing tables
-					if (nonExistent.contains(ent.getName())) {
-						executeStatement((String) createTables.get(ent.getName()), stmt);
-					}
-				}
-			}
-
-			if (shouldCreateTables && shouldCreateFKConstraints && getAdapter().supportsFkConstraints()) {
-				Iterator it = orderedEnts.iterator();
-				while (it.hasNext()) {
-					DbEntity ent = (DbEntity)it.next();
-
-					// only create FK for the newly created tables
-					if (nonExistent.contains(ent.getName())) {
-						List fks = (List) createFK.get(ent.getName());
-						Iterator fkIt = fks.iterator();
-						while (fkIt.hasNext()) {
-							executeStatement((String) fkIt.next(), stmt);
+						// check if this table even exists
+						if (!nonExistent.contains(ent.getName())) {
+							executeStatement(
+								(String) dropTables.get(ent.getName()),
+								stmt);
 						}
 					}
 				}
+
+				if (shouldCreateTables) {
+					Iterator it = orderedEnts.iterator();
+					while (it.hasNext()) {
+						DbEntity ent = (DbEntity) it.next();
+
+						// only create missing tables
+						if (nonExistent.contains(ent.getName())) {
+							executeStatement(
+								(String) createTables.get(ent.getName()),
+								stmt);
+						}
+					}
+				}
+
+				if (shouldCreateTables
+					&& shouldCreateFKConstraints
+					&& getAdapter().supportsFkConstraints()) {
+					Iterator it = orderedEnts.iterator();
+					while (it.hasNext()) {
+						DbEntity ent = (DbEntity) it.next();
+
+						// only create FK for the newly created tables
+						if (nonExistent.contains(ent.getName())) {
+							List fks = (List) createFK.get(ent.getName());
+							Iterator fkIt = fks.iterator();
+							while (fkIt.hasNext()) {
+								executeStatement((String) fkIt.next(), stmt);
+							}
+						}
+					}
+				}
+			} finally {
+				stmt.close();
 			}
 		} finally {
-			stmt.close();
+			con.close();
+		}
+
+		// run PK generation via adapter's generator
+		node.setDataSource(ds);
+
+		try {
+			if (shouldDropPKSupport) {
+				getAdapter().getPkGenerator().dropAutoPk(node, orderedEnts);
+			}
+
+			if (shouldCreatePKSupport) {
+				getAdapter().getPkGenerator().createAutoPk(node, orderedEnts);
+			}
+		} finally {
+			node.setDataSource(null);
 		}
 	}
 
@@ -332,20 +396,19 @@ public class DbGenerator {
 	public void setShouldCreateFKConstraints(boolean shouldCreateFKConstraints) {
 		this.shouldCreateFKConstraints = shouldCreateFKConstraints;
 	}
-	
-	
-    /** 
-     * Helper method that orders DbEntities to satisfy referential
-     * constraints and returns an ordered list. 
-     */
-    private List dbEntitiesInInsertOrder() {
-        List list = map.getDbEntitiesAsList();
 
-        OperationSorter sorter = getAdapter().getOpSorter(node);
-        if (sorter != null) {
-            sorter.sortEntitiesInInsertOrder(list);
-        }
-        return list;
-    }
+	/** 
+	 * Helper method that orders DbEntities to satisfy referential
+	 * constraints and returns an ordered list. 
+	 */
+	private List dbEntitiesInInsertOrder() {
+		List list = map.getDbEntitiesAsList();
+
+		OperationSorter sorter = getAdapter().getOpSorter(node);
+		if (sorter != null) {
+			sorter.sortEntitiesInInsertOrder(list);
+		}
+		return list;
+	}
 
 }

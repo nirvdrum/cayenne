@@ -84,18 +84,11 @@ public class DbGeneratorTool {
             
         try {
             DataMap map = new MapLoaderImpl().loadDataMap(new InputSource(args[0]));
-            DataSourceInfo dsi = DbLoaderTool.getConnectionInfo(!noGui);
-            Connection conn = DbLoaderTool.openConnection(dsi);
-            if (null == conn) {
-            	System.out.println("Cancel processing...");
-            	return;
-            }
-            
+            DataSourceInfo dsi = DbLoaderTool.getConnectionInfo(!noGui);            
             DbAdapter adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
             DbGenerator gen = new DbGenerator(adapter, map);
             gen.setShouldDropTables(true);            
-            gen.runGenerator(conn);
-            conn.close();
+            gen.runGenerator(dsi);
             
         } catch (Exception ex) {
             ex.printStackTrace();

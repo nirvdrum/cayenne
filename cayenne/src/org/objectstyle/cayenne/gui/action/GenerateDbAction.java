@@ -96,12 +96,13 @@ public class GenerateDbAction extends CayenneAction {
 
 	protected void generateDb() {
         DataSourceInfo dsi = new DataSourceInfo();
-        Connection conn = null;
         DbAdapter adapter = null;
-        // Get connection
-        while (conn == null) {
+        
+        // Get connection info
+        while (true) {
 	        InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
 	        loginObj.collectLoginInfo();
+	        
 	        // connect
 	        dsi = loginObj.getDataSrcInfo();
 	        if (null == dsi) {
@@ -113,19 +114,8 @@ public class GenerateDbAction extends CayenneAction {
 	        	continue;
 	        }
 	        try {
-		        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
-		        conn = DriverManager.getConnection(
-		              					dsi.getDataSourceUrl(),
-		                   				dsi.getUserName(),
-		                   				dsi.getPassword());
 		        adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
-			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(Editor.getFrame()
-							, e.getMessage(), "Error Connecting to the Database"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
+		        break;
 			} catch (InstantiationException e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(Editor.getFrame()
@@ -146,16 +136,9 @@ public class GenerateDbAction extends CayenneAction {
 				continue;
 			}
 		}
-
-		DataMap map = getMediator().getCurrentDataMap();
-		try {
-			new GenerateDbDialog(conn, adapter);
-		} 
-		finally {
-			try {
-				conn.close();
-			} catch (Exception e) {e.printStackTrace();}
-		}
+		GenerateDbDialog dialog = new GenerateDbDialog(dsi, adapter);
+		dialog.show();
+		dialog.dispose();
 	}
 
 

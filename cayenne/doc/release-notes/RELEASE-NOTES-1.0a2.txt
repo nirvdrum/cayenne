@@ -60,3 +60,5 @@ to allow more flexibility in defining how the generation should work.
 
 19. Added "public String createTable(DbEntity ent)" method to DbAdapter
 with default implementation in JdbcAdapter.
+
+19. PkGenerator API has changed.
