@@ -1215,37 +1215,38 @@ public class MapLoader extends DefaultHandler {
     private void resetCurrentTag() {
         currentTag = null;
     }
-}
+    
+    /** Used for creating the key in DbRelationship map */
+    class SourceTarget {
+        public String source;
+        public String target;
+        public String name;
 
-/** Used for creating the key in DbRelationship map */
-class SourceTarget {
-    public String source;
-    public String target;
-    public String name;
-
-    public SourceTarget(String temp1, String temp2, String temp3) {
-        source = temp1;
-        target = temp2;
-        name = temp3;
-    }
-
-    public int hashCode() {
-        int code = source.hashCode() * 100000 + target.hashCode() * 10000;
-        if (null != name) {
-            code += name.hashCode();
+        public SourceTarget(String temp1, String temp2, String temp3) {
+            source = temp1;
+            target = temp2;
+            name = temp3;
         }
-        return code;
-    }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof SourceTarget))
+        public int hashCode() {
+            int code = source.hashCode() * 100000 + target.hashCode() * 10000;
+            if (null != name) {
+                code += name.hashCode();
+            }
+            return code;
+        }
+
+        public boolean equals(Object obj) {
+            if (!(obj instanceof SourceTarget))
+                return false;
+            SourceTarget other = (SourceTarget) obj;
+            if (source.equals(other.source)
+                && target.equals(other.target)
+                && name.equals(other.name)) {
+                return true;
+            }
             return false;
-        SourceTarget other = (SourceTarget) obj;
-        if (source.equals(other.source)
-            && target.equals(other.target)
-            && name.equals(other.name)) {
-            return true;
         }
-        return false;
     }
 }
+

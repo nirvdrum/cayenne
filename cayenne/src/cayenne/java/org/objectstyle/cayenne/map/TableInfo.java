@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,15 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 /**
  * Stores information about a table retrieved from database meta data.
  * @author Michael Misha Shengaout
- * @version 1.0
+ * 
+ * @deprecated Since 1.0-Beta1 This class is not used, it is replaced by
+ * Ashwood's Table.
  */
-
 public class TableInfo {
     private String name;
     private String schema;

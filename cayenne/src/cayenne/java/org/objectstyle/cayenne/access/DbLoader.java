@@ -66,6 +66,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.ashwood.dbutil.Table;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -78,7 +79,6 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.map.TableInfo;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.NameConverter;
 
@@ -252,9 +252,8 @@ public class DbLoader {
         while (rs.next()) {
             String cat = rs.getString("TABLE_CAT");
             String schema = rs.getString("TABLE_SCHEM");
-            String type = rs.getString("TABLE_TYPE");
             String name = rs.getString("TABLE_NAME");
-            TableInfo info = new TableInfo(name, type, schema, cat);
+            Table info = new Table(cat, schema, name);
             tables.add(info);
         }
         rs.close();
@@ -266,8 +265,8 @@ public class DbLoader {
      * 
      * @param map DataMap to be populated with DbEntities.
      * 
-     * @param tables The list of TableInfo objects for which DbEntities must 
-     * be created.
+     * @param tables The list of org.objectstyle.ashwood.dbutil.Table objects
+     * for which DbEntities must be created.
      * 
      * @return true if need to continue, false if must stop loading. 
      */
@@ -277,7 +276,7 @@ public class DbLoader {
         dbEntityList = new ArrayList();
         Iterator iter = tables.iterator();
         while (iter.hasNext()) {
-            TableInfo table = (TableInfo) iter.next();
+            Table table = (Table) iter.next();
 
             // Check if there already is db entity under such name
             // if so, consult the delegate what to do
