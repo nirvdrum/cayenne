@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.access;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,51 +64,47 @@ import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
-
-
 public class DataContextExtrasTst extends TestCase {
     static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
-    
+
     private static final int _artistCount = 25;
     private static final int _galleryCount = 10;
-    
+
     protected DataContext ctxt;
-    
-    
+
     public DataContextExtrasTst(String name) {
         super(name);
     }
-    
-    
-    protected void setUp() throws java.lang.Exception {   
+
+    protected void setUp() throws java.lang.Exception {
         ctxt = TestMain.getSharedDomain().createDataContext();
     }
-    
+
     public void testCreateAndRegisterNewObject() throws Exception {
-        Artist a1 = (Artist)ctxt.createAndRegisterNewObject("Artist");
+        Artist a1 = (Artist) ctxt.createAndRegisterNewObject("Artist");
         assertTrue(ctxt.registeredObjects().contains(a1));
         assertTrue(ctxt.newObjects().contains(a1));
     }
-    
-    
-    public void testCommitChangesError() throws Exception {        
-        Artist o1 = new Artist();    
+
+    public void testCommitChangesError() throws Exception {
+        Artist o1 = new Artist();
         o1.setArtistName("a");
-        ctxt.registerNewObject(o1, "Artist");  
-        
+        ctxt.registerNewObject(o1, "Artist");
+
         // this should cause PK generation exception in commit later
-        TestMain.getSharedDatabaseSetup().cleanTableData();
+        TestMain.getSharedNode().getAdapter().dropAutoPkSupport(
+            TestMain.getSharedNode());
 
         // disable logging for thrown exceptions
         Level oldLevel = DefaultOperationObserver.logObj.getLevel();
         DefaultOperationObserver.logObj.setLevel(Level.SEVERE);
         try {
             ctxt.commitChanges();
-            fail();
+            fail("Exception expected but not thrown due to missing PK generation routine.");
         }
-        catch(CayenneRuntimeException ex) {
+        catch (CayenneRuntimeException ex) {
             // exception expected
-        }  
+        }
         finally {
             DefaultOperationObserver.logObj.setLevel(oldLevel);
         }

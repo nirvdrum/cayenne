@@ -105,6 +105,7 @@ public class SybaseAdapter extends JdbcAdapter {
      * BEGIN
      *    DROP PROCEDURE auto_pk_for_table 
      * END
+     * </pre>
      * 
      * <p>3. Executed under any circumstances. </p>
      * CREATE PROCEDURE auto_pk_for_table @tname VARCHAR(32) AS
@@ -129,6 +130,7 @@ public class SybaseAdapter extends JdbcAdapter {
         super.createAutoPkSupport(node);
         pkGen.runSchemaUpdate(node, unsafePkProcCreate());
     }
+
 
     /** 
      * Drops database objects related to automatic primary
@@ -188,7 +190,6 @@ public class SybaseAdapter extends JdbcAdapter {
         finally {
             con.close();
         }
-        // return super.generatePkForDbEntity(dataNode, dbEntity);
     }
 
     private String safePkTableCreate() {

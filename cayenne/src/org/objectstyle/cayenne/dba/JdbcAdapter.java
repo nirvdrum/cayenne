@@ -149,11 +149,9 @@ public class JdbcAdapter implements DbAdapter {
         pkGen.dropAutoPkSupport(node);
     }
 
-    public void createAutoPkSupportForDbEntity(
-        DataNode dataNode,
-        DbEntity dbEntity)
+    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity dbEntity)
         throws Exception {
-        pkGen.createAutoPkSupportForDbEntity(dataNode, dbEntity);
+        pkGen.createAutoPkSupportForDbEntity(node, dbEntity);
     }
 
     public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
