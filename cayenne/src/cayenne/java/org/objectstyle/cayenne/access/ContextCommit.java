@@ -130,7 +130,7 @@ class ContextCommit {
      * Commits changes in the enclosed DataContext.
      */
     void commit(Level logLevel) throws CayenneException {
-        this.logLevel = logLevel;
+        this.logLevel = (logLevel == null) ? QueryLogger.DEFAULT_LOG_LEVEL : logLevel;
 
         categorizeObjects();
         createPrimaryKeys();
@@ -184,7 +184,7 @@ class ContextCommit {
                 if (queries.size() == 0) {
                     continue;
                 }
-                
+
                 nodeHelper.getNode().performQueries(queries, observer);
 
                 if (observer.isTransactionRolledback()) {
@@ -289,6 +289,8 @@ class ContextCommit {
                 objects = sorter.sort(objects, entity);
             InsertBatchQuery batch =
                 new InsertBatchQuery(entity.getDbEntity(), objects.size());
+            batch.setLoggingLevel(logLevel);
+
             if (logObj.isDebugEnabled())
                 logObj.debug(
                     "Creating InsertBatchQuery for DbEntity "
@@ -328,6 +330,8 @@ class ContextCommit {
                 objects = sorter.sort(objects, entity);
             DeleteBatchQuery batch =
                 new DeleteBatchQuery(entity.getDbEntity(), objects.size());
+            batch.setLoggingLevel(logLevel);
+
             if (logObj.isDebugEnabled())
                 logObj.debug(
                     "Creating DeleteBatchQuery for DbEntity "
@@ -377,6 +381,8 @@ class ContextCommit {
                             entity.getDbEntity(),
                             new ArrayList(snapshot.keySet()),
                             10);
+                    batch.setLoggingLevel(logLevel);
+                    
                     if (logObj.isDebugEnabled())
                         logObj.debug(
                             "Creating UpdateBatchQuery for DbEntity "
@@ -566,8 +572,10 @@ class ContextCommit {
             DbEntity flattenedEntity = (DbEntity) firstDbRel.getTargetEntity();
             InsertBatchQuery relationInsertQuery =
                 (InsertBatchQuery) batchesByDbEntity.get(flattenedEntity);
+        
             if (relationInsertQuery == null) {
                 relationInsertQuery = new InsertBatchQuery(flattenedEntity, 50);
+                relationInsertQuery.setLoggingLevel(logLevel);
                 if (logObj.isDebugEnabled())
                     logObj.debug(
                         "Creating InsertBatchQuery for DbEntity "
@@ -618,6 +626,7 @@ class ContextCommit {
                 (DeleteBatchQuery) batchesByDbEntity.get(flattenedEntity);
             if (relationDeleteQuery == null) {
                 relationDeleteQuery = new DeleteBatchQuery(flattenedEntity, 50);
+                relationDeleteQuery.setLoggingLevel(logLevel);
                 if (logObj.isDebugEnabled())
                     logObj.debug(
                         "Creating DeleteBatchQuery for DbEntity "

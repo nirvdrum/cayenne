@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -111,6 +112,13 @@ public class BatchInterpreter {
         String query = queryBuilder.query(batch);
         PreparedStatement st = null;
         ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
+
+        // log batch execution
+        QueryLogger.logQuery(
+            batch.getLoggingLevel(),
+            query,
+            Collections.EMPTY_LIST);
+
         try {
             st = connection.prepareStatement(query);
             batch.reset();
