@@ -217,10 +217,12 @@ public class ConfigSaver {
         if (info.getUserName() != null || info.getPassword() != null) {
             out.print("\t<login");
             if (info.getUserName() != null) {
-                out.print(" userName=\"" + info.getUserName() + "\"");
+                String encoded = Util.encodeXmlAttribute(info.getUserName());
+                out.print(" userName=\"" + encoded + "\"");
             }
             if (info.getPassword() != null) {
-                out.print(" password=\"" + info.getPassword() + "\"");
+                String encoded = Util.encodeXmlAttribute(info.getPassword());
+                out.print(" password=\"" + encoded + "\"");
             }
             out.println("/>");
         }
