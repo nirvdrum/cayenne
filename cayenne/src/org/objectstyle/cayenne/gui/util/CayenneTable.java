@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.gui.util;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -68,6 +68,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import javax.swing.text.Document;
 
+import org.objectstyle.cayenne.gui.Editor;
+
 /**  Contains cludge to the JTable. It updates model every time
   *  data is changed in the TextField editor. Also,
   *  If user escapes (presses ESC), returns value in the model
@@ -76,7 +78,9 @@ import javax.swing.text.Document;
   * @author Michael Misha Shengaout
   * @author Andrei Adamchik
   */
-public class CayenneTable extends JTable implements ActionListener {
+public class CayenneTable extends JTable {
+	static Logger logObj = Logger.getLogger(CayenneTable.class.getName());
+
 	public CayenneTable() {
 		super();
 		// Replace "cancel" action with custom table cancel
@@ -88,14 +92,13 @@ public class CayenneTable extends JTable implements ActionListener {
 		TextFieldCellEditor temp = new TextFieldCellEditor();
 		setDefaultEditor(Object.class, temp);
 		setDefaultEditor(String.class, temp);
-		CayenneBooleanRenderer temp1 = new CayenneBooleanRenderer();
-		this.setDefaultRenderer(Boolean.class, temp1);
+		this.setDefaultRenderer(Boolean.class, new CayenneBooleanRenderer());
 	}
 
-    public CayenneTableModel getCayenneModel() {
-    	return (CayenneTableModel)getModel();
-    }
-    
+	public CayenneTableModel getCayenneModel() {
+		return (CayenneTableModel) getModel();
+	}
+
 	public void select(Object row) {
 		if (row == null) {
 			return;
@@ -141,7 +144,7 @@ public class CayenneTable extends JTable implements ActionListener {
 			boolean isSelected,
 			int temp_row,
 			int temp_col) {
-				
+
 			row = temp_row;
 			col = temp_col;
 			originalValue = value != null ? value.toString() : "";
@@ -151,16 +154,16 @@ public class CayenneTable extends JTable implements ActionListener {
 			JTextField field =
 				(JTextField) TextFieldCellEditor.this.getComponent();
 			field.setText(text);
-			// field.addActionListener((CayenneTable)table);
-			
 			return field;
 		}
 
 		public void cancelCellEditing() {
 			JTextField field =
 				(JTextField) TextFieldCellEditor.this.getComponent();
-			if (!originalValue.equals(field.getText()))
+
+			if (!originalValue.equals(field.getText())) {
 				tableModel.setValueAt(originalValue.toString(), row, col);
+			}
 			super.cancelCellEditing();
 		}
 
@@ -180,23 +183,15 @@ public class CayenneTable extends JTable implements ActionListener {
 				(JTextField) TextFieldCellEditor.this.getComponent();
 			String text = field.getText();
 			Object obj = tableModel.getValueAt(row, col);
-			String model_text = "";
-			if (null != obj)
-				model_text = obj.toString();
+			String modelText = (obj != null) ? obj.toString() : "";
+
 			// If initial loading of data, ignore.
-			if (model_text.equals(text))
+			if (modelText.equals(text)) {
 				return;
+			}
+
 			tableModel.setValueAt(text, row, col);
 		}
-		
-		
-		/**
-		 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-		 */
-		public void actionPerformed(ActionEvent e) {
-		}
-
-
 	}
 
 	static private class CayenneBooleanRenderer
@@ -243,20 +238,15 @@ public class CayenneTable extends JTable implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			// Stop whatever editing may be taking place
-			int col_index = getEditingColumn();
-			if (col_index >= 0) {
-				TableColumn col = getColumnModel().getColumn(col_index);
-				col.getCellEditor().cancelCellEditing();
+			int col = getEditingColumn();
+			int row = getEditingRow();
+			if (col >= 0 && row >= 0) {
+				TableCellEditor editor = getCellEditor(row, col);
+				if (editor != null) {
+					editor.cancelCellEditing();
+				}
 			}
 			nextAction.actionPerformed(e);
 		}
-	}
-	
-	
-	/**
-	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		
 	}
 }

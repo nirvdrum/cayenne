@@ -139,7 +139,6 @@ public class DbAttributePane
 	}
 
 	public void processExistingSelection() {
-
 		DbAttribute att = null;
 		if (table.getSelectedRow() >= 0) {
 			DbAttributeTableModel model =
