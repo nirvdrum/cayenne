@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.event;
 
 import java.util.EventListener;
+import java.util.EventObject;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -161,7 +162,39 @@ public class EventManagerTst
 
 		_eventManager.postEvent(new CayenneEvent(this), subject);
 	}
-	
+
+	public void testValidSubclassOfRegisteredEventClass() {
+		try {
+			EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");		
+			_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject);
+			_eventManager.postEvent(new MyCayenneEvent(this), subject);
+
+			Assert.assertTrue(_didReceiveNotification);
+		}
+
+		catch (Exception e) {
+			log.error("testSuccessfulNotification", e);
+			Assert.fail();
+		}
+	}
+
+	public void testWrongRegisteredEventClass() {
+		try {
+			EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
+			// we register a method that takes a CayenbneEvent or subclass thereof.. 
+			_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject);
+			// ..but post a subclass of EventObject that is not compatible with CayenneEvent
+			_eventManager.postEvent(new EventObject(this), subject);
+
+			Assert.assertTrue(_didReceiveNotification == false);
+		}
+
+		catch (Exception e) {
+			log.error("testSuccessfulNotification", e);
+			Assert.fail();
+		}
+	}
+
 	public void testSuccessfulNotification() {
 		try {
 			EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");		
@@ -213,3 +246,10 @@ public class EventManagerTst
 		log.debug("seeTheWrongMethod: " + hansi);
 	}
 }
+
+class MyCayenneEvent extends CayenneEvent {
+	public MyCayenneEvent(EventListener l) {
+		super(l);
+	}
+}
+

@@ -173,14 +173,23 @@ public class EventManager extends Object {
 			Iterator iter = listenersForSubject.iterator();
 			while (iter.hasNext()) {
 				Invocation inv = (Invocation)iter.next();
+				Class[] invParamTypes = inv.getParameterTypes();
 
-				// fire invocation, detect if anything went wrong
-				if (inv.fire(eventArgument) == false) {
-					if (invalidInvocations == null) {
-						invalidInvocations = new ArrayList();
+				// we only process event listeners which take exactly
+				// one argument in their registered methods: the passed
+				// event or a valid subclass thereof
+				if ((invParamTypes != null)
+					&& (invParamTypes.length == 1)
+					&& (invParamTypes[0].isAssignableFrom(event.getClass()))) {
+					// fire invocation, detect if anything went wrong
+					// (e.g. GC'ed invocation targets)
+					if (inv.fire(eventArgument) == false) {
+						if (invalidInvocations == null) {
+							invalidInvocations = new ArrayList();
+						}
+	
+						invalidInvocations.add(inv);
 					}
-
-					invalidInvocations.add(inv);
 				}
 			}
 
