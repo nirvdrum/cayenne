@@ -432,10 +432,14 @@ public class QualifierTranslator
      * @see org.objectstyle.cayenne.access.trans.QueryAssemblerHelper#getObjEntity()
      */
     public ObjEntity getObjEntity() {
-        return (isTranslateParentQual())
-            ? queryAssembler.getEngine().getEntityResolver().lookupObjEntity(
-                (queryAssembler.getQuery()))
-            : super.getObjEntity();
+        if (isTranslateParentQual()) {
+        	SelectQuery query = (SelectQuery)queryAssembler.getQuery();
+			return queryAssembler.getEngine().getEntityResolver().lookupObjEntity(
+							(query.getParentObjEntityName()));
+        }
+        else {
+			return super.getObjEntity();
+        }
     }
 
     /**

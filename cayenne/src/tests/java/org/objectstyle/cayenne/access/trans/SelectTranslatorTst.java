@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
@@ -78,7 +79,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class SelectTranslatorTst extends CayenneTestCase {
-
+	private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);
     protected SelectQuery q;
     protected DbEntity artistEnt;
 
@@ -181,41 +182,47 @@ public class SelectTranslatorTst extends CayenneTestCase {
         Connection con = getConnection();
 
         try {
-            // query with qualifier and ordering
-            q.setRoot(ArtistAssets.class);
-            q.setParentObjEntityName("Painting");
-            q.setParentQualifier(
-                ExpressionFactory.matchExp("toArtist.artistName", "abc"));
-            q.setQualifier(
-                ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
+			// query with qualifier and ordering
+			q.setRoot(ArtistAssets.class);
+			q.setParentObjEntityName("Painting");
+			q.setParentQualifier(
+				ExpressionFactory.matchExp("toArtist.artistName", "abc"));
+			q.andParentQualifier(
+				ExpressionFactory.greaterOrEqualExp("estimatedPrice", new BigDecimal(1)));
+			q.setQualifier(
+				ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
 
-            String sql = buildTranslator(con).createSqlString();
+			String sql = buildTranslator(con).createSqlString();
 
-            // do some simple assertions to make sure all parts are in
-            assertNotNull(sql);
-            assertTrue(sql.startsWith("SELECT "));
-            assertTrue(sql.indexOf(" FROM ") > 0);
+			// do some simple assertions to make sure all parts are in
+			assertNotNull(sql);
+			assertTrue(sql.startsWith("SELECT "));
+			assertTrue(sql.indexOf(" FROM ") > 0);
 
-            // no WHERE clause
-            assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
+			// no WHERE clause
+			assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
+			assertTrue("WHERE clause must have estimated price: " + sql, sql.indexOf("ESTIMATED_PRICE >=") > 0);
 
-            assertTrue(
-                "GROUP BY clause is expected:" + sql,
-                sql.indexOf(" GROUP BY ") > 0);
-            assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
-            assertTrue(sql.indexOf("ARTIST_ID =") > 0);
-            assertTrue(
-                "Relationship join must be in WHERE: " + sql,
-                sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
-            assertTrue(
-                "Relationship join must be in WHERE: " + sql,
-                sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
-            assertTrue(
-                "Qualifier for related entity must be in WHERE: " + sql,
-                sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
-            assertTrue(
-                "Qualifier for related entity must be in WHERE: " + sql,
-                sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
+			assertTrue(
+				"GROUP BY clause is expected:" + sql,
+				sql.indexOf(" GROUP BY ") > 0);
+			assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
+			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
+			assertTrue(
+				"Relationship join must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
+			assertTrue(
+				"Relationship join must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
+			assertTrue(
+				"Qualifier for related entity must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
+			assertTrue(
+				"Qualifier for related entity must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
+			assertTrue(
+				 "WHERE clause must have estimated price: " + sql,
+				 sql.indexOf("ESTIMATED_PRICE >=") < sql.indexOf(" GROUP BY "));
         } finally {
             con.close();
         }
