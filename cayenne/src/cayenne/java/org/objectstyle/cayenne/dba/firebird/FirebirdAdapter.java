@@ -58,9 +58,6 @@ package org.objectstyle.cayenne.dba.firebird;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.trans.QualifierTranslator;
-import org.objectstyle.cayenne.access.trans.QueryAssembler;
-import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -218,7 +215,8 @@ public class FirebirdAdapter extends JdbcAdapter {
         return new FirebirdPkGenerator();
     } 
     
-    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+    // TODO: Does Firebird support something like RTRIM?... It really needs it.
+/*    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new TrimmingQualifierTranslator(queryAssembler, "");
-    }
+    } */
 }

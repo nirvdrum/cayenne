@@ -111,8 +111,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
     public void testSelectLikeExactMatch() throws Exception {
         query.setRoot(Artist.class);
-        Expression qual =
-            ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist1");
+        Expression qual = ExpressionFactory.likeExp("artistName", "artist1");
         query.setQualifier(qual);
         performQuery();
 
@@ -122,18 +121,18 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(1, objects.size());
     }
 
-	public void testSelectNotLikeSingleWildcardMatch() throws Exception {
-		query.setRoot(Artist.class);
-		Expression qual = ExpressionFactory.notLikeExp("artistName", "artist11%");
-		query.setQualifier(qual);
-		performQuery();
+    public void testSelectNotLikeSingleWildcardMatch() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual = ExpressionFactory.notLikeExp("artistName", "artist11%");
+        query.setQualifier(qual);
+        performQuery();
 
-		// check query results
-		List objects = opObserver.objectsForQuery(query);
-		assertNotNull(objects);
-		assertEquals(_artistCount - 1, objects.size());
-	}
-	
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertNotNull(objects);
+        assertEquals(_artistCount - 1, objects.size());
+    }
+
     public void testSelectLikeSingleWildcardMatch() throws Exception {
         query.setRoot(Artist.class);
         Expression qual = ExpressionFactory.likeExp("artistName", "artist11%");
