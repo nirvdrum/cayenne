@@ -63,8 +63,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -166,32 +164,7 @@ public abstract class QueryAssembler extends QueryTranslator {
                 } else {
                     int type = attr.getType();
                     int precision = attr.getPrecision();
-
-                    if (val == null)
-                        stmt.setNull(i + 1, type);
-                    else {
-                        ExtendedType typeConverter =
-                            adapter.getExtendedTypes().getRegisteredType(
-                                val.getClass());
-                        try {
-                            typeConverter.setJdbcObject(
-                                stmt,
-                                val,
-                                i + 1,
-                                type,
-                                precision);
-                        } catch (Exception ex) {
-                            // log error information
-                            logObj.warn(
-                                "Error setting value '"
-                                    + val
-                                    + "' as "
-                                    + TypesMapping.getSqlNameByType(type)
-                                    + ", type converter used:"
-                                    + typeConverter);
-                            throw ex;
-                        }
-                    }
+					adapter.bindParameter(stmt, val, i + 1, type, precision);
                 }
             }
         }

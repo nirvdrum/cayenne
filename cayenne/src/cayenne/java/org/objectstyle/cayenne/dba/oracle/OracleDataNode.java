@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -138,7 +137,6 @@ public class OracleDataNode extends DataNode {
 			attributeScales[i] = attribute.getPrecision();
 		}
 		String queryStr = queryBuilder.query(query);
-		ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
 
 		// log batch execution
 		QueryLogger.logQuery(
@@ -159,18 +157,7 @@ public class OracleDataNode extends DataNode {
 				for (int i = 0; i < attributeCount; i++) {
 					Object value = query.getObject(i);
 					int type = attributeTypes[i];
-					if (value == null)
-						st.setNull(i + 1, type);
-					else {
-						ExtendedType typeProcessor =
-							typeConverter.getRegisteredType(value.getClass());
-						typeProcessor.setJdbcObject(
-							st,
-							value,
-							i + 1,
-							type,
-							attributeScales[i]);
-					}
+					adapter.bindParameter(st, value, i + 1, type, attributeScales[i]);
 				}
 
 				// this line differs from super

@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.dba;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -74,6 +76,7 @@ import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.types.UtilDateType;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -405,5 +408,28 @@ public class JdbcAdapter implements DbAdapter {
         node.setAdapter(this);
         return node;
     }
+    
+	public void bindParameter(
+		PreparedStatement statement,
+		Object object,
+		int pos,
+		int sqlType,
+		int precision)
+		throws SQLException, Exception {
+			
+		if (object == null){
+			statement.setNull(pos, sqlType);
+		}
+		else {
+			ExtendedType typeProcessor =
+				getExtendedTypes().getRegisteredType(object.getClass());
+			typeProcessor.setJdbcObject(
+				statement,
+				object,
+				pos,
+				sqlType,
+				precision);
+		}
+	}
 
 }

@@ -76,8 +76,6 @@ import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
-import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.util.DefaultSorter;
 import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.access.util.NullSorter;
@@ -479,7 +477,6 @@ public class DataNode implements QueryEngine {
             attributeScales[i] = attribute.getPrecision();
         }
         String queryStr = queryBuilder.query(query);
-        ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
 
         // log batch execution
         QueryLogger.logQuery(
@@ -500,18 +497,7 @@ public class DataNode implements QueryEngine {
                 for (int i = 0; i < attributeCount; i++) {
                     Object value = query.getObject(i);
                     int type = attributeTypes[i];
-                    if (value == null)
-                        st.setNull(i + 1, type);
-                    else {
-                        ExtendedType typeProcessor =
-                            typeConverter.getRegisteredType(value.getClass());
-                        typeProcessor.setJdbcObject(
-                            st,
-                            value,
-                            i + 1,
-                            type,
-                            attributeScales[i]);
-                    }
+                    adapter.bindParameter(st, value, i + 1, type, attributeScales[i]);
                 }
                 int updated = st.executeUpdate();
                 delegate.nextCount(query, updated);

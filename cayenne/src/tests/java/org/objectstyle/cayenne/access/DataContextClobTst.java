@@ -90,19 +90,21 @@ public class DataContextClobTst extends CayenneTestCase {
 		}
 		runWithClobSize(5 * 1024);
 	}
-
+	
 	public void test1MBClob() throws Exception {
 		if (skipTests()) {
 			return;
 		}
 		runWithClobSize(1024 * 1024);
 	}
-
+	*/
 	public void testNullClob() throws Exception {
-		//		insert new clob
-		ClobTest clobObj1 =
-			(ClobTest) ctxt.createAndRegisterNewObject("ClobTest");
+		if (skipTests()) {
+			return;
+		}
 
+		// insert new clob
+		ctxt.createAndRegisterNewObject("ClobTest");
 		ctxt.commitChanges();
 
 		// read the CLOB in the new context
@@ -124,7 +126,7 @@ public class DataContextClobTst extends CayenneTestCase {
 
 		ClobTest clobObj3 = (ClobTest) objects3.get(0);
 		assertEquals(clobObj2.getClobCol(), clobObj3.getClobCol());
-	}*/
+	}
 
 	protected void runWithClobSize(int sizeBytes) throws Exception {
 		// insert new clob

@@ -66,7 +66,6 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
@@ -249,20 +248,7 @@ public class ProcedureTranslator
         throws Exception {
 
         int type = param.getType();
-        if (val == null) {
-            stmt.setNull(pos, type);
-        } else {
-            ExtendedType typeConverter =
-                adapter.getExtendedTypes().getRegisteredType(val.getClass());
-
-            typeConverter.setJdbcObject(
-                stmt,
-                val,
-                pos,
-                type,
-                param.getPrecision());
-        }
-
+		adapter.bindParameter(stmt, val, pos, type, param.getPrecision());
     }
 
     /**

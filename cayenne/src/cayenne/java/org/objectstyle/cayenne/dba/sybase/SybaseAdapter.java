@@ -55,6 +55,10 @@
  */
 package org.objectstyle.cayenne.dba.sybase;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -69,26 +73,50 @@ import org.objectstyle.cayenne.dba.PkGenerator;
  */
 public class SybaseAdapter extends JdbcAdapter {
 
-    /**
-     * Installs appropriate ExtendedTypes as converters for passing values
-     * between JDBC and Java layers.
-     */
-    protected void configureExtendedTypes(ExtendedTypeMap map) {
-        super.configureExtendedTypes(map);
+	/**
+	 * Installs appropriate ExtendedTypes as converters for passing values
+	 * between JDBC and Java layers.
+	 */
+	protected void configureExtendedTypes(ExtendedTypeMap map) {
+		super.configureExtendedTypes(map);
 
-        // create specially configured CharType handler
-        map.registerType(new CharType(true, false));
+		// create specially configured CharType handler
+		map.registerType(new CharType(true, false));
 
-        // create specially configured ByteArrayType handler
-        map.registerType(new ByteArrayType(true, false));
-    }
+		// create specially configured ByteArrayType handler
+		map.registerType(new ByteArrayType(true, false));
+	}
 
-    /** 
-     * Creates and returns a primary key generator. 
-     * Overrides superclass implementation to return an
-     * instance of SybasePkGenerator.
-     */
-    protected PkGenerator createPkGenerator() {
-        return new SybasePkGenerator();
-    }
+	/** 
+	 * Creates and returns a primary key generator. 
+	 * Overrides superclass implementation to return an
+	 * instance of SybasePkGenerator.
+	 */
+	protected PkGenerator createPkGenerator() {
+		return new SybasePkGenerator();
+	}
+	/**
+	 *
+	 */
+
+	public void bindParameter(
+		PreparedStatement statement,
+		Object object,
+		int pos,
+		int sqlType,
+		int precision)
+		throws SQLException, Exception {
+
+		// Sybase driver doesn't like CLOBs and BLOBs as parameters
+		if (object == null) {
+			if (sqlType == Types.CLOB) {
+				sqlType = Types.VARCHAR;
+			} else if (sqlType == Types.BLOB) {
+				sqlType = Types.VARBINARY;
+			}
+		}
+
+		super.bindParameter(statement, object, pos, sqlType, precision);
+	}
+
 }

@@ -29,3 +29,6 @@ and deletes were failing. Bug report 730396:
 4. Added the ability to select generated objects superclass from the modeler.
 
 5. Fixed a SelectQuery translator bug that generated incorrect SQL when matching on flattened relationships.
+
+6. Added new method to DbAdapter: "bindParameter" to allow customization
+of PreparedStatements building.

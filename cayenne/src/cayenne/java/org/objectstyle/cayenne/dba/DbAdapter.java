@@ -56,6 +56,9 @@
 
 package org.objectstyle.cayenne.dba;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
@@ -178,6 +181,18 @@ public interface DbAdapter {
         int size,
         int precision,
         boolean allowNulls);
+        
+	/**
+	 * Binds an object value to PreparedStatement's numbered parameter.
+	 */
+	public void bindParameter(
+		PreparedStatement statement,
+		Object object,
+		int pos,
+		int sqlType,
+		int precision)
+		throws SQLException, Exception;
+
 
     /**
      * Returns the name of the table type (as returned by
