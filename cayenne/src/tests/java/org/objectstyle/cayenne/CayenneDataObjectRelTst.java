@@ -59,6 +59,7 @@ import java.util.*;
 
 import org.apache.log4j.*;
 import org.objectstyle.art.*;
+import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.query.*;
 
@@ -239,6 +240,68 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 		assertEquals(0, groupList.size());
 	}
 
+	public void testReflexiveRelationshipInsertOrder1() {
+		DataContext dc=this.createDataContext();
+		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		parentGroup.setName("parent");
+		
+		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		childGroup1.setName("child1");
+		childGroup1.setToParentGroup(parentGroup);
+		dc.commitChanges();
+	}
+	
+	public void testReflexiveRelationshipInsertOrder2() {
+		//Create in a different order and see what happens
+		DataContext dc=this.createDataContext();
+		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		childGroup1.setName("child1");
+
+		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		parentGroup.setName("parent");
+		
+		childGroup1.setToParentGroup(parentGroup);
+		
+		dc.commitChanges();
+	}
+	
+	public void testReflexiveRelationshipInsertOrder3() {
+		//Tey multiple children, one created before parent, one after
+		DataContext dc=this.createDataContext();
+		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		childGroup1.setName("child1");
+
+		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		parentGroup.setName("parent");
+		
+		childGroup1.setToParentGroup(parentGroup);
+
+		ArtGroup childGroup2=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		childGroup2.setName("child2");
+		childGroup2.setToParentGroup(parentGroup);
+		
+		dc.commitChanges();
+	}
+	
+	public void testReflexiveRelationshipInsertOrder4() {
+		//Tey multiple children, one created before parent, one after
+		DataContext dc=this.createDataContext();
+		ArtGroup childGroup1=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		childGroup1.setName("child1");
+
+		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		parentGroup.setName("parent");
+		
+		childGroup1.setToParentGroup(parentGroup);
+
+		ArtGroup childGroup2=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
+		childGroup2.setName("subchild");
+		childGroup2.setToParentGroup(childGroup1);
+		
+		dc.commitChanges();
+	}
+
+	
 	private Artist newSavedArtist() {
 		Artist o1 = newArtist();
 		o1.setDateOfBirth(new java.util.Date());

@@ -464,7 +464,6 @@ public class DataContext implements QueryEngine, Serializable {
                 // 2. deal with deletes
                 else if (objectState == PersistenceState.DELETED) {
                     filterReadOnly(nextObject);
-                    queryList.add(QueryHelper.deleteQuery(nextObject));
                     delObjects.add(nextObject);
                 }
                 // 3. deal with updates
@@ -475,18 +474,37 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
+		if(delObjects.size() > 0 ) {
+			OperationSorter.sortObjectsInDeleteOrder(delObjects);
+			Iterator delIt=delObjects.iterator();
+			while(delIt.hasNext()) {
+				queryList.add(QueryHelper.deleteQuery((DataObject)delIt.next()));
+			}
+
+		}
         // prepare inserts (create id's, build queries) 
         if (insObjects.size() > 0) {
-            // create permanent id's. 
+            // create permanent id's and orders insObjects in the correct order for insertion
+            // (which is very important with respect to dependent pk's and reflexive relationships)
             createPermIds(insObjects);
 
             // create insert queries
             Iterator insIt = insObjects.iterator();
             while (insIt.hasNext()) {
                 DataObject nextObject = (DataObject) insIt.next();
+                
+                if(logObj.isDebugEnabled()) {
+	                logObj.debug("Creating InsertQuery for object of class "+nextObject.getClass());
+                }
+                Map snapshot=takeObjectSnapshot(nextObject);
+                
+                //Don't create the string (expensive) if it's not needed
+                if(logObj.isDebugEnabled()) {
+	                logObj.debug("snapshot for insert :"+snapshot);
+                }
                 queryList.add(
                     QueryHelper.insertQuery(
-                        takeObjectSnapshot(nextObject),
+                        snapshot,
                         nextObject.getObjectId()));
             }
         }
@@ -812,12 +830,14 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
-    /** Creates permanent ObjectId's for the list of new objects. */
+    /** Creates permanent ObjectId's for the list of new objects, 
+     * and orders the list of objects in the correct order for insertion. 
+     * The list is modified in-place*/
     private void createPermIds(List objects) {
         OperationSorter.sortObjectsInInsertOrder(objects);
         Iterator it = objects.iterator();
         while (it.hasNext()) {
-            createPermId((DataObject) it.next());
+             createPermId((DataObject)it.next());
         }
     }
 
