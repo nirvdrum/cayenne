@@ -62,6 +62,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -117,8 +119,18 @@ public class DbGenerator {
     protected boolean shouldCreatePKSupport;
     protected boolean shouldCreateFKConstraints;
 
-    /** Creates and initializes new DbGenerator. */
+    /** 
+     * Creates and initializes new DbGenerator. 
+     */
     public DbGenerator(DbAdapter adapter, DataMap map) {
+        this(adapter, map, Collections.EMPTY_LIST);
+    }
+
+    /** 
+     * Creates and initializes new DbGenerator. <code>excludedEntities</code>
+     * parameter specifies which entities should be ignored during class generation.
+     */
+    public DbGenerator(DbAdapter adapter, DataMap map, Collection excludedEntities) {
         // sanity check
         if (adapter == null) {
             throw new IllegalArgumentException("Adapter must not be null.");
@@ -132,7 +144,7 @@ public class DbGenerator {
         this.node = adapter.createDataNode("internal");
         node.addDataMap(map);
 
-        prepareDbEntities();
+        prepareDbEntities(excludedEntities);
         resetToDefaults();
         buildStatements();
     }
@@ -177,8 +189,7 @@ public class DbGenerator {
 
         PkGenerator pkGenerator = adapter.getPkGenerator();
         dropPK = pkGenerator.dropAutoPkStatements(dbEntitiesRequiringAutoPK);
-        createPK =
-            pkGenerator.createAutoPkStatements(dbEntitiesRequiringAutoPK);
+        createPK = pkGenerator.createAutoPkStatements(dbEntitiesRequiringAutoPK);
     }
 
     /**
@@ -189,8 +200,7 @@ public class DbGenerator {
      * objects.
      */
     public boolean isEmpty(boolean respectConfiguredSettings) {
-        if (dbEntitiesInInsertOrder.isEmpty()
-            && dbEntitiesRequiringAutoPK.isEmpty()) {
+        if (dbEntitiesInInsertOrder.isEmpty() && dbEntitiesRequiringAutoPK.isEmpty()) {
             return true;
         }
 
@@ -220,8 +230,7 @@ public class DbGenerator {
 
         if (shouldDropTables) {
             ListIterator it =
-                dbEntitiesInInsertOrder.listIterator(
-                    dbEntitiesInInsertOrder.size());
+                dbEntitiesInInsertOrder.listIterator(dbEntitiesInInsertOrder.size());
             while (it.hasPrevious()) {
                 DbEntity ent = (DbEntity) it.previous();
                 list.add(dropTables.get(ent.getName()));
@@ -236,8 +245,7 @@ public class DbGenerator {
             }
         }
 
-        if (shouldCreateFKConstraints
-            && getAdapter().supportsFkConstraints()) {
+        if (shouldCreateFKConstraints && getAdapter().supportsFkConstraints()) {
             Iterator it = dbEntitiesInInsertOrder.iterator();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity) it.next();
@@ -279,7 +287,8 @@ public class DbGenerator {
 
         try {
             runGenerator(dataSource);
-        } finally {
+        }
+        finally {
             dataSource.dispose();
         }
     }
@@ -346,10 +355,12 @@ public class DbGenerator {
                         }
                     }
                 }
-            } finally {
+            }
+            finally {
                 stmt.close();
             }
-        } finally {
+        }
+        finally {
             con.close();
         }
 
@@ -358,9 +369,7 @@ public class DbGenerator {
 
         try {
             if (shouldDropPKSupport) {
-                getAdapter().getPkGenerator().dropAutoPk(
-                    node,
-                    dbEntitiesRequiringAutoPK);
+                getAdapter().getPkGenerator().dropAutoPk(node, dbEntitiesRequiringAutoPK);
             }
 
             if (shouldCreatePKSupport) {
@@ -368,7 +377,8 @@ public class DbGenerator {
                     node,
                     dbEntitiesRequiringAutoPK);
             }
-        } finally {
+        }
+        finally {
             node.setDataSource(null);
         }
     }
@@ -382,7 +392,8 @@ public class DbGenerator {
 
         try {
             stmt.execute(stmtText);
-        } catch (SQLException ex) {
+        }
+        catch (SQLException ex) {
             SQLException newException = new SQLException("Failed statement: " + stmtText);
             newException.setNextException(ex);
             throw newException;
@@ -425,7 +436,8 @@ public class DbGenerator {
             while (rs.next()) {
                 tables.add(rs.getString("TABLE_NAME").toLowerCase());
             }
-        } finally {
+        }
+        finally {
             rs.close();
         }
 
@@ -486,7 +498,11 @@ public class DbGenerator {
      * constraints and returns an ordered list. It also filters out
      * DerivedDbEntities.
      */
-    private void prepareDbEntities() {
+    private void prepareDbEntities(Collection excludedEntities) {
+        if (excludedEntities == null) {
+            excludedEntities = Collections.EMPTY_LIST;
+        }
+
         // remove derived db entities
         List tables = new ArrayList();
         List tablesWithAutoPk = new ArrayList();
@@ -496,10 +512,6 @@ public class DbGenerator {
 
             // do sanity checks...
 
-            // TODO: [Andrus] Any ideas how to integrate this with Validator?
-            // validation rules here are similar to generic validation,
-            // but still have its own distinction
-
             // derived DbEntities are not included in generated SQL
             if (nextEntity instanceof DerivedDbEntity) {
                 continue;
@@ -508,9 +520,13 @@ public class DbGenerator {
             // tables with no columns are not included
             if (nextEntity.getAttributes().size() == 0) {
                 logObj.info(
-                    "Skipping entity with no attributes: "
-                        + nextEntity.getName());
+                    "Skipping entity with no attributes: " + nextEntity.getName());
                 continue;
+            }
+
+            // check if this entity is explicitly excluded
+            if (excludedEntities.contains(nextEntity)) {
+            	continue;
             }
 
             // tables with invalid DbAttributes are not included
@@ -542,8 +558,7 @@ public class DbGenerator {
             // since the list will be modified locally
             List pkAttributes = new ArrayList(nextEntity.getPrimaryKey());
             while (pkAttributes.size() > 0 && relationships.hasNext()) {
-                DbRelationship nextRelationship =
-                    (DbRelationship) relationships.next();
+                DbRelationship nextRelationship = (DbRelationship) relationships.next();
                 if (!nextRelationship.isToMasterPK()) {
                     continue;
                 }

@@ -53,77 +53,64 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.view;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.awt.BorderLayout;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.modeler.ModelerConstants;
-import org.objectstyle.cayenne.modeler.control.EventController;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.GenerateDbController;
+import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
+import org.scopemvc.view.swing.SAction;
+import org.scopemvc.view.swing.SButton;
+import org.scopemvc.view.swing.SPanel;
+import org.scopemvc.view.swing.STable;
+import org.scopemvc.view.swing.SwingView;
 
 /**
+ * View for DbEntity validation errors display. Used
+ * as a warning dialog for DB schema generation.
+ * 
  * @author Andrei Adamchik
  */
-public class ModelerUtil {
-    /**
-     * Builds a consistent title that starts with the application name.
-     */
-    public static String buildTitle(String title) {
-        return (title != null)
-            ? ModelerConstants.TITLE + " - " + title
-            : ModelerConstants.TITLE;
+public class DbEntityValidationDialog extends SPanel {
+
+    public DbEntityValidationDialog() {
+        init();
     }
 
-    /** 
-     * Returns array of db attribute names for DbEntity mapped to 
-     * current ObjEntity. 
-     */
-    public static Collection getDbAttributeNames(
-        EventController mediator,
-        DbEntity entity) {
+    private void init() {
+        setDisplayMode(SwingView.MODAL_DIALOG);
+        setTitle("Generate DB Schema: Validation Messages");
+        setLayout(new BorderLayout());
 
-        Set keys = entity.getAttributeMap().keySet();
-        List list = new ArrayList(keys.size());
-        list.add("");
-        list.addAll(keys);
-        return list;
-    }
+        // build entity table
+        STable table = new STable();
+        table.setBackground(ValidatorDialog.WARNING_COLOR);
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+        table.setColumnNames(new String[] { "Entity", "Problems" });
+		table.setColumnSelectors(new String[] { "validatedObject.name", "message" });
 
-    public static String[] getRegisteredTypeNames() {
-        String[] srcList = new ExtendedTypeMap().getRegisteredTypeNames();
-        Arrays.sort(srcList);
+        // make sure that long columns are not squeezed
+        table.getColumnModel().getColumn(0).setMinWidth(100);
+        table.getColumnModel().getColumn(1).setMinWidth(250);
 
-        String[] finalList = new String[srcList.length + 1];
-        System.arraycopy(srcList, 0, finalList, 1, srcList.length);
-        finalList[0] = "";
+        // build action buttons
+        SButton continueButton =
+            new SButton(new SAction(GenerateDbController.GENERATION_OPTIONS_CONTROL));
+        continueButton.setEnabled(true);
 
-        return finalList;
-    }
+        SButton cancelButton =
+            new SButton(new SAction(GenerateDbController.CANCEL_CONTROL));
+        cancelButton.setEnabled(true);
 
-    public static DataNode getNodeLinkedToMap(DataDomain domain, DataMap map) {
-        Collection nodes = domain.getDataNodes();
-
-        // go via an iterator in an indexed loop, since
-        // we already obtained the size 
-        // (and index is required to initialize array)
-        Iterator nodesIt = nodes.iterator();
-        while (nodesIt.hasNext()) {
-            DataNode node = (DataNode) nodesIt.next();
-
-            if (node.getDataMaps().contains(map)) {
-                return node;
-            }
-        }
-
-        return null;
+        // assemble
+        JPanel panel = PanelFactory.createTablePanel(table, new JComponent[] {
+        }, new JButton[] { continueButton, cancelButton });
+        add(panel, BorderLayout.CENTER);
     }
 }

@@ -174,7 +174,7 @@ public class Validator {
         registerValidated(ValidationInfo.WARNING, message, treeNodePath);
     }
 
-    /** Return collection of ValidationDisplayHandler objects from last validation. */
+    /** Return collection of ValidationInfo objects from last validation. */
     public List validationResults() {
         return validationResults;
     }

@@ -73,17 +73,15 @@ public class ClassGeneratorController extends BasicController {
         return model;
     }
 
+
     /**
-      * @see org.scopemvc.controller.basic.BasicController#startup()
-      */
+     * Creates and runs the class generation dialog.
+     */
     public void startup() {
         setView(new ClassGeneratorDialog());
         super.startup();
     }
 
-    /**
-     * @see org.scopemvc.controller.basic.BasicController#doHandleControl(Control)
-     */
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(CANCEL_CONTROL)) {
             shutdown();
