@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
+
+package org.objectstyle.cayenne.access;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -363,7 +364,7 @@ public class DataContext implements QueryEngine {
         String objClassName = lookupEntity(objEntityName).getClassName();
         DataObject dobj = null;
         try {
-            dobj = (DataObject) Class.forName(objClassName).newInstance();
+            dobj = newDataObject(objClassName);
         }
         catch (Exception ex) {
             throw new CayenneRuntimeException("Error instantiating object.", ex);
