@@ -81,7 +81,7 @@ public class DbLoaderTst extends CayenneTestCase {
 		loader =
 			new DbLoader(
 				getSharedConnection(),
-				getSharedNode().getAdapter());
+				getSharedNode().getAdapter(), null);
 	}
 
 	/** 
