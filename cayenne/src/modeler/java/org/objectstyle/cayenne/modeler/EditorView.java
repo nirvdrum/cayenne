@@ -113,7 +113,7 @@ public class EditorView
     protected ObjDetailView objDetailView;
     protected DbDetailView dbDetailView;
     protected CardLayout detailLayout;
-	protected ModelerPreferences preferences;
+	protected ModelerPreferences prefs;
 
     public EditorView(EventController temp_mediator) {
         super(new BorderLayout());
@@ -123,15 +123,15 @@ public class EditorView
 		treePanel = new BrowseView(temp_mediator);
         splitPane.setLeftComponent(treePanel);
         splitPane.setRightComponent(detailPanel);
-		splitPane.addPropertyChangeListener(this);
+		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 
         Dimension minimumSize = new Dimension(350, 200);
         detailPanel.setMinimumSize(minimumSize);
         minimumSize = new Dimension(INIT_DIVIDER_LOCATION, 200);
         treePanel.setMinimumSize(minimumSize);
 
-		preferences = ModelerPreferences.getPreferences();
-		int preferredSize = preferences.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
+		prefs = ModelerPreferences.getPreferences();
+		int preferredSize = prefs.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
 		splitPane.setDividerLocation(preferredSize);
 
         detailLayout = new CardLayout();
@@ -195,10 +195,8 @@ public class EditorView
 
 	public void propertyChange(PropertyChangeEvent e) {
 		if (e.getSource() == splitPane) {
-			if (e.getPropertyName().equals(JSplitPane.DIVIDER_LOCATION_PROPERTY)) {
-				preferences.put(ModelerPreferences.EDITOR_TREE_WIDTH,
-								String.valueOf(splitPane.getDividerLocation()));
-			}
+			prefs.put(ModelerPreferences.EDITOR_TREE_WIDTH,
+						String.valueOf(splitPane.getDividerLocation()));
 		}
 	}
 
