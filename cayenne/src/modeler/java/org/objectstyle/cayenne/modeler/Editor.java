@@ -71,8 +71,11 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JToolBar;
 
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Layout;
 import org.apache.log4j.Logger;
-import org.apache.log4j.SimpleLayout;
+import org.apache.log4j.PatternLayout;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
 import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
@@ -119,7 +122,6 @@ import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.scopemvc.core.Control;
 import org.scopemvc.util.UIStrings;
 
@@ -184,32 +186,40 @@ public class Editor
     }
 
     /** 
-     * Configures modeler to log its stdout and stderr to a logfile.
+     * Configures Log4J appenders to perform logging to 
+     * $HOME/.cayenne/modeler.log.
      */
     public static void configLogging() {
         try {
-
             File log = getLogFile();
 
             if (log != null) {
+            	
+            	// read default Cayenne log configuration
+            	Configuration.configCommonLogging();
+            	
+            	// replace appenders to jsut log to a file.
                 Logger p1 = logObj;
                 Logger p2 = null;
                 while ((p2 = (Logger) p1.getParent()) != null) {
                     p1 = p2;
                 }
 
+                Layout layout = new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c{3}: %m%n");
                 p1.removeAllAppenders();
                 p1.addAppender(
-                    new CayenneFileHandler(
-                        new SimpleLayout(),
-                        log.getCanonicalPath(),
-                        true));
+                    new FileAppender(layout, log.getCanonicalPath(), true));
+            } else {
+                logObj.warn("Can't create log file, ignoring.");
             }
         } catch (IOException ioex) {
             logObj.warn("Error setting logging.", ioex);
         }
     }
 
+    /** 
+     * Returns a file correspinding to $HOME/.cayenne/modeler.log
+     */
     public static File getLogFile() {
         if (!CayenneUserDir.getInstance().canWrite()) {
             return null;

@@ -98,7 +98,9 @@ public class ProjectTypeSelectDialog extends SPanel {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(2, 1));
         mainPanel.add(buildProjectPanel("cayenne.modeler.project.app", false));
-        mainPanel.add(buildProjectPanel("cayenne.modeler.project.map", false));
+        
+        // disable DataMap projects for now
+        mainPanel.add(buildProjectPanel("cayenne.modeler.project.map", true));
 
         add(mainPanel, BorderLayout.CENTER);
         add(
