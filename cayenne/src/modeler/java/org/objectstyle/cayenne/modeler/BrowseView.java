@@ -267,8 +267,15 @@ public class BrowseView
     }
 
     public void procedureRemoved(ProcedureEvent e) {
-        // TODO Auto-generated method stub
+        if (e.getSource() == this) {
+            return;
+        }
 
+        removeNode(
+            new Object[] {
+                mediator.getCurrentDataDomain(),
+                mediator.getCurrentDataMap(),
+                e.getProcedure()});
     }
 
     public void domainChanged(DomainEvent e) {
@@ -697,7 +704,6 @@ public class BrowseView
                     (DataMap) data[data.length - 2],
                     (DataDomain) data[data.length - 3]);
             mediator.fireProcedureDisplayEvent(e);
-
         }
     }
 

@@ -73,12 +73,15 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.MapEvent;
+import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -135,6 +138,9 @@ public class RemoveAction extends CayenneAction {
         else if (mediator.getCurrentDbEntity() != null) {
             removeDbEntity();
         }
+        else if (mediator.getCurrentProcedure() != null) {
+            removeProcedure();
+        }
         else if (mediator.getCurrentDataMap() != null) {
             // In context of Data node just remove from Data Node
             if (mediator.getCurrentDataNode() != null) {
@@ -159,7 +165,7 @@ public class RemoveAction extends CayenneAction {
         DataDomain domain = mediator.getCurrentDataDomain();
         project.getConfiguration().removeDomain(domain.getName());
         mediator.fireDomainEvent(
-            new DomainEvent(Editor.getFrame(), domain, DomainEvent.REMOVE));
+            new DomainEvent(Editor.getFrame(), domain, MapEvent.REMOVE));
     }
 
     protected void removeDataMap() {
@@ -168,7 +174,7 @@ public class RemoveAction extends CayenneAction {
         DataDomain domain = mediator.getCurrentDataDomain();
         domain.removeMap(map.getName());
         mediator.fireDataMapEvent(
-            new DataMapEvent(Editor.getFrame(), map, DataMapEvent.REMOVE));
+            new DataMapEvent(Editor.getFrame(), map, MapEvent.REMOVE));
     }
 
     protected void removeDataNode() {
@@ -177,7 +183,7 @@ public class RemoveAction extends CayenneAction {
         DataDomain domain = mediator.getCurrentDataDomain();
         domain.removeDataNode(node.getName());
         mediator.fireDataNodeEvent(
-            new DataNodeEvent(Editor.getFrame(), node, DataNodeEvent.REMOVE));
+            new DataNodeEvent(Editor.getFrame(), node, MapEvent.REMOVE));
     }
 
     /** 
@@ -190,7 +196,20 @@ public class RemoveAction extends CayenneAction {
         DataMap map = mediator.getCurrentDataMap();
         map.deleteDbEntity(ent.getName());
         mediator.fireDbEntityEvent(
-            new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+            new EntityEvent(Editor.getFrame(), ent, MapEvent.REMOVE));
+    }
+
+    /** 
+       * Removes current Procedure from its DataMap and fires 
+       * "remove" ProcedureEvent.
+       */
+    protected void removeProcedure() {
+        EventController mediator = getMediator();
+        Procedure procedure = mediator.getCurrentProcedure();
+        DataMap map = mediator.getCurrentDataMap();
+        map.removeProcedure(procedure.getName());
+        mediator.fireProcedureEvent(
+            new ProcedureEvent(Editor.getFrame(), procedure, MapEvent.REMOVE));
     }
 
     /** 
@@ -202,7 +221,7 @@ public class RemoveAction extends CayenneAction {
         DataMap map = mediator.getCurrentDataMap();
         map.deleteObjEntity(ent.getName());
         mediator.fireObjEntityEvent(
-            new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+            new EntityEvent(Editor.getFrame(), ent, MapEvent.REMOVE));
     }
 
     protected void removeObjAttribute() {
@@ -211,7 +230,7 @@ public class RemoveAction extends CayenneAction {
         ObjAttribute attrib = mediator.getCurrentObjAttribute();
         entity.removeAttribute(attrib.getName());
         AttributeEvent e =
-            new AttributeEvent(Editor.getFrame(), attrib, entity, AttributeEvent.REMOVE);
+            new AttributeEvent(Editor.getFrame(), attrib, entity, MapEvent.REMOVE);
         mediator.fireObjAttributeEvent(e);
     }
 
@@ -223,7 +242,7 @@ public class RemoveAction extends CayenneAction {
         MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
         AttributeEvent e =
-            new AttributeEvent(Editor.getFrame(), attrib, entity, AttributeEvent.REMOVE);
+            new AttributeEvent(Editor.getFrame(), attrib, entity, MapEvent.REMOVE);
         mediator.fireDbAttributeEvent(e);
     }
 
