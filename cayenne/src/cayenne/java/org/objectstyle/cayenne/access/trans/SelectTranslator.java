@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access.trans;
 import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,6 +67,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -102,25 +104,25 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         return false;
     }
 
-    private final Map aliasLookup = new HashMap();
-    
-    private final List tableList = new ArrayList();
-    private final List aliasList = new ArrayList();
-    private final List dbRelList = new ArrayList();
-    
-    private List columnList;
-    private List groupByList;
-    
-    private int aliasCounter;
+    final Map aliasLookup = new HashMap();
 
-    private boolean suppressingDistinct;
+    final List tableList = new ArrayList();
+    final List aliasList = new ArrayList();
+    final List dbRelList = new ArrayList();
+
+    List columnList;
+    List groupByList;
+
+    int aliasCounter;
+
+    boolean suppressingDistinct;
 
     /**
      * If set to <code>true</code>, indicates that distinct select query is required no
      * matter what the original query settings where. This flag can be set when joins are
      * created using "to-many" relationships.
      */
-    private boolean forcingDistinct;
+    boolean forcingDistinct;
 
     /**
      * Returns a list of DbAttributes representing columns in this query.
@@ -324,120 +326,184 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
      * Creates a list of DbAttributes used in query.
      */
     private List buildColumnList() {
-        DbEntity table = getRootDbEntity();
         SelectQuery query = getSelectQuery();
+        if (query.isFetchingCustomAttributes()) {
+            return buildColumnListFromCustomAttributes(query.getCustomDbAttributes());
+        }
+
         List columnList = new ArrayList();
 
-        // extract custom attributes from the query
-        if (query.isFetchingCustomAttributes()) {
-            List custAttrNames = query.getCustomDbAttributes();
-            int len = custAttrNames.size();
-            for (int i = 0; i < len; i++) {
-                Attribute attr = table.getAttribute((String) custAttrNames.get(i));
-                if (attr == null) {
-                    throw new CayenneRuntimeException("Attribute does not exist: "
-                            + custAttrNames.get(i));
+        // fetched attributes include attributes that are either:
+        // 
+        //   * class properties
+        //   * PK
+        //   * FK used in relationships
+        //   * GROUP BY
+        //   * joined prefetch PK
+
+        ObjEntity oe = getRootEntity();
+
+        // null tree will indicate that we don't take inheritance into account
+        EntityInheritanceTree tree = null;
+
+        if (query.isResolvingInherited()) {
+            tree = getRootInheritanceTree();
+        }
+
+        // ObjEntity attrs
+        Iterator attrs = (tree != null) ? tree.allAttributes().iterator() : oe
+                .getAttributes()
+                .iterator();
+        while (attrs.hasNext()) {
+            ObjAttribute oa = (ObjAttribute) attrs.next();
+            Iterator dbPathIterator = oa.getDbPathIterator();
+            while (dbPathIterator.hasNext()) {
+                Object pathPart = dbPathIterator.next();
+                if (pathPart instanceof DbRelationship) {
+                    DbRelationship rel = (DbRelationship) pathPart;
+                    dbRelationshipAdded(rel);
                 }
-                columnList.add(attr);
+                else if (pathPart instanceof DbAttribute) {
+                    DbAttribute dbAttr = (DbAttribute) pathPart;
+                    if (dbAttr == null) {
+                        throw new CayenneRuntimeException(
+                                "ObjAttribute has no DbAttribute: " + oa.getName());
+                    }
+
+                    if (!columnList.contains(dbAttr)) {
+                        columnList.add(dbAttr);
+                    }
+                }
             }
         }
-        else {
-            // fetched attributes include attributes that are either:
-            // 
-            //   * class properties
-            //   * PK
-            //   * FK used in relationships
-            //   * GROUP BY
-            //   * joined prefetch PK
 
-            ObjEntity oe = getRootEntity();
-            
-            // null tree will indicate that we don't take inheritance into account
-            EntityInheritanceTree tree = null;
+        // relationship keys
+        Iterator rels = (tree != null) ? tree.allRelationships().iterator() : oe
+                .getRelationships()
+                .iterator();
+        while (rels.hasNext()) {
+            ObjRelationship rel = (ObjRelationship) rels.next();
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
-            if (query.isResolvingInherited()) {
-                tree = getRootInheritanceTree();
-            }
-
-            // ObjEntity attrs
-            Iterator attrs = (tree != null) ? tree.allAttributes().iterator() : oe
-                    .getAttributes()
-                    .iterator();
-            while (attrs.hasNext()) {
-                ObjAttribute oa = (ObjAttribute) attrs.next();
-                Iterator dbPathIterator = oa.getDbPathIterator();
-                while (dbPathIterator.hasNext()) {
-                    Object pathPart = dbPathIterator.next();
-                    if (pathPart instanceof DbRelationship) {
-                        DbRelationship rel = (DbRelationship) pathPart;
-                        dbRelationshipAdded(rel);
-                    }
-                    else if (pathPart instanceof DbAttribute) {
-                        DbAttribute dbAttr = (DbAttribute) pathPart;
-                        if (dbAttr == null) {
-                            throw new CayenneRuntimeException(
-                                    "ObjAttribute has no DbAttribute: " + oa.getName());
-                        }
-
-                        if (!columnList.contains(dbAttr)) {
-                            columnList.add(dbAttr);
-                        }
-                    }
+            List joins = dbRel.getJoins();
+            int len = joins.size();
+            for (int i = 0; i < len; i++) {
+                DbJoin join = (DbJoin) joins.get(i);
+                DbAttribute src = join.getSource();
+                if (!columnList.contains(src)) {
+                    columnList.add(src);
                 }
             }
+        }
 
-            // relationship keys
-            Iterator rels = (tree != null) ? tree.allRelationships().iterator() : oe
-                    .getRelationships()
-                    .iterator();
-            while (rels.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) rels.next();
-                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+        // add remaining needed attrs from DbEntity
+
+        DbEntity table = getRootDbEntity();
+        Iterator pk = table.getPrimaryKey().iterator();
+        while (pk.hasNext()) {
+            DbAttribute dba = (DbAttribute) pk.next();
+            if (!columnList.contains(dba)) {
+                columnList.add(dba);
+            }
+        }
+
+        // certain prefetch selects require special handling
+        if (query instanceof PrefetchSelectQuery) {
+            PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
+            ObjRelationship r = pq.getLastPrefetchHint();
+            if ((r != null) && (r.getReverseRelationship() == null)) {
+                // Prefetching a single step toMany relationship which
+                // has no reverse obj relationship. Add the FK attributes
+                // of the relationship (wouldn't otherwise be included)
+                DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);
 
                 List joins = dbRel.getJoins();
-                int len = joins.size();
-                for (int i = 0; i < len; i++) {
-                    DbJoin join = (DbJoin) joins.get(i);
-                    DbAttribute src = join.getSource();
-                    if (!columnList.contains(src)) {
-                        columnList.add(src);
-                    }
-                }
-            }
-
-            // add remaining needed attrs from DbEntity
-            Iterator dbattrs = table.getPrimaryKey().iterator();
-            while (dbattrs.hasNext()) {
-                DbAttribute dba = (DbAttribute) dbattrs.next();
-                if (!columnList.contains(dba)) {
-                    columnList.add(dba);
-                }
-            }
-
-            // May require some special handling for prefetch selects
-            // if the prefetch is of a certain type
-            if (query instanceof PrefetchSelectQuery) {
-                PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
-                ObjRelationship r = pq.getLastPrefetchHint();
-                if ((r != null) && (r.getReverseRelationship() == null)) {
-                    // Prefetching a single step toMany relationship which
-                    // has no reverse obj relationship. Add the FK attributes
-                    // of the relationship (wouldn't otherwise be included)
-                    DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);
-
-                    List joins = dbRel.getJoins();
-                    int jLen = joins.size();
-                    for (int j = 0; j < jLen; j++) {
-                        DbJoin join = (DbJoin) joins.get(j);
-                        DbAttribute target = join.getTarget();
-                        if (!columnList.contains(target)) {
-                            columnList.add(target);
-                        }
+                for (int j = 0; j < joins.size(); j++) {
+                    DbJoin join = (DbJoin) joins.get(j);
+                    DbAttribute target = join.getTarget();
+                    if (!columnList.contains(target)) {
+                        columnList.add(target);
                     }
                 }
             }
         }
-        
+
+        // hanlde joint prefetches
+        if (!query.getJointPrefetches().isEmpty()) {
+            Iterator jointPrefetches = query.getJointPrefetches().iterator();
+            while (jointPrefetches.hasNext()) {
+                String prefetch = (String) jointPrefetches.next();
+
+                // for each prefetch add all joins plus columns from the target entity
+
+                Expression dbPrefetch = oe.translateToDbPath(Expression
+                        .fromString(prefetch));
+
+                // find target entity
+                Iterator it = table.resolvePathComponents(dbPrefetch);
+
+                DbRelationship r = null;
+                while (it.hasNext()) {
+                    r = (DbRelationship) it.next();
+                    dbRelationshipAdded(r);
+                }
+
+                if (r == null) {
+                    throw new CayenneRuntimeException("Invalid joint prefetch '"
+                            + prefetch
+                            + "' for entity: "
+                            + oe.getName());
+                }
+
+                // add columns from the target entity, skipping those that are an FK to
+                // source entity
+
+                Collection skipColumns = Collections.EMPTY_LIST;
+
+                // if one step relationship..
+                if (r.getSourceEntity() == table) {
+                    skipColumns = new ArrayList(2);
+                    Iterator joins = r.getJoins().iterator();
+                    while (joins.hasNext()) {
+                        DbJoin join = (DbJoin) joins.next();
+                        if (columnList.contains(join.getSource())) {
+                            skipColumns.add(join.getTarget());
+                        }
+                    }
+                }
+
+                Iterator targetAttributes = r
+                        .getTargetEntity()
+                        .getAttributes()
+                        .iterator();
+                while (targetAttributes.hasNext()) {
+                    DbAttribute attribute = (DbAttribute) targetAttributes.next();
+                    if (!skipColumns.contains(attribute)) {
+                        columnList.add(attribute);
+                    }
+                }
+            }
+        }
+
+        return columnList;
+    }
+
+    private List buildColumnListFromCustomAttributes(List customAttributes) {
+        DbEntity table = getRootDbEntity();
+        int len = customAttributes.size();
+
+        List columnList = new ArrayList(len);
+
+        for (int i = 0; i < len; i++) {
+            Attribute attribute = table.getAttribute((String) customAttributes.get(i));
+            if (attribute == null) {
+                throw new CayenneRuntimeException("Attribute does not exist: "
+                        + customAttributes.get(i));
+            }
+
+            columnList.add(attribute);
+        }
+
         return columnList;
     }
 
