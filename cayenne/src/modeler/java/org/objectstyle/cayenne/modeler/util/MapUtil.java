@@ -71,6 +71,8 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -169,6 +171,12 @@ public class MapUtil {
         procedure.setName(newName);
         map.removeProcedure(oldName);
         map.addProcedure(procedure);
+        
+        // important - clear parent namespace:
+        MappingNamespace ns = map.getNamespace();
+        if(ns instanceof EntityResolver) {
+            ((EntityResolver) ns).clearCache();
+        }
     }
 
     public static void setQueryName(DataMap map, Query query, String newName) {
@@ -183,6 +191,12 @@ public class MapUtil {
         query.setName(newName);
         map.removeQuery(oldName);
         map.addQuery(query);
+        
+        // important - clear parent namespace:
+        MappingNamespace ns = map.getNamespace();
+        if(ns instanceof EntityResolver) {
+            ((EntityResolver) ns).clearCache();
+        }
     }
 
     public static void setObjEntityName(DataMap map, ObjEntity entity, String newName) {
@@ -196,6 +210,12 @@ public class MapUtil {
         entity.setName(newName);
         map.removeObjEntity(oldName, false);
         map.addObjEntity(entity);
+        
+        // important - clear parent namespace:
+        MappingNamespace ns = map.getNamespace();
+        if(ns instanceof EntityResolver) {
+            ((EntityResolver) ns).clearCache();
+        }
     }
 
     public static void setDbEntityName(DataMap map, DbEntity entity, String newName) {
@@ -209,6 +229,12 @@ public class MapUtil {
         entity.setName(newName);
         map.removeDbEntity(oldName, false);
         map.addDbEntity(entity);
+        
+        // important - clear parent namespace:
+        MappingNamespace ns = map.getNamespace();
+        if(ns instanceof EntityResolver) {
+            ((EntityResolver) ns).clearCache();
+        }
     }
 
     /** Changes the name of the attribute in all places in DataMap. */

@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
@@ -86,8 +87,10 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.validation.ValidationException;
 import org.scopemvc.util.convertor.StringConvertor;
 import org.scopemvc.util.convertor.StringConvertors;
 import org.scopemvc.view.swing.ValidationHelper;
@@ -95,24 +98,24 @@ import org.scopemvc.view.swing.ValidationHelper;
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
- * Detail view of the ObjEntity properties. 
+/**
+ * Detail view of the ObjEntity properties.
  * 
- * @author Michael Misha Shengaout 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ObjEntityTab
-    extends JPanel
-    implements ObjEntityDisplayListener, ExistingSelectionProcessor {
+public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
+        ExistingSelectionProcessor {
 
-    private static final Object noInheritance =
-        new MapObject("Direct Mapping to Table/View") {
+    private static final Object noInheritance = new MapObject(
+            "Direct Mapping to Table/View") {
+
         public void encodeAsXML(XMLEncoder encoder) {
         }
     };
 
     protected EventController mediator;
-    protected JTextField name;
+    protected TextFieldAdapter name;
     protected JTextField className;
     protected JTextField superClassName;
     protected JTextField qualifier;
@@ -130,7 +133,12 @@ public class ObjEntityTab
 
     private void initView() {
         // create widgets
-        name = CayenneWidgetFactory.createTextField();
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+
+            protected void initModel(String text) {
+                setEntityName(text);
+            }
+        };
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
         qualifier = CayenneWidgetFactory.createTextField();
@@ -145,13 +153,14 @@ public class ObjEntityTab
 
         // assemble
         setLayout(new BorderLayout());
-        FormLayout layout =
-            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("ObjEntity Configuration");
-        builder.append("ObjEntity Name:", name);
+        builder.append("ObjEntity Name:", name.getTextField());
         builder.append("Inheritance:", superEntityCombo);
         builder.append(tableLabel, dbEntityCombo);
 
@@ -172,6 +181,7 @@ public class ObjEntityTab
         mediator.addObjEntityDisplayListener(this);
 
         qualifier.setInputVerifier(new InputVerifier() {
+
             public boolean verify(JComponent input) {
                 String text = qualifier.getText();
                 if (text != null && text.trim().length() == 0) {
@@ -182,8 +192,8 @@ public class ObjEntityTab
 
                 if (ent != null) {
                     Expression exp = null;
-                    StringConvertor convertor =
-                        StringConvertors.forClass(Expression.class);
+                    StringConvertor convertor = StringConvertors
+                            .forClass(Expression.class);
 
                     try {
                         exp = (Expression) convertor.stringAsValue(text);
@@ -191,12 +201,12 @@ public class ObjEntityTab
                         mediator.fireObjEntityEvent(new EntityEvent(this, ent));
 
                         // TODO: this is a hack until we implement a real MVC
-                        qualifier.setBackground(name.getBackground());
+                        qualifier.setBackground(Color.WHITE);
                     }
                     catch (IllegalArgumentException ex) {
-                        // unparsable qualifier 
-                        qualifier.setBackground(
-                            ValidationHelper.DEFAULT_VALIDATION_FAILED_COLOR);
+                        // unparsable qualifier
+                        qualifier
+                                .setBackground(ValidationHelper.DEFAULT_VALIDATION_FAILED_COLOR);
                     }
                 }
 
@@ -204,37 +214,8 @@ public class ObjEntityTab
             }
         });
 
-        name.setInputVerifier(new InputVerifier() {
-            public boolean verify(JComponent input) {
-                String text = name.getText();
-                if (text == null || text.trim().length() == 0) {
-                    text = "";
-                }
-
-                DataMap map = mediator.getCurrentDataMap();
-                ObjEntity ent = mediator.getCurrentObjEntity();
-
-                ObjEntity matchingEnt = map.getObjEntity(text);
-
-                if (matchingEnt == null) {
-                    // completely new name, set new name for entity
-                    EntityEvent e = new EntityEvent(this, ent, ent.getName());
-                    MapUtil.setObjEntityName(map, ent, text);
-                    mediator.fireObjEntityEvent(e);
-                    return true;
-                }
-                else if (matchingEnt == ent) {
-                    // no name changes, just return
-                    return true;
-                }
-                else {
-                    // there is an entity with the same name
-                    return false;
-                }
-            }
-        });
-
         className.setInputVerifier(new InputVerifier() {
+
             public boolean verify(JComponent input) {
                 String classText = className.getText();
                 if (classText != null && classText.trim().length() == 0) {
@@ -254,6 +235,7 @@ public class ObjEntityTab
         });
 
         superClassName.setInputVerifier(new InputVerifier() {
+
             public boolean verify(JComponent input) {
                 String parentClassText = superClassName.getText();
                 if (parentClassText != null && parentClassText.trim().length() == 0) {
@@ -263,7 +245,7 @@ public class ObjEntityTab
                 ObjEntity ent = mediator.getCurrentObjEntity();
 
                 if (ent != null
-                    && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
+                        && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
                     ent.setSuperClassName(parentClassText);
                     mediator.fireObjEntityEvent(new EntityEvent(this, ent));
                 }
@@ -273,6 +255,7 @@ public class ObjEntityTab
         });
 
         dbEntityCombo.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 // Change DbEntity for current ObjEntity
                 ObjEntity entity = mediator.getCurrentObjEntity();
@@ -286,11 +269,12 @@ public class ObjEntityTab
         });
 
         superEntityCombo.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 // Change super-entity
                 MapObject superEntity = (MapObject) superEntityCombo.getSelectedItem();
-                String name =
-                    (superEntity == noInheritance) ? null : superEntity.getName();
+                String name = (superEntity == noInheritance) ? null : superEntity
+                        .getName();
 
                 ObjEntity entity = mediator.getCurrentObjEntity();
 
@@ -310,25 +294,33 @@ public class ObjEntityTab
                     DataMap map = mediator.getCurrentDataMap();
 
                     mediator.fireObjEntityEvent(new EntityEvent(this, entity));
-                    mediator.fireObjEntityDisplayEvent(
-                        new EntityDisplayEvent(this, entity, map, domain));
+                    mediator.fireObjEntityDisplayEvent(new EntityDisplayEvent(
+                            this,
+                            entity,
+                            map,
+                            domain));
                 }
             }
         });
 
         tableLabel.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 // Jump to DbEntity of the current ObjEntity
                 DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
                 if (entity != null) {
                     DataDomain dom = mediator.getCurrentDataDomain();
-                    mediator.fireDbEntityDisplayEvent(
-                        new EntityDisplayEvent(this, entity, entity.getDataMap(), dom));
+                    mediator.fireDbEntityDisplayEvent(new EntityDisplayEvent(
+                            this,
+                            entity,
+                            entity.getDataMap(),
+                            dom));
                 }
             }
         });
 
         readOnly.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 ObjEntity entity = mediator.getCurrentObjEntity();
                 if (entity != null) {
@@ -339,11 +331,11 @@ public class ObjEntityTab
         });
 
         optimisticLocking.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 ObjEntity entity = mediator.getCurrentObjEntity();
                 if (entity != null) {
-                    entity.setDeclaredLockType(
-                        optimisticLocking.isSelected()
+                    entity.setDeclaredLockType(optimisticLocking.isSelected()
                             ? ObjEntity.LOCK_TYPE_OPTIMISTIC
                             : ObjEntity.LOCK_TYPE_NONE);
                     mediator.fireObjEntityEvent(new EntityEvent(this, entity));
@@ -353,16 +345,16 @@ public class ObjEntityTab
     }
 
     /**
-     * Updates the view from the current model state.
-     * Invoked when a currently displayed ObjEntity is changed.
+     * Updates the view from the current model state. Invoked when a currently displayed
+     * ObjEntity is changed.
      */
     private void initFromModel(final ObjEntity entity) {
         // TODO: this is a hack until we implement a real MVC
-        qualifier.setBackground(name.getBackground());
+        qualifier.setBackground(Color.WHITE);
 
         name.setText(entity.getName());
-        superClassName.setText(
-            entity.getSuperClassName() != null ? entity.getSuperClassName() : "");
+        superClassName.setText(entity.getSuperClassName() != null ? entity
+                .getSuperClassName() : "");
         className.setText(entity.getClassName() != null ? entity.getClassName() : "");
         readOnly.setSelected(entity.isReadOnly());
 
@@ -370,12 +362,12 @@ public class ObjEntityTab
         qualifier.setText(convertor.valueAsString(entity.getDeclaredQualifier()));
 
         // TODO: fix inheritance - we should allow to select optimistic
-        // lock if superclass is not already locked, 
+        // lock if superclass is not already locked,
         // otherwise we must keep this checked in but not editable.
-        optimisticLocking.setSelected(
-            entity.getDeclaredLockType() == ObjEntity.LOCK_TYPE_OPTIMISTIC);
+        optimisticLocking
+                .setSelected(entity.getDeclaredLockType() == ObjEntity.LOCK_TYPE_OPTIMISTIC);
 
-        // init DbEntities 
+        // init DbEntities
         DataMap map = mediator.getCurrentDataMap();
         Object[] dbEntities = map.getNamespace().getDbEntities().toArray();
         Arrays.sort(dbEntities, Comparators.getDataMapChildrenComparator());
@@ -390,9 +382,10 @@ public class ObjEntityTab
 
         // init ObjEntities for inheritance
         Predicate inheritanceFilter = new Predicate() {
+
             public boolean evaluate(Object object) {
-                    // do not show this entity or any of the subentities
-    if (entity == object) {
+                // do not show this entity or any of the subentities
+                if (entity == object) {
                     return false;
                 }
 
@@ -404,35 +397,58 @@ public class ObjEntityTab
             }
         };
 
-        Object[] objEntities =
-            CollectionUtils
-                .select(map.getNamespace().getObjEntities(), inheritanceFilter)
-                .toArray();
+        Object[] objEntities = CollectionUtils.select(
+                map.getNamespace().getObjEntities(),
+                inheritanceFilter).toArray();
         Arrays.sort(objEntities, Comparators.getDataMapChildrenComparator());
         Object[] finalObjEntities = new Object[objEntities.length + 1];
         finalObjEntities[0] = noInheritance;
         System.arraycopy(objEntities, 0, finalObjEntities, 1, objEntities.length);
 
-        DefaultComboBoxModel superEntityModel =
-            new DefaultComboBoxModel(finalObjEntities);
+        DefaultComboBoxModel superEntityModel = new DefaultComboBoxModel(finalObjEntities);
         superEntityModel.setSelectedItem(entity.getSuperEntity());
         superEntityCombo.setRenderer(CellRenderers.entityListRendererWithIcons(map));
         superEntityCombo.setModel(superEntityModel);
     }
 
-    private void activateFields(boolean active) {
+    void setEntityName(String newName) {
+        if (newName != null && newName.trim().length() == 0) {
+            newName = null;
+        }
+
+        ObjEntity entity = mediator.getCurrentObjEntity();
+        
+        if(Util.nullSafeEquals(newName, entity.getName())) {
+            return;
+        }
+
+        if(newName == null) {
+            throw new ValidationException("Entity name is required.");
+        }
+        else if (entity.getDataMap().getObjEntity(newName) == null) {
+            // completely new name, set new name for entity
+            EntityEvent e = new EntityEvent(this, entity, entity.getName());
+            MapUtil.setObjEntityName(entity.getDataMap(), entity, newName);
+            mediator.fireObjEntityEvent(e);
+        }
+        else {
+            // there is an entity with the same name
+            throw new ValidationException("There is another entity with name '"
+                    + newName
+                    + "'.");
+        }
+    }
+
+    void activateFields(boolean active) {
         superClassName.setEnabled(active);
         superClassName.setEditable(active);
         dbEntityCombo.setEnabled(active);
     }
 
     public void processExistingSelection() {
-        EntityDisplayEvent e =
-            new EntityDisplayEvent(
-                this,
-                mediator.getCurrentObjEntity(),
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain());
+        EntityDisplayEvent e = new EntityDisplayEvent(this, mediator
+                .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
+                .getCurrentDataDomain());
         mediator.fireObjEntityDisplayEvent(e);
     }
 

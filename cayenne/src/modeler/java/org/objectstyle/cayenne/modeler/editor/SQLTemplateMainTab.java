@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -221,27 +222,33 @@ public class SQLTemplateMainTab extends JPanel {
     /**
      * Initializes Query name from string.
      */
-    void setQueryName(String string) {
-        string = (string == null) ? "" : string.trim();
-        if (string.length() == 0) {
-            throw new ValidationException("Enter name for SQLTemplate Query");
+    void setQueryName(String newName) {
+        if (newName != null && newName.trim().length() == 0) {
+            newName = null;
+        }
+        
+        Query query = getQuery();
+        
+        if (Util.nullSafeEquals(newName, query.getName())) {
+            return;
+        }
+        
+        if (newName == null) {
+            throw new ValidationException("Query name is required.");
         }
 
         DataMap map = mediator.getCurrentDataMap();
-        Query query = getQuery();
-
-        Query matchingQuery = map.getQuery(string);
-
-        if (matchingQuery == null) {
+        
+        if (map.getQuery(newName) == null) {
             // completely new name, set new name for entity
             QueryEvent e = new QueryEvent(this, query, query.getName());
-            MapUtil.setQueryName(map, query, string);
+            MapUtil.setQueryName(map, query, newName);
             mediator.fireQueryEvent(e);
         }
-        else if (matchingQuery != query) {
+        else {
             // there is a query with the same name
             throw new ValidationException("There is another query named '"
-                    + string
+                    + newName
                     + "'. Use a different name.");
         }
     }

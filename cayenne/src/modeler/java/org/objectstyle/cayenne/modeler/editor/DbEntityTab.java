@@ -86,24 +86,25 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
- * Detail view of the DbEntity properties. 
+/**
+ * Detail view of the DbEntity properties.
  * 
- * @author Michael Misha Shengaout 
+ * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbEntityTab
-    extends JPanel
-    implements ExistingSelectionProcessor, DbEntityDisplayListener, ActionListener {
+public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
+        DbEntityDisplayListener, ActionListener {
 
     protected EventController mediator;
 
-    protected JTextField name;
+    protected TextFieldAdapter name;
     protected JTextField schema;
     protected JComboBox parentEntities;
     protected JButton parentLabel;
@@ -128,7 +129,12 @@ public class DbEntityTab
     private void initView() {
 
         // create widgets
-        name = CayenneWidgetFactory.createTextField();
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+
+            protected void initModel(String text) {
+                setEntityName(text);
+            }
+        };
         schemaLabel = CayenneWidgetFactory.createLabel("Schema:");
         schema = CayenneWidgetFactory.createTextField();
 
@@ -140,14 +146,13 @@ public class DbEntityTab
         parentEntities.setEnabled(false);
 
         customPKGenerator = new JCheckBox();
-        customPKGeneratorLabel =
-            CayenneWidgetFactory.createLabel("Customize primary key generation");
-        customPKGeneratorNote =
-            CayenneWidgetFactory.createLabel(
-                "(currently ignored by all adapters except Oracle)");
+        customPKGeneratorLabel = CayenneWidgetFactory
+                .createLabel("Customize primary key generation");
+        customPKGeneratorNote = CayenneWidgetFactory
+                .createLabel("(currently ignored by all adapters except Oracle)");
         customPKGeneratorNote.setFont(customPKGeneratorNote.getFont().deriveFont(10));
-        customPKGeneratorNameLabel =
-            CayenneWidgetFactory.createLabel("Database object name: ");
+        customPKGeneratorNameLabel = CayenneWidgetFactory
+                .createLabel("Database object name: ");
         customPKSizeLabel = CayenneWidgetFactory.createLabel("Cached PK Size: ");
 
         customPKName = CayenneWidgetFactory.createTextField();
@@ -155,13 +160,14 @@ public class DbEntityTab
 
         // assemble
         setLayout(new BorderLayout());
-        FormLayout layout =
-            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DbEntity Configuration");
-        builder.append("DbEntity name:", name);
+        builder.append("DbEntity name:", name.getTextField());
         builder.append(schemaLabel, schema);
         builder.append(parentLabel, parentEntities);
 
@@ -177,12 +183,12 @@ public class DbEntityTab
     private void initController() {
         mediator.addDbEntityDisplayListener(this);
         InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
         schema.setInputVerifier(inputCheck);
         customPKName.setInputVerifier(inputCheck);
         customPKSize.setInputVerifier(inputCheck);
 
         parentEntities.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 DbEntity current = mediator.getCurrentDbEntity();
 
@@ -207,8 +213,7 @@ public class DbEntityTab
     }
 
     public void processExistingSelection() {
-        EntityDisplayEvent e =
-            new EntityDisplayEvent(
+        EntityDisplayEvent e = new EntityDisplayEvent(
                 this,
                 mediator.getCurrentDbEntity(),
                 mediator.getCurrentDataMap(),
@@ -254,8 +259,7 @@ public class DbEntityTab
     }
 
     /**
-     * Enables or disbales form fields depending on the
-     * type of entity shown.
+     * Enables or disbales form fields depending on the type of entity shown.
      */
     protected void updateState(boolean isDerivedEntity) {
         schemaLabel.setEnabled(!isDerivedEntity);
@@ -284,10 +288,9 @@ public class DbEntityTab
 
         if (isPKGeneratorCustomized) {
             customPKName.setText(generator.getGeneratorName());
-            customPKSize.setText(
-                generator.getKeyCacheSize() != null
-                    ? generator.getKeyCacheSize().toString()
-                    : "0");
+            customPKSize.setText(generator.getKeyCacheSize() != null ? generator
+                    .getKeyCacheSize()
+                    .toString() : "0");
         }
         else {
             customPKName.setText("");
@@ -303,8 +306,11 @@ public class DbEntityTab
                 DbEntity parent = ((DerivedDbEntity) current).getParentEntity();
                 if (parent != null) {
                     DataDomain dom = mediator.getCurrentDataDomain();
-                    mediator.fireDbEntityDisplayEvent(
-                        new EntityDisplayEvent(this, parent, parent.getDataMap(), dom));
+                    mediator.fireDbEntityDisplayEvent(new EntityDisplayEvent(
+                            this,
+                            parent,
+                            parent.getDataMap(),
+                            dom));
                 }
             }
         }
@@ -318,8 +324,8 @@ public class DbEntityTab
                 if (entity.getPrimaryKeyGenerator() == null) {
                     DbKeyGenerator generator = new DbKeyGenerator();
                     generator.setGeneratorType(DbKeyGenerator.ORACLE_TYPE);
-                    generator.setKeyCacheSize(
-                        new Integer(JdbcPkGenerator.DEFAULT_PK_CACHE_SIZE));
+                    generator.setKeyCacheSize(new Integer(
+                            JdbcPkGenerator.DEFAULT_PK_CACHE_SIZE));
                     entity.setPrimaryKeyGenerator(generator);
                 }
 
@@ -332,12 +338,38 @@ public class DbEntityTab
         }
     }
 
+    void setEntityName(String newName) {
+        if (newName != null && newName.trim().length() == 0) {
+            newName = null;
+        }
+
+        DbEntity entity = mediator.getCurrentDbEntity();
+
+        if (Util.nullSafeEquals(newName, entity.getName())) {
+            return;
+        }
+
+        if (newName == null) {
+            throw new ValidationException("Entity name is required.");
+        }
+        else if (entity.getDataMap().getDbEntity(newName) == null) {
+            // completely new name, set new name for entity
+            EntityEvent e = new EntityEvent(this, entity, entity.getName());
+            MapUtil.setDbEntityName(entity.getDataMap(), entity, newName);
+            mediator.fireDbEntityEvent(e);
+        }
+        else {
+            // there is an entity with the same name
+            throw new ValidationException("There is another entity with name '"
+                    + newName
+                    + "'.");
+        }
+    }
+
     class FieldVerifier extends InputVerifier {
+
         public boolean verify(JComponent input) {
-            if (input == name) {
-                return verifyName();
-            }
-            else if (input == schema) {
+            if (input == schema) {
                 return verifySchema();
             }
             else if (input == customPKSize) {
@@ -348,34 +380,6 @@ public class DbEntityTab
             }
             else {
                 return true;
-            }
-        }
-
-        protected boolean verifyName() {
-            String text = name.getText();
-            if (text == null || text.trim().length() == 0) {
-                text = "";
-            }
-
-            DataMap map = mediator.getCurrentDataMap();
-            DbEntity ent = mediator.getCurrentDbEntity();
-
-            DbEntity matchingEnt = map.getDbEntity(text);
-
-            if (matchingEnt == null) {
-                // completely new name, set new name for entity
-                EntityEvent e = new EntityEvent(this, ent, ent.getName());
-                MapUtil.setDbEntityName(map, ent, text);
-                mediator.fireDbEntityEvent(e);
-                return true;
-            }
-            else if (matchingEnt == ent) {
-                // no name changes, just return
-                return true;
-            }
-            else {
-                // there is an entity with the same name
-                return false;
             }
         }
 
@@ -416,8 +420,9 @@ public class DbEntityTab
             DbKeyGenerator generator = entity.getPrimaryKeyGenerator();
 
             if (generator != null
-                && (generator.getKeyCacheSize() == null
-                    || generator.getKeyCacheSize().intValue() != cacheSize)) {
+                    && (generator.getKeyCacheSize() == null || generator
+                            .getKeyCacheSize()
+                            .intValue() != cacheSize)) {
                 generator.setKeyCacheSize(new Integer(cacheSize));
                 mediator.fireDbEntityEvent(new EntityEvent(this, entity));
             }

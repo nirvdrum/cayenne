@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -190,27 +191,33 @@ public class ProcedureQueryView extends JPanel {
     /**
      * Initializes Query name from string.
      */
-    void setQueryName(String string) {
-        string = (string == null) ? "" : string.trim();
-        if (string.length() == 0) {
-            throw new ValidationException("Enter name for ProcedureQuery");
+    void setQueryName(String newName) {
+        if (newName != null && newName.trim().length() == 0) {
+            newName = null;
         }
         
-        DataMap map = mediator.getCurrentDataMap();
         Query query = mediator.getCurrentQuery();
+        
+        if (Util.nullSafeEquals(newName, query.getName())) {
+            return;
+        }
+        
+        if (newName == null) {
+            throw new ValidationException("Query name is required.");
+        }
 
-        Query matchingQuery = map.getQuery(string);
-
-        if (matchingQuery == null) {
+        DataMap map = mediator.getCurrentDataMap();
+        
+        if (map.getQuery(newName) == null) {
             // completely new name, set new name for entity
             QueryEvent e = new QueryEvent(this, query, query.getName());
-            MapUtil.setQueryName(map, query, string);
+            MapUtil.setQueryName(map, query, newName);
             mediator.fireQueryEvent(e);
         }
-        else if (matchingQuery != query) {
+        else {
             // there is a query with the same name
             throw new ValidationException("There is another query named '"
-                    + string
+                    + newName
                     + "'. Use a different name.");
         }
     }

@@ -109,27 +109,29 @@ public abstract class QueryBuilder {
      * @throws CayenneRuntimeException if a valid root can't be established.
      */
     protected Object getRoot() {
-        Object root = null;
 
         if (rootType == null || DATA_MAP_ROOT.equals(rootType)) {
-            root = dataMap;
+            return dataMap;
+        }
+        else if (rootName == null) {
+            return null;
         }
         else if (OBJ_ENTITY_ROOT.equals(rootType)) {
-            root = dataMap.getObjEntity(rootName);
+            return dataMap.getObjEntity(rootName);
         }
         else if (DB_ENTITY_ROOT.equals(rootType)) {
-            root = dataMap.getDbEntity(rootName);
+            return dataMap.getDbEntity(rootName);
         }
         else if (PROCEDURE_ROOT.equals(rootType)) {
-            root = dataMap.getProcedure(rootName);
+            return dataMap.getProcedure(rootName);
         }
         else if (JAVA_CLASS_ROOT.equals(rootType)) {
             // setting root to ObjEntity, since creating a Class requires
             // the knowledge of the ClassLoader
-            root = dataMap.getObjEntityForJavaClass(rootName);
+            return dataMap.getObjEntityForJavaClass(rootName);
         }
 
-        return root;
+        return null;
     }
 
     public void setSelecting(String selecting) {

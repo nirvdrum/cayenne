@@ -63,7 +63,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.modeler.EventController;
@@ -132,7 +131,7 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
         PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.addSeparator("Stored Procedure Configuration", cc.xywh(1, 1, 3, 1));
+        builder.addSeparator("Stored Procedure Configuration", cc.xywh(1, 1, 5, 1));
         builder.addLabel("Procedure Name:", cc.xy(1, 3));
         builder.add(name.getTextField(), cc.xywh(3, 3, 3, 1));
         builder.addLabel("Schema:", cc.xy(1, 5));
@@ -188,26 +187,31 @@ public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
         ignoreChange = false;
     }
 
-    void setProcedureName(String text) {
-        if (text == null || text.trim().length() == 0) {
-            throw new ValidationException("Enter name for Procedure");
+    void setProcedureName(String newName) {
+        if (newName != null && newName.trim().length() == 0) {
+            newName = null;
         }
 
-        DataMap map = eventController.getCurrentDataMap();
         Procedure procedure = eventController.getCurrentProcedure();
 
-        Procedure matchingProcedure = map.getProcedure(text);
+        if (procedure == null || Util.nullSafeEquals(newName, procedure.getName())) {
+            return;
+        }
 
-        if (matchingProcedure == null) {
+        if (newName == null) {
+            throw new ValidationException("Procedure name is required.");
+        }
+        else if (procedure.getDataMap().getProcedure(newName) == null) {
             // completely new name, set new name for entity
             ProcedureEvent e = new ProcedureEvent(this, procedure, procedure.getName());
-            MapUtil.setProcedureName(map, procedure, text);
+            MapUtil.setProcedureName(procedure.getDataMap(), procedure, newName);
             eventController.fireProcedureEvent(e);
         }
-        else if (matchingProcedure != procedure) {
-            throw new ValidationException("There is another Procedure named '"
-                    + text
-                    + "'. Use a different name.");
+        else {
+            // there is an entity with the same name
+            throw new ValidationException("There is another procedure with name '"
+                    + newName
+                    + "'.");
         }
     }
 

@@ -258,27 +258,34 @@ public class SelectQueryMainTab extends JPanel {
     /**
      * Initializes Query name from string.
      */
-    void setQueryName(String string) {
-        string = (string == null) ? "" : string.trim();
-        if (string.length() == 0) {
-            throw new ValidationException("Enter name for SelectQuery");
+    void setQueryName(String newName) {
+        if (newName != null && newName.trim().length() == 0) {
+            newName = null;
+        }
+        
+        Query query = getQuery();
+        
+        if (Util.nullSafeEquals(newName, query.getName())) {
+            return;
+        }
+        
+        if (newName == null) {
+            throw new ValidationException("SelectQuery name is required.");
         }
         
         DataMap map = mediator.getCurrentDataMap();
-        Query query = getQuery();
-
-        Query matchingQuery = map.getQuery(string);
+        Query matchingQuery = map.getQuery(newName);
 
         if (matchingQuery == null) {
             // completely new name, set new name for entity
             QueryEvent e = new QueryEvent(this, query, query.getName());
-            MapUtil.setQueryName(map, query, string);
+            MapUtil.setQueryName(map, query, newName);
             mediator.fireQueryEvent(e);
         }
         else if (matchingQuery != query) {
             // there is a query with the same name
             throw new ValidationException("There is another query named '"
-                    + string
+                    + newName
                     + "'. Use a different name.");
         }
     }
