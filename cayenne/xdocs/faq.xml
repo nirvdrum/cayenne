@@ -1,22 +1,22 @@
 <document>
-<title>User Guide - Installation</title>
-
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/install/index.html</prev>
-	<next>/userguide/quickstart/index.html</next>
-</navigator>
+<title>Frequently Asked Questions</title>
 
 <body>
-    <section name="2. Installation">
-        <subsection name="2.5 Installation FAQ" anchor="faq">
- 			<p><strong>After installation, an application using Cayenne
+    <section name="Cayenne FAQ">
+    	<p>Note that Cayenne FAQ is created using WikiWiki collaboration technology.
+    	Anyone can participate in creation of the FAQ by going to 
+    	<a href="http://c2.com/cgi-bin/wiki?CayenneFaq">http://c2.com/cgi-bin/wiki?CayenneFaq</a>. 
+    	Current page contains more or less complete snapshot of the WikiWiki page.
+		</p>
+ 
+ 		<subsection name="cayenne.xml is not found">
+ 			<p><strong>Q.:</strong> After installation, an application using Cayenne
  			gives an error similar to 
- 			"ConfigException: [org.objectstyle.cayenne.conf.DefaultConfiguration] : 
+ 			<code>"ConfigException: [org.objectstyle.cayenne.conf.DefaultConfiguration] : 
  			Domain configuration file "cayenne.xml" is not found.", even though cayenne.xml
- 			is in the CLASSPATH.</strong></p>
+ 			is in the CLASSPATH.</code></p>
  			
- 			<p>Most likely this happened due to the fact that application 
+ 			<p><strong>A.:</strong> Most likely this happened due to the fact that application 
  			classes and Cayenne classes are loaded by different ClassLoaders
  			and Cayenne configuration package can't access configuration
  			files accessible to application ClassLoader. Typical scenario
@@ -25,14 +25,13 @@
  			programmer must explicitly bootstrap Cayenne to look for configuration
  			files in the right place. This can be done by the following code
  			(it can be added to "main" method of the applicaton for instance):	
- 			</p>
+ 	     	</p>
  			
-<source>
+			<source>
 // let Cayenne know about the default application ClassLoader
 Configuration.bootstrapSharedConfig(MyClass.class);
 </source>
- 
-        </subsection>
+			</subsection>
     </section>
 </body>
 </document>
