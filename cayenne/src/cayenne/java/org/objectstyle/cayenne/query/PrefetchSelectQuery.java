@@ -52,126 +52,153 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */package org.objectstyle.cayenne.query;
+ */
+package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
+ * Internal query object used to handle prefetching. Shouldn't be
+ * used directly.
  * 
  * @author Craig Miskell
  */
 public class PrefetchSelectQuery extends SelectQuery {
-	/** The query that provides the "root" objects of the prefetch*/
-	protected SelectQuery rootQuery;
-	
-	/** The relationship path from root objects to the objects being prefetched*/
-	protected String prefetchPath;
-	
-	protected ObjRelationship singleStepToManyRelationship=null;
-	
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 */
-	public PrefetchSelectQuery() {
-		super();
-	}
+    /** 
+     * The query that provides the "root" objects of the prefetch.
+     */
+    protected SelectQuery rootQuery;
 
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 * @param root
-	 */
-	public PrefetchSelectQuery(ObjEntity root) {
-		super(root);
-	}
+    /** 
+     * The relationship path from root objects to the objects being prefetched.
+     */
+    protected String prefetchPath;
 
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 * @param root
-	 * @param qualifier
-	 */
-	public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
-		super(root, qualifier);
-	}
+    /**
+     * Stores the last ObjRelationship in the prefetch path.
+     */
+    protected ObjRelationship lastPrefetchHint;
 
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 * @param rootClass
-	 */
-	public PrefetchSelectQuery(Class rootClass) {
-		super(rootClass);
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     */
+    public PrefetchSelectQuery() {
+        super();
+    }
 
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 * @param rootClass
-	 * @param qualifier
-	 */
-	public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
-		super(rootClass, qualifier);
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     * @param root
+     */
+    public PrefetchSelectQuery(ObjEntity root) {
+        super(root);
+    }
 
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 * @param objEntityName
-	 */
-	public PrefetchSelectQuery(String objEntityName) {
-		super(objEntityName);
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     * @param root
+     * @param qualifier
+     */
+    public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
+        super(root, qualifier);
+    }
 
-	/**
-	 * Constructor for PrefetchSelectQuery.
-	 * @param objEntityName
-	 * @param qualifier
-	 */
-	public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
-		super(objEntityName, qualifier);
-	}
-	
-	/**
-	 * Returns the prefetchPath.
-	 * @return String
-	 */
-	public String getPrefetchPath() {
-		return prefetchPath;
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     * @param rootClass
+     */
+    public PrefetchSelectQuery(Class rootClass) {
+        super(rootClass);
+    }
 
-	/**
-	 * Sets the prefetchPath.
-	 * @param prefetchPath The prefetchPath to set
-	 */
-	public void setPrefetchPath(String prefetchPath) {
-		this.prefetchPath = prefetchPath;
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     * @param rootClass
+     * @param qualifier
+     */
+    public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
+        super(rootClass, qualifier);
+    }
 
-	/**
-	 * @return SelectQuery
-	 */
-	public SelectQuery getRootQuery() {
-		return rootQuery;
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     * @param objEntityName
+     */
+    public PrefetchSelectQuery(String objEntityName) {
+        super(objEntityName);
+    }
 
-	/**
-	 * Sets the rootQuery.
-	 * @param rootQuery The rootQuery to set
-	 */
-	public void setRootQuery(SelectQuery rootQuery) {
-		this.rootQuery = rootQuery;
-	}
+    /**
+     * Constructor for PrefetchSelectQuery.
+     * @param objEntityName
+     * @param qualifier
+     */
+    public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
+        super(objEntityName, qualifier);
+    }
 
-	/**
-	 * @return ObjRelationship
-	 */
-	public ObjRelationship getSingleStepToManyRelationship() {
-		return singleStepToManyRelationship;
-	}
+    /**
+     * Returns the prefetchPath.
+     * @return String
+     */
+    public String getPrefetchPath() {
+        return prefetchPath;
+    }
 
-	/**
-	 * Sets the singleStepToManyRelationship.
-	 * @param singleStepToManyRelationship The singleStepToManyRelationship to set
-	 */
-	public void setSingleStepToManyRelationship(ObjRelationship singleStepToManyRelationship) {
-		this.singleStepToManyRelationship = singleStepToManyRelationship;
-	}
+    /**
+     * Sets the prefetchPath.
+     * @param prefetchPath The prefetchPath to set
+     */
+    public void setPrefetchPath(String prefetchPath) {
+        this.prefetchPath = prefetchPath;
+    }
+
+    /**
+     * @return SelectQuery
+     */
+    public SelectQuery getRootQuery() {
+        return rootQuery;
+    }
+
+    /**
+     * Sets the rootQuery.
+     * @param rootQuery The rootQuery to set
+     */
+    public void setRootQuery(SelectQuery rootQuery) {
+        this.rootQuery = rootQuery;
+    }
+
+    /**
+     * @return ObjRelationship
+     * @deprecated Since 1.1 replaced with "lastPrefetch" property. 
+     */
+    public ObjRelationship getSingleStepToManyRelationship() {
+        return lastPrefetchHint;
+    }
+
+    /**
+     * Sets the singleStepToManyRelationship.
+     * @param singleStepToManyRelationship The singleStepToManyRelationship to set
+     * @deprecated Since 1.1 replaced with "lastPrefetch" property. 
+     */
+    public void setSingleStepToManyRelationship(ObjRelationship singleStepToManyRelationship) {
+        this.lastPrefetchHint = singleStepToManyRelationship;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public ObjRelationship getLastPrefetchHint() {
+        return lastPrefetchHint;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setLastPrefetchHint(ObjRelationship relationship) {
+        lastPrefetchHint = relationship;
+    }
+
 }

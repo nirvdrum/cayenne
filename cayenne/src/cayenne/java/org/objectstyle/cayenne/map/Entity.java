@@ -288,6 +288,13 @@ public abstract class Entity extends MapObject {
     public abstract Iterator resolvePathComponents(Expression pathExp)
         throws ExpressionException;
 
+    /**
+     * Returns an Iterator over the path components that contains a sequence of 
+     * Attributes and Relationships. Note that if path is invalid and can not be 
+     * resolved from this entity, this method will still return an Iterator, 
+     * but an attempt to read the first invalid path component will result in 
+     * ExpressionException.
+     */
     public Iterator resolvePathComponents(String path) throws ExpressionException {
         return new PathIterator(path);
     }

@@ -94,4 +94,8 @@ public class SelectObserverTst extends DataContextTestBase {
         assertEquals(1, results.size());
 		assertTrue(results.get(0) instanceof Artist);
     }
+    
+    public void testQueryOrdering() throws Exception {
+        
+    }
 }

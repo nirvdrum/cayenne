@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access.util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -65,12 +64,15 @@ import java.util.Map;
 
 import org.apache.commons.collections.Factory;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections.map.LinkedMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.ObjectStore;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -176,63 +178,16 @@ public class SelectObserver extends DefaultOperationObserver {
       * @since 1.1
       */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
-        List dataRows = getResults(rootQuery);
-
-        if (dataRows == null) {
-            return Collections.EMPTY_LIST;
-        }
-
         ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
         boolean refresh =
             (rootQuery instanceof GenericSelectQuery)
                 ? ((GenericSelectQuery) rootQuery).isRefreshingObjects()
                 : true;
-        List objects = dataContext.objectsFromDataRows(entity, dataRows, refresh);
 
-        // handle prefetches for this query results
-        Iterator queries = results.keySet().iterator();
-        while (queries.hasNext()) {
-            Query nextQuery = (Query) queries.next();
-
-            if (rootQuery == nextQuery) {
-                continue;
-            }
-
-            List nextDataRows = getResults(nextQuery);
-            if (nextDataRows == null) {
-                throw new CayenneRuntimeException(
-                    "Can't find results for query: " + nextQuery);
-            }
-
-            ObjEntity nextEntity =
-                dataContext.getEntityResolver().lookupObjEntity(nextQuery);
-
-            // TODO: how should we handle refreshing of prefetched objects???
-            // should we propagate the setting from parent query?
-            List nextObjects =
-                dataContext.objectsFromDataRows(nextEntity, nextDataRows, refresh);
-
-            // now deal with to-many prefetching
-            if (!(nextQuery instanceof PrefetchSelectQuery)) {
-                continue;
-            }
-
-            PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) nextQuery;
-            if (prefetchQuery.getRootQuery() != rootQuery) {
-                continue;
-            }
-
-            ObjRelationship relationship =
-                prefetchQuery.getSingleStepToManyRelationship();
-
-            if (relationship == null) {
-                continue;
-            }
-
-            mergePrefetchResultsRelationships(objects, relationship, nextObjects);
-        }
-
-        return objects;
+        return new PrefetchTreeNode(entity, rootQuery).resolveObjectTree(
+            dataContext,
+            entity,
+            refresh);
     }
 
     /** 
@@ -253,32 +208,18 @@ public class SelectObserver extends DefaultOperationObserver {
     }
 
     /**
-     * Takes a list of "root" (or "source") objects,
-     * a list of destination objects, and the relationship which relates them
-     * (from root to destination).  It then merges the destination objects
-     * into the toMany relationships of the relevant root objects, thus clearing
-     * the toMany fault.  This method is typically only used internally by Cayenne
-     * and is not intended for client use.
-     * @param rootObjects
-     * @param theRelationship
-     * @param destinationObjects
+     * Organizes a list of objects in a map keyed by the source related object for
+     * the "incoming" relationship.
+     * 
+     * @since 1.1
      */
-    static void mergePrefetchResultsRelationships(
-        List rootObjects,
-        ObjRelationship relationship,
-        List destinationObjects) {
+    static Map partitionBySource(ObjRelationship incoming, List prefetchedObjects) {
+        Class sourceObjectClass = ((ObjEntity) incoming.getSourceEntity()).getJavaClass();
+        ObjRelationship reverseRelationship = incoming.getReverseRelationship();
 
-        if (rootObjects.size() == 0) {
-            // nothing to do
-            return;
-        }
-
-        Class sourceObjectClass = ((DataObject) rootObjects.get(0)).getClass();
-        ObjRelationship reverseRelationship = relationship.getReverseRelationship();
-        
         // Might be used later on... obtain and cast only once
         DbRelationship dbRelationship =
-            (DbRelationship) relationship.getDbRelationships().get(0);
+            (DbRelationship) incoming.getDbRelationships().get(0);
 
         Factory listFactory = new Factory() {
             public Object create() {
@@ -287,44 +228,233 @@ public class SelectObserver extends DefaultOperationObserver {
         };
 
         Map toManyLists = MapUtils.lazyMap(new HashMap(), listFactory);
-
-        Iterator destIterator = destinationObjects.iterator();
+        Iterator destIterator = prefetchedObjects.iterator();
         while (destIterator.hasNext()) {
-            DataObject thisDestinationObject = (DataObject) destIterator.next();
+            DataObject destinationObject = (DataObject) destIterator.next();
             DataObject sourceObject = null;
             if (reverseRelationship != null) {
                 sourceObject =
-                    (DataObject) thisDestinationObject.readNestedProperty(
+                    (DataObject) destinationObject.readProperty(
                         reverseRelationship.getName());
             }
             else {
                 // Reverse relationship doesn't exist... match objects manually
-                DataContext context = thisDestinationObject.getDataContext();
+                DataContext context = destinationObject.getDataContext();
+                ObjectStore objectStore = context.getObjectStore();
+
                 Map sourcePk =
                     dbRelationship.srcPkSnapshotWithTargetSnapshot(
-                        context.getObjectStore().getSnapshot(
-                            thisDestinationObject.getObjectId(),
+                        objectStore.getSnapshot(
+                            destinationObject.getObjectId(),
                             context));
+
+                // if object does not exist yet, don't create it
+                // the reason for its absense is likely due to the absent intermediate prefetch
                 sourceObject =
-                    context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
+                    objectStore.getObject(new ObjectId(sourceObjectClass, sourcePk));
             }
 
-            if (sourceObject != null) {
+            // don't attach to hollow objects
+            if (sourceObject != null
+                && sourceObject.getPersistenceState() != PersistenceState.HOLLOW) {
                 List relatedObjects = (List) toManyLists.get(sourceObject);
-                relatedObjects.add(thisDestinationObject);
+                relatedObjects.add(destinationObject);
             }
         }
 
-        // destinationObjects has now been partitioned into a list per
-        // source object... Iterate over the source objects and fix up 
-        // the relationship on each.
-        Iterator rootIterator = rootObjects.iterator();
-        while (rootIterator.hasNext()) {
-            DataObject thisRoot = (DataObject) rootIterator.next();
-            ToManyList toManyList =
-                (ToManyList) thisRoot.readNestedProperty(relationship.getName());
+        return toManyLists;
+    }
 
-            toManyList.setObjectList((List) toManyLists.get(thisRoot));
+    // ====================================================
+    // Represents a tree of prefetch queries intended to
+    // resolve prefetch relationships in the correct order
+    // ====================================================
+    final class PrefetchTreeNode {
+        ObjRelationship incomingRelationship;
+        List dataRows;
+        List objects;
+        Map children;
+
+        // creates root node of prefetch tree
+        PrefetchTreeNode(ObjEntity entity, Query rootQuery) {
+            // add children
+            Iterator it = results.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+
+                Query query = (Query) entry.getKey();
+                List dataRows = (List) entry.getValue();
+
+                if (dataRows == null) {
+                    logObj.warn("Can't find prefetch results for query: " + query);
+                    continue;
+
+                    // ignore null result (this shouldn't happen), however do not ignore
+                    // empty result, since it should be used to
+                    // update the source objects...
+                }
+
+                if (rootQuery == query) {
+                    this.dataRows = dataRows;
+                    continue;
+                }
+
+                // add prefetch queries to the tree
+                if (query instanceof PrefetchSelectQuery) {
+                    PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
+                    addChildWithPath(entity, prefetchQuery.getPrefetchPath(), dataRows);
+                }
+            }
+        }
+
+        PrefetchTreeNode(ObjRelationship incomingRelationship) {
+            this.incomingRelationship = incomingRelationship;
+        }
+
+        // adds a possibly indirect child
+        void addChildWithPath(ObjEntity rootEntity, String prefetchPath, List dataRows) {
+            Iterator it = rootEntity.resolvePathComponents(prefetchPath);
+
+            if (!it.hasNext()) {
+                return;
+            }
+
+            PrefetchTreeNode lastChild = this;
+
+            while (it.hasNext()) {
+                ObjRelationship r = (ObjRelationship) it.next();
+                lastChild = lastChild.addChild(r);
+            }
+
+            if (lastChild != null) {
+                lastChild.dataRows = dataRows;
+            }
+        }
+
+        // adds a direct child
+        PrefetchTreeNode addChild(ObjRelationship outgoingRelationship) {
+            PrefetchTreeNode child = null;
+
+            if (children == null) {
+                children = new LinkedMap();
+            }
+            else {
+                child = (PrefetchTreeNode) children.get(outgoingRelationship.getName());
+            }
+
+            if (child == null) {
+                child = new PrefetchTreeNode(outgoingRelationship);
+                children.put(outgoingRelationship.getName(), child);
+            }
+
+            return child;
+        }
+
+        // method called on root to get its children 
+        // and trigger all prefetch resolution
+        List resolveObjectTree(
+            DataContext dataContext,
+            ObjEntity entity,
+            boolean refresh) {
+
+            // resolve objects
+            this.objects = dataContext.objectsFromDataRows(entity, dataRows, refresh);
+
+            // resolve children
+            if (children != null) {
+                Iterator it = children.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    PrefetchTreeNode node = (PrefetchTreeNode) entry.getValue();
+                    node.resolveObjectTree(PrefetchTreeNode.this, dataContext, refresh);
+                }
+            }
+
+            return this.objects;
+        }
+
+        // main processing method
+        // resolves this node objects and all child prefetches
+        void resolveObjectTree(
+            PrefetchTreeNode parent,
+            DataContext dataContext,
+            boolean refresh) {
+
+            // skip most operations on a "phantom" node that had no prefetch query
+            if (dataRows != null) {
+                // resolve objects;
+                this.objects =
+                    dataContext.objectsFromDataRows(
+                        (ObjEntity) incomingRelationship.getTargetEntity(),
+                        dataRows,
+                        refresh);
+
+                // connect to parent
+                if (parent != null
+                    && incomingRelationship != null
+                    && incomingRelationship.isToMany()) {
+
+                    Map partitioned =
+                        partitionBySource(incomingRelationship, this.objects);
+
+                    // depending on whether parent is a "phantom" node,
+                    // use different strategy
+
+                    if (parent.objects != null && parent.objects.size() > 0) {
+                        connectToNodeParents(parent.objects, partitioned);
+                    }
+                    else {
+                        connectToFaultedParents(partitioned);
+                    }
+                }
+            }
+
+            //  resolve children
+            if (children != null) {
+                Iterator it = children.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry entry = (Map.Entry) it.next();
+                    PrefetchTreeNode node = (PrefetchTreeNode) entry.getValue();
+                    node.resolveObjectTree(PrefetchTreeNode.this, dataContext, refresh);
+                }
+            }
+        }
+
+        void connectToNodeParents(List parentObjects, Map partitioned) {
+
+            // destinationObjects has now been partitioned into a list per
+            // source object... Now init their "toMany"
+
+            Iterator it = parentObjects.iterator();
+            while (it.hasNext()) {
+                DataObject root = (DataObject) it.next();
+                List related = (List) partitioned.get(root);
+
+                if (related == null) {
+                    related = new ArrayList(1);
+                }
+
+                ToManyList toManyList =
+                    (ToManyList) root.readProperty(incomingRelationship.getName());
+                toManyList.setObjectList(related);
+            }
+        }
+
+        void connectToFaultedParents(Map partitioned) {
+            Iterator it = partitioned.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+
+                DataObject root = (DataObject) entry.getKey();
+                List related = (List) entry.getValue();
+
+                ToManyList toManyList =
+                    (ToManyList) root.readProperty(incomingRelationship.getName());
+
+                // TODO: if a list is modified, should we
+                // merge to-many instead of simply overriting it
+                toManyList.setObjectList(related);
+            }
         }
     }
 }

@@ -369,12 +369,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             CayenneDataObject a1 = (CayenneDataObject) context.performQuery(q).get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
-
             assertFalse(toMany.needsFetch());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Should not have failed " + e.getMessage());
         }
         finally {
             //Fix it up again, so other tests do not fail
@@ -387,7 +382,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
      * Test that a to-many relationship is initialized when there is no inverse
      * relationship and the root query is qualified
      */
-    public void testPrefetch3b() throws Exception {
+    public void testPrefetchOneWayToMany() throws Exception {
         populatePaintings();
 
         ObjEntity paintingEntity =
@@ -404,12 +399,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
             CayenneDataObject a1 = (CayenneDataObject) context.performQuery(q).get(0);
             ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
             assertNotNull(toMany);
-
             assertFalse(toMany.needsFetch());
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Should not have failed " + e.getMessage());
         }
         finally {
             //Fix it up again, so other tests do not fail

@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
@@ -77,7 +78,7 @@ import org.objectstyle.cayenne.query.SqlModifyQuery;
  * 
  * @author Andrei Adamchik
  */
-public class DataContextPrefetchMultistep extends DataContextTestBase {
+public class DataContextPrefetchMultistepTst extends DataContextTestBase {
 
     public void testToManyToManyFirstStepUnresolved() throws Exception {
         prepareForToManyToMany();
@@ -119,6 +120,41 @@ public class DataContextPrefetchMultistep extends DataContextTestBase {
         assertNotNull(ae2);
         assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
         assertEquals(PersistenceState.COMMITTED, ae2.getPersistenceState());
+    }
+
+    public void testToManyToManyFirstStepResolved() throws Exception {
+        prepareForToManyToMany();
+
+        Expression e = Expression.fromString("galleryName = $name");
+        SelectQuery q =
+            new SelectQuery(
+                Gallery.class,
+                e.expWithParameters(Collections.singletonMap("name", "g2")));
+        q.addPrefetch("exhibitArray");
+        q.addPrefetch("exhibitArray.artistExhibitArray");
+
+        List galleries = context.performQuery(q);
+        assertEquals(1, galleries.size());
+
+        Gallery g2 = (Gallery) galleries.get(0);
+
+        // this relationship should be resolved
+        assertTrue(g2.readPropertyDirectly("exhibitArray") instanceof ToManyList);
+        ToManyList exhibits = (ToManyList) g2.readPropertyDirectly("exhibitArray");
+        assertFalse(exhibits.needsFetch());
+        assertEquals(1, exhibits.size());
+
+        Exhibit e1 = (Exhibit) exhibits.get(0);
+        assertEquals(PersistenceState.COMMITTED, e1.getPersistenceState());
+
+        // this to-many must also be resolved
+        assertTrue(e1.readPropertyDirectly("artistExhibitArray") instanceof ToManyList);
+        ToManyList aexhibits = (ToManyList) e1.readPropertyDirectly("artistExhibitArray");
+        assertFalse(aexhibits.needsFetch());
+        assertEquals(1, exhibits.size());
+
+        ArtistExhibit ae1 = (ArtistExhibit) aexhibits.get(0);
+        assertEquals(PersistenceState.COMMITTED, ae1.getPersistenceState());
     }
 
     private void prepareForToManyToMany() throws Exception {

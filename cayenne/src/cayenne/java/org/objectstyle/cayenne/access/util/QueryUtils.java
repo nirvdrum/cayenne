@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -283,25 +282,25 @@ public class QueryUtils {
         ObjEntity ent = e.getEntityResolver().lookupObjEntity(q);
         PrefetchSelectQuery newQ = new PrefetchSelectQuery();
 
-        newQ.setPrefetchPath(prefetchPath);
         newQ.setRootQuery(q);
+        newQ.setPrefetchPath(prefetchPath);
         Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, prefetchPath);
         Iterator it = ent.resolvePathComponents(exp);
-        Relationship r = null;
-        int relCount = 0;
+
+        ObjRelationship r = null;
         while (it.hasNext()) {
-            r = (Relationship) it.next();
-            relCount++;
+            r = (ObjRelationship) it.next();
         }
 
         if (r != null) {
-            ObjRelationship objR = (ObjRelationship) r;
-            newQ.setRoot(objR.getTargetEntity());
-            newQ.setQualifier(ent.translateToRelatedEntity(q.getQualifier(), prefetchPath));
-            if ((relCount == 1) && objR.isToMany() && !objR.isFlattened()) {
-                //A one step toMany relationship needs the special handling
-                newQ.setSingleStepToManyRelationship(objR);
+            newQ.setRoot(r.getTargetEntity());
+            newQ.setQualifier(
+                ent.translateToRelatedEntity(q.getQualifier(), prefetchPath));
+                
+            if (r.isToMany() && !r.isFlattened()) {
+                newQ.setLastPrefetchHint(r);
             }
+
             return newQ;
         }
         else {

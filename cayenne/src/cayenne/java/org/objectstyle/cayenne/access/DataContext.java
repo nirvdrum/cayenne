@@ -598,7 +598,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
 
-        if (dataRows == null && dataRows.size() == 0) {
+        if (dataRows == null || dataRows.size() == 0) {
             return new ArrayList(1);
         }
 

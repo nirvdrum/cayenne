@@ -353,13 +353,12 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             // if the prefetch is of a certain type
             if (q instanceof PrefetchSelectQuery) {
                 PrefetchSelectQuery pq = (PrefetchSelectQuery) q;
-                ObjRelationship r = pq.getSingleStepToManyRelationship();
+                ObjRelationship r = pq.getLastPrefetchHint();
                 if ((r != null) && (r.getReverseRelationship() == null)) {
                     //Prefetching a single step toMany relationship which
                     // has no reverse obj relationship.  Add the FK attributes
                     // of the relationship (wouldn't otherwise be included)
-                    DbRelationship dbRel =
-                        (DbRelationship) r.getDbRelationships().get(0);
+                    DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);
 
                     List joins = dbRel.getJoins();
                     int jLen = joins.size();

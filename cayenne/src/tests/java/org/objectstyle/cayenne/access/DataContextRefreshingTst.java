@@ -161,7 +161,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
 
         // select using relationship prefetching
         artist = fetchArtist(artist.getArtistName(), true);
-        assertEquals(artist.getPaintingArray().size(), 0);
+        assertEquals(0, artist.getPaintingArray().size());
     }
 
     public void testRefetchRootWithAddedToMany() throws Exception {
