@@ -52,37 +52,38 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.access.event;
 
-package org.objectstyle.cayenne.event;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Collections;
-import java.util.EventObject;
-import java.util.Map;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
- * Common superclass for events passed from the EventManager to Listeners;
- * encapsulates optional event information.
- * 
- * @author Dirk Olmes
- * @author Holger Hoffstaette
+ * @author Andrei Adamchik
  */
+public class SnapshotEventTst extends CayenneTestCase {
+    public void testEventConstructor1() {
+        Object source = new Object();
+        List ids = new ArrayList();
 
-public class CayenneEvent extends EventObject {
+        SnapshotEvent event = new SnapshotEvent(source, ids);
+        assertSame(source, event.getSource());
+        assertSame(source, event.getRootSource());
+        assertSame(ids, event.getObjectIds());
+        assertNull(event.getEventCause());
+    }
 
-	private Map info;
-
-	public CayenneEvent(Object source) {
-		this(source, null);
-	}
-
-	public CayenneEvent(Object source, Map info) {
-		super(source);
-		this.info = (info != null ? info : Collections.EMPTY_MAP);
-	}
-
-	public Map getInfo() {
-		return info;
-	}
+    public void testEventConstructor2() {
+        Object rootSource = new Object();
+        Object source = new Object();
+        List ids = new ArrayList();
+        SnapshotEvent eventCause = new SnapshotEvent(rootSource, ids);
+        SnapshotEvent event = new SnapshotEvent(source, eventCause);
+        assertSame(source, event.getSource());
+        assertSame(eventCause, event.getEventCause());
+        assertSame(ids, event.getObjectIds());
+        assertSame(rootSource, event.getRootSource());
+    }
 }
-

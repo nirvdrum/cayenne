@@ -52,37 +52,50 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.access;
 
-package org.objectstyle.cayenne.event;
-
-import java.util.Collections;
-import java.util.EventObject;
-import java.util.Map;
+import org.objectstyle.cayenne.access.event.SnapshotEvent;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.event.EventSubject;
 
 /**
- * Common superclass for events passed from the EventManager to Listeners;
- * encapsulates optional event information.
- * 
- * @author Dirk Olmes
- * @author Holger Hoffstaette
+ * @author Andrei Adamchik
  */
+public class SnapshotCache {
+    protected String name;
+    protected EventSubject snapshotChangeSubject;
 
-public class CayenneEvent extends EventObject {
+    public SnapshotCache(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("SnapshotCache name can't be null.");
+        }
 
-	private Map info;
+        this.name = name;
+        this.snapshotChangeSubject = EventSubject.getSubject(this.getClass(), name);
+    }
 
-	public CayenneEvent(Object source) {
-		this(source, null);
-	}
+    public String getName() {
+        return name;
+    }
 
-	public CayenneEvent(Object source, Map info) {
-		super(source);
-		this.info = (info != null ? info : Collections.EMPTY_MAP);
-	}
+    protected void processSnapshotsChangeEvent(SnapshotEvent event) {
+        // TODO: implement me
+    }
 
-	public Map getInfo() {
-		return info;
-	}
+    /**
+     * Processes a SnapshotEvent. Modifies internal cache state, and then
+     * sends the event to all listeners. Outgoing event will have a source 
+     * set ot this SnapshotCache.
+     */
+    public void postSnapshotsChangeEvent(SnapshotEvent event) {
+        // first do whatever is needed to update the internal cache
+        processSnapshotsChangeEvent(event);
+
+        // now notify children;
+        // create a chained event so that its source is SnapshotCache.
+        EventManager.getDefaultManager().postEvent(
+            new SnapshotEvent(this, event),
+            snapshotChangeSubject);
+    }
 }
-

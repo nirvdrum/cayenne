@@ -52,37 +52,59 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.access.event;
 
-package org.objectstyle.cayenne.event;
-
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.EventObject;
-import java.util.Map;
+
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.event.CayenneEvent;
 
 /**
- * Common superclass for events passed from the EventManager to Listeners;
- * encapsulates optional event information.
+ * Event sent on modification of the SnapshotCache.  
  * 
- * @author Dirk Olmes
- * @author Holger Hoffstaette
+ * @author Andrei Adamchik
  */
+public class SnapshotEvent extends CayenneEvent implements Serializable {
+    protected SnapshotEvent eventCause;
+    protected Collection objectIds;
 
-public class CayenneEvent extends EventObject {
+    public SnapshotEvent(Object source, ObjectId objectId) {
+        super(source);
+        this.objectIds =
+            (objectId != null)
+                ? Collections.singletonList(objectId)
+                : Collections.EMPTY_LIST;
+    }
 
-	private Map info;
+    public SnapshotEvent(Object source, Collection objectIds) {
+        super(source);
+        this.objectIds = (objectIds != null) ? objectIds : Collections.EMPTY_LIST;
+    }
 
-	public CayenneEvent(Object source) {
-		this(source, null);
-	}
+    public SnapshotEvent(Object source, SnapshotEvent eventCause) {
+        this(source, eventCause.getObjectIds());
+        this.eventCause = eventCause;
+    }
 
-	public CayenneEvent(Object source, Map info) {
-		super(source);
-		this.info = (info != null ? info : Collections.EMPTY_MAP);
-	}
+    /**
+     * Returns a SnapshotEvent that triggered this event, or null
+     * if no such evbent existed.
+     */
+    public SnapshotEvent getEventCause() {
+        return eventCause;
+    }
 
-	public Map getInfo() {
-		return info;
-	}
+    /**
+     * Returns the source of the event that started this sequence of events.
+     */
+    public Object getRootSource() {
+        return (eventCause != null) ? eventCause.getRootSource() : this.getSource();
+    }
+
+    public Collection getObjectIds() {
+        return objectIds;
+    }
 }
-

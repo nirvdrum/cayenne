@@ -65,9 +65,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.event.SnapshotEvent;
+import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 
 /**
@@ -75,7 +78,9 @@ import org.objectstyle.cayenne.access.util.QueryUtils;
  * 
  * @author Andrei Adamchik
  */
-public class ObjectStore implements Serializable {
+public class ObjectStore implements Serializable, SnapshotEventListener {
+	private static Logger logObj = Logger.getLogger(ObjectStore.class);
+	
     protected transient Map objectMap = new HashMap();
     protected transient Map newObjectMap = null;
     protected Map snapshotMap = new HashMap();
@@ -112,7 +117,7 @@ public class ObjectStore implements Serializable {
     public synchronized void addObject(DataObject obj) {
         objectMap.put(obj.getObjectId(), obj);
 
-        if ( newObjectMap != null ) {
+        if (newObjectMap != null) {
             newObjectMap.put(obj.getObjectId(), obj);
         }
     }
@@ -217,12 +222,13 @@ public class ObjectStore implements Serializable {
         while (it.hasNext()) {
             DataObject dobj = (DataObject) it.next();
             int state = dobj.getPersistenceState();
-            if(state==PersistenceState.MODIFIED) {
-            	if(QueryUtils.updatedProperties(dobj)!=null) {
-            		return true; //There were some updated properties
-            	} //no updated properties, continue and see if any other objects have changed
-            } else if (state == PersistenceState.NEW
-                || state == PersistenceState.DELETED) {
+            if (state == PersistenceState.MODIFIED) {
+                if (QueryUtils.updatedProperties(dobj) != null) {
+                    return true; //There were some updated properties
+                } //no updated properties, continue and see if any other objects have changed
+            }
+            else if (
+                state == PersistenceState.NEW || state == PersistenceState.DELETED) {
                 return true;
             }
         }
@@ -245,5 +251,19 @@ public class ObjectStore implements Serializable {
         }
 
         return filteredObjects;
+    }
+
+    /**
+     * Processes snapshot change event, updating DataObjects whose
+     * snapshots have changed.
+     */
+    public void snapshotsChanged(SnapshotEvent event) {
+        // ignore event if this ObjectStore was the originator
+        if(event.getRootSource() == this) {
+        	logObj.debug("Ignoring snapshot event sent by us: " + event);
+        	return;
+        }
+        
+		logObj.debug("Processing snapshot event: " + event);
     }
 }

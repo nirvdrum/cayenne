@@ -52,37 +52,12 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
-package org.objectstyle.cayenne.event;
-
-import java.util.Collections;
-import java.util.EventObject;
-import java.util.Map;
+ */
+package org.objectstyle.cayenne.access.event;
 
 /**
- * Common superclass for events passed from the EventManager to Listeners;
- * encapsulates optional event information.
- * 
- * @author Dirk Olmes
- * @author Holger Hoffstaette
+ * @author Andrei Adamchik
  */
-
-public class CayenneEvent extends EventObject {
-
-	private Map info;
-
-	public CayenneEvent(Object source) {
-		this(source, null);
-	}
-
-	public CayenneEvent(Object source, Map info) {
-		super(source);
-		this.info = (info != null ? info : Collections.EMPTY_MAP);
-	}
-
-	public Map getInfo() {
-		return info;
-	}
+public interface SnapshotEventListener {
+    public void snapshotsChanged(SnapshotEvent event);
 }
-
