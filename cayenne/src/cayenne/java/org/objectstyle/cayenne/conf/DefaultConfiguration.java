@@ -82,14 +82,18 @@ public class DefaultConfiguration extends Configuration {
 	protected boolean shouldInitialize = false;
 
 	/**
-	 * @HH todo
+	 * Default constructor. Simply calls Configuration().
+	 * @see Configuration()
 	 */
 	public DefaultConfiguration() {
 		super();
 	}
 
 	/**
-	 * @HH todo
+	 * Default implementation of Configuration#shouldInitialize().
+	 * Creates a ResourceLocator suitable for loading from the CLASSPATH,
+	 * unless it has already been set in a subclass.
+	 * Always returns <code>true</code>.
 	 */
 	protected boolean shouldInitialize() {
 		logObj.debug("shouldInitialize started.");
@@ -126,7 +130,6 @@ public class DefaultConfiguration extends Configuration {
 	/** 
 	 * Initializes all Cayenne resources. Loads all configured domains and their
 	 * data maps, initializes all domain Nodes and their DataSources.
-	 * Calls #didInitialize() after completion.
 	 */
 	protected void initialize() throws Exception {
 		logObj.debug("initialize starting.");
@@ -162,7 +165,8 @@ public class DefaultConfiguration extends Configuration {
 	}
 
 	/**
-	 * @HH todo
+	 * Default implementation of Configuration#didInitialize.
+	 * Currently does nothing except logging.
 	 */
 	protected void didInitialize() {
 		// empty default implementation
@@ -170,14 +174,15 @@ public class DefaultConfiguration extends Configuration {
 	}
 
 	/**
-	 * @HH todo
+	 * Returns the default ResourceLocator configured for CLASSPATH lookups.
 	 */
 	public ResourceLocator getResourceLocator() {
 		return this.locator;
 	}
 
 	/**
-	 * @HH todo
+	 * Sets the specified ResourceLocator.
+	 * Currently called from #initialize.
 	 */
 	protected void setResourceLocator(ResourceLocator locator) {
 		this.locator = locator;
