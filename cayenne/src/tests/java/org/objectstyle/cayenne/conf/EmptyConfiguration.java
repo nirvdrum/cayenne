@@ -67,7 +67,7 @@ public class EmptyConfiguration extends DefaultConfiguration {
 		super();
 
 		// add "test-resources" directory to CLASSPATH
-		this.getResourceLocator().addClassPath("test-resources");
+		this.addClassPath("test-resources");
 
 		// ignore any loading failures
 		this.setIgnoringLoadFailures(true);

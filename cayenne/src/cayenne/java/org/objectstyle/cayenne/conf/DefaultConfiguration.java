@@ -91,7 +91,7 @@ public class DefaultConfiguration extends Configuration {
 	/**
 	 * Constructor with a named domain configuration resource.
 	 * Simply calls {@link Configuration#Configuration(String)}.
-	 * @throws {@link ConfigurationException} when <code>domainConfigurationName</code>
+	 * @throws ConfigurationException when <code>domainConfigurationName</code>
 	 * is <code>null</code>.
 	 * @see Configuration#Configuration(String)
 	 */
@@ -116,14 +116,30 @@ public class DefaultConfiguration extends Configuration {
 			l.addClassPath(Util.getPackagePath(this.getClass().getName()));
 		}
 
-		// Configuration superclass statically defines what 
-		// ClassLoader to use for resources. This
-		// allows applications to control where resources 
-		// are loaded from.
+		// The Configuration superclass statically defines what 
+		// ClassLoader to use for resources. This allows applications to
+		// control where resources are loaded from.
 		l.setClassLoader(Configuration.getResourceLoader());
 	
 		// remember configured ResourceLocator
 		this.setResourceLocator(l);
+	}
+
+	/**
+	 * Adds a custom path for class path lookups.
+	 * Format should be "my/package/name" <i>without</i> leading "/".
+	 * 
+	 * This allows for easy customization of custom search paths after
+	 * Constructor invocation:
+	 * <pre>
+	 * conf = new DefaultConfiguration();
+	 * conf.addClassPath("my/package/name");
+	 * Configuration.initializeSharedConfiguration(conf);
+	 * </pre>
+	 * 
+	 */
+	public void addClassPath(String customPath) {
+		this.getResourceLocator().addClassPath(customPath);
 	}
 
 	/**
@@ -187,6 +203,7 @@ public class DefaultConfiguration extends Configuration {
 
 	/**
 	 * Returns the default ResourceLocator configured for CLASSPATH lookups.
+	 * @deprecated since 1.0 Beta-3; this method will become "protected".
 	 */
 	public ResourceLocator getResourceLocator() {
 		return this.locator;

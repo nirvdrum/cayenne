@@ -91,18 +91,6 @@ public class FileConfiguration extends DefaultConfiguration {
 	 * The file name is <b>not</b> checked for existence and must not
 	 * contain relative or absolute paths, i.e. only the file name.
 	 *
-	 * This allows adding of custom search paths after Constructor invocation:
-	 * <pre>
-	 * conf = new FileConfiguration("myconfig-cayenne.xml");
-	 * ResourceLocator l = conf.getResourceLocator();
-	 * l.addFilesystemPath(new File("a/relative/path"));
-	 * l.addFilesystemPath(new File("/an/absolute/search/path"));
-	 * Configuration.initializeSharedConfiguration(conf);
-	 * </pre>
-	 * The added file search paths must exist when given as
-	 * <code>File</code>; for adding possibly nonexisting paths, use
-	 * {@link ResourceLocator#addFilesystemPath(String)}.
-	 *
 	 * @throws ConfigurationException when projectFile is <code>null</code>.
 	 * @see DefaultConfiguration#DefaultConfiguration(String)
 	 */
@@ -153,6 +141,40 @@ public class FileConfiguration extends DefaultConfiguration {
 		if (projectDirectory != null) {
 			l.addFilesystemPath(projectDirectory);
 		}
+	}
+
+	/**
+	 * Adds the given String as a custom path for filesystem lookups.
+	 * The path can be relative or absolute and is <i>not</i> checked
+	 * for existence.
+	 *
+	 * This allows for easy customization of resource search paths after
+	 * Constructor invocation:
+	 * <pre>
+	 * conf = new FileConfiguration("myconfig-cayenne.xml");
+	 * conf.addFilesystemPath(new File("a/relative/path"));
+	 * conf.addFilesystemPath(new File("/an/absolute/search/path"));
+	 * Configuration.initializeSharedConfiguration(conf);
+	 * </pre>
+	 * 
+	 * Alternatively use {@link FileConfiguration#addFilesystemPath(File)}
+	 * for adding a path that is checked for existence.
+	 * 
+	 * @throws IllegalArgumentException if <code>path</code> is <code>null</code>.
+	 */
+	public void addFilesystemPath(String path) {
+		this.getResourceLocator().addFilesystemPath(path);
+	}
+
+	/**
+	 * Adds the given directory as a path for filesystem lookups.
+	 * The directory is checked for existence.
+	 * 
+	 * @throws IllegalArgumentException if <code>path</code> is <code>null</code>,
+	 * not a directory or not readable.
+	 */
+	public void addFilesystemPath(File path) {
+		this.getResourceLocator().addFilesystemPath(path);
 	}
 
 	/**

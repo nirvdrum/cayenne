@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.util.ResourceLocator;
  *
  * <p>To use a custom subclass of Configuration, Java applications must
  * call {@link #initializeSharedConfiguration} with the subclass as argument.
- * This will crate and initialize a Configuration singleton instance of the
+ * This will create and initialize a Configuration singleton instance of the
  * specified class. By default {@link DefaultConfiguration} is instantiated.
  * </p>
  *
@@ -311,6 +311,9 @@ public abstract class Configuration {
 
 	/**
 	 * Returns the resource locator used for finding and loading resources.
+	 * @deprecated since 1.0 Beta-3; this method will become "protected".
+	 * Please use appropriate Configuration subclass methods for customization
+	 * of resource lookup strategies.
 	 */
 	public abstract ResourceLocator getResourceLocator();
 

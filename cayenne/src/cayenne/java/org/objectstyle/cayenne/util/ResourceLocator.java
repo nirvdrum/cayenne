@@ -489,7 +489,7 @@ public class ResourceLocator {
 
 	/**
 	 * Adds a custom path for class path lookups.
-	 * Format should be "/my/package/name".
+	 * Format should be "my/package/name" <i>without</i> leading "/".
 	 */
 	public void addClassPath(String customPath) {
 		this.additionalClassPaths.add(customPath);
