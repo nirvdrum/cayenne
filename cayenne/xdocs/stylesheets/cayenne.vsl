@@ -113,10 +113,10 @@
     <table cellpadding="2" cellspacing="0" border="0" width="80%">
     <tr>
 #if ($panel.getAttributeValue("name"))
-    <td colspan="2" bgcolor="$panelbg"><strong>$panel.getAttributeValue("name")</strong></td></tr>
-    <tr><td bgcolor="$panelbg" width="20">&nbsp;</td>
+    <td colspan="2" bgcolor="$panelbg" align="left"><strong>$panel.getAttributeValue("name")</strong></td></tr>
+    <tr><td bgcolor="$panelbg" width="20" align="left">&nbsp;</td>
 #end
-    <td bgcolor="$panelbg">$panel.getText()</td></tr></table>
+    <td bgcolor="$panelbg" align="left">$panel.getText()</td></tr></table>
 </p>
 </div>
 #end
@@ -190,19 +190,21 @@
 
 
 #macro ( image $value )
+#set ($tag = "<img src='${relativePath}$value.getAttributeValue('src')'")
 #if ($value.getAttributeValue("width"))
-#set ($width=$value.getAttributeValue("width"))
+#set ($tag = "$tag width='$value.getAttributeValue('width')'")
 #end
 #if ($value.getAttributeValue("height"))
-#set ($height=$value.getAttributeValue("height"))
+#set ($tag = "$tag height='$value.getAttributeValue('height')'")
 #end
 #if ($value.getAttributeValue("align"))
-#set ($align=$value.getAttributeValue("align"))
+#set ($tag = "$tag align='$value.getAttributeValue('align')'")
 #end
 #if ($value.getAttributeValue("alt"))
-#set ($alt=$value.getAttributeValue("alt"))
+#set ($tag = "$tag alt='$value.getAttributeValue('alt')'")
 #end
-<img src="${relativePath}$value.getAttributeValue('src')" width="$!width" height="$!height" align="$!align" alt="$!alt">
+#set ($tag = "$tag/>")
+$tag
 #end
 
 #macro ( source $value)
