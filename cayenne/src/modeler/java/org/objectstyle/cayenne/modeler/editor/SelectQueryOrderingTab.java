@@ -69,6 +69,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.tree.TreeModel;
 
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
@@ -100,8 +102,6 @@ public class SelectQueryOrderingTab extends JPanel {
 
     protected MultiColumnBrowser browser;
     protected JTable table;
-    protected JButton addButton;
-    protected JButton removeButton;
 
     public SelectQueryOrderingTab(EventController mediator) {
         this.mediator = mediator;
@@ -110,10 +110,10 @@ public class SelectQueryOrderingTab extends JPanel {
         initController();
     }
 
-    private void initView() {
+    protected void initView() {
         // create widgets
-        addButton = new JButton("Add Ordering");
-        removeButton = new JButton("Remove Ordering");
+        JButton addButton = createAddPathButton();
+        JButton removeButton = createRemovePathButton();
 
         browser = new MultiColumnBrowser();
         browser.setPreferredColumnSize(BROWSER_CELL_DIM);
@@ -146,7 +146,7 @@ public class SelectQueryOrderingTab extends JPanel {
         add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    private void initController() {
+    protected void initController() {
 
         // scroll to selected row whenever a selection even occurs
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -157,23 +157,9 @@ public class SelectQueryOrderingTab extends JPanel {
                 }
             }
         });
-
-        addButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
-                addOrdering();
-            }
-        });
-
-        removeButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
-                removeOrdering();
-            }
-        });
     }
 
-    void initFromModel() {
+    protected void initFromModel() {
         Query query = mediator.getCurrentQuery();
 
         if (!(query instanceof SelectQuery)) {
@@ -188,8 +174,8 @@ public class SelectQueryOrderingTab extends JPanel {
 
         this.selectQuery = (SelectQuery) query;
 
-        browser.setModel(new EntityTreeModel((Entity) selectQuery.getRoot()));
-        table.setModel(new OrderingModel());
+        browser.setModel(createBrowserModel((Entity) selectQuery.getRoot()));
+        table.setModel(createTableModel());
 
         // init column sizes
         table.getColumnModel().getColumn(0).setPreferredWidth(250);
@@ -197,14 +183,45 @@ public class SelectQueryOrderingTab extends JPanel {
         setVisible(true);
     }
 
-    void addOrdering() {
+    protected JButton createAddPathButton() {
+        JButton button = new JButton("Add Ordering");
+        button.addActionListener(new ActionListener() {
 
+            public void actionPerformed(ActionEvent event) {
+                addOrdering();
+            }
+        });
+
+        return button;
+    }
+
+    protected JButton createRemovePathButton() {
+        JButton button = new JButton("Remove Ordering");
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                removeOrdering();
+            }
+        });
+
+        return button;
+    }
+
+    protected TreeModel createBrowserModel(Entity entity) {
+        return new EntityTreeModel(entity);
+    }
+
+    protected TableModel createTableModel() {
+        return new OrderingModel();
+    }
+
+    protected String getSelectedPath() {
         Object[] path = browser.getSelectionPath().getPath();
 
         // first item in the path is Entity, so we must have
         // at least two elements to constitute a valid ordering path
         if (path != null && path.length < 2) {
-            return;
+            return null;
         }
 
         StringBuffer buffer = new StringBuffer();
@@ -218,7 +235,14 @@ public class SelectQueryOrderingTab extends JPanel {
             buffer.append(".").append(pathEntry.getName());
         }
 
-        String orderingPath = buffer.toString();
+        return buffer.toString();
+    }
+
+    void addOrdering() {
+        String orderingPath = getSelectedPath();
+        if (orderingPath == null) {
+            return;
+        }
 
         // check if such ordering already exists
         Iterator it = selectQuery.getOrderings().iterator();

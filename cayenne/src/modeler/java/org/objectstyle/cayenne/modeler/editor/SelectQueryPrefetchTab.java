@@ -55,18 +55,177 @@
  */
 package org.objectstyle.cayenne.modeler.editor;
 
-import javax.swing.JPanel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.tree.TreeModel;
+
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 
 /**
+ * Subclass of the SelectQueryOrderingTab configured to work with prefetches.
+ * 
  * @author Andrei Adamchik
  */
-public class SelectQueryPrefetchTab extends JPanel {
-
-    protected EventController mediator;
+public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
 
     public SelectQueryPrefetchTab(EventController mediator) {
-        this.mediator = mediator;
+        super(mediator);
+    }
+
+    protected JButton createAddPathButton() {
+        JButton button = new JButton("Add Prefetch");
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                addPrefetch();
+            }
+        });
+
+        return button;
+    }
+
+    protected JButton createRemovePathButton() {
+        JButton button = new JButton("Remove Prefetch");
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                removePrefetch();
+            }
+        });
+
+        return button;
+    }
+
+    protected TreeModel createBrowserModel(Entity entity) {
+        EntityTreeModel treeModel = new EntityTreeModel(entity);
+        treeModel.setHideAttributes(true);
+        return treeModel;
+    }
+
+    protected TableModel createTableModel() {
+        return new PrefetchModel();
+    }
+
+    void addPrefetch() {
+        String prefetch = getSelectedPath();
+        if (prefetch == null) {
+            return;
+        }
+
+        // check if such prefetch already exists
+        if (selectQuery.getPrefetches().contains(prefetch)) {
+            return;
+        }
+
+        selectQuery.addPrefetch(prefetch);
+
+        // reset the model, since it is immutable
+        table.setModel(createTableModel());
+        mediator.fireQueryEvent(new QueryEvent(SelectQueryPrefetchTab.this, selectQuery));
+    }
+
+    void removePrefetch() {
+        int selection = table.getSelectedRow();
+        if (selection < 0) {
+            return;
+        }
+
+        String prefetch = (String) table.getModel().getValueAt(selection, 0);
+        selectQuery.removePrefetch(prefetch);
+
+        // reset the model, since it is immutable
+        table.setModel(createTableModel());
+        mediator.fireQueryEvent(new QueryEvent(SelectQueryPrefetchTab.this, selectQuery));
+    }
+
+    boolean isToMany(String prefetch) {
+        if (selectQuery == null) {
+            return false;
+        }
+
+        Object root = selectQuery.getRoot();
+
+        // totally invalid path would result in ExpressionException
+        try {
+            Expression exp = Expression.fromString(prefetch);
+            Object object = exp.evaluate(root);
+            if (object instanceof Relationship) {
+                return ((Relationship) object).isToMany();
+            }
+            else {
+                return false;
+            }
+        }
+        catch (ExpressionException e) {
+            return false;
+        }
+    }
+
+    /**
+     * A table model for the Ordering editing table.
+     */
+    final class PrefetchModel extends AbstractTableModel {
+
+        String[] prefetches;
+
+        PrefetchModel() {
+            prefetches = new String[selectQuery.getPrefetches().size()];
+            selectQuery.getPrefetches().toArray(prefetches);
+        }
+
+        public int getColumnCount() {
+            return 2;
+        }
+
+        public int getRowCount() {
+            return prefetches.length;
+        }
+
+        public Object getValueAt(int row, int column) {
+            switch (column) {
+                case 0:
+                    return prefetches[row];
+                case 1:
+                    return isToMany(prefetches[row]) ? Boolean.TRUE : Boolean.FALSE;
+                default:
+                    throw new IndexOutOfBoundsException("Invalid column: " + column);
+            }
+        }
+
+        public Class getColumnClass(int column) {
+            switch (column) {
+                case 0:
+                    return String.class;
+                case 1:
+                    return Boolean.class;
+                default:
+                    throw new IndexOutOfBoundsException("Invalid column: " + column);
+            }
+        }
+
+        public String getColumnName(int column) {
+            switch (column) {
+                case 0:
+                    return "Prefetch Path";
+                case 1:
+                    return "To Many";
+                default:
+                    throw new IndexOutOfBoundsException("Invalid column: " + column);
+            }
+        }
+
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
     }
 }

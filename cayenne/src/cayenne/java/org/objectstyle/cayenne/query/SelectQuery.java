@@ -461,6 +461,15 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery,
     public void clearPrefetches() {
         prefetches.clear();
     }
+    
+    /**
+     * Removes prefetch.
+     * 
+     * @since 1.1 
+     */
+    public void removePrefetch(String prefetch) {
+        this.prefetches.remove(prefetch);
+    }
 
     /**
      * Returns <code>true</code> if this query should produce a list of data rows as

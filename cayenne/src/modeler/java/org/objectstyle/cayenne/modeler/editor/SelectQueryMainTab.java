@@ -71,8 +71,6 @@ import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
@@ -156,15 +154,6 @@ public class SelectQueryMainTab extends JPanel {
     }
 
     private void initController() {
-        mediator.addQueryDisplayListener(new QueryDisplayListener() {
-
-            public void currentQueryChanged(QueryDisplayEvent e) {
-                Query query = e.getQuery();
-                if (query != null) {
-                    initFromModel(query);
-                }
-            }
-        });
 
         queryRoot.addActionListener(new ActionListener() {
 
@@ -194,7 +183,9 @@ public class SelectQueryMainTab extends JPanel {
      * Updates the view from the current model state. Invoked when a currently displayed
      * query is changed.
      */
-    private void initFromModel(Query query) {
+    void initFromModel() {
+        Query query = mediator.getCurrentQuery();
+
         if (!(query instanceof SelectQuery)) {
             setVisible(false);
             return;

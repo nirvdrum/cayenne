@@ -115,12 +115,15 @@ public class SelectQueryTabbedView extends JTabbedPane {
     }
 
     void initFromModel() {
-        if (model == null) {
+        if (mediator.getCurrentQuery() == null) {
             setVisible(false);
             return;
         }
 
-        setVisible(true);
+        // if no root, reset tabs to show the first panel..
+        if (mediator.getCurrentQuery().getRoot() == null) {
+            lastSelectionIndex = 0;
+        }
 
         // tab did not change - force update
         if (getSelectedIndex() == lastSelectionIndex) {
@@ -130,14 +133,21 @@ public class SelectQueryTabbedView extends JTabbedPane {
         else {
             setSelectedIndex(lastSelectionIndex);
         }
+
+        setVisible(true);
     }
 
     void updateTabs() {
         switch (lastSelectionIndex) {
+            case 0:
+                mainTab.initFromModel();
+                break;
             case 1:
                 orderingTab.initFromModel();
                 break;
+            case 2:
+                prefetchTab.initFromModel();
+                break;
         }
     }
-
 }
