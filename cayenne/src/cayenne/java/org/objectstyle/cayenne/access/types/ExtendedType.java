@@ -76,7 +76,7 @@ public interface ExtendedType {
     
     /**
      * Performs validation of an object property. Property is considered
-     * valid if this it satsifies the database constraints known to this
+     * valid if this it satisfies the database constraints known to this
      * ExtendedType. In case of validation failure, failures are appended
      * to the ValidationResult object and <code>false</code> is returned.
      * 
