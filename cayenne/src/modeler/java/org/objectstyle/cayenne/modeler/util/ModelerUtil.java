@@ -55,12 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.types.DefaultType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
@@ -83,7 +81,9 @@ public class ModelerUtil {
      * Returns array of db attribute names for DbEntity mapped to 
      * current ObjEntity. 
      */
-    public static String[] getDbAttributeNames(EventController mediator, DbEntity entity) {
+    public static String[] getDbAttributeNames(
+        EventController mediator,
+        DbEntity entity) {
         List list = entity.getAttributeList();
         int list_size = list.size() + 1;
         String[] arr = new String[list_size];
@@ -98,20 +98,14 @@ public class ModelerUtil {
     }
 
     public static String[] getRegisteredTypeNames() {
-        Iterator it = DefaultType.defaultTypes();
-        List list = new ArrayList();
-        while (it.hasNext()) {
-            list.add(it.next());
-        }
-
-        // can't use this anymore, ExtendedTypes are no longer a singleton
-        // String [] arr = ExtendedTypeMap.sharedInstance().getRegisteredTypeNames();
-
-        String[] ret_arr = new String[list.size() + 1];
-        ret_arr[0] = "";
-        for (int i = 0; i < list.size(); i++)
-            ret_arr[i + 1] = (String) list.get(i);
-        return ret_arr;
+        String[] srcList = new ExtendedTypeMap().getRegisteredTypeNames();
+        Arrays.sort(srcList);
+        
+        String[] finalList = new String[srcList.length + 1];
+        System.arraycopy(srcList, 0, finalList, 1, srcList.length);
+        finalList[0] = "";
+        
+        return finalList;
     }
 
     public static String[] getDatabaseTypes() {

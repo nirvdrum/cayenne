@@ -144,7 +144,7 @@ public class DataContextTst extends CayenneTestCase {
 
         Map s2 = new HashMap();
         s2.put("ARTIST_NAME", n2);
-        s2.put("DATE_OF_BIRTH", new java.sql.Date(System.currentTimeMillis()));
+        s2.put("DATE_OF_BIRTH", new java.util.Date());
         ObjEntity e = ctxt.getEntityResolver().lookupObjEntity(a1);
         ctxt.getSnapshotManager().mergeObjectWithSnapshot(e, a1, s2);
 
@@ -432,7 +432,7 @@ public class DataContextTst extends CayenneTestCase {
         assertEquals(artistCount, objects.size());
         
         Artist a1 = (Artist)objects.get(0);
-        assertEquals(java.sql.Date.class, a1.getDateOfBirth().getClass());
+        assertEquals(java.util.Date.class, a1.getDateOfBirth().getClass());
     }
 
     public void testPerformSelectQuery1() throws Exception {

@@ -60,19 +60,19 @@ import java.util.List;
 
 public class Exhibit extends org.objectstyle.cayenne.CayenneDataObject {
 
-    public void setClosingDate(java.sql.Timestamp closingDate) {
+    public void setClosingDate(java.util.Date closingDate) {
         writeProperty("closingDate", closingDate);
     }
-    public java.sql.Timestamp getClosingDate() {
-        return (java.sql.Timestamp)readProperty("closingDate");
+    public java.util.Date getClosingDate() {
+        return (java.util.Date)readProperty("closingDate");
     }
     
     
-    public void setOpeningDate(java.sql.Timestamp openingDate) {
+    public void setOpeningDate(java.util.Date openingDate) {
         writeProperty("openingDate", openingDate);
     }
-    public java.sql.Timestamp getOpeningDate() {
-        return (java.sql.Timestamp)readProperty("openingDate");
+    public java.util.Date getOpeningDate() {
+        return (java.util.Date)readProperty("openingDate");
     }
     
     

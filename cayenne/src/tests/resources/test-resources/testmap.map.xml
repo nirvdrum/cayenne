@@ -74,7 +74,7 @@
 	</obj-entity>
 	<obj-entity name="Artist" className="org.objectstyle.art.Artist" dbEntityName="ARTIST">
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
-		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="dateOfBirth" type="java.util.Date" db-attribute-name="DATE_OF_BIRTH"/>
 	</obj-entity>
 	<obj-entity name="ArtistAssets" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
@@ -90,8 +90,8 @@
 	<obj-entity name="DeleteRuleTest2" className="org.objectstyle.art.DeleteRuleTest2" dbEntityName="DELETE_RULE_TEST2">
 	</obj-entity>
 	<obj-entity name="Exhibit" className="org.objectstyle.art.Exhibit" dbEntityName="EXHIBIT">
-		<obj-attribute name="closingDate" type="java.sql.Timestamp" db-attribute-name="CLOSING_DATE"/>
-		<obj-attribute name="openingDate" type="java.sql.Timestamp" db-attribute-name="OPENING_DATE"/>
+		<obj-attribute name="closingDate" type="java.util.Date" db-attribute-name="CLOSING_DATE"/>
+		<obj-attribute name="openingDate" type="java.util.Date" db-attribute-name="OPENING_DATE"/>
 	</obj-entity>
 	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>
