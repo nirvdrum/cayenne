@@ -21,20 +21,20 @@
 <body text="#000000" bgcolor="#ffffff" link="#000000" alink="#000000" vlink="#000000" 
       topmargin="0" leftmargin="0" marginwidth="0" marginheight="0">
 <br>
-<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0">
   <tbody><tr>
     <td width="12%" height="70" align="right" valign="top" background="${relativePath}/images/778899.gif">
-       <a href="http://objectstyle.org/"><img border="0" src="${relativePath}/images/os_logo.gif" width="160" height="32"></a>
+       <a href="http://objectstyle.org/" target="_new"><img border="0" src="${relativePath}/images/os_logo.gif" width="160" height="32"></a>
     </td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" align="right" background="${relativePath}/images/cccc99.gif">
-       <a href="http://objectstyle.org/cayenne/"><img border="0" src="${relativePath}/images/cayenne_logo.gif" width="300" height="92"></a>
+       <a href="http://objectstyle.org/cayenne/" target="_new"><img border="0" src="${relativePath}/images/cayenne_logo.gif" width="300" height="92"></a>
     </td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${rightWidth}" background="${rightBG}"> </td>
   </tr>
   <tr>
-    <td width="12%" valign="top" bgcolor="#778899"><table width="100%" border="0" cellspacing="10" cellpadding="0">
+    <td width="12%" valign="top" bgcolor="#778899" height="450" ><table width="100%" border="0" cellspacing="10" cellpadding="0">
     <tbody>
       <tr>
         <td align="right" class="normal">
@@ -42,22 +42,7 @@
         </td>
       </tr>
     </tbody>
-    </table>
-    <table width="100%" border="0" cellspacing="10" cellpadding="0" class="body-black">
-      <tbody><tr>
-        <td align="right"><form onsubmit="q.value = query.value + ' site:objectstyle.org'" action="http://www.google.com/search" method="get">
-            <input name="q" type="hidden"><input id="query" type="text" class="input" size="20">
-            <br>
-
-search          </form>          </td>
-      </tr>
-      <tr>
-        <td align="right"><!--SFLOGO--></td>
-      </tr>
-      <tr>
-        <td align="right"><!--JNLOGO--></td>
-      </tr>
-    </tbody></table></td>
+    </table></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" valign="top" bgcolor="#cccc99" class="body-black">
     
@@ -92,14 +77,6 @@ search          </form>          </td>
 <br>
 </body>
 </html>
-
-## Velocity Macros
-## Creates mailing list archive placeholder
-#macro ( listarch $arch)
-<!-- Do not change comments below, it is a placeholder to create archive links -->
-<!-- ARCHIVE_START:$arch.getAttributeValue("name") -->
-<!-- ARCHIVE_END:$arch.getAttributeValue("name") -->
-#end
 
 #macro ( panel $panel)
 <table width="100%" border="0" cellpadding="0" cellspacing="7" class="note">
@@ -178,7 +155,7 @@ $panel.getText()<br></td>
 
 #macro ( menuprojectanchor $name $value )
 #if ($value.startsWith("http://"))
-    <a href="$value" class="body-white-small">$name</a>
+    <a href="$value" class="body-white-small" target="_new">$name</a>
 #else
     <a href="$relativePath$value" class="body-white-small">$name</a>
 #end
@@ -265,7 +242,6 @@ $tag
     </tbody>
     </table>
 #end
-
 
 #macro ( leftMenu )
     #set ($menus = $project.getChildren("menu"))

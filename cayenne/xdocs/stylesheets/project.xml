@@ -1,31 +1,22 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="Cayenne" href="http://objectstyle.org/cayenne/">
 
-    <title>Cayenne</title>
+    <title>Cayenne 1.1</title>
     
-    <menu name="ABOUT">
-        <item name="Home"       href="/index.html"/>
-        <item name="Download"       href="http://objectstyle.org/cayenne/download.html"/>
-        <item name="Contributors"   href="/contributors.html"/>
-        <item name="How Can I Help" href="/how-can-i-help.html"/>
-        <item name="Success Stories" href="/poweredby.html"/>
-        <item name="License"        href="/LICENSE"/>
-        <item name="Commercial Support" href="/cayenne-commercial-support.html"/>
-    </menu>
-
-
-    <menu name="DOCUMENTATION">
+    <menu name="LOCAL DOCS">
+    	<item name="Start" href="/index.html"/>
         <item name="User Guide" href="/userguide/index.html"/>
         <item name="Modeler Guide" href="/modelerguide/index.html"/>
         <item name="Examples" href="/examples/index.html"/>
         <item name="Javadoc API" href="/api/index.html"/>
-        <item name="FAQ" href="/faq/index.html"/>    
+        <item name="License" href="/LICENSE"/>
     </menu>
     
-    <menu name="COLLABORATION">
-        <item name="Bugs and Features" href="/bugs-features.html"/>
-        <item name="Mailing Lists"  href="http://objectstyle.org/cayenne/lists.html"/>
-        <item name="Developer Guide"  href="/developerguide/index.html"/>
+    <menu name="ONLINE RESOURCES">
+        <item name="Home" href="http://objectstyle.org/cayenne/"/>
+        <item name="Download" href="http://objectstyle.org/cayenne/download.html"/>
+        <item name="Bugs and Features" href="http://objectstyle.org/cayenne/bugs-features.html"/>
+        <item name="Commercial Support" href="http://objectstyle.org/cayenne/cayenne-commercial-support.html"/>
     </menu>
     
     <!-- Embedded TOC Start -->

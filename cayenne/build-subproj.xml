@@ -152,7 +152,7 @@
                     windowtitle="Cayenne API"
                     overview="src/${subproj}/java/overview.html">
             
-            <bottom><![CDATA[<!--SFLOGO--> &nbsp; <i>Copyright &#169; 2001-2004 <a href=
+            <bottom><![CDATA[<!--@SFLOGO@--> &nbsp; <i>Copyright &#169; 2001-2004 <a href=
             "http://objectstyle.org" target="_top">ObjectStyle.org</a> All Rights Reserved.</i>]]>
             </bottom>
             <classpath refid="classpath-${subproj}"/>
