@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.project;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -89,27 +88,28 @@ public class ProjectTraversal {
      * of any type supported in Cayenne projects (Configuration, DataMap, DataNode, etc...)
      */
     public void traverse(Object rootNode) {
-        traverse(rootNode, new ProjectPath());
+        this.traverse(rootNode, new ProjectPath());
     }
 
     public void traverse(Object rootNode, ProjectPath path) {
         if (rootNode instanceof Project) {
-            traverseProject((Project) rootNode, path);
+            this.traverseProject((Project)rootNode, path);
         } else if (rootNode instanceof DataDomain) {
-            traverseDomains(Collections.singletonList(rootNode), path);
+            this.traverseDomains(Collections.singletonList(rootNode).iterator(), path);
         } else if (rootNode instanceof DataMap) {
-            traverseMaps(Collections.singletonList(rootNode), path);
+            this.traverseMaps(Collections.singletonList(rootNode).iterator(), path);
         } else if (rootNode instanceof Entity) {
-            traverseEntities(Collections.singletonList(rootNode), path);
+            this.traverseEntities(Collections.singletonList(rootNode).iterator(), path);
         } else if (rootNode instanceof Attribute) {
-            traverseAttributes(Collections.singletonList(rootNode), path);
+            this.traverseAttributes(Collections.singletonList(rootNode).iterator(), path);
         } else if (rootNode instanceof Relationship) {
-            traverseRelationships(Collections.singletonList(rootNode), path);
+            this.traverseRelationships(Collections.singletonList(rootNode).iterator(), path);
         } else if (rootNode instanceof DataNode) {
-            traverseNodes(Collections.singletonList(rootNode), path);
+            this.traverseNodes(Collections.singletonList(rootNode).iterator(), path);
         } else {
-            String nodeClass =
-                (rootNode != null) ? rootNode.getClass().getName() : "(null)";
+            String nodeClass = (rootNode != null)
+            					? rootNode.getClass().getName()
+            					: "(null)";
             throw new IllegalArgumentException(
                 "Unsupported root node: " + nodeClass);
         }
@@ -125,7 +125,7 @@ public class ProjectTraversal {
         if (handler.shouldReadChildren(project, path)) {
             Iterator it = project.getChildren().iterator();
             while (it.hasNext()) {
-                traverse(it.next(), projectPath);
+                this.traverse(it.next(), projectPath);
             }
         }
     }
@@ -133,73 +133,66 @@ public class ProjectTraversal {
     /**
       * Performs traversal starting from a list of domains.
       */
-    public void traverseDomains(List domains, ProjectPath path) {
-        Iterator it = domains.iterator();
-        while (it.hasNext()) {
-            DataDomain domain = (DataDomain) it.next();
+    public void traverseDomains(Iterator domains, ProjectPath path) {
+        while (domains.hasNext()) {
+            DataDomain domain = (DataDomain)domains.next();
             ProjectPath domainPath = path.appendToPath(domain);
             handler.projectNode(domainPath);
 
             if (handler.shouldReadChildren(domain, path)) {
-                traverseMaps(domain.getDataMapsAsList(), domainPath);
-                traverseNodes(domain.getDataNodesAsList(), domainPath);
+                this.traverseMaps(domain.getDataMaps().iterator(), domainPath);
+                this.traverseNodes(domain.getDataNodes().iterator(), domainPath);
             }
         }
     }
 
-    public void traverseNodes(List nodes, ProjectPath path) {
-        Iterator it = nodes.iterator();
-        while (it.hasNext()) {
-            DataNode node = (DataNode) it.next();
+    public void traverseNodes(Iterator nodes, ProjectPath path) {
+        while (nodes.hasNext()) {
+            DataNode node = (DataNode)nodes.next();
             ProjectPath nodePath = path.appendToPath(node);
             handler.projectNode(nodePath);
 
             if (handler.shouldReadChildren(node, path)) {
-                traverseMaps(node.getDataMapsAsList(), nodePath);
+                this.traverseMaps(node.getDataMaps().iterator(), nodePath);
             }
         }
     }
 
-    public void traverseMaps(List maps, ProjectPath path) {
-
-        Iterator it = maps.iterator();
-        while (it.hasNext()) {
-            DataMap map = (DataMap) it.next();
+    public void traverseMaps(Iterator maps, ProjectPath path) {
+        while (maps.hasNext()) {
+            DataMap map = (DataMap)maps.next();
             ProjectPath mapPath = path.appendToPath(map);
             handler.projectNode(mapPath);
 
             if (handler.shouldReadChildren(map, path)) {
-                traverseEntities(map.getObjEntitiesAsList(), mapPath);
-                traverseEntities(map.getDbEntitiesAsList(), mapPath);
+                this.traverseEntities(map.getObjEntitiesAsList().iterator(), mapPath);
+                this.traverseEntities(map.getDbEntitiesAsList().iterator(), mapPath);
             }
         }
     }
 
-    public void traverseEntities(List entities, ProjectPath path) {
-        Iterator it = entities.iterator();
-        while (it.hasNext()) {
-            Entity ent = (Entity) it.next();
+    public void traverseEntities(Iterator entities, ProjectPath path) {
+        while (entities.hasNext()) {
+            Entity ent = (Entity)entities.next();
             ProjectPath entPath = path.appendToPath(ent);
             handler.projectNode(entPath);
 
             if (handler.shouldReadChildren(ent, path)) {
-                traverseAttributes(ent.getAttributeList(), entPath);
-                traverseRelationships(ent.getRelationshipList(), entPath);
+                this.traverseAttributes(ent.getAttributes().iterator(), entPath);
+                this.traverseRelationships(ent.getRelationships().iterator(), entPath);
             }
         }
     }
 
-    public void traverseAttributes(List attributes, ProjectPath path) {
-        Iterator it = attributes.iterator();
-        while (it.hasNext()) {
-            handler.projectNode(path.appendToPath(it.next()));
+    public void traverseAttributes(Iterator attributes, ProjectPath path) {
+        while (attributes.hasNext()) {
+            handler.projectNode(path.appendToPath(attributes.next()));
         }
     }
 
-    public void traverseRelationships(List relationships, ProjectPath path) {
-        Iterator it = relationships.iterator();
-        while (it.hasNext()) {
-            handler.projectNode(path.appendToPath(it.next()));
+    public void traverseRelationships(Iterator relationships, ProjectPath path) {
+        while (relationships.hasNext()) {
+            handler.projectNode(path.appendToPath(relationships.next()));
         }
     }
 }
