@@ -53,16 +53,62 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.util.List;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.gui.validator.RelationshipErrorMsg;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class ObjRelationshipValidator extends TreeNodeValidator {
+
+    /**
+     * Constructor for ObjRelationshipValidator.
+     */
+    public ObjRelationshipValidator() {
+        super();
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[])
+     */
+    public void validateObject(Object[] path, Validator validator) {
+        ObjRelationship rel = (ObjRelationship) ProjectTraversal.objectFromPath(path);
+        if (Util.isEmptyString(rel.getName())) {
+            validator.registerError("Unnamed ObjRelationship.", path);
+        }
+
+        if (rel.getTargetEntity() == null) {
+            validator.registerError("ObjRelationship has no target entity.", path);
+        } else {
+            // check for missing DbRelationship mappings
+            List dbRels = rel.getDbRelationshipList();
+            if (dbRels.size() == 0) {
+                validator.registerWarning(
+                    "ObjRelationship has no DbRelationship mapping.",
+                    path);
+            } else {
+                DbEntity expectedSrc = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
+                DbEntity expectedTarget =
+                    ((ObjEntity) rel.getTargetEntity()).getDbEntity();
+
+                if (((DbRelationship) dbRels.get(0)).getSourceEntity() != expectedSrc
+                    || ((DbRelationship) dbRels.get(dbRels.size() - 1)).getTargetEntity()
+                        != expectedTarget) {
+                    validator.registerWarning(
+                        "ObjRelationship has incomplete DbRelationship mapping.",
+                        path);
+                }
+            }
+        }
+    }
 }

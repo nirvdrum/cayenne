@@ -189,6 +189,13 @@ public class Util {
 		else
 			return obj2.equals(obj1);
 	}
+	
+	/**
+	 * Returns true, if the String is null or an empty string.
+	 */
+	public static boolean isEmptyString(String str) {
+		return str == null || str.length() == 0;
+	}
 
 	/** Create object copy using serialization mechanism. */
 	public static Object cloneViaSerialization(Serializable obj)

@@ -55,9 +55,15 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
-import org.apache.log4j.Logger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -82,297 +88,311 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class DataDomain implements QueryEngine {
-	static Logger logObj = Logger.getLogger(DataDomain.class.getName());
+    static Logger logObj = Logger.getLogger(DataDomain.class.getName());
 
-	/** Stores "name" property. */
-	protected String name;
+    /** Stores "name" property. */
+    protected String name;
 
-	/** Stores mapping of data nodes to DataNode name keys. */
-	protected HashMap dataNodes = new HashMap();
+    /** Stores mapping of data nodes to DataNode name keys. */
+    protected Map dataNodes = Collections.synchronizedMap(new HashMap());
 
-	/** Stores DataMaps by name. */
-	protected HashMap maps = new HashMap();
+    /** Stores DataMaps by name. */
+    protected Map maps = Collections.synchronizedMap(new HashMap());
 
-	/** Stores mapping of data nodes to ObjEntity names.
-	  * Its goal is to speed up lookups for data operation 
-	  * switching. */
-	protected HashMap nodesByEntityName = new HashMap();
+    /** Stores mapping of data nodes to ObjEntity names.
+      * Its goal is to speed up lookups for data operation 
+      * switching. */
+    protected Map nodesByEntityName = Collections.synchronizedMap(new HashMap());
 
-	/** Creates an unnamed DataDomain */
-	public DataDomain() {
-	}
+    /** Creates an unnamed DataDomain */
+    public DataDomain() {}
 
-	/** Creates DataDomain and assigns it a <code>name</code>. */
-	public DataDomain(String name) {
-		this.name = name;
-	}
+    /** Creates DataDomain and assigns it a <code>name</code>. */
+    public DataDomain(String name) {
+        this.name = name;
+    }
 
-	/** Returns "name" property value. */
-	public String getName() {
-		return name;
-	}
+    /** Returns "name" property value. */
+    public String getName() {
+        return name;
+    }
 
-	/** Sets "name" property to a new value. */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /** Sets "name" property to a new value. */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/** Registers new DataMap with this domain. */
-	public void addMap(DataMap map) {
-		maps.put(map.getName(), map);
-	}
+    /** Registers new DataMap with this domain. */
+    public void addMap(DataMap map) {
+        maps.put(map.getName(), map);
+    }
 
-	/** Returns DataMap matching <code>name</code> parameter. */
-	public DataMap getMap(String name) {
-		return (DataMap) maps.get(name);
-	}
+    /** Returns DataMap matching <code>name</code> parameter. */
+    public DataMap getMap(String name) {
+        return (DataMap) maps.get(name);
+    }
 
-	/** 
-	 * Unregisters DataMap matching <code>name</code> parameter.
-	 * Also removes map from any child DataNodes that use it.
-	 */
-	public void removeMap(String name) {
-		DataMap map = (DataMap)maps.remove(name);
-		if(map == null) {
-			return;
-		}
-		
-		// remove from data nodes
-		Iterator it = dataNodes.keySet().iterator();
-		while(it.hasNext()) {
-			DataNode node = (DataNode)dataNodes.get(it.next());
-			node.removeDataMap(name);
-		}
-		
-		// reindex nodes to remove references on removed map entities
-		reindexNodes();		
-	}
+    /** 
+     * Unregisters DataMap matching <code>name</code> parameter.
+     * Also removes map from any child DataNodes that use it.
+     */
+    public void removeMap(String name) {
+        DataMap map = (DataMap) maps.remove(name);
+        if (map == null) {
+            return;
+        }
 
-	/** Unregisters DataNode. Also removes entities mapped to the current node. */
-	public void removeDataNode(String name) {
-		DataNode node_to_remove = (DataNode) dataNodes.get(name);
-		if (null == node_to_remove)
-			return;
-		dataNodes.remove(name);
-		Iterator iter = nodesByEntityName.keySet().iterator();
-		while (iter.hasNext()) {
-			String text = (String) iter.next();
-			DataNode node = (DataNode) nodesByEntityName.get(text);
-			if (node == node_to_remove) {
-				nodesByEntityName.remove(text);
-			}
-		}
-	}
+        // remove from data nodes
+        Iterator it = dataNodes.keySet().iterator();
+        while (it.hasNext()) {
+            DataNode node = (DataNode) dataNodes.get(it.next());
+            node.removeDataMap(name);
+        }
 
-	/** Returns a list of registered DataMap objects. */
-	public List getMapList() {
-		ArrayList list = new ArrayList();
-		Iterator it = maps.keySet().iterator();
-		while (it.hasNext()) {
-			list.add(maps.get(it.next()));
-		}
-		return list;
-	}
+        // reindex nodes to remove references on removed map entities
+        reindexNodes();
+    }
 
-	/** Return an array of DataNodes (by copy) */
-	public DataNode[] getDataNodes() {
-		DataNode[] dataNodesArray = null;
-		synchronized (dataNodes) {
-			Collection nodes = dataNodes.values();
+    /** Unregisters DataNode. Also removes entities mapped to the current node. */
+    public void removeDataNode(String name) {
+        DataNode node_to_remove = (DataNode) dataNodes.get(name);
+        if (null == node_to_remove)
+            return;
+        dataNodes.remove(name);
+        Iterator iter = nodesByEntityName.keySet().iterator();
+        while (iter.hasNext()) {
+            String text = (String) iter.next();
+            DataNode node = (DataNode) nodesByEntityName.get(text);
+            if (node == node_to_remove) {
+                nodesByEntityName.remove(text);
+            }
+        }
+    }
 
-			if (nodes == null || nodes.size() == 0)
-				dataNodesArray = new DataNode[0];
-			else {
-				dataNodesArray = new DataNode[nodes.size()];
-				nodes.toArray(dataNodesArray);
-			}
-		}
-		return dataNodesArray;
-	}
+    /** Returns a list of registered DataMap objects. */
+    public List getMapList() {
+        ArrayList list = new ArrayList();
 
-	/** Closes all data nodes, removes them from the list
-	*  of available nodes. */
-	public void reset() {
-		synchronized (dataNodes) {
-			dataNodes.clear();
-			nodesByEntityName.clear();
-		}
-	}
+        synchronized (maps) {
+            Iterator it = maps.keySet().iterator();
+            while (it.hasNext()) {
+                list.add(maps.get(it.next()));
+            }
+        }
+        return list;
+    }
 
-	/** Adds new DataNode to this domain. */
-	public void addNode(DataNode node) {
-		synchronized (dataNodes) {
-			// add node to name->node map
-			dataNodes.put(node.getName(), node);
+    /**
+     * Returns a list of DataNodes associated with this domain.
+     * List is returned by copy.
+     */
+    public List getDataNodeList() {
+        ArrayList list = new ArrayList();
 
-			// add node to "ent name->node" map
-			DataMap[] maps = node.getDataMaps();
-			if (maps != null) {
-				int mapsCount = maps.length;
-				for (int i = 0; i < mapsCount; i++) {
-					addMap(maps[i]);
-					Iterator it = maps[i].getObjEntitiesAsList().iterator();
-					while (it.hasNext()) {
-						ObjEntity e = (ObjEntity) it.next();
-						nodesByEntityName.put(e.getName(), node);
-					}
-				}
-			}
-		}
-	}
+        synchronized (dataNodes) {
+            Iterator it = dataNodes.keySet().iterator();
+            while (it.hasNext()) {
+                list.add(dataNodes.get(it.next()));
+            }
+        }
+        return list;
+    }
 
-	/** Creates and returns new DataContext. */
-	public DataContext createDataContext() {
-		return new DataContext(this);
-	}
+    /** Returns an array of DataNodes (by copy) */
+    public DataNode[] getDataNodes() {
+        DataNode[] dataNodesArray = null;
+        synchronized (dataNodes) {
+            Collection nodes = dataNodes.values();
 
-	/** Returns registered DataNode whose name matches
-	  * <code>name</code> parameter. */
-	public DataNode getNode(String nodeName) {
-		return (DataNode) dataNodes.get(nodeName);
-	}
+            if (nodes == null || nodes.size() == 0)
+                dataNodesArray = new DataNode[0];
+            else {
+                dataNodesArray = new DataNode[nodes.size()];
+                nodes.toArray(dataNodesArray);
+            }
+        }
+        return dataNodesArray;
+    }
 
-	/** 
-	 * Returns DataNode that should handle database operations for
-	 * a specified <code>objEntityName</code>. Method is synchronized
-	 * since it can potentially update the index of DataNodes.
-	 */
-	public synchronized DataNode dataNodeForObjEntityName(String objEntityName) {
-		DataNode node = (DataNode) nodesByEntityName.get(objEntityName);
+    /** Closes all data nodes, removes them from the list
+    *  of available nodes. */
+    public void reset() {
+        synchronized (dataNodes) {
+            dataNodes.clear();
+            nodesByEntityName.clear();
+        }
+    }
 
-		// if lookup fails, it may mean that internal index
-		// in 'nodesByEntityName' need to be updated
-		// do it and then try again.
-		if (node == null) {
-			reindexNodes();
-			return (DataNode) nodesByEntityName.get(objEntityName);
-		} else {
-			return node;
-		}
-	}
+    /** Adds new DataNode to this domain. */
+    public void addNode(DataNode node) {
+        synchronized (dataNodes) {
+            // add node to name->node map
+            dataNodes.put(node.getName(), node);
 
-	/**
-	 * Updates internal index of DataNodes stored by the entity name.
-	 */
-	public void reindexNodes() {
-		nodesByEntityName.clear();
-		DataNode[] nodes = this.getDataNodes();
-		for (int j = 0; j < nodes.length; j++) {
-			DataNode node = nodes[j];
-			DataMap[] maps = node.getDataMaps();
-			
-			if (maps != null) {
-				int mapsCount = maps.length;
-				for (int i = 0; i < mapsCount; i++) {
-					addMap(maps[i]);
-					Iterator it = maps[i].getObjEntitiesAsList().iterator();
-					while (it.hasNext()) {
-						ObjEntity e = (ObjEntity) it.next();
-						nodesByEntityName.put(e.getName(), node);
-					}
-				}
-			}
-		}
-	}
+            // add node to "ent name->node" map
+            DataMap[] maps = node.getDataMaps();
+            if (maps != null) {
+                int mapsCount = maps.length;
+                for (int i = 0; i < mapsCount; i++) {
+                    addMap(maps[i]);
+                    Iterator it = maps[i].getObjEntitiesAsList().iterator();
+                    while (it.hasNext()) {
+                        ObjEntity e = (ObjEntity) it.next();
+                        nodesByEntityName.put(e.getName(), node);
+                    }
+                }
+            }
+        }
+    }
 
-	/** 
-	 * Returns DataNode that should handle database operations for
-	 * a specified <code>objEntity</code>. 
-	 */
-	public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-		return dataNodeForObjEntityName(objEntity.getName());
-	}
+    /** Creates and returns new DataContext. */
+    public DataContext createDataContext() {
+        return new DataContext(this);
+    }
 
-	/** Returns ObjEntity whose name matches <code>name</code> parameter. */
-	public ObjEntity lookupEntity(String name) {
-		Iterator it = maps.values().iterator();
-		while (it.hasNext()) {
-			DataMap map = (DataMap) it.next();
-			ObjEntity anEntity = map.getObjEntity(name);
-			if (anEntity != null) {
-				return anEntity;
-			}
-		}
-		return null;
-	}
+    /** Returns registered DataNode whose name matches
+      * <code>name</code> parameter. */
+    public DataNode getNode(String nodeName) {
+        return (DataNode) dataNodes.get(nodeName);
+    }
 
-	/** 
-	 * Returns a DataMap that contains DbEntity matching the 
-	 * <code>entityName</code> parameter.
-	 */
-	public DataMap getMapForDbEntity(String entityName) {
-		Iterator it = maps.values().iterator();
-		while (it.hasNext()) {
-			DataMap map = (DataMap) it.next();
-			if (map.getDbEntity(entityName) != null) {
-				return map;
-			}
-		}
-		return null;
-	} 
-	
-	/**
-	 * Returns a DataMap that contains ObjEntity matching the 
-	 * <code>entityName</code> parameter.
-	 */
-	public DataMap getMapForObjEntity(String entityName) {
-		Iterator it = maps.values().iterator();
-		while (it.hasNext()) {
-			DataMap map = (DataMap) it.next();
-			if (map.getObjEntity(entityName) != null) {
-				return map;
-			}
-		}
-		return null;
-	} 
-	
-	/** Analyzes each query and sends it to appropriate DataNode for execution. */
-	public void performQueries(List queries, OperationObserver resultCons) {
-		Iterator it = queries.iterator();
-		HashMap queryMap = new HashMap();
-		// organize queries by node
-		while (it.hasNext()) {
-			Query nextQ = (Query) it.next();
-			DataNode aNode =
-				this.dataNodeForObjEntityName(nextQ.getObjEntityName());
-			if (aNode == null) {
-				throw new CayenneRuntimeException(
-					"No suitable DataNode to handle entity '"
-						+ nextQ.getObjEntityName()
-						+ "'.");
-			}
+    /** 
+     * Returns DataNode that should handle database operations for
+     * a specified <code>objEntityName</code>. Method is synchronized
+     * since it can potentially update the index of DataNodes.
+     */
+    public synchronized DataNode dataNodeForObjEntityName(String objEntityName) {
+        DataNode node = (DataNode) nodesByEntityName.get(objEntityName);
 
-			ArrayList nodeQueries = (ArrayList) queryMap.get(aNode);
-			if (nodeQueries == null) {
-				nodeQueries = new ArrayList();
-				queryMap.put(aNode, nodeQueries);
-			}
+        // if lookup fails, it may mean that internal index
+        // in 'nodesByEntityName' need to be updated
+        // do it and then try again.
+        if (node == null) {
+            reindexNodes();
+            return (DataNode) nodesByEntityName.get(objEntityName);
+        } else {
+            return node;
+        }
+    }
 
-			nodeQueries.add(nextQ);
-		} // perform queries on each node
-		Iterator nodeIt = queryMap.keySet().iterator();
-		while (nodeIt.hasNext()) {
-			DataNode nextNode = (DataNode) nodeIt.next();
-			List nodeQueries = (List) queryMap.get(nextNode);
-			// ? maybe this should be run in parallel on different nodes ?
-			// (then resultCons will have to be prepared to handle results coming
-			// from multiple threads)
-			// another way of handling this (which actually preserves
-			nextNode.performQueries(nodeQueries, resultCons);
-		}
-	} 
-	
-	/** Analyzes a query and sends it to appropriate DataNode */
-	public void performQuery(Query query, OperationObserver resultCons) {
-		DataNode aNode =
-			this.dataNodeForObjEntityName(query.getObjEntityName());
-		if (aNode == null) {
-			throw new CayenneRuntimeException(
-				"No DataNode to handle entity '"
-					+ query.getObjEntityName()
-					+ "'.");
-		}
+    /**
+     * Updates internal index of DataNodes stored by the entity name.
+     */
+    public void reindexNodes() {
+        nodesByEntityName.clear();
+        DataNode[] nodes = this.getDataNodes();
+        for (int j = 0; j < nodes.length; j++) {
+            DataNode node = nodes[j];
+            DataMap[] maps = node.getDataMaps();
 
-		aNode.performQuery(query, resultCons);
-	}
+            if (maps != null) {
+                int mapsCount = maps.length;
+                for (int i = 0; i < mapsCount; i++) {
+                    addMap(maps[i]);
+                    Iterator it = maps[i].getObjEntitiesAsList().iterator();
+                    while (it.hasNext()) {
+                        ObjEntity e = (ObjEntity) it.next();
+                        nodesByEntityName.put(e.getName(), node);
+                    }
+                }
+            }
+        }
+    }
+
+    /** 
+     * Returns DataNode that should handle database operations for
+     * a specified <code>objEntity</code>. 
+     */
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+        return dataNodeForObjEntityName(objEntity.getName());
+    }
+
+    /** Returns ObjEntity whose name matches <code>name</code> parameter. */
+    public ObjEntity lookupEntity(String name) {
+        Iterator it = maps.values().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            ObjEntity anEntity = map.getObjEntity(name);
+            if (anEntity != null) {
+                return anEntity;
+            }
+        }
+        return null;
+    }
+
+    /** 
+     * Returns a DataMap that contains DbEntity matching the 
+     * <code>entityName</code> parameter.
+     */
+    public DataMap getMapForDbEntity(String entityName) {
+        Iterator it = maps.values().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            if (map.getDbEntity(entityName) != null) {
+                return map;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns a DataMap that contains ObjEntity matching the 
+     * <code>entityName</code> parameter.
+     */
+    public DataMap getMapForObjEntity(String entityName) {
+        Iterator it = maps.values().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            if (map.getObjEntity(entityName) != null) {
+                return map;
+            }
+        }
+        return null;
+    }
+
+    /** Analyzes each query and sends it to appropriate DataNode for execution. */
+    public void performQueries(List queries, OperationObserver resultCons) {
+        Iterator it = queries.iterator();
+        HashMap queryMap = new HashMap();
+        // organize queries by node
+        while (it.hasNext()) {
+            Query nextQ = (Query) it.next();
+            DataNode aNode = this.dataNodeForObjEntityName(nextQ.getObjEntityName());
+            if (aNode == null) {
+                throw new CayenneRuntimeException(
+                    "No suitable DataNode to handle entity '"
+                        + nextQ.getObjEntityName()
+                        + "'.");
+            }
+
+            ArrayList nodeQueries = (ArrayList) queryMap.get(aNode);
+            if (nodeQueries == null) {
+                nodeQueries = new ArrayList();
+                queryMap.put(aNode, nodeQueries);
+            }
+
+            nodeQueries.add(nextQ);
+        } // perform queries on each node
+        Iterator nodeIt = queryMap.keySet().iterator();
+        while (nodeIt.hasNext()) {
+            DataNode nextNode = (DataNode) nodeIt.next();
+            List nodeQueries = (List) queryMap.get(nextNode);
+            // ? maybe this should be run in parallel on different nodes ?
+            // (then resultCons will have to be prepared to handle results coming
+            // from multiple threads)
+            // another way of handling this (which actually preserves
+            nextNode.performQueries(nodeQueries, resultCons);
+        }
+    }
+
+    /** Analyzes a query and sends it to appropriate DataNode */
+    public void performQuery(Query query, OperationObserver resultCons) {
+        DataNode aNode = this.dataNodeForObjEntityName(query.getObjEntityName());
+        if (aNode == null) {
+            throw new CayenneRuntimeException(
+                "No DataNode to handle entity '" + query.getObjEntityName() + "'.");
+        }
+
+        aNode.performQuery(query, resultCons);
+    }
 }

@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
  * Relationship validation message.

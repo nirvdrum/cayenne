@@ -64,9 +64,6 @@ import javax.sql.DataSource;
  * from configuration data.
  */
 public interface DataSourceFactory {
-
-	public static final String JNDI_FACTORY = "org.objectstyle.cayenne.conf.JNDIDataSourceFactory";
-	public static final String DIRECT_FACTORY = "org.objectstyle.cayenne.conf.DriverDataSourceFactory";
     
     /** Initializes factory with the parent configuration object. */
     public void setParentConfig(Configuration conf);

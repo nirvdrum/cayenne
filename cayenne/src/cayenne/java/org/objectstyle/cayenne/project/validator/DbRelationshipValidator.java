@@ -53,16 +53,38 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+/**
+ * @author Andrei Adamchik
+ */
+public class DbRelationshipValidator extends TreeNodeValidator {
+
+    /**
+     * Constructor for DbRelationshipValidator.
+     */
+    public DbRelationshipValidator() {
+        super();
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
+     */
+    public void validateObject(Object[] path, Validator validator) {
+        DbRelationship rel = (DbRelationship) ProjectTraversal.objectFromPath(path);
+        if (rel.getTargetEntity() == null) {
+        	validator.registerError("DbRelationship has no target entity.", path);
+        } else if (rel.getJoins().size() == 0) {
+        	validator.registerWarning("DbRelationship has no joins.", path);
+        }
+
+        if (Util.isEmptyString(rel.getName())) {
+        	validator.registerError("Unnamed DbRelationship.", path);
+        }
+    }
+
 }

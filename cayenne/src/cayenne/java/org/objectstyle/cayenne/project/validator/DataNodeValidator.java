@@ -53,16 +53,81 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.util.Iterator;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class DataNodeValidator extends TreeNodeValidator {
+    static Logger logObj = Logger.getLogger(DataNodeValidator.class);
+
+    /**
+     * Constructor for DataNodeValidator.
+     */
+    public DataNodeValidator() {
+        super();
+    }
+
+    public void validateObject(Object[] path, Validator validator) {
+        DataNode node = (DataNode) ProjectTraversal.objectFromPath(path);
+        validateName(node, path, validator);
+        validateConnection(node, path, validator);
+    }
+
+    protected void validateConnection(
+        DataNode node,
+        Object[] path,
+        Validator validator) {
+        String factory = node.getDataSourceFactory();
+
+        // If direct factory, make sure the location is a valid file name.
+        if (Util.isEmptyString(factory)) {
+            validator.registerError("No DataSource factory.", path);
+        } else {
+            String location = node.getDataSourceLocation();
+            if (Util.isEmptyString(location)) {
+                validator.registerError("DataNode has no location parameter.", path);
+            }
+        }
+
+        if (node.getAdapter() == null) {
+            validator.registerError("DataNode has no DBAdapter.", path);
+        }
+    }
+
+    protected void validateName(DataNode node, Object[] path, Validator validator) {
+        String name = node.getName();
+
+        if (Util.isEmptyString(name)) {
+            validator.registerError("Unnamed DataNode.", path);
+            return;
+        }
+
+        DataDomain domain = (DataDomain) ProjectTraversal.objectParentFromPath(path);
+        if (domain == null) {
+            return;
+        }
+
+        // check for duplicate names in the parent context
+        Iterator it = domain.getDataNodeList().iterator();
+        while (it.hasNext()) {
+            DataNode otherNode = (DataNode) it.next();
+            if (otherNode == node) {
+                continue;
+            }
+
+            if (name.equals(otherNode.getName())) {
+                validator.registerError("Duplicate DataNode name: " + name + ".", path);
+                break;
+            }
+        }
+    }
 }

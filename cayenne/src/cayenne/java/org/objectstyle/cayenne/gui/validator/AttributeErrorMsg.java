@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.project.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
  * Attribute validation message.

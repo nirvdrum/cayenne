@@ -53,16 +53,55 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.util.Iterator;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class DomainValidator extends TreeNodeValidator {
+    /**
+     * Constructor for DomainValidator.
+     */
+    public DomainValidator() {
+        super();
+    }
+
+    public void validateObject(Object[] path, Validator validator) {
+
+        // check for empty name
+        DataDomain domain = (DataDomain) ProjectTraversal.objectFromPath(path);
+        String name = domain.getName();
+        if (Util.isEmptyString(name)) {
+            validator.registerError("Unnamed DataDomain.", path);
+
+            // no more name assertions
+            return;
+        }
+
+        Configuration config = (Configuration) ProjectTraversal.objectParentFromPath(path);
+        if (config == null) {
+            return;
+        }
+
+        // check for duplicate names in the parent context
+        Iterator it = config.getDomainList().iterator();
+        while (it.hasNext()) {
+            DataDomain dom = (DataDomain) it.next();
+            if (dom == domain) {
+                continue;
+            }
+
+            if (name.equals(dom.getName())) {
+                validator.registerError("Duplicate DataDomain name: " + name + ".", path);
+                return;
+            }
+        }
+    }
 }

@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.gui.CayenneDialog;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /** 
  * Dialog for displaying validation errors.
@@ -143,8 +144,8 @@ public class ValidatorDialog
 		if (messages.getSelectedRow() >= 0) {
 			ValidatorTableModel model =
 				(ValidatorTableModel) messages.getModel();
-			ErrorMsg obj = model.getValue(messages.getSelectedRow());
-			obj.displayField(mediator, super.getParentEditor());
+			ValidationResult obj = model.getValue(messages.getSelectedRow());
+			ErrorMsg.getErrorMsg(obj).displayField(mediator, super.getParentEditor());
 		}
 	}
 
@@ -179,7 +180,7 @@ class ValidatorTableModel extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		ErrorMsg msg = (ErrorMsg) errMsg.get(row);
+		ValidationResult msg = (ValidationResult) errMsg.get(row);
 		if (col == 0) {
 			if (msg.getSeverity() == ErrorMsg.ERROR)
 				return "ERROR";
@@ -195,7 +196,7 @@ class ValidatorTableModel extends AbstractTableModel {
 		return false;
 	}
 
-	public ErrorMsg getValue(int row) {
-		return (ErrorMsg) errMsg.get(row);
+	public ValidationResult getValue(int row) {
+		return (ValidationResult) errMsg.get(row);
 	}
 }

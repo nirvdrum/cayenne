@@ -80,6 +80,8 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.gui.event.DataNodeDisplayListener;
@@ -183,8 +185,8 @@ public class DataNodeDetailView
         DefaultComboBoxModel model =
             new DefaultComboBoxModel(
                 new String[] {
-                    DataSourceFactory.JNDI_FACTORY,
-                    DataSourceFactory.DIRECT_FACTORY });
+                    JNDIDataSourceFactory.class.getName(),
+                    DriverDataSourceFactory.class.getName() });
         factory.setModel(model);
         factory.setSelectedIndex(-1);
 
@@ -368,7 +370,7 @@ public class DataNodeDetailView
         if (src == factory) {
             String ele = (String) factory.getModel().getSelectedItem();
             if (ele != null && ele.trim().length() > 0) {
-                if (ele.equals(DataSourceFactory.DIRECT_FACTORY)) {
+                if (ele.equals(DriverDataSourceFactory.class.getName())) {
                     fileBtn.setVisible(true);
                     location.setEditable(false);
                 } else {
@@ -568,7 +570,7 @@ public class DataNodeDetailView
                     // If direct connection, 
                     // show File button and disable text field.
                     // Otherwise hide File button and enable text field.
-                    if (selected_class.equals(DataSourceFactory.DIRECT_FACTORY)) {
+                    if (selected_class.equals(DriverDataSourceFactory.class.getName())) {
                         fileBtn.setVisible(true);
                         location.setEditable(false);
                     } else {

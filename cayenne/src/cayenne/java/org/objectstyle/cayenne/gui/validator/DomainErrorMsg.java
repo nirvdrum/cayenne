@@ -61,7 +61,7 @@ import javax.swing.JFrame;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.project.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
  * DataDomain validation message.

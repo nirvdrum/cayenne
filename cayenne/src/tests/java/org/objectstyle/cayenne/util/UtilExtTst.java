@@ -52,15 +52,13 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.util;
 
 import java.io.File;
 import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.CayenneTestCase;
-
-
 
 public class UtilExtTst extends CayenneTestCase {
     static Logger logObj = Logger.getLogger(UtilTst.class.getName());
@@ -89,13 +87,25 @@ public class UtilExtTst extends CayenneTestCase {
         assertEquals("", Util.getPackagePath("ClassWithNoPackage"));
     }
 
+    public void testIsEmptyString1() throws Exception {
+        assertTrue(Util.isEmptyString(""));
+    }
+
+    public void testIsEmptyString2() throws Exception {
+        assertTrue(!Util.isEmptyString("  "));
+    }
+
+    public void testIsEmptyString3() throws Exception {
+        assertTrue(Util.isEmptyString(null));
+    }
+
     public void testBackslashFix() throws java.lang.Exception {
         String strBefore = "abcd\\12345\\";
         String strAfter = "abcd/12345/";
         assertEquals(strAfter, Util.substBackslashes(strBefore));
     }
 
-    public void testNullSafeEquals()  throws java.lang.Exception {
+    public void testNullSafeEquals() throws java.lang.Exception {
         // need a special subclass of Object to make "clone" method public
         class CloneableObject implements Cloneable {
             public Object clone() throws CloneNotSupportedException {
@@ -103,7 +113,7 @@ public class UtilExtTst extends CayenneTestCase {
             }
 
             public boolean equals(Object obj) {
-                if(obj == null)
+                if (obj == null)
                     return false;
 
                 // for the purpose of this test

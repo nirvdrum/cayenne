@@ -55,14 +55,69 @@
  */
 package org.objectstyle.cayenne.project;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.CayenneTestCase;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+/**
+ * @author Andrei Adamchik
+ */
+public class ProjectTraversalTst extends CayenneTestCase {
+
+    /**
+     * Constructor for ProjectTraversalTst.
+     * @param arg0
+     */
+    public ProjectTraversalTst(String arg0) {
+        super(arg0);
+    }
+
+   public void testObjectFromPath1() throws Exception {
+        Object[] path = new Object[] { new Object(), new Object()};
+        assertSame(path[1], ProjectTraversal.objectFromPath(path));
+    }
+
+    public void testObjectFromPath2() throws Exception {
+        Object[] path = new Object[] { new Object()};
+        assertSame(path[0], ProjectTraversal.objectFromPath(path));
+    }
+
+    public void testObjectFromPath3() throws Exception {
+        Object[] path = new Object[] {};
+
+        try {
+            ProjectTraversal.objectFromPath(path);
+            fail("Must throw exception on empty list");
+        } catch (ProjectException ex) {}
+    }
+
+    public void testObjectParentFromPath1() throws Exception {
+        Object[] path = new Object[] { new Object(), new Object()};
+        assertSame(path[0], ProjectTraversal.objectParentFromPath(path));
+    }
+
+    public void testObjectParentFromPath2() throws Exception {
+        Object[] path = new Object[] { new Object()};
+        assertNull(ProjectTraversal.objectParentFromPath(path));
+    }
+    
+    
+   public void testBuildPath1() throws Exception {
+    	Object obj1 = new Object();
+    	Object[] path = ProjectTraversal.buildPath(obj1, null);
+    	assertNotNull(path);
+    	assertEquals(1, path.length);
+    	assertSame(obj1, path[0]);
+    }
+    
+    public void testBuildPath2() throws Exception {
+    	Object obj1 = new Object();
+    	Object[] tstPath = new Object[] {new Object(), new Object()};
+    	
+    	Object[] path = ProjectTraversal.buildPath(obj1, tstPath);
+    	assertNotNull(path);
+    	assertEquals(3, path.length);
+    	assertSame(obj1, path[2]);
+    	assertSame(tstPath[1], path[1]);
+    	assertSame(tstPath[0], path[0]);
+    }
 }
+

@@ -53,81 +53,41 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
+
+import org.objectstyle.cayenne.gui.validator.AttributeErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * ValidationResult encapsulates information about a single node validation
- * on the project tree.
- * 
  * @author Andrei Adamchik
  */
-public class ValidationResult {
-	public static final int VALID = 0;
-	public static final int WARNING = 1;
-	public static final int ERROR = 2;
-	
-	
-    protected Object[] treeNodePath;
-    protected String message;
-    protected int severity;
+public class ObjAttributeValidator extends TreeNodeValidator {
 
     /**
-     * Constructor for ProjectValidationError.
+     * Constructor for ObjAttributeValidator.
      */
-    public ValidationResult(int severity, String message, Object[] treeNodePath) {
-    	this.severity = severity;
-    	this.message = message;
-    	this.treeNodePath = treeNodePath;
+    public ObjAttributeValidator() {
+        super();
     }
 
-    public String toString() {
-        return getMessage();
-    }
-    /**
-     * Returns the message.
-     * @return String
-     */
-    public String getMessage() {
-        return message;
-    }
+    public void validateObject(Object[] path, Validator validator) {
+        ObjAttribute attribute = (ObjAttribute) ProjectTraversal.objectFromPath(path);
 
-    /**
-     * Returns the severity.
-     * @return int
-     */
-    public int getSeverity() {
-        return severity;
-    }
+        // Must have name
+        if (Util.isEmptyString(attribute.getName())) {
+            validator.registerError("Unnamed ObjAttribute.", path);
+        }
+        
+         // all attributes must have type
+        if (Util.isEmptyString(attribute.getType())) {
+            validator.registerWarning("ObjAttribute has no type.", path);
+        }
 
-    /**
-     * Returns the treeNodePath.
-     * @return Object[]
-     */
-    public Object[] getTreeNodePath() {
-        return treeNodePath;
-    }
-
-    /**
-     * Sets the message.
-     * @param message The message to set
-     */
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    /**
-     * Sets the severity.
-     * @param severity The severity to set
-     */
-    public void setSeverity(int severity) {
-        this.severity = severity;
-    }
-
-    /**
-     * Sets the treeNodePath.
-     * @param treeNodePath The treeNodePath to set
-     */
-    public void setTreeNodePath(Object[] treeNodePath) {
-        this.treeNodePath = treeNodePath;
+        if (attribute.getDbAttribute() == null) {
+        	validator.registerWarning("ObjAttribute has no DbAttribute mapping.", path);
+        }
     }
 }

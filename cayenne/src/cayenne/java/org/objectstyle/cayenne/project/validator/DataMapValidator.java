@@ -53,16 +53,62 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.util.Iterator;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class DataMapValidator extends TreeNodeValidator {
+
+    /**
+     * Constructor for DataMapValidator.
+     */
+    public DataMapValidator() {
+        super();
+    }
+
+    public void validateObject(Object[] path, Validator validator) {
+        DataMap map = (DataMap) ProjectTraversal.objectFromPath(path);
+        validateName(map, path, validator);
+
+        if (Util.isEmptyString(map.getLocation())) {
+            validator.registerError("Unspecified DataMap location.", path);
+        }
+    }
+
+    protected void validateName(DataMap map, Object[] path, Validator validator) {
+        String name = map.getName();
+
+        if (Util.isEmptyString(name)) {
+            validator.registerError("Unnamed DataMap.", path);
+            return;
+        }
+
+        DataDomain domain = (DataDomain) ProjectTraversal.objectParentFromPath(path);
+        if (domain == null) {
+            return;
+        }
+
+        // check for duplicate names in the parent context
+        Iterator it = domain.getMapList().iterator();
+        while (it.hasNext()) {
+            DataMap otherMap = (DataMap) it.next();
+            if (otherMap == map) {
+                continue;
+            }
+
+            if (name.equals(otherMap.getName())) {
+                validator.registerError("Duplicate DataMap name: " + name + ".", path);
+                return;
+            }
+        }
+    }
 }

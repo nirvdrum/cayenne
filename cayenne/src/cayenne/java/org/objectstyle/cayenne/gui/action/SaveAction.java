@@ -70,8 +70,8 @@ import javax.swing.KeyStroke;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DomainHelper;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.validator.ErrorMsg;
@@ -79,7 +79,7 @@ import org.objectstyle.cayenne.gui.validator.ValidatorDialog;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.project.ProjectDataSource;
-import org.objectstyle.cayenne.project.Validator;
+import org.objectstyle.cayenne.project.validator.Validator;
 
 /** 
  * Parent class for all Editor actions related to saving project.
@@ -122,7 +122,7 @@ public class SaveAction extends CayenneAction {
 		while (iter.hasNext()) {
 			DataNode node = (DataNode) iter.next();
 			// If using direct connection, save into separate file
-			if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
+			if (node.getDataSourceFactory().equals(DriverDataSourceFactory.class.getName())) {
 				saveDataNode(node);
 			}
 		}
@@ -267,7 +267,7 @@ public class SaveAction extends CayenneAction {
 			new ValidatorDialog(
 				Editor.getFrame(),
 				mediator,
-				val.getErrorMessages(),
+				val.validationResults(),
 				validationCode).setVisible(true);
 		}
 	}

@@ -53,16 +53,19 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
 import junit.framework.TestSuite;
 
+/**
+ * @author Andrei Adamchik
+ */
 public class AllTests {
 	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
+		TestSuite suite = new TestSuite("Project Validator Package Tests");
+	    suite.addTestSuite(ValidatorTst.class);
 		return suite;
 	}
+
 }
+

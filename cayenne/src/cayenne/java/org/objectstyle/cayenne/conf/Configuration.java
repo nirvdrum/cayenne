@@ -55,11 +55,9 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -70,6 +68,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.util.CayenneMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
@@ -108,7 +107,7 @@ public abstract class Configuration {
 		Configuration.class.getClassLoader();
 
 	/** Lookup map that stores DataDomains with names as keys. */
-	protected HashMap dataDomains = new HashMap();
+	protected CayenneMap dataDomains = new CayenneMap(this);
 
 	/** 
 	 * Sets <code>cl</code> class's ClassLoader to serve

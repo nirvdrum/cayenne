@@ -53,70 +53,78 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.project.validator;
 
-package org.objectstyle.cayenne.gui.validator;
-
-import javax.swing.JFrame;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.gui.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.gui.validator.AttributeErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * DataDomain validation message.
- * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class EntityErrorMsg extends ErrorMsg {
-    protected DataMap map;
-    protected Entity entity;
+public class DbAttributeValidator extends TreeNodeValidator {
 
     /**
-     * Constructor for EntityErrorMsg.
-     * @param result
+     * Constructor for DbAttributeValidator.
      */
-    public EntityErrorMsg(ValidationResult result) {
-        super(result);
-        this.map = (DataMap) result.getTreeNodePath()[1];
-        this.entity = (Entity) result.getTreeNodePath()[2];
+    public DbAttributeValidator() {
+        super();
     }
 
     /**
-     * Constructor for EntityErrorMsg.
-     * @param message
-     * @param severity
-     * @param domain
+     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
      */
-    public EntityErrorMsg(String message, int severity, DataDomain domain) {
-        super(message, severity, domain);
-    }
+    public void validateObject(Object[] path, Validator validator) {
+        DbAttribute attribute = (DbAttribute) ProjectTraversal.objectFromPath(path);
+        // Must have name
+        if (Util.isEmptyString(attribute.getName())) {
+            validator.registerError("Unnamed DbAttribute.", path);
+        }
 
-    public EntityErrorMsg(
-        String message,
-        int severity,
-        DataDomain domain,
-        DataMap map,
-        Entity entity) {
+        // all attributes must have type
+        if (attribute.getType() == TypesMapping.NOT_DEFINED) {
+            validator.registerWarning("DbAttribute has no type.", path);
+        }
 
-        super(message, severity, domain);
-        this.map = map;
-        this.entity = entity;
-    }
+        if (attribute instanceof DerivedDbAttribute) {
+            DerivedDbAttribute derived = (DerivedDbAttribute) attribute;
+            int paramCount = derived.getParams().size();
 
-    public void displayField(Mediator mediator, JFrame frame) {
-        EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
-        event.setTabReset(true);
+            String spec = derived.getExpressionSpec();
+            int paramsExpected = 0;
+            if (spec != null) {
+                // count tokens
+                int ind = -DerivedDbAttribute.ATTRIBUTE_TOKEN.length();
+                while ((ind =
+                    spec.indexOf(
+                        DerivedDbAttribute.ATTRIBUTE_TOKEN,
+                        ind + DerivedDbAttribute.ATTRIBUTE_TOKEN.length()))
+                    >= 0) {
+                    paramsExpected++;
+                }
+            }
 
-        if (entity instanceof ObjEntity) {
-            mediator.fireObjEntityDisplayEvent(event);
-        } else if (entity instanceof DbEntity) {
-            mediator.fireDbEntityDisplayEvent(event);
+            if (paramsExpected != paramCount) {
+                validator.registerWarning(
+                    "Derived Attribute's \""
+                        + attribute.getName()
+                        + "\" parameter mismatch.",
+                    path);
+            }
+        }
+        // VARCHAR and CHAR attributes must have max length
+        else if (
+            attribute.getMaxLength() < 0
+                && (attribute.getType() == java.sql.Types.VARCHAR
+                    || attribute.getType() == java.sql.Types.CHAR)) {
+
+            validator.registerWarning(
+                "Character DbAttribute doesn't have max length.",
+                path);
         }
     }
 }

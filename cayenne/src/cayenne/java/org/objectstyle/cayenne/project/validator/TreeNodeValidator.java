@@ -53,105 +53,89 @@
  * <http://objectstyle.org/>.
  *
  */
-
-package org.objectstyle.cayenne.gui.validator;
-
-import javax.swing.JFrame;
+package org.objectstyle.cayenne.project.validator;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.ProjectException;
 import org.objectstyle.cayenne.project.ProjectTraversal;
-import org.objectstyle.cayenne.project.validator.TreeNodeValidator;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
 
-/** 
- * Superclass of CayenneModeler validation messages.
+/**
+ * Validator of a single node in a project object tree. 
+ * Do not confuse with org.objectstyle.cayenne.access.DataNode.
  * 
- * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public abstract class ErrorMsg {
-    public static final int NO_ERROR = ValidationResult.VALID;
-    public static final int WARNING = ValidationResult.WARNING;
-    public static final int ERROR = ValidationResult.ERROR;
+public abstract class TreeNodeValidator {
 
-    protected String message;
-    protected int severity;
-    protected DataDomain domain;
+    // initialize singleton validators
+    protected static final DomainValidator domainValidator = new DomainValidator();
+    protected static final DataNodeValidator nodeValidator = new DataNodeValidator();
+    protected static final DataMapValidator mapValidator = new DataMapValidator();
+    protected static final ObjEntityValidator objEntityValidator =
+        new ObjEntityValidator();
+    protected static final ObjAttributeValidator objAttrValidator =
+        new ObjAttributeValidator();
+    protected static final ObjRelationshipValidator objRelValidator =
+        new ObjRelationshipValidator();
+    protected static final DbEntityValidator dbEntityValidator = new DbEntityValidator();
+    protected static final DbAttributeValidator dbAttrValidator =
+        new DbAttributeValidator();
+    protected static final DbRelationshipValidator dbRelValidator =
+        new DbRelationshipValidator();
 
-    public static ErrorMsg getErrorMsg(ValidationResult result) {
-        Object validatedObj = result.getValidatedObject();
-        
-        ErrorMsg msg = null;
-        if (validatedObj instanceof Attribute) {
-            msg = new AttributeErrorMsg(result);
-        } else if (validatedObj instanceof Relationship) {
-            msg = new RelationshipErrorMsg(result);
-        } else if (validatedObj instanceof Entity) {
-            msg = new EntityErrorMsg(result);
+    /**
+     * Validates an object, appending any validation messages 
+     * to the validator provided.
+     */
+    public static void validate(Object[] path, Validator validator) {
+        Object validatedObj = ProjectTraversal.objectFromPath(path);
+        TreeNodeValidator validatorObj = null;
+        if (validatedObj instanceof ObjAttribute) {
+            validatorObj = objAttrValidator;
+        } else if (validatedObj instanceof ObjRelationship) {
+            validatorObj = objRelValidator;
+        } else if (validatedObj instanceof ObjEntity) {
+            validatorObj = objEntityValidator;
+        } else if (validatedObj instanceof DbAttribute) {
+            validatorObj = dbAttrValidator;
+        } else if (validatedObj instanceof DbRelationship) {
+            validatorObj = dbRelValidator;
+        } else if (validatedObj instanceof DbEntity) {
+            validatorObj = dbEntityValidator;
         } else if (validatedObj instanceof DataNode) {
-            msg = new DataNodeErrorMsg(result);
+            validatorObj = nodeValidator;
         } else if (validatedObj instanceof DataMap) {
-            msg = new DataMapErrorMsg(result);
+            validatorObj = mapValidator;
         } else if (validatedObj instanceof DataDomain) {
-            msg = new DomainErrorMsg(result);
+            validatorObj = domainValidator;
         } else {
             throw new ProjectException("Unsupported project node: " + validatedObj);
         }
 
-        return msg;
+        validatorObj.validateObject(path, validator);
     }
 
-    public ErrorMsg(ValidationResult result) {
-        this.message = result.getMessage();
-        this.severity = result.getSeverity();
-        this.domain = (DataDomain) result.getTreeNodePath()[0];
-    }
-
-    public ErrorMsg(String message, int severity, DataDomain domain) {
-        this.message = message;
-        this.severity = severity;
-        this.domain = domain;
-    }
-
-    /** 
-     * Fires event to display the screen where error should be corrected. 
+    /**
+     * Constructor for TreeNodeValidator.
      */
-    public abstract void displayField(Mediator mediator, JFrame frame);
-
-    /** Returns the text of the error message. */
-    public String getMessage() {
-        return message;
+    public TreeNodeValidator() {
+        super();
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    /** Returns the severity of the error message.*/
-    public int getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(int severity) {
-        this.severity = severity;
-    }
-
-    public DataDomain getDomain() {
-        return domain;
-    }
-
-    public void setDomain(DataDomain domain) {
-        this.domain = domain;
-    }
-
-    public String toString() {
-        return getMessage();
-    }
+    /**
+     * Validates an object, appending any warnings or errors to the validator. 
+     * Object to be validated is the last object in a <code>treeNodePath</code> 
+     * array argument.
+     * Concrete implementations would expect an object of a specific type.
+     * Otherwise, ClassCastException will be thrown.
+     */
+    public abstract void validateObject(Object[] treeNodePath, Validator validator);
 }

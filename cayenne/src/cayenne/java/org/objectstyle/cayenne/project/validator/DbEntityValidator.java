@@ -53,16 +53,73 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.util.Iterator;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.gui.validator.EntityErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class DbEntityValidator extends TreeNodeValidator {
+
+    /**
+     * Constructor for DbEntityValidator.
+     */
+    public DbEntityValidator() {
+        super();
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
+     */
+    public void validateObject(Object[] path, Validator validator) {
+        DbEntity ent = (DbEntity) ProjectTraversal.objectFromPath(path);
+        validateName(ent, path, validator);
+
+        if ((ent instanceof DerivedDbEntity)
+            && ((DerivedDbEntity) ent).getParentEntity() == null) {
+            validator.registerError(
+                "No parent selected for derived entity \"" + ent.getName() + "\".",
+                path);
+        }
+    }
+
+    protected void validateName(DbEntity ent, Object[] path, Validator validator) {
+        String name = ent.getName();
+
+        // Must have name
+        if (Util.isEmptyString(name)) {
+            validator.registerError("Unnamed DbEntity.", path);
+            return;
+        } 
+        
+        
+        DataMap map = (DataMap) ProjectTraversal.objectParentFromPath(path);
+        if (map == null) {
+            return;
+        }
+
+        // check for duplicate names in the parent context
+        Iterator it = map.getDbEntitiesAsList().iterator();
+        while (it.hasNext()) {
+            DbEntity otherEnt = (DbEntity) it.next();
+            if (otherEnt == ent) {
+                continue;
+            }
+
+            if (name.equals(otherEnt.getName())) {
+                validator.registerError("Duplicate DbEntity name: " + name + ".", path);
+                break;
+            }
+        }
+    }
 }

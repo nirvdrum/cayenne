@@ -53,16 +53,75 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.util.Iterator;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.gui.validator.EntityErrorMsg;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class ObjEntityValidator extends TreeNodeValidator {
+
+    /**
+     * Constructor for ObjEntityValidator.
+     */
+    public ObjEntityValidator() {
+        super();
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[])
+     */
+    public void validateObject(Object[] path, Validator validator) {
+        ObjEntity ent = (ObjEntity) ProjectTraversal.objectFromPath(path);
+        validateName(ent, path, validator);
+
+        // validate DbEntity presence
+        if (ent.getDbEntity() == null) {
+            validator.registerWarning("ObjEntity has no DbEntity mapping.", path);
+        }
+
+        // validate Java Class
+        if (Util.isEmptyString(ent.getClassName())) {
+            validator.registerWarning("ObjEntity has no Java class mapped.", path);
+        }
+
+    }
+
+    protected void validateName(ObjEntity ent, Object[] path, Validator validator) {
+        String name = ent.getName();
+
+        // Must have name
+        if (Util.isEmptyString(name)) {
+            validator.registerError("Unnamed ObjEntity.", path);
+            return;
+        }
+
+        DataMap map = (DataMap) ProjectTraversal.objectParentFromPath(path);
+        if (map == null) {
+            return;
+        }
+
+        // check for duplicate names in the parent context
+        Iterator it = map.getObjEntitiesAsList().iterator();
+        while (it.hasNext()) {
+            ObjEntity otherEnt = (ObjEntity) it.next();
+            if (otherEnt == ent) {
+                continue;
+            }
+
+            if (name.equals(otherEnt.getName())) {
+                validator.registerError("Duplicate ObjEntity name: " + name + ".", path);
+                break;
+            }
+        }
+    }
 }

@@ -133,12 +133,14 @@ public class CayenneTable extends JTable {
 	}
 
 	public JTextComponent getSelectedTextComponent() {
-		if (getSelectedRow() < 0 && getSelectedColumn() < 0) {
+		int row = getSelectedRow();
+		int column = getSelectedColumn();
+		if (row < 0 || column < 0) {
 			return null;
 		}
 
 		TableCellEditor editor =
-			this.getCellEditor(getSelectedRow(), getSelectedColumn());
+			this.getCellEditor(row, column);
 		if (editor instanceof DefaultCellEditor) {
 			Component comp = ((DefaultCellEditor) editor).getComponent();
 			if (comp instanceof JTextComponent) {

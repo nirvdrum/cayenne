@@ -53,16 +53,67 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.project;
+package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		return suite;
-	}
+/**
+ * ValidationResult encapsulates information about a single node validation
+ * on the project tree.
+ * 
+ * @author Andrei Adamchik
+ */
+public class ValidationResult {
+    public static final int VALID = 0;
+    public static final int WARNING = 1;
+    public static final int ERROR = 2;
+
+    protected Object[] treeNodePath;
+    protected String message;
+    protected int severity;
+
+    /**
+     * Constructor for ProjectValidationError.
+     */
+    public ValidationResult(int severity, String message, Object[] treeNodePath) {
+        this.severity = severity;
+        this.message = message;
+        this.treeNodePath = treeNodePath;
+    }
+
+    public Object getValidatedObject() {
+        return ProjectTraversal.objectFromPath(treeNodePath);
+    }
+
+    public Object getValidatedObjectParent() {
+        return ProjectTraversal.objectParentFromPath(treeNodePath);
+    }
+
+    public String toString() {
+        return getMessage();
+    }
+
+    /**
+     * Returns the message.
+     * @return String
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Returns the severity.
+     * @return int
+     */
+    public int getSeverity() {
+        return severity;
+    }
+
+    /**
+     * Returns the treeNodePath.
+     * @return Object[]
+     */
+    public Object[] getTreeNodePath() {
+        return treeNodePath;
+    }
 }

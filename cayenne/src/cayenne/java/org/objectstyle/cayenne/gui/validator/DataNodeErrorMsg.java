@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.project.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
  * DataNode validation message.
