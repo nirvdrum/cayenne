@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
-import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +65,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;

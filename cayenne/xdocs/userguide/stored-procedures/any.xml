@@ -9,7 +9,54 @@
 <body>
     <section name="9. Using Stored Procedures">
     <subsection name="9.2 Executing an Arbitrary Stored Procedure">
-		<p>TO BE DONE</p>
+		<p>Previous chapter showed how to select a single set of data rows
+		using a ProcedureQuery. In a more general case stored procedures can return multiple 
+		sets of data, execute update/delete/insert queries, etc. To collect the results of
+		execution of such stored procedure, a special class, <a href=
+		"../../api/cayenne/org/objectstyle/cayenne/access/QueryResult.html">QueryResult</a>, 
+		is used. Its superclass implements OperationObserver, so it can be used as a second parameter to
+		<code>DataContext.performQuery()</code> method. After the query execution is done, QueryResult 
+		instance will contain all the output of the query:
+		</p>
+		
+<source>
+DataContext ctxt;
+
+// "my_procedure" is a name of a stored procedure,
+// that must exist in the DataMap
+ProcedureQuery query = new ProcedureQuery("my_procedure");
+
+// Set "IN" parameter values
+query.addParam("paramter1", "abc");
+query.addParam("parameter2", new Integer(3000));
+
+QueryResult resultsCollection = new QueryResult();
+
+// run query
+ctxt.performQuery(query, resultsCollection);
+
+// check the results
+
+// note that this is a list of lists
+// if you expect only a single result set, use 
+// resultCollection.getFirstRows(query) as a shortcut
+List rowSets = resultsCollection.getRows(query);
+Iterator it = rowSets.iterator();
+while(it.hasNext()) {
+  // nextResultSet will contain data rows
+  List nextResultSet = (List)it.next();
+  ....
+}
+
+// now check update counts
+List updates = resultsCollection.getUpdates(query);
+it = updates.iterator();
+while(it.hasNext()) {
+  Integer nextUpdateCount = (Integer)it.next();
+  System.out.println("Updated " + nextUpdateCount + " rows.");
+  ....
+}
+</source>
 	</subsection>
     </section>
 </body>
