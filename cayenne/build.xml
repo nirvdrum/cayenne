@@ -62,6 +62,7 @@
     <target name="release">
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-modeler.xml" target="dist-src"/>
+		<ant antfile="build-dvmodeler.xml" target="dist-src"/>
 		<ant antfile="build-tutorials.xml" target="dist-src"/>
 		<ant antfile="build-doc.xml" target="dist-src"/>
 		
@@ -86,6 +87,7 @@
     <target name="release-site" depends="nositedir">
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-modeler.xml" target="dist-src"/>
+		<ant antfile="build-dvmodeler.xml" target="dist-src"/>
 		<ant antfile="build-tutorials.xml" target="release-site"/>
 		<ant antfile="build-doc.xml" target="release-site"/>
     </target>
@@ -101,6 +103,8 @@
 		<!-- Modeler must be fully compiled, with scripts -->
 		<ant antfile="build-modeler.xml" target="dist-bin"/>
 		<ant antfile="build-tests-modeler.xml" target="test"/>
+
+		<ant antfile="build-dvmodeler.xml" target="dist-bin"/>
     </target>
     
     <!-- ========================================== -->
@@ -128,6 +132,7 @@
     <target name="build">
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-modeler.xml" target="dist-bin"/>
+		<ant antfile="build-dvmodeler.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="dist-bin"/>
 		<ant antfile="build-performance.xml" target="dist-bin"/>
 		<ant antfile="build-tutorials.xml" target="dist-bin"/>
@@ -140,6 +145,7 @@
     <target name="compile">
 		<ant antfile="build-cayenne.xml" target="compile"/>
 		<ant antfile="build-modeler.xml" target="compile"/>
+		<ant antfile="build-dvmodeler.xml" target="compile"/>
 		<ant antfile="build-tests.xml" target="compile"/>
 		<ant antfile="build-performance.xml" target="compile"/>
 		<ant antfile="build-tutorials.xml" target="compile"/>
@@ -189,6 +195,7 @@
     <target name="api">
 		<ant antfile="build-cayenne.xml" target="api"/>
 		<ant antfile="build-modeler.xml" target="api"/>
+		<ant antfile="build-dvmodeler.xml" target="api"/>
     </target>  
     
     <target name="nositedir" unless="site.dir">
