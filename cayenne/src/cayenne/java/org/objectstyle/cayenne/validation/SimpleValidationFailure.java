@@ -103,7 +103,10 @@ public class SimpleValidationFailure implements ValidationFailure {
             buffer.append("[General]");
         }
         else {
-            buffer.append(source.getClass().getName());
+            String sourceLabel = (source instanceof String) ? source.toString() : source
+                    .getClass()
+                    .getName();
+            buffer.append(sourceLabel);
         }
         buffer.append(": ");
         buffer.append(getDescription());

@@ -56,8 +56,9 @@
 package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -80,6 +81,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DbGenerator;
@@ -98,8 +100,7 @@ import org.objectstyle.cayenne.util.Util;
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class GenerateDbDialog extends CayenneDialog implements ActionListener,
-        ItemListener {
+public class GenerateDbDialog extends CayenneDialog {
 
     private static Logger logObj = Logger.getLogger(GenerateDbDialog.class);
 
@@ -129,27 +130,72 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener,
         this.gen = gen;
 
         init();
+        initController();
+        initStatements();
+    }
 
-        dropTables.addItemListener(this);
-        createTables.addItemListener(this);
-        createFK.addItemListener(this);
-        createPK.addItemListener(this);
-        dropPK.addItemListener(this);
+    private void initController() {
+        dropTables.addItemListener(new ItemListener() {
 
-        generate.addActionListener(this);
-        saveSql.addActionListener(this);
-        cancel.addActionListener(this);
+            public void itemStateChanged(ItemEvent e) {
+                gen.setShouldDropTables(dropTables.isSelected());
+                initStatements();
+            }
+        });
+        createTables.addItemListener(new ItemListener() {
 
-        setSize(GENERATEDB_WIDTH, GENERATEDB_HEIGHT);
-        this.pack();
-        this.centerWindow();
-        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            public void itemStateChanged(ItemEvent e) {
+                gen.setShouldCreateTables(createTables.isSelected());
+                initStatements();
+            }
+        });
+        createFK.addItemListener(new ItemListener() {
+
+            public void itemStateChanged(ItemEvent e) {
+                gen.setShouldCreateFKConstraints(createFK.isSelected());
+                initStatements();
+            }
+        });
+        createPK.addItemListener(new ItemListener() {
+
+            public void itemStateChanged(ItemEvent e) {
+                gen.setShouldCreatePKSupport(createPK.isSelected());
+                initStatements();
+            }
+        });
+        dropPK.addItemListener(new ItemListener() {
+
+            public void itemStateChanged(ItemEvent e) {
+                gen.setShouldDropPKSupport(dropPK.isSelected());
+                initStatements();
+            }
+        });
+
+        generate.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                generateDBSchema();
+            }
+        });
+
+        saveSql.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                storeSQL();
+            }
+        });
+
+        cancel.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
     }
 
     private void init() {
-        Container contentPane = this.getContentPane();
-        contentPane.setLayout(new BorderLayout());
 
+        // create widgets
         dropTables = new JCheckBox("Drop Tables");
         dropTables.setSelected(gen.shouldDropTables());
 
@@ -170,36 +216,45 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener,
         dropPK = new JCheckBox("Drop Primary Key Support");
         dropPK.setSelected(gen.shouldDropPKSupport());
 
-        JPanel optionsPane = PanelFactory.createForm(new Component[] {
-                dropTables, new JLabel(), dropPK
-        }, new Component[] {
-                createTables, createFK, createPK
-        });
-        optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
-        contentPane.add(optionsPane, BorderLayout.NORTH);
-
-        sql = new JTextArea();
-        sql.setRows(16);
-        sql.setColumns(40);
+        sql = new JTextArea(16, 40);
         sql.setEditable(false);
         sql.setLineWrap(true);
         sql.setWrapStyleWord(true);
 
-        JScrollPane scrollPanel = new JScrollPane(
+        // assemble...
+        JPanel optionsPane = new JPanel(new GridLayout(3, 2));
+        optionsPane.add(dropTables);
+        optionsPane.add(createTables);
+        optionsPane.add(new JLabel());
+        optionsPane.add(createFK);
+        optionsPane.add(dropPK);
+        optionsPane.add(createPK);
+
+        JPanel optionsHolder = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        optionsHolder.add(optionsPane);
+        optionsHolder.setBorder(BorderFactory.createTitledBorder("Options"));
+
+        JPanel sqlTextPanel = new JPanel(new BorderLayout());
+        sqlTextPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+        sqlTextPanel.add(new JScrollPane(
                 sql,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        JPanel sqlTextPanel = new JPanel(new BorderLayout());
-        sqlTextPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        sqlTextPanel.add(scrollPanel, BorderLayout.CENTER);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+
+        Container contentPane = this.getContentPane();
+        contentPane.setLayout(new BorderLayout());
+
+        contentPane.add(optionsHolder, BorderLayout.NORTH);
         contentPane.add(sqlTextPanel, BorderLayout.CENTER);
-
-        JPanel btnPanel = PanelFactory.createButtonPanel(new JButton[] {
+        contentPane.add(PanelFactory.createButtonPanel(new JButton[] {
                 generate, saveSql, cancel
-        });
-        contentPane.add(btnPanel, BorderLayout.SOUTH);
+        }), BorderLayout.SOUTH);
 
-        initStatements();
+        // set dialog parameters
+        this.setSize(GENERATEDB_WIDTH, GENERATEDB_HEIGHT);
+        this.pack();
+        this.centerWindow();
+        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
     }
 
     /**
@@ -221,22 +276,8 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener,
         sql.setText(buf.toString());
     }
 
-    public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
-        if (generate == src) {
-            generateDBSchema();
-        }
-        else if (src == saveSql) {
-            storeSQL();
-        }
-        else if (cancel == src) {
-            setVisible(false);
-            dispose();
-        }
-    }
-
     /**
-     * Performs the actual schema generation.
+     * Action that performs schema operations via DbGenerator.
      */
     protected void generateDBSchema() {
         try {
@@ -250,7 +291,7 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener,
                     dsi.getUserName(),
                     dsi.getPassword());
             gen.runGenerator(dataSource);
-            
+
             JOptionPane.showMessageDialog(this, "Schema Generation Complete.");
         }
         catch (ClassNotFoundException e) {
@@ -262,7 +303,16 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener,
                     "Schema Generation Error",
                     JOptionPane.ERROR_MESSAGE);
         }
-        catch (Exception ex) {
+        catch (NoClassDefFoundError e) {
+            logObj.warn("Error loading driver. Classpath: "
+                    + System.getProperty("java.class.path"), e);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Driver class not found: " + e.getMessage(),
+                    "Schema Generation Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+        catch (Throwable ex) {
             Throwable rootCause = Util.unwindException(ex);
             logObj.warn("Database connection problem", rootCause);
             JOptionPane.showMessageDialog(
@@ -300,29 +350,6 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener,
                         + ex.getMessage());
             }
         }
-    }
-
-    /**
-     * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
-     */
-    public void itemStateChanged(ItemEvent e) {
-        if (e.getSource() == dropTables) {
-            gen.setShouldDropTables(dropTables.isSelected());
-        }
-        else if (e.getSource() == createTables) {
-            gen.setShouldCreateTables(createTables.isSelected());
-        }
-        else if (e.getSource() == createFK) {
-            gen.setShouldCreateFKConstraints(createFK.isSelected());
-        }
-        else if (e.getSource() == createPK) {
-            gen.setShouldCreatePKSupport(createPK.isSelected());
-        }
-        else if (e.getSource() == dropPK) {
-            gen.setShouldDropPKSupport(dropPK.isSelected());
-        }
-
-        initStatements();
     }
 
 }

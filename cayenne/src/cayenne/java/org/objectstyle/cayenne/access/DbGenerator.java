@@ -57,9 +57,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.Driver;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -87,17 +85,25 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.validation.SimpleValidationFailure;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
-  * Utility class that generates database schema based on Cayenne mapping.
-  * It is a logical counterpart of DbLoader class. 
-  *
-  * @author Andrei Adamchik
-  */
+ * Utility class that generates database schema based on Cayenne mapping. It is a logical
+ * counterpart of DbLoader class.
+ * 
+ * @author Andrei Adamchik
+ */
 public class DbGenerator {
+
     private Logger logObj = Logger.getLogger(DbGenerator.class);
 
+    /**
+     * @deprecated Unused since 1.1
+     */
     protected DataNode node;
+    
+    protected DbAdapter adapter;
     protected DataMap map;
 
     // stores generated SQL statements
@@ -120,16 +126,18 @@ public class DbGenerator {
     protected boolean shouldCreatePKSupport;
     protected boolean shouldCreateFKConstraints;
 
-    /** 
-     * Creates and initializes new DbGenerator. 
+    protected ValidationResult failures;
+
+    /**
+     * Creates and initializes new DbGenerator.
      */
     public DbGenerator(DbAdapter adapter, DataMap map) {
         this(adapter, map, Collections.EMPTY_LIST);
     }
 
-    /** 
-     * Creates and initializes new DbGenerator. <code>excludedEntities</code>
-     * parameter specifies which entities should be ignored during class generation.
+    /**
+     * Creates and initializes new DbGenerator. <code>excludedEntities</code> parameter
+     * specifies which entities should be ignored during class generation.
      */
     public DbGenerator(DbAdapter adapter, DataMap map, Collection excludedEntities) {
         // sanity check
@@ -142,8 +150,7 @@ public class DbGenerator {
         }
 
         this.map = map;
-        this.node = adapter.createDataNode("internal");
-        node.addDataMap(map);
+        this.adapter = adapter;
 
         prepareDbEntities(excludedEntities);
         resetToDefaults();
@@ -159,9 +166,9 @@ public class DbGenerator {
     }
 
     /**
-     * Creates and stores internally a set of statements 
-     * for database schema creation, ignoring configured schema creation
-     * preferences. Statements are NOT executed in this method.
+     * Creates and stores internally a set of statements for database schema creation,
+     * ignoring configured schema creation preferences. Statements are NOT executed in
+     * this method.
      */
     protected void buildStatements() {
         dropTables = new HashMap();
@@ -194,11 +201,10 @@ public class DbGenerator {
     }
 
     /**
-     * Returns <code>true</code> if there is nothing to be done by this generator.
-     * If <code>respectConfiguredSettings</code> is <code>true</code>,
-     * checks are done applying currently configured settings,
-     * otherwise check is done, assuming that all possible generated
-     * objects.
+     * Returns <code>true</code> if there is nothing to be done by this generator. If
+     * <code>respectConfiguredSettings</code> is <code>true</code>, checks are done
+     * applying currently configured settings, otherwise check is done, assuming that all
+     * possible generated objects.
      */
     public boolean isEmpty(boolean respectConfiguredSettings) {
         if (dbEntitiesInInsertOrder.isEmpty() && dbEntitiesRequiringAutoPK.isEmpty()) {
@@ -209,29 +215,27 @@ public class DbGenerator {
             return false;
         }
 
-        return !(
-            shouldDropTables
+        return !(shouldDropTables
                 || shouldCreateTables
                 || shouldCreateFKConstraints
-                || shouldCreatePKSupport
-                || shouldDropPKSupport);
+                || shouldCreatePKSupport || shouldDropPKSupport);
     }
 
     /** Returns DbAdapter associated with this DbGenerator. */
     public DbAdapter getAdapter() {
-        return node.getAdapter();
+        return adapter;
     }
 
     /**
-     * Returns a list of all schema statements that
-     * should be executed with the current configuration.
+     * Returns a list of all schema statements that should be executed with the current
+     * configuration.
      */
     public List configuredStatements() {
         List list = new ArrayList();
 
         if (shouldDropTables) {
-            ListIterator it =
-                dbEntitiesInInsertOrder.listIterator(dbEntitiesInInsertOrder.size());
+            ListIterator it = dbEntitiesInInsertOrder
+                    .listIterator(dbEntitiesInInsertOrder.size());
             while (it.hasPrevious()) {
                 DbEntity ent = (DbEntity) it.previous();
                 list.add(dropTables.get(ent.getName()));
@@ -267,10 +271,12 @@ public class DbGenerator {
     }
 
     /**
-     * Creates a temporary DataSource out of DataSourceInfo and
-     * invokes <code>public void runGenerator(DataSource ds)</code>.
+     * Creates a temporary DataSource out of DataSourceInfo and invokes
+     * <code>public void runGenerator(DataSource ds)</code>.
      */
     public void runGenerator(DataSourceInfo dsi) throws Exception {
+        this.failures = null;
+
         // do a pre-check. Maybe there is no need to run anything
         // and therefore no need to create a connection
         if (isEmpty(true)) {
@@ -285,120 +291,139 @@ public class DbGenerator {
     }
 
     /**
-     * Main method to generate database objects out of the DataMap.
+     * Executes a set of commands to drop/create database objects. This is the main worker
+     * method of DbGenerator. Command set is built based on pre-configured generator
+     * settings.
      */
     public void runGenerator(DataSource ds) throws Exception {
-        Connection con = ds.getConnection();
+        this.failures = null;
+
+        Connection connection = ds.getConnection();
 
         try {
-            List nonExistent = filterNonExistentTables(con);
-            Statement stmt = con.createStatement();
 
-            try {
-                if (shouldDropTables) {
-                    ListIterator it =
-                        dbEntitiesInInsertOrder.listIterator(
-                            dbEntitiesInInsertOrder.size());
-                    while (it.hasPrevious()) {
-                        DbEntity ent = (DbEntity) it.previous();
-
-                        // check if this table even exists
-                        if (!nonExistent.contains(ent.getName())) {
-                            executeStatement(
-                                (String) dropTables.get(ent.getName()),
-                                stmt);
-                        }
-                    }
+            // drop tables
+            if (shouldDropTables) {
+                ListIterator it = dbEntitiesInInsertOrder
+                        .listIterator(dbEntitiesInInsertOrder.size());
+                while (it.hasPrevious()) {
+                    DbEntity ent = (DbEntity) it.previous();
+                    safeExecute(connection, (String) dropTables.get(ent.getName()));
                 }
+            }
 
-                //Refresh the list to ensure all required tables will be created
-                nonExistent = filterNonExistentTables(con);
-                List createdTables = new ArrayList();
+            // create tables
+            List createdTables = new ArrayList();
+            if (shouldCreateTables) {
+                Iterator it = dbEntitiesInInsertOrder.iterator();
+                while (it.hasNext()) {
+                    DbEntity ent = (DbEntity) it.next();
 
-                if (shouldCreateTables) {
-                    Iterator it = dbEntitiesInInsertOrder.iterator();
-                    while (it.hasNext()) {
-                        DbEntity ent = (DbEntity) it.next();
+                    // only create missing tables
 
-                        // only create missing tables
-                        if (nonExistent.contains(ent.getName())) {
-                            createdTables.add(ent.getName());
-                            executeStatement(
-                                (String) createTables.get(ent.getName()),
-                                stmt);
-                        }
-                    }
+                    safeExecute(connection, (String) createTables.get(ent.getName()));
+                    createdTables.add(ent.getName());
                 }
+            }
 
-                if (shouldCreateTables
+            // create FK
+            if (shouldCreateTables
                     && shouldCreateFKConstraints
                     && getAdapter().supportsFkConstraints()) {
-                    Iterator it = dbEntitiesInInsertOrder.iterator();
-                    while (it.hasNext()) {
-                        DbEntity ent = (DbEntity) it.next();
+                Iterator it = dbEntitiesInInsertOrder.iterator();
+                while (it.hasNext()) {
+                    DbEntity ent = (DbEntity) it.next();
 
-                        if (createdTables.contains(ent.getName())) {
-                            List fks = (List) createFK.get(ent.getName());
-                            Iterator fkIt = fks.iterator();
-                            while (fkIt.hasNext()) {
-                                executeStatement((String) fkIt.next(), stmt);
-                            }
+                    if (createdTables.contains(ent.getName())) {
+                        List fks = (List) createFK.get(ent.getName());
+                        Iterator fkIt = fks.iterator();
+                        while (fkIt.hasNext()) {
+                            safeExecute(connection, (String) fkIt.next());
                         }
                     }
                 }
             }
-            finally {
-                stmt.close();
+            
+            // drop PK
+            if (shouldDropPKSupport) {
+                List dropAutoPKSQL = getAdapter().getPkGenerator().dropAutoPkStatements(
+                        dbEntitiesRequiringAutoPK);
+                Iterator it = dropAutoPKSQL.iterator();
+                while (it.hasNext()) {
+                    safeExecute(connection, (String) it.next());
+                }
+            }
+
+            // create pk
+            if (shouldCreatePKSupport) {
+                List createAutoPKSQL = getAdapter()
+                        .getPkGenerator()
+                        .createAutoPkStatements(dbEntitiesRequiringAutoPK);
+                Iterator it = createAutoPKSQL.iterator();
+                while (it.hasNext()) {
+                    safeExecute(connection, (String) it.next());
+                }
             }
         }
         finally {
-            con.close();
+            connection.close();
         }
+    }
 
-        // run PK generation via adapter's generator
-        node.setDataSource(ds);
+    /**
+     * Builds and executes a SQL statement, catching and storing SQL exceptions resulting
+     * from invalid SQL. Only non-recoverable exceptions are rethrown.
+     * 
+     * @since 1.1
+     */
+    protected boolean safeExecute(Connection connection, String sql) throws SQLException {
+        Statement statement = connection.createStatement();
 
         try {
-            if (shouldDropPKSupport) {
-                getAdapter().getPkGenerator().dropAutoPk(node, dbEntitiesRequiringAutoPK);
+            QueryLogger.logQuery(Level.INFO, sql, null);
+            statement.execute(sql);
+            return true;
+        }
+        catch (SQLException ex) {
+            if (this.failures == null) {
+                this.failures = new ValidationResult();
             }
 
-            if (shouldCreatePKSupport) {
-                getAdapter().getPkGenerator().createAutoPk(
-                    node,
-                    dbEntitiesRequiringAutoPK);
-            }
+            failures.addFailure(new SimpleValidationFailure(sql, ex.getMessage()));
+            return false;
         }
         finally {
-            node.setDataSource(null);
+            statement.close();
         }
     }
 
     /**
      * Executes a DDL statement, logging the execution via the QueryLogger.
+     * 
+     * @deprecated Since 1.1 this method is unused.
      */
-    protected void executeStatement(String stmtText, Statement stmt)
-        throws SQLException {
-        QueryLogger.logQuery(Level.INFO, stmtText, null);
+    protected void executeStatement(String sql, Statement stmt) throws SQLException {
+        QueryLogger.logQuery(Level.INFO, sql, null);
 
         try {
-            stmt.execute(stmtText);
+            stmt.execute(sql);
         }
         catch (SQLException ex) {
-            SQLException newException = new SQLException("Failed statement: " + stmtText);
+            SQLException newException = new SQLException("Failed statement: " + sql);
             newException.setNextException(ex);
             throw newException;
         }
     }
 
-    /** 
-     * Returns an array of queries to create foreign key constraints
-     * for a particular DbEntity. Throws CayenneRuntimeException, if called
-     * for adapter that does not support FK constraints.
+    /**
+     * Returns an array of queries to create foreign key constraints for a particular
+     * DbEntity. Throws CayenneRuntimeException, if called for adapter that does not
+     * support FK constraints.
      */
     public List createFkConstraintsQueries(DbEntity dbEnt) {
         if (!getAdapter().supportsFkConstraints()) {
-            throw new CayenneRuntimeException("FK constraints are not supported by adapter.");
+            throw new CayenneRuntimeException(
+                    "FK constraints are not supported by adapter.");
         }
 
         List list = new ArrayList();
@@ -421,8 +446,7 @@ public class DbGenerator {
 
                     DbRelationship reverse = rel.getReverseRelationship();
                     if (reverse != null && !reverse.isToMany() && !reverse.isToPK()) {
-                        list.add(
-                            getAdapter().createUniqueConstraint(
+                        list.add(getAdapter().createUniqueConstraint(
                                 (DbEntity) rel.getSourceEntity(),
                                 rel.getSourceAttributes()));
                     }
@@ -434,42 +458,29 @@ public class DbGenerator {
         return list;
     }
 
-    /** Returns a subset of DbEntity names from the <code>map</code>
-     *  that have no corresponding database tables. 
+    /**
+     * Returns an object representing a collection of failures that occurred on the last
+     * "runGenerator" invocation, or null if there were no failures. Failures usually
+     * indicate problems with generated DDL (such as "create...", "drop...", etc.) and
+     * usually happen due to the DataMap being out of sync with the database.
      * 
-     * @throws SQLException if an error occurred while processing
-     * a list of database tables. 
+     * @since 1.1
      */
-    private List filterNonExistentTables(Connection con) throws SQLException {
-        // read a list of tables
-        DatabaseMetaData md = con.getMetaData();
-        ResultSet rs = md.getTables(null, null, "%", null);
-        List tables = new ArrayList();
-        try {
-            while (rs.next()) {
-                tables.add(rs.getString("TABLE_NAME").toLowerCase());
-            }
-        }
-        finally {
-            rs.close();
-        }
-
-        // find tables that are in the map but not in the database
-        List missing = new ArrayList();
-        Iterator it = map.getDbEntities().iterator();
-        while (it.hasNext()) {
-            DbEntity e = (DbEntity) it.next();
-            if (!tables.contains(e.getName().toLowerCase())) {
-                missing.add(e.getName());
-            }
-        }
-        return missing;
+    public ValidationResult getFailures() {
+        return failures;
     }
 
+    /**
+     * Returns whether DbGenerator is configured to create primary key support for DataMap
+     * entities.
+     */
     public boolean shouldCreatePKSupport() {
         return shouldCreatePKSupport;
     }
 
+    /**
+     * Returns whether DbGenerator is configured to create tables for DataMap entities.
+     */
     public boolean shouldCreateTables() {
         return shouldCreateTables;
     }
@@ -506,10 +517,9 @@ public class DbGenerator {
         this.shouldCreateFKConstraints = shouldCreateFKConstraints;
     }
 
-    /** 
-     * Helper method that orders DbEntities to satisfy referential
-     * constraints and returns an ordered list. It also filters out
-     * DerivedDbEntities.
+    /**
+     * Helper method that orders DbEntities to satisfy referential constraints and returns
+     * an ordered list. It also filters out DerivedDbEntities.
      */
     private void prepareDbEntities(Collection excludedEntities) {
         if (excludedEntities == null) {
@@ -532,8 +542,9 @@ public class DbGenerator {
 
             // tables with no columns are not included
             if (nextEntity.getAttributes().size() == 0) {
-                logObj.info(
-                    "Skipping entity with no attributes: " + nextEntity.getName());
+                logObj
+                        .info("Skipping entity with no attributes: "
+                                + nextEntity.getName());
                 continue;
             }
 
@@ -548,8 +559,7 @@ public class DbGenerator {
             while (nextDbAtributes.hasNext()) {
                 DbAttribute attr = (DbAttribute) nextDbAtributes.next();
                 if (attr.getType() == TypesMapping.NOT_DEFINED) {
-                    logObj.info(
-                        "Skipping entity, attribute type is undefined: "
+                    logObj.info("Skipping entity, attribute type is undefined: "
                             + nextEntity.getName()
                             + "."
                             + attr.getName());
@@ -567,7 +577,7 @@ public class DbGenerator {
             // in this entity. For now simply check that the key is not propagated
             Iterator relationships = nextEntity.getRelationships().iterator();
 
-            // create a copy of the original PK list, 
+            // create a copy of the original PK list,
             // since the list will be modified locally
             List pkAttributes = new ArrayList(nextEntity.getPrimaryKey());
             while (pkAttributes.size() > 0 && relationships.hasNext()) {
@@ -578,7 +588,7 @@ public class DbGenerator {
 
                 // supposedly all source attributes of the relationship
                 // to master entity must be a part of primary key,
-                // so 
+                // so
                 Iterator joins = nextRelationship.getJoins().iterator();
                 while (joins.hasNext()) {
                     DbJoin join = (DbJoin) joins.next();
@@ -593,8 +603,12 @@ public class DbGenerator {
             }
         }
 
-        // sort the list
-        this.node.getEntitySorter().sortDbEntities(tables, false);
+        // sort table list
+        if (tables.size() > 1) {
+            DataNode node = adapter.createDataNode("temp");
+            node.addDataMap(map);
+            node.getEntitySorter().sortDbEntities(tables, false);
+        }
 
         this.dbEntitiesInInsertOrder = tables;
         this.dbEntitiesRequiringAutoPK = tablesWithAutoPk;
