@@ -53,82 +53,22 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Map;
+import org.objectstyle.cayenne.exp.Expression;
 
-import org.objectstyle.art.Artist;
-
-public class SqlSelectQueryInContextTst extends SelectQueryBase {
-	private static final int _artistCount = 10;
-
-	protected SqlSelectQuery q;
-
-	public void setUp() throws Exception {
-		super.setUp();
-		q = new SqlSelectQuery();
-	}
-
-	protected Query getQuery() {
-		return q;
-	}
-
-	public void testSelect1() throws Exception {
-
-        q.setRoot(Artist.class);
-		q.setSqlString("select count(*)  from ARTIST");
-		performQuery();
-
-		// check query results
-		List objects = opObserver.rowsForQuery(q);
-		assertNotNull(objects);
-		assertEquals(1, objects.size());
-		Map countMap = (Map) objects.get(0);
-		Object count = countMap.values().iterator().next();
-		assertEquals(_artistCount, ((Number) count).intValue());
-	}
-
-	public void testSelect2() throws java.lang.Exception {
-		// use fetch limit
-        q.setRoot(Artist.class);
-		q.setSqlString("select ARTIST_NAME from ARTIST");
-		q.setFetchLimit(5);
-		performQuery();
-
-		// check query results
-		List objects = opObserver.rowsForQuery(q);
-		assertNotNull(objects);
-		assertEquals(5, objects.size());
-	}
-	
-
-	protected void populateTables() throws java.lang.Exception {
-		String insertArtist =
-			"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-		Connection conn = getConnection();
-
-		try {
-			conn.setAutoCommit(false);
-
-			PreparedStatement stmt = conn.prepareStatement(insertArtist);
-			long dateBase = System.currentTimeMillis();
-
-			for (int i = 1; i <= _artistCount; i++) {
-				stmt.setInt(1, i);
-				stmt.setString(2, "artist" + i);
-				stmt.setDate(
-					3,
-					new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
-				stmt.executeUpdate();
-			}
-
-			stmt.close();
-			conn.commit();
-		} finally {
-			conn.close();
-		}
-	}
+/**
+ * Implements utility methods used inside Velocity templates
+ * when rendering SQLTemplates.
+ * 
+ * @since 1.1
+ * @author Andrei Adamchik
+ */
+public class SQLTemplateRenderingUtils {
+    /**
+     * Returns the result of evaluation of expression with object.
+     */
+    public Object cayenneExp(Object object, String expression) {
+        return Expression.fromString(expression).evaluate(object);
+    }
 }

@@ -105,6 +105,8 @@ public interface DbAdapter {
         "org.objectstyle.cayenne.dba.firebird.FirebirdAdapter";
     public static final String OPENBASE =
         "org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter";
+    public static final String SQLSERVER =
+        "org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter";
 
     /**
      * All available DbAdapter subclass names.
@@ -119,7 +121,8 @@ public interface DbAdapter {
             DbAdapter.ORACLE,
             DbAdapter.POSTGRES,
             DbAdapter.SYBASE,
-            DbAdapter.OPENBASE };
+            DbAdapter.OPENBASE,
+            DbAdapter.SQLSERVER };
 
     /**
      * Returns a String used to terminate a batch in command-line

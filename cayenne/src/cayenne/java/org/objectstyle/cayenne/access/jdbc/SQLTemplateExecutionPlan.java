@@ -60,10 +60,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.IteratorUtils;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -79,6 +82,8 @@ import org.objectstyle.cayenne.query.SQLTemplate;
 // soon, and all query types will be run by an execution plan instead of
 // a DataNode. Then ExecutionPlan will become a true Strategy pattern...
 public class SQLTemplateExecutionPlan {
+    private static Logger logObj = Logger.getLogger(SQLTemplateExecutionPlan.class);
+
     protected DbAdapter adapter;
 
     public SQLTemplateExecutionPlan(DbAdapter adapter) {
@@ -101,13 +106,20 @@ public class SQLTemplateExecutionPlan {
         OperationObserver observer)
         throws SQLException, Exception {
 
-        // template maybe customized by adapter
-        List bindings = new ArrayList();
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
         String template = query.getTemplate(adapter.getClass().getName());
-        Iterator it = query.parametersIterator();
+        List bindings = new ArrayList();
 
-        while (it.hasNext()) {
+        int size = query.parametersSize();
+
+        // zero size indicates a one-shot query with no parameters
+        // so fake a single entry batch...
+        int[] counts = new int[size > 0 ? size : 1];
+        Iterator it =
+            (size > 0)
+                ? query.parametersIterator()
+                : IteratorUtils.singletonIterator(Collections.EMPTY_MAP);
+        for (int i = 0; i < counts.length; i++) {
             Map nextParameters = (Map) it.next();
 
             // reset bindings
@@ -116,29 +128,44 @@ public class SQLTemplateExecutionPlan {
             String sqlString =
                 templateProcessor.processTemplate(template, nextParameters, bindings);
 
+            QueryLogger.logQuery(query.getLoggingLevel(), sqlString, bindings);
+
             // TODO: we may cache prep stataments for this loop, using merged string as a key
             // since it is very likely that it will be the same for multiple parameter sets...
             PreparedStatement statement = connection.prepareStatement(sqlString);
             try {
-                execute(statement, observer, query);
+                counts[i] = execute(statement, bindings);
+                QueryLogger.logUpdateCount(query.getLoggingLevel(), counts[i]);
             }
             finally {
                 statement.close();
             }
         }
+
+        observer.nextBatchCount(query, counts);
     }
 
     /**
      * Executes update notifying OperationObserver of the outcome.
      */
-    protected void execute(
-        PreparedStatement preparedStatement,
-        OperationObserver observer,
-        SQLTemplate query)
-        throws SQLException {
+    protected int execute(PreparedStatement preparedStatement, List bindings)
+        throws SQLException, Exception {
 
-        int count = preparedStatement.executeUpdate();
-        QueryLogger.logUpdateCount(query.getLoggingLevel(), count);
-        observer.nextCount(query, count);
+        // bind parameters
+        if (bindings != null && !bindings.isEmpty()) {
+            int len = bindings.size();
+            for (int i = 0; i < len; i++) {
+                DataBinding binding = (DataBinding) bindings.get(i);
+                adapter.bindParameter(
+                    preparedStatement,
+                    binding.getValue(),
+                    i + 1,
+                    binding.getJdbcType(),
+                    binding.getPrecision());
+            }
+        }
+
+        // run query
+        return preparedStatement.executeUpdate();
     }
 }

@@ -77,7 +77,6 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.TestOperationObserver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.exp.Expression;
@@ -86,16 +85,17 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
+import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
 
 public class DataContextTst extends DataContextTestBase {
     private static Logger logObj = Logger.getLogger(DataContextTst.class);
 
-    protected TestOperationObserver opObserver;
+    protected MockupOperationObserver opObserver;
 
     protected void setUp() throws Exception {
         super.setUp();
 
-        opObserver = new TestOperationObserver();
+        opObserver = new MockupOperationObserver();
     }
 
     public void testLocalObjects() throws Exception {
@@ -399,11 +399,11 @@ public class DataContextTst extends DataContextTestBase {
         context.performQueries(qs, opObserver);
 
         // check query results
-        List o1 = opObserver.objectsForQuery(q1);
+        List o1 = opObserver.rowsForQuery(q1);
         assertNotNull(o1);
         assertEquals(artistCount, o1.size());
 
-        List o2 = opObserver.objectsForQuery(q2);
+        List o2 = opObserver.rowsForQuery(q2);
         assertNotNull(o2);
         assertEquals(galleryCount, o2.size());
     }
@@ -474,7 +474,7 @@ public class DataContextTst extends DataContextTestBase {
     public void testPerformQuery() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
         context.performQueries(Collections.singletonList(query), opObserver);
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
 
         assertNotNull(objects);
         assertEquals(artistCount, objects.size());

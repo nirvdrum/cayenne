@@ -74,12 +74,15 @@ public class BindEqualDirective extends BindDirective {
         return "bindEqual";
     }
 
-    protected void render(InternalContextAdapter context, Writer writer, Object value)
+    protected void render(
+        InternalContextAdapter context,
+        Writer writer,
+        DataBinding binding)
         throws IOException {
-        if (value != null) {
-            bind(context, value);
-            writer.write("= ?");
 
+        if (binding.getValue() != null) {
+            bind(context, binding);
+            writer.write("= ?");
         }
         else {
             writer.write("IS NULL");

@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access.jdbc;
 
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,8 +81,13 @@ class SQLTemplateProcessor {
     private static RuntimeInstance sharedRuntime;
 
     static final String BINDINGS_LIST_KEY = "bindings";
+    static final String HELPER_KEY = "helper";
+
+    private static final SQLTemplateRenderingUtils sharedUtils =
+        new SQLTemplateRenderingUtils();
 
     RuntimeInstance velocityRuntime;
+    SQLTemplateRenderingUtils renderingUtils;
 
     static {
         initVelocityRuntime();
@@ -110,10 +114,14 @@ class SQLTemplateProcessor {
 
     SQLTemplateProcessor() {
         this.velocityRuntime = sharedRuntime;
+        this.renderingUtils = sharedUtils;
     }
 
-    SQLTemplateProcessor(RuntimeInstance velocityRuntime) {
+    SQLTemplateProcessor(
+        RuntimeInstance velocityRuntime,
+        SQLTemplateRenderingUtils renderingUtils) {
         this.velocityRuntime = velocityRuntime;
+        this.renderingUtils = renderingUtils;
     }
 
     /**
@@ -128,15 +136,13 @@ class SQLTemplateProcessor {
         // cleaned up to avoid using any Velocity singletons
 
         // have to make a copy of parameter map since we are gonna modify it..
-        Map internalParameters = null;
-        if (parameters != null && !parameters.isEmpty()) {
-            internalParameters = new HashMap(parameters);
-            internalParameters.put(BINDINGS_LIST_KEY, bindingsHolder);
-        }
-        else {
-            internalParameters =
-                Collections.singletonMap(BINDINGS_LIST_KEY, bindingsHolder);
-        }
+        Map internalParameters =
+            (parameters != null && !parameters.isEmpty())
+                ? new HashMap(parameters)
+                : new HashMap(3);
+
+        internalParameters.put(BINDINGS_LIST_KEY, bindingsHolder);
+        internalParameters.put(HELPER_KEY, renderingUtils);
 
         VelocityContext context = new VelocityContext(internalParameters);
         StringWriter out = new StringWriter(template.length());

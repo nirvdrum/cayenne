@@ -60,6 +60,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.jdbc.DataBinding;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -162,9 +163,15 @@ public class QueryLogger {
                 buf.append("...");
             }
             buf.append('>');
-        } else if (anObject instanceof Boolean) {
+        }
+        else if (anObject instanceof Boolean) {
             buf.append('\'').append(anObject).append('\'');
-        } else {
+
+        }
+        else if (anObject instanceof DataBinding) {
+            sqlLiteralForObject(buf, ((DataBinding) anObject).getValue());
+        }
+        else {
             // unknown
             buf
                 .append("[")
@@ -255,7 +262,8 @@ public class QueryLogger {
 
                 buf.append("\n\tLogin: ").append(dsi.getUserName());
                 buf.append("\n\tPassword: *******");
-            } else {
+            }
+            else {
                 buf.append(" pool information unavailable");
             }
 
@@ -343,7 +351,8 @@ public class QueryLogger {
 
             if (count == 1) {
                 buf.append("=== returned 1 row.");
-            } else {
+            }
+            else {
                 buf.append("=== returned ").append(count).append(" rows.");
             }
 
@@ -376,7 +385,7 @@ public class QueryLogger {
     public static void logRollbackTransaction(Level logLevel) {
         logObj.log(logLevel, "*** transaction rolled back.");
     }
-    
+
     /**
      * @since 1.1
      */
@@ -385,7 +394,7 @@ public class QueryLogger {
             logObj.log(logLevel, "--- " + transactionLabel);
         }
     }
-    
+
     /**
      * @since 1.1
      */

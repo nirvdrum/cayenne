@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -112,23 +113,43 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
     public void testProcessTemplateBind() throws Exception {
         String sqlTemplate =
-            "SELECT * FROM ME WHERE COLUMN1 = #bind($a) AND COLUMN2 = #bind($b)";
+            "SELECT * FROM ME WHERE "
+                + "COLUMN1 = #bind($a 'VARCHAR') AND COLUMN2 = #bind($b 'INTEGER')";
         Map map = Collections.singletonMap("a", "VALUE_OF_A");
         List bindings = new ArrayList(1);
         String sql =
             new SQLTemplateProcessor().processTemplate(sqlTemplate, map, bindings);
 
-        assertEquals(
-            "Unexpected template: " + sql,
-            "SELECT * FROM ME WHERE COLUMN1 = ? AND COLUMN2 = ?",
-            sql);
+        assertEquals("SELECT * FROM ME WHERE COLUMN1 = ? AND COLUMN2 = ?", sql);
         assertEquals(2, bindings.size());
-        assertEquals("VALUE_OF_A", bindings.get(0));
-        assertEquals(null, bindings.get(1));
+        assertBindingValue("VALUE_OF_A", bindings.get(0));
+        assertBindingValue(null, bindings.get(1));
+    }
+
+    public void testProcessTemplateBindGuessVarchar() throws Exception {
+        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN1 = #bind($a)";
+        Map map = Collections.singletonMap("a", "VALUE_OF_A");
+        List bindings = new ArrayList(1);
+
+        new SQLTemplateProcessor().processTemplate(sqlTemplate, map, bindings);
+
+        assertEquals(1, bindings.size());
+        assertBindingType(Types.VARCHAR, bindings.get(0));
+    }
+
+    public void testProcessTemplateBindGuessInteger() throws Exception {
+        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN1 = #bind($a)";
+        Map map = Collections.singletonMap("a", new Integer(4));
+        List bindings = new ArrayList(1);
+
+        new SQLTemplateProcessor().processTemplate(sqlTemplate, map, bindings);
+
+        assertEquals(1, bindings.size());
+        assertBindingType(Types.INTEGER, bindings.get(0));
     }
 
     public void testProcessTemplateBindEqual() throws Exception {
-        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN #bindEqual($a)";
+        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN #bindEqual($a 'VARCHAR')";
         List bindings = new ArrayList(1);
         String sql =
             new SQLTemplateProcessor().processTemplate(
@@ -145,11 +166,11 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         assertEquals("SELECT * FROM ME WHERE COLUMN = ?", sql);
         assertEquals(1, bindings.size());
-        assertEquals("VALUE_OF_A", bindings.get(0));
+        assertBindingValue("VALUE_OF_A", bindings.get(0));
     }
 
     public void testProcessTemplateBindNotEqual() throws Exception {
-        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN #bindNotEqual($a)";
+        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN #bindNotEqual($a 'VARCHAR')";
         List bindings = new ArrayList(1);
         String sql =
             new SQLTemplateProcessor().processTemplate(
@@ -166,11 +187,12 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         assertEquals("SELECT * FROM ME WHERE COLUMN <> ?", sql);
         assertEquals(1, bindings.size());
-        assertEquals("VALUE_OF_A", bindings.get(0));
+        assertBindingValue("VALUE_OF_A", bindings.get(0));
     }
 
     public void testProcessTemplateID() throws Exception {
-        String sqlTemplate = "SELECT * FROM ME WHERE COLUMN1 = #bind($a 'db:ID_COLUMN')";
+        String sqlTemplate =
+            "SELECT * FROM ME WHERE COLUMN1 = #bind($helper.cayenneExp($a, 'db:ID_COLUMN'))";
 
         DataObject dataObject = new CayenneDataObject();
         dataObject.setObjectId(new ObjectId(Object.class, "ID_COLUMN", 5));
@@ -182,12 +204,14 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         assertEquals("SELECT * FROM ME WHERE COLUMN1 = ?", sql);
         assertEquals(1, bindings.size());
-        assertEquals(new Integer(5), bindings.get(0));
+        assertBindingValue(new Integer(5), bindings.get(0));
     }
 
     public void testProcessTemplateNotEqualID() throws Exception {
         String sqlTemplate =
-            "SELECT * FROM ME WHERE COLUMN1 #bindNotEqual($a 'db:ID_COLUMN1') AND COLUMN2 #bindNotEqual($a 'db:ID_COLUMN2')";
+            "SELECT * FROM ME WHERE "
+                + "COLUMN1 #bindNotEqual($helper.cayenneExp($a, 'db:ID_COLUMN1')) "
+                + "AND COLUMN2 #bindNotEqual($helper.cayenneExp($a, 'db:ID_COLUMN2'))";
 
         Map idMap = new HashMap();
         idMap.put("ID_COLUMN1", new Integer(3));
@@ -203,8 +227,8 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         assertEquals("SELECT * FROM ME WHERE COLUMN1 <> ? AND COLUMN2 <> ?", sql);
         assertEquals(2, bindings.size());
-        assertEquals(new Integer(3), bindings.get(0));
-        assertEquals("aaa", bindings.get(1));
+        assertBindingValue(new Integer(3), bindings.get(0));
+        assertBindingValue("aaa", bindings.get(1));
     }
 
     public void testProcessTemplateConditions() throws Exception {
@@ -217,7 +241,7 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         assertEquals("SELECT * FROM ME  WHERE COLUMN1 > ?", sql);
         assertEquals(1, bindings.size());
-        assertEquals("VALUE_OF_A", bindings.get(0));
+        assertBindingValue("VALUE_OF_A", bindings.get(0));
 
         bindings.clear();
         sql =
@@ -228,5 +252,20 @@ public class SQLTemplateProcessorTst extends BasicTestCase {
 
         assertEquals("SELECT * FROM ME ", sql);
         assertTrue(bindings.isEmpty());
+    }
+
+    protected void assertBindingValue(Object expectedValue, Object binding) {
+        assertTrue("Not a binding!", binding instanceof DataBinding);
+        assertEquals(expectedValue, ((DataBinding) binding).getValue());
+    }
+
+    protected void assertBindingType(int expectedType, Object binding) {
+        assertTrue("Not a binding!", binding instanceof DataBinding);
+        assertEquals(expectedType, ((DataBinding) binding).getJdbcType());
+    }
+
+    protected void assertBindingPrecision(int expectedPrecision, Object binding) {
+        assertTrue("Not a binding!", binding instanceof DataBinding);
+        assertEquals(expectedPrecision, ((DataBinding) binding).getPrecision());
     }
 }

@@ -52,39 +52,34 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.query;
 
 import java.util.Collections;
 
-import org.objectstyle.cayenne.TestOperationObserver;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
 
 public abstract class SelectQueryBase extends CayenneTestCase {
 
     protected SelectQuery query;
-    protected TestOperationObserver opObserver;
-    
+    protected MockupOperationObserver opObserver;
+
     protected void setUp() throws Exception {
         deleteTestData();
         populateTables();
         query = new SelectQuery();
-        opObserver = new TestOperationObserver();
+        opObserver = new MockupOperationObserver();
     }
-    
-    
+
     protected void performQuery() throws Exception {
         // run query
         getDomain().performQueries(Collections.singletonList(getQuery()), opObserver);
-        
-        // check query errors
-        opObserver.assertAllExceptions();
     }
-    
+
     protected Query getQuery() {
         return query;
-    }  
-    
-    
+    }
+
     protected abstract void populateTables() throws java.lang.Exception;
 }

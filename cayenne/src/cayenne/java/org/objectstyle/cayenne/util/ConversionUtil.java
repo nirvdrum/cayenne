@@ -62,12 +62,31 @@ import java.math.BigInteger;
 import org.objectstyle.cayenne.exp.ExpressionException;
 
 /**
- * A collection of static utility methods used mainly for expressions evaluation.
+ * A collection of static conversion utility methods.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public final class ConversionUtil {
+
+    public static int toInt(Object object, int defaultValue) {
+        if (object == null) {
+            return defaultValue;
+        }
+        else if (object instanceof Number) {
+            return ((Number) object).intValue();
+        }
+        else if (object instanceof String) {
+            try {
+                return Integer.parseInt((String) object);
+            }
+            catch (NumberFormatException ex) {
+                return defaultValue;
+            }
+        }
+
+        return defaultValue;
+    }
 
     public static boolean toBoolean(Object object) {
         if (object instanceof Boolean) {

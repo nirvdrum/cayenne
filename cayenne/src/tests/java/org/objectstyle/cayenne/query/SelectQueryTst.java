@@ -74,7 +74,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(7, objects.size());
     }
@@ -84,7 +84,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -94,7 +94,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -104,7 +104,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -116,7 +116,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertEquals(1, objects.size());
     }
 
@@ -127,7 +127,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertEquals(_artistCount - 1, objects.size());
     }
 
@@ -139,7 +139,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertEquals(_artistCount - 1, objects.size());
     }
 
@@ -154,7 +154,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertEquals(0, objects.size());
     }
 
@@ -165,7 +165,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(1, objects.size());
     }
@@ -177,7 +177,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(11, objects.size());
     }
@@ -190,7 +190,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -203,7 +203,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
@@ -215,7 +215,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertEquals(2, objects.size());
     }
 
@@ -229,7 +229,7 @@ public class SelectQueryTst extends SelectQueryBase {
         performQuery();
 
         // check query results
-        List objects = opObserver.objectsForQuery(query);
+        List objects = opObserver.rowsForQuery(query);
         assertEquals(2, objects.size());
     }
 

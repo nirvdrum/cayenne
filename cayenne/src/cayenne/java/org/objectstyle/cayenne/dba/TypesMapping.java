@@ -266,7 +266,6 @@ public class TypesMapping {
             || type == Types.REAL
             || type == Types.NUMERIC;
     }
-    
 
     /** Returns an array of string names of the default JDBC data types.*/
     public static String[] getDatabaseTypes() {
@@ -357,12 +356,33 @@ public class TypesMapping {
         return (String) sqlEnumType.get(new Integer(type));
     }
 
-    /** Get the java.sql.Types SQL type by the Java type name.
-    *  @param javaTypeName Fully qualified Java type name.
-    *  @return The SQL type or NOT_DEFINED if no type found. */
+    /** 
+     * Returns default java.sql.Types type by the Java type name.
+     * 
+     * @param javaTypeName Fully qualified Java Class name.
+     * @return The SQL type or NOT_DEFINED if no type found.
+     */
     public static int getSqlTypeByJava(String javaTypeName) {
         Integer temp = (Integer) javaSqlEnum.get(javaTypeName);
         return (null == temp) ? NOT_DEFINED : temp.intValue();
+    }
+
+    /**
+     * Guesses a default JDBC type for the Java class.
+     * 
+     * @since 1.1
+     */
+    public static int getSqlTypeByJava(Class javaClass) {
+        while (javaClass != null) {
+            Object type = javaSqlEnum.get(javaClass.getName());
+            if (type != null) {
+                return ((Number) type).intValue();
+            }
+
+            javaClass = javaClass.getSuperclass();
+        }
+
+        return NOT_DEFINED;
     }
 
     /** 
@@ -379,17 +399,13 @@ public class TypesMapping {
       * 
       *  @return Fully qualified Java type name or null if not found. 
       */
-    public static String getJavaBySqlType(
-        int type,
-        int length,
-        int precision) {
+    public static String getJavaBySqlType(int type, int length, int precision) {
 
         if (type == Types.NUMERIC && precision == 0) {
             type = Types.INTEGER;
         }
         return (String) sqlEnumJava.get(new Integer(type));
     }
-    
 
     // *************************************************************
     // non-static code
@@ -418,7 +434,8 @@ public class TypesMapping {
 
                 infos.add(info);
             }
-        } finally {
+        }
+        finally {
             rs.close();
         }
 

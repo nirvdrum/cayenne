@@ -121,7 +121,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     public SQLTemplate(Class rootClass) {
-        setRoot(root);
+        setRoot(rootClass);
     }
 
     public SQLTemplate(DbEntity root) {
@@ -142,6 +142,13 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
             : IteratorUtils.transformedIterator(
                 IteratorUtils.arrayIterator(parameters),
                 nullMapTransformer);
+    }
+
+    /**
+     * Returns the number of parameter sets.
+     */
+    public int parametersSize() {
+        return (parameters != null) ? parameters.length : 0;
     }
 
     /**

@@ -53,82 +53,46 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Map;
+/**
+ * Described PreparedStatement parameter binding.
+ * 
+ * @since 1.1
+ * @author Andrei Adamchik
+ */
+public class DataBinding {
+    protected int jdbcType;
+    protected int precision;
+    protected Object value;
 
-import org.objectstyle.art.Artist;
+    public DataBinding(Object value, int jdbcType, int precision) {
+        this.value = value;
+        this.jdbcType = jdbcType;
+        this.precision = precision;
+    }
 
-public class SqlSelectQueryInContextTst extends SelectQueryBase {
-	private static final int _artistCount = 10;
+    public int getJdbcType() {
+        return jdbcType;
+    }
 
-	protected SqlSelectQuery q;
+    public int getPrecision() {
+        return precision;
+    }
 
-	public void setUp() throws Exception {
-		super.setUp();
-		q = new SqlSelectQuery();
-	}
+    public Object getValue() {
+        return value;
+    }
 
-	protected Query getQuery() {
-		return q;
-	}
+    public void setJdbcType(int i) {
+        jdbcType = i;
+    }
 
-	public void testSelect1() throws Exception {
+    public void setPrecision(int i) {
+        precision = i;
+    }
 
-        q.setRoot(Artist.class);
-		q.setSqlString("select count(*)  from ARTIST");
-		performQuery();
-
-		// check query results
-		List objects = opObserver.rowsForQuery(q);
-		assertNotNull(objects);
-		assertEquals(1, objects.size());
-		Map countMap = (Map) objects.get(0);
-		Object count = countMap.values().iterator().next();
-		assertEquals(_artistCount, ((Number) count).intValue());
-	}
-
-	public void testSelect2() throws java.lang.Exception {
-		// use fetch limit
-        q.setRoot(Artist.class);
-		q.setSqlString("select ARTIST_NAME from ARTIST");
-		q.setFetchLimit(5);
-		performQuery();
-
-		// check query results
-		List objects = opObserver.rowsForQuery(q);
-		assertNotNull(objects);
-		assertEquals(5, objects.size());
-	}
-	
-
-	protected void populateTables() throws java.lang.Exception {
-		String insertArtist =
-			"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-		Connection conn = getConnection();
-
-		try {
-			conn.setAutoCommit(false);
-
-			PreparedStatement stmt = conn.prepareStatement(insertArtist);
-			long dateBase = System.currentTimeMillis();
-
-			for (int i = 1; i <= _artistCount; i++) {
-				stmt.setInt(1, i);
-				stmt.setString(2, "artist" + i);
-				stmt.setDate(
-					3,
-					new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
-				stmt.executeUpdate();
-			}
-
-			stmt.close();
-			conn.commit();
-		} finally {
-			conn.close();
-		}
-	}
+    public void setValue(Object object) {
+        value = object;
+    }
 }

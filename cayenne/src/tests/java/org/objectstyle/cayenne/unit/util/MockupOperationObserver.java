@@ -52,72 +52,57 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
-package org.objectstyle.cayenne;
+ */
+package org.objectstyle.cayenne.unit.util;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
-import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
 
-/** Helper class to process test queries results. */
-public class TestOperationObserver extends DefaultOperationObserver {
-    private static Logger logObj = Logger.getLogger(TestOperationObserver.class);
-    
-    protected Map resultObjs = new HashMap();
+/** 
+ * Helper class to process test queries results. 
+ */
+public class MockupOperationObserver extends DefaultOperationObserver {
+
+    protected Map resultRows = new HashMap();
     protected Map resultCounts = new HashMap();
-    
-    
-    public void assertAllExceptions() {
-        assertGlobalExceptions();
-        Assert.assertEquals("No exceptions expected", 0, queryExceptions.size());
+    protected Map resultBatch = new HashMap();
+
+    public List rowsForQuery(Query q) {
+        return (List) resultRows.get(q);
     }
-    
-    
-    public void assertGlobalExceptions() {
-        Assert.assertEquals("No exceptions expected", 0, globalExceptions.size());
-    }
-    
-    
-    public void assertQueryException(Query q) {
-        Assert.assertNull(queryExceptions.get(q));
-    }
-    
-    
-    public List objectsForQuery(Query q) {
-        return (List)resultObjs.get(q);
-    }
-    
-    
+
     public int countForQuery(Query q) {
-        Integer count = (Integer)resultCounts.get(q);
+        Integer count = (Integer) resultCounts.get(q);
         return (count != null) ? count.intValue() : -1;
     }
-    
-    
+
+    public int[] countsForQuery(Query q) {
+        return (int[]) resultBatch.get(q);
+    }
+
     public void nextCount(Query query, int resultCount) {
         resultCounts.put(query, new Integer(resultCount));
     }
-    
-    
+
     public void nextDataRows(Query query, List dataRows) {
-        resultObjs.put(query, dataRows);
+        resultRows.put(query, dataRows);
     }
-    
-    
-    public void nextQueryException(Query query, Exception ex) {
-        logObj.debug("Query Exception", ex);
-        super.nextQueryException(query, ex);
+
+    public void nextBatchCount(Query query, int[] resultCount) {
+        resultBatch.put(query, resultCount);
     }
-    
-    
+
     public void nextGlobalException(Exception ex) {
-        logObj.debug("Global Exception", ex);
-        super.nextGlobalException(ex);
+        throw new CayenneRuntimeException(ex);
     }
+
+    public void nextQueryException(Query query, Exception ex) {
+        throw new CayenneRuntimeException(ex);
+    }
+
 }

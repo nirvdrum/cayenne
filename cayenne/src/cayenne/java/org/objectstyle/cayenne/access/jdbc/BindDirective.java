@@ -66,27 +66,29 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.parser.node.Node;
-import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.ConversionUtil;
 
 /**
  * A custom Velocity directive to create a PreparedStatement parameter text.
- * There are three possible invocation forms inside the template:
+ * There are these possible invocation forms inside the template:
  * 
  * <pre>
- * #bind(value) - e.g.: #bind($xyz)
- * #bind(value cayenne_property_expression) - e.g.: #bind($xyz "db:ID_COL1")
- * #bind(value cayenne_property_expression jdbc_type_name) - e.g.: #bind($xyz $null "VARCHAR")</pre>
+ * #bind(value) - e.g. #bind($xyz)
+ * #bind(value jdbc_type_name) - e.g. #bind($xyz 'VARCHAR'). This is the most common and useful form.
+ * #bind(value jdbc_type_name, precision) - e.g. #bind($xyz 'VARCHAR' 2)</pre>
  * 
- * <p><i>Three-argument directive is not implemented yet.</i></p>
  * 
  * <p>Other examples:</p>
  * 
  * <p><strong>Binding literal parameter value:</strong></p>
- * <p><code>"WHERE SOME_COLUMN > #bind($xyz)"</code> produces <code>"WHERE SOME_COLUMN > ?"</code>
+ * <p><code>"WHERE SOME_COLUMN > #bind($xyz)"</code> produces 
+ * <code>"WHERE SOME_COLUMN > ?"</code>
  * and also places the value of the "xyz" parameter in the context "bindings" collection.</p>
  * 
  * <p><strong>Binding ID column of a DataObject value:</strong></p>
- * <p><code>"WHERE ID_COL1 = #bind($xyz 'db:ID_COL1') AND ID_COL2 = #bind($xyz 'db:ID_COL2')"</code> 
+ * <p><code>"WHERE ID_COL1 = #bind($helper.cayenneExp($xyz, 'db:ID_COL2')) 
+ * AND ID_COL2 = #bind($helper.cayenneExp($xyz, 'db:ID_COL2'))"</code> 
  * produces <code>"WHERE ID_COL1 = ? AND ID_COL2 = ?"</code>
  * and also places the values of id columns of the DataObject parameter  "xyz" in the context 
  * "bindings" collection.</p>
@@ -105,6 +107,11 @@ public class BindDirective extends Directive {
         return LINE;
     }
 
+    /**
+     * Extracts the value of the object property to render and passes
+     * control to {@link #render(InternalContextAdapter, Writer, Object, Object, Object)} 
+     * to do the actual rendering.
+     */
     public boolean render(InternalContextAdapter context, Writer writer, Node node)
         throws
             IOException,
@@ -113,18 +120,43 @@ public class BindDirective extends Directive {
             MethodInvocationException {
 
         Object value = getChild(context, node, 0);
-        Object property = getChild(context, node, 1);
-        if (value != null && property != null) {
-            value = Expression.fromString(property.toString()).evaluate(value);
+        Object type = getChild(context, node, 1);
+        Object precision = getChild(context, node, 2);
+
+        int jdbcType = TypesMapping.NOT_DEFINED;
+        if (type != null) {
+            jdbcType = TypesMapping.getSqlTypeByName(type.toString());
+        }
+        else if (value != null) {
+            jdbcType = TypesMapping.getSqlTypeByJava(value.getClass());
         }
 
-        render(context, writer, value);
+        if (jdbcType == TypesMapping.NOT_DEFINED) {
+            throw new ParseErrorException(
+                "Can't determine JDBC type of binding ("
+                    + value
+                    + ", "
+                    + type
+                    + ") at line "
+                    + node.getLine()
+                    + ", column "
+                    + node.getColumn());
+        }
+
+        DataBinding binding =
+            new DataBinding(value, jdbcType, ConversionUtil.toInt(precision, -1));
+
+        render(context, writer, binding);
         return true;
     }
 
-    protected void render(InternalContextAdapter context, Writer writer, Object value)
+    protected void render(
+        InternalContextAdapter context,
+        Writer writer,
+        DataBinding binding)
         throws IOException {
-        bind(context, value);
+
+        bind(context, binding);
         writer.write('?');
     }
 
@@ -138,13 +170,13 @@ public class BindDirective extends Directive {
     /**
      * Adds value to the list of bindings in the context.
      */
-    protected void bind(InternalContextAdapter context, Object value) {
+    protected void bind(InternalContextAdapter context, DataBinding binding) {
         Collection bindings =
             (Collection) context.getInternalUserContext().get(
                 SQLTemplateProcessor.BINDINGS_LIST_KEY);
 
         if (bindings != null) {
-            bindings.add(value);
+            bindings.add(binding);
         }
     }
 }
