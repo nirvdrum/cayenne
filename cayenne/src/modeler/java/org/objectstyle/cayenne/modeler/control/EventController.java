@@ -621,10 +621,10 @@ public class EventController extends ModelerController {
         currentProcedure = e.getProcedure();
         currentProcedureParameter = e.getProcedureParameter();
 
-        EventListener[] list = getListeners(ProcedureDisplayListener.class);
+        EventListener[] list = getListeners(ProcedureParameterDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
-            ProcedureDisplayListener listener = (ProcedureDisplayListener) list[i];
-            listener.currentProcedureChanged(e);
+			ProcedureParameterDisplayListener listener = (ProcedureParameterDisplayListener) list[i];
+            listener.currentProcedureParameterChanged(e);
         }
     }
 

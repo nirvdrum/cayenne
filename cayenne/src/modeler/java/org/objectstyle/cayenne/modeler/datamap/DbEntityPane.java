@@ -366,8 +366,8 @@ public class DbEntityPane
 
         protected boolean verifyName() {
             String text = name.getText();
-            if (text != null && text.trim().length() == 0) {
-                text = null;
+            if (text == null || text.trim().length() == 0) {
+                text = "";
             }
 
             DataMap map = mediator.getCurrentDataMap();

@@ -326,8 +326,8 @@ public class DataMapDetailView
 
         protected boolean verifyName() {
             String text = name.getText();
-            if (text != null && text.trim().length() == 0) {
-                text = null;
+            if (text == null || text.trim().length() == 0) {
+                text = "";
             }
 
             DataDomain domain = eventController.getCurrentDataDomain();
