@@ -437,7 +437,7 @@ public class Editor
 	 * Adds asterisk to the title of the window to indicate 
 	 * it is dirty. 
 	 */
-	public void setDirty(boolean flag) {	   
+	public void setDirty(boolean flag) {
 		String title = getTitle();
 		if (flag) {
 			getAction(SaveAction.ACTION_NAME).setEnabled(true);
@@ -528,11 +528,11 @@ public class Editor
 
 	public void currentDomainChanged(DomainDisplayEvent e) {
 		if (e.getDomain() == null) {
-			disableMenu();
-			return;
+			enableProjectMenu();
+		} else {
+			enableDomainMenu();
+			getAction(RemoveAction.ACTION_NAME).setName("Remove Domain");
 		}
-		enableDomainMenu();
-		getAction(RemoveAction.ACTION_NAME).setName("Remove Domain");
 	}
 
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
@@ -617,13 +617,18 @@ public class Editor
 		getAction(OpenProjectAction.ACTION_NAME).setEnabled(true);
 	}
 
-	private void enableDomainMenu() {
+	private void enableProjectMenu() {
 		disableMenu();
+		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
+		closeProjectMenu.setEnabled(true);
+	}
+
+	private void enableDomainMenu() {
+		enableProjectMenu();
+
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(true);
-		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
-		closeProjectMenu.setEnabled(true);
 		getAction(ImportDbAction.ACTION_NAME).setEnabled(true);
 		getAction(ImportEOModelAction.ACTION_NAME).setEnabled(true);
 	}
