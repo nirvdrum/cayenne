@@ -98,16 +98,16 @@ public class IncrementalFaultList implements List {
     protected SelectQuery internalQuery;
     protected int unfetchedObjects;
 
-    /** size fetches will be limited to in order to avoid where clause limitations */
-    protected int fetchSize = 10000;
+    /** 
+     * Defines the upper limit on the size of fetches. This is needed to avoid where clause size limitations.
+     */
+    protected int maxFetchSize = 10000;
     // Don't confuse this with the JDBC ResultSet fetch size setting - this controls
     // the where clause generation that is necessary to fetch specific records a page
     // at a time.  Some JDBC Drivers/Databases may have limits on statement length
     // or complexity of the where clause - e.g., PostgreSQL having a default limit of 10,000
     // nested expressions.
-    //
-    // TODO: make configurable?
-    
+
     /**
      * Creates a new list copying settings from another list.
      * Elements WILL NOT be copied or fetched.
@@ -117,13 +117,11 @@ public class IncrementalFaultList implements List {
         this.internalQuery = list.internalQuery;
         this.dataContext = list.dataContext;
         this.rootEntity = list.rootEntity;
-        this.fetchSize = list.fetchSize;
+        this.maxFetchSize = list.maxFetchSize;
         elements = Collections.synchronizedList(new ArrayList());
     }
 
-    public IncrementalFaultList(
-        DataContext dataContext,
-        GenericSelectQuery query) {
+    public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
         if (query.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
                 "IncrementalFaultList does not support unpaged queries. Query page size is "
@@ -133,8 +131,7 @@ public class IncrementalFaultList implements List {
         this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
         this.pageSize = query.getPageSize();
-        this.rootEntity =
-            dataContext.getEntityResolver().lookupObjEntity(query);
+        this.rootEntity = dataContext.getEntityResolver().lookupObjEntity(query);
 
         // create an internal query, it is a partial replica of 
         // the original query and will serve as a value holder for 
@@ -167,12 +164,10 @@ public class IncrementalFaultList implements List {
                     // read first page completely, the rest as ObjectIds
                     List firstPage = new ArrayList(pageSize);
                     for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
-						firstPage.add(it.nextDataRow());
+                        firstPage.add(it.nextDataRow());
                     }
-					elements.addAll(dataContext.objectsFromDataRows(
-					      rootEntity,
-					      firstPage,
-				          true));
+                    elements.addAll(
+                        dataContext.objectsFromDataRows(rootEntity, firstPage, true));
 
                     // continue reading ids
                     while (it.hasNextRow()) {
@@ -184,17 +179,18 @@ public class IncrementalFaultList implements List {
                         elements.size(),
                         System.currentTimeMillis() - t1);
 
-                } finally {
+                }
+                finally {
                     it.close();
                 }
-            } catch (CayenneException e) {
+            }
+            catch (CayenneException e) {
                 throw new CayenneRuntimeException("Error performing query.", e);
             }
 
             // process prefetching
             if (internalQuery.getPrefetches().size() > 0) {
-                int endOfPage =
-                    (elements.size() < pageSize) ? elements.size() : pageSize;
+                int endOfPage = (elements.size() < pageSize) ? elements.size() : pageSize;
                 dataContext.prefetchRelationships(
                     internalQuery,
                     elements.subList(0, endOfPage));
@@ -242,9 +238,7 @@ public class IncrementalFaultList implements List {
                 if (obj instanceof Map) {
                     ids.add(obj);
                     quals.add(
-                        ExpressionFactory.matchAllDbExp(
-                            (Map) obj,
-                            Expression.EQUAL_TO));
+                        ExpressionFactory.matchAllDbExp((Map) obj, Expression.EQUAL_TO));
                 }
             }
 
@@ -254,16 +248,19 @@ public class IncrementalFaultList implements List {
 
             // fetch the range of objects in fetchSize chunks
             List objects = new ArrayList(1);
+            int fetchEnd = Math.min(quals.size(), maxFetchSize);
             int fetchBegin = 0;
-            for (int fetchEnd = Math.min(quals.size(), fetchSize); fetchBegin < quals.size(); fetchEnd += Math.min(fetchSize, (quals.size()-fetchEnd)))
-            {
-            SelectQuery query =
-                new SelectQuery(
-                    rootEntity.getName(),
-                        ExpressionFactory.joinExp(Expression.OR, quals.subList(fetchBegin, fetchEnd)));
+            while (fetchBegin < quals.size()) {
+                SelectQuery query =
+                    new SelectQuery(
+                        rootEntity.getName(),
+                        ExpressionFactory.joinExp(
+                            Expression.OR,
+                            quals.subList(fetchBegin, fetchEnd)));
 
                 objects.addAll(dataContext.performQuery(query));
-                fetchBegin = fetchEnd;                
+                fetchBegin = fetchEnd;
+                fetchEnd += Math.min(maxFetchSize, quals.size() - fetchEnd);
             }
 
             // sanity check - database data may have changed
@@ -271,8 +268,7 @@ public class IncrementalFaultList implements List {
                 // find missing ids
                 StringBuffer buf = new StringBuffer();
                 buf.append("Some ObjectIds are missing from the database. ");
-                buf.append("Expected ").append(ids.size()).append(
-                    ", fetched ").append(
+                buf.append("Expected ").append(ids.size()).append(", fetched ").append(
                     objects.size());
 
                 Iterator idsIt = ids.iterator();
@@ -294,7 +290,8 @@ public class IncrementalFaultList implements List {
                     if (!found) {
                         if (first) {
                             first = false;
-                        } else {
+                        }
+                        else {
                             buf.append(", ");
                         }
 
@@ -303,12 +300,10 @@ public class IncrementalFaultList implements List {
                 }
 
                 throw new CayenneRuntimeException(buf.toString());
-            } else if (objects.size() > ids.size()) {
+            }
+            else if (objects.size() > ids.size()) {
                 throw new CayenneRuntimeException(
-                    "Expected "
-                        + ids.size()
-                        + " objects, retrieved "
-                        + objects.size());
+                    "Expected " + ids.size() + " objects, retrieved " + objects.size());
             }
 
             // replace ids in the list with objects
@@ -327,8 +322,7 @@ public class IncrementalFaultList implements List {
                 }
 
                 if (!found) {
-                    throw new CayenneRuntimeException(
-                        "Can't find id for " + idMap);
+                    throw new CayenneRuntimeException("Can't find id for " + idMap);
                 }
             }
 
@@ -337,8 +331,7 @@ public class IncrementalFaultList implements List {
 
         // process prefetching
         if (internalQuery.getPrefetches().size() > 0) {
-            int endOfPage =
-                (elements.size() < toIndex) ? elements.size() : toIndex;
+            int endOfPage = (elements.size() < toIndex) ? elements.size() : toIndex;
             dataContext.prefetchRelationships(
                 internalQuery,
                 elements.subList(fromIndex, endOfPage));
@@ -361,8 +354,12 @@ public class IncrementalFaultList implements List {
      * will be made to resolve a page.
      * @return int
      */
-    public int getFetchSize() {
-        return fetchSize;
+    public int getMaxFetchSize() {
+        return maxFetchSize;
+    }
+
+    public void setMaxFetchSize(int fetchSize) {
+        this.maxFetchSize = fetchSize;
     }
 
     /**
@@ -391,52 +388,47 @@ public class IncrementalFaultList implements List {
         // objects will occur on pageSize boundaries as necessary.
         return new ListIterator() {
             int listIndex = 0;
-            
+
             public void add(Object o) {
-                throw new UnsupportedOperationException(
-                            "add operation not supported");
+                throw new UnsupportedOperationException("add operation not supported");
             }
-            
+
             public boolean hasNext() {
                 return (listIndex < elements.size());
             }
-            
+
             public boolean hasPrevious() {
                 return (listIndex > 0);
             }
-            
+
             public Object next() {
-                if (listIndex >= elements.size()) 
-                    throw new NoSuchElementException(
-                                "at the end of the list");
-                    
+                if (listIndex >= elements.size())
+                    throw new NoSuchElementException("at the end of the list");
+
                 return get(listIndex++);
             }
-            
+
             public int nextIndex() {
                 return listIndex;
             }
-            
+
             public Object previous() {
                 if (listIndex < 1)
-                    throw new NoSuchElementException(
-                                "at the beginning of the list");
-                
+                    throw new NoSuchElementException("at the beginning of the list");
+
                 return get(--listIndex);
             }
-            
+
             public int previousIndex() {
                 return (listIndex - 1);
             }
-            
+
             public void remove() {
-                throw new UnsupportedOperationException(
-                            "remove operation not supported");             
+                throw new UnsupportedOperationException("remove operation not supported");
             }
-            
+
             public void set(Object o) {
-                throw new UnsupportedOperationException(
-                            "set operation not supported");
+                throw new UnsupportedOperationException("set operation not supported");
             }
         };
     }
@@ -457,54 +449,49 @@ public class IncrementalFaultList implements List {
         // objects will occur on pageSize boundaries as necessary.
         return new ListIterator() {
             int listIndex = index;
-            
+
             public void add(Object o) {
-                throw new UnsupportedOperationException(
-                            "add operation not supported");
+                throw new UnsupportedOperationException("add operation not supported");
             }
-            
+
             public boolean hasNext() {
                 return (listIndex < elements.size());
             }
-            
+
             public boolean hasPrevious() {
                 return (listIndex > 0);
             }
-            
+
             public Object next() {
-                if (listIndex >= elements.size()) 
-                    throw new NoSuchElementException(
-                                "at the end of the list");
-                    
+                if (listIndex >= elements.size())
+                    throw new NoSuchElementException("at the end of the list");
+
                 return get(listIndex++);
             }
-            
+
             public int nextIndex() {
                 return listIndex;
             }
-            
+
             public Object previous() {
                 if (listIndex < 1)
-                    throw new NoSuchElementException(
-                                "at the beginning of the list");
-                
+                    throw new NoSuchElementException("at the beginning of the list");
+
                 return get(--listIndex);
             }
-            
+
             public int previousIndex() {
                 return (listIndex - 1);
             }
-            
+
             public void remove() {
-                throw new UnsupportedOperationException(
-                            "remove operation not supported");             
+                throw new UnsupportedOperationException("remove operation not supported");
             }
-            
+
             public void set(Object o) {
-                throw new UnsupportedOperationException(
-                            "set operation not supported");
+                throw new UnsupportedOperationException("set operation not supported");
             }
-        };        
+        };
     }
 
     /**
@@ -519,17 +506,17 @@ public class IncrementalFaultList implements List {
             int listIndex = 0;
 
             public boolean hasNext() {
-                return (listIndex < elements.size());                
+                return (listIndex < elements.size());
             }
-            
+
             public Object next() {
                 if (listIndex >= elements.size())
                     throw new NoSuchElementException("no more elements");
-                    
-                return get(listIndex++); 
+
+                return get(listIndex++);
             }
-            
-            public void remove() { 
+
+            public void remove() {
                 throw new UnsupportedOperationException("remove not supported.");
             }
         };
@@ -619,7 +606,8 @@ public class IncrementalFaultList implements List {
                 resolveInterval(pageStart, pageStart + pageSize);
 
                 return elements.get(index);
-            } else {
+            }
+            else {
                 return o;
             }
         }
