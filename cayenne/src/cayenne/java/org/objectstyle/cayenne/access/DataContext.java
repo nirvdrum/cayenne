@@ -728,7 +728,12 @@ public class DataContext implements QueryEngine {
      * depending on the value returned by <code>query.isFetchingDataRows()</code>.
      */
     public List performQuery(GenericSelectQuery query) {
-    	// 
+    	
+    	// check if result pagination is requested
+    	// let a list handle fetch in this case
+    	if(query.getPageSize() > 0) {
+    		return new IncrementalFaultList(this, query);
+    	}
     	
         // Fetch either DataObjects or data rows.
         SelectObserver observer =

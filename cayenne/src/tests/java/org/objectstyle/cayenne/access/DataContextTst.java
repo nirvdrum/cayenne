@@ -393,6 +393,16 @@ public class DataContextTst extends CayenneTestCase {
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());
 	}
+	
+	public void testPerformPagedQuery() throws Exception {
+		SelectQuery query = new SelectQuery("Artist");
+		query.setPageSize(5);
+		List objects = ctxt.performQuery(query);
+		assertNotNull(objects);
+		assertTrue(objects instanceof IncrementalFaultList);
+		
+		assertEquals(1, ((IncrementalFaultList)objects).getPagesRead());
+	}
 
 	public void testPerformDataRowQuery() throws Exception {
 		SelectQuery query = new SelectQuery("Artist");
