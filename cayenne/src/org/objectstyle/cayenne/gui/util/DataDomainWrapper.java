@@ -60,10 +60,30 @@ import org.objectstyle.cayenne.access.*;
 
 
 /** Wrapper for DataDomain. 
- *  Used to put DataDomains into the JTree and any other place where 
- *  toString() method must return DataDomain name.
- */
-public class DataDomainWrapper{
+  *  Used to put DataDomains into the JTree and any other place where 
+  *  toString() method must return DataDomain name.
+  *
+  * @author Michael Shengaout
+  * @author Andrei Adamchik  
+  */
+public class DataDomainWrapper {
+    private static int sessionNameCounter = -1;
+    
+    /** Returns a "unique" name that can be used as a default name of a new DataDomain.
+      *
+      * <p>There are pitfalls in using this method, since it doesn't check 
+      * if the same exact name was typed by the user elsewhere
+      * or if there is a gap in name numbering. In the future we will need 
+      * a cleaner implementation.</p>
+      */
+    public static String sessionUniqueDomainName() {
+        sessionNameCounter++;
+        
+        return (sessionNameCounter == 0) 
+        ? "Untitled": "Untitled " + sessionNameCounter;
+    }
+    
+    
 	DataDomain domain = null;
 	
 	public DataDomainWrapper(DataDomain temp_rel){

@@ -62,6 +62,9 @@ import java.util.*;
  * Provides the entry point into the relational and object meta information.
  * In many ways, particularly for the tools responsible for creation of the
  * DataMap, plays the role of the Facade design pattern.
+ *
+ * @author Michael Shengaout
+ * @author Andrei Adamchik  
  */
 public class DataMap {
     private String name;
@@ -74,19 +77,9 @@ public class DataMap {
     /** Db entities representing metadata for individual database tables.
     *  The name of the database table serves as a key. */
     private SortedMap dbEntityMap = new TreeMap();
-	
-	/** Used to generate unique "Untitled" names within the editing session.*/
-	private static int untitledNumCounter = 0;
 
     /** Creates an empty DataMap */
-    public DataMap() {
-    	if (untitledNumCounter == 0)
-			name = "Untitled ";
-		else 
-			name = "Untitled " + untitledNumCounter;
-
-		untitledNumCounter++;
-	}
+    public DataMap() {}
 
     /** Creates an empty DataMap and assigns it a <code>name</code>. */
     public DataMap(String name) {

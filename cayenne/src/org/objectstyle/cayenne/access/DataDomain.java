@@ -98,19 +98,10 @@ public class DataDomain implements QueryEngine {
       * its goal is to speed up lookups for data operation 
       * switching. */
     private HashMap nodesToDataMap = new HashMap();
-
-	/** Used to generate unique "Untitled" names within the editing session.*/
-	private static int untitledNumCounter = 0;
+    
 
     /** Creates an unnamed DataDomain */
-    public DataDomain() {
-    	if (untitledNumCounter == 0)
-			name = "Untitled ";
-		else 
-			name = "Untitled " + untitledNumCounter;
-
-		untitledNumCounter++;
-    }
+    public DataDomain() {}
 
 
     /** Creates DataDomain and assigns it a <code>name</code>. */

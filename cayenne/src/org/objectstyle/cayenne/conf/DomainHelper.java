@@ -64,7 +64,6 @@ import java.util.*;
 import javax.sql.DataSource;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
-import java.util.logging.*;
 import java.io.*;
 
 /**
@@ -85,6 +84,7 @@ public class DomainHelper {
     private Configuration config;
     private MapLoaderImpl loader;
     private XMLReader parser;
+    private Locator locator;
     private ArrayList domains;
     private HashMap failedMaps;
     private HashMap failedAdapters;
@@ -244,6 +244,16 @@ public class DomainHelper {
      * Handler for the root element. Its only child must be the "domains" element.
      */
     private class RootHandler extends DefaultHandler {
+       /**
+         * Sets the locator in the project helper for future reference.
+         * 
+         * @param locator The locator used by the parser.
+         *                Will not be <code>null</code>.
+         */
+        public void setDocumentLocator(Locator locator) {
+            DomainHelper.this.locator = locator;
+        }
+        
         /**
          * Handles the start of a datadomains element. A domains handler is created
          * and initialised with the element name and attributes.
@@ -256,7 +266,7 @@ public class DomainHelper {
             if (localName.equals("domains")) {
                 new DomainsHandler(parser, this);
             } else {
-                throw new SAXException("Config file is not of expected XML type");
+                throw new SAXParseException("Config file is not of expected XML type", locator);
             }
         }
     }
@@ -289,7 +299,7 @@ public class DomainHelper {
             if (localName.equals("domain")) {
                 new DomainHandler(getParser(), this).init(localName, atts);
             } else {
-                throw new SAXException("Unexpected element \"" + localName + "\"");
+                throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
     }
@@ -308,7 +318,7 @@ public class DomainHelper {
         public void init(String name, Attributes attrs) throws SAXException {
             String domainName = attrs.getValue("", "name");
             if (domainName == null)
-                throw new SAXException("Domain 'name' attribute must be not null.");
+                throw new SAXParseException("Domain 'name' attribute must be not null.", locator);
 
             domain = new DataDomain(domainName);
             domains.add(domain);
@@ -321,7 +331,7 @@ public class DomainHelper {
             } else if (localName.equals("node")) {
                 new NodeHandler(getParser(), this).init(localName, atts, domain);
             } else {
-                throw new SAXException("Unexpected element \"" + localName + "\"");
+                throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
     }
@@ -334,11 +344,11 @@ public class DomainHelper {
         public void init(String name, Attributes attrs, DataDomain domain) throws SAXException {
             String mapName = attrs.getValue("", "name");
             if (mapName == null)
-                throw new SAXException("Map 'name' attribute must be present.");
+                throw new SAXParseException("<map> 'name' attribute must be present.", locator);
 
             String location = attrs.getValue("", "location");
             if (location == null)
-                throw new SAXException("Map 'location' attribute must be present.");
+                throw new SAXParseException("<map> 'location' attribute must be present.", locator);
 
             InputStream mapIn = config.getMapConfig(location);
             if (mapIn == null) {
@@ -382,15 +392,15 @@ public class DomainHelper {
 
             String nodeName = attrs.getValue("", "name");
             if (nodeName == null)
-                throw new SAXException("Node 'name' attribute must be present.");
+                throw new SAXParseException("'<node name=' attribute must be present.", locator);
 
             String dataSrcLocation = attrs.getValue("", "datasource");
             if (dataSrcLocation == null)
-                throw new SAXException("Node 'datasource' attribute must be present.");
+                throw new SAXParseException("'<node datasource=' attribute must be present.", locator);
 
             String factoryName = attrs.getValue("", "factory");
             if (factoryName == null)
-                throw new SAXException("Node 'factory' attribute must be present.");
+                throw new SAXParseException("'<node factory=' attribute must be present.", locator);
 
             // unlike other parameters, adapter class is optional
             // default is used when none is specified.
@@ -430,7 +440,7 @@ public class DomainHelper {
             if (localName.equals("map-ref")) {
                 new MapRefHandler(getParser(), this).init(localName, attrs, domain, node);
             } else {
-                throw new SAXException("Unexpected element \"" + localName + "\"");
+                throw new SAXParseException("Unexpected element \"" + localName + "\"", locator);
             }
         }
     }
@@ -451,7 +461,7 @@ public class DomainHelper {
         public void init(String name, Attributes attrs, DataDomain domain, DataNode node) throws SAXException {
             String mapName = attrs.getValue("", "name");
             if (mapName == null)
-                throw new SAXException("Map ref 'name' attribute must be present.");
+                throw new SAXParseException("'<mapref name=' attribute must be present.", locator);
 
             DataMap map = domain.getMap(mapName);
             if (map == null) {

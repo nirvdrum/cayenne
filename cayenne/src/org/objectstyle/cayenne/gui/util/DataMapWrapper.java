@@ -63,8 +63,28 @@ import org.objectstyle.cayenne.dba.*;
 import org.objectstyle.cayenne.map.*;
 
 
-/** Adds name and i/o to DataMap.  */
+/** Adds name and i/o to DataMap.
+  * 
+  * @author Michael Shengaout
+  * @author Andrei Adamchik  
+  */
 public class DataMapWrapper {
+    private static int sessionNameCounter = -1;
+    
+    /** Returns a "unique" name that can be used as a default name of a new DataMap. 
+      *
+      * <p>There are pitfalls in using this method, since it doesn't check 
+      * if the same exact name was typed by the user elsewhere
+      * or if there is a gap in name numbering. In the future we will need 
+      * a cleaner implementation.</p>
+      */
+    public static String sessionUniqueDomainName() {
+        sessionNameCounter++;
+        
+        return (sessionNameCounter == 0) 
+        ? "Untitled": "Untitled " + sessionNameCounter;
+    }
+    
 	private DataMap dataMap;
 	
 	/** Used when map is created from database. */

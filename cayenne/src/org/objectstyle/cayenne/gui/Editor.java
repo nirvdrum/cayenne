@@ -136,7 +136,7 @@ implements ActionListener
         } else if (src == createDomainMenu) {
             createDomain();
         } else if (src == createDataMapMenu) {
-        	mediator.addDataMap(this, new DataMap());
+        	mediator.addDataMap(this, new DataMap(DataMapWrapper.sessionUniqueDomainName()));
         } else if (src == createObjEntityMenu) {
         	createObjEntity();
         } else if (src == createDbEntityMenu) {
@@ -467,8 +467,8 @@ implements ActionListener
 		}
 	}
 	
-	private void createDomain(){
-		DataDomain domain = new DataDomain();
+	private void createDomain() {
+		DataDomain domain = new DataDomain(DataDomainWrapper.sessionUniqueDomainName());
 		mediator.getConfig().addDomain(domain);
 		mediator.fireDomainEvent(new DomainEvent(this, domain, DomainEvent.ADD));
 		mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
