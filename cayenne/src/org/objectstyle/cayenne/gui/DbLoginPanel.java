@@ -253,6 +253,7 @@ public class DbLoginPanel extends JDialog implements ActionListener {
             drInput.storePreferences();
             urlInput.storePreferences();
             adapterInput.storePreferences();
+            Preferences.getPreferences().storePreferences(null);
         }
         else if (e.getSource() == cancel) {
         	setDataSrcInfo(null);
