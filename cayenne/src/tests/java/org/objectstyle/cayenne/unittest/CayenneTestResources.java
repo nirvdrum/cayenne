@@ -181,7 +181,7 @@ public class CayenneTestResources {
     }
 
     public DataNode getSharedNode() {
-        return (DataNode)sharedDomain.getDataNodes().iterator().next();
+        return (DataNode) sharedDomain.getDataNodes().iterator().next();
     }
 
     public DataSourceInfo getFreshConnInfo() throws Exception {
@@ -200,10 +200,17 @@ public class CayenneTestResources {
             PoolDataSource poolDS =
                 new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
             sharedDataSource =
-                new PoolManager(poolDS, 1, 1, dsi.getUserName(), dsi.getPassword());
+                new PoolManager(
+                    poolDS,
+                    1,
+                    1,
+                    dsi.getUserName(),
+                    dsi.getPassword());
         } catch (Exception ex) {
             logObj.error("Can not create shared data source.", ex);
-            throw new CayenneRuntimeException("Can not create shared data source.", ex);
+            throw new CayenneRuntimeException(
+                "Can not create shared data source.",
+                ex);
         }
     }
 
@@ -218,24 +225,26 @@ public class CayenneTestResources {
             // map
             DataMap map = new MapLoader().loadDataMap(mapPath);
 
-            // node
-            DataNode node = new DataNode("node");
-            node.setDataSource(sharedDataSource);
+            // adapter/node
             Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
             if (sharedConnInfo.getAdapterClass() != null) {
                 adapterClass = Class.forName(sharedConnInfo.getAdapterClass());
             }
 
-            node.setAdapter((DbAdapter) adapterClass.newInstance());
+            DbAdapter adapter = (DbAdapter) adapterClass.newInstance();
+            DataNode node = adapter.createDataNode("node");
+            node.setDataSource(sharedDataSource);
             node.addDataMap(map);
-            
+
             // dirk: Postgres hack to make BLOBs work
-            if ((adapterClass == PostgresAdapter.class) && (mapPath.indexOf("testmap") != -1)) {
-            	logObj.info("changing attribute IMAGE_BLOB of DbEntity PAINTING_INFO to VARBINARY for PostgreSQL");
-	            DbEntity pi = map.getDbEntity("PAINTING_INFO");
-	            DbAttribute att = (DbAttribute)pi.getAttribute("IMAGE_BLOB");
-	            att.setType(Types.VARBINARY);
+            if ((adapterClass == PostgresAdapter.class)
+                && (mapPath.indexOf("testmap") != -1)) {
+                logObj.info(
+                    "changing attribute IMAGE_BLOB of DbEntity PAINTING_INFO to VARBINARY for PostgreSQL");
+                DbEntity pi = map.getDbEntity("PAINTING_INFO");
+                DbAttribute att = (DbAttribute) pi.getAttribute("IMAGE_BLOB");
+                att.setType(Types.VARBINARY);
             }
 
             // domain
@@ -260,10 +269,14 @@ public class CayenneTestResources {
     protected void createDbSetup() {
         try {
             sharedDatabaseSetup =
-                new CayenneTestDatabaseSetup(this, (DataMap)getSharedNode().getDataMaps().iterator().next());
+                new CayenneTestDatabaseSetup(
+                    this,
+                    (DataMap) getSharedNode().getDataMaps().iterator().next());
         } catch (Exception ex) {
             logObj.error("Can not create shared DatabaseSetup.", ex);
-            throw new CayenneRuntimeException("Can not create shared DatabaseSetup.", ex);
+            throw new CayenneRuntimeException(
+                "Can not create shared DatabaseSetup.",
+                ex);
         }
     }
 
@@ -278,7 +291,9 @@ public class CayenneTestResources {
             dbSetup.setupTestTables();
         } catch (Exception ex) {
             logObj.error("Error creating test database.", ex);
-            throw new CayenneRuntimeException("Error creating test database.", ex);
+            throw new CayenneRuntimeException(
+                "Error creating test database.",
+                ex);
         }
     }
 

@@ -78,14 +78,14 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
 
-/** Wrapper class for javax.sql.DataSource. Links Cayenne framework
-  * with JDBC layer, providing query execution facilities.
-  *
-  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
-  * target="_top">Cayenne User Guide.</a></i></p>
-  *
-  * @author Andrei Adamchik
-  */
+/**
+ * Describes a single physical data source, e.g. a database server.
+ *
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ *
+ * @author Andrei Adamchik
+ */
 public class DataNode implements QueryEngine {
 
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;

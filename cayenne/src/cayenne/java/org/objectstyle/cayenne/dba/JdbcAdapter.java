@@ -476,4 +476,15 @@ public class JdbcAdapter implements DbAdapter {
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new QualifierTranslator(queryAssembler);
     }
+    
+    
+    /**
+     * Creates an instance of DataNode class.
+     */
+    public DataNode createDataNode(String name) {
+        DataNode node = new DataNode(name);
+        node.setAdapter(this);
+        return node;
+    }
+
 }

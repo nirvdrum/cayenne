@@ -269,7 +269,22 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             }
         }
 
-        DataNode node = new DataNode(nodeName);
+        // load DbAdapter
+        if (adapter == null) {
+            adapter = JdbcAdapter.class.getName();
+        }
+
+        DbAdapter dbAdapter = null;
+
+        try {
+            dbAdapter = (DbAdapter) Class.forName(adapter).newInstance();
+        } catch (Exception ex) {
+            logObj.log(logLevel, "instantiating adapter failed, using default adapter.", ex);
+            getStatus().getFailedAdapters().put(nodeName, adapter);
+            dbAdapter = new JdbcAdapter();
+        }
+
+        DataNode node = dbAdapter.createDataNode(nodeName);
         node.setDataSourceFactory(factory);
         node.setDataSourceLocation(dataSource);
 
@@ -299,18 +314,6 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         } catch (Exception ex) {
             logObj.log(logLevel, "error: DataSource load failed", ex);
             getStatus().getFailedDataSources().put(nodeName, dataSource);
-        }
-
-        // load DbAdapter
-        if (adapter == null) {
-            adapter = JdbcAdapter.class.getName();
-        }
-
-        try {
-            node.setAdapter((DbAdapter) Class.forName(adapter).newInstance());
-        } catch (Exception ex) {
-            logObj.log(logLevel, "instantiating adapter failed.", ex);
-            getStatus().getFailedAdapters().put(nodeName, adapter);
         }
 
         try {

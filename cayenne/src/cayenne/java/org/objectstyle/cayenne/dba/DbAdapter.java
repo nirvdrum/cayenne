@@ -98,6 +98,11 @@ public interface DbAdapter {
     public static final String HSQLDB =
         "org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
 
+    /**
+     * Creates an returns a named instance of a DataNode. Sets node adapter to be this object.
+     */
+    public DataNode createDataNode(String name);
+
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
 
@@ -131,7 +136,7 @@ public interface DbAdapter {
      * name is confusing.
      */
     public ExtendedTypeMap getTypeConverter();
-    
+
     /**
      * Returns a map of ExtendedTypes that is used to translate values between
      * Java and JDBC layer.
@@ -170,7 +175,7 @@ public interface DbAdapter {
      * DbAdapter via 'getQualifierTranslator'.
      */
     public QualifierTranslatorFactory getQualifierFactory();
-    
+
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler);
 
     /**

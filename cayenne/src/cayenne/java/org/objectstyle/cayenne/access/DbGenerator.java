@@ -108,9 +108,13 @@ public class DbGenerator {
 
 	/** Creates and initializes new DbGenerator. */
 	public DbGenerator(DbAdapter adapter, DataMap map) {
+		// sanity check
+		if(adapter == null) {
+			throw new IllegalArgumentException("Adapter must not be null.");
+		}
+		
 		this.map = map;
-		this.node = new DataNode("internal");
-		node.setAdapter(adapter);
+		this.node = adapter.createDataNode("internal");
 		node.addDataMap(map);
 
 		resetToDefaults();

@@ -77,9 +77,9 @@ public class AntMain extends Main {
      */
     public static void main(String[] args) {
         TestPreferences prefs;
-        
+
         Configuration.configCommonLogging();
-        
+
         try {
             prefs = new TestPreferences(System.getProperties());
         } catch (Exception ex) {
@@ -119,15 +119,15 @@ public class AntMain extends Main {
                 info.getUserName(),
                 info.getPassword());
 
-        DataNode node = new DataNode("node");
-        node.setDataSource(ds);
         Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
         if (info.getAdapterClass() != null) {
             adapterClass = Class.forName(info.getAdapterClass());
         }
-
-        node.setAdapter((DbAdapter) adapterClass.newInstance());
+        
+        DbAdapter adapter = (DbAdapter) adapterClass.newInstance();
+        DataNode node = adapter.createDataNode("node");
+        node.setDataSource(ds);
 
         // domain
         DataDomain domain = new DataDomain("domain");

@@ -60,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -68,6 +69,13 @@ public class JdbcAdapterTst extends CayenneTestCase {
 
 	protected void setUp() throws java.lang.Exception {
 		adapter = new JdbcAdapter();
+	}
+	
+	public void testCreateDataNode() throws Exception {
+		DataNode node = adapter.createDataNode("1234");
+		assertNotNull(node);
+		assertEquals("1234", node.getName());
+		assertSame(adapter, node.getAdapter());
 	}
 
 	public void testExternalTypesForJdbcType() throws Exception {

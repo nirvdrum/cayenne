@@ -201,17 +201,15 @@ public class PerformMain {
             DataMap map = new MapLoader().loadDataMap(CayenneTestResources.TEST_MAP_PATH);
 
             // node
-            DataNode node = new DataNode("node");
-            node.setDataSource(ds);
-            
             Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
             if (dsi.getAdapterClass() != null) {
                 adapterClass = Class.forName(dsi.getAdapterClass());
             }
  
-            node.setAdapter((DbAdapter) adapterClass.newInstance());
-            
+            DbAdapter adapter = (DbAdapter) adapterClass.newInstance();
+			DataNode node = adapter.createDataNode("node");
+			node.setDataSource(ds);
             node.addDataMap(map);
 
             // generate pk's
