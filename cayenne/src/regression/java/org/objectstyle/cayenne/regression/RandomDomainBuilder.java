@@ -325,7 +325,6 @@ public class RandomDomainBuilder {
       DbEntity pk1Entity = pk1ObjEntity.getDbEntity();
       DbEntity pk2Entity = pk2ObjEntity.getDbEntity();
       Collection foreignKeys = flattenedTable.getForeignKeys();
-      Collection primaryKeys = flattenedTable.getPrimaryKeys();
       ForeignKey fk = null;
 
       //master1 <-> flattened

@@ -476,7 +476,6 @@ class ContextCommit {
 				flattenedBatches.put(responsibleNode, batchesByDbEntity);
 			}
 
-			String relName = info.getBaseRelationship().getName();
 			ObjRelationship flattenedRel = info.getBaseRelationship();
 			List relList = flattenedRel.getDbRelationshipList();
 			DbRelationship firstDbRel = (DbRelationship)relList.get(0);
@@ -513,7 +512,6 @@ class ContextCommit {
 				flattenedBatches.put(responsibleNode, batchesByDbEntity);
 			}
 			
-			String relName = info.getBaseRelationship().getName();
 			ObjRelationship flattenedRel = info.getBaseRelationship();
 			List relList = flattenedRel.getDbRelationshipList();
 			DbRelationship firstDbRel = (DbRelationship)relList.get(0);
