@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -65,7 +65,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
+import org.objectstyle.cayenne.modeler.FileClassLoadingService;
 import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
@@ -106,7 +106,7 @@ public class ClasspathPreferences extends CayenneController {
     protected Domain getClassLoaderDomain() {
         return editor
                 .editableInstance(getApplication().getApplicationPreferences())
-                .getSubdomain(ModelerClassLoader.class);
+                .getSubdomain(FileClassLoadingService.class);
     }
 
     protected void initBindings() {

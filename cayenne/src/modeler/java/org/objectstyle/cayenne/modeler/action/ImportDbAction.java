@@ -169,7 +169,7 @@ public class ImportDbAction extends CayenneAction {
     public DbAdapter createAdapter(DataSourceInfo dsi) {
         // load adapter
         try {
-            Class adapterClass = Application.getClassLoader().loadClass(
+            Class adapterClass = getApplication().getClassLoadingService().loadClass(
                     dsi.getAdapterClassName());
 
             return (DbAdapter) adapterClass.newInstance();
@@ -190,7 +190,7 @@ public class ImportDbAction extends CayenneAction {
 
         try {
             // load driver via custom ClassLoader
-            Class driverClass = Application.getClassLoader().loadClass(
+            Class driverClass = getApplication().getClassLoadingService().loadClass(
                     driverClassName);
             Driver driver = (Driver) driverClass.newInstance();
 

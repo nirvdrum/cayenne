@@ -66,7 +66,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
@@ -140,29 +139,25 @@ public class OpenProjectAction extends ProjectAction {
     /** Opens specified project file. File must already exist. */
     public void openProject(File file) {
         // Using fresh ModelerClassLoader, as we need to support custom adapters
-        ConfigurationHack.setResourceLoader(Application
-                .getClassLoader()
-                .createClassLoader());
+        ConfigurationHack.setResourceLoader(getApplication()
+                .getClassLoadingService()
+                .getClassLoader());
 
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         try {
             // Save dir path to the preferences
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
-            Application.getFrame().addToLastProjList(file.getAbsolutePath());
+            getApplication().getFrameController().addToLastProjListAction(file.getAbsolutePath());
 
             Project project = Project.createProject(file);
-            CayenneModelerController controller = Application
-                    .getInstance()
-                    .getFrameController();
-
-            controller.setCurrentProject(project);
+            getProjectController().setCurrentProject(project);
 
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             }
             else {
-                controller.projectOpenedAction(project);
+                getApplication().getFrameController().projectOpenedAction(project);
             }
         }
         catch (Exception ex) {

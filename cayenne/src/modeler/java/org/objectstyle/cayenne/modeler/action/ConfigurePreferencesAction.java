@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.prefeditor.PreferenceDialog;
+import org.objectstyle.cayenne.modeler.dialog.pref.PreferenceDialog;
 import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 
 /**

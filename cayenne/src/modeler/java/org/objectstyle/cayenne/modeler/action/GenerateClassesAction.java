@@ -68,9 +68,9 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class GenerateClassesAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Generate Classes";
-	}
+    public static String getActionName() {
+        return "Generate Classes";
+    }
 
     /**
      * Constructor for GenerateClassesAction.
@@ -87,16 +87,12 @@ public class GenerateClassesAction extends CayenneAction {
     }
 
     protected void generateClasses() {
-        new ClassGeneratorController(
-            getCurrentProject(),
-            getProjectController().getCurrentDataMap(),
-            getProjectController().getCurrentObjEntity())
-            .startup();
+        new ClassGeneratorController(getProjectController()).startup();
     }
 
     /**
-    * Returns <code>true</code> if path contains a DataMap object.
-    */
+     * Returns <code>true</code> if path contains a DataMap object.
+     */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;

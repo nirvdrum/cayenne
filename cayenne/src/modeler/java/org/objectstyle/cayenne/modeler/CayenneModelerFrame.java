@@ -59,8 +59,6 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.util.Iterator;
-import java.util.Vector;
 
 import javax.swing.Box;
 import javax.swing.JFrame;
@@ -257,27 +255,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }
 
-    /** Adds path to the list of last opened projects in preferences. */
-    public void addToLastProjList(String path) {
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        Vector arr = pref.getVector(ModelerPreferences.LAST_PROJ_FILES);
-        // Add proj path to the preferences
-        // Prevent duplicate entries.
-        if (arr.contains(path)) {
-            arr.remove(path);
-        }
-
-        arr.insertElementAt(path, 0);
-        while (arr.size() > 4) {
-            arr.remove(arr.size() - 1);
-        }
-
-        pref.remove(ModelerPreferences.LAST_PROJ_FILES);
-        Iterator iter = arr.iterator();
-        while (iter.hasNext()) {
-            pref.addProperty(ModelerPreferences.LAST_PROJ_FILES, iter.next());
-        }
-    }
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         enableDataNodeMenu();

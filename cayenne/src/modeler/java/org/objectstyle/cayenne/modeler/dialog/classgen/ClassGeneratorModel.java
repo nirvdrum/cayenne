@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
@@ -20,6 +21,8 @@ import org.scopemvc.model.basic.BasicModel;
 public class ClassGeneratorModel extends BasicModel {
 
     protected DataMap map;
+    protected DataMapDefaults defaults;
+
     protected String outputDir;
     protected boolean pairs;
     protected List entities;
@@ -27,34 +30,21 @@ public class ClassGeneratorModel extends BasicModel {
     protected String customSuperclassTemplate;
     protected String customClassTemplate;
 
-    public ClassGeneratorModel(DataMap map, ObjEntity selectedEntity, List validationInfo) {
+    public ClassGeneratorModel(DataMap map, DataMapDefaults defaults,
+            ObjEntity selectedEntity, List validationInfo) {
         this.map = map;
+        this.defaults = defaults;
+
         prepareEntities(selectedEntity, validationInfo);
+        initFromDefaults();
     }
 
-    /**
-     * Initializes superClassPackage to a default reasonable superclass package value.
-     */
-    public void updateDefaultSuperClassPackage() {
-        Iterator it = entities.iterator();
-        while (it.hasNext()) {
-            ClassGeneratorEntityWrapper entityWrapper = (ClassGeneratorEntityWrapper) it
-                    .next();
-            String className = entityWrapper.getEntity().getClassName();
-            if (className == null) {
-                continue;
-            }
-
-            int dot = className.lastIndexOf('.');
-            if (dot > 0) {
-                superClassPackage = className.substring(0, dot + 1) + "auto";
-                break;
-            }
-        }
-
-        if (superClassPackage == null) {
-            superClassPackage = "auto";
-        }
+    protected void initFromDefaults() {
+        this.customClassTemplate = defaults.getSubclassTemplate();
+        this.customSuperclassTemplate = defaults.getSuperclassTemplate();
+        this.pairs = (defaults.getGeneratePairs() != null) ? defaults
+                .getGeneratePairs()
+                .booleanValue() : true;
     }
 
     protected void prepareEntities(ObjEntity selectedEntity, List validationInfo) {
@@ -92,7 +82,33 @@ public class ClassGeneratorModel extends BasicModel {
 
             tmp.add(wrapper);
         }
-        entities = tmp;
+
+        this.entities = tmp;
+    }
+
+    /**
+     * Initializes superClassPackage to a default reasonable superclass package value.
+     */
+    public void updateDefaultSuperClassPackage() {
+        Iterator it = entities.iterator();
+        while (it.hasNext()) {
+            ClassGeneratorEntityWrapper entityWrapper = (ClassGeneratorEntityWrapper) it
+                    .next();
+            String className = entityWrapper.getEntity().getClassName();
+            if (className == null) {
+                continue;
+            }
+
+            int dot = className.lastIndexOf('.');
+            if (dot > 0) {
+                superClassPackage = className.substring(0, dot + 1) + "auto";
+                break;
+            }
+        }
+
+        if (superClassPackage == null) {
+            superClassPackage = "auto";
+        }
     }
 
     public List getSelectedEntities() {
@@ -158,6 +174,7 @@ public class ClassGeneratorModel extends BasicModel {
     public void setPairs(boolean pairs) {
         if (this.pairs != pairs) {
             this.pairs = pairs;
+            this.defaults.setGeneratePairs(Boolean.valueOf(pairs));
             fireModelChange(VALUE_CHANGED, Selector.fromString("pairs"));
         }
     }
@@ -169,6 +186,7 @@ public class ClassGeneratorModel extends BasicModel {
     public void setCustomClassTemplate(String customClassTemplate) {
         if (!Util.nullSafeEquals(this.customClassTemplate, customClassTemplate)) {
             this.customClassTemplate = customClassTemplate;
+            this.defaults.setSubclassTemplate(customClassTemplate);
             fireModelChange(VALUE_CHANGED, Selector.fromString("customClassTemplate"));
         }
     }
@@ -180,6 +198,7 @@ public class ClassGeneratorModel extends BasicModel {
     public void setCustomSuperclassTemplate(String customSuperclassTemplate) {
         if (!Util.nullSafeEquals(this.customSuperclassTemplate, customSuperclassTemplate)) {
             this.customSuperclassTemplate = customSuperclassTemplate;
+            this.defaults.setSuperclassTemplate(customSuperclassTemplate);
             fireModelChange(VALUE_CHANGED, Selector
                     .fromString("customSuperclassTemplate"));
         }

@@ -115,8 +115,12 @@ import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * A controller that works with the project tree, tracking selection and dispatching
@@ -130,6 +134,10 @@ import org.objectstyle.cayenne.query.Query;
 public class ProjectController extends CayenneController {
 
     protected EventListenerList listenerList;
+    protected boolean dirty;
+
+    protected Project currentProject;
+    protected Domain projectPreferences;
 
     protected DataDomain currentDomain;
     protected DataNode currentNode;
@@ -144,9 +152,6 @@ public class ProjectController extends CayenneController {
     protected Procedure currentProcedure;
     protected ProcedureParameter currentProcedureParameter;
 
-    /** Changes have been made, need to be saved. */
-    protected boolean dirty;
-
     public ProjectController(CayenneModelerController parent) {
         super(parent);
         this.listenerList = new EventListenerList();
@@ -154,6 +159,56 @@ public class ProjectController extends CayenneController {
 
     public Component getView() {
         return parent.getView();
+    }
+
+    public Project getCurrentProject() {
+        return currentProject;
+    }
+
+    public void setCurrentProject(Project currentProject) {
+        this.currentProject = currentProject;
+        this.projectPreferences = null;
+    }
+
+    /**
+     * Returns top preferences Domain for the application.
+     */
+    public Domain getApplicationPreferences() {
+        return getApplication().getApplicationPreferences();
+    }
+
+    /**
+     * Returns top preferences Domain for the current project.
+     */
+    public Domain getCurrentProjectPreferences() {
+        if (getCurrentProject() == null) {
+            return null;
+        }
+        if (projectPreferences == null) {
+            Project project = getCurrentProject();
+            String key = project.isLocationUndefined() ? new String(IDUtil
+                    .pseudoUniqueByteSequence16()) : project
+                    .getMainFile()
+                    .getAbsolutePath();
+
+            projectPreferences = getApplicationPreferences()
+                    .getSubdomain(Project.class)
+                    .getSubdomain(key);
+        }
+
+        return projectPreferences;
+    }
+
+    public DataMapDefaults getCurrentDataMapPreferences() {
+        DataMap map = getCurrentDataMap();
+        if (map == null) {
+            return null;
+        }
+
+        return (DataMapDefaults) getCurrentProjectPreferences().getPreferenceDetail(
+                map.getName(),
+                DataMapDefaults.class,
+                true);
     }
 
     public void projectOpened() {

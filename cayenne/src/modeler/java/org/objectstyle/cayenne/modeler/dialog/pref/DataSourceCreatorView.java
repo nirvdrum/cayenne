@@ -53,14 +53,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
+import javax.swing.JTextField;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -68,51 +70,53 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * @author Andrei Adamchik
  */
-public class ClasspathPreferencesView extends JPanel {
+public class DataSourceCreatorView extends JDialog {
 
-    protected JButton addJarButton;
-    protected JButton addDirButton;
-    protected JButton removeEntryButton;
-    protected JTable table;
+    protected JTextField dataSourceName;
+    protected JComboBox adapters;
+    protected JButton okButton;
+    protected JButton cancelButton;
 
-    public ClasspathPreferencesView() {
-
-        // create widgets
-        addJarButton = new JButton("Add Jar/Zip");
-        addDirButton = new JButton("Add Class Folder");
-        removeEntryButton = new JButton("Remove");
-
-        table = new JTable();
-        table.setRowMargin(3);
+    public DataSourceCreatorView() {
+        this.dataSourceName = new JTextField();
+        this.adapters = new JComboBox();
+        this.okButton = new JButton("Create");
+        this.cancelButton = new JButton("Cancel");
 
         // assemble
-
-        FormLayout layout = new FormLayout("fill:min(150dlu;pref)", "");
+        FormLayout layout = new FormLayout(
+                "right:pref, 3dlu, fill:max(50dlu;pref):grow",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.append(addJarButton);
-        builder.append(addDirButton);
-        builder.append(removeEntryButton);
+        builder.append("Name:", dataSourceName);
+        builder.append("Adapter:", adapters);
 
-        setLayout(new BorderLayout());
-        add(new JScrollPane(table), BorderLayout.CENTER);
-        add(builder.getPanel(), BorderLayout.EAST);
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(okButton);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
+        getContentPane().add(buttons, BorderLayout.SOUTH);
+
+        setTitle("Create New Local DataSource");
     }
 
-    public JButton getAddDirButton() {
-        return addDirButton;
+    public JComboBox getAdapters() {
+        return adapters;
     }
 
-    public JButton getAddJarButton() {
-        return addJarButton;
+    public JButton getCancelButton() {
+        return cancelButton;
     }
 
-    public JButton getRemoveEntryButton() {
-        return removeEntryButton;
+    public JButton getOkButton() {
+        return okButton;
     }
 
-    public JTable getTable() {
-        return table;
+    public JTextField getDataSourceName() {
+        return dataSourceName;
     }
 }

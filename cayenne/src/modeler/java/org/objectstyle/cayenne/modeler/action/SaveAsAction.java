@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -97,12 +98,20 @@ public class SaveAsAction extends CayenneAction {
     protected boolean saveAll() throws Exception {
         Project p = getCurrentProject();
 
+        // obtain preference object before save, when the project path may change.....
+        Domain preference = getProjectController().getCurrentProjectPreferences();
+
         if (!chooseDestination(p)) {
             return false;
         }
 
         p.save();
-        Application.getFrame().addToLastProjList(p.getMainFile().getAbsolutePath());
+
+        // update preferences domain key
+        preference.rename(p.getMainFile().getAbsolutePath());
+
+        getApplication().getFrameController().addToLastProjListAction(
+                p.getMainFile().getAbsolutePath());
         return true;
     }
 

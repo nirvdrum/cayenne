@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;

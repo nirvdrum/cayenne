@@ -53,82 +53,67 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
+import javax.swing.JTable;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Andrei Adamchik
  */
-public class PreferenceDialogView extends JDialog {
+public class ClasspathPreferencesView extends JPanel {
 
-    protected JSplitPane split;
-    protected JList list;
-    protected CardLayout detailLayout;
-    protected Container detailPanel;
-    protected JButton cancelButton;
-    protected JButton saveButton;
+    protected JButton addJarButton;
+    protected JButton addDirButton;
+    protected JButton removeEntryButton;
+    protected JTable table;
 
-    public PreferenceDialogView() {
-        this.split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        this.list = new JList();
-        this.detailLayout = new CardLayout();
-        this.detailPanel = new JPanel(detailLayout);
-        this.saveButton = new JButton("Save");
-        this.cancelButton = new JButton("Cancel");
+    public ClasspathPreferencesView() {
+
+        // create widgets
+        addJarButton = new JButton("Add Jar/Zip");
+        addDirButton = new JButton("Add Class Folder");
+        removeEntryButton = new JButton("Remove");
+
+        table = new JTable();
+        table.setRowMargin(3);
+        table.setRowHeight(25);
 
         // assemble
 
-        Container leftContainer = new JPanel(new BorderLayout());
-        leftContainer.add(new JScrollPane(list));
+        FormLayout layout = new FormLayout("fill:min(150dlu;pref)", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttons.add(cancelButton);
-        buttons.add(saveButton);
+        builder.append(addJarButton);
+        builder.append(addDirButton);
+        builder.append(removeEntryButton);
 
-        Container rightContainer = new JPanel(new BorderLayout());
-        rightContainer.add(detailPanel, BorderLayout.CENTER);
-        rightContainer.add(buttons, BorderLayout.SOUTH);
-
-        split.setLeftComponent(leftContainer);
-        split.setRightComponent(rightContainer);
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(split, BorderLayout.CENTER);
-        setTitle("Edit Preferences");
+        setLayout(new BorderLayout());
+        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(builder.getPanel(), BorderLayout.EAST);
     }
 
-    public JList getList() {
-        return list;
+    public JButton getAddDirButton() {
+        return addDirButton;
     }
 
-    public JSplitPane getSplit() {
-        return split;
+    public JButton getAddJarButton() {
+        return addJarButton;
     }
 
-    public Container getDetailPanel() {
-        return detailPanel;
+    public JButton getRemoveEntryButton() {
+        return removeEntryButton;
     }
 
-    public CardLayout getDetailLayout() {
-        return detailLayout;
-    }
-
-    public JButton getCancelButton() {
-        return cancelButton;
-    }
-
-    public JButton getSaveButton() {
-        return saveButton;
+    public JTable getTable() {
+        return table;
     }
 }

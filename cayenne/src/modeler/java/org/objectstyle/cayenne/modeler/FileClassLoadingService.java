@@ -68,20 +68,19 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 /**
- * A facade to CayenneModeler specialized ClassLoader that allows to load jar files
- * dynamically from non-classpath locations.
+ * A default implementation of ClassLoadingService used in CayenneModeler.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ModelerClassLoader {
+public class FileClassLoadingService implements ClassLoadingService {
 
-    private static Logger logObj = Logger.getLogger(ModelerClassLoader.class);
+    private static Logger logObj = Logger.getLogger(FileClassLoadingService.class);
 
     private FileClassLoader classLoader;
     protected List pathFiles;
 
-    public ModelerClassLoader() {
+    public FileClassLoadingService() {
         this.pathFiles = new ArrayList(15);
     }
 
@@ -95,7 +94,7 @@ public class ModelerClassLoader {
     /**
      * Returns a ClassLoader based on the current configured CLASSPATH settings.
      */
-    public ClassLoader createClassLoader() {
+    public ClassLoader getClassLoader() {
         return nonNullClassLoader();
     }
 

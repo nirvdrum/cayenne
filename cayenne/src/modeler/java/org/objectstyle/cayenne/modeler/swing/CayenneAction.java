@@ -110,7 +110,10 @@ public abstract class CayenneAction extends AbstractAction {
     }
 
     protected Project getCurrentProject() {
-        return application.getFrameController().getCurrentProject();
+        return application
+                .getFrameController()
+                .getProjectController()
+                .getCurrentProject();
     }
 
     /**

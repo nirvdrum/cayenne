@@ -53,62 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.ModelerClassLoader;
-import org.objectstyle.cayenne.pref.Domain;
-import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceEditor;
-import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceService;
-import org.objectstyle.cayenne.pref.PreferenceDetail;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 
 /**
- * Specialized preferences editor for CayenneModeler.
- * 
  * @author Andrei Adamchik
  */
-public class CayenneModelerPreferenceEditor extends HSQLEmbeddedPreferenceEditor {
+public class PreferenceDialogView extends JDialog {
 
-    protected boolean refreshingClassLoader;
-    protected Application application;
+    protected JSplitPane split;
+    protected JList list;
+    protected CardLayout detailLayout;
+    protected Container detailPanel;
+    protected JButton cancelButton;
+    protected JButton saveButton;
 
-    public CayenneModelerPreferenceEditor(Application application) {
-        super((HSQLEmbeddedPreferenceService) application.getPreferenceService());
-        this.application = application;
+    public PreferenceDialogView() {
+        this.split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        this.list = new JList();
+        this.detailLayout = new CardLayout();
+        this.detailPanel = new JPanel(detailLayout);
+        this.saveButton = new JButton("Save");
+        this.cancelButton = new JButton("Cancel");
+
+        // assemble
+
+        Container leftContainer = new JPanel(new BorderLayout());
+        leftContainer.add(new JScrollPane(list));
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttons.add(cancelButton);
+        buttons.add(saveButton);
+
+        Container rightContainer = new JPanel(new BorderLayout());
+        rightContainer.add(detailPanel, BorderLayout.CENTER);
+        rightContainer.add(buttons, BorderLayout.SOUTH);
+
+        split.setLeftComponent(leftContainer);
+        split.setRightComponent(rightContainer);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(split, BorderLayout.CENTER);
+        setTitle("Edit Preferences");
     }
 
-    public boolean isRefreshingClassLoader() {
-        return refreshingClassLoader;
+    public JList getList() {
+        return list;
     }
 
-    public void setRefreshingClassLoader(boolean refreshingClassLoader) {
-        this.refreshingClassLoader = refreshingClassLoader;
+    public JSplitPane getSplit() {
+        return split;
     }
 
-    public void save() {
-        super.save();
-
-        if (isRefreshingClassLoader()) {
-            application.initClassLoader();
-            refreshingClassLoader = false;
-        }
+    public Container getDetailPanel() {
+        return detailPanel;
     }
 
-    public PreferenceDetail createDetail(Domain domain, String key) {
-        changeInDomain(domain);
-        return super.createDetail(domain, key);
+    public CardLayout getDetailLayout() {
+        return detailLayout;
     }
 
-    public PreferenceDetail deleteDetail(Domain domain, String key) {
-        changeInDomain(domain);
-        return super.deleteDetail(domain, key);
+    public JButton getCancelButton() {
+        return cancelButton;
     }
 
-    protected void changeInDomain(Domain domain) {
-        if (!refreshingClassLoader
-                && domain != null
-                && ModelerClassLoader.class.getName().equals(domain.getName())) {
-            refreshingClassLoader = true;
-        }
+    public JButton getSaveButton() {
+        return saveButton;
     }
 }

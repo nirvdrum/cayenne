@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Preferences "domain" is logical area for preferences storage. Domains are organized in
@@ -81,25 +82,80 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class Domain extends _Domain {
 
     /**
-     * Returns a direct child of this domain that should handle preferences for Java
-     * class. Creates such subdomain if it doesn't exist.
+     * Renames this domain. If there is a sibling domain with same name, such sibling is
+     * renamed using generated unique name. This operation essentially substitutes one
+     * domain subtree with another.
+     */
+    public void rename(String newName) {
+        if (Util.nullSafeEquals(getName(), newName)) {
+            return;
+        }
+
+        Domain parent = getParentDomain();
+        if (parent == null) {
+            setName(newName);
+            return;
+        }
+
+        Domain other = parent.getSubdomain(newName, false);
+        if (other != null && other != this) {
+            String otherName = null;
+            for (int i = 1; i < 1000; i++) {
+                if (parent.getSubdomain(newName + i, false) == null) {
+                    otherName = newName + i;
+                    break;
+                }
+            }
+
+            if (otherName == null) {
+                throw new PreferenceException("Can't rename an existing domain '"
+                        + newName
+                        + "'.");
+            }
+
+            other.setName(otherName);
+        }
+        setName(newName);
+    }
+
+    /**
+     * Returns a direct child of this domain that should handle preferences for all
+     * instances of a given Java class. Creates such subdomain if it doesn't exist.
      */
     public Domain getSubdomain(Class javaClass) {
+        return getSubdomain(javaClass.getName());
+    }
+
+    /**
+     * Returns named subdomain. Creates such subdomain if it doesn't exist. Named
+     * subdomains are useful when preferences have to be assigned based on a more
+     * fine-grained criteria than a Java class. E.g. a class Project can have preferences
+     * subdomain for each project location.
+     */
+    public Domain getSubdomain(String subdomainName) {
+        return getSubdomain(subdomainName, true);
+    }
+
+    public Domain getSubdomain(String subdomainName, boolean create) {
         List subdomains = getSubdomains();
 
         if (subdomains.size() > 0) {
             List matching = ExpressionFactory.matchExp(
                     Domain.NAME_PROPERTY,
-                    javaClass.getName()).filterObjects(subdomains);
+                    subdomainName).filterObjects(subdomains);
             if (matching.size() > 0) {
                 return (Domain) matching.get(0);
             }
         }
 
+        if (!create) {
+            return null;
+        }
+
         Domain childSubdomain = (Domain) getDataContext().createAndRegisterNewObject(
                 Domain.class);
         addToSubdomains(childSubdomain);
-        childSubdomain.setName(javaClass.getName());
+        childSubdomain.setName(subdomainName);
 
         if (getLevel() == null) {
             throw new CayenneRuntimeException("Null level, can't create child");

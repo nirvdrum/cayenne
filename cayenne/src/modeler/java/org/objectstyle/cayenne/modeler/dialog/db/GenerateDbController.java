@@ -234,7 +234,9 @@ public class GenerateDbController extends BasicController {
                 continue;
             }
             try {
-                Class adapterClass = Application.getClassLoader().loadClass(
+                Class adapterClass = Application
+                        .getInstance()
+                        .getClassLoadingService().loadClass(
                         dataSourceInfo.getAdapterClassName());
 
                 this.adapter = (DbAdapter) adapterClass.newInstance();

@@ -53,70 +53,76 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JScrollPane;
 
-import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataSourceCreatorView extends JDialog {
+public class DataSourcePreferencesView extends JPanel {
 
-    protected JTextField dataSourceName;
-    protected JComboBox adapters;
-    protected JButton okButton;
-    protected JButton cancelButton;
+    protected JButton addDataSource;
+    protected JButton removeDataSource;
+    protected JButton testDataSource;
+    protected JComboBox dataSources;
 
-    public DataSourceCreatorView() {
-        this.dataSourceName = new JTextField();
-        this.adapters = new JComboBox();
-        this.okButton = new JButton("Create");
-        this.cancelButton = new JButton("Cancel");
+    protected DataSourceEditorView dataSourceEditor;
+
+    public DataSourcePreferencesView() {
+        this.addDataSource = new JButton("New DataSource");
+        this.removeDataSource = new JButton("Delete DataSource");
+        this.testDataSource = new JButton("Test...");
+        this.dataSources = new JComboBox();
+        this.dataSourceEditor = new DataSourceEditorView();
+
+        this.dataSourceEditor.setEnabled(false);
 
         // assemble
-        FormLayout layout = new FormLayout(
-                "right:pref, 3dlu, fill:max(50dlu;pref):grow",
-                "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(new FormLayout(
+                "fill:min(150dlu;pref)",
+                "p, 3dlu, p, 5dlu, p, 3dlu, p, 3dlu, p"));
         builder.setDefaultDialogBorder();
 
-        builder.append("Name:", dataSourceName);
-        builder.append("Adapter:", adapters);
+        builder.add(new JLabel("Select DataSource"), cc.xy(1, 1));
+        builder.add(dataSources, cc.xy(1, 3));
+        builder.add(addDataSource, cc.xy(1, 5));
+        builder.add(removeDataSource, cc.xy(1, 7));
+        builder.add(testDataSource, cc.xy(1, 9));
 
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttons.add(cancelButton);
-        buttons.add(okButton);
-
-        getContentPane().setLayout(new BorderLayout());
-        getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
-        getContentPane().add(buttons, BorderLayout.SOUTH);
-
-        setTitle("Create New Local DataSource");
+        setLayout(new BorderLayout());
+        add(new JScrollPane(dataSourceEditor), BorderLayout.CENTER);
+        add(builder.getPanel(), BorderLayout.EAST);
     }
 
-    public JComboBox getAdapters() {
-        return adapters;
+    public DataSourceEditorView getDataSourceEditor() {
+        return dataSourceEditor;
     }
 
-    public JButton getCancelButton() {
-        return cancelButton;
+    public JComboBox getDataSources() {
+        return dataSources;
     }
 
-    public JButton getOkButton() {
-        return okButton;
+    public JButton getAddDataSource() {
+        return addDataSource;
     }
 
-    public JTextField getDataSourceName() {
-        return dataSourceName;
+    public JButton getRemoveDataSource() {
+        return removeDataSource;
+    }
+
+    public JButton getTestDataSource() {
+        return testDataSource;
     }
 }

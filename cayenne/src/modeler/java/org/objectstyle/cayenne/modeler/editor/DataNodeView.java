@@ -456,7 +456,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
         DbAdapter newAdapter = null;
         if (adapterName != null && adapterName.trim().length() > 0) {
             try {
-                Class adapterClass = Application.getClassLoader().loadClass(
+                Class adapterClass = Application.getInstance().getClassLoadingService().loadClass(
                         adapterName);
                 newAdapter = (DbAdapter) adapterClass.newInstance();
             }

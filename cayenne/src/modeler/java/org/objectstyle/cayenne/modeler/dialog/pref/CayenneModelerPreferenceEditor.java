@@ -53,50 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
-import com.jgoodies.forms.builder.DefaultFormBuilder;
-import com.jgoodies.forms.layout.FormLayout;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.FileClassLoadingService;
+import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceEditor;
+import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceService;
+import org.objectstyle.cayenne.pref.PreferenceDetail;
 
 /**
+ * Specialized preferences editor for CayenneModeler.
+ * 
  * @author Andrei Adamchik
  */
-public class GeneralPreferencesView extends JPanel {
+public class CayenneModelerPreferenceEditor extends HSQLEmbeddedPreferenceEditor {
 
-    protected JTextField saveInterval;
-    protected JLabel saveIntervalLabel;
+    protected boolean refreshingClassLoader;
+    protected Application application;
 
-    public GeneralPreferencesView() {
-        this.saveInterval = new JTextField();
-
-        FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(50dlu;pref):grow",
-                "");
-        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.appendSeparator("General Preferences");
-        saveIntervalLabel = builder.append(
-                "Preferences Save Interval (ms.):",
-                saveInterval);
-
-        this.setLayout(new BorderLayout());
-        this.add(builder.getPanel(), BorderLayout.CENTER);
+    public CayenneModelerPreferenceEditor(Application application) {
+        super((HSQLEmbeddedPreferenceService) application.getPreferenceService());
+        this.application = application;
     }
 
-    public void setEnabled(boolean b) {
-        super.setEnabled(b);
-        saveInterval.setEnabled(b);
-        saveIntervalLabel.setEnabled(b);
+    public boolean isRefreshingClassLoader() {
+        return refreshingClassLoader;
     }
 
-    public JTextField getSaveInterval() {
-        return saveInterval;
+    public void setRefreshingClassLoader(boolean refreshingClassLoader) {
+        this.refreshingClassLoader = refreshingClassLoader;
+    }
+
+    public void save() {
+        super.save();
+
+        if (isRefreshingClassLoader()) {
+            application.initClassLoader();
+            refreshingClassLoader = false;
+        }
+    }
+
+    public PreferenceDetail createDetail(Domain domain, String key) {
+        changeInDomain(domain);
+        return super.createDetail(domain, key);
+    }
+
+    public PreferenceDetail deleteDetail(Domain domain, String key) {
+        changeInDomain(domain);
+        return super.deleteDetail(domain, key);
+    }
+
+    protected void changeInDomain(Domain domain) {
+        if (!refreshingClassLoader
+                && domain != null
+                && FileClassLoadingService.class.getName().equals(domain.getName())) {
+            refreshingClassLoader = true;
+        }
     }
 }

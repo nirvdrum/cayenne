@@ -53,85 +53,97 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
-import javax.swing.InputVerifier;
-import javax.swing.JComponent;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 
-import org.objectstyle.cayenne.modeler.swing.CayenneController;
-import org.objectstyle.cayenne.pref.CayennePreferenceEditor;
-import org.objectstyle.cayenne.pref.CayennePreferenceService;
-import org.objectstyle.cayenne.pref.PreferenceEditor;
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
  * @author Andrei Adamchik
  */
-public class GeneralPreferences extends CayenneController {
+public class DataSourceEditorView extends JPanel {
 
-    protected GeneralPreferencesView view;
-    protected CayennePreferenceEditor editor;
+    protected JComboBox adapters;
+    protected JTextField driver;
+    protected JTextField url;
+    protected JTextField userName;
+    protected JPasswordField password;
 
-    public GeneralPreferences(PreferenceDialog parentController) {
-        super(parentController);
-        this.view = new GeneralPreferencesView();
+    protected Collection labels;
 
-        PreferenceEditor editor = parentController.getEditor();
-        if (editor instanceof CayennePreferenceEditor) {
-            this.editor = (CayennePreferenceEditor) editor;
-            this.view.setEnabled(true);
-            this.view.getSaveInterval().setText(this.editor.getSaveInterval() + "");
-            initBindings();
-        }
-        else {
-            this.view.setEnabled(false);
-        }
+    public DataSourceEditorView() {
+        adapters = new JComboBox();
+        adapters.setEditable(true);
+
+        driver = new JTextField();
+        url = new JTextField();
+        userName = new JTextField();
+        password = new JPasswordField();
+        labels = new ArrayList();
+
+        // assemble
+        FormLayout layout = new FormLayout(
+                "right:pref, 3dlu, fill:max(50dlu;pref):grow",
+                "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.appendSeparator("DataSource Information");
+        labels.add(builder.append("Adapter:", adapters));
+        labels.add(builder.append("JDBC Driver:", driver));
+        labels.add(builder.append("DB URL:", url));
+        labels.add(builder.append("User Name:", userName));
+        labels.add(builder.append("Password:", password));
+
+        this.setLayout(new BorderLayout());
+        this.add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    public Component getView() {
-        return view;
+    public JComboBox getAdapters() {
+        return adapters;
     }
 
-    protected void initBindings() {
-        final JTextField textField = view.getSaveInterval();
-        textField.setInputVerifier(new InputVerifier() {
+    public JTextField getDriver() {
+        return driver;
+    }
 
-            public boolean verify(JComponent component) {
-                String text = textField.getText();
-                boolean resetText = false;
-                if (text.length() == 0) {
-                    resetText = true;
-                }
-                else {
-                    try {
-                        int interval = Integer.parseInt(text);
-                        if (interval < CayennePreferenceService.MIN_SAVE_INTERVAL) {
-                            interval = CayennePreferenceService.MIN_SAVE_INTERVAL;
-                            textField.setText("" + interval);
-                        }
+    public JPasswordField getPassword() {
+        return password;
+    }
 
-                        editor.setSaveInterval(interval);
-                    }
-                    catch (NumberFormatException ex) {
-                        resetText = true;
-                    }
-                }
+    public JTextField getUrl() {
+        return url;
+    }
 
-                if (resetText) {
-                    Runnable setText = new Runnable() {
+    public JTextField getUserName() {
+        return userName;
+    }
 
-                        public void run() {
-                            textField.setText("" + editor.getSaveInterval());
-                        }
-                    };
-                    SwingUtilities.invokeLater(setText);
-                }
-
-                return true;
+    public void setEnabled(boolean enabled) {
+        if (isEnabled() != enabled) {
+            super.setEnabled(enabled);
+            Iterator it = labels.iterator();
+            while (it.hasNext()) {
+                Component c = (Component) it.next();
+                c.setEnabled(enabled);
             }
-        });
+
+            adapters.setEnabled(enabled);
+            driver.setEnabled(enabled);
+            url.setEnabled(enabled);
+            userName.setEnabled(enabled);
+            password.setEnabled(enabled);
+        }
     }
 }

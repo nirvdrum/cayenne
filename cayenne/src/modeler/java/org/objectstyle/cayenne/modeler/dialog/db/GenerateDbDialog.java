@@ -281,7 +281,7 @@ public class GenerateDbDialog extends CayenneDialog {
     protected void generateDBSchema() {
         try {
             // use modeler custom class loader
-            Class driverClass = Application.getClassLoader().loadClass(
+            Class driverClass = Application.getInstance().getClassLoadingService().loadClass(
                     dsi.getJdbcDriver());
             Driver driver = (Driver) driverClass.newInstance();
             DataSource dataSource = new DriverDataSource(

@@ -66,6 +66,8 @@ import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -80,22 +82,21 @@ import org.scopemvc.view.swing.STable;
 public class ClassGeneratorController extends BasicController {
 
     public static final String CANCEL_CONTROL = "cayenne.modeler.classgenerator.cancel.button";
-
     public static final String GENERATE_CLASSES_CONTROL = "cayenne.modeler.classgenerator.generate.button";
-
     public static final String SELECT_ALL_CONTROL = "cayenne.modeler.classgenerator.selectall.button";
-
     public static final String CHOOSE_LOCATION_CONTROL = "cayenne.modeler.classgenerator.choose.button";
-
     public static final String CHOOSE_TEMPLATE_CONTROL = "cayenne.modeler.classgenerator.choosetemplate.button";
-
     public static final String CHOOSE_SUPERTEMPLATE_CONTROL = "cayenne.modeler.classgenerator.choosesupertemplate.button";
 
-    public ClassGeneratorController(Project project, DataMap map, ObjEntity selectedEntity) {
-        setModel(prepareModel(project, map, selectedEntity));
+    public ClassGeneratorController(ProjectController parent) {
+        setModel(prepareModel(parent));
     }
 
-    protected Object prepareModel(Project project, DataMap map, ObjEntity selectedEntity) {
+    protected Object prepareModel(ProjectController parent) {
+        Project project = parent.getCurrentProject();
+        DataMap map = parent.getCurrentDataMap();
+        DataMapDefaults preferences = parent.getCurrentDataMapPreferences();
+        ObjEntity selectedEntity = parent.getCurrentObjEntity();
 
         // validate entities
         Validator validator = project.getValidator();
@@ -103,11 +104,11 @@ public class ClassGeneratorController extends BasicController {
 
         ClassGeneratorModel model = new ClassGeneratorModel(
                 map,
+                preferences,
                 selectedEntity,
                 validator.validationResults());
 
         // by default generate pairs of classes
-        model.setPairs(true);
         model.updateDefaultSuperClassPackage();
 
         // figure out default out directory

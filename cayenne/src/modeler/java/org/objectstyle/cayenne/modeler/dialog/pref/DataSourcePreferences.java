@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -79,7 +79,6 @@ import javax.swing.text.JTextComponent;
 
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.conn.DriverDataSource;
-import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
@@ -273,7 +272,7 @@ public class DataSourcePreferences extends CayenneController {
         }
 
         try {
-            Class driverClass = Application.getClassLoader().loadClass(
+            Class driverClass = getApplication().getClassLoadingService().loadClass(
                     currentDataSource.getJdbcDriver());
             Driver driver = (Driver) driverClass.newInstance();
 

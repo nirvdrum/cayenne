@@ -9,6 +9,7 @@
 	<property name="modeler.build.properties" value="${modeler.build}/properties"/>
 	<property name="modeler.build.deps" value="${modeler.build}/deps"/>
 	<property name="modeler.src" value="src/modeler/java"/>
+	<property name="modeler.resources" value="src/modeler/resources"/>
 	<property name="modeler.bin" value="src/modeler/bin"/>
 	
     
@@ -24,13 +25,14 @@
 	<target name="dist-src" depends="dist-bin">
 		<copy todir="${modeler.dist.src}">
  			<fileset dir="${modeler.src}"/>
-        </copy>
+ 			<fileset dir="${modeler.resources}"/>
+	        </copy>
 	</target>
 
 	<target name="dist-bin" depends="jar">
 	    <copy todir="${dist}/bin">
             <fileset dir="${modeler.bin}" includes="*.bat,*.sh,*.ico"/>
-        </copy>
+		</copy>
 
         <chmod perm="ugo+rx">
             <fileset dir="${dist}/bin">
@@ -58,6 +60,7 @@
         <jar jarfile="${dist}/lib/modeler/cayenne-modeler.jar">
  			<fileset dir="${modeler.build}/classes"/>
 			<fileset dir="${modeler.build.properties}"/>
+			<fileset dir="${modeler.resources}"/>
 			<fileset dir="${modeler.src}">
 				<include name="**/*.xml"/>
             	<include name="**/*.gif"/>
@@ -79,7 +82,6 @@
             </manifest>
         </jar>
     </target>  
-    
     
     <!-- ========================================== -->
     <!-- Performs replacements in property files.   -->

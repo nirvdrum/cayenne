@@ -78,15 +78,15 @@ public class RevertAction extends CayenneAction {
     }
 
     public void performAction(ActionEvent e) {
-        CayenneModelerController controller = Application
-                .getInstance()
-                .getFrameController();
-        Project project = controller.getCurrentProject();
+
+        Project project = getCurrentProject();
         if (project == null) {
             return;
         }
 
         boolean isNew = project.isLocationUndefined();
+
+        CayenneModelerController controller = getApplication().getFrameController();
 
         // close ... don't use OpenProjectAction close method as it will ask for save, we
         // don't want that here

@@ -53,76 +53,85 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.prefeditor;
+package org.objectstyle.cayenne.modeler.dialog.pref;
 
-import java.awt.BorderLayout;
+import java.awt.Component;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
+import org.objectstyle.cayenne.modeler.swing.CayenneController;
+import org.objectstyle.cayenne.pref.CayennePreferenceEditor;
+import org.objectstyle.cayenne.pref.CayennePreferenceService;
+import org.objectstyle.cayenne.pref.PreferenceEditor;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataSourcePreferencesView extends JPanel {
+public class GeneralPreferences extends CayenneController {
 
-    protected JButton addDataSource;
-    protected JButton removeDataSource;
-    protected JButton testDataSource;
-    protected JComboBox dataSources;
+    protected GeneralPreferencesView view;
+    protected CayennePreferenceEditor editor;
 
-    protected DataSourceEditorView dataSourceEditor;
+    public GeneralPreferences(PreferenceDialog parentController) {
+        super(parentController);
+        this.view = new GeneralPreferencesView();
 
-    public DataSourcePreferencesView() {
-        this.addDataSource = new JButton("New DataSource");
-        this.removeDataSource = new JButton("Delete DataSource");
-        this.testDataSource = new JButton("Test...");
-        this.dataSources = new JComboBox();
-        this.dataSourceEditor = new DataSourceEditorView();
-
-        this.dataSourceEditor.setEnabled(false);
-
-        // assemble
-        CellConstraints cc = new CellConstraints();
-        PanelBuilder builder = new PanelBuilder(new FormLayout(
-                "fill:min(150dlu;pref)",
-                "p, 3dlu, p, 5dlu, p, 3dlu, p, 3dlu, p"));
-        builder.setDefaultDialogBorder();
-
-        builder.add(new JLabel("Select DataSource"), cc.xy(1, 1));
-        builder.add(dataSources, cc.xy(1, 3));
-        builder.add(addDataSource, cc.xy(1, 5));
-        builder.add(removeDataSource, cc.xy(1, 7));
-        builder.add(testDataSource, cc.xy(1, 9));
-
-        setLayout(new BorderLayout());
-        add(new JScrollPane(dataSourceEditor), BorderLayout.CENTER);
-        add(builder.getPanel(), BorderLayout.EAST);
+        PreferenceEditor editor = parentController.getEditor();
+        if (editor instanceof CayennePreferenceEditor) {
+            this.editor = (CayennePreferenceEditor) editor;
+            this.view.setEnabled(true);
+            this.view.getSaveInterval().setText(this.editor.getSaveInterval() + "");
+            initBindings();
+        }
+        else {
+            this.view.setEnabled(false);
+        }
     }
 
-    public DataSourceEditorView getDataSourceEditor() {
-        return dataSourceEditor;
+    public Component getView() {
+        return view;
     }
 
-    public JComboBox getDataSources() {
-        return dataSources;
-    }
+    protected void initBindings() {
+        final JTextField textField = view.getSaveInterval();
+        textField.setInputVerifier(new InputVerifier() {
 
-    public JButton getAddDataSource() {
-        return addDataSource;
-    }
+            public boolean verify(JComponent component) {
+                String text = textField.getText();
+                boolean resetText = false;
+                if (text.length() == 0) {
+                    resetText = true;
+                }
+                else {
+                    try {
+                        int interval = Integer.parseInt(text);
+                        if (interval < CayennePreferenceService.MIN_SAVE_INTERVAL) {
+                            interval = CayennePreferenceService.MIN_SAVE_INTERVAL;
+                            textField.setText("" + interval);
+                        }
 
-    public JButton getRemoveDataSource() {
-        return removeDataSource;
-    }
+                        editor.setSaveInterval(interval);
+                    }
+                    catch (NumberFormatException ex) {
+                        resetText = true;
+                    }
+                }
 
-    public JButton getTestDataSource() {
-        return testDataSource;
+                if (resetText) {
+                    Runnable setText = new Runnable() {
+
+                        public void run() {
+                            textField.setText("" + editor.getSaveInterval());
+                        }
+                    };
+                    SwingUtilities.invokeLater(setText);
+                }
+
+                return true;
+            }
+        });
     }
 }

@@ -10,6 +10,12 @@
 		<db-attribute name="x" type="INTEGER"/>
 		<db-attribute name="y" type="INTEGER"/>
 	</db-entity>
+	<db-entity name="data_map_defaults">
+		<db-attribute name="generate_pairs" type="INTEGER"/>
+		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="subclass_template" type="VARCHAR" length="254"/>
+		<db-attribute name="superclass_template" type="VARCHAR" length="254"/>
+	</db-entity>
 	<db-entity name="db_connection_info">
 		<db-attribute name="db_adapter" type="VARCHAR" length="254"/>
 		<db-attribute name="domain_preference_id" type="INTEGER"/>
@@ -22,12 +28,6 @@
 	<db-entity name="fs_path">
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="path" type="VARCHAR" length="254"/>
-	</db-entity>
-	<db-entity name="project_defaults">
-		<db-attribute name="generate_pairs" type="INTEGER"/>
-		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="subclass_template" type="VARCHAR" length="254"/>
-		<db-attribute name="superclass_template" type="VARCHAR" length="254"/>
 	</db-entity>
 	<obj-entity name="ComponentGeometry" className="org.objectstyle.cayenne.modeler.pref.ComponentGeometry" dbEntityName="component_geometry" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
 		<obj-attribute name="height" type="java.lang.Integer" db-attribute-path="height"/>
@@ -43,12 +43,12 @@
 		<obj-attribute name="url" type="java.lang.String" db-attribute-path="url"/>
 		<obj-attribute name="userName" type="java.lang.String" db-attribute-path="user_name"/>
 	</obj-entity>
-	<obj-entity name="FSPath" className="org.objectstyle.cayenne.modeler.pref.FSPath" dbEntityName="fs_path" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
-		<obj-attribute name="path" type="java.lang.String" db-attribute-path="path"/>
-	</obj-entity>
-	<obj-entity name="ProjectDefaults" className="org.objectstyle.cayenne.modeler.pref.ProjectDefaults" lock-type="optimistic" dbEntityName="project_defaults" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
+	<obj-entity name="DataMapDefaults" className="org.objectstyle.cayenne.modeler.pref.DataMapDefaults" lock-type="optimistic" dbEntityName="data_map_defaults" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
 		<obj-attribute name="generatePairs" type="java.lang.Boolean" db-attribute-path="generate_pairs"/>
 		<obj-attribute name="subclassTemplate" type="java.lang.String" db-attribute-path="subclass_template"/>
 		<obj-attribute name="superclassTemplate" type="java.lang.String" db-attribute-path="superclass_template"/>
+	</obj-entity>
+	<obj-entity name="FSPath" className="org.objectstyle.cayenne.modeler.pref.FSPath" dbEntityName="fs_path" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
+		<obj-attribute name="path" type="java.lang.String" db-attribute-path="path"/>
 	</obj-entity>
 </data-map>

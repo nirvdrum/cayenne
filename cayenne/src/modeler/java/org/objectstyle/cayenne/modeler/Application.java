@@ -133,7 +133,7 @@ public class Application {
     // TODO: implement cleaner IoC approach to avoid using this singleton...
     protected static Application instance;
 
-    protected ModelerClassLoader modelerClassLoader;
+    protected FileClassLoadingService modelerClassLoader;
     protected HSQLEmbeddedPreferenceService preferenceService;
     protected CayenneModelerController frameController;
     protected ActionMap actionMap;
@@ -152,14 +152,10 @@ public class Application {
     }
 
     public static Project getProject() {
-        return getInstance().getFrameController().getCurrentProject();
-    }
-
-    /**
-     * Returns a singleton ModelerClassLoader.
-     */
-    public static ModelerClassLoader getClassLoader() {
-        return getInstance().getModelerClassLoader();
+        return getInstance()
+                .getFrameController()
+                .getProjectController()
+                .getCurrentProject();
     }
 
     public Application(File initialProject) {
@@ -179,7 +175,7 @@ public class Application {
         return name;
     }
 
-    public ModelerClassLoader getModelerClassLoader() {
+    public ClassLoadingService getClassLoadingService() {
         return modelerClassLoader;
     }
 
@@ -248,11 +244,11 @@ public class Application {
      * Reinitializes ModelerClassLoader from preferences.
      */
     public void initClassLoader() {
-        ModelerClassLoader classLoader = new ModelerClassLoader();
+        FileClassLoadingService classLoader = new FileClassLoadingService();
 
         // init from preferences...
         Domain classLoaderDomain = getApplicationPreferences().getSubdomain(
-                ModelerClassLoader.class);
+                FileClassLoadingService.class);
 
         Collection details = classLoaderDomain.getPreferences();
         if (details.size() > 0) {
@@ -280,6 +276,9 @@ public class Application {
         service.stopOnShutdown();
         this.preferenceService = service;
         this.preferenceService.startService();
+        
+        // test service
+        getApplicationPreferences();
     }
 
     protected void initActions() {

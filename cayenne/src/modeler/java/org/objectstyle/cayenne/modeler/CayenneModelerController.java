@@ -60,6 +60,8 @@ import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.Iterator;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -86,7 +88,6 @@ public class CayenneModelerController extends CayenneController {
     protected ActionController actionController;
 
     protected CayenneModelerFrame frame;
-    protected Project currentProject;
     protected File initialProject;
 
     public CayenneModelerController(Application application, File initialProject) {
@@ -101,14 +102,6 @@ public class CayenneModelerController extends CayenneController {
 
     public Component getView() {
         return frame;
-    }
-
-    public Project getCurrentProject() {
-        return currentProject;
-    }
-
-    public void setCurrentProject(Project currentProject) {
-        this.currentProject = currentProject;
     }
 
     public ProjectController getProjectController() {
@@ -149,9 +142,9 @@ public class CayenneModelerController extends CayenneController {
     }
 
     public void projectModifiedAction() {
-        String title = (getCurrentProject().isLocationUndefined())
+        String title = (projectController.getCurrentProject().isLocationUndefined())
                 ? "[New]"
-                : getCurrentProject().getMainFile().getAbsolutePath();
+                : projectController.getCurrentProject().getMainFile().getAbsolutePath();
 
         frame.setTitle("* - " + ModelerConstants.TITLE + " - " + title);
     }
@@ -161,7 +154,7 @@ public class CayenneModelerController extends CayenneController {
         updateStatus("Project saved...");
         frame.setTitle(ModelerConstants.TITLE
                 + " - "
-                + getCurrentProject().getMainFile().getAbsolutePath());
+                + projectController.getCurrentProject().getMainFile().getAbsolutePath());
     }
 
     /**
@@ -183,7 +176,7 @@ public class CayenneModelerController extends CayenneController {
         frame.repaint();
         frame.setTitle(ModelerConstants.TITLE);
 
-        setCurrentProject(null);
+        projectController.setCurrentProject(null);
 
         projectController.reset();
         actionController.projectClosed();
@@ -197,7 +190,7 @@ public class CayenneModelerController extends CayenneController {
      */
     public void projectOpenedAction(Project project) {
 
-        setCurrentProject(project);
+        projectController.setCurrentProject(project);
 
         if (project.isLocationUndefined()) {
             updateStatus("New project created...");
@@ -227,6 +220,28 @@ public class CayenneModelerController extends CayenneController {
             ValidatorDialog.showDialog(frame, projectController, new Validator(
                     project,
                     project.getLoadStatus()));
+        }
+    }
+    
+    /** Adds path to the list of last opened projects in preferences. */
+    public void addToLastProjListAction(String path) {
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        Vector arr = pref.getVector(ModelerPreferences.LAST_PROJ_FILES);
+        // Add proj path to the preferences
+        // Prevent duplicate entries.
+        if (arr.contains(path)) {
+            arr.remove(path);
+        }
+
+        arr.insertElementAt(path, 0);
+        while (arr.size() > 4) {
+            arr.remove(arr.size() - 1);
+        }
+
+        pref.remove(ModelerPreferences.LAST_PROJ_FILES);
+        Iterator iter = arr.iterator();
+        while (iter.hasNext()) {
+            pref.addProperty(ModelerPreferences.LAST_PROJ_FILES, iter.next());
         }
     }
 

@@ -93,7 +93,7 @@ public class NewProjectAction extends ProjectAction {
                 .getInstance()
                 .getFrameController();
         // Save and close (if needed) currently open project.
-        if (controller.getCurrentProject() != null && !closeProject()) {
+        if (getCurrentProject() != null && !closeProject()) {
             return;
         }
 
