@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.Util;
@@ -102,7 +103,7 @@ public class DomainDetailView
 
     private void init() {
         this.setLayout(new BorderLayout());
-        this.name = new JTextField(25);
+        this.name = CayenneWidgetFactory.createTextField();
         this.add(
             PanelFactory.createForm(
                 new Component[] { new JLabel("Domain name: ")},

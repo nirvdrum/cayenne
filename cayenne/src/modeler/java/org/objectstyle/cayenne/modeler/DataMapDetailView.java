@@ -130,7 +130,7 @@ public class DataMapDetailView
     protected void init() {
         this.setLayout(new BorderLayout());
 
-        name = new JTextField(25);
+        name = CayenneWidgetFactory.createTextField();
         location = new JLabel();
 
         nodeSelector = CayenneWidgetFactory.createComboBox();
@@ -346,10 +346,10 @@ public class DataMapDetailView
                 // Being paranoid, we will still scan through all.
                 if (nextNode != node && nextNode.getDataMaps().contains(map)) {
                     nextNode.removeDataMap(map.getName());
-                    
+
                     // announce DataNode change
                     mediator.fireDataNodeEvent(new DataNodeEvent(this, nextNode));
-                    
+
                     hasChanges = true;
                 }
             }

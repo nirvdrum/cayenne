@@ -71,6 +71,7 @@ import javax.swing.table.TableCellRenderer;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.ClassGeneratorController;
+import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.scopemvc.core.PropertyManager;
 import org.scopemvc.core.Selector;
@@ -121,7 +122,7 @@ public class ClassGeneratorDialog extends SPanel {
 
 		// build superclass package
 		JLabel superClassPackageLabel = new JLabel("Superclass Package:");
-		final STextField superClassPackage = new STextField();
+		final STextField superClassPackage = ScopeWidgetFactory.createTextField();
 		superClassPackage.setSelector("superClassPackage");
 
 		// build pair checkbox
@@ -141,7 +142,7 @@ public class ClassGeneratorDialog extends SPanel {
 		JLabel folderLabel = new JLabel("Output directory:");
 		JPanel folderPanel = new JPanel();
 		folderPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
-		STextField folder = new STextField();
+		STextField folder = ScopeWidgetFactory.createTextField();
 		folder.setSelector("outputDir");
 		SAction chooseAction =
 			new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL);

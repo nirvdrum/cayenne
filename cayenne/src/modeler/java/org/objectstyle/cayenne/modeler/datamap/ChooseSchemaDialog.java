@@ -118,7 +118,7 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
     protected void init(String userName) {
         getContentPane().setLayout(new BorderLayout());
 
-        tabeNamePatternField = new JTextField(10);
+        tabeNamePatternField = CayenneWidgetFactory.createTextField();
         tabeNamePatternField.setText(DbLoader.WILDCARD);
 
         Component[] left = null;

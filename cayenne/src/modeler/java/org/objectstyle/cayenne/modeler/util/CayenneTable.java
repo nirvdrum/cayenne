@@ -61,7 +61,6 @@ import java.util.EventObject;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
@@ -77,7 +76,8 @@ import javax.swing.text.JTextComponent;
 public class CayenneTable extends JTable {
     protected void createDefaultEditors() {
         super.createDefaultEditors();
-        DefaultCellEditor temp = new DefaultCellEditor(new JTextField());
+        DefaultCellEditor temp =
+            new DefaultCellEditor(CayenneWidgetFactory.createTextField(0));
         setDefaultEditor(Object.class, temp);
         setDefaultEditor(String.class, temp);
     }
@@ -118,9 +118,7 @@ public class CayenneTable extends JTable {
 
         // only go down one row if we are editing text
         int row = getSelectedRow();
-        if (row >= 0
-            && this.getRowCount() > 0
-            && getSelectedTextComponent() != null) {
+        if (row >= 0 && this.getRowCount() > 0 && getSelectedTextComponent() != null) {
             row++;
 
             if (row >= this.getRowCount()) {

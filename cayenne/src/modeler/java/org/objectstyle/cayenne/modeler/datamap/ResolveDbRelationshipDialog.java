@@ -117,8 +117,8 @@ public class ResolveDbRelationshipDialog
 
     JLabel reverseNameLabel = new JLabel("Reverse Relationship:");
     JLabel reverseCheckLabel = new JLabel("Create Reverse:");
-    JTextField name = new JTextField(20);
-    JTextField reverseName = new JTextField(20);
+    JTextField name = CayenneWidgetFactory.createTextField();
+    JTextField reverseName = CayenneWidgetFactory.createTextField();
     JCheckBox hasReverseDbRel = new JCheckBox("", false);
     JTable table = new CayenneTable();
     JButton add = new JButton("Add");

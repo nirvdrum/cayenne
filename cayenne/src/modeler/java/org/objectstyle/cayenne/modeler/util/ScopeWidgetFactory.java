@@ -56,122 +56,38 @@
 
 package org.objectstyle.cayenne.modeler.util;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JTextField;
+import org.scopemvc.view.swing.STextField;
 
 /**
- * Utility class to create standard Swing widgets following
- * default look-and-feel of CayenneModeler.
+ * Utility class to create Scope Swing widgets following
+ * default look-and-feel of CayenneModeler. Mirrors CayenneWidgetFactory.
  *  
  * @author Andrei Adamchik
  */
 
-// TODO: (Andrus) investigate performance impact of substituting 
-// constructors for all new widgets with cloning the prototype
-public class CayenneWidgetFactory {
+// TODO: (Andrus) combine with CayenneWidgetFactory via inheritance?
+public class ScopeWidgetFactory {
     /**
      * Not intended for instantiation.
      */
-    protected CayenneWidgetFactory() {
+    protected ScopeWidgetFactory() {
         super();
-    }
-
-    public static PreferenceField createPreferenceField(String preferencesKey) {
-        return createPreferenceField(preferencesKey, Collections.EMPTY_LIST);
-    }
-
-    /**
-     * Creates a new PreferenceField.
-     */
-    public static PreferenceField createPreferenceField(
-        String preferencesKey,
-        Collection initialValues) {
-
-        PreferenceField preferenceField =
-            new PreferenceField(preferencesKey, initialValues);
-        initComponent(preferenceField);
-        preferenceField.setBackground(Color.WHITE);
-        return preferenceField;
-    }
-
-    /**
-     * Creates a new JComboBox with a collection of model objects.
-     */
-    public static JComboBox createComboBox(Collection model, boolean sort) {
-        return createComboBox(model.toArray(), sort);
-    }
-
-    /**
-     * Creates a new JComboBox with an array of model objects.
-     */
-    public static JComboBox createComboBox(Object[] model, boolean sort) {
-        JComboBox comboBox = CayenneWidgetFactory.createComboBox();
-
-        if (sort) {
-            Arrays.sort(model);
-        }
-
-        comboBox.setModel(new DefaultComboBoxModel(model));
-        return comboBox;
-    }
-
-    /**
-     * Creates a new JComboBox.
-     */
-    public static JComboBox createComboBox() {
-        JComboBox comboBox = new JComboBox();
-        initComponent(comboBox);
-        comboBox.setBackground(Color.WHITE);
-        return comboBox;
     }
 
     /**
      * Creates a new JTextField with a default columns count of 20.
      */
-    public static JTextField createTextField() {
+    public static STextField createTextField() {
         return createTextField(20);
     }
 
     /**
      * Creates a new JTextField with a specified columns count.
      */
-    public static JTextField createTextField(int columns) {
-        final JTextField textField = new JTextField(columns);
-        initComponent(textField);
-        initTextField(textField);
+    public static STextField createTextField(int columns) {
+        final STextField textField = new STextField(columns);
+        CayenneWidgetFactory.initComponent(textField);
+        CayenneWidgetFactory.initTextField(textField);
         return textField;
-    }
-
-    protected static void initTextField(final JTextField textField) {
-        // config focus
-        textField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // transfer focus
-                textField.transferFocus();
-            }
-        });
-    }
-
-    protected static void initComponent(JComponent component) {
-        component.setFont(component.getFont().deriveFont(Font.PLAIN, 12));
-
-        Dimension size = component.getPreferredSize();
-        if (size == null) {
-            size = new Dimension();
-        }
-
-        size.setSize(size.getWidth(), 20);
-        component.setPreferredSize(size);
     }
 }

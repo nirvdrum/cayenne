@@ -170,9 +170,9 @@ public class DataNodeDetailView
         constraints.anchor = GridBagConstraints.NORTHWEST;
 
         nameLabel = new JLabel("Data node name: ");
-        name = new JTextField(20);
+        name = CayenneWidgetFactory.createTextField();
         locationLabel = new JLabel("Location: ");
-        location = new JTextField(25);
+        location = CayenneWidgetFactory.createTextField();
         factoryLabel = new JLabel("Data source factory:");
         factory = CayenneWidgetFactory.createComboBox();
         factory.setEditable(true);
@@ -222,9 +222,9 @@ public class DataNodeDetailView
         url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         url.addActionListener(this);
         minConnectionsLabel = new JLabel("Min connections: ");
-        minConnections = new JTextField(5);
+        minConnections = CayenneWidgetFactory.createTextField();
         maxConnectionsLabel = new JLabel("Max connections: ");
-        maxConnections = new JTextField(5);
+        maxConnections = CayenneWidgetFactory.createTextField();
 
         left_comp = new Component[6];
         left_comp[0] = userNameLabel;
