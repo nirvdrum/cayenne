@@ -104,6 +104,8 @@ public interface DbAdapter {
 		"org.objectstyle.cayenne.dba.db2.DB2Adapter";
 	public static final String FIREBIRD =
 		"org.objectstyle.cayenne.dba.firebird.FirebirdAdapter";
+    public static final String OPENBASE =
+            "org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter";
 
 	/**
 	 * All available DbAdapter subclass names.
@@ -117,7 +119,8 @@ public interface DbAdapter {
 			DbAdapter.MYSQL,
 			DbAdapter.ORACLE,
 			DbAdapter.POSTGRES,
-			DbAdapter.SYBASE
+			DbAdapter.SYBASE,
+            DbAdapter.OPENBASE
 		};
     
     /**
