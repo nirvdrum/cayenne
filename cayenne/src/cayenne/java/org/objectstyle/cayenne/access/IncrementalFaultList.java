@@ -111,7 +111,9 @@ public class IncrementalFaultList implements List {
         elements = Collections.synchronizedList(new ArrayList());
     }
 
-    public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
+    public IncrementalFaultList(
+        DataContext dataContext,
+        GenericSelectQuery query) {
         if (query.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
                 "IncrementalFaultList does not support unpaged queries. Query page size is "
@@ -121,7 +123,8 @@ public class IncrementalFaultList implements List {
         this.elements = Collections.synchronizedList(new ArrayList());
         this.dataContext = dataContext;
         this.pageSize = query.getPageSize();
-        this.rootEntity = dataContext.getEntityResolver().lookupObjEntity(query);
+        this.rootEntity =
+            dataContext.getEntityResolver().lookupObjEntity(query);
 
         // create an internal query, it is a partial replica of 
         // the original query and will serve as a value holder for 
@@ -130,7 +133,8 @@ public class IncrementalFaultList implements List {
         this.internalQuery.setRoot(query.getRoot());
         this.internalQuery.setLoggingLevel(query.getLoggingLevel());
         if (query instanceof SelectQuery) {
-            this.internalQuery.addPrefetches(((SelectQuery) query).getPrefetchList());
+            this.internalQuery.addPrefetches(
+                ((SelectQuery) query).getPrefetchList());
         }
 
         fillIn(query);
@@ -155,7 +159,10 @@ public class IncrementalFaultList implements List {
                     for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
                         Map row = it.nextDataRow();
                         elements.add(
-                            dataContext.objectFromDataRow(rootEntity, row, true));
+                            dataContext.objectFromDataRow(
+                                rootEntity,
+                                row,
+                                true));
                     }
 
                     // continue reading ids
@@ -177,12 +184,13 @@ public class IncrementalFaultList implements List {
 
             // process prefetching
             if (internalQuery.getPrefetchList().size() > 0) {
-                int endOfPage = (elements.size() < pageSize) ? elements.size() : pageSize;
+                int endOfPage =
+                    (elements.size() < pageSize) ? elements.size() : pageSize;
                 dataContext.prefetchRelationships(
                     internalQuery,
                     elements.subList(0, endOfPage));
             }
-            
+
             unfetchedObjects = elements.size() - pageSize;
         }
     }
@@ -205,19 +213,19 @@ public class IncrementalFaultList implements List {
         }
 
         synchronized (elements) {
-        	if(elements.size() == 0) {
-        		return;
-        	}
-        	
-        	// perform bound checking
-        	if(fromIndex < 0) {
-        		fromIndex = 0;
-        	}
-        	
-        	if(toIndex > elements.size()) {
-        		toIndex = elements.size();
-        	}
-        	
+            if (elements.size() == 0) {
+                return;
+            }
+
+            // perform bound checking
+            if (fromIndex < 0) {
+                fromIndex = 0;
+            }
+
+            if (toIndex > elements.size()) {
+                toIndex = elements.size();
+            }
+
             List quals = new ArrayList(pageSize);
             List ids = new ArrayList(pageSize);
             for (int i = fromIndex; i < toIndex; i++) {
@@ -225,7 +233,9 @@ public class IncrementalFaultList implements List {
                 if (obj instanceof Map) {
                     ids.add(obj);
                     quals.add(
-                        ExpressionFactory.matchAllDbExp((Map) obj, Expression.EQUAL_TO));
+                        ExpressionFactory.matchAllDbExp(
+                            (Map) obj,
+                            Expression.EQUAL_TO));
                 }
             }
 
@@ -245,7 +255,8 @@ public class IncrementalFaultList implements List {
                 // find missing ids
                 StringBuffer buf = new StringBuffer();
                 buf.append("Some ObjectIds are missing from the database. ");
-                buf.append("Expected ").append(ids.size()).append(", fetched ").append(
+                buf.append("Expected ").append(ids.size()).append(
+                    ", fetched ").append(
                     objects.size());
 
                 Iterator idsIt = ids.iterator();
@@ -278,7 +289,10 @@ public class IncrementalFaultList implements List {
                 throw new CayenneRuntimeException(buf.toString());
             } else if (objects.size() > ids.size()) {
                 throw new CayenneRuntimeException(
-                    "Expected " + ids.size() + " objects, retrieved " + objects.size());
+                    "Expected "
+                        + ids.size()
+                        + " objects, retrieved "
+                        + objects.size());
             }
 
             // replace ids in the list with objects
@@ -297,16 +311,18 @@ public class IncrementalFaultList implements List {
                 }
 
                 if (!found) {
-                    throw new CayenneRuntimeException("Can't find id for " + idMap);
+                    throw new CayenneRuntimeException(
+                        "Can't find id for " + idMap);
                 }
             }
-            
+
             unfetchedObjects -= objects.size();
         }
 
         // process prefetching
         if (internalQuery.getPrefetchList().size() > 0) {
-            int endOfPage = (elements.size() < toIndex) ? elements.size() : toIndex;
+            int endOfPage =
+                (elements.size() < toIndex) ? elements.size() : toIndex;
             dataContext.prefetchRelationships(
                 internalQuery,
                 elements.subList(fromIndex, endOfPage));
@@ -338,27 +354,29 @@ public class IncrementalFaultList implements List {
     }
 
     /**
-     * @see java.util.List#listIterator()
+     * This method would resolve all unresolved objects and then return
+     * a list iterator over an internal list.
      */
     public ListIterator listIterator() {
-        throw new UnsupportedOperationException("'listIterator' is not supported.");
+        resolveAll();
+        return elements.listIterator();
     }
 
     /**
-     * @see java.util.List#listIterator(int)
+     * This method would resolve all unresolved objects and then return
+     * a list iterator over an internal list.
      */
     public ListIterator listIterator(int index) {
-        throw new UnsupportedOperationException("'listIterator' is not supported.");
+        resolveAll();
+        return elements.listIterator(index);
     }
 
     /**
      * This method would resolve all unresolved objects and then return
      * an iterator over an internal list.
-     * 
-     * @see java.util.Collection#iterator()
      */
     public Iterator iterator() {
-    	resolveAll();
+        resolveAll();
         return elements.iterator();
     }
 
@@ -465,7 +483,11 @@ public class IncrementalFaultList implements List {
             return -1;
         }
 
-        if (!dataObj.getObjectId().getObjClass().getName().equals(rootEntity.getClassName())) {
+        if (!dataObj
+            .getObjectId()
+            .getObjClass()
+            .getName()
+            .equals(rootEntity.getClassName())) {
             return -1;
         }
 
@@ -514,7 +536,11 @@ public class IncrementalFaultList implements List {
             return -1;
         }
 
-        if (!dataObj.getObjectId().getObjClass().getName().equals(rootEntity.getClassName())) {
+        if (!dataObj
+            .getObjectId()
+            .getObjClass()
+            .getName()
+            .equals(rootEntity.getClassName())) {
             return -1;
         }
 
@@ -630,8 +656,7 @@ public class IncrementalFaultList implements List {
     }
 
     /**
-     * Returns the unfetchedObjects.
-     * @return int
+     * Returns a total number of objects that are not resolved yet.
      */
     public int getUnfetchedObjects() {
         return unfetchedObjects;
