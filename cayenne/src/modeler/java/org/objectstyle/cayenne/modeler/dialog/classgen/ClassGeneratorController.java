@@ -108,18 +108,6 @@ public class ClassGeneratorController extends BasicController {
                 selectedEntity,
                 validator.validationResults());
 
-        // by default generate pairs of classes
-        model.updateDefaultSuperClassPackage();
-
-        // figure out default out directory
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        String startDir = (String) pref
-                .getProperty(ModelerPreferences.LAST_GENERATED_CLASSES_DIR);
-
-        if (startDir != null) {
-            model.setOutputDir(startDir);
-        }
-
         return model;
     }
 
@@ -242,15 +230,6 @@ public class ClassGeneratorController extends BasicController {
         // guess start directory
         if (startDir == null) {
             String lastUsed = (String) ModelerPreferences.getPreferences().getProperty(
-                    ModelerPreferences.LAST_GENERATED_CLASSES_DIR);
-            if (lastUsed != null) {
-                startDir = new File(lastUsed);
-            }
-        }
-
-        // guess again
-        if (startDir == null) {
-            String lastUsed = (String) ModelerPreferences.getPreferences().getProperty(
                     ModelerPreferences.LAST_DIR);
             if (lastUsed != null) {
                 startDir = new File(lastUsed);
@@ -268,10 +247,6 @@ public class ClassGeneratorController extends BasicController {
         int result = chooser.showOpenDialog((Component) this.getView());
         if (result == JFileChooser.APPROVE_OPTION) {
             File selected = chooser.getSelectedFile();
-            // Set preferences
-            ModelerPreferences.getPreferences().setProperty(
-                    ModelerPreferences.LAST_GENERATED_CLASSES_DIR,
-                    selected.getAbsolutePath());
 
             // update model
             model.setOutputDir(selected.getAbsolutePath());
@@ -305,14 +280,6 @@ public class ClassGeneratorController extends BasicController {
         // guess start directory
         if (startDir == null) {
             String lastUsed = (String) ModelerPreferences.getPreferences().getProperty(
-                    ModelerPreferences.LAST_CLASS_GENERATION_TEMPLATE);
-            if (lastUsed != null) {
-                startDir = new File(lastUsed).getParentFile();
-            }
-        }
-
-        if (startDir == null) {
-            String lastUsed = (String) ModelerPreferences.getPreferences().getProperty(
                     ModelerPreferences.LAST_DIR);
             if (lastUsed != null) {
                 startDir = new File(lastUsed);
@@ -337,9 +304,6 @@ public class ClassGeneratorController extends BasicController {
             selected = chooser.getSelectedFile();
 
             // Set preferences
-            ModelerPreferences.getPreferences().setProperty(
-                    ModelerPreferences.LAST_CLASS_GENERATION_TEMPLATE,
-                    selected.getAbsolutePath());
             ModelerPreferences.getPreferences().setProperty(
                     ModelerPreferences.LAST_DIR,
                     selected.getAbsolutePath());

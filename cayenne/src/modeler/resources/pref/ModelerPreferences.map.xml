@@ -13,7 +13,9 @@
 	<db-entity name="data_map_defaults">
 		<db-attribute name="generate_pairs" type="INTEGER"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="output_path" type="VARCHAR" length="254"/>
 		<db-attribute name="subclass_template" type="VARCHAR" length="254"/>
+		<db-attribute name="superclass_package_suffix" type="VARCHAR" length="254"/>
 		<db-attribute name="superclass_template" type="VARCHAR" length="254"/>
 	</db-entity>
 	<db-entity name="db_connection_info">
@@ -45,7 +47,9 @@
 	</obj-entity>
 	<obj-entity name="DataMapDefaults" className="org.objectstyle.cayenne.modeler.pref.DataMapDefaults" lock-type="optimistic" dbEntityName="data_map_defaults" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
 		<obj-attribute name="generatePairs" type="java.lang.Boolean" db-attribute-path="generate_pairs"/>
+		<obj-attribute name="outputPath" type="java.lang.String" db-attribute-path="output_path"/>
 		<obj-attribute name="subclassTemplate" type="java.lang.String" db-attribute-path="subclass_template"/>
+		<obj-attribute name="superclassPackageSuffix" type="java.lang.String" db-attribute-path="superclass_package_suffix"/>
 		<obj-attribute name="superclassTemplate" type="java.lang.String" db-attribute-path="superclass_template"/>
 	</obj-entity>
 	<obj-entity name="FSPath" className="org.objectstyle.cayenne.modeler.pref.FSPath" dbEntityName="fs_path" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">

@@ -8,7 +8,9 @@ package org.objectstyle.cayenne.modeler.pref;
 public class _DataMapDefaults extends org.objectstyle.cayenne.pref.PreferenceDetail {
 
     public static final String GENERATE_PAIRS_PROPERTY = "generatePairs";
+    public static final String OUTPUT_PATH_PROPERTY = "outputPath";
     public static final String SUBCLASS_TEMPLATE_PROPERTY = "subclassTemplate";
+    public static final String SUPERCLASS_PACKAGE_SUFFIX_PROPERTY = "superclassPackageSuffix";
     public static final String SUPERCLASS_TEMPLATE_PROPERTY = "superclassTemplate";
 
     public static final String ID_PK_COLUMN = "id";
@@ -21,11 +23,27 @@ public class _DataMapDefaults extends org.objectstyle.cayenne.pref.PreferenceDet
     }
     
     
+    public void setOutputPath(String outputPath) {
+        writeProperty("outputPath", outputPath);
+    }
+    public String getOutputPath() {
+        return (String)readProperty("outputPath");
+    }
+    
+    
     public void setSubclassTemplate(String subclassTemplate) {
         writeProperty("subclassTemplate", subclassTemplate);
     }
     public String getSubclassTemplate() {
         return (String)readProperty("subclassTemplate");
+    }
+    
+    
+    public void setSuperclassPackageSuffix(String superclassPackageSuffix) {
+        writeProperty("superclassPackageSuffix", superclassPackageSuffix);
+    }
+    public String getSuperclassPackageSuffix() {
+        return (String)readProperty("superclassPackageSuffix");
     }
     
     

@@ -45,6 +45,9 @@ public class ClassGeneratorModel extends BasicModel {
         this.pairs = (defaults.getGeneratePairs() != null) ? defaults
                 .getGeneratePairs()
                 .booleanValue() : true;
+        this.outputDir = defaults.getOutputPath();
+
+        this.superClassPackage = defaults.getSuperclassPackage(getDefaultClassPackage());
     }
 
     protected void prepareEntities(ObjEntity selectedEntity, List validationInfo) {
@@ -86,29 +89,29 @@ public class ClassGeneratorModel extends BasicModel {
         this.entities = tmp;
     }
 
-    /**
-     * Initializes superClassPackage to a default reasonable superclass package value.
-     */
-    public void updateDefaultSuperClassPackage() {
-        Iterator it = entities.iterator();
-        while (it.hasNext()) {
-            ClassGeneratorEntityWrapper entityWrapper = (ClassGeneratorEntityWrapper) it
-                    .next();
-            String className = entityWrapper.getEntity().getClassName();
-            if (className == null) {
-                continue;
-            }
+    protected String getDefaultClassPackage() {
+        String defaultPackage = map.getDefaultPackage();
 
-            int dot = className.lastIndexOf('.');
-            if (dot > 0) {
-                superClassPackage = className.substring(0, dot + 1) + "auto";
-                break;
+        // check entities packages...
+        if (defaultPackage == null) {
+            Iterator it = entities.iterator();
+            while (it.hasNext()) {
+                ClassGeneratorEntityWrapper entityWrapper = (ClassGeneratorEntityWrapper) it
+                        .next();
+                String className = entityWrapper.getEntity().getClassName();
+                if (className == null) {
+                    continue;
+                }
+
+                int dot = className.lastIndexOf('.');
+                if (dot > 0) {
+                    defaultPackage = className.substring(0, dot);
+                    break;
+                }
             }
         }
 
-        if (superClassPackage == null) {
-            superClassPackage = "auto";
-        }
+        return defaultPackage;
     }
 
     public List getSelectedEntities() {
@@ -230,6 +233,7 @@ public class ClassGeneratorModel extends BasicModel {
     public void setOutputDir(String outputDir) {
         if (!Util.nullSafeEquals(this.outputDir, outputDir)) {
             this.outputDir = outputDir;
+            this.defaults.setOutputPath(outputDir);
             fireModelChange(VALUE_CHANGED, Selector.fromString("outputDir"));
         }
     }
@@ -241,6 +245,8 @@ public class ClassGeneratorModel extends BasicModel {
     public void setSuperClassPackage(String superClassPackage) {
         if (!Util.nullSafeEquals(this.superClassPackage, superClassPackage)) {
             this.superClassPackage = superClassPackage;
+
+            defaults.setSuperclassPackage(superClassPackage, getDefaultClassPackage());
             fireModelChange(VALUE_CHANGED, Selector.fromString("superClassPackage"));
         }
     }

@@ -92,18 +92,6 @@ public class ModelerPreferences extends ExtendedProperties {
     /** List of the last 4 opened project files. */
     public static final String LAST_PROJ_FILES = "Editor.lastSeveralProjectFiles";
 
-    /** The directory of the last generated classes. */
-    public static final String LAST_GENERATED_CLASSES_DIR = "gui.datamap.GenerateClassDialog.lastDir";
-
-    /**
-     * @since 1.1
-     */
-    public static final String LAST_CLASS_GENERATION_TEMPLATE = "gui.datamap.GenerateClassDialog.lastTemplate";
-
-    /**
-     * @since 1.1
-     */
-    public static final String LAST_CLASSPATH_SELECTION_DIR = "gui.datamap.ConfigureClasspathDialog.lastDir";
 
     /** User name */
     public static final String USER_NAME = "DbLoginPanel.unInput";
@@ -120,8 +108,6 @@ public class ModelerPreferences extends ExtendedProperties {
     /** GUI layout */
     public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";
     public static final String EDITOR_THEMENAME = "Editor.theme";
-
-    public static final String EDITOR_TREE_WIDTH = "Editor.treeWidth";
 
     /** Log file */
     public static final String EDITOR_LOGFILE_ENABLED = "Editor.logfileEnabled";

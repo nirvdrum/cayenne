@@ -81,6 +81,46 @@ public class PreferenceDetail extends CayenneDataObject {
 
     protected DomainPreference domainPreference;
 
+    /**
+     * Changes the key of this preference. If there is a sibling prefrence with same key,
+     * such sibling is renamed using generated unique name. This operation essentially
+     * substitutes one prefrence entry with another.
+     */
+    public void rename(String newKey) {
+        if (Util.nullSafeEquals(getKey(), newKey)) {
+            return;
+        }
+
+        DomainPreference domainPrefrence = getDomainPreference();
+        Domain parent = domainPrefrence.getDomain();
+
+        if (parent == null) {
+            domainPrefrence.setKey(newKey);
+            return;
+        }
+
+        DomainPreference other = parent.getDomainPreference(newKey);
+        if (other != null && other != domainPrefrence) {
+            String otherName = null;
+            for (int i = 1; i < 1000; i++) {
+                if (parent.getDomainPreference(newKey + i) == null) {
+                    otherName = newKey + i;
+                    break;
+                }
+            }
+
+            if (otherName == null) {
+                throw new PreferenceException("Can't rename an existing preference '"
+                        + newKey
+                        + "'.");
+            }
+
+            other.setKey(otherName);
+        }
+        
+        domainPrefrence.setKey(newKey);
+    }
+
     public int getIntProperty(String key, int defaultValue) {
         String value = getProperty(key);
 

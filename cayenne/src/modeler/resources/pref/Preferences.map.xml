@@ -8,6 +8,7 @@
 		<db-attribute name="level" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="100"/>
 		<db-attribute name="parent_id" type="INTEGER"/>
+		<db-attribute name="version" type="VARCHAR" length="254"/>
 	</db-entity>
 	<db-entity name="domain_preference">
 		<db-attribute name="domain_id" type="INTEGER" isMandatory="true"/>
@@ -19,6 +20,7 @@
 		<obj-attribute name="description" type="java.lang.String" db-attribute-path="description"/>
 		<obj-attribute name="level" type="java.lang.Integer" db-attribute-path="level"/>
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="name"/>
+		<obj-attribute name="version" type="java.lang.String" db-attribute-path="version"/>
 	</obj-entity>
 	<obj-entity name="DomainPreference" className="org.objectstyle.cayenne.pref.DomainPreference" lock-type="optimistic" dbEntityName="domain_preference">
 		<obj-attribute name="key" type="java.lang.String" db-attribute-path="key"/>

@@ -83,6 +83,7 @@ import org.objectstyle.cayenne.modeler.dialog.datamap.SchemaUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SuperclassUpdateController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
+import org.objectstyle.cayenne.modeler.pref.DataMapDefaults;
 import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.swing.CellRenderers;
 import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
@@ -363,8 +364,8 @@ public class DataMapView extends JPanel {
         eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
     }
 
-    void setDataMapName(String text) {
-        if (text == null || text.trim().length() == 0) {
+    void setDataMapName(String newName) {
+        if (newName == null || newName.trim().length() == 0) {
             throw new ValidationException("Enter name for DataMap");
         }
 
@@ -380,7 +381,7 @@ public class DataMapView extends JPanel {
         Iterator it = config.getDomains().iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
-            DataMap nextMap = domain.getMap(text);
+            DataMap nextMap = domain.getMap(newName);
 
             if (nextMap == map) {
                 continue;
@@ -396,13 +397,15 @@ public class DataMapView extends JPanel {
 
             // there is an entity with the same name
             throw new ValidationException("There is another DataMap named '"
-                    + text
+                    + newName
                     + "'. Use a different name.");
         }
 
         // completely new name, set new name for domain
+        DataMapDefaults pref = eventController.getCurrentDataMapPreferences();
         DataMapEvent e = new DataMapEvent(this, map, map.getName());
-        ProjectUtil.setDataMapName(eventController.getCurrentDataDomain(), map, text);
+        ProjectUtil.setDataMapName(eventController.getCurrentDataDomain(), map, newName);
+        pref.rename(newName);
         eventController.fireDataMapEvent(e);
     }
 

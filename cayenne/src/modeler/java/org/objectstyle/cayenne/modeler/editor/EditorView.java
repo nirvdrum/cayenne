@@ -60,15 +60,12 @@ import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.ProjectTreeView;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
@@ -83,6 +80,8 @@ import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
+import org.objectstyle.cayenne.modeler.pref.ComponentGeometry;
+import org.objectstyle.cayenne.pref.Domain;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -95,8 +94,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class EditorView extends JPanel implements ObjEntityDisplayListener,
         DbEntityDisplayListener, DomainDisplayListener, DataMapDisplayListener,
         DataNodeDisplayListener, ProcedureDisplayListener, QueryDisplayListener {
-
-    private static final int INIT_DIVIDER_LOCATION = 170;
 
     private static final String EMPTY_VIEW = "Empty";
     private static final String DOMAIN_VIEW = "Domain";
@@ -125,15 +122,10 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
 
         // init widgets
         ProjectTreeView treePanel = new ProjectTreeView(eventController);
-        treePanel.setMinimumSize(new Dimension(INIT_DIVIDER_LOCATION, 200));
+        treePanel.setMinimumSize(new Dimension(50, 200));
 
         this.detailPanel = new JPanel();
         this.splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
-
-        int preferredSize = ModelerPreferences.getPreferences().getInt(
-                ModelerPreferences.EDITOR_TREE_WIDTH,
-                INIT_DIVIDER_LOCATION);
-        splitPane.setDividerLocation(preferredSize);
 
         // assemble...
 
@@ -189,16 +181,14 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
         eventController.addProcedureDisplayListener(this);
         eventController.addQueryDisplayListener(this);
 
-        splitPane.addPropertyChangeListener(
-                JSplitPane.DIVIDER_LOCATION_PROPERTY,
-                new PropertyChangeListener() {
+        Domain domain = eventController.getApplicationPreferences().getSubdomain(
+                this.getClass());
+        ComponentGeometry geometry = (ComponentGeometry) domain.getPreferenceDetail(
+                "splitPane.divider",
+                ComponentGeometry.class,
+                true);
 
-                    public void propertyChange(PropertyChangeEvent e) {
-                        ModelerPreferences.getPreferences().put(
-                                ModelerPreferences.EDITOR_TREE_WIDTH,
-                                String.valueOf(splitPane.getDividerLocation()));
-                    }
-                });
+        geometry.bindIntProperty(splitPane, JSplitPane.DIVIDER_LOCATION_PROPERTY, 150);
     }
 
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
