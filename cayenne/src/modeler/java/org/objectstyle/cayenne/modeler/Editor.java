@@ -155,7 +155,8 @@ public class Editor
     protected static Editor frame;
 
     protected EditorView view;
-    protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
+    protected RecentFileMenu recentFileMenu =
+        new RecentFileMenu("Recent Files");
     protected TopController controller;
 
     /** Returns an editor singleton object. */
@@ -169,6 +170,15 @@ public class Editor
     public static void main(String[] args) {
         // redirect all logging to the log file
         configLogging();
+
+        // check jdk version
+        try {
+            Class.forName("javax.swing.SpringLayout");
+        } catch (Exception ex) {
+            logObj.fatal("CayenneModeler requires JDK 1.4.");
+            logObj.fatal("Found : '" + System.getProperty("java.version") + "' at " + System.getProperty("java.home"));
+            System.exit(1);
+        }
 
         Editor frame = new Editor();
         //Center the window
@@ -184,19 +194,21 @@ public class Editor
             (screenSize.width - frameSize.width) / 2,
             (screenSize.height - frameSize.height) / 2);
         frame.setVisible(true);
-        
+
         logObj.info("Started CayenneModeler.");
-        
+
         // load project if filename is supplied as an argument
-        if(args.length == 1) {
+        if (args.length == 1) {
             File f = new File(args[0]);
-            if(f.isDirectory()) {
-               f = new File(f, Configuration.DOMAIN_FILE);              
+            if (f.isDirectory()) {
+                f = new File(f, Configuration.DOMAIN_FILE);
             }
-            
-            if(f.isFile() && Configuration.DOMAIN_FILE.equals(f.getName())) {
-                OpenProjectAction openAction = (OpenProjectAction)frame.getAction(OpenProjectAction.ACTION_NAME);
-                openAction.openProject(f);        
+
+            if (f.isFile() && Configuration.DOMAIN_FILE.equals(f.getName())) {
+                OpenProjectAction openAction =
+                    (OpenProjectAction) frame.getAction(
+                        OpenProjectAction.ACTION_NAME);
+                openAction.openProject(f);
             }
         }
     }
@@ -210,18 +222,19 @@ public class Editor
             File log = getLogFile();
 
             if (log != null) {
-            	
-            	// read default Cayenne log configuration
-            	Configuration.configCommonLogging();
-            	
-            	// replace appenders to jsut log to a file.
+
+                // read default Cayenne log configuration
+                Configuration.configCommonLogging();
+
+                // replace appenders to jsut log to a file.
                 Logger p1 = logObj;
                 Logger p2 = null;
                 while ((p2 = (Logger) p1.getParent()) != null) {
                     p1 = p2;
                 }
 
-                Layout layout = new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
+                Layout layout =
+                    new PatternLayout("CayenneModeler %-5p [%t %d{MM-dd HH:mm:ss}] %c: %m%n");
                 p1.removeAllAppenders();
                 p1.addAppender(
                     new FileAppender(layout, log.getCanonicalPath(), true));
@@ -308,8 +321,8 @@ public class Editor
         fileMenu.add(getAction(OpenProjectAction.ACTION_NAME).buildMenu());
         fileMenu.add(getAction(ProjectAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
-		fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
-		fileMenu.add(getAction(ValidateAction.ACTION_NAME).buildMenu());
+        fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
+        fileMenu.add(getAction(ValidateAction.ACTION_NAME).buildMenu());
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();
@@ -322,13 +335,17 @@ public class Editor
         projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
 
-        projectMenu.add(getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(
+            getAction(CreateObjEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(
+            getAction(CreateDbEntityAction.ACTION_NAME).buildMenu());
+        projectMenu.add(
+            getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
         projectMenu.addSeparator();
         projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
         projectMenu.add(getAction(ObjEntitySyncAction.ACTION_NAME).buildMenu());
-        projectMenu.add(getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
+        projectMenu.add(
+            getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
         projectMenu.addSeparator();
         projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
@@ -363,10 +380,12 @@ public class Editor
         toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateDbEntityAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
+        toolBar.add(
+            getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateObjEntityAction.ACTION_NAME).buildButton());
         toolBar.add(getAction(CreateAttributeAction.ACTION_NAME).buildButton());
-        toolBar.add(getAction(CreateRelationshipAction.ACTION_NAME).buildButton());
+        toolBar.add(
+            getAction(CreateRelationshipAction.ACTION_NAME).buildButton());
 
         getContentPane().add(toolBar, BorderLayout.NORTH);
     }
@@ -407,7 +426,8 @@ public class Editor
         } else {
             getAction(SaveAction.ACTION_NAME).setEnabled(false);
             if (title != null && title.startsWith(DIRTY_STRING)) {
-                setTitle(title.substring(DIRTY_STRING.length(), title.length()));
+                setTitle(
+                    title.substring(DIRTY_STRING.length(), title.length()));
             }
         }
     }
@@ -449,14 +469,16 @@ public class Editor
     public void currentDbRelationshipChanged(RelationshipDisplayEvent e) {
         enableDbEntityMenu();
         if (e.getRelationship() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove DbRelationship");
+            getAction(RemoveAction.ACTION_NAME).setName(
+                "Remove DbRelationship");
         }
     }
 
     public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
         enableObjEntityMenu();
         if (e.getRelationship() != null) {
-            getAction(RemoveAction.ACTION_NAME).setName("Remove ObjRelationship");
+            getAction(RemoveAction.ACTION_NAME).setName(
+                "Remove ObjRelationship");
         }
     }
 
