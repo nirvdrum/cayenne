@@ -90,8 +90,8 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 			qa.dispose();
 		}
 	}
-
-	public void testNullQualifier() throws java.lang.Exception {
+    
+	public void testNullQualifier() throws Exception {
 		try {
 			assertNull(new QualifierTranslator(qa).doTranslation());
 		} finally {

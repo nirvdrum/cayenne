@@ -72,253 +72,290 @@ import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class SelectTranslatorTst extends CayenneTestCase {
-	static Logger logObj =
-		Logger.getLogger(SelectTranslatorTst.class.getName());
+    static Logger logObj = Logger.getLogger(SelectTranslatorTst.class.getName());
 
-	protected SelectQuery q;
-	protected DbEntity artistEnt;
+    protected SelectQuery q;
+    protected DbEntity artistEnt;
 
-	public SelectTranslatorTst(String name) {
-		super(name);
-	}
+    public SelectTranslatorTst(String name) {
+        super(name);
+    }
 
-	protected void setUp() throws Exception {
-		q = new SelectQuery();
-		artistEnt = getSharedDomain().lookupEntity("Artist").getDbEntity();
-	}
+    protected void setUp() throws Exception {
+        q = new SelectQuery();
+        artistEnt = getSharedDomain().lookupEntity("Artist").getDbEntity();
+    }
 
-	private SelectTranslator buildTranslator(Connection con) throws Exception {
-		SelectTranslator t = new SelectTranslator();
-		t.setAdapter(getSharedNode().getAdapter());
-		t.setCon(con);
-		t.setEngine(getSharedDomain());
-		t.setQuery(q);
-		return t;
-	}
+    private SelectTranslator buildTranslator(Connection con) throws Exception {
+        SelectTranslator transl =
+            (SelectTranslator) getSharedNode().getAdapter().getQueryTranslator(q);
+        transl.setEngine(getSharedNode());
+        transl.setCon(con);
 
-	/**
-	 * Tests query creation with qualifier and ordering.
-	 */
-	public void testCreateSqlString1() throws Exception {
-		Connection con = getSharedConnection();
+        return transl;
+    }
 
-		try {
-			// query with qualifier and ordering
-			q.setObjEntityName("Artist");
-			q.setQualifier(
-				ExpressionFactory.binaryExp(
-					Expression.LIKE,
-					"artistName",
-					"a%"));
-			q.addOrdering("dateOfBirth", Ordering.ASC);
+    /**
+     * Tests query creation with qualifier and ordering.
+     */
+    public void testCreateSqlString1() throws Exception {
+        Connection con = getSharedConnection();
 
-			String generatedSql = buildTranslator(con).createSqlString();
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("Artist");
+            q.setQualifier(
+                ExpressionFactory.binaryExp(Expression.LIKE, "artistName", "a%"));
+            q.addOrdering("dateOfBirth", Ordering.ASC);
 
-			// do some simple assertions to make sure all parts are in
-			assertNotNull(generatedSql);
-			assertTrue(generatedSql.startsWith("SELECT "));
-			assertTrue(generatedSql.indexOf(" FROM ") > 0);
-			assertTrue(
-				generatedSql.indexOf(" WHERE ")
-					> generatedSql.indexOf(" FROM "));
-			assertTrue(
-				generatedSql.indexOf(" ORDER BY ")
-					> generatedSql.indexOf(" WHERE "));
-		} finally {
-			con.close();
-		}
-	}
+            String generatedSql = buildTranslator(con).createSqlString();
 
-	/**
-	 * Tests query creation with "distinct" specified.
-	 */
-	public void testCreateSqlString2() throws java.lang.Exception {
-		Connection con = getSharedConnection();
-		try {
-			// query with "distinct" set
-			q.setObjEntityName("Artist");
-			q.setDistinct(true);
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT "));
+            assertTrue(generatedSql.indexOf(" FROM ") > 0);
+            assertTrue(generatedSql.indexOf(" WHERE ") > generatedSql.indexOf(" FROM "));
+            assertTrue(
+                generatedSql.indexOf(" ORDER BY ") > generatedSql.indexOf(" WHERE "));
+        } finally {
+            con.close();
+        }
+    }
 
-			String generatedSql = buildTranslator(con).createSqlString();
+    /**
+     * Tests query creation with "distinct" specified.
+     */
+    public void testCreateSqlString2() throws java.lang.Exception {
+        Connection con = getSharedConnection();
+        try {
+            // query with "distinct" set
+            q.setObjEntityName("Artist");
+            q.setDistinct(true);
 
-			// do some simple assertions to make sure all parts are in
-			assertNotNull(generatedSql);
-			assertTrue(generatedSql.startsWith("SELECT DISTINCT"));
-		} finally {
-			con.close();
-		}
-	}
+            String generatedSql = buildTranslator(con).createSqlString();
 
-	/**
-	 * Tests query creation with relationship from derived entity.
-	 */
-	public void testCreateSqlString3() throws Exception {
-		ObjectId id = new ObjectId("Artist", "ARTIST_ID", 35);
-		Artist a1 = (Artist) createDataContext().registeredObject(id);
-		Connection con = getSharedConnection();
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT DISTINCT"));
+        } finally {
+            con.close();
+        }
+    }
 
-		try {
-			// query with qualifier and ordering
-			q.setObjEntityName("ArtistAssets");
-			q.setQualifier(ExpressionFactory.matchExp("toArtist", a1));
+    /**
+     * Tests query creation with relationship from derived entity.
+     */
+    public void testCreateSqlString3() throws Exception {
+        ObjectId id = new ObjectId("Artist", "ARTIST_ID", 35);
+        Artist a1 = (Artist) createDataContext().registeredObject(id);
+        Connection con = getSharedConnection();
 
-			String sql = buildTranslator(con).createSqlString();
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("ArtistAssets");
+            q.setQualifier(ExpressionFactory.matchExp("toArtist", a1));
 
-			// do some simple assertions to make sure all parts are in
-			assertNotNull(sql);
-			assertTrue(sql.startsWith("SELECT "));
-			assertTrue(sql.indexOf(" FROM ") > 0);
+            String sql = buildTranslator(con).createSqlString();
 
-			// no WHERE clause
-			assertTrue(sql.indexOf(" WHERE ") < 0);
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(sql);
+            assertTrue(sql.startsWith("SELECT "));
+            assertTrue(sql.indexOf(" FROM ") > 0);
 
-			assertTrue(sql.indexOf(" GROUP BY ") > 0);
-			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
-			assertTrue(sql.indexOf("ARTIST_ID =") > sql.indexOf(" GROUP BY "));
-		} finally {
-			con.close();
-		}
-	}
+            // no WHERE clause
+            assertTrue(sql.indexOf(" WHERE ") < 0);
 
-	/**
-	 * Tests query creation with relationship from derived entity.
-	 */
-	public void testCreateSqlString4() throws Exception {
-		Connection con = getSharedConnection();
+            assertTrue(sql.indexOf(" GROUP BY ") > 0);
+            assertTrue(sql.indexOf("ARTIST_ID =") > 0);
+            assertTrue(sql.indexOf("ARTIST_ID =") > sql.indexOf(" GROUP BY "));
+        } finally {
+            con.close();
+        }
+    }
 
-		try {
-			// query with qualifier and ordering
-			q.setObjEntityName("ArtistAssets");
-			q.setParentObjEntityName("Painting");
-			q.setParentQualifier(
-				ExpressionFactory.matchExp("toArtist.artistName", "abc"));
-			q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
+    /**
+     * Tests query creation with relationship from derived entity.
+     */
+    public void testCreateSqlString4() throws Exception {
+        Connection con = getSharedConnection();
 
-			String sql = buildTranslator(con).createSqlString();
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("ArtistAssets");
+            q.setParentObjEntityName("Painting");
+            q.setParentQualifier(
+                ExpressionFactory.matchExp("toArtist.artistName", "abc"));
+            q.setQualifier(
+                ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
 
-			// do some simple assertions to make sure all parts are in
-			assertNotNull(sql);
-			assertTrue(sql.startsWith("SELECT "));
-			assertTrue(sql.indexOf(" FROM ") > 0);
+            String sql = buildTranslator(con).createSqlString();
 
-			// no WHERE clause
-			assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(sql);
+            assertTrue(sql.startsWith("SELECT "));
+            assertTrue(sql.indexOf(" FROM ") > 0);
 
-			assertTrue(
-				"GROUP BY clause is expected:" + sql,
-				sql.indexOf(" GROUP BY ") > 0);
-			assertTrue(
-				"HAVING clause is expected",
-				sql.indexOf(" HAVING ") > 0);
-			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
-			assertTrue(
-				"Relationship join must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
-			assertTrue(
-				"Relationship join must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
-			assertTrue(
-				"Qualifier for related entity must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
-			assertTrue(
-				"Qualifier for related entity must be in WHERE: " + sql,
-				sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
-		} finally {
-			con.close();
-		}
-	}
+            // no WHERE clause
+            assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
 
-	public void testBuildColumnList1() throws Exception {
-		Connection con = getSharedConnection();
+            assertTrue(
+                "GROUP BY clause is expected:" + sql,
+                sql.indexOf(" GROUP BY ") > 0);
+            assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
+            assertTrue(sql.indexOf("ARTIST_ID =") > 0);
+            assertTrue(
+                "Relationship join must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
+            assertTrue(
+                "Relationship join must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
+            assertTrue(
+                "Qualifier for related entity must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
+            assertTrue(
+                "Qualifier for related entity must be in WHERE: " + sql,
+                sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
+        } finally {
+            con.close();
+        }
+    }
 
-		try {
-			// configure query with entity that maps one-to-one to DbEntity
-			q.setObjEntityName("Artist");
-			SelectTranslator transl = buildTranslator(con);
-			transl.createSqlString();
+    /**
+     * Test aliases when the same table used in more then 1 relationship.
+     * Check translation of relationship path "ArtistExhibit.toArtist.artistName"
+     * and "ArtistExhibit.toExhibit.toGallery.paintingArray.toArtist.artistName".
+     */
+    public void testCreateSqlString5() throws Exception {
+        Connection con = getSharedConnection();
 
-			List columns = transl.getColumnList();
-			List dbAttrs = artistEnt.getAttributeList();
+        try {
+            // query with qualifier and ordering
+            q.setObjEntityName("ArtistExhibit");
+            q.setQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.LIKE,
+                    "toArtist.artistName",
+                    "a%"));
+            q.andQualifier(
+                ExpressionFactory.binaryPathExp(
+                    Expression.LIKE,
+                    "toExhibit.toGallery.paintingArray.toArtist.artistName",
+                    "a%"));
 
-			assertEquals(dbAttrs.size(), columns.size());
-			Iterator it = dbAttrs.iterator();
-			while (it.hasNext()) {
-				assertTrue(columns.contains(it.next()));
-			}
+            SelectTranslator transl = buildTranslator(con);
+            String generatedSql = transl.createSqlString();
+            // logObj.warn("Query: " + generatedSql);
 
-		} finally {
-			con.close();
-		}
-	}
+            // do some simple assertions to make sure all parts are in
+            assertNotNull(generatedSql);
+            assertTrue(generatedSql.startsWith("SELECT "));
+            assertTrue(generatedSql.indexOf(" FROM ") > 0);
+            assertTrue(generatedSql.indexOf(" WHERE ") > generatedSql.indexOf(" FROM "));
 
-	public void testBuildColumnList2() throws Exception {
-		Connection con = getSharedConnection();
+            // check that there are 2 distinct aliases for the ARTIST table
+            int ind1 = generatedSql.indexOf("ARTIST t", generatedSql.indexOf(" FROM "));
+            assertTrue(ind1 > 0);
 
-		try {
-			// configure query with custom attributes
-			q.setObjEntityName("Artist");
-			q.addCustDbAttribute("ARTIST_ID");
+            int ind2 = generatedSql.indexOf("ARTIST t", ind1 + 1);
+            assertTrue(ind2 > 0);
 
-			SelectTranslator transl = buildTranslator(con);
-			transl.createSqlString();
+            assertTrue(
+                generatedSql.charAt(ind1 + "ARTIST t".length())
+                    != generatedSql.charAt(ind2 + "ARTIST t".length()));
 
-			List columns = transl.getColumnList();
-			Object[] dbAttrs =
-				new Object[] { artistEnt.getAttribute("ARTIST_ID")};
+        } finally {
+            con.close();
+        }
+    }
 
-			assertEquals(dbAttrs.length, columns.size());
-			for (int i = 0; i < dbAttrs.length; i++) {
-				assertTrue(columns.contains(dbAttrs[i]));
-			}
+    public void testBuildColumnList1() throws Exception {
+        Connection con = getSharedConnection();
 
-		} finally {
-			con.close();
-		}
-	}
+        try {
+            // configure query with entity that maps one-to-one to DbEntity
+            q.setObjEntityName("Artist");
+            SelectTranslator transl = buildTranslator(con);
+            transl.createSqlString();
 
-	public void testBuildColumnList3() throws Exception {
-		Connection con = getSharedConnection();
+            List columns = transl.getColumnList();
+            List dbAttrs = artistEnt.getAttributeList();
 
-		try {
-			// configure query with entity that maps to a subset of DbEntity
-			q.setObjEntityName("SubPainting");
-			SelectTranslator transl = buildTranslator(con);
-			transl.createSqlString();
+            assertEquals(dbAttrs.size(), columns.size());
+            Iterator it = dbAttrs.iterator();
+            while (it.hasNext()) {
+                assertTrue(columns.contains(it.next()));
+            }
 
-			List columns = transl.getColumnList();
+        } finally {
+            con.close();
+        }
+    }
 
-			ObjEntity subPainting =
-				getSharedDomain().lookupEntity("SubPainting");
+    public void testBuildColumnList2() throws Exception {
+        Connection con = getSharedConnection();
 
-			// assert that the number of attributes in the query is right
-			// 1 (obj attr) + 1 (pk) = 2 
-			assertEquals(2, columns.size());
+        try {
+            // configure query with custom attributes
+            q.setObjEntityName("Artist");
+            q.addCustDbAttribute("ARTIST_ID");
 
-		} finally {
-			con.close();
-		}
-	}
+            SelectTranslator transl = buildTranslator(con);
+            transl.createSqlString();
 
-	public void testBuildColumnList4() throws Exception {
-		Connection con = getSharedConnection();
+            List columns = transl.getColumnList();
+            Object[] dbAttrs = new Object[] { artistEnt.getAttribute("ARTIST_ID")};
 
-		try {
-			// configure query with derived entity that maps to a subset of DbEntity
-			q.setObjEntityName("ArtistPaintingCounts");
-			SelectTranslator transl = buildTranslator(con);
-			transl.createSqlString();
+            assertEquals(dbAttrs.length, columns.size());
+            for (int i = 0; i < dbAttrs.length; i++) {
+                assertTrue(columns.contains(dbAttrs[i]));
+            }
 
-			List columns = transl.getColumnList();
+        } finally {
+            con.close();
+        }
+    }
 
-			ObjEntity countsEnt =
-				getSharedDomain().lookupEntity("ArtistPaintingCounts");
+    public void testBuildColumnList3() throws Exception {
+        Connection con = getSharedConnection();
 
-			// assert that the number of attributes in the query is right
-			// 1 (obj attr) + 1 (pk) = 2 
-			assertEquals(2, columns.size());
+        try {
+            // configure query with entity that maps to a subset of DbEntity
+            q.setObjEntityName("SubPainting");
+            SelectTranslator transl = buildTranslator(con);
+            transl.createSqlString();
 
-		} finally {
-			con.close();
-		}
-	}
+            List columns = transl.getColumnList();
+
+            ObjEntity subPainting = getSharedDomain().lookupEntity("SubPainting");
+
+            // assert that the number of attributes in the query is right
+            // 1 (obj attr) + 1 (pk) = 2 
+            assertEquals(2, columns.size());
+
+        } finally {
+            con.close();
+        }
+    }
+
+    public void testBuildColumnList4() throws Exception {
+        Connection con = getSharedConnection();
+
+        try {
+            // configure query with derived entity that maps to a subset of DbEntity
+            q.setObjEntityName("ArtistPaintingCounts");
+            SelectTranslator transl = buildTranslator(con);
+            transl.createSqlString();
+
+            List columns = transl.getColumnList();
+
+            ObjEntity countsEnt = getSharedDomain().lookupEntity("ArtistPaintingCounts");
+
+            // assert that the number of attributes in the query is right
+            // 1 (obj attr) + 1 (pk) = 2 
+            assertEquals(2, columns.size());
+
+        } finally {
+            con.close();
+        }
+    }
 }
