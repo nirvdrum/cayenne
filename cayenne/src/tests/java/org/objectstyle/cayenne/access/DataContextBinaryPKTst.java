@@ -31,6 +31,10 @@ public class DataContextBinaryPKTst extends CayenneTestCase {
     }
 
     public void testInsertBinaryPK() throws Exception {
+        if(!getDatabaseSetupDelegate().supportsBinaryPK()) {
+            return;
+        }
+        
         // set alt PK generator for the duration of the test
         AdapterProxyHandler handler = initAdapterProxy();
         try {
@@ -53,6 +57,10 @@ public class DataContextBinaryPKTst extends CayenneTestCase {
     }
 
     public void testFetchRelationshipBinaryPK() throws Exception {
+        if(!getDatabaseSetupDelegate().supportsBinaryPK()) {
+            return;
+        }
+        
         // set alt PK generator for the duration of the test
         AdapterProxyHandler handler = initAdapterProxy();
         try {

@@ -66,6 +66,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
 import org.objectstyle.cayenne.dba.oracle.OracleAdapter;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -89,6 +90,7 @@ public class DatabaseSetupDelegate {
     static {
         delegates.put(OracleAdapter.class, OracleDelegate.class);
         delegates.put(SybaseAdapter.class, SybaseDelegate.class);
+        delegates.put(FirebirdAdapter.class, FirebirdDelegate.class);
     }
 
     protected DbAdapter adapter;
@@ -148,6 +150,10 @@ public class DatabaseSetupDelegate {
      */
     public boolean supportsLobs() {
     	return false;
+    }
+    
+    public boolean supportsBinaryPK() {
+        return true;
     }
 
     protected void executeDDL(Connection con, String ddl) throws Exception {
