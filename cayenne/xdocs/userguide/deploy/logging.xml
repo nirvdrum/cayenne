@@ -26,12 +26,16 @@ log4j.appender.A1.layout.ConversionPattern=cayenne %-5p [%t %d{MM-dd HH:mm:ss}] 
 log4j.logger.org.objectstyle.cayenne.access.QueryLogger = INFO
 </source>
             
+            <p>
+            </p>
             <panel name="Users of Other Logging Frameworks:">
             If your application uses another package for its own logging purposes 
             (like JDK 1.4 java.util.logging, or commons-logging from Jakarta), 
             Cayenne Log4J-based logging will not interfere with your other logging configurations.
             </panel>
             
+            <p>
+            </p>
             <panel name="Log4J Users:">
             If your application already uses Log4J, Cayenne will simply use your existing configuration.
             </panel>
@@ -48,7 +52,8 @@ log4j.logger.org.objectstyle.cayenne.access.QueryLogger = INFO
 <source># Turn SQL tracing on
 log4j.logger.org.objectstyle.cayenne.access.QueryLogger = INFO
 </source>
-
+            <p>
+            </p>
 <source>
 # Turn SQL tracing off, e.g. to increase performance
 log4j.logger.org.objectstyle.cayenne.access.QueryLogger = WARN
@@ -74,7 +79,9 @@ log4j.logger.org.objectstyle.cayenne.util = DEBUG
             
             <subsection name="12.6.2 Default Configuration">
             <p>Default behaviour of Cayenne is to look for a file called <code>cayenne-log.properties</code>, 
-            first in the directory $HOME/.cayenne/, then in the CLASSPATH. $HOME is a system specific home directory of a user
+            first in the directory $HOME/.cayenne/, then in the CLASSPATH (i.e. a file called <code>.cayenne/cayenne-log.properties</code>
+            at the root of one of the locations accessible by the ClassLoader). 
+            $HOME is a system specific home directory of a user
             running the application. If you don't know what it is, try printing it from Java like this:
             <code>System.out.println(System.getProperty("user.home"))</code>.</p>
             

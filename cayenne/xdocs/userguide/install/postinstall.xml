@@ -22,6 +22,8 @@
             They include:
             
             <ul>
+            	<li><a href="http:/objectstyle.org/ashwood/">ObjectStyle Ashwood Graph Library</a>
+            	<i>(see a note about Ashwood below)</i></li>
             	<li><a href="http://jakarta.apache.org/velocity/">Jakarta Velocity Template 
             	Engine</a>, version 1.3</li>
 				<li><a href="http://jakarta.apache.org/oro/">Jakarta ORO Regular Expressions 
@@ -34,6 +36,14 @@
             on the user machine, a leaner <code>cayenne-nodeps.jar</code> file should be used.
             In this case all the dependencies must be installed manually.
             </p>
+            
+            <p></p>
+            <panel name="Ashwood Library Note:">
+			The version of Ashwood library currently used with Cayenne is not officially released
+			as of this writing. In the meantime the correct version of ashwood.jar file can be downloaded
+			from Cayenne CVS, e.g. by using this URL: 
+			http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/cayenne/cayenne/otherlib/ashwood-28012003.jar
+			</panel>
             
             <p><code>cayenne.jar</code> or <code>cayenne-nodeps.jar</code> should be accessible by 
 			the applications that use Cayenne. There are a few "standard" ways of doing it in Java,
