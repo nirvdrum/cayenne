@@ -11,11 +11,11 @@
             <subsection name="4.4.1 Getting DataContext" anchor="cayenne_dc">
             <p>In a Cayenne application most of the database work is done via a 
             <a 
-            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
+            href="../../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
             instance. It isolates changes made by a single user from other users. In
             web application speak this means that DataContext usually has a "session
             scope". <a 
-            href="../api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
+            href="../../api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
             usually serves as a factory for DataContext objects. In a simple
             case of a standalone application, DataContext can be obtained with the following
             lines of code:</p>

@@ -37,7 +37,7 @@
             
             <p><strong>- DataMap file : </strong>
             Used to instantiate 
-            <a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            <a href="../../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
             objects that desribe a database schema and map it to the Java classes
             in the Java application. XML structure of the DataMap file is described 
             in this <a href="../../dtd/data-map.dtd">DTD file</a>.
@@ -48,7 +48,7 @@
             provided by deployment containers. Cayenne framework still needs a DataSource
             to connect to the database. Therefore Cayenne has a set of wrapper classes
             located in <a href=
-            "../api/org/objectstyle/cayenne/conn/package-summary.html">org.objectstyle.cayenne.conn</a>
+            "../../api/org/objectstyle/cayenne/conn/package-summary.html">org.objectstyle.cayenne.conn</a>
             package, to create DataSource objects based on regular JDBC drivers.
             DataSource file provides needed information about database URL, JDBC driver, login, password
             and connection pooling parameters of a single DataSource.
