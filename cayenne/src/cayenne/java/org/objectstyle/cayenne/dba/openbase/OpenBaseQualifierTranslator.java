@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.dba.openbase;
 
+import java.sql.Types;
+
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.exp.Expression;
@@ -69,6 +72,8 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @since 1.1
  */
 public class OpenBaseQualifierTranslator extends QualifierTranslator {
+    private static Logger logObj = Logger.getLogger(OpenBaseQualifierTranslator.class);
+
     public OpenBaseQualifierTranslator() {
         this(null);
     }
@@ -91,35 +96,58 @@ public class OpenBaseQualifierTranslator extends QualifierTranslator {
         // ...
     }
 
-    protected void appendLiteral(
+    protected void appendLiteralDirect(
         StringBuffer buf,
         Object val,
         DbAttribute attr,
         Expression parentExpression) {
- 
-        // OpenBase LIKE looks like this: "WHERE column LIKE '[A][b][C]%'"
-        // Should we support nonString bindings?
-        if (val instanceof String
-            && (parentExpression.getType() == Expression.LIKE
-                || parentExpression.getType() == Expression.NOT_LIKE)) {
 
+        // Special handling of string matching is needed:
+        // 
+        //   1. Case-sensitive LIKE must be converted to [x][Y][z] format
+        //   2. When comparing to LOBs, we can't use a prepared statement parameter -
+        //      not sure if this an OpenBase bug, or simply their philosophy? But it is strange...
+        if (val instanceof String) {
             String string = (String) val;
-            int len = string.length();
-            StringBuffer buffer = new StringBuffer(len * 3);
-            for (int i = 0; i < len; i++) {
-                char c = string.charAt(i);
-                if (c == '%' || c == '?') {
-                    buffer.append(c);
-                }
-                else {
-                    buffer.append("[").append(c).append("]");
-                }
+
+            // convert pattern
+            if (parentExpression.getType() == Expression.LIKE
+                || parentExpression.getType() == Expression.NOT_LIKE) {
+                string = caseSensitiveLikePattern(string);
             }
 
-            val = buffer.toString();
+            // see if we need to inline the pattern
+            if (attr != null
+                && (attr.getType() == Types.CLOB
+                    || attr.getType() == Types.BLOB
+                    || attr.getType() == Types.LONGVARCHAR
+                    || attr.getType() == Types.LONGVARBINARY)) {
+                buf.append('\'').append(string).append('\'');
+            }
+            else {
+                super.appendLiteralDirect(buf, string, attr, parentExpression);
+            }
+        }
+        else {
+            super.appendLiteralDirect(buf, val, attr, parentExpression);
+        }
+    }
+
+    private String caseSensitiveLikePattern(String pattern) {
+        int len = pattern.length();
+        StringBuffer buffer = new StringBuffer(len * 3);
+
+        for (int i = 0; i < len; i++) {
+            char c = pattern.charAt(i);
+            if (c == '%' || c == '?') {
+                buffer.append(c);
+            }
+            else {
+                buffer.append("[").append(c).append("]");
+            }
         }
 
-        super.appendLiteral(buf, val, attr, parentExpression);
+        return buffer.toString();
     }
 
     public void endBinaryNode(Expression node, Expression parentNode) {

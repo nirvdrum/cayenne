@@ -172,7 +172,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
         // "=" comparisons on "text" columns
         SelectQuery q =
             new SelectQuery(
-                "PaintingInfo",
+                PaintingInfo.class,
                 ExpressionFactory.likeExp("textReview", textReview));
         List pts = ctxt.performQuery(q);
         return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
