@@ -55,17 +55,28 @@
  */ 
 package org.objectstyle.cayenne.modeler.datamap;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.swing.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.modeler.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.modeler.CayenneDialog;
+import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.RelationshipWrapper;
-import org.objectstyle.cayenne.map.*;
 
 /** 
  * Used to select the DbRelationship for ObjRelationship mapping. 

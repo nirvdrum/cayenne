@@ -77,6 +77,13 @@ public class DomainErrorMsg extends ValidationDisplayHandler {
      */
     public DomainErrorMsg(ValidationResult result) {
         super(result);
+        
+        Object[] path = result.getTreeNodePath();
+        int len = path.length;
+
+        if (len >= 1) {
+            domain = (DataDomain) path[len - 1];
+        }
     }
 
 	public void displayField(Mediator mediator, JFrame frame) {

@@ -111,10 +111,6 @@ public abstract class ValidationDisplayHandler {
     public ValidationDisplayHandler(ValidationResult result) {
         this.message = result.getMessage();
         this.severity = result.getSeverity();
-
-        if (result.getTreeNodePath().length > 1) {
-            this.domain = (DataDomain) result.getTreeNodePath()[1];
-        }
     }
 
     /** 

@@ -66,7 +66,7 @@ import javax.swing.text.JTextComponent;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 
 public class PreferenceField extends JComboBox {
-	static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
+	static Logger logObj = Logger.getLogger(PreferenceField.class);
 
 	private String key;
 

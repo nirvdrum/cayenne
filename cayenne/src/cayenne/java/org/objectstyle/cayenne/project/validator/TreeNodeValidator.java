@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -73,6 +74,7 @@ import org.objectstyle.cayenne.project.ProjectTraversal;
  * @author Andrei Adamchik
  */
 public abstract class TreeNodeValidator {
+	static Logger logObj = Logger.getLogger(TreeNodeValidator.class);
     
     // initialize singleton validators
     protected static final DomainValidator domainValidator = new DomainValidator();
@@ -117,6 +119,8 @@ public abstract class TreeNodeValidator {
             validatorObj = domainValidator;
         } else {
             // ignore unknown nodes
+            String className = (validatedObj != null) ? validatedObj.getClass().getName() : "(null object)";
+            logObj.info("Validation not supported for object of class: " + className);
             return;
         }
 

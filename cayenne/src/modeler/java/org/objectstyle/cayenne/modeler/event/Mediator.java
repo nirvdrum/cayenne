@@ -64,8 +64,6 @@ import javax.swing.event.EventListenerList;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.util.DataMapWrapper;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -73,6 +71,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.modeler.Editor;
 
 /** 
  * Implementation of event dispatching in CayenneModeler using <code>Mediator</code>
@@ -193,18 +192,6 @@ public class Mediator {
 	  * @see #setCurrentDataMap */
 	public void setCurrentModel(DataMap model) {
 		setCurrentDataMap(model);
-	}
-
-	/** Gets data map under specified name. 
-	  * @deprecated
-	  * @see #getDataMap */
-	public DataMapWrapper getModel(String name) {
-		return getDataMap(name);
-	}
-
-	/** Gets data map under specified name. */
-	public DataMapWrapper getDataMap(String name) {
-		return null;
 	}
 
 	public DataNode getCurrentDataNode() {

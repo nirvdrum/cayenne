@@ -83,8 +83,21 @@ public class EntityErrorMsg extends ValidationDisplayHandler {
      */
     public EntityErrorMsg(ValidationResult result) {
         super(result);
-        this.map = (DataMap) result.getTreeNodePath()[2];
-        this.entity = (Entity) result.getTreeNodePath()[3];
+        
+        Object[] path = result.getTreeNodePath();
+        int len = path.length;
+
+        if (len >= 1) {
+            entity = (Entity) path[len - 1];
+        }
+
+        if (len >= 2) {
+            map = (DataMap) path[len - 2];
+        }
+
+        if (len >= 3) {
+            domain = (DataDomain) path[len - 3];
+        }
     }
 
     public void displayField(Mediator mediator, JFrame frame) {

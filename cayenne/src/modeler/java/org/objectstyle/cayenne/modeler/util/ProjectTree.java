@@ -53,61 +53,91 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.modeler.util;
 
-package org.objectstyle.cayenne.modeler.validator;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 
-import javax.swing.JFrame;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.event.Mediator;
-import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
- * Relationship validation message.
+ * Specialized tree object that can render Cayenne project trees.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class RelationshipErrorMsg extends ValidationDisplayHandler {
-    protected DataMap map;
-    protected Entity entity;
-    protected Relationship rel;
+public class ProjectTree extends JTree {
+    static Logger logObj = Logger.getLogger(ProjectTree.class);
 
     /**
-     * Constructor for RelationshipErrorMsg.
-     * @param result
+     * Constructor for ProjectTree.
      */
-    public RelationshipErrorMsg(ValidationResult result) {
-        super(result);
-        Object[] path = result.getTreeNodePath();
-        int len = path.length;
-
-        if (len >= 1) {
-            rel = (Relationship) path[len - 1];
-        }
-
-        if (len >= 2) {
-            entity = (Entity) path[len - 2];
-        }
-
-        if (len >= 3) {
-            map = (DataMap) path[len - 3];
-        }
-
-        if (len >= 4) {
-            domain = (DataDomain) path[len - 4];
-        }
+    public ProjectTree() {
+        super();
     }
 
-    public void displayField(Mediator mediator, JFrame frame) {
-        RelationshipDisplayEvent event;
-        event = new RelationshipDisplayEvent(frame, rel, entity, map, domain);
-        if (entity instanceof ObjEntity) {
-            mediator.fireObjRelationshipDisplayEvent(event);
-        } else if (entity instanceof DbEntity) {
-            mediator.fireDbRelationshipDisplayEvent(event);
+    /**
+     * Constructor for ProjectTree.
+     * @param root
+     */
+    public ProjectTree(TreeNode root) {
+        super(root);
+    }
+
+    /**
+     * Constructor for ProjectTree.
+     * @param newModel
+     */
+    public ProjectTree(TreeModel newModel) {
+        super(newModel);
+    }
+
+    /**
+     * Returns a "name" property of the tree node.
+     */
+    public String convertValueToText(
+        Object value,
+        boolean selected,
+        boolean expanded,
+        boolean leaf,
+        int row,
+        boolean hasFocus) {
+
+        // unwrap
+        while (value instanceof DefaultMutableTreeNode) {
+            value = ((DefaultMutableTreeNode) value).getUserObject();
         }
+
+        // String - just return it
+        if (value instanceof String) {
+            return value.toString();
+        }
+
+        
+        // configuration - root node
+        if (value instanceof Configuration) {
+            return "";
+        }
+
+        // read name property
+        try {
+            return (value != null)
+                ? String.valueOf(PropertyUtils.getProperty(value, "name"))
+                : "";
+
+        } catch (Exception e) {
+            String objectClass =
+                (value == null) ? "(unknown)" : value.getClass().getName();
+            logObj.warn("Exception reading property 'name', class " + objectClass, e);
+            return "";
+        }
+
+    }
+
+    public String getName() {
+        return "";
     }
 }

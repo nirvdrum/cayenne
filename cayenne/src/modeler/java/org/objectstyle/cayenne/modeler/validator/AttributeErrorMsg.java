@@ -73,9 +73,9 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Andrei Adamchik
  */
 public class AttributeErrorMsg extends ValidationDisplayHandler {
-	protected DataMap map;
-	protected Entity entity;
-	protected Attribute attribute;
+    protected DataMap map;
+    protected Entity entity;
+    protected Attribute attribute;
 
     /**
      * Constructor for AttributeErrorMsg.
@@ -83,18 +83,34 @@ public class AttributeErrorMsg extends ValidationDisplayHandler {
      */
     public AttributeErrorMsg(ValidationResult result) {
         super(result);
-        this.map = (DataMap)result.getTreeNodePath()[2];
-        this.entity = (Entity)result.getTreeNodePath()[3];
-        this.attribute = (Attribute)result.getTreeNodePath()[4];
+
+        Object[] path = result.getTreeNodePath();
+        int len = path.length;
+
+        if (len >= 1) {
+            attribute = (Attribute) path[len - 1];
+        }
+
+        if (len >= 2) {
+            entity = (Entity) path[len - 2];
+        }
+
+        if (len >= 3) {
+            map = (DataMap) path[len - 3];
+        }
+
+        if (len >= 4) {
+            domain = (DataDomain) path[len - 4];
+        }
+
     }
 
-	public void displayField(Mediator mediator, JFrame frame) {
-		AttributeDisplayEvent event;
-		event =
-			new AttributeDisplayEvent(frame, attribute, entity, map, domain);
-		if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
-			mediator.fireObjAttributeDisplayEvent(event);
-		else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
-			mediator.fireDbAttributeDisplayEvent(event);
-	}
+    public void displayField(Mediator mediator, JFrame frame) {
+        AttributeDisplayEvent event;
+        event = new AttributeDisplayEvent(frame, attribute, entity, map, domain);
+        if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)
+            mediator.fireObjAttributeDisplayEvent(event);
+        else if (entity instanceof org.objectstyle.cayenne.map.DbEntity)
+            mediator.fireDbAttributeDisplayEvent(event);
+    }
 }
