@@ -7,23 +7,22 @@
  * software. All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- *  2. Redistributions in binary form must reproduce the above copyright
- * notice, this list of conditions and the following disclaimer in the
- * documentation and/or other materials provided with the distribution.
- *  3. The end-user documentation included with the redistribution, if any,
- * must include the following acknowlegement: "This product includes software
- * developed by the ObjectStyle Group (http://objectstyle.org/)." Alternately,
- * this acknowlegement may appear in the software itself, if and wherever such
- * third-party acknowlegements normally appear.
- *  4. The names "ObjectStyle Group" and "Cayenne" must not be used to endorse
- * or promote products derived from this software without prior written
- * permission. For written permission, please contact andrus@objectstyle.org.
- *  5. Products derived from this software may not be called "ObjectStyle" nor
- * may "ObjectStyle" appear in their names without prior written permission of
- * the ObjectStyle Group.
+ * modification, are permitted provided that the following conditions are met: 1.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer. 2. Redistributions in
+ * binary form must reproduce the above copyright notice, this list of
+ * conditions and the following disclaimer in the documentation and/or other
+ * materials provided with the distribution. 3. The end-user documentation
+ * included with the redistribution, if any, must include the following
+ * acknowlegement: "This product includes software developed by the ObjectStyle
+ * Group (http://objectstyle.org/)." Alternately, this acknowlegement may
+ * appear in the software itself, if and wherever such third-party
+ * acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this
+ * software without prior written permission. For written permission, please
+ * contact andrus@objectstyle.org. 5. Products derived from this software may
+ * not be called "ObjectStyle" nor may "ObjectStyle" appear in their names
+ * without prior written permission of the ObjectStyle Group.
  * 
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
@@ -69,15 +68,15 @@ public class ProjectPath {
     }
 
     /**
-	 * Constructor for ProjectPath.
-	 */
+     * Constructor for ProjectPath.
+     */
     public ProjectPath(Object object) {
         path = new Object[] { object };
     }
 
     /**
-	 * Constructor for ProjectPath.
-	 */
+     * Constructor for ProjectPath.
+     */
     public ProjectPath(Object[] path) {
         this.path = (path != null) ? path : EMPTY_PATH;
     }
@@ -86,9 +85,13 @@ public class ProjectPath {
         return path;
     }
 
+    public boolean isEmpty() {
+        return path == null || path.length == 0;
+    }
+
     /**
-	 * Scans path, looking for the first element that is an instanceof <code>aClass</code>.
-	 */
+     * Scans path, looking for the first element that is an instanceof <code>aClass</code>.
+     */
     public Object firstInstanceOf(Class aClass) {
         for (int i = 0; i < path.length; i++) {
             if (path[i] != null && aClass.isAssignableFrom(path[i].getClass())) {
@@ -100,9 +103,9 @@ public class ProjectPath {
     }
 
     /**
-	 * Returns an instance of the path, expanding this one by appending an
-	 * object at the end.
-	 */
+     * Returns an instance of the path, expanding this one by appending an
+     * object at the end.
+     */
     public ProjectPath appendToPath(Object object) {
         if (object != null) {
             Object[] newPath = new Object[path.length + 1];
@@ -112,14 +115,56 @@ public class ProjectPath {
             }
             newPath[path.length] = object;
             return new ProjectPath(newPath);
-        } else {
+        }
+        else {
             return this;
         }
     }
 
     /**
-	 * Returns the root or starting object of the path.
-	 */
+     * 
+     * @since 1.1
+     */
+    public ProjectPath subpathWithSize(int subpathSize) {
+        if (subpathSize <= 0) {
+            return new ProjectPath();
+        }
+        else if(subpathSize == path.length) {
+            return this;
+        }
+
+        if (subpathSize > path.length) {
+            throw new ArrayIndexOutOfBoundsException(
+                "Subpath is longer than this path "
+                    + subpathSize
+                    + " components. Path size: "
+                    + path.length);
+        }
+
+        Object[] newPath = new Object[subpathSize];
+        System.arraycopy(path, 0, newPath, 0, subpathSize);
+        return new ProjectPath(newPath);
+    }
+
+    /**
+     * Returns a subpath to the first occurance of an object.
+     * 
+     * @since 1.1
+     */
+    public ProjectPath subpathOfObject(Object object) {
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] == object) {
+                // strip remaining objects
+                return subpathWithSize(i + 1);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the root or starting object of the path.
+     */
     public Object getRoot() {
         if (path.length == 0) {
             return null;
@@ -129,8 +174,8 @@ public class ProjectPath {
     }
 
     /**
-	 * Returns the last object in the path.
-	 */
+     * Returns the last object in the path.
+     */
     public Object getObject() {
         if (path.length == 0) {
             return null;
@@ -141,10 +186,10 @@ public class ProjectPath {
     }
 
     /**
-	 * Returns an object corresponding to the parent node of the node
-	 * represented by the path. This is the object next to last object in the
-	 * path.
-	 */
+     * Returns an object corresponding to the parent node of the node
+     * represented by the path. This is the object next to last object in the
+     * path.
+     */
     public Object getObjectParent() {
         if (path.length == 0) {
             return null;
