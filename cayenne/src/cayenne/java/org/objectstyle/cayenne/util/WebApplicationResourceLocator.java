@@ -57,6 +57,9 @@ package org.objectstyle.cayenne.util;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletContext;
 
@@ -84,24 +87,59 @@ public class WebApplicationResourceLocator extends ResourceLocator {
     }
     
     protected ServletContext context;
+    protected List additionalContextPaths;
 
+    /**
+     * Sets the ServletContext used to locate resources.
+     */
+    public void setServletContext(ServletContext servletContext) {
+        this.context = servletContext;
+    }
+
+    /**
+     * Gets the ServletContext used to locate resources.
+     */
+    public ServletContext getServletContext() {
+        return this.context;
+    }
+
+    /**
+     * Creates new WebApplicationResourceLocator with default lookup policy including
+     * user home directory, current directory and CLASSPATH.
+     */
     public WebApplicationResourceLocator(ServletContext context) {
-        this.context = context;
+        super();
+
+        // store the ServletContext for use in finding resources
+        this.setServletContext(context);
+
+        this.additionalContextPaths = new ArrayList();
+
+        this.addFilesystemPath("/WEB-INF/");
     }
 
     /**
      * Looks for resources relative to /WEB-INF/ directory using ServletContext.
      */
     public URL findResource(String location) {
-        URL url = null;
-        
-        try {
-            url = context.getResource("/WEB-INF/" + location);
-        } catch (MalformedURLException e) {
-            logObj.debug("Malformed url, ignoring.", e);
+        if (!this.additionalContextPaths.isEmpty()) {
+            logObj.debug("searching additional context paths: " + this.additionalContextPaths);
+            Iterator cpi = this.additionalContextPaths.iterator();
+            while (cpi.hasNext()) {
+                String fullName = cpi.next() + "/" + location;
+                logObj.debug("searching for: " + fullName);
+                try {
+                    URL url = this.getServletContext().getResource(fullName);
+                    if (url != null) {
+                        return url;
+                    }
+                } catch (MalformedURLException ex) {
+                    // ignoring
+                    logObj.debug("Malformed URL, ignoring.", ex);
+                }
+            }
         }
-        
-        return (url != null) ? url : super.findResource(location);
+        return super.findResource(location);
     }
 
 }
