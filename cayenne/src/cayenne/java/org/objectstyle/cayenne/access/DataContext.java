@@ -1451,7 +1451,24 @@ public class DataContext implements QueryEngine, Serializable {
                     + "'.");
         }
 
-        if (parameters != null
+        // for SelectQuery we must always run parameter substitution as the query
+        // in question might have unbound values in the qualifier... that's a bit
+        // inefficient... any better ideas to determine whether we can skip parameter
+        // processing?
+
+        // another side effect from NOT substituting parameters is that caching key of the
+        // final query will be that of the original query... thus parameters vs. no
+        // paramete will result in inconsistent caching behavior.
+
+        if (query instanceof SelectQuery) {
+            SelectQuery select = (SelectQuery) query;
+            if (select.getQualifier() != null) {
+                query = select.createQuery(parameters != null
+                        ? parameters
+                        : Collections.EMPTY_MAP);
+            }
+        }
+        else if (parameters != null
                 && !parameters.isEmpty()
                 && query instanceof ParameterizedQuery) {
             query = ((ParameterizedQuery) query).createQuery(parameters);

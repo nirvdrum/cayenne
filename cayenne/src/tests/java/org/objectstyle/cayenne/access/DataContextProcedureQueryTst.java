@@ -66,7 +66,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
-import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -76,6 +75,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextProcedureQueryTst extends CayenneTestCase {
+
     public static final String UPDATE_STORED_PROCEDURE = "cayenne_tst_upd_proc";
     public static final String SELECT_STORED_PROCEDURE = "cayenne_tst_select_proc";
     public static final String OUT_STORED_PROCEDURE = "cayenne_tst_out_proc";
@@ -100,19 +100,19 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
             return;
         }
 
-        // create an artist with painting in the database  
+        // create an artist with painting in the database
         createArtist(1000.0);
 
         ProcedureQuery q = new ProcedureQuery(UPDATE_STORED_PROCEDURE);
         q.addParameter("paintingPrice", new Integer(3000));
         DefaultOperationObserver observer = new DefaultOperationObserver();
 
-        // since stored procedure commits its stuff, we must use an explicit 
+        // since stored procedure commits its stuff, we must use an explicit
         // non-committing transaction
         Transaction.externalTransaction(null).performQueries(
-            ctxt,
-            Collections.singletonList(q),
-            observer);
+                ctxt,
+                Collections.singletonList(q),
+                observer);
 
         // check that price have doubled
         SelectQuery select = new SelectQuery(Artist.class);
@@ -138,16 +138,7 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         ProcedureQuery q = new ProcedureQuery(SELECT_STORED_PROCEDURE);
         q.addParameter("aName", "An Artist");
         q.addParameter("paintingPrice", new Integer(3000));
-        List artists = null;
-
-        // since stored procedure commits its stuff, we must use an explicit 
-        // non-committing transaction
-        SelectObserver observer = new SelectObserver();
-        Transaction.externalTransaction(null).performQueries(
-            ctxt,
-            Collections.singletonList(q),
-            observer);
-        artists = observer.getResults(q);
+        List artists = runProcedureSelect(q);
 
         // check the results
         assertNotNull("Null result from StoredProcedure.", artists);
@@ -174,16 +165,7 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         q.addParameter("aName", "An Artist");
         q.addParameter("paintingPrice", new Integer(3000));
 
-        QueryResult result = new QueryResult();
-
-        // since stored procedure commits its stuff, we must use an explicit 
-        // non-committing transaction
-        Transaction.externalTransaction(null).performQueries(
-            ctxt,
-            Collections.singletonList(q),
-            result);
-
-        List artists = result.getFirstRows(q);
+        List artists = runProcedureSelect(q);
 
         // check the results
         assertNotNull("Null result from StoredProcedure.", artists);
@@ -212,16 +194,7 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         q.addParameter("aName", "An Artist");
         q.addParameter("paintingPrice", new Integer(3000));
 
-        QueryResult result = new QueryResult();
-
-        // since stored procedure commits its stuff, we must use an explicit 
-        // non-committing transaction
-        Transaction.externalTransaction(null).performQueries(
-            ctxt,
-            Collections.singletonList(q),
-            result);
-
-        List artists = result.getFirstRows(q);
+        List artists = runProcedureSelect(q);
 
         // check the results
         assertNotNull("Null result from StoredProcedure.", artists);
@@ -244,28 +217,59 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
         ProcedureQuery q = new ProcedureQuery(OUT_STORED_PROCEDURE);
         q.addParameter("in_param", new Integer(20));
 
-        QueryResult resultHolder = new QueryResult();
-        // since stored procedure commits its stuff, we must use an explicit 
-        // non-committing transaction
-        Transaction.externalTransaction(null).performQueries(
-            ctxt,
-            Collections.singletonList(q),
-            resultHolder);
-
-        // check the results
-        List rows = resultHolder.getFirstRows(q);
-        assertNotNull(rows);
+        List rows = runProcedureSelect(q);
 
         assertEquals(1, rows.size());
         Object row = rows.get(0);
         assertNotNull(row);
         assertTrue(
-            "Unexpected row class: " + row.getClass().getName(),
-            row instanceof Map);
+                "Unexpected row class: " + row.getClass().getName(),
+                row instanceof Map);
         Map outParams = (Map) row;
         Number price = (Number) outParams.get("out_param");
         assertNotNull(price);
         assertEquals(40, price.intValue());
+    }
+
+    public void testSelectdataObject() throws Exception {
+        // Don't run this on MySQL
+        if (!getAccessStackAdapter().supportsStoredProcedures()) {
+            return;
+        }
+
+        // create an artist with painting in the database
+        createArtist(1101.01);
+
+        ProcedureQuery q = new ProcedureQuery(SELECT_STORED_PROCEDURE, Artist.class);
+        q.addParameter("aName", "An Artist");
+
+        List artists = runProcedureSelect(q);
+
+        // check the results
+        assertNotNull("Null result from StoredProcedure.", artists);
+        assertEquals(1, artists.size());
+        Artist a = (Artist) artists.get(0);
+        Painting p = (Painting) a.getPaintingArray().get(0);
+
+        // invalidate painting, it may have been updated in the proc
+        ctxt.invalidateObjects(Collections.singletonList(p));
+        assertEquals(1101.01, p.getEstimatedPrice().doubleValue(), 0.02);
+
+    }
+
+    protected List runProcedureSelect(ProcedureQuery q) throws Exception {
+        // Sybase blows whenever a transaction wraps a SP, so turn of transactions
+        boolean transactionsFlag = ctxt
+                .getParentDataDomain()
+                .isUsingExternalTransactions();
+
+        ctxt.getParentDataDomain().setUsingExternalTransactions(true);
+        try {
+            return ctxt.performQuery(q);
+        }
+        finally {
+            ctxt.getParentDataDomain().setUsingExternalTransactions(transactionsFlag);
+        }
     }
 
     protected void createArtist(double paintingPrice) {
@@ -274,7 +278,8 @@ public class DataContextProcedureQueryTst extends CayenneTestCase {
 
         Painting p = (Painting) ctxt.createAndRegisterNewObject("Painting");
         p.setPaintingTitle("A Painting");
-        p.setEstimatedPrice(new BigDecimal(paintingPrice));
+        // converting double to stringn prevents rounding weirdness...
+        p.setEstimatedPrice(new BigDecimal("" + paintingPrice));
         a.addToPaintingArray(p);
 
         ctxt.commitChanges();

@@ -101,16 +101,25 @@ public class SQLTemplateScriptsTab extends JPanel {
 
     protected JList scripts;
     protected TextAreaAdapter script;
+    protected ListSelectionListener scriptRefreshHandler;
 
     public SQLTemplateScriptsTab(EventController mediator) {
         this.mediator = mediator;
 
         initView();
-        initController();
     }
 
     protected void initView() {
-        // create widgets
+        // create widgets, etc.
+
+        scriptRefreshHandler = new ListSelectionListener() {
+
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    displayScript();
+                }
+            }
+        };
 
         scripts = new JList();
         scripts.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -151,19 +160,6 @@ public class SQLTemplateScriptsTab extends JPanel {
         add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    protected void initController() {
-
-        // scroll to selected row whenever a selection even occurs
-        scripts.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {
-                    displayScript();
-                }
-            }
-        });
-    }
-
     void initFromModel() {
         Query query = mediator.getCurrentQuery();
 
@@ -172,10 +168,13 @@ public class SQLTemplateScriptsTab extends JPanel {
             return;
         }
 
-        // select default script
+        // select default script.. display it bypassing the listener...
+        scripts.removeListSelectionListener(scriptRefreshHandler);
         scripts.setSelectedIndex(0);
-        script.getTextArea().setEnabled(true);
+        displayScript();
+        scripts.addListSelectionListener(scriptRefreshHandler);
 
+        script.getTextArea().setEnabled(true);
         setVisible(true);
     }
 

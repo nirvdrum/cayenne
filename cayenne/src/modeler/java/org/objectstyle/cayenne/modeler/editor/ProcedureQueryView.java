@@ -197,6 +197,9 @@ public class ProcedureQueryView extends JPanel {
         }
         
         Query query = mediator.getCurrentQuery();
+        if(query == null) {
+            return;
+        }
         
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;

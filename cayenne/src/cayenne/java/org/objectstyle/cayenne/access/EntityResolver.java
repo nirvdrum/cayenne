@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.EntityInheritanceTree;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -492,12 +493,19 @@ public class EntityResolver {
      */
     public synchronized ObjEntity lookupObjEntity(Query q) {
 
-        Object root = q.getRoot();
+        // a special case of ProcedureQuery ...
+        // TODO: should really come up with some generic way of doing this...
+        // e.g. all queries may separate the notion of root from the notion
+        // of result type
+
+        Object root = (q instanceof ProcedureQuery) ? ((ProcedureQuery) q)
+                .getResultType() : q.getRoot();
+
         if (root instanceof DbEntity) {
             throw new CayenneRuntimeException(
-                "Cannot safely resolve the ObjEntity for the query "
-                    + q
-                    + " because the root of the query is a DbEntity");
+                    "Cannot safely resolve the ObjEntity for the query "
+                            + q
+                            + " because the root of the query is a DbEntity");
         }
         else if (root instanceof ObjEntity) {
             return (ObjEntity) root;
@@ -511,16 +519,17 @@ public class EntityResolver {
         else if (root instanceof DataObject) {
             return this.lookupObjEntity((DataObject) root);
         }
+
         return null;
     }
 
     /**
-     * Searches for the named query associated with the ObjEntity corresponding
-     * to the Java class specified. Returns such query if found, null otherwise.
+     * Searches for the named query associated with the ObjEntity corresponding to the
+     * Java class specified. Returns such query if found, null otherwise.
      * 
      * @since 1.1 return type is Query instead of SelectQuery
-     * @deprecated Since 1.1 use {@link #lookupQuery(String)}, since queries may
-     * not be associated with Entities.
+     * @deprecated Since 1.1 use {@link #lookupQuery(String)}, since queries may not be
+     *             associated with Entities.
      */
     public Query lookupQuery(Class queryRoot, String queryName) {
         Entity ent = lookupObjEntity(queryRoot);

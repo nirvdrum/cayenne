@@ -5,7 +5,7 @@
 		<procedure-parameter name="out_param" type="INTEGER" direction="out"/>
 	</procedure>
 	<procedure name="cayenne_tst_select_proc">
-		<procedure-parameter name="aName" type="VARCHAR" direction="in"/>
+		<procedure-parameter name="aName" type="VARCHAR" length="254" direction="in"/>
 		<procedure-parameter name="paintingPrice" type="INTEGER" direction="in"/>
 	</procedure>
 	<procedure name="cayenne_tst_upd_proc">
@@ -381,6 +381,22 @@
 	<obj-relationship name="painting" source="PaintingInfo" target="Painting" deleteRule="Nullify" db-relationship-path="painting"/>
 	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" deleteRule="Deny" db-relationship-path="paintingArray"/>
 	<obj-relationship name="toArtist" source="ROPainting" target="Artist" deleteRule="Nullify" db-relationship-path="toArtist"/>
+	<query name="NonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap" selecting="false">
+		<sql><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE)
+VALUES (512, 'No Painting Like This', 12.5)]]></sql>
+	</query>
+	<query name="ObjectQuery" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Painting">
+		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="false"/>
+		<qualifier><![CDATA[toArtist = $artist]]></qualifier>
+		<ordering><![CDATA[paintingTitle]]></ordering>
+	</query>
+	<query name="ParameterizedNonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap" selecting="false">
+		<sql><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE)
+VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
+	</query>
+	<query name="ProcedureQuery" factory="org.objectstyle.cayenne.map.ProcedureQueryBuilder" root="procedure" root-name="cayenne_tst_select_proc">
+		<property name="cayenne.GenericSelectQuery.fetchingDataRows" value="true"/>
+	</query>
 	<query name="QueryWithOrdering" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
 		<ordering descending="true" ignore-case="true"><![CDATA[artistName]]></ordering>
 		<ordering><![CDATA[dateOfBirth]]></ordering>

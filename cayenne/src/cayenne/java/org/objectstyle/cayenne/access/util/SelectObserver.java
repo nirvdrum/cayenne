@@ -180,6 +180,14 @@ public class SelectObserver extends DefaultOperationObserver {
       */
     public List getResultsAsObjects(DataContext dataContext, Query rootQuery) {
         ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
+        
+        // sanity check
+        if (entity == null) {
+            throw new CayenneRuntimeException(
+                    "Can't instantiate DataObjects from resutls. ObjEntity is undefined for query: "
+                            + rootQuery);
+        }
+        
         boolean refresh =
             (rootQuery instanceof GenericSelectQuery)
                 ? ((GenericSelectQuery) rootQuery).isRefreshingObjects()
