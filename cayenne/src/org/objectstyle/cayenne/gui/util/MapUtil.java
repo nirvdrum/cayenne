@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.gui.util;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.*;
@@ -121,15 +122,56 @@ public class MapUtil {
 		entity.addRelationship(rel);
 	}
 
-    /**
-     * Cleans any mappings of ObjEntities, ObjAttributes, 
-     * ObjRelationship to the corresponding Db* objects that not longer
-     * exist.
-     */
-    public static void cleanMappings(DataMap map) {
-//    	Iterator ents = map;
-    }
-    
+	/**
+	 * Cleans any mappings of ObjEntities, ObjAttributes, 
+	 * ObjRelationship to the corresponding Db* objects that not longer
+	 * exist.
+	 */
+	public static void cleanObjMappings(DataMap map) {
+		Iterator ents = map.getObjEntitiesAsList().iterator();
+		while (ents.hasNext()) {
+			ObjEntity ent = (ObjEntity) ents.next();
+			DbEntity dbEnt = ent.getDbEntity();
+
+			// the whole entity mapping is invalid
+			if (dbEnt != null && map.getDbEntity(dbEnt.getName()) != dbEnt) {
+				clearDbMapping(ent);
+				continue;
+			}
+
+			// check indiv. attributes
+			Iterator atts = ent.getAttributeList().iterator();
+			while (atts.hasNext()) {
+				ObjAttribute att = (ObjAttribute) atts.next();
+				DbAttribute dbAtt = att.getDbAttribute();
+				if (dbAtt != null) {
+					if (dbEnt.getAttribute(dbAtt.getName()) != dbAtt) {
+						att.setDbAttribute(null);
+					}
+				}
+			}
+
+			// check indiv. relationships
+			Iterator rels = ent.getRelationshipList().iterator();
+			while (rels.hasNext()) {
+				ObjRelationship rel = (ObjRelationship) rels.next();
+
+				Iterator dbRels =
+					new ArrayList(rel.getDbRelationshipList()).iterator();
+				while (dbRels.hasNext()) {
+					DbRelationship dbRel = (DbRelationship) dbRels.next();
+					Entity srcEnt = dbRel.getSourceEntity();
+					if (srcEnt == null
+						|| map.getDbEntity(srcEnt.getName()) != srcEnt
+						|| srcEnt.getRelationship(dbRel.getName()) != dbRel) {
+						rel.removeDbRelationship(dbRel);
+					}
+				}
+			}
+
+		}
+	}
+
 	/** 
 	 * Clears all the mapping between this obj entity and 
 	 * its current db entity. Clears mapping between 

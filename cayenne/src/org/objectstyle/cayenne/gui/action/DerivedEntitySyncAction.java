@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gui.action;
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.gui.event.EntityEvent;
+import org.objectstyle.cayenne.gui.util.MapUtil;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
@@ -80,11 +81,11 @@ public class DerivedEntitySyncAction extends CayenneAction {
 	public void performAction(ActionEvent e) {
 		DerivedDbEntity ent =
 			(DerivedDbEntity) getMediator().getCurrentDbEntity();
-			
+
 		if (ent != null && ent.getParentEntity() != null) {
 			ent.resetToParentView();
-		    // MapUtil.cleanDeletedRelationship(mediator.getCurrentDataMap(), rel);
-
+			MapUtil.cleanObjMappings(getMediator().getCurrentDataMap());
+			
 			// fire a chain of "remove/add" events for entity
 			// this seems to be the only way to refresh the view
 			getMediator().fireObjEntityEvent(
@@ -93,5 +94,4 @@ public class DerivedEntitySyncAction extends CayenneAction {
 				new EntityEvent(this, ent, EntityEvent.ADD));
 		}
 	}
-
 }

@@ -208,7 +208,7 @@ public class RemoveAction extends CayenneAction {
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbAttribute attrib = mediator.getCurrentDbAttribute();
 		entity.removeAttribute(attrib.getName());
-		// MapUtil.cleanDeletedAttribute(mediator.getCurrentDataMap(), entity, attrib);
+	    MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
 		
 		AttributeEvent e =
 			new AttributeEvent(
@@ -256,7 +256,7 @@ public class RemoveAction extends CayenneAction {
 		DbEntity entity = mediator.getCurrentDbEntity();
 		DbRelationship rel = mediator.getCurrentDbRelationship();
 		entity.removeRelationship(rel.getName());
-		// MapUtil.cleanDeletedRelationship(mediator.getCurrentDataMap(), rel);
+		MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
 		
 		RelationshipEvent e =
 			new RelationshipEvent(
