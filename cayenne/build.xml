@@ -153,7 +153,8 @@
     <!-- fly.                                       -->
     <!-- ========================================== -->
     <target name="api">
-        <ant antfile="build-doc.xml" target="api"/>
+		<ant antfile="build-cayenne.xml" target="api"/>
+		<ant antfile="build-modeler.xml" target="api"/>
     </target>    
 </project>
 

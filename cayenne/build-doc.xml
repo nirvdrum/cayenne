@@ -16,7 +16,7 @@
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site in a local directory -->
     <!-- ============================================= -->
-    <target name="release-site" depends="nositedir,prepare,doc,api">
+    <target name="release-site" depends="nositedir,prepare,doc">
          <mkdir dir="${site.dir}/cayenne"/>         
          
          <!-- copy all but HTML -->
@@ -45,7 +45,6 @@
     <target name="prepare">
         <tstamp/>
         <mkdir dir="${dist}/doc"/>
-        <mkdir dir="${dist}/doc/api"/>
         <mkdir dir="${dist}/doc/dtd"/>
     </target>    
 
@@ -58,9 +57,9 @@
     </target>
     
     <!-- ========================================== -->
-    <!-- Creates a fulldocumentation build.         -->
+    <!-- Creates a full documentation build.         -->
     <!-- ========================================== -->
-    <target name="dist-src" depends="doc,api"/>
+    <target name="dist-src" depends="doc"/>
     
 
     <!-- ========================================== -->
@@ -116,43 +115,6 @@
         </copy>
     </target>
 
-
-    <!-- ========================================== -->
-    <!-- Lazy API documenatation build.             -->
-    <!-- ========================================== -->
-    <target name="api" depends="check-api,build-api"/>
-    
-    <target name="build-api" depends="prepare,doc-img" unless="api.up2date">
-        <javadoc    packagenames="org.objectstyle.*"
-                    sourcepath="src/cayenne/java"
-                    defaultexcludes="yes"
-                    destdir="${dist}/doc/api"
-                    author="true"
-                    use="true"
-                    splitindex="true"
-                    windowtitle="Cayenne API">
-            <!-- Exclude PostgreSQL for the interim release -->
-            <excludepackage name="org.objectstyle.cayenne.dba.postgres"/>
-            
-            <group title="Core Packages" packages="org.objectstyle.*"/>
-            <group title="WebObjects Compatibility Packages" packages="org.objectstyle.cayenne.wocompat*"/>
-			<group title="GUI Packages" packages="org.objectstyle.cayenne.gui*"/>
-            <doctitle><![CDATA[<h2><a href="http://objectstyle.org/cayenne/" target="_top">
-            		<img height="40" border="0" src="../images/cayenne_logo_small.gif"><a> 
-            		Cayenne API Documentation (Version ${project.version})</h2>]]></doctitle>
-            <bottom><![CDATA[<!--SFLOGO--> &nbsp; <i>Copyright &#169; 2001-2002 <a href=
-            "http://objectstyle.org" target="_top">ObjectStyle.org</a> All Rights Reserved.</i>]]>
-            </bottom>
-            <classpath refid="classpath"/>
-        </javadoc>
-    </target>
-    
-    <target name="check-api">
-		<uptodate property="api.up2date" targetfile="${dist}/doc/api/index.html" >
-			<srcfiles dir= "src/cayenne/java" includes="**/*.java"/>
-		</uptodate>
-    </target>
-    
     <target name="nositedir" unless="site.dir">
     	<fail>"site.dir" must be defined.</fail>
     </target>

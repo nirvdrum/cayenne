@@ -19,6 +19,13 @@
     <!-- Build targets.                             -->
     <!-- ========================================== -->
     
+    <target name="api">
+		<ant antfile="build-subproj.xml" target="api">
+			<property name="subproj" value="cayenne"/>
+		</ant>
+	</target>
+	
+	
 	<target name="javacc">
 		<ant antfile="build-subproj.xml" target="javacc">
 			<property name="javacc.grammar" value="${plist.grammar}"/>
@@ -33,7 +40,7 @@
 		</ant>
 	</target>
 	
-	<target name="dist-src" depends="dist-bin">
+	<target name="dist-src" depends="dist-bin,api">
 		<copy todir="${core.dist.src}">
  			<fileset dir="${core.src}"/>		
 			<fileset dir="${core.resources}">
