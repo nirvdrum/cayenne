@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +66,9 @@ import org.objectstyle.art.DecimalPKTest1;
 import org.objectstyle.art.SmallintTest;
 import org.objectstyle.art.TinyintTest;
 import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -82,24 +79,13 @@ public class NumericTypesTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         deleteTestData();
         context = createDataContext();
     }
 
     public void testShortInQualifier() throws Exception {
-        // populate
-        List inserts = new ArrayList(2);
-        inserts.add(
-            new SqlModifyQuery(
-                SmallintTest.class,
-                "insert into SMALLINT_TEST (ID, SMALLINT_COL) values (1, 9999)"));
-        inserts.add(
-            new SqlModifyQuery(
-                SmallintTest.class,
-                "insert into SMALLINT_TEST (ID, SMALLINT_COL) values (2, 3333)"));
-
-        context.performQueries(inserts, new DefaultOperationObserver());
+        createTestData("testShortInQualifier");
 
         // test
         Expression qual = ExpressionFactory.matchExp("smallintCol", new Short("9999"));
@@ -118,18 +104,7 @@ public class NumericTypesTst extends CayenneTestCase {
     }
 
     public void testTinyintInQualifier() throws Exception {
-        // populate
-        List inserts = new ArrayList(2);
-        inserts.add(
-            new SqlModifyQuery(
-                TinyintTest.class,
-                "insert into TINYINT_TEST (ID, TINYINT_COL) values (1, 81)"));
-        inserts.add(
-            new SqlModifyQuery(
-                TinyintTest.class,
-                "insert into TINYINT_TEST (ID, TINYINT_COL) values (2, 50)"));
-
-        context.performQueries(inserts, new DefaultOperationObserver());
+        createTestData("testTinyintInQualifier");
 
         // test
         Expression qual = ExpressionFactory.matchExp("tinyintCol", new Byte((byte) 81));

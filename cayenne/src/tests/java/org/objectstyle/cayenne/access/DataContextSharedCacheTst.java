@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
@@ -66,12 +68,11 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.Fault;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.unit.MultiContextTestCase;
 import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
@@ -114,17 +115,17 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         DataContext altContext = context.getParentDataDomain().createDataContext(true);
 
         // update artist using raw SQL
-        SqlModifyQuery update =
-            new SqlModifyQuery(
+        SQLTemplate query =
+            getSQLTemplateCustomizer().createSQLTemplate(
                 Artist.class,
-                "UPDATE ARTIST SET ARTIST_NAME = '"
-                    + newName
-                    + "' WHERE ARTIST_NAME = '"
-                    + originalName
-                    + "'");
-        context.performQueries(
-            Collections.singletonList(update),
-            new DefaultOperationObserver());
+                "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)",
+                false);
+
+        Map map = new HashMap(3);
+        map.put("newName", newName);
+        map.put("oldName", originalName);
+        query.setParameters(map);
+        context.performModifyQuery(query);
 
         // fetch updated artist into the new context, and see if the original
         // one gets updated
@@ -593,17 +594,16 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertEquals(originalName, oldSnapshot.get("ARTIST_NAME"));
 
         // update artist using raw SQL
-        SqlModifyQuery update =
-            new SqlModifyQuery(
+        SQLTemplate update =
+            getSQLTemplateCustomizer().createSQLTemplate(
                 Artist.class,
-                "UPDATE ARTIST SET ARTIST_NAME = '"
-                    + newName
-                    + "' WHERE ARTIST_NAME = '"
-                    + originalName
-                    + "'");
-        context.performQueries(
-            Collections.singletonList(update),
-            new DefaultOperationObserver());
+                "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)",
+                false);
+        Map map = new HashMap(3);
+        map.put("newName", newName);
+        map.put("oldName", originalName);
+        update.setParameters(map);
+        context.performModifyQuery(update);
 
         // fetch updated artist without refreshing
         Expression qual = ExpressionFactory.matchExp("artistName", newName);
@@ -642,17 +642,16 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertEquals(originalName, oldSnapshot.get("ARTIST_NAME"));
 
         // update artist using raw SQL
-        SqlModifyQuery update =
-            new SqlModifyQuery(
+        SQLTemplate update =
+            getSQLTemplateCustomizer().createSQLTemplate(
                 Artist.class,
-                "UPDATE ARTIST SET ARTIST_NAME = '"
-                    + newName
-                    + "' WHERE ARTIST_NAME = '"
-                    + originalName
-                    + "'");
-        context.performQueries(
-            Collections.singletonList(update),
-            new DefaultOperationObserver());
+                "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)",
+                false);
+        Map map = new HashMap(3);
+        map.put("newName", newName);
+        map.put("oldName", originalName);
+        update.setParameters(map);
+        context.performModifyQuery(update);
 
         // fetch updated artist without refreshing
         Expression qual = ExpressionFactory.matchExp("artistName", newName);
@@ -756,17 +755,14 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
                 artist.getObjectId()));
 
         // now replace the row in the database
-        SqlModifyQuery update =
-            new SqlModifyQuery(
-                Artist.class,
-                "UPDATE ARTIST SET ARTIST_NAME = '"
-                    + backendName
-                    + "' WHERE ARTIST_NAME = '"
-                    + originalName
-                    + "'");
-        context.performQueries(
-            Collections.singletonList(update),
-            new DefaultOperationObserver());
+        SQLTemplate update = new SQLTemplate(Artist.class, false);
+        update.setDefaultTemplate(
+            "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)");
+        Map map = new HashMap(3);
+        map.put("newName", backendName);
+        map.put("oldName", originalName);
+        update.setParameters(map);
+        context.performModifyQuery(update);
 
         context.commitChanges();
 

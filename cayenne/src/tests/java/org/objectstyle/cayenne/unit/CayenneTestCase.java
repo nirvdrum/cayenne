@@ -124,7 +124,12 @@ public abstract class CayenneTestCase extends BasicTestCase {
     }
 
     protected SQLTemplateCustomizer getSQLTemplateCustomizer() {
-        return CayenneTestResources.getResources().getSQLTemplateCustomizer();
+        SQLTemplateCustomizer customizer =
+            CayenneTestResources.getResources().getSQLTemplateCustomizer();
+
+        // make sure adapter is correct
+        customizer.setAdapter(getAccessStackAdapter().getAdapter());
+        return customizer;
     }
 
     /**

@@ -60,7 +60,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 
@@ -117,7 +117,7 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         Collection queries = dataSetFactory.getDataSet(testCase, testName);
 
         if (queries != null && !queries.isEmpty()) {
-            getDataDomain().performQueries(queries, new DefaultOperationObserver());
+            getDataDomain().performQueries(queries, new QueryResult());
         }
     }
 

@@ -76,6 +76,8 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
 
     public void setUp() throws Exception {
         super.setUp();
+        deleteTestData();
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         context = createDataContext();
     }
 
@@ -92,7 +94,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testOr() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         Expression parsed =
             Expression.fromString("artistName='artist1' or artistName='artist3'");
@@ -105,8 +106,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testAnd() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
-
         Expression parsed =
             Expression.fromString("artistName='artist1' and artistName='artist1'");
         assertEquals(1, execute(Artist.class, parsed).size());
@@ -116,7 +115,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testNot() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         Expression parsed1 = Expression.fromString("not artistName='artist3'");
         assertEquals(
@@ -130,7 +128,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testEqual() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         Expression parsed1 = Expression.fromString("artistName='artist3'");
         assertEquals(1, execute(Artist.class, parsed1).size());
@@ -143,7 +140,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testNotEqual() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         Expression parsed1 = Expression.fromString("artistName!='artist3'");
         assertEquals(
@@ -185,20 +181,17 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testLike() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 = Expression.fromString("artistName like 'artist%2'");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testLikeIgnoreCase() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName likeIgnoreCase 'artist%2'");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotLike() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 = Expression.fromString("artistName not like 'artist%2'");
         assertEquals(
             DataContextTestBase.artistCount - 3,
@@ -206,7 +199,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testNotLikeIgnoreCase() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName not likeIgnoreCase 'artist%2'");
         assertEquals(
@@ -215,14 +207,12 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testIn() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName in ('artist1', 'artist3', 'artist19')");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotIn() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 =
             Expression.fromString("artistName not in ('artist1', 'artist3', 'artist19')");
         assertEquals(
@@ -247,7 +237,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testParameter() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Map parameters = new HashMap();
         parameters.put("artistName", "artist5");
         Expression parsed1 = Expression.fromString("artistName=$artistName");
@@ -256,7 +245,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testDbExpression() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
         Expression parsed1 = Expression.fromString("db:ARTIST_NAME='artist3'");
         assertEquals(1, execute(Artist.class, parsed1).size());
     }
@@ -268,7 +256,6 @@ public class ParsedExpQualifierCompatTst extends CayenneTestCase {
     }
 
     public void testNullExpression() throws Exception {
-        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
         Expression parsed1 = Expression.fromString("artistName!=null");
         assertEquals(

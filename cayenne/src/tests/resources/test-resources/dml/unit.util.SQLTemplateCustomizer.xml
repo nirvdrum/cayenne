@@ -10,6 +10,7 @@
 			<map>
 				<entry key="SELECT * FROM ARTIST ORDER BY ARTIST_ID"><ref bean="Q1"/></entry>
 				<entry key="SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)"><ref bean="Q2"/></entry>
+				<entry key="UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)"><ref bean="Q3"/></entry>
 			</map>
 		</constructor-arg>
 	</bean>
@@ -23,6 +24,9 @@
 				<entry key="org.objectstyle.cayenne.dba.postgres.PostgresAdapter">
 					<value>SELECT #result('ARTIST_ID'), RTRIM(#result('ARTIST_NAME')), #result('DATE_OF_BIRTH') FROM ARTIST ORDER BY ARTIST_ID</value>
 				</entry>
+				<entry key="org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter">
+					<value>SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH') FROM ARTIST ORDER BY ARTIST_ID</value>
+				</entry>
 			</map>
 		</constructor-arg>
 	</bean>
@@ -31,6 +35,18 @@
 			<map>
 				<entry key="org.objectstyle.cayenne.dba.postgres.PostgresAdapter">
 					<value>SELECT #result('ARTIST_ID'), RTRIM(#result('ARTIST_NAME')), #result('DATE_OF_BIRTH') FROM ARTIST WHERE ARTIST_ID = #bind($id)</value>
+				</entry>
+				<entry key="org.objectstyle.cayenne.dba.openbase.OpenBaseAdapter">
+					<value>SELECT #result('ARTIST_ID'), #result('ARTIST_NAME'), #result('DATE_OF_BIRTH') FROM ARTIST WHERE ARTIST_ID = #bind($id)</value>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+	<bean id="Q3" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<entry key="org.objectstyle.cayenne.dba.oracle.OracleAdapter">
+					<value>UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE RTRIM(ARTIST_NAME) = #bind($oldName)</value>
 				</entry>
 			</map>
 		</constructor-arg>

@@ -60,6 +60,9 @@ import java.sql.PreparedStatement;
 
 import org.objectstyle.art.Artist;
 
+/**
+ * @deprecated Since 1.1 corresponding class is deprecated.
+ */
 public class SqlModifyQueryInContextTst extends SelectQueryBase {
     private static final int _artistCount = 2;
 

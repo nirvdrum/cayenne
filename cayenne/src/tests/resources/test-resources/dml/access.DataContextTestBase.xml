@@ -308,7 +308,7 @@
 	<bean id="P15" class="org.objectstyle.cayenne.query.SqlModifyQuery">
 		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.Painting</value></constructor-arg>
 		<constructor-arg><value>
-		INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (33015, 'P_artist10', 33015, 15000)
+		INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) VALUES (33015, 'P_artist15', 33015, 15000)
 		</value></constructor-arg>
 	</bean>
 	<bean id="P16" class="org.objectstyle.cayenne.query.SqlModifyQuery">

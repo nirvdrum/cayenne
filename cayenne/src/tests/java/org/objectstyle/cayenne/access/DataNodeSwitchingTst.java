@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -89,7 +88,7 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         node = new NodeSwitchingMockup();
         node.setDataSource(getNode().getDataSource());
     }
@@ -98,8 +97,13 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
         assertQuery(new SelectQuery(Artist.class), "runSelect");
     }
 
+    /**
+     * @deprecated Since 1.1 SqlSelectQuery is deprecated, so is the test.
+     */
     public void testSQLSelectQuery() throws Exception {
-        assertQuery(new SqlSelectQuery(Artist.class), "runSelect");
+        assertQuery(
+            new org.objectstyle.cayenne.query.SqlSelectQuery(Artist.class),
+            "runSelect");
     }
 
     public void testUpdateQuery() throws Exception {

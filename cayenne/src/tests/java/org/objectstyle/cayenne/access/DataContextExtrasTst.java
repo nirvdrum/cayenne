@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /** 
@@ -188,8 +188,8 @@ public class DataContextExtrasTst extends CayenneTestCase {
      * is thrown in SELECT query.
      */
     public void testSelectException() throws Exception {
-        SqlSelectQuery q =
-            new SqlSelectQuery("Artist", "SELECT * FROM NON_EXISTENT_TABLE");
+        SQLTemplate q = new SQLTemplate(Artist.class, true);
+        q.setDefaultTemplate("SELECT * FROM NON_EXISTENT_TABLE");
 
         // disable logging for thrown exceptions
         Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);

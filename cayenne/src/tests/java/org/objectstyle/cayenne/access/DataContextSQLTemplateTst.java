@@ -80,7 +80,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
+        getSQLTemplateCustomizer().updateSQLTemplate(query);
 
         query.setFetchingDataRows(true);
 
@@ -98,7 +98,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
+        getSQLTemplateCustomizer().updateSQLTemplate(query);
 
         query.setFetchingDataRows(false);
 
@@ -120,7 +120,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
+        getSQLTemplateCustomizer().updateSQLTemplate(query);
 
         query.setFetchLimit(fetchLimit);
 
@@ -139,7 +139,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
+        getSQLTemplateCustomizer().updateSQLTemplate(query);
 
         query.setPageSize(pageSize);
 
@@ -169,7 +169,7 @@ public class DataContextSQLTemplateTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Artist.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(query, getNode().getAdapter());
+        getSQLTemplateCustomizer().updateSQLTemplate(query);
 
         ResultIterator it = context.performIteratedQuery(query);
 

@@ -55,16 +55,13 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.art.oneway.Painting;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.unit.OneWayMappingTestCase;
 
 /**
@@ -79,36 +76,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
     }
 
     public void testReadList() throws Exception {
-        // save bypassing DataContext
-        List queries = new ArrayList(3);
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                    + "VALUES (201, 'artist with one painting', null)"));
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                    + "VALUES (202, 'artist XXX', null)"));
-
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO PAINTING (ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID, "
-                    + "PAINTING_ID, PAINTING_TITLE) VALUES (201, null, null, 201, 'p1')"));
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO PAINTING (ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID, "
-                    + "PAINTING_ID, PAINTING_TITLE) VALUES (201, null, null, 202, 'p2')"));
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO PAINTING (ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID, "
-                    + "PAINTING_ID, PAINTING_TITLE) VALUES (202, null, null, 203, 'p2')"));
-
-        ctxt.performQueries(queries, new DefaultOperationObserver());
+        createTestData("testReadList");
 
         Artist a2 = fetchArtist();
         assertNotNull(a2);

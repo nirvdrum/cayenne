@@ -62,6 +62,9 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 
+/**
+ * @deprecated Since 1.1 corresponding class is deprecated.
+ */
 public class SqlSelectQueryInContextTst extends SelectQueryBase {
 	private static final int _artistCount = 10;
 

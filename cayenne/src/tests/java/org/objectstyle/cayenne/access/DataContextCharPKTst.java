@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.art.CharPkTest;
-import org.objectstyle.cayenne.query.SqlSelectQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -81,9 +81,11 @@ public class DataContextCharPKTst extends CayenneTestCase {
         object.setPkCol("PK1");
         ctxt.commitChanges();
 
-        List rows =
-            ctxt.performQuery(
-                new SqlSelectQuery(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST"));
+        SQLTemplate q = new SQLTemplate(CharPkTest.class, true);
+        q.setDefaultTemplate("SELECT * FROM CHAR_PK_TEST");
+        q.setFetchingDataRows(true);
+
+        List rows = ctxt.performQuery(q);
         assertNotNull(rows);
         assertEquals(1, rows.size());
         Map row = (Map) rows.get(0);
@@ -110,9 +112,11 @@ public class DataContextCharPKTst extends CayenneTestCase {
         ctxt.deleteObject(object);
         ctxt.commitChanges();
 
-        List rows =
-            ctxt.performQuery(
-                new SqlSelectQuery(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST"));
+        SQLTemplate q = new SQLTemplate(CharPkTest.class, true);
+        q.setDefaultTemplate("SELECT * FROM CHAR_PK_TEST");
+        q.setFetchingDataRows(true);
+
+        List rows = ctxt.performQuery(q);
         assertNotNull(rows);
         assertEquals(0, rows.size());
     }
@@ -126,9 +130,11 @@ public class DataContextCharPKTst extends CayenneTestCase {
         object.setOtherCol("UPDATED");
         ctxt.commitChanges();
 
-        List rows =
-            ctxt.performQuery(
-                new SqlSelectQuery(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST"));
+        SQLTemplate q = new SQLTemplate(CharPkTest.class, true);
+        q.setDefaultTemplate("SELECT * FROM CHAR_PK_TEST");
+        q.setFetchingDataRows(true);
+
+        List rows = ctxt.performQuery(q);
         assertNotNull(rows);
         assertEquals(1, rows.size());
         Map row = (Map) rows.get(0);

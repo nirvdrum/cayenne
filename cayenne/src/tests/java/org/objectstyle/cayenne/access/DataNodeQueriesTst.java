@@ -147,9 +147,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
 
         SQLTemplate query = new SQLTemplate(Object.class, true);
         query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(
-            query,
-            getAccessStackAdapter().getAdapter());
+        getSQLTemplateCustomizer().updateSQLTemplate(query);
 
         MockupOperationObserver observer = new MockupOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);

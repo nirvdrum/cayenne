@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,21 +62,36 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataRowUtilsTst extends DataContextTestBase {
+public class DataRowUtilsTst extends CayenneTestCase {
+    protected DataContext context;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        deleteTestData();
+        context = createDataContext();
+    }
+
     public void testMerge() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         String n1 = "changed";
         String n2 = "changed again";
 
-        Artist a1 = fetchArtist("artist1", false);
+        SelectQuery artistQ =
+            new SelectQuery(
+                Artist.class,
+                Expression.fromString("artistName = 'artist1'"));
+        Artist a1 = (Artist) context.performQuery(artistQ).get(0);
         a1.setArtistName(n1);
 
         Map s2 = new HashMap();
@@ -94,13 +108,29 @@ public class DataRowUtilsTst extends DataContextTestBase {
     }
 
     public void testIsToOneTargetModified() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
         ObjEntity paintingEntity =
             context.getEntityResolver().lookupObjEntity(Painting.class);
         ObjRelationship toArtist =
             (ObjRelationship) paintingEntity.getRelationship("toArtist");
 
-        Painting painting = insertPaintingInContext("p");
-        Artist artist = fetchArtist("artist1", false);
+        SelectQuery artistQ =
+            new SelectQuery(
+                Artist.class,
+                Expression.fromString("artistName = 'artist2'"));
+        Artist anotherArtist = (Artist) context.performQuery(artistQ).get(0);
+        Painting painting = (Painting) context.createAndRegisterNewObject(Painting.class);
+        painting.setPaintingTitle("PX");
+        painting.setToArtist(anotherArtist);
+
+        context.commitChanges();
+
+        artistQ =
+            new SelectQuery(
+                Artist.class,
+                Expression.fromString("artistName = 'artist1'"));
+        Artist artist = (Artist) context.performQuery(artistQ).get(0);
         assertNotSame(artist, painting.getToArtist());
 
         Map map = new HashMap();
@@ -111,26 +141,11 @@ public class DataRowUtilsTst extends DataContextTestBase {
         assertFalse(DataRowUtils.isToOneTargetModified(toArtist, painting, map));
 
         painting.setToArtist(artist);
-
         assertTrue(DataRowUtils.isToOneTargetModified(toArtist, painting, map));
     }
 
     public void testIsToOneTargetModifiedWithNewTarget() throws Exception {
-        // save bypassing DataContext
-        List queries = new ArrayList(3);
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                    + "VALUES (2000, 'artist with one painting', null)"));
-
-        queries.add(
-            new SqlModifyQuery(
-                Artist.class,
-                "INSERT INTO PAINTING (ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID, "
-                    + "PAINTING_ID, PAINTING_TITLE) VALUES (2000, null, null, 3000, 'p1')"));
-
-        context.performQueries(queries, new DefaultOperationObserver());
+        createTestData("testIsToOneTargetModifiedWithNewTarget");
 
         // add NEW gallery to painting
         List paintings = context.performQuery(new SelectQuery(Painting.class));

@@ -185,6 +185,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
 
         MockupOperationObserver observer = new MockupOperationObserver();
         SelectQuery query = new SelectQuery(Artist.class);
+        query.addOrdering("db:ARTIST_ID", true);
         getDomain().performQueries(Collections.singletonList(query), observer);
 
         List data = observer.rowsForQuery(query);

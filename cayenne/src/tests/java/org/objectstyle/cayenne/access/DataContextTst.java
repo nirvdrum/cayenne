@@ -84,7 +84,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
 
 public class DataContextTst extends DataContextTestBase {
@@ -480,14 +479,18 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(artistCount, objects.size());
     }
 
+    /**
+     * @deprecated Since 1.1 SqlModifyQuery is deprecated, so is this test.
+     * @throws Exception
+     */
     public void testPerformModifyQuery() throws Exception {
         SelectQuery select =
             new SelectQuery(Painting.class, Expression.fromString("db:PAINTING_ID = 1"));
 
         assertEquals(0, context.performQuery(select).size());
 
-        SqlModifyQuery query =
-            new SqlModifyQuery(
+        org.objectstyle.cayenne.query.SqlModifyQuery query =
+            new org.objectstyle.cayenne.query.SqlModifyQuery(
                 Painting.class,
                 "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
                     + "VALUES (1, 'PX', 33002, 1)");

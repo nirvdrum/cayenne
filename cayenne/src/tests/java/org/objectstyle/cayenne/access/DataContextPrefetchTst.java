@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -65,10 +64,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.CharFkTest;
-import org.objectstyle.art.CharPkTest;
-import org.objectstyle.art.CompoundFkTest;
-import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
@@ -76,7 +71,6 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -85,7 +79,6 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 /**
  * @author Andrei Adamchik
@@ -219,23 +212,19 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         List artists = context.performQuery(q);
         assertEquals(artistCount, artists.size());
 
-        Artist a1 = (Artist) artists.get(0);
-        ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
-        assertNotNull(toMany);
-        assertFalse(toMany.needsFetch());
-        assertEquals(1, toMany.size());
+        for (int i = 0; i < artistCount; i++) {
+            Artist a = (Artist) artists.get(i);
+            ToManyList toMany = (ToManyList) a.readPropertyDirectly("paintingArray");
+            assertNotNull(toMany);
+            assertFalse(toMany.needsFetch());
+            assertEquals(1, toMany.size());
 
-        Painting p1 = (Painting) toMany.get(0);
-        assertEquals("P_" + a1.getArtistName(), p1.getPaintingTitle());
-
-        Artist a2 = (Artist) artists.get(1);
-        ToManyList toMany2 = (ToManyList) a2.readPropertyDirectly("paintingArray");
-        assertNotNull(toMany2);
-        assertFalse(toMany2.needsFetch());
-        assertEquals(1, toMany2.size());
-
-        Painting p2 = (Painting) toMany2.get(0);
-        assertEquals("P_" + a2.getArtistName(), p2.getPaintingTitle());
+            Painting p = (Painting) toMany.get(0);
+            assertEquals(
+                "Invalid prefetched painting:" + p,
+                "P_" + a.getArtistName(),
+                p.getPaintingTitle());
+        }
     }
 
     /**
@@ -265,60 +254,6 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         ArtistExhibit artistExhibit = (ArtistExhibit) toMany.get(0);
         assertEquals(PersistenceState.COMMITTED, artistExhibit.getPersistenceState());
         assertSame(a1, artistExhibit.getToArtist());
-    }
-
-    public void testPrefetchToManyOnCharKey() throws Exception {
-
-        List queries = new ArrayList(6);
-        queries.add(
-            new SqlModifyQuery(
-                CharPkTest.class,
-                "insert into CHAR_PK_TEST (PK_COL, OTHER_COL) values ('k1', 'n1')"));
-        queries.add(
-            new SqlModifyQuery(
-                CharPkTest.class,
-                "insert into CHAR_PK_TEST (PK_COL, OTHER_COL) values ('k2', 'n2')"));
-        queries.add(
-            new SqlModifyQuery(
-                CharFkTest.class,
-                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (1, 'k1', 'fn1')"));
-        queries.add(
-            new SqlModifyQuery(
-                CharFkTest.class,
-                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (2, 'k1', 'fn2')"));
-        queries.add(
-            new SqlModifyQuery(
-                CharFkTest.class,
-                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (3, 'k2', 'fn3')"));
-        queries.add(
-            new SqlModifyQuery(
-                CharFkTest.class,
-                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (4, 'k2', 'fn4')"));
-        queries.add(
-            new SqlModifyQuery(
-                CharFkTest.class,
-                "insert into CHAR_FK_TEST (PK, FK_COL, NAME) values (5, 'k1', 'fn5')"));
-
-        context.performQueries(queries, new DefaultOperationObserver());
-
-        SelectQuery q = new SelectQuery(CharPkTest.class);
-        q.addPrefetch("charFKs");
-        q.addOrdering(CharPkTest.OTHER_COL_PROPERTY, Ordering.ASC);
-
-        List pks = context.performQuery(q);
-        assertEquals(2, pks.size());
-
-        CharPkTest pk1 = (CharPkTest) pks.get(0);
-        logObj.warn("PK1: " + pk1);
-        assertEquals("n1", pk1.getOtherCol());
-        ToManyList toMany = (ToManyList) pk1.readPropertyDirectly("charFKs");
-        assertNotNull(toMany);
-        assertFalse(toMany.needsFetch());
-        assertEquals(3, toMany.size());
-
-        CharFkTest fk1 = (CharFkTest) toMany.get(0);
-        assertEquals(PersistenceState.COMMITTED, fk1.getPersistenceState());
-        assertSame(pk1, fk1.getToCharPK());
     }
 
     /**
@@ -545,100 +480,4 @@ public class DataContextPrefetchTst extends DataContextTestBase {
          */
 
     }
-
-    /**
-     * Tests to-one prefetching over relationships with compound keys.
-     */
-    public void testPrefetch10() throws Exception {
-        populateCompoundKeyEntities();
-
-        Expression e = ExpressionFactory.matchExp("name", "CFK2");
-        SelectQuery q = new SelectQuery(CompoundFkTest.class, e);
-        q.addPrefetch("toCompoundPk");
-
-        List objects = context.performQuery(q);
-        assertEquals(1, objects.size());
-        CayenneDataObject fk1 = (CayenneDataObject) objects.get(0);
-
-        // resolving the fault must not result in extra queries, since
-        // artist must have been prefetched
-        DataContextDelegate delegate = new DefaultDataContextDelegate() {
-            public GenericSelectQuery willPerformSelect(
-                DataContext context,
-                GenericSelectQuery query) {
-                throw new CayenneRuntimeException(
-                    "No query expected.. attempt to run: " + query);
-            }
-        };
-
-        fk1.getDataContext().setDelegate(delegate);
-
-        Object toOnePrefetch = fk1.readNestedProperty("toCompoundPk");
-        assertNotNull(toOnePrefetch);
-        assertTrue(
-            "Expected DataObject, got: " + toOnePrefetch.getClass().getName(),
-            toOnePrefetch instanceof DataObject);
-
-        DataObject pk1 = (DataObject) toOnePrefetch;
-        assertEquals(PersistenceState.COMMITTED, pk1.getPersistenceState());
-        assertEquals("CPK2", pk1.readPropertyDirectly("name"));
-    }
-
-    /**
-     * Tests to-many prefetching over relationships with compound keys.
-     */
-    public void testPrefetch11() throws Exception {
-        populateCompoundKeyEntities();
-
-        Expression e = ExpressionFactory.matchExp("name", "CPK2");
-        SelectQuery q = new SelectQuery(CompoundPkTest.class, e);
-        q.addPrefetch("compoundFkArray");
-
-        List pks = context.performQuery(q);
-        assertEquals(1, pks.size());
-        CayenneDataObject pk1 = (CayenneDataObject) pks.get(0);
-
-        ToManyList toMany = (ToManyList) pk1.readPropertyDirectly("compoundFkArray");
-        assertNotNull(toMany);
-        assertFalse(toMany.needsFetch());
-        assertEquals(2, toMany.size());
-
-        CayenneDataObject fk1 = (CayenneDataObject) toMany.get(0);
-        assertEquals(PersistenceState.COMMITTED, fk1.getPersistenceState());
-
-        CayenneDataObject fk2 = (CayenneDataObject) toMany.get(1);
-        assertEquals(PersistenceState.COMMITTED, fk2.getPersistenceState());
-    }
-
-    protected void populateCompoundKeyEntities() {
-        List queries = new ArrayList(6);
-        queries.add(
-            new SqlModifyQuery(
-                CompoundPkTest.class,
-                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values ('101', '201', 'CPK1')"));
-        queries.add(
-            new SqlModifyQuery(
-                CompoundPkTest.class,
-                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values ('102', '202', 'CPK2')"));
-        queries.add(
-            new SqlModifyQuery(
-                CompoundPkTest.class,
-                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values ('103', '203', 'CPK3')"));
-
-        queries.add(
-            new SqlModifyQuery(
-                CompoundPkTest.class,
-                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (301, '102', '202', 'CFK1')"));
-        queries.add(
-            new SqlModifyQuery(
-                CompoundPkTest.class,
-                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (302, '102', '202', 'CFK2')"));
-        queries.add(
-            new SqlModifyQuery(
-                CompoundPkTest.class,
-                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (303, '101', '201', 'CFK3')"));
-
-        context.performQueries(queries, new DefaultOperationObserver());
-    }
-
 }

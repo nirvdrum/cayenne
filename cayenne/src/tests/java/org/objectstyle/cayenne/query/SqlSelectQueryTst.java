@@ -58,6 +58,9 @@ package org.objectstyle.cayenne.query;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
+/**
+ * @deprecated Since 1.1 corresponding class is deprecated.
+ */
 public class SqlSelectQueryTst extends CayenneTestCase {
 
 	public void testFetchLimit1() throws Exception {
