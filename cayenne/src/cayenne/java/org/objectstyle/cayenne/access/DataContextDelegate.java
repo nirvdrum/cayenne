@@ -56,15 +56,16 @@
 
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
  * Defines API for a DataContext "delegate" - an object that is temporarily passed control 
  * by DataContext at some critical points in the normal flow of execution. A delegate thus can 
  * modify the flow, abort an operation, modify the objects participating in an operation, 
- * or perform any other tasks it deems necessary.
+ * or perform any other tasks it deems necessary. DataContextDelegate is shared by DataContext 
+ * and its ObjectStore.
  * 
  * @see org.objectstyle.cayenne.access.DataContext
  * 
@@ -85,17 +86,26 @@ public interface DataContextDelegate {
 	public GenericSelectQuery willPerformSelect(DataContext context, GenericSelectQuery query);
 
 	/**
-	 * This method is invoked by DataObject's DataContext during commit, when it detects
-	 * that a snapshot for object was modified in the underlying DataRowStore. It is invoked
-	 * for MODIFIED and DELETED objects about to be committed. Delegate can perform merging
-	 * of the snapshot, or abort commit by throwing an exception.
+	 * Invoked by parent DataContext whenever a change is detected to the object snapshot.
 	 * 
 	 * <p>Note that this delegate method may not be invoked even if the database row
 	 * has changed compared to the snapshot an update is built against. The reasons for 
-	 * that are the latency of distributed notifications and the fact that DataContext commit 
-	 * operations are not synchronized on DataRowStore.
+	 * that are the latency of distributed notifications and the fact that sometiomes DataContext commit 
+	 * operations may not be synchronized on DataRowStore.
 	 * </p>
 	 */
-    public void snapshotChangedInDataRowStore(DataObject object, DataRow snapshotInStore);
+    public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore);
+    
+    /**
+     * Invoked by ObjectStore whenever it is detected that a database
+     * row was deleted for object. If a delegate returns <code>true</code>,
+     * ObjectStore will change MODIFIED objects to NEW (resulting in recreating the 
+     * deleted record on next commit) and all other objects - to TRANSIENT. 
+     * To block this behavior, delegate should return <code>false</code>, and
+     * possibly do its own processing.
+     * 
+     * @param object
+     */
+    public boolean shouldProcessDelete(DataObject object);
 }
 
