@@ -1,8 +1,8 @@
 <document>
 <title>DataPort</title>
-<toc name="toc-examples" chapter="2. DataPort"/>
+<toc name="toc-examples" chapter="3. DataPort"/>
 <body>
-    <section name="2. DataPort">
+    <section name="3. DataPort">
             
 	<p>This example demonstrates how Cayenne can be used to port relational data from one 
 	database to another. It shows the operation of the few internal parts of 

@@ -1,8 +1,8 @@
 <document>
 <title>EJB Facade Example</title>
-<toc name="toc-examples" chapter="3. EJB Facade"/>
+<toc name="toc-examples" chapter="4. EJB Facade"/>
 <body>
-    <section name="3. EJB Facade">
+    <section name="4. EJB Facade">
             
 	<p>Demonstrates deploying Cayenne on JBoss server and accessing it via a SessionBean facade.
 	Example project structure is based on JBoss project template.</p>
@@ -18,17 +18,17 @@
 	 prevent Cayenne from attempting explicit commit/rollback when container-managed transactions are in effect. 
 	</panel>
 	
-	<subsection name="1.1 Preparing the Environment">
+	<subsection name="4.1 Preparing the Environment">
 	<p>The example requires running JBoss server, version 3.0 or newer. Building the example
 	requires Ant and XDoclet 1.1.2.</p>
 	</subsection>
 	
-	<subsection name="1.2 Building Example">
+	<subsection name="44.2 Building Example">
 	<p>After installing XDoclet and starting JBoss, follow generic instructions for building examples.
 	Build script will deploy all application components to the JBoss server.</p>
 	</subsection>
 	
-	<subsection name="1.3 Running Example">
+	<subsection name="4.3 Running Example">
 	<p>Web client can be accessed on the JBoss server via a URL like 
 	<a href="http://localhost:8080/cayenne-ejbfacade/" target="_new">http://localhost:8080/cayenne-ejbfacade/</a>.
 	There is also a simple command-line client that can be started from [example-folder]/build/bin .</p>

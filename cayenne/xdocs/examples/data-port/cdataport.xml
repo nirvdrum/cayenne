@@ -1,28 +1,30 @@
 <document>
 <title>CDataPort task</title>
-<toc name="toc-examples" chapter="2. DataPort"/>
+<toc name="toc-examples" chapter="3. DataPort"/>
 <body>
-    <section name="2. DataPort">
-    <subsection name="2.2 CDataPort Ant Task">
+    <section name="3. DataPort">
+    <subsection name="3.2 CDataPort Ant Task">
 			<h3>Description</h3>
 			
 			<p>Sometimes it is necessary to recreate a database, copying data
             from another existing database. For instance, recreating development database 
             instance from production data, etc. While most RDBMS provide data import/export
             tools, they normally require advanced DBA skills to use and are most often not
-            portable across database engines. Cayenne will provide a lightweight ant task to do data porting 
-            between the databases with identical schema, using DataMap information.
+            portable across database engines. Cayenne will provide a lightweight ant task to 
+			do data porting between the databases with identical schema, using DataMap information.
             </p>
             
-			<p><code>CDataPort</code> is an Ant task uses Cayenne project with at least one 
-			DataMap and two DataNodes to port data from source DataNode to a destination DataNode. 
-			Only DataMaps linked to the source DataNode will be considered for porting.
+			<p><code>CDataPort</code> is an Ant task that takes a Cayenne project (cayenne.xml) 
+			with at least one DataMap and two DataNodes and ports data from source DataNode to a 
+			destination DataNode. All DataMaps linked to either the source or the target DataNode will 
+			be considered for porting.
 			</p>
 			
 			<h3>Installation</h3>
 			
 			<p>Copy cayenne.jar and data-port.jar to $ANT_HOME/lib, or refrence both in the build script
-			explicitly.</p>
+			classpath for dataport "taskdef". As CDataPort doesn't rely on ObjEntities and works at the DB level, 
+			it doesn't need to access generated DataObject classes.</p>
 
 			<h3>Parameters</h3>
 			

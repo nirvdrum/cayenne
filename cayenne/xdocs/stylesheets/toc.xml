@@ -175,10 +175,13 @@
     </toc-developer-guide>
     
     <toc-examples name="Examples"  href="/examples/index.html">
-    	<item name="1. Aggregate Functions"  href="/examples/aggregate-functions/index.html"/>
-        <item name="2. DataPort"  href="/examples/data-port/index.html">
-        	<item name="2.1 CDataPort Ant Task" href="/examples/data-port/cdataport.html"/>
-        </item>
-        <item name="3. EJB Facade"  href="/examples/ejb-facade/index.html"/>
+    	<item name="1. Tapestry Blog"  href="/examples/blog-tapestry/index.html"/>
+    	<item name="2. HRDataView"  href="/examples/hr-dataview/index.html"/>
+		<item name="3. DataPort"  href="/examples/data-port/index.html">
+			<item name="3.1 CDataPort Ant Task" href="/examples/data-port/cdataport.html"/>
+		</item>
+		<item name="4. EJB Facade"  href="/examples/ejb-facade/index.html"/>
+		<item name="5. Servlet Filter"  href="/examples/servlet-filter/index.html"/>
+		<item name="6. Aggregate Functions"  href="/examples/aggregate-functions/index.html"/>
     </toc-examples>
  </toc>
