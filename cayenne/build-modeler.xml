@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+
+<!-- ========================================== -->
+<!-- CayenneModeler(Swing) subproject buildfile.-->
+<!-- ========================================== -->
+<project name="cayenne-modeler" default="compile">
+	<property name="modeler.dist.src" value="${dist}/src/modeler"/>
+	<property name="modeler.build" value="build/modeler"/>
+	<property name="modeler.build.properties" value="${modeler.build}/properties"/>
+	<property name="modeler.build.deps" value="${modeler.build}/deps"/>
+	<property name="modeler.src" value="src/modeler/java"/>
+	<property name="modeler.bin" value="src/modeler/bin"/>
+	
+    
+	<!-- ========================================== -->
+    <!-- Build targets.                             -->
+    <!-- ========================================== -->
+
+	<target name="compile">
+		<ant antfile="build-subproj.xml" target="compile">
+			<property name="subproj" value="modeler"/>
+		</ant>
+	</target>
+	
+	<target name="dist-src" depends="dist-bin">
+		<copy todir="${modeler.dist.src}">
+ 			<fileset dir="${modeler.src}"/>
+        </copy>
+	</target>
+
+	<target name="dist-bin" depends="jar">
+	    <copy todir="${dist}/bin">
+            <fileset dir="${modeler.bin}" includes="*.bat,*.sh,*.ico"/>
+        </copy>
+
+        <chmod perm="gu+x">
+            <fileset dir="${dist}/bin">
+                <include name="**/*.sh"/>
+            </fileset>
+        </chmod>        
+	</target>
+	
+	
+	<!-- ========================================== -->
+    <!-- Build Modeler JAR file.                    -->
+    <!-- ========================================== -->
+    <target name="jar" depends="compile,prepare-properties">
+        <jar jarfile="${dist}/lib/cayenne-modeler.jar">
+ 			<fileset dir="${modeler.build}/classes"/>
+			<fileset dir="${modeler.build.properties}"/>
+			<fileset dir="${modeler.src}">
+				<include name="**/*.xml"/>
+            	<include name="**/*.gif"/>
+        		<include name="**/*.jpg"/>
+			</fileset>
+            
+            <metainf dir="doc/licenses" includes="LICENSE"/>
+            <manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+               <attribute name="Extension-Name" value="org.objectstyle.cayenne"/>
+               <attribute name="Specification-Version" value="${project.name}"/>
+               <attribute name="Specification-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Implementation-Vendor-Id" value="org.objectstyle"/>
+               <attribute name="Implementation-Version" value="${project.version}"/>
+               <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
+               <attribute name="Main-Class" value="org.objectstyle.cayenne.modeler.Editor"/>
+               <attribute name="Class-Path" value="cayenne.jar"/>
+            </manifest>
+        </jar>
+    </target>  
+    
+    
+    <!-- ========================================== -->
+    <!-- Performs replacements in property files.   -->
+    <!-- ========================================== -->
+    <target name="prepare-properties">
+    	<tstamp/>
+		<copy todir="${modeler.build.properties}" overwrite="yes">
+			<fileset dir="${modeler.src}" >
+				<include name="**/*.properties"/>
+			</fileset>
+			<filterset>
+				<filter token="CAYENNE_BUILD_DATE" value="${TODAY}" />
+				<filter token="CAYENNE_VERSION" value="${project.version}"/>
+			</filterset>
+		</copy>
+	</target>
+</project>
