@@ -64,37 +64,31 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.parser.ASTDbPath;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
- * Describes navigational association between two ObjEntities. Stores
- * navigation information in terms of the DbEntity relationships.
- * ObjRelationships are owned by source ObjEntities.
+ * Describes navigational association between two Java classes, represented
+ * as source and target ObjEntity. Maps to a path of DbRelationships.
  * 
  * @author Andrei Adamchik
  */
 public class ObjRelationship extends Relationship implements EventListener {
     private static Logger logObj = Logger.getLogger(ObjRelationship.class);
 
-    // What to do with any inverse relationship when the source object
-    // is deleted
-    private int deleteRule = DeleteRule.NO_ACTION;
-
-    // Not flattened initially;
-    // will be set when dbRels are added that make it flattened
-    private boolean flattened;
-
-    // Initially all relationships are read/write;
-    // a flattened relationship may be readonly (in certain circumstances),
-    // will be set in that case
-    private boolean readOnly;
+    int deleteRule = DeleteRule.NO_ACTION;
+    boolean readOnly;
+    boolean dbRelationshipsRefreshNeeded = true;
 
     //  Whether optimstic locking should consider this relationship
     protected boolean usedForLocking;
+    protected String dbRelationshipPath;
 
-    private List dbRelationships = new ArrayList();
-    private List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
+    List dbRelationships = new ArrayList();
+    List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
 
     public ObjRelationship() {
     }
@@ -125,55 +119,31 @@ public class ObjRelationship extends Relationship implements EventListener {
             return;
         }
 
-        encoder.print("<obj-relationship name=\"" + getName() + '\"');
-        encoder.print(" source=\"" + source.getName() + '\"');
+        encoder.print("<obj-relationship name=\"" + getName());
+        encoder.print("\" source=\"" + source.getName());
 
         ObjEntity target = (ObjEntity) getTargetEntity();
         if (target != null) {
-            encoder.print(" target=\"" + target.getName() + '\"');
+            encoder.print("\" target=\"" + target.getName());
         }
 
         if (isUsedForLocking()) {
-            encoder.print(" lock=\"true\"");
+            encoder.print("\" lock=\"true");
         }
 
         String deleteRule = DeleteRule.deleteRuleName(getDeleteRule());
         if (getDeleteRule() != DeleteRule.NO_ACTION && deleteRule != null) {
-            encoder.print(" deleteRule=\"" + deleteRule + '\"');
+            encoder.print("\" deleteRule=\"" + deleteRule);
         }
 
-        encoder.println('>');
-        encoder.indent(1);
-
-        // do the first empty run, to see that the chain of
-        // relationships is valid
-        boolean validChain = true;
-        Iterator dryRun = getDbRelationships().iterator();
-        while (dryRun.hasNext()) {
-            DbRelationship relationship = (DbRelationship) dryRun.next();
-            if (!dbRelationships.contains(relationship)) {
-                validChain = false;
-                break;
-            }
+        // quietly get rid of invalid path... this is not the best way of doing things,
+        // but it is consistent across map package
+        String path = getValidRelationshipPath();
+        if (path != null) {
+            encoder.print("\" db-relationship-path=\"" + path);
         }
 
-        if (validChain) {
-            // TODO: this is dumb, store chain as a path expression...
-            Iterator iter = getDbRelationships().iterator();
-            while (iter.hasNext()) {
-                DbRelationship rel = (DbRelationship) iter.next();
-                encoder.print("<db-relationship-ref source=\"");
-                encoder.print(rel.getSourceEntity().getName());
-                encoder.print("\" target=\"");
-                encoder.print(rel.getTargetEntityName());
-                encoder.print("\" name=\"");
-                encoder.print(rel.getName());
-                encoder.println("\"/>");
-            }
-        }
-
-        encoder.indent(-1);
-        encoder.println("</obj-relationship>");
+        encoder.println("\"/>");
     }
 
     public Entity getTargetEntity() {
@@ -235,11 +205,14 @@ public class ObjRelationship extends Relationship implements EventListener {
      * Returns an immutable list of underlying DbRelationships.
      */
     public List getDbRelationships() {
+        refreshFromPath(true);
         return dbRelationshipsRef;
     }
 
     /** Appends a DbRelationship to the existing list of DbRelationships. */
     public void addDbRelationship(DbRelationship dbRel) {
+        refreshFromPath(true);
+
         // Adding a second is creating a flattened relationship.
         // Ensure that the new relationship properly continues 
         // on the flattened path
@@ -259,10 +232,6 @@ public class ObjRelationship extends Relationship implements EventListener {
                         + "is not the target of the previous relationship "
                         + "in the chain");
             }
-
-            flattened = true;
-            //Now there will be more than one dbRel - this is a flattened
-            // relationship
         }
 
         EventManager.getDefaultManager().addListener(
@@ -273,9 +242,8 @@ public class ObjRelationship extends Relationship implements EventListener {
             dbRel);
 
         dbRelationships.add(dbRel);
-        //Recalculate whether this relationship is readOnly,
+
         this.calculateReadOnlyValue();
-        // and whether it is toMany
         this.calculateToManyValue();
     }
 
@@ -284,92 +252,25 @@ public class ObjRelationship extends Relationship implements EventListener {
      * relationships.
      */
     public void removeDbRelationship(DbRelationship dbRel) {
+        refreshFromPath(true);
+
         dbRelationships.remove(dbRel);
         //Do not listen any more
         EventManager.getDefaultManager().removeListener(
             this,
             DbRelationship.PROPERTY_DID_CHANGE,
             dbRel);
-        //If we removed all but one dbRel, then it's no longer flattened
-        if (dbRelationships.size() <= 1) {
-            flattened = false;
-        }
+
         this.calculateReadOnlyValue();
         this.calculateToManyValue();
     }
 
     public void clearDbRelationships() {
-        dbRelationships.clear();
+        this.dbRelationshipPath = null;
+        this.dbRelationshipsRefreshNeeded = false;
+        this.dbRelationships.clear();
         this.readOnly = false;
         this.toMany = false;
-    }
-
-    //Recalculates whether a relationship is toMany or toOne, based on the
-    // underlying db relationships
-    private void calculateToManyValue() {
-        //If there is a single toMany along the path, then the flattend
-        // rel is toMany. If all are toOne, then the rel is toOne.
-        // Simple (non-flattened) relationships form the degenerate case
-        // taking the value of the single underlying dbrel.
-        Iterator dbRelIterator = this.dbRelationships.iterator();
-        while (dbRelIterator.hasNext()) {
-            DbRelationship thisRel = (DbRelationship) dbRelIterator.next();
-            if (thisRel.isToMany()) {
-                this.toMany = true;
-                return;
-            }
-        }
-        this.toMany = false;
-    }
-
-    //Implements logic to calculate a new readonly value after having
-    // added/removed dbRelationships
-    private void calculateReadOnlyValue() {
-        //Quickly filter the single dbrel case
-        if (dbRelationships.size() < 2) {
-            this.readOnly = false;
-            return;
-        }
-
-        //Also quickly filter any really complex db rel cases
-        if (dbRelationships.size() > 2) {
-            this.readOnly = true;
-            return;
-        }
-
-        //Now check for a toMany -> toOne series (to return false)
-        DbRelationship firstRel = (DbRelationship) dbRelationships.get(0);
-        DbRelationship secondRel = (DbRelationship) dbRelationships.get(1);
-
-        //First toOne or second toMany means read only
-        if (!firstRel.isToMany() || secondRel.isToMany()) {
-            this.readOnly = true;
-            return;
-        }
-
-        //Relationship type is in order, now we only have to check the
-        // intermediate table
-        DataMap map = firstRel.getTargetEntity().getDataMap();
-        if (map == null) {
-            throw new CayenneRuntimeException(
-                this.getClass().getName()
-                    + " could not obtain a DataMap for the destination of "
-                    + firstRel.getName());
-        }
-
-        DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName());
-        List pkAttribs = intermediateEntity.getPrimaryKey();
-
-        Iterator allAttribs = intermediateEntity.getAttributes().iterator();
-        while (allAttribs.hasNext()) {
-            if (!pkAttribs.contains(allAttribs.next())) {
-                this.readOnly = true;
-                return;
-                //one of the attributes of intermediate entity is not in the
-                // pk. Must be readonly
-            }
-        }
-        this.readOnly = false;
     }
 
     /**
@@ -388,7 +289,7 @@ public class ObjRelationship extends Relationship implements EventListener {
      * Returns true if underlying DbRelationships point to dependent entity.
      */
     public boolean isToDependentEntity() {
-        return ((DbRelationship) dbRelationships.get(0)).isToDependentPK();
+        return ((DbRelationship) getDbRelationships().get(0)).isToDependentPK();
     }
 
     /**
@@ -398,22 +299,22 @@ public class ObjRelationship extends Relationship implements EventListener {
      * @since 1.1
      */
     public boolean isToPK() {
-        return ((DbRelationship) dbRelationships.get(0)).isToPK();
+        return ((DbRelationship) getDbRelationships().get(0)).isToPK();
     }
 
     /**
      * Returns true if the relationship is a "flattened" relationship.
-     * Flattened ObjRelationship transparently represents a series of
-     * DbRelationships, also called "relationship path". All flattened
-     * relationships are "readable", but only those formed across a many-many
-     * join table (with no custom attributes other than foreign keys) can be
-     * automatically written.
+     * A relationship is considered "flattened" if it maps to more than one
+     * DbRelationship. Such chain of DbRelationships is also called "relationship 
+     * path". All flattened relationships are at least readable, but only those 
+     * formed across a many-many join table (with no custom attributes other than 
+     * foreign keys) can be automatically written.
      * 
      * @see #isReadOnly
-     * @return flag indicating if the relationship is flattened or not
+     * @return flag indicating if the relationship is flattened or not.
      */
     public boolean isFlattened() {
-        return flattened;
+        return getDbRelationships().size() > 1;
     }
 
     /**
@@ -423,7 +324,13 @@ public class ObjRelationship extends Relationship implements EventListener {
      * @return flag indicating if the relationship is read only or not
      */
     public boolean isReadOnly() {
+        refreshFromPath(true);
         return readOnly;
+    }
+
+    public boolean isToMany() {
+        refreshFromPath(true);
+        return super.isToMany();
     }
 
     /**
@@ -456,6 +363,7 @@ public class ObjRelationship extends Relationship implements EventListener {
                     + value
                     + " is not a constant from the DeleteRule class");
         }
+
         this.deleteRule = value;
     }
 
@@ -479,5 +387,223 @@ public class ObjRelationship extends Relationship implements EventListener {
      */
     public void setUsedForLocking(boolean usedForLocking) {
         this.usedForLocking = usedForLocking;
+    }
+
+    /**
+     * Returns a dot-separated path over mapped DbRelationships.
+     * 
+     * @since 1.1
+     */
+    public String getDbRelationshipPath() {
+        if (dbRelationshipsRefreshNeeded) {
+            return dbRelationshipPath;
+        }
+        else {
+            // build path on the fly
+            if (getDbRelationships().isEmpty()) {
+                return null;
+            }
+
+            StringBuffer path = new StringBuffer();
+            Iterator it = getDbRelationships().iterator();
+            while (it.hasNext()) {
+                DbRelationship next = (DbRelationship) it.next();
+                path.append(next.getName());
+                if (it.hasNext()) {
+                    path.append(Entity.PATH_SEPARATOR);
+                }
+            }
+
+            return path.toString();
+        }
+    }
+
+    /**
+     * Sets mapped DbRelationships as a dot-separated path.
+     */
+    public void setDbRelationshipPath(String relationshipPath) {
+        if (!Util.nullSafeEquals(this.dbRelationshipPath, relationshipPath)) {
+            this.dbRelationshipPath = relationshipPath;
+            this.dbRelationshipsRefreshNeeded = true;
+        }
+    }
+
+    /**
+     * Returns dot-separated path over DbRelationships, only including
+     * components that have valid DbRelationships.
+     */
+    String getValidRelationshipPath() {
+        String path = getDbRelationshipPath();
+        if (path == null) {
+            return null;
+        }
+
+        ObjEntity entity = (ObjEntity) getSourceEntity();
+        if (entity == null) {
+            throw new CayenneRuntimeException("Can't resolve DbRelationships, null source ObjEntity");
+        }
+
+        StringBuffer validPath = new StringBuffer();
+
+        Iterator it = entity.resolvePathComponents(new ASTDbPath(path));
+        try {
+
+            while (it.hasNext()) {
+                DbRelationship relationship = (DbRelationship) it.next();
+
+                if (validPath.length() > 0) {
+                    validPath.append(Entity.PATH_SEPARATOR);
+                }
+                validPath.append(relationship.getName());
+            }
+        }
+        catch (ExpressionException ex) {
+
+        }
+
+        return validPath.toString();
+    }
+
+    /**
+     * Rebuild a list of relationships if String relationshipPath has changed.
+     */
+    final void refreshFromPath(boolean stripInvalid) {
+        if (!dbRelationshipsRefreshNeeded) {
+            return;
+        }
+
+        synchronized (this) {
+            // check flag again in the synced block...
+            if (!dbRelationshipsRefreshNeeded) {
+                return;
+            }
+
+            EventManager eventLoop = EventManager.getDefaultManager();
+
+            // remove existing relationships
+            Iterator removeIt = dbRelationships.iterator();
+            while (removeIt.hasNext()) {
+                DbRelationship relationship = (DbRelationship) removeIt.next();
+                eventLoop.removeListener(
+                    this,
+                    DbRelationship.PROPERTY_DID_CHANGE,
+                    relationship);
+
+                removeIt.remove();
+            }
+
+            if (this.dbRelationshipPath != null) {
+
+                ObjEntity entity = (ObjEntity) getSourceEntity();
+                if (entity == null) {
+                    throw new CayenneRuntimeException("Can't resolve DbRelationships, null source ObjEntity");
+                }
+
+                // add new relationships from path
+                Iterator it =
+                    entity.resolvePathComponents(new ASTDbPath(this.dbRelationshipPath));
+
+                try {
+
+                    while (it.hasNext()) {
+                        DbRelationship relationship = (DbRelationship) it.next();
+
+                        // listen for changes
+                        eventLoop.addListener(
+                            this,
+                            "dbRelationshipDidChange",
+                            RelationshipEvent.class,
+                            DbRelationship.PROPERTY_DID_CHANGE,
+                            relationship);
+
+                        dbRelationships.add(relationship);
+                    }
+                }
+                catch (ExpressionException ex) {
+                    if (!stripInvalid) {
+                        throw ex;
+                    }
+                }
+            }
+
+            dbRelationshipsRefreshNeeded = false;
+
+            calculateToManyValue();
+            calculateReadOnlyValue();
+        }
+    }
+
+    /**
+     * Recalculates whether a relationship is toMany or toOne, based on the
+     * underlying db relationships.
+     */
+    final void calculateToManyValue() {
+        //If there is a single toMany along the path, then the flattend
+        // rel is toMany. If all are toOne, then the rel is toOne.
+        // Simple (non-flattened) relationships form the degenerate case
+        // taking the value of the single underlying dbrel.
+        Iterator dbRelIterator = this.dbRelationships.iterator();
+        while (dbRelIterator.hasNext()) {
+            DbRelationship thisRel = (DbRelationship) dbRelIterator.next();
+            if (thisRel.isToMany()) {
+                this.toMany = true;
+                return;
+            }
+        }
+
+        this.toMany = false;
+    }
+
+    /**
+     * Recalculates a new readonly value based on the underlying 
+     * DbRelationships.
+     */
+    final void calculateReadOnlyValue() {
+        //Quickly filter the single dbrel case
+        if (dbRelationships.size() < 2) {
+            this.readOnly = false;
+            return;
+        }
+
+        //Also quickly filter any really complex db rel cases
+        if (dbRelationships.size() > 2) {
+            this.readOnly = true;
+            return;
+        }
+
+        //Now check for a toMany -> toOne series (to return false)
+        DbRelationship firstRel = (DbRelationship) dbRelationships.get(0);
+        DbRelationship secondRel = (DbRelationship) dbRelationships.get(1);
+
+        //First toOne or second toMany means read only
+        if (!firstRel.isToMany() || secondRel.isToMany()) {
+            this.readOnly = true;
+            return;
+        }
+
+        // Relationship type is in order, now we only have to check the
+        // intermediate table
+        DataMap map = firstRel.getTargetEntity().getDataMap();
+        if (map == null) {
+            throw new CayenneRuntimeException(
+                this.getClass().getName()
+                    + " could not obtain a DataMap for the destination of "
+                    + firstRel.getName());
+        }
+
+        DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName());
+        List pkAttribs = intermediateEntity.getPrimaryKey();
+
+        Iterator allAttribs = intermediateEntity.getAttributes().iterator();
+        while (allAttribs.hasNext()) {
+            if (!pkAttribs.contains(allAttribs.next())) {
+                this.readOnly = true;
+                return;
+                //one of the attributes of intermediate entity is not in the
+                // pk. Must be readonly
+            }
+        }
+
+        this.readOnly = false;
     }
 }

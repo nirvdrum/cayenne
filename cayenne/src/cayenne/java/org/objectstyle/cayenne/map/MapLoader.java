@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.map;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -128,7 +127,6 @@ public class MapLoader extends DefaultHandler {
     private DbRelationship dbRelationship;
     private ObjRelationship objRelationship;
     private DbAttribute attrib;
-    private Map dbRelationshipMap;
     private Procedure procedure;
     private QueryBuilder queryBuilder;
     private String descending;
@@ -159,8 +157,6 @@ public class MapLoader extends DefaultHandler {
         try {
             String mapName = mapNameFromLocation(src.getSystemId());
             dataMap = new DataMap(mapName);
-
-            dbRelationshipMap = new HashMap();
             XMLReader parser = Util.createXmlReader();
 
             parser.setContentHandler(this);
@@ -608,11 +604,6 @@ public class MapLoader extends DefaultHandler {
             return;
         }
 
-        String targetName = atts.getValue("", "target");
-        if (targetName == null) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationship() - null target entity.");
-        }
-
         String toManyString = atts.getValue("", "toMany");
         boolean toMany = toManyString != null && toManyString.equalsIgnoreCase(TRUE);
 
@@ -622,48 +613,28 @@ public class MapLoader extends DefaultHandler {
 
         dbRelationship = new DbRelationship(name);
         dbRelationship.setSourceEntity(source);
-        dbRelationship.setTargetEntityName(targetName);
+        dbRelationship.setTargetEntityName(atts.getValue("", "target"));
         dbRelationship.setToMany(toMany);
         dbRelationship.setToDependentPK(toDependentPK);
-
-        // Save the reference to this db relationship for later resolution
-        // in the ObjRelationship
-        dbRelationshipMap.put(
-            new SourceTarget(sourceName, targetName, name),
-            dbRelationship);
 
         source.addRelationship(dbRelationship);
     }
 
     private void processStartDbRelationshipRef(Attributes atts) throws SAXException {
-        String source = atts.getValue("", "source");
-        if (null == source) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartDbRelationshipRef(),"
-                    + " Unable to parse source. Attributes:\n"
-                    + printAttributes(atts).toString());
-        }
-        String target = atts.getValue("", "target");
-        if (null == target) {
-            throw new SAXException(
-                "MapLoaderImpl::processStartDbRelationshipRef(),"
-                    + " Unable to parse target. Attributes:\n"
-                    + printAttributes(atts).toString());
-        }
+        // db-relationship-ref element is deprecated and is supported for backwards 
+        // compatibility only
 
         String name = atts.getValue("", "name");
-
-        SourceTarget key = new SourceTarget(source, target, name);
-        DbRelationship temp = (DbRelationship) dbRelationshipMap.get(key);
-        if (null == temp) {
+        if (name == null) {
             throw new SAXException(
                 "MapLoaderImpl::processStartDbRelationshipRef()"
-                    + ", Unresolved reference from "
-                    + source
-                    + " to "
-                    + target);
+                    + ", Null DbRelationship name for "
+                    + objRelationship.getName());
         }
-        objRelationship.addDbRelationship(temp);
+
+        String path = objRelationship.getDbRelationshipPath();
+        path = (path != null) ? path + "." + name : name;
+        objRelationship.setDbRelationshipPath(path);
     }
 
     private void processStartDbAttributePair(Attributes atts) throws SAXException {
@@ -710,6 +681,7 @@ public class MapLoader extends DefaultHandler {
         objRelationship.setDeleteRule(deleteRule);
         objRelationship.setUsedForLocking(
             TRUE.equalsIgnoreCase(atts.getValue("", "lock")));
+        objRelationship.setDbRelationshipPath((atts.getValue("", "db-relationship-path")));
         source.addRelationship(objRelationship);
     }
 
@@ -960,38 +932,5 @@ public class MapLoader extends DefaultHandler {
 
     private void resetCurrentTag() {
         currentTag = null;
-    }
-
-    /** Used for creating the key in DbRelationship map */
-    class SourceTarget {
-        public String source;
-        public String target;
-        public String name;
-
-        public SourceTarget(String temp1, String temp2, String temp3) {
-            source = temp1;
-            target = temp2;
-            name = temp3;
-        }
-
-        public int hashCode() {
-            int code = source.hashCode() * 100000 + target.hashCode() * 10000;
-            if (null != name) {
-                code += name.hashCode();
-            }
-            return code;
-        }
-
-        public boolean equals(Object obj) {
-            if (!(obj instanceof SourceTarget))
-                return false;
-            SourceTarget other = (SourceTarget) obj;
-            if (source.equals(other.source)
-                && target.equals(other.target)
-                && name.equals(other.name)) {
-                return true;
-            }
-            return false;
-        }
     }
 }

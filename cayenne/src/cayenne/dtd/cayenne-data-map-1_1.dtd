@@ -77,20 +77,14 @@ hierarchy.
 	lock (true | false) "false"
 >
 
-<!ELEMENT obj-relationship (db-relationship-ref*)>
+<!ELEMENT obj-relationship>
 <!ATTLIST obj-relationship
 	name CDATA #REQUIRED
 	source CDATA #REQUIRED
 	target CDATA #REQUIRED
 	toMany (true | false) "false"
 	lock (true | false) "false"
->
-
-<!ELEMENT db-relationship-ref EMPTY>
-<!ATTLIST db-relationship-ref
-	source CDATA #REQUIRED
-	target CDATA #REQUIRED
-	name   CDATA #REQUIRED
+	db-relationship-path CDATA #IMPLIED
 >
 
 <!ELEMENT db-relationship (db-attribute-pair+)>

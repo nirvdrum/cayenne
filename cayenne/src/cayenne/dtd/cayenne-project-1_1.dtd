@@ -28,15 +28,10 @@
 	value CDATA #REQUIRED
 >
 
-<!ELEMENT map (dep-map-ref*)>
+<!ELEMENT map>
 <!ATTLIST map
 	name CDATA #REQUIRED
 	location CDATA #REQUIRED
->
-
-<!ELEMENT dep-map-ref>
-<!ATTLIST dep-map-ref
-	name CDATA #REQUIRED
 >
 
 <!ELEMENT node (map-ref*)>

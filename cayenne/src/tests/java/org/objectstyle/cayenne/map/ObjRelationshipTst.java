@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.List;
+
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 public class ObjRelationshipTst extends CayenneTestCase {
-    protected ObjRelationship rel;
+    protected ObjRelationship relationship;
 
     protected DbEntity artistDBEntity = getDbEntity("ARTIST");
     protected DbEntity artistExhibitDBEntity = getDbEntity("ARTIST_EXHIBIT");
@@ -68,14 +71,175 @@ public class ObjRelationshipTst extends CayenneTestCase {
     protected DbEntity galleryDBEntity = getDbEntity("GALLERY");
 
     public void setUp() throws Exception {
-        rel = new ObjRelationship();
+        relationship = new ObjRelationship();
+    }
+
+    public void testSetDbRelationshipPath() throws Exception {
+        relationship.dbRelationshipsRefreshNeeded = false;
+
+        relationship.setDbRelationshipPath("dummy.path");
+        assertTrue(relationship.dbRelationshipsRefreshNeeded);
+
+        assertEquals("dummy.path", relationship.getDbRelationshipPath());
+        assertTrue(relationship.dbRelationshipsRefreshNeeded);
+    }
+
+    public void testRefreshFromPath() throws Exception {
+        relationship.setDbRelationshipPath("dummy.path");
+
+        // attempt to resolve must fail - relationship is outside of context,
+        // plus the path is random
+        try {
+            relationship.refreshFromPath(false);
+            fail("refresh without source entity should have failed.");
+        }
+        catch (CayenneRuntimeException ex) {
+            // expected
+        }
+
+        DataMap map = new DataMap();
+        ObjEntity entity = new ObjEntity("Test");
+        map.addObjEntity(entity);
+
+        relationship.setSourceEntity(entity);
+        // attempt to resolve must fail - relationship is outside of context,
+        // plus the path is random
+        try {
+            relationship.refreshFromPath(false);
+            fail("refresh over a dummy path should have failed.");
+        }
+        catch (ExpressionException ex) {
+            // expected
+        }
+
+        // finally assemble ObjEntity to make the path valid
+        DbEntity dbEntity1 = new DbEntity("TEST1");
+        DbEntity dbEntity2 = new DbEntity("TEST2");
+        DbEntity dbEntity3 = new DbEntity("TEST3");
+        map.addDbEntity(dbEntity1);
+        map.addDbEntity(dbEntity2);
+        map.addDbEntity(dbEntity3);
+        entity.setDbEntityName("TEST1");
+        DbRelationship dummyR = new DbRelationship("dummy");
+        dummyR.setTargetEntityName("TEST2");
+        dummyR.setSourceEntity(dbEntity1);
+        DbRelationship pathR = new DbRelationship("path");
+        pathR.setTargetEntityName("TEST3");
+        pathR.setSourceEntity(dbEntity2);
+        dbEntity1.addRelationship(dummyR);
+        dbEntity2.addRelationship(pathR);
+
+        relationship.refreshFromPath(false);
+        assertFalse(relationship.dbRelationshipsRefreshNeeded);
+
+        List resolvedPath = relationship.getDbRelationships();
+        assertEquals(2, resolvedPath.size());
+        assertSame(dummyR, resolvedPath.get(0));
+        assertSame(pathR, resolvedPath.get(1));
+    }
+
+    public void testCalculateToMany() throws Exception {
+        // assemble fixture....
+        DataMap map = new DataMap();
+        ObjEntity entity = new ObjEntity("Test");
+        map.addObjEntity(entity);
+
+        DbEntity dbEntity1 = new DbEntity("TEST1");
+        DbEntity dbEntity2 = new DbEntity("TEST2");
+        DbEntity dbEntity3 = new DbEntity("TEST3");
+        map.addDbEntity(dbEntity1);
+        map.addDbEntity(dbEntity2);
+        map.addDbEntity(dbEntity3);
+        entity.setDbEntityName("TEST1");
+        DbRelationship dummyR = new DbRelationship("dummy");
+        dummyR.setTargetEntityName("TEST2");
+        dummyR.setSourceEntity(dbEntity1);
+        DbRelationship pathR = new DbRelationship("path");
+        pathR.setTargetEntityName("TEST3");
+        pathR.setSourceEntity(dbEntity2);
+        dbEntity1.addRelationship(dummyR);
+        dbEntity2.addRelationship(pathR);
+
+        relationship.setSourceEntity(entity);
+
+        // test how toMany changes dependending on the underlying DbRelationships
+        // add DbRelationships directly to avoid events to test "calculateToMany"
+        relationship.dbRelationshipsRefreshNeeded = false;
+        relationship.dbRelationships.add(dummyR);
+        assertFalse(relationship.isToMany());
+
+        dummyR.setToMany(true);
+        relationship.calculateToManyValue();
+        assertTrue(relationship.isToMany());
+
+        dummyR.setToMany(false);
+        relationship.calculateToManyValue();
+        assertFalse(relationship.isToMany());
+
+        // test chain
+        relationship.dbRelationships.add(pathR);
+        assertFalse(relationship.isToMany());
+
+        pathR.setToMany(true);
+        relationship.calculateToManyValue();
+        assertTrue(relationship.isToMany());
+    }
+
+    public void testCalculateToManyFromPath() throws Exception {
+        // assemble fixture....
+        DataMap map = new DataMap();
+        ObjEntity entity = new ObjEntity("Test");
+        map.addObjEntity(entity);
+
+        DbEntity dbEntity1 = new DbEntity("TEST1");
+        DbEntity dbEntity2 = new DbEntity("TEST2");
+        DbEntity dbEntity3 = new DbEntity("TEST3");
+        map.addDbEntity(dbEntity1);
+        map.addDbEntity(dbEntity2);
+        map.addDbEntity(dbEntity3);
+        entity.setDbEntityName("TEST1");
+        DbRelationship dummyR = new DbRelationship("dummy");
+        dummyR.setTargetEntityName("TEST2");
+        dummyR.setSourceEntity(dbEntity1);
+        DbRelationship pathR = new DbRelationship("path");
+        pathR.setTargetEntityName("TEST3");
+        pathR.setSourceEntity(dbEntity2);
+        dbEntity1.addRelationship(dummyR);
+        dbEntity2.addRelationship(pathR);
+
+        relationship.setSourceEntity(entity);
+
+        // test how toMany changes when the path is set as a string
+
+        relationship.setDbRelationshipPath("dummy");
+        assertFalse(relationship.isToMany());
+
+        dummyR.setToMany(true);
+        relationship.setDbRelationshipPath(null);
+        relationship.setDbRelationshipPath("dummy");
+        assertTrue(relationship.isToMany());
+
+        dummyR.setToMany(false);
+        relationship.setDbRelationshipPath(null);
+        relationship.setDbRelationshipPath("dummy");
+        assertFalse(relationship.isToMany());
+
+        // test chain
+        relationship.setDbRelationshipPath(null);
+        relationship.setDbRelationshipPath("dummy.path");
+        assertFalse(relationship.isToMany());
+
+        pathR.setToMany(true);
+        relationship.setDbRelationshipPath(null);
+        relationship.setDbRelationshipPath("dummy.path");
+        assertTrue(relationship.isToMany());
     }
 
     public void testTargetEntity() throws Exception {
-        rel.setTargetEntityName("targ");
+        relationship.setTargetEntityName("targ");
 
         try {
-            rel.getTargetEntity();
+            relationship.getTargetEntity();
             fail("Without a container, getTargetEntity() must fail.");
         }
         catch (CayenneRuntimeException ex) {
@@ -87,13 +251,13 @@ public class ObjRelationshipTst extends CayenneTestCase {
         ObjEntity src = new ObjEntity("src");
         map.addObjEntity(src);
 
-        src.addRelationship(rel);
-        assertNull(rel.getTargetEntity());
+        src.addRelationship(relationship);
+        assertNull(relationship.getTargetEntity());
 
         ObjEntity target = new ObjEntity("targ");
         map.addObjEntity(target);
 
-        assertSame(target, rel.getTargetEntity());
+        assertSame(target, relationship.getTargetEntity());
     }
 
     public void testGetReverseRel1() throws Exception {
@@ -123,14 +287,14 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     public void testSingleDbRelationship() {
         DbRelationship r1 = new DbRelationship();
-        rel.addDbRelationship(r1);
-        assertEquals(1, rel.getDbRelationships().size());
-        assertEquals(r1, rel.getDbRelationships().get(0));
-        assertFalse(rel.isFlattened());
-        assertFalse(rel.isReadOnly());
-        assertEquals(r1.isToMany(), rel.isToMany());
-        rel.removeDbRelationship(r1);
-        assertEquals(0, rel.getDbRelationships().size());
+        relationship.addDbRelationship(r1);
+        assertEquals(1, relationship.getDbRelationships().size());
+        assertEquals(r1, relationship.getDbRelationships().get(0));
+        assertFalse(relationship.isFlattened());
+        assertFalse(relationship.isReadOnly());
+        assertEquals(r1.isToMany(), relationship.isToMany());
+        relationship.removeDbRelationship(r1);
+        assertEquals(0, relationship.getDbRelationships().size());
     }
 
     public void testFlattenedRelationship() throws Exception {
@@ -145,22 +309,22 @@ public class ObjRelationshipTst extends CayenneTestCase {
         r2.setTargetEntity(exhibitDBEntity);
         r2.setToMany(false);
 
-        rel.addDbRelationship(r1);
-        rel.addDbRelationship(r2);
-        assertTrue(rel.isToMany());
-        assertEquals(2, rel.getDbRelationships().size());
-        assertEquals(r1, rel.getDbRelationships().get(0));
-        assertEquals(r2, rel.getDbRelationships().get(1));
+        relationship.addDbRelationship(r1);
+        relationship.addDbRelationship(r2);
+        assertTrue(relationship.isToMany());
+        assertEquals(2, relationship.getDbRelationships().size());
+        assertEquals(r1, relationship.getDbRelationships().get(0));
+        assertEquals(r2, relationship.getDbRelationships().get(1));
 
-        assertTrue(rel.isFlattened());
-        assertFalse(rel.isReadOnly());
+        assertTrue(relationship.isFlattened());
+        assertFalse(relationship.isReadOnly());
 
-        rel.removeDbRelationship(r1);
-        assertFalse(rel.isToMany()); //only remaining rel is r2... a toOne
-        assertEquals(1, rel.getDbRelationships().size());
-        assertEquals(r2, rel.getDbRelationships().get(0));
-        assertFalse(rel.isFlattened());
-        assertFalse(rel.isReadOnly());
+        relationship.removeDbRelationship(r1);
+        assertFalse(relationship.isToMany()); //only remaining rel is r2... a toOne
+        assertEquals(1, relationship.getDbRelationships().size());
+        assertEquals(r2, relationship.getDbRelationships().get(0));
+        assertFalse(relationship.isFlattened());
+        assertFalse(relationship.isReadOnly());
 
     }
 
@@ -180,13 +344,13 @@ public class ObjRelationshipTst extends CayenneTestCase {
         r3.setTargetEntity(galleryDBEntity);
         r3.setToMany(false);
 
-        rel.addDbRelationship(r1);
-        rel.addDbRelationship(r2);
-        rel.addDbRelationship(r3);
+        relationship.addDbRelationship(r1);
+        relationship.addDbRelationship(r2);
+        relationship.addDbRelationship(r3);
 
-        assertTrue(rel.isFlattened());
-        assertTrue(rel.isReadOnly());
-        assertTrue(rel.isToMany());
+        assertTrue(relationship.isFlattened());
+        assertTrue(relationship.isReadOnly());
+        assertTrue(relationship.isToMany());
 
     }
 
@@ -202,12 +366,12 @@ public class ObjRelationshipTst extends CayenneTestCase {
         r2.setTargetEntity(galleryDBEntity);
         r2.setToMany(false);
 
-        rel.addDbRelationship(r1);
-        rel.addDbRelationship(r2);
+        relationship.addDbRelationship(r1);
+        relationship.addDbRelationship(r2);
 
-        assertTrue(rel.isFlattened());
-        assertTrue(rel.isReadOnly());
-        assertTrue(rel.isToMany());
+        assertTrue(relationship.isFlattened());
+        assertTrue(relationship.isReadOnly());
+        assertTrue(relationship.isToMany());
     }
 
     //Test a relationship loaded from the test datamap that we know should be flattened
@@ -222,7 +386,7 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     public void testBadDeleteRuleValue() {
         try {
-            rel.setDeleteRule(999);
+            relationship.setDeleteRule(999);
             fail("Should have failed with IllegalArgumentException");
         }
         catch (IllegalArgumentException e) {
@@ -232,9 +396,9 @@ public class ObjRelationshipTst extends CayenneTestCase {
 
     public void testOkDeleteRuleValue() {
         try {
-            rel.setDeleteRule(DeleteRule.CASCADE);
-            rel.setDeleteRule(DeleteRule.DENY);
-            rel.setDeleteRule(DeleteRule.NULLIFY);
+            relationship.setDeleteRule(DeleteRule.CASCADE);
+            relationship.setDeleteRule(DeleteRule.DENY);
+            relationship.setDeleteRule(DeleteRule.NULLIFY);
         }
         catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -245,11 +409,11 @@ public class ObjRelationshipTst extends CayenneTestCase {
     public void testWatchesDbRelChanges() {
         DbRelationship r1 = new DbRelationship();
         r1.setToMany(true);
-        rel.addDbRelationship(r1);
-        assertTrue(rel.isToMany());
+        relationship.addDbRelationship(r1);
+        assertTrue(relationship.isToMany());
 
         //rel should be watching r1 (events) to see when that changes
         r1.setToMany(false);
-        assertFalse(rel.isToMany());
+        assertFalse(relationship.isToMany());
     }
 }

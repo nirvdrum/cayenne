@@ -55,13 +55,7 @@
 	<db-relationship name="relaLockingTests" source="SIMPLE_LOCKING_TEST" target="REL_LOCKING_TEST" toMany="true">
 		<db-attribute-pair source="LOCKING_TEST_ID" target="SIMPLE_LOCKING_TEST_ID"/>
 	</db-relationship>
-	<obj-relationship name="toRelLockingTest" source="LockingHelper" target="RelLockingTest">
-		<db-relationship-ref source="LOCKING_HELPER" target="REL_LOCKING_TEST" name="toRelLockingTest"/>
-	</obj-relationship>
-	<obj-relationship name="lockingHelpers" source="RelLockingTest" target="LockingHelper" lock="true">
-		<db-relationship-ref source="REL_LOCKING_TEST" target="LOCKING_HELPER" name="lockingHelpers"/>
-	</obj-relationship>
-	<obj-relationship name="toSimpleLockingTest" source="RelLockingTest" target="SimpleLockingTest" lock="true">
-		<db-relationship-ref source="REL_LOCKING_TEST" target="SIMPLE_LOCKING_TEST" name="toSimpleLockingTest"/>
-	</obj-relationship>
+	<obj-relationship name="toRelLockingTest" source="LockingHelper" target="RelLockingTest" db-relationship-path="toRelLockingTest"/>
+	<obj-relationship name="lockingHelpers" source="RelLockingTest" target="LockingHelper" lock="true" db-relationship-path="lockingHelpers"/>
+	<obj-relationship name="toSimpleLockingTest" source="RelLockingTest" target="SimpleLockingTest" lock="true" db-relationship-path="toSimpleLockingTest"/>
 </data-map>
