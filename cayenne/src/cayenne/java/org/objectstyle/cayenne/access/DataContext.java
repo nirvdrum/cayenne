@@ -56,6 +56,10 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.*;
 
 import org.apache.log4j.Level;
@@ -79,10 +83,12 @@ import org.objectstyle.cayenne.util.Util;
   * 
   * @author Andrei Adamchik
   */
-public class DataContext implements QueryEngine {
+public class DataContext implements QueryEngine, Serializable {
     static Logger logObj = Logger.getLogger(DataContext.class.getName());
 
-    protected QueryEngine parent;
+    //Will not be directly serialized - see read/writeObject for details
+    protected transient QueryEngine parent;
+    
     protected Map registeredMap = Collections.synchronizedMap(new HashMap());
     protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
     protected RelationshipDataSource relDataSource = new RelationshipDataSource();
@@ -521,7 +527,7 @@ public class DataContext implements QueryEngine {
         registeredMap.put(tempId, dataObject);
         dataObject.setDataContext(this);
     }
-    
+
     /**
      * Unregisters a DataObject from the context.
      * This would remove object from the internal cache,
@@ -529,20 +535,20 @@ public class DataContext implements QueryEngine {
      * and change its state to TRANSIENT.
      */
     public void unregisterObject(DataObject dataObj) {
-    	// we don't care about objects that are not ours    		
-    	if(dataObj.getDataContext() != this) {
-    		return;
-    	}
-    	
-    	ObjectId oid = dataObj.getObjectId();
-    	registeredMap.remove(oid);
-    	committedSnapshots.remove(oid);
-    	
-    	dataObj.setDataContext(null);
-    	dataObj.setObjectId(null);
-    	dataObj.setPersistenceState(PersistenceState.TRANSIENT);
+        // we don't care about objects that are not ours    		
+        if (dataObj.getDataContext() != this) {
+            return;
+        }
+
+        ObjectId oid = dataObj.getObjectId();
+        registeredMap.remove(oid);
+        committedSnapshots.remove(oid);
+
+        dataObj.setDataContext(null);
+        dataObj.setObjectId(null);
+        dataObj.setPersistenceState(PersistenceState.TRANSIENT);
     }
-    
+
     /**
      * "Invalidates" a DataObject, changing it to a HOLLOW state.
      * This would remove object's snapshot
@@ -550,13 +556,14 @@ public class DataContext implements QueryEngine {
      * On the next access to this object, it will be refeched.
      */
     public void invalidateObject(DataObject dataObj) {
-    	// we don't care about objects that are not ours    
-    	// we don't care about uncomitted objects		
-    	if(dataObj.getDataContext() != this || dataObj.getPersistenceState() == PersistenceState.NEW) {
-    		return;
-    	}
-    	committedSnapshots.remove(dataObj.getObjectId());
-    	dataObj.setPersistenceState(PersistenceState.HOLLOW);
+        // we don't care about objects that are not ours    
+        // we don't care about uncomitted objects		
+        if (dataObj.getDataContext() != this
+            || dataObj.getPersistenceState() == PersistenceState.NEW) {
+            return;
+        }
+        committedSnapshots.remove(dataObj.getObjectId());
+        dataObj.setPersistenceState(PersistenceState.HOLLOW);
     }
 
     /** 
@@ -728,13 +735,13 @@ public class DataContext implements QueryEngine {
      * depending on the value returned by <code>query.isFetchingDataRows()</code>.
      */
     public List performQuery(GenericSelectQuery query) {
-    	
-    	// check if result pagination is requested
-    	// let a list handle fetch in this case
-    	if(query.getPageSize() > 0) {
-    		return new IncrementalFaultList(this, query);
-    	}
-    	
+
+        // check if result pagination is requested
+        // let a list handle fetch in this case
+        if (query.getPageSize() > 0) {
+            return new IncrementalFaultList(this, query);
+        }
+
         // Fetch either DataObjects or data rows.
         SelectObserver observer =
             (query.isFetchingDataRows())
@@ -1058,6 +1065,47 @@ public class DataContext implements QueryEngine {
         }
     }
 
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        //If the "parent" of this datacontext is a DataDomain, then just write the
+        // name of it.  Then when deser happens, we can get back the DataDomain by name, 
+        // from the shared configuration (which will either load it if need be, or return 
+        // an existing one.
+        out.defaultWriteObject();
+        if (this.parent instanceof DataDomain) {
+            DataDomain domain = (DataDomain) this.parent;
+            out.writeObject(domain.getName());
+        } else {
+            out.writeObject(this.parent);
+            //Hope that whatever this.parent is, that it is Serializable
+        }
+    }
+
+    private void readObject(ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+        boolean failed = false;
+        in.defaultReadObject();
+        Object value = in.readObject();
+        if (value instanceof QueryEngine) {
+            //Must be a real QueryEngine object - use it
+            this.parent = (QueryEngine) value;
+        } else if (value instanceof String) {
+            //Must be the name of a DataDomain - use it
+            this.parent = Configuration.getSharedConfig().getDomain((String) value);
+            if (this.parent == null) {
+                failed = true;
+            }
+        } else {
+            failed = true;
+        }
+        if (failed) {
+            throw new IOException(
+                "Parent attribute of DataContext was neither a QueryEngine nor "
+                    + "the name of a valid DataDomain:"
+                    + value);
+        }
+
+    }
+
     /** 
      * OperationObserver for select queries. Will register bacthes of 
      * fetched objects with this DataContext.
@@ -1087,7 +1135,7 @@ public class DataContext implements QueryEngine {
         }
     }
 
-    class RelationshipDataSource implements ToManyListDataSource {
+    class RelationshipDataSource implements ToManyListDataSource, Serializable {
         public void updateListData(ToManyList list) {
             if (list.getSrcObjectId().isTemporary())
                 list.setObjectList(new ArrayList());
