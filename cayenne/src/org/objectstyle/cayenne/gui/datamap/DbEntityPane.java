@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,7 @@ package org.objectstyle.cayenne.gui.datamap;
  *
  */ 
 
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.*;
 import java.util.*;
@@ -68,22 +68,27 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
-/** Detail view of the ObjEntity properties. 
- * @author Michael Misha Shengaout */
+/** 
+ * Detail view of the DbEntity properties. 
+ * 
+ * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
+ */
 public class DbEntityPane extends JPanel
 implements DocumentListener, DbEntityDisplayListener
 , ExistingSelectionProcessor
 {
 	Mediator mediator;
 	
-	JLabel		nameLabel;
 	JTextField	name;
 	String		oldName;
-	JLabel		catalogLabel;
 	JTextField	catalog;
-	JLabel		schemaLabel;
 	JTextField	schema;
-	/** Cludge to prevent marking data map as dirty during initial load. */
+	
+	/** 
+	 * Cludge to prevent marking data map as dirty 
+	 * during initial load. 
+	 */
 	private boolean ignoreChange = false;
 	
 	public DbEntityPane(Mediator temp_mediator) {
@@ -102,33 +107,42 @@ implements DocumentListener, DbEntityDisplayListener
 		SpringLayout layout = new SpringLayout();
 		this.setLayout(layout);
 
-		nameLabel 	= new JLabel("Entity name: ");
-		name 		= new JTextField(20);
-		catalogLabel= new JLabel("Catalog: ");
-		catalog 	= new JTextField(20);
-		schemaLabel	= new JLabel("Schema: ");
-		schema 		= new JTextField(20);
+		JLabel nameLabel = new JLabel("Entity name: ");
+		name = new JTextField(25);
+		
+		JLabel catalogLabel= new JLabel("Catalog: ");
+		catalog = new JTextField(25);
+		
+		JLabel schemaLabel = new JLabel("Schema: ");
+		schema = new JTextField(25);
 
-		Component[] left_comp = new Component[3];
-		left_comp[0] = nameLabel;
-		left_comp[1] = catalogLabel;
-		left_comp[2] = schemaLabel;
-		Component[] right_comp = new Component[3];
-		right_comp[0] = name;
-		right_comp[1] = catalog;
-		right_comp[2] = schema;
-		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
+		Component[] leftCol = new Component[] {
+			nameLabel, catalogLabel, schemaLabel
+		};
+		
+		Component[] rightCol = new Component[] {
+			name, catalog, schema
+		};
+		
+		JPanel temp = PanelFactory.createForm(leftCol, rightCol, 5,5,5,5);
 		Spring pad = Spring.constant(5);
-		Spring ySpring = pad;
 		add(temp);
 		SpringLayout.Constraints cons = layout.getConstraints(temp);
-		cons.setY(ySpring);
+		cons.setY(pad);
 		cons.setX(pad);
 	}
 
-	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }
-	public void changedUpdate(DocumentEvent e) { textFieldChanged(e); }
-	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
+	public void insertUpdate(DocumentEvent e)  { 
+		textFieldChanged(e); 
+	}
+	
+	public void changedUpdate(DocumentEvent e) { 
+		textFieldChanged(e); 
+	}
+	
+	public void removeUpdate(DocumentEvent e)  { 
+		textFieldChanged(e); 
+	}
 
 	private void textFieldChanged(DocumentEvent e) {
 		if (ignoreChange)
@@ -163,7 +177,7 @@ implements DocumentListener, DbEntityDisplayListener
 	
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
 		DbEntity entity = (DbEntity)e.getEntity();
-		if (null == entity || e.isEntityChanged() == false) 
+		if (null == entity || !e.isEntityChanged()) 
 			return;
 		ignoreChange = true;
 		name.setText(entity.getName());

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,41 +53,47 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
-
+ 
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.*;
-import java.util.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
+import java.util.Vector;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.EntityWrapper;
+import org.objectstyle.cayenne.map.*;
 
-/** Detail view of the ObjEntity properties. 
- * @author Michael Misha Shengaout */
+/** 
+ * Detail view of the ObjEntity properties. 
+ * 
+ * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
+ */
 public class ObjEntityPane extends JPanel
 implements DocumentListener, ActionListener
 , ObjEntityDisplayListener, ExistingSelectionProcessor
 {
 	Mediator mediator;
 	
-	JLabel 		nameLbl;
 	JTextField	name;
 	String		oldName;
-	JLabel		classNameLbl;
 	JTextField	className;
 	JPanel		dbPane;
-	JLabel		dbNameLbl;
 	JComboBox	dbName;
 	JButton		dbNew;
-	/** At some point it will generate DbEntity from ObjEntity.
-	  * For now it will be invisible. */
-	JButton		dbGenerate;
+	
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
+	
 	
 	public ObjEntityPane(Mediator temp_mediator) {
 		super();		
@@ -101,58 +106,41 @@ implements DocumentListener, ActionListener
 		className.getDocument().addDocumentListener(this);
 		dbName.addActionListener(this);
 		dbNew.addActionListener(this);
-		dbGenerate.addActionListener(this);
 	}
 
-	private void init(){
+	private void init() {
 		SpringLayout layout = new SpringLayout();
-		setLayout(layout);
-
-		Box temp = Box.createHorizontalBox();
-
-		Spring pad = Spring.constant(5);
-		Spring ySpring = pad;
-		add(temp);
-		SpringLayout.Constraints cons = layout.getConstraints(temp);
-		cons.setY(ySpring);
-		cons.setX(pad);
+		this.setLayout(layout);
 
 		JLabel nameLbl = new JLabel("Entity name: ");
-		name = new JTextField(10);
+		name = new JTextField(25);
+		
 		JLabel classNameLbl	= new JLabel("Class name: ");
-		className = new JTextField(30);
-
-		temp.add(nameLbl);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(name);
-		temp.add(Box.createHorizontalStrut(12));
-		temp.add(classNameLbl);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(className);
-		temp.add(Box.createGlue());
-
-		// DB Pane
-		temp 	= Box.createHorizontalBox();
-		add(temp);
-		ySpring = Spring.sum(ySpring, cons.getConstraint("South"));
-		cons = layout.getConstraints(temp);
-		cons.setY(ySpring);
-		cons.setX(pad);
-
-		dbNameLbl	= new JLabel("Table name:");
-		temp.add(dbNameLbl);
-		temp.add(Box.createHorizontalStrut(5));
+		className = new JTextField(25);
+		
+		JLabel dbNameLbl = new JLabel("Table name:");
 		dbName 	= new JComboBox();
 		dbName.setBackground(Color.WHITE);
-		temp.add(dbName);
-		temp.add(Box.createHorizontalStrut(12));
+		
 		dbNew = new JButton("New");
-		temp.add(dbNew);
-		temp.add(Box.createHorizontalStrut(5));
-		dbGenerate= new JButton("Generate");
-		temp.add(dbGenerate);
-		temp.add(Box.createGlue());
-		dbGenerate.setVisible(false);
+		JPanel dbNewContainer = new JPanel();
+		dbNewContainer.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		dbNewContainer.add(dbNew);
+		
+		Component[] leftCol = new Component[] {
+			nameLbl, classNameLbl, dbNameLbl, new JLabel()
+		};
+		
+		Component[] rightCol = new Component[] {
+			name, className, dbName, dbNewContainer
+		};
+		
+		JPanel formPanel = PanelFactory.createForm(leftCol, rightCol, 5,5,5,5);
+		Spring pad = Spring.constant(5);
+		add(formPanel);
+		SpringLayout.Constraints cons = layout.getConstraints(formPanel);
+		cons.setY(pad);
+		cons.setX(pad);
 	}
 
 	public void processExistingSelection()

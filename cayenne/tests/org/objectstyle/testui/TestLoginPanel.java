@@ -1,4 +1,3 @@
-package org.objectstyle.testui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,12 +53,15 @@ package org.objectstyle.testui;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.testui;
 
-import org.objectstyle.cayenne.gui.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
+
 import javax.swing.*;
+
+import org.objectstyle.cayenne.gui.DbLoginPanel;
 
 
 /** Login panel that allows to quickly switch databases. */
