@@ -92,44 +92,25 @@ public abstract class QueryAssemblerHelper {
     protected void appendObjPath(StringBuffer buf, Expression pathExp) {
         Iterator it =
             getQueryAssembler().getRootEntity().resolvePathComponents(pathExp);
-        
-        // store last processed pass component 
-        // to determine if a FK attribute need to be appended
-        Object lastPathComp = null;
+
         while (it.hasNext()) {
-            lastPathComp = it.next();
-            if (lastPathComp instanceof ObjRelationship) {
-                // find and add joins ....
-                processRelParts((ObjRelationship) lastPathComp);
+            Object pathComp = it.next();
+            if (pathComp instanceof ObjRelationship) {
+
+                // if this is a last relationship in the path,
+                // instead of join, just append foreign key attribute
+                if (!it.hasNext()) {
+                    processRelTermination(buf, (ObjRelationship) pathComp);
+                }
+                else {
+                    // find and add joins ....
+                    processRelParts((ObjRelationship) pathComp);
+                }
             }
             else {
-                ObjAttribute objAttr = (ObjAttribute) lastPathComp;
+                ObjAttribute objAttr = (ObjAttribute) pathComp;
                 processColumn(buf, objAttr.getDbAttribute());
             }
-        }
-        
-        // append FK attribute here if path ends
-        // with relationship
-        if(lastPathComp instanceof ObjRelationship) {
-            List dbRels = ((ObjRelationship)lastPathComp).getDbRelationshipList();
-            
-            // get last DbRelationship on the list
-            DbRelationship dbRel = (DbRelationship)dbRels.get(dbRels.size() - 1);
-            List joins = dbRel.getJoins();
-            if(joins.size() != 1) {
-                                StringBuffer msg = new StringBuffer();
-                msg
-                    .append("OBJ_PATH expressions are only supported ")
-                    .append("for a single-join relationships. ")
-                    .append("This relationship has ")
-                    .append(joins.size())
-                    .append(" joins.");
-
-                throw new CayenneRuntimeException(msg.toString());
-            }
-            
-            DbAttribute srcAtt = ((DbAttributePair)joins.get(0)).getSource();
-            processColumn(buf, srcAtt);
         }
     }
 
@@ -214,7 +195,6 @@ public abstract class QueryAssemblerHelper {
         }
     }
 
-    
     /**
      * Appends SQL code to the query buffer to handle <code>val</code> as a
      * parameter to the PreparedStatement being built. Adds <code>val</code>
@@ -233,7 +213,6 @@ public abstract class QueryAssemblerHelper {
         // guessed without looking at DbAttribute...
         queryAssembler.addToParamList(null, val);
     }
-    
 
     /** 
      *  Processes ObjRelationship. Decomposes it into DbRelationships 
@@ -244,5 +223,27 @@ public abstract class QueryAssemblerHelper {
         while (it.hasNext()) {
             queryAssembler.dbRelationshipAdded((DbRelationship) it.next());
         }
+    }
+
+    protected void processRelTermination(StringBuffer buf, ObjRelationship rel) {
+        List dbRels = rel.getDbRelationshipList();
+
+        // get last DbRelationship on the list
+        DbRelationship dbRel = (DbRelationship) dbRels.get(dbRels.size() - 1);
+        List joins = dbRel.getJoins();
+        if (joins.size() != 1) {
+            StringBuffer msg = new StringBuffer();
+            msg
+                .append("OBJ_PATH expressions are only supported ")
+                .append("for a single-join relationships. ")
+                .append("This relationship has ")
+                .append(joins.size())
+                .append(" joins.");
+
+            throw new CayenneRuntimeException(msg.toString());
+        }
+
+        DbAttribute srcAtt = ((DbAttributePair) joins.get(0)).getSource();
+        processColumn(buf, srcAtt);
     }
 }
