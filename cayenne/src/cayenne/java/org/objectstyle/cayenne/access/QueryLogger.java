@@ -235,9 +235,11 @@ public class QueryLogger {
                 buf.append(']');
             }
 
-            if (time >= 0) {
+            // log preparation time only if it is something significant
+            if (time > 10) {
                 buf.append(" - prepared in ").append(time).append(" ms.");
             }
+            
             logObj.log(logLevel, buf.toString());
         }
     }
@@ -290,14 +292,6 @@ public class QueryLogger {
                 : "--- will run " + count + " queries.";
         logObj.log(logLevel, countStr);
 
-    }
-
-    /**
-    * Logs an event when select query only retrievs a range of rows
-    * from the whole result set.
-    */
-    public static void logQueryRange(org.apache.log4j.Level logLevel, int from, int to) {
-        logObj.log(logLevel, "--- will select rows from " + from + " to " + to);
     }
 
     public static boolean isLoggable(org.apache.log4j.Level logLevel) {
