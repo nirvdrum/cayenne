@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.conf;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -98,9 +100,9 @@ public class ConnectionProperties {
      * Returns ConnectionProperties singleton.
      */
     public static ConnectionProperties getInstance() {
-    	return sharedInstance;
+        return sharedInstance;
     }
-    
+
     /**
      * Loads connection properties from $HOME/.cayenne/connection.properties.
      */
@@ -111,12 +113,64 @@ public class ConnectionProperties {
             if (f.exists()) {
                 return new ConnectionProperties(
                     new ExtendedProperties(f.getAbsolutePath()));
+            } else {
+                // lets touch this file so that users would get a clue of what it is
+                createSamplPropertiesFile(f);
             }
         } catch (IOException e) {
             logObj.warn("Error loading connection properties. Ignoring..", e);
         }
 
         return new ConnectionProperties(new ExtendedProperties());
+    }
+
+    protected static void createSamplPropertiesFile(File f) throws IOException {
+        BufferedWriter out = new BufferedWriter(new FileWriter(f));
+
+        try {
+            out.write("# Cayenne named connections configuration file.");
+            out.newLine();
+
+            out.write("#");
+            out.newLine();
+            out.write("# Sample named connections (named 'example1' and 'example2'): ");
+            out.newLine();
+
+            out.write("#");
+            out.newLine();
+            out.write(
+                "# example1."
+                    + ADAPTER_KEY
+                    + " = org.objectstyle.cayenne.dba.mysql.MySQLAdapter");
+            out.newLine();
+            out.write("# example1." + USER_NAME_KEY + " = some_user");
+            out.newLine();
+            out.write("# example1." + PASSWORD_KEY + " = some_passwd");
+            out.newLine();
+            out.write("# example1." + URL_KEY + " = jdbc:mysql://noise/cayenne");
+            out.newLine();
+            out.write("# example1." + DRIVER_KEY + " = org.gjt.mm.mysql.Driver");
+            out.newLine();
+
+            // example 2
+            out.write("#");
+            out.newLine();
+            out.write(
+                "# example2."
+                    + ADAPTER_KEY
+                    + " = org.objectstyle.cayenne.dba.mysql.MySQLAdapter");
+            out.newLine();
+            out.write("# example2." + USER_NAME_KEY + " = some_user");
+            out.newLine();
+            out.write("# example2." + PASSWORD_KEY + " = some_passwd");
+            out.newLine();
+            out.write("# example2." + URL_KEY + " = jdbc:mysql://noise/cayenne");
+            out.newLine();
+            out.write("# example2." + DRIVER_KEY + " = org.gjt.mm.mysql.Driver");
+            out.newLine();
+        } finally {
+            out.close();
+        }
     }
 
     /**
