@@ -204,10 +204,15 @@ public class PerformMain implements TestConstants {
             // node
             DataNode node = new DataNode("node");
             node.setDataSource(ds);
-            String adapterClass = dsi.getAdapterClass();
-            if (adapterClass == null)
-                adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-            node.setAdapter((DbAdapter) Class.forName(adapterClass).newInstance());
+            
+            Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
+
+            if (dsi.getAdapterClass() != null) {
+                adapterClass = Class.forName(dsi.getAdapterClass());
+            }
+ 
+            node.setAdapter((DbAdapter) adapterClass.newInstance());
+            
             node.addDataMap(map);
 
             // generate pk's

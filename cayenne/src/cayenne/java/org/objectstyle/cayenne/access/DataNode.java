@@ -56,18 +56,22 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
@@ -81,8 +85,7 @@ import org.objectstyle.cayenne.query.Query;
 public class DataNode implements QueryEngine {
 	static Logger logObj = Logger.getLogger(DataNode.class.getName());
 
-	public static final String DEFAULT_ADAPTER_CLASS =
-		"org.objectstyle.cayenne.dba.JdbcAdapter";
+	public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
 
 	private static final DataMap[] noDataMaps = new DataMap[0];
 

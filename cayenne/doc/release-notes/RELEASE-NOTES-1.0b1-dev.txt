@@ -19,4 +19,6 @@ preset extensions, and project file version is saved in "cayenne.xml".
 Old format is still understood by Cayenne runtime. 
 
 3. GUI would allow to upgrade from the earlier projects.
+
+4. DataNode.DEFAULT_ADAPTER_CLASS is now an instance of Class, not String
  
