@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
@@ -329,9 +330,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     public String toString() {
-        StringBuffer buf = new StringBuffer();
-        buf.append("[DataMap '").append(name).append("']");
-        return buf.toString();
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append(getName());
+        return builder.toString();
     }
 
     /**

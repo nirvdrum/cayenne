@@ -226,7 +226,6 @@ public class DbRelationship extends Relationship {
         }
         
         DbJoin testJoin = new DbJoin(this);
-
         Iterator it = target.getRelationships().iterator();
         while (it.hasNext()) {
             DbRelationship rel = (DbRelationship) it.next();
@@ -234,8 +233,9 @@ public class DbRelationship extends Relationship {
                 continue;
 
             List otherJoins = rel.getJoins();
-            if (otherJoins.size() != joins.size())
+            if (otherJoins.size() != joins.size()) {
                 continue;
+            }
 
             Iterator jit = otherJoins.iterator();
             boolean joinsMatch = true;
@@ -251,9 +251,11 @@ public class DbRelationship extends Relationship {
                 }
             }
 
-            if (joinsMatch)
+            if (joinsMatch) {
                 return rel;
+            }
         }
+        
         return null;
     }
 

@@ -250,16 +250,13 @@ public class DbAttribute extends Attribute {
     /** Appends string representation of attribute to a provided buffer.
      *  This is a variation of "toString" method. It may be more
      *  efficient in some cases. For example, when printing all
-     *  attributes of a single entity together. */
+     *  attributes of a single entity together. 
+     * 
+     * @deprecated since 1.1
+     */
     public StringBuffer toStringBuffer(StringBuffer buf) {
         buf.append("   Column name: " + this.getName() + "\n");
         buf.append("   Column type: " + type + "\n");
         return buf;
     }
-
-    public String toString() {
-        StringBuffer buf = new StringBuffer("DbAttribute\n");
-        return this.toStringBuffer(buf).toString();
-    }
-
 }

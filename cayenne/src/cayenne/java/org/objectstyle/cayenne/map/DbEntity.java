@@ -187,35 +187,6 @@ public class DbEntity extends Entity implements DbAttributeListener {
         return primaryKeyRef;
     }
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer("DbEntity:");
-        sb.append("\nTable name: ").append(this.getName());
-
-        // 1. print attributes
-        Iterator attIt = this.getAttributes().iterator();
-        while (attIt.hasNext()) {
-            DbAttribute dbAttribute = (DbAttribute) attIt.next();
-            String name = dbAttribute.getName();
-            int type = dbAttribute.getType();
-            sb.append("\n   Column name: ").append(name);
-            if (dbAttribute.isPrimaryKey())
-                sb.append(" (pk)");
-
-            sb.append("\n   Column type: ").append(type);
-            sb.append("\n------------------");
-        }
-
-        // 2. print relationships
-        Iterator relIt = this.getRelationships().iterator();
-        while (relIt.hasNext()) {
-            DbRelationship dbRel = (DbRelationship) relIt.next();
-            sb.append("\n   Rel. to: ").append(dbRel.getTargetEntityName());
-            sb.append("\n------------------");
-        }
-
-        return sb.toString();
-    }
-
     public void addAttribute(Attribute attr) {
         super.addAttribute(attr);
         this.dbAttributeAdded(new AttributeEvent(this, attr, this, MapEvent.ADD));

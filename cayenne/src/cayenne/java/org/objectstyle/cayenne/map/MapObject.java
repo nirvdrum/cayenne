@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.util.CayenneMapEntry;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -106,5 +107,11 @@ public abstract class MapObject implements CayenneMapEntry, XMLSerializable {
      */
     public void setName(String name) {
         this.objName = name;
+    }
+    
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append(getName());
+        return builder.toString();
     }
 }

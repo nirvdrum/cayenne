@@ -117,37 +117,6 @@ public abstract class Relationship extends MapObject {
         this.targetEntityName = targetEntityName;
     }
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("[");
-        sb.append(this.getClass().getName());
-        sb.append(" - relationship '").append(this.getName());
-        if (toMany) {
-            sb.append("', to-many,");
-        }
-        else {
-            sb.append("', to-one,");
-        }
-
-        Entity src = this.getSourceEntity();
-        if (src == null) {
-            sb.append("<null>");
-        }
-        else {
-            sb.append(src.getName());
-        }
-
-        sb.append(" -> ");
-        String targetName = this.getTargetEntityName();
-        if (targetName == null)
-            sb.append("<null>");
-        else
-            sb.append(targetName);
-
-        sb.append("]");
-        return sb.toString();
-    }
-
     /** 
      * Tells whether relationship from source to target is to-one or to-many.
      * If one-to-many, getxxx() method of the data object class would 

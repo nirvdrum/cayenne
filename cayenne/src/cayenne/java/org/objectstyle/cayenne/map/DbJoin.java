@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -67,6 +68,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik
  */
 public class DbJoin implements XMLSerializable {
+
     protected DbRelationship relationship;
     protected String sourceName;
     protected String targetName;
@@ -85,8 +87,8 @@ public class DbJoin implements XMLSerializable {
     }
 
     /**
-     * Returns a "reverse" join. Join source relationship is not set
-     * and must be initialized by the caller.
+     * Returns a "reverse" join. Join source relationship is not set and must be
+     * initialized by the caller.
      */
     public DbJoin createReverseJoin() {
         DbJoin reverse = new DbJoin();
@@ -95,8 +97,8 @@ public class DbJoin implements XMLSerializable {
         return reverse;
     }
 
-    /** 
-     * Returns DbAttribute on on the left side of the join. 
+    /**
+     * Returns DbAttribute on on the left side of the join.
      */
     public DbAttribute getSource() {
         if (sourceName == null) {
@@ -163,8 +165,8 @@ public class DbJoin implements XMLSerializable {
 
         DbJoin j = (DbJoin) o;
         return j.relationship == this.relationship
-            && Util.nullSafeEquals(j.sourceName, this.sourceName)
-            && Util.nullSafeEquals(j.targetName, this.targetName);
+                && Util.nullSafeEquals(j.sourceName, this.sourceName)
+                && Util.nullSafeEquals(j.targetName, this.targetName);
     }
 
     public DbRelationship getRelationship() {
@@ -197,5 +199,12 @@ public class DbJoin implements XMLSerializable {
         }
 
         return relationship;
+    }
+
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("source", getSourceName());
+        builder.append("target", getTargetName());
+        return builder.toString();
     }
 }

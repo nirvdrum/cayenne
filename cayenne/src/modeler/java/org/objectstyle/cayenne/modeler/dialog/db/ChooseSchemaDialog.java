@@ -86,10 +86,10 @@ public class ChooseSchemaDialog extends CayenneDialog {
     public static final int SELECT = 1;
 
     protected JLabel schemaLabel;
-    protected JComboBox schemaSelect;
+    protected JComboBox schemaSelector;
     protected JTextField tabeNamePatternField;
-    protected JButton select;
-    protected JButton cancel;
+    protected JButton selectButton;
+    protected JButton cancelButton;
     protected int choice;
 
     /**
@@ -110,9 +110,9 @@ public class ChooseSchemaDialog extends CayenneDialog {
     protected void init() {
 
         // create widgets...
-        select = new JButton("Continue");
-        cancel = new JButton("Cancel");
-        schemaSelect = CayenneWidgetFactory.createComboBox();
+        selectButton = new JButton("Continue");
+        cancelButton = new JButton("Cancel");
+        schemaSelector = CayenneWidgetFactory.createComboBox();
         tabeNamePatternField = CayenneWidgetFactory.createTextField();
 
         // assemble
@@ -123,10 +123,10 @@ public class ChooseSchemaDialog extends CayenneDialog {
         builder.setDefaultDialogBorder();
 
         builder.append("Table Name Pattern:", tabeNamePatternField);
-        schemaLabel = builder.append("Schemas:", schemaSelect);
+        schemaLabel = builder.append("Schemas:", schemaSelector);
 
         JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {
-                select, cancel
+                selectButton, cancelButton
         });
 
         getContentPane().setLayout(new BorderLayout());
@@ -137,14 +137,14 @@ public class ChooseSchemaDialog extends CayenneDialog {
     }
 
     protected void initController() {
-        select.addActionListener(new ActionListener() {
+        selectButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 processSelect();
             }
         });
 
-        cancel.addActionListener(new ActionListener() {
+        cancelButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 processCancel();
@@ -157,12 +157,12 @@ public class ChooseSchemaDialog extends CayenneDialog {
         this.tabeNamePatternField.setText(DbLoader.WILDCARD);
 
         boolean showSchemaSelector = schemas != null && !schemas.isEmpty();
-        schemaSelect.setVisible(showSchemaSelector);
+        schemaSelector.setVisible(showSchemaSelector);
         schemaLabel.setVisible(showSchemaSelector);
 
         if (showSchemaSelector) {
 
-            schemaSelect.setModel(new DefaultComboBoxModel(schemas.toArray()));
+            schemaSelector.setModel(new DefaultComboBoxModel(schemas.toArray()));
 
             // select schema belonging to the user
             if (dbUserName != null) {
@@ -170,7 +170,7 @@ public class ChooseSchemaDialog extends CayenneDialog {
                 while (it.hasNext()) {
                     String schema = (String) it.next();
                     if (dbUserName.equalsIgnoreCase(schema)) {
-                        schemaSelect.setSelectedItem(schema);
+                        schemaSelector.setSelectedItem(schema);
                         break;
                     }
                 }
@@ -195,8 +195,8 @@ public class ChooseSchemaDialog extends CayenneDialog {
     /**
      * Returns selected schema.
      */
-    public String getSchemaName() {
-        String schema = (String) schemaSelect.getSelectedItem();
+    public String getSelectedSchema() {
+        String schema = (String) schemaSelector.getSelectedItem();
         return "".equals(schema) ? null : schema;
     }
 

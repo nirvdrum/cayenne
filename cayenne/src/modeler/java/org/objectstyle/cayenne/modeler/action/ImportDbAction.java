@@ -181,7 +181,7 @@ public class ImportDbAction extends CayenneAction {
                 return;
             }
 
-            String schemaName = dialog.getSchemaName();
+            String schemaName = dialog.getSelectedSchema();
             String tableNamePattern = dialog.getTableNamePattern();
             dialog.dispose();
 
