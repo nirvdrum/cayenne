@@ -79,11 +79,26 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	static Logger logObj =
 		Logger.getLogger(DriverDataSourceFactory.class.getName());
 
+    private static boolean applyWebAppPatch;
+    
+    static {
+    	// determine if servlet environment is even accessible
+    	try {
+    		Class.forName("javax.servlet.http.HttpSession");
+    		applyWebAppPatch = true;
+    	}
+    	catch(Exception ex) {
+    		applyWebAppPatch = false;
+    	}
+    }
+    	
 	protected XMLReader parser;
 	protected DataSourceInfo driverInfo;
 	protected Level logLevel = Level.FINER;
 	protected ResourceLocator locator;
 	protected Configuration parentConfig;
+	
+	
 
 	public DriverDataSourceFactory() throws Exception {
 		parser = Util.createXmlReader();
@@ -130,16 +145,21 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 	}
 
 	protected InputStream getInputStream(String location) {
+		InputStream in = getWebAppInputStream(location);
+		
+		// if not a web app, return to normal behavior
+		return (in != null) ? in : locator.findResourceStream(location);
+	}
+	
+	protected InputStream getWebAppInputStream(String location) {
 		// webapp patch - first lookup in WEB-INF
-		if (parentConfig != null
+		if (applyWebAppPatch && parentConfig != null
 			&& (parentConfig instanceof ServletConfiguration)) {
 			ServletConfiguration servlConf =
 				(ServletConfiguration) parentConfig;
 			return servlConf.getMapConfig(location);
 		}
-
-		// if not a web app, return to normal behavior
-		return locator.findResourceStream(location);
+		return null;
 	}
 
 	/** Loads driver information from the file at <code>location</code>.
