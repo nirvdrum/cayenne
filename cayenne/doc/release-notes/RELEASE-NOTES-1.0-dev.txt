@@ -13,17 +13,20 @@ works if internal Cayenne connection pool is used.
 
 2. Changed arbitrary queue size in connection pool to unlimited.
 
-3. Modeler: Added preselection of database connection info on "reengineer database"
+3. {Modeler}: Added preselection of database connection info on "reengineer database"
 when a DataNode is selected.
 
-4. Modeler: Added support for customizable sequences on Oracle.
+4. {Modeler}: Added support for customizable sequences on Oracle.
 
 5. Fixed bugs in EOModelProcessor that prevented incomplete (or argueably inconsistent) 
 EOModels from loading. Right now Cayenne will try to fix or ignore questionable 
 objects during import.
 
-6. Changed the way DataMaps are linked to DataNodes from being hidden deep in the menus
+6. {Modeler}: Changed the way DataMaps are linked to DataNodes from being hidden deep in the menus
 to be displayed on the DataMap panel instead.
+
+7. {Modeler}: Fixed visual inconsistencies happenning on delete of rows in tables, 
+such as Attributes and relationships. Bugs 707926, 664516.
 
 
 
