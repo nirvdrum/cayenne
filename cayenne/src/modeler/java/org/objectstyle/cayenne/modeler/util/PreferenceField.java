@@ -56,130 +56,167 @@
 
 package org.objectstyle.cayenne.modeler.util;
 
+import java.awt.Component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
+import javax.swing.JList;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.util.Util;
 
 public class PreferenceField extends JComboBox {
-	private static Logger logObj = Logger.getLogger(PreferenceField.class);
+    private static Logger logObj = Logger.getLogger(PreferenceField.class);
 
-	private String key;
+    private String key;
 
-	/** 
-	 * Values to put in pref field in addition to preference values.
-	 * These values are not going to be stored to preference file.
-	 */
-	private List initValues;
+    /** 
+     * Values to put in pref field in addition to preference values.
+     * These values are not going to be stored to preference file.
+     */
+    private List initValues;
 
-	/** 
-	 * Creates PreferenceField that will set preferences 
-	 * only on explicit call to <code>storePreferences()</code>.
-	 */
-	public PreferenceField(String key) {
-		this(key, new Vector());
-	}
+    /** 
+     * Creates PreferenceField that will set preferences 
+     * only on explicit call to <code>storePreferences()</code>.
+     */
+    public PreferenceField(String key) {
+        this(key, new Vector());
+    }
 
-	public PreferenceField(String key, List initValues) {
-		this.key = key;
-		setEditable(true);
-		setSelectedIndex(-1);
-		ModelerPreferences pref = ModelerPreferences.getPreferences();
-		this.initValues = initValues;
-		Vector v = new Vector(initValues);
+    public PreferenceField(String key, List initValues) {
+        this.key = key;
 
-		// If has key, append preference values to init values
-		if (pref.containsKey(key)) {
-			String[] options = pref.getStringArray(key);
-			if (options != null) {
-				v.addAll(Arrays.asList(options));
-			}
-		}
+        setRenderer(new Renderer(40));
+        setEditable(true);
+        setSelectedIndex(-1);
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        this.initValues = initValues;
+        Vector v = new Vector(initValues);
 
-		// If any values (init or pref), put them in the model
-		if (v.size() > 0) {
-			setModel(new DefaultComboBoxModel(v));
-		}
-		setSelectedItem(null);
-	}
+        // If has key, append preference values to init values
+        if (pref.containsKey(key)) {
+            String[] options = pref.getStringArray(key);
+            if (options != null) {
+                v.addAll(Arrays.asList(options));
+            }
+        }
 
-	/** 
-	 * Returns the text of the selected item or empty string 
-	 * if nothing is selected.
-	 */
-	public String getText() {
-		ComboBoxEditor editor = getEditor();
-		if (null == editor) {
-			return "";
-		}
-		return editor.getItem().toString();
-	}
+        // If any values (init or pref), put them in the model
+        if (v.size() > 0) {
+            setModel(new DefaultComboBoxModel(v));
+        }
+        setSelectedItem(null);
+    }
 
-	/** Adds string to the drop down and selects it. */
-	public void setText(String text) {
-		getEditor().setItem(text);
-	}
-	
-	/** 
-	 * Returns elements of the combo as string array. Doesn't check 
-	 * if currently selected item is in the drop down. 
-	 */
-	public Object[] getItems() {
-		DefaultComboBoxModel model = (DefaultComboBoxModel) getModel();
-		int size = model.getSize();
-		Object[] arr = new Object[size];
-		for (int i = 0; i < size; i++) {
-			arr[i] = model.getElementAt(i);
-		}
-		return arr;
-	}
-	
+    /** 
+     * Returns the text of the selected item or empty string 
+     * if nothing is selected.
+     */
+    public String getText() {
+        ComboBoxEditor editor = getEditor();
+        if (null == editor) {
+            return "";
+        }
+        return editor.getItem().toString();
+    }
 
-	/** 
-	 * Saves the drop down items and newly added item to preferences.
-	 */
-	public void storePreferences() {
-		DefaultComboBoxModel model = (DefaultComboBoxModel)getModel();
-		
-		// add new item to ComboBox if it is not there already
-		String item = getText();
-		if (item != null) {
-			item = item.trim();
-			if (item.length() > 0 && model.getIndexOf(item) < 0) {
-				model.addElement(item);
-			}
-		}
+    /** Adds string to the drop down and selects it. */
+    public void setText(String text) {
+        getEditor().setItem(text);
+    }
+
+    /** 
+     * Returns elements of the combo as string array. Doesn't check 
+     * if currently selected item is in the drop down. 
+     */
+    public Object[] getItems() {
+        DefaultComboBoxModel model = (DefaultComboBoxModel) getModel();
+        int size = model.getSize();
+        Object[] arr = new Object[size];
+        for (int i = 0; i < size; i++) {
+            arr[i] = model.getElementAt(i);
+        }
+        return arr;
+    }
+
+    /** 
+     * Saves the drop down items and newly added item to preferences.
+     */
+    public void storePreferences() {
+        DefaultComboBoxModel model = (DefaultComboBoxModel) getModel();
+
+        // add new item to ComboBox if it is not there already
+        String item = getText();
+        if (item != null) {
+            item = item.trim();
+            if (item.length() > 0 && model.getIndexOf(item) < 0) {
+                model.addElement(item);
+            }
+        }
 
         Object[] items = getItems();
-	    Arrays.sort(items);
-	    
-		ModelerPreferences pref = ModelerPreferences.getPreferences();
-		pref.remove(key);
-		
-		int size = items.length;
-		for(int i = 0; i < size; i++) {			
-			// Skip initial items (not from preferences)
-			if (initValues.contains(items[i])) {
-				continue;
-			}
+        Arrays.sort(items);
 
-			pref.addProperty(key, items[i]);
-		}
-		
-		model = new DefaultComboBoxModel(items);
-		model.setSelectedItem(item);
-	}
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        pref.remove(key);
 
-	public Document getDocument() {
-		return ((JTextComponent) getEditor().getEditorComponent())
-			.getDocument();
-	}
+        int size = items.length;
+        for (int i = 0; i < size; i++) {
+            // Skip initial items (not from preferences)
+            if (initValues.contains(items[i])) {
+                continue;
+            }
+
+            pref.addProperty(key, items[i]);
+        }
+
+        model = new DefaultComboBoxModel(items);
+        model.setSelectedItem(item);
+    }
+
+    public Document getDocument() {
+        return ((JTextComponent) getEditor().getEditorComponent())
+            .getDocument();
+    }
+
+    class Renderer extends DefaultListCellRenderer {
+    	protected int size;
+    	
+    	public Renderer(int size) {
+    		this.size = size;
+    	}
+    	
+        /**
+         * Will trim the value to fit defined size.
+         */
+        public Component getListCellRendererComponent(
+            JList list,
+            Object value,
+            int index,
+            boolean isSelected,
+            boolean cellHasFocus) {
+
+            if (size > 0 && !(value instanceof Icon) && value != null) {
+                value = Util.prettyTrim(value.toString(), size);
+            }
+
+            return super.getListCellRendererComponent(
+                list,
+                value,
+                index,
+                isSelected,
+                cellHasFocus);
+        }
+
+    }
 }

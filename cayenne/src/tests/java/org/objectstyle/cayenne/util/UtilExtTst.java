@@ -68,15 +68,20 @@ public class UtilExtTst extends CayenneTestCase {
 
     public void testPackagePath1() throws java.lang.Exception {
         String expectedPath = "org/objectstyle/cayenne/util";
-        assertEquals(expectedPath, Util.getPackagePath(UtilExtTst.class.getName()));
+        assertEquals(
+            expectedPath,
+            Util.getPackagePath(UtilExtTst.class.getName()));
     }
 
     public void testPackagePath2() throws java.lang.Exception {
         // inner class
-        class TmpTest extends Object {};
+        class TmpTest extends Object {
+        };
 
         String expectedPath = "org/objectstyle/cayenne/util";
-        assertEquals(expectedPath, Util.getPackagePath(TmpTest.class.getName()));
+        assertEquals(
+            expectedPath,
+            Util.getPackagePath(TmpTest.class.getName()));
     }
 
     public void testPackagePath3() throws java.lang.Exception {
@@ -189,8 +194,24 @@ public class UtilExtTst extends CayenneTestCase {
     }
 
     public void testUnwindException3() throws Exception {
-    	Throwable root = new Throwable();
+        Throwable root = new Throwable();
         CayenneException e = new CayenneException(root);
         assertSame(root, Util.unwindException(e));
+    }
+
+    public void testPrettyTrim1() throws Exception {
+        // size is too short, must throw
+        try {
+            Util.prettyTrim("abc", 4);
+        } catch (IllegalArgumentException ex) {
+            // expected
+        }
+    }
+
+    public void testPrettyTrim2() throws Exception {
+        assertEquals("123", Util.prettyTrim("123", 6));
+        assertEquals("123456", Util.prettyTrim("123456", 6));
+        assertEquals("1...67", Util.prettyTrim("1234567", 6));
+        assertEquals("1...78", Util.prettyTrim("12345678", 6));
     }
 }

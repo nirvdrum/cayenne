@@ -326,4 +326,31 @@ public class Util {
 
         return encoded.toString();
     }
+    
+    /**
+     * Trims long strings substituting middle part with "...".
+     * 
+     * @param str String to trim.
+     * @param maxLength maximum allowable length. Must be at least 5,
+     * or an IllegalArgumentException is thrown.
+     * 
+     * @return String
+     */
+    public static String prettyTrim(String str, int maxLength) {
+    	if(maxLength < 5) {
+    		throw new IllegalArgumentException("Algorithm for 'prettyTrim' works only with length >= 5. "
+    		+ "Supplied length is " + maxLength);
+    	}
+    	
+    	if(str == null || str.length() <= maxLength) {
+    		return str;
+    	}
+    	
+    	// find a section to cut off
+    	int len = maxLength - 3;
+    	int startLen = len / 2;
+    	int endLen = len - startLen;
+    	
+    	return str.substring(0, startLen) + "..." + str.substring(str.length() - endLen);
+    }
 }
