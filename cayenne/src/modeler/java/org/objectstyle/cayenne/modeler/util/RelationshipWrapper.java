@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.Relationship;
@@ -67,21 +68,19 @@ import org.objectstyle.cayenne.map.Relationship;
  * toString() method must return relationship name.
  */
 public class RelationshipWrapper{
-	//Relationship rel = null;
-	private List relationshipList=null;
+	private List relationshipList = null;
 	
 	public RelationshipWrapper(Relationship temp_rel){
 		super();
 		if(null!=temp_rel) {
-			relationshipList=new ArrayList();
-			relationshipList.add(temp_rel);
+			relationshipList = Collections.singletonList(temp_rel);
 		}
 	}
 	
 	public RelationshipWrapper(List relList){
 		super();
 		if(null != relList) {
-			relationshipList=new ArrayList(relList);
+			relationshipList = new ArrayList(relList);
 		}
 	}
 	

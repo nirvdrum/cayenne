@@ -471,7 +471,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
-            List columns = transl.getColumnList();
+            List columns = transl.getColumns();
             Collection dbAttrs = artistEnt.getAttributes();
 
             assertEquals(dbAttrs.size(), columns.size());
@@ -496,7 +496,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
-            List columns = transl.getColumnList();
+            List columns = transl.getColumns();
             Object[] dbAttrs = new Object[] { artistEnt.getAttribute("ARTIST_ID")};
 
             assertEquals(dbAttrs.length, columns.size());
@@ -518,7 +518,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
-            List columns = transl.getColumnList();
+            List columns = transl.getColumns();
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2
@@ -538,7 +538,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
             SelectTranslator transl = buildTranslator(con);
             transl.createSqlString();
 
-            List columns = transl.getColumnList();
+            List columns = transl.getColumns();
 
             // assert that the number of attributes in the query is right
             // 1 (obj attr) + 1 (pk) = 2

@@ -92,23 +92,24 @@ public class ObjRelationship extends Relationship {
 	private List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
 
 	public ObjRelationship() {
+		super();
 	}
 
 	public ObjRelationship(String name) {
 		super(name);
 	}
 
-	public ObjRelationship(
-		ObjEntity source,
-		ObjEntity target,
-		boolean toMany) {
-		setSourceEntity(source);
-		setTargetEntity(target);
-		setToMany(toMany);
-		if (toMany)
-			setName(target.getName() + "Array");
-		else
-			setName("to" + target.getName());
+	public ObjRelationship(ObjEntity source, ObjEntity target, boolean toMany) {
+		this();
+		this.setSourceEntity(source);
+		this.setTargetEntity(target);
+		this.setToMany(toMany);
+		if (toMany) {
+			this.setName(target.getName() + "Array");
+		}
+		else {
+			this.setName("to" + target.getName());
+		}
 	}
 
 	public Entity getTargetEntity() {

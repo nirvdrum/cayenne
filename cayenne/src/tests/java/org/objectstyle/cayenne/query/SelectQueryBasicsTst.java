@@ -87,23 +87,23 @@ public class SelectQueryBasicsTst extends CayenneTestCase {
     public void testAddOrdering1() throws Exception {
         Ordering ord = new Ordering();
         q.addOrdering(ord);
-        assertEquals(1, q.getOrderingList().size());
-        assertSame(ord, q.getOrderingList().get(0));
+        assertEquals(1, q.getOrderings().size());
+        assertSame(ord, q.getOrderings().get(0));
     }
 
     public void testAddPrefetching() throws Exception {
         String path = "a.b.c";
         q.addPrefetch(path);
-        assertEquals(1, q.getPrefetchList().size());
-        assertSame(path, q.getPrefetchList().get(0));
+        assertEquals(1, q.getPrefetches().size());
+        assertSame(path, q.getPrefetches().get(0));
     }
 
     public void testAddOrdering2() throws Exception {
         String path = "a.b.c";
         q.addOrdering(path, Ordering.DESC);
-        assertEquals(1, q.getOrderingList().size());
+        assertEquals(1, q.getOrderings().size());
 
-        Ordering ord = (Ordering) q.getOrderingList().get(0);
+        Ordering ord = (Ordering) q.getOrderings().get(0);
         assertEquals(path, ord.getSortSpec().getOperand(0));
         assertEquals(Ordering.DESC, ord.isAscending());
     }

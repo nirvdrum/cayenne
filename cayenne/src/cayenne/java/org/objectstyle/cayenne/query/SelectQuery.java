@@ -199,7 +199,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 
     /** Adds ordering specification to this query orderings. */
     public void addOrdering(String sortPathSpec, boolean isAscending) {
-        addOrdering(new Ordering(sortPathSpec, isAscending));
+        this.addOrdering(new Ordering(sortPathSpec, isAscending));
     }
 
     /** Adds ordering specification to this query orderings. */
@@ -207,13 +207,23 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
         String sortPathSpec,
         boolean isAscending,
         boolean ignoreCase) {
-        addOrdering(new Ordering(sortPathSpec, isAscending, ignoreCase));
+        this.addOrdering(new Ordering(sortPathSpec, isAscending, ignoreCase));
     }
 
-    /** Returns a list of orderings used by this query. */
-    public List getOrderingList() {
-        return orderings;
-    }
+	/**
+	 * Returns a list of orderings used by this query.
+	 * @deprecated Since 1.0 Beta1; use #getOrderings() instead.
+	 */
+	public List getOrderingList() {
+		return this.getOrderings();
+	}
+    
+	/**
+	 * Returns a list of orderings used by this query.
+	 */
+	public List getOrderings() {
+		return orderings;
+	}
     
     public void clearOrderings() {
         orderings.clear();
@@ -254,11 +264,11 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	 * @deprecated Since 1.0 Beta1; use #addCustomAttribute() instead
 	 */
 	public void addCustDbAttribute(String attributePath) {
-		customDbAttributes.add(attributePath);
+		this.customDbAttributes.add(attributePath);
 	}
     
 	public void addCustDbAttributes(List attrPaths) {
-		customDbAttributes.addAll(attrPaths);
+		this.customDbAttributes.addAll(attrPaths);
 	}
 
 	/**
@@ -304,13 +314,22 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 		return customDbAttributes.size() > 0;
 	}
 
-    /**
-     * Returns a list of relationships that must be prefetched 
-     * as a part of this query.
-     */
-    public List getPrefetchList() {
-        return prefetches;
-    }
+	/**
+	 * Returns a list of relationships that must be prefetched 
+	 * as a part of this query.
+	 * @deprecated Since 1.0 Beta1; use #getPrefetches() instead
+	 */
+	public List getPrefetchList() {
+		return this.getPrefetches();
+	}
+
+	/**
+	 * Returns a list of relationships that must be prefetched 
+	 * as a part of this query.
+	 */
+	public List getPrefetches() {
+		return prefetches;
+	}
 
     /** 
      * Adds a relationship path. ObjRelationship names are separated by ".".

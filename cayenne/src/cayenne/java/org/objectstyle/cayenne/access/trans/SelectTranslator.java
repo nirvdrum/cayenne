@@ -99,13 +99,22 @@ public class SelectTranslator extends SelectQueryAssembler {
      */
     private boolean forceDistinct;
 
-    /**
-     * Returns a list of DbAttributes representing columns
-     * in this query.
-     */
-    protected List getColumnList() {
-        return columnList;
-    }
+	/**
+	 * Returns a list of DbAttributes representing columns
+	 * in this query.
+	 * @deprecated Since 1.0 Beta1; use #getColumns() instead.
+	 */
+	protected List getColumnList() {
+		return this.getColumns();
+	}
+
+	/**
+	 * Returns a list of DbAttributes representing columns
+	 * in this query.
+	 */
+	protected List getColumns() {
+		return columnList;
+	}
 
     public int getFetchLimit() {
         return getSelectQuery().getFetchLimit();

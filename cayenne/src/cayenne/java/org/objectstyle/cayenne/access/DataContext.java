@@ -774,7 +774,7 @@ public class DataContext implements QueryEngine, Serializable {
                 Object q = it.next();
                 if (q instanceof SelectQuery) {
                     SelectQuery sel = (SelectQuery) q;
-                    List prefetchRels = sel.getPrefetchList();
+                    List prefetchRels = sel.getPrefetches();
                     if (prefetchRels != null && prefetchRels.size() > 0) {
                         Iterator prIt = prefetchRels.iterator();
                         while (prIt.hasNext()) {
@@ -809,7 +809,7 @@ public class DataContext implements QueryEngine, Serializable {
      * arbitrary limitation and will be removed soon.</i></p>
      */
     public void prefetchRelationships(SelectQuery query, List objects) {
-        List prefetches = query.getPrefetchList();
+        List prefetches = query.getPrefetches();
 
         if (objects == null
             || prefetches == null

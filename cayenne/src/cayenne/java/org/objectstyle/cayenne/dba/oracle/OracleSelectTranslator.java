@@ -142,7 +142,7 @@ public class OracleSelectTranslator extends SelectTranslator {
             // apply Oracle optimization of the statement
 
             // 1. name result columns
-            List columns = getColumnList();
+            List columns = getColumns();
             int len = columns.size();
             Object[] args = new Object[2];
             for (int i = 0; i < len; i++) {

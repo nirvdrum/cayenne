@@ -87,7 +87,7 @@ public class OrderingTranslator extends QueryAssemblerHelper {
             return null;
 
         StringBuffer buf = new StringBuffer();
-        List list = ((SelectQuery) q).getOrderingList();
+        List list = ((SelectQuery) q).getOrderings();
         int len = list.size();
 
         for (int i = 0; i < len; i++) {

@@ -131,8 +131,7 @@ public class IncrementalFaultList implements List {
         this.internalQuery.setRoot(query.getRoot());
         this.internalQuery.setLoggingLevel(query.getLoggingLevel());
         if (query instanceof SelectQuery) {
-            this.internalQuery.addPrefetches(
-                ((SelectQuery) query).getPrefetchList());
+            this.internalQuery.addPrefetches(((SelectQuery) query).getPrefetches());
         }
 
         fillIn(query);
@@ -181,7 +180,7 @@ public class IncrementalFaultList implements List {
             }
 
             // process prefetching
-            if (internalQuery.getPrefetchList().size() > 0) {
+            if (internalQuery.getPrefetches().size() > 0) {
                 int endOfPage =
                     (elements.size() < pageSize) ? elements.size() : pageSize;
                 dataContext.prefetchRelationships(
@@ -318,7 +317,7 @@ public class IncrementalFaultList implements List {
         }
 
         // process prefetching
-        if (internalQuery.getPrefetchList().size() > 0) {
+        if (internalQuery.getPrefetches().size() > 0) {
             int endOfPage =
                 (elements.size() < toIndex) ? elements.size() : toIndex;
             dataContext.prefetchRelationships(
