@@ -60,7 +60,7 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * A FlattenedObjectId is a class that uniquely identifies 
  * an object that is the destination of a flattened relationship
- * that is defined by a series of toOne relationships
+ * that is defined by a series of toOne relationships.
  * 
  * <p>It encapsulates enough information (relationship, source object 
  * pk etc.) in order for DataContext to fetch the appropriate row
