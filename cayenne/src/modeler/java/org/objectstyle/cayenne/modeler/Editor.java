@@ -81,6 +81,9 @@ import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.SimpleLayout;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.action.AddDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
@@ -102,7 +105,8 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
-import org.objectstyle.cayenne.modeler.control.*;
+import org.objectstyle.cayenne.modeler.control.StatusBarController;
+import org.objectstyle.cayenne.modeler.control.TopController;
 import org.objectstyle.cayenne.modeler.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -121,16 +125,15 @@ import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.modeler.util.XmlFilter;
-import org.objectstyle.cayenne.modeler.view.*;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectSet;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
+import org.scopemvc.core.Control;
 
 /** 
  * Main frame of CayenneModeler. Responsibilities include 
@@ -182,7 +185,7 @@ public class Editor
     protected Properties props;
     protected final JFileChooser fileChooser = new JFileChooser();
     protected XmlFilter xmlFilter = new XmlFilter();
-    protected StatusBarController status;
+    protected TopController controller = new TopController();
 
     /** Returns an editor singleton object. */
     public static Editor getFrame() {
@@ -279,6 +282,8 @@ public class Editor
 
         // these are legacy methods being refactored out
         initOther();
+
+        controller.startup();
     }
 
     /**
@@ -428,12 +433,11 @@ public class Editor
             }
         });
     }
-    
+
     protected void initStatusBar() {
-    	StatusBarView statusBar = new StatusBarView();
-    	getContentPane().add(statusBar, BorderLayout.SOUTH);
-    	status = new StatusBarController();
-    	status.startup(statusBar);
+        StatusBarView statusBar = new StatusBarView();
+        getContentPane().add(statusBar, BorderLayout.SOUTH);
+        controller.setStatusBarView(statusBar);
     }
 
     /** Initializes main toolbar. */
@@ -500,6 +504,9 @@ public class Editor
         getAction(SaveAction.ACTION_NAME).setEnabled(false);
         getAction(CreateDomainAction.ACTION_NAME).setEnabled(false);
 
+        controller.handleControl(
+            new Control(TopModel.STATUS_MESSAGE_KEY, "Project closed..."));
+
         // repaint is needed, since there is a trace from menu left on the screen
         repaint();
         setProjectTitle(null);
@@ -523,8 +530,9 @@ public class Editor
         validate();
 
         setProjectTitle(project.getMainProjectFile().getAbsolutePath());
-        
-        status.projectOpened();
+
+        controller.handleControl(
+            new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
     }
 
     /**
@@ -534,7 +542,7 @@ public class Editor
         Properties props = new Properties();
         InputStream in =
             this.getClass().getClassLoader().getResourceAsStream(
-                 CayenneAction.RESOURCE_PATH + "gui.properties");
+                CayenneAction.RESOURCE_PATH + "gui.properties");
         if (in != null) {
             try {
                 props.load(in);

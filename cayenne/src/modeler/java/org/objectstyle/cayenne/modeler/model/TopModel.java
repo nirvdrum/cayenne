@@ -53,74 +53,69 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.control;
+package org.objectstyle.cayenne.modeler.model;
 
-import org.objectstyle.cayenne.modeler.model.TopModel;
-import org.objectstyle.cayenne.modeler.view.StatusBarView;
-import org.scopemvc.controller.basic.BasicController;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
+import org.objectstyle.cayenne.project.Project;
+import org.scopemvc.core.ModelChangeTypes;
+import org.scopemvc.core.Selector;
 
 /**
+ * A top level MVC model object in CayenneModeler.
+ * 
  * @author Andrei Adamchik
  */
-public class StatusBarController extends BasicController {
+public class TopModel {
+    public static final String STATUS_MESSAGE_KEY = "statusMessage";
 
-    public StatusBarController(TopModel model) {
-        setModel(model);
+    protected Project currentProject;
+    protected String statusMessage;
+    protected Object[] selectedPath;
+
+    /**
+     * Returns the currentProject.
+     * @return Project
+     */
+    public Project getCurrentProject() {
+        return currentProject;
     }
 
-    protected void doUpdate(String message) {
-        TopModel model = (TopModel) getModel();
-        if (model == null) {
-            return;
-        }
-
-        synchronized (model) {
-            model.setStatusMessage(message);
-            ((StatusBarView) getView()).refresh();
-        }
-
-        // start message cleanup thread that would remove the message after X seconds
-        if (message != null && message.trim().length() > 0) {
-            Thread cleanup = new ExpireThread(message, 6);
-            cleanup.start();
-        }
-
+    /**
+     * Returns the selectedPath.
+     * @return Object[]
+     */
+    public Object[] getSelectedPath() {
+        return selectedPath;
     }
 
-    class ExpireThread extends Thread {
-        protected int seconds;
-        protected String message;
-
-        public ExpireThread(String message, int seconds) {
-            this.seconds = seconds;
-            this.message = message;
-        }
-
-        public void run() {
-            try {
-                sleep(seconds * 1000);
-            } catch (InterruptedException e) {
-                // ignore exception
-            }
-
-            TopModel model = (TopModel) getModel();
-            if (model == null) {
-                return;
-            }
-
-            synchronized (model) {
-                if (message.equals(model.getStatusMessage())) {
-                    doUpdate(null);
-                }
-            }
-        }
+    /**
+     * Returns the statusMessage.
+     * @return String
+     */
+    public String getStatusMessage() {
+        return statusMessage;
     }
 
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
-            doUpdate((String) control.getParameter());
-        }
+    /**
+     * Sets the currentProject.
+     * @param currentProject The currentProject to set
+     */
+    public void setCurrentProject(Project currentProject) {
+        this.currentProject = currentProject;
+    }
+
+    /**
+     * Sets the selectedPath.
+     * @param selectedPath The selectedPath to set
+     */
+    public void setSelectedPath(Object[] selectedPath) {
+        this.selectedPath = selectedPath;
+    }
+
+    /**
+     * Sets the statusMessage.
+     * @param statusMessage The statusMessage to set
+     */
+    public void setStatusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
     }
 }

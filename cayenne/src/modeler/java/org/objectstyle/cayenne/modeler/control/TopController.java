@@ -64,63 +64,31 @@ import org.scopemvc.core.ControlException;
 /**
  * @author Andrei Adamchik
  */
-public class StatusBarController extends BasicController {
+public class TopController extends BasicController {
+    protected StatusBarController statusController;
 
-    public StatusBarController(TopModel model) {
+    /**
+     * Constructor for TopController.
+     */
+    public TopController() {
+        TopModel model = new TopModel();
+        statusController = new StatusBarController(model);
         setModel(model);
     }
 
-    protected void doUpdate(String message) {
-        TopModel model = (TopModel) getModel();
-        if (model == null) {
-            return;
-        }
-
-        synchronized (model) {
-            model.setStatusMessage(message);
-            ((StatusBarView) getView()).refresh();
-        }
-
-        // start message cleanup thread that would remove the message after X seconds
-        if (message != null && message.trim().length() > 0) {
-            Thread cleanup = new ExpireThread(message, 6);
-            cleanup.start();
-        }
-
+    public void setStatusBarView(StatusBarView view) {
+        statusController.setView(view);
     }
 
-    class ExpireThread extends Thread {
-        protected int seconds;
-        protected String message;
-
-        public ExpireThread(String message, int seconds) {
-            this.seconds = seconds;
-            this.message = message;
-        }
-
-        public void run() {
-            try {
-                sleep(seconds * 1000);
-            } catch (InterruptedException e) {
-                // ignore exception
-            }
-
-            TopModel model = (TopModel) getModel();
-            if (model == null) {
-                return;
-            }
-
-            synchronized (model) {
-                if (message.equals(model.getStatusMessage())) {
-                    doUpdate(null);
-                }
-            }
-        }
+    public TopModel getTopModel() {
+        return (TopModel) getModel();
     }
 
     protected void doHandleControl(Control control) throws ControlException {
+    	// pass control to the child that knows how to handle it
         if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
-            doUpdate((String) control.getParameter());
+        	control.markUnmatched();
+            statusController.doHandleControl(control);
         }
     }
 }
