@@ -60,15 +60,19 @@ import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.EOModelFileFilter;
 import org.objectstyle.cayenne.gui.util.EOModelSelectFilter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 import org.objectstyle.util.Preferences;
 
 /**
@@ -77,6 +81,9 @@ import org.objectstyle.util.Preferences;
  * @author Andrei Adamchik
  */
 public class ImportEOModelAction extends CayenneAction {
+	static Logger logObj =
+		Logger.getLogger(ImportEOModelAction.class.getName());
+
 	protected JFileChooser eoModelChooser;
 
 	/**
@@ -111,9 +118,54 @@ public class ImportEOModelAction extends CayenneAction {
 				Preferences.LAST_EOM_DIR,
 				file.getParent());
 
-			System.out.println("File: " + file);
+			try {
+				String path = file.getCanonicalPath();
+				DataMap map = new EOModelProcessor().loadEOModel(path);
+				addDataMap(map);
+			} catch (Exception ex) {
+				logObj.log(Level.INFO, "EOModel Loading Exception", ex);
+			}
+
 		}
 	}
+
+	/** 
+	 * Adds DataMap into the project.
+	 */
+	protected void addDataMap(DataMap map) {
+		DataMap currentMap = mediator.getCurrentDataMap();
+
+		if (currentMap != null) {
+			// merge with existing map
+			// loader.loadDataMapFromDB(schema_name, null, map);
+			currentMap.mergeWithDataMap(map);
+			map = currentMap;
+		} else {
+			String relLocation = CreateDataMapAction.getMapLocation(mediator);
+			if (relLocation == null) {
+				return;
+			}
+			map.setLocation(relLocation);
+		}
+
+		// If this is adding to existing data map, remove it
+		// and re-add to the BroseView
+		if (currentMap != null) {
+			mediator.fireDataMapEvent(
+				new DataMapEvent(Editor.getFrame(), map, DataMapEvent.REMOVE));
+			mediator.fireDataMapEvent(
+				new DataMapEvent(Editor.getFrame(), map, DataMapEvent.ADD));
+			mediator.fireDataMapDisplayEvent(
+				new DataMapDisplayEvent(
+					Editor.getFrame(),
+					map,
+					mediator.getCurrentDataDomain(),
+					mediator.getCurrentDataNode()));
+		} else {
+			mediator.addDataMap(Editor.getFrame(), map);
+		}
+	}
+
 
 	/** 
 	 * Returns EOModel chooser.

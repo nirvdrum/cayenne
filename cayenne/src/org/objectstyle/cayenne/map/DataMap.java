@@ -94,6 +94,31 @@ public class DataMap {
     public void setName(String name) {
         this.name = name;
     }
+    
+    /** 
+     * Adds all Object and DB entities from another map
+     * to this map. Overwrites all existing entities with the
+     * new ones.
+     * 
+     * <p><i>FIXME: will need to implement advanced merge
+     * that allows different policies for overwriting entities.
+     * </i></p>
+     */
+    public void mergeWithDataMap(DataMap map) {
+    	Iterator dbs = map.getDbEntitiesAsList().iterator();
+    	while(dbs.hasNext()) {
+    		DbEntity ent = (DbEntity)dbs.next();
+    		this.removeDbEntity(ent.getName());
+    		this.addDbEntity(ent);
+    	}
+    	
+    	Iterator objs = map.getObjEntitiesAsList().iterator();
+    	while(objs.hasNext()) {
+    		ObjEntity ent = (ObjEntity)objs.next();
+    		this.removeObjEntity(ent.getName());
+    		this.addObjEntity(ent);
+    	}
+    }
 
     /** Returns "location" property value.
       * Location is abstract and treated differently

@@ -232,13 +232,12 @@ public class DbLoader {
             DbEntity temp = map.getDbEntity(table.getName());
             if (null != temp) {
                 if (duplicate == YesNoToAllDialog.UNDEFINED) {
-                    YesNoToAllDialog dialog;
-                    dialog =
+                    YesNoToAllDialog dialog =
                         new YesNoToAllDialog(
-                            "Duplicate table name",
-                            "Data map already contains db entity for table "
+                            "Duplicate Table Name",
+                            "Data map already contains DB entity for table '"
                                 + table.getName()
-                                + ". Overwrite?");
+                                + "'. Overwrite?");
                     int code = dialog.getStatus();
                     dialog.dispose();
                     if (YesNoToAllDialog.CANCEL == code)
