@@ -81,7 +81,7 @@ public class BasicServletConfiguration extends Configuration {
 
     public static BasicServletConfiguration initConfig(ServletContext ctxt) {
         BasicServletConfiguration conf = new BasicServletConfiguration(ctxt);
-        Configuration.initSharedConfiguration(conf);
+        Configuration.initializeSharedConfiguration(conf);
         return conf;
     }
 
@@ -104,25 +104,35 @@ public class BasicServletConfiguration extends Configuration {
         return servletContext;
     }
 
-	/**
-	 * @see org.objectstyle.cayenne.conf.Configuration#getResourceLocator()
-	 */
-	public ResourceLocator getResourceLocator()
-	{
-		// @HH: create a suitable ResourceLoader here
+	protected boolean shouldInitialize() {
+		return true;
+	}
+
+	protected void initialize() throws Exception {
+	}
+
+	protected void didInitialize() {
+	}
+
+	public ResourceLocator getResourceLocator() {
+		// @HH create a suitable ResourceLoader here
 		return null;
 	}
 
-	/** Locates domain configuration file in a web application
-	  * looking for "cayenne.xml" in application "WEB-INF" directory. */
-	public InputStream getDomainConfiguration() {
+	/**
+	 * Locates domain configuration file in a web application
+	 * looking for "cayenne.xml" in application "WEB-INF" directory.
+	 */
+	protected InputStream getDomainConfiguration() {
 		return servletContext.getResourceAsStream("/WEB-INF/" + DEFAULT_DOMAIN_FILE);
 	}
 
-	/** Locates data map configuration file via ServletContext
-	  * associated with this Configuration treating 
-	  * <code>location</code> as relative to application "WEB-INF" directory.. */
-	public InputStream getMapConfiguration(String location) {
+	/**
+	 * Locates data map configuration file via ServletContext
+	 * associated with this Configuration treating 
+	 * <code>location</code> as relative to application "WEB-INF" directory..
+	 */
+	protected InputStream getMapConfiguration(String location) {
 		return servletContext.getResourceAsStream("/WEB-INF/" + location);
 	}
 

@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.conf;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
@@ -80,95 +79,134 @@ public class DefaultConfiguration extends Configuration {
 
 	protected ResourceLocator locator;
 	protected File projectFile;
+	protected boolean shouldInitialize = false;
 
+	/**
+	 * @HH todo
+	 */
 	public DefaultConfiguration() {
-		// configure CLASSPATH-only locator
-		locator = new ResourceLocator();
-		locator.setSkipAbsolutePath(true);
-		locator.setSkipClasspath(false);
-		locator.setSkipCurrentDirectory(true);
-		locator.setSkipHomeDirectory(true);
-
-		// add the current Configuration subclass' package as additional path.
-		if (!(this.getClass().equals(DefaultConfiguration.class))) {
-			locator.addClassPath(Util.getPackagePath(this.getClass().getName()));
-		}
-
-		// Configuration superclass statically defines what 
-		// ClassLoader to use for resources. This
-		// allows applications to control where resources 
-		// are loaded from.
-		locator.setClassLoader(Configuration.getResourceLoader());
+		super();
 	}
 
 	/**
-	 * Creates configuration object that uses provided file 
-	 * for the main project file, ignoring any other lookup strategies.
+	 * @HH todo
 	 */
-	public DefaultConfiguration(File projectFile) {
-		this();
-		if (projectFile != null) {
-			this.projectFile = projectFile;
-			this.getResourceLocator().addFilesystemPath(this.projectDirectory().getPath());
-		}
-	}
+	protected boolean shouldInitialize() {
+		logObj.debug("shouldInitialize started.");
 
-	public ResourceLocator getResourceLocator() {
-		return locator;
-	}
+		// a subclass might have set the ResourceLocator already;
+		// do not overwrite it.
+		if (this.getResourceLocator() == null) {
+			// configure CLASSPATH-only locator
+			ResourceLocator l = new ResourceLocator();
+			l.setSkipAbsolutePath(true);
+			l.setSkipClasspath(false);
+			l.setSkipCurrentDirectory(true);
+			l.setSkipHomeDirectory(true);
 
-	public File projectFile() {
-		return projectFile;
-	}
-
-	public File projectDirectory() {
-		File pfile = this.projectFile();
-		if (pfile != null) {
-			return pfile.getParentFile();
-		}
-		else {
-			return null;
-		}
-	}
-
-	/** Returns domain configuration as a stream or null if it
-	  * can not be found. This method will look for "cayenne.xml"
-	  * file in locations accessible to ClassLoader (in Java CLASSPATH).
-	  * This can be a standalone file or an entry in a JAR file. */
-	public InputStream getDomainConfiguration() {
-		File pfile = this.projectFile();
-		if (pfile != null) {
-			try {
-				return new FileInputStream(pfile);
+			// add the current Configuration subclass' package as additional path.
+			if (!(this.getClass().equals(DefaultConfiguration.class))) {
+				l.addClassPath(Util.getPackagePath(this.getClass().getName()));
 			}
-			catch (Throwable ex) {
-	            logObj.warn("Error opening project file.", ex);
-	            throw new ConfigurationException("Error opening project file.", ex);
-			}
+
+			// Configuration superclass statically defines what 
+			// ClassLoader to use for resources. This
+			// allows applications to control where resources 
+			// are loaded from.
+			l.setClassLoader(Configuration.getResourceLoader());
+		
+			// remember configured ResourceLocator
+			this.setResourceLocator(l);
 		}
-		else {
-			return locator.findResourceStream(DEFAULT_DOMAIN_FILE);
-		}
+
+		// allow to proceed
+		return true;
 	}
 
-	/** Returns DataMap configuration from a specified location or null if it
-	  * can not be found. This method will look for resource identified by
-	  * <code>location</code> in places accessible to ClassLoader (in Java CLASSPATH).
-	  * This can be a standalone file or an entry in a JAR file. */
-	public InputStream getMapConfiguration(String location) {
+	/** 
+	 * Initializes all Cayenne resources. Loads all configured domains and their
+	 * data maps, initializes all domain Nodes and their DataSources.
+	 * Calls #didInitialize() after completion.
+	 */
+	protected void initialize() throws Exception {
+		logObj.debug("initialize starting.");
+
+		InputStream in = this.getDomainConfiguration();
+		if (in == null) {
+			StringBuffer msg = new StringBuffer();
+			msg
+				.append("[")
+				.append(this.getClass().getName())
+				.append("] : Domain configuration file \"")
+				.append(DEFAULT_DOMAIN_FILE)
+				.append("\" is not found.");
+
+			throw new ConfigurationException(msg.toString());
+		}
+
+		ConfigLoaderDelegate delegate = this.getLoaderDelegate();
+		if (delegate == null) {
+			delegate = new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
+		}
+
+		ConfigLoader loader = new ConfigLoader(delegate);
+
 		try {
-			File dir = this.projectDirectory();
-			if (dir != null) {
-				return new FileInputStream(new File(dir, location));
-			}
-		} catch (Throwable ex) {
-            logObj.warn("Error opening map file.", ex);
-            throw new ConfigurationException("Error opening map file.", ex);
+			loader.loadDomains(in);
+		} finally {
+			this.loadStatus = delegate.getStatus();
+			in.close();
 		}
 
+		logObj.debug("initialize finished.");
+		this.didInitialize();
+	}
+
+	/**
+	 * @HH todo
+	 */
+	protected void didInitialize() {
+		// empty default implementation
+		logObj.debug("didInitialize finished.");
+	}
+
+	/**
+	 * @HH todo
+	 */
+	public ResourceLocator getResourceLocator() {
+		return this.locator;
+	}
+
+	/**
+	 * @HH todo
+	 */
+	protected void setResourceLocator(ResourceLocator locator) {
+		this.locator = locator;
+	}
+
+	/**
+	 * Returns domain configuration as a stream or null if it
+	 * can not be found. This method will look for "cayenne.xml"
+	 * file in locations accessible to ClassLoader (in Java CLASSPATH).
+	 * This can be a standalone file or an entry in a JAR file.
+	 */
+	protected InputStream getDomainConfiguration() {
+		return locator.findResourceStream(DEFAULT_DOMAIN_FILE);
+	}
+
+	/**
+	 * Returns DataMap configuration from a specified location or null if it
+	 * can not be found. This method will look for resource identified by
+	 * <code>location</code> in places accessible to ClassLoader (in Java CLASSPATH).
+	 * This can be a standalone file or an entry in a JAR file.
+	 */
+	protected InputStream getMapConfiguration(String location) {
 		return locator.findResourceStream(location);
 	}
 
+	/**
+	 * @see Object#toString()
+	 */
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
 		buf
@@ -179,4 +217,5 @@ public class DefaultConfiguration extends Configuration {
 			.append(']');
 		return buf.toString();
 	}
+
 }

@@ -90,9 +90,9 @@ public abstract class Configuration {
 
     public static final String DEFAULT_LOGGING_PROPS_FILE = ".cayenne/cayenne-log.properties";
     public static final String DEFAULT_DOMAIN_FILE = "cayenne.xml";
-    public static final Class DEFAULT_CONFIG_CLASS = DefaultConfiguration.class;
+    public static final Class DEFAULT_CONFIGURATION_CLASS = DefaultConfiguration.class;
 
-    protected static Configuration sharedConfig;
+    protected static Configuration sharedConfiguration;
     private static boolean loggingConfigured;
 
     /** 
@@ -125,7 +125,7 @@ public abstract class Configuration {
      * Search for the properties file called <code>cayenne-log.properties</code> 
      * is first done in $HOME/.cayenne, then in CLASSPATH.
      */
-    public synchronized static void configCommonLogging() {
+    public synchronized static void configureCommonLogging() {
         if (!Configuration.isLoggingConfigured()) {
 			// create a simple CLASSPATH/$HOME locator
             ResourceLocator locator = new ResourceLocator();
@@ -158,10 +158,16 @@ public abstract class Configuration {
         }
     }
 
+	/**
+	 * @HH todo
+	 */
 	public static boolean isLoggingConfigured() {
 		return loggingConfigured;
 	}
 
+	/**
+	 * @HH todo
+	 */
 	protected synchronized static void setLoggingConfigured(boolean state) {
 		loggingConfigured = state;
 	}
@@ -174,11 +180,7 @@ public abstract class Configuration {
 	 * @deprecated Since 1.0 Beta1; use #getSharedConfiguration() instead.
 	 */
 	public synchronized static Configuration getSharedConfig() {
-		if (sharedConfig == null) {
-			Configuration.initSharedConfig();
-		}
-
-		return sharedConfig;
+		return Configuration.getSharedConfiguration();
 	}
 
 	/**
@@ -188,13 +190,16 @@ public abstract class Configuration {
 	 * before your application code has a chance to call this method.
 	 */
 	public synchronized static Configuration getSharedConfiguration() {
-		if (sharedConfig == null) {
-			Configuration.initSharedConfiguration();
+		if (sharedConfiguration == null) {
+			Configuration.initializeSharedConfiguration();
 		}
 
-		return sharedConfig;
+		return sharedConfiguration;
 	}
 
+	/**
+	 * @HH todo
+	 */
     public static ClassLoader getResourceLoader() {
         return resourceLoader;
     }
@@ -210,7 +215,7 @@ public abstract class Configuration {
     }
 
     /**
-     * Sets default log level for loading configuration.
+     * Sets the default log level for loading a configuration.
      */
     public static void setLoggingLevel(Level logLevel) {
     	logObj.setLevel(logLevel);
@@ -221,20 +226,9 @@ public abstract class Configuration {
 	 * org.objectstyle.cayenne.conf.DefaultConfiguration will be 
 	 * instantiated and assigned to a singleton instance of
 	 * Configuration.
-	 * @deprecated Since 1.0 Beta1; use #initSharedConfiguration(Class) instead.
 	 */
-	public static void initSharedConfig() {
-		Configuration.initSharedConfig(DEFAULT_CONFIG_CLASS.getName());
-	}
-
-	/**
-	 * Creates and initializes shared Configuration object.
-	 * org.objectstyle.cayenne.conf.DefaultConfiguration will be 
-	 * instantiated and assigned to a singleton instance of
-	 * Configuration.
-	 */
-	public static void initSharedConfiguration() {
-		Configuration.initSharedConfiguration(DEFAULT_CONFIG_CLASS);
+	public static void initializeSharedConfiguration() {
+		Configuration.initializeSharedConfiguration(DEFAULT_CONFIGURATION_CLASS);
 	}
 
 	/**
@@ -243,37 +237,30 @@ public abstract class Configuration {
 	 * @deprecated Since 1.0 Beta1; use #initSharedConfiguration(Class) instead.
 	 */
 	public static void initSharedConfig(String configClass) {
-		Configuration conf = null;
-
-		// separate instantiation exceptions from the
-		// possible runtime exceptions thrown in initSharedConfig
 		try {
-			conf = (Configuration)Class.forName(configClass).newInstance();
+			Configuration.initializeSharedConfiguration(Class.forName(configClass));
 		} catch (Exception ex) {
 			logObj.error("Error initializing shared Configuration", ex);
 			throw new ConfigurationException("Error initializing shared Configuration");
 		}
-
-		Configuration.initSharedConfig(conf);
 	}
 
 	/**
 	 * Creates and initializes shared Configuration object with
 	 * custom Configuration subclass.
 	 */
-	public static void initSharedConfiguration(Class configClass) {
+	public static void initializeSharedConfiguration(Class configClass) {
 		Configuration conf = null;
 
 		// separate instantiation exceptions from the
 		// possible runtime exceptions thrown in initSharedConfig
 		try {
 			conf = (Configuration)configClass.newInstance();
+			Configuration.initializeSharedConfiguration(conf);
 		} catch (Exception ex) {
 			logObj.error("Error initializing shared Configuration", ex);
 			throw new ConfigurationException("Error initializing shared Configuration");
 		}
-
-		Configuration.initSharedConfiguration(conf);
 	}
 
 	/**
@@ -282,30 +269,59 @@ public abstract class Configuration {
 	 * @deprecated Since 1.0 Beta1; use #initSharedConfiguration(Class) instead.
 	 */
 	public static void initSharedConfig(Configuration conf) {
+		Configuration.initializeSharedConfiguration(conf);
+	}
+
+	/**
+	 * Sets shared Configuration object to a new Configuration object.
+	 * Calls the <code>initialize</code> method of <code>conf</code>.
+	 */
+	public static void initializeSharedConfiguration(Configuration conf) {
 		try {
-			sharedConfig = conf;
-			sharedConfig.init();
+			sharedConfiguration = conf;
+			// sharedConfiguration.initialize();
 		} catch (Exception ex) {
 			throw new ConfigurationException("Error initializing shared Configuration", ex);
 		}
 	}
 
 	/**
-	 * Sets shared Configuration object to a new Configuration object.
-	 * calls <code>init</code> method of <code>conf</code> object.
+	 * @HH todo
 	 */
-	public static void initSharedConfiguration(Configuration conf) {
-		try {
-			sharedConfig = conf;
-			sharedConfig.init();
-		} catch (Exception ex) {
-			throw new ConfigurationException("Error initializing shared Configuration", ex);
+	protected Configuration() {
+		super();
+
+		// first of all set up logging
+		this.configureLogging();
+
+		// Load domains if we can; Subclasses can call #initialize() later
+		// when they feel like it.
+		if (this.shouldInitialize()) {
+			try {
+				this.initialize();
+			} catch (Exception ex) {
+				throw new ConfigurationException(ex);
+			}
 		}
 	}
 
-    public ConfigLoaderDelegate getLoaderDelegate() {
-    	return new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
-    }
+	/**
+	 * @HH todo
+	 * @throws Exception
+	 */
+	protected abstract boolean shouldInitialize();
+
+	/**
+	 * @HH todo
+	 * @throws Exception
+	 */
+	protected abstract void initialize() throws Exception;
+
+	/**
+	 * @HH todo
+	 * @throws Exception
+	 */
+	protected abstract void didInitialize();
 
 	/**
 	 * Returns the resource locator used for finding and loading resources 
@@ -316,56 +332,20 @@ public abstract class Configuration {
 	 * Returns domain configuration as a stream or null if it
 	 * can not be found.
 	 */
-	public abstract InputStream getDomainConfiguration();
+	protected abstract InputStream getDomainConfiguration();
 
 	/**
 	 * Returns DataMap configuration from a specified location or
 	 * null if it can not be found.
 	 */
-	public abstract InputStream getMapConfiguration(String location);
-
-    /** 
-     * Initializes all Cayenne resources. Loads all configured domains and their
-     * data maps, initializes all domain Nodes and their DataSources.
-     */
-    public void init() throws Exception {
-		// first of all set up logging
-        this.configureLogging();
-
-        InputStream in = this.getDomainConfiguration();
-        if (in == null) {
-            StringBuffer msg = new StringBuffer();
-            msg
-                .append("[")
-                .append(this.getClass().getName())
-                .append("] : Domain configuration file \"")
-                .append(DEFAULT_DOMAIN_FILE)
-                .append("\" is not found.");
-
-            throw new ConfigurationException(msg.toString());
-        }
-
-        ConfigLoaderDelegate delegate = getLoaderDelegate();
-        if(delegate == null) {
-        	delegate = new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
-        }
-        
-        ConfigLoader loader = new ConfigLoader(delegate);
-
-        try {
-            loader.loadDomains(in);
-        } finally {
-            this.loadStatus = delegate.getStatus();
-            in.close();
-        }
-    }
+	protected abstract InputStream getMapConfiguration(String location);
 
     /**
      * Configures Log4J. This implementation calls
-     * <code>configCommonLogging</code>.
+     * <code>Configuration.configureCommonLogging</code>.
      */
     protected void configureLogging() {
-        Configuration.configCommonLogging();
+        Configuration.configureCommonLogging();
     }
 
     /**
@@ -383,14 +363,18 @@ public abstract class Configuration {
         this.overrideFactory = overrideFactory;
     }
 
-    /** Adds new DataDomain to the list of registered domains. */
+    /**
+     * Adds new DataDomain to the list of registered domains.
+     */
     public void addDomain(DataDomain domain) {
         dataDomains.put(domain.getName(), domain);
 		logObj.debug("added domain: " + domain.getName());
     }
 
-    /** Returns registered domain matching <code>name</code>
-      * or null if no such domain is found. */
+    /**
+     * Returns registered domain matching <code>name</code>
+     * or null if no such domain is found.
+     */
     public DataDomain getDomain(String name) {
         return (DataDomain) dataDomains.get(name);
     }
@@ -462,5 +446,12 @@ public abstract class Configuration {
     public ConfigStatus getLoadStatus() {
         return loadStatus;
     }
+
+	/**
+	 * @HH todo
+	 */
+	public ConfigLoaderDelegate getLoaderDelegate() {
+		return new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
+	}
 
 }
