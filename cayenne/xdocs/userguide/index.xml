@@ -41,9 +41,8 @@
             
             <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>
             <ul>
-                <li><a href="appguide/index.html#intro">5.1 Introduction</a></li>
-                <li><a href="appguide/project.html#datamap">5.2 Cayenne Project</a></li>
-                <li><a href="appguide/javagen.html#javagen">5.3 Generating Java Classes</a></li>
+                <li><a href="appguide/project.html#datamap">5.1 Cayenne Project</a></li>
+                <li><a href="appguide/javagen.html#javagen">5.2 Generating Java Classes</a></li>
             </ul><br/></li>
             
             <li><a href="datactxt/index.html">6. Using DataContext</a>

@@ -11,7 +11,7 @@
 </navigator>
 <body>
     <section name="5. Writing Cayenne Applications">        
-        <subsection name="5.2 Cayenne Project" anchor="datamap">
+        <subsection name="5.1 Cayenne Project" anchor="datamap">
             <p>Cayenne project is a set of XML configuration files
             needed for a Java application to work with Cayenne. While project
             files can be edited by hand, there is a 

@@ -9,16 +9,14 @@
 
 <body>
     <section name="5. Writing Cayenne Applications">
-        <subsection name="5.1 Introduction" anchor="intro">
             <p>The following steps are needed to write and deploy a Cayenne 
-            application. <i>Each one of the steps is discussed in detail in the 
-            following subsections.</i></p>
+            application. They are discussed in detail in the following chapters.</p>
             
             <p><strong>- Create Cayenne Project : </strong> 
             Cayenne project is a set of configuration files
             needed for a Java application to work with Cayenne. All these
-            files are in XML format. They can either be edited by hand or
-            using CayenneModeler GUI tool.
+            files are in XML format. The easiest way to create them is to use CayenneModeler GUI tool.
+            But they can be created and edited by hand as well.
             </p>
             
             <p><strong>- Generate Java classes : </strong> In Cayenne
@@ -28,11 +26,9 @@
             CayenneModeler can be used to generate and maintain such Java classes.            
             </p>
             
-            <p><strong>- Access Cayenne classes from your Java code : </strong> 
-            Access to Cayenne functionality at the user (Java developer) level 
-            is done via  <a 
-            href="../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
-            class.      
+            <p><strong>- Write an actual application : </strong> 
+            Write a Java application taking advantage of Cayenne functionality. 
+            Note: <a href="../datactxt/index.html">DataContext</a> is normally an access point to Cayenne.      
             </p>
             
             <p><strong>- Configure deployment environment : </strong> 
@@ -40,7 +36,6 @@
             configure Cayenne in a few ways. Possible deployment scenarious include 
             standalone application, web application, EJB application.
             </p>
-        </subsection>
     </section>
 </body>
 </document>
