@@ -21,8 +21,6 @@ public abstract class SimpleNode extends Expression implements Node {
     protected Node[] children;
     protected int id;
 
-    protected Object value;
-
     /**
      * Utility method that encodes an object that is not an expression Node to String.
      */
@@ -37,7 +35,7 @@ public abstract class SimpleNode extends Expression implements Node {
             pw.print('\"');
         }
     }
-    
+
     /**
      * Utility method that prints a string to the provided PrintWriter,
      * escaping special characters.
@@ -82,18 +80,7 @@ public abstract class SimpleNode extends Expression implements Node {
         id = i;
     }
 
-    protected void setValue(Object value) {
-        this.value = value;
-    }
-
-    protected Object getValue() {
-        return value;
-    }
-
-    protected String getExpressionOperator(int index) {
-        throw new UnsupportedOperationException(
-            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
-    }
+    protected abstract String getExpressionOperator(int index);
 
     /**
      * Implemented for backwards compatibility with exp package.
@@ -145,7 +132,9 @@ public abstract class SimpleNode extends Expression implements Node {
     }
 
     public void encodeAsString(PrintWriter pw) {
-        pw.print((parent == null) ? "" : "(");
+        if (parent != null) {
+            pw.print("(");
+        }
 
         if ((children != null) && (children.length > 0)) {
             for (int i = 0; i < children.length; ++i) {

@@ -62,6 +62,7 @@ package org.objectstyle.cayenne.exp.parser;
  * @since 1.1
  */
 public abstract class ASTPath extends SimpleNode {
+    protected Object path;
 
     ASTPath(int i) {
         super(i);
@@ -73,7 +74,7 @@ public abstract class ASTPath extends SimpleNode {
 
     public Object getOperand(int index) {
         if (index == 0) {
-            return value;
+            return path;
         }
 
         throw new ArrayIndexOutOfBoundsException(index);
@@ -84,6 +85,19 @@ public abstract class ASTPath extends SimpleNode {
             throw new ArrayIndexOutOfBoundsException(index);
         }
 
-        this.value = value;
+        this.path = value;
+    }
+
+    protected void setPath(Object path) {
+        this.path = path;
+    }
+
+    protected Object getPath() {
+        return path;
+    }
+
+    protected String getExpressionOperator(int index) {
+        throw new UnsupportedOperationException(
+            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
     }
 }

@@ -70,13 +70,14 @@ import org.objectstyle.cayenne.exp.Expression;
  * @author Andrei Adamchik
  */
 public class ASTList extends SimpleNode {
+    protected Object[] values;
 
     /**
      * Initializes a list expression with an Object[].
      */
     public ASTList(Object[] objects) {
         super(ExpressionParserTreeConstants.JJTLIST);
-        setValue(objects);
+        setValues(objects);
     }
 
     /**
@@ -84,7 +85,7 @@ public class ASTList extends SimpleNode {
      */
     public ASTList(Collection objects) {
         super(ExpressionParserTreeConstants.JJTLIST);
-        setValue(objects);
+        setValues(objects);
     }
 
     /**
@@ -92,7 +93,7 @@ public class ASTList extends SimpleNode {
      */
     public ASTList(Iterator objects) {
         super(ExpressionParserTreeConstants.JJTLIST);
-        setValue(objects);
+        setValues(objects);
     }
 
     ASTList(int id) {
@@ -116,8 +117,6 @@ public class ASTList extends SimpleNode {
 
     public void encodeAsString(PrintWriter pw) {
         pw.print('(');
-
-        Object[] values = (Object[]) value;
 
         if ((values != null) && (values.length > 0)) {
             for (int i = 0; i < values.length; ++i) {
@@ -144,7 +143,7 @@ public class ASTList extends SimpleNode {
 
     public Object getOperand(int index) {
         if (index == 0) {
-            return value;
+            return values;
         }
 
         throw new ArrayIndexOutOfBoundsException(index);
@@ -155,22 +154,22 @@ public class ASTList extends SimpleNode {
             throw new ArrayIndexOutOfBoundsException(index);
         }
 
-        setValue(value);
+        setValues(value);
     }
 
     /**
      * Sets an internal collection of values. Value argument
      * can be an Object[], a Collection or an iterator.
      */
-    protected void setValue(Object value) {
+    protected void setValues(Object value) {
         if (value == null) {
-            this.value = null;
+            this.values = null;
         }
         else if (value instanceof Object[]) {
-            this.value = value;
+            this.values = (Object[]) value;
         }
         else if (value instanceof Collection) {
-            this.value = ((Collection) value).toArray();
+            this.values = ((Collection) value).toArray();
         }
         else if (value instanceof Iterator) {
             List values = new ArrayList();
@@ -179,7 +178,7 @@ public class ASTList extends SimpleNode {
                 values.add(it.next());
             }
 
-            this.value = values.toArray();
+            this.values = values.toArray();
         }
         else {
             throw new IllegalArgumentException(
@@ -201,7 +200,7 @@ public class ASTList extends SimpleNode {
             listValue[i] = unwrapChild(jjtGetChild(i));
         }
 
-        setValue(listValue);
+        setValues(listValue);
 
         // clean children - we are not supposed to use them anymore
         children = null;

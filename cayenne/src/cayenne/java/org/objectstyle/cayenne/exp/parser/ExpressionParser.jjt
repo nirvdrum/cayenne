@@ -283,13 +283,13 @@ void pathExpression() : {
 }
 {
    ( 
-     t = <PROPERTY_PATH> { jjtThis.setValue(t.image); } #ObjPath(0)
+     t = <PROPERTY_PATH> { jjtThis.setPath(t.image); } #ObjPath(0)
    | 
      "obj:" 
-     t = <PROPERTY_PATH> { jjtThis.setValue(t.image); } #ObjPath(0)
+     t = <PROPERTY_PATH> { jjtThis.setPath(t.image); } #ObjPath(0)
    |
      "db:" 
-     t = <PROPERTY_PATH> { jjtThis.setValue(t.image); } #DbPath(0)
+     t = <PROPERTY_PATH> { jjtThis.setPath(t.image); } #DbPath(0)
    )
 }
 

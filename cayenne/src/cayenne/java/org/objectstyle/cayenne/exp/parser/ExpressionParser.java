@@ -781,7 +781,7 @@ public class ExpressionParser/*@bgen(jjtree)*/implements ExpressionParserTreeCon
       try {
                            jjtree.closeNodeScope(jjtn001,  0);
                            jjtc001 = false;
-                           jjtn001.setValue(t.image);
+                           jjtn001.setPath(t.image);
       } finally {
                            if (jjtc001) {
                              jjtree.closeNodeScope(jjtn001,  0);
@@ -797,7 +797,7 @@ public class ExpressionParser/*@bgen(jjtree)*/implements ExpressionParserTreeCon
       try {
                            jjtree.closeNodeScope(jjtn002,  0);
                            jjtc002 = false;
-                           jjtn002.setValue(t.image);
+                           jjtn002.setPath(t.image);
       } finally {
                            if (jjtc002) {
                              jjtree.closeNodeScope(jjtn002,  0);
@@ -813,7 +813,7 @@ public class ExpressionParser/*@bgen(jjtree)*/implements ExpressionParserTreeCon
       try {
                            jjtree.closeNodeScope(jjtn003,  0);
                            jjtc003 = false;
-                           jjtn003.setValue(t.image);
+                           jjtn003.setPath(t.image);
       } finally {
                            if (jjtc003) {
                              jjtree.closeNodeScope(jjtn003,  0);

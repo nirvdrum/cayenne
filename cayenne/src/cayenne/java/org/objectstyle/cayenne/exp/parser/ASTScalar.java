@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @author Andrei Adamchik
  */
 public class ASTScalar extends SimpleNode {
+    protected Object value;
 
     public ASTScalar(Object value) {
         super(ExpressionParserTreeConstants.JJTSCALAR);
@@ -90,5 +91,18 @@ public class ASTScalar extends SimpleNode {
 
     public void encodeAsString(PrintWriter pw) {
         SimpleNode.encodeScalarAsString(pw, value);
+    }
+
+    protected void setValue(Object value) {
+        this.value = value;
+    }
+
+    protected Object getValue() {
+        return value;
+    }
+    
+    protected String getExpressionOperator(int index) {
+        throw new UnsupportedOperationException(
+            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
     }
 }

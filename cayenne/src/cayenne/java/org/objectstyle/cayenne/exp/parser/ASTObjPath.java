@@ -64,7 +64,7 @@ public class ASTObjPath extends ASTPath {
 
     public ASTObjPath(Object value) {
         super(ExpressionParserTreeConstants.JJTOBJPATH);
-        setValue(value);
+        setPath(value);
     }
 
     /**
@@ -79,12 +79,12 @@ public class ASTObjPath extends ASTPath {
      */
     public Expression shallowCopy() {
         ASTObjPath copy = new ASTObjPath(id);
-        copy.value = value;
+        copy.path = path;
         return copy;
     }
 
     public void encodeAsString(PrintWriter pw) {
-        pw.print(value);
+        pw.print(path);
     }
 
     public int getType() {

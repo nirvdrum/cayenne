@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.exp.Expression;
 public class ASTDbPath extends ASTPath {
     public ASTDbPath(Object value) {
         super(ExpressionParserTreeConstants.JJTDBPATH);
-        setValue(value);
+        setPath(value);
     }
 
     ASTDbPath(int id) {
@@ -80,13 +80,13 @@ public class ASTDbPath extends ASTPath {
      */
     public Expression shallowCopy() {
         ASTDbPath copy = new ASTDbPath(id);
-        copy.value = value;
+        copy.path = path;
         return copy;
     }
 
     public void encodeAsString(PrintWriter pw) {
         pw.print("db:");
-        pw.print(value);
+        pw.print(path);
     }
 
     public int getType() {

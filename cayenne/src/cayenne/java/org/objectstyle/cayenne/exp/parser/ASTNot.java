@@ -90,4 +90,9 @@ public class ASTNot extends SimpleNode {
         pw.print("not ");
         super.encodeAsString(pw);
     }
+    
+    protected String getExpressionOperator(int index) {
+        throw new UnsupportedOperationException(
+            "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");
+    }
 }
