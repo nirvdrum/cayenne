@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.exp.TraversalHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -469,15 +468,4 @@ public class QualifierTranslator
             objectMatchTranslator.setRelationship(rel);
         }
     }
-
-    /*   protected void processRelTermination(
-           StringBuffer buf,
-           ObjRelationship rel) {
-           if (!matchingObject) {
-               super.processRelTermination(buf, rel);
-           } else {
-               objectMatchTranslator.setRelationship(rel);
-           }
-       } */
-
 }

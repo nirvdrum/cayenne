@@ -60,6 +60,8 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.objectstyle.art.CompoundFkTest;
 import org.objectstyle.art.CompoundPkTest;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -69,39 +71,116 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextCompoundRelTst extends CayenneTestCase {
-	protected DataContext ctxt;
-   
+    protected DataContext ctxt;
+
     protected void setUp() throws Exception {
-       getDatabaseSetup().cleanTableData();
-       ctxt = getDomain().createDataContext();
-    }
-    
-    public void testInsert() throws Exception {
-    	CompoundPkTest master = (CompoundPkTest)ctxt.createAndRegisterNewObject("CompoundPkTest");
-		CompoundFkTest detail = (CompoundFkTest)ctxt.createAndRegisterNewObject("CompoundFkTest");
-		master.addToCompoundFkArray(detail);
-		master.setName("m1");
-		master.setKey1("key11");
-		master.setKey2("key21");
-		detail.setName("d1");
-		
-		ctxt.commitChanges(Level.WARN);
-		
-		// reset context
-		ctxt = getDomain().createDataContext();
-		
-		SelectQuery q = new SelectQuery(CompoundPkTest.class);
-		List objs = ctxt.performQuery(q);
-		assertEquals(1, objs.size());
-		
-		master = (CompoundPkTest)objs.get(0);
-		assertEquals("m1", master.getName());
-		
-		List details = master.getCompoundFkArray();
-		assertEquals(1, details.size());
-		detail = (CompoundFkTest)details.get(0);
-		
-		assertEquals("d1", detail.getName());
+        getDatabaseSetup().cleanTableData();
+        ctxt = getDomain().createDataContext();
     }
 
+    public void testInsert() throws Exception {
+        CompoundPkTest master =
+            (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
+        CompoundFkTest detail =
+            (CompoundFkTest) ctxt.createAndRegisterNewObject("CompoundFkTest");
+        master.addToCompoundFkArray(detail);
+        master.setName("m1");
+        master.setKey1("key11");
+        master.setKey2("key21");
+        detail.setName("d1");
+
+        ctxt.commitChanges(Level.WARN);
+
+        // reset context
+        ctxt = getDomain().createDataContext();
+
+        SelectQuery q = new SelectQuery(CompoundPkTest.class);
+        List objs = ctxt.performQuery(q);
+        assertEquals(1, objs.size());
+
+        master = (CompoundPkTest) objs.get(0);
+        assertEquals("m1", master.getName());
+
+        List details = master.getCompoundFkArray();
+        assertEquals(1, details.size());
+        detail = (CompoundFkTest) details.get(0);
+
+        assertEquals("d1", detail.getName());
+    }
+
+    public void testFetchQualifyingToOne() throws Exception {
+        CompoundPkTest master =
+            (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
+        CompoundPkTest master1 =
+            (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
+        CompoundFkTest detail =
+            (CompoundFkTest) ctxt.createAndRegisterNewObject("CompoundFkTest");
+        CompoundFkTest detail1 =
+            (CompoundFkTest) ctxt.createAndRegisterNewObject("CompoundFkTest");
+        master.addToCompoundFkArray(detail);
+        master1.addToCompoundFkArray(detail1);
+
+        master.setName("m1");
+        master.setKey1("key11");
+        master.setKey2("key21");
+
+        master1.setName("m2");
+        master1.setKey1("key12");
+        master1.setKey2("key22");
+
+        detail.setName("d1");
+
+        detail1.setName("d2");
+
+        ctxt.commitChanges(Level.WARN);
+
+        // reset context
+        ctxt = getDomain().createDataContext();
+
+        Expression qual = ExpressionFactory.matchExp("toCompoundPk", master);
+        SelectQuery q = new SelectQuery(CompoundFkTest.class, qual);
+        List objs = ctxt.performQuery(q);
+        assertEquals(1, objs.size());
+
+        detail = (CompoundFkTest) objs.get(0);
+        assertEquals("d1", detail.getName());
+    }
+
+	public void testFetchQualifyingToMany() throws Exception {
+		   CompoundPkTest master =
+			   (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
+		   CompoundPkTest master1 =
+			   (CompoundPkTest) ctxt.createAndRegisterNewObject("CompoundPkTest");
+		   CompoundFkTest detail =
+			   (CompoundFkTest) ctxt.createAndRegisterNewObject("CompoundFkTest");
+		   CompoundFkTest detail1 =
+			   (CompoundFkTest) ctxt.createAndRegisterNewObject("CompoundFkTest");
+		   master.addToCompoundFkArray(detail);
+		   master1.addToCompoundFkArray(detail1);
+
+		   master.setName("m1");
+		   master.setKey1("key11");
+		   master.setKey2("key21");
+
+		   master1.setName("m2");
+		   master1.setKey1("key12");
+		   master1.setKey2("key22");
+
+		   detail.setName("d1");
+
+		   detail1.setName("d2");
+
+		   ctxt.commitChanges(Level.WARN);
+
+		   // reset context
+		   ctxt = getDomain().createDataContext();
+
+		   Expression qual = ExpressionFactory.matchExp("compoundFkArray", detail1);
+		   SelectQuery q = new SelectQuery(CompoundPkTest.class, qual);
+		   List objs = ctxt.performQuery(q);
+		   assertEquals(1, objs.size());
+
+		   master = (CompoundPkTest) objs.get(0);
+		   assertEquals("m2", master.getName());
+	   }
 }
