@@ -93,8 +93,8 @@ public abstract class Configuration {
     public static final String DEFAULT_DOMAIN_FILE = "cayenne.xml";
     public static final Class DEFAULT_CONFIGURATION_CLASS = DefaultConfiguration.class;
 
-    protected static Configuration sharedConfiguration;
-    private static boolean loggingConfigured;
+    protected static Configuration sharedConfiguration = null;
+    private static boolean loggingConfigured = false;
 
     /** 
      * Defines a ClassLoader to use for resource lookup.
@@ -102,13 +102,14 @@ public abstract class Configuration {
      * to locate resources may need to be bootstrapped
      * explicitly.
      */
-    private static ClassLoader resourceLoader = Configuration.class.getClassLoader();
+	protected static ClassLoader resourceLoader = Configuration.class.getClassLoader();
 
     /** Lookup map that stores DataDomains with names as keys. */
-    protected CayenneMap dataDomains = new CayenneMap(this);
+	protected CayenneMap dataDomains = new CayenneMap(this);
 	protected Collection dataDomainsRef = Collections.unmodifiableCollection(dataDomains.values());
-    protected DataSourceFactory overrideFactory;
-    protected ConfigStatus loadStatus = new ConfigStatus();
+	protected DataSourceFactory overrideFactory;
+	protected ConfigStatus loadStatus = new ConfigStatus();
+	protected String domainConfigurationName = DEFAULT_DOMAIN_FILE;
 	protected boolean ignoringLoadFailures = false;
 
 	/** 
@@ -195,18 +196,18 @@ public abstract class Configuration {
 	 * before your application code has a chance to call this method.
 	 */
 	public synchronized static Configuration getSharedConfiguration() {
-		if (sharedConfiguration == null) {
+		if (Configuration.sharedConfiguration == null) {
 			Configuration.initializeSharedConfiguration();
 		}
 
-		return sharedConfiguration;
+		return Configuration.sharedConfiguration;
 	}
 
 	/**
 	 * Returns the ClassLoader used to load resources.
 	 */
     public static ClassLoader getResourceLoader() {
-        return resourceLoader;
+        return Configuration.resourceLoader;
     }
 
     /** 
@@ -223,7 +224,7 @@ public abstract class Configuration {
      * Sets the default log level for loading a configuration.
      */
     public static void setLoggingLevel(Level logLevel) {
-    	logObj.setLevel(logLevel);
+		logObj.setLevel(logLevel);
     }
 
 	/**
@@ -273,19 +274,32 @@ public abstract class Configuration {
 	 * Sets the shared Configuration object to a new Configuration object.
 	 */
 	public static void setSharedConfiguration(Configuration conf) {
-		sharedConfiguration = conf;
+		Configuration.sharedConfiguration = conf;
 	}
 
 	/**
 	 * Default constructor for new Configuration instances.
+	 * Simply calls {@link Configuration#Configuration(String)}.
+	 * @see Configuration#Configuration(String)
+	 */
+	protected Configuration() {
+		this(DEFAULT_DOMAIN_FILE);
+	}
+
+	/**
+	 * Default constructor for new Configuration instances using the
+	 * given resource name as the main domain file.
 	 * First calls {@link #configureLogging}, then {@link #shouldInitialize}
 	 * and - if permitted - {@link #initialize} follwed by {@link #didInitialize}.
 	 */
-	protected Configuration() {
+	protected Configuration(String domainConfigurationName) {
 		super();
 
-		// first of all set up logging
+		// set up logging
 		this.configureLogging();
+
+		// set domain configuration name
+		this.setDomainConfigurationName(domainConfigurationName);
 
 		// Load domains if we can; Subclasses can call #initialize() later
 		// when they feel like it.
@@ -298,6 +312,7 @@ public abstract class Configuration {
 			}
 		}
 	}
+
 
 	/**
 	 * Indicate whether {@link #initialize} should be called.
@@ -323,16 +338,17 @@ public abstract class Configuration {
 	public abstract ResourceLocator getResourceLocator();
 
 	/**
-	 * Returns domain configuration as a stream or <code>null</code> if it
-	 * cannot be found.
+	 * Returns a DataDomain as a stream or <code>null</code>
+	 * if it cannot be found.
 	 */
 	protected abstract InputStream getDomainConfiguration();
 
 	/**
-	 * Returns DataMap configuration from a specified location or
-	 * <code>null</code> if it cannot be found.
+	 * Returns a DataMap with the given name or <code>null</code>
+	 * if it cannot be found.
 	 */
-	protected abstract InputStream getMapConfiguration(String location);
+	protected abstract InputStream getMapConfiguration(String name);
+
 
     /**
      * Configures log4J. This implementation calls
@@ -342,6 +358,23 @@ public abstract class Configuration {
         Configuration.configureCommonLogging();
     }
 
+	/**
+	 * Returns the name of the main domain configuration resource.
+	 * Defaults to {@link Configuration#DEFAULT_DOMAIN_FILE}.
+	 */
+	public String getDomainConfigurationName() {
+		return this.domainConfigurationName;
+	}
+
+	/**
+	 * Sets the name of the main domain configuration resource.
+	 * @param domainConfigurationName the name of the resource that contains
+	 * this Configuration's domain(s).
+	 */
+	protected void setDomainConfigurationName(String domainConfigurationName) {
+		this.domainConfigurationName = domainConfigurationName;
+	}
+
     /**
      * Returns an internal property for the DataSource factory that 
      * will override any settings configured in XML. 
@@ -350,7 +383,7 @@ public abstract class Configuration {
      * configured in a cayenne project. 
      */
     public DataSourceFactory getDataSourceFactory() {
-        return overrideFactory;
+        return this.overrideFactory;
     }
 
     public void setDataSourceFactory(DataSourceFactory overrideFactory) {
@@ -361,7 +394,7 @@ public abstract class Configuration {
      * Adds new DataDomain to the list of registered domains.
      */
     public void addDomain(DataDomain domain) {
-        dataDomains.put(domain.getName(), domain);
+        this.dataDomains.put(domain.getName(), domain);
 		logObj.debug("added domain: " + domain.getName());
     }
 
@@ -370,7 +403,7 @@ public abstract class Configuration {
      * or <code>null</code> if no such domain is found.
      */
     public DataDomain getDomain(String name) {
-        return (DataDomain) dataDomains.get(name);
+        return (DataDomain)this.dataDomains.get(name);
     }
 
     /** 
@@ -381,11 +414,11 @@ public abstract class Configuration {
      * In such cases {@link #getDomain(String name)} must be used instead.
      */
     public DataDomain getDomain() {
-        int size = dataDomains.size();
+        int size = this.dataDomains.size();
         if (size == 0) {
             return null;
         } else if (size == 1) {
-            return (DataDomain)dataDomains.values().iterator().next();
+            return (DataDomain)this.dataDomains.values().iterator().next();
         } else {
             throw new CayenneRuntimeException("More than one domain is configured; use 'getDomain(String name)' instead.");
         }
@@ -398,7 +431,7 @@ public abstract class Configuration {
      * caller to clean it up.
      */
     public void removeDomain(String name) {
-        dataDomains.remove(name);
+        this.dataDomains.remove(name);
 		logObj.debug("removed domain: " + name);
     }
 
@@ -414,7 +447,7 @@ public abstract class Configuration {
 	 * Returns an unmodifiable collection of registered {@link DataDomain} objects.
 	 */
 	public Collection getDomains() {
-		return dataDomainsRef;
+		return this.dataDomainsRef;
 	}
 
     /**
@@ -422,24 +455,31 @@ public abstract class Configuration {
      * @return boolean
      */
     public boolean isIgnoringLoadFailures() {
-        return ignoringLoadFailures;
+        return this.ignoringLoadFailures;
     }
 
     /**
      * Sets whether to ignore any failures during map loading or not.
      * @param ignoringLoadFailures <code>true</code> or <code>false</code>
      */
-    public void setIgnoringLoadFailures(boolean ignoringLoadFailures) {
+    protected void setIgnoringLoadFailures(boolean ignoringLoadFailures) {
         this.ignoringLoadFailures = ignoringLoadFailures;
     }
 
-    /**
-     * Returns the load status.
-     * @return ConfigStatus
-     */
-    public ConfigStatus getLoadStatus() {
-        return loadStatus;
-    }
+	/**
+	 * Returns the load status.
+	 * @return ConfigStatus
+	 */
+	public ConfigStatus getLoadStatus() {
+		return this.loadStatus;
+	}
+
+	/**
+	 * Sets the load status.
+	 */
+	protected void setLoadStatus(ConfigStatus status) {
+		this.loadStatus = status;
+	}
 
 	/**
 	 * Returns a delegate used for controlling the loading of
@@ -447,7 +487,7 @@ public abstract class Configuration {
 	 * By default a {@link RuntimeLoadDelegate} is used.
 	 */
 	public ConfigLoaderDelegate getLoaderDelegate() {
-		return new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
+		return new RuntimeLoadDelegate(this, this.getLoadStatus(), Configuration.getLoggingLevel());
 	}
 
 }

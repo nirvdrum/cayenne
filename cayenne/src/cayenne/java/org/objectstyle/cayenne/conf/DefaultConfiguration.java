@@ -73,14 +73,28 @@ import org.objectstyle.cayenne.util.Util;
 public class DefaultConfiguration extends Configuration {
 	private static Logger logObj = Logger.getLogger(DefaultConfiguration.class);
 
+	/**
+	 * the default ResourceLocator used for CLASSPATH loading
+	 */
 	protected ResourceLocator locator;
 
 	/**
-	 * Default constructor. Simply calls {@link Configuration#Configuration()}.
+	 * Default constructor.
+	 * Simply calls {@link DefaultConfiguration#DefaultConfiguration(String)}
+	 * with {@link Configuration#DEFAULT_DOMAIN_FILE} as argument.
 	 * @see Configuration#Configuration()
 	 */
 	public DefaultConfiguration() {
-		super();
+		this(Configuration.DEFAULT_DOMAIN_FILE);
+	}
+
+	/**
+	 * Constructor with a named domain configuration resource.
+	 * Simply calls {@link Configuration#Configuration(String)}.
+	 * @see Configuration#Configuration(String)
+	 */
+	public DefaultConfiguration(String domainConfigurationName) {
+		super(domainConfigurationName);
 	}
 
 	/**
@@ -143,7 +157,7 @@ public class DefaultConfiguration extends Configuration {
 
 		ConfigLoaderDelegate delegate = this.getLoaderDelegate();
 		if (delegate == null) {
-			delegate = new RuntimeLoadDelegate(this, loadStatus, Configuration.getLoggingLevel());
+			delegate = new RuntimeLoadDelegate(this, this.getLoadStatus(), Configuration.getLoggingLevel());
 		}
 
 		ConfigLoader loader = new ConfigLoader(delegate);
@@ -151,7 +165,7 @@ public class DefaultConfiguration extends Configuration {
 		try {
 			loader.loadDomains(in);
 		} finally {
-			this.loadStatus = delegate.getStatus();
+			this.setLoadStatus(delegate.getStatus());
 			in.close();
 		}
 
@@ -188,7 +202,7 @@ public class DefaultConfiguration extends Configuration {
 	 * find the file.
 	 */
 	protected InputStream getDomainConfiguration() {
-		return locator.findResourceStream(DEFAULT_DOMAIN_FILE);
+		return locator.findResourceStream(this.getDomainConfigurationName());
 	}
 
 	/**

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.FileConfiguration;
 
@@ -86,11 +87,17 @@ public class ProjectConfiguration extends FileConfiguration {
 	}
 
 	/**
-	 * Override parent implementation to not check for existing files.
+	 * Override parent implementation to allow for null files.
 	 * @see FileConfiguration#setProjectFile(File)
 	 */
 	protected void setProjectFile(File projectFile) {
-		super.projectFile = projectFile;
+		if ((projectFile != null) && (projectFile.exists())) {
+			super.setProjectFile(projectFile);
+		}
+		else {
+			super.projectFile = projectFile;
+			this.setDomainConfigurationName(Configuration.DEFAULT_DOMAIN_FILE);
+		}
 	}
 
     /**

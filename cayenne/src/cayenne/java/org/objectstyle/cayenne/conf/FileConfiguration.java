@@ -71,7 +71,7 @@ public class FileConfiguration extends DefaultConfiguration {
 	private static Logger logObj = Logger.getLogger(FileConfiguration.class);
 
 	/**
-	 * The main project file used for loading this configuration
+	 * The domain file used for this configuration
 	 */
 	protected File projectFile;
 
@@ -83,8 +83,8 @@ public class FileConfiguration extends DefaultConfiguration {
 	}
 
 	/**
-	 * Creates configuration object that uses the provided file 
-	 * for the main project file, ignoring any other lookup strategies.
+	 * Creates a configuration that uses the provided file 
+	 * as the main project file, ignoring any other lookup strategies.
 	 * @throws ConfigurationException when projectFile is <code>null</code>,
 	 * a directory or not readable.
 	 * @see DefaultConfiguration#DefaultConfiguration()
@@ -139,14 +139,14 @@ public class FileConfiguration extends DefaultConfiguration {
 	}
 
 	/**
-	 * Returns the main file used for this configuration. 
+	 * Returns the main domain file used for this configuration. 
 	 */
 	public File getProjectFile() {
 		return projectFile;
 	}
 
 	/**
-	 * Sets the main file used for this configuration.
+	 * Sets the main domain file used for this configuration.
 	 * @throws ConfigurationException if <code>projectFile</code> is null,
 	 * a directory or not readable.
 	 */
@@ -154,6 +154,7 @@ public class FileConfiguration extends DefaultConfiguration {
 		if (projectFile != null) {
 			if (projectFile.isFile()) {
 				this.projectFile = projectFile;
+				this.setDomainConfigurationName(projectFile.getName());
 			}
 			else {
 				throw new ConfigurationException("Project file: "
