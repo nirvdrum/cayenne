@@ -118,11 +118,9 @@
                     author="true"
                     use="true"
                     splitindex="true"
-                    windowtitle="Cayenne API">
+                    windowtitle="Cayenne API"
+                    overview="src/${subproj}/java/overview.html">
             
-            <doctitle><![CDATA[<h2><a href="http://objectstyle.org/cayenne/" target="_top">
-            		<img height="40" border="0" src="../../images/cayenne_logo_small.gif"><a> 
-            		API: ${subproj} (Version ${project.version})</h2>]]></doctitle>
             <bottom><![CDATA[<!--SFLOGO--> &nbsp; <i>Copyright &#169; 2001-2002 <a href=
             "http://objectstyle.org" target="_top">ObjectStyle.org</a> All Rights Reserved.</i>]]>
             </bottom>
