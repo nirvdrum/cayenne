@@ -18,6 +18,12 @@
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GROUP_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="DATE_TEST">
+		<db-attribute name="DATE_COLUMN" type="DATE"/>
+		<db-attribute name="DATE_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="TIMESTAMP_COLUMN" type="TIMESTAMP"/>
+		<db-attribute name="TIME_COLUMN" type="TIME"/>
+	</db-entity>
 	<db-entity name="DELETE_RULE_TEST1">
 		<db-attribute name="DEL_RULE_TEST1_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="TEST2_ID" type="INTEGER" isMandatory="true"/>
@@ -84,6 +90,11 @@
 	</obj-entity>
 	<obj-entity name="ArtistPaintingCounts" className="org.objectstyle.art.ArtistPaintingCounts" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
+	</obj-entity>
+	<obj-entity name="DateTest" className="org.objectstyle.art.DateTest" dbEntityName="DATE_TEST">
+		<obj-attribute name="dateColumn" type="java.util.Date" db-attribute-name="DATE_COLUMN"/>
+		<obj-attribute name="timeColumn" type="java.util.Date" db-attribute-name="TIME_COLUMN"/>
+		<obj-attribute name="timestampColumn" type="java.util.Date" db-attribute-name="TIMESTAMP_COLUMN"/>
 	</obj-entity>
 	<obj-entity name="DeleteRuleTest1" className="org.objectstyle.art.DeleteRuleTest1" dbEntityName="DELETE_RULE_TEST1">
 	</obj-entity>
