@@ -58,7 +58,6 @@ package org.objectstyle.util;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Logger;
 
 /** 
   * Utility class to find resources (usually files) using most common 
@@ -67,7 +66,6 @@ import java.util.logging.Logger;
   * @author Andrei Adamchik
   */
 public class ResourceLocator {
-    static Logger logObj = Logger.getLogger(ResourceLocator.class.getName());
     
     protected boolean skipHomeDir;
     protected boolean skipCurDir;

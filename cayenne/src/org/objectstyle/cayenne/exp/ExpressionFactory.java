@@ -56,19 +56,14 @@
 
 package org.objectstyle.cayenne.exp;
 
-import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /** 
  * Helper class to build expressions. 
  * 
  * @author Andrei Adamchik
  */
-public class ExpressionFactory {
-    static Logger logObj = Logger.getLogger(ExpressionFactory.class.getName());
-    
+public class ExpressionFactory {    
     private static Class[] typeLookup;
 
     static {
