@@ -76,6 +76,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.log4j.Logger;
 import org.apache.oro.text.perl.Perl5Util;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -180,6 +182,28 @@ public class Util {
         return regexUtil.match("/\\\\/", str)
             ? regexUtil.substitute("s/\\\\/\\//g", str)
             : str;
+    }
+
+    /**
+     * Attempts to find an underlying exception of an given exception.
+     * If none is found, returns given thorwable object. Currently
+     * supports unwinding Cayenne-specific exceptions.
+     */
+    public static Throwable unwindException(Throwable th) {
+        if (th instanceof CayenneException) {
+            CayenneException e = (CayenneException) th;
+            if (e.getCause() != null) {
+                return unwindException(e.getCause());
+            }
+        }
+        else if (th instanceof CayenneRuntimeException) {
+            CayenneRuntimeException e = (CayenneRuntimeException) th;
+            if (e.getCause() != null) {
+                return unwindException(e.getCause());
+            }
+        }
+
+        return th;
     }
 
     /** Compare two objects just like "equals" would. Unlike Object.equals,

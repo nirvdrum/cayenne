@@ -73,6 +73,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import org.objectstyle.cayenne.modeler.util.ModelerStrings;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Displays CayenneModeler exceptions and warning messages.
@@ -80,210 +81,203 @@ import org.objectstyle.cayenne.modeler.util.ModelerStrings;
  * @author Andrei Adamchik
  */
 public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
-	protected JButton close;
-	protected JButton showHide;
-	protected JTextArea exText = new JTextArea();
-	protected JPanel exPanel;
-	protected Throwable throwable;
-	protected boolean detailed;
+    protected JButton close;
+    protected JButton showHide;
+    protected JTextArea exText = new JTextArea();
+    protected JPanel exPanel;
+    protected Throwable throwable;
+    protected boolean detailed;
 
-	public static void guiException(Throwable th) {
-		if (th != null) {
-			th.printStackTrace();
-		}
+    public static void guiException(Throwable th) {
+        if (th != null) {
+            th.printStackTrace();
+        }
 
-		ErrorDebugDialog dialog =
-			new ErrorDebugDialog(
-				Editor.getFrame(),
-				"CayenneModeler Error",
-				th,
-				true);
-		dialog.show();
-	}
+        ErrorDebugDialog dialog =
+            new ErrorDebugDialog(Editor.getFrame(), "CayenneModeler Error", th, true);
+        dialog.show();
+    }
 
-	public static void guiWarning(Throwable th, String message) {
-		if (th != null) {
-			th.printStackTrace();
-		}
+    public static void guiWarning(Throwable th, String message) {
+        if (th != null) {
+            th.printStackTrace();
+        }
 
-		WarningDialog dialog =
-			new WarningDialog(Editor.getFrame(), message, th, false);
-		dialog.show();
-	}
+        WarningDialog dialog = new WarningDialog(Editor.getFrame(), message, th, false);
+        dialog.show();
+    }
 
-	/**
-	 * Constructor for ErrorDebugDialog.
-	 */
-	protected ErrorDebugDialog(
-		Editor owner,
-		String title,
-		Throwable throwable,
-		boolean detailed)
-		throws HeadlessException {
+    /**
+     * Constructor for ErrorDebugDialog.
+     */
+    protected ErrorDebugDialog(
+        Editor owner,
+        String title,
+        Throwable throwable,
+        boolean detailed)
+        throws HeadlessException {
 
-		super(owner, title, true);
+        super(owner, title, true);
 
-		setThrowable(throwable);
-		setDetailed(detailed);
-		init();
-	}
+        setThrowable(Util.unwindException(throwable));
+        setDetailed(detailed);
+        init();
+    }
 
-	protected void init() {
-		setResizable(false);
+    protected void init() {
+        setResizable(false);
 
-		Container pane = this.getContentPane();
-		pane.setLayout(new BorderLayout());
+        Container pane = this.getContentPane();
+        pane.setLayout(new BorderLayout());
 
-		// info area
-		JEditorPane infoText = new JEditorPane("text/html", infoHTML());
-		infoText.setBackground(pane.getBackground());
-		infoText.setEditable(false);
-		// popup hyperlinks
-		infoText.addHyperlinkListener(this);
+        // info area
+        JEditorPane infoText = new JEditorPane("text/html", infoHTML());
+        infoText.setBackground(pane.getBackground());
+        infoText.setEditable(false);
+        // popup hyperlinks
+        infoText.addHyperlinkListener(this);
 
-		JPanel infoPanel = new JPanel();
-		infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-		infoPanel.add(infoText);
-		pane.add(infoPanel, BorderLayout.NORTH);
+        JPanel infoPanel = new JPanel();
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        infoPanel.add(infoText);
+        pane.add(infoPanel, BorderLayout.NORTH);
 
-		// exception area
-		if (throwable != null) {
-			exText.setEditable(false);
-			exText.setLineWrap(true);
-			exText.setWrapStyleWord(true);
-			exText.setRows(16);
-			exText.setColumns(40);
-			JScrollPane exScroll =
-				new JScrollPane(
-					exText,
-					JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-			exPanel = new JPanel();
-			exPanel.setLayout(new BorderLayout());
-			exPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-			exPanel.add(exScroll, BorderLayout.CENTER);
+        // exception area
+        if (throwable != null) {
+            exText.setEditable(false);
+            exText.setLineWrap(true);
+            exText.setWrapStyleWord(true);
+            exText.setRows(16);
+            exText.setColumns(40);
+            JScrollPane exScroll =
+                new JScrollPane(
+                    exText,
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            exPanel = new JPanel();
+            exPanel.setLayout(new BorderLayout());
+            exPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            exPanel.add(exScroll, BorderLayout.CENTER);
 
-			// buttons
-			showHide = new JButton("");
-			showHide.addActionListener(this);
-			if (isDetailed()) {
-				showDetails();
-			} else {
-				hideDetails();
-			}
-		}
+            // buttons
+            showHide = new JButton("");
+            showHide.addActionListener(this);
+            if (isDetailed()) {
+                showDetails();
+            } else {
+                hideDetails();
+            }
+        }
 
-		close = new JButton("Close");
-		close.addActionListener(this);
+        close = new JButton("Close");
+        close.addActionListener(this);
 
-		JButton[] buttons =
-			(showHide != null) ? new JButton[] { showHide, close }
-		: new JButton[] { close };
-		pane.add(PanelFactory.createButtonPanel(buttons), BorderLayout.SOUTH);
+        JButton[] buttons = (showHide != null) ? new JButton[] { showHide, close }
+        : new JButton[] { close };
+        pane.add(PanelFactory.createButtonPanel(buttons), BorderLayout.SOUTH);
 
-		// prepare to display
-		this.pack();
-		this.centerWindow();
-	}
+        // prepare to display
+        this.pack();
+        this.centerWindow();
+    }
 
-	protected String infoHTML() {
-		return "<b><font face='Arial,Helvetica' size='+1' color='red'>"
-			+ getTitle()
-			+ "</font></b><br>"
-			+ "<font face='Arial,Helvetica' size='-1'>Please copy the message below and "
-			+ "report this error by going to <br>"
-			+ "<a href='http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068'>"
-			+ "http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068</a></font>";
-	}
+    protected String infoHTML() {
+        return "<b><font face='Arial,Helvetica' size='+1' color='red'>"
+            + getTitle()
+            + "</font></b><br>"
+            + "<font face='Arial,Helvetica' size='-1'>Please copy the message below and "
+            + "report this error by going to <br>"
+            + "<a href='http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068'>"
+            + "http://sourceforge.net/tracker/?func=add&group_id=48132&atid=452068</a></font>";
+    }
 
-	protected void setThrowable(Throwable throwable) {
-		this.throwable = throwable;
+    protected void setThrowable(Throwable throwable) {
+        this.throwable = throwable;
 
-		String text = null;
-		if (throwable != null) {
-			StringWriter str = new StringWriter();
-			PrintWriter out = new PrintWriter(str);
+        String text = null;
+        if (throwable != null) {
+            StringWriter str = new StringWriter();
+            PrintWriter out = new PrintWriter(str);
 
-			// first add extra diagnostics
-			String version = ModelerStrings.getString("cayenne.version");
-			version = (version != null) ? version : "(unknown)";
+            // first add extra diagnostics
+            String version = ModelerStrings.getString("cayenne.version");
+            version = (version != null) ? version : "(unknown)";
 
-			String buildDate =
-				ModelerStrings.getString("cayenne.build.date");
-			buildDate = (buildDate != null) ? buildDate : "(unknown)";
+            String buildDate = ModelerStrings.getString("cayenne.build.date");
+            buildDate = (buildDate != null) ? buildDate : "(unknown)";
 
-			out.println("CayenneModeler Info");
-			out.println("Version: " + version);
-			out.println("Build Date: " + buildDate);
-			out.println("Exception: ");
-			out.println("=================================");
-			buildStackTrace(out, throwable);
+            out.println("CayenneModeler Info");
+            out.println("Version: " + version);
+            out.println("Build Date: " + buildDate);
+            out.println("Exception: ");
+            out.println("=================================");
+            buildStackTrace(out, throwable);
 
-			try {
-				out.close();
-				str.close();
-			} catch (IOException ioex) {
-				// this should never happen
-			}
-			text = str.getBuffer().toString();
-		}
+            try {
+                out.close();
+                str.close();
+            } catch (IOException ioex) {
+                // this should never happen
+            }
+            text = str.getBuffer().toString();
+        }
 
-		exText.setText(text);
-	}
+        exText.setText(text);
+    }
 
-	protected void buildStackTrace(PrintWriter out, Throwable th) {
-		if (th == null) {
-			return;
-		}
+    protected void buildStackTrace(PrintWriter out, Throwable th) {
+        if (th == null) {
+            return;
+        }
 
-		th.printStackTrace(out);
+        th.printStackTrace(out);
 
-		Throwable cause = th.getCause();
-		if (cause != null) {
-			out.println("Caused by:");
-			buildStackTrace(out, cause);
-		}
-	}
+        Throwable cause = th.getCause();
+        if (cause != null) {
+            out.println("Caused by:");
+            buildStackTrace(out, cause);
+        }
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == close) {
-			this.dispose();
-		} else if (e.getSource() == showHide) {
-			if (isDetailed()) {
-				hideDetails();
-			} else {
-				showDetails();
-			}
-			this.pack();
-			this.centerWindow();
-		}
-	}
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == close) {
+            this.dispose();
+        } else if (e.getSource() == showHide) {
+            if (isDetailed()) {
+                hideDetails();
+            } else {
+                showDetails();
+            }
+            this.pack();
+            this.centerWindow();
+        }
+    }
 
-	protected void hideDetails() {
-		getContentPane().remove(exPanel);
-		showHide.setText("Show Details");
-		setDetailed(false);
-	}
+    protected void hideDetails() {
+        getContentPane().remove(exPanel);
+        showHide.setText("Show Details");
+        setDetailed(false);
+    }
 
-	protected void showDetails() {
-		getContentPane().add(exPanel, BorderLayout.CENTER);
-		showHide.setText("Hide Details");
-		setDetailed(true);
-	}
+    protected void showDetails() {
+        getContentPane().add(exPanel, BorderLayout.CENTER);
+        showHide.setText("Hide Details");
+        setDetailed(true);
+    }
 
-	/**
-	 * Returns the detailed.
-	 * @return boolean
-	 */
-	public boolean isDetailed() {
-		return detailed;
-	}
+    /**
+     * Returns the detailed.
+     * @return boolean
+     */
+    public boolean isDetailed() {
+        return detailed;
+    }
 
-	/**
-	 * Sets the detailed.
-	 * @param detailed The detailed to set
-	 */
-	public void setDetailed(boolean detailed) {
-		this.detailed = detailed;
-	}
+    /**
+     * Sets the detailed.
+     * @param detailed The detailed to set
+     */
+    public void setDetailed(boolean detailed) {
+        this.detailed = detailed;
+    }
 }
