@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 
@@ -71,40 +69,72 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public class PropertyComparator implements Comparator {
 	protected Method getter;
+	protected boolean ascending;
+
+	public static String capitalize(String s) {
+		if (s.length() == 0) {
+			return s;
+		}
+		char chars[] = s.toCharArray();
+		chars[0] = Character.toUpperCase(chars[0]);
+		return new String(chars);
+	}
+
+	public static Method findReadMethod(String propertyName, Class beanClass) {
+		String base = capitalize(propertyName);
+
+		// find non-boolean property
+		try {
+			return beanClass.getMethod("get" + base, null);
+		} catch (Exception ex) {
+			// ignore, this might be a boolean property
+		}
+
+		try {
+			return beanClass.getMethod("is" + base, null);
+		} catch (Exception ex) {
+			// ran out of options
+			return null;
+		}
+	}
 
 	public PropertyComparator(String propertyName, Class beanClass) {
-		try {
-			getter =
-				new PropertyDescriptor(propertyName, beanClass).getReadMethod();
-		} catch (IntrospectionException iex) {
-			throw new CayenneRuntimeException(
-				"Error doing introspection.",
-				iex);
+		this(propertyName, beanClass, true);
+	}
+	
+	public PropertyComparator(String propertyName, Class beanClass, boolean ascending) {
+		getter = findReadMethod(propertyName, beanClass);
+		if (getter == null) {
+			throw new CayenneRuntimeException("No getter for " + propertyName);
 		}
+		
+		this.ascending = ascending;
 	}
 
 	/**
 	 * @see java.util.Comparator#compare(Object, Object)
 	 */
 	public int compare(Object o1, Object o2) {
+		return (ascending) ? compareAsc(o1, o2) : compareAsc(o2, o1);
+	}
+	
+	protected int compareAsc(Object o1, Object o2) {
+		
 		if ((o1 == null && o2 == null) || o1 == o2) {
 			return 0;
-		}
-		else if(o1 == null && o2 != null) {
+		} else if (o1 == null && o2 != null) {
 			return -1;
-		}
-		else if(o1 != null && o2 == null) {
+		} else if (o1 != null && o2 == null) {
 			return 1;
 		}
 
 		try {
-            String p1 = (String)getter.invoke(o1, null);
-            String p2 = (String)getter.invoke(o2, null);
-            
-            return (p1 == null) ? -1 : p1.compareTo(p2);
+			Comparable p1 = (Comparable) getter.invoke(o1, null);
+			Comparable p2 = (Comparable) getter.invoke(o2, null);
+
+			return (p1 == null) ? -1 : p1.compareTo(p2);
 		} catch (Exception ex) {
 			throw new CayenneRuntimeException("Error reading property.", ex);
 		}
 	}
-
 }
