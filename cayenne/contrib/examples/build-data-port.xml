@@ -9,12 +9,6 @@
 	<!-- ========================================== -->
     <!-- Build targets.                             -->
     <!-- ========================================== -->
-    
-    <target name="doc">
-		<ant antfile="build-subproj.xml" target="doc">
-			<property name="subproj" value="data-port"/>
-		</ant>
-	</target>
 	
     <target name="api">
 		<ant antfile="build-subproj.xml" target="api">
@@ -26,6 +20,10 @@
 		<ant antfile="build-subproj.xml" target="compile">
 			<property name="subproj" value="data-port"/>
 		</ant>
+	</target>
+	
+	<target name="dist-src" depends="dist-bin,api"> 
+	
 	</target>
 	
 	<target name="dist-bin" depends="jar"/>

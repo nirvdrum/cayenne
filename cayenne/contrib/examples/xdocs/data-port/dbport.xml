@@ -16,6 +16,11 @@
 			DataMap and two DataNodes to port data from source DataNode to a destination DataNode. 
 			Only DataMaps linked to the source DataNode will be considered for porting.
 			</p>
+			
+			<h3>Installation</h3>
+			
+			<p>Copy cayenne.jar and data-port.jar to $ANT_HOME/lib, or refrence both in the build script
+			explicitly.</p>
 
 			<h3>Parameters</h3>
 			

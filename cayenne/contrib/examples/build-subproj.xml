@@ -28,7 +28,6 @@
 		<mkdir dir="build/${subproj}/classes"/>
 		<mkdir dir="${dist-subproj}/src"/>
 		<mkdir dir="${dist-subproj}/lib"/>
-		<mkdir dir="${dist-subproj}/bin"/>
 	</target>
 
 	<target name="compile" depends="nosubproj,prepare">

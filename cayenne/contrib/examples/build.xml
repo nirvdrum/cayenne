@@ -61,7 +61,18 @@
     <!-- Creates a full release of Cayenne Examples.   -->
     <!-- ============================================= -->
     <target name="release">
-    
+    	<ant antfile="build-data-port.xml" target="dist-src"/>
+    	<antcall target="doc"/>
+    	
+    	<tar tarfile="${dist.base}/${project.name}-${project.version}.tar">
+			<tarfileset dir="${dist.base}">
+				<include name="${project.name}-${project.version}/**"/>
+			</tarfileset>
+		</tar>
+		
+        <gzip src="${dist.base}/${project.name}-${project.version}.tar" 
+              zipfile="${dist.base}/${project.name}-${project.version}.tar.gz"/>  
+        <delete file="${dist.base}/${project.name}-${project.version}.tar"/>
     </target>
 
     <!-- ========================================== -->
