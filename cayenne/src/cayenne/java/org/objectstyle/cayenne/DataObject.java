@@ -113,8 +113,10 @@ public interface DataObject extends java.io.Serializable {
     
     public void setToOneDependentTarget(String relName, DataObject val);
 
-    /** Returns a snapshot for this object corresponding to the state of the database 
-     *  when object was last fetched or committed. */ 
+    /** 
+     * Returns a snapshot for this object corresponding to the state 
+     * of the database when object was last fetched or committed. 
+     */ 
     public Map getCommittedSnapshot();
     
     /** Returns a snapshot of object current values. */

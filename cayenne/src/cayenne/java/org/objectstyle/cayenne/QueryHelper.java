@@ -86,394 +86,416 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  *
  */
 public final class QueryHelper {
-	private static Logger logObj = Logger.getLogger(QueryHelper.class);
+    private static Logger logObj = Logger.getLogger(QueryHelper.class);
 
-	/** Returns an update query for the DataObject that can be used to commit
-	 *  object state changes to the database. If no changes are found, null is returned.
-	 *
-	 *  @param dataObject data object that potentially can have changes that need
-	 *  to be synchronized with the database.
-	 */
-	public static UpdateQuery updateQuery(DataObject dataObject) {
-		UpdateQuery upd = new UpdateQuery();
+    /** Returns an update query for the DataObject that can be used to commit
+     *  object state changes to the database. If no changes are found, null is returned.
+     *
+     *  @param dataObject data object that potentially can have changes that need
+     *  to be synchronized with the database.
+     */
+    public static UpdateQuery updateQuery(DataObject dataObject) {
+        UpdateQuery upd = new UpdateQuery();
 
-		ObjectId id = dataObject.getObjectId();
-		upd.setRoot(dataObject.getClass());
+        ObjectId id = dataObject.getObjectId();
+        upd.setRoot(dataObject.getClass());
 
-		Map committedSnapshot = dataObject.getCommittedSnapshot();
-		Map currentSnapshot = dataObject.getCurrentSnapshot();
+        Map committedSnapshot = dataObject.getCommittedSnapshot();
+        Map currentSnapshot = dataObject.getCurrentSnapshot();
 
-		Iterator it = currentSnapshot.keySet().iterator();
-		while (it.hasNext()) {
-			String attrName = (String) it.next();
-			Object newValue = currentSnapshot.get(attrName);
+        Iterator it = currentSnapshot.keySet().iterator();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            Object newValue = currentSnapshot.get(attrName);
 
-			// if snapshot exists, compare old values and new values,
-			// only add attribute to the update clause if the value has changed
-			if (committedSnapshot != null) {
-				Object oldValue = committedSnapshot.get(attrName);
-				if (oldValue != null && !oldValue.equals(newValue))
-					upd.addUpdAttribute(attrName, newValue);
-				else if (oldValue == null && newValue != null)
-					upd.addUpdAttribute(attrName, newValue);
-			}
-			// if no snapshot exists, just add the fresh value to update clause
-			else
-				upd.addUpdAttribute(attrName, newValue);
-		}
+            // if snapshot exists, compare old values and new values,
+            // only add attribute to the update clause if the value has changed
+            if (committedSnapshot != null) {
+                Object oldValue = committedSnapshot.get(attrName);
+                if (oldValue != null && !oldValue.equals(newValue))
+                    upd.addUpdAttribute(attrName, newValue);
+                else if (oldValue == null && newValue != null)
+                    upd.addUpdAttribute(attrName, newValue);
+            }
+            // if no snapshot exists, just add the fresh value to update clause
+            else
+                upd.addUpdAttribute(attrName, newValue);
+        }
 
-		// original snapshot can have extra keys that are missing in the
-		// current snapshot; process those
-		if (committedSnapshot != null) {
-			Iterator origit = committedSnapshot.keySet().iterator();
-			while (origit.hasNext()) {
-				String attrName = (String) origit.next();
-				if (currentSnapshot.containsKey(attrName))
-					continue;
-	
-				Object oldValue = committedSnapshot.get(attrName);
-				if (oldValue == null)
-					continue;
-	
-				upd.addUpdAttribute(attrName, null);
-			}
-		}
+        // original snapshot can have extra keys that are missing in the
+        // current snapshot; process those
+        if (committedSnapshot != null) {
+            Iterator origit = committedSnapshot.keySet().iterator();
+            while (origit.hasNext()) {
+                String attrName = (String) origit.next();
+                if (currentSnapshot.containsKey(attrName))
+                    continue;
 
-		if (upd.getUpdAttributes().size() > 0) {
-			// set qualifier
-			upd.setQualifier(ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-			return upd;
-		}
+                Object oldValue = committedSnapshot.get(attrName);
+                if (oldValue == null)
+                    continue;
 
-		return null;
-	}
+                upd.addUpdAttribute(attrName, null);
+            }
+        }
 
-	/** Generates a delete query for a specified data object */
-	public static DeleteQuery deleteQuery(DataObject dataObject) {
-		DeleteQuery del = new DeleteQuery();
-		ObjectId id = dataObject.getObjectId();
-		del.setRoot(dataObject.getClass());
-		del.setQualifier(ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
-		return del;
-	}
+        if (upd.getUpdAttributes().size() > 0) {
+            // set qualifier
+            upd.setQualifier(
+                ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+            return upd;
+        }
 
-	/** Generates an insert query for a specified data object.
-	 *
-	 *  @param dataObject new data object that need to be inserted to the database.
-	 *  @param permId permanent object id that will be assigned to this data object after
-	 *  it is committed to the database.
-	 */
-	public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
-		InsertQuery ins = new InsertQuery();
-		ins.setRoot(permId.getObjClass());
-		ins.setObjectSnapshot(objectSnapshot);
-		ins.setObjectId(permId);
-		return ins;
-	}
+        return null;
+    }
 
-	/** 
-	 * Creates and returns a select query that can be used to 
-	 * fetch an object given an ObjectId.
-	 */
-	public static SelectQuery selectObjectForId(ObjectId oid) {
-		SelectQuery sel = new SelectQuery();
-		sel.setRoot(oid.getObjClass());
-		sel.setQualifier(ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
-		return sel;
-	}
-	
-	
-	/** 
-	 * Creates and returns a select query that can be used to 
-	 * fetch a list of objects given a list of ObjectIds.
-	 * All ObjectIds must belong to the same entity.
-	 */
-	public static SelectQuery selectQueryForIds(List oids) {
-		if(oids == null || oids.size() == 0) {
-			throw new IllegalArgumentException("List must contain at least one ObjectId");
-		}
-		
-		SelectQuery sel = new SelectQuery();
-		sel.setRoot(((ObjectId)oids.get(1)).getObjClass());
-		
-		Iterator it = oids.iterator();
-		
-		ObjectId firstId = (ObjectId)it.next();
-		Expression exp = ExpressionFactory.matchAllDbExp(firstId.getIdSnapshot(), Expression.EQUAL_TO);
-		
-		while(it.hasNext()) {
-			ObjectId anId = (ObjectId)it.next();
-			exp = exp.orExp(ExpressionFactory.matchAllDbExp(anId.getIdSnapshot(), Expression.EQUAL_TO));
-		}
-		
-		sel.setQualifier(exp);
-		return sel;
-	}
+    /** Generates a delete query for a specified data object */
+    public static DeleteQuery deleteQuery(DataObject dataObject) {
+        DeleteQuery del = new DeleteQuery();
+        ObjectId id = dataObject.getObjectId();
+        del.setRoot(dataObject.getClass());
+        del.setQualifier(
+            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+        return del;
+    }
 
-	/** 
-	 * Creates and returns SelectQuery for a given SelectQuery and
-	 * relationship prefetching path.
-	 */
-	public static SelectQuery selectPrefetchPath(
-		QueryEngine e,
-		SelectQuery q,
-		String prefetchPath) {
-		ObjEntity ent = e.getEntityResolver().lookupObjEntity(q);
-		SelectQuery newQ = new SelectQuery();
+    /** Generates an insert query for a specified data object.
+     *
+     *  @param dataObject new data object that need to be inserted to the database.
+     *  @param permId permanent object id that will be assigned to this data object after
+     *  it is committed to the database.
+     */
+    public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
+        InsertQuery ins = new InsertQuery();
+        ins.setRoot(permId.getObjClass());
+        ins.setObjectSnapshot(objectSnapshot);
+        ins.setObjectId(permId);
+        return ins;
+    }
 
-		Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, prefetchPath);
-		Iterator it = ent.resolvePathComponents(exp);
-		Relationship r = null;
-		while (it.hasNext()) {
-			r = (Relationship) it.next();
-		}
+    /** 
+     * Creates and returns a select query that can be used to 
+     * fetch an object given an ObjectId.
+     */
+    public static SelectQuery selectObjectForId(ObjectId oid) {
+        SelectQuery sel = new SelectQuery();
+        sel.setRoot(oid.getObjClass());
+        sel.setQualifier(
+            ExpressionFactory.matchAllDbExp(oid.getIdSnapshot(), Expression.EQUAL_TO));
+        return sel;
+    }
 
-		if (r != null) {
-			newQ.setRoot(r.getTargetEntity());
-			newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
-			return newQ;
-		}
-		else {
-			// TODO: what else could we do here?
-			return null;
-		}
-	}
+    /** 
+     * Creates and returns a select query that can be used to 
+     * fetch a list of objects given a list of ObjectIds.
+     * All ObjectIds must belong to the same entity.
+     */
+    public static SelectQuery selectQueryForIds(List oids) {
+        if (oids == null || oids.size() == 0) {
+            throw new IllegalArgumentException("List must contain at least one ObjectId");
+        }
+
+        SelectQuery sel = new SelectQuery();
+        sel.setRoot(((ObjectId) oids.get(1)).getObjClass());
+
+        Iterator it = oids.iterator();
+
+        ObjectId firstId = (ObjectId) it.next();
+        Expression exp =
+            ExpressionFactory.matchAllDbExp(firstId.getIdSnapshot(), Expression.EQUAL_TO);
+
+        while (it.hasNext()) {
+            ObjectId anId = (ObjectId) it.next();
+            exp =
+                exp.orExp(
+                    ExpressionFactory.matchAllDbExp(
+                        anId.getIdSnapshot(),
+                        Expression.EQUAL_TO));
+        }
+
+        sel.setQualifier(exp);
+        return sel;
+    }
+
+    /** 
+     * Creates and returns SelectQuery for a given SelectQuery and
+     * relationship prefetching path.
+     */
+    public static SelectQuery selectPrefetchPath(
+        QueryEngine e,
+        SelectQuery q,
+        String prefetchPath) {
+        ObjEntity ent = e.getEntityResolver().lookupObjEntity(q);
+        SelectQuery newQ = new SelectQuery();
+
+        Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, prefetchPath);
+        Iterator it = ent.resolvePathComponents(exp);
+        Relationship r = null;
+        while (it.hasNext()) {
+            r = (Relationship) it.next();
+        }
+
+        if (r != null) {
+            newQ.setRoot(r.getTargetEntity());
+            newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
+            return newQ;
+        } else {
+            // TODO: what else could we do here?
+            return null;
+        }
+    }
 
     /**
      * Translates qualifier applicable for one ObjEntity into a
      * qualifier for a related ObjEntity.
      */
-	public static Expression transformQualifier(
-		ObjEntity ent,
-		Expression qual,
-		String relPath) {
-		if (qual == null) {
-			return null;
-		}
+    public static Expression transformQualifier(
+        ObjEntity ent,
+        Expression qual,
+        String relPath) {
+        if (qual == null) {
+            return null;
+        }
 
-		ExpressionTranslator trans = new ExpressionTranslator(ent, relPath);
-		ExpressionTraversal parser = new ExpressionTraversal();
-		parser.setHandler(trans);
-		parser.traverseExpression(qual);
+        ExpressionTranslator trans = new ExpressionTranslator(ent, relPath);
+        ExpressionTraversal parser = new ExpressionTraversal();
+        parser.setHandler(trans);
+        parser.traverseExpression(qual);
 
-		return trans.getPeer(qual);
-	}
+        return trans.getPeer(qual);
+    }
 
-	public static SelectQuery selectRelationshipObjects(QueryEngine e, DataObject source, String relName) {
-		SelectQuery sel = new SelectQuery();
-		ObjEntity ent = e.getEntityResolver().lookupObjEntity(source);
-		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
-		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
-		sel.setRoot(destEnt);
-		sel.setQualifier(
-			ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, rel.getReverseRelationship().getName(), source));
-		return sel;
-	}
+    /**
+     * Generates a SelectQuery that can be used to fetch 
+     * relationship destination objects given a source object
+     * of a to-many relationship. 
+     */
+    public static SelectQuery selectRelationshipObjects(
+        QueryEngine e,
+        DataObject source,
+        String relName) {
+        	
+        SelectQuery sel = new SelectQuery();
+        ObjEntity ent = e.getEntityResolver().lookupObjEntity(source);
+        ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
+        ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
+        sel.setRoot(destEnt);
+        sel.setQualifier(
+            ExpressionFactory.binaryPathExp(
+                Expression.EQUAL_TO,
+                rel.getReverseRelationship().getName(),
+                source));
+                
+        return sel;
+    }
 
-	/** 
-	 * Generates a SelectQuery that can be used to fetch 
-	 * relationship destination objects given a source object
-	 * of a to-many relationship. 
-	 * @deprecated use selectRelationshipObjects(QueryEngine, DataObject, String) instead
-	 */
-	public static SelectQuery selectRelationshipObjects(
-		QueryEngine e,
-		ObjectId oid,
-		String relName) {
-		SelectQuery sel = new SelectQuery();
-		ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjClass());
-		ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
-		ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
-		sel.setRoot(destEnt);
+    /** 
+     * Generates a SelectQuery that can be used to fetch 
+     * relationship destination objects given a source object
+     * of a to-many relationship.
+     *  
+     * @deprecated use selectRelationshipObjects(QueryEngine, DataObject, String) instead
+     */
+    public static SelectQuery selectRelationshipObjects(
+        QueryEngine e,
+        ObjectId oid,
+        String relName) {
+        SelectQuery sel = new SelectQuery();
+        ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjClass());
+        ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
+        ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
+        sel.setRoot(destEnt);
 
-		// convert source PK into destination FK definition,
-		// use it to build a qualifier that will be applied to the destination entity
-		List dbRels = rel.getDbRelationshipList();
+        // convert source PK into destination FK definition,
+        // use it to build a qualifier that will be applied to the destination entity
+        List dbRels = rel.getDbRelationshipList();
 
-		// no support for flattened rels yet...
-		if (dbRels == null || dbRels.size() != 1) {
-			throw new CayenneRuntimeException("ObjRelationship has invalid/unsupported DbRelationships.");
-		}
+        // no support for flattened rels yet...
+        if (dbRels == null || dbRels.size() != 1) {
+            throw new CayenneRuntimeException("ObjRelationship has invalid/unsupported DbRelationships.");
+        }
 
-		DbRelationship dbRel = (DbRelationship) dbRels.get(0);
-		Map fkAttrs =
-			dbRel.getReverseRelationship().srcFkSnapshotWithTargetSnapshot(
-				oid.getIdSnapshot());
-		sel.setQualifier(ExpressionFactory.matchAllDbExp(fkAttrs, Expression.EQUAL_TO));
-		return sel;
-	}
+        DbRelationship dbRel = (DbRelationship) dbRels.get(0);
+        Map fkAttrs =
+            dbRel.getReverseRelationship().srcFkSnapshotWithTargetSnapshot(
+                oid.getIdSnapshot());
+        sel.setQualifier(ExpressionFactory.matchAllDbExp(fkAttrs, Expression.EQUAL_TO));
+        return sel;
+    }
 
-	static final class ExpressionTranslator extends TraversalHelper {
-		protected Map expMap = new HashMap();
-		protected Map expFill = new HashMap();
-		protected String relationshipPath;
-		protected String relationshipDbPath;
-		protected String prependObjPath;
-		protected String prependDbPath;
+    static final class ExpressionTranslator extends TraversalHelper {
+        protected Map expMap = new HashMap();
+        protected Map expFill = new HashMap();
+        protected String relationshipPath;
+        protected String relationshipDbPath;
+        protected String prependObjPath;
+        protected String prependDbPath;
 
-		public ExpressionTranslator(ObjEntity e, String relPath) {
-			this.relationshipPath = relPath;
-			this.relationshipDbPath = forwardDbPath(e, relPath);
-			this.prependObjPath = reversePath(e, relPath);
-			this.prependDbPath = reverseDbPath(e, relPath);
-		}
+        public ExpressionTranslator(ObjEntity e, String relPath) {
+            this.relationshipPath = relPath;
+            this.relationshipDbPath = forwardDbPath(e, relPath);
+            this.prependObjPath = reversePath(e, relPath);
+            this.prependDbPath = reverseDbPath(e, relPath);
+        }
 
-		public Expression getPeer(Expression orig) {
-			return (Expression) expMap.get(orig);
-		}
+        public Expression getPeer(Expression orig) {
+            return (Expression) expMap.get(orig);
+        }
 
-		private int getOperandIndex(Expression orig) {
-			Integer indObj = (Integer) expFill.get(orig);
-			int ind = (indObj != null) ? indObj.intValue() + 1 : 0;
-			expFill.put(orig, new Integer(ind));
+        private int getOperandIndex(Expression orig) {
+            Integer indObj = (Integer) expFill.get(orig);
+            int ind = (indObj != null) ? indObj.intValue() + 1 : 0;
+            expFill.put(orig, new Integer(ind));
 
-			return ind;
-		}
+            return ind;
+        }
 
-		/**
-		 * For a relationship path from source to target, builds a reverse path 
-		 * from target to source.
-		 */
-		public String reversePath(ObjEntity e, String relPath) {
-			Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
-			Iterator it = e.resolvePathComponents(exp);
-			StringBuffer buf = new StringBuffer();
-			boolean hasRels = false;
+        /**
+         * For a relationship path from source to target, builds a reverse path 
+         * from target to source.
+         */
+        public String reversePath(ObjEntity e, String relPath) {
+            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
+            Iterator it = e.resolvePathComponents(exp);
+            StringBuffer buf = new StringBuffer();
+            boolean hasRels = false;
 
-			while (it.hasNext()) {
-				ObjRelationship rel = (ObjRelationship) it.next();
-				ObjRelationship reverse = rel.getReverseRelationship();
+            while (it.hasNext()) {
+                ObjRelationship rel = (ObjRelationship) it.next();
+                ObjRelationship reverse = rel.getReverseRelationship();
 
-				if (hasRels) {
-					buf.insert(0, Entity.PATH_SEPARATOR);
-				}
+                if (hasRels) {
+                    buf.insert(0, Entity.PATH_SEPARATOR);
+                }
 
-				buf.insert(0, reverse.getName());
-				hasRels = true;
-			}
+                buf.insert(0, reverse.getName());
+                hasRels = true;
+            }
 
-			return buf.toString();
-		}
+            return buf.toString();
+        }
 
-		public String forwardDbPath(ObjEntity e, String relPath) {
-			Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
-			Iterator it = e.resolvePathComponents(exp);
-			StringBuffer buf = new StringBuffer();
-			
-			while (it.hasNext()) {
-				ObjRelationship rel = (ObjRelationship) it.next();
-				Iterator dbRels = rel.getDbRelationshipList().iterator();
-                while(dbRels.hasNext()) {
-                	DbRelationship r = (DbRelationship)dbRels.next();
-                	if(buf.length() > 0) {
-                		buf.append(Entity.PATH_SEPARATOR);
-                	}
-                	
-                	buf.append(r.getName());
-                }	
-			}
+        public String forwardDbPath(ObjEntity e, String relPath) {
+            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
+            Iterator it = e.resolvePathComponents(exp);
+            StringBuffer buf = new StringBuffer();
 
-			return buf.toString();
-		}
+            while (it.hasNext()) {
+                ObjRelationship rel = (ObjRelationship) it.next();
+                Iterator dbRels = rel.getDbRelationshipList().iterator();
+                while (dbRels.hasNext()) {
+                    DbRelationship r = (DbRelationship) dbRels.next();
+                    if (buf.length() > 0) {
+                        buf.append(Entity.PATH_SEPARATOR);
+                    }
 
-		/**
-		 * For a relationship path from source to target, builds a reverse path 
-		 * from target to source.
-		 */
-		public String reverseDbPath(ObjEntity e, String relPath) {
-			Expression exp = ExpressionFactory.unaryExp(Expression.DB_PATH, relPath);
-			Iterator it = e.resolvePathComponents(exp);
-			StringBuffer buf = new StringBuffer();
-			boolean hasRels = false;
+                    buf.append(r.getName());
+                }
+            }
 
-			while (it.hasNext()) {
-				ObjRelationship rel = (ObjRelationship) it.next();
+            return buf.toString();
+        }
 
-				Iterator dbRels = rel.getDbRelationshipList().iterator();
-				while (dbRels.hasNext()) {
-					DbRelationship dbRel = (DbRelationship) dbRels.next();
-					DbRelationship reverse = dbRel.getReverseRelationship();
+        /**
+         * For a relationship path from source to target, builds a reverse path 
+         * from target to source.
+         */
+        public String reverseDbPath(ObjEntity e, String relPath) {
+            Expression exp = ExpressionFactory.unaryExp(Expression.DB_PATH, relPath);
+            Iterator it = e.resolvePathComponents(exp);
+            StringBuffer buf = new StringBuffer();
+            boolean hasRels = false;
 
-					if (hasRels) {
-						buf.insert(0, Entity.PATH_SEPARATOR);
-					}
+            while (it.hasNext()) {
+                ObjRelationship rel = (ObjRelationship) it.next();
 
-					buf.insert(0, reverse.getName());
-					hasRels = true;
-				}
-			}
+                Iterator dbRels = rel.getDbRelationshipList().iterator();
+                while (dbRels.hasNext()) {
+                    DbRelationship dbRel = (DbRelationship) dbRels.next();
+                    DbRelationship reverse = dbRel.getReverseRelationship();
 
-			return buf.toString();
-		}
+                    if (hasRels) {
+                        buf.insert(0, Entity.PATH_SEPARATOR);
+                    }
 
-		/** 
-		 * Creates expression of the same type and same operands 
-		 * as the original expression. Operands of the new expression
-		 * are set to null.
-		 */
-		public Expression createExpressionOfType(Expression e)
-			throws ExpressionException {
-			try {
-				Expression exp = (Expression) e.getClass().newInstance();
-				exp.setType(e.getType());
-				return exp;
-			} catch (Exception ex) {
-				throw new ExpressionException("Error instantiating expression.", ex);
-			}
-		}
+                    buf.insert(0, reverse.getName());
+                    hasRels = true;
+                }
+            }
 
-		private void processOperand(Object operand, Expression parentNode) {
-			// attach operand to parent at index
-			if (parentNode != null) {
-				int ind = getOperandIndex(parentNode);
-				Expression parentPeer = getPeer(parentNode);
+            return buf.toString();
+        }
 
-				// operands of object expression need translation
-				if (parentPeer.getType() == Expression.OBJ_PATH) {
-					operand = processPath((String) operand, relationshipPath, prependObjPath);
-				} else if (parentPeer.getType() == Expression.DB_PATH) {
-					operand = processPath((String) operand, relationshipDbPath, prependDbPath);
-				}
+        /** 
+         * Creates expression of the same type and same operands 
+         * as the original expression. Operands of the new expression
+         * are set to null.
+         */
+        public Expression createExpressionOfType(Expression e)
+            throws ExpressionException {
+            try {
+                Expression exp = (Expression) e.getClass().newInstance();
+                exp.setType(e.getType());
+                return exp;
+            } catch (Exception ex) {
+                throw new ExpressionException("Error instantiating expression.", ex);
+            }
+        }
 
-				parentPeer.setOperand(ind, operand);
-			}
-		}
+        private void processOperand(Object operand, Expression parentNode) {
+            // attach operand to parent at index
+            if (parentNode != null) {
+                int ind = getOperandIndex(parentNode);
+                Expression parentPeer = getPeer(parentNode);
 
-		private String processPath(String path, String toPrefix, String fromPrefix) {
-			if (path.equals(toPrefix)) {
-				// 1. Path ends with prefetch entity - match PK
-				throw new CayenneRuntimeException(
-					"Prefetching with path ending on "
-						+ "prefetch entity is not supported yet.");
-			} else if (path.startsWith(toPrefix + Entity.PATH_SEPARATOR)) {
-				// 2. Path starts with prefetch entity - strip it.
-				return path.substring((toPrefix + Entity.PATH_SEPARATOR).length());
-			} else {
-				// 3. Path has nothing to do with prefetch entity - prepend rel from prefetch
-				return fromPrefix + Entity.PATH_SEPARATOR + path;
-			}
-		}
+                // operands of object expression need translation
+                if (parentPeer.getType() == Expression.OBJ_PATH) {
+                    operand =
+                        processPath((String) operand, relationshipPath, prependObjPath);
+                } else if (parentPeer.getType() == Expression.DB_PATH) {
+                    operand =
+                        processPath((String) operand, relationshipDbPath, prependDbPath);
+                }
 
-		private void processNode(Expression node, Expression parentNode) {
-			Expression e = createExpressionOfType(node);
-			expMap.put(node, e);
-			processOperand(e, parentNode);
-		}
+                parentPeer.setOperand(ind, operand);
+            }
+        }
 
-		public void startUnaryNode(Expression node, Expression parentNode) {
-			processNode(node, parentNode);
-		}
+        private String processPath(String path, String toPrefix, String fromPrefix) {
+            if (path.equals(toPrefix)) {
+                // 1. Path ends with prefetch entity - match PK
+                throw new CayenneRuntimeException(
+                    "Prefetching with path ending on "
+                        + "prefetch entity is not supported yet.");
+            } else if (path.startsWith(toPrefix + Entity.PATH_SEPARATOR)) {
+                // 2. Path starts with prefetch entity - strip it.
+                return path.substring((toPrefix + Entity.PATH_SEPARATOR).length());
+            } else {
+                // 3. Path has nothing to do with prefetch entity - prepend rel from prefetch
+                return fromPrefix + Entity.PATH_SEPARATOR + path;
+            }
+        }
 
-		public void startBinaryNode(Expression node, Expression parentNode) {
-			processNode(node, parentNode);
-		}
+        private void processNode(Expression node, Expression parentNode) {
+            Expression e = createExpressionOfType(node);
+            expMap.put(node, e);
+            processOperand(e, parentNode);
+        }
 
-		public void startTernaryNode(Expression node, Expression parentNode) {
-			processNode(node, parentNode);
-		}
+        public void startUnaryNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
 
-		public void objectNode(Object leaf, Expression parentNode) {
-			processOperand(leaf, parentNode);
-		}
-	}
+        public void startBinaryNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
+
+        public void startTernaryNode(Expression node, Expression parentNode) {
+            processNode(node, parentNode);
+        }
+
+        public void objectNode(Object leaf, Expression parentNode) {
+            processOperand(leaf, parentNode);
+        }
+    }
 }

@@ -57,7 +57,7 @@
 package org.objectstyle.cayenne.access;
 
 /** 
- * Defines methods called by ToManyList to initialize its data. 
+ * Defines an API of a DataSource used in conjunction with ToManyList.  
  * 
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
@@ -65,7 +65,9 @@ package org.objectstyle.cayenne.access;
  * @author Andrei Adamchik
  */
 public interface ToManyListDataSource {
-    /** Called by WeakReferenceList notifying about the need for the fresh list data. */
+	
+    /** Performs an update of ToManyList data. */
     public void updateListData(ToManyList list);
+    
 } 
    
