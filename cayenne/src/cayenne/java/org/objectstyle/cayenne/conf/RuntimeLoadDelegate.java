@@ -416,9 +416,10 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         if (status.hasFailures()) {
             if (!config.isIgnoringLoadFailures()) {
                 StringBuffer msg = new StringBuffer(128);
-                msg.append("[");
+                msg.append("Load failures. Main configuration class: ");
                 msg.append(config.getClass().getName());
-                msg.append("] : failed to load domain and/or its maps/nodes.");
+                msg.append(", details: ");
+                msg.append(status.describeFailures());
                 throw new ConfigurationException(msg.toString());
             }
         }

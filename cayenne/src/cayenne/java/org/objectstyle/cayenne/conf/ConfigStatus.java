@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 
 /**
  * Interface defines API to check the status of Cayenne configuration.
@@ -73,6 +74,49 @@ public class ConfigStatus {
     protected Map failedDataSources = new HashMap();
     protected List failedMapRefs = new ArrayList();
 
+    /**
+     * Returns a String description of failed configuration pieces.
+     * Returns a canned "no failures" message if no failures occurred.
+     */
+    public String describeFailures() {
+    	if(!hasFailures()) {
+    		return "[No failures]";
+    	}
+    	
+    	StringBuffer buf = new StringBuffer();
+    	
+    	Iterator it = failedMaps.keySet().iterator();
+    	while(it.hasNext()) {
+    		String name = (String)it.next();
+    		String location = (String)failedMaps.get(name);
+    		buf.append("\n\tdomain.map.name=").append(name).append(", domain.map.location=").append(location);
+    	}
+ 
+		it = failedAdapters.keySet().iterator();
+		while(it.hasNext()) {
+			String node = (String)it.next();
+			String adapter = (String)failedAdapters.get(node);
+			buf.append("\n\tdomain.node.name=").append(node).append(", domain.node.adapter=").append(adapter);
+		}
+		
+    	it = failedDataSources.keySet().iterator();
+		while(it.hasNext()) {
+			String node = (String)it.next();
+			String location = (String)failedDataSources.get(node);
+			buf.append("\n\tdomain.node.name=").append(node).append(", domain.node.datasource=").append(location);
+		}
+		
+		it = failedMapRefs.iterator();
+		while(it.hasNext()) {
+			String mapName = (String)it.next();
+			// don't report failed links if the DataMap itself failed to load
+			if(failedMaps.get(mapName) == null) {
+				buf.append("\n\tdomain.node.map-ref.name=").append(mapName);
+			}
+		}
+    	return buf.toString();
+    }
+    
     /**
      * Returns a list of error messages not directly associated with project
      * objects, such as XML pare exceptions, IOExceptions, etc.

@@ -234,7 +234,7 @@ public abstract class Configuration {
 		try {
 			Configuration.initializeSharedConfiguration(Class.forName(configClass));
 		} catch (Exception ex) {
-			logObj.error("Error initializing shared Configuration", ex);
+			logObj.error("Error initializing shared Configuration" + ex.getMessage(), ex);
 			throw new ConfigurationException("Error initializing shared Configuration");
 		}
 	}
@@ -267,7 +267,7 @@ public abstract class Configuration {
 			conf = (Configuration)configurationClass.newInstance();
 		} catch (Exception ex) {
 			logObj.error("Error creating shared Configuration: ", ex);
-			throw new ConfigurationException("Error creating shared Configuration: ", ex);
+			throw new ConfigurationException("Error creating shared Configuration." + ex.getMessage(), ex);
 		}
 
 		Configuration.initializeSharedConfiguration(conf);
@@ -296,7 +296,7 @@ public abstract class Configuration {
 			// set the initialized Configuration only after success
 			Configuration.sharedConfiguration = conf;
 		} catch (Exception ex) {
-			throw new ConfigurationException("Error during Configuration initialization: ", ex);
+			throw new ConfigurationException("Error during Configuration initialization. " + ex.getMessage(), ex);
 		}
 	}
 
