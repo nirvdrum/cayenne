@@ -81,6 +81,8 @@ public class Preferences extends ExtendedProperties {
 
 	/** The directory of the cayenne project edited last. */
 	public static final String LAST_DIR = "Editor.lastProject";
+	/** List of the last 4 opened project files. */
+	public static final String LAST_PROJ_FILES = "Editor.lastSeveralProjectFiles";
 	/** The directory of the last generated classes. */
 	public static final String LAST_GENERATED_CLASSES_DIR = "gui.datamap.GenerateClassDialog.lastDir";
 	/** User name */

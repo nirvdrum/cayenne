@@ -98,25 +98,32 @@ implements ActionListener
     Object context;
 
     JMenuBar  menuBar    	= new JMenuBar();
-    JMenu  fileMenu    		= new JMenu("File");
-    JMenuItem  createProjectMenu  	= new JMenuItem("New Project");
-    JMenuItem createDomainMenu 		= new JMenuItem("New Domain");
-    JMenuItem createDataMapMenu 	= new JMenuItem("New Data Map");
-    JMenuItem createDataSourceMenu	= new JMenuItem("New Data Source");
-    JMenuItem createObjEntityMenu 	= new JMenuItem("New Object Entity");
-    JMenuItem createDbEntityMenu 	= new JMenuItem("New DB Entity");
+    JMenu  fileMenu    			= new JMenu("File");
+    JMenuItem  openProjectMenu  = new JMenuItem("Open Project");
+    JMenuItem  createProjectMenu= new JMenuItem("New Project");
+    JMenuItem  closeProjectMenu = new JMenuItem("Close Project");
+    JMenuItem saveMenu   		= new JMenuItem("Save");
+    JMenuItem  exitMenu    		= new JMenuItem("Exit");
+/*
+	JMenu editMenu			= new JMenu("Edit");
+	JMenuItem cutMenu		= new JMenu("Cut");
+	JMenuItem copyMenu		= new JMenu("Copy");
+	JMenuItem pasteMenu		= new JMenu("Paste");
+*/	
+	JMenu projectMenu				= new JMenu("Project");
+    JMenuItem createDomainMenu 		= new JMenuItem("Create Domain");
+    JMenuItem createDataMapMenu 	= new JMenuItem("Create Data Map");
+    JMenuItem createDataSourceMenu	= new JMenuItem("Create Data Source");
+    JMenuItem createObjEntityMenu 	= new JMenuItem("Create Object Entity");
+    JMenuItem createDbEntityMenu 	= new JMenuItem("Create DB Entity");
     JMenuItem removeMenu 			= new JMenuItem("Remove");
-    JMenuItem  openProjectMenu  	= new JMenuItem("Open Project");
-    JMenuItem  openDataMapMenu  	= new JMenuItem("Open Data Map");
-    JMenuItem  closeProjectMenu  	= new JMenuItem("Close Project");
-    JMenuItem saveMapMenu   		= new JMenuItem("Save Current Map");
-    JMenuItem saveMapAsMenu 		= new JMenuItem("Save Current Map As");
-    JMenuItem saveProjectMenu    	= new JMenuItem("Save Project");
-    JMenuItem saveAllMenu   = new JMenuItem("Save All");
-    JMenuItem  exitMenu    	= new JMenuItem("Exit");
+
     JMenu  toolMenu   		= new JMenu("Tools");
     JMenuItem importDbMenu  = new JMenuItem("Reverse engineer database");
     JMenuItem generateMenu  = new JMenuItem("Generate Classes");
+
+    JMenu helpMenu				= new JMenu("Help");
+    JMenuItem aboutMenu  		= new JMenuItem("About");
 
 	JToolBar toolBar		= new JToolBar();
 	JButton  createDomainBtn;
@@ -137,6 +144,7 @@ implements ActionListener
 
         init();
 		disableMenu();
+		closeProjectMenu.setEnabled(false);
         createDomainMenu.setEnabled(false);
         createDomainBtn.setEnabled(false);
 
@@ -152,13 +160,9 @@ implements ActionListener
         openProjectMenu.addActionListener(this);
         openProjectMenu.setAccelerator(KeyStroke.getKeyStroke(
 				        	KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-        openDataMapMenu.addActionListener(this);
         closeProjectMenu.addActionListener(this);
-        saveMapMenu.addActionListener(this);
-        saveProjectMenu.addActionListener(this);
-        saveMapAsMenu.addActionListener(this);
-        saveAllMenu.addActionListener(this);
-        saveAllMenu.setAccelerator(KeyStroke.getKeyStroke(
+        saveMenu.addActionListener(this);
+        saveMenu.setAccelerator(KeyStroke.getKeyStroke(
 				        	KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         exitMenu.addActionListener(this);
 
@@ -181,6 +185,87 @@ implements ActionListener
     		}
     	});
     }
+
+
+    private void init() {
+        getContentPane().setLayout(new BorderLayout());
+
+        // Setup menu bar
+        setJMenuBar(menuBar);
+        menuBar.add(fileMenu);
+        menuBar.add(projectMenu);
+        menuBar.add(toolMenu);
+        menuBar.add(helpMenu);
+
+        fileMenu.add(createProjectMenu);
+        fileMenu.add(openProjectMenu);
+        fileMenu.add(closeProjectMenu);
+        fileMenu.addSeparator();
+        fileMenu.add(saveMenu);
+        fileMenu.addSeparator();
+        fileMenu.add(exitMenu);
+        
+        projectMenu.add(createDomainMenu);
+        projectMenu.add(createDataMapMenu);
+        projectMenu.add(createDataSourceMenu);
+        projectMenu.add(createObjEntityMenu);
+        projectMenu.add(createDbEntityMenu);
+        projectMenu.addSeparator();
+        projectMenu.add(removeMenu);
+
+        toolMenu.add(importDbMenu);
+        toolMenu.add(generateMenu);
+        
+        helpMenu.add(aboutMenu);
+        
+        initToolBar();
+    }
+    
+    
+    
+    private void initToolBar() {
+    	String path = "org/objectstyle/gui/";
+    	
+    	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
+    	URL url = cl.getResource(path + "images/domain24_grey.gif");
+        ImageIcon domainIcon = new ImageIcon(url);
+        createDomainBtn = new JButton(domainIcon);
+        createDomainBtn.setToolTipText("Create new domain");
+        toolBar.add(createDomainBtn);
+        
+    	url = cl.getResource(path + "images/map24_grey.gif");
+    	ImageIcon mapIcon = new ImageIcon(url);
+    	createDataMapBtn = new JButton(mapIcon);
+    	createDataMapBtn.setToolTipText("Create new data map");
+        toolBar.add(createDataMapBtn);
+    	
+    	url = cl.getResource(path + "images/node24_grey.gif");
+    	ImageIcon nodeIcon = new ImageIcon(url);
+    	createDataSourceBtn = new JButton(nodeIcon);
+    	createDataSourceBtn.setToolTipText("Create new data node");
+        toolBar.add(createDataSourceBtn);
+    	
+    	url = cl.getResource(path + "images/objentity24_grey.gif");
+    	ImageIcon objEntityIcon = new ImageIcon(url);
+    	createObjEntityBtn = new JButton(objEntityIcon);
+    	createObjEntityBtn.setToolTipText("Create new obj entity");
+        toolBar.add(createObjEntityBtn);
+    	
+    	url = cl.getResource(path + "images/dbentity24_grey.gif");
+    	ImageIcon dbEntityIcon = new ImageIcon(url);
+    	createDbEntityBtn = new JButton(dbEntityIcon);
+    	createDbEntityBtn.setToolTipText("Create new db entity");
+        toolBar.add(createDbEntityBtn);
+    	
+    	url = cl.getResource(path + "images/remove24_grey.gif");
+    	ImageIcon removeIcon = new ImageIcon(url);
+    	removeBtn = new JButton(removeIcon);
+    	removeBtn.setToolTipText("Remove current");
+        toolBar.add(removeBtn);
+    	
+    	getContentPane().add(toolBar, BorderLayout.NORTH);
+    }
+
 
 	/** Singleton implementation of getting Editor window. */
 	public static Editor getFrame() {
@@ -225,82 +310,6 @@ implements ActionListener
 		System.exit(0);
 	}
 
-    private void init() {
-        getContentPane().setLayout(new BorderLayout());
-
-        // Setup menu bar
-        setJMenuBar(menuBar);
-        menuBar.add(fileMenu);
-        menuBar.add(toolMenu);
-
-        fileMenu.add(createProjectMenu);
-        fileMenu.add(createDomainMenu);
-        fileMenu.add(createDataMapMenu);
-        fileMenu.add(createDataSourceMenu);
-        fileMenu.add(createObjEntityMenu);
-        fileMenu.add(createDbEntityMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(removeMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(openProjectMenu);
-        fileMenu.add(openDataMapMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(closeProjectMenu);
-        fileMenu.add(saveMapMenu);
-        fileMenu.add(saveMapAsMenu);
-        fileMenu.add(saveProjectMenu);
-        fileMenu.add(saveAllMenu);
-        fileMenu.addSeparator();
-        fileMenu.add(exitMenu);
-
-        toolMenu.add(importDbMenu);
-        toolMenu.add(generateMenu);
-        
-        initToolBar();
-    }
-    
-    private void initToolBar() {
-    	String path = "org/objectstyle/gui/";
-    	
-    	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
-    	URL url = cl.getResource(path + "images/domain24_grey.gif");
-        ImageIcon domainIcon = new ImageIcon(url);
-        createDomainBtn = new JButton(domainIcon);
-        createDomainBtn.setToolTipText("Create new domain");
-        toolBar.add(createDomainBtn);
-        
-    	url = cl.getResource(path + "images/node24_grey.gif");
-    	ImageIcon nodeIcon = new ImageIcon(url);
-    	createDataSourceBtn = new JButton(nodeIcon);
-    	createDataSourceBtn.setToolTipText("Create new data node");
-        toolBar.add(createDataSourceBtn);
-    	
-    	url = cl.getResource(path + "images/map24_grey.gif");
-    	ImageIcon mapIcon = new ImageIcon(url);
-    	createDataMapBtn = new JButton(mapIcon);
-    	createDataMapBtn.setToolTipText("Create new data map");
-        toolBar.add(createDataMapBtn);
-    	
-    	url = cl.getResource(path + "images/dbentity24_grey.gif");
-    	ImageIcon dbEntityIcon = new ImageIcon(url);
-    	createDbEntityBtn = new JButton(dbEntityIcon);
-    	createDbEntityBtn.setToolTipText("Create new db entity");
-        toolBar.add(createDbEntityBtn);
-    	
-    	url = cl.getResource(path + "images/objentity24_grey.gif");
-    	ImageIcon objEntityIcon = new ImageIcon(url);
-    	createObjEntityBtn = new JButton(objEntityIcon);
-    	createObjEntityBtn.setToolTipText("Create new obj entity");
-        toolBar.add(createObjEntityBtn);
-    	
-    	url = cl.getResource(path + "images/remove24_grey.gif");
-    	ImageIcon removeIcon = new ImageIcon(url);
-    	removeBtn = new JButton(removeIcon);
-    	removeBtn.setToolTipText("Remove current");
-        toolBar.add(removeBtn);
-    	
-    	getContentPane().add(toolBar, BorderLayout.NORTH);
-    }
 
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
@@ -311,8 +320,6 @@ implements ActionListener
             openProject();
         } else if (src == closeProjectMenu) {
         	closeProject();
-        } else if (src == saveMapAsMenu) {
-            saveMapAs(mediator.getCurrentDataMap());
         } else if (src == createProjectMenu) {
             createProject();
         } else if (src == createDomainMenu || src == createDomainBtn) {
@@ -327,11 +334,7 @@ implements ActionListener
         	createDbEntity();
         } else if (src == removeMenu || src == removeBtn) {
         	remove();
-        } else if (src == saveMapMenu) {
-            saveDataMap(mediator.getCurrentDataMap());
-        } else if (src == saveProjectMenu) {
-            saveProject();
-        } else if (src == saveAllMenu) {
+        } else if (src == saveMenu) {
             saveAll();
         } else if (src == importDbMenu) {
             importDb();
@@ -344,16 +347,42 @@ implements ActionListener
 
 	private void remove()
 	{
+		int ret;
 		if (context instanceof DataDomain) {
-			mediator.removeDomain(this, (DataDomain)context);
+			ret = JOptionPane.showConfirmDialog(this, 
+				"Are you sure you want to remove "
+				+ ((DataDomain)context).getName() + " data domain?"
+				, "Cayenne", JOptionPane.YES_NO_OPTION);
+			if (ret == JOptionPane.YES_OPTION)
+				mediator.removeDomain(this, (DataDomain)context);
 		} else if (context instanceof DataNode) {
-			mediator.removeDataNode(this, (DataNode)context);
+			ret = JOptionPane.showConfirmDialog(this, 
+				"Are you sure you want to remove "
+				+ ((DataNode)context).getName() + " data node?"
+				, "Cayenne", JOptionPane.YES_NO_OPTION);
+			if (ret == JOptionPane.YES_OPTION)
+				mediator.removeDataNode(this, (DataNode)context);
 		} else if (context instanceof DataMap) {
-			mediator.removeDataMap(this, (DataMap)context);
+			ret = JOptionPane.showConfirmDialog(this, 
+				"Are you sure you want to remove "
+				+ ((DataMap)context).getName() + " data map?"
+				, "Cayenne", JOptionPane.YES_NO_OPTION);
+			if (ret == JOptionPane.YES_OPTION)
+				mediator.removeDataMap(this, (DataMap)context);
 		} else if (context instanceof DbEntity) {
-			mediator.removeDbEntity(this, (DbEntity)context);
+			ret = JOptionPane.showConfirmDialog(this, 
+				"Are you sure you want to remove "
+				+ ((DbEntity)context).getName() + " db entity?"
+				, "Cayenne", JOptionPane.YES_NO_OPTION);
+			if (ret == JOptionPane.YES_OPTION)
+				mediator.removeDbEntity(this, (DbEntity)context);
 		} else if (context instanceof ObjEntity) {
-			mediator.removeObjEntity(this, (ObjEntity)context);
+			ret = JOptionPane.showConfirmDialog(this, 
+				"Are you sure you want to remove "
+				+ ((ObjEntity)context).getName() + " obj entity?"
+				, "Cayenne", JOptionPane.YES_NO_OPTION);
+			if (ret == JOptionPane.YES_OPTION)
+				mediator.removeObjEntity(this, (ObjEntity)context);
 		}
 		
 	}
@@ -365,21 +394,25 @@ implements ActionListener
 		dialog.dispose();
 	}
 
-
-	private void closeProject()
+	/** Returns true if successfully closed project, false otherwise. */
+	private boolean closeProject()
 	{
+		if (false == checkSaveOnClose())
+			return false;
         getContentPane().remove(view);
         view = null;
         mediator = null;
         repaint();
         disableMenu();
 
+        closeProjectMenu.setEnabled(false);
         createDomainMenu.setEnabled(false);
         createDomainBtn.setEnabled(false);
         removeMenu.setText("Remove");
         removeBtn.setToolTipText("Remove");
         // Take path of the proj away from the title
 		this.setTitle(TITLE);
+		return true;
 	}
 
 	private void importDb() {
@@ -479,6 +512,10 @@ implements ActionListener
 	}
 
     private void createProject() {
+    	if (mediator != null) {
+    		if (false == closeProject())
+    			return;
+    	}
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
@@ -528,8 +565,46 @@ implements ActionListener
         }
     }
 
-    /** Open specified cayenne.xml file. */
+	/** Open specified project file. File must already exist. */
+	private void openProject(File file) {
+    	Preferences pref = Preferences.getPreferences();
+       	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
+       	Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
+        try {
+            // Save dir path to the preferences
+			pref.setProperty(Preferences.LAST_DIR, file.getParent());
+			// Add proj path to the preferences
+			// Prevent duplicate entries.
+			if (arr.contains(file.getAbsolutePath())) {
+				arr.remove(file.getAbsolutePath());
+			}
+			arr.add(0, file.getAbsolutePath());
+			while (arr.size() > 4)
+				arr.remove(arr.size()-1);
+			pref.remove(Preferences.LAST_PROJ_FILES);
+			Iterator iter = arr.iterator();
+			while (iter.hasNext())
+				pref.addProperty(Preferences.LAST_PROJ_FILES, iter.next());
+			// Initialize gui configuration
+			GuiConfiguration.initSharedConfig(file);
+            GuiConfiguration config = GuiConfiguration.getGuiConfig();
+            Mediator mediator = Mediator.getMediator(config);
+            project(mediator);
+            // Set title to contain proj file path
+            this.setTitle(TITLE + " - " + file.getAbsolutePath());
+
+        } catch (Exception e) {
+            System.out.println("Error loading project file, " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /** Open cayenne.xml file using file chooser. */
     private void openProject() {
+    	if (mediator != null) {
+    		if (false == closeProject())
+    			return;
+    	}
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
@@ -547,16 +622,7 @@ implements ActionListener
             if ( ret_code != JFileChooser.APPROVE_OPTION)
                 return;
             file = fileChooser.getSelectedFile();
-            // Save dir path to the preferences
-			pref.setProperty(Preferences.LAST_DIR, file.getParent());
-			System.out.println("File path is " + file.getAbsolutePath());
-			GuiConfiguration.initSharedConfig(file);
-            GuiConfiguration config = GuiConfiguration.getGuiConfig();
-            Mediator mediator = Mediator.getMediator(config);
-            project(mediator);
-            // Set title to contain proj file path
-            this.setTitle(TITLE + " - " + file.getAbsolutePath());
-
+            openProject(file);
         } catch (Exception e) {
             System.out.println("Error loading project file, " + e.getMessage());
             e.printStackTrace();
@@ -975,12 +1041,8 @@ implements ActionListener
         createDataSourceMenu.setEnabled(false);
         createObjEntityMenu.setEnabled(false);
         createDbEntityMenu.setEnabled(false);
-        openDataMapMenu.setEnabled(false);
-        closeProjectMenu.setEnabled(false);
-        saveProjectMenu.setEnabled(false);
-        saveMapMenu.setEnabled(false);
-        saveMapAsMenu.setEnabled(false);
-        saveAllMenu.setEnabled(false);
+
+        saveMenu.setEnabled(false);
         removeMenu.setEnabled(false);
 
         importDbMenu.setEnabled(false);
@@ -1000,9 +1062,7 @@ implements ActionListener
 		createDataMapMenu.setEnabled(true);
 		createDataSourceMenu.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
-        openDataMapMenu.setEnabled(true);
-	    saveProjectMenu.setEnabled(true);
-	    saveAllMenu.setEnabled(true);
+	    saveMenu.setEnabled(true);
         importDbMenu.setEnabled(true);
         removeMenu.setEnabled(true);
 
@@ -1013,10 +1073,7 @@ implements ActionListener
 	}
 	
 	private void enableDataMapMenu() {
-		saveMapAsMenu.setEnabled(true);		
 		enableDomainMenu();
-	    saveMapMenu.setEnabled(true);
-        saveMapAsMenu.setEnabled(true);
         createObjEntityMenu.setEnabled(true);
         createDbEntityMenu.setEnabled(true);
         generateMenu.setEnabled(true);
