@@ -55,8 +55,12 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.util.Collection;
+import java.util.Map;
+
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.project.NamedObjectFactory;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /** 
  * DataMap unit tests.
@@ -64,191 +68,230 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik 
  * @author Craig Miskell
  */
-public class DataMapTst extends CayenneTestCase {
-	protected DataMap map;
+public class DataMapTst extends TestCase {
+    protected DataMap map;
 
-	protected void setUp() throws Exception {
-		super.setUp();
-		map = new DataMap();
-	}
+    protected void setUp() throws Exception {
+        super.setUp();
+        map = new DataMap();
+    }
 
-	public void testName() throws Exception {
-		assertNotNull(map.getName());
-		String tstName = "tst_name";
-		map.setName(tstName);
-		assertEquals(tstName, map.getName());
-	}
+    public void testName() throws Exception {
+        assertNotNull(map.getName());
+        String tstName = "tst_name";
+        map.setName(tstName);
+        assertEquals(tstName, map.getName());
+    }
 
-	public void testLocation() throws Exception {
-		String tstName = "tst_name";
-		assertNull(map.getLocation());
-		map.setLocation(tstName);
-		assertEquals(tstName, map.getLocation());
-	}
+    public void testLocation() throws Exception {
+        String tstName = "tst_name";
+        assertNull(map.getLocation());
+        map.setLocation(tstName);
+        assertEquals(tstName, map.getLocation());
+    }
 
-	public void testAddObjEntity() throws Exception {
-		ObjEntity e = new ObjEntity("b");
-		e.setClassName("b");
-		map.addObjEntity(e);
-		assertSame(e, map.getObjEntity(e.getName()));
-		assertSame(map, e.getDataMap());
-	}
+    public void testAddObjEntity() throws Exception {
+        ObjEntity e = new ObjEntity("b");
+        e.setClassName("b");
+        map.addObjEntity(e);
+        assertSame(e, map.getObjEntity(e.getName()));
+        assertSame(map, e.getDataMap());
+    }
 
-	public void testAddEntityWithSameName() throws Exception {
-		//Give them different class-names... we are only testing for the same entity name being a problem
-		ObjEntity e1 = new ObjEntity("c");
-		e1.setClassName("c1");
-		ObjEntity e2 = new ObjEntity("c");
-		e2.setClassName("c2");
-		map.addObjEntity(e1);
-		try {
-			map.addObjEntity(e2);
-			fail("Should not be able to add more than one entity with the same name");	
-		} catch (Exception e) {
-		}	
-	}
+    public void testAddEntityWithSameName() throws Exception {
+        //Give them different class-names... we are only testing for the same entity name being a problem
+        ObjEntity e1 = new ObjEntity("c");
+        e1.setClassName("c1");
+        ObjEntity e2 = new ObjEntity("c");
+        e2.setClassName("c2");
+        map.addObjEntity(e1);
+        try {
+            map.addObjEntity(e2);
+            fail("Should not be able to add more than one entity with the same name");
+        } catch (Exception e) {
+        }
+    }
 
-	//It should be possible to cleanly remove and then add the same entity again.
-	//Uncovered the need for this while testing modeller manually.
-	public void testRemoveThenAddNullClassName() {
-		ObjEntity e = new ObjEntity("f");
-		map.addObjEntity(e);
-		
-		map.removeObjEntity(e.getName());
-		map.addObjEntity(e);
-	}
+    //It should be possible to cleanly remove and then add the same entity again.
+    //Uncovered the need for this while testing modeller manually.
+    public void testRemoveThenAddNullClassName() {
+        ObjEntity e = new ObjEntity("f");
+        map.addObjEntity(e);
 
-	// make sure deleting an ObjEntity & other entity's relationships to it
-	// works & does not cause a ConcurrentModificationException
-	public void testDeleteObjEntity() {
-		ObjEntity e1 = new ObjEntity("1");
-		ObjEntity e2 = new ObjEntity("2");
-		e1.addRelationship(new ObjRelationship(e1, e2, false));
-		e1.addRelationship(new ObjRelationship(e2, e1, false));
-		e2.addRelationship(new ObjRelationship(e1, e2, false));
-		e2.addRelationship(new ObjRelationship(e2, e1, false));
-		map.addObjEntity(e1);
-		map.addObjEntity(e2);
+        map.removeObjEntity(e.getName());
+        map.addObjEntity(e);
+    }
 
-		map.deleteObjEntity("1");
-		assertNull(map.getObjEntity("1"));
-		assertEquals(1, e2.getRelationships().size());
+    // make sure deleting an ObjEntity & other entity's relationships to it
+    // works & does not cause a ConcurrentModificationException
+    public void testDeleteObjEntity() {
+        ObjEntity e1 = new ObjEntity("1");
+        ObjEntity e2 = new ObjEntity("2");
+        e1.addRelationship(new ObjRelationship(e1, e2, false));
+        e1.addRelationship(new ObjRelationship(e2, e1, false));
+        e2.addRelationship(new ObjRelationship(e1, e2, false));
+        e2.addRelationship(new ObjRelationship(e2, e1, false));
+        map.addObjEntity(e1);
+        map.addObjEntity(e2);
 
-		map.deleteObjEntity("2");
-		assertNull(map.getObjEntity("2"));
-	}
+        map.deleteObjEntity("1");
+        assertNull(map.getObjEntity("1"));
+        assertEquals(1, e2.getRelationships().size());
 
-	//Now possible to have more than one objEntity with a null class name. 
-	//This test proves it
-	public void testMultipleNullClassNames() {
-		ObjEntity e1 = new ObjEntity("g");
-		ObjEntity e2 = new ObjEntity("h");
-		map.addObjEntity(e1);
-		map.addObjEntity(e2);
-	}
-	
-	public void testRemoveThenAddRealClassName() {
-		ObjEntity e = new ObjEntity("f");
-		e.setClassName("f");
-		map.addObjEntity(e);
-		
-		map.removeObjEntity(e.getName());
-		map.addObjEntity(e);
-	}
+        map.deleteObjEntity("2");
+        assertNull(map.getObjEntity("2"));
+    }
 
-	public void testAddDbEntity() throws Exception {
-		DbEntity e = new DbEntity("b");
-		map.addDbEntity(e);
-		assertSame(e, map.getDbEntity(e.getName()));
-		assertSame(map, e.getDataMap());
-	}
-	
-	public void testAddDependency1() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		assertFalse(map.isDependentOn(map2));
-		map.addDependency(map2);
-		assertTrue(map.isDependentOn(map2));
-	}
-	
-	public void testAddDependency2() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		DataMap map3 = new DataMap("m3");
-		map.addDependency(map2);
-		map2.addDependency(map3);
-		assertTrue(map.isDependentOn(map3));
-	}
-	
-	public void testAddDependency3() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		
-		try {
-			map2.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
-	}
-	
-	public void testAddDependency4() throws Exception {
-		map.setName("m1");
-		DataMap map2 = new DataMap("m2");
-		map.addDependency(map2);
-		DataMap map3 = new DataMap("m3");
-		map2.addDependency(map3);
-		
-		try {
-			map3.addDependency(map);
-			fail("Circular dependencies should throw exceptions.");
-		}
-		catch(RuntimeException ex) {
-			// exception expected
-		}
-	}
+    //Now possible to have more than one objEntity with a null class name. 
+    //This test proves it
+    public void testMultipleNullClassNames() {
+        ObjEntity e1 = new ObjEntity("g");
+        ObjEntity e2 = new ObjEntity("h");
+        map.addObjEntity(e1);
+        map.addObjEntity(e2);
+    }
 
-	// make sure deleting a DbEntity & other entity's relationships to it
-	// works & does not cause a ConcurrentModificationException
-	public void testDeleteDbEntity() {
+    public void testRemoveThenAddRealClassName() {
+        ObjEntity e = new ObjEntity("f");
+        e.setClassName("f");
+        map.addObjEntity(e);
 
-		// create a twisty maze of intermingled relationships.
-		DbEntity e1 = (DbEntity)NamedObjectFactory.createObject(DbEntity.class, map);
-		e1.setName("e1");
+        map.removeObjEntity(e.getName());
+        map.addObjEntity(e);
+    }
 
-		DbEntity e2 = (DbEntity)NamedObjectFactory.createObject(DbEntity.class, map);
-		e2.setName("e2");
+    public void testAddDbEntity() throws Exception {
+        DbEntity e = new DbEntity("b");
+        map.addDbEntity(e);
+        assertSame(e, map.getDbEntity(e.getName()));
+        assertSame(map, e.getDataMap());
+    }
 
-		DbRelationship r1 = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, e1);
-		r1.setName("r1");
-		r1.setTargetEntity(e2);
+    public void testAddDependency1() throws Exception {
+        map.setName("m1");
+        DataMap map2 = new DataMap("m2");
+        assertFalse(map.isDependentOn(map2));
+        map.addDependency(map2);
+        assertTrue(map.isDependentOn(map2));
+    }
 
-		DbRelationship r2 = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, e2);
-		r2.setName("r2");
-		r2.setTargetEntity(e1);
+    public void testAddDependency2() throws Exception {
+        map.setName("m1");
+        DataMap map2 = new DataMap("m2");
+        DataMap map3 = new DataMap("m3");
+        map.addDependency(map2);
+        map2.addDependency(map3);
+        assertTrue(map.isDependentOn(map3));
+    }
 
-		DbRelationship r3 = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, e1);
-		r3.setName("r3");
-		r3.setTargetEntity(e2);
+    public void testAddDependency3() throws Exception {
+        map.setName("m1");
+        DataMap map2 = new DataMap("m2");
+        map.addDependency(map2);
 
-		e1.addRelationship(r1);
-		e1.addRelationship(r2);
-		e1.addRelationship(r3);
+        try {
+            map2.addDependency(map);
+            fail("Circular dependencies should throw exceptions.");
+        } catch (RuntimeException ex) {
+            // exception expected
+        }
+    }
 
-		e2.addRelationship(r1);
-		e2.addRelationship(r2);
-		e2.addRelationship(r3);
+    public void testAddDependency4() throws Exception {
+        map.setName("m1");
+        DataMap map2 = new DataMap("m2");
+        map.addDependency(map2);
+        DataMap map3 = new DataMap("m3");
+        map2.addDependency(map3);
 
-		map.addDbEntity(e1);
-		map.addDbEntity(e2);
+        try {
+            map3.addDependency(map);
+            fail("Circular dependencies should throw exceptions.");
+        } catch (RuntimeException ex) {
+            // exception expected
+        }
+    }
 
-		// now actually test something
-		map.deleteDbEntity(e1.getName());
-		assertNull(map.getDbEntity(e1.getName()));
-		map.deleteDbEntity(e2.getName());
-		assertNull(map.getDbEntity(e2.getName()));
-	}
+    // make sure deleting a DbEntity & other entity's relationships to it
+    // works & does not cause a ConcurrentModificationException
+    public void testDeleteDbEntity() {
+
+        // create a twisty maze of intermingled relationships.
+        DbEntity e1 =
+            (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
+        e1.setName("e1");
+
+        DbEntity e2 =
+            (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
+        e2.setName("e2");
+
+        DbRelationship r1 =
+            (DbRelationship) NamedObjectFactory.createObject(
+                DbRelationship.class,
+                e1);
+        r1.setName("r1");
+        r1.setTargetEntity(e2);
+
+        DbRelationship r2 =
+            (DbRelationship) NamedObjectFactory.createObject(
+                DbRelationship.class,
+                e2);
+        r2.setName("r2");
+        r2.setTargetEntity(e1);
+
+        DbRelationship r3 =
+            (DbRelationship) NamedObjectFactory.createObject(
+                DbRelationship.class,
+                e1);
+        r3.setName("r3");
+        r3.setTargetEntity(e2);
+
+        e1.addRelationship(r1);
+        e1.addRelationship(r2);
+        e1.addRelationship(r3);
+
+        e2.addRelationship(r1);
+        e2.addRelationship(r2);
+        e2.addRelationship(r3);
+
+        map.addDbEntity(e1);
+        map.addDbEntity(e2);
+
+        // now actually test something
+        map.deleteDbEntity(e1.getName());
+        assertNull(map.getDbEntity(e1.getName()));
+        map.deleteDbEntity(e2.getName());
+        assertNull(map.getDbEntity(e2.getName()));
+    }
+
+    public void testChildProcedures() throws Exception {
+        checkProcedures(new String[0]);
+
+        map.addProcedure(new Procedure("proc1"));
+        checkProcedures(new String[] { "proc1" });
+
+        map.addProcedure(new Procedure("proc2"));
+        checkProcedures(new String[] { "proc1", "proc2" });
+
+        map.removeProcedure("proc2");
+        checkProcedures(new String[] { "proc1" });
+    }
+
+    protected void checkProcedures(String[] expectedNames) throws Exception {
+        int len = expectedNames.length;
+        Map proceduresMap = map.getProcedureMap();
+        Collection proceduresCollection = map.getProcedures();
+
+        assertNotNull(proceduresMap);
+        assertEquals(len, proceduresMap.size());
+        assertNotNull(proceduresCollection);
+        assertEquals(len, proceduresCollection.size());
+
+        for (int i = 0; i < len; i++) {
+            Procedure proc = map.getProcedure(expectedNames[i]);
+            assertNotNull(proc);
+            assertEquals(expectedNames[i], proc.getName());
+        }
+    }
 
 }
