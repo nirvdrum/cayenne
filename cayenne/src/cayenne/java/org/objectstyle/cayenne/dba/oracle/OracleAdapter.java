@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -63,7 +63,11 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -97,8 +101,8 @@ public class OracleAdapter extends JdbcAdapter {
             "org.objectstyle.cayenne.dba.oracle.OracleQualifierTranslator");
     }
 
-    /** 
-     * Creates and returns a primary key generator. 
+    /**
+     * Creates and returns a primary key generator.
      * Overrides superclass implementation to return an
      * instance of OraclePkGenerator.
      */
@@ -117,10 +121,10 @@ public class OracleAdapter extends JdbcAdapter {
         }
     }
 
-    /** 
+    /**
      * Returns a query string to drop a table corresponding
      * to <code>ent</code> DbEntity. Changes superclass behavior
-     * to drop all related foreign key constraints. 
+     * to drop all related foreign key constraints.
      */
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getFullyQualifiedName() + " CASCADE CONSTRAINTS";
@@ -137,13 +141,13 @@ public class OracleAdapter extends JdbcAdapter {
         int size,
         int precision,
         boolean allowNulls) {
-            
+
         DbAttribute attr = super.buildAttribute(name, type, size, precision, allowNulls);
         if(type == Types.DECIMAL && precision <= 0) {
             attr.setType(Types.INTEGER);
             attr.setPrecision(-1);
         }
-        
+
         return attr;
     }
 
@@ -155,5 +159,35 @@ public class OracleAdapter extends JdbcAdapter {
         else {
             return super.queryTranslatorClass(q);
         }
+    }
+
+    public BatchInterpreter getInsertBatchInterpreter() {
+        if (insertBatchInterpreter == null) {
+            insertBatchInterpreter = new OracleBatchInterpreter();
+            insertBatchInterpreter.setAdapter(this);
+            insertBatchInterpreter.setQueryBuilder(
+                new InsertBatchQueryBuilder(this));
+        }
+        return insertBatchInterpreter;
+    }
+
+    public BatchInterpreter getDeleteBatchInterpreter() {
+        if (deleteBatchInterpreter == null) {
+            deleteBatchInterpreter = new OracleBatchInterpreter();
+            deleteBatchInterpreter.setAdapter(this);
+            deleteBatchInterpreter.setQueryBuilder(
+                new DeleteBatchQueryBuilder(this));
+        }
+        return deleteBatchInterpreter;
+    }
+
+    public BatchInterpreter getUpdateBatchInterpreter() {
+        if (updateBatchInterpreter == null) {
+            updateBatchInterpreter = new OracleBatchInterpreter();
+            updateBatchInterpreter.setAdapter(this);
+            updateBatchInterpreter.setQueryBuilder(
+                new UpdateBatchQueryBuilder(this));
+        }
+        return updateBatchInterpreter;
     }
 }

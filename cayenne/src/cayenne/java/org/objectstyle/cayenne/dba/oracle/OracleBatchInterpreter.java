@@ -54,7 +54,7 @@
  *
  */
 
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,39 +63,23 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
- * BatchInterpreter performs BatchQueries in a JDBC specific fashion
- * Its descendants may even employ some RDBMS specific features for the sake of
- * batch efficiency. It is mostly used by DataNodes.
+ * OracleBatchInterpreter performs BatchQueries
+ * in the Oracle JDBC specific fashion.
+ * It makes use of addBatch too.
  *
  * @author Andriy Shapochka
  */
 
-public class BatchInterpreter {
-    private static Logger logObj = Logger.getLogger(BatchInterpreter.class);
-
-    protected DbAdapter adapter;
-    protected BatchQueryBuilder queryBuilder;
-
-    public void setAdapter(DbAdapter adapter) {
-        this.adapter = adapter;
-    }
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
-    public BatchQueryBuilder getQueryBuilder() {
-        return queryBuilder;
-    }
-    public void setQueryBuilder(BatchQueryBuilder queryBuilder) {
-        this.queryBuilder = queryBuilder;
-    }
+public class OracleBatchInterpreter extends BatchInterpreter {
+    private static Logger logObj = Logger.getLogger(OracleBatchInterpreter.class);
 
     public int[] execute(BatchQuery batch, Connection connection) throws SQLException, CayenneException {
         List dbAttributes = batch.getDbAttributes();
@@ -113,8 +97,6 @@ public class BatchInterpreter {
         try {
             st = connection.prepareStatement(query);
             batch.reset();
-            int[] results = new int[batch.size()];
-            int index = 0;
             while (batch.next()) {
                 for (int i = 0; i < attributeCount; i++) {
                     Object value = batch.getObject(i);
@@ -126,9 +108,9 @@ public class BatchInterpreter {
                         st.setObject(i + 1, jdbcValue, type, attributeScales[i]);
                     }
                 }
-                results[index++] = st.executeUpdate();
+                st.addBatch();
             }
-            return results;
+            return st.executeBatch();
         } catch (SQLException e) {
             throw e;
         } catch (CayenneException e) {

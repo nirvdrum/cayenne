@@ -66,7 +66,9 @@ import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -358,7 +360,10 @@ public class CayenneDataObject implements DataObject {
     /** Remove current object from reverse relationship of object <code>val</code> to this object.
       * @param relName name of relationship from this object to <code>val</code>. */
     protected void unsetReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel=(ObjRelationship) dataContext.getEntityResolver().lookupObjEntity(objectId.getObjClass()).getRelationship(relName);
+        Class clazz = objectId.getObjClass();
+        EntityResolver resolver = dataContext.getEntityResolver();
+        ObjEntity entity = resolver.lookupObjEntity(clazz);
+        ObjRelationship rel=(ObjRelationship) entity.getRelationship(relName);
         ObjRelationship revRel = rel.getReverseRelationship();
         if (revRel != null) {
             if (revRel.isToMany())

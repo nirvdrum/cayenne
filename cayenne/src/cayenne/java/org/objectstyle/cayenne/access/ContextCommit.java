@@ -382,7 +382,7 @@ class ContextCommit {
         }
     }
 
-    private void categorizeObjects() {
+    private void categorizeObjects() throws CayenneException {
         Iterator it = context.getObjectStore().getObjectIterator();
         newObjectsByObjEntity = new HashMap();
         objectsToDeleteByObjEntity = new HashMap();
@@ -412,28 +412,31 @@ class ContextCommit {
         }
     }
 
-    private void objectToInsert(DataObject o) {
-        classifyByEntityAndNode(
+    private void objectToInsert(DataObject o) throws CayenneException {
+        if (!classifyByEntityAndNode(
             o,
             newObjectsByObjEntity,
             objEntitiesToInsertByNode,
-            objEntitiesToInsert);
+            objEntitiesToInsert))
+            throw new CayenneException("Classification failed");
     }
 
-    private void objectToDelete(DataObject o) {
-        classifyByEntityAndNode(
+    private void objectToDelete(DataObject o) throws CayenneException {
+        if (!classifyByEntityAndNode(
             o,
             objectsToDeleteByObjEntity,
             objEntitiesToDeleteByNode,
-            objEntitiesToDelete);
+            objEntitiesToDelete))
+            throw new CayenneException("Classification failed");
     }
 
-    private void objectToUpdate(DataObject o) {
-        classifyByEntityAndNode(
+    private void objectToUpdate(DataObject o) throws CayenneException {
+        if (!classifyByEntityAndNode(
             o,
             objectsToUpdateByObjEntity,
             objEntitiesToUpdateByNode,
-            objEntitiesToUpdate);
+            objEntitiesToUpdate))
+            throw new CayenneException("Classification failed");
     }
 
     private ObjEntity classifyAsWritable(Class objEntityClass) {

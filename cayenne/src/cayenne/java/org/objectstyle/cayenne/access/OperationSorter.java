@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -76,15 +76,16 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * Class provides a set of sorting utilities for Cayenne.
  * For instance it supports sorting of database operations to
  * satisfy database referential integrity consraints.
- * 
+ *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
- * 
+ *
  * @author Andrei Adamchik
  */
 public class OperationSorter {
@@ -108,7 +109,7 @@ public class OperationSorter {
 		queryComparator = new QueryComparator(queryEngine, sortedEntityNames);
 	}
 
-	/** 
+	/**
 	  *  Returns a new list containing all the DbEntities in <code>entities</code>,
 	  *  in the correct order for inserting objects int,o or creating the tables of, those entities.
 	  */
@@ -116,7 +117,7 @@ public class OperationSorter {
 		return InsertOrderSorter.sortedDbEntities(entities);
 	}
 
-	/** 
+	/**
 	  *  Returns a new list containing all the DbEntities in <code>entities</code>,
 	  *  in the correct order for deleting objects from or removing the tables of, those entities.
 	  */
@@ -126,9 +127,9 @@ public class OperationSorter {
 		return result;
 	}
 
-	/** 
-	 *  Sorts an unsorted array of DataObjects in the right 
-	 *  insert order for database constraints not to be violated, 
+	/**
+	 *  Sorts an unsorted array of DataObjects in the right
+	 *  insert order for database constraints not to be violated,
 	 *  and so that master pk's for dependent relationships
 	 *  are in place prior to being needed for the dependent
 	 *  object, and reflexive relationships are correctly handled
@@ -136,10 +137,10 @@ public class OperationSorter {
 	public static void sortObjectsInInsertOrder(List objects) {
 		Collections.sort(objects, ObjectComparator.comparatorForInsertOrder(objects));
 	}
-	
-	/** 
-	 *  Sorts an unsorted array of DataObjects in the right 
-	 *  delete order for database constraints not to be violated, 
+
+	/**
+	 *  Sorts an unsorted array of DataObjects in the right
+	 *  delete order for database constraints not to be violated,
 	 *  and so that master pk's for dependent relationships
 	 *  are in place prior to being needed for the dependent
 	 *  object and reflexive relationships are correctly handled
@@ -159,7 +160,7 @@ public class OperationSorter {
 		return Arrays.asList(qs);
 	}
 
-	/** Used as a comparator to sort in place a list of entities into insert Order (based on a 
+	/** Used as a comparator to sort in place a list of entities into insert Order (based on a
 	 * sorted list that had to be created from scratch) */
 	static final class PreSortedEntityComparator implements Comparator {
 		private List sortedList;
@@ -188,14 +189,14 @@ public class OperationSorter {
 		private List dataObjects;
 		private int direction;
 
-		//Entities that have one or more reflexive relationships.  Key is the entity, 
+		//Entities that have one or more reflexive relationships.  Key is the entity,
 		// value is a list of the reflexive relationships
 		private HashMap reflexiveEntities = new HashMap();
-		
+
 		public static ObjectComparator comparatorForInsertOrder(List objects) {
 			return new ObjectComparator(objects, true);
 		}
-		
+
 		public static ObjectComparator comparatorForDeleteOrder(List objects) {
 			return new ObjectComparator(objects, false);
 		}
@@ -203,12 +204,12 @@ public class OperationSorter {
 		 * Create a comparator that will be able to sort a list of objects.  Is private because
 		 * the insert boolean flag is not totally clear, and there are only two uses for it.
 		 * These users are provided for by the more clearly named static methods.
-		 * 
+		 *
 		 * @param objects a List of DataObjects to be sorted into insert/delete order.
 		 * This parameter is necessary to determine both the list of entities for
 		 * gross sorting by entity, and to sort within an entity if there are any
 		 * reflexive relationships
-		 * @param insert A boolean indicating if the ordering is for insert or for delete.  
+		 * @param insert A boolean indicating if the ordering is for insert or for delete.
 		 * true means insert order, false means delete
 		 */
 		private ObjectComparator(List objects, boolean insert) {
@@ -250,7 +251,7 @@ public class OperationSorter {
 						}
 						relList.add(new ReflexiveRelData(thisRel, objects));
 						handledRelationships.add(thisRel);
-						//Only handle the relationship from one direction at this level - 
+						//Only handle the relationship from one direction at this level -
 						//ReflexiveRelData will handle both directions as needed
 						ObjRelationship reverse = thisRel.getReverseRelationship();
 						if (reverse != null) {
@@ -304,19 +305,21 @@ public class OperationSorter {
 				return 0;
 			}
 		}
-		
+
 		private final class ReflexiveRelData {
 			private ObjRelationship rel;
 			private List orderedObjects = new ArrayList();
       private Class targetClass;
-      
+
 			public ReflexiveRelData(ObjRelationship relationship, List allObjects) {
 				super();
 				this.rel = relationship;
     		ObjEntity targetEntity=(ObjEntity)this.rel.getTargetEntity();
 				try {
-				  this.targetClass =
-						Class.forName(targetEntity.getClassName());
+//				  this.targetClass =
+//						Class.forName(targetEntity.getClassName());
+                  this.targetClass =
+                      Configuration.getResourceLoader().loadClass(targetEntity.getClassName());
 				} catch (Exception e) {
 					throw new CayenneRuntimeException(
 						"Unable to load class named "
@@ -328,10 +331,10 @@ public class OperationSorter {
 			}
 
 			//Creates an ordered list based on obj (i.e. finds other objects
-			// that must come before and after obj), and adds this list to the 
+			// that must come before and after obj), and adds this list to the
 			// end of orderedList.  Uses recursion to find dependencies.
 			private void addObjectToList(DataObject obj, List allObjects, List orderedList) {
-				//Do toOne relationships first, because any objects on a toOne will need to be 
+				//Do toOne relationships first, because any objects on a toOne will need to be
 				//added prior to obj (but still at the end of the current list)
 				ObjRelationship toOneRel;
 
@@ -345,7 +348,7 @@ public class OperationSorter {
 					DataObject dest = (DataObject) obj.readPropertyDirectly(toOneRel.getName());
 					//In the case that a relationship had a NULLIFY delete rule, this property may be null
 					// when in fact it used to point to an object that is being deleted (and is hence important
-					// from the perspective of sorting the operations).  So if there is no object, 
+					// from the perspective of sorting the operations).  So if there is no object,
 					// we do a quick check at the dbrelationship/snapshot level just to be sure.  If
 					// an object turns up, then it must have been the above situation, so we use that object
 					if(dest==null) {
@@ -354,7 +357,7 @@ public class OperationSorter {
 						if(snapshot==null) {
 							snapshot=obj.getCurrentSnapshot();
 						}
-					
+
 						Map pksnapshot=finalRel.targetPkSnapshotWithSrcSnapshot(snapshot);
 						if(pksnapshot!=null) {
 
@@ -405,8 +408,8 @@ public class OperationSorter {
 				//The objects from allObjects that use the given entity
 				List entityObjects = new ArrayList();
 
-				//It's more convenient to iterate once and filter to get just the objects 
-				// of interest... makes the relationship following code cleaner and 
+				//It's more convenient to iterate once and filter to get just the objects
+				// of interest... makes the relationship following code cleaner and
 				// possibly faster (but cleaner is the only intention, until and unless
 				// this algorithm proves unviably slow)
 				Iterator objectsIterator = allObjects.iterator();
@@ -529,29 +532,29 @@ public class OperationSorter {
 		}
 
 		/* The algorithm
-		 *  Partition the entities into sets of connected entities.  All entities in a given set must have a relationship path to 
+		 *  Partition the entities into sets of connected entities.  All entities in a given set must have a relationship path to
 		 * 	all other entities in the set.
 		 * 		While there are unassigned entities:
 		 * 			Create a new set and put the first unassigned entity in it.
-		 * 			Follow relationships of entities in the set and add entities that aren't already in the set, 
+		 * 			Follow relationships of entities in the set and add entities that aren't already in the set,
 		 * 				until all relationships have been checked.
 		 * 		   end while
 		 *   For each set:
-		 *   		Pick an entity, create a Structure entityDeps {entity, afterEntities, beforeEntities, dontCareEntities} 
+		 *   		Pick an entity, create a Structure entityDeps {entity, afterEntities, beforeEntities, dontCareEntities}
 		 * 			and populate for that entity.
 		 * 		Put this structure into a "main" list (one object only to start with)
 		 * 		While there exists a structure in the main list that has after/before/dontcare entities do
 		 * 			Pick one such "current" structure
-		 * 			From its beforeEntities list, pick one of the entities and create its structure, only using other entities from 
-		 * 				the current before list in the new before/after/dontcare lists.  
+		 * 			From its beforeEntities list, pick one of the entities and create its structure, only using other entities from
+		 * 				the current before list in the new before/after/dontcare lists.
 		 * 				Insert this new structure into the main list directly before the current structure
 		 * 			Do the same for the afterEntities, but insert the resulting structure directly after the current structure in the main list
 		 * 			Do the same for the dontCareEntities list, and place the result directly after the current structure (before or
 		 * 				after is an arbitrary choice and doesn't matter.  However, it must be between the current and the newly inserted
 		 * 				after or before structure (the previous two steps) for consistency.
 		 * 		End while
-		 * 
-		 * 	Finally, take the lists from each set and concatenate the top level entities into one big list.  
+		 *
+		 * 	Finally, take the lists from each set and concatenate the top level entities into one big list.
 		 * 		The order of sets doesn't matter as by creation they are disjoint
 		 */
 		public static List sortedDbEntities(List dbEntities) {
@@ -650,7 +653,7 @@ public class OperationSorter {
 					}
 				}
 
-				//Processed this set - shove the results into finalResult		
+				//Processed this set - shove the results into finalResult
 				Iterator mainListIterator = mainList.iterator();
 				while (mainListIterator.hasNext()) {
 					//Add the root entity to the final result
@@ -717,9 +720,9 @@ public class OperationSorter {
 				Iterator relIterator = start.getRelationshipList().iterator();
 				while (relIterator.hasNext()) {
 					DbRelationship thisRel = (DbRelationship) relIterator.next();
-					//When looking for entities to do after 'start', then if the rel is toMany *OR* it's dependent, 
+					//When looking for entities to do after 'start', then if the rel is toMany *OR* it's dependent,
 					//  then it's one we want
-					//When looking for entities to do before 'start', then if it's toOne and it's NOT dependent then 
+					//When looking for entities to do before 'start', then if it's toOne and it's NOT dependent then
 					// it's one we want.  If it's toOne and dependent, then the it's not a "before" situation
 					if ((findAfterEntities && (thisRel.isToMany() || thisRel.isToDependentPK()))
 						|| (!findAfterEntities && !thisRel.isToMany() && !thisRel.isToDependentPK())) {

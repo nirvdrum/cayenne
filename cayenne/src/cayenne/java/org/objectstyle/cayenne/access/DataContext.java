@@ -1384,11 +1384,11 @@ public class DataContext implements QueryEngine, Serializable {
     private List getFlattenedInsertQueries() {
         List result = new ArrayList();
         /*
-        
+
         int i;
-        
+
         Iterator objectIterator;
-        
+
         objectIterator = flattenedInserts.keySet().iterator();
         while (objectIterator.hasNext()) {
         	DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1428,7 +1428,7 @@ public class DataContext implements QueryEngine, Serializable {
         List result = new ArrayList();
         /*int i;
         Iterator objectIterator;
-        
+
         objectIterator = flattenedDeletes.keySet().iterator();
         while (objectIterator.hasNext()) {
         	DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1501,9 +1501,17 @@ public class DataContext implements QueryEngine, Serializable {
         return keyGenerator;
     }
 
-    public void commit(Level logLevel) throws CayenneException {
+    public void commit(Level logLevel) throws CayenneRuntimeException {
+        if (this.getParent() == null) {
+            throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
+        }
         ContextCommit worker = new ContextCommit(this);
-        worker.commit(logLevel);
+        try {
+          worker.commit(logLevel);
+        }
+        catch (CayenneException ex) {
+          throw new CayenneRuntimeException(ex);
+        }
     }
 
     void fireWillCommit() {
