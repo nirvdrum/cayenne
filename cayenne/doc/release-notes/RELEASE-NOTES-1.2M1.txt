@@ -10,3 +10,7 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 
 
 Bugs Fixed:
+
+CAY-236	gui application generates malformed xml
+CAY-243	Allow Cayenne PK generator to work over SQLServer identity columns
+CAY-222	Change CREATE statement for HSQLDB when Generating SQL
