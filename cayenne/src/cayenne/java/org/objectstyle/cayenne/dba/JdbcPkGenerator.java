@@ -245,7 +245,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	 * @throws SQLException in case of query failure.
 	 */
 	public int runUpdate(DataNode node, String sql) throws SQLException {
-		QueryLogger.logQuery(QueryLogger.getLoggingLevel(), sql, Collections.EMPTY_LIST);
+		QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, sql, Collections.EMPTY_LIST);
 
 		Connection con = node.getDataSource().getConnection();
 		try {
