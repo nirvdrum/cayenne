@@ -62,7 +62,7 @@ public class Main {
                 "galleryName",
                 likePattern);
 
-        SelectQuery query = new SelectQuery("Gallery", qual);
+        SelectQuery query = new SelectQuery(Gallery.class, qual);
         // using log level of WARN to make sure that query 
         // execution is logged to STDOUT
         query.setLoggingLevel(Level.WARN);

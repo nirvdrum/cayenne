@@ -24,8 +24,8 @@ query.addOrdering("artistName", true);
 </source>    
 
 		<p>Orderings also support in-memory sorting of lists of Java Beans 
-		(any DataObjects is normally a Java Beans, since it has set/get method
-		pairs for all its properties). For instance 
+		(all DataObjects are normally  Java Beans, since they has set/get method
+		pairs for all the properties). For instance 
 		to sort with a single ordering, the following code might be used:
 		</p>
 

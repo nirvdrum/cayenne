@@ -12,6 +12,7 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.SelectQuery;
+import webtest.Gallery;
 
 public final class GalleryPageAction extends Action {
 
@@ -24,7 +25,7 @@ public final class GalleryPageAction extends Action {
 
         DataContext ctxt = (DataContext) request.getSession().getAttribute("context");
 
-        SelectQuery query = new SelectQuery("Gallery");
+        SelectQuery query = new SelectQuery(Gallery.class);
 
         // set a relatively high logging level, 
         // to show the query execution progress

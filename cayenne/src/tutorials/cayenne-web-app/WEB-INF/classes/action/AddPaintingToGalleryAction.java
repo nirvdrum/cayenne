@@ -14,6 +14,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import webtest.Gallery;
 import webtest.Painting;
 
 public final class AddPaintingToGalleryAction extends Action {
@@ -35,7 +36,7 @@ public final class AddPaintingToGalleryAction extends Action {
                 "paintingTitle",
                 paintingTitle);
 
-        SelectQuery query = new SelectQuery("Painting", qual);
+        SelectQuery query = new SelectQuery(Painting.class, qual);
 
 		// set a relatively high logging level, 
 		// to show the query execution progress
@@ -46,7 +47,7 @@ public final class AddPaintingToGalleryAction extends Action {
         Painting painting = (Painting) paintings.get(0);
         System.err.println("painting: " + painting);
 
-        query = new SelectQuery("Gallery");
+        query = new SelectQuery(Gallery.class);
         query.setLoggingLevel(Level.WARN);
 
         List galleries = ctxt.performQuery(query);

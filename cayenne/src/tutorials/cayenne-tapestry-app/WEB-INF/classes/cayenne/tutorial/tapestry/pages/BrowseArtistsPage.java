@@ -70,7 +70,7 @@ public class BrowseArtistsPage extends BasePage {
 
 		DataContext ctxt = visit.getDataContext();
 
-		SelectQuery query = new SelectQuery("Artist");
+		SelectQuery query = new SelectQuery(Artist.class);
 		Ordering ordering = new Ordering("artistName", Ordering.ASC);
 		query.addOrdering(ordering);
 

@@ -38,7 +38,7 @@ public final class SavePaintingAction extends Action {
                                         "artistName",
                                         anArtistName);
         
-        SelectQuery query = new SelectQuery("Artist", qual);
+        SelectQuery query = new SelectQuery(Artist.class, qual);
         
         // using log level of WARN to show the query execution
         query.setLoggingLevel(Level.WARN);

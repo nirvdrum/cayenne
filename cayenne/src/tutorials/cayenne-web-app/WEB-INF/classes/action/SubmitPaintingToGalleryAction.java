@@ -38,7 +38,7 @@ public final class SubmitPaintingToGalleryAction extends Action {
 				"paintingTitle",
 				paintingTitle);
 
-		SelectQuery query = new SelectQuery("Painting", qual);
+		SelectQuery query = new SelectQuery(Painting.class, qual);
 
 		// using log level of WARN to show the query execution
 		query.setLoggingLevel(Level.WARN);

@@ -37,7 +37,7 @@ public final class RemovePaintingFromGalleryAction extends Action {
                 "paintingTitle",
                 paintingTitle);
 
-        SelectQuery query = new SelectQuery("Painting", qual);
+        SelectQuery query = new SelectQuery(Painting.class, qual);
 
         // set a relatively high logging level, 
         // to show the query execution progress
@@ -53,7 +53,7 @@ public final class RemovePaintingFromGalleryAction extends Action {
                 "galleryName",
                 galleryName);
 
-        query = new SelectQuery("Gallery", qual);
+        query = new SelectQuery(Gallery.class, qual);
         query.setLoggingLevel(Level.WARN);
         List galleries = ctxt.performQuery(query);
         Gallery gallery = (Gallery) galleries.get(0);

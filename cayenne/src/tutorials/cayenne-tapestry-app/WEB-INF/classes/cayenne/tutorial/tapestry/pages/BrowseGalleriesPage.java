@@ -50,7 +50,7 @@ public class BrowseGalleriesPage extends BasePage {
 		Visit visit = (Visit) this.getPage().getVisit();
 		ctxt = visit.getDataContext();
 
-		SelectQuery query = new SelectQuery("Gallery");
+		SelectQuery query = new SelectQuery(Gallery.class);
 		Ordering ordering = new Ordering("galleryName", Ordering.ASC);
 		query.addOrdering(ordering);
 

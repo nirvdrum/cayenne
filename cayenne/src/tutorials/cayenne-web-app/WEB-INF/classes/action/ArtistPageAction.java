@@ -13,6 +13,7 @@ import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
+import webtest.Artist;
 
 public final class ArtistPageAction extends Action {
 
@@ -26,7 +27,7 @@ public final class ArtistPageAction extends Action {
 		DataContext ctxt =
 			(DataContext) request.getSession().getAttribute("context");
 
-		SelectQuery query = new SelectQuery("Artist");
+		SelectQuery query = new SelectQuery(Artist.class);
 		Ordering ordering = new Ordering("artistName", Ordering.ASC);
 		query.addOrdering(ordering);
 
