@@ -84,11 +84,10 @@ public class PooledConnectionImpl implements PooledConnection {
     private Connection connectionObj;
     private List connectionEventListeners;
     private boolean hadErrors;
-    private long lastReconnected;
     private DataSource connectionSource;
     private String userName;
     private String password;
-    private int reconnectCount;
+ 
 
     protected PooledConnectionImpl() {
         this.connectionEventListeners =
@@ -110,7 +109,7 @@ public class PooledConnectionImpl implements PooledConnection {
 
     }
 
-    protected void reconnect() throws SQLException {
+    public void reconnect() throws SQLException {
         if (connectionObj != null) {
             try {
                 connectionObj.close();
@@ -126,9 +125,6 @@ public class PooledConnectionImpl implements PooledConnection {
             (userName != null)
                 ? connectionSource.getConnection(userName, password)
                 : connectionSource.getConnection();
-
-        lastReconnected = System.currentTimeMillis();
-        reconnectCount++;
     }
 
     public void addConnectionEventListener(ConnectionEventListener listener) {
@@ -191,41 +187,12 @@ public class PooledConnectionImpl implements PooledConnection {
             this.connectionClosedNotification();
     }
 
-    /**
-     * Returns time in miliseconds since the original creation or last reconnection
-     * attempt.
-     */
-    public long timeSinceReconnect() {
-        return System.currentTimeMillis() - lastReconnected;
-    }
-
-    /**
-     * Tries to reconnect on connection error. Rethrows the original exception if 
-     * this is not possible.
-     */
-    public Connection reconnectOnError(SQLException exception)
-        throws SQLException {
-
-        // if there was a relatively recent reconnect, just rethrow an error
-        // and retire itself
-        if (reconnectCount > 1
-            && System.currentTimeMillis() - lastReconnected < 90000) {
-            connectionErrorNotification(exception);
-            throw exception;
-        }
-
-        // force reconnect
-        reconnect();
-
-        return getConnection();
-    }
-
     /** This method creates and sents an event to listeners when an error occurs in the
      *  underlying connection. Listeners can have special logic to
      *  analyze the error and do things like closing this PooledConnection
      *  (if the error is fatal), etc...
      */
-    protected void connectionErrorNotification(SQLException exception) {
+    public void connectionErrorNotification(SQLException exception) {
         // hint for later to avoid returning bad connections to the pool
         hadErrors = true;
 
