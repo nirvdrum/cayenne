@@ -63,6 +63,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -72,16 +73,26 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.AdapterMapping;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.pref.FSPath;
 import org.objectstyle.cayenne.modeler.util.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
 
@@ -92,7 +103,7 @@ import org.objectstyle.cayenne.wocompat.EOModelProcessor;
  */
 public class ImportEOModelAction extends CayenneAction {
 
-    private static Logger logObj = Logger.getLogger(ImportEOModelAction.class);
+    private static final Logger logObj = Logger.getLogger(ImportEOModelAction.class);
 
     public static String getActionName() {
         return "Import EOModel";
@@ -104,15 +115,12 @@ public class ImportEOModelAction extends CayenneAction {
         super(getActionName(), application);
     }
 
-    /**
-     * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-     */
     public void performAction(ActionEvent event) {
         importEOModel();
     }
 
     /**
-     * Lets user select an EOModel, then imports it as a DataMap.
+     * Allows user to select an EOModel, then imports it as a DataMap.
      */
     protected void importEOModel() {
         JFileChooser fileChooser = getEOModelChooser();
@@ -131,16 +139,86 @@ public class ImportEOModelAction extends CayenneAction {
                 file = file.getParentFile();
             }
 
+            DataMap currentMap = getProjectController().getCurrentDataMap();
+
             try {
                 String path = file.getCanonicalPath();
-                DataMap map = new EOModelProcessor().loadEOModel(path);
-                addDataMap(map);
+
+                EOModelProcessor processor = new EOModelProcessor();
+
+                // load DataNode if we are not merging with an existing map
+                if (currentMap == null) {
+                    loadDataNode(processor.loadModeIndex(path));
+                }
+
+                // load DataMap
+                DataMap map = processor.loadEOModel(path);
+                addDataMap(map, currentMap);
+
             }
             catch (Exception ex) {
                 logObj.log(Level.INFO, "EOModel Loading Exception", ex);
                 ErrorDebugDialog.guiException(ex);
             }
 
+        }
+    }
+
+    protected void loadDataNode(Map eomodelIndex) {
+        // if this is JDBC or JNDI node and connection dictionary is specified, load a
+        // DataNode, otherwise ignore it (meaning that pre 5.* EOModels will not have a
+        // node).
+
+        String adapter = (String) eomodelIndex.get("adaptorName");
+        Map connection = (Map) eomodelIndex.get("connectionDictionary");
+
+        if (adapter != null && connection != null) {
+            CreateNodeAction nodeBuilder = (CreateNodeAction) getApplication().getAction(
+                    CreateNodeAction.getActionName());
+
+            // this should make created node current, resulting in the new map being added
+            // to the node automatically once it is loaded
+            DataNode node = nodeBuilder.buildDataNode();
+
+            // configure node...
+            if ("JNDI".equalsIgnoreCase(adapter)) {
+                node.setDataSourceFactory(JNDIDataSourceFactory.class.getName());
+                node.setDataSourceLocation((String) connection.get("serverUrl"));
+            }
+            else {
+                // guess adapter from plugin or driver
+                AdapterMapping adapterDefaults = getApplication().getAdapterMapping();
+                String cayenneAdapter = adapterDefaults.adapterForEOFPluginOrDriver(
+                        (String) connection.get("plugin"),
+                        (String) connection.get("driver"));
+                if (cayenneAdapter != null) {
+                    try {
+                        Class adapterClass = getApplication()
+                                .getClassLoadingService()
+                                .loadClass(cayenneAdapter);
+                        node.setAdapter((DbAdapter) adapterClass.newInstance());
+                    }
+                    catch (Throwable ex) {
+                        // ignore...
+                    }
+                }
+
+                node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
+
+                DataSourceInfo dsi = ((ProjectDataSource) node.getDataSource())
+                        .getDataSourceInfo();
+                dsi.setDataSourceUrl((String) connection.get("URL"));
+                dsi.setJdbcDriver((String) connection.get("driver"));
+                dsi.setPassword((String) connection.get("password"));
+                dsi.setUserName((String) connection.get("username"));
+            }
+
+            // send events after the node creation is complete
+            getProjectController().fireDataNodeEvent(
+                    new DataNodeEvent(this, node, DataNodeEvent.ADD));
+            getProjectController().fireDataNodeDisplayEvent(
+                    new DataNodeDisplayEvent(this, getProjectController()
+                            .getCurrentDataDomain(), node));
         }
     }
 
@@ -158,8 +236,8 @@ public class ImportEOModelAction extends CayenneAction {
     /**
      * Adds DataMap into the project.
      */
-    protected void addDataMap(DataMap map) {
-        DataMap currentMap = getProjectController().getCurrentDataMap();
+    protected void addDataMap(DataMap map, DataMap currentMap) {
+
         ProjectController mediator = getProjectController();
 
         if (currentMap != null) {
@@ -172,7 +250,7 @@ public class ImportEOModelAction extends CayenneAction {
             currentMap.mergeWithDataMap(map);
             map = currentMap;
 
-            // ostprocess changes
+            // postprocess changes
             Collection newOE = new ArrayList(currentMap.getObjEntities());
             Collection newDE = new ArrayList(currentMap.getDbEntities());
 
@@ -219,6 +297,13 @@ public class ImportEOModelAction extends CayenneAction {
                     .getCurrentDataNode()));
         }
         else {
+            // fix DataMap name, as there maybe a map with the same name already
+            DataDomain domain = mediator.getCurrentDataDomain();
+            map.setName(NamedObjectFactory.createName(DataMap.class, domain, map
+                    .getName()));
+
+            // side effect of this operation is that if a node was created, this DataMap
+            // will be linked with it...
             mediator.addDataMap(Application.getFrame(), map);
         }
     }

@@ -143,6 +143,7 @@ public class Application {
     protected String name;
     protected String preferencesDB;
     protected BindingFactory bindingFactory;
+    protected AdapterMapping adapterMapping;
 
     public static Application getInstance() {
         return instance;
@@ -174,6 +175,7 @@ public class Application {
         File dbDir = new File(CayenneUserDir.getInstance().resolveFile("prefs"), subdir);
         dbDir.mkdirs();
         this.preferencesDB = new File(dbDir, "db").getAbsolutePath();
+
     }
 
     public String getName() {
@@ -182,6 +184,10 @@ public class Application {
 
     public ClassLoadingService getClassLoadingService() {
         return modelerClassLoader;
+    }
+    
+    public AdapterMapping getAdapterMapping() {
+        return adapterMapping;
     }
 
     /**
@@ -214,6 +220,7 @@ public class Application {
         initClassLoader();
         initActions();
         this.bindingFactory = new BindingFactory();
+        this.adapterMapping = new AdapterMapping();
 
         // ...Scope
 

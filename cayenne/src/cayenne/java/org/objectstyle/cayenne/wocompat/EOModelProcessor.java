@@ -56,6 +56,9 @@
 
 package org.objectstyle.cayenne.wocompat;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -76,17 +79,54 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
- * Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
+ * Class for converting stored Apple EOModel mapping files to Cayenne DataMaps.
  */
 public class EOModelProcessor {
 
     /**
+     * Returns index.eomodeld contents as a Map.
+     * 
+     * @since 1.1
+     */
+    // TODO: refactor EOModelHelper to provide a similar method without loading
+    // all entity files in memory... here we simply copied stuff from EOModelHelper
+    public Map loadModeIndex(String path) throws Exception {
+
+        ResourceLocator locator = new ResourceLocator();
+        locator.setSkipClasspath(false);
+        locator.setSkipCurrentDirectory(false);
+        locator.setSkipHomeDirectory(true);
+        locator.setSkipAbsolutePath(false);
+
+        if (!path.endsWith(".eomodeld")) {
+            path += ".eomodeld";
+        }
+
+        URL base = locator.findDirectoryResource(path);
+        if (base == null) {
+            throw new FileNotFoundException("Can't find EOModel: " + path);
+        }
+
+        Parser plistParser = new Parser();
+        InputStream in = new URL(base, "index.eomodeld").openStream();
+
+        try {
+            plistParser.ReInit(in);
+            return (Map) plistParser.propertyList();
+        }
+        finally {
+            in.close();
+        }
+    }
+
+    /**
      * Performs EOModel loading.
      * 
-     * @param path
-     *            A path to ".eomodeld" directory. If path doesn't end with ".eomodeld",
+     * @param path A path to ".eomodeld" directory. If path doesn't end with ".eomodeld",
      *            ".eomodeld" suffix is automatically assumed.
      */
     public DataMap loadEOModel(String path) throws Exception {
@@ -96,13 +136,11 @@ public class EOModelProcessor {
     /**
      * Performs EOModel loading.
      * 
-     * @param path
-     *            A path to ".eomodeld" directory. If path doesn't end with ".eomodeld",
+     * @param path A path to ".eomodeld" directory. If path doesn't end with ".eomodeld",
      *            ".eomodeld" suffix is automatically assumed.
-     * @param generateClientClass
-     *            if true then loading of EOModel is java client classes aware and the
-     *            following processing will work with Java client class settings of the
-     *            EOModel.
+     * @param generateClientClass if true then loading of EOModel is java client classes
+     *            aware and the following processing will work with Java client class
+     *            settings of the EOModel.
      */
     public DataMap loadEOModel(String path, boolean generateClientClass) throws Exception {
         EOModelHelper helper = makeHelper(path, generateClientClass);
@@ -215,7 +253,6 @@ public class EOModelProcessor {
 
         DataMap dataMap = helper.getDataMap();
         Map entityPlist = helper.entityPListMap(name);
-        
 
         // create ObjEntity
         EOObjEntity objEntity = new EOObjEntity(name);
@@ -235,8 +272,8 @@ public class EOModelProcessor {
         // associated with multiple EOEntities, check for name duplicates
         String dbEntityName = (String) entityPlist.get("externalName");
         if (dbEntityName != null) {
-            
-            // ... if inheritance is involved and parent hierarchy uses the same DBEntity, 
+
+            // ... if inheritance is involved and parent hierarchy uses the same DBEntity,
             // do not create a DbEntity...
             boolean createDbEntity = true;
             if (parent != null) {
@@ -260,8 +297,7 @@ public class EOModelProcessor {
                     break;
                 }
             }
-            
-            
+
             if (createDbEntity) {
                 int i = 0;
                 String dbEntityBaseName = dbEntityName;
@@ -302,7 +338,8 @@ public class EOModelProcessor {
         List classProperties;
         if (objEntity.getIsClientEntity()) {
             classProperties = (List) entityPlistMap.get("clientClassProperties");
-        } else {
+        }
+        else {
             classProperties = (List) entityPlistMap.get("classProperties");
         }
 
@@ -320,7 +357,7 @@ public class EOModelProcessor {
         if (attributes == null) {
             attributes = Collections.EMPTY_LIST;
         }
-        
+
         // detect single table inheritance
         boolean singleTableInheritance = false;
         String parentName = (String) entityPlistMap.get("parent");
@@ -343,7 +380,6 @@ public class EOModelProcessor {
 
             break;
         }
-        
 
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
@@ -376,7 +412,6 @@ public class EOModelProcessor {
             EODbAttribute dbAttr = null;
 
             if (dbAttrName != null && dbEntity != null) {
-                
 
                 // if inherited atribute, skip it for DbEntity...
                 if (!singleTableInheritance || dbEntity.getAttribute(dbAttrName) == null) {
@@ -437,8 +472,6 @@ public class EOModelProcessor {
             }
         }
     }
-    
-    
 
     /**
      * Create ObjRelationships of the specified entity, as well as DbRelationships of the
@@ -450,7 +483,7 @@ public class EOModelProcessor {
         List rinfo = (List) entityPlistMap.get("relationships");
 
         Collection attributes = (Collection) entityPlistMap.get("attributes");
-        
+
         if (rinfo == null) {
             return;
         }
@@ -458,7 +491,7 @@ public class EOModelProcessor {
         if (classProps == null) {
             classProps = Collections.EMPTY_LIST;
         }
-        
+
         if (attributes == null) {
             attributes = Collections.EMPTY_LIST;
         }
@@ -494,7 +527,7 @@ public class EOModelProcessor {
             // Note: there is no flattened rel. support here....
             // Note: source maybe null, e.g. an abstract entity.
             if (dbSrc != null && dbTarget != null) {
-                
+
                 // in case of inheritance EOF stores duplicates of all inherited
                 // relationships, so we must skip this relationship in DB entity if it is
                 // already there...
@@ -633,32 +666,33 @@ public class EOModelProcessor {
 
                 flatRel.setTargetEntity((ObjEntity) potentialTargets.iterator().next());
                 e.addRelationship(flatRel);
-            } else {
+            }
+            else {
                 throw new CayenneRuntimeException("relationship in the path was null!");
             }
         }
 
     }
-    
+
     /**
      * Locates an attribute map matching the name and returns column name for this
-     * attribute. 
+     * attribute.
      * 
      * @since 1.1
      */
     String columnName(Collection entityAttributes, String attributeName) {
-        if(attributeName == null) {
+        if (attributeName == null) {
             return null;
         }
-        
+
         Iterator it = entityAttributes.iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Map map = (Map) it.next();
-            if(attributeName.equals(map.get("name"))) {
+            if (attributeName.equals(map.get("name"))) {
                 return (String) map.get("columnName");
             }
         }
-        
+
         return null;
     }
 

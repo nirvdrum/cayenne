@@ -100,15 +100,25 @@ public class CreateNodeAction extends CayenneAction {
     }
 
     /**
-     * Creates a new data node. Data node may consist of two pieces of information:
-     * <ul>
-     * <li>Name/location</li>
-     * <li>Database url/uid/password (for direct connection to DB).</li>
-     * </ul>
-     * First piece of info is stored directly into the cayenne.xml. Second piece of data
-     * should be stored in the separate file if the factory requires it.
+     * Creates a new DataNode, notifying listeners of this event.
      */
-    protected void createDataNode() {
+    protected DataNode createDataNode() {
+        ProjectController mediator = getProjectController();
+        DataDomain domain = mediator.getCurrentDataDomain();
+
+        // use domain name as DataNode base, as node names must be unique across the
+        // project...
+        DataNode node = buildDataNode();
+        mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
+        mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
+
+        return node;
+    }
+
+    /**
+     * Creates a new DataNode, adding to the current domain, but doesn't send any events.
+     */
+    protected DataNode buildDataNode() {
         ProjectController mediator = getProjectController();
         DataDomain domain = mediator.getCurrentDataDomain();
 
@@ -125,8 +135,7 @@ public class CreateNodeAction extends CayenneAction {
         node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
 
         domain.addNode(node);
-        mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
-        mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
+        return node;
     }
 
     /**
