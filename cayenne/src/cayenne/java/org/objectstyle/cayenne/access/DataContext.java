@@ -503,13 +503,7 @@ public class DataContext implements QueryEngine, Serializable {
             ObjRelationship rel = (ObjRelationship) relMap.get(relName);
 
             // to-many will be handled on the other side
-            if (rel.isToMany()) {
-                continue;
-            }
-
-            // dependent relationship key is part of PK
-            // and will be handled downstream 
-            if (rel.isToDependentEntity()) {
+            if (rel.isSourceIndependentFromTargetChange()) {
                 continue;
             }
 

@@ -94,7 +94,7 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
   * @author Andrei Adamchik
   */
 public class DbGenerator {
-    Logger logObj = Logger.getLogger(DbGenerator.class);
+    private Logger logObj = Logger.getLogger(DbGenerator.class);
 
     protected DataNode node;
     protected DataMap map;
@@ -414,7 +414,11 @@ public class DbGenerator {
         Iterator it = dbEnt.getRelationships().iterator();
         while (it.hasNext()) {
             DbRelationship rel = (DbRelationship) it.next();
-            if (!rel.isToMany() && !rel.isToDependentPK()) {
+
+            // TODO: last condition ("isToPK") is a temp hack - to-one relationships 
+            // with a target that is not a PK should be skipped... Permanent solution 
+            // would be to generate UNIQUE constraint, and then - an FK
+            if (!rel.isToMany() && !rel.isToDependentPK() && rel.isToPK()) {
                 list.add(getAdapter().createFkConstraint(rel));
             }
         }
@@ -526,7 +530,7 @@ public class DbGenerator {
 
             // check if this entity is explicitly excluded
             if (excludedEntities.contains(nextEntity)) {
-            	continue;
+                continue;
             }
 
             // tables with invalid DbAttributes are not included

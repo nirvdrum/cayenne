@@ -149,6 +149,13 @@
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="TINYINT_COL" type="TINYINT"/>
 	</db-entity>
+	<db-entity name="TO_ONEFK1">
+		<db-attribute name="TO_ONEFK1_FK" type="INTEGER"/>
+		<db-attribute name="TO_ONEFK1_PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="TO_ONEFK2">
+		<db-attribute name="TO_ONEFK2_PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
 		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isGroupBy="true" spec="%@">
 			<db-attribute-ref name="ARTIST_ID"/>
@@ -273,7 +280,7 @@
 	<obj-entity name="RWCompoundPainting" className="org.objectstyle.art.RWCompoundPainting" dbEntityName="PAINTING">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
-		<obj-attribute name="textReview" type="java.lang.String" db-attribute-path="toPaintingInfo.TEXT_REVIEW"/>
+		<obj-attribute name="textReview" type="java.lang.String"  db-attribute-path="toPaintingInfo.TEXT_REVIEW"/>
 	</obj-entity>
 	<obj-entity name="SmallintTest" className="org.objectstyle.art.SmallintTest" dbEntityName="SMALLINT_TEST">
 		<obj-attribute name="smallintCol" type="java.lang.Short" db-attribute-path="SMALLINT_COL"/>
@@ -283,6 +290,10 @@
 	</obj-entity>
 	<obj-entity name="TinyintTest" className="org.objectstyle.art.TinyintTest" dbEntityName="TINYINT_TEST">
 		<obj-attribute name="tinyintCol" type="java.lang.Byte" db-attribute-path="TINYINT_COL"/>
+	</obj-entity>
+	<obj-entity name="ToOneFK1" className="org.objectstyle.art.ToOneFK1" dbEntityName="TO_ONEFK1">
+	</obj-entity>
+	<obj-entity name="ToOneFK2" className="org.objectstyle.art.ToOneFK2" dbEntityName="TO_ONEFK2">
 	</obj-entity>
 	<db-relationship name="artistExhibitArray" source="ARTIST" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
@@ -384,6 +395,12 @@
 	</db-relationship>
 	<db-relationship name="toMeaningfulPK" source="MEANINGFUL_PK_DEP" target="MEANINGFUL_PK_TEST1" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="MASTER_PK" target="PK_ATTRIBUTE"/>
+	</db-relationship>
+	<db-relationship name="toOneToFK" source="TO_ONEFK2" target="TO_ONEFK1" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="TO_ONEFK2_PK" target="TO_ONEFK1_FK"/>
+	</db-relationship>
+	<db-relationship name="toPK" source="TO_ONEFK1" target="TO_ONEFK2" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="TO_ONEFK1_FK" target="TO_ONEFK2_PK"/>
 	</db-relationship>
 	<db-relationship name="toPaintingInfo" source="PAINTING" target="PAINTING_INFO" toDependentPK="true" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
@@ -502,6 +519,12 @@
 	</obj-relationship>
 	<obj-relationship name="toMeaningfulPK" source="MeaningfulPKDep" target="MeaningfulPKTest1" toMany="false">
 		<db-relationship-ref source="MEANINGFUL_PK_DEP" target="MEANINGFUL_PK_TEST1" name="toMeaningfulPK"/>
+	</obj-relationship>
+	<obj-relationship name="toOneToFK" source="ToOneFK2" target="ToOneFK1" toMany="false">
+		<db-relationship-ref source="TO_ONEFK2" target="TO_ONEFK1" name="toOneToFK"/>
+	</obj-relationship>
+	<obj-relationship name="toPK" source="ToOneFK1" target="ToOneFK2" toMany="false">
+		<db-relationship-ref source="TO_ONEFK1" target="TO_ONEFK2" name="toPK"/>
 	</obj-relationship>
 	<obj-relationship name="toPaintingInfo" source="CompoundPainting" target="PaintingInfo" toMany="false" deleteRule="Cascade">
 		<db-relationship-ref source="PAINTING" target="PAINTING_INFO" name="toPaintingInfo"/>

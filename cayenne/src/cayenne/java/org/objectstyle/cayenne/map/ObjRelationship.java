@@ -129,16 +129,9 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-	 * Returns true if underlying DbRelationships point to dependent entity.
-	 */
-    public boolean isToDependentEntity() {
-        return ((DbRelationship) dbRelationships.get(0)).isToDependentPK();
-    }
-
-    /**
-	 * Returns ObjRelationship that is the opposite of this ObjRelationship.
-	 * returns null if no such relationship exists.
-	 */
+     * Returns ObjRelationship that is the opposite of this ObjRelationship.
+     * returns null if no such relationship exists.
+     */
     public ObjRelationship getReverseRelationship() {
         // reverse the list
         List reversed = new ArrayList();
@@ -182,8 +175,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-	 * Returns a list of underlying DbRelationships.
-	 */
+     * Returns a list of underlying DbRelationships.
+     */
     public List getDbRelationships() {
         return dbRelationshipsRef;
     }
@@ -192,7 +185,7 @@ public class ObjRelationship extends Relationship implements EventListener {
     public void addDbRelationship(DbRelationship dbRel) {
         //Adding a second is creating a flattened relationship.
         //Ensure that the new relationship properly continues on the flattened
-		// path
+        // path
         int numDbRelationships = dbRelationships.size();
         if (numDbRelationships > 0) {
             DbRelationship lastRel =
@@ -211,7 +204,7 @@ public class ObjRelationship extends Relationship implements EventListener {
             }
             isFlattened = true;
             //Now there will be more than one dbRel - this is a flattened
-			// relationship
+            // relationship
         }
 
         EventManager.getDefaultManager().addListener(
@@ -229,9 +222,9 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-	 * Removes the relationship <code>dbRel</code> from the list of
-	 * relationships.
-	 */
+     * Removes the relationship <code>dbRel</code> from the list of
+     * relationships.
+     */
     public void removeDbRelationship(DbRelationship dbRel) {
         dbRelationships.remove(dbRel);
         //Do not listen any more
@@ -272,7 +265,7 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     //Implements logic to calculate a new readonly value after having
-	// added/removed dbRelationships
+    // added/removed dbRelationships
     private void calculateReadOnlyValue() {
         //Quickly filter the single dbrel case
         if (dbRelationships.size() < 2) {
@@ -297,7 +290,7 @@ public class ObjRelationship extends Relationship implements EventListener {
         }
 
         //Relationship type is in order, now we only have to check the
-		// intermediate table
+        // intermediate table
         DataMap map = firstRel.getTargetEntity().getDataMap();
         if (map == null) {
             throw new CayenneRuntimeException(
@@ -316,68 +309,87 @@ public class ObjRelationship extends Relationship implements EventListener {
                 this.isReadOnly = true;
                 return;
                 //one of the attributes of intermediate entity is not in the
-				// pk. Must be readonly
+                // pk. Must be readonly
             }
         }
         this.isReadOnly = false;
     }
 
     /**
-	 * Returns a flag indicating whether modifying a target of such relationship 
+     * Returns a flag indicating whether modifying a target of such relationship 
      * in any way will not change the underlying table row of the source.
-	 * 
-	 * @since 1.1
-	 */
+     * 
+     * @since 1.1
+     */
     public boolean isSourceIndependentFromTargetChange() {
-        return isToMany() || isFlattened() || isToDependentEntity();
+        // note - call "isToPK" at the end of the chain, since
+        // if it is to a dependent PK, we still should return true...
+        return isToMany() || isFlattened() || isToDependentEntity() || !isToPK();
     }
 
     /**
-	 * Returns true if the relationship is a "flattened" relationship.
-	 * Flattened ObjRelationship transparently represents a series of
-	 * DbRelationships, also called "relationship path". All flattened
-	 * relationships are "readable", but only those formed across a many-many
-	 * join table (with no custom attributes other than foreign keys) can be
-	 * automatically written.
-	 * 
-	 * @see #isReadOnly
-	 * @return flag indicating if the relationship is flattened or not
-	 */
+     * Returns true if underlying DbRelationships point to dependent entity.
+     */
+    public boolean isToDependentEntity() {
+        return ((DbRelationship) dbRelationships.get(0)).isToDependentPK();
+    }
+
+    /**
+     * Returns true if the underlying DbRelationships point to a at least one 
+     * of the columns of the target entity.
+     * 
+     * @since 1.1
+     */
+    public boolean isToPK() {
+        return ((DbRelationship) dbRelationships.get(0)).isToPK();
+    }
+
+    /**
+     * Returns true if the relationship is a "flattened" relationship.
+     * Flattened ObjRelationship transparently represents a series of
+     * DbRelationships, also called "relationship path". All flattened
+     * relationships are "readable", but only those formed across a many-many
+     * join table (with no custom attributes other than foreign keys) can be
+     * automatically written.
+     * 
+     * @see #isReadOnly
+     * @return flag indicating if the relationship is flattened or not
+     */
     public boolean isFlattened() {
         return isFlattened;
     }
 
     /**
-	 * Returns true if the relationship is flattened, but is not of the single
-	 * case that can have automatic write support. Otherwise, it returns false.
-	 * 
-	 * @return flag indicating if the relationship is read only or not
-	 */
+     * Returns true if the relationship is flattened, but is not of the single
+     * case that can have automatic write support. Otherwise, it returns false.
+     * 
+     * @return flag indicating if the relationship is read only or not
+     */
     public boolean isReadOnly() {
         return isReadOnly;
     }
 
     /**
-	 * Returns the deleteRule. The delete rule is a constant from the
-	 * DeleteRule class, and specifies what should happen to the destination
-	 * object when the source object is deleted.
-	 * 
-	 * @return int a constant from DeleteRule
-	 * @see #setDeleteRule
-	 */
+     * Returns the deleteRule. The delete rule is a constant from the
+     * DeleteRule class, and specifies what should happen to the destination
+     * object when the source object is deleted.
+     * 
+     * @return int a constant from DeleteRule
+     * @see #setDeleteRule
+     */
     public int getDeleteRule() {
         return deleteRule;
     }
 
     /**
-	 * Sets the deleteRule.
-	 * 
-	 * @param deleteRule
-	 *            The deleteRule to set
-	 * @see #getDeleteRule
-	 * @throws IllegalArgumentException
-	 *             if the value is not a known value.
-	 */
+     * Sets the deleteRule.
+     * 
+     * @param deleteRule
+     *            The deleteRule to set
+     * @see #getDeleteRule
+     * @throws IllegalArgumentException
+     *             if the value is not a known value.
+     */
     public void setDeleteRule(int value) {
         if ((value != DeleteRule.CASCADE)
             && (value != DeleteRule.DENY)

@@ -85,7 +85,7 @@ public abstract class Fault implements Serializable {
     public static Fault getToOneFault() {
         return toOneFault;
     }
-    
+
     public static Fault getToManyFault() {
         return toManyFault;
     }
@@ -118,28 +118,26 @@ public abstract class Fault implements Serializable {
             DataContext context = sourceObject.getDataContext();
 
             ObjEntity entity = context.getEntityResolver().lookupObjEntity(sourceObject);
-            ObjRelationship rel = (ObjRelationship) entity.getRelationship(relationshipName);
+            ObjRelationship rel =
+                (ObjRelationship) entity.getRelationship(relationshipName);
 
             // create HOLLOW object if we can, or do a fetch if we can't
             ObjEntity targetEntity = (ObjEntity) rel.getTargetEntity();
-            
 
             // handle regular to-one relationship
-            if (!rel.isFlattened()) {
 
+            // dependent to one relationship is optional
+            // use fault, since we do not know whether it is null or not...
+            if (!rel.isSourceIndependentFromTargetChange()) {
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
-                // dependent to one relationship is optional
-                // use fault, since we do not know whether it is null or not...
-                if (!dbRel.isToDependentPK()) {
-                    Class targetClass = targetEntity.getJavaClass();
-                    ObjectId id =
-                        context
-                            .getObjectStore()
-                            .getSnapshot(sourceObject.getObjectId(), context)
-                            .createTargetObjectId(targetClass, dbRel);
-                    return (id != null) ? context.registeredObject(id) : null;
-                }
+                Class targetClass = targetEntity.getJavaClass();
+                ObjectId id =
+                    context
+                        .getObjectStore()
+                        .getSnapshot(sourceObject.getObjectId(), context)
+                        .createTargetObjectId(targetClass, dbRel);
+                return (id != null) ? context.registeredObject(id) : null;
             }
 
             // TODO: stop using selecteRelationshipObjects, since it performs

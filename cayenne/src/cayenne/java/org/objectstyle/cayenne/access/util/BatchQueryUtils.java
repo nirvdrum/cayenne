@@ -223,11 +223,10 @@ public class BatchQueryUtils {
             while (itr.hasNext()) {
                 String relName = (String) itr.next();
                 ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-                // to-many will be handled on the other side
-                if (rel.isToMany())
+                
+                if (rel.isSourceIndependentFromTargetChange())
                     continue;
-                if (rel.isToDependentEntity())
-                    continue;
+
                 DataObject target = (DataObject) o.readPropertyDirectly(relName);
                 if (target == null)
                     continue;
@@ -247,10 +246,10 @@ public class BatchQueryUtils {
                 String relName = (String) itr.next();
                 ObjRelationship rel = (ObjRelationship) relMap.get(relName);
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(1);
-                if (rel.isToMany())
+                
+                if (rel.isSourceIndependentFromTargetChange())
                     continue;
-                if (dbRel.isToDependentPK())
-                    continue;
+
                 DataObject target = (DataObject) o.readPropertyDirectly(relName);
                 if (target == null)
                     continue;
