@@ -11,18 +11,25 @@
 </navigator>
 <body>
    <section name="1. Introduction" anchor="intro">
-            <p>CayenneModeler is a Java GUI application that performs the
-            following functions:
+            <p>Cayenne stores mapping and deployment information using a set of XML files with a predefined
+            format. These files can be always edited by hand. But Cayenne goes beyond that. A
+            standard distribution contains CayenneModeler - a Java Swing GUI application for 
+            maintenance of Object/Relational projects. It is much more than just an advanced XML editor. 
+            It provides a full set of O/R tools, including:</p>
             <ul>
-                <li>Object Relational mapping functions.</li>
-            	<li>Reverse-engineering of RDBMS schema to create Cayenne
-            	data maps.</li>
-            	<li>Forward-engineering (generation) of the database schema
-            	from a data map.</li>
-            	<li>Java class generation from a data map.</li>
-            	<li>Cayenne project deployment organization into domains
-            	and nodes.</li>
+                <li>Manual Object/Relational mapping operations.</li>
+            	<li>Reverse-engineering RDBMS schema into Cayenne DataMaps.</li>
+            	<li>Generation of the database schema from the mapping information stored in DataMaps.</li>
+            	<li>Java class generation from the mapping information stored in DataMaps.</li>
+            	<li>Management of the project deployment structure and database connection
+            	information.</li>
+            	<li>Validation of created mappings.</li>
             </ul>
+            
+            <p>Among other things CayenneModeler allows new users to learn the concepts used in 
+            Cayenne framework, its terminology, and overall structure.</p> 
+            
+            <p>The following chapters of this Guide discuss how to use various functions of CayenneModeler.
             </p>
     </section>
 </body>
