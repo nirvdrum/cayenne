@@ -148,7 +148,7 @@ public interface DbAdapter {
      * 
      * @param name database column name
      * @param type JDBC column type
-     * @param size database column size
+     * @param size database column size (ignored if less than zero)
      * @param precision database column precision (ignored if less than zero)
      * @param allowNulls database column nullable parameter
      */ 

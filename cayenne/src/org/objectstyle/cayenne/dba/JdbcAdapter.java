@@ -212,7 +212,26 @@ public class JdbcAdapter implements DbAdapter {
         return qualifierFactory;
     }
 
-    public DbAttribute buildAttribute(String name, int type, int size, int precision, boolean allowNulls) {
-        return null;
+    public DbAttribute buildAttribute(
+        String name,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls) {
+
+        DbAttribute attr = new DbAttribute();
+        attr.setName(name);
+        attr.setType(type);
+        attr.setMandatory(!allowNulls);
+
+        if (size >= 0) {
+            attr.setMaxLength(size);
+        }
+        
+        if (precision >= 0) {
+            attr.setPrecision(precision);
+        }
+
+        return attr;
     }
 }

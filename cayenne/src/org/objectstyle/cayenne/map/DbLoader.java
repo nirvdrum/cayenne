@@ -258,24 +258,38 @@ public class DbLoader {
                     "%");
 
             while (rs.next()) {
-                // gets attribute's (column's) name and type,
-                // create DbAttribute and add to dbEntity
+                // gets attribute's (column's) information
                 String columnName = rs.getString("COLUMN_NAME");
+                boolean allowNulls = rs.getBoolean("NULLABLE");
                 int columnType = rs.getInt("DATA_TYPE");
-                int columnSize = rs.getInt("COLUMN_SIZE");
 
-                DbAttribute dbAttribute = new DbAttribute(columnName, columnType, dbEntity);
-                dbAttribute.setMaxLength(columnSize);
-                dbAttribute.setMandatory(!rs.getBoolean("NULLABLE"));
-                dbEntity.addAttribute(dbAttribute);
+                // ignore size of numeric columns
+                int columnSize = -1;
+                if (TypesMapping.isNumeric(columnType)) {
+                    columnSize = rs.getInt("COLUMN_SIZE");
+                }
 
+                // ignore precision of non-decimal columns
+                int decimalDigits = -1;
                 if (TypesMapping.isDecimal(columnType)) {
-                    int decimalDigits = rs.getInt("DECIMAL_DIGITS");
-                    if (!rs.wasNull()) {
-                        dbAttribute.setPrecision(decimalDigits);
+                    decimalDigits = rs.getInt("DECIMAL_DIGITS");
+                    if (rs.wasNull()) {
+                        decimalDigits = -1;
                     }
                 }
+
+                // create attribute delegating this task to adapter
+                DbAttribute attr =
+                    adapter.buildAttribute(
+                        columnName,
+                        columnType,
+                        columnSize,
+                        decimalDigits,
+                        allowNulls);
+                attr.setEntity(dbEntity);
+                dbEntity.addAttribute(attr);
             }
+
             rs.close();
             map.addDbEntity(dbEntity);
         }

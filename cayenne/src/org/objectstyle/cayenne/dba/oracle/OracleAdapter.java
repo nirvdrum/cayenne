@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.dba.oracle;
 
+import java.sql.Types;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -64,6 +65,7 @@ import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -101,11 +103,34 @@ public class OracleAdapter extends JdbcAdapter {
         }
     }
 
-    /** Returns a query string to drop a table corresponding
-      * to <code>ent</code> DbEntity. Changes superclass behavior
-      * to drop all related foreign key constraints. */
+    /** 
+     * Returns a query string to drop a table corresponding
+     * to <code>ent</code> DbEntity. Changes superclass behavior
+     * to drop all related foreign key constraints. 
+     */
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getName() + " CASCADE CONSTRAINTS";
+    }
+
+    /**
+     * Fixes some reverse engineering problems. Namely if a columns
+     * is created as DECIMAL and has non-positive precision it is
+     * converted to INTEGER.
+     */
+    public DbAttribute buildAttribute(
+        String name,
+        int type,
+        int size,
+        int precision,
+        boolean allowNulls) {
+            
+        DbAttribute attr = super.buildAttribute(name, type, size, precision, allowNulls);
+        if(type == Types.DECIMAL && precision <= 0) {
+            attr.setType(Types.INTEGER);
+            attr.setPrecision(-1);
+        }
+        
+        return attr;
     }
 
     /** Returns Oracle-specific classes for SELECT queries. */
