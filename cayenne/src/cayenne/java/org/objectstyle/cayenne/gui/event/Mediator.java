@@ -115,8 +115,10 @@ public class Mediator {
 	ArrayList dirtyNodes = new ArrayList();
 
 	GuiConfiguration config;
+	
 	/** Changes have been made, need to be saved. */
 	boolean dirty;
+	
 	private static Mediator mediator;
 
 	private Mediator() {
@@ -135,8 +137,8 @@ public class Mediator {
 		return mediator;
 	}
 
-	public static Mediator getMediator(GuiConfiguration gui_config) {
-		mediator = new Mediator(gui_config);
+	public static Mediator createMediator(GuiConfiguration config) {
+		mediator = new Mediator(config);
 		return mediator;
 	}
 

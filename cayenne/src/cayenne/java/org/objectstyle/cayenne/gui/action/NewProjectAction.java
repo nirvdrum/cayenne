@@ -159,7 +159,7 @@ public class NewProjectAction extends ProjectAction {
                 logObj.warn(e);
             }
 
-            setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
+            setMediator(Mediator.createMediator(GuiConfiguration.getGuiConfig()));
             Editor.getFrame().projectOpened();
 
             // Set title to contain proj file path
