@@ -107,7 +107,7 @@ public class SelectQueryBasicsTst extends TestCase {
 
 	public void testFetchingDataRows2() {
 		assertTrue(!q.isFetchingDataRows());
-		q.addResultDbAttribute("ARTIST_ID");
+		q.addCustDbAttribute("ARTIST_ID");
 		assertTrue(q.isFetchingDataRows());
 
         // this shouldn't have any effect, since custom attributes are fetched
@@ -116,17 +116,17 @@ public class SelectQueryBasicsTst extends TestCase {
 	}
 
 	public void testQueryAttributes() throws Exception {
-		assertEquals(0, q.getResultsDbAttributes().size());
+		assertEquals(0, q.getCustDbAttributes().size());
 
-		q.addResultDbAttribute("ARTIST_ID");
-		assertEquals(1, q.getResultsDbAttributes().size());
-		assertEquals("ARTIST_ID", q.getResultsDbAttributes().get(0));
+		q.addCustDbAttribute("ARTIST_ID");
+		assertEquals(1, q.getCustDbAttributes().size());
+		assertEquals("ARTIST_ID", q.getCustDbAttributes().get(0));
 	}
 
 	public void testUsingRootEntityAttributes() throws Exception {
 		assertTrue(!q.isFetchingCustAttributes());
 
-		q.addResultDbAttribute("ARTIST_ID");
+		q.addCustDbAttribute("ARTIST_ID");
 		assertTrue(q.isFetchingCustAttributes());
 	}
 }

@@ -65,6 +65,7 @@ import junit.framework.TestCase;
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -142,7 +143,7 @@ public class SelectTranslatorTst extends TestCase {
 		}
 	}
 
-	public void testBuildColumnList() throws java.lang.Exception {
+	public void testBuildColumnList1() throws Exception {
 		Connection con = TestMain.getSharedConnection();
 
 		try {
@@ -152,11 +153,36 @@ public class SelectTranslatorTst extends TestCase {
 
 			List columns = transl.getColumnList();
 			List dbAttrs = artistEnt.getAttributeList();
-			
+
 			assertEquals(dbAttrs.size(), columns.size());
 			Iterator it = dbAttrs.iterator();
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				assertTrue(columns.contains(it.next()));
+			}
+
+		} finally {
+			con.close();
+		}
+	}
+
+	public void testBuildColumnList2() throws Exception {
+		Connection con = TestMain.getSharedConnection();
+
+		try {
+			// configure query with custom attributes
+			q.setObjEntityName("Artist");
+			q.addCustDbAttribute("ARTIST_ID");
+
+			SelectTranslator transl = buildTranslator(con);
+			transl.createSqlString();
+
+			List columns = transl.getColumnList();
+			Object[] dbAttrs =
+				new Object[] { artistEnt.getAttribute("ARTIST_ID")};
+
+			assertEquals(dbAttrs.length, columns.size());
+			for (int i = 0; i < dbAttrs.length; i++) {
+				assertTrue(columns.contains(dbAttrs[i]));
 			}
 
 		} finally {

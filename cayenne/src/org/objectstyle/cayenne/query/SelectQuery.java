@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.exp.Expression;
 public class SelectQuery extends QualifiedQuery {
 	static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
 
-	protected ArrayList resultsDbAttributes = new ArrayList();
+	protected ArrayList custDbAttributes = new ArrayList();
 	protected ArrayList orderings = new ArrayList();
 	protected ArrayList prefetches = new ArrayList();
 	protected boolean distinct;
@@ -121,8 +121,8 @@ public class SelectQuery extends QualifiedQuery {
 	 * Returns a list of attributes that will be included
 	 * in the results of this query.
 	 */
-	public List getResultsDbAttributes() {
-		return resultsDbAttributes;
+	public List getCustDbAttributes() {
+		return custDbAttributes;
 	}
 
 	/**
@@ -131,8 +131,8 @@ public class SelectQuery extends QualifiedQuery {
 	 * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
 	 * etc.
 	 */
-	public void addResultDbAttribute(String attributePath) {
-		resultsDbAttributes.add(attributePath);
+	public void addCustDbAttribute(String attributePath) {
+		custDbAttributes.add(attributePath);
 	}
 	
 	/**
@@ -146,7 +146,7 @@ public class SelectQuery extends QualifiedQuery {
 	 * </p>
 	 */
 	public boolean isFetchingCustAttributes() {
-		return resultsDbAttributes.size() > 0;
+		return custDbAttributes.size() > 0;
 	}
 
 	/**

@@ -55,17 +55,13 @@ package org.objectstyle.cayenne.query;
  *
  */
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import junit.framework.*;
-import java.util.logging.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.exp.*;
-import java.sql.*;
-import java.net.*;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 
 public class SelectQueryTst extends SelectQueryBase {
     private static final int _artistCount = 20;
@@ -131,6 +127,21 @@ public class SelectQueryTst extends SelectQueryBase {
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
+    
+    public void testSelectCustAttributes() throws java.lang.Exception {
+        query.setObjEntityName("Artist");
+        query.addCustDbAttribute("ARTIST_NAME");
+        
+        List results = TestMain.getSharedDomain().createDataContext().performQuery(query);
+
+        // check query results
+        assertEquals(_artistCount, results.size());
+        
+        Map row = (Map)results.get(0);
+        assertNotNull(row.get("ARTIST_NAME"));
+        assertEquals(1, row.size());
+    }
+    
 
     protected void populateTables() throws java.lang.Exception {
         String insertArtist =
