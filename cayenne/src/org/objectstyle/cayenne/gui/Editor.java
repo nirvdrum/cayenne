@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
@@ -66,7 +67,6 @@ import java.util.logging.Logger;
 
 import javax.swing.*;
 
-import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.gui.action.*;
 import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
@@ -106,15 +106,14 @@ public class Editor
 	 */
 	private static final String DIRTY_STRING = "* - ";
 
-	EditorView view;
-	Mediator mediator;
-	ActionMap actionMap = new ActionMap();
+	protected EditorView view;
+	protected Mediator mediator;
+	protected ActionMap actionMap;
 
 	JMenu fileMenu = new JMenu("File");
-	JMenuItem openProjectMenu = new JMenuItem("Open Project");
+	RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 	JMenuItem closeProjectMenu = new JMenuItem("Close Project");
 	JMenuItem exitMenu = new JMenuItem("Exit");
-	ArrayList lastOpenProjMenus = new ArrayList();
 
 	JMenu projectMenu = new JMenu("Project");
 	JMenuItem createDomainMenu = new JMenuItem("Create Domain");
@@ -186,6 +185,9 @@ public class Editor
 
 		CayenneAction newProjectAction = new NewProjectAction();
 		actionMap.put(newProjectAction.getKey(), newProjectAction);
+		
+		CayenneAction openProjectAction = new OpenProjectAction();
+		actionMap.put(openProjectAction.getKey(), openProjectAction);
 
 		CayenneAction createMapAction = new CreateDataMapAction();
 		actionMap.put(createMapAction.getKey(), createMapAction);
@@ -214,14 +216,18 @@ public class Editor
 		menuBar.add(helpMenu);
 
 		fileMenu.add(getAction(NewProjectAction.ACTION_NAME).buildMenu());
-		fileMenu.add(openProjectMenu);
+		fileMenu.add(getAction(OpenProjectAction.ACTION_NAME).buildMenu());
 		fileMenu.add(closeProjectMenu);
 		fileMenu.addSeparator();
 		fileMenu.add(getAction(SaveAction.ACTION_NAME).buildMenu());
 		fileMenu.addSeparator();
+		
+		recentFileMenu.rebuildFromPreferences();
+		fileMenu.add(recentFileMenu);
+		
 		fileMenu.addSeparator();
 		fileMenu.add(exitMenu);
-		reloadLastProjList();
+		
 
 		projectMenu.add(createDomainMenu);
 		projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
@@ -282,9 +288,6 @@ public class Editor
 		createObjEntityMenu.addActionListener(this);
 		createDbEntityMenu.addActionListener(this);
 
-		openProjectMenu.addActionListener(this);
-		openProjectMenu.setAccelerator(
-			KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 		closeProjectMenu.addActionListener(this);
 		exitMenu.addActionListener(this);
 
@@ -306,25 +309,7 @@ public class Editor
 			}
 		});
 	}
-
-	private void reloadLastProjList() {
-		// Get list of last opened proj files and trim it down to 4
-		Preferences pref = Preferences.getPreferences();
-		Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
-		while (arr.size() > 4)
-			arr.remove(arr.size() - 1);
-		for (int i = 0; i < arr.size(); i++) {
-			if (lastOpenProjMenus.size() <= i) {
-				JMenuItem item = new JMenuItem((String) arr.get(i));
-				fileMenu.insert(item, lastOpenProjMenus.size() + 6);
-				lastOpenProjMenus.add(item);
-				item.addActionListener(this);
-			} else {
-				JMenuItem item = (JMenuItem) lastOpenProjMenus.get(i);
-				item.setText((String) arr.get(i));
-			}
-		}
-	}
+    
 
 	/** Adds path to the list of last opened projects in preferences. */
 	public void addToLastProjList(String path) {
@@ -348,14 +333,7 @@ public class Editor
 		ClassLoader cl = Editor.class.getClassLoader();
 
 		toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
-
-		ImageIcon openIcon =
-			new ImageIcon(
-				cl.getResource(
-					CayenneAction.RESOURCE_PATH + "images/icon-open.gif"));
-		JButton openBtn = new JButton(openIcon);
-		openBtn.setToolTipText("open project");
-		toolBar.add(openBtn);
+		toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
 		toolBar.addSeparator();
@@ -414,7 +392,7 @@ public class Editor
 	}
 
     public void projectClosed() {
-    	reloadLastProjList();
+    	recentFileMenu.rebuildFromPreferences();
 		getContentPane().remove(view);
 		view = null;
 		setMediator(null);
@@ -425,7 +403,7 @@ public class Editor
 		createDomainMenu.setEnabled(false);
 		createDomainBtn.setEnabled(false);
 	
-		// Editor.getFrame().repaint();
+		Editor.getFrame().repaint();
 		Editor.getFrame().getAction(RemoveAction.ACTION_NAME).setName("Remove");
 		Editor.getFrame().setProjectTitle(null);
     }
@@ -517,9 +495,7 @@ public class Editor
 		try {
 			Object src = e.getSource();
 
-			if (src == openProjectMenu) {
-				openProject();
-			} else if (src == closeProjectMenu) {
+            if (src == closeProjectMenu) {
 				((ProjectAction)getAction(NewProjectAction.ACTION_NAME)).closeProject();
 			} else if (src == createDomainMenu || src == createDomainBtn) {
 				createDomain();
@@ -540,12 +516,6 @@ public class Editor
 				exitEditor();
 			} else if (src == aboutMenu) {
 				AboutDialog win = new AboutDialog(this);
-			} else if (lastOpenProjMenus.contains(src)) {
-				// uncomment this line to provide debugging 
-				// information during driver loading
-				// Configuration.setLogLevel(Level.SEVERE);
-
-				openProject(((JMenuItem) src).getText());
 			}
 		} catch (Exception ex) {
 			GUIErrorHandler.guiException(ex);
@@ -626,73 +596,6 @@ public class Editor
 				mediator.getCurrentDataNode(),
 				mediator.getCurrentDataDomain()));
 	}
-
-	private void openProject(String file_path) {
-		if (null == file_path || file_path.trim().length() == 0)
-			return;
-		File file = new File(file_path);
-		if (!file.exists()) {
-			JOptionPane.showMessageDialog(
-				this,
-				"Project file " + file_path + " does not exist.");
-			return;
-		}
-		openProject(file);
-	}
-
-	/** Open specified project file. File must already exist. */
-	private void openProject(File file) {
-		// Save and close (if needed) currently open project.
-		if (mediator != null) {
-			if (!((ProjectAction)getAction(NewProjectAction.ACTION_NAME)).closeProject()) {
-				return;
-			}
-		}
-		Preferences pref = Preferences.getPreferences();
-		String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
-		try {
-			// Save dir path to the preferences
-			pref.setProperty(Preferences.LAST_DIR, file.getParent());
-			addToLastProjList(file.getAbsolutePath());
-			// Initialize gui configuration
-			GuiConfiguration.initSharedConfig(file);
-			setMediator(Mediator.getMediator(GuiConfiguration.getGuiConfig()));
-			projectOpened();
-			// Set title to contain proj file path
-			this.setTitle(TITLE + " - " + file.getAbsolutePath());
-
-		} catch (Exception e) {
-			System.out.println("Error loading project file, " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-	/** Opens cayenne.xml file using file chooser. */
-	private void openProject() {
-		Preferences pref = Preferences.getPreferences();
-		String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
-		try {
-			// Get the project file name (always cayenne.xml)
-			File file = null;
-			fileChooser.setFileFilter(new ProjectFileFilter());
-			fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
-			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			if (null != init_dir) {
-				File init_dir_file = new File(init_dir);
-				if (init_dir_file.exists())
-					fileChooser.setCurrentDirectory(init_dir_file);
-			}
-			int ret_code = fileChooser.showOpenDialog(this);
-			if (ret_code != JFileChooser.APPROVE_OPTION)
-				return;
-			file = fileChooser.getSelectedFile();
-			openProject(file);
-		} catch (Exception e) {
-			System.out.println("Error loading project file, " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
 
 	private void createDomain() {
 		DataDomain domain =
