@@ -57,11 +57,18 @@ package org.objectstyle.cayenne.modeler;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.KeyStroke;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.BrowserControl;
 
@@ -71,42 +78,67 @@ import org.objectstyle.cayenne.modeler.util.BrowserControl;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneDialog extends JDialog implements HyperlinkListener {	
-	
-	public CayenneDialog(Editor frame, String title, boolean modal) {
-		super(frame, title, modal);
-	}
-	
-	/** 
-	 * Centers this dialog on the screen. 
-	 */
-	public void centerWindow() {
-		int width = this.getWidth();
-		int height = this.getHeight();
-		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		int x = (screen.width - width) / 2;
-		int y = (screen.height - height) / 2;
-		this.setBounds(x, y, width, height);
-	}
-	
+public class CayenneDialog extends JDialog implements HyperlinkListener {
+    private static Logger logObj = Logger.getLogger(CayenneDialog.class);
 
-	public Editor getParentEditor() {
-		return (Editor) super.getParent();
-	}
 
-	/** 
-	 * Opens hyperlink in the default browser.
-	 */
-	public void hyperlinkUpdate(HyperlinkEvent event) {
-		if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
-			BrowserControl.displayURL(event.getURL().toExternalForm());
-		}
-	}
-	
-	/**
-	 * Returns current CayenneModeler mediator.
-	 */
-	public EventController getMediator() {
-		return getParentEditor().getController().getEventController();
-	}
+    public CayenneDialog(Editor frame, String title, boolean modal) {
+        super(frame, title, modal);
+
+        // make dialog closable on escape
+        // TODO: Note that if a dialog contains subcomponents
+        // that use ESC for their own purposes (like editable JTable or JComboBox),
+        // this code will still close the dialog  (e.g. not just an expanded 
+        // ComboBox). To fix it see this advise (Swing is Fun!!):
+        //
+        //   http://www.eos.dk/pipermail/swing/2001-June/000789.html
+
+        KeyStroke escReleased = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, true);
+        ActionListener closeAction = new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (CayenneDialog.this.isVisible()) {
+                    // dispatch window closing event
+                    WindowEvent windowClosing =
+                        new WindowEvent(CayenneDialog.this, WindowEvent.WINDOW_CLOSING);
+                    CayenneDialog.super.processWindowEvent(windowClosing);
+                }
+            }
+        };
+        getRootPane().registerKeyboardAction(
+            closeAction,
+            escReleased,
+            JComponent.WHEN_IN_FOCUSED_WINDOW);
+    }
+
+    /** 
+     * Centers this dialog on the screen. 
+     */
+    public void centerWindow() {
+        int width = this.getWidth();
+        int height = this.getHeight();
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (screen.width - width) / 2;
+        int y = (screen.height - height) / 2;
+        this.setBounds(x, y, width, height);
+    }
+
+    public Editor getParentEditor() {
+        return (Editor) super.getParent();
+    }
+
+    /** 
+     * Opens hyperlink in the default browser.
+     */
+    public void hyperlinkUpdate(HyperlinkEvent event) {
+        if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+            BrowserControl.displayURL(event.getURL().toExternalForm());
+        }
+    }
+
+    /**
+     * Returns current CayenneModeler mediator.
+     */
+    public EventController getMediator() {
+        return getParentEditor().getController().getEventController();
+    }
 }

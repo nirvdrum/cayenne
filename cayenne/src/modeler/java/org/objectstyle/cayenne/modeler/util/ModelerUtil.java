@@ -84,34 +84,22 @@ public class ModelerUtil {
     public static String[] getDbAttributeNames(
         EventController mediator,
         DbEntity entity) {
-		List list = new ArrayList(32);
-		list.add("");
-		list.addAll(entity.getAttributeMap().keySet());
-		String[] arr = (String[])(list.toArray(new String[list.size()]));
-		Arrays.sort(arr);
+        List list = new ArrayList(32);
+        list.add("");
+        list.addAll(entity.getAttributeMap().keySet());
+        String[] arr = (String[]) (list.toArray(new String[list.size()]));
+        Arrays.sort(arr);
         return arr;
     }
 
     public static String[] getRegisteredTypeNames() {
         String[] srcList = new ExtendedTypeMap().getRegisteredTypeNames();
         Arrays.sort(srcList);
-        
+
         String[] finalList = new String[srcList.length + 1];
         System.arraycopy(srcList, 0, finalList, 1, srcList.length);
         finalList[0] = "";
-        
+
         return finalList;
     }
-
-    public static String[] getDatabaseTypes() {
-        // FIXME!!! Need to have a reference TypesMapping instance
-        //String [] arr;
-        //arr = TypesMapping.getDatabaseTypes();
-        //String[] ret_arr = new String[arr.length + 1];
-        String[] ret_arr = new String[1];
-        ret_arr[0] = "";
-        //for (int i = 0; i < arr.length; i++) ret_arr[i+1] = arr[i];
-        return ret_arr;
-    }
-
 }

@@ -92,7 +92,7 @@ public class EditorView
         DataMapDisplayListener,
         DataNodeDisplayListener,
         PropertyChangeListener {
-    EventController mediator;
+  
 
     private static final int INIT_DIVIDER_LOCATION = 170;
 
@@ -103,6 +103,7 @@ public class EditorView
     private static final String OBJ_VIEW = "ObjView";
     private static final String DB_VIEW = "DbView";
 
+	protected EventController mediator;
     protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     protected BrowseView treePanel;
     protected JPanel detailPanel = new JPanel();
@@ -115,12 +116,12 @@ public class EditorView
     protected CardLayout detailLayout;
 	protected ModelerPreferences prefs;
 
-    public EditorView(EventController temp_mediator) {
+    public EditorView(EventController eventController) {
         super(new BorderLayout());
-        mediator = temp_mediator;
+        mediator = eventController;
 
         add(splitPane, BorderLayout.CENTER);
-		treePanel = new BrowseView(temp_mediator);
+		treePanel = new BrowseView(eventController);
         splitPane.setLeftComponent(treePanel);
         splitPane.setRightComponent(detailPanel);
 		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
@@ -139,16 +140,16 @@ public class EditorView
 
         JPanel temp = new JPanel(new FlowLayout());
         detailPanel.add(temp, EMPTY_VIEW);
-        domainView = new DomainDetailView(temp_mediator);
+        domainView = new DomainDetailView(eventController);
         detailPanel.add(domainView, DOMAIN_VIEW);
-        nodeView = new DataNodeDetailView(temp_mediator);
+        nodeView = new DataNodeDetailView(eventController);
         detailPanel.add(nodeView, NODE_VIEW);
-        dataMapView = new DataMapDetailView(temp_mediator);
+        dataMapView = new DataMapDetailView(eventController);
         detailPanel.add(dataMapView, DATA_MAP_VIEW);
 
-        objDetailView = new ObjDetailView(temp_mediator);
+        objDetailView = new ObjDetailView(eventController);
         detailPanel.add(objDetailView, OBJ_VIEW);
-        dbDetailView = new DbDetailView(temp_mediator);
+        dbDetailView = new DbDetailView(eventController);
         detailPanel.add(dbDetailView, DB_VIEW);
 
         mediator.addDomainDisplayListener(this);

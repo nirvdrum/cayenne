@@ -87,16 +87,16 @@ public class ObjDetailView
         ObjEntityDisplayListener,
         ObjRelationshipDisplayListener,
         ObjAttributeDisplayListener {
+        	
     protected EventController mediator;
-
     protected JTabbedPane tab;
     protected ObjEntityPane entityPanel;
     protected ObjAttributePane attributesPanel;
     protected ObjRelationshipPane relationshipsPanel;
 
-    public ObjDetailView(EventController temp_mediator) {
+    public ObjDetailView(EventController mediator) {
         super();
-        mediator = temp_mediator;
+        this.mediator = mediator;
         mediator.addObjEntityDisplayListener(this);
         mediator.addObjAttributeDisplayListener(this);
         mediator.addObjRelationshipDisplayListener(this);
@@ -165,5 +165,4 @@ public class ObjDetailView
         // Display attribute tab
         tab.setSelectedIndex(1);
     }
-
 }

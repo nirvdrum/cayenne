@@ -89,16 +89,18 @@ public class ProjectTypeSelectControl extends BasicController {
         setView(new ProjectTypeSelectDialog());
         super.startup();
     }
-    
+
     /**
      * @see org.scopemvc.controller.basic.BasicController#doHandleControl(Control)
      */
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(CANCEL_PROJECT_CREATE_CONTROL)) {
             shutdown();
-        } else if (control.matchesID(CREATE_APP_PROJECT_CONTROL)) {
+        }
+        else if (control.matchesID(CREATE_APP_PROJECT_CONTROL)) {
             doCreateAppProject();
-        } else if (control.matchesID(CREATE_MAP_PROJECT_CONTROL)) {
+        }
+        else if (control.matchesID(CREATE_MAP_PROJECT_CONTROL)) {
             doCreateMapProject();
         }
     }

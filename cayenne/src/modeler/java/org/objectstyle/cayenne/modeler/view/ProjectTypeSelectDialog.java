@@ -65,8 +65,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
+import org.objectstyle.cayenne.modeler.control.ProjectTypeSelectControl;
 import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.scopemvc.core.Control;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SPanel;

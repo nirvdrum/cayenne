@@ -66,7 +66,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.Arrays;
 
 import javax.swing.JButton;
@@ -77,6 +76,7 @@ import javax.swing.KeyStroke;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Keymap;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
@@ -88,196 +88,187 @@ import org.objectstyle.cayenne.modeler.util.PreferenceField;
  * @author Misha Shengauot
  */
 public class DbLoginPanel extends CayenneDialog implements ActionListener {
-	protected DataSourceInfo dataSrcInfo;
+    private static Logger logObj = Logger.getLogger(DbLoginPanel.class);
 
-	protected PreferenceField unInput;
-	protected JPasswordField pwdInput;
-	protected PreferenceField drInput;
-	protected PreferenceField urlInput;
-	protected PreferenceField adapterInput;
+    protected DataSourceInfo dataSrcInfo;
 
-	protected JButton ok;
-	protected JButton cancel;
+    protected PreferenceField unInput;
+    protected JPasswordField pwdInput;
+    protected PreferenceField drInput;
+    protected PreferenceField urlInput;
+    protected PreferenceField adapterInput;
 
-	private static String COMMAND_OK = "ok";
-	private static String COMMAND_CANCEL = "cancel";
-	
-	public DbLoginPanel(Editor frame) {
-		super(frame, "Driver And Login Information", true);
-		this.setResizable(false);
+    protected JButton ok;
+    protected JButton cancel;
 
-		Container pane = this.getContentPane();
-		pane.setLayout(new BorderLayout());
+    private static String COMMAND_OK = "ok";
+    private static String COMMAND_CANCEL = "cancel";
 
-		JPanel messagePanel = initMessagePanel();
-		pane.add(messagePanel, BorderLayout.NORTH);
+    public DbLoginPanel(Editor frame) {
+        super(frame, "Driver And Login Information", true);
+        this.setResizable(false);
 
-		// input fields go here
-		JPanel inputPanel = initInputArea();
-		pane.add(inputPanel, BorderLayout.CENTER);
+        Container pane = this.getContentPane();
+        pane.setLayout(new BorderLayout());
 
-		// buttons go here
-		JPanel buttonsPanel = initButtons();
-		this.getRootPane().setDefaultButton(ok);
-		pane.add(buttonsPanel, BorderLayout.SOUTH);
+        JPanel messagePanel = initMessagePanel();
+        pane.add(messagePanel, BorderLayout.NORTH);
 
-		// closing the window means "Cancel"
-		WindowListener l = new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				ActionEvent ae = new ActionEvent(this, ActionEvent.ACTION_PERFORMED, COMMAND_CANCEL);
-				DbLoginPanel.this.actionPerformed(ae);
-			}
-		};
-		this.addWindowListener(l);
+        // input fields go here
+        JPanel inputPanel = initInputArea();
+        pane.add(inputPanel, BorderLayout.CENTER);
 
-		this.pack();
-		this.centerWindow();
-	}
+        // buttons go here
+        JPanel buttonsPanel = initButtons();
+        this.getRootPane().setDefaultButton(ok);
+        pane.add(buttonsPanel, BorderLayout.SOUTH);
 
-	protected void disableVKEvents(JTextComponent txtField) {
-		KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-		Keymap map = txtField.getKeymap();
-		map.removeKeyStrokeBinding(enter);
-	}
+        // closing the window means "Cancel"
+        this.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                ActionEvent ae =
+                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED, COMMAND_CANCEL);
+                DbLoginPanel.this.actionPerformed(ae);
+            }
+        });
 
-	protected void disableVKEvents(PreferenceField prefField) {
-		// I have no idea how to trap "ENTER" hit on a combo box
-		// this should be something faily easy.
-		// Anyone can implement that to trigger this Dialog default button?
-	}
+        this.pack();
+        this.centerWindow();
+    }
 
-	public DataSourceInfo getDataSrcInfo() {
-		return dataSrcInfo;
-	}
+    protected void disableVKEvents(JTextComponent txtField) {
+        KeyStroke enter = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        Keymap map = txtField.getKeymap();
+        map.removeKeyStrokeBinding(enter);
+    }
 
-	public void setDataSrcInfo(DataSourceInfo dataSrcInfo) {
-		this.dataSrcInfo = dataSrcInfo;
-		if (dataSrcInfo != null) {
-			unInput.setText(dataSrcInfo.getUserName());
-			pwdInput.setText(dataSrcInfo.getPassword());
-			drInput.setText(dataSrcInfo.getJdbcDriver());
-			urlInput.setText(dataSrcInfo.getDataSourceUrl());
-			adapterInput.setText(dataSrcInfo.getAdapterClassName());
-		}
-	}
+    protected void disableVKEvents(PreferenceField prefField) {
+        // TODO: I have no idea how to trap "ENTER" hit on a combo box
+        // this should be something fairly easy.
+        // Anyone can implement that to trigger this Dialog default button?
+    }
 
-	protected JPanel initInputArea() {
-		// user name line
-		JLabel unLabel = new JLabel("User Name:");
-		unInput = new PreferenceField(ModelerPreferences.USER_NAME);
-		disableVKEvents(unInput);
+    public DataSourceInfo getDataSrcInfo() {
+        return dataSrcInfo;
+    }
 
-		// password line
-		JLabel pwdLabel = new JLabel("Password:");
-		pwdInput = new JPasswordField(25);
-		disableVKEvents(pwdInput);
+    public void setDataSrcInfo(DataSourceInfo dataSrcInfo) {
+        this.dataSrcInfo = dataSrcInfo;
+        if (dataSrcInfo != null) {
+            unInput.setText(dataSrcInfo.getUserName());
+            pwdInput.setText(dataSrcInfo.getPassword());
+            drInput.setText(dataSrcInfo.getJdbcDriver());
+            urlInput.setText(dataSrcInfo.getDataSourceUrl());
+            adapterInput.setText(dataSrcInfo.getAdapterClassName());
+        }
+    }
 
-		// JDBC driver line
-		JLabel drLabel = new JLabel("JDBC Driver Class:");
-		drInput = new PreferenceField(ModelerPreferences.JDBC_DRIVER);
-		disableVKEvents(drInput);
+    protected JPanel initInputArea() {
+        // user name line
+        JLabel unLabel = new JLabel("User Name:");
+        unInput = new PreferenceField(ModelerPreferences.USER_NAME);
+        disableVKEvents(unInput);
 
-		// Database URL line
-		JLabel urlLabel = new JLabel("Database URL:");
-		urlInput = new PreferenceField(ModelerPreferences.DB_URL);
-		disableVKEvents(urlInput);
+        // password line
+        JLabel pwdLabel = new JLabel("Password:");
+        pwdInput = new JPasswordField(25);
+        disableVKEvents(pwdInput);
 
-		// Adapter class line
-		JLabel adapterLabel = new JLabel("RDBMS Adapter:");
-		adapterInput =
-			new PreferenceField(
-				ModelerPreferences.RDBMS_ADAPTER,
-				Arrays.asList(DbAdapter.availableAdapterClassNames));
-		disableVKEvents(adapterInput);
+        // JDBC driver line
+        JLabel drLabel = new JLabel("JDBC Driver Class:");
+        drInput = new PreferenceField(ModelerPreferences.JDBC_DRIVER);
+        disableVKEvents(drInput);
 
-		Component[] left =
-			new Component[] {
-				unLabel,
-				pwdLabel,
-				drLabel,
-				urlLabel,
-				adapterLabel };
+        // Database URL line
+        JLabel urlLabel = new JLabel("Database URL:");
+        urlInput = new PreferenceField(ModelerPreferences.DB_URL);
+        disableVKEvents(urlInput);
 
-		Component[] right =
-			new Component[] {
-				unInput,
-				pwdInput,
-				drInput,
-				urlInput,
-				adapterInput };
+        // Adapter class line
+        JLabel adapterLabel = new JLabel("RDBMS Adapter:");
+        adapterInput =
+            new PreferenceField(
+                ModelerPreferences.RDBMS_ADAPTER,
+                Arrays.asList(DbAdapter.availableAdapterClassNames));
+        disableVKEvents(adapterInput);
 
-		return PanelFactory.createForm(left, right, 5, 5, 5, 5);
-	}
+        Component[] left =
+            new Component[] { unLabel, pwdLabel, drLabel, urlLabel, adapterLabel };
 
-	private JPanel initButtons() {
-		// buttons
-		ok = new JButton("Ok");
-		ok.setActionCommand(COMMAND_OK);
+        Component[] right =
+            new Component[] { unInput, pwdInput, drInput, urlInput, adapterInput };
 
-		cancel = new JButton("Cancel");
-		cancel.setActionCommand(COMMAND_CANCEL);
+        return PanelFactory.createForm(left, right, 5, 5, 5, 5);
+    }
 
-		ok.addActionListener(this);
-		cancel.addActionListener(this);
+    private JPanel initButtons() {
+        // buttons
+        ok = new JButton("Ok");
+        ok.setActionCommand(COMMAND_OK);
 
-		return PanelFactory.createButtonPanel(new JButton[] { ok, cancel });
-	}
+        cancel = new JButton("Cancel");
+        cancel.setActionCommand(COMMAND_CANCEL);
 
-	protected JPanel initMessagePanel() {
-		JPanel panel = new JPanel();
-		panel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
-		JLabel lbl = new JLabel("Enter JDBC Information");
-		lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN, 18));
-		lbl.setForeground(Color.red);
-		panel.add(lbl);
-		return panel;
-	}
+        ok.addActionListener(this);
+        cancel.addActionListener(this);
 
-	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(COMMAND_OK) && dataSrcInfo != null) {
-			// populate DataSourceInfo with text values
-			String un = unInput.getText();
-			if (un != null && un.length() == 0)
-				un = null;
-			dataSrcInfo.setUserName(un);
+        return PanelFactory.createButtonPanel(new JButton[] { ok, cancel });
+    }
 
-			char[] pwd = pwdInput.getPassword();
-			String pwdStr =
-				(pwd != null && pwd.length > 0) ? new String(pwd) : null;
-			dataSrcInfo.setPassword(pwdStr);
+    protected JPanel initMessagePanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
+        JLabel lbl = new JLabel("Enter JDBC Information");
+        lbl.setFont(lbl.getFont().deriveFont(Font.PLAIN, 18));
+        lbl.setForeground(Color.red);
+        panel.add(lbl);
+        return panel;
+    }
 
-			String dr = drInput.getText();
-			if (dr != null && dr.length() == 0)
-				dr = null;
-			dataSrcInfo.setJdbcDriver(dr);
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals(COMMAND_OK) && dataSrcInfo != null) {
+            // populate DataSourceInfo with text values
+            String un = unInput.getText();
+            if (un != null && un.length() == 0)
+                un = null;
+            dataSrcInfo.setUserName(un);
 
-			String url = urlInput.getText();
-			if (url != null && url.length() == 0)
-				url = null;
-			dataSrcInfo.setDataSourceUrl(url);
+            char[] pwd = pwdInput.getPassword();
+            String pwdStr = (pwd != null && pwd.length > 0) ? new String(pwd) : null;
+            dataSrcInfo.setPassword(pwdStr);
 
-			String adapter = adapterInput.getText();
-			if (adapter != null && adapter.length() == 0)
-				adapter = null;
-			dataSrcInfo.setAdapterClassName(adapter);
+            String dr = drInput.getText();
+            if (dr != null && dr.length() == 0)
+                dr = null;
+            dataSrcInfo.setJdbcDriver(dr);
 
-			// set some reasonable pool size
-			if (dataSrcInfo.getMinConnections() <= 0)
-				dataSrcInfo.setMinConnections(1);
+            String url = urlInput.getText();
+            if (url != null && url.length() == 0)
+                url = null;
+            dataSrcInfo.setDataSourceUrl(url);
 
-			if (dataSrcInfo.getMaxConnections()
-				< dataSrcInfo.getMinConnections())
-				dataSrcInfo.setMaxConnections(dataSrcInfo.getMinConnections());
+            String adapter = adapterInput.getText();
+            if (adapter != null && adapter.length() == 0)
+                adapter = null;
+            dataSrcInfo.setAdapterClassName(adapter);
 
-			unInput.storePreferences();
-			drInput.storePreferences();
-			urlInput.storePreferences();
-			adapterInput.storePreferences();
-			ModelerPreferences.getPreferences().storePreferences();
-		} else if (e.getActionCommand().equals(COMMAND_CANCEL)) {
-			this.setDataSrcInfo(null);
-		}
-		this.hide();
-	}
+            // set some reasonable pool size
+            if (dataSrcInfo.getMinConnections() <= 0)
+                dataSrcInfo.setMinConnections(1);
+
+            if (dataSrcInfo.getMaxConnections() < dataSrcInfo.getMinConnections())
+                dataSrcInfo.setMaxConnections(dataSrcInfo.getMinConnections());
+
+            unInput.storePreferences();
+            drInput.storePreferences();
+            urlInput.storePreferences();
+            adapterInput.storePreferences();
+            ModelerPreferences.getPreferences().storePreferences();
+        }
+        else if (e.getActionCommand().equals(COMMAND_CANCEL)) {
+            this.setDataSrcInfo(null);
+        }
+        this.hide();
+    }
 
 }
