@@ -67,7 +67,7 @@
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
     <td width="${centralWidth}" valign="top"><table width="100%" border="0" cellspacing="10" cellpadding="0" class="body-black">
       <tbody><tr>
-        <td>Copyright &copy;2001-2004 ObjectStyle Group</td>
+        <td>Copyright &copy;2001-2005 ObjectStyle Group</td>
       </tr>
     </tbody></table></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
