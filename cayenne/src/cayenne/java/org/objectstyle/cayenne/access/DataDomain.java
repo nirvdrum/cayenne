@@ -200,16 +200,15 @@ public class DataDomain implements QueryEngine {
 	 * List is returned by copy.
 	 */
 	public List getDataNodeList() {
-		List list;
-
 		synchronized (dataNodes) {
-			list = new ArrayList(dataNodes.values());
+			return new ArrayList(dataNodes.values());
 		}
-
-		return list;
 	}
 
-	/** Returns an array of DataNodes (by copy) */
+	/**
+	 * Returns an array of DataNodes (by copy)
+	 * @deprecated since b1; use #getDataNodeList instead.
+	 */
 	public DataNode[] getDataNodes() {
 		DataNode[] dataNodesArray = null;
 		synchronized (dataNodes) {

@@ -266,7 +266,10 @@ public class DataMap {
         dbEntityMap.put(dbEntity.getName(), dbEntity);
     }
 
-    /** Returns a by copy array of object entities. */
+    /**
+     * Returns a by copy array of object entities.
+     * @deprecated since b1; use #getObjEntitiesAsList() instead.
+     */
     public ObjEntity[] getObjEntities() {
         Collection objEnts = getObjEntityMap().values();
         ObjEntity[] immutableEnts = null;
@@ -279,8 +282,11 @@ public class DataMap {
         return immutableEnts;
     }
 
-    /** Return an array of database entities (by copy) */
-    public DbEntity[] getDbEntities() {
+    /**
+     * Return an array of database entities (by copy)
+     * @deprecated since b1; use #getDbEntitiesAsList() instead.
+     */
+	public DbEntity[] getDbEntities() {
         Collection dbEnts = getDbEntityMap().values();
         DbEntity[] immutableEnts = null;
         if (dbEnts == null || dbEnts.size() == 0) {
@@ -359,8 +365,8 @@ public class DataMap {
     }
 
     /** 
-     * Returnms DbEntity matching the <code>name</code> parameter.
-     * No dependencies will be searched.
+     * Returns DbEntity matching the <code>name</code> parameter. No
+     * dependencies will be searched.
      */
     public DbEntity getDbEntity(String dbEntityName) {
         return getDbEntity(dbEntityName, false);

@@ -145,6 +145,7 @@ public class DataNode implements QueryEngine {
 
     /**
      * Returns an array of DataMaps handled by this DataNode.
+     * @deprecated since b1; use #getMapList() instead.
      */
     public DataMap[] getDataMaps() {
         // Andrus: this should probably be deprecated eventually,
