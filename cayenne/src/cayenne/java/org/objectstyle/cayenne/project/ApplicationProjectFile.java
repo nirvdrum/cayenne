@@ -56,9 +56,7 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.PrintWriter;
-import java.util.List;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.ConfigSaver;
 import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
 import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;

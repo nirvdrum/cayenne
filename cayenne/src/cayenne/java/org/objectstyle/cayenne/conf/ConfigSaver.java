@@ -58,13 +58,8 @@ package org.objectstyle.cayenne.conf;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
-import java.util.List;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.access.OperationSorter;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.util.Util;
 

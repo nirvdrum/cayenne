@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.util.Util;
