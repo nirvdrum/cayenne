@@ -144,7 +144,10 @@ public class GenerateClassDialog
 		Preferences pref = Preferences.getPreferences();
 		String startDir =
 			(String) pref.getProperty(Preferences.LAST_GENERATED_CLASSES_DIR);
-		folder.setText(startDir);
+		if (startDir != null) {
+			outputFolder = new File(startDir);
+			folder.setText(startDir);
+		}
 		folder.setEditable(false);
 		chooseFolder = new JButton("Choose");
 		folder_box.add(Box.createHorizontalStrut(2));

@@ -28,8 +28,7 @@
     		<li><a href="#3">Setup Cayenne Configuration Files.</a></li>
     		<li><a href="#4">Create Database Primary Key Support.</a></li>
     		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
-    		<li><a href="#6">Application Code.</a></li>
-    		<li><a href="#7">Compile and Run the Application.</a></li>
+    		<li><a href="#6">Compile and Deploy the Application.</a></li>
     	</ul>
     	
        	<subsection name="3.2.1 Tutorial Setup" anchor="1">
@@ -130,8 +129,57 @@
     		</ul>
     		</p>    	
     	</subsection>
-    	
-    	
+    	   	<subsection name="3.2.6 Compile and Deploy the Application" anchor="6">
+    		<p>Compile the source code lime ypou would normally compile a webapplications.
+    		The example is given for javac from the command line (assuming that JAVA_HOME variable 
+    		points to the JSDK 1.4 installation). 
+    		On Windows (substitute <code>[servlet.jar]</code> with the path to the actiual JAR file,
+    		for instance tomcat/common/lib/servlet.jar):</p>
+<source>
+cayenne-web-app> cd WEB-INF\classes
+cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;[servlet.jar] 
+cayenne-web-app\WEB-INF\classes> set CLASSPATH=%CLASSPATH%;..\lib\struts.jar;..\lib\cayenne.jar
+cayenne-web-app\WEB-INF\classes> %JAVA_HOME%\bin\javac test\*.java formbean\*.java action\*.java
+</source>
+
+    		<p>On UNIX:</p>
+<source>
+cayenne-web-app# export CLASSPATH=$CLASSPATH:$CAYENNE_HOME/lib/cayenne.jar
+cayenne-web-app# $JAVA_HOME/bin/javac test/*.java
+</source>
+
+
+			<p>Main tutorial class is "test.Main". It takes a single parameter - a search
+			word to look up a gallery by name. It will try to find a matching gallery, then
+			create a new artist (Salvador Dali) with a single painting and add this painting 
+			to the found gallery. To run the tutorial do something like this (example given for Windows):
+			</p>
+<source>
+projectdir> set CLASSPATH=%CLASSPATH%;.
+projectdir> %JAVA_HOME%\bin\java -classpath . test.Main metro
+</source>
+			
+			<p>If there is a gallery matching search criteria (in our case "Metropolitan Museum of Art"
+			would match the word "metro"), the following output will be printed:
+			</p>
+<source>
+SEVERE access.QueryLogger 0: --- will run 1 query.
+SEVERE access.QueryLogger 40: SELECT t0.GALLERY_NAME, t0.GALLERY_ID FROM GALLERY t0 
+WHERE UPPER(t0.GALLERY_NAME) LIKE UPPER(?) [params: '%metro%']
+SEVERE access.QueryLogger 140: === returned 1 row.
+
+Found gallery 'The Metropolitan Museum of Art'.
+
+SEVERE access.QueryLogger 210: --- will run 2 queries.
+SEVERE access.QueryLogger 220: INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) 
+VALUES (?, ?, ?) [params: 41, NULL, 'Salvador Dali']
+SEVERE access.QueryLogger 220: === updated 1 row.
+SEVERE access.QueryLogger 230: INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, 
+ESTIMATED_PRICE, ARTIST_ID) VALUES (?, ?, ?, ?) [params: 41, 'Sleep', NULL, 41]
+SEVERE access.QueryLogger 240: === updated 1 row.
+SEVERE access.QueryLogger 250: +++ transaction committed.
+</source>
+    	</subsection>
     	</subsection>
     </section>
 </body>

@@ -1,22 +1,19 @@
 package action;
 
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionForm;
+import java.util.List;
+import java.util.logging.Level;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+
+import org.apache.struts.action.*;
+import test.Artist;
+import test.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory; 
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
-import java.util.logging.Level;
-import java.util.List;
-import formbean.PaintingForm;
-import test.Painting;
-import test.Artist;
-
+import formbean.*;
 
 public final class SavePaintingAction extends Action {
 
@@ -40,7 +37,10 @@ public final class SavePaintingAction extends Action {
         SelectQuery query = new SelectQuery("Artist", qual);
         
         // using log level of SEVERE to show the query execution
-        List artists = ctxt.performQuery(query, Level.SEVERE);
+        query.setLogLevel(Level.SEVERE);
+        
+      
+        List artists = ctxt.performQuery(query);
         System.err.println("artists: " + artists);
         Artist artist = (Artist)artists.get(0);
         

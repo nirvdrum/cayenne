@@ -1,16 +1,14 @@
 package action;
 
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionForm;
+import java.util.logging.Level;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.objectstyle.cayenne.access.DataContext;
-import java.util.logging.Level;
-import formbean.GalleryForm;
+
+import org.apache.struts.action.*;
 import test.Gallery;
+import org.objectstyle.cayenne.access.DataContext;
+import formbean.*;
 
 public final class SaveGalleryAction extends Action {
 

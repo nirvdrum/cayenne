@@ -1,20 +1,20 @@
 package action;
 
-import org.apache.struts.action.Action;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
-import org.apache.struts.action.ActionForm;
+import java.util.List;
+import java.util.logging.Level;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory; 
-import org.objectstyle.cayenne.query.SelectQuery;
-import java.util.logging.Level;
-import java.util.List;
+
+import org.apache.struts.action.*;
 import test.Gallery;
 import test.Painting;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+
+import formbean.*;
 
 public final class RemovePaintingFromGalleryAction extends Action {
     
@@ -37,7 +37,8 @@ public final class RemovePaintingFromGalleryAction extends Action {
         SelectQuery query = new SelectQuery("Painting", qual);
         
         // using log level of SEVERE to show the query execution
-        List paintings = ctxt.performQuery(query, Level.SEVERE);
+        query.setLogLevel(Level.SEVERE);
+        List paintings = ctxt.performQuery(query);
                 
         Painting painting = (Painting)paintings.get(0);
         System.err.println("painting: " + painting);
@@ -48,7 +49,8 @@ public final class RemovePaintingFromGalleryAction extends Action {
                                         galleryName);
         
         query = new SelectQuery("Gallery", qual);
-        List galleries = ctxt.performQuery(query, Level.SEVERE);
+        query.setLogLevel(Level.SEVERE);
+        List galleries = ctxt.performQuery(query);
         Gallery gallery = (Gallery)galleries.get(0);
         
         gallery.removeFromPaintingArray(painting);

@@ -1,12 +1,10 @@
 package formbean;
 
-import javax.servlet.http.HttpServletRequest;
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionMapping;
 import java.math.BigDecimal;
-import test.Gallery;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.struts.action.*;
 
 public final class PaintingForm extends ActionForm  {
     
