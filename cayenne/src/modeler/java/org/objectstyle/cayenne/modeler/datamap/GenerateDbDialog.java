@@ -233,9 +233,11 @@ public class GenerateDbDialog
             JOptionPane.showMessageDialog(this, "Schema Generation Complete.");
 
         } catch (Exception ex) {
+            StringBuffer buffer = new StringBuffer("Schema Generation Error - " + ex.getMessage());
             if (ex instanceof SQLException) {
                 SQLException exception = (SQLException) ex;
                 while ((exception = exception.getNextException()) != null) {
+                    buffer.append(" - ").append(exception.getMessage());
                     logObj.log(Level.INFO, "Nested exception", exception);
                 }
             }
@@ -243,7 +245,7 @@ public class GenerateDbDialog
 
             JOptionPane.showMessageDialog(
                 this,
-                "Error creating database - " + ex.getMessage());
+                buffer.toString());
             return;
         }
     }
