@@ -66,6 +66,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.db2.DB2Adapter;
 import org.objectstyle.cayenne.dba.firebird.FirebirdAdapter;
 import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
@@ -99,6 +100,7 @@ public class DatabaseSetupDelegate {
         delegates.put(MySQLAdapter.class, MySQLDelegate.class);
         delegates.put(HSQLDBAdapter.class, HSQLDBDelegate.class);
         delegates.put(OpenBaseAdapter.class, OpenBaseDelegate.class);
+        delegates.put(DB2Adapter.class, DB2SetupDelegate.class);
     }
 
     protected DbAdapter adapter;

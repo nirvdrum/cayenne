@@ -212,7 +212,10 @@ public class CayenneTestDatabaseSetup {
             Iterator it = tableCreateQueries(map);
             while (it.hasNext()) {
                 String query = (String) it.next();
-                QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL, query, Collections.EMPTY_LIST);
+                QueryLogger.logQuery(
+                    QueryLogger.DEFAULT_LOG_LEVEL,
+                    query,
+                    Collections.EMPTY_LIST);
                 stmt.execute(query);
             }
             delegate.createdTables(conn, map);
@@ -244,8 +247,6 @@ public class CayenneTestDatabaseSetup {
             node.getAdapter().getPkGenerator().createAutoPk(node, filteredEntities);
         }
     }
-    
-    
 
     /** Returns iterator of preprocessed table create queries */
     protected Iterator tableCreateQueries(DataMap map) throws Exception {
@@ -289,27 +290,62 @@ public class CayenneTestDatabaseSetup {
     private List dbEntitiesInInsertOrder(DataMap map) {
         List entities = new ArrayList(map.getDbEntities());
 
-        // filter out BLOB/CLOB tables if database does not support them
-        if (!delegate.supportsLobs()) {
+        // filter varios unsupported tests...
+
+        // LOBs
+        boolean excludeLOB = !delegate.supportsLobs();
+        boolean excludeBinPK = !delegate.supportsBinaryPK();
+        if (excludeLOB || excludeBinPK) {
             Iterator it = entities.iterator();
             List filtered = new ArrayList();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity) it.next();
 
                 // check for LOB attributes
-                boolean hasLob = false;
-                Iterator attrs = ent.getAttributes().iterator();
-                while (attrs.hasNext()) {
-                    DbAttribute attr = (DbAttribute) attrs.next();
-                    if (attr.getType() == Types.BLOB || attr.getType() == Types.CLOB) {
-                        hasLob = true;
-                        break;
+                if (excludeLOB) {
+                    boolean hasLob = false;
+                    Iterator attrs = ent.getAttributes().iterator();
+                    while (attrs.hasNext()) {
+                        DbAttribute attr = (DbAttribute) attrs.next();
+                        if (attr.getType() == Types.BLOB
+                            || attr.getType() == Types.CLOB) {
+                            hasLob = true;
+                            break;
+                        }
+                    }
+
+                    if (hasLob) {
+                        continue;
                     }
                 }
 
-                if (!hasLob) {
-                    filtered.add(ent);
+                // check for BIN PK
+                if (excludeBinPK) {
+                    boolean skip = false;
+                    Iterator attrs = ent.getAttributes().iterator();
+                    while (attrs.hasNext()) {
+                        // check for BIN PK or FK to BIN Pk
+                        DbAttribute attr = (DbAttribute) attrs.next();
+                        if (attr.getType() == Types.BINARY
+                            || attr.getType() == Types.VARBINARY
+                            || attr.getType() == Types.LONGVARBINARY) {
+
+                            if (attr.isPrimaryKey() || attr.isForeignKey()) {
+                                skip = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (skip) {
+                        continue;
+                    }
+
+                    // check for FK to bin PK
+
                 }
+
+                filtered.add(ent);
             }
 
             entities = filtered;
