@@ -57,10 +57,10 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -221,9 +221,9 @@ public class QualifierTranslator
         else if (parentNode.getType() == Expression.DB_NAME)
             appendDbPath(qualBuf, parentNode);
         else if (parentNode.getType() == Expression.LIST)
-            appendList(parentNode);
+            appendList(parentNode, paramsDbType(parentNode));
         else
-            appendLiteral(qualBuf, leaf);
+            appendLiteral(qualBuf, leaf, paramsDbType(parentNode));
     }
 
     private boolean parenthesisNeeded(Expression node, Expression parentNode) {
@@ -248,20 +248,20 @@ public class QualifierTranslator
             qualBuf.append(sql);
     }
 
-    private void appendList(Expression listExpr) {
+    private final void appendList(Expression listExpr, DbAttribute paramDesc) {
         List list = (List) listExpr.getOperand(0);
 
         Iterator it = list.iterator();
         // process first element outside the loop
         // (unroll loop to avoid condition checking
         if (it.hasNext())
-            appendLiteral(qualBuf, it.next());
+            appendLiteral(qualBuf, it.next(), paramDesc);
         else
             return;
 
         while (it.hasNext()) {
             qualBuf.append(", ");
-            appendLiteral(qualBuf, it.next());
+            appendLiteral(qualBuf, it.next(), paramDesc);
         }
     }
 }

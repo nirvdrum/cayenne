@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,12 +54,18 @@ package org.objectstyle.cayenne.exp;
  *
  */
 
+package org.objectstyle.cayenne.exp;
+
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Helper class to build expressions. */
+/** 
+ * Helper class to build expressions. 
+ * 
+ * @author Andrei Adamchik
+ */
 public class ExpressionFactory {
     static Logger logObj = Logger.getLogger(ExpressionFactory.class.getName());
     
@@ -207,9 +212,12 @@ public class ExpressionFactory {
         return exp;
     }
 
-    /** Creates a binary expression. Binary expression is an expression with two operands.
-     * <code>type</code> must be a valid type defined in Expression interface. It must also
-     * resolve to a unary expression, or an ExpressionException will be thrown. */
+    /** 
+     * Creates a binary expression. Binary expression is an expression 
+     * with two operands. <code>type</code> must be a valid type defined 
+     * in Expression interface. It must also resolve to a binary expression, 
+     * or an ExpressionException will be thrown. 
+     */
     public static Expression binaryExp(
         int type,
         Object leftOperand,
@@ -223,7 +231,8 @@ public class ExpressionFactory {
         return exp;
     }
 
-    /** Creates a binary expression with left operand being Expression.OBJ_PATH. 
+    /** 
+     * Creates a binary expression with left operand being Expression.OBJ_PATH. 
      * This is a more useful method to build binary expressions then 
      * generic {@link #binaryExp(int, Object, Object) binaryExp}.
      * It is intended for cases when one of the operands is OBJ_PATH. 
@@ -240,7 +249,8 @@ public class ExpressionFactory {
         return binaryExp(type, unaryExp(Expression.OBJ_PATH, pathSpec), value);
     }
 
-    /** Creates a ternary expression. Ternary expression is an expression with three operands.
+    /** 
+     * Creates a ternary expression. Ternary expression is an expression with three operands.
      * <code>type</code> must be a valid type defined in Expression interface. It must also
      * resolve to a ternary expression, or an ExpressionException will be thrown.
      *

@@ -62,14 +62,13 @@ import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.*;
 
-
 /** Translates parts of the query to SQL.
  * Always works in the context of parent Translator. */
 public abstract class QueryAssemblerHelper {
     static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class.getName());
 
     protected QueryAssembler queryAssembler;
-    
+
     /** Creates QueryAssemblerHelper. Sets queryAssembler property. */
     public QueryAssemblerHelper(QueryAssembler queryAssembler) {
         this.queryAssembler = queryAssembler;
@@ -157,11 +156,16 @@ public abstract class QueryAssemblerHelper {
      * used as a parameter. <i>Only objects with a single column primary key 
      * can be used.</i>
      * 
-     * @param buf query buffer
+     * @param buf query buffer.
+     * 
      * @param val object that should be appended as a literal to the query.
      * Must be of one of "standard JDBC" types, null or a DataObject.
+     * 
+     * @param attr DbAttribute that has information on what type of parameter
+     * is being appended.
+     * 
      */
-    protected void appendLiteral(StringBuffer buf, Object val) {
+    protected void appendLiteral(StringBuffer buf, Object val, DbAttribute attr) {
         if (val == null) {
             buf.append("NULL");
         }
@@ -192,10 +196,10 @@ public abstract class QueryAssemblerHelper {
             }
 
             // checks have been passed, use id value
-            appendLiteralDirect(buf, snap.get(snap.keySet().iterator().next()));
+            appendLiteralDirect(buf, snap.get(snap.keySet().iterator().next()), attr);
         }
         else {
-            appendLiteralDirect(buf, val);
+            appendLiteralDirect(buf, val, attr);
         }
     }
 
@@ -209,13 +213,54 @@ public abstract class QueryAssemblerHelper {
      * @param val object that should be appended as a literal to the query. 
      * Must be of one of "standard JDBC" types. Can not be null.
      */
-    private final void appendLiteralDirect(StringBuffer buf, Object val) {
+    private final void appendLiteralDirect(
+        StringBuffer buf,
+        Object val,
+        DbAttribute attr) {
         buf.append('?');
 
         // we are hoping that when processing parameter list, 
         // the correct type will be
         // guessed without looking at DbAttribute...
-        queryAssembler.addToParamList(null, val);
+        queryAssembler.addToParamList(attr, val);
+    }
+
+    /** 
+     * Returns database type of expression parameters or
+     * null if it can not be determined.
+     */
+    protected DbAttribute paramsDbType(Expression e) {
+        int len = e.getOperandCount();
+        // ignore unary expressions
+        if (len < 2) {
+            return null;
+        }
+
+        // naive algorithm:
+
+        // if at least one of the sibling operands is a
+        // OBJ_PATH expression, use its attribute type as
+        // a final answer.
+
+        for (int i = 0; i < len; i++) {
+            Object op = e.getOperand(i);
+            if (op instanceof Expression) {
+                Expression ope = (Expression) op;
+                if (ope.getType() == Expression.OBJ_PATH) {
+                    
+                    Iterator it = getQueryAssembler().getRootEntity().resolvePathComponents(ope);
+                    while (it.hasNext()) {
+                        Object pathComp = it.next();
+
+                        if (pathComp instanceof ObjAttribute) {
+                            return ((ObjAttribute) pathComp).getDbAttribute();
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /** 
@@ -275,13 +320,12 @@ public abstract class QueryAssemblerHelper {
 
                 throw new CayenneRuntimeException(msg.toString());
             }
-            
-            att = (DbAttribute)pk.get(0);
+
+            att = (DbAttribute) pk.get(0);
         }
         else {
             att = join.getSource();
         }
-
 
         processColumn(buf, att);
     }

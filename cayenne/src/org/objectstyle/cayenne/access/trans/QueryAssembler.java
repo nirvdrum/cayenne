@@ -78,7 +78,10 @@ public abstract class QueryAssembler extends QueryTranslator {
     /** PreparedStatement values. */
     protected ArrayList values = new ArrayList();
 
-    /** PreparedStatement attributes matching entries in <code>values</code> list.. */
+    /** 
+     * PreparedStatement attributes matching entries in <code>values</code> 
+     * list. 
+     */
     protected ArrayList attributes = new ArrayList();
 
     /** Processes a join being added. */

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,9 +54,15 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-/** Generic unary expression. 
- *  Describes expression in a form: "<tt>operation operand</tt>". 
- *  SQL example of unary expression is NOT expression.*/
+package org.objectstyle.cayenne.exp;
+
+/** 
+ * Generic unary expression. 
+ * Describes expression in a form: "<tt>operation operand</tt>". 
+ * SQL example of unary expression is NOT expression.
+ * 
+ * @author Andrei Adamchik
+ */
 public class UnaryExpression implements Expression {
     protected Object operand;
     protected int type;
@@ -106,6 +111,5 @@ public class UnaryExpression implements Expression {
         .append(operand)
         .append("'>");
         return buf.toString();
-        
     }
 }
