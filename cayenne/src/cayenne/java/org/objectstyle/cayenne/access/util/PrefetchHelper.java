@@ -60,11 +60,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
-
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.exp.Expression;
@@ -78,7 +76,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Arndt Brenschede
  */
 public class PrefetchHelper {
-    private static Logger logObj = Logger.getLogger(PrefetchHelper.class);
 
     /**
      * resolve a toOne relation for a list of objects
