@@ -51,8 +51,8 @@
     		<item name="7.3 Using Orderings"  href="/userguide/fetch/orderings.html"/>
     		<item name="7.4 SelectQuery Customization"  href="/userguide/fetch/other.html"/>
     		<item name="7.5 Parameterized Queries"  href="/userguide/fetch/params.html"/>
-    		<item name="7.6 Using Raw SQL"  href="/userguide/fetch/raw.html"/>
-    		<item name="7.7 Modifying Database Directly"  href="/userguide/fetch/dml.html"/>
+    		<item name="7.6 SQLTemplate Query"  href="/userguide/fetch/sqltemplate.html"/>
+    		<item name="7.7 Scripting SQLTemplate"  href="/userguide/fetch/sqltemplate-scripting.html"/>
     		<item name="7.8 Queries Stored in DataMap"  href="/userguide/fetch/datamap-queries.html"/>
     	</item>
     	

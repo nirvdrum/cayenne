@@ -2,7 +2,8 @@
 <title>User Guide - Using SelectQueries</title>
 <toc name="toc-user-guide" chapter="7. Using Queries"/> 
 <body>
- 	 <section name="7.8 Queries Stored in DataMap">
+	<section name="7. Using Queries"> 
+		<subsection name="7.8 Queries Stored in DataMap">
 		<p>To facilitate reuse of queries users can assign symbolic names to them
 		and store such named queries in a DataMap. Normally this is done by <a href=
 		"../../modelerguide/modeling-queries/index.html">creating a query in CayenneModeler</a>.
@@ -29,6 +30,7 @@ SelectQuery query = prototype.queryWithParameters(params);
 // 3. execute query
 List objects = context.performQuery(query);
 </source>
+	</subsection>
     </section>
 </body>
 </document>

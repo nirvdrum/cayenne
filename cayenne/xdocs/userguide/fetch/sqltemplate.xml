@@ -1,0 +1,70 @@
+<document>
+<title>User Guide - Using SelectQueries</title>
+<toc name="toc-user-guide" chapter="7. Using Queries"/> 
+<body>
+    <section name="7. Using Queries"> 
+        <subsection name="7.6 SQLTemplate Query">
+            <p>Not all SQL capabilities can be adequately mapped in the object model.  Quiet often there is a need to 
+            execute a very complex query that can't be expressed well in terms of DataObject properties. Cayenne provides
+            a powerful mechanism for executing both selecting and non-selecting SQL queries using scriptable <a href=
+            "../../api/cayenne/org/objectstyle/cayenne/query/SQLTemplate.html">SQLTemplate query</a>. This chapter 
+            describes how SQLTemplates can be created and executed with DataContext to select and update
+            the database data. Subsequent chapters show how to customize SQLTemplate and use template scripting.</p> 
+            
+            <panel name="Note:">In Cayenne 1.0 SQL queries were supported via SqlSelectQuery and SqlModifyQuery. 
+            These classes didn't provide adequate support for building dynamic parameterized SQL, and are now deprecated
+             in favor of SQLTemplate.
+            </panel>
+            
+            <subsection name="7.6.1 Creating SQLTemplate">
+            <p>While SQLTemplates can be built using CayenneModeler <i>(not there yet, coming soon)</i>, they can be also 
+            easily created in the code just like regular SelectQueries. SQLTemplate consists of root and dynamic SQL template 
+            (more discussion of dynamic behavior of the template is done in subsequent chapters). Note that one of the 
+            parameters in SQLTemplate constructor is a boolean specifying whether the query is expected to return the result or not.
+            </p>
+<source>
+import org.objectstyle.cayenne.query.SQLTemplate;
+...
+// create selecting SQLTemplate
+SQLTemplate selectQuery = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+...
+// create updating SQLTemplate
+SQLTemplate updateQuery = new SQLTemplate(Artist.class, "delete from ARTIST", false);
+</source>
+
+		</subsection>
+		<subsection name="7.6.2 Selecting Objects with SQLTemplate">
+
+		<p>Selecting SQLTemplate is very similar to SelectQuery in many other respects. It can be executed via <code>DataContext.performQuery(..)</code>
+		and supports the same configuration parameters, such as fetch limit, pagination, data rows vs. DataObjects, etc.</p>
+<source>
+import org.objectstyle.cayenne.query.SQLTemplate;
+...
+// fetch all artists, but no more than 1000 objects...
+SQLTemplate rawSelect = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+rawSelect.setFetchLimit(1000);
+
+List artists = dataContext.performQuery(rawSelect);
+</source>
+		</subsection>
+		
+		<subsection name="7.6.3 Modifying Data with SQLTemplate">
+		<p>Non-selecting SQL template allows to execute arbitrary SQL that modifies the database, but does not return the results.
+		<code>DataContext.performNonSelectingQuery(..) is used for this task.</code>
+		</p>
+<source>
+import org.objectstyle.cayenne.query.SQLTemplate;
+...
+// fetch all artists, but no more than 1000 objects...
+SQLTemplate rawDelete = new SQLTemplate(Artist.class, "delete from ARTIST", false);
+int[] deleteCounts = dataContext.performNonSelectingQuery(rawDelete);
+</source>
+		<p> </p>
+		<panel name="Important!">Developers doing any database changes via SQLTemplate must realize that these changes
+		are being done directly to the database, and therefore may potentially leave object graph in an inconsistent state.
+		</panel>
+		</subsection>
+        </subsection>
+    </section>
+</body>
+</document>

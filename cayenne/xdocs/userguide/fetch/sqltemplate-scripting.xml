@@ -1,0 +1,48 @@
+<document>
+<title>User Guide - Using SelectQueries</title>
+<toc name="toc-user-guide" chapter="7. Using Queries"/> 
+<body>
+	<section name="7. Using Queries"> 
+		<subsection name="7.7 Scripting SQLTemplate">
+		<p>Internal SQL String within SQLTemplate is not static. It is a dynamic Velocity script that is processed at 
+		runtime to generate PreparedStatement SQL. So it can be parameterized and conditionally exclude/include 
+		pieces of SQL depending on parameters.  </p>
+		
+		<subsection name="7.7.1 Dynamic Template">
+		<p></p>
+		</subsection>
+		
+		<subsection name="7.7.2 Binding Values">
+		<p></p>
+		</subsection>
+		
+		<subsection name="7.7.3 Describing the Results">
+		<p></p>
+		</subsection>
+		
+		<subsection name="7.7.4 Building Dynamic SQL">
+		<p></p>
+		</subsection>
+		
+		<subsection name="7.7.5 Customizing SQL Dialects">
+		<p>Even though SQL is an industry standard, different DB vendors still have their own dialects and
+		extensions. Two versions of the same query written for Oracle and PostgreSQL may look quiet 
+		different. If a SQLTemplate may potentially be executed using different target databases, it is desirable 
+		to have a way of providing different templates for the same query. SQLTemplate supports such template customization.
+		While the template provided in constructor is the default, internally SQLTemplate keeps a map of alternative templates. 
+		The map should use a fully-qualified name of the target DbAdapter as a key.
+		</p>
+		
+<source>// build template with default SQL
+SQLTemplate query = new SQLTemplate(Artist.class, "select * from ARTIST", true);
+
+// for Postgres it would be nice to trim the CHAR ARTIST_NAME column 
+// or otherwise it will be returned padded with spaces
+String pgTemplate = "SELECT ARTIST_ID, RTRIM(ARTIST_NAME), DATE_OF_BIRTH FROM ARTIST";
+query.setTemplate(PostgresAdapter.class.getName(), pgTemplate);
+</source>
+		</subsection>
+		</subsection>
+    </section>
+</body>
+</document>

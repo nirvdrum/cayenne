@@ -92,10 +92,9 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
 
         MockupOperationObserver observer = new MockupOperationObserver();
         Connection c = getConnection();
+        
         try {
-
             plan.execute(c, template, observer);
-
         }
         finally {
             c.close();

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -494,6 +495,64 @@ public class DataContextTst extends DataContextTestBase {
                 false);
         context.performNonSelectingQuery(query);
         assertEquals(1, context.performQuery(select).size());
+    }
+
+    public void testPerformNonSelectingQueryCounts1() throws Exception {
+        SQLTemplate query =
+            new SQLTemplate(
+                Painting.class,
+                "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
+                    + "VALUES ($pid, '$pt', $aid, $price)",
+                false);
+
+        Map map = new HashMap();
+        map.put("pid", new Integer(1));
+        map.put("pt", "P1");
+        map.put("aid", new Integer(33002));
+        map.put("price", new Double(1.1));
+
+        // single batch of parameters
+        query.setParameters(map);
+
+        int[] counts = context.performNonSelectingQuery(query);
+        assertNotNull(counts);
+        assertEquals(1, counts.length);
+        assertEquals(1, counts[0]);
+    }
+
+    public void testPerformNonSelectingQueryCounts2() throws Exception {
+        SQLTemplate query =
+            new SQLTemplate(
+                Painting.class,
+                "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE) "
+                    + "VALUES ($pid, '$pt', $aid, $price)",
+                false);
+
+        Map[] maps = new Map[3];
+        for (int i = 0; i < maps.length; i++) {
+            maps[i] = new HashMap();
+            maps[i].put("pid", new Integer(1 + i));
+            maps[i].put("pt", "P-" + i);
+            maps[i].put("aid", new Integer(33002));
+            maps[i].put("price", new Double(1.1 * (i + 1)));
+        }
+
+        // single batch of parameters
+        query.setParameters(maps);
+
+        int[] counts = context.performNonSelectingQuery(query);
+        assertNotNull(counts);
+        assertEquals(maps.length, counts.length);
+        for (int i = 0; i < maps.length; i++) {
+            assertEquals(1, counts[i]);
+        }
+
+        SQLTemplate delete =
+            new SQLTemplate(Painting.class, "delete from PAINTING", false);
+        counts = context.performNonSelectingQuery(delete);
+        assertNotNull(counts);
+        assertEquals(1, counts.length);
+        assertEquals(3, counts[0]);
     }
 
     public void testPerformPagedQuery() throws Exception {
