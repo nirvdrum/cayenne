@@ -108,15 +108,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return snapshotCache;
     }
 
+    /**
+     * Sets parent SnapshotCache. Registers to receive SnapshotEvents
+     * if the cache is configured to allow ObjectStores to receive such 
+     * events.
+     */
     public void setSnapshotCache(SnapshotCache snapshotCache) {
         if (this.snapshotCache != null) {
-            this.snapshotCache.unregisterSnapshotEventListener(this);
+            this.snapshotCache.stopReceivingSnapshotEvents(this);
         }
 
         this.snapshotCache = snapshotCache;
 
         if (snapshotCache != null) {
-            snapshotCache.registerSnapshotEventListener(this);
+            snapshotCache.startReceivingSnapshotEvents(this);
         }
     }
 

@@ -66,7 +66,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
-import org.objectstyle.cayenne.access.event.SnapshotEventListener;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.util.Util;
@@ -81,6 +80,7 @@ public class SnapshotCache implements Serializable {
 
     protected String name;
     protected Cache snapshots;
+    protected boolean notifyingObjectStores;
 
     /**
      * Creates new SnapshotCache, assigning it a specified name.
@@ -120,18 +120,31 @@ public class SnapshotCache implements Serializable {
         return EventSubject.getSubject(this.getClass(), name);
     }
 
-    protected void unregisterSnapshotEventListener(SnapshotEventListener listener) {
-        EventManager.getDefaultManager().removeListener(listener);
+    /**
+     * Unregisters an ObjectStore to stop receiving SnapshotChangeEvents.
+     */
+    public void stopReceivingSnapshotEvents(ObjectStore objectStore) {
+        EventManager.getDefaultManager().removeListener(objectStore);
     }
 
-    protected void registerSnapshotEventListener(SnapshotEventListener listener) {
+    /**
+     * Registers an ObjectStore to receive SnapshotChangeEvents.
+     * If <code>notifyingObjectStores</code> property is false,
+     * this method skips the registration.
+     */
+    public boolean startReceivingSnapshotEvents(ObjectStore objectStore) {
+        if (!isNotifyingObjectStores()) {
+            return false;
+        }
+
         try {
             EventManager.getDefaultManager().addListener(
-                listener,
+                objectStore,
                 "snapshotsChanged",
                 SnapshotEvent.class,
                 getSnapshotEventSubject(),
                 this);
+            return true;
         }
         catch (NoSuchMethodException e) {
             logObj.warn("Error adding listener.", e);
@@ -218,7 +231,7 @@ public class SnapshotCache implements Serializable {
         // create a chained event so that its source is SnapshotCache.
         EventManager.getDefaultManager().postEvent(
             SnapshotEvent.createEvent(this, event),
-			getSnapshotEventSubject());
+            getSnapshotEventSubject());
     }
 
     /**
@@ -252,5 +265,20 @@ public class SnapshotCache implements Serializable {
         }
 
         return (diff != null) ? diff : Collections.EMPTY_MAP;
+    }
+
+    /**
+     * Stores a preference value for notifying child ObjectStores
+     * of snapshot changes. SnapshotChangeEvents are still posted 
+     * via EventManager, even if this value is false. Rather this setting
+     * has effect on {@link #startReceivingSnapshotEvents(ObjectStore) 
+     * startReceivingSnapshotEvents(ObjectStore)} behavior.
+     */
+    public boolean isNotifyingObjectStores() {
+        return notifyingObjectStores;
+    }
+
+    public void setNotifyingObjectStores(boolean b) {
+        notifyingObjectStores = b;
     }
 }
