@@ -6,20 +6,13 @@ For the latest information go to the project web site at
 http://objectstyle.org/cayenne/
 
 
-Changes Since 1.0:
+Changes Since last stable 1.0:
 
-1. QueryEngine.performQuery(Query, OperationObserver) is deprecated
-as redundant.
+1. QueryEngine.performQuery(Query, OperationObserver) is deprecated, since it is redundant.
 
 2. ContextSelectObserver is deprecated. Its functionality is now implemented in 
 the superclass.
 
-3. SnapshotManager is now stateless and is used as a singelton.
+3. SnapshotManager is deprecated in favor of DataRowUtils that is used in a static fashion.
 
-4. Fixed CayenneDataObject.readNestedProperty() to avoid converting all
-non-persistent properties to String. [Bug 817449]
-
-5. FlattenedObjectId is no longer used for tracking to-one flattened relationships
-(or for anything else for that matter). Instead a correct solution
-using RelationshipFault is implemented. [Bug 813413]
-
+4. Implemented open and extensible transaction API.
