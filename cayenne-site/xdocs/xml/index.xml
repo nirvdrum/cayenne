@@ -3,7 +3,15 @@
     <title>Overview</title>
 
     <body>        
-        <!-- News section -->
+         <section name="Cayenne: Professional Object Relational Mapping">
+        <p>Cayenne is a powerful, full-featured Java Object Relational Mapping framework. It is open source
+        and completely free. One of the main Cayenne distinctions is that it comes with cross-platform 
+        modeling GUI tools. This places Cayenne in the league of its own, making it a very attractive
+        choice over both closed source commerical products and traditional "edit your own XML" open 
+        source solutions.
+        </p>
+        </section>
+        
         <section name="Cayenne News">
         
         <p><u><i>[April 14, 2004]</i></u> <strong>Cayenne Success Story - AccessPoint Inc.</strong></p>
@@ -47,22 +55,16 @@
         
         </section>
         
-        <!-- About section -->
         <section name="About Cayenne">
-        <p>Cayenne is a powerful, full-featured OpenSource Object/Relational framework. 
-        Cayenne is written in Java and is intended for Java developers working with
-        relational databases. Cayenne has been successfully deployed in production environment on high 
-        volume sites. Cayenne has a growing international user and developer community.</p>
-        
         <p>Cayenne provides management of persistent Java objects mapped to relational databases, 
         single method call queries and updates (including atomic updates of all modified objects), 
         seamless integration of multiple databases into a single virtual data source. 
-        Cayenne is distributed with CayenneModeler -
-        a complete GUI mapping tool that supports reverse-engineering of RDBMS schema, 
-        working with database mappings and generation of Java source code for the 
-        persistent objects.</p>
+        Cayenne is distributed with CayenneModeler - a complete GUI mapping tool that supports 
+        reverse-engineering of RDBMS schema, working with database mappings and generation of 
+        Java source code for the persistent objects. Cayenne has been successfully deployed in 
+        production environment on high volume sites and has a constantly growing international community.</p>
         
-        <p>Cayenne is an OpenSource project and as such encourages the 
+        <p>Cayenne is an open source project and we encourage the 
         community to participate in development, testing and writing documentation.
         This way we can produce a better product that will benefit both contributors
         and user community.</p>
