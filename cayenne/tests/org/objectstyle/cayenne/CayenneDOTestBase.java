@@ -82,7 +82,7 @@ public class CayenneDOTestBase extends TestCase {
     
     public void setUp() throws java.lang.Exception {
         TestMain.getSharedDatabaseSetup().cleanTableData();        
-        DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
+        DataDomain dom = TestMain.getSharedDomain();
         Level oldLevel = QueryLogger.getLogLevel();
         QueryLogger.setLogLevel(Level.SEVERE);
         dom.getDataNodes()[0].createPkSupportForMapEntities();

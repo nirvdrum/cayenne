@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,29 +54,39 @@ package org.objectstyle.cayenne;
  *
  */
 
-import junit.framework.TestCase;
+package org.objectstyle.cayenne;
 
-import org.objectstyle.TestMain;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-public class QueryHelperTst extends TestCase {
-    public QueryHelperTst(String name) {
+public class DOPrefetchTst extends CayenneDOTestBase {
+    static Logger logObj = Logger.getLogger(DOPrefetchTst.class.getName());
+
+    public DOPrefetchTst(String name) {
         super(name);
     }
 
-    public void testSelectPrefetchPath() throws Exception {
-        SelectQuery q = new SelectQuery("Artist");
-        q.setQualifier(
-            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
-        SelectQuery reverseQ =
-            QueryHelper.selectPrefetchPath(TestMain.getSharedDomain(), q, "paintingArray");
-            assertEquals("Painting", reverseQ.getObjEntityName());
-        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
+    public void testPrefetchToMany() throws Exception {
+        Artist a1 = super.newArtist();
+        Painting p1 = super.newPainting();
+        p1.setToArtist(a1);
+        ctxt.commitChanges();
         
-        Expression newPath = (Expression)reverseQ.getQualifier().getOperand(0);
-        assertNotNull("Null path operand.", newPath);
-        assertEquals("toArtist.artistName", newPath.getOperand(0));
+        super.resetContext();
+        Expression e = ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist%");
+        SelectQuery q = new SelectQuery("Artist", e);
+        
+        /** TESTING THIS **/
+        q.addPrefetch("paintingArray");
+        
+        List artists = ctxt.performQuery(q);
+        assertTrue("Only one artist expected.", artists.size() == 1);
+        Artist a2 = (Artist)artists.get(0);
     }
 }

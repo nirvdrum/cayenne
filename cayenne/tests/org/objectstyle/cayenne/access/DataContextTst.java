@@ -162,7 +162,11 @@ public class DataContextTst extends TestCase {
         assertNull(ctxt.lookupEntity("NonExistent"));
     }
 
-    public void testPrefetch1() throws java.lang.Exception {
+    /** 
+     * Test that all queries specified in prefetch are executed
+     * with a single prefetch path. 
+     */
+    public void testPrefetch1() throws Exception {
         Expression e =
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
         SelectQuery q = new SelectQuery("Artist", e);
@@ -172,6 +176,24 @@ public class DataContextTst extends TestCase {
         // o.setQueryLogLevel(Level.SEVERE);
         ctxt.performQuery(q, o);
         assertEquals(2, o.getSelectCount());
+    }
+    
+    /** 
+     * Test that all queries specified in prefetch are executed
+     * in a more complex prefetch scenario. 
+     */
+    public void testPrefetch2() throws Exception {
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
+        SelectQuery q = new SelectQuery("Artist", e);
+        q.addPrefetch("paintingArray");
+        q.addPrefetch("paintingArray.toGallery");
+        q.addPrefetch("artistExhibitArray.toExhibit");
+
+        SelectOperationObserver o = new SelectOperationObserver();
+        // o.setQueryLogLevel(Level.SEVERE);
+        ctxt.performQuery(q, o);
+        assertEquals(4, o.getSelectCount());
     }
 
     public void testPerformQueries() throws Exception {

@@ -65,11 +65,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 public class DataContextExtrasTst extends TestCase {
-    static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
-
-    private static final int _artistCount = 25;
-    private static final int _galleryCount = 10;
-
     protected DataContext ctxt;
 
     public DataContextExtrasTst(String name) {
