@@ -70,6 +70,9 @@ import org.objectstyle.cayenne.query.*;
   * the datasource to the application code. Normal use pattern is to 
   * create DataContext in a session scope.
   *
+  * <p><i>For more information see <a href="../../../../../userguide/index.html"
+  * target="_top">Cayenne User Guide.</a></i></p>
+  * 
   * @author Andrei Adamchik
   */
 public class DataContext implements QueryEngine {
@@ -135,7 +138,7 @@ public class DataContext implements QueryEngine {
     }
 
     /** Filter array of registered objects to return objects in a certian state */
-    public Collection objectsInState(int state) {
+    Collection objectsInState(int state) {
         ArrayList filteredObjects = new ArrayList();
         Iterator it = registeredMap.values().iterator();
 

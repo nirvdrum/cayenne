@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,25 +54,37 @@ package org.objectstyle.cayenne.access;
  *
  */
 
+package org.objectstyle.cayenne.access;
+
 import java.util.*;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
 
 /** 
- * Subclass of DefaultOperationObserver that accumulates 
- * select query results in internal list. This is a helper
- * class for classes that work with DataNode directly, bypassing DataContext. 
+ * OperationObserver that accumulates select query results provided 
+ * by callback methods. Later the results can be retrieved
+ * via different <code>getResults</code> methods. 
+ * 
+ * <p>This class can server as a helper for classes that work with 
+ * DataNode directly, bypassing DataContext. Also it is used by DataContext
+ * to implement "data rows" functionality - retrieving data without instantiating
+ * and registering DataObjects.
+ * </p>
  * 
  * <p>If exceptions happen during the execution, they are immediately rethrown.
  * </p>
+ * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
  * 
  *  @author Andrei Adamchik
  */
 public class SelectOperationObserver extends DefaultOperationObserver {
     protected HashMap results = new HashMap();
     protected int selectCount;
-
+    
+    
     /** 
      * Returns a count of select queries that returned results
      * since the last time "clear" was called, or since this object

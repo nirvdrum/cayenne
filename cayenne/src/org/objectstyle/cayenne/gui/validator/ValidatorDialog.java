@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.validator;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.gui.validator;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.validator;
 
 import java.awt.Color;
 import java.awt.Component;

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,9 +54,16 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
+package org.objectstyle.cayenne.access;
+
 import org.objectstyle.util.Util;
 
-/** Helper JavaBean class that holds datasource login information. */
+/** 
+ * Helper JavaBean class that holds datasource login information. 
+ * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ */
 public class DataSourceInfo implements Cloneable, java.io.Serializable {
     protected String userName;
     protected String password;

@@ -59,9 +59,15 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/** Logs special events during query exectutions.
-* DataNodes invoke its static methods to do logging.
-*/
+/** 
+ * Logs special events during query exectutions.
+ * DataNodes invoke its static methods to do logging.
+ * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ * 
+ * @author Andrei Adamchik
+ */
 public class QueryLogger {
     static Logger logObj = Logger.getLogger(QueryLogger.class.getName());
 

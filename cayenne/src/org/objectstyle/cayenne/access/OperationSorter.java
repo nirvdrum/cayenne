@@ -68,8 +68,10 @@ import org.objectstyle.cayenne.query.Query;
  *  It works using DataMap information about entities 
  *  and relationships.
  * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ * 
  *  @author Andrei Adamchik
- *
  */
 public class OperationSorter {
     static Logger logObj = Logger.getLogger(OperationSorter.class.getName());

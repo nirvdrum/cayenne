@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
+ 
+package org.objectstyle.cayenne.access;
 
 import java.sql.*;
 import java.util.*;
@@ -68,11 +69,13 @@ import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
   *
+  * <p><i>For more information see <a href="../../../../../userguide/index.html"
+  * target="_top">Cayenne User Guide.</a></i></p>
+  * 
   * @author Andrei Adamchik
   */
 public class DataNode implements QueryEngine {

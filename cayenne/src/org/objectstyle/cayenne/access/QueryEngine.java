@@ -61,7 +61,14 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 
-/** Interface declares methods used to run Cayenne queries. */
+/** 
+ * Interface declares methods used to run Cayenne queries. 
+ * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ * 
+ * @author Andrei Adamchik
+ */
 public interface QueryEngine {
     
     /** Executes a list of queries. Will notify <code>resultConsumer</code> 

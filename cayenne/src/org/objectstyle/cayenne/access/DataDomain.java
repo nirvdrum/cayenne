@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -75,6 +75,9 @@ import org.objectstyle.cayenne.query.Query;
  * <li>Factory of DataContexts
  * <li>Storage of DataMaps
  * </ul>
+ * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
  *
  * @author Andrei Adamchik
  */

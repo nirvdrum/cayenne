@@ -67,7 +67,14 @@ import org.objectstyle.cayenne.ObjectId;
  * list when it runs out of memory. This list can be restored later if it is requested again.
  * Such approach should prevent circular references between objects.
  *
- * To retain guaranteed immutable reference to the list, application might use "List.toArray()" method. */
+ * To retain guaranteed immutable reference to the list, 
+ * application might use "List.toArray()" method. 
+ * 
+ * <p><i>For more information see <a href="../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ * 
+ * @author Andrei Adamchik
+ */
 public class ToManyList implements List {
     private ObjectId srcObjectId;
     private String relName;

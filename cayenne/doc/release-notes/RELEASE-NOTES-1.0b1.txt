@@ -1,0 +1,13 @@
+           Cayenne Release Notes 1.0b1 (Beta 1)
+                 Date: [unreleased]
+         ============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+
+
+Changes in this release:
+============================================
+1. Method DataContext.objectsInState() changed from public to default 
+access to simplify the API.
