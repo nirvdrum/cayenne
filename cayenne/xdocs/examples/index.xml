@@ -34,6 +34,11 @@
 			Ant task, so it has practical value for certain database maintenance tasks.
 		</td>
 	</tr>
+	<tr>
+		<td><a href="ejb-facade/index.html">EJB Facade</a></td>
+		<td>Demonstrates deploying Cayenne on JBoss server and accessing it via a SessionBean facade.
+		</td>
+	</tr>
 	</table>
 	
 	<subsection name="Installing and Building Examples">

@@ -109,36 +109,36 @@ public class ValidationResultTst extends TestCase {
         res.addFailure(null, null, "null");
     }
 
-    public void testHasFailure() {
+    public void testHasFailures() {
         this.addFailures();
 
         assertTrue(res.hasFailures());
 
         assertTrue(res.hasFailures(obj1));
-        assertTrue(res.hasFailure(obj1, "obj1 1"));
-        assertTrue(res.hasFailure(obj1, "obj1 2"));
-        assertTrue(res.hasFailure(obj1, "obj1 3"));
-        assertFalse(res.hasFailure(obj1, "Foobar"));
-        assertFalse(res.hasFailure(obj1, null));
+        assertTrue(res.hasFailures(obj1, "obj1 1"));
+        assertTrue(res.hasFailures(obj1, "obj1 2"));
+        assertTrue(res.hasFailures(obj1, "obj1 3"));
+        assertFalse(res.hasFailures(obj1, "Foobar"));
+        assertFalse(res.hasFailures(obj1, null));
 
         assertTrue(res.hasFailures(obj2));
-        assertTrue(res.hasFailure(obj2, "obj2 1"));
-        assertTrue(res.hasFailure(obj2, "obj2 2"));
-        assertFalse(res.hasFailure(obj2, "Foobar"));
+        assertTrue(res.hasFailures(obj2, "obj2 1"));
+        assertTrue(res.hasFailures(obj2, "obj2 2"));
+        assertFalse(res.hasFailures(obj2, "Foobar"));
 
-        assertTrue(res.hasFailure(obj3, "obj3 1"));
-        assertTrue(res.hasFailure(obj3, null));
-        assertFalse(res.hasFailure(obj3, "Foobar"));
+        assertTrue(res.hasFailures(obj3, "obj3 1"));
+        assertTrue(res.hasFailures(obj3, null));
+        assertFalse(res.hasFailures(obj3, "Foobar"));
 
-        assertTrue(res.hasFailure(obj4, "obj4 1"));
-        assertTrue(res.hasFailure(obj4, null));
-        assertFalse(res.hasFailure(obj4, "Foobar"));
+        assertTrue(res.hasFailures(obj4, "obj4 1"));
+        assertTrue(res.hasFailures(obj4, null));
+        assertFalse(res.hasFailures(obj4, "Foobar"));
 
-        assertTrue(res.hasFailure(obj5, null));
-        assertFalse(res.hasFailure(obj5, "Foobar"));
+        assertTrue(res.hasFailures(obj5, null));
+        assertFalse(res.hasFailures(obj5, "Foobar"));
 
-        assertFalse(res.hasFailure(obj6, null));
-        assertFalse(res.hasFailure(obj6, "Foobar"));
+        assertFalse(res.hasFailures(obj6, null));
+        assertFalse(res.hasFailures(obj6, "Foobar"));
     }
 
     public void testGetFailure() {
@@ -220,9 +220,9 @@ public class ValidationResultTst extends TestCase {
         assertFalse(res.hasFailures(obj1));
         assertFalse(res.hasFailures(null));
 
-        assertFalse(res.hasFailure(obj1, "property"));
-        assertFalse(res.hasFailure(obj1, null));
-        assertFalse(res.hasFailure(null, null));
+        assertFalse(res.hasFailures(obj1, "property"));
+        assertFalse(res.hasFailures(obj1, null));
+        assertFalse(res.hasFailures(null, null));
     }
 
     public void testAsserts() {
@@ -241,7 +241,7 @@ public class ValidationResultTst extends TestCase {
         catch (IllegalArgumentException e) {
         }
         try {
-            res.hasFailure(null, "property");
+            res.hasFailures(null, "property");
             fail();
         }
         catch (IllegalArgumentException e) {

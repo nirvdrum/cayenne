@@ -71,7 +71,7 @@ import org.apache.log4j.Logger;
  * Represents a result of a validation execution. Contains a set of failures ({@link ValidationFailure}) 
  * occured in a given context. All failures are kept in the same order they were added.
  *
- * <i><p>Note to developers:</p>
+ * <i><p>Implementation Note:</p>
  * <p>
  * Failures are stored in a map indexed by source and property name. As most of the times a pair (source, property) will
  * only one failure, the failure itself is stored as the value. When more than one failure is added to the same pair,
@@ -134,13 +134,13 @@ public class ValidationResult implements Serializable {
                 }
                 list = new ArrayList(3);
                 list.add(obj);
-                this.errors.put(tuple, list);
+                errors.put(tuple, list);
             }
             list.add(failure);
 
         }
         else {
-            this.errors.put(tuple, failure);
+            errors.put(tuple, failure);
         }
     }
 
@@ -159,7 +159,6 @@ public class ValidationResult implements Serializable {
             if (obj instanceof List) {
                 List res = (List) obj;
                 failures.addAll(res);
-
             }
             else {
                 failures.add(obj);
@@ -202,16 +201,16 @@ public class ValidationResult implements Serializable {
         }
 
         Tuple tuple = new Tuple(source, property);
-        Object obj = this.errors.get(tuple);
+        Object obj = errors.get(tuple);
+        
         if (obj instanceof List) {
             return Collections.unmodifiableList((List) obj);
-
+        }
+        else if (obj != null) {
+            return Collections.singletonList(obj);
         }
         else {
-            if (obj == null) {
-                return Collections.EMPTY_LIST;
-            }
-            return Collections.singletonList(obj);
+            return Collections.EMPTY_LIST;
         }
     }
 
@@ -219,7 +218,7 @@ public class ValidationResult implements Serializable {
      * @return true if at least one failure has been added to this result. False otherwise.
      */
     public boolean hasFailures() {
-        return !this.errors.isEmpty();
+        return !errors.isEmpty();
     }
 
     /**
@@ -228,7 +227,7 @@ public class ValidationResult implements Serializable {
      */
     public boolean hasFailures(Object source) {
         if (source == null) {
-            return this.hasFailure(null, null);
+            return this.hasFailures(null, null);
         }
 
         Iterator it = this.errors.entrySet().iterator();
@@ -247,10 +246,11 @@ public class ValidationResult implements Serializable {
      * @param property it may be null.
      * @return true if there is at least one failure for <code>source</code> and <code>property</code>. False otherwise.
      */
-    public boolean hasFailure(Object source, String property) {
+    public boolean hasFailures(Object source, String property) {
         if (source == null && property != null) {
             throw new IllegalArgumentException("Param 'source' cannot be null when 'property' is not null.");
         }
+        
         return this.errors.containsKey(new Tuple(source, property));
     }
 
@@ -270,7 +270,7 @@ public class ValidationResult implements Serializable {
         return ret.toString();
     }
 
-    //TODO: Move to a place where everyone can use it.
+    // used as a key in hash maps
     private static class Tuple implements Serializable {
         Object one;
         Object two;
@@ -303,5 +303,4 @@ public class ValidationResult implements Serializable {
             return result;
         }
     }
-
 }

@@ -190,5 +190,6 @@
         <item name="2. DataPort"  href="/examples/data-port/index.html">
         	<item name="2.1 CDataPort Ant Task" href="/examples/data-port/cdataport.html"/>
         </item>
+        <item name="3. EJB Facade"  href="/examples/ejb-facade/index.html"/>
     </toc-examples>
 </project>

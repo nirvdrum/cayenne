@@ -6,6 +6,7 @@
 
 <project name="template" default="main" basedir=".">
    <property file="build.properties"/>
+   <property file="default.properties"/>
    
    <property name="Name" value="Template"/>
    <property name="version" value="1.1"/>
