@@ -740,7 +740,7 @@ public class MapLoader extends DefaultHandler {
 
         String precision = attributes.getValue("", "precision");
         if (precision != null) {
-            attrib.setPrecision(Integer.parseInt(precision));
+            parameter.setPrecision(Integer.parseInt(precision));
         }
 
         String direction = attributes.getValue("", "direction");
