@@ -252,7 +252,8 @@ public class DataContext implements QueryEngine, Serializable {
 	/**
 	 * Returns an object for a given ObjectId.
 	 * If object is not registered with this context,
-	 * a "hollow" object fault is created, registered and returned to the caller.
+	 * a "hollow" object fault is created, registered, 
+	 * and returned to the caller.
 	 */
 	public DataObject registeredObject(ObjectId oid) {
 		// must synchronize on ObjectStore since we must read and write atomically
@@ -469,10 +470,15 @@ public class DataContext implements QueryEngine, Serializable {
 		// we don't care about objects that are not ours
 		// we don't care about uncommitted objects
 		if (dataObj.getDataContext() != this
-			|| dataObj.getPersistenceState() == PersistenceState.NEW) {
+			|| dataObj.getPersistenceState() == PersistenceState.NEW 
+			|| dataObj.getPersistenceState() == PersistenceState.HOLLOW) {
 			return;
 		}
+		
+		// remove snapshot
 		objectStore.removeSnapshot(dataObj.getObjectId());
+		
+		// change state to HOLLOW
 		dataObj.setPersistenceState(PersistenceState.HOLLOW);
 	}
 
@@ -622,6 +628,17 @@ public class DataContext implements QueryEngine, Serializable {
 	 * any records, or if there is more than one object is fetched.
 	 */
 	public DataObject refetchObject(ObjectId oid) {
+		
+	    synchronized (objectStore) {
+			DataObject object = objectStore.getObject(oid);
+			
+			// clean up any cached data for this object
+			if(object != null) {
+				this.invalidateObject(object);
+			}
+		}
+		
+		
 		SelectQuery sel;
 		List results;
 		if (oid instanceof FlattenedObjectId) {

@@ -32,3 +32,8 @@ all "Guides".
 
 9. DataMap.getMappedEntities changed to return Collection instead of 
 List to be consistent with the overall API.
+
+10. Fixed "DataContext.invalidateObject" and "DataContext.refetchObject"
+to turn to-many relationships to faults. Bug report number 768183:
+
+   http://sourceforge.net/tracker/?func=detail&aid=768183&group_id=48132&atid=452068

@@ -122,6 +122,10 @@ public class EventSubjectTst
 		Assert.assertFalse(s1.equals(null));
 	}
 
+    // TODO: (Andrus) This test can not be run reliably and in fact consistently
+    // fails in some environments, since forcing GC at a certain time is not 
+    // guaranteed.
+/*
 	public void testSubjectGC() {
 		EventSubject s = EventSubject.getSubject(EventSubjectTst.class, "GCSubject");
 		long hash1 = s.hashCode();
@@ -136,6 +140,7 @@ public class EventSubjectTst
 
 		Assert.assertTrue(hash1 != hash2);
 	}
+	*/
 
 }
 

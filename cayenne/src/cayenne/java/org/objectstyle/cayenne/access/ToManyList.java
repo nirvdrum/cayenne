@@ -104,6 +104,13 @@ public class ToManyList implements List, Serializable {
         return objectList == null;
     }
     
+    /**
+     * Will force refresh on the next access.
+     */
+    public void invalidateObjectList() {
+		setObjectList(null);
+    }
+    
     public void setObjectList(List objectList) {
         this.objectList = objectList;
     }

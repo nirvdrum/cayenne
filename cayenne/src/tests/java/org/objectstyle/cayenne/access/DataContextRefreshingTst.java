@@ -121,8 +121,7 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertSame(artistAfter, painting.getToArtist());
     }
 
-    public void testRefetchRootWithNullToOneTargetChangedToNotNull()
-        throws Exception {
+    public void testRefetchRootWithNullToOneTargetChangedToNotNull() throws Exception {
         Painting painting = insertPaintingInContext("p");
         painting.setToArtist(null);
         context.commitChanges();
@@ -257,9 +256,19 @@ public class DataContextRefreshingTst extends DataContextTestBase {
         assertEquals(artist.getPaintingArray().size(), 0);
 
         insertPaintingBypassingContext("p", artist.getArtistName());
-
+		assertEquals(artist.getPaintingArray().size(), 0);
         context.invalidateObject(artist);
         assertEquals(artist.getPaintingArray().size(), 1);
     }
 
+    public void testRefetchRootWithAddedToManyViaRefetchObject() throws Exception {
+        Artist artist = fetchArtist("artist2", false);
+        assertEquals(artist.getPaintingArray().size(), 0);
+
+        insertPaintingBypassingContext("p", artist.getArtistName());
+
+		assertEquals(artist.getPaintingArray().size(), 0);
+		artist = (Artist)context.refetchObject(artist.getObjectId());
+        assertEquals(artist.getPaintingArray().size(), 1);
+    }
 }
