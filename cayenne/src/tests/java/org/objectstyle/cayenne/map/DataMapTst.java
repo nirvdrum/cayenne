@@ -90,9 +90,37 @@ public class DataMapTst extends CayenneTestCase {
 
 	public void testAddObjEntity() throws Exception {
 		ObjEntity e = new ObjEntity("b");
+		e.setClassName("b");
 		map.addObjEntity(e);
 		assertSame(e, map.getObjEntity(e.getName()));
 		assertSame(map, e.getDataMap());
+	}
+
+	public void testAddEntityWithSameName() throws Exception {
+		//Give them different class-names... we are only testing for the same entity name being a problem
+		ObjEntity e1 = new ObjEntity("c");
+		e1.setClassName("c1");
+		ObjEntity e2 = new ObjEntity("c");
+		e2.setClassName("c2");
+		map.addObjEntity(e1);
+		try {
+			map.addObjEntity(e2);
+			fail("Should not be able to add more than one entity with the same name");	
+		} catch (Exception e) {
+		}	
+	}
+	
+	public void testAddEntityWithSameClassName() throws Exception {
+		ObjEntity e1 = new ObjEntity("d");
+		ObjEntity e2 = new ObjEntity("e");
+		e1.setClassName("d");
+		e2.setClassName("d");
+		map.addObjEntity(e1);
+		try {
+			map.addObjEntity(e2);
+			fail("Should not be able to add more than one entity with the same class name");	
+		} catch (Exception e) {
+		}	
 	}
 
 	public void testAddDbEntity() throws Exception {

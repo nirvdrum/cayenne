@@ -229,10 +229,17 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
     }
 
+	public void testEntityResolver() {
+		EntityResolver er=ctxt.getEntityResolver();
+		assertNotNull(er);
+	}
+	
     /** Helper class to get access to DataContext inner classes. */
     class DataContextExtended extends DataContext {
         public OperationObserver getSelectObserver() {
             return new ContextSelectObserver(this, Level.DEBUG);
         }
     }
+    
+    
 }

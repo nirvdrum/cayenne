@@ -60,11 +60,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
+import org.objectstyle.art.Painting1;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -86,13 +84,13 @@ public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
     /**
      * @see org.objectstyle.cayenne.CayenneDOTestBase#newPainting()
      */
-    protected Painting newPainting() {
-        Painting p1 = (Painting) ctxt.createAndRegisterNewObject("Painting1");
+    protected Painting1 newPainting1() {
+        Painting1 p1 = (Painting1) ctxt.createAndRegisterNewObject("Painting1");
         p1.setPaintingTitle(paintingName);
         return p1;
     }
 
-    protected Painting fetchPainting() {    	
+    protected Painting1 fetchPainting1() {    	
         SelectQuery q =
             new SelectQuery(
                 "Painting1",
@@ -101,12 +99,12 @@ public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
                     "paintingTitle",
                     paintingName));
         List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (Painting) pts.get(0) : null;
+        return (pts.size() > 0) ? (Painting1) pts.get(0) : null;
     }
 
     public void testNewAdd() throws Exception {
         Artist a1 = newArtist();
-        Painting p1 = newPainting();
+        Painting1 p1 = newPainting1();
 
         // *** TESTING THIS *** 
         p1.setToArtist(a1);
@@ -119,7 +117,7 @@ public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
         resetContext();
 
         // test database data
-        Painting p2 = fetchPainting();
+        Painting1 p2 = fetchPainting1();
         Artist a2 = p2.getToArtist();
         assertNotNull(a2);
         assertEquals(artistName, a2.getArtistName());

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -109,6 +110,28 @@ public class DataDomainTst extends CayenneTestCase {
 		assertNull(d1.getMap(m1.getName()));
 	}
 
+	public void testMapsWithConflictingObjEntityClassNames() throws Exception {
+		DataDomain d1 = new DataDomain("dom1");
+
+		ObjEntity e1=new ObjEntity("e1");
+		ObjEntity e2= new ObjEntity("e2");
+		e1.setClassName("e");
+		e2.setClassName("e");
+		
+		DataMap m1 = new DataMap("m1");
+		m1.addObjEntity(e1);
+		DataMap m2 = new DataMap("m2");
+		m2.addObjEntity(e2);
+		
+		d1.addMap(m1);
+		
+		try {
+			d1.addMap(m2);
+			fail("Should not be able to add a map with an ObjEntity using the same classname as an existing ObjEntity");
+		} catch (CayenneRuntimeException e) {
+		}
+	}
+	
 	public void testDataNodeForObjEntity() throws Exception {
 		DataDomain domain = new DataDomain("dom1");
 		assertNull(domain.getMap("map"));
@@ -158,4 +181,12 @@ public class DataDomainTst extends CayenneTestCase {
 		
 		assertSame(node, domain.nodesByEntityName.get("e1"));
 	}
+	
+	public void testEntityResolver() {
+		assertNotNull(getSharedDomain().getEntityResolver());
+		
+		DataDomain domain = new DataDomain("dom1");
+		assertNotNull(domain.getEntityResolver());
+	}
+
 }

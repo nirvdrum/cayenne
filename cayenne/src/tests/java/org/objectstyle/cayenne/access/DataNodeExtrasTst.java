@@ -109,4 +109,16 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 				node,
 				exhibitEnt));
 	}
+	
+	public void testPopulatedNodeEntityResolver() {
+		//Test shared node (one loaded with a real model)
+		assertNotNull(getSharedDomain().getDataNodes()[0].getEntityResolver());
+	}
+	
+	public void testEmptyNodeEntityResolver() {
+		//Test a brand new otherwise empty node
+		DataNode node = new DataNode();
+		assertNotNull(node.getEntityResolver());
+	}
+
 }

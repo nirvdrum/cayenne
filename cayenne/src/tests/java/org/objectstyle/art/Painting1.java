@@ -1,3 +1,4 @@
+package org.objectstyle.art;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,82 +54,55 @@
  * <http://objectstyle.org/>.
  *
  */ 
-package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.*;
+import java.util.*;
+import java.math.BigDecimal;
 
-
-public class ObjRelationshipTst extends CayenneTestCase {
-    protected ObjRelationship rel;
+public class Painting1 extends ArtDataObject {
     
-    public ObjRelationshipTst(String name) {
-        super(name);
+    public void setEstimatedPrice(BigDecimal estimatedPrice) {
+        writeProperty("estimatedPrice", estimatedPrice);
     }
     
-    public void setUp() throws Exception {
-        rel = new ObjRelationship();
-    }
-    
-    public void testTargetEntity() throws Exception {
-    	rel.setTargetEntityName("targ");
-    	assertNull(rel.getTargetEntity());
-    	
-    	ObjEntity src = new ObjEntity("src");
-    	src.setClassName("src");
-    	src.addRelationship(rel);
-    	assertNull(rel.getTargetEntity());
-    	
-    	DataMap map = new DataMap();
-    	map.addObjEntity(src);
-    	assertNull(rel.getTargetEntity());
-    	
-    	ObjEntity targ = new ObjEntity("targ");
-    	targ.setClassName("targ");
-    	map.addObjEntity(targ);
-    	rel.setTargetEntity(targ);
-    	assertSame(targ, rel.getTargetEntity());
-    }
-    
-    public void testGetReverseRel1() throws Exception {
-        DataDomain dom = getSharedDomain();
-        ObjEntity artistEnt = dom.lookupEntity("Artist");
-        ObjEntity paintingEnt = dom.lookupEntity("Painting");
-        
-        // start with "to many"
-        ObjRelationship r1 = (ObjRelationship)artistEnt.getRelationship("paintingArray");
-        ObjRelationship r2 = r1.getReverseRelationship();
-        
-        assertNotNull(r2);
-        assertSame(paintingEnt.getRelationship("toArtist"), r2);
-    }
-    
-    public void testGetReverseRel2() throws Exception {
-        DataDomain dom = getSharedDomain();
-        ObjEntity artistEnt = dom.lookupEntity("Artist");
-        ObjEntity paintingEnt = dom.lookupEntity("Painting");
-        
-        // start with "to one"
-        ObjRelationship r1 = (ObjRelationship)paintingEnt.getRelationship("toArtist");
-        ObjRelationship r2 = r1.getReverseRelationship();
-        
-        assertNotNull(r2);
-        assertSame(artistEnt.getRelationship("paintingArray"), r2);
+    public BigDecimal getEstimatedPrice() {
+        return (BigDecimal)readProperty("estimatedPrice");
     }
     
     
-    public void testDbRelationship() throws Exception {
-        DbRelationship r1 = new DbRelationship();
-        DbRelationship r2 = new DbRelationship();
-
-        rel.addDbRelationship(r1);
-        rel.addDbRelationship(r2);
-        assertEquals(2, rel.getDbRelationshipList().size());
-        assertEquals(r1, rel.getDbRelationshipList().get(0));
-        assertEquals(r2, rel.getDbRelationshipList().get(1));
-        
-        rel.removeDbRelationship(r1);
-        assertEquals(1, rel.getDbRelationshipList().size());
-        assertEquals(r2, rel.getDbRelationshipList().get(0));
+    public void setPaintingTitle(String paintingTitle) {
+        writeProperty("paintingTitle", paintingTitle);
     }
+    
+    public String getPaintingTitle() {
+        return (String)readProperty("paintingTitle");
+    }
+    
+    
+    public void setToArtist(Artist toArtist) {
+        setToOneTarget("toArtist", toArtist, true);
+    }
+    
+    public Artist getToArtist() {
+        return (Artist)readProperty("toArtist");
+    } 
+    
+    
+    public void setToGallery(Gallery toGallery) {
+        setToOneTarget("toGallery", toGallery, true);
+    }
+    
+    public Gallery getToGallery() {
+        return (Gallery)readProperty("toGallery");
+    } 
+    
+    
+    public void setToPaintingInfo(PaintingInfo toPaintingInfo) {
+        setToOneDependentTarget("toPaintingInfo", toPaintingInfo);
+    }
+    
+    public PaintingInfo getToPaintingInfo() {
+        return (PaintingInfo)readToOneDependentTarget("toPaintingInfo");
+    } 
+    
 }
