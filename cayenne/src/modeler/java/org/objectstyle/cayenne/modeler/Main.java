@@ -194,16 +194,23 @@ public class Main {
                 .valueOf(logfileEnabled));
 
         if (logfileEnabled) {
+            String defaultPath = getLogFile().getPath();
+            String logfilePath = prefs.getString(
+                    ModelerPreferences.EDITOR_LOGFILE,
+                    defaultPath);
             try {
                 // use logfile from preferences or default
-                String defaultPath = getLogFile().getPath();
-                String logfilePath = prefs.getString(
-                        ModelerPreferences.EDITOR_LOGFILE,
-                        defaultPath);
+
                 File logfile = new File(logfilePath);
 
                 if (logfile != null) {
                     if (!logfile.exists()) {
+                        // create dir path first
+                        File parent = logfile.getParentFile();
+                        if (parent != null) {
+                            parent.mkdirs();
+                        }
+
                         if (!logfile.createNewFile()) {
                             logObj.warn("Can't create log file, ignoring.");
                             return;
@@ -230,7 +237,7 @@ public class Main {
                 }
             }
             catch (IOException ioex) {
-                logObj.warn("Error setting logging.", ioex);
+                logObj.warn("Error setting logging - " + logfilePath, ioex);
             }
         }
     }

@@ -341,6 +341,14 @@ public class HSQLEmbeddedPreferenceService extends CayennePreferenceService {
 
             // no lock exists... continue...
             File lockFile = new File(dbDirectory, sessionBaseName + ".lck");
+
+            // on Windows try deleting the lock... OS locking should prevent
+            // this operation if another process is running...
+            if (lockFile.exists()
+                    && System.getProperty("os.name").toLowerCase().indexOf("windows") >= 0) {
+                lockFile.delete();
+            }
+
             if (!lockFile.exists()) {
                 needSchemaUpdate = false;
                 url = "jdbc:hsqldb:file:"
