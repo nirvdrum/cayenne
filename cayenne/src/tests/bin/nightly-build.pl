@@ -94,17 +94,14 @@ if($opt_u) {
 	run_command("rsync -rltp -e ssh --delete --exclude='*.xml' $test_reports/ $upload_dir/reports");
 	
 
-	# Upload build if it succeeded
-	if(! $test_failure) {
-		my @gz_files = <dist/*.gz>;
-		my $gz_file = $gz_files[0];
+	# Upload build even if it failed... 
+	my @gz_files = <dist/*.gz>;
+	my $gz_file = $gz_files[0];
 
-		die "Distribution file not found." unless @gz_files;
-		$status = 
-		run_command("scp $gz_files[0] $upload_dir/");
-		die_with_email("Can't upload release, return status: $status\n") if $status;
-	}
-	
+	die "Distribution file not found." unless @gz_files;
+	$status = 
+	run_command("scp $gz_files[0] $upload_dir/");
+	die_with_email("Can't upload release, return status: $status\n") if $status;
 }
 
 die_with_email("Unit tests failed, return status: $status\n") if $test_failure;
