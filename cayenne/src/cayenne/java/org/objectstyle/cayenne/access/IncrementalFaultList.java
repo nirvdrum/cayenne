@@ -355,10 +355,14 @@ public class IncrementalFaultList implements List {
     }
 
     /**
+     * This method would resolve all unresolved objects and then return
+     * an iterator over an internal list.
+     * 
      * @see java.util.Collection#iterator()
      */
     public Iterator iterator() {
-        return new FaultIterator();
+    	resolveAll();
+        return elements.iterator();
     }
 
     /**
@@ -626,33 +630,6 @@ public class IncrementalFaultList implements List {
         resolveAll();
 
         return elements.toArray(a);
-    }
-
-    class FaultIterator implements Iterator {
-        private int cursor;
-
-        /**
-        * @see java.util.Iterator#hasNext()
-        */
-        public boolean hasNext() {
-            return cursor < size();
-        }
-
-        /**
-         * @see java.util.Iterator#next()
-         */
-        public Object next() {
-            Object obj = get(cursor);
-            cursor++;
-            return obj;
-        }
-
-        /**
-         * @see java.util.Iterator#remove()
-         */
-        public void remove() {
-            elements.remove(cursor);
-        }
     }
 
     /**
