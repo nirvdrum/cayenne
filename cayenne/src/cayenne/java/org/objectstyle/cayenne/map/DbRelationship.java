@@ -144,10 +144,12 @@ public class DbRelationship extends Relationship {
 	/** Returns <code>true</code> if a method <code>isToDependentPK</code> of reverse relationship
 	 * of this relationship returns <code>true</code>. */
 	public boolean isToMasterPK() {
-		if (isToMany() || isToDependentPK())
+		if (isToMany() || isToDependentPK()) {
 			return false;
+		}
 
-		return getReverseRelationship().isToDependentPK();
+        DbRelationship revRel = getReverseRelationship();
+		return (revRel != null) ? revRel.isToDependentPK() : false;
 	}
 
 	/** 

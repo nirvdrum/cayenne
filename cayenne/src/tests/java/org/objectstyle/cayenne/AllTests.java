@@ -70,6 +70,7 @@ public class AllTests {
 		suite.addTestSuite(CayenneDataObjectTst.class);
 		suite.addTestSuite(CayenneDataObjectInCtxtTst.class);
 		suite.addTestSuite(CayenneDataObjectRelTst.class);
+		suite.addTestSuite(CDOMany2OneNoRevTst.class);
 		suite.addTestSuite(CDOOneDep2OneTst.class);
 		suite.addTestSuite(CDOMany2OneTst.class);
 		suite.addTestSuite(CDOOne2ManyTst.class);

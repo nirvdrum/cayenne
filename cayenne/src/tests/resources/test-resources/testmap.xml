@@ -28,6 +28,14 @@
 		<db-attribute name="ARTIST_ID" type="INTEGER"/>
 	</db-entity>
 	
+	<db-entity name="PAINTING1">
+		<db-attribute name="PAINTING_TITLE" type="VARCHAR" isMandatory="true" length="255"/>
+		<db-attribute name="GALLERY_ID" type="INTEGER"/>
+		<db-attribute name="PAINTING_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2"/>
+		<db-attribute name="ARTIST_ID" type="INTEGER"/>
+	</db-entity>
+	
 	<!-- derived entity -->
 	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
 		<db-attribute-derived name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2" spec="SUM(%@)">
@@ -73,6 +81,12 @@
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
 	</obj-entity>
+	
+	<obj-entity name="Painting1" className="org.objectstyle.art.Painting" dbEntityName="PAINTING1">
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
+	</obj-entity>
+	
 	<obj-entity name="ROPainting" readOnly="true" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
@@ -129,6 +143,9 @@
 	<db-relationship source="PAINTING" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
+	<db-relationship source="PAINTING1" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
 	<db-relationship source="ARTIST_ASSETS" target="ARTIST" name="toArtist" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
@@ -170,6 +187,9 @@
 	</obj-relationship>
 	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
 		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
+	</obj-relationship>
+	<obj-relationship name="toArtist" source="Painting1" target="Artist" toMany="false">
+		<db-relationship-ref source="PAINTING1" target="ARTIST" name="toArtist"/>
 	</obj-relationship>
 	<obj-relationship name="toArtist" source="ROPainting" target="Artist" toMany="false">
 		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>

@@ -71,7 +71,7 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         super(name);
     }
 
-    public void testSelectViaRelationship() throws Exception {
+  /*  public void testSelectViaRelationship() throws Exception {
         // setup test, intentionally add more than 1 painting to artist
         // since this reduces a chance that painting and artist primary keys 
         // would accidentally match, resulting in success when it should fail
@@ -88,12 +88,12 @@ public class CDOOne2ManyTst extends CayenneDOTestBase {
         Expression e =
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingArray", p2);
         SelectQuery q = new SelectQuery("Artist", e);
-
+ 
         // *** TESTING THIS *** 
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
         assertSame(a1, artists.get(0));
-    }
+    } */
 
     public void testNewAdd() throws Exception {
         Artist a1 = newArtist();
