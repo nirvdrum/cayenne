@@ -32,19 +32,18 @@
      * to see targets):
      *
      *  1. release      - creates a full Cayenne distribution.
-     *  2. examples     - creates a full cayenne-examples distribution.
-     *  3. build        - (default target) builds all subproject JAR files.
-     *  4. compile      - compiles all subprojects source files.
-     *  5. clean        - cleans temporary build and distribution directories
-     *  6. clean-java   - cleans all build directories, preserving the docs and such
-     *  7. doc          - builds Cayenne documentation including Javadocs.
-     *  8. api          - builds Javdoc API documentation.
-     *  9. javacc       - runs javacc
-     * 10. jjtree       - runs jjtree
-     * 11. test         - runs JUnit tests
-     * 12. performance  - runs performance tests
-     * 13. regression   - runs regression test application
-     * 14. help         - prints this message
+     *  2. build        - (default target) builds all subproject JAR files.
+     *  3. compile      - compiles all subprojects source files.
+     *  4. clean        - cleans temporary build and distribution directories
+     *  5. clean-java   - cleans all build directories, preserving the docs and such
+     *  6. doc          - builds Cayenne documentation including Javadocs.
+     *  7. api          - builds Javdoc API documentation.
+     *  8. javacc       - runs javacc
+     *  9. jjtree       - runs jjtree
+     * 10. test         - runs JUnit tests
+     * 11. performance  - runs performance tests
+     * 12. regression   - runs regression test application
+     * 13. help         - prints this message
      *
      *
      * ENVIRONMENT:
@@ -192,14 +191,7 @@
     <!-- ========================================== -->
     <target name="api">
 		<ant antfile="build-cayenne.xml" target="api"/>
-    </target>  
-
-     <!-- ========================================== -->
-     <!-- Build cayenne-examples.tar.gz              -->
-     <!-- ========================================== -->
-     <target name="examples">
-        <ant antfile="build-examples.xml"/>
-     </target>
+    </target> 
 </project>
 
 
