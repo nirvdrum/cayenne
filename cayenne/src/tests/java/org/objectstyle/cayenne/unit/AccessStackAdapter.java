@@ -148,7 +148,7 @@ public class AccessStackAdapter {
     protected void executeDDL(Connection con, File sourceFile) throws Exception {
         // not sure if all JDBC adapters will like multiline statements
         // separated with '\n'. Oracle & Sybase seem OK, though
-        // joining with space is probably safer, though produces agly code
+        // joining with space is probably safer, though produces ugly code
         String ddl = Util.stringFromFile(sourceFile, "\n");
         executeDDL(con, ddl);
     }

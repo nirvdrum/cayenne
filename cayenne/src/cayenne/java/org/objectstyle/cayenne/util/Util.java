@@ -102,12 +102,16 @@ public class Util {
     private static final Perl5Util regexUtil = new Perl5Util();
 
     /**
-     * Reads file contents as String.
+     * Reads file contents, returning it as a String, using System default
+     * line separator.
      */
     public static String stringFromFile(File file) throws IOException {
-        return stringFromFile(file, "");
+        return stringFromFile(file, System.getProperty("line.separator"));
     }
 
+    /**
+     * Reads file contents, returning it as a String, joining lines with provided separator.
+     */
     public static String stringFromFile(File file, String joinWith) throws IOException {
         StringBuffer buf = new StringBuffer();
         BufferedReader in = new BufferedReader(new FileReader(file));
@@ -125,15 +129,16 @@ public class Util {
     }
 
     /**
+     * Copies file contents from source to destination.
      * Makes up for the lack of file copying utilities in Java
      */
-    public static boolean copy(File from, File to) {
+    public static boolean copy(File source, File destination) {
         BufferedInputStream fin = null;
         BufferedOutputStream fout = null;
         try {
             int bufSize = 8 * 1024;
-            fin = new BufferedInputStream(new FileInputStream(from), bufSize);
-            fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
+            fin = new BufferedInputStream(new FileInputStream(source), bufSize);
+            fout = new BufferedOutputStream(new FileOutputStream(destination), bufSize);
             copyPipe(fin, fout, bufSize);
         }
         catch (IOException ioex) {
@@ -200,8 +205,8 @@ public class Util {
     }
 
     /**
-     * Reads from input and writes read data to the output, until the stream
-     * end.
+     * Reads data from the input and writes it to the output, 
+     * until the end of the input stream.
      * 
      * @param in
      * @param out
@@ -219,12 +224,14 @@ public class Util {
     }
 
     /**
-     * Improved File.delete method that allows recursive directory deletion.
+     * Deletes a file or directory, allowing recursive directory
+     * deletion. This is an improved version of File.delete() method.
      */
     public static boolean delete(String filePath, boolean recursive) {
         File file = new File(filePath);
-        if (!file.exists())
+        if (!file.exists()) {
             return true;
+        }
 
         if (!recursive || !file.isDirectory())
             return file.delete();
@@ -238,21 +245,24 @@ public class Util {
         return file.delete();
     }
 
-    public static String substBackslashes(String str) {
-        if (str == null) {
+    /**
+     * Replaces all backslashes "\" with forward slashes "/". Convenience
+     * method to convert path Strings to URI format.
+     */
+    public static String substBackslashes(String string) {
+        if (string == null) {
             return null;
         }
 
-        return regexUtil.match("/\\\\/", str)
-            ? regexUtil.substitute("s/\\\\/\\//g", str)
-            : str;
+        return regexUtil.match("/\\\\/", string)
+            ? regexUtil.substitute("s/\\\\/\\//g", string)
+            : string;
     }
 
     /**
-     * Attempts to find an underlying exception of a given exception.
-     * If none is found, returns given throwable object, otherwise unwraps
-     * the root cause of an exception and returns it. Currently
-     * supports unwinding Cayenne-specific exceptions.
+     * Looks up and returns the root cause of an exception. If none is found, 
+     * returns supplied Throwable object unchanged. If root is found,
+     * recursively "unwraps" it, and returns the result to the user.
      */
     public static Throwable unwindException(Throwable th) {
         if (th instanceof CayenneException) {
@@ -278,8 +288,9 @@ public class Util {
     }
 
     /**
-     * Compare two objects just like "equals" would. Unlike Object.equals,
-     * this method allows any of the 2 objects to be null.
+     * Compares two objects similar to "Object.equals(Object)". 
+     * Unlike Object.equals(..), this method doesn't throw an exception
+     * if any of the two objects is null.
      */
     public static boolean nullSafeEquals(Object obj1, Object obj2) {
         if (obj1 == null && obj2 == null)
@@ -291,9 +302,9 @@ public class Util {
     }
 
     /**
-     * Compare two objects just like "Comparable.compareTo" would. 
-     * Unlike Comparable.compareTo, this method allows any of the 2
-     * objects to be null.
+     * Compares two objects similar to "Comparable.compareTo(Object)". 
+     * Unlike Comparable.compareTo(..), this method doesn't throw an exception
+     * if any of the two objects is null.
      * 
      * @since 1.1
      */
@@ -315,12 +326,12 @@ public class Util {
     /**
      * Returns true, if the String is null or an empty string.
      */
-    public static boolean isEmptyString(String str) {
-        return str == null || str.length() == 0;
+    public static boolean isEmptyString(String string) {
+        return string == null || string.length() == 0;
     }
 
     /**
-     * Create object copy using serialization mechanism.
+     * Creates Serializable object copy using serialization/deserialization.
      */
     public static Object cloneViaSerialization(Serializable obj) throws Exception {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -366,10 +377,9 @@ public class Util {
     }
 
     /**
-     * Returns package information for the <code>className</code>
-     * parameter as a path separated with forward slash ('/').
-     * For example for class a.b.c.ClassName "a/b/c" will be returned.
+     * Returns package name for the Java class as a path separated with forward slash ("/").
      * Method is used to lookup resources that are located in package subdirectories.
+     * For example, a String "a/b/c" will be returned for class name "a.b.c.ClassName".
      */
     public static String getPackagePath(String className) {
         if (regexUtil.match("/\\./", className)) {
@@ -382,7 +392,7 @@ public class Util {
     }
 
     /**
-     * Utility method to extract extension from of file name.
+     * Extracts extension from the file name.
      */
     public static String extractFileExtension(String fileName) {
         int dotInd = fileName.lastIndexOf('.');
@@ -395,7 +405,7 @@ public class Util {
     }
 
     /**
-     * Utility method to remove extension from a file name.
+     * Strips extension from the file name.
      */
     public static String stripFileExtension(String fileName) {
         int dotInd = fileName.lastIndexOf('.');
@@ -467,11 +477,11 @@ public class Util {
     }
 
     /**
-      * Returns a sorted iterator from an unsorted one. 
-      * Use this method as a last resort, since it is 
-      * much less efficient then just sorting a collection 
-      * that backs the original iterator.
-      */
+     * Returns a sorted iterator from an unsorted one. 
+     * Use this method as a last resort, since it is 
+     * much less efficient then just sorting a collection 
+     * that backs the original iterator.
+     */
     public static Iterator sortedIterator(Iterator it, Comparator comparator) {
         List list = new ArrayList();
         while (it.hasNext()) {
@@ -483,7 +493,7 @@ public class Util {
     }
 
     /**
-     * Utility method to build a hashCode of Collection.
+     * Builds a hashCode of Collection.
      */
     public static int hashCode(Collection c) {
         HashCodeBuilder builder = new HashCodeBuilder();
@@ -493,7 +503,7 @@ public class Util {
     }
 
     /**
-     * Converts a SQL-style pattern to a valid Perl regular expression. E.g.
+     * Converts a SQL-style pattern to a valid Perl regular expression. E.g.:
      * 
      * <p>
      * <code>"billing_%"</code> will become <code>/^billing_.*$/</code> 
@@ -557,5 +567,4 @@ public class Util {
 
         return finalPattern;
     }
-
 }
