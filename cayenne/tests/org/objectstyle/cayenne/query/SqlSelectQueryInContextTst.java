@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.query;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

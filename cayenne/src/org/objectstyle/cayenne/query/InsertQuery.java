@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.ObjectId;
 
 /** Describes insert database operation.
  * InsertQuery is initialized with object values snapshot and ObjectId. */
-public class InsertQuery extends Query {
+public class InsertQuery extends AbstractQuery {
     protected ObjectId objectId;
     protected Map objectSnapshot;
     

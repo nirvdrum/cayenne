@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,11 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.exp.Expression;
 
-public abstract class QualifiedQuery extends Query {
+public abstract class QualifiedQuery extends AbstractQuery {
     protected Expression qualifier;
     
     
@@ -71,5 +71,4 @@ public abstract class QualifiedQuery extends Query {
     public Expression getQualifier() {
         return qualifier;
     }
-    
 }

@@ -61,11 +61,14 @@ import java.util.List;
 import org.objectstyle.cayenne.map.ObjAttribute;
 
 
-/** Allows to send "raw" SQL select statements to the database using 
- * Cayenne connection layer. It is intended to allow programmers to access
- * database-specific features not covered by Cayenne. Queries created
- * using SqlSelectQuery are very likely not portable accross database engines. */
-public class SqlSelectQuery extends Query {
+/** 
+ * Allows to send "raw" SQL select statements to the database 
+ * using Cayenne connection layer. Its intention is to allow 
+ * programmers to access database-specific features not covered 
+ * by Cayenne. Queries created using SqlSelectQuery are very likely 
+ * not portable accross database engines. 
+ */
+public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery {
     protected String sqlString;
     protected ObjAttribute[] resultDesc;
     protected int fetchLimit;
@@ -123,6 +126,9 @@ public class SqlSelectQuery extends Query {
 	public void setFetchLimit(int fetchLimit) {
 		this.fetchLimit = fetchLimit;
 	}
-
-
+	
+	/** Always returns <code>true</code>. */
+	public boolean isFetchingDataRows() {
+		return true;
+	}
 }

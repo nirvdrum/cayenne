@@ -61,7 +61,7 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.exp.Expression;
 
-public class SelectQuery extends QualifiedQuery {
+public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
 
 	protected ArrayList custDbAttributes = new ArrayList();

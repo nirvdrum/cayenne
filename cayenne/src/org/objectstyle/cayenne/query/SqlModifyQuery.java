@@ -62,7 +62,7 @@ package org.objectstyle.cayenne.query;
  * to the database using Cayenne connection layer. It is intended to allow programmers to access
  * database-specific features not covered by Cayenne. Queries created
  * using SqlModifyQuery are very likely not portable accross database engines. */
-public class SqlModifyQuery extends Query {
+public class SqlModifyQuery extends AbstractQuery {
     protected String sqlString;
     
     /** Creates empty SqlModifyQuery. */

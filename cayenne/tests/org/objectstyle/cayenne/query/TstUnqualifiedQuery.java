@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.query;
 
 
 /** Extend QualfiedQuery for tests since it is abstract. */
-public class TstUnqualifiedQuery extends Query {
+public class TstUnqualifiedQuery extends AbstractQuery {
     public int getQueryType() {
         return SELECT_QUERY;
     }

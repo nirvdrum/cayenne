@@ -578,24 +578,24 @@ public class DataContext implements QueryEngine {
 	 * @return A list of DataObjects or a list of data rows
 	 * depending on the value returned by <code>query.isFetchingDataRows()</code>.
 	 */
-	public List performQuery(SelectQuery query) {
+	public List performQuery(GenericSelectQuery query) {
 		// Fetch either DataObjects or data rows.
 		SelectObserver observer =
 			(query.isFetchingDataRows())
 				? new SelectObserver(query.getLogLevel())
 				: new SelectProcessor(query.getLogLevel());
 				
-		performQuery(query, observer);
-		return observer.getResults(query);
+		performQuery((Query)query, observer);
+		return observer.getResults((Query)query);
 	}
 
 	/** 
 	 * Performs a single database select query.
 	 * SQL execution logging is done using specified log level. 
 	 * 
-	 * @deprecated Set log level of the query object instead, use performQuery(Query).
+	 * @deprecated Set log level of the query object instead, and then use performQuery(Query).
 	 */
-	public List performQuery(SelectQuery query, Level logLevel) {
+	public List performQuery(GenericSelectQuery query, Level logLevel) {
 		return performQuery(query);
 	}
 
@@ -604,12 +604,12 @@ public class DataContext implements QueryEngine {
 	 * Returned ResultIterator will provide access to "data rows" 
 	 * - maps with database data that can be used to create DataObjects.
 	 */
-	public ResultIterator performIteratedQuery(SelectQuery query)
+	public ResultIterator performIteratedQuery(GenericSelectQuery query)
 		throws CayenneException {
 
 		IteratedSelectObserver observer = new IteratedSelectObserver();
 		observer.setQueryLogLevel(query.getLogLevel());
-		performQuery(query, observer);
+		performQuery((Query)query, observer);
 		return observer.getResultIterator();
 	}
 

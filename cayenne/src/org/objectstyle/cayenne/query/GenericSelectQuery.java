@@ -58,35 +58,22 @@ package org.objectstyle.cayenne.query;
 import java.util.logging.Level;
 
 /**
- * Generic query interface.
+ * Interface that defines API of a generic SELECT query 
+ * from a DataContext perspective. It allows DataContext to
+ * run different select queries that can be Cayenne based or use 
+ * raw SQL.
+ * 
+ * <p><i>Note that all implementing classes are expected to
+ * inherit from Query.</i></p>
  * 
  * @author Andrei Adamchik
  */
-public interface Query {
-	public static final int SELECT_QUERY = 1;
-	public static final int INSERT_QUERY = 2;
-	public static final int UPDATE_QUERY = 3;
-	public static final int DELETE_QUERY = 4;
-	public static final int UNKNOWN_QUERY = 5;
-
+public interface GenericSelectQuery extends Query {
 	/**
-	 * Returns the <code>logLevel</code> property of this query.
-	 * Log level is a hint to QueryEngine that performs this query
-	 * to log execution with a certain priority.
+	 * Returns <code>true</code> if this query 
+	 * should produce a list of data rows as opposed
+	 * to DataObjects, <code>false</code> for DataObjects. 
+	 * This is a hint to QueryEngine executing this query.
 	 */
-	public Level getLogLevel();
-	
-	public void setLogLevel(Level level);
-
-	/** Returns the name of root ObjEntity associated with the query. */
-	public String getObjEntityName();
-	
-    /** Sets the name of root ObjEntity associated with the query. */
-	public void setObjEntityName(String name);
-	
-	/** 
-	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY, 
-	 * UPDATE_QUERY, DELETE_QUERY  
-	 */
-    public int getQueryType();
+	public boolean isFetchingDataRows();
 }
