@@ -93,7 +93,7 @@ public class PerformanceTestRunner {
      * results, so that the same test case is never run more than once.
      * This will allow to speed up testing by reusing reference test results.
      */
-	protected TestResult runTest(PerformanceTest test) {
+	public TestResult runTest(PerformanceTest test) {
 		if (test == null) {
 			return null;
 		}

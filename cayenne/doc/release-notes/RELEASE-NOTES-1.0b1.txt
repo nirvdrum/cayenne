@@ -47,4 +47,6 @@ schema information
 
 16. Updated CayenneModeler look, added commonly used buttons to the toolbar
 
+17. Added support of schemas in queries.
+
 

@@ -77,41 +77,61 @@ public class PerformMain implements TestConstants {
 
 	public static void main(String[] args) {
 		prepareDomain();
-		ResultRenderer renderer = new ResultRenderer();
-		new PerformanceTestRunner(renderer).runSuite(prepareTests());
-		renderer.showResults();
+
+		if (args.length == 0) {
+			ResultRenderer renderer = new ResultRenderer();
+			new PerformanceTestRunner(renderer).runSuite(prepareTests());
+			renderer.showResults();
+		} else {
+			new PerformanceTestRunner(null).runTest(prepareTest(args[0]));
+		}
+
+	}
+
+	public static PerformanceTest prepareTest(String testClass) {
+		try {
+			return PerformanceTestSuite.testForClass(testClass);
+		}
+		catch(Exception ex) {
+			throw new RuntimeException("Error", ex);
+		}
 	}
 
 	public static PerformanceTestSuite prepareTests() {
 		PerformanceTestSuite suite = new PerformanceTestSuite();
 		suite.addTestPair(
-		    "Insert",
-		    "Inserting " + CayennePerformanceTest.objCount + " records, Cayenne vs. JDBC.",
+			"Insert",
+			"Inserting "
+				+ CayennePerformanceTest.objCount
+				+ " records, Cayenne vs. JDBC.",
 			"org.objectstyle.cayenne.perform.test.InsertTest",
 			"org.objectstyle.cayenne.perform.test.InsertRefTest");
 
 		suite.addTestPair(
-		    "Select",
-		    "Select " + CayennePerformanceTest.objCount + " records, Cayenne objects vs. JDBC.",
+			"Select",
+			"Select "
+				+ CayennePerformanceTest.objCount
+				+ " records, Cayenne objects vs. JDBC.",
 			"org.objectstyle.cayenne.perform.test.SelectTest",
 			"org.objectstyle.cayenne.perform.test.SelectRefTest");
 
 		suite.addTestPair(
-		    "Select",
-		    "Select " + CayennePerformanceTest.objCount + " records, Cayenne data rows vs. Cayenne objects.",
+			"Select",
+			"Select "
+				+ CayennePerformanceTest.objCount
+				+ " records, Cayenne data rows vs. Cayenne objects.",
 			"org.objectstyle.cayenne.perform.test.SelectDataRowsTest",
 			"org.objectstyle.cayenne.perform.test.SelectTest");
-			
-			
+
 		suite.addTestPair(
-		    "Select Small Lists",
-		    "Select one record over and over again, JDBC Prep. Statement. vs. JDBC Statement",
+			"Select Small Lists",
+			"Select one record over and over again, JDBC Prep. Statement. vs. JDBC Statement",
 			"org.objectstyle.cayenne.perform.test.PreparedSmallSelectTest",
 			"org.objectstyle.cayenne.perform.test.SmallSelectTest");
-			
+
 		suite.addTestPair(
-		    "Select Small Lists",
-		    "Select one record over and over again, Cayenne vs. JDBC Statement (being reopened in every query)",
+			"Select Small Lists",
+			"Select one record over and over again, Cayenne vs. JDBC Statement (being reopened in every query)",
 			"org.objectstyle.cayenne.perform.test.CayenneSmallSelectTest",
 			"org.objectstyle.cayenne.perform.test.ReopenedSmallSelectTest");
 

@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 
-
+<!-- ================================================= -->
+<!--              Cayenne master build file.           -->
+<!-- ================================================= -->
 <project name="cayenne" default="dist" basedir=".">   
     <!-- ============================================= -->
     <!-- Loads properties from default locations.      -->
@@ -66,30 +68,10 @@
 
 
     <!-- ============================================= -->
-    <!-- Deploys Cayenne web site in a local           -->
-    <!-- directory.                                    -->
+    <!-- Deploys Cayenne web site in a local directory -->
     <!-- ============================================= -->
-    <target name="deploy-web" depends="prepare,doc,api" if="deploy.web">
-    	 <delete dir="${deploy.web}/cayenne"/>
-         <mkdir dir="${deploy.web}/cayenne"/>
-             
-         <!-- copy all but HTML -->
-         <copy todir="${deploy.web}/cayenne">
-             <fileset dir="${dist}/doc"> 
-             	<exclude name="**/*.html"/>
-             </fileset>
-         </copy>
-         
-         <!-- do replacement in HTML files -->
-         <copy todir="${deploy.web}/cayenne">
-             <fileset dir="${dist}/doc"> 
-             	<include name="**/*.html"/>
-             </fileset>
-             
-             <filterset begintoken="!--" endtoken="--">
-				<filter token="SFLOGO" value="${sf.logo}"/>
-			 </filterset>
-         </copy>
+    <target name="deploy-web">
+		 <ant antfile="build-doc.xml" target="deploy-web"/>
     </target>
     
     
@@ -102,9 +84,6 @@
         <mkdir dir="${dist.base}"/>
         <mkdir dir="${dist}"/>
         <mkdir dir="${dist}/lib"/>
-        <mkdir dir="${dist}/doc"/>
-        <mkdir dir="${dist}/doc/api"/>
-        <mkdir dir="${dist}/doc/dtd"/>
         <mkdir dir="${dist}/bin"/>
     </target>
     
@@ -289,60 +268,21 @@
         <ant dir="performance" target="clean"/>
     </target>
 
-
+    <!-- ========================================== -->
+    <!-- Compiles subprojects.                      -->
+    <!-- ========================================== -->
+    <target name="compile_subprojects">
+        <ant dir="src" target="compile"/>
+        <ant dir="tests" target="compile"/>
+    </target>
+    
+    
 
     <!-- ========================================== -->
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare,doc-img">
-        <!-- copy all licenses including ours -->
-        <copy todir="${dist}/doc">
-            <fileset dir="doc">
-               <include name="LICENSE*"/>
-            </fileset>
-            
-            <fileset dir="doc/release-notes">
-               <include name="RELEASE-NOTES-*.txt"/>
-            </fileset>
-        </copy>
-
-        <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
-            <classpath refid="classpath"/>
-        </taskdef>
-        
-        <!-- Build site -->
-        <anakia basedir="xdocs" destdir="${dist}/doc"
-             extension=".html" style="cayenne.vsl"
-             projectFile="stylesheets/project.xml"
-             excludes="**/stylesheets/**"
-             includes="**/*.xml"
-             lastModifiedCheck="true"
-             templatePath="xdocs/stylesheets">
-        </anakia>
-        
-        <!-- copy DTD's -->
-        <copy todir="${dist}/doc/dtd">
-            <fileset dir="src/dtd">
-                <include name="**/*.dtd"/>
-            </fileset>
-        </copy>
-        
-        <!-- copy tutorial code -->
-        <copy todir="${dist}/doc/tutorial" filtering="no">
-            <fileset dir="doc/tutorial"/>
-        </copy>
-    </target>
-    
-    <target name="doc-img">
-        <!-- copy images -->
-        <copy todir="${dist}/doc/images" filtering="no">
-            <fileset dir="xdocs/images">
-                <include name="**/*.gif"/>
-                <include name="**/*.jpeg"/>
-                <include name="**/*.jpg"/>
-                <include name="**/*.css"/>
-            </fileset>
-        </copy>
+    <target name="doc" depends="prepare">
+        <ant antfile="build-doc.xml" target="doc"/>
     </target>
 
 
@@ -352,39 +292,9 @@
     <!-- some of the classes are generated on the   -->
     <!-- fly.                                       -->
     <!-- ========================================== -->
-    <target name="api" depends="prepare,doc-img,compile_subprojects">
-        <javadoc    packagenames="org.objectstyle.*"
-                    sourcepath="src"
-                    defaultexcludes="yes"
-                    destdir="${dist}/doc/api"
-                    author="true"
-                    use="true"
-                    windowtitle="Cayenne API">
-            <!-- Exclude PostgreSQL for the interim release -->
-            <excludepackage name="org.objectstyle.cayenne.dba.postgres"/>
-            
-            <group title="Core Packages" packages="org.objectstyle.*"/>
-            <group title="WebObjects Compatibility Packages" packages="org.objectstyle.cayenne.wocompat*"/>
-			<group title="GUI Packages" packages="org.objectstyle.cayenne.gui*"/>
-            <doctitle><![CDATA[<h2><a href="http://objectstyle.org/cayenne/" target="_top">
-            		<img height="40" border="0" src="../images/cayenne_logo_small.gif"><a> 
-            		Cayenne API Documentation (Version ${project.version})</h2>]]></doctitle>
-            <bottom><![CDATA[<!--SFLOGO--> &nbsp; <i>Copyright &#169; 2001-2002 <a href=
-            "http://objectstyle.org" target="_top">ObjectStyle.org</a> All Rights Reserved.</i>]]>
-            </bottom>
-            <classpath refid="classpath"/>
-        </javadoc>
-    </target>
-
-
-    <!-- ========================================== -->
-    <!-- Compiles subprojects.                      -->
-    <!-- ========================================== -->
-    <target name="compile_subprojects">
-        <ant dir="src" target="compile"/>
-        <ant dir="tests" target="compile"/>
-    </target>
-    
+    <target name="api" depends="prepare,compile_subprojects">
+        <ant antfile="build-doc.xml" target="api"/>
+    </target>    
     
     
     <!-- ========================================== -->
