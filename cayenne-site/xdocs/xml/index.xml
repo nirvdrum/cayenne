@@ -13,8 +13,10 @@
         </section>
         
         <section name="Project News">
-           <p><u><i>[December 6, 2004]</i></u> <strong>Cayenne 1.1 Final Release</strong></p>
-		<p>Cayenne 1.1 Final is <a href="download.html">available for download</a>.</p>
+           <p><u><i>[February 7, 2005]</i></u> <strong>Cayenne 1.2 M2</strong></p>
+		<p>Second 1.2 milestone is <a href="download.html">available for download</a>. 
+It removes all previously deprecated API, features real support for auto-increment columns, adds a 
+new ant task "cdbgen" for database schema generation, and <a href="release-notes/RELEASE-NOTES-1.2M2.txt">much, much more</a>...</p>
 
         <p><u><i>[Aug 30, 2004]</i></u> <strong>Cayenne on the Cover of JavaWorld Japan</strong></p>
 		<p><img align="left" hspace="3" src="images/other/javaworld-200409.gif"/>

@@ -4,6 +4,8 @@
 
     <body>        
         <section name="Cayenne News Archive">
+<p><u><i>[December 6, 2004]</i></u> <strong>Cayenne 1.1 Final Release</strong></p>
+		<p>Cayenne 1.1 Final is <a href="download.html">available for download</a>.</p>
 <p><u><i>[November 21, 2004]</i></u> <strong>Cayenne 1.2 M1</strong></p>
 		<p>The first 1.2 milestone is out. It is a first step towards full support of 
 		auto-increment (aka "identity") columns. This release allows Cayenne to work
