@@ -74,7 +74,6 @@ public interface PkGenerator {
      */
     public void createAutoPkSupport(DataNode node) throws Exception;
 
-
     /** 
      * Drops any database objects associated with automatic primary 
      * key generation process. This may be lookup tables, special stored
@@ -103,4 +102,33 @@ public interface PkGenerator {
      */
     public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
         throws Exception;
+
+    /** 
+     * Returns SQL query needed to generates 
+     * database objects to provide automatic primary support.
+     * No actual database operations are performed.
+     */
+    public String createAutoPkSupportString();
+
+    /** 
+     * Returns SQL query needed to drop database objects associated 
+     * with automatic primary key generation. No actual database 
+     * operations are performed.
+     */
+    public String dropAutoPkSupportString();
+
+    /** 
+     * Returns SQL query to generate primary key objects for a 
+     * particular DbEntity. No actual database operations are performed.
+     */
+    public String createAutoPkSupportForDbEntityString(DbEntity ent);
+
+
+    /**
+     * Returns SQL query that can generate new (unique and non-repeating) 
+     * primary key for specified DbEntity. No actual database operations 
+     * are performed.
+     */
+    public String generatePkForDbEntityString(DbEntity ent);
+
 }

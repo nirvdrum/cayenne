@@ -81,6 +81,28 @@ public class JdbcPkGenerator implements PkGenerator {
     protected HashMap pkCache = new HashMap();
     protected int pkCacheSize = 20;
 
+    public String createAutoPkSupportString() {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("CREATE TABLE AUTO_PK_SUPPORT (")
+            .append("  TABLE_NAME CHAR(100) NOT NULL,")
+            .append("  NEXT_ID INTEGER NOT NULL")
+            .append(")");
+        return buf.toString();
+    }
+
+    public String dropAutoPkSupportString() {
+        return null;
+    }
+
+    public String createAutoPkSupportForDbEntityString(DbEntity ent) {
+        return null;
+    }
+
+    public String generatePkForDbEntityString(DbEntity ent) {
+        return null;
+    }
+
     /** Generates database objects to provide
      *  automatic primary key support. This implementation will create
      *  a lookup table called "AUTO_PK_SUPPORT" unless it already exists:
@@ -110,11 +132,7 @@ public class JdbcPkGenerator implements PkGenerator {
         }
 
         if (shouldCreate) {
-            StringBuffer buf = new StringBuffer();
-            buf.append("CREATE TABLE AUTO_PK_SUPPORT ").append(
-                "(TABLE_NAME CHAR(100) NOT NULL, NEXT_ID INTEGER NOT NULL)");
-
-            runSchemaUpdate(node, buf.toString());
+            runSchemaUpdate(node, createAutoPkSupportString());
         }
     }
 
@@ -231,15 +249,15 @@ public class JdbcPkGenerator implements PkGenerator {
      */
     public Object generatePkForDbEntity(DataNode node, DbEntity ent)
         throws Exception {
-            
+
         PkRange r = (PkRange) pkCache.get(ent.getName());
         if (r == null || r.isExhausted()) {
             int val = pkFromDatabase(node, ent);
-            
-            if(pkCacheSize == 1)  {
+
+            if (pkCacheSize == 1) {
                 return new Integer(val);
             }
-            
+
             r = new PkRange(val, val + pkCacheSize - 1);
             pkCache.put(ent.getName(), r);
         }
