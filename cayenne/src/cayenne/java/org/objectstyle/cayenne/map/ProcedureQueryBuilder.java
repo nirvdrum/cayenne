@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -71,23 +70,17 @@ class ProcedureQueryBuilder extends QueryBuilder {
      * Returns a ProcedureQuery.
      */
     public Query getQuery() {
-        ProcedureQuery query;
+        ProcedureQuery query = new ProcedureQuery();
 
         Object root = getRoot();
-        if (root instanceof String) {
-            query = new ProcedureQuery(root.toString());
+
+        if (root != null) {
+            query.setRoot(root);
         }
-        else if (root instanceof Procedure) {
-            query = new ProcedureQuery((Procedure) root);
-        }
-        else {
-            throw new CayenneRuntimeException("Invalid ProcedureQuery root - "
-                    + rootType
-                    + ", "
-                    + rootName);
-        }
-        
-        // TODO: procedure queries are too primitive yet ... 
+
+        query.setName(name);
+
+        // TODO: procedure queries are too primitive yet ...
         // in the future we must support all GenericSelectQuery properties...
 
         return query;

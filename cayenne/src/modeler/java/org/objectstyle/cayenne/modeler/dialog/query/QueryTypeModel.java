@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,51 +53,82 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
 
-import java.util.Iterator;
-import java.util.Map;
+package org.objectstyle.cayenne.modeler.dialog.query;
 
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.scopemvc.core.Selector;
 
 /**
- * QueryBuilder for the SQLTemplates.
- * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-class SQLTemplateBuilder extends QueryBuilder {
+public class QueryTypeModel {
 
-    /**
-     * Builds a SQLTemplate query.
-     */
-    public Query getQuery() {
+    public static final Selector OBJECT_SELECT_QUERY_SELECTOR = Selector
+            .fromString("objectSelectQuery");
+    public static final Selector RAW_SQL_QUERY_SELECTOR = Selector
+            .fromString("rawSQLQuery");
+    public static final Selector PROCEDURE_QUERY_SELECTOR = Selector
+            .fromString("procedureQuery");
 
-        SQLTemplate template = new SQLTemplate(selecting);
-        Object root = getRoot();
+    // query prototypes...
+    protected Query objectSelectQuery = new SelectQuery();
+    protected Query rawSQLQuery = new SQLTemplate(true);
+    protected Query procedureQuery = new ProcedureQuery();
 
-        if (root != null) {
-            template.setRoot(root);
+    protected Query selectedQuery;
+
+    public QueryTypeModel() {
+        selectedQuery = objectSelectQuery;
+    }
+
+    public Query getSelectedQuery() {
+        return selectedQuery;
+    }
+
+    public void setSelectedQuery(Query selectedQuery) {
+        this.selectedQuery = selectedQuery;
+    }
+
+    public boolean isObjectSelectQuery() {
+        return selectedQuery == objectSelectQuery;
+    }
+
+    public void setObjectSelectQuery(boolean flag) {
+        if (!flag && isObjectSelectQuery()) {
+            selectedQuery = null;
         }
-
-        template.setName(name);
-        template.initWithProperties(properties);
-
-        // init SQL
-        template.setDefaultTemplate(sql);
-        if (adapterSql != null) {
-            Iterator it = adapterSql.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                Object key = entry.getKey();
-                Object value = entry.getValue();
-                if (key != null && value != null) {
-                    template.setTemplate(key.toString(), value.toString());
-                }
-            }
+        else if (flag && !isObjectSelectQuery()) {
+            selectedQuery = objectSelectQuery;
         }
+    }
 
-        return template;
+    public boolean isRawSQLQuery() {
+        return selectedQuery == rawSQLQuery;
+    }
+
+    public void setRawSQLQuery(boolean flag) {
+        if (!flag && isRawSQLQuery()) {
+            selectedQuery = null;
+        }
+        else if (flag && !isRawSQLQuery()) {
+            selectedQuery = rawSQLQuery;
+        }
+    }
+
+    public boolean isProcedureQuery() {
+        return selectedQuery == procedureQuery;
+    }
+
+    public void setProcedureQuery(boolean flag) {
+        if (!flag && isProcedureQuery()) {
+            selectedQuery = null;
+        }
+        else if (flag && !isProcedureQuery()) {
+            selectedQuery = procedureQuery;
+        }
     }
 }

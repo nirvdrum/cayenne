@@ -56,20 +56,25 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputVerifier;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
@@ -80,24 +85,30 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * Query editor panel.
+ * Query editor panel that allows to configure general query parameters, such as name and
+ * root.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
 public class QueryDetailView extends JPanel implements QueryDisplayListener {
+
     static final Logger logObj = Logger.getLogger(QueryDetailView.class);
-    
+
     protected EventController eventController;
     protected JTextField name;
     protected JComboBox queryRoot;
     protected JButton editButton;
+    protected JLabel titleLabel;
 
     public QueryDetailView(EventController eventController) {
         this.eventController = eventController;
@@ -115,16 +126,14 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
 
         // assemble
         this.setLayout(new BorderLayout());
-        FormLayout layout =
-            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
-        builder.appendSeparator("Query Configuration");
+        JComponent separator = builder.appendSeparator("Query Configuration");
         builder.append("Query Name:", name);
-
-        // for now only allow ObjEntities in queries
-        // in the future this will be expanded...
         builder.append("Query Root:", queryRoot);
 
         JPanel buttons = new JPanel();
@@ -133,12 +142,22 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
 
         this.add(builder.getPanel(), BorderLayout.CENTER);
         this.add(buttons, BorderLayout.SOUTH);
+
+        // find child label ... we need to change it dynamically
+        Component[] children = separator.getComponents();
+        for (int i = 0; i < children.length; i++) {
+            if (children[i] instanceof JLabel) {
+                titleLabel = (JLabel) children[i];
+                break;
+            }
+        }
     }
 
     private void initController() {
         eventController.addQueryDisplayListener(this);
 
         name.setInputVerifier(new InputVerifier() {
+
             public boolean verify(JComponent input) {
                 String text = name.getText();
                 if (text != null) {
@@ -169,6 +188,7 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
         });
 
         queryRoot.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent event) {
                 Query query = eventController.getCurrentQuery();
                 if (query != null) {
@@ -179,13 +199,14 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
         });
 
         editButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent event) {
                 Query query = eventController.getCurrentQuery();
                 if (query != null) {
                     try {
-                    new SelectQueryController(eventController, query).startup();
+                        new SelectQueryController(eventController, query).startup();
                     }
-                    catch(Exception ex) {
+                    catch (Exception ex) {
                         logObj.warn("EEEEE", ex);
                     }
                 }
@@ -194,30 +215,62 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
     }
 
     /**
-     * Updates the view from the current model state.
-     * Invoked when a currently displayed query is changed.
+     * Updates the view from the current model state. Invoked when a currently displayed
+     * query is changed.
      */
     private void initFromModel(Query query) {
         // init query name
         name.setText(query.getName());
 
-        // init root choices
+        // init root choices and title label..
 
-        // TODO: in the future we will allow all kinds of "roots"
-        // for now just allow ObjEntity
+        // - SelectQuery supports ObjEntity roots
+        // - SQLTemplate supports DataMap, ObjEntity, DbEntity roots
+        // - ProcedureQuery supports Procedure roots.
 
-        DataMap map = eventController.getCurrentDataMap();
-        
-        // TODO: now we only allow ObjEntities from the current map,
+        // TODO: now we only allow roots from the current map,
         // since query root is fully resolved during map loading,
         // making it impossible to reference other DataMaps.
-        Object[] entities = map.getObjEntities().toArray();
 
-        if (entities.length > 1) {
-            Arrays.sort(entities, Comparators.getDataMapChildrenComparator());
+        DataMap map = eventController.getCurrentDataMap();
+        Object[] roots;
+
+        if (query instanceof SelectQuery) {
+            roots = map.getObjEntities().toArray();
+
+            if (titleLabel != null) {
+                titleLabel.setText("Object Select Query Configuration");
+            }
+        }
+        else if (query instanceof SQLTemplate) {
+            List allRoots = new ArrayList();
+            allRoots.add(map);
+            allRoots.addAll(map.getObjEntities());
+            allRoots.addAll(map.getDbEntities());
+
+            roots = allRoots.toArray();
+
+            if (titleLabel != null) {
+                titleLabel.setText("Raw SQL Query Configuration");
+            }
+        }
+        else if (query instanceof ProcedureQuery) {
+            roots = map.getProcedures().toArray();
+
+            if (titleLabel != null) {
+                titleLabel.setText("Procedure Query Configuration");
+            }
+        }
+        else {
+            // unsupported type
+            throw new CayenneRuntimeException("Unsupported QueryType: " + query);
         }
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(entities);
+        if (roots.length > 1) {
+            Arrays.sort(roots, Comparators.getDataMapChildrenComparator());
+        }
+
+        DefaultComboBoxModel model = new DefaultComboBoxModel(roots);
         model.setSelectedItem(query.getRoot());
         queryRoot.setModel(model);
     }

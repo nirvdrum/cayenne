@@ -124,9 +124,13 @@ public abstract class AbstractQuery implements Query {
      * Sets the root of the query
      * @param value The new root
      * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity,
-     * Procedure, or Class
+     * Procedure, DataMap, Class or null.
      */
     public void setRoot(Object value) {
+        if(value == null) {
+            this.root = null;
+        }
+        
         // sanity check
         if (!((value instanceof String)
             || (value instanceof ObjEntity)

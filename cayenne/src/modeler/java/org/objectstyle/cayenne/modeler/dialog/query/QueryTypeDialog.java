@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,51 +53,81 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.modeler.dialog.query;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.awt.BorderLayout;
 
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SQLTemplate;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.scopemvc.view.swing.SAction;
+import org.scopemvc.view.swing.SButton;
+import org.scopemvc.view.swing.SPanel;
+import org.scopemvc.view.swing.SRadioButton;
+import org.scopemvc.view.swing.SwingView;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * QueryBuilder for the SQLTemplates.
+ * A dialog to select a type of newly created query.
  * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-class SQLTemplateBuilder extends QueryBuilder {
+public class QueryTypeDialog extends SPanel {
 
-    /**
-     * Builds a SQLTemplate query.
-     */
-    public Query getQuery() {
+    public QueryTypeDialog() {
+        initView();
+    }
 
-        SQLTemplate template = new SQLTemplate(selecting);
-        Object root = getRoot();
+    private void initView() {
+        // create widgets
+        ButtonGroup buttonGroup = new ButtonGroup();
+        SRadioButton objectSelect = new SRadioButton(
+                QueryTypeController.OBJECT_QUERY_CONTROL,
+                QueryTypeModel.OBJECT_SELECT_QUERY_SELECTOR);
+        buttonGroup.add(objectSelect);
 
-        if (root != null) {
-            template.setRoot(root);
-        }
+        SRadioButton sqlSelect = new SRadioButton(
+                QueryTypeController.SQL_QUERY_CONTROL,
+                QueryTypeModel.RAW_SQL_QUERY_SELECTOR);
+        buttonGroup.add(sqlSelect);
 
-        template.setName(name);
-        template.initWithProperties(properties);
+        SRadioButton procedureSelect = new SRadioButton(
+                QueryTypeController.PROCEDURE_QUERY_CONTROL,
+                QueryTypeModel.PROCEDURE_QUERY_SELECTOR);
+        buttonGroup.add(procedureSelect);
 
-        // init SQL
-        template.setDefaultTemplate(sql);
-        if (adapterSql != null) {
-            Iterator it = adapterSql.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                Object key = entry.getKey();
-                Object value = entry.getValue();
-                if (key != null && value != null) {
-                    template.setTemplate(key.toString(), value.toString());
-                }
-            }
-        }
+        SButton saveButton = new SButton(new SAction(QueryTypeController.CREATE_CONTROL));
+        saveButton.setEnabled(true);
 
-        return template;
+        SButton cancelButton = new SButton(
+                new SAction(QueryTypeController.CANCEL_CONTROL));
+        cancelButton.setEnabled(true);
+
+        // assemble
+        CellConstraints cc = new CellConstraints();
+        FormLayout layout = new FormLayout(
+                "left:max(180dlu;pref)",
+                "p, 3dlu, p, 3dlu, p, 3dlu");
+        PanelBuilder builder = new PanelBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.add(objectSelect, cc.xy(1, 1));
+        builder.add(sqlSelect, cc.xy(1, 3));
+        builder.add(procedureSelect, cc.xy(1, 5));
+
+        setLayout(new BorderLayout());
+        add(builder.getPanel(), BorderLayout.CENTER);
+
+        add(PanelFactory.createButtonPanel(new JButton[] {
+                saveButton, cancelButton
+        }), BorderLayout.SOUTH);
+
+        // decorate
+        setDisplayMode(SwingView.MODAL_DIALOG);
+        setTitle("Select New Query Type");
     }
 }

@@ -129,13 +129,6 @@ public abstract class QueryBuilder {
             root = dataMap.getObjEntityForJavaClass(rootName);
         }
 
-        if (root == null) {
-            throw new CayenneRuntimeException("Invalid query root - "
-                    + rootType
-                    + ", "
-                    + rootName);
-        }
-
         return root;
     }
 
