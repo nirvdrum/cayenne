@@ -68,102 +68,157 @@ import org.objectstyle.cayenne.util.ZipUtil;
  * @author Andrei Adamchik
  */
 public class ProjectConfigurator {
-	private static Logger logObj = Logger.getLogger(ProjectConfigurator.class);
-	protected ProjectConfigInfo info;
+    private static Logger logObj = Logger.getLogger(ProjectConfigurator.class);
+    protected ProjectConfigInfo info;
 
-	public ProjectConfigurator(ProjectConfigInfo info) {
-		this.info = info;
-	}
+    public ProjectConfigurator(ProjectConfigInfo info) {
+        this.info = info;
+    }
 
-	/**
-	 * Performs reconfiguration of the project.
-	 * 
-	 * @throws ProjectException
-	 */
-	public void execute() throws ProjectException {
-		File tmpDir = null;
+    /**
+     * Performs reconfiguration of the project.
+     * 
+     * @throws ProjectException
+     */
+    public void execute() throws ProjectException {
+        File tmpDir = null;
+        File tmpDest = null;
+        try {
+            // initialize default settings 
+            if (info.getDestJar() == null) {
+                info.setDestJar(info.getSourceJar());
+            }
 
-		try {
-			if (info.getDestJar() == null) {
-				info.setDestJar(info.getSourceJar());
-			}
-			validate();
-			tmpDir = makeTempDirectory();
-			ZipUtil.unzip(info.getSourceJar(), tmpDir);
-		} catch (Exception ex) {
-			throw new ProjectException("Error performing reconfiguration.", ex);
-		} finally {
-			if (tmpDir != null) {
-				cleanup(tmpDir);
-			}
-		}
-	}
+            // perform sanity check
+            validate();
 
-	/**
-	 *  Deletes a temporary directories and files created.
-	 */
-	protected void cleanup(File dir) {
-		if (!Util.delete(dir.getPath(), true)) {
-			logObj.info("Can't delete temporary directory: " + dir);
-		}
-	}
+            // do the processing
+            tmpDir = makeTempDirectory();
+            ZipUtil.unzip(info.getSourceJar(), tmpDir);
 
 
-	/**
-	 * Creates a temporary directory to unjar the jar file.
-	 * 
-	 * @return File
-	 * @throws IOException
-	 */
-	protected File makeTempDirectory() throws IOException {
-		File destFolder = info.getDestJar().getParentFile();
-		if (destFolder != null && !destFolder.isDirectory()) {
-			if (!destFolder.mkdirs()) {
-				throw new IOException(
-					"Can't create directory: " + destFolder.getCanonicalPath());
-			}
-		}
+            tmpDest = makeTempDestJar();
+            ZipUtil.zip(tmpDest, tmpDir, tmpDir.listFiles(), '/');
 
-		String baseName = info.getDestJar().getName();
+            // finally, since everything goes well so far, rename temp file to final name
+            if (info.getDestJar().exists() && !info.getDestJar().delete()) {
+                throw new IOException(
+                    "Can't delete old jar file: " + info.getDestJar());
+            }
 
-		// seeting upper limit on a number of tries, though normally we would expect
-		// to succeed from the first attempt... 
-		for (int i = 0; i < 100; i++) {
-			File tmpDir =
-				(destFolder != null)
-					? new File(destFolder, baseName + i)
-					: new File(baseName + i);
-			if (!tmpDir.exists()) {
-				if (!tmpDir.mkdir()) {
-					throw new IOException(
-						"Can't create directory: " + tmpDir.getCanonicalPath());
-				}
+            if (!tmpDest.renameTo(info.getDestJar())) {
+                throw new IOException(
+                    "Error renaming: " + tmpDest + " to " + info.getDestJar());
+            }
+        } catch (Exception ex) {
+            throw new ProjectException("Error performing reconfiguration.", ex);
+        } finally {
+            if (tmpDir != null) {
+                cleanup(tmpDir);
+            }
 
-				return tmpDir;
-			}
-		}
+            if (tmpDest != null) {
+                tmpDest.delete();
+            }
+        }
+    }
 
-		throw new IOException("Problems creating temporary directory.");
-	}
+    /**
+     * Returns a temporary file for the destination jar.
+     */
+    protected File makeTempDestJar() throws IOException {
+        File destFolder = info.getDestJar().getParentFile();
+        if (destFolder != null && !destFolder.isDirectory()) {
+            if (!destFolder.mkdirs()) {
+                throw new IOException(
+                    "Can't create directory: " + destFolder.getCanonicalPath());
+            }
+        }
 
-	/**
-	 * Validates consistency of the reconfiguration information.
-	 */
-	protected void validate() throws Exception {
-		if (info == null) {
-			throw new IllegalArgumentException("ProjectConfig info is not set.");
-		}
+        String baseName = "tmp_" + info.getDestJar().getName();
 
-		if (info.getSourceJar() == null) {
-			throw new IllegalArgumentException("Source jar file is not set.");
-		}
+        // seeting upper limit on a number of tries, though normally we would expect
+        // to succeed from the first attempt...
+        for (int i = 0; i < 50; i++) {
+            File tmpFile =
+                (destFolder != null)
+                    ? new File(destFolder, baseName + i)
+                    : new File(baseName + i);
+            if (!tmpFile.exists()) {
+                return tmpFile;
+            }
+        }
 
-		if (!info.getSourceJar().isFile()) {
-			throw new IOException(info.getSourceJar() + " is not a file.");
-		}
+        throw new IOException("Problems creating temporary file.");
+    }
 
-		if (!info.getSourceJar().canRead()) {
-			throw new IOException("Can't read file: " + info.getSourceJar());
-		}
-	}
+    /**
+     *  Deletes a temporary directories and files created.
+     */
+    protected void cleanup(File dir) {
+        if (!Util.delete(dir.getPath(), true)) {
+            logObj.info("Can't delete temporary directory: " + dir);
+        }
+    }
+
+    /**
+     * Creates a temporary directory to unjar the jar file.
+     * 
+     * @return File
+     * @throws IOException
+     */
+    protected File makeTempDirectory() throws IOException {
+        File destFolder = info.getDestJar().getParentFile();
+        if (destFolder != null && !destFolder.isDirectory()) {
+            if (!destFolder.mkdirs()) {
+                throw new IOException(
+                    "Can't create directory: " + destFolder.getCanonicalPath());
+            }
+        }
+
+        String baseName = info.getDestJar().getName();
+        if (baseName.endsWith(".jar")) {
+            baseName = baseName.substring(0, baseName.length() - 4);
+        }
+
+        // seeting upper limit on a number of tries, though normally we would expect
+        // to succeed from the first attempt... 
+        for (int i = 0; i < 50; i++) {
+            File tmpDir =
+                (destFolder != null)
+                    ? new File(destFolder, baseName + i)
+                    : new File(baseName + i);
+            if (!tmpDir.exists()) {
+                if (!tmpDir.mkdir()) {
+                    throw new IOException(
+                        "Can't create directory: " + tmpDir.getCanonicalPath());
+                }
+
+                return tmpDir;
+            }
+        }
+
+        throw new IOException("Problems creating temporary directory.");
+    }
+
+    /**
+     * Validates consistency of the reconfiguration information.
+     */
+    protected void validate() throws Exception {
+        if (info == null) {
+            throw new IllegalArgumentException("ProjectConfig info is not set.");
+        }
+
+        if (info.getSourceJar() == null) {
+            throw new IllegalArgumentException("Source jar file is not set.");
+        }
+
+        if (!info.getSourceJar().isFile()) {
+            throw new IOException(info.getSourceJar() + " is not a file.");
+        }
+
+        if (!info.getSourceJar().canRead()) {
+            throw new IOException("Can't read file: " + info.getSourceJar());
+        }
+    }
 }
