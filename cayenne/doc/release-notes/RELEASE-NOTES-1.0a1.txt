@@ -32,31 +32,27 @@ Notes:
 
 1. Incomplete documentation .
    Some chapters of the UserGuide are just placeholders and still need to 
-   be written. Some require more work.
+   be written. Some require more work. CayenneModeler chapter needs screenshots.
 
    Workaround: use Cayenne mailing lists http://objectstyle.org/cayenne/lists.html 
-   for any questions.
+   for any specific questions.
+
 ---------------------------------------------
 
-2. Bug ID 554689. CayenneModeler database login panel doesn't save 
-   entered values between the sessions.
-
-   Workaround: all the values need to be typed again in a new session.
----------------------------------------------
-
-3. Bug ID 562527. Toolbar "delete" button doesn't work for relationships 
-   and attributes.
-   
-   Workaround: Use "delete" button on the screen.
----------------------------------------------
-
-4. Bug ID 549101. When data node and data map file locations are 
+2. Bug ID 549101. When data node and data map file locations are 
    changed, old file are not removed.
    
    Workaround: Remove old files manually or ignore them.
 ---------------------------------------------
 
-5. PostgreSQL support. Even though Cayenne libraries contain 
-PostgresAdapter, it has not been implemented or tested. PostgreSQL
-support is postponed till later releases.   
+3. PostgreSQL support. Even though Cayenne libraries contain 
+   PostgresAdapter, it has not been implemented or tested. PostgreSQL
+   support is postponed till later releases.   
+---------------------------------------------
+
+4. Bug ID 563131. Connection leak in CayenneModeler during database
+   reverse engineering.
    
+   Workaround: This is a bug reported based on the code review. It never
+   caused any problems during testing. If it does, close CayenneModeler,
+   then reopen it.
