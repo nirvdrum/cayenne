@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -85,18 +84,8 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Andrei Adamchik
  */
 public class Validator {
-	protected Mediator mediator;
 	protected Vector errorMessages;
 	protected int errorSeverity;
-
-	/** 
-	 * Creates validator for specified mediator. 
-	 * 
-	 * @param mediator The mediator with dirty elements to check.
-	 */
-	public Validator(Mediator mediator) {
-		this.mediator = mediator;
-	}
 
 	/** 
 	 * Resets internal state. 
