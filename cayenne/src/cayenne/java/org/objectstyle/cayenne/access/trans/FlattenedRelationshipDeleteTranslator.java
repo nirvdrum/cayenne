@@ -80,7 +80,7 @@ public class FlattenedRelationshipDeleteTranslator extends DeleteTranslator {
 	
 	protected DbEntity getDbEntity() {
 		ObjRelationship relationship = this.getRelationship();
-		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
+		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationships().get(0);
 		return (DbEntity) firstRel.getTargetEntity();
 	}
 

@@ -86,14 +86,14 @@ public class FlattenedRelationshipInsertTranslator extends InsertTranslator {
 	
 	protected DbEntity getDbEntity() {
 		ObjRelationship relationship = this.getRelationship();
-		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
+		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationships().get(0);
 		return (DbEntity) firstRel.getTargetEntity();
 	}
 
 	/** Creates 2 matching lists: columns names and values */
 	protected void prepareLists() throws Exception {
 		ObjRelationship relationship = this.getRelationship();
-		DbRelationship dbRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
+		DbRelationship dbRel = (DbRelationship) relationship.getDbRelationships().get(0);
 
 		
 		//First relationship - use source of joins to get a value, target of joins to get attribute name for insert
@@ -113,7 +113,7 @@ public class FlattenedRelationshipInsertTranslator extends InsertTranslator {
 		//Second relationship- use target of joins to get a value, source of joins to get attribute name for insert
 		oid = flattenedInsertQuery().getDestination().getObjectId();
 		id = (oid != null) ? oid.getIdSnapshot() : null;
-		dbRel= (DbRelationship) relationship.getDbRelationshipList().get(1);
+		dbRel= (DbRelationship) relationship.getDbRelationships().get(1);
 		joins=dbRel.getJoins();
 		for(i=0; i<joins.size(); i++) {
 			DbAttributePair thisJoin=(DbAttributePair) joins.get(i);

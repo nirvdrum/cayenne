@@ -77,13 +77,15 @@ public class DbEntity extends Entity {
      * Creates an unnamed DbEntity.
      */
     public DbEntity() {
+    	super();
     }
 
     /**
      * Creates a named DbEntity.
      */
     public DbEntity(String name) {
-        setName(name);
+    	this();
+        this.setName(name);
     }
 
     /**

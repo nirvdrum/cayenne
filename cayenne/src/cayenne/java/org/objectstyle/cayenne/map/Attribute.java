@@ -62,7 +62,10 @@ package org.objectstyle.cayenne.map;
  * @author Andrei Adamchik
  */
 public abstract class Attribute extends MapObject {
-	public Attribute() {}
+
+	public Attribute() {
+		super();
+	}
 	
 	/**
 	 * Creates a named attribute.

@@ -98,8 +98,7 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     public Object getObject(int dbAttributeIndex) {
-        DbAttribute attribute =
-            (DbAttribute) dbAttributes.get(dbAttributeIndex);
+        DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
         return currentSnapshot.get(attribute.getName());
     }
 
@@ -112,11 +111,11 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     public List getDbAttributes() {
-        return Collections.unmodifiableList(dbAttributes);
+        return dbAttributes;
     }
 
     private void prepareMetadata() {
-        dbAttributes = getDbEntity().getAttributeList();
+        dbAttributes = Collections.unmodifiableList(new ArrayList(this.getDbEntity().getAttributes()));
     }
 
     public int getQueryType() {

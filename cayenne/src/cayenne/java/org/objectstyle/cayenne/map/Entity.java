@@ -114,15 +114,15 @@ public abstract class Entity extends MapObject {
      */
     public void addQuery(String queryName, SelectQuery query) {
         if (query == null) {
-            throw new IllegalArgumentException("Attempt to insert null query.");
+            throw new IllegalArgumentException("Attempt to add null query.");
         }
 
         if (queryName == null) {
-            throw new IllegalArgumentException("Attempt to insert query with null name.");
+            throw new IllegalArgumentException("Attempt to add query with null name.");
         }
 
         // check if this is the right query
-        validateQueryRoot(query);
+        this.validateQueryRoot(query);
         queries.put(queryName, query);
     }
 

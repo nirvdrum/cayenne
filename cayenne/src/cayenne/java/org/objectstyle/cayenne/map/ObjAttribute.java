@@ -134,7 +134,9 @@ public class ObjAttribute extends Attribute {
         int lastPartStart = dbAttributePath.lastIndexOf('.');
         if (lastPartStart < 0) {
             Attribute attribute = dbEnt.getAttribute(dbAttributePath);
-            if (attribute == null) return IteratorUtils.EMPTY_ITERATOR;
+            if (attribute == null) {
+            	return IteratorUtils.EMPTY_ITERATOR;
+            }
             return IteratorUtils.singletonIterator(attribute);
         }
 
@@ -146,10 +148,10 @@ public class ObjAttribute extends Attribute {
      *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
     public void setDbAttribute(DbAttribute dbAttribute) {
     	if(dbAttribute == null) {
-    		setDbAttributePath(null);
+    		this.setDbAttributePath(null);
     	}
     	else {
-    		setDbAttributePath(dbAttribute.getName());
+    		this.setDbAttributePath(dbAttribute.getName());
     	}
     }
 
@@ -179,9 +181,9 @@ public class ObjAttribute extends Attribute {
             return;
         }
         int lastPartStart = dbAttributePath.lastIndexOf('.');
-        String newPath = (lastPartStart > 0 ?
-                          StringUtils.chomp(dbAttributePath, ".") :
-                          "");
+        String newPath = (lastPartStart > 0
+        					? StringUtils.chomp(dbAttributePath, ".")
+        					: "");
         newPath += (newPath.length() > 0 ? "." : "") + dbAttributeName;
 		this.dbAttributePath = newPath;
 	}

@@ -68,11 +68,12 @@ public class DbAttributePair {
 	protected DbAttribute source;
 	protected DbAttribute target;
 
-    public DbAttributePair() {}
+    public DbAttributePair() {
+    }
     
 	public DbAttributePair(DbAttribute sourceAttribute, DbAttribute targetAttribute) {
-		setSource(sourceAttribute);
-		setTarget(targetAttribute);
+		this.setSource(sourceAttribute);
+		this.setTarget(targetAttribute);
 	}
 
 	/** Returns DbAttribute on on the left side of the join. */

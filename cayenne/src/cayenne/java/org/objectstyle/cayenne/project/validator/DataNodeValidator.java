@@ -116,7 +116,7 @@ public class DataNodeValidator extends TreeNodeValidator {
         }
 
         // check for duplicate names in the parent context
-        Iterator it = domain.getDataNodesAsList().iterator();
+        Iterator it = domain.getDataNodes().iterator();
         while (it.hasNext()) {
             DataNode otherNode = (DataNode) it.next();
             if (otherNode == node) {

@@ -61,6 +61,7 @@ public abstract class Relationship extends MapObject {
 	protected boolean toMany;
 
 	public Relationship() {
+		super();
 	}
 
 	public Relationship(String name) {

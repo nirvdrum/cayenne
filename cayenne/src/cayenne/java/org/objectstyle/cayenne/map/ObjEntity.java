@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.map;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -81,10 +81,12 @@ public class ObjEntity extends Entity {
     protected boolean readOnly;
 
     public ObjEntity() {
+    	super();
     }
 
     public ObjEntity(String name) {
-        setName(name);
+    	this();
+        this.setName(name);
     }
 
     /** Returns the name of the corresponding data object class */
@@ -147,7 +149,7 @@ public class ObjEntity extends Entity {
     public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRel) {
         Iterator it = getRelationshipMap().values().iterator();
         while (it.hasNext()) {
-            ObjRelationship objRel = (ObjRelationship) it.next();
+            ObjRelationship objRel = (ObjRelationship)it.next();
             List relList = objRel.getDbRelationships();
             if (relList.size() != 1)
                 continue;
@@ -167,7 +169,7 @@ public class ObjEntity extends Entity {
         Map idMap = new HashMap();
         Iterator it = getDbEntity().getPrimaryKey().iterator();
         while (it.hasNext()) {
-            DbAttribute attr = (DbAttribute) it.next();
+            DbAttribute attr = (DbAttribute)it.next();
             Object val = objectSnapshot.get(attr.getName());
             if (val == null) {
                 throw new CayenneRuntimeException(

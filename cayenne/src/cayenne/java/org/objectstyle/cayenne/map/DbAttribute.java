@@ -89,6 +89,7 @@ public class DbAttribute extends Attribute {
 	protected int precision = -1;
 
 	public DbAttribute() {
+		super();
 	}
 	
 	public DbAttribute(String name) {
@@ -96,9 +97,9 @@ public class DbAttribute extends Attribute {
 	}
 
 	public DbAttribute(String name, int type, DbEntity entity) {
-		setName(name);
-		setType(type);
-		setEntity(entity);
+		this.setName(name);
+		this.setType(type);
+		this.setEntity(entity);
 	}
 
 	public String getAliasedName(String alias) {
