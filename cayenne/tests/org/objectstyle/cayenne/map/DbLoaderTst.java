@@ -86,8 +86,14 @@ public class DbLoaderTst extends TestCase {
         // *** TESTING THIS ***
         loader.loadDbEntities(map, loader.getTables(null, null, "%", null));
         DbEntity dae = map.getDbEntity("ARTIST");
+        
+        // sometimes table names get converted to lowercase
+        if(dae == null) {
+            dae = map.getDbEntity("artist");
+        }
+        
         assertNotNull(dae);
-        assertEquals("ARTIST", dae.getName());
+        assertEquals("ARTIST", dae.getName().toUpperCase());
         assertTrue(((DbAttribute)dae.getAttribute("ARTIST_ID")).isPrimaryKey());
 
         if(supportsFK) {
