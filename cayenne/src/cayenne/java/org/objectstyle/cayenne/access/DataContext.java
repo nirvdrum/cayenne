@@ -150,6 +150,14 @@ public class DataContext implements QueryEngine, Serializable {
         public boolean shouldProcessDelete(DataObject object) {
             return true;
         }
+        
+        public void finishedMergeChanges(DataObject object) {
+            
+        }
+        
+        public void finishedProcessDelete(DataObject object) {
+            
+        }
     };
 
     // DataContext events

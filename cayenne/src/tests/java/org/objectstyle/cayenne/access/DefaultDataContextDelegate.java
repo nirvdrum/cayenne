@@ -80,4 +80,12 @@ public abstract class DefaultDataContextDelegate implements DataContextDelegate 
     public boolean shouldProcessDelete(DataObject object) {
         return true;
     }
+    
+    public void finishedMergeChanges(DataObject object) {
+            
+    }
+        
+    public void finishedProcessDelete(DataObject object) {
+            
+    }
 }

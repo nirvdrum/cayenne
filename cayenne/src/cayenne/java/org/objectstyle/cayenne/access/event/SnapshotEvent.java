@@ -71,17 +71,15 @@ public class SnapshotEvent extends CayenneEvent {
     protected long timestamp;
     protected Collection deletedIds;
     protected Map modifiedDiffs;
-    
-    // don't serialize the root, it can be a heavy object like ObjectStore
-    protected transient Object rootSource;
 
     public SnapshotEvent(
+        Object source,
         Object postedBy,
-        Object rootSource,
         Map modifiedDiffs,
         Collection deletedIds) {
-        super(postedBy);
-        this.rootSource = rootSource;
+            
+        super(source, postedBy, null);
+    
         this.timestamp = System.currentTimeMillis();
         this.modifiedDiffs = modifiedDiffs;
         this.deletedIds = deletedIds;
@@ -90,11 +88,7 @@ public class SnapshotEvent extends CayenneEvent {
     public long getTimestamp() {
         return timestamp;
     }
-
-    public Object getRootSource() {
-        return rootSource;
-    }
-
+ 
     public Map modifiedDiffs() {
         return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
     }
@@ -119,5 +113,4 @@ public class SnapshotEvent extends CayenneEvent {
 
         return buffer.toString();
     }
-
 }

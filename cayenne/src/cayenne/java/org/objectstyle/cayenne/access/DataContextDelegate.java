@@ -87,14 +87,10 @@ public interface DataContextDelegate {
 
 	/**
 	 * Invoked by parent DataContext whenever a change is detected to the object snapshot.
-	 * 
-	 * <p>Note that this delegate method may not be invoked even if the database row
-	 * has changed compared to the snapshot an update is built against. The reasons for 
-	 * that are the latency of distributed notifications and the fact that sometiomes DataContext commit 
-	 * operations may not be synchronized on DataRowStore.
-	 * </p>
 	 */
     public boolean shouldMergeChanges(DataObject object, DataRow snapshotInStore);
+    
+    public void finishedMergeChanges(DataObject object);
     
     /**
      * Invoked by ObjectStore whenever it is detected that a database
@@ -107,5 +103,7 @@ public interface DataContextDelegate {
      * @param object
      */
     public boolean shouldProcessDelete(DataObject object);
+    
+    public void finishedProcessDelete(DataObject object);
 }
 

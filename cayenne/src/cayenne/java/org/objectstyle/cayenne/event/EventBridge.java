@@ -159,7 +159,8 @@ public abstract class EventBridge implements EventListener {
         this.mode = mode;
 
         if (receivesLocalEvents()) {
-            // by default set as a non-blockign listener
+            // by default set as a non-blocking listener
+            // also, listen only for source events
             eventManager.addNonBlockingListener(
                 this,
                 "onLocalEvent",
@@ -199,7 +200,8 @@ public abstract class EventBridge implements EventListener {
     public void onExternalEvent(CayenneEvent event) {
         if (eventManager != null) {
 
-            // event may have been deserialized with null source
+            // initialize event sources
+            event.setPostedBy(this);
             if (event.getSource() == null) {
                 event.setSource(this);
             }
@@ -218,7 +220,7 @@ public abstract class EventBridge implements EventListener {
      * Internally delegates to "sendExternalEvent" abstract method.
      */
     public void onLocalEvent(CayenneEvent event) throws Exception {
-        if(event.getSource() != this) {
+        if (event.getSource() != this) {
             sendExternalEvent(event);
         }
     }

@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.event;
 
@@ -70,26 +70,46 @@ import java.util.Map;
 
 public class CayenneEvent extends EventObject {
 
-	private Map info;
+    protected Map info;
+    protected transient Object postedBy;
 
-	public CayenneEvent(Object source) {
-		this(source, null);
-	}
+    public CayenneEvent(Object source) {
+        this(source, null);
+    }
 
-	public CayenneEvent(Object source, Map info) {
-		super(source);
-		this.info = (info != null ? info : Collections.EMPTY_MAP);
-	}
+    public CayenneEvent(Object source, Map info) {
+        this(source, source, info);
+    }
 
-	public Map getInfo() {
-		return info;
-	}
-    
+    /**
+     * @since 1.1
+     */
+    public CayenneEvent(Object source, Object postedBy, Map info) {
+        super(source);
+        this.postedBy = postedBy;
+        this.info = (info != null ? info : Collections.EMPTY_MAP);
+    }
+
+    public Map getInfo() {
+        return info;
+    }
+
     /**
      * Used when deserializing remote events.
      */
     void setSource(Object source) {
         super.source = source;
     }
-}
+    
+    /**
+     * Returns an object that posted this event. It may be different 
+     * from event source, if event is reposted multiple times.
+     */
+    public Object getPostedBy() {
+        return postedBy;
+    }
 
+    public void setPostedBy(Object postedBy) {
+        this.postedBy = postedBy;
+    }
+}

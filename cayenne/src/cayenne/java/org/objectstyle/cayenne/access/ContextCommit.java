@@ -56,7 +56,6 @@ import java.util.TreeSet;
 import org.apache.commons.collections.SequencedHashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -212,7 +211,7 @@ class ContextCommit {
      * Checks if any updated or deleted objects have been modified in the
      * underlying store. Ask delegate what to do about it.
      */
-    private void checkConcurrentModifications(DataObject object) {
+  /*  private void checkConcurrentModifications(DataObject object) {
         DataContextDelegate delegate = context.getDelegate();
         if (delegate == null) {
             return;
@@ -227,7 +226,7 @@ class ContextCommit {
         if (object.getSnapshotVersion() != snapshotInStore.getVersion()) {
             delegate.shouldMergeChanges(object, snapshotInStore);
         }
-    }
+    } */
 
     private void prepareInsertQueries(DataNodeCommitHelper commitHelper)
         throws CayenneException {
@@ -349,7 +348,7 @@ class ContextCommit {
 
                     // check if object was modified from underneath and consult the delegate
                     // if this is the case...
-                    checkConcurrentModifications(o);
+                   // checkConcurrentModifications(o);
 
                     Map id = o.getObjectId().getIdSnapshot();
                     if (id != null && !id.isEmpty()) {
@@ -400,7 +399,7 @@ class ContextCommit {
 
                     // check if object was modified from underneath and consult the delegate
                     // if this is the case...
-                    checkConcurrentModifications(o);
+                   // checkConcurrentModifications(o);
 
                     Map snapshot =
                         BatchQueryUtils.buildSnapshotForUpdate(

@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * DataRow is a map that holds values retrieved from the database for a 
@@ -110,6 +111,61 @@ public class DataRow extends HashMap {
     public void setReplacesVersion(long replacesVersion) {
         this.replacesVersion = replacesVersion;
     }
+    
+    /**
+     * Builds a new DataRow, merging changes from <code>diff</code>
+     * parameter with data contained in this DataRow.
+     * 
+     * @since 1.1
+     */
+    public DataRow applyDiff(DataRow diff) {
+        DataRow merged = new DataRow(this);
+        
+        Iterator it = diff.entrySet().iterator();
+        while(it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Object key = entry.getKey();
+            
+            if(!merged.containsKey(key)) {
+                merged.put(key, entry.getValue());
+            }
+        }
+        
+        return merged;
+    }
+    
+    /**
+      * Creates a DataRow that contains only the keys that have values that differ
+      * between this object and <code>row</code> parameter. Diff values are taken from the
+      * <code>row</code> parameter. It is assumed that key 
+      * sets are compatible in both rows (e.g. they represent
+      * snapshots for the same entity). Returns null if no differences are found.
+      * 
+      * @since 1.1
+      */
+     public DataRow createDiff(DataRow row) {
+
+         // build a diff...
+         DataRow diff = null;
+
+         Iterator entries = entrySet().iterator();
+         while (entries.hasNext()) {
+             Map.Entry entry = (Map.Entry)entries.next();
+             
+             Object key = entry.getKey();
+             Object currentValue = entry.getValue();
+             Object rowValue = row.get(key);
+             
+             if (!Util.nullSafeEquals(currentValue, rowValue)) {
+                 if (diff == null) {
+                     diff = new DataRow(this.size());
+                 }
+                 diff.put(key, rowValue);
+             }
+         }
+
+         return diff;
+     }
 
     /**
       * Creates an ObjectId from the values in the snapshot.

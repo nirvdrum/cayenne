@@ -79,7 +79,6 @@ import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * Represents a fixed size cache of DataRows keyed by ObjectId. 
@@ -216,6 +215,16 @@ public class DataRowStore implements Serializable {
                     (EventBridgeFactory) Class.forName(eventBridgeFactory).newInstance();
                 this.remoteNotificationsHandler =
                     factory.createEventBridge(getSnapshotEventSubject(), properties);
+
+                // listen to EventBridge
+                EventManager.getDefaultManager().addListener(
+                    this,
+                    "processRemoteEvent",
+                    SnapshotEvent.class,
+                    getSnapshotEventSubject(),
+                    remoteNotificationsHandler);
+
+                // start EventBridge - it will listen to all event sources for this subject
                 remoteNotificationsHandler.startup(
                     EventManager.getDefaultManager(),
                     EventBridge.RECEIVE_LOCAL_EXTERNAL);
@@ -225,11 +234,17 @@ public class DataRowStore implements Serializable {
             }
         }
     }
-    
+
+    /**
+     * Returns current cache size.
+     */
     public int size() {
         return snapshots.size();
     }
-    
+
+    /**
+     * Returns maximum allowed cache size.
+     */
     public int maximumSize() {
         return snapshots.getMaximumSize();
     }
@@ -284,8 +299,8 @@ public class DataRowStore implements Serializable {
         if (cachedSnapshot != null) {
             return cachedSnapshot;
         }
-        
-        if(logObj.isDebugEnabled()) {
+
+        if (logObj.isDebugEnabled()) {
             logObj.debug("no cached snapshot for ObjectId: " + oid);
         }
 
@@ -337,8 +352,33 @@ public class DataRowStore implements Serializable {
     }
 
     /**
+     * Handles remote events received via EventBridge. Performs needed snapshot updates,
+     * and then resends the event to local listeners.
+     */
+    public void processRemoteEvent(SnapshotEvent event) {
+        if (logObj.isDebugEnabled()) {
+            logObj.debug("remote event: " + event);
+        }
+
+        Collection deletedSnapshotIds = event.deletedIds();
+        Map diffs = event.modifiedDiffs();
+
+        if (deletedSnapshotIds.isEmpty() && diffs.isEmpty()) {
+            logObj.warn("processRemoteEvent.. bogus call... no changes.");
+            return;
+        }
+
+        synchronized (this) {
+            processDeletedIDs(deletedSnapshotIds);
+            processUpdateDiffs(diffs);
+            sendUpdateNotification(event.getSource(), diffs, deletedSnapshotIds);
+        }
+    }
+
+    /**
      * Processes changes made to snapshots. Modifies internal cache state, and
-     * then sends the event to all listeners.
+     * then sends the event to all listeners. Source of these changes is 
+     * usually an ObjectStore.
      */
     public void processSnapshotChanges(
         Object source,
@@ -346,124 +386,125 @@ public class DataRowStore implements Serializable {
         Collection deletedSnapshotIds) {
 
         // update the internal cache, prepare snapshot event
-        Map diffs = null;
 
         if (deletedSnapshotIds.isEmpty() && updatedSnapshots.isEmpty()) {
             logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
             return;
         }
-        
-        // TODO: for performance, we may check if this DataRowStore event subject has
-        // any listeners before attempting to build an event
 
         synchronized (this) {
+            processDeletedIDs(deletedSnapshotIds);
+            Map diffs = processUpdatedSnapshots(updatedSnapshots);
+            sendUpdateNotification(source, diffs, deletedSnapshotIds);
+        }
+    }
 
-            // DELETED: evict deleted snapshots
-            if (!deletedSnapshotIds.isEmpty()) {
-                Iterator it = deletedSnapshotIds.iterator();
-                while (it.hasNext()) {
-                    snapshots.remove(it.next());
-                }
+    private void processDeletedIDs(Collection deletedSnapshotIDs) {
+        // DELETED: evict deleted snapshots
+        if (!deletedSnapshotIDs.isEmpty()) {
+            Iterator it = deletedSnapshotIDs.iterator();
+            while (it.hasNext()) {
+                snapshots.remove(it.next());
             }
+        }
+    }
 
-            // MODIFIED: replace/add snapshots, generate diffs for event
-            if (!updatedSnapshots.isEmpty()) {
-                Iterator it = updatedSnapshots.keySet().iterator();
-                while (it.hasNext()) {
+    private Map processUpdatedSnapshots(Map updatedSnapshots) {
+        Map diffs = null;
 
-                    ObjectId key = (ObjectId) it.next();
-                    DataRow newSnapshot = (DataRow) updatedSnapshots.get(key);
-                    DataRow oldSnapshot = (DataRow) snapshots.put(key, newSnapshot);
+        // MODIFIED: replace/add snapshots, generate diffs for event
+        if (!updatedSnapshots.isEmpty()) {
+            Iterator it = updatedSnapshots.keySet().iterator();
+            while (it.hasNext()) {
 
-                    // generate diff for the updated event, if this not a new
-                    // snapshot
+                ObjectId key = (ObjectId) it.next();
+                DataRow newSnapshot = (DataRow) updatedSnapshots.get(key);
+                DataRow oldSnapshot = (DataRow) snapshots.put(key, newSnapshot);
 
-                    // The following cases should be handled here:
+                // generate diff for the updated event, if this not a new
+                // snapshot
 
-                    // 1. There is no previously cached snapshot for a given id.
-                    // 2. There was a previously cached snapshot for a given id,
-                    //    but it expired from cache and was removed. Currently
-                    //    handled as (1); what are the consequences of that?
-                    // 3. There is a previously cached snapshot and it has the
-                    //    *same version* as the "replacesVersion" property of the
-                    //    new snapshot.
-                    // 4. There is a previously cached snapshot and it has a
-                    //    *different version* from "replacesVersion" property of
-                    //    the new snapshot. It means that we don't know how to merge
-                    //    the two (we don't even know which one is newer due to
-                    //    multithreading). Just throw out this snapshot....
+                // The following cases should be handled here:
 
-                    if (oldSnapshot != null) {
-                        // case 4 above... have to throw out the snapshot since
-                        // no good options exist to tell how to merge the two.
-                        if (oldSnapshot.getVersion()
-                            != newSnapshot.getReplacesVersion()) {
-                            forgetSnapshot(key);
-                            continue;
+                // 1. There is no previously cached snapshot for a given id.
+                // 2. There was a previously cached snapshot for a given id,
+                //    but it expired from cache and was removed. Currently
+                //    handled as (1); what are the consequences of that?
+                // 3. There is a previously cached snapshot and it has the
+                //    *same version* as the "replacesVersion" property of the
+                //    new snapshot.
+                // 4. There is a previously cached snapshot and it has a
+                //    *different version* from "replacesVersion" property of
+                //    the new snapshot. It means that we don't know how to merge
+                //    the two (we don't even know which one is newer due to
+                //    multithreading). Just throw out this snapshot....
+
+                if (oldSnapshot != null) {
+                    // case 4 above... have to throw out the snapshot since
+                    // no good options exist to tell how to merge the two.
+                    if (oldSnapshot.getVersion() != newSnapshot.getReplacesVersion()) {
+                        forgetSnapshot(key);
+                        continue;
+                    }
+
+                    Map diff = oldSnapshot.createDiff(newSnapshot);
+                    
+                    if (diff != null) {
+                        if (diffs == null) {
+                            diffs = new HashMap();
                         }
 
-                        Map diff = buildSnapshotDiff(oldSnapshot, newSnapshot);
-                        if (diff != null) {
-                            if (diffs == null) {
-                                diffs = new HashMap();
-                            }
-
-                            diffs.put(key, diff);
-                        }
+                        diffs.put(key, diff);
                     }
                 }
             }
+        }
 
-            // do not send bogus events... e.g. inserted objects are not counted
-            if ((diffs != null && !diffs.isEmpty())
-                || (deletedSnapshotIds != null && !deletedSnapshotIds.isEmpty())) {
-                SnapshotEvent event =
-                    new SnapshotEvent(this, source, diffs, deletedSnapshotIds);
-                if (logObj.isDebugEnabled()) {
-                    logObj.debug("postSnapshotsChangeEvent: " + event);
+        return diffs;
+    }
+
+    private void processUpdateDiffs(Map diffs) {
+        // apply snapshot diffs
+        if (!diffs.isEmpty()) {
+            Iterator it = diffs.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                ObjectId key = (ObjectId) entry.getKey();
+                DataRow oldSnapshot = (DataRow) snapshots.remove(key);
+
+                if (oldSnapshot == null) {
+                    continue;
                 }
 
-                // notify listeners
-
-                // send synchronously, relying on listeners to 
-                // register as "non-blocking" if needed.
-                EventManager.getDefaultManager().postEvent(
-                    event,
-                    getSnapshotEventSubject());
+                DataRow newSnapshot = oldSnapshot.applyDiff((DataRow) entry.getValue());
+                snapshots.put(key, newSnapshot);
             }
         }
     }
 
-    /**
-     * Creates a map that contains only the keys that have values that differ
-     * in the registered snapshot for a given ObjectId and a given snapshot. It
-     * is assumed that key sets are the same in both snapshots (since they
-     * should represent the same entity data). Returns null if no
-     * differences are found.
-     */
-    protected DataRow buildSnapshotDiff(DataRow oldSnapshot, DataRow newSnapshot) {
-        if (oldSnapshot == null) {
-            return newSnapshot;
-        }
+    private void sendUpdateNotification(
+        Object source,
+        Map diffs,
+        Collection deletedSnapshotIDs) {
 
-        // build a diff...
-        DataRow diff = null;
+        //      do not send bogus events... e.g. inserted objects are not counted
+        if ((diffs != null && !diffs.isEmpty())
+            || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())) {
+            SnapshotEvent event =
+                new SnapshotEvent(source, this, diffs, deletedSnapshotIDs);
 
-        Iterator keys = oldSnapshot.keySet().iterator();
-        while (keys.hasNext()) {
-            Object key = keys.next();
-            Object oldValue = oldSnapshot.get(key);
-            Object newValue = newSnapshot.get(key);
-            if (!Util.nullSafeEquals(oldValue, newValue)) {
-                if (diff == null) {
-                    diff = new DataRow(10);
-                }
-                diff.put(key, newValue);
+            if (logObj.isDebugEnabled()) {
+                logObj.debug("postSnapshotsChangeEvent: " + event);
             }
-        }
 
-        return diff;
+            // notify listeners
+
+            // send synchronously, relying on listeners to 
+            // register as "non-blocking" if needed.
+            EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
+        }
     }
+
 
     public boolean isNotifyingRemoteListeners() {
         return notifyingRemoteListeners;
@@ -479,7 +520,7 @@ public class DataRowStore implements Serializable {
 
         in.defaultReadObject();
 
-        // restore subject
+        // restore subjects
         this.eventSubject = createSubject();
     }
 

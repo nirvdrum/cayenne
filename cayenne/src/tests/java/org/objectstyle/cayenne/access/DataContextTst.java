@@ -163,6 +163,14 @@ public class DataContextTst extends DataContextTestBase {
             public boolean shouldProcessDelete(DataObject object) {
                 return true;
             }
+            
+            public void finishedMergeChanges(DataObject object) {
+            
+            }
+        
+            public void finishedProcessDelete(DataObject object) {
+            
+            }
         };
 
         altContext.setDelegate(delegate);

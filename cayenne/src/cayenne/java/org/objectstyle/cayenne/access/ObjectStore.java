@@ -173,23 +173,23 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * Sets parent SnapshotCache. Registers to receive SnapshotEvents if the
      * cache is configured to allow ObjectStores to receive such events.
      */
-    public void setDataRowCache(DataRowStore snapshotCache) {
-        if (snapshotCache == this.dataRowCache) {
+    public void setDataRowCache(DataRowStore dataRowCache) {
+        if (dataRowCache == this.dataRowCache) {
             return;
         }
 
-        // note: ObjectStore listens to events using the subject provided
-        // by parent DataRowStore, but event source can be anything (e.g. EventBridge)
-        
+        // IMPORTANT: listen for all senders on a given EventSubject,
+        // filtering of events will be done in the handler method.
+
         if (this.dataRowCache != null) {
             EventManager.getDefaultManager().removeListener(
                 this,
-                dataRowCache.getSnapshotEventSubject());
+                this.dataRowCache.getSnapshotEventSubject());
         }
 
-        this.dataRowCache = snapshotCache;
+        this.dataRowCache = dataRowCache;
 
-        if (snapshotCache != null) {
+        if (dataRowCache != null) {
             // setting itself as non-blocking listener,
             // since event sending thread will likely be locking sender's
             // ObjectStore and snapshot cache itself.
@@ -197,7 +197,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 this,
                 "snapshotsChanged",
                 SnapshotEvent.class,
-                snapshotCache.getSnapshotEventSubject());
+                dataRowCache.getSnapshotEventSubject());
         }
     }
 
@@ -651,13 +651,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     /**
      * SnapshotEventListener implementation that processes snapshot change
-     * event, updating DataObjects that have the changes.
+     * event, updating DataObjects that have the changes. 
+     * 
+     * <p><i>Implementation note:</i> This method should not attempt to alter the 
+     * underlying DataRowStore, since it is normally invoked *AFTER* the
+     * DataRowStore was modified as a result of some external interaction.</p>
      * 
      * @since 1.1
      */
     public void snapshotsChanged(SnapshotEvent event) {
-        // ignore event if this ObjectStore was the originator
-        if (event.getRootSource() == this || event.getSource() == this) {
+        // filter events that we should not process
+        if (event.getPostedBy() != this.dataRowCache || event.getSource() == this) {
             return;
         }
 
@@ -746,6 +750,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                             // setting DataContext to null will also set
                             // state to transient
                             object.setDataContext(null);
+
+                            if (delegate != null) {
+                                delegate.finishedProcessDelete(object);
+                            }
                         }
 
                         break;
@@ -756,6 +764,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         delegate = object.getDataContext().getDelegate();
                         if (delegate == null || delegate.shouldProcessDelete(object)) {
                             object.setPersistenceState(PersistenceState.NEW);
+
+                            if (delegate != null) {
+                                delegate.finishedProcessDelete(object);
+                            }
                         }
 
                         break;
@@ -871,6 +883,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     DataContextDelegate delegate = object.getDataContext().getDelegate();
                     if (delegate == null || delegate.shouldMergeChanges(object, diff)) {
                         object.setPersistenceState(PersistenceState.HOLLOW);
+
+                        if (delegate != null) {
+                            delegate.finishedMergeChanges(object);
+                        }
                     }
                     continue;
                 }
@@ -886,6 +902,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                             object.getDataContext().getEntityResolver().lookupObjEntity(
                                 object);
                         DataRowUtils.forceMergeWithSnapshot(entity, object, diff);
+
+                        if (delegate != null) {
+                            delegate.finishedMergeChanges(object);
+                        }
                     }
                 }
             }
