@@ -63,6 +63,7 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * OperationObserver that accumulates select query results provided 
@@ -143,7 +144,7 @@ public class SelectObserver extends DefaultOperationObserver {
 	 */
 	public void nextQueryException(Query query, Exception ex) {
 		super.nextQueryException(query, ex);
-		throw new CayenneRuntimeException("Query exception.", ex);
+		throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
 	}
 
 	/** 
@@ -152,6 +153,6 @@ public class SelectObserver extends DefaultOperationObserver {
 	 */
 	public void nextGlobalException(Exception ex) {
 		super.nextGlobalException(ex);
-		throw new CayenneRuntimeException("Global exception.", ex);
+		throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
 	}
 }

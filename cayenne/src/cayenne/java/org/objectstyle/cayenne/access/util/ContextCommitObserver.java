@@ -75,6 +75,7 @@ import org.objectstyle.cayenne.access.event.DataContextTransactionEventListener;
 import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * ContextCommitObserver is used as an observer for DataContext 
@@ -177,14 +178,16 @@ public class ContextCommitObserver
 
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException("Raising from query exception.", ex);
+        throw new CayenneRuntimeException(
+            "Raising from query exception.",
+            Util.unwindException(ex));
     }
 
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
         throw new CayenneRuntimeException(
             "Raising from underlyingQueryEngine exception.",
-            ex);
+            Util.unwindException(ex));
     }
 
     public void registerForDataContextEvents() {
@@ -224,7 +227,8 @@ public class ContextCommitObserver
     public void dataContextWillCommit(DataContextEvent event) {
         Iterator iter = objectsToNotify.iterator();
         while (iter.hasNext()) {
-            ((DataObjectTransactionEventListener) iter.next()).willCommit(event);
+            ((DataObjectTransactionEventListener) iter.next()).willCommit(
+                event);
         }
     }
 

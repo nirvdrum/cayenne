@@ -64,6 +64,7 @@ import java.util.List;
 import org.apache.commons.collections.SequencedHashMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * QueryResult encapsulates a result of execution of zero or more queries using QueryEngine.
@@ -82,10 +83,10 @@ public class QueryResult
     protected SequencedHashMap queries = new SequencedHashMap();
 
     /** Clears any previously collected information. */
-	public void clear() {
-		queries.clear();
-	}
-			
+    public void clear() {
+        queries.clear();
+    }
+
     /**
      * Returns an iterator over all executed queries in the order they were executed.
      */
@@ -103,30 +104,26 @@ public class QueryResult
         return (list != null) ? list : Collections.EMPTY_LIST;
     }
 
-	/**
-	* Returns the first update count for the query. This is a shortcut for
-	* <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
-	* Returns -1 if no update count is found for the query.
-	*/
-    public int getFirstUpdateCount(Query query)
-   {
-    List allResults = getResults(query);
-    int size = allResults.size();
-    if (size > 0)
-    {
-      Iterator it = allResults.iterator();
-      while (it.hasNext())
-      {
-        Object obj = it.next();
-        if (obj instanceof Number)
-        {
-          return ((Number)obj).intValue();
+    /**
+    * Returns the first update count for the query. This is a shortcut for
+    * <code>(Integer)getUpdates(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
+    * Returns -1 if no update count is found for the query.
+    */
+    public int getFirstUpdateCount(Query query) {
+        List allResults = getResults(query);
+        int size = allResults.size();
+        if (size > 0) {
+            Iterator it = allResults.iterator();
+            while (it.hasNext()) {
+                Object obj = it.next();
+                if (obj instanceof Number) {
+                    return ((Number) obj).intValue();
+                }
+            }
         }
-      }
+        return -1;
     }
-	return -1;
-   }
-		 
+
     /**
      * Returns the first results for the query. This is a shortcut for
      * <code>(List)getRows(query).get(0)<code>, kind of like Google's "I'm feeling lucky".
@@ -203,7 +200,9 @@ public class QueryResult
      */
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException("Query exception.", ex);
+        throw new CayenneRuntimeException(
+            "Query exception.",
+            Util.unwindException(ex));
     }
 
     /** 
@@ -212,7 +211,9 @@ public class QueryResult
      */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
-        throw new CayenneRuntimeException("Global exception.", ex);
+        throw new CayenneRuntimeException(
+            "Global exception.",
+            Util.unwindException(ex));
     }
 
     /**
