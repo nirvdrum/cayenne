@@ -7,6 +7,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import java.util.List;
+import java.util.logging.Level;
 
 public class Main {
 
@@ -61,10 +62,11 @@ public class Main {
                 likePattern);
 
         SelectQuery query = new SelectQuery("Gallery", qual);
-        List galleries = ctxt.performQuery(query);
+        // using log level of SEVERE to show the query execution
+        List galleries = ctxt.performQuery(query, Level.SEVERE);
         if (galleries.size() == 1) {
             Gallery gallery = (Gallery) galleries.get(0);
-            System.out.println("Found gallery '" + gallery.getGalleryName() + "'.");
+            System.out.println("\nFound gallery '" + gallery.getGalleryName() + "'.\n");
             return gallery;
         }
         else if (galleries.size() == 0) {
@@ -91,6 +93,7 @@ public class Main {
        dali.addToPaintingArray(paint);
        
        // commit to the database
-       ctxt.commitChanges(); 
+       // using log level of SEVERE to show the query execution
+       ctxt.commitChanges(Level.SEVERE); 
     }
 }

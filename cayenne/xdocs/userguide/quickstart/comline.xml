@@ -114,6 +114,37 @@ projectdir> %JAVA_HOME%\bin\javac test\*.java
 <source>
 projectdir# $JAVA_HOME/bin/javac test/*.java
 </source>
+
+
+			<p>Main tutorial class is "test.Main". It takes a single parameter - a search
+			word to look up a gallery by name. It will try to find a matching gallery, then
+			create a new artist (Salvador Dali) with a single painting and add this painting 
+			to the found gallery. To run the tutorial do something like this (example given for Windows):
+			</p>
+<source>
+projectdir> %JAVA_HOME%\bin\java -classpath . test.Main metro
+</source>
+			
+			<p>If there is a gallery matching search criteria (in our case "Metropolitan Museum of Art"
+			would match the word "metro"), the following output will be printed:
+			</p>
+<source>
+SEVERE access.QueryLogger 0: --- will run 1 query.
+SEVERE access.QueryLogger 40: SELECT t0.GALLERY_NAME, t0.GALLERY_ID FROM GALLERY t0 
+WHERE UPPER(t0.GALLERY_NAME) LIKE UPPER(?) [params: '%metro%']
+SEVERE access.QueryLogger 140: === returned 1 row.
+
+Found gallery 'The Metropolitan Museum of Art'.
+
+SEVERE access.QueryLogger 210: --- will run 2 queries.
+SEVERE access.QueryLogger 220: INSERT INTO ARTIST (ARTIST_ID, DATE_OF_BIRTH, ARTIST_NAME) 
+VALUES (?, ?, ?) [params: 41, NULL, 'Salvador Dali']
+SEVERE access.QueryLogger 220: === updated 1 row.
+SEVERE access.QueryLogger 230: INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, 
+ESTIMATED_PRICE, ARTIST_ID) VALUES (?, ?, ?, ?) [params: 41, 'Sleep', NULL, 41]
+SEVERE access.QueryLogger 240: === updated 1 row.
+SEVERE access.QueryLogger 250: +++ transaction committed.
+</source>
     	</subsection>
     	</subsection>
     </section>
