@@ -60,11 +60,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.collections.SequencedHashMap;
@@ -113,7 +111,6 @@ class ContextCommit {
     private Map newObjectsByObjEntity;
     private Map objectsToDeleteByObjEntity;
     private Map objectsToUpdateByObjEntity;
-    private Set writableObjEntities;
     private List objEntitiesToInsert;
     private List objEntitiesToDelete;
     private List objEntitiesToUpdate;
@@ -160,7 +157,12 @@ class ContextCommit {
         }
 
         ContextCommitObserver observer =
-            new ContextCommitObserver(logLevel, context, insObjects, updObjects, delObjects);
+            new ContextCommitObserver(
+                logLevel,
+                context,
+                insObjects,
+                updObjects,
+                delObjects);
 
         if (context.isTransactionEventsEnabled()) {
             observer.registerForDataContextEvents();
@@ -277,7 +279,6 @@ class ContextCommit {
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
 
         DependencySorter sorter = commitHelper.getNode().getDependencySorter();
-        //        sorter.sortObjEntities(entities, false);
         sorter.sortDbEntities(dbEntities, false);
 
         for (Iterator i = dbEntities.iterator(); i.hasNext();) {
@@ -300,6 +301,13 @@ class ContextCommit {
                             dbEntity));
 
                 List objects = (List) newObjectsByObjEntity.get(entity.getClassName());
+
+                // throw an exception - an attempt to modify read-only entity
+                if (entity.isReadOnly() && objects.size() > 0) {
+                    throw attemptToCommitReadOnlyEntity(
+                        objects.get(0).getClass(),
+                        entity);
+                }
 
                 if (isMasterDbEntity)
                     sorter.sortObjectsForEntity(entity, objects, false);
@@ -350,6 +358,7 @@ class ContextCommit {
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
+
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
                 DbRelationship masterDependentDbRel =
                     (isMasterDbEntity
@@ -361,8 +370,16 @@ class ContextCommit {
                 List objects =
                     (List) objectsToDeleteByObjEntity.get(entity.getClassName());
 
-                if (isMasterDbEntity)
+                // throw an exception - an attempt to delete read-only entity
+                if (entity.isReadOnly() && objects.size() > 0) {
+                    throw attemptToCommitReadOnlyEntity(
+                        objects.get(0).getClass(),
+                        entity);
+                }
+
+                if (isMasterDbEntity) {
                     sorter.sortObjectsForEntity(entity, objects, true);
+                }
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
@@ -398,13 +415,15 @@ class ContextCommit {
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {
                 ObjEntity entity = (ObjEntity) j.next();
+
                 boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
+
                 DbRelationship masterDependentDbRel =
-                    (isMasterDbEntity
+                    (isMasterDbEntity)
                         ? null
                         : findMasterToDependentDbRelationship(
                             entity.getDbEntity(),
-                            dbEntity));
+                            dbEntity);
                 List objects =
                     (List) objectsToUpdateByObjEntity.get(entity.getClassName());
 
@@ -415,11 +434,17 @@ class ContextCommit {
                             entity,
                             o,
                             masterDependentDbRel);
-                    //                    Map snapshot = BatchUtils.buildSnapshotForUpdate(o);
 
+                    // check whether MODEIFIED object has real db-level modifications 
                     if (snapshot.isEmpty()) {
                         o.setPersistenceState(PersistenceState.COMMITTED);
                         continue;
+                    }
+
+                    // after we filtered out "fake" modifications, check if an attempt is made to 
+                    // modify a read only entity
+                    if (entity.isReadOnly()) {
+                        throw attemptToCommitReadOnlyEntity(o.getClass(), entity);
                     }
 
                     TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
@@ -486,7 +511,6 @@ class ContextCommit {
         newObjectsByObjEntity = new HashMap();
         objectsToDeleteByObjEntity = new HashMap();
         objectsToUpdateByObjEntity = new HashMap();
-        writableObjEntities = new HashSet();
         objEntitiesToInsert = new ArrayList();
         objEntitiesToDelete = new ArrayList();
         objEntitiesToUpdate = new ArrayList();
@@ -532,22 +556,6 @@ class ContextCommit {
             DataNodeCommitHelper.UPDATE);
     }
 
-    private ObjEntity classifyAsWritable(Class objEntityClass) {
-        ObjEntity entity = context.getEntityResolver().lookupObjEntity(objEntityClass);
-        if (entity == null) {
-            throw attemptToCommitUnmappedClass(objEntityClass);
-        }
-        else if (entity.isReadOnly()) {
-            throw attemptToCommitReadOnlyEntity(
-                objEntityClass,
-                context.getEntityResolver().lookupObjEntity(objEntityClass));
-        }
-        else {
-            writableObjEntities.add(objEntityClass);
-            return entity;
-        }
-    }
-
     private RuntimeException attemptToCommitReadOnlyEntity(
         Class objectClass,
         ObjEntity entity) {
@@ -584,15 +592,7 @@ class ContextCommit {
         int operationType) {
 
         Class objEntityClass = o.getObjectId().getObjClass();
-        ObjEntity entity = null;
-
-        if (!writableObjEntities.contains(objEntityClass)) {
-            entity = classifyAsWritable(objEntityClass);
-        }
-        else {
-            entity = context.getEntityResolver().lookupObjEntity(objEntityClass);
-        }
-
+        ObjEntity entity = context.getEntityResolver().lookupObjEntity(objEntityClass);
         Collection objectsForObjEntity =
             (Collection) objectsByObjEntity.get(objEntityClass.getName());
         if (objectsForObjEntity == null) {

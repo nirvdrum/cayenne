@@ -77,7 +77,6 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataContextTst extends DataContextTestBase {
-    
 
     public void testCreatePermId1() throws Exception {
         Artist artist = new Artist();
@@ -164,7 +163,6 @@ public class DataContextTst extends DataContextTestBase {
         assertEquals(1, artists.size());
     }
 
- 
     /**
      * Test fetching query with multiple relationship
      * paths between the same 2 entities used in qualifier.
@@ -386,6 +384,24 @@ public class DataContextTst extends DataContextTestBase {
         }
     }
 
+    public void testCommitChangesRO4() throws Exception {
+        ROArtist a1 = fetchROArtist("artist1");
+        Painting painting = (Painting) context.createAndRegisterNewObject("Painting");
+        painting.setPaintingTitle("paint");
+        a1.addToPaintingArray(painting);
+
+        assertEquals(PersistenceState.MODIFIED, a1.getPersistenceState());
+        try {
+            context.commitChanges();
+        }
+        catch (Exception ex) {
+            fail(
+                "Updating 'read-only' object's to-many must succeed, instead an exception was thrown: "
+                    + ex);
+        }
+        
+		assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+    }
 
     public void testPerformIteratedQuery1() throws Exception {
         SelectQuery q1 = new SelectQuery("Artist");
@@ -435,7 +451,10 @@ public class DataContextTst extends DataContextTestBase {
 
     public void changeMaxConnections(int delta) {
         DataNode node =
-            (DataNode) ((DataDomain) context.getParent()).getDataNodes().iterator().next();
+            (DataNode) ((DataDomain) context.getParent())
+                .getDataNodes()
+                .iterator()
+                .next();
         PoolManager manager = (PoolManager) node.getDataSource();
         manager.setMaxConnections(manager.getMaxConnections() + delta);
     }
