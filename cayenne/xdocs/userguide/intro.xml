@@ -22,10 +22,10 @@
             "transparent" does not mean that you can't do what you used to do with SQL. 
             You still can. Also Cayenne includes GUI tool to automate and streamline most 
             mapping tasks. Cayenne allows tying multiple database
-			into what looks to the application like a single data source. Cayenne
-			allows issuing a direct SQL query, calling stored procedures, setting
-			the automatic primary key generation, caching policy, integrating
-			with EJB-s, and other things. Some of the ideas used in Cayenne
+			into what looks to an application like a single data source. Cayenne
+			allows issuing direct SQL queries, supports
+			automatic primary key generation, various caching policies, integration
+			with web containers, and other things. Some of the ideas used in Cayenne
 			have been inspired by the persistence mechanism of NeXT' (and now
 			Apple's) WebObjects application server.
             </p>
