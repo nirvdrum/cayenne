@@ -109,7 +109,6 @@ import org.objectstyle.cayenne.modeler.model.TopModel;
  * attributes and relationships, register themselves as listeners to the 
  * different types of events and act as controllers.
  * 
- * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
 public class EventController {
@@ -155,41 +154,6 @@ public class EventController {
         return dirty;
     }
 
-    /** Makes data map current. This means also clearing the current
-      * entities, populating browse trees and making detail views invisible
-      * until entities in browse trees are selected. */
-    public void setCurrentDataMap(DataMap model) {
-        if (model == currentMap) {
-            return;
-        }
-        currentMap = model;
-        currentObjEntity = null;
-        currentDbEntity = null;
-    }
-
-    /** Makes Db Attribute current. Clears Db Relationship.*/
-    public void setCurrentDbAttribute(DbAttribute temp_attribute) {
-        this.currentDbAttr = temp_attribute;
-        this.currentDbRel = null;
-    }
-
-    /** Makes Obj Attribute current. Clears nothing.*/
-    public void setCurrentObjAttribute(ObjAttribute temp_attribute) {
-        this.currentObjAttr = temp_attribute;
-    }
-
-    /** Makes Db Relationship current. Clears Db Attribute.*/
-    public void setCurrentDbRelationship(DbRelationship temp_rel) {
-        this.currentDbRel = temp_rel;
-        this.currentDbAttr = null;
-    }
-
-    /** Makes Obj Relationship current. Clears Obj Attribute.*/
-    public void setCurrentObjRelationship(ObjRelationship temp_rel) {
-        this.currentObjRel = temp_rel;
-        this.currentObjAttr = null;
-    }
-
     /** Resets all current models to null. */
     private void clearState() {
         currentDomain = null;
@@ -201,15 +165,6 @@ public class EventController {
         currentDbAttr = null;
         currentObjRel = null;
         currentDbRel = null;
-    }
-
-    /** Makes data map current. This means also clearing the current
-      * entities, populating browse trees and making detail views invisible
-      * until entities in browse trees are selected. 
-      * @deprecated
-      * @see #setCurrentDataMap */
-    public void setCurrentModel(DataMap model) {
-        setCurrentDataMap(model);
     }
 
     public DataNode getCurrentDataNode() {
