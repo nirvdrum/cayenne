@@ -63,7 +63,7 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 
@@ -73,11 +73,21 @@ import org.objectstyle.cayenne.map.DbEntity;
  * at least 50% faster when tested with Oracle compared to the lookup table
  * approach.
  * 
+ * <p>When using Cayenne key caching mechanism, make sure that sequences in 
+ * the database have "INCREMENT BY" greater or equal to OraclePkGenerator 
+ * "pkCacheSize" property value. If this is not the case, you will need to
+ * adjust PkGenerator value accordingly. For example when sequence is
+ * incremented by 1 each time, use the following code:</p>
+ * 
+ * <pre>
+ * dataNode.getAdapter().getPkGenerator().setPkCacheSize(1);
+ * </pre>
+ * 
  * @author Andrei Adamchik
  */
-public class OraclePkGenerator implements PkGenerator {
+public class OraclePkGenerator extends JdbcPkGenerator {
     static Logger logObj = Logger.getLogger(OraclePkGenerator.class.getName());
-    
+
     private static final String _SEQUENCE_PREFIX = "pk_";
 
     /** 
@@ -102,7 +112,7 @@ public class OraclePkGenerator implements PkGenerator {
      * following SQL:
      * 
      * <pre>
-     * CREATE SEQUENCE pk_table_name
+     * CREATE SEQUENCE pk_table_name INCREMENT BY pkCacheSize
      * </pre>
      *
      *  @param node node that provides access to a DataSource.
@@ -116,7 +126,14 @@ public class OraclePkGenerator implements PkGenerator {
             if (existing == null || existing.size() == 0) {
                 Statement upd = con.createStatement();
                 try {
-                    upd.executeUpdate("CREATE SEQUENCE " + sequenceName(dbEntity));
+                    StringBuffer buf = new StringBuffer();
+                    buf
+                        .append("CREATE SEQUENCE ")
+                        .append(sequenceName(dbEntity))
+                        .append(" INCREMENT BY ")
+                        .append(getPkCacheSize());
+
+                    upd.executeUpdate(buf.toString());
                 }
                 finally {
                     upd.close();
@@ -187,28 +204,23 @@ public class OraclePkGenerator implements PkGenerator {
      * SELECT pk_table_name.nextval FROM DUAL
      * </pre>
      */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)
-        throws Exception {
+    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
 
-        Connection con = dataNode.getDataSource().getConnection();
+        Connection con = node.getDataSource().getConnection();
         try {
             Statement st = con.createStatement();
             try {
                 ResultSet rs =
-                    st.executeQuery("SELECT " + sequenceName(dbEntity) + ".nextval FROM DUAL");
+                    st.executeQuery("SELECT " + sequenceName(ent) + ".nextval FROM DUAL");
 
                 try {
                     Object pk = null;
-                    if (rs.next()) {
-                        pk = new Integer(rs.getInt(1));
-                    }
-
-                    if (pk == null) {
+                    if (!rs.next()) {
                         throw new CayenneRuntimeException(
-                            "Error generating pk for DbEntity " + dbEntity.getName());
-                    }
+                            "Error generating pk for DbEntity " + ent.getName());
 
-                    return pk;
+                    }
+                    return rs.getInt(1);
                 }
                 finally {
                     rs.close();
