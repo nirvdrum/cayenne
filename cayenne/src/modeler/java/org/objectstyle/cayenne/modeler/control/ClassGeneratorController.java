@@ -52,7 +52,13 @@ public class ClassGeneratorController extends BasicController {
                 validator.validationResults());
 
         // by default generate pairs of classes
-        model.setPairs(true);
+        // this may come from preferences later
+        boolean setPairs = true;
+        
+        model.setPairs(setPairs);
+        if(setPairs) {
+        	model.updateDefaultSuperClassPackage();
+        }
 
         // figure out default out directory
         ModelerPreferences pref = ModelerPreferences.getPreferences();
@@ -122,6 +128,7 @@ public class ClassGeneratorController extends BasicController {
         DefaultClassGenerator generator = new DefaultClassGenerator(selected);
         generator.setDestDir(outputDir);
         generator.setMakePairs(model.isPairs());
+        generator.setSuperPkg(model.getSuperClassPackage());
 
         try {
             generator.execute();
