@@ -387,7 +387,7 @@ public class DbEntityPane
 
             DbEntity ent = mediator.getCurrentDbEntity();
 
-            if (!Util.nullSafeEquals(ent.getSchema(), text)) {
+            if (ent != null && !Util.nullSafeEquals(ent.getSchema(), text)) {
                 ent.setSchema(text);
                 mediator.fireDbEntityEvent(new EntityEvent(this, ent));
             }

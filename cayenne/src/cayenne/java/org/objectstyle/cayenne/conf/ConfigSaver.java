@@ -91,23 +91,20 @@ public class ConfigSaver {
      */
     public void storeDomains(PrintWriter pw) {
         pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-        pw.println(
-            "<domains project-version=\""
-                + delegate.projectVersion()
-                + "\">");
+        pw.println("<domains project-version=\"" + delegate.projectVersion() + "\">");
 
         Iterator it = delegate.domainNames();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             storeDomain(pw, (String) it.next());
         }
-        
+
         Iterator views = delegate.viewNames();
-        while(views.hasNext()) {
-            storeDataView(pw, (String)views.next());
+        while (views.hasNext()) {
+            storeDataView(pw, (String) views.next());
         }
         pw.println("</domains>");
     }
-    
+
     protected void storeDataView(PrintWriter pw, String dataViewName) {
         String location = delegate.viewLocation(dataViewName);
         pw.print("<view name=\"" + dataViewName.trim());
@@ -120,29 +117,32 @@ public class ConfigSaver {
 
         // store properties
         Iterator properties = delegate.propertyNames(domainName);
-        boolean hasProperties = properties.hasNext();
+        boolean breakNeeded = properties.hasNext();
         while (properties.hasNext()) {
             String name = (String) properties.next();
-            if(name == null) {
+            if (name == null) {
                 continue;
             }
-            
+
             String value = delegate.propertyValue(domainName, name);
-            if(value == null) {
+            if (value == null) {
                 continue;
             }
-     
+
             pw.print("\t<property name=\"" + Util.encodeXmlAttribute(name.trim()));
             pw.println("\" value=\"" + Util.encodeXmlAttribute(value.trim()) + "\"/>");
         }
-        
-        if(hasProperties) {
-            pw.println();
-        }
-               
+
         // store maps
         Iterator maps = delegate.mapNames(domainName);
-        boolean hasMaps = maps.hasNext();
+        if (maps.hasNext()) {
+            if (breakNeeded) {
+                pw.println();
+            }
+
+            breakNeeded = true;
+        }
+
         while (maps.hasNext()) {
             String mapName = (String) maps.next();
             String mapLocation = delegate.mapLocation(domainName, mapName);
@@ -153,28 +153,26 @@ public class ConfigSaver {
 
             if (!depMaps.hasNext()) {
                 pw.println("\"/>");
-            } else {
+            }
+            else {
                 pw.println("\">");
                 while (depMaps.hasNext()) {
                     String depName = (String) depMaps.next();
-                    pw.println(
-                        "\t\t<dep-map-ref name=\"" + depName.trim() + "\"/>");
+                    pw.println("\t\t<dep-map-ref name=\"" + depName.trim() + "\"/>");
                 }
 
                 pw.println("\t</map>");
             }
         }
-        
-        if (hasMaps) {
-            pw.println();
-        }
 
         // store nodes
         Iterator nodes = delegate.nodeNames(domainName);
+        if (nodes.hasNext() && breakNeeded) {
+            pw.println();
+        }
         while (nodes.hasNext()) {
             String nodeName = (String) nodes.next();
-            String datasource =
-                delegate.nodeDataSourceName(domainName, nodeName);
+            String datasource = delegate.nodeDataSourceName(domainName, nodeName);
             String adapter = delegate.nodeAdapterName(domainName, nodeName);
             String factory = delegate.nodeFactoryName(domainName, nodeName);
             Iterator mapNames = delegate.linkedMapNames(domainName, nodeName);
@@ -210,11 +208,8 @@ public class ConfigSaver {
      * <code>info</code> object may contain full or partial information.
      */
     public void storeDataNode(PrintWriter out, DataSourceInfo info) {
-		out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-        out.print(
-            "<driver project-version=\""
-                + Project.CURRENT_PROJECT_VERSION
-                + "\"");
+        out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        out.print("<driver project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\"");
         if (info.getJdbcDriver() != null) {
             out.print(" class=\"" + info.getJdbcDriver() + "\"");
         }
