@@ -256,6 +256,7 @@ public class AboutDialog extends CayenneDialog {
         JEditorPane infoPanel = new JEditorPane("text/html", getInfoString());
         infoPanel.setEditable(false);
         infoPanel.addHyperlinkListener(this);
+        infoPanel.setBackground(getParent().getBackground());
 
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
