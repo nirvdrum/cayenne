@@ -119,8 +119,6 @@
                     use="true"
                     splitindex="true"
                     windowtitle="Cayenne API">
-            <!-- Exclude PostgreSQL for the interim release -->
-            <excludepackage name="org.objectstyle.cayenne.dba.postgres"/>
             
             <doctitle><![CDATA[<h2><a href="http://objectstyle.org/cayenne/" target="_top">
             		<img height="40" border="0" src="../../images/cayenne_logo_small.gif"><a> 
