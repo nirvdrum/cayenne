@@ -205,7 +205,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
                 modifiedIds.add(id);
 
-                // postpone processing of objects tha require an id change
+                // postpone processing of objects that require an id change
                 continue;
             }
 

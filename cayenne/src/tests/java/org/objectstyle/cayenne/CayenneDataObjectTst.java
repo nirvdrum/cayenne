@@ -98,11 +98,19 @@ public class CayenneDataObjectTst extends TestCase {
         assertEquals("aaa", a.readNestedProperty("artistName"));
     }
     
-    public void testReadNestedProperty2() throws Exception {
+    public void testReadNestedPropertyNotPersistentString() throws Exception {
         Artist a = new Artist();
         assertNull(a.readNestedProperty("someOtherProperty"));
         a.setSomeOtherProperty("aaa");
         assertEquals("aaa", a.readNestedProperty("someOtherProperty"));
     }
+    
+	public void testReadNestedPropertyNonPersistentNotString() throws Exception {
+		Artist a = new Artist();
+		Object object = new Object();
+		assertNull(a.readNestedProperty("someOtherObjectProperty"));
+		a.setSomeOtherObjectProperty(object);
+		assertSame(object, a.readNestedProperty("someOtherObjectProperty"));
+	}
 }
 

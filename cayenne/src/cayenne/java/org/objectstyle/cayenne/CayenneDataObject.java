@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.PropertyComparator;
 
 /**
  * A CayenneDataObject is a default implementation of DataObject interface.
@@ -175,8 +176,7 @@ public class CayenneDataObject implements DataObject {
             // via reflection
             if (obj == null && !values.containsKey(pathComp)) {
                 try {
-                    // TODO: BeanUtils.getSimpleProperty only retruns String!!!!!
-                    obj = BeanUtils.getSimpleProperty(dataObj, pathComp);
+                    obj = PropertyComparator.readProperty(pathComp, dataObj);
                 }
                 catch (IllegalAccessException e) {
                     throw new CayenneRuntimeException(

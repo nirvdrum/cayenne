@@ -189,8 +189,6 @@ class ContextCommit {
                         throw new CayenneException("Error committing transaction.");
                     }
                 }
-
-              //  postprocess(nodeHelper);
             }
             
             context.getObjectStore().objectsCommitted();

@@ -10,6 +10,7 @@ public class Artist
     private boolean _receivedDidCommit = false;
     
     protected String someOtherProperty;
+    protected Object someOtherObjectProperty;
 
     public Artist() {
         super();
@@ -42,6 +43,14 @@ public class Artist
 
     public void setSomeOtherProperty(String string) {
         someOtherProperty = string;
+    }
+
+    public Object getSomeOtherObjectProperty() {
+        return someOtherObjectProperty;
+    }
+
+    public void setSomeOtherObjectProperty(Object object) {
+        someOtherObjectProperty = object;
     }
 
 }
