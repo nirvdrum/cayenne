@@ -70,6 +70,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -248,6 +249,11 @@ public class Util {
             CayenneRuntimeException e = (CayenneRuntimeException) th;
             if (e.getCause() != null) {
                 return unwindException(e.getCause());
+            }
+        } else if (th instanceof InvocationTargetException) {
+            InvocationTargetException e = (InvocationTargetException) th;
+            if (e.getTargetException() != null) {
+                return unwindException(e.getTargetException());
             }
         }
 
