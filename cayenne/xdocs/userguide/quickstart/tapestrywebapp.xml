@@ -4,7 +4,7 @@
 <body>
     <section name="3. Quick Start">
     	<subsection name="3.4 Tapestry Tutorial">
-		<p><a href="http://tapestry.sourceforge.net/">Tapestry</a> is a powerful component-based 
+		<p><a href="http://jakarta.apache.org/tapestry/">Tapestry</a> is a powerful component-based 
 		web application framework. This section shows how to write and a deploy a Tapestry web 
 		application	using Cayenne as an O/R layer.</p>
     	
@@ -57,14 +57,23 @@
        		</p>
        		
     		<p>- <i>Optional: if you have Tapestry already installed, you should skip 
-    		this step.</i> Obtain the latest Tapestry distribution and unzip somewhere. 
-    		(This tutorial was tested with Tapestry 2.2). Copy <code>ognl.jar</code> 
+    		this step.</i> Obtain the latest <a href="http://jakarta.apache.org/tapestry/">Tapestry 
+    		distribution</a> and unzip somewhere. 
+    		(This tutorial was tested with Tapestry 2.3). Copy <code>ognl.jar</code> 
     		and <code>net.sf.tapestry-*.jar</code> 
     		from the Tapestry distribution (/lib/ext for ognl, /lib for tapestry-*.jar) 
     		to EITHER the <code>WEB-INF/lib</code> subdirectory of the tutorial project 
     		directory, or some other location that your web container will be able to 
     		locate.
     		</p>
+    		
+    		<panel name="Tapestry 3.0+ Note:">Tapestry 3.0 and higher is a Jakarta 
+    		subproject and is no longer hosted on 
+    		SourceForge. As a result it has its packages renamed from "net.sf.tapestry.*" 
+    		to "org.apache.tapestry.*". To use the tutorial with 3.0+, import statements 
+    		must be manually fixed to reflect package name change. Older versions of Tapestry
+    		can still be found at the SourceForge page at http://sourceforge.net/projects/tapestry 
+    		</panel>
     	</subsection>
     	
     	<subsection name="3.4.2 Prepare Tutorial Database" anchor="2">
