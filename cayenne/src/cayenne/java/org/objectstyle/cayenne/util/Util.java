@@ -185,8 +185,9 @@ public class Util {
     }
 
     /**
-     * Attempts to find an underlying exception of an given exception.
-     * If none is found, returns given thorwable object. Currently
+     * Attempts to find an underlying exception of a given exception.
+     * If none is found, returns given throwable object, otherwise unwraps
+     * the root cause of an exception and returns it. Currently
      * supports unwinding Cayenne-specific exceptions.
      */
     public static Throwable unwindException(Throwable th) {

@@ -66,6 +66,8 @@ import javax.swing.tree.TreeSelectionModel;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.DataMapProject;
 import org.objectstyle.cayenne.project.Project;
 
 /**
@@ -74,19 +76,30 @@ import org.objectstyle.cayenne.project.Project;
  * @author Andrei Adamchik
  */
 public class ProjectTree extends JTree {
-    private static Logger logObj = Logger.getLogger(ProjectTree.class);
+    static Logger logObj = Logger.getLogger(ProjectTree.class);
 
+    /**
+     * Factory method to create project tree.
+     */
+    public static ProjectTree createProjectTree(Project project) {
+    	ProjectTree tree = new ProjectTree(project);
+    	if(project instanceof ApplicationProject) {
+    		tree.setRootVisible(false);
+    	}
+    	else {
+    		tree.setRootVisible(true);
+    	}
+    	return tree;
+    }
+     
     /**
      * Constructor for ProjectTree.
      */
-    public ProjectTree(Project project) {
+    protected ProjectTree(Project project) {
         // build model
         DefaultMutableTreeNode root =
             ProjectTreeWrapper.getInstance().wrapProject(project);
         setModel(new DefaultTreeModel(root));
-
-        // hide root
-        setRootVisible(false);
 
         // expand top level
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);

@@ -143,7 +143,7 @@ public class BrowseView
         super();
         this.mediator = mediator;
 
-        browseTree = new ProjectTree(Editor.getProject());
+        browseTree = ProjectTree.createProjectTree(Editor.getProject());
         browseTree.setCellRenderer(new BrowseViewRenderer());
         setViewportView(browseTree);
 
@@ -877,8 +877,6 @@ public class BrowseView
                 row,
                 hasFocus);
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-            if (node.isRoot())
-                return this;
             Object obj = node.getUserObject();
             if (obj instanceof DataDomain) {
                 setIcon(domainIcon);

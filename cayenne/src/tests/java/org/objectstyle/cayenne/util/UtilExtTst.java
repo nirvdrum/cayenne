@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class UtilExtTst extends CayenneTestCase {
@@ -73,7 +74,7 @@ public class UtilExtTst extends CayenneTestCase {
     public void testPackagePath2() throws java.lang.Exception {
         // inner class
         class TmpTest extends Object {};
-        
+
         String expectedPath = "org/objectstyle/cayenne/util";
         assertEquals(expectedPath, Util.getPackagePath(TmpTest.class.getName()));
     }
@@ -175,5 +176,21 @@ public class UtilExtTst extends CayenneTestCase {
     public void testEncodeXmlAttribute3() throws Exception {
         String unencoded = "a&b";
         assertEquals("a&amp;b", Util.encodeXmlAttribute(unencoded));
+    }
+
+    public void testUnwindException1() throws Exception {
+        Throwable e = new Throwable();
+        assertSame(e, Util.unwindException(e));
+    }
+
+    public void testUnwindException2() throws Exception {
+        CayenneException e = new CayenneException();
+        assertSame(e, Util.unwindException(e));
+    }
+
+    public void testUnwindException3() throws Exception {
+    	Throwable root = new Throwable();
+        CayenneException e = new CayenneException(root);
+        assertSame(root, Util.unwindException(e));
     }
 }

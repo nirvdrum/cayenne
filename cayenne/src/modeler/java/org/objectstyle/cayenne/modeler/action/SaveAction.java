@@ -104,7 +104,7 @@ public class SaveAction extends CayenneAction {
         Project p = Editor.getProject();
 
         if (p.isLocationUndefined()) {
-            File projectDir = fileChooser.newApplicationProjectDir(Editor.getFrame());
+            File projectDir = fileChooser.newProjectDir(Editor.getFrame(), p);
             if (projectDir == null) {
                 return false;
             }

@@ -96,14 +96,4 @@ public class NewProjectAction extends ProjectAction {
 
         new ProjectTypeSelectControl().startup();
     }
-
-    public void newAppProject() {
-        Project project = new ApplicationProject(null);
-        Editor.getFrame().getController().projectOpened(project);
-    }
-
-    public void newMapProject() {
-        Project project = new DataMapProject(null);
-        Editor.getFrame().getController().projectOpened(project);
-    }
 }

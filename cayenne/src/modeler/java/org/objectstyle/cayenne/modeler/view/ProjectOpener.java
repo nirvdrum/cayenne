@@ -59,15 +59,23 @@ import java.awt.Frame;
 import java.io.File;
 
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.util.ApplicationFileFilter;
 import org.objectstyle.cayenne.modeler.util.DataMapFileFilter;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.DataMapProject;
+import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectFile;
 
 /**
+ * File chooser panel used to select a directory to store project files.
+ * 
  * @author Andrei Adamchik
  */
 public class ProjectOpener extends JFileChooser {
@@ -81,24 +89,46 @@ public class ProjectOpener extends JFileChooser {
     }
 
     /**
-     * Runs a dialog to select a directory for the new 
-     * Cayenne application project.
+     * Selects a directory to store the project.
      */
-    public File newApplicationProjectDir(Frame f) {
+    public File newProjectDir(Frame f, Project p) {
+        if (p instanceof ApplicationProject) {
+        	// configure for application project
+            return newProjectDir(
+                f,
+                Configuration.DOMAIN_FILE,
+                ApplicationFileFilter.getInstance());
+        } else if (p instanceof DataMapProject) {
+        	// configure for DataMap project
+            ProjectFile projFileWrapper = p.findFile(p.getRootNode());
+            return newProjectDir(
+                f,
+                projFileWrapper.getLocation(),
+                DataMapFileFilter.getInstance());
+        } else {
+            String message =
+                (p == null)
+                    ? "Null project."
+                    : "Unrecognized project class: " + p.getClass().getName();
+            throw new CayenneRuntimeException(message);
+        }
+    }
+
+    protected File newProjectDir(Frame f, String location, FileFilter filter) {
         // configure dialog
         setDialogTitle("Select Project Directory");
         setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         setCurrentDirectory(getDefaultStartDir());
-        
+
         // preselect current directory
-        if(getCurrentDirectory() != null) {
-        	setSelectedFile(getCurrentDirectory());
+        if (getCurrentDirectory() != null) {
+            setSelectedFile(getCurrentDirectory());
         }
 
         // configure filters
         resetChoosableFileFilters();
         // allow users to see directories with cayenne.xml files
-        addChoosableFileFilter(ApplicationFileFilter.getInstance());
+        addChoosableFileFilter(filter);
 
         File selectedDir;
 
@@ -117,7 +147,7 @@ public class ProjectOpener extends JFileChooser {
             }
 
             // check for overwrite
-            File projectFile = new File(selectedDir, Configuration.DOMAIN_FILE);
+            File projectFile = new File(selectedDir, location);
             if (projectFile.exists()) {
                 OverwriteDialog dialog = new OverwriteDialog(projectFile, f);
                 dialog.show();

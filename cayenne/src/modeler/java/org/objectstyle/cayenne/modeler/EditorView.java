@@ -100,16 +100,16 @@ public class EditorView
     private static final String OBJ_VIEW = "ObjView";
     private static final String DB_VIEW = "DbView";
 
-    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    BrowseView treePanel;
-    JPanel detailPanel = new JPanel();
-    JPanel emptyPanel = new JPanel();
-    DomainDetailView domainView;
-    DataNodeDetailView nodeView;
-    DataMapDetailView dataMapView;
-    ObjDetailView objDetailView;
-    DbDetailView dbDetailView;
-    CardLayout detailLayout;
+    protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    protected BrowseView treePanel;
+    protected JPanel detailPanel = new JPanel();
+    protected JPanel emptyPanel = new JPanel();
+    protected DomainDetailView domainView;
+    protected DataNodeDetailView nodeView;
+    protected DataMapDetailView dataMapView;
+    protected ObjDetailView objDetailView;
+    protected DbDetailView dbDetailView;
+    protected CardLayout detailLayout;
 
     public EditorView(EventController temp_mediator) {
         super(new BorderLayout());

@@ -74,8 +74,6 @@ public class DataMapFile extends ProjectFile {
 
     /**
      * Constructor for DataMapFile.
-     * @param name
-     * @param extension
      */
     public DataMapFile(Project project, DataMap map) {
         super(project, map.getLocation());
@@ -83,7 +81,7 @@ public class DataMapFile extends ProjectFile {
     }
 
     /**
-     * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+     * Returns DataMap associated with this project.
      */
     public Object getObject() {
         return map;

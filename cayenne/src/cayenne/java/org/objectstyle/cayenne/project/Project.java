@@ -306,7 +306,7 @@ public abstract class Project {
     }
 
     /**
-     * Returns a main file associated with this project.
+     * Returns a canonical form of a main file associated with this project.
      */
     public File getMainFile() {
     	if(projectDir == null) {

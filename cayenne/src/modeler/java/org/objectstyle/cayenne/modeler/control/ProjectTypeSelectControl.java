@@ -57,8 +57,10 @@ package org.objectstyle.cayenne.modeler.control;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.view.ProjectTypeSelectDialog;
+import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.DataMapProject;
+import org.objectstyle.cayenne.project.Project;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -104,20 +106,14 @@ public class ProjectTypeSelectControl extends BasicController {
     }
 
     protected void doCreateAppProject() {
-        // delegate to Editor action.
-        // in the future, Scope controllers should handle this
-
-        ((NewProjectAction) Editor.getFrame().getAction(NewProjectAction.ACTION_NAME))
-            .newAppProject();
+        Project project = new ApplicationProject(null);
+        Editor.getFrame().getController().projectOpened(project);
         shutdown();
     }
 
     protected void doCreateMapProject() {
-        // delegate to Editor action.
-        // in the future, Scope controllers should handle this
-
-        ((NewProjectAction) Editor.getFrame().getAction(NewProjectAction.ACTION_NAME))
-            .newMapProject();
+        Project project = new DataMapProject(null);
+        Editor.getFrame().getController().projectOpened(project);
         shutdown();
     }
 }
