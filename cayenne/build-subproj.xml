@@ -117,6 +117,7 @@
                     destdir="${dist}/doc/api/${subproj}"
                     author="true"
                     use="true"
+                    stylesheetfile="doc/objectstyle-javadoc.css"
                     splitindex="true"
                     windowtitle="Cayenne API"
                     overview="src/${subproj}/java/overview.html">
