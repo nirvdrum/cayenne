@@ -90,27 +90,27 @@ public class PoolDataSource implements ConnectionPoolDataSource {
 		nonPooledDatasource = new DriverDataSource(jdbcDriver, connectionUrl);
 	}
 
-	public int getLoginTimeout() throws java.sql.SQLException {
+	public int getLoginTimeout() throws SQLException {
 		return nonPooledDatasource.getLoginTimeout();
 	}
 
-	public void setLoginTimeout(int seconds) throws java.sql.SQLException {
+	public void setLoginTimeout(int seconds) throws SQLException {
 		nonPooledDatasource.setLoginTimeout(seconds);
 	}
 
-	public PrintWriter getLogWriter() throws java.sql.SQLException {
+	public PrintWriter getLogWriter() throws SQLException {
 		return nonPooledDatasource.getLogWriter();
 	}
 
-	public void setLogWriter(PrintWriter out) throws java.sql.SQLException {
+	public void setLogWriter(PrintWriter out) throws SQLException {
 		nonPooledDatasource.setLogWriter(out);
 	}
 
-	public PooledConnection getPooledConnection() throws java.sql.SQLException {
+	public PooledConnection getPooledConnection() throws SQLException {
 		return new PooledConnectionImpl(nonPooledDatasource.getConnection());
 	}
 
-	public PooledConnection getPooledConnection(String user, String password) throws java.sql.SQLException {
+	public PooledConnection getPooledConnection(String user, String password) throws SQLException {
 		return new PooledConnectionImpl(nonPooledDatasource.getConnection(user, password));
 	}
 }

@@ -413,7 +413,7 @@ public class PoolManager implements DataSource, ConnectionEventListener {
      * to notify PoolManager that connection is in invalid state.
      */
     public synchronized void connectionErrorOccurred(ConnectionEvent event) {
-        // later on we should analize the error to see if this
+        // later on we should analyze the error to see if this
         // is fatal... right now just kill this PooledConnection
 
         PooledConnection errorSrc = (PooledConnection) event.getSource();

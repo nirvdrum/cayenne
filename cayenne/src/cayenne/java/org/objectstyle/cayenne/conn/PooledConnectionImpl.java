@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.conn;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -86,7 +87,8 @@ public class PooledConnectionImpl implements PooledConnection {
     /** Creates new PooledConnection */
     public PooledConnectionImpl(Connection connectionObj) {
         this.connectionObj = connectionObj;
-        connectionEventListeners = new ArrayList(10);
+        this.connectionEventListeners =
+            Collections.synchronizedList(new ArrayList(10));
     }
 
     public void addConnectionEventListener(ConnectionEventListener listener) {
@@ -102,27 +104,33 @@ public class PooledConnectionImpl implements PooledConnection {
         }
     }
 
-    public void close() throws java.sql.SQLException {
-        connectionObj.close();
-        connectionObj = null;
+    public void close() throws SQLException {
 
-        // remove all listeners
         synchronized (connectionEventListeners) {
+            // remove all listeners
             connectionEventListeners.clear();
+        }
+
+        try {
+            connectionObj.close();
+        } finally {
+            connectionObj = null;
         }
     }
 
-    public Connection getConnection() throws java.sql.SQLException {
+    public Connection getConnection() throws SQLException {
         // set autocommit to false to return connection
         // always in consistent state
         if (!connectionObj.getAutoCommit()) {
 
             try {
                 connectionObj.setAutoCommit(true);
-            }
-            catch (SQLException sqlEx) {
+            } catch (SQLException sqlEx) {
                 // try applying Sybase patch
-                ConnectionWrapper.sybaseAutoCommitPatch(connectionObj, sqlEx, true);
+                ConnectionWrapper.sybaseAutoCommitPatch(
+                    connectionObj,
+                    sqlEx,
+                    true);
             }
         }
 
@@ -131,7 +139,7 @@ public class PooledConnectionImpl implements PooledConnection {
         return new ConnectionWrapper(connectionObj, this);
     }
 
-    protected void returnConnectionToThePool() throws java.sql.SQLException {
+    protected void returnConnectionToThePool() throws SQLException {
         // do not return to pool bad connections
         if (hadErrors)
             close();
@@ -148,6 +156,12 @@ public class PooledConnectionImpl implements PooledConnection {
     protected void connectionErrorNotification(SQLException exception) {
         // hint for later to avoid returning bad connections to the pool
         hadErrors = true;
+
+        if (logObj.isDebugEnabled()) {
+            logObj.debug(
+                "Child connection error, retiring pooled connection.",
+                exception);
+        }
 
         synchronized (connectionEventListeners) {
             if (connectionEventListeners.size() == 0)
