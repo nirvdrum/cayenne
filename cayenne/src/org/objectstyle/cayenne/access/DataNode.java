@@ -241,6 +241,8 @@ public class DataNode implements QueryEngine {
                         opObserver.nextCount(nextQuery, count);
                     }
                 } catch (Exception queryEx) {
+                    QueryLogger.logQueryError(logLevel, queryEx);
+
                     // notify consumer of the exception,
                     // stop running further queries
                     opObserver.nextQueryException(nextQuery, queryEx);
@@ -271,6 +273,8 @@ public class DataNode implements QueryEngine {
         }
         // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
+            QueryLogger.logQueryError(logLevel, globalEx);
+            
             if (!usesAutoCommit) {
                 // rollback failed transaction
                 rolledBackFlag = true;

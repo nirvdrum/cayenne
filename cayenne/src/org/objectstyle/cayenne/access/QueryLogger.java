@@ -177,6 +177,10 @@ public class QueryLogger {
     public static void logRollbackTransaction(Level logLevel) {
         logObj.log(logLevel, "*** transaction rolledback.");
     }
+    
+    public static void logQueryError(Level logLevel, Throwable th) {
+        logObj.log(logLevel, "*** error.", th);
+    }
 
     public static void logQueryStart(Level logLevel, int count) {
         String countStr = (count == 1)
