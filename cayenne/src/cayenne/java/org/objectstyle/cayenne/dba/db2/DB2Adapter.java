@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.dba.db2;
 
+import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 
@@ -83,5 +85,11 @@ public class DB2Adapter extends JdbcAdapter {
 		return new DB2PkGenerator();
 	}
 
+	protected void configureExtendedTypes(ExtendedTypeMap map) {
+		super.configureExtendedTypes(map);
+
+		// create specially configured CharType handler
+		map.registerType(new CharType(true, false));
+	}
 }
 
