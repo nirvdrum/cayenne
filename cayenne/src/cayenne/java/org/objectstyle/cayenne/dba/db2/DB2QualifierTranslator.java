@@ -107,10 +107,19 @@ public class DB2QualifierTranslator extends TrimmingQualifierTranslator {
 
         if (castNeeded) {
             int jdbcType = attr.getType();
+            int len = attr.getMaxLength();
 
-            // triming a value first, and then comparing it to CHAR may produce unpredictable results.
-            if (jdbcType == Types.CHAR) {
+            // determine CAST type
+
+            // LIKE on CHAR may produce unpredictible results
+            // LIKE on LONVARCHAR doesn't seem to be supported 
+            if (jdbcType == Types.CHAR || jdbcType == Types.LONGVARCHAR) {
                 jdbcType = Types.VARCHAR;
+
+                // length is required for VARCHAR
+                if (len <= 0) {
+                    len = 254;
+                }
             }
 
             buf.append(" AS ");
@@ -125,13 +134,11 @@ public class DB2QualifierTranslator extends TrimmingQualifierTranslator {
             }
 
             buf.append(types[0]);
-            if (attr.getMaxLength() > 0
-                && TypesMapping.supportsLength(jdbcType)) {
-                buf.append("(").append(attr.getMaxLength()).append(")");
+            if (len > 0 && TypesMapping.supportsLength(jdbcType)) {
+                buf.append("(").append(len).append(")");
             }
 
             buf.append(")");
         }
     }
-
 }
