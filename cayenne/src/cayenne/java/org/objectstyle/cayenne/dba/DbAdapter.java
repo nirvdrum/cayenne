@@ -84,15 +84,18 @@ import org.objectstyle.cayenne.query.Query;
  */
 public interface DbAdapter {
 
-    public static final String JDBC = "org.objectstyle.cayenne.dba.JdbcAdapter";
+    public static final String JDBC =
+		"org.objectstyle.cayenne.dba.JdbcAdapter";
     public static final String MYSQL =
         "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
     public static final String ORACLE =
         "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
     public static final String SYBASE =
         "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
-    public static final String POSTGRES =
-        "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+	public static final String POSTGRES =
+		"org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
+	public static final String HSQLDB =
+		"org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
 
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();

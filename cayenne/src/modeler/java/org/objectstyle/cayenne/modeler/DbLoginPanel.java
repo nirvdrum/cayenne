@@ -177,7 +177,8 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 			DbAdapter.SYBASE,
 			DbAdapter.MYSQL,
 			DbAdapter.ORACLE,
-			DbAdapter.POSTGRES
+			DbAdapter.POSTGRES,
+			DbAdapter.HSQLDB
 		};
 		adapterInput =
 			new PreferenceField(
