@@ -256,14 +256,11 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
     }
 
     public void testNoActionToOne() {
-        DeleteRuleTest1 test1 =
-            (DeleteRuleTest1) context.createAndRegisterNewObject("DeleteRuleTest1");
         DeleteRuleTest2 test2 =
             (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
         DeleteRuleTest3 test3 =
             (DeleteRuleTest3) context.createAndRegisterNewObject("DeleteRuleTest3");
-        test1.setTest2(test2);
-        test3.setToDeleteRuleTest1(test1);
+        test3.setToDeleteRuleTest2(test2);
         context.commitChanges();
 
         try {
@@ -278,26 +275,22 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
     }
 
     public void testNoActionToMany() {
-        DeleteRuleTest1 test1 =
-            (DeleteRuleTest1) context.createAndRegisterNewObject("DeleteRuleTest1");
         DeleteRuleTest2 test2 =
             (DeleteRuleTest2) context.createAndRegisterNewObject("DeleteRuleTest2");
         DeleteRuleTest3 test3 =
             (DeleteRuleTest3) context.createAndRegisterNewObject("DeleteRuleTest3");
-        test1.setTest2(test2);
-        test3.setToDeleteRuleTest1(test1);
+        test3.setToDeleteRuleTest2(test2);
         context.commitChanges();
 
         try {
-        	// unset another required relationship, we are testing a different one
-			test1.setTest2(null);
-            context.deleteObject(test1);
-            context.commitChanges();
+			context.deleteObject(test2);
         }
         catch (Exception e) {
             e.printStackTrace();
             fail("Shouldn't have thrown an exception");
         }
+        
+        // don't commit, since this will cause a constraint exception
     }
 
 }
