@@ -23,7 +23,11 @@
 	</target>
 	
 	<target name="dist-src" depends="dist-bin,api"> 
-	
+	    <copy todir="${dist}/src/data-port">
+        	<fileset dir="data-port/src/java">
+                <include name="**/*.java"/>
+            </fileset>
+        </copy>
 	</target>
 	
 	<target name="dist-bin" depends="jar"/>
