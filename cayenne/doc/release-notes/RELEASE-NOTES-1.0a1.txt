@@ -15,6 +15,7 @@ Included in this release:
 2. CayenneModeler GUI application used for modeling and deployment
 3. User Guide documentation in HTML format (also mirrored on the website)
 4. Source code of all Cayenne classes.
+5. Tested support of Oracle, Sybase and MySQL
 
 
 Known issues:
@@ -52,3 +53,9 @@ Notes:
    changed, old file are not removed.
    
    Workaround: Remove old files manually or ignore them.
+---------------------------------------------
+
+5. PostgreSQL support. Even though Cayenne libraries contain 
+PostgresAdapter, it has not been implemented or tested. PostgreSQL
+support is postponed till later releases.   
+   
