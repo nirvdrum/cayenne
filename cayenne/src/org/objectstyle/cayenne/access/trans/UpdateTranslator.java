@@ -97,11 +97,11 @@ public class UpdateTranslator extends QueryAssembler {
 		buildSetClause(queryBuf, (UpdateQuery) query);
 
 		// 3. build qualifier
-		String qualifierStr =
-			adapter
-				.getQualifierFactory()
-				.createTranslator(this)
-				.doTranslation();
+		QualifierTranslator qt =
+			adapter.getQualifierFactory().createTranslator(this);
+		qt.performTranslation();
+		String qualifierStr = qt.getTranslated();
+
 		if (qualifierStr != null)
 			queryBuf.append(" WHERE ").append(qualifierStr);
 

@@ -151,17 +151,18 @@ public class SelectTranslator extends SelectQueryAssembler {
 		buildColumnList();
 
 		// build WHERE
-		String qualifierStr =
-			adapter
-				.getQualifierFactory()
-				.createTranslator(this)
-				.doTranslation();
+		QualifierTranslator qt =
+			adapter.getQualifierFactory().createTranslator(this);
+		qt.performTranslation();
+		String qualifierStr = qt.getTranslated();
 
 		// build GROUP BY
 		buildGroupByList();
 
-		// build ORDER BY,
-		String orderByStr = new OrderingTranslator(this).doTranslation();
+		// build ORDER BY
+		OrderingTranslator ot = new OrderingTranslator(this);
+		ot.performTranslation();
+		String orderByStr = ot.getTranslated();
 
 		// assemble
 		StringBuffer queryBuf = new StringBuffer();
@@ -190,6 +191,17 @@ public class SelectTranslator extends SelectQueryAssembler {
 			appendTable(queryBuf, i);
 		}
 
+		// append db relationship joins if any
+		int dbRelCount = dbRelList.size();
+		if (dbRelCount > 0) {
+			queryBuf.append(" WHERE ");
+			appendDbRelJoins(queryBuf, 0);
+			for (int i = 1; i < dbRelCount; i++) {
+				queryBuf.append(" AND ");
+				appendDbRelJoins(queryBuf, i);
+			}
+		}
+
 		// append group by
 		boolean hasGroupBy = false;
 		if (groupByList != null) {
@@ -205,33 +217,18 @@ public class SelectTranslator extends SelectQueryAssembler {
 			}
 		}
 
-		// append db relationship joins if any
-		int dbRelCount = dbRelList.size();
-		if (dbRelCount > 0) {
+		// append prebuilt qualifier
+		if (qualifierStr != null) {
 			if (hasGroupBy) {
 				queryBuf.append(" HAVING ");
 			} else {
-				queryBuf.append(" WHERE ");
-			}
-
-			appendDbRelJoins(queryBuf, 0);
-			for (int i = 1; i < dbRelCount; i++) {
-				queryBuf.append(" AND ");
-				appendDbRelJoins(queryBuf, i);
-			}
-		}
-
-		// append prebuilt qualifier
-		if (qualifierStr != null) {
-			if (dbRelCount > 0) {
-				queryBuf.append(" AND ");
-			} else {
-				if (hasGroupBy) {
-					queryBuf.append(" HAVING ");
+				if (dbRelCount > 0) {
+					queryBuf.append(" AND ");
 				} else {
 					queryBuf.append(" WHERE ");
 				}
 			}
+
 			queryBuf.append(qualifierStr);
 		}
 

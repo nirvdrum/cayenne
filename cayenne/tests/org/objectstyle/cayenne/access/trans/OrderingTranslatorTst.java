@@ -85,7 +85,9 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 				new TranslationTestCase("Artist", null, "<ta.>ARTIST_NAME");
 			q.setObjEntityName("Artist");
 			q.addOrdering("artistName", Ordering.ASC);
-			String orderBySql = new OrderingTranslator(qa).doTranslation();
+			OrderingTranslator ot = new OrderingTranslator(qa);
+			ot.performTranslation();
+			String orderBySql = ot.getTranslated();
 
 			assertNotNull(orderBySql);
 			tstCase.assertTranslatedWell(orderBySql, true);
@@ -103,7 +105,9 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 					"<ta.>ARTIST_NAME DESC");
 			q.setObjEntityName("Artist");
 			q.addOrdering("artistName", Ordering.DESC);
-			String orderBySql = new OrderingTranslator(qa).doTranslation();
+			OrderingTranslator ot = new OrderingTranslator(qa);
+			ot.performTranslation();
+			String orderBySql = ot.getTranslated();
 
 			assertNotNull(orderBySql);
 			tstCase.assertTranslatedWell(orderBySql, true);
@@ -122,8 +126,11 @@ public class OrderingTranslatorTst extends CayenneTestCase {
 			q.setObjEntityName("Artist");
 			q.addOrdering("artistName", Ordering.DESC);
 			q.addOrdering("paintingArray.estimatedPrice", Ordering.ASC);
-			String orderBySql = new OrderingTranslator(qa).doTranslation();
-
+			OrderingTranslator ot = new OrderingTranslator(qa);
+			ot.performTranslation();
+			String orderBySql = ot.getTranslated();
+			
+			
 			assertNotNull(orderBySql);
 			tstCase.assertTranslatedWell(orderBySql, true);
 		} finally {

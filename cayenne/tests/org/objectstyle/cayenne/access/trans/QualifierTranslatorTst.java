@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneTestCase;
@@ -77,12 +78,12 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.SELECT_QUERY);
 	}
 
-	public void testNonQualifiedQuery() throws java.lang.Exception {
+	public void testNonQualifiedQuery() throws Exception {
 		qa.dispose();
 		qa = TstQueryAssembler.assembler(getSharedDomain(), Query.INSERT_QUERY);
 
 		try {
-			new QualifierTranslator(qa).doTranslation();
+			new QualifierTranslator(qa).performTranslation();
 			fail();
 		} catch (ClassCastException ccex) {
 			// exception expected
@@ -91,23 +92,25 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 		}
 	}
 
-	public void testNullQualifier() throws java.lang.Exception {
+	public void testNullQualifier() throws Exception {
 		try {
-			assertNull(new QualifierTranslator(qa).doTranslation());
+			QualifierTranslator qt = new QualifierTranslator(qa);
+			qt.performTranslation();
+			assertNull(qt.getTranslated());
 		} finally {
 			qa.dispose();
 		}
 	}
 
-	public void testUnary() throws java.lang.Exception {
+	public void testUnary() throws Exception {
 		doExpressionTest(new TstUnaryExpSuite());
 	}
 
-	public void testBinary() throws java.lang.Exception {
+	public void testBinary() throws Exception {
 		doExpressionTest(new TstBinaryExpSuite());
 	}
 
-	public void testTernary() throws java.lang.Exception {
+	public void testTernary() throws Exception {
 		doExpressionTest(new TstTernaryExpSuite());
 	}
 
@@ -127,11 +130,12 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 							cases[i].getRootEntity());
 					assertNotNull(ent);
 					qa.getQuery().setObjEntityName(ent.getName());
-					cases[i].assertTranslatedWell(
-						new QualifierTranslator(qa).doTranslation(),
-						false);
+					QualifierTranslator qt = new QualifierTranslator(qa);
+					qt.performTranslation();
+
+					cases[i].assertTranslatedWell(qt.getTranslated(), false);
 				} catch (Exception ex) {
-					System.out.println("Failed case: [" + i + "]: " + cases[i]);
+					logObj.log(Level.SEVERE, "Failed case: [" + i + "]: " + cases[i], ex);
 					throw ex;
 				}
 			}

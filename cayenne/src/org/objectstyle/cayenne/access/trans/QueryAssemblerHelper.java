@@ -55,10 +55,14 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.*;
 
@@ -73,9 +77,9 @@ public abstract class QueryAssemblerHelper {
 		Logger.getLogger(QueryAssemblerHelper.class.getName());
 
 	protected QueryAssembler queryAssembler;
+	protected StringBuffer buffer;
 
-	public QueryAssemblerHelper() {
-	}
+	public QueryAssemblerHelper() {}
 
 	/** Creates QueryAssemblerHelper. Sets queryAssembler property. */
 	public QueryAssemblerHelper(QueryAssembler queryAssembler) {
@@ -91,14 +95,21 @@ public abstract class QueryAssemblerHelper {
 		this.queryAssembler = queryAssembler;
 	}
 
-	/** Translates the part of parent translator's query that is supported 
-	 * by this PartTranslator. For example, QualifierTranslator will process 
-	 * qualifier expression, OrderingTranslator - ordering of the query. 
-	 * In the process of translation parent translator is notified of any 
-	 * join tables added (so that it can update its "FROM" clause). 
-	 * Also parent translator is consulted about table aliases to use 
-	 * when translating columns. */
-	public abstract String doTranslation();
+    /** 
+     * Main worker method of the QueryAssemblerHelper. 
+     * The actual translation should be done in this method. 
+     * Translation results will be stored in internal variables that 
+     * will be returned to the caller via additional accessor methods. 
+     */
+    public abstract void performTranslation();
+    
+    /**
+     * Returns the contents of assembler internal buffer.
+     */
+    public String getTranslated() {
+    	return (buffer != null && buffer.length() > 0) ? buffer.toString() : null;
+    }
+    
 
 	/** Processes parts of the OBJ_PATH expression. */
 	protected void appendObjPath(StringBuffer buf, Expression pathExp) {

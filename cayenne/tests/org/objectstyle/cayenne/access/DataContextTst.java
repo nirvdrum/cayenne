@@ -267,13 +267,28 @@ public class DataContextTst extends CayenneTestCase {
 	}
 
 	/** 
-	 * Test that a to-many relationship is initialized.
+	 * Test fetching a derived entity.
 	 */
-	public void testDerivedEntityFetch() throws Exception {
+	public void testDerivedEntityFetch1() throws Exception {
 		populatePaintings();
 		
 		SelectQuery q = new SelectQuery("ArtistAssets");
 		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
+		q.setLogLevel(Level.SEVERE);
+
+		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
+        assertEquals(1, a1.getPaintingsCount().intValue());
+	}
+	
+	/** 
+	 * Test fetching a derived entity with complex qualifier including relationships.
+	 */
+	public void testDerivedEntityFetch2() throws Exception {
+		populatePaintings();
+		
+		SelectQuery q = new SelectQuery("ArtistAssets");
+		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
+		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
 		q.setLogLevel(Level.SEVERE);
 
 		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);

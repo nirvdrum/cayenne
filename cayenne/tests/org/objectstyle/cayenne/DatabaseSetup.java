@@ -79,21 +79,21 @@ public class DatabaseSetup {
 	public void cleanTableData() throws Exception {
 		Connection conn = TestMain.getSharedConnection();
 
-        List list = dbEntitiesInInsertOrder();
+		List list = dbEntitiesInInsertOrder();
 		try {
 			if (conn.getAutoCommit()) {
 				conn.setAutoCommit(false);
 			}
 
 			Statement stmt = conn.createStatement();
-			
+
 			ListIterator it = list.listIterator(list.size());
 			while (it.hasPrevious()) {
 				DbEntity ent = (DbEntity) it.previous();
-				if(ent instanceof DerivedDbEntity) {
+				if (ent instanceof DerivedDbEntity) {
 					continue;
 				}
-				
+
 				String deleteSql = "DELETE FROM " + ent.getName();
 				stmt.executeUpdate(deleteSql);
 			}
@@ -102,8 +102,8 @@ public class DatabaseSetup {
 		} finally {
 			conn.close();
 		}
-		
-	    // lets recreate pk support, since there is no
+
+		// lets recreate pk support, since there is no
 		// generic way to reset pk info
 		DataNode node = TestMain.getSharedNode();
 		DbAdapter adapter = node.getAdapter();
@@ -120,8 +120,8 @@ public class DatabaseSetup {
 		Connection conn = TestMain.getSharedConnection();
 		DataNode node = TestMain.getSharedNode();
 		DbAdapter adapter = node.getAdapter();
-        List list = dbEntitiesInInsertOrder();
-        
+		List list = dbEntitiesInInsertOrder();
+
 		try {
 			DatabaseMetaData md = conn.getMetaData();
 			ResultSet tables = md.getTables(null, null, "%", null);
@@ -138,7 +138,7 @@ public class DatabaseSetup {
 
 			// drop all tables in the map
 			Statement stmt = conn.createStatement();
-			
+
 			ListIterator it = list.listIterator(list.size());
 			while (it.hasPrevious()) {
 				DbEntity ent = (DbEntity) it.previous();
@@ -184,7 +184,9 @@ public class DatabaseSetup {
 		// create primary key support
 		DataNode node = TestMain.getSharedNode();
 		DbAdapter adapter = node.getAdapter();
-		adapter.getPkGenerator().createAutoPk(node, node.getDataMaps()[0].getDbEntitiesAsList());
+		adapter.getPkGenerator().createAutoPk(
+			node,
+			node.getDataMaps()[0].getDbEntitiesAsList());
 	}
 
 	/** Oracle 8i does not support more then 1 "LONG xx" column per table
@@ -214,10 +216,10 @@ public class DatabaseSetup {
 		Iterator it = dbEntitiesInInsertOrder().iterator();
 		while (it.hasNext()) {
 			DbEntity ent = (DbEntity) it.next();
-			if(ent instanceof DerivedDbEntity) {
+			if (ent instanceof DerivedDbEntity) {
 				continue;
 			}
-			
+
 			queries.add(adapter.createTable(ent));
 		}
 
@@ -226,6 +228,10 @@ public class DatabaseSetup {
 			it = dbEntitiesInInsertOrder().iterator();
 			while (it.hasNext()) {
 				DbEntity ent = (DbEntity) it.next();
+				if (ent instanceof DerivedDbEntity) {
+					continue;
+				}
+
 				List qs = gen.createFkConstraintsQueries(ent);
 				queries.addAll(qs);
 			}

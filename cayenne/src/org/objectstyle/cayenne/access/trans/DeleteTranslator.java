@@ -92,13 +92,14 @@ public class DeleteTranslator extends QueryAssembler {
 		queryBuf.append(dbEnt.getFullyQualifiedName());
 
 		// 2. build qualifier
-		String qualifierStr =
-			adapter
-				.getQualifierFactory()
-				.createTranslator(this)
-				.doTranslation();
-		if (qualifierStr != null)
+		QualifierTranslator qTr =
+			adapter.getQualifierFactory().createTranslator(this);
+		qTr.performTranslation();
+		String qualifierStr = qTr.getTranslated();
+
+		if (qualifierStr != null) {
 			queryBuf.append(" WHERE ").append(qualifierStr);
+		}
 
 		return queryBuf.toString();
 	}
