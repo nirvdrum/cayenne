@@ -1,5 +1,6 @@
 <document>
-<toc name="toc-user-guide"/>
+<title>User Guide - Deployment</title>
+<toc name="toc-user-guide" chapter="13. Deployment"/>
 <body>
      <section name="13. Deployment">
 		<subsection name="13.3 Customizing Configuration" anchor="custom">

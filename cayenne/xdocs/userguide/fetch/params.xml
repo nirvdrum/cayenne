@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
 <body>
     <section name="7. Using SelectQueries">        
-        <subsection name="7.5 Reusing SelectQueries: Parameterized Queries.">
+        <subsection name="7.5 Parameterized Queries">
 		<p>SelectQuery objects can be rather complex. They may contain big qualifiers
     	and lots of tuning parameters. <i>Parameterized Queries</i> is a feature in Cayenne
     	that addresses reusability of complex queries. With this feature, for each group of queries
@@ -16,7 +16,7 @@
     	class.
 		</p>
 		
-		<subsection name="7.5.1 Using Parameterized Queries.">                	
+		<subsection name="7.5.1 Using Parameterized Queries">                	
 	<p>Here is an example of building a prototype query:</p>
 <source>import java.util.List;
 import java.util.ArrayList;

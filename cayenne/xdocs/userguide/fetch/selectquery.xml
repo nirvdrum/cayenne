@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
 <body>
     <section name="7. Using SelectQueries">      
         <subsection name="7.1 SelectQuery">

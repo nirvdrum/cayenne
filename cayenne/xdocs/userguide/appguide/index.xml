@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Writing Cayenne Applications</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="5. Writing Cayenne Applications"/>
 <body>
     <section name="5. Writing Cayenne Applications">
             <p>The following steps are needed to write and deploy a Cayenne 

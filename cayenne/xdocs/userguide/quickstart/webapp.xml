@@ -1,16 +1,16 @@
 <document>
 <title>User Guide - Quick Start</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="3. Quick Start"/>
 <body>
     <section name="3. Quick Start">
-       <subsection name="3.2 &quot;JSP/Struts Web Application&quot; Tutorial">
+       <subsection name="3.2 JSP/Struts Tutorial">
                <p>This section shows how to write and a deploy a jsp web application
     	using Cayenne.</p>
     	
    	    <panel name="Note:">
     		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
     	</panel>
-    	
+    	<p></p>
     	<panel name="Note:">
     		Configuration given in this tutorial assumes Servlet 2.3 compatible
     		container. For older containers, move cayenne files from WEB-INF to WEB-INF/classes

@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Performance Tuning</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="11. Performance Tuning"/>
 <body>
     <section name="11. Performance Tuning">        
-			<subsection name="11.3 ResultIterator: Incremental Data Processing">
+			<subsection name="11.3 Iterating Through Data Rows">
 			<p>There are cases when the result sets are so large that even when fetching data rows, 
 			application can run out of memory. For instance, a user may be creating a report
 			that requires in-memory processing of hundreds of thousands of database rows. 

@@ -1,6 +1,6 @@
 <document>
-<toc name="toc-user-guide"/>
-
+<title>User Guide - Using SelectQueries</title>
+<toc name="toc-user-guide" chapter="7. Using SelectQueries"/> 
 <body>
     <section name="7. Using SelectQueries">        
         <subsection name="7.3 Using Orderings" anchor="order">

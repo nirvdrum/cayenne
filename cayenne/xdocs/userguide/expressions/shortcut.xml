@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Using Expressions</title>
-<toc name="toc-user-guide"/>   
+<toc name="toc-user-guide" chapter="10. Using Expressions"/>
 <body>
     <section name="10. Using Expressions">        
 		<subsection name="10.3 Simplified Expression API">

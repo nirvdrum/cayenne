@@ -1,8 +1,8 @@
 <document>
 <title>User Guide - Using DataContext</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="6. Using DataContext"/>
 <body>   	
-    <section name="6. Using DataContext" anchor="cayenne_dc">
+    <section name="6. Using DataContext">
     	<p>In most applications <a href=
     	"../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
     	is the main user access point to all Cayenne functionality. It provides query 

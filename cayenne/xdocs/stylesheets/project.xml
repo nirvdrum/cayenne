@@ -31,16 +31,16 @@
     	<item name="1. Introduction"  href="/userguide/intro.html"/>
     	
     	<item name="2. Installation"  href="/userguide/install/index.html">
-    		<item name="2.1 System Requirements"  href="/userguide/install/index.html#sys_req"/>
+    		<item name="2.1 System Requirements"  href="/userguide/install/index.html"/>
     		<item name="2.2 Installation"  href="/userguide/install/install.html"/>
     		<item name="2.3 Understanding JAR Files"  href="/userguide/install/postinstall.html"/>
     		<item name="2.4 Compiling from Source"  href="/userguide/install/compile.html"/>
     	</item>
     	
     	<item name="3. Quick Start"  href="/userguide/quickstart/index.html">
-    		<item name="3.1 &quot;Command-line Application&quot; Tutorial"  href="/userguide/quickstart/comline.html"/>
-    		<item name="3.2 &quot;JSP/Struts Web Application&quot; Tutorial"  href="/userguide/quickstart/webapp.html"/>
-    		<item name="3.3 &quot;Tapestry Web Application&quot; Tutorial"  href="/userguide/quickstart/tapestrywebapp.html"/>
+    		<item name="3.1 Command-Line Tutorial"  href="/userguide/quickstart/comline.html"/>
+    		<item name="3.2 JSP/Struts Tutorial"  href="/userguide/quickstart/webapp.html"/>
+    		<item name="3.3 Tapestry Tutorial"  href="/userguide/quickstart/tapestrywebapp.html"/>
     	</item>
     	
     	<item name="4. Design"  href="/userguide/design/index.html">
@@ -68,9 +68,9 @@
     		<item name="7.1 SelectQuery"  href="/userguide/fetch/selectquery.html"/>
     		<item name="7.2 Qualifier Expressions"  href="/userguide/fetch/exp.html"/>
     		<item name="7.3 Using Orderings"  href="/userguide/fetch/orderings.html"/>
-    		<item name="7.4 Controlling SelectQuery Behavior"  href="/userguide/fetch/other.html"/>
-    		<item name="7.5 Reusing SelectQueries: Parameterized Queries"  href="/userguide/fetch/params.html"/>
-    		<item name="7.6 Executing raw SQL: SqlSelectQuery"  href="/userguide/fetch/raw.html"/>
+    		<item name="7.4 SelectQuery Customization"  href="/userguide/fetch/other.html"/>
+    		<item name="7.5 Parameterized Queries"  href="/userguide/fetch/params.html"/>
+    		<item name="7.6 Executing Raw SQL"  href="/userguide/fetch/raw.html"/>
     	</item>
     	
     	<item name="8. Modifying DataObjects"  href="/userguide/modify/index.html">
@@ -78,12 +78,12 @@
     	</item>
     	
     	<item name="9. Using Stored Procedures"  href="/userguide/stored-procedures/index.html">
-    		<item name="9.1 Selecting Objects With a Stored Procedure"  href="/userguide/stored-procedures/select.html"/>
-    		<item name="9.2 Executing an Arbitrary Stored Procedure"  href="/userguide/stored-procedures/any.html"/>
+    		<item name="9.1 Selecting Objects"  href="/userguide/stored-procedures/select.html"/>
+    		<item name="9.2 Executing a Stored Procedure"  href="/userguide/stored-procedures/any.html"/>
     	</item>
     	
     	<item name="10. Using Expressions"  href="/userguide/expressions/index.html">
-    		<item name="10.1 General Approach to Building Expressions"  href="/userguide/expressions/common.html"/>
+    		<item name="10.1 Building Expressions"  href="/userguide/expressions/common.html"/>
     		<item name="10.2 Path Expressions"  href="/userguide/expressions/path.html"/>
     		<item name="10.3 Simplified Expression API"  href="/userguide/expressions/shortcut.html"/>
     		<item name="10.4 NULL handling"  href="/userguide/expressions/nulls.html"/>
@@ -92,7 +92,7 @@
         <item name="11. Performance Tuning"  href="/userguide/perform/index.html">
     		<item name="11.1 Prefetching"  href="/userguide/perform/prefetching.html"/>
     		<item name="11.2 Data Rows"  href="/userguide/perform/data-rows.html"/>
-    		<item name="11.3 ResultIterator: Incremental Data Processing"  href="/userguide/perform/result-iterator.html"/>
+    		<item name="11.3 Iterating Through Data Rows"  href="/userguide/perform/result-iterator.html"/>
     		<item name="11.4 Paged Queries"  href="/userguide/perform/paged-queries.html"/>
     	</item>
     	
@@ -105,12 +105,12 @@
     		<item name="13.2 Web Applications"  href="/userguide/deploy/web-application.html"/>
     		<item name="13.3 Customizing Configuration"  href="/userguide/deploy/custom.html"/>
     		<item name="13.4 Using JNDI"  href="/userguide/deploy/jndi.html"/>
-    		<item name="13.5 Deployment Configuration With Ant"  href="/userguide/deploy/cdeploy.html"/>
+    		<item name="13.5 Deployment with Ant"  href="/userguide/deploy/cdeploy.html"/>
     		<item name="13.6 Configuring Logging"  href="/userguide/deploy/logging.html"/>
     	</item>
     	
     	<item name="14. Miscellaneous Information"  href="/userguide/misc.html">
-    		<item name="14.1 Cayenne and WebObjects"  href="/userguide/misc.html#webobjects"/>
+    		<item name="14.1 Cayenne and WebObjects"  href="/userguide/misc.html"/>
     	</item>
     </toc-user-guide>
 </project>

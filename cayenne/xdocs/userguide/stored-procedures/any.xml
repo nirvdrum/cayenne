@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="9. Using Stored Procedures"/>
 <body>
     <section name="9. Using Stored Procedures">
-    <subsection name="9.2 Executing an Arbitrary Stored Procedure">
+    <subsection name="9.2 Executing a Stored Procedure">
 		<p>Previous chapter showed how to select a single set of data rows
 		using a ProcedureQuery. In a more general case stored procedures can return multiple 
 		sets of data, execute update/delete/insert queries, etc. To collect the results of

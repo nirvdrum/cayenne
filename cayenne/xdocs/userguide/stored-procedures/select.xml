@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="9. Using Stored Procedures"/>
 <body>
     <section name="9. Using Stored Procedures">
-    <subsection name="9.1 Selecting Objects With a Stored Procedure">
+    <subsection name="9.1 Selecting Objects">
 		<p>If a stored procedure is known to return at least one result set, procedure 
 		queries can be executed just like normal select queries. Of course in addtion to returning
 		data, such procedures can perform any other database operations. </p>

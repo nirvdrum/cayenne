@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Quick Start</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="3. Quick Start"/>
 <body>
     <section name="3. Quick Start">
       	<p>Before getting any deeper into details of Cayenne design, it may be helpful to go through

@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Installation</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="2. Installation"/>
 <body>
     <section name="2. Installation">
         <subsection name="2.1 System Requirements" anchor="sys_req">

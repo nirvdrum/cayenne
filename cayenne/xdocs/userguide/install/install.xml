@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Installation</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="2. Installation"/>
 <body>
     <section name="2. Installation">
-        <subsection name="2.2 Installation" anchor="inst">
+        <subsection name="2.2 Installation">
             <p>Installation of Cayenne is simple. It consists of downloading 
             the distribution, unpacking it and making JAR files available to the 
             applications.</p>

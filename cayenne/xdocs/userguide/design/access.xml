@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Design</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="4. Design"/>
 <body>
     <section name="4. Design">
             <subsection name="4.4 Access Classes" anchor="access_classes">

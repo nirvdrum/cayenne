@@ -1,10 +1,10 @@
 <document>
 <title>User Guide - Using Expressions</title>
-<toc name="toc-user-guide"/>    
+<toc name="toc-user-guide" chapter="10. Using Expressions"/>  
 <body>
     <section name="10. Using Expressions">        
-		<subsection name="10.1 General Approach to Building Expressions">
-		<p>There is a very generic way to build any semantically valid 
+		<subsection name="10.1 Building Expressions">
+		<p>There is a generic way to build any semantically valid 
 		Cayenne expression.	Internally all expressions are categorized by the 
 		number of operands as unary, binary, and ternary. <a href=
         "../../api/cayenne/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory

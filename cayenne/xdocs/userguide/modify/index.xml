@@ -1,6 +1,6 @@
 <document>
 <title>User Guide - Modifying DataObjects</title>
-<toc name="toc-user-guide"/>
+<toc name="toc-user-guide" chapter="8. Modifying DataObjects"/>
 <body>
     <section name="8. Modifying DataObjects">
     	<p>Normally changes to DataObjects are done via simple "set*" method calls.
