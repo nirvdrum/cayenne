@@ -52,69 +52,70 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
+
+import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 
 public class CDOOne2OneDepTst extends CayenneDOTestBase {
-   
+
     public void test2Null() throws Exception {
-        Artist a1 = newArtist();        
+        Artist a1 = newArtist();
         Painting p1 = newPainting();
-        
+
         // needed to save without errors
         p1.setToArtist(a1);
         ctxt.commitChanges();
-		ctxt = createDataContext();
-        
+        ctxt = createDataContext();
+
         // test database data
         Painting p2 = fetchPainting();
-        
+
         // *** TESTING THIS ***
         assertNull(p2.getToPaintingInfo());
     }
-    
-    
+
     public void testReplaceNull() throws Exception {
-        Artist a1 = newArtist();        
+        Artist a1 = newArtist();
         Painting p1 = newPainting();
-        
+
         // needed to save without errors
         p1.setToArtist(a1);
         ctxt.commitChanges();
-		ctxt = createDataContext();
-        
+        ctxt = createDataContext();
+
         // test database data
         Painting p2 = fetchPainting();
-        
+
         // *** TESTING THIS ***
         p2.setToPaintingInfo(null);
-        
+
         assertNull(p2.getToPaintingInfo());
     }
-    
-    
+
     public void testNewAdd() throws Exception {
-        Artist a1 = newArtist();        
+        Artist a1 = newArtist();
         PaintingInfo pi1 = newPaintingInfo();
         Painting p1 = newPainting();
-        
+
         // needed to save without errors
         p1.setToArtist(a1);
-        
+
         // *** TESTING THIS *** 
         p1.setToPaintingInfo(pi1);
-        
+
         // test before save
         assertSame(pi1, p1.getToPaintingInfo());
         assertSame(p1, pi1.getPainting());
-        
+
         // do save 
         ctxt.commitChanges();
-		ctxt = createDataContext();
+        ctxt = createDataContext();
 
         // test database data
         Painting p2 = fetchPainting();
@@ -122,6 +123,27 @@ public class CDOOne2OneDepTst extends CayenneDOTestBase {
         assertNotNull(pi2);
         assertEquals(textReview, pi2.getTextReview());
     }
-    
-}
 
+    public void testTakeObjectSnapshotDependentFault() throws Exception {
+        // prepare data
+        Artist a1 = newArtist();
+        PaintingInfo pi1 = newPaintingInfo();
+        Painting p1 = newPainting();
+        
+        p1.setToArtist(a1);
+        p1.setToPaintingInfo(pi1);
+        ctxt.commitChanges();
+        
+        ctxt = createDataContext();
+        Painting painting = fetchPainting();
+
+        assertTrue(painting.readPropertyDirectly("toPaintingInfo") instanceof RelationshipFault);
+
+        // test that taking a snapshot does not trigger a fault, and generally works well 
+        Map snapshot = ctxt.currentSnapshot(painting);
+
+        assertEquals(paintingName, snapshot.get("PAINTING_TITLE"));
+        assertTrue(painting.readPropertyDirectly("toPaintingInfo") instanceof RelationshipFault);
+    }
+
+}

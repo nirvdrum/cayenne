@@ -70,20 +70,21 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
+import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.RelationshipDataSource;
+import org.objectstyle.cayenne.access.util.RelationshipFault;
 import org.objectstyle.cayenne.access.util.SelectObserver;
-import org.objectstyle.cayenne.access.util.DataRowUtils;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.event.EventManager;
@@ -426,12 +427,13 @@ public class DataContext implements QueryEngine, Serializable {
             if (rel.isToDependentEntity()) {
                 continue;
             }
-
-            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
-            if (target == null) {
+            
+            Object targetObject = anObject.readPropertyDirectly(relName);
+            if (targetObject == null || (targetObject instanceof RelationshipFault)) {
                 continue;
             }
 
+            DataObject target = (DataObject) targetObject;
             Map idParts = target.getObjectId().getIdSnapshot();
 
             // this may happen in uncommitted objects
