@@ -63,6 +63,8 @@ import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
 public class OracleAdapter extends JdbcAdapter {
@@ -78,7 +80,7 @@ public class OracleAdapter extends JdbcAdapter {
     protected PkGenerator createPkGenerator() {
         return new OraclePkGenerator();
     }
-    
+
     public OperationSorter getOpSorter(DataNode node) {
         synchronized (sorters) {
             OperationSorter sorter = (OperationSorter) sorters.get(node);
@@ -95,5 +97,16 @@ public class OracleAdapter extends JdbcAdapter {
       * to drop all related foreign key constraints. */
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getName() + " CASCADE CONSTRAINTS";
+    }
+
+ 
+    /** Returns Oracle-specific classes for SELECT queries. */
+    protected Class queryTranslatorClass(Query q) {
+        if(q instanceof SelectQuery) {
+            return OracleSelectTranslator.class;
+        }
+        else {
+            return super.queryTranslatorClass(q);
+        }
     }
 }

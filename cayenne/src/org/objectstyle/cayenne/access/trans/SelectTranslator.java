@@ -86,6 +86,14 @@ public class SelectTranslator extends SelectQueryAssembler {
     private boolean forceDistinct;
     
 
+    /** 
+     * Returns a list of DbAttributes representing columns
+     * in this query.
+     */
+    protected List getColumnList() {
+        return columnList;
+    }
+    
     /** Returns ordered list of names that should be assigned as keys
      * for values fetched from the database. ResultSet column names are ignored, 
      * names specified in the query are used instead. */

@@ -104,7 +104,6 @@ public abstract class QueryAssembler extends QueryTranslator {
      */
     public abstract String aliasForTable(DbEntity dbEnt);
 
-
     public ObjEntity getRootEntity() {
         return engine.lookupEntity(query.getObjEntityName());
     }
@@ -127,11 +126,19 @@ public abstract class QueryAssembler extends QueryTranslator {
 
     /** Translates internal query into PreparedStatement. */
     public PreparedStatement createStatement(Level logLevel) throws Exception {
-
         String sqlStr = createSqlString();
         QueryLogger.logQuery(logLevel, sqlStr, values);
         PreparedStatement stmt = con.prepareStatement(sqlStr);
+        initStatement(stmt);
+        return stmt;
+    }
 
+    /** 
+     * Initializes prepared statements with collected parameters. 
+     * Called internally from "createStatement". Cayenne users
+     * shouldn't normally call it directly.
+     */
+    protected void initStatement(PreparedStatement stmt) throws Exception {
         if (values != null && values.size() > 0) {
             int len = values.size();
             for (int i = 0; i < len; i++) {
@@ -161,6 +168,5 @@ public abstract class QueryAssembler extends QueryTranslator {
                 }
             }
         }
-        return stmt;
     }
 }
