@@ -56,8 +56,10 @@
 package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
+import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.event.EntityEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
@@ -66,6 +68,8 @@ import org.objectstyle.cayenne.util.EntityMergeSupport;
  * @author Andrei Adamchik
  */
 public class ObjEntitySyncAction extends CayenneAction {
+	static Logger logObj = Logger.getLogger(ObjEntitySyncAction.class.getName());
+	
 	public static final String ACTION_NAME = "Sync ObjEntity with DbEntity";
 
 	public ObjEntitySyncAction() {
@@ -92,6 +96,7 @@ public class ObjEntitySyncAction extends CayenneAction {
 			// this seems to be the only way to refresh the view
 			mediator.fireObjEntityEvent(
 				new EntityEvent(this, ent, EntityEvent.REMOVE));
+
 			mediator.fireObjEntityEvent(
 				new EntityEvent(this, ent, EntityEvent.ADD));
 		}

@@ -90,9 +90,9 @@ public class ObjAttributePane
 	Mediator mediator;
 	CayenneTable table;
 
-	public ObjAttributePane(Mediator temp_mediator) {
+	public ObjAttributePane(Mediator mediator) {
 		super();
-		mediator = temp_mediator;
+		this.mediator = mediator;
 		mediator.addObjEntityDisplayListener(this);
 		mediator.addObjEntityListener(this);
 		mediator.addObjAttributeListener(this);
@@ -115,14 +115,14 @@ public class ObjAttributePane
 				(ObjAttributeTableModel) table.getModel();
 			rel = model.getAttribute(table.getSelectedRow());
 		}
-		AttributeDisplayEvent ev;
-		ev =
+		AttributeDisplayEvent ev =
 			new AttributeDisplayEvent(
 				this,
 				rel,
 				mediator.getCurrentObjEntity(),
 				mediator.getCurrentDataMap(),
 				mediator.getCurrentDataDomain());
+
 		mediator.fireObjAttributeDisplayEvent(ev);
 	}
 

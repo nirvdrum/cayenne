@@ -116,7 +116,8 @@ public class CayenneTable extends JTable {
 	public void editingStopped(ChangeEvent e) {
 		super.editingStopped(e);
 
-		if (getSelectedRow() >= 0) {
+        // only go down one row if we are editing text
+		if (getSelectedRow() >= 0 && getSelectedTextComponent() != null) {
 			select(getSelectedRow() + 1);
 		}
 

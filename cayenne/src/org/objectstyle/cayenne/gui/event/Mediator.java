@@ -641,7 +641,7 @@ public class Mediator {
 			ObjAttributeDisplayListener temp =
 				(ObjAttributeDisplayListener) list[i];
 			temp.currentObjAttributeChanged(e);
-		} // End for()
+		}
 	}
 
 	/** Notifies all listeners of the change(add, remove) and does the change.*/

@@ -100,7 +100,7 @@ public class EntityDisplayEvent extends EventObject {
 		Object src,
 		Entity entity,
 		DataMap dataMap,
-		DataDomain tempDomain,
+		DataDomain domain,
 		boolean tabReset) {
 			
 		this(src, entity, tabReset);
