@@ -120,7 +120,7 @@
 Defines a Cayenne Query that can be either at the DataMap
 level, or linked to an entity or procedure.
 -->
-<!ELEMENT query (property*, (qualifier | sql)? )>
+<!ELEMENT query (property*, result-column*, (sql* | (qualifier?, ordering*, prefetch*)? )>
 <!ATTLIST query
         name CDATA #REQUIRED
         class CDATA #REQUIRED
@@ -129,12 +129,24 @@ level, or linked to an entity or procedure.
 >
 
 <!-- ===================================================
-Defines a property of an object.
+Defines a property of an object. For example this can be
+a query pageSize or fetchLimit.
 -->
 <!ELEMENT property>
 <!ATTLIST property
 	name CDATA #REQUIRED
 	value CDATA #REQUIRED
+>
+
+<!-- ===================================================
+Defines a query ResultSet column. This can be viewed as 
+a stripped down combination of ObjAttribute and DbAttribute. 
+-->
+<!ELEMENT result-column>
+<!ATTLIST result-column
+	label CDATA #IMPLIED
+	db-type CDATA #REQUIRED
+	obj-type CDATA #REQUIRED
 >
 
 <!-- ===================================================
@@ -146,9 +158,15 @@ $param2".
 
 <!-- ===================================================
 Defines arbitrary SQL statement, normally wrapped in 
-CDATA section.
+CDATA section. Note that SQL statement can be customized
+for different SQL dialects per DbAdapter class. If no
+adapter-specific statement is found, the one with no
+adapter label is used by default
 -->
 <!ELEMENT sql (#PCDATA)>
+<!ATTLIST sql
+        adapterClass CDATA #IMPLIED
+>
 
 
 <!-- =================================================== 
