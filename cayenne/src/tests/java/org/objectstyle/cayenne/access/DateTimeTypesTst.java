@@ -101,7 +101,11 @@ public class DateTimeTypesTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(DateTest.class);
         DateTest testRead = (DateTest) context.performQuery(q).get(0);
         assertNotNull(testRead.getTimeColumn());
-        assertEquals(nowTime, testRead.getTimeColumn());
+        
+        // OpenBase fails to store seconds for the time
+        // do an approximate match rounding to minutes
+        
+        assertTrue(Math.abs(nowTime.getTime() - testRead.getTimeColumn().getTime()) < 1000 * 60);
     }
 
     public void testTimestamp() throws Exception {
