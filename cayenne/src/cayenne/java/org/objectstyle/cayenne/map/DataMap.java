@@ -80,12 +80,12 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Andrei Adamchik  
  * @author Craig Miskell
  */
-public class DataMap implements XMLSerializable, EntityNamespace {
+public class DataMap implements XMLSerializable, MappingNamespace {
     private static Logger logObj = Logger.getLogger(DataMap.class);
 
     protected String name;
     protected String location;
-    protected EntityNamespace namespace;
+    protected MappingNamespace namespace;
 
     // ====================================================
     // DataMaps that provide dependencies for this DataMap
@@ -849,7 +849,7 @@ public class DataMap implements XMLSerializable, EntityNamespace {
      * 
      * @since 1.1
      */
-    public EntityNamespace getNamespace() {
+    public MappingNamespace getNamespace() {
         return namespace;
     }
 
@@ -860,7 +860,7 @@ public class DataMap implements XMLSerializable, EntityNamespace {
      * 
      * @since 1.1
      */
-    public void setNamespace(EntityNamespace namespace) {
+    public void setNamespace(MappingNamespace namespace) {
         this.namespace = namespace;
     }
 }

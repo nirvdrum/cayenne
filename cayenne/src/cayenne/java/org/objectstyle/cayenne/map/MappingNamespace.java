@@ -58,18 +58,34 @@ package org.objectstyle.cayenne.map;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Defines a container API for DbEntities, ObjEntities, Procedures, Queries 
+ * Defines API of a container of DbEntities, ObjEntities, Procedures, Queries 
  * and other mapping objects.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public interface EntityNamespace {
+public interface MappingNamespace {
+    /**
+     * Returns DbEntity for a given name, or null if no
+     * such DbEntity is found in the MappingNamespace.
+     */
     public DbEntity getDbEntity(String name);
 
+    /**
+     * Returns ObjEntity for a given name, or null if no
+     * such ObjEntity is found in the MappingNamespace.
+     */
     public ObjEntity getObjEntity(String name);
 
+    /**
+     * Returns Procedure for a given name, or null if no
+     * such Procedure is found in the MappingNamespace.
+     */
     public Procedure getProcedure(String name);
 
+    /**
+     * Returns Query for a given name, or null if no
+     * such Query is found in the MappingNamespace.
+     */
     public Query getQuery(String name);
 }

@@ -59,7 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.EntityNamespace;
+import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.query.Query;
 /**
  * @author Andrei Adamchik
  */
-public class MockupEntityNamespace implements EntityNamespace {
+public class MockupMappingNamespace implements MappingNamespace {
     private Map dbEntities = new HashMap();
     private Map objEntities = new HashMap();
     private Map queries = new HashMap();

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.map;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.util.MockupEntityNamespace;
+import org.objectstyle.cayenne.unit.util.MockupMappingNamespace;
 import org.objectstyle.cayenne.unit.util.MockupQuery;
 
 /**
@@ -78,7 +78,7 @@ public class DataMapNamespaceTst extends TestCase {
     public void testNamespace() {
         assertNull(map.getNamespace());
 
-        EntityNamespace namespace = new MockupEntityNamespace();
+        MappingNamespace namespace = new MockupMappingNamespace();
         map.setNamespace(namespace);
         assertSame(namespace, map.getNamespace());
 
@@ -87,7 +87,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetDbEntity() throws Exception {
-        MockupEntityNamespace namespace = new MockupEntityNamespace();
+        MockupMappingNamespace namespace = new MockupMappingNamespace();
         map.setNamespace(namespace);
 
         DbEntity e1 = new DbEntity("entity");
@@ -104,7 +104,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetObjEntity() throws Exception {
-        MockupEntityNamespace namespace = new MockupEntityNamespace();
+        MockupMappingNamespace namespace = new MockupMappingNamespace();
         map.setNamespace(namespace);
 
         ObjEntity e1 = new ObjEntity("entity");
@@ -121,7 +121,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetProcedure() throws Exception {
-        MockupEntityNamespace namespace = new MockupEntityNamespace();
+        MockupMappingNamespace namespace = new MockupMappingNamespace();
         map.setNamespace(namespace);
 
         Procedure p1 = new Procedure("procedure");
@@ -138,7 +138,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetQuery() throws Exception {
-        MockupEntityNamespace namespace = new MockupEntityNamespace();
+        MockupMappingNamespace namespace = new MockupMappingNamespace();
         map.setNamespace(namespace);
 
         Query q1 = new MockupQuery("query");

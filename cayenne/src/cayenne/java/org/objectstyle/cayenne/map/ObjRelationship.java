@@ -370,8 +370,7 @@ public class ObjRelationship extends Relationship implements EventListener {
                     + firstRel.getName());
         }
 
-        DbEntity intermediateEntity =
-            map.getDbEntity(firstRel.getTargetEntityName(), true);
+        DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName());
         List pkAttribs = intermediateEntity.getPrimaryKey();
 
         Iterator allAttribs = intermediateEntity.getAttributes().iterator();

@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class EntityResolver
     extends org.objectstyle.cayenne.access.EntityResolver
-    implements EntityNamespace {
+    implements MappingNamespace {
     // NOTE: this class explicitly overrides all superclass methods to avoid
     // deprecation warnings all over the code.
 
