@@ -226,21 +226,26 @@ public class DbEntityPane
 			parentEntities.setSelectedIndex(-1);
 		}
 	}
-	
+
 	/**
 	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == parentEntities) {
-			DerivedDbEntity current = (DerivedDbEntity)mediator.getCurrentDbEntity();
-			String name = (String)parentEntities.getSelectedItem();
-			DbEntity ent = (name != null) ? mediator.getCurrentDataMap().getDbEntity(name, true) : null;
-			((DerivedDbEntity)mediator.getCurrentDbEntity()).setParentEntity(ent);
-			
-			EntityEvent event = new EntityEvent(this, current);
-			mediator.fireDbEntityEvent(event);
+		if (e.getSource() == parentEntities) {
+			DbEntity current = mediator.getCurrentDbEntity();
+
+			if (current instanceof DerivedDbEntity) {
+				String name = (String) parentEntities.getSelectedItem();
+				DbEntity ent =
+					(name != null)
+						? mediator.getCurrentDataMap().getDbEntity(name, true)
+						: null;
+				((DerivedDbEntity) current).setParentEntity(ent);
+
+				EntityEvent event = new EntityEvent(this, current);
+				mediator.fireDbEntityEvent(event);
+			}
 		}
 	}
-
 
 }

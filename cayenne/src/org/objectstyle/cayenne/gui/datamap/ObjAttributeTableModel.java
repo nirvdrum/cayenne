@@ -85,9 +85,6 @@ class ObjAttributeTableModel extends CayenneTableModel {
 	protected ObjEntity entity;
 	protected DbEntity dbEntity;
 
-	/** Whether to show the mapping to the db attributes.*/
-	private boolean showDb;
-
 	public ObjAttributeTableModel(
 		ObjEntity entity,
 		Mediator mediator,
@@ -96,7 +93,6 @@ class ObjAttributeTableModel extends CayenneTableModel {
 		super(mediator, eventSource, entity.getAttributeList());
 		this.entity = entity;
 		this.dbEntity = entity.getDbEntity();
-		this.showDb = (dbEntity != null);
 	}
 
 	/**
@@ -122,23 +118,25 @@ class ObjAttributeTableModel extends CayenneTableModel {
 			return;
 		}
 
+        boolean wasShowing = isShowingDb();
 		dbEntity = entity.getDbEntity();
-		showDb = (null != dbEntity);
+		boolean isShowing = isShowingDb();
 
-		if (dbEntity == null
-			&& entity.getDbEntity() != null
-			|| dbEntity != null
-			&& entity.getDbEntity() == null) {
+		if (wasShowing != isShowing) {
 			fireTableStructureChanged();
 		}
 		
 		fireTableDataChanged();
 	}
+	
+	public boolean isShowingDb() {
+		return dbEntity != null;
+	}
 
 	public int getColumnCount() {
 		// If showing only obj attributes, show 2 columns 
 		// otherwise show 5 additional columns (7 total) for Db Attributes.
-		return (showDb) ? 4 : 2;
+		return (isShowingDb()) ? 4 : 2;
 	}
 
 	public String getColumnName(int column) {
