@@ -53,37 +53,84 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.modeler.editor;
 
-import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.Query;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JCheckBox;
+
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
- * A QueryBuilder for stored procedure-based queries.
+ * A panel that supports editing the properties of a query based on ObjEntity.
  * 
- * @since 1.1
  * @author Andrei Adamchik
  */
-class ProcedureQueryBuilder extends QueryBuilder {
+public class ObjectQueryPropertiesPanel extends SelectPropertiesPanel {
 
-    /**
-     * Returns a ProcedureQuery.
-     */
-    public Query getQuery() {
-        ProcedureQuery query = new ProcedureQuery();
-        query.setSelecting(selecting);
+    protected JCheckBox dataRows;
 
-        Object root = getRoot();
-
-        if (root != null) {
-            query.setRoot(root);
-        }
-
-        query.setName(name);
-        query.setResultClassName(resultType);
-        query.initWithProperties(properties);
-
-        return query;
+    public ObjectQueryPropertiesPanel(EventController mediator) {
+        super(mediator);
     }
 
+    protected void initView() {
+        super.initView();
+        // create widgets
+
+        dataRows = new JCheckBox();
+
+        // assemble
+        CellConstraints cc = new CellConstraints();
+        FormLayout layout = new FormLayout(
+                "right:max(80dlu;pref), 3dlu, left:max(50dlu;pref), fill:max(120dlu;pref)",
+                "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
+        PanelBuilder builder = new PanelBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.addSeparator("", cc.xywh(1, 1, 4, 1));
+
+        builder.addLabel("Result Caching:", cc.xy(1, 3));
+        builder.add(cachePolicy, cc.xywh(3, 3, 2, 1));
+        builder.addLabel("Fetch Data Rows:", cc.xy(1, 7));
+        builder.add(dataRows, cc.xy(3, 7));
+        builder.addLabel("Refresh Results:", cc.xy(1, 9));
+        builder.add(refreshesResults, cc.xy(3, 9));
+        builder.addLabel("Fetch Limit, Rows:", cc.xy(1, 11));
+        builder.add(fetchLimit.getTextField(), cc.xy(3, 11));
+        builder.addLabel("Page Size:", cc.xy(1, 13));
+        builder.add(pageSize.getTextField(), cc.xy(3, 13));
+
+        this.setLayout(new BorderLayout());
+        this.add(builder.getPanel(), BorderLayout.CENTER);
+    }
+
+    protected void initController() {
+        super.initController();
+
+        dataRows.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                Boolean b = dataRows.isSelected() ? Boolean.TRUE : Boolean.FALSE;
+                setQueryProperty("fetchingDataRows", b);
+            }
+        });
+    }
+
+    /**
+     * Updates the view from the current model state. Invoked when a currently displayed
+     * query is changed.
+     */
+    public void initFromModel(GenericSelectQuery query) {
+        super.initFromModel(query);
+
+        dataRows.setSelected(query.isFetchingDataRows());
+    }
 }

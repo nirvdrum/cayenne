@@ -58,23 +58,18 @@ package org.objectstyle.cayenne.modeler.editor;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.CellRenderers;
-import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;
@@ -93,9 +88,8 @@ public class SQLTemplateMainTab extends JPanel {
 
     protected EventController mediator;
     protected TextFieldAdapter name;
-    protected JComboBox queryRoot;
     protected JCheckBox selecting;
-    protected SelectQueryPropertiesPanel properties;
+    protected SelectPropertiesPanel properties;
 
     public SQLTemplateMainTab(EventController mediator) {
         this.mediator = mediator;
@@ -113,28 +107,36 @@ public class SQLTemplateMainTab extends JPanel {
             }
         };
 
-        queryRoot = CayenneWidgetFactory.createComboBox();
-        queryRoot.setRenderer(CellRenderers.listRendererWithIcons());
-
         selecting = new JCheckBox();
 
-        properties = new SelectQueryPropertiesPanel(mediator);
+        properties = new RawQueryPropertiesPanel(mediator) {
+
+            protected void setEntity(ObjEntity entity) {
+                SQLTemplateMainTab.this.setEntity(entity);
+            }
+
+            public ObjEntity getEntity(GenericSelectQuery query) {
+                if (query instanceof SQLTemplate) {
+                    return SQLTemplateMainTab.this.getEntity((SQLTemplate) query);
+                }
+
+                return null;
+            }
+        };
 
         // assemble
         CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
                 "right:max(80dlu;pref), 3dlu, fill:max(170dlu;pref)",
-                "p, 3dlu, p, 3dlu, p, 3dlu, p");
+                "p, 3dlu, p, 3dlu, p");
         PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.addSeparator("SQLTemplate Settings", cc.xywh(1, 1, 3, 1));
         builder.addLabel("Query Name:", cc.xy(1, 3));
         builder.add(name.getTextField(), cc.xy(3, 3));
-        builder.addLabel("Query Root:", cc.xy(1, 5));
-        builder.add(queryRoot, cc.xy(3, 5));
-        builder.addLabel("Is Selecting:", cc.xy(1, 7));
-        builder.add(selecting, cc.xy(3, 7));
+        builder.addLabel("Is Selecting:", cc.xy(1, 5));
+        builder.add(selecting, cc.xy(3, 5));
 
         this.setLayout(new BorderLayout());
         this.add(builder.getPanel(), BorderLayout.NORTH);
@@ -142,17 +144,6 @@ public class SQLTemplateMainTab extends JPanel {
     }
 
     private void initController() {
-
-        queryRoot.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
-                Query query = getQuery();
-                if (query != null) {
-                    query.setRoot(queryRoot.getModel().getSelectedItem());
-                    mediator.fireQueryEvent(new QueryEvent(this, query));
-                }
-            }
-        });
 
         selecting.addActionListener(new ActionListener() {
 
@@ -186,29 +177,6 @@ public class SQLTemplateMainTab extends JPanel {
         name.setText(sqlQuery.getName());
         selecting.setSelected(sqlQuery.isSelecting());
         properties.setEnabled(sqlQuery.isSelecting());
-
-        // init root choices and title label..
-
-        // - SQLTemplate supports ObjEntity, DbEntity, DataMap roots
-
-        // TODO: now we only allow roots from the current map,
-        // since query root is fully resolved during map loading,
-        // making it impossible to reference other DataMaps.
-
-        DataMap map = mediator.getCurrentDataMap();
-        List roots = new ArrayList();
-        roots.add(map);
-        roots.addAll(map.getObjEntities());
-        roots.addAll(map.getDbEntities());
-
-        if (roots.size() > 1) {
-            Collections.sort(roots, Comparators.getDataMapChildrenComparator());
-        }
-
-        DefaultComboBoxModel model = new DefaultComboBoxModel(roots.toArray());
-        model.setSelectedItem(query.getRoot());
-        queryRoot.setModel(model);
-
         properties.initFromModel(sqlQuery);
 
         setVisible(true);
@@ -226,19 +194,19 @@ public class SQLTemplateMainTab extends JPanel {
         if (newName != null && newName.trim().length() == 0) {
             newName = null;
         }
-        
+
         Query query = getQuery();
-        
+
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;
         }
-        
+
         if (newName == null) {
             throw new ValidationException("Query name is required.");
         }
 
         DataMap map = mediator.getCurrentDataMap();
-        
+
         if (map.getQuery(newName) == null) {
             // completely new name, set new name for entity
             QueryEvent e = new QueryEvent(this, query, query.getName());
@@ -250,6 +218,25 @@ public class SQLTemplateMainTab extends JPanel {
             throw new ValidationException("There is another query named '"
                     + newName
                     + "'. Use a different name.");
+        }
+    }
+
+    /**
+     * Returns an entity that maps to a procedure query result class.
+     */
+    ObjEntity getEntity(SQLTemplate query) {
+        return query != null && query.getRoot() instanceof ObjEntity ? (ObjEntity) query
+                .getRoot() : null;
+    }
+
+    void setEntity(ObjEntity entity) {
+        SQLTemplate template = getQuery();
+        if (template != null) {
+            // in case of null entity, set root to DataMap
+            Object root = entity != null ? (Object) entity : mediator.getCurrentDataMap();
+            template.setRoot(root);
+            
+            mediator.fireQueryEvent(new QueryEvent(this, template));
         }
     }
 }

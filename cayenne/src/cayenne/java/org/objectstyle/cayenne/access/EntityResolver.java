@@ -499,7 +499,7 @@ public class EntityResolver {
         // of result type
 
         Object root = (q instanceof ProcedureQuery) ? ((ProcedureQuery) q)
-                .getResultType() : q.getRoot();
+                .getResultClass(Configuration.getResourceLoader()) : q.getRoot();
 
         if (root instanceof DbEntity) {
             throw new CayenneRuntimeException(

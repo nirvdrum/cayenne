@@ -98,7 +98,7 @@ public class SelectQueryMainTab extends JPanel {
     protected JComboBox queryRoot;
     protected TextFieldAdapter qualifier;
     protected JCheckBox distinct;
-    protected SelectQueryPropertiesPanel properties;
+    protected ObjectQueryPropertiesPanel properties;
 
     public SelectQueryMainTab(EventController mediator) {
         this.mediator = mediator;
@@ -128,7 +128,7 @@ public class SelectQueryMainTab extends JPanel {
 
         distinct = new JCheckBox();
 
-        properties = new SelectQueryPropertiesPanel(mediator);
+        properties = new ObjectQueryPropertiesPanel(mediator);
 
         // assemble
         CellConstraints cc = new CellConstraints();

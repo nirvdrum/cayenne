@@ -84,16 +84,7 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * </p>
  * 
  * <pre>
- * 
- *  
- *   
- *    
- *              SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
- *      
- *     
- *    
- *   
- *  
+ *   SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a
  * </pre>
  * 
  * <p>
@@ -478,10 +469,16 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         this.parameters = parameters;
     }
 
+    /**
+     * Returns true if SQLTemplate is expected to return a ResultSet.
+     */
     public boolean isSelecting() {
         return selecting;
     }
 
+    /**
+     * Sets whether SQLTemplate is expected to return a ResultSet.
+     */
     public void setSelecting(boolean b) {
         selecting = b;
     }

@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.QueryBuilder;
 import org.objectstyle.cayenne.util.XMLEncoder;
@@ -99,10 +100,11 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * 
      * @since 1.1
      */
-    protected Class resultType;
+    protected String resultClassName;
 
     protected Map parameters = new HashMap();
     protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
+    protected boolean selecting;
 
     /**
      * Creates an empty procedure query.
@@ -139,7 +141,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery(Procedure procedure, Class resultType) {
         setRoot(procedure);
-        setResultType(resultType);
+        setResultClassName(resultType != null ? resultType.getName() : null);
     }
 
     /**
@@ -147,7 +149,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      */
     public ProcedureQuery(String procedureName, Class resultType) {
         setRoot(procedureName);
-        setResultType(resultType);
+        setResultClassName(resultType != null ? resultType.getName() : null);
     }
 
     /**
@@ -193,9 +195,13 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
             encoder.print(rootString);
         }
 
-        if (resultType != null) {
+        if (resultClassName != null) {
             encoder.print("\" result-type=\"");
-            encoder.print(resultType.getName());
+            encoder.print(resultClassName);
+        }
+
+        if (!selecting) {
+            encoder.print("\" selecting=\"false");
         }
 
         encoder.println("\">");
@@ -223,7 +229,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         }
 
         query.setLoggingLevel(logLevel);
-        query.setResultType(resultType);
+        query.setResultClassName(resultClassName);
 
         selectProperties.copyToProperties(query.selectProperties);
         query.setParameters(parameters);
@@ -362,8 +368,36 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * 
      * @since 1.1
      */
-    public Class getResultType() {
-        return resultType;
+    public String getResultClassName() {
+        return resultClassName;
+    }
+
+    /**
+     * Returns Java class of the DataObjects returned by this query. If ClassLoader
+     * argument is null, uses Class.forName(..) to discover result class.
+     * 
+     * @since 1.1
+     */
+    public Class getResultClass(ClassLoader classLoader) {
+        if (this.getResultClassName() == null) {
+            return null;
+        }
+
+        try {
+            // tolerate null class loader
+            if (classLoader == null) {
+                return Class.forName(this.getResultClassName());
+            }
+            else {
+                return classLoader.loadClass(this.getResultClassName());
+            }
+        }
+        catch (ClassNotFoundException e) {
+            throw new CayenneRuntimeException("Failed to load class for name '"
+                    + this.getResultClassName()
+                    + "': "
+                    + e.getMessage(), e);
+        }
     }
 
     /**
@@ -372,7 +406,25 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
      * 
      * @since 1.1
      */
-    public void setResultType(Class resultType) {
-        this.resultType = resultType;
+    public void setResultClassName(String resultClassName) {
+        this.resultClassName = resultClassName;
+    }
+
+    /**
+     * Returns true if ProcedureQuery is expected to return a ResultSet.
+     * 
+     * @since 1.1
+     */
+    public boolean isSelecting() {
+        return selecting;
+    }
+
+    /**
+     * Sets whether ProcedureQuery is expected to return a ResultSet.
+     * 
+     * @since 1.1
+     */
+    public void setSelecting(boolean b) {
+        selecting = b;
     }
 }

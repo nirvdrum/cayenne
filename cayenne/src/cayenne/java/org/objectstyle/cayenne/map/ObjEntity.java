@@ -176,6 +176,10 @@ public class ObjEntity extends Entity {
      * @since 1.0.7
      */
     public Class getJavaClass(ClassLoader classLoader) {
+        if(this.getClassName() == null) {
+            return null;
+        }
+        
         try {
             // tolerate null class loader
             if (classLoader == null) {

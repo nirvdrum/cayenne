@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler.editor;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
@@ -80,19 +79,14 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.validation.ValidationException;
 
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-
 /**
  * A panel that supports editing the properties of a GenericSelectQuery.
  * 
  * @author Andrei Adamchik
  */
-public class SelectQueryPropertiesPanel extends JPanel {
+public abstract class SelectPropertiesPanel extends JPanel {
 
-    private static final Logger logObj = Logger
-            .getLogger(SelectQueryPropertiesPanel.class);
+    private static final Logger logObj = Logger.getLogger(SelectPropertiesPanel.class);
 
     private static final Integer ZERO = new Integer(0);
 
@@ -113,26 +107,20 @@ public class SelectQueryPropertiesPanel extends JPanel {
         cachePolicyLabels.put(GenericSelectQuery.SHARED_CACHE, SHARED_CACHE_LABEL);
     }
 
-    protected EventController mediator;
-
-    protected JCheckBox dataRows;
-    protected JCheckBox refreshesResults;
     protected TextFieldAdapter fetchLimit;
     protected TextFieldAdapter pageSize;
     protected JComboBox cachePolicy;
+    protected JCheckBox refreshesResults;
 
-    public SelectQueryPropertiesPanel(EventController mediator) {
+    protected EventController mediator;
+
+    public SelectPropertiesPanel(EventController mediator) {
         this.mediator = mediator;
         initView();
         initController();
     }
 
-    private void initView() {
-        // create widgets
-
-        dataRows = new JCheckBox();
-        refreshesResults = new JCheckBox();
-
+    protected void initView() {
         fetchLimit = new TextFieldAdapter(CayenneWidgetFactory.createTextField(7)) {
 
             protected void initModel(String text) {
@@ -149,40 +137,15 @@ public class SelectQueryPropertiesPanel extends JPanel {
 
         cachePolicy = CayenneWidgetFactory.createComboBox();
         cachePolicy.setRenderer(new CachePolicyRenderer());
-
-        // assemble
-        CellConstraints cc = new CellConstraints();
-        FormLayout layout = new FormLayout(
-                "right:max(80dlu;pref), 3dlu, left:max(50dlu;pref) fill:max(120dlu;pref)",
-                "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p");
-        PanelBuilder builder = new PanelBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.addSeparator("", cc.xywh(1, 1, 4, 1));
-
-        builder.addLabel("Result Caching:", cc.xy(1, 3));
-        builder.add(cachePolicy, cc.xywh(3, 3, 2, 1));
-        builder.addLabel("Fetch Data Rows:", cc.xy(1, 7));
-        builder.add(dataRows, cc.xy(3, 7));
-        builder.addLabel("Refresh Objects:", cc.xy(1, 9));
-        builder.add(refreshesResults, cc.xy(3, 9));
-        builder.addLabel("Fetch Limit, Rows:", cc.xy(1, 11));
-        builder.add(fetchLimit.getTextField(), cc.xy(3, 11));
-        builder.addLabel("Page Size:", cc.xy(1, 13));
-        builder.add(pageSize.getTextField(), cc.xy(3, 13));
-
-        this.setLayout(new BorderLayout());
-        this.add(builder.getPanel(), BorderLayout.CENTER);
-
-        // store children
+        refreshesResults = new JCheckBox();
     }
 
-    private void initController() {
-        dataRows.addActionListener(new ActionListener() {
+    protected void initController() {
+        cachePolicy.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent event) {
-                Boolean b = dataRows.isSelected() ? Boolean.TRUE : Boolean.FALSE;
-                setQueryProperty("fetchingDataRows", b);
+                Object policy = cachePolicy.getModel().getSelectedItem();
+                setQueryProperty("cachePolicy", policy);
             }
         });
 
@@ -191,14 +154,6 @@ public class SelectQueryPropertiesPanel extends JPanel {
             public void actionPerformed(ActionEvent event) {
                 Boolean b = refreshesResults.isSelected() ? Boolean.TRUE : Boolean.FALSE;
                 setQueryProperty("refreshingObjects", b);
-            }
-        });
-
-        cachePolicy.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent event) {
-                Object policy = cachePolicy.getModel().getSelectedItem();
-                setQueryProperty("cachePolicy", policy);
             }
         });
     }
@@ -212,24 +167,9 @@ public class SelectQueryPropertiesPanel extends JPanel {
         cacheModel.setSelectedItem(query.getCachePolicy());
         cachePolicy.setModel(cacheModel);
 
-        dataRows.setSelected(query.isFetchingDataRows());
-        refreshesResults.setSelected(query.isRefreshingObjects());
-
         fetchLimit.setText(String.valueOf(query.getFetchLimit()));
         pageSize.setText(String.valueOf(query.getPageSize()));
-    }
-
-    void setQueryProperty(String property, Object value) {
-        Query query = getQuery();
-        if (query != null) {
-            try {
-                PropertyUtils.setProperty(query, property, value);
-                mediator.fireQueryEvent(new QueryEvent(this, query));
-            }
-            catch (Exception ex) {
-                logObj.warn("Error setting property: " + property, ex);
-            }
-        }
+        refreshesResults.setSelected(query.isRefreshingObjects());
     }
 
     void setFetchLimit(String string) {
@@ -268,24 +208,6 @@ public class SelectQueryPropertiesPanel extends JPanel {
         return mediator.getCurrentQuery();
     }
 
-    final class CachePolicyRenderer extends DefaultListCellRenderer {
-
-        public Component getListCellRendererComponent(
-                JList list,
-                Object object,
-                int arg2,
-                boolean arg3,
-                boolean arg4) {
-
-            object = cachePolicyLabels.get(object);
-            if (object == null) {
-                object = NO_CACHE_LABEL;
-            }
-
-            return super.getListCellRendererComponent(list, object, arg2, arg3, arg4);
-        }
-    }
-
     public void setEnabled(boolean flag) {
         super.setEnabled(flag);
 
@@ -297,4 +219,39 @@ public class SelectQueryPropertiesPanel extends JPanel {
             children[i].setEnabled(flag);
         }
     }
+
+    void setQueryProperty(String property, Object value) {
+        Query query = getQuery();
+        if (query != null) {
+            try {
+                PropertyUtils.setProperty(query, property, value);
+                mediator.fireQueryEvent(new QueryEvent(this, query));
+            }
+            catch (Exception ex) {
+                logObj.warn("Error setting property: " + property, ex);
+            }
+        }
+    }
+
+    final class CachePolicyRenderer extends DefaultListCellRenderer {
+
+        public Component getListCellRendererComponent(
+                JList list,
+                Object object,
+                int arg2,
+                boolean arg3,
+                boolean arg4) {
+
+            if (object != null) {
+                object = cachePolicyLabels.get(object);
+            }
+
+            if (object == null) {
+                object = NO_CACHE_LABEL;
+            }
+
+            return super.getListCellRendererComponent(list, object, arg2, arg3, arg4);
+        }
+    }
+
 }

@@ -86,9 +86,9 @@ public class ProcedureQueryTst extends TestCase {
 
     public void testResultType() throws Exception {
         ProcedureQuery query = new ProcedureQuery();
-        assertNull(query.getResultType());
+        assertNull(query.getResultClassName());
 
-        query.setResultType(Object.class);
-        assertSame(Object.class, query.getResultType());
+        query.setResultClassName("abc.AAAA");
+        assertSame("abc.AAAA", query.getResultClassName());
     }
 }

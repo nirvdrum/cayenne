@@ -61,10 +61,12 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
@@ -74,6 +76,7 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -91,6 +94,8 @@ public class ProcedureQueryView extends JPanel {
     protected EventController mediator;
     protected TextFieldAdapter name;
     protected JComboBox queryRoot;
+    protected JCheckBox selecting;
+    protected SelectPropertiesPanel properties;
 
     public ProcedureQueryView(EventController mediator) {
         this.mediator = mediator;
@@ -107,26 +112,43 @@ public class ProcedureQueryView extends JPanel {
                 setQueryName(text);
             }
         };
-
+        selecting = new JCheckBox();
         queryRoot = CayenneWidgetFactory.createComboBox();
         queryRoot.setRenderer(CellRenderers.listRendererWithIcons());
+        properties = new RawQueryPropertiesPanel(mediator) {
+
+            protected void setEntity(ObjEntity entity) {
+                ProcedureQueryView.this.setEntity(entity);
+            }
+
+            public ObjEntity getEntity(GenericSelectQuery query) {
+                if (query instanceof ProcedureQuery) {
+                    return ProcedureQueryView.this.getEntity((ProcedureQuery) query);
+                }
+
+                return null;
+            }
+        };
 
         // assemble
         CellConstraints cc = new CellConstraints();
         FormLayout layout = new FormLayout(
                 "right:max(80dlu;pref), 3dlu, fill:max(170dlu;pref)",
-                "p, 3dlu, p, 3dlu, p");
+                "p, 3dlu, p, 3dlu, p, 3dlu, p");
         PanelBuilder builder = new PanelBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.addSeparator("ProcedureQuery Settings", cc.xywh(1, 1, 3, 1));
         builder.addLabel("Query Name:", cc.xy(1, 3));
         builder.add(name.getTextField(), cc.xy(3, 3));
-        builder.addLabel("Query Root:", cc.xy(1, 5));
+        builder.addLabel("Procedure:", cc.xy(1, 5));
         builder.add(queryRoot, cc.xy(3, 5));
+        builder.addLabel("Is Selecting:", cc.xy(1, 7));
+        builder.add(selecting, cc.xy(3, 7));
 
         this.setLayout(new BorderLayout());
-        this.add(builder.getPanel(), BorderLayout.CENTER);
+        this.add(builder.getPanel(), BorderLayout.NORTH);
+        this.add(properties, BorderLayout.CENTER);
     }
 
     private void initController() {
@@ -148,6 +170,19 @@ public class ProcedureQueryView extends JPanel {
                 initFromModel();
             }
         });
+
+        selecting.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                properties.setEnabled(selecting.isSelected());
+
+                Query query = mediator.getCurrentQuery();
+                if (query instanceof ProcedureQuery) {
+                    ((ProcedureQuery) query).setSelecting(selecting.isSelected());
+                    mediator.fireQueryEvent(new QueryEvent(this, query));
+                }
+            }
+        });
     }
 
     /**
@@ -164,6 +199,8 @@ public class ProcedureQueryView extends JPanel {
 
         ProcedureQuery procedureQuery = (ProcedureQuery) query;
 
+        selecting.setSelected(procedureQuery.isSelecting());
+        properties.setEnabled(procedureQuery.isSelecting());
         name.setText(procedureQuery.getName());
 
         // init root choices and title label..
@@ -185,6 +222,7 @@ public class ProcedureQueryView extends JPanel {
         model.setSelectedItem(query.getRoot());
         queryRoot.setModel(model);
 
+        properties.initFromModel(procedureQuery);
         setVisible(true);
     }
 
@@ -195,22 +233,22 @@ public class ProcedureQueryView extends JPanel {
         if (newName != null && newName.trim().length() == 0) {
             newName = null;
         }
-        
+
         Query query = mediator.getCurrentQuery();
-        if(query == null) {
+        if (query == null) {
             return;
         }
-        
+
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;
         }
-        
+
         if (newName == null) {
             throw new ValidationException("Query name is required.");
         }
 
         DataMap map = mediator.getCurrentDataMap();
-        
+
         if (map.getQuery(newName) == null) {
             // completely new name, set new name for entity
             QueryEvent e = new QueryEvent(this, query, query.getName());
@@ -222,6 +260,42 @@ public class ProcedureQueryView extends JPanel {
             throw new ValidationException("There is another query named '"
                     + newName
                     + "'. Use a different name.");
+        }
+    }
+
+    /**
+     * Returns an entity that maps to a procedure query result class.
+     */
+    ObjEntity getEntity(ProcedureQuery query) {
+        String resultClass = query.getResultClassName();
+        if (resultClass == null) {
+            return null;
+        }
+
+        // currently entity resolver doesn't support lookup by class name
+        // we will have to do manual ObjEntity scan...
+        // TODO: replace this once such indexing is supported
+
+        DataMap map = mediator.getCurrentDataMap();
+        if (map == null) {
+            return null;
+        }
+
+        return map.getObjEntityForJavaClass(resultClass);
+    }
+
+    void setEntity(ObjEntity entity) {
+        Query query = mediator.getCurrentQuery();
+        if (query instanceof ProcedureQuery) {
+            ProcedureQuery procedureQuery = (ProcedureQuery) query;
+            String resultClass = null;
+            
+            if (entity != null) {
+                resultClass = entity.getClassName();
+            }
+            
+            procedureQuery.setResultClassName(resultClass);
+            mediator.fireQueryEvent(new QueryEvent(this, procedureQuery));
         }
     }
 }

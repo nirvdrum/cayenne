@@ -92,6 +92,7 @@ public abstract class QueryBuilder {
     protected DataMap dataMap;
     protected String rootType;
     protected String rootName;
+    protected String resultType;
     protected boolean selecting = true;
 
     /**
@@ -137,6 +138,10 @@ public abstract class QueryBuilder {
     public void setSelecting(String selecting) {
         // "true" is a default per DTD
         this.selecting = ("false".equalsIgnoreCase(selecting)) ? false : true;
+    }
+    
+    public void setResultType(String resultType) {
+        this.resultType = resultType;
     }
 
     /**

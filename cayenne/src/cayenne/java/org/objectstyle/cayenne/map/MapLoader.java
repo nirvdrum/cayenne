@@ -784,11 +784,13 @@ public class MapLoader extends DefaultHandler {
 
         String rootType = attributes.getValue("", "root");
         String rootName = attributes.getValue("", "root-name");
+        String resultType = attributes.getValue("", "result-type");
         String selecting = attributes.getValue("", "selecting");
 
         queryBuilder.setName(name);
         queryBuilder.setRoot(dataMap, rootType, rootName);
         queryBuilder.setSelecting(selecting);
+        queryBuilder.setResultType(resultType);
     }
 
     private void processStartQueryProperty(Attributes attributes) throws SAXException {
