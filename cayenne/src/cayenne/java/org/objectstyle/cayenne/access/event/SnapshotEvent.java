@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access.event;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -67,105 +66,56 @@ import org.objectstyle.cayenne.event.CayenneEvent;
  * 
  * @author Andrei Adamchik
  */
-public abstract class SnapshotEvent extends CayenneEvent implements Serializable {
+public class SnapshotEvent extends CayenneEvent {
 
-    public static SnapshotEvent createEvent(
-        Object source,
+    protected long timestamp;
+    protected Collection deletedIds;
+    protected Map modifiedDiffs;
+    protected Object rootSource;
+
+    public SnapshotEvent(
+        Object postedBy,
+        Object rootSource,
         Map modifiedDiffs,
         Collection deletedIds) {
-
-        RootSnapshotEvent event = new RootSnapshotEvent(source);
-        event.modifiedDiffs = modifiedDiffs;
-        event.deletedIds = deletedIds;
-
-        return event;
+        super(postedBy);
+        this.rootSource = rootSource;
+        this.timestamp = System.currentTimeMillis();
+        this.modifiedDiffs = modifiedDiffs;
+        this.deletedIds = deletedIds;
     }
 
-    public static SnapshotEvent createEvent(Object source, SnapshotEvent rootEvent) {
-        return new ChainedSnapshotEvent(source, rootEvent);
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    protected SnapshotEvent(Object source) {
-        super(source);
+    public Object getRootSource() {
+        return rootSource;
     }
 
-    public abstract Object getRootSource();
+    public Map modifiedDiffs() {
+        return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
+    }
 
-    public abstract Map modifiedDiffs();
-
-    public abstract Collection deletedIds();
-
+    public Collection deletedIds() {
+        return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
+    }
 
     public String toString() {
-    	StringBuffer buffer = new StringBuffer();
-		buffer.append("[SnapshotEvent] root: ").append(getRootSource());
-		
-		Map modified = modifiedDiffs();
-		if(modified != null && !modified.isEmpty()) {
-			buffer.append(", modified " ).append(modified.size()).append(" id(s)");
-		}
-		
-		Collection deleted = deletedIds();
-		if(deleted != null && !deleted.isEmpty()) {
-			buffer.append(", deleted " ).append(deleted.size()).append(" id(s)");
-		}
-		
-    	return buffer.toString();
-    }
-    
-    /**
-     * Subclass of SnapshotEvent representing an event resent
-     * as a result of receiving another event.
-     */
-    static class ChainedSnapshotEvent extends SnapshotEvent {
-        protected SnapshotEvent rootEvent;
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("[SnapshotEvent] source: ").append(getSource());
 
-        ChainedSnapshotEvent(Object source, SnapshotEvent rootEvent) {
-            super(source);
-            this.rootEvent = rootEvent;
+        Map modified = modifiedDiffs();
+        if (modified != null && !modified.isEmpty()) {
+            buffer.append(", modified ").append(modified.size()).append(" id(s)");
         }
 
-        /**
-          * Returns the source of the event that started this sequence of events.
-          */
-        public Object getRootSource() {
-            return rootEvent.getRootSource();
+        Collection deleted = deletedIds();
+        if (deleted != null && !deleted.isEmpty()) {
+            buffer.append(", deleted ").append(deleted.size()).append(" id(s)");
         }
 
-        public Map modifiedDiffs() {
-            return rootEvent.modifiedDiffs();
-        }
-
-        public Collection deletedIds() {
-            return rootEvent.deletedIds();
-        }
+        return buffer.toString();
     }
 
-    /**
-     * Subclass of SnapshotEvent representing an event
-     * generated from scratch by the sender.
-     */
-    static class RootSnapshotEvent extends SnapshotEvent {
-        protected Collection deletedIds;
-        protected Map modifiedDiffs;
- 
-        RootSnapshotEvent(Object source) {
-            super(source);
-        }
-
-        /**
-          * Returns the source of the event that started this sequence of events.
-          */
-        public Object getRootSource() {
-            return getSource();
-        }
-
-        public Map modifiedDiffs() {
-            return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
-        }
-
-        public Collection deletedIds() {
-            return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
-        }
-    }
 }

@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.access.util.QueryUtils;
 public class ObjectStore implements Serializable, SnapshotEventListener {
     private static Logger logObj = Logger.getLogger(ObjectStore.class);
 
+    private long lastCachSync = System.currentTimeMillis();
     protected Map objectMap = new HashMap();
     protected transient Map newObjectMap = null;
 
@@ -98,11 +99,23 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     public ObjectStore(SnapshotCache snapshotCache) {
+    	this();
         setSnapshotCache(snapshotCache);
     }
+    
+    /**
+     * Synchronizes the state of registered DataObjects with
+     * the current state of SnapshotCache.
+     */
+    public synchronized void synchronizeWithCache() {
+		this.lastCachSync = System.currentTimeMillis();
+		
+		// TODO: do the actual synchronization
+    }
+    
 
     /**
-     * Returns a SnapshotCache associated with this object.
+     * Returns a SnapshotCache associated with this ObjectStore.
      */
     public SnapshotCache getSnapshotCache() {
         return snapshotCache;
@@ -526,12 +539,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Processes snapshot change event, updating DataObjects
-     * that have the changes.
+     * SnapshotEventListener implementation that processes snapshot 
+     * change event, updating DataObjects that have the changes.
      */
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
-        if (event.getRootSource() == this) {
+        if (event.getSource() == this) {
             logObj.debug("Ignoring snapshot event sent by us: " + event);
             return;
         }
@@ -543,5 +556,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         
         // TODO: what should we do with deleted objects?
         // I suggest to turn them into TRANSIENT and notify a delegate...
+        
+		this.lastCachSync = event.getTimestamp();
     }
 }

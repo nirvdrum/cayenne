@@ -221,17 +221,13 @@ public class SnapshotCache implements Serializable {
             }
         }
 
-        SnapshotEvent event =
-            SnapshotEvent.createEvent(source, diffs, deletedSnapshotIds);
+        SnapshotEvent event = new SnapshotEvent(this, source, diffs, deletedSnapshotIds);
         if (logObj.isDebugEnabled()) {
             logObj.debug("postSnapshotsChangeEvent: " + event);
         }
 
-        // now notify children;
-        // create a chained event so that its source is SnapshotCache.
-        EventManager.getDefaultManager().postEvent(
-            SnapshotEvent.createEvent(this, event),
-            getSnapshotEventSubject());
+        // notify listeners;
+        EventManager.getDefaultManager().postEvent(event, getSnapshotEventSubject());
     }
 
     /**

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * @author Andrei Adamchik
@@ -66,7 +67,7 @@ public class DataContextSnapshotEventsTst extends MultiContextTestCase {
     public void testUpdatePropagationViaEvents() throws Exception {
         // turn on the events
         getDomain().getSnapshotCache().setNotifyingObjectStores(true);
-        
+
         try {
             // prepare data
             Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
@@ -91,5 +92,35 @@ public class DataContextSnapshotEventsTst extends MultiContextTestCase {
             // reset shared settings to default
             getDomain().getSnapshotCache().setNotifyingObjectStores(false);
         }
+    }
+
+    public void testUpdatePropagationViaExplicitSync() throws Exception {
+
+        // prepare data
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+        artist.setArtistName("version1");
+        context.commitChanges();
+
+        // prepare a second context
+        DataContext altContext = mirrorDataContext(context);
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
+
+        // test update propagation
+        artist.setArtistName("version2");
+        context.commitChanges();
+
+        // before sync
+        assertFalse(
+            Util.nullSafeEquals(artist.getArtistName(), altArtist.getArtistName()));
+
+        altContext.getObjectStore().synchronizeWithCache();
+        
+        // after sync
+        // TODO: uncomment this test when the feature is implemented
+        // assertEquals(artist.getArtistName(), altArtist.getArtistName());
     }
 }
