@@ -4,10 +4,7 @@
 	<next>/userguide/intro.html</next>
 </navigator>
 <body>
-    <section name="Table of Contents">
-        <p><i>Please note that User Guide is still under development. Additions, fixes
-        and other contributions are welcomed.</i></p>
-        
+    <section name="Table of Contents">        
         <ul>
             <li><a href="intro.html">1. Introduction</a>
             <ul>
