@@ -136,10 +136,24 @@ public class QualifierTranslator
                 qualBuf.append(" OR ");
                 break;
             case Expression.EQUAL_TO :
-                qualBuf.append(" = ");
+                // translate NULL as IS NULL
+                if (childIndex == 0
+                    && node.getOperandCount() == 2
+                    && node.getOperand(1) == null) {
+                    qualBuf.append(" IS ");
+                } else {
+                    qualBuf.append(" = ");
+                }
                 break;
             case Expression.NOT_EQUAL_TO :
-                qualBuf.append(" <> ");
+                // translate NULL as IS NOT NULL
+                if (childIndex == 0
+                    && node.getOperandCount() == 2
+                    && node.getOperand(1) == null) {
+                    qualBuf.append(" IS NOT ");
+                } else {
+                    qualBuf.append(" <> ");
+                }
                 break;
             case Expression.LESS_THAN :
                 qualBuf.append(" < ");
@@ -279,18 +293,17 @@ public class QualifierTranslator
     private final void appendList(Expression listExpr, DbAttribute paramDesc) {
         Iterator it = null;
         Object list = listExpr.getOperand(0);
-        if(list instanceof List) {
+        if (list instanceof List) {
             it = ((List) list).iterator();
-        }
-        else if(list instanceof Object[]) {
-        	it = IteratorUtils.arrayIterator((Object[])list);
-        }
-        else {
-        	String className = (list != null) ? list.getClass().getName() : "<null>";
-        	throw new IllegalArgumentException("Unsupported type for the list expressions: " + className);
+        } else if (list instanceof Object[]) {
+            it = IteratorUtils.arrayIterator((Object[]) list);
+        } else {
+            String className =
+                (list != null) ? list.getClass().getName() : "<null>";
+            throw new IllegalArgumentException(
+                "Unsupported type for the list expressions: " + className);
         }
 
-      
         // process first element outside the loop
         // (unroll loop to avoid condition checking
         if (it.hasNext())
