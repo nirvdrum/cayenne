@@ -1,7 +1,7 @@
 <document>
 <title>cdataport task</title>
 <body>
-    <section name="'cdataport' Ant Task">
+    <section name="Ant Task: cdataport">
 			<h3>Description</h3>
 			
 			<p>Sometimes it is necessary to recreate a database, copying data
