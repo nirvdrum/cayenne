@@ -59,50 +59,77 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.objectstyle.cayenne.map.DbEntity;
+import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.ModelChangeEvent;
 import org.scopemvc.core.Selector;
 import org.scopemvc.model.basic.BasicModel;
 
 /**
+ * A model representing an Entity with a set of Relationships, with zero or one
+ * selected Relationship.
+ *  
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class MapObjRelationshipEntryWrapper extends BasicModel {
+public class EntityRelationshipsModel extends BasicModel {
+    private static final Perl5Util regexUtil = new Perl5Util();
 
-    public static final Selector RELATIONSHIP_NAME_SELECTOR =
-        Selector.fromString("relationshipName");
-    public static final Selector SOURCE_NAME_SELECTOR =
-        Selector.fromString("sourceEntityName");
-    public static final Selector TARGET_NAME_SELECTOR =
-        Selector.fromString("targetEntityName");
+    public static final Selector RELATIONSHIP_DISPLAY_NAME_SELECTOR =
+        Selector.fromString("relationshipDisplayName");
 
-    protected DbEntity sourceEntity;
-    protected String relationshipName;
+    protected Entity sourceEntity;
+    protected String relationshipDisplayName;
     protected String defaultTargetName;
     protected Object[] relationshipNames;
 
-    /**
-     * Creates MapObjRelationshipEntryWrapper with two unconnected DbEntities.
-     */
-    public MapObjRelationshipEntryWrapper(DbEntity sourceEntity, DbEntity targetEntity) {
-        this.sourceEntity = sourceEntity;
-        this.defaultTargetName = targetEntity.getName();
-        this.relationshipName = "";
+    private static String nameFromDisplayName(String displayName) {
+        if (displayName == null) {
+            return null;
+        }
+
+        return regexUtil.match("/\\s\\[.+\\]$/", displayName)
+            ? regexUtil.substitute("s/\\s\\[.+\\]$//g", displayName)
+            : displayName;
+    }
+
+    private static String displayNameFromName(Relationship relationship) {
+        if (relationship == null) {
+            return null;
+        }
+
+        return relationship.getName()
+            + " ["
+            + relationship.getSourceEntity().getName()
+            + " -> "
+            + relationship.getTargetEntityName()
+            + "]";
     }
 
     /**
-     * Creates MapObjRelationshipEntryWrapper over the relationship connecting
-     * two DbEntities.
+     * Creates EntityRelationshipsModel with two unconnected Entities.
      */
-    public MapObjRelationshipEntryWrapper(DbRelationship relationship) {
-        this.sourceEntity = (DbEntity) relationship.getSourceEntity();
-        this.relationshipName = relationship.getName();
+    public EntityRelationshipsModel(Entity sourceEntity, Entity targetEntity) {
+        this.sourceEntity = sourceEntity;
+        this.defaultTargetName = targetEntity.getName();
+        this.relationshipDisplayName = "";
+    }
+
+    /**
+     * Creates EntityRelationshipsModel over the relationship connecting
+     * two Entities.
+     */
+    public EntityRelationshipsModel(Relationship relationship) {
+        this.sourceEntity = relationship.getSourceEntity();
+        this.relationshipDisplayName = displayNameFromName(relationship);
     }
 
     public synchronized Object[] getRelationshipNames() {
+        // build an ordered list of available relationship names
+        // on demand
         if (relationshipNames == null) {
             Collection relationships = getSourceEntity().getRelationships();
             int size = relationships.size();
@@ -110,7 +137,8 @@ public class MapObjRelationshipEntryWrapper extends BasicModel {
 
             Iterator it = relationships.iterator();
             for (int i = 0; i < size; i++) {
-                names[i] = ((DbRelationship) it.next()).getName();
+                DbRelationship next = (DbRelationship) it.next();
+                names[i] = displayNameFromName(next);
             }
             Arrays.sort(names);
             this.relationshipNames = names;
@@ -119,24 +147,39 @@ public class MapObjRelationshipEntryWrapper extends BasicModel {
         return relationshipNames;
     }
 
-    public DbEntity getSourceEntity() {
+    /**
+     * Returns a root entity of this model.
+     * @return
+     */
+    public Entity getSourceEntity() {
         return sourceEntity;
     }
 
-    public String getRelationshipName() {
-        return relationshipName;
+    /**
+     * Returns a String describing currently selected relationship.
+     */
+    public String getRelationshipDisplayName() {
+        return relationshipDisplayName;
     }
 
-    public void setRelationshipName(String relationshipName) {
-        if (!Util.nullSafeEquals(relationshipName, this.relationshipName)) {
-            this.relationshipName = relationshipName;
+    public void setRelationshipDisplayName(String relationshipDisplayName) {
+        if (!Util
+            .nullSafeEquals(relationshipDisplayName, this.relationshipDisplayName)) {
+            this.relationshipDisplayName = relationshipDisplayName;
             relationshipNames = null;
-            fireModelChange(ModelChangeEvent.VALUE_CHANGED, RELATIONSHIP_NAME_SELECTOR);
+            fireModelChange(
+                ModelChangeEvent.VALUE_CHANGED,
+                RELATIONSHIP_DISPLAY_NAME_SELECTOR);
         }
     }
 
-    public DbRelationship getSelectedRelationship() {
-        return (DbRelationship) sourceEntity.getRelationship(relationshipName);
+    public void setRelationshipName(String relationshipName) {
+        setRelationshipDisplayName(
+            displayNameFromName(sourceEntity.getRelationship(relationshipName)));
+    }
+
+    public Relationship getSelectedRelationship() {
+        return sourceEntity.getRelationship(nameFromDisplayName(relationshipDisplayName));
     }
 
     public String getSourceEntityName() {
@@ -144,7 +187,7 @@ public class MapObjRelationshipEntryWrapper extends BasicModel {
     }
 
     public String getTargetEntityName() {
-        DbRelationship selected = getSelectedRelationship();
+        Relationship selected = getSelectedRelationship();
         return (selected != null) ? selected.getTargetEntityName() : defaultTargetName;
     }
 }

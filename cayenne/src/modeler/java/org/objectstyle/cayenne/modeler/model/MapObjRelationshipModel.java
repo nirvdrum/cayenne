@@ -60,8 +60,10 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 import org.scopemvc.core.IntIndexSelector;
 import org.scopemvc.core.ModelChangeEvent;
 import org.scopemvc.core.Selector;
@@ -80,9 +82,12 @@ public class MapObjRelationshipModel extends BasicModel {
         Selector.fromString("dbRelationshipPath");
     public static final Selector RELATIONSHIP_SELECTOR =
         Selector.fromString("relationship");
+    public static final Selector SELECTED_PATH_COMPONENT_SELECTOR =
+        Selector.fromString("selectedPathComponent");
 
     protected ObjRelationship relationship;
     protected ListModel dbRelationshipPath;
+    protected EntityRelationshipsModel selectedPathComponent;
 
     public MapObjRelationshipModel(ObjRelationship relationship) {
         this.relationship = relationship;
@@ -97,8 +102,7 @@ public class MapObjRelationshipModel extends BasicModel {
         Iterator it = relationship.getDbRelationships().iterator();
         while (it.hasNext()) {
             DbRelationship dbRelationship = (DbRelationship) it.next();
-            this.dbRelationshipPath.add(
-                new MapObjRelationshipEntryWrapper(dbRelationship));
+            this.dbRelationshipPath.add(new EntityRelationshipsModel(dbRelationship));
         }
 
         // add dummy last relationship if we are not connected
@@ -113,6 +117,19 @@ public class MapObjRelationshipModel extends BasicModel {
 
     public ListModel getDbRelationshipPath() {
         return dbRelationshipPath;
+    }
+
+    public EntityRelationshipsModel getSelectedPathComponent() {
+        return selectedPathComponent;
+    }
+
+    public void setSelectedPathComponent(EntityRelationshipsModel selectedPathComponent) {
+        if (this.selectedPathComponent != selectedPathComponent) {
+            this.selectedPathComponent = selectedPathComponent;
+            fireModelChange(
+                ModelChangeEvent.VALUE_CHANGED,
+                SELECTED_PATH_COMPONENT_SELECTOR);
+        }
     }
 
     public void modelChanged(ModelChangeEvent event) {
@@ -149,14 +166,13 @@ public class MapObjRelationshipModel extends BasicModel {
 
         Iterator it = dbRelationshipPath.iterator();
         while (it.hasNext()) {
-            MapObjRelationshipEntryWrapper next =
-                (MapObjRelationshipEntryWrapper) it.next();
-            DbRelationship nextPathComponent = next.getSelectedRelationship();
+            EntityRelationshipsModel next = (EntityRelationshipsModel) it.next();
+            Relationship nextPathComponent = next.getSelectedRelationship();
             if (nextPathComponent == null) {
                 break;
             }
 
-            relationship.addDbRelationship(nextPathComponent);
+            relationship.addDbRelationship((DbRelationship) nextPathComponent);
         }
     }
 
@@ -176,29 +192,37 @@ public class MapObjRelationshipModel extends BasicModel {
     }
 
     private void connectTail() {
-        DbRelationship last = getLastRelationship();
-        DbEntity target = getEndEntity();
+        Relationship last = null;
+
+        int size = dbRelationshipPath.size();
+        if (size > 0) {
+            EntityRelationshipsModel wrapper =
+                (EntityRelationshipsModel) dbRelationshipPath.get(size - 1);
+            last = wrapper.getSelectedRelationship();
+
+        }
+
+        Entity target = getEndEntity();
 
         if (last == null || last.getTargetEntity() != target) {
             // try to connect automatically, if we can't use dummy connector
-            DbEntity source =
-                (last == null) ? getStartEntity() : (DbEntity) last.getTargetEntity();
 
-            MapObjRelationshipEntryWrapper connector = null;
+            Entity source = (last == null) ? getStartEntity() : last.getTargetEntity();
+            EntityRelationshipsModel connector = null;
             Iterator it = source.getRelationships().iterator();
             while (it.hasNext()) {
-                DbRelationship next = (DbRelationship) it.next();
+                Relationship next = (Relationship) it.next();
 
                 // there is a naturally matching relationship, 
                 // use it to connect to the end
                 if (next.getTargetEntity() == target) {
-                    connector = new MapObjRelationshipEntryWrapper(next);
+                    connector = new EntityRelationshipsModel(next);
                     break;
                 }
             }
 
             if (connector == null) {
-                connector = new MapObjRelationshipEntryWrapper(source, getEndEntity());
+                connector = new EntityRelationshipsModel(source, getEndEntity());
             }
 
             dbRelationshipPath.makeActive(false);
@@ -227,20 +251,6 @@ public class MapObjRelationshipModel extends BasicModel {
         if (getEndEntity() == null) {
             throw new CayenneRuntimeException("Can't map relationship without target DbEntity.");
         }
-    }
-
-    /**
-     * Returns last DbRelationship in the chain.
-     */
-    private DbRelationship getLastRelationship() {
-        int size = dbRelationshipPath.size();
-        if (size == 0) {
-            return null;
-        }
-
-        MapObjRelationshipEntryWrapper wrapper =
-            (MapObjRelationshipEntryWrapper) dbRelationshipPath.get(size - 1);
-        return wrapper.getSelectedRelationship();
     }
 
     public DbEntity getStartEntity() {

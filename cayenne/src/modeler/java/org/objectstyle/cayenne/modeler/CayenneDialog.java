@@ -56,11 +56,9 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.Dialog;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -74,6 +72,7 @@ import javax.swing.event.HyperlinkListener;
 
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.BrowserControl;
+import org.scopemvc.view.awt.AWTUtilities;
 
 /**
  * Superclass of CayenneModeler dialogs. Adds support for popping hyperlinks 
@@ -172,15 +171,10 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
     }
 
     /** 
-     * Centers this dialog on the screen. 
+     * Centers this dialog relative to the parent Window 
      */
     public void centerWindow() {
-        int width = this.getWidth();
-        int height = this.getHeight();
-        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        int x = (screen.width - width) / 2;
-        int y = (screen.height - height) / 2;
-        this.setBounds(x, y, width, height);
+        AWTUtilities.centreOnWindow(getParentEditor(), this);
     }
 
     public CayenneModelerFrame getParentEditor() {
@@ -202,7 +196,6 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
     public EventController getMediator() {
         return getParentEditor().getController().getEventController();
     }
-
 
     protected void dialogInit() {
         super.dialogInit();

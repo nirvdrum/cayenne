@@ -58,12 +58,16 @@ package org.objectstyle.cayenne.modeler.control;
 import java.util.Collections;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.datamap.ResolveDbRelationshipDialog;
+import org.objectstyle.cayenne.modeler.model.EntityRelationshipsModel;
 import org.objectstyle.cayenne.modeler.model.MapObjRelationshipModel;
 import org.objectstyle.cayenne.modeler.view.MapObjRelationshipDialog;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -130,18 +134,52 @@ public class MapObjRelationshipController extends BasicController {
                 model.getRelationship().getSourceEntity()));
     }
 
+    /**
+     * Creates a new relationship connecting currently selected source entity 
+     * with ObjRelationship target entity. User is allowed to edit the relationship, 
+     * change its name, and create joins.
+     */
     protected void createRelationship(boolean toMany) {
         MapObjRelationshipModel model = (MapObjRelationshipModel) getModel();
+        DbEntity source = model.getStartEntity();
+        DbEntity target = model.getEndEntity();
+
+        EntityRelationshipsModel selectedPathComponent = model.getSelectedPathComponent();
+        if (selectedPathComponent != null) {
+            source = (DbEntity) selectedPathComponent.getSourceEntity();
+        }
+
+        DbRelationship dbRelationship = new DbRelationship();
+        dbRelationship.setSourceEntity(source);
+        dbRelationship.setTargetEntity(target);
+        dbRelationship.setName(
+            NamedObjectFactory.createName(DbRelationship.class, source));
+        dbRelationship.setToMany(toMany);
+
         ResolveDbRelationshipDialog dialog =
             new ResolveDbRelationshipDialog(
-                Collections.EMPTY_LIST,
-                model.getStartEntity(),
-                model.getEndEntity(),
+                Collections.singletonList(dbRelationship),
+                source,
+                target,
                 toMany);
 
         dialog.setVisible(true);
         if (!dialog.isCancelPressed()) {
-            
+            // use new relationship
+            source.addRelationship(dbRelationship);
+
+            if (!dialog.isCancelPressed()) {
+                // use new relationship
+                source.addRelationship(dbRelationship);
+
+                if (selectedPathComponent == null) {
+                    selectedPathComponent =
+                        (EntityRelationshipsModel) model.getDbRelationshipPath().get(0);
+                    model.setSelectedPathComponent(selectedPathComponent);
+                }
+
+                selectedPathComponent.setRelationshipName(dbRelationship.getName());
+            }
         }
 
         dialog.dispose();

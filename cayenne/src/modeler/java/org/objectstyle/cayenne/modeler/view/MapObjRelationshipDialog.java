@@ -71,7 +71,7 @@ import javax.swing.table.TableCellEditor;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.MapObjRelationshipController;
-import org.objectstyle.cayenne.modeler.model.MapObjRelationshipEntryWrapper;
+import org.objectstyle.cayenne.modeler.model.EntityRelationshipsModel;
 import org.objectstyle.cayenne.modeler.model.MapObjRelationshipModel;
 import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
@@ -140,16 +140,14 @@ public class MapObjRelationshipDialog extends SPanel {
         STable pathTable = new ObjRelationshipPathTable();
         STableModel pathTableModel = new STableModel(pathTable);
         pathTableModel.setSelector(MapObjRelationshipModel.DB_RELATIONSHIP_PATH_SELECTOR);
-        pathTableModel.setColumnNames(
-            new String[] { "DbRelationship", "From DbEntity", "To DbEntity" });
+        pathTableModel.setColumnNames(new String[] { "DbRelationship Path" });
         pathTableModel.setColumnSelectors(
-            new Selector[] {
-                MapObjRelationshipEntryWrapper.RELATIONSHIP_NAME_SELECTOR,
-                MapObjRelationshipEntryWrapper.SOURCE_NAME_SELECTOR,
-                MapObjRelationshipEntryWrapper.TARGET_NAME_SELECTOR });
+            new Selector[] { EntityRelationshipsModel.RELATIONSHIP_DISPLAY_NAME_SELECTOR });
 
         pathTable.setModel(pathTableModel);
-        pathTable.getColumn("DbRelationship").setCellEditor(
+        pathTable.setSelectionSelector(
+            MapObjRelationshipModel.SELECTED_PATH_COMPONENT_SELECTOR);
+        pathTable.getColumn("DbRelationship Path").setCellEditor(
             RelationshipPicker.createEditor(this));
 
         // assemble
@@ -174,7 +172,7 @@ public class MapObjRelationshipDialog extends SPanel {
     }
 
     class ObjRelationshipPathTable extends STable {
-        final Dimension preferredSize = new Dimension(500, 300);
+        final Dimension preferredSize = new Dimension(300, 300);
 
         ObjRelationshipPathTable() {
             setRowHeight(25);
@@ -213,8 +211,8 @@ public class MapObjRelationshipDialog extends SPanel {
             MapObjRelationshipModel model =
                 (MapObjRelationshipModel) view.getBoundModel();
 
-            MapObjRelationshipEntryWrapper relationshipWrapper =
-                (MapObjRelationshipEntryWrapper) model.getDbRelationshipPath().get(row);
+            EntityRelationshipsModel relationshipWrapper =
+                (EntityRelationshipsModel) model.getDbRelationshipPath().get(row);
 
             DefaultComboBoxModel comboModel =
                 new DefaultComboBoxModel(relationshipWrapper.getRelationshipNames());

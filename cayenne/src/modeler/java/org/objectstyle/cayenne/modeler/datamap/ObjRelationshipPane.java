@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -76,7 +75,6 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
@@ -225,43 +223,6 @@ public class ObjRelationshipPane
         ObjRelationshipTableModel model;
         model = (ObjRelationshipTableModel) table.getModel();
         ObjRelationship rel = model.getRelationship(row);
-        DbEntity start = ((ObjEntity) rel.getSourceEntity()).getDbEntity();
-        DbEntity end = ((ObjEntity) rel.getTargetEntity()).getDbEntity();
-        List db_rel_list = rel.getDbRelationships();
-
-        // Choose the relationship to resolve this obj relationship
-    /*    ChooseDbRelationshipDialog dg;
-        dg =
-            new ChooseDbRelationshipDialog(
-                mediator.getCurrentDataMap(),
-                db_rel_list,
-                start,
-                end,
-                rel.isToMany());
-        dg.setVisible(true);
-        if (ChooseDbRelationshipDialog.CANCEL == dg.getChoice())
-            return;
-        else if (ChooseDbRelationshipDialog.SELECT == dg.getChoice()) {
-            this.copyDbRelationship(rel, dg.getDbRelationshipList());
-            dg.dispose();
-            return;
-        }
-
-        // If chose to create new db relationship or edit existing
-        // display dialog for editing joins.
-        if (ChooseDbRelationshipDialog.EDIT == dg.getChoice())
-            db_rel_list = dg.getDbRelationshipList();
-        else if (ChooseDbRelationshipDialog.NEW == dg.getChoice())
-            db_rel_list = new ArrayList();
-
-        ResolveDbRelationshipDialog dialog =
-            new ResolveDbRelationshipDialog(db_rel_list, start, end, rel.isToMany());
-        dialog.setVisible(true);
-        // If user pressed "Save"
-        if (!dialog.isCancelPressed())
-            this.copyDbRelationship(rel, dialog.getDbRelationships());
-        dialog.dispose(); */
-        
         new MapObjRelationshipController(mediator, rel).startup();
     }
 
@@ -283,7 +244,10 @@ public class ObjRelationshipPane
         }
 
         mediator.fireObjRelationshipEvent(
-            new RelationshipEvent(CayenneModelerFrame.getFrame(), rel, rel.getSourceEntity()));
+            new RelationshipEvent(
+                CayenneModelerFrame.getFrame(),
+                rel,
+                rel.getSourceEntity()));
     }
 
     /** Loads obj relationships into table. */

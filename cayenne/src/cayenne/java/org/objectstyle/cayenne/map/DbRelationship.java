@@ -151,6 +151,11 @@ public class DbRelationship extends Relationship {
 	 */
 	public DbRelationship getReverseRelationship() {
 		Entity target = this.getTargetEntity();
+        
+        if(target == null) {
+            return null;
+        }
+        
 		Entity src = this.getSourceEntity();
 		DbAttributePair testJoin = new DbAttributePair(null, null);
 

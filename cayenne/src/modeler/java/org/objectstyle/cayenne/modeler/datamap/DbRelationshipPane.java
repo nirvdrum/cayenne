@@ -103,19 +103,19 @@ public class DbRelationshipPane
         ExistingSelectionProcessor,
         ListSelectionListener,
         TableModelListener {
-            
+
     protected EventController mediator;
     protected CayenneTable table;
     protected JButton resolve;
 
     public DbRelationshipPane(EventController mediator) {
         super();
-        
+
         this.mediator = mediator;
         this.mediator.addDbEntityDisplayListener(this);
         this.mediator.addDbEntityListener(this);
         this.mediator.addDbRelationshipListener(this);
-        
+
         init();
         resolve.addActionListener(this);
     }
@@ -123,7 +123,6 @@ public class DbRelationshipPane
     protected void init() {
         setLayout(new BorderLayout());
         table = new CayenneTable();
-
         resolve = new JButton("Database Mapping");
         JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
         add(panel, BorderLayout.CENTER);
@@ -258,10 +257,10 @@ public class DbRelationshipPane
         Object[] names = dbEntities.toArray();
 
         for (int i = 0; i < len; i++) {
-        	// substitute DbEntities with their names
+            // substitute DbEntities with their names
             names[i] = ((DbEntity) names[i]).getName();
         }
-        
+
         Arrays.sort(names);
 
         return names;
@@ -279,6 +278,10 @@ public class DbRelationshipPane
 
     public void dbRelationshipChanged(RelationshipEvent e) {
         if (e.getSource() != this) {
+            if (!(table.getModel() instanceof DbRelationshipTableModel)) {
+                rebuildTable((DbEntity) e.getEntity());
+            }
+
             table.select(e.getRelationship());
             DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
             model.fireTableDataChanged();
@@ -313,7 +316,7 @@ public class DbRelationshipPane
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
         JComboBox combo = (JComboBox) editor.getComponent();
         combo.setModel(new DefaultComboBoxModel(createComboModel()));
-        
+
         DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         model.fireTableDataChanged();
         table.getSelectionModel().addListSelectionListener(this);
