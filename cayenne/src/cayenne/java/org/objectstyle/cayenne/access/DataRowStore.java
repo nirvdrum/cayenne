@@ -62,7 +62,6 @@ import org.objectstyle.cayenne.event.EventBridge;
 import org.objectstyle.cayenne.event.EventBridgeFactory;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
-import org.objectstyle.cayenne.event.JavaGroupsBridgeFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 import org.shiftone.cache.Cache;
@@ -96,8 +95,11 @@ public class DataRowStore implements Serializable {
     public static final int SNAPSHOT_CACHE_SIZE_DEFAULT = 10000;
     public static final boolean OBJECT_STORE_NOTIFICATION_DEFAULT = true;
     public static final boolean REMOTE_NOTIFICATION_DEFAULT = false;
+
+    // use String for class name, since JavaGroups may not be around,
+    // causing CNF exceptions
     public static final String EVENT_BRIDGE_FACTORY_DEFAULT =
-        JavaGroupsBridgeFactory.class.getName();
+        "org.objectstyle.cayenne.event.JavaGroupsBridgeFactory";
 
     protected String name;
     protected Cache snapshots;

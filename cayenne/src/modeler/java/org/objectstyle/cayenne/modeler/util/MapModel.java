@@ -57,17 +57,20 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
 import org.scopemvc.model.basic.BasicModel;
 
 /**
- * Scope active model that has an internal map of
- * properties, firing change events when a value in the map changes.
+ * Scope active model that has an internal map of properties, 
+ * firing change events when a value in the map changes.
  * 
  * @author Andrei Adamchik
  */
 public abstract class MapModel extends BasicModel {
+    private static Logger logObj = Logger.getLogger(MapModel.class);
+    
     protected Map map;
 
     public MapModel() {
@@ -77,6 +80,18 @@ public abstract class MapModel extends BasicModel {
     public abstract Selector selectorForKey(String key);
 
     public abstract String defaultForKey(String key);
+
+    public abstract String[] supportedProperties();
+
+    /**
+     * Saves properties in provided map.
+     */
+    public void storeProperties(Map map) {
+        String[] properties = supportedProperties();
+        for (int i = 0; i < properties.length; i++) {
+            map.put(properties[i], this.map.get(properties[i]));
+        }
+    }
 
     public void setMap(Map map) {
         this.map = map;

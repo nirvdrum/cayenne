@@ -55,74 +55,41 @@
  */
 package org.objectstyle.cayenne.modeler.model;
 
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.access.DataRowStore;
+import org.objectstyle.cayenne.modeler.util.MapModel;
 import org.scopemvc.core.Selector;
-import org.scopemvc.model.basic.BasicModel;
 
 /**
  * @author Andrei Adamchik
  */
-public class CacheSyncConfigModel extends BasicModel {
+public class CacheSyncConfigModel extends MapModel {
 
-    public static final String JGROUPS_TYPE = "JavaGroups Multicast (Default)";
-    public static final String JMS_TYPE = "JMS Transport";
-    public static final String CUSTOM_TYPE = "Custom Transport";
+    private static final String[] storedProperties =
+        new String[] { DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY };
 
-    public static final Object[] NOTIFICATION_TYPES =
-        new Object[] { JGROUPS_TYPE, JMS_TYPE, CUSTOM_TYPE };
+    // selectors
+    public static final Selector FACTORY_CLASS_SELECTOR =
+        Selector.fromString("factoryClass");
 
-    public static final Selector NOTIFICATION_TYPES_SELECTOR =
-        Selector.fromString("notificationTypes");
-
-    public static final Selector SELECTED_TYPE_SELECTOR =
-        Selector.fromString("selectedType");
-
-    public static final Selector CONFIG_DETAIL_SELECTOR =
-        Selector.fromString("configDetail");
-
-    protected String selectedType;
-    protected boolean modified;
-    protected Object configDetail;
-
-    public CacheSyncConfigModel() {
-        super();
+    public String[] supportedProperties() {
+        return storedProperties;
     }
 
-    public Object getConfigDetail() {
-        return configDetail;
+    public Selector selectorForKey(String key) {
+        return (DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY.equals(key))
+            ? FACTORY_CLASS_SELECTOR
+            : null;
     }
 
-    public void setConfigDetail(Object configDetail) {
-        if (this.configDetail != configDetail) {
-            unlistenOldSubmodel(CONFIG_DETAIL_SELECTOR);
-
-            this.configDetail = configDetail;
-
-            listenNewSubmodel(CONFIG_DETAIL_SELECTOR);
-            fireModelChange(VALUE_CHANGED, CONFIG_DETAIL_SELECTOR);
-        }
+    public String defaultForKey(String key) {
+        return null;
     }
 
-    public String getSelectedType() {
-        return selectedType;
+    public String getFactoryClass() {
+        return getProperty(DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY);
     }
 
-    public void setSelectedType(String selectedType) {
-        if (!Util.nullSafeEquals(this.selectedType, selectedType)) {
-            this.selectedType = selectedType;
-            fireModelChange(VALUE_CHANGED, SELECTED_TYPE_SELECTOR);
-        }
-    }
-
-    public Object[] getNotificationTypes() {
-        return NOTIFICATION_TYPES;
-    }
-
-    public boolean isModified() {
-        return modified;
-    }
-
-    public void setModified(boolean b) {
-        this.modified = b;
+    public void setFactoryClass(String factoryClass) {
+        setProperty(DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY, factoryClass);
     }
 }

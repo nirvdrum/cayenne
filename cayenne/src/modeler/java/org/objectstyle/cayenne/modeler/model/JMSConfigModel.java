@@ -55,16 +55,25 @@
  */
 package org.objectstyle.cayenne.modeler.model;
 
+import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.event.JMSBridgeFactory;
-import org.objectstyle.cayenne.modeler.util.MapModel;
 import org.scopemvc.core.Selector;
 
 /**
  * @author Andrei Adamchik
  */
-public class JMSConfigModel extends MapModel {
+public class JMSConfigModel extends CacheSyncConfigModel {
+    private static final String[] storedProperties =
+        new String[] {
+            DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY,
+            JMSBridgeFactory.TOPIC_CONNECTION_FACTORY_PROPERTY };
+
     public static final Selector TOPIC_FACTORY_SELECTOR =
         Selector.fromString("topicFactory");
+
+    public String[] supportedProperties() {
+        return storedProperties;
+    }
 
     public Selector selectorForKey(String key) {
         return (JMSBridgeFactory.TOPIC_CONNECTION_FACTORY_PROPERTY.equals(key))

@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.modeler.view;
 
 import java.awt.BorderLayout;
 
-import org.objectstyle.cayenne.modeler.model.CustomRemoteEventsConfigModel;
+import org.objectstyle.cayenne.modeler.model.CacheSyncConfigModel;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STextField;
 
@@ -78,7 +78,7 @@ public class CustomRemoteEventsConfigPanel extends SPanel {
         setLayout(new BorderLayout());
 
         STextField factoryClass = new STextField(30);
-        factoryClass.setSelector(CustomRemoteEventsConfigModel.FACTORY_CLASS_SELECTOR);
+        factoryClass.setSelector(CacheSyncConfigModel.FACTORY_CLASS_SELECTOR);
 
         // type form
         FormLayout layout = new FormLayout("right:150, 3dlu, left:200", "");

@@ -63,7 +63,7 @@ import java.awt.FlowLayout;
 import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.modeler.control.CacheSyncConfigController;
-import org.objectstyle.cayenne.modeler.model.CacheSyncConfigModel;
+import org.objectstyle.cayenne.modeler.model.CacheSyncTypesModel;
 import org.scopemvc.core.Control;
 import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SComboBox;
@@ -91,8 +91,8 @@ public class CacheSyncConfigDialog extends SPanel {
         this.setTitle("Configure Remote Cache Synchronization");
 
         SComboBox type = new SComboBox();
-        type.setSelector(CacheSyncConfigModel.NOTIFICATION_TYPES_SELECTOR);
-        type.setSelectionSelector(CacheSyncConfigModel.SELECTED_TYPE_SELECTOR);
+        type.setSelector(CacheSyncTypesModel.NOTIFICATION_TYPES_SELECTOR);
+        type.setSelectionSelector(CacheSyncTypesModel.FACTORY_LABEL_SELECTOR);
 
         SButton saveButton = new SButton(CacheSyncConfigController.SAVE_CONFIG_CONTROL);
         SButton cancelButton =

@@ -1,3 +1,4 @@
+
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,33 +56,40 @@
  */
 package org.objectstyle.cayenne.modeler.model;
 
-import org.objectstyle.cayenne.access.DataRowStore;
-import org.objectstyle.cayenne.modeler.util.MapModel;
+import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Selector;
+import org.scopemvc.model.basic.BasicModel;
 
 /**
  * @author Andrei Adamchik
  */
-public class CustomRemoteEventsConfigModel extends MapModel {
-    public static final Selector FACTORY_CLASS_SELECTOR =
-        Selector.fromString("factoryClass");
+public class CacheSyncTypesModel extends BasicModel {
+    public static final String JGROUPS_FACTORY_LABEL = "JavaGroups Multicast (Default)";
+    public static final String JMS_FACTORY_LABEL = "JMS Transport";
+    public static final String CUSTOM_FACTORY_LABEL = "Custom Transport";
 
-    public Selector selectorForKey(String key) {
-        return (DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY.equals(key))
-            ? FACTORY_CLASS_SELECTOR
-            : null;
+    public static final Object[] NOTIFICATION_TYPES =
+        new Object[] { JGROUPS_FACTORY_LABEL, JMS_FACTORY_LABEL, CUSTOM_FACTORY_LABEL };
+
+    public static final Selector NOTIFICATION_TYPES_SELECTOR =
+        Selector.fromString("notificationTypes");
+    public static final Selector FACTORY_LABEL_SELECTOR =
+        Selector.fromString("factoryLabel");
+
+    protected String factoryLabel;
+
+    public Object[] getNotificationTypes() {
+        return NOTIFICATION_TYPES;
     }
 
-    public String defaultForKey(String key) {
-        // no support for defaults
-        return null;
+    public String getFactoryLabel() {
+        return factoryLabel;
     }
 
-    public String getFactoryClass() {
-        return getProperty(DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY);
-    }
-
-    public void setFactoryClass(String factoryClass) {
-        setProperty(DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY, factoryClass);
+    public void setFactoryLabel(String factoryLabel) {
+        if (!Util.nullSafeEquals(this.factoryLabel, factoryLabel)) {
+            this.factoryLabel = factoryLabel;
+            fireModelChange(VALUE_CHANGED, FACTORY_LABEL_SELECTOR);
+        }
     }
 }

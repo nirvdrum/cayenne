@@ -59,14 +59,21 @@ package org.objectstyle.cayenne.modeler.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.event.JavaGroupsBridgeFactory;
-import org.objectstyle.cayenne.modeler.util.MapModel;
 import org.scopemvc.core.Selector;
 
 /**
  * @author Andrei Adamchik
  */
-public class JGroupsConfigModel extends MapModel {
+public class JGroupsConfigModel extends CacheSyncConfigModel {
+    private static final String[] storedProperties =
+        new String[] {
+            DataRowStore.EVENT_BRIDGE_FACTORY_PROPERTY,
+            JavaGroupsBridgeFactory.MCAST_ADDRESS_PROPERTY,
+            JavaGroupsBridgeFactory.MCAST_PORT_PROPERTY,
+            JavaGroupsBridgeFactory.JGROUPS_CONFIG_URL_PROPERTY };
+
     private static Map selectors;
     private static Map defaults;
 
@@ -119,8 +126,20 @@ public class JGroupsConfigModel extends MapModel {
         return usingConfigFile;
     }
 
+    public String[] supportedProperties() {
+        return storedProperties;
+    }
+
     public void setUsingConfigFile(boolean b) {
         this.usingConfigFile = b;
+
+        if (b) {
+            setMcastAddress(null);
+            setMcastPort(null);
+        }
+        else {
+            setJgroupsConfigURL(null);
+        }
     }
 
     public boolean isUsingDefaultConfig() {

@@ -126,18 +126,24 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         this.configRemoteUpdates = new JButton("Configure");
         configRemoteUpdates.setEnabled(false);
 
-        FormLayout layout = new FormLayout("right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150", "");
+        FormLayout layout =
+            new FormLayout(
+                "right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
-        
+
         builder.appendSeparator("DataDomain Info");
         builder.append("DataDomain Name:", name, 3);
-        
+
         builder.appendSeparator("Cache Configuration");
         builder.append("Max. Number of Objects:", cacheSize, 3);
         builder.append("Entry Expiration, sec.:", cacheExpiration, 3);
         builder.append("Local Change Notifications:", localUpdates, 3);
-        builder.append("Remote Change Notifications:", remoteUpdates, configRemoteUpdates);
+        builder.append(
+            "Remote Change Notifications:",
+            remoteUpdates,
+            configRemoteUpdates);
 
         this.add(builder.getPanel());
     }
@@ -165,10 +171,10 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         remoteUpdates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 String value = remoteUpdates.isSelected() ? "true" : "false";
-                
+
                 // update config button state
                 configRemoteUpdates.setEnabled(remoteUpdates.isSelected());
-                
+
                 setDomainProperty(
                     DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
                     value,
@@ -178,7 +184,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
 
         configRemoteUpdates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               new CacheSyncConfigController().startup();
+                new CacheSyncConfigController(eventController).startup();
             }
         });
     }
@@ -263,6 +269,8 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
             getDomainBooleanProperty(
                 DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
                 Boolean.toString(DataRowStore.REMOTE_NOTIFICATION_DEFAULT)));
+
+        configRemoteUpdates.setEnabled(remoteUpdates.isSelected());
     }
 
     class FieldVerifier extends InputVerifier {
