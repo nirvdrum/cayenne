@@ -9,7 +9,14 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><strong><font size="+2"><i>June 16:</i> <font color="red">Cayenne Alpha1 Is Out.</font></font></strong> 
+        <p><font color="#AAAAAA"><i>July 16:</i></font> <strong>Cayenne Alpha 2 Is Out.</strong> 
+        This is a second Alpha release. Everybody is incouraged to upgrade. You won't 
+        regret - CayenneModeler GUI is much better now. Source and binary packages
+        can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
+        Release notes are located <a href="RELEASE-NOTES-1.0a2.txt">here</a>.
+        </p>
+        
+        <p><font color="#AAAAAA"><i>June 16:</i></font> <strong>Cayenne Alpha 1 Is Out.</strong> 
         Download now the first "official" Cayenne release. Source and binary packages
         can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
         Release notes are located <a href="RELEASE-NOTES-1.0a1.txt">here</a>.
