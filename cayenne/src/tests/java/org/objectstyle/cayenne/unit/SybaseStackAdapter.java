@@ -64,6 +64,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Procedure;
 
 /**
  * @author Andrei Adamchik
@@ -72,6 +73,7 @@ public class SybaseStackAdapter extends AccessStackAdapter {
 
     /**
      * Constructor for SybaseDelegate.
+     * 
      * @param adapter
      */
     public SybaseStackAdapter(DbAdapter adapter) {
@@ -83,17 +85,20 @@ public class SybaseStackAdapter extends AccessStackAdapter {
     }
 
     public void createdTables(Connection con, DataMap map) throws Exception {
-        if (map.getProcedure("cayenne_tst_select_proc") != null) {
+        Procedure proc = map.getProcedure("cayenne_tst_select_proc");
+        if (proc != null && proc.getDataMap() == map) {
             executeDDL(con, super.ddlFile("sybase", "create-select-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "create-update-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "create-out-sp.sql"));
         }
     }
 
-    public void willDropTables(Connection con, DataMap map, Collection tablesToDrop) throws Exception {
+    public void willDropTables(Connection con, DataMap map, Collection tablesToDrop)
+            throws Exception {
         super.willDropTables(con, map, tablesToDrop);
 
-        if (map.getProcedure("cayenne_tst_select_proc") != null) {
+        Procedure proc = map.getProcedure("cayenne_tst_select_proc");
+        if (proc != null && proc.getDataMap() == map) {
             executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
             executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
@@ -105,13 +110,11 @@ public class SybaseStackAdapter extends AccessStackAdapter {
         Statement select = con.createStatement();
 
         try {
-            ResultSet rs =
-                select.executeQuery(
-                    "SELECT t0.name "
-                        + "FROM sysobjects t0, sysconstraints t1, sysobjects t2 "
-                        + "WHERE t0.id = t1.constrid and t1.tableid = t2.id and t2.name = '"
-                        + tableName
-                        + "'");
+            ResultSet rs = select.executeQuery("SELECT t0.name "
+                    + "FROM sysobjects t0, sysconstraints t1, sysobjects t2 "
+                    + "WHERE t0.id = t1.constrid and t1.tableid = t2.id and t2.name = '"
+                    + tableName
+                    + "'");
             try {
 
                 while (rs.next()) {
@@ -127,9 +130,10 @@ public class SybaseStackAdapter extends AccessStackAdapter {
         }
 
         for (int i = 0; i < names.size(); i++) {
-            executeDDL(
-                con,
-                "alter table " + tableName + " drop constraint " + names.get(i));
+            executeDDL(con, "alter table "
+                    + tableName
+                    + " drop constraint "
+                    + names.get(i));
         }
     }
 

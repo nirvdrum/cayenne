@@ -529,7 +529,7 @@ public class DataContextTst extends DataContextTestBase {
             maps[i].put("pid", new Integer(1 + i));
             maps[i].put("pt", "P-" + i);
             maps[i].put("aid", new Integer(33002));
-            maps[i].put("price", new BigDecimal(1.1 * (i + 1)));
+            maps[i].put("price", new BigDecimal("1." + i));
         }
 
         // single batch of parameters
