@@ -199,7 +199,7 @@ public class DatabaseSetup {
     public Iterator tableCreateQueries() throws Exception {
         ArrayList queries = new ArrayList();
         DbAdapter adapter = TestMain.getSharedNode().getAdapter();
-        DbGenerator gen = new DbGenerator(TestMain.getSharedConnection(), adapter);
+        DbGenerator gen = new DbGenerator(adapter, map);
 
         // Oracle 8i does not support more then 1 "LONG xx" column per table
         // PAINTING_INFO need to be fixed

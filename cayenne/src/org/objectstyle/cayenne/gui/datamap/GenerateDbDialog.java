@@ -56,11 +56,12 @@
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.*;
@@ -68,7 +69,7 @@ import javax.swing.*;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbGenerator;
 
 /** 
  * Wizard for generating the database from the data map.
@@ -76,24 +77,23 @@ import org.objectstyle.cayenne.map.*;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class GenerateDbDialog extends CayenneDialog implements ActionListener {
+public class GenerateDbDialog extends CayenneDialog implements ActionListener, ItemListener  {
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 
 	private static final int WIDTH = 380;
 	private static final int HEIGHT = 190;
 
-	Connection conn;
-	DbAdapter adapter;
-	DbGenerator gen;
+	protected Connection conn;
+	protected DbAdapter adapter;
+	protected DbGenerator gen;
 
-	private JTextArea sql;
-	private JButton generate = new JButton("Generate");
-	private JButton cancel = new JButton("Cancel");
-	private JButton saveSql = new JButton("Save SQL");
-	
+	protected JTextArea sql;
+	protected JButton generate = new JButton("Generate");
+	protected JButton cancel = new JButton("Cancel");
+	protected JButton saveSql = new JButton("Save SQL");
+
 	/** Drop the existing tables in the database. */
 	private JCheckBox dropTables;
-
 
 	public GenerateDbDialog(Connection conn, DbAdapter adapter) {
 		super(Editor.getFrame(), "Generate Database", true);
@@ -101,10 +101,10 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener {
 			throw new IllegalStateException(
 				"Must have current data map to " + "allow db generation");
 		}
-		
-		this.conn = conn ;
+
+		this.conn = conn;
 		this.adapter = adapter;
-		this.gen = new DbGenerator(conn, adapter);
+		this.gen = new DbGenerator(adapter, getMediator().getCurrentDataMap());
 
 		init();
 
@@ -115,7 +115,7 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener {
 
 		setSize(WIDTH, HEIGHT);
 		this.pack();
-        this.centerWindow();
+		this.centerWindow();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setVisible(true);
 	}
@@ -123,89 +123,106 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener {
 	private void init() {
 		Container contentPane = this.getContentPane();
 		contentPane.setLayout(new BorderLayout());
-		
-		JPanel optionsPane = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 5));
+
+		JPanel optionsPane =
+			new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 5));
 		optionsPane.setBorder(BorderFactory.createTitledBorder("Options"));
 		dropTables = new JCheckBox("Drop Tables");
 		optionsPane.add(dropTables);
 		contentPane.add(optionsPane, BorderLayout.NORTH);
 
 		sql = new JTextArea();
-	    sql.setRows(16);
+		sql.setRows(16);
 		sql.setColumns(40);
-		sql.setEditable(false);
+		sql.setEditable(true);
 		sql.setLineWrap(true);
 		sql.setWrapStyleWord(true);
-		
-		JScrollPane scrollPanel = new JScrollPane(
+
+		JScrollPane scrollPanel =
+			new JScrollPane(
 				sql,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        JPanel sqlTextPanel = new JPanel(new BorderLayout());
+		JPanel sqlTextPanel = new JPanel(new BorderLayout());
 		sqlTextPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		sqlTextPanel.add(scrollPanel, BorderLayout.CENTER);
 		contentPane.add(sqlTextPanel, BorderLayout.CENTER);
 
-		
-		JPanel btnPanel = PanelFactory.createButtonPanel(new JButton[] {generate, cancel, saveSql});
+		JPanel btnPanel =
+			PanelFactory.createButtonPanel(
+				new JButton[] { generate, cancel, saveSql });
 		contentPane.add(btnPanel, BorderLayout.SOUTH);
 
-		DbGenerator gen = new DbGenerator(conn, adapter);
-		DataMap map = getMediator().getCurrentDataMap();
-		DbEntity[] arr = map.getDbEntities();
+		initStatements();
+	}
+
+	/** 
+	 * Builds a list of SQL statements to run.
+	 */
+	protected void initStatements() {
+		// convert them to string representation for display
 		StringBuffer buf = new StringBuffer();
-		for (int i = 0; i < arr.length; i++) {
-			buf.append(gen.createTableQuery(arr[i])).append("\n");
-			if (adapter.supportsFkConstraints()) {
-				buf.append(gen.createFkConstraintsQueries(arr[i])).append("\n");
-			}
+		Iterator it = gen.configuredStatements().iterator();
+		while (it.hasNext()) {
+			buf.append(it.next()).append("\n\n");
 		}
 		sql.setText(buf.toString());
 	}
+	
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (generate == src) {
-			try {
-				gen.createTables(
-					getMediator().getCurrentDataMap(),
-					dropTables.isSelected());
-			} catch (SQLException ex) {
-				logObj.severe(ex.getMessage());
-				SQLException exception = ex;
-				while ((exception = exception.getNextException()) != null) {
-					logObj.severe(exception.getMessage());
-				}
-				ex.printStackTrace();
-				JOptionPane.showMessageDialog(
-					this,
-					"Error creating database - " + ex.getMessage());
-				return;
-			}
+			generateDBSchema();
 			setVisible(false);
 			dispose();
 		} else if (src == saveSql) {
+			storeSQL();
+		} else if (cancel == src) {
+			setVisible(false);
+			dispose();
+		}
+	}
+
+	protected void generateDBSchema() {
+		gen.setShouldDropTables(dropTables.isSelected());
+		
+		try {
+			gen.runGenerator(conn);
+		} catch (SQLException ex) {
+
+			SQLException exception = ex;
+			while ((exception = exception.getNextException()) != null) {
+				logObj.log(Level.INFO, "Nested exception", exception);
+			}
+			logObj.log(Level.INFO, "Main exception", ex);
+
+			JOptionPane.showMessageDialog(
+				this,
+				"Error creating database - " + ex.getMessage());
+			return;
+		}
+	}
+
+	protected void storeSQL() {
+		String projDirStr = getMediator().getConfig().getProjDir();
+		File projDir = null;
+		if (projDirStr != null) {
+			projDir = new File(projDirStr);
+		}
+
+		JFileChooser fc;
+		FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
+		fc = new JFileChooser(fileView);
+		fc.setDialogType(JFileChooser.SAVE_DIALOG);
+		fc.setDialogTitle("Create database");
+		if (null != projDir) {
+			fc.setCurrentDirectory(projDir);
+		}
+
+		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			try {
-				String proj_dir_str = getMediator().getConfig().getProjDir();
-				File proj_dir = null;
-				if (proj_dir_str != null)
-					proj_dir = new File(proj_dir_str);
-				JFileChooser fc;
-				FileSystemViewDecorator file_view;
-				file_view = new FileSystemViewDecorator(proj_dir);
-				fc = new JFileChooser(file_view);
-				fc.setDialogType(JFileChooser.SAVE_DIALOG);
-				fc.setDialogTitle("Create database");
-				if (null != proj_dir)
-					fc.setCurrentDirectory(proj_dir);
-				int ret_code = fc.showSaveDialog(this);
-				if (ret_code != JFileChooser.APPROVE_OPTION)
-					return;
 				File file = fc.getSelectedFile();
-				if (!file.exists()) {
-					file.createNewFile();
-					return;
-				}
 				FileWriter fw = new FileWriter(file);
 				PrintWriter pw = new PrintWriter(fw);
 				pw.print(sql.getText());
@@ -217,12 +234,19 @@ public class GenerateDbDialog extends CayenneDialog implements ActionListener {
 				JOptionPane.showMessageDialog(
 					this,
 					"Error writing into file - " + ex.getMessage());
-				return;
 			}
-		} else if (cancel == src) {
-			setVisible(false);
-			dispose();
 		}
 	}
+
+	/**
+	 * @see java.awt.event.ItemListener#itemStateChanged(ItemEvent)
+	 */
+	public void itemStateChanged(ItemEvent e) {
+		if(e.getSource() == dropTables) {
+			gen.setShouldDropTables(dropTables.isSelected());
+			initStatements();
+		}
+	}
+
 
 }

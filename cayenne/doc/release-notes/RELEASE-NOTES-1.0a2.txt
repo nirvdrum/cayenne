@@ -55,4 +55,8 @@ schema information
 
 17. Added support of schemas in queries.
 
+18. DbGenerator API has changed to allow more flexibility in defining how the 
+generation should work.
+
+
 

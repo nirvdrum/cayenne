@@ -66,27 +66,48 @@ import org.objectstyle.TestMain;
   * @author Andrei Adamchik
   */
 public class DbGeneratorTst extends TestCase {
-    static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
+	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
 
-    protected DbGenerator gen;
+	protected DbGenerator gen;
 
-    public DbGeneratorTst(String name) {
-        super(name);
-    }
+	public DbGeneratorTst(String name) {
+		super(name);
+	}
 
-    public void setUp() throws Exception {
-        gen =
-            new DbGenerator(
-                TestMain.getSharedConnection(),
-                TestMain.getSharedNode().getAdapter());
-    }
+	public void setUp() throws Exception {
+		gen =
+			new DbGenerator(
+				TestMain.getSharedNode().getAdapter(),
+				TestMain.getSharedNode().getDataMaps()[0]);
+	}
 
-    public void testGetAdapter() throws Exception {
-        try {
-            assertSame(TestMain.getSharedNode().getAdapter(), gen.getAdapter());
-        }
-        finally {
-            gen.getCon().close();
-        }
-    }
+	public void testAdapter() throws Exception {
+		assertSame(TestMain.getSharedNode().getAdapter(), gen.getAdapter());
+	}
+
+	public void testCreatePkSupport() throws Exception {
+		assertTrue(!gen.shouldCreatePKSupport());
+		gen.setShouldCreatePKSupport(true);
+		assertTrue(gen.shouldCreatePKSupport());
+
+	}
+
+	public void testShouldCreateTables() throws Exception {
+		assertTrue(gen.shouldCreateTables());
+		gen.setShouldCreateTables(false);
+		assertTrue(!gen.shouldCreateTables());
+	}
+
+	public void testDropPkSupport() throws Exception {
+
+		assertTrue(!gen.shouldDropPKSupport());
+		gen.setShouldDropPKSupport(true);
+		assertTrue(gen.shouldDropPKSupport());
+	}
+
+	public void testShouldDropTables() throws Exception {
+		assertTrue(!gen.shouldDropTables());
+		gen.setShouldDropTables(true);
+		assertTrue(gen.shouldDropTables());
+	}
 }

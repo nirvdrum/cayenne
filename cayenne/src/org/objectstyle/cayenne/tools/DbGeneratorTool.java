@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.tools;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.tools;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.tools;
 
 import java.sql.Connection;
 
@@ -91,8 +91,9 @@ public class DbGeneratorTool {
             }
             
             DbAdapter adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
-            DbGenerator gen = new DbGenerator(conn, adapter);
-            gen.createTables(map, true);
+            DbGenerator gen = new DbGenerator(adapter, map);
+            gen.setShouldDropTables(true);            
+            gen.runGenerator(conn);
             conn.close();
             
         } catch (Exception ex) {
