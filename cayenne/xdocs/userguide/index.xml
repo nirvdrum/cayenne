@@ -64,6 +64,7 @@
             
             <li><a href="modify/index.html">8. Modifying DataObjects</a>
             <ul>
+            	<li><a href="modify/data-context.html">8.1 Using DataContext</a></li>
             </ul><br/></li>
             
             <li><a href="perform/index.html">9. Performance Tuning</a>
