@@ -23,17 +23,17 @@
 Configuration conf = Configuration.getSharedConfiguration();
 </source>
               <p>DefaultConfiguration will expect <code>cayenne.xml</code> file to be located 
-              in the CLASSPATH. Same is true for datamaps referenced in <code>cayenne.xml</code>.
+              in the CLASSPATH. The same is true for datamaps referenced in <code>cayenne.xml</code>.
               Their location is resolved relative to CLASSPATH as well. To make these files available to
               Cayenne, you can simply include them in the root of your application jar file. 
               </p>
               
-              <p>Location of the datasource files referenced in <code>cayenne.xml</code>
+              <p>The location of the datasource files referenced in <code>cayenne.xml</code>
               depends on what factory was assigned to each datasource in <code>cayenne.xml</code>.
               Normally this would be a <a href=
                "../../api/cayenne/org/objectstyle/cayenne/conf/DriverDataSourceFactory.html"
                >org.objectstyle.cayenne.conf.DriverDataSourceFactory</a>. It would use
-               the following lookup order to resolve location:
+               the following lookup order to resolve locations:
                
                <ul>
                   <li>Location is assumed to be a file relative to the user HOME 
