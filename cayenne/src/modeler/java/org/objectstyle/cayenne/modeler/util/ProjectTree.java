@@ -84,10 +84,10 @@ public class ProjectTree extends JTree {
         DefaultMutableTreeNode root =
             ProjectTreeWrapper.getInstance().wrapProject(project);
         setModel(new DefaultTreeModel(root));
- 
+
         // hide root
         setRootVisible(false);
-        
+
         // expand top level
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         Enumeration level = root.children();
@@ -141,5 +141,14 @@ public class ProjectTree extends JTree {
 
     public String getName() {
         return "";
+    }
+
+    public void insertObject(Object obj, DefaultMutableTreeNode parent) {
+        DefaultMutableTreeNode node =
+            ProjectTreeWrapper.getInstance().wrapProjectNode(obj);
+        ((DefaultTreeModel) getModel()).insertNodeInto(
+            node,
+            parent,
+            parent.getChildCount());
     }
 }

@@ -102,7 +102,6 @@ import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
-import org.objectstyle.cayenne.modeler.util.ProjectTreeWrapper;
 
 /** 
  * Tree of domains, data maps, data nodes (sources) and entities. 
@@ -248,9 +247,7 @@ public class BrowseView
     public void domainAdded(DomainEvent e) {
         if (e.getSource() == this)
             return;
-        DefaultMutableTreeNode node =
-            ProjectTreeWrapper.getInstance().wrapProjectNode(e.getDomain());
-        model.insertNodeInto(node, rootNode, rootNode.getChildCount());
+        browseTree.insertObject(e.getDomain(), rootNode);
     }
 
     public void domainRemoved(DomainEvent e) {
@@ -285,11 +282,8 @@ public class BrowseView
                             break;
                         }
                     }
-                    if (false == found) {
-                        DefaultMutableTreeNode map_ele =
-                            ProjectTreeWrapper.getInstance().wrapProjectNode(maps[i]);
-                        model.insertNodeInto(map_ele, node, node.getChildCount());
-                        logObj.debug("Added map " + maps[i].getName() + " to node");
+                    if (!found) {
+                        browseTree.insertObject(maps[i], node);
                         break;
                     }
                 } // End for(i)
@@ -322,9 +316,8 @@ public class BrowseView
         parent = getDomainNode(mediator.getCurrentDataDomain());
         if (null == parent)
             return;
-        DefaultMutableTreeNode node;
-        node = ProjectTreeWrapper.getInstance().wrapProjectNode(e.getDataNode());
-        model.insertNodeInto(node, parent, parent.getChildCount());
+
+        browseTree.insertObject(e.getDataNode(), parent);
     }
 
     public void dataNodeRemoved(DataNodeEvent e) {
@@ -355,9 +348,8 @@ public class BrowseView
         parent = getDomainNode(mediator.getCurrentDataDomain());
         if (null == parent)
             return;
-        DefaultMutableTreeNode node;
-        node = ProjectTreeWrapper.getInstance().wrapProjectNode(e.getDataMap());
-        model.insertNodeInto(node, parent, parent.getChildCount());
+
+        browseTree.insertObject(e.getDataMap(), parent);
     }
 
     public void dataMapRemoved(DataMapEvent e) {
