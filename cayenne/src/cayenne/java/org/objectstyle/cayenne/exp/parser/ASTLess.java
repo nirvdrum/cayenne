@@ -88,12 +88,12 @@ public class ASTLess extends ConditionNode {
             return Boolean.FALSE;
         }
 
-        Comparable c1 = ConversionUtil.toComparabe(evaluateChild(0, o));
+        Comparable c1 = ConversionUtil.toComparable(evaluateChild(0, o));
         if (c1 == null) {
             return Boolean.FALSE;
         }
 
-        Comparable c2 = ConversionUtil.toComparabe(evaluateChild(1, o));
+        Comparable c2 = ConversionUtil.toComparable(evaluateChild(1, o));
         if (c2 == null) {
             return Boolean.FALSE;
         }

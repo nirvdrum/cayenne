@@ -62,10 +62,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.collections.ComparatorUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.util.ConversionUtil;
-import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -95,11 +95,13 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
     protected boolean caseInsensitive;
 
     /**
-     * Orders the given list of objects according to the list of orderings.
-     * The list is modified in place.
+     * Orders a given list of objects, using a List of Orderings
+     * applied according the default iteration order of the Orderings list. 
+     * I.e. each Ordering with lower index is more significant than any other
+     * Ordering with higer index. List being ordered is modified in place.
      */
     public static void orderList(List objects, List orderings) {
-        Collections.sort(objects, new DataObjectPropertyComparator(orderings));
+        Collections.sort(objects, ComparatorUtils.chainedComparator(orderings));
     }
 
     public Ordering() {
@@ -225,8 +227,8 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
         }
 
         int compareResult =
-            ConversionUtil.toComparabe(value1).compareTo(
-                ConversionUtil.toComparabe(value2));
+            ConversionUtil.toComparable(value1).compareTo(
+                ConversionUtil.toComparable(value2));
         return (ascending) ? compareResult : -compareResult;
     }
 

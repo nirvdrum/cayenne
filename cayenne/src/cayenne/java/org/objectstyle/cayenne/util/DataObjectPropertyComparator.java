@@ -65,6 +65,9 @@ import org.objectstyle.cayenne.query.Ordering;
  * org.objectstyle.util.PropertyComparator class, this class
  * allows nested properties. 
  * 
+ * @deprecated Unused Since 1.1. To chain orderings use 
+ * org.apache.commons.collections.ComparatorUtils.
+ * 
  * @author Andrei Adamchik
  */
 public class DataObjectPropertyComparator implements Comparator {

@@ -121,7 +121,7 @@ public final class ConversionUtil {
     /**
      * Attempts to convert an object to Comparable instance.
      */
-    public static Comparable toComparabe(Object object) {
+    public static Comparable toComparable(Object object) {
         if (object == null) {
             return null;
         }

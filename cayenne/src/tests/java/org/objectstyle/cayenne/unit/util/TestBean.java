@@ -59,6 +59,8 @@ package org.objectstyle.cayenne.unit.util;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 /**
  * A non-persistent Java Bean used for various expressions testing.
  * 
@@ -93,6 +95,10 @@ public class TestBean {
     public TestBean(String string, int intValue) {
         this.string = string;
         this.integer = new Integer(intValue);
+    }
+
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
     }
 
     public TestBean(int intValue) {

@@ -60,10 +60,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.art.Painting;
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 import org.objectstyle.cayenne.unit.util.TestBean;
 
-public class OrderingTst extends CayenneTestCase {
+public class OrderingTst extends BasicTestCase {
 
     public void testPathSpec1() throws Exception {
         String pathSpec = "a.b.c";
@@ -143,4 +143,30 @@ public class OrderingTst extends CayenneTestCase {
         assertEquals(5, ((TestBean) list.get(2)).getInteger().intValue());
     }
 
+    public void testOrderListWithMultipleOrderings() throws Exception {
+        // compare on non-persistent property
+        List list = new ArrayList(6);
+
+        list.add(new TestBean("c", 1));
+        list.add(new TestBean("c", 30));
+        list.add(new TestBean("a", 5));
+        list.add(new TestBean("b", 1));
+        list.add(new TestBean("b", 2));
+        list.add(new TestBean("b", 5));
+
+        List orderings = new ArrayList(2);
+        orderings.add(new Ordering("string", Ordering.ASC));
+        orderings.add(new Ordering("integer", Ordering.DESC));
+
+        // clone list and then order
+        List orderedList = new ArrayList(list);
+        Ordering.orderList(orderedList, orderings);
+
+        assertEquals(list.get(2), orderedList.get(0));
+        assertEquals(list.get(5), orderedList.get(1));
+        assertEquals(list.get(4), orderedList.get(2));
+        assertEquals(list.get(3), orderedList.get(3));
+        assertEquals(list.get(1), orderedList.get(4));
+        assertEquals(list.get(0), orderedList.get(5));
+    }
 }
