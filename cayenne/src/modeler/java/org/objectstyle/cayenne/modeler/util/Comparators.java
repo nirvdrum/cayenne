@@ -57,10 +57,13 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.util.Comparator;
 
+import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -73,14 +76,29 @@ public class Comparators {
     private static final Comparator dataMapChildrenComparator =
         new DataMapChildrenComparator();
 
+    private static final Comparator entityChildrenComparator =
+        new EntityChildrenComparator();
+
     private static final Comparator namedObjectComparator = new NamedObjectComparator();
 
     /**
-     * Returns a comparator to order DataMap children of mixed types, such as
-     * ObjEntities, DbEntities, Procedures and Queries.
+     * Returns a comparator to order DataMap objects of mixed types. 
+     * Objects of the same type are ordered based on "name" property.
+     * Objects of different types are ordered based on the following
+     * prcedence: DataMap, ObjEntity, DbEntity, Procedure and Query.
      */
     public static Comparator getDataMapChildrenComparator() {
         return dataMapChildrenComparator;
+    }
+    
+    /**
+     * Returns a comparator to order Entity properties such as Attributes and
+     * Relationships. Objects of the same type are ordered based on "name" 
+     * property. Objects of different types are ordered based on the following
+     * prcedence: Attribute, Relationship.
+     */
+    public static Comparator getEntityChildrenComparator() {
+        return entityChildrenComparator;
     }
 
     /**
@@ -91,7 +109,7 @@ public class Comparators {
         return namedObjectComparator;
     }
 
-    final static class NamedObjectComparator implements Comparator {
+    static class NamedObjectComparator implements Comparator {
         public int compare(Object o1, Object o2) {
 
             String name1 = ModelerUtil.getObjectName(o1);
@@ -109,24 +127,14 @@ public class Comparators {
         }
     }
 
-    final static class DataMapChildrenComparator implements Comparator {
+    final static class DataMapChildrenComparator extends NamedObjectComparator {
         public int compare(Object o1, Object o2) {
             int delta = getClassWeight(o1) - getClassWeight(o2);
             if (delta != 0) {
                 return delta;
             }
-
-            String name1 = ModelerUtil.getObjectName(o1);
-            String name2 = ModelerUtil.getObjectName(o2);
-
-            if (name1 == null) {
-                return (name2 != null) ? -1 : 0;
-            }
-            else if (name2 == null) {
-                return 1;
-            }
             else {
-                return name1.compareTo(name2);
+                return super.compare(o1, o2);
             }
         }
 
@@ -145,6 +153,34 @@ public class Comparators {
             }
             else if (o instanceof Query) {
                 return 5;
+            }
+            else {
+                // this should trap nulls among other things
+                return Integer.MAX_VALUE;
+            }
+        }
+    }
+
+    final static class EntityChildrenComparator extends NamedObjectComparator {
+        public int compare(Object o1, Object o2) {
+            int delta = getClassWeight(o1) - getClassWeight(o2);
+            if (delta != 0) {
+                return delta;
+            }
+            else {
+                return super.compare(o1, o2);
+            }
+        }
+
+        private static int getClassWeight(Object o) {
+            if (o instanceof Entity) {
+                return 1;
+            }
+            else if (o instanceof Attribute) {
+                return 2;
+            }
+            else if (o instanceof Relationship) {
+                return 3;
             }
             else {
                 // this should trap nulls among other things

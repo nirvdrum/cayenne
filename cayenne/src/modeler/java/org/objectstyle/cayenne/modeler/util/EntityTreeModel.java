@@ -53,34 +53,36 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.dialog.query;
+package org.objectstyle.cayenne.modeler.util;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
+import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.util.Comparators;
 
 /**
+ * Swing TreeModel for Entity attributes and relationships
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class EntityRelationshipTreeModel implements TreeModel {
-    protected Relationship root;
-    protected Map sortedRelationships;
+public class EntityTreeModel implements TreeModel {
+    protected Entity root;
+    protected Map sortedChildren;
 
-    public EntityRelationshipTreeModel(Entity root) {
-        // create fake relationship
-        this.root = new RootWrapper(root);
-
-        sortedRelationships = Collections.synchronizedMap(new HashMap());
+    public EntityTreeModel(Entity root) {
+        this.root = root;
+        sortedChildren = Collections.synchronizedMap(new HashMap());
     }
 
     public Object getRoot() {
@@ -88,11 +90,11 @@ public class EntityRelationshipTreeModel implements TreeModel {
     }
 
     public Object getChild(Object node, int index) {
-        return sortedRelationships(node)[index];
+        return sortedChildren(node)[index];
     }
 
     public int getChildCount(Object node) {
-        return sortedRelationships(node).length;
+        return (node instanceof Attribute) ? 0 : sortedChildren(node).length;
     }
 
     public boolean isLeaf(Object node) {
@@ -104,69 +106,69 @@ public class EntityRelationshipTreeModel implements TreeModel {
     }
 
     public int getIndexOfChild(Object node, Object child) {
+        if(node instanceof Attribute) {
+            return -1;
+        }
+        
         // wonder if linear search will be faster, considering that
         // this comparator uses reflection?
         return Arrays.binarySearch(
-            sortedRelationships(node),
+            sortedChildren(node),
             child,
             Comparators.getNamedObjectComparator());
     }
 
-    public void addTreeModelListener(TreeModelListener arg0) {
+    public void addTreeModelListener(TreeModelListener listener) {
         // do nothing...
     }
 
-    public void removeTreeModelListener(TreeModelListener arg0) {
+    public void removeTreeModelListener(TreeModelListener listener) {
         // do nothing...
     }
 
-    private Object[] sortedRelationships(Object node) {
-        Relationship source = castNode(node);
-        synchronized (sortedRelationships) {
-            String key = source.getTargetEntityName();
+    private Object[] sortedChildren(Object node) {
+        Entity entity = entityForNonLeafNode(node);
 
-            Object[] sortedForNode = (Object[]) sortedRelationships.get(key);
+        synchronized (sortedChildren) {
+            String key = entity.getName();
+            Object[] sortedForNode = (Object[]) sortedChildren.get(key);
 
             if (sortedForNode == null) {
-                Collection relationships = source.getTargetEntity().getRelationships();
-                if (relationships.size() == 0) {
-                    sortedForNode = new Object[0];
-                }
-                else {
-                    sortedForNode = relationships.toArray();
-                    Arrays.sort(sortedForNode, Comparators.getNamedObjectComparator());
+                Collection attributes = entity.getAttributes();
+                Collection relationships = entity.getRelationships();
+
+                // combine two collections in an array
+                int alen = attributes.size();
+                int rlen = relationships.size();
+                sortedForNode = new Object[alen + rlen];
+
+                Iterator ait = attributes.iterator();
+                for (int i = 0; i < alen; i++) {
+                    sortedForNode[i] = ait.next();
                 }
 
-                sortedRelationships.put(key, sortedForNode);
+                Iterator rit = relationships.iterator();
+                for (int i = 0; i < rlen; i++) {
+                    sortedForNode[alen + i] = rit.next();
+                }
+
+                Arrays.sort(sortedForNode, Comparators.getEntityChildrenComparator());
+                sortedChildren.put(key, sortedForNode);
             }
 
             return sortedForNode;
         }
     }
 
-    private Relationship castNode(Object node) {
-        if (!(node instanceof Relationship)) {
-            String className = (node != null) ? node.getClass().getName() : "null";
-            throw new IllegalArgumentException(
-                "Relationship node expected, instead got: " + className);
+    private Entity entityForNonLeafNode(Object node) {
+        if (node instanceof Entity) {
+            return (Entity) node;
+        }
+        else if (node instanceof Relationship) {
+            return ((Relationship) node).getTargetEntity();
         }
 
-        return (Relationship) node;
-    }
-
-    final class RootWrapper extends Relationship {
-        Entity root;
-
-        RootWrapper(Entity root) {
-            RootWrapper.this.root = root;
-        }
-
-        public Entity getTargetEntity() {
-            return RootWrapper.this.root;
-        }
-
-        public String getTargetEntityName() {
-            return getTargetEntity().getName();
-        }
+        String className = (node != null) ? node.getClass().getName() : "null";
+        throw new IllegalArgumentException("Unexpected non-leaf node: " + className);
     }
 }

@@ -58,7 +58,10 @@ package org.objectstyle.cayenne.modeler.dialog.query;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 
+import javax.swing.JScrollPane;
+
 import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
 import org.scopemvc.view.swing.SPanel;
 
@@ -69,6 +72,7 @@ import org.scopemvc.view.swing.SPanel;
  * @author Andrei Adamchik
  */
 public class SelectQueryOrderingPanel extends SPanel {
+    private static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
 
     protected MultiColumnBrowser browser;
 
@@ -79,11 +83,17 @@ public class SelectQueryOrderingPanel extends SPanel {
     private void initView() {
         // create widgets
         browser = new MultiColumnBrowser();
-        browser.setPreferredSize(new Dimension(203, 100));
+        browser.setPreferredColumnSize(BROWSER_CELL_DIM);
 
         // assemble
         setLayout(new BorderLayout());
-        add(browser, BorderLayout.NORTH);
+
+        JScrollPane scroller =
+            new JScrollPane(
+                browser,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        add(scroller, BorderLayout.NORTH);
     }
 
     public void setBoundModel(Object model) {
@@ -93,8 +103,7 @@ public class SelectQueryOrderingPanel extends SPanel {
         if (model instanceof QueryModel) {
             Object root = ((QueryModel) model).getRoot();
             if (root instanceof Entity) {
-                EntityRelationshipTreeModel treeModel =
-                    new EntityRelationshipTreeModel((Entity) root);
+                EntityTreeModel treeModel = new EntityTreeModel((Entity) root);
                 browser.setModel(treeModel);
             }
         }

@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JList;
@@ -86,103 +90,145 @@ import org.apache.log4j.Logger;
 public class MultiColumnBrowser extends JPanel {
     private static Logger logObj = Logger.getLogger(MultiColumnBrowser.class);
 
-    public static final int MIN_COLUMNS_COUNT = 3;
+    public static final int DEFAULT_MIN_COLUMNS_COUNT = 3;
 
+    protected int minColumns;
+    protected ListCellRenderer renderer;
     protected TreeModel model;
     protected TreePath selectionPath;
+    protected Dimension preferredColumnSize;
+
     private int offset;
-    private BrowserPanel[] columns;
+    private List columns;
+    private ListSelectionListener browserSelector = new PanelController();
 
     public MultiColumnBrowser() {
-        this(MIN_COLUMNS_COUNT);
+        this(DEFAULT_MIN_COLUMNS_COUNT);
     }
 
-    public MultiColumnBrowser(int columnsCount) {
-        this(MIN_COLUMNS_COUNT, CellRenderers.listRendererWithIcons());
+    public MultiColumnBrowser(int minColumns) {
+        this(minColumns, CellRenderers.listRendererWithIcons());
     }
 
-    public MultiColumnBrowser(int columnsCount, ListCellRenderer cellRenderer) {
-        if (columnsCount < MIN_COLUMNS_COUNT) {
+    public MultiColumnBrowser(int minColumns, ListCellRenderer renderer) {
+        if (minColumns < DEFAULT_MIN_COLUMNS_COUNT) {
             throw new IllegalArgumentException(
                 "Expected "
-                    + MIN_COLUMNS_COUNT
+                    + DEFAULT_MIN_COLUMNS_COUNT
                     + " or more columns, got: "
-                    + columnsCount);
+                    + minColumns);
         }
 
-        initView(columnsCount, cellRenderer);
-        initController();
+        this.minColumns = minColumns;
+        this.renderer = renderer;
+
+        initView();
     }
 
-    private void initView(int columnsCount, ListCellRenderer cellRenderer) {
-        setLayout(new GridLayout(1, columnsCount, 3, 3));
-        columns = new BrowserPanel[columnsCount];
-        for (int i = 0; i < columnsCount; i++) {
-            columns[i] = new BrowserPanel();
-            if (cellRenderer != null) {
-                columns[i].setCellRenderer(cellRenderer);
-            }
-
-            add(new JScrollPane(columns[i]));
-        }
+    private void initView() {
+        columns = new ArrayList(minColumns);
+        expandView(minColumns);
     }
 
-    private void initController() {
-        ListSelectionListener browserSelector = new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting()) {
-                    // ignore "adjusting"
-                    updateFromModel((BrowserPanel) e.getSource(), e.getFirstIndex());
-                }
-            }
-        };
-
-        for (int i = 0; i < columns.length; i++) {
-            columns[i].addListSelectionListener(browserSelector);
-        }
-    }
-
-    private void updateFromModel(BrowserPanel panel, int selectionIndex) {
-        // clear browsers following currently selected browser
-        int i = columns.length - 1;
-        for (; columns[i] != panel && i >= 0; i--) {
-            logObj.debug("cleaning column: " + i);
-            columns[i].setRootNode(null);
-        }
-
-        // create new selection path
-        Object selectedNode = panel.getModel().getElementAt(selectionIndex);
-        selectionPath = rebuildPath(selectionPath, selectedNode);
-        logObj.debug("new path: " + selectionPath);
-
-        i++;
-        columns[i].setRootNode(selectionPath.getPathComponent(offset + i));
-        logObj.debug(
-            "column: "
-                + i
-                + ", updated with: "
-                + selectionPath.getPathComponent(offset + i));
-    }
-
-    private void updateFromModel() {
-        int size = selectionPath.getPathCount();
-        int len = Math.min(size - offset, getColumnsCount());
-
-        if (len == 0) {
+    private void expandView(int addColumns) {
+        if (addColumns == 0) {
             return;
         }
 
-        for (int i = 0; i < len; i++) {
-            columns[i].setRootNode(selectionPath.getPathComponent(offset + i));
-            logObj.debug(
-                "column: "
-                    + i
-                    + ", updated with: "
-                    + selectionPath.getPathComponent(offset + i));
+        if (addColumns < 0) {
+            // TODO: implement "contractView" if the columns number has shrunk
+            return;
+        }
+
+        setLayout(new GridLayout(1, columns.size() + addColumns, 3, 3));
+
+        for (int i = 0; i < addColumns; i++) {
+            appendColumn();
+        }
+
+        refreshPreferredSize();
+        refreshView();
+    }
+
+    private void refreshView() {
+        Container parent = getParent();
+        if (parent != null) {
+
+        }
+
+        revalidate();
+    }
+
+    private void refreshPreferredSize() {
+        if (preferredColumnSize != null) {
+            int w = getColumnsCount() * (preferredColumnSize.width + 3) + 3;
+            int h = preferredColumnSize.height + 6;
+            setPreferredSize(new Dimension(w, h));
         }
     }
 
-    // builds a path to the new node 
+    private BrowserPanel appendColumn() {
+        BrowserPanel panel = new BrowserPanel();
+        panel.addListSelectionListener(browserSelector);
+
+        if (renderer != null) {
+            panel.setCellRenderer(renderer);
+        }
+
+        columns.add(panel);
+        JScrollPane scroller =
+            new JScrollPane(
+                panel,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        // note - it is important to set prefrred size on scroller,
+        // not on the component itself... otherwise resizing
+        // will be very ugly...
+        if (preferredColumnSize != null) {
+            scroller.setPreferredSize(preferredColumnSize);
+        }
+        add(scroller);
+        return panel;
+    }
+
+    // builds initial view
+    private void initFromModel() {
+        Object root = model.getRoot();
+        selectionPath = new TreePath(root);
+
+        if (!model.isLeaf(model.getRoot())) {
+            BrowserPanel firstPanel = (BrowserPanel) columns.get(0);
+            firstPanel.setRootNode(root);
+            logObj.debug("initFromModel:: updated with: " + root);
+        }
+    }
+
+    // rebuilds view for the new path selection
+    private void updateFromModel(Object selectedNode, int panelIndex) {
+
+        // build path to selected node
+        // TreePath oldPath = this.selectionPath;
+        this.selectionPath = rebuildPath(selectionPath, selectedNode);
+        //   int lastRootIndex = selectionPath.getPathCount();
+
+        // figure how to display the new path
+        // selectedNode becomes the root of columns[panelIndex + 1]
+
+        if (!model.isLeaf(selectedNode)) {
+
+            // expand columns as needed
+            expandView(panelIndex + 2 - columns.size());
+
+            BrowserPanel lastPanel = (BrowserPanel) columns.get(panelIndex + 1);
+            lastPanel.setRootNode(selectedNode);
+            logObj.debug(
+                "column: " + (panelIndex + 1) + ", updated with: " + selectedNode);
+        }
+
+    }
+
+    // builds a TreePath to the new node 
     // that is known to be a peer or a child of one 
     // of the path components
     private TreePath rebuildPath(TreePath path, Object node) {
@@ -206,12 +252,36 @@ public class MultiColumnBrowser extends JPanel {
         return selectionPath;
     }
 
+    public int getMinColumns() {
+        return minColumns;
+    }
+
+    public void setMinColumns(int minColumns) {
+        this.minColumns = minColumns;
+    }
+
+    public Dimension getPreferredColumnSize() {
+        return preferredColumnSize;
+    }
+
+    public void setPreferredColumnSize(Dimension preferredColumnSize) {
+        this.preferredColumnSize = preferredColumnSize;
+        refreshPreferredSize();
+    }
+
+    public ListCellRenderer getRenderer() {
+        return renderer;
+    }
+
+    public void setRenderer(ListCellRenderer renderer) {
+        this.renderer = renderer;
+    }
+
     public void setModel(TreeModel model) {
         this.model = model;
 
         // display first column
-        selectionPath = new TreePath(model.getRoot());
-        updateFromModel();
+        initFromModel();
     }
 
     public TreeModel getModel() {
@@ -219,7 +289,7 @@ public class MultiColumnBrowser extends JPanel {
     }
 
     public int getColumnsCount() {
-        return columns.length;
+        return columns.size();
     }
 
     // List adapter for the TreeModel node, showing the branch
@@ -256,8 +326,26 @@ public class MultiColumnBrowser extends JPanel {
 
         void setRootNode(Object node) {
             ((ColumnListModel) BrowserPanel.this.getModel()).setTreeNode(node);
-            getParent().invalidate();
-            getParent().validate();
+        }
+
+        Object getTreeNode() {
+            return ((ColumnListModel) BrowserPanel.this.getModel()).treeNode;
         }
     }
+
+    final class PanelController implements ListSelectionListener {
+        public void valueChanged(ListSelectionEvent e) {
+            // ignore "adjusting"
+            if (!e.getValueIsAdjusting()) {
+                BrowserPanel panel = (BrowserPanel) e.getSource();
+                int index = e.getFirstIndex();
+                Object selectedNode =
+                    (index >= 0)
+                        ? panel.getModel().getElementAt(index)
+                        : panel.getTreeNode();
+
+                updateFromModel(selectedNode, columns.indexOf(panel));
+            }
+        }
+    };
 }
