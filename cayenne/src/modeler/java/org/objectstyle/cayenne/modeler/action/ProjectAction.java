@@ -57,58 +57,53 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 
 /**
  * @author Andrei Adamchik
  */
 public abstract class ProjectAction extends CayenneAction {
-	protected JFileChooser fileChooser = new JFileChooser();
-	
-	/**
-	 * Constructor for ProjectAction.
-	 * @param name
-	 */
-	public ProjectAction(String name) {
-		super(name);
-	}
-	
-	/** Returns true if successfully closed project, false otherwise. */
-	public boolean closeProject() {
-		if (!checkSaveOnClose()) {
-			return false;
-		}
-		
-		// later may create an event, right now notify frame
-		// directly
-		Editor.getFrame().projectClosed();
-		return true;
-	}
-	
-	/** Return false if cancel closing the window, true otherwise. */
-	public boolean checkSaveOnClose() {
-		Mediator mediator = getMediator();
-		if (mediator != null && mediator.isDirty()) {
-			int ret_code =
-				JOptionPane.showConfirmDialog(
-					Editor.getFrame(),
-					"You have unsaved data. Do you want to save it?");
-					
-			if (ret_code == JOptionPane.CANCEL_OPTION) {
-				return false;
-			}
-			else if (ret_code == JOptionPane.YES_OPTION)
-				Editor.getFrame().getAction(SaveAction.ACTION_NAME).actionPerformed(
-					new ActionEvent(
-						this,
-						ActionEvent.ACTION_PERFORMED,
-						"SaveAll"));
-		}
-		return true;
-	}
-}
+    protected ProjectOpener fileChooser = new ProjectOpener();
 
+    /**
+     * Constructor for ProjectAction.
+     * @param name
+     */
+    public ProjectAction(String name) {
+        super(name);
+    }
+
+    /** Returns true if successfully closed project, false otherwise. */
+    public boolean closeProject() {
+        if (!checkSaveOnClose()) {
+            return false;
+        }
+
+        // later may create an event, right now notify frame
+        // directly
+        Editor.getFrame().projectClosed();
+        return true;
+    }
+
+    /** Return false if cancel closing the window, true otherwise. */
+    public boolean checkSaveOnClose() {
+        Mediator mediator = getMediator();
+        if (mediator != null && mediator.isDirty()) {
+            int ret_code =
+                JOptionPane.showConfirmDialog(
+                    Editor.getFrame(),
+                    "You have unsaved data. Do you want to save it?");
+
+            if (ret_code == JOptionPane.CANCEL_OPTION) {
+                return false;
+            } else if (ret_code == JOptionPane.YES_OPTION)
+                Editor.getFrame().getAction(SaveAction.ACTION_NAME).actionPerformed(
+                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SaveAll"));
+        }
+        return true;
+    }
+}

@@ -57,11 +57,9 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -112,20 +110,11 @@ public class OpenProjectAction extends ProjectAction {
         String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
-            File file = null;
-            fileChooser.setFileFilter(new ProjectFileFilter());
-            fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            if (null != init_dir) {
-                File init_dir_file = new File(init_dir);
-                if (init_dir_file.exists())
-                    fileChooser.setCurrentDirectory(init_dir_file);
+            File file = fileChooser.openProjectFile(Editor.getFrame());
+
+            if (file != null) {
+                openProject(file);
             }
-            int ret_code = fileChooser.showOpenDialog(Editor.getFrame());
-            if (ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fileChooser.getSelectedFile();
-            openProject(file);
         } catch (Exception e) {
             logObj.warn("Error loading project file.", e);
         }
@@ -143,7 +132,6 @@ public class OpenProjectAction extends ProjectAction {
             Editor.getFrame().addToLastProjList(file.getAbsolutePath());
             // Initialize gui configuration
             // uncomment to debug GUI
-            Configuration.setLoggingLevel(Level.INFO);
             Project project = Project.createProject(file);
             Editor.getFrame().getController().getTopModel().setCurrentProject(project);
             // if upgrade was canceled

@@ -55,20 +55,40 @@
  */
 package org.objectstyle.cayenne.modeler.view;
 
+import java.awt.Frame;
+import java.io.File;
+
 import javax.swing.JFileChooser;
 
+import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.modeler.util.ProjectFileFilter;
 
 /**
  * @author Andrei Adamchik
  */
-public class ProjectFileChooser extends JFileChooser {
+public class ProjectOpener extends JFileChooser {
 
     /**
-     * Constructor for FileChooser.
+     * Constructor for ProjectOpener.
      */
-    public ProjectFileChooser() {
+    public ProjectOpener() {
         super();
+    }
+
+    public File openProjectFile(Frame f) {
+        // Get the project file name (always cayenne.xml)
+        setFileFilter(new ProjectFileFilter());
+        setDialogTitle("Select Project File");
+        setFileSelectionMode(JFileChooser.FILES_ONLY);
+        setCurrentDirectory(getDefaultStartDir());
+
+        int status = showOpenDialog(f);
+        if (status != JFileChooser.APPROVE_OPTION) {
+            return null;
+        }
+        
+        return getSelectedFile();
     }
 
     /**
@@ -76,5 +96,28 @@ public class ProjectFileChooser extends JFileChooser {
      */
     public void setDialogTitle(String dialogTitle) {
         super.setDialogTitle(ModelerUtil.buildTitle(dialogTitle));
+    }
+
+    /**
+     * Returns directory where file search should start. 
+     * This is either coming from saved preferences, or a current directory is
+     * used.
+     */
+    public File getDefaultStartDir() {
+        File startDir = null;
+
+        // find start directory in preferences
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        String startDirStr = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
+        if (startDirStr != null) {
+            startDir = new File(startDirStr);
+        }
+
+        // not found or invalid, use current dir
+        if (startDir == null || !startDir.isDirectory()) {
+            startDir = new File(System.getProperty("user.dir"));
+        }
+
+        return startDir;
     }
 }
