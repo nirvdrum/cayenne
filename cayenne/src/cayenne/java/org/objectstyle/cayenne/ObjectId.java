@@ -64,15 +64,13 @@ import java.util.Map;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
-/** 
+/**
  * An ObjectId is a globally unique identifier of DataObjects.
- * 
- * <p>Each non-transient DataObject has an associated ObjectId. 
- * It is a global object identifier and does not depend on the 
- * DataContext of a particular object instance.
- * ObjectId conceptually close to a RDBMS primary key idea. 
- * Among other things ObjectId is used to ensure object uniqueness 
- * within DataContext. 
+ * <p>
+ * Each non-transient DataObject has an associated ObjectId. It is a global object
+ * identifier and does not depend on the DataContext of a particular object instance.
+ * ObjectId conceptually close to a RDBMS primary key idea. Among other things ObjectId is
+ * used to ensure object uniqueness within DataContext.
  * </p>
  * 
  * @author Andrei Adamchik
@@ -89,16 +87,14 @@ public class ObjectId implements Serializable {
     private int hashCode = Integer.MIN_VALUE;
 
     /**
-     * Convenience constructor for entities that have a 
-     * single Integer as their id.
+     * Convenience constructor for entities that have a single Integer as their id.
      */
     public ObjectId(Class objClass, String keyName, int id) {
         this(objClass, keyName, new Integer(id));
     }
 
     /**
-     * Convenience constructor for entities that have a 
-     * single column as their id.
+     * Convenience constructor for entities that have a single column as their id.
      */
     public ObjectId(Class objClass, String keyName, Object id) {
         this.objectClass = objClass;
@@ -159,8 +155,7 @@ public class ObjectId implements Serializable {
             Object key = entry.getKey();
             Object value = entry.getValue();
             if (value == null) {
-                if (id.objectIdKeys.get(key) != null
-                    || !id.objectIdKeys.containsKey(key)) {
+                if (id.objectIdKeys.get(key) != null || !id.objectIdKeys.containsKey(key)) {
                     return false;
                 }
             }
@@ -177,17 +172,15 @@ public class ObjectId implements Serializable {
     }
 
     /**
-     * Returns a map of id components. 
-     * Keys in the map are DbAttribute names, values are database values
-     * of corresponding columns.
+     * Returns a map of id components. Keys in the map are DbAttribute names, values are
+     * database values of corresponding columns.
      */
     public Map getIdSnapshot() {
         return objectIdKeys;
     }
 
     /**
-     * Returns a value of id attribute identified by the 
-     * name of DbAttribute.
+     * Returns a value of id attribute identified by the name of DbAttribute.
      */
     public Object getValueForAttribute(String attrName) {
         return objectIdKeys.get(attrName);
@@ -244,10 +237,11 @@ public class ObjectId implements Serializable {
                     Arrays.sort(keys);
 
                     for (int i = 0; i < len; i++) {
-                        // HashCodeBuilder will take care of processing object if it 
+                        // HashCodeBuilder will take care of processing object if it
                         // happens to be a primitive array such as byte[]
 
-                        // also we don't have to append the key hashcode, its index will work
+                        // also we don't have to append the key hashcode, its index will
+                        // work
                         builder.append(i).append(objectIdKeys.get(keys[i]));
                     }
                 }
@@ -267,7 +261,7 @@ public class ObjectId implements Serializable {
     public Class getObjectClass() {
         return objectClass;
     }
-    
+
     /**
      * @deprecated since 1.2 use getObjectClass().
      */
@@ -276,14 +270,17 @@ public class ObjectId implements Serializable {
     }
 
     /**
-     * Returns a replacement ObjectId associated with this id. Replacement ObjectId is either a
-     * permananent ObjectId for an uncommitted object or a new id for object whose id
-     * depends on its relationships.
+     * Returns a replacement ObjectId associated with this id. Replacement ObjectId is
+     * either a permananent ObjectId for an uncommitted object or a new id for object
+     * whose id depends on its relationships.
      */
     public ObjectId getReplacementId() {
         return replacementId;
     }
 
+    /**
+     * Initializes a replacement ObjectId.
+     */
     public void setReplacementId(ObjectId replacementId) {
         this.replacementId = replacementId;
     }

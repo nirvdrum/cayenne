@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Arrays;
+import java.util.Collections;
+
 import org.objectstyle.art.GeneratedColumnDep;
 import org.objectstyle.art.GeneratedColumnTest;
 import org.objectstyle.cayenne.DataObjectUtils;
@@ -71,34 +74,69 @@ public class IdentityColumnsTst extends CayenneTestCase {
     }
 
     public void testNewObject() throws Exception {
-        GeneratedColumnTest idObject = (GeneratedColumnTest) createDataContext()
+        DataContext context = createDataContext();
+        GeneratedColumnTest idObject = (GeneratedColumnTest) context
                 .createAndRegisterNewObject(GeneratedColumnTest.class);
-        idObject.setName("aaa");
+
+        String name = "n_" + System.currentTimeMillis();
+        idObject.setName(name);
 
         idObject.getDataContext().commitChanges();
 
-        // this will throw an exception if id wasn't generated
-        assertTrue(DataObjectUtils.intPKForObject(idObject) >= 0);
+        // this will throw an exception if id wasn't generated one way or another
+        int id = DataObjectUtils.intPKForObject(idObject);
+        assertTrue(id >= 0);
+
+        // make sure that id is the same as id in the DB
+        context.invalidateObjects(Collections.singleton(idObject));
+        GeneratedColumnTest object = (GeneratedColumnTest) DataObjectUtils.objectForPK(
+                context,
+                GeneratedColumnTest.class,
+                id);
+        assertNotNull(object);
+        assertEquals(name, object.getName());
     }
 
     public void testMultipleNewObjects() throws Exception {
         DataContext context = createDataContext();
-        GeneratedColumnTest idObject1 = (GeneratedColumnTest) context
-                .createAndRegisterNewObject(GeneratedColumnTest.class);
-        idObject1.setName("aaa");
-        GeneratedColumnTest idObject2 = (GeneratedColumnTest) context
-                .createAndRegisterNewObject(GeneratedColumnTest.class);
-        idObject2.setName("bbbb");
-        GeneratedColumnTest idObject3 = (GeneratedColumnTest) context
-                .createAndRegisterNewObject(GeneratedColumnTest.class);
-        idObject3.setName("ccc");
+
+        String[] names = new String[] {
+                "n1_" + System.currentTimeMillis(), "n2_" + System.currentTimeMillis(),
+                "n3_" + System.currentTimeMillis()
+        };
+
+        GeneratedColumnTest[] idObjects = new GeneratedColumnTest[] {
+                (GeneratedColumnTest) context
+                        .createAndRegisterNewObject(GeneratedColumnTest.class),
+                (GeneratedColumnTest) context
+                        .createAndRegisterNewObject(GeneratedColumnTest.class),
+                (GeneratedColumnTest) context
+                        .createAndRegisterNewObject(GeneratedColumnTest.class)
+        };
+
+        for (int i = 0; i < idObjects.length; i++) {
+            idObjects[i].setName(names[i]);
+        }
 
         context.commitChanges();
 
         // this will throw an exception if id wasn't generated
-        assertTrue(DataObjectUtils.intPKForObject(idObject1) >= 0);
-        assertTrue(DataObjectUtils.intPKForObject(idObject2) >= 0);
-        assertTrue(DataObjectUtils.intPKForObject(idObject3) >= 0);
+
+        int[] ids = new int[idObjects.length];
+
+        for (int i = 0; i < idObjects.length; i++) {
+            ids[i] = DataObjectUtils.intPKForObject(idObjects[i]);
+            assertTrue(ids[i] > 0);
+        }
+
+        context.invalidateObjects(Arrays.asList(idObjects));
+
+        for (int i = 0; i < ids.length; i++) {
+            GeneratedColumnTest object = (GeneratedColumnTest) DataObjectUtils
+                    .objectForPK(context, GeneratedColumnTest.class, ids[i]);
+            assertNotNull(object);
+            assertEquals(names[i], object.getName());
+        }
     }
 
     public void testPropagateToDependent() throws Exception {

@@ -242,7 +242,7 @@ public class BatchAction extends BaseSQLAction {
                 }
 
                 delegate.nextCount(query, updated);
-
+                
                 if (generatesKeys) {
                     processGeneratedKeys(query, statement, delegate);
                 }
@@ -273,9 +273,10 @@ public class BatchAction extends BaseSQLAction {
         // see if the query needs them
         if (query instanceof InsertBatchQuery) {
 
-            Iterator attributes = query.getDbAttributes().iterator();
+            // see if any of the generated attributes is PK
+            Iterator attributes = query.getDbEntity().getGeneratedAttributes().iterator();
             while (attributes.hasNext()) {
-                if (((DbAttribute) attributes.next()).isGenerated()) {
+                if (((DbAttribute) attributes.next()).isPrimaryKey()) {
                     return true;
                 }
             }

@@ -216,12 +216,20 @@ public class DbAttribute extends Attribute {
         return false;
     }
 
+    /**
+     * Updates attribute "primaryKey" property.
+     */
     public void setPrimaryKey(boolean primaryKey) {
-        this.primaryKey = primaryKey;
-        Entity e = this.getEntity();
-        if (e instanceof DbAttributeListener) {
-            ((DbAttributeListener) e).dbAttributeChanged(
-                new AttributeEvent(this, this, e));
+        if (this.primaryKey != primaryKey) {
+            this.primaryKey = primaryKey;
+
+            Entity e = this.getEntity();
+            if (e instanceof DbAttributeListener) {
+                ((DbAttributeListener) e).dbAttributeChanged(new AttributeEvent(
+                        this,
+                        this,
+                        e));
+            }
         }
     }
 
@@ -270,9 +278,21 @@ public class DbAttribute extends Attribute {
     }
     
     /**
+     * Updates attribute "generated" property.
+     * 
      * @since 1.2
      */
-    public void setGenerated(boolean autoIncrement) {
-        this.generated = autoIncrement;
+    public void setGenerated(boolean generated) {
+        if (this.generated != generated) {
+            this.generated = generated;
+
+            Entity e = this.getEntity();
+            if (e instanceof DbAttributeListener) {
+                ((DbAttributeListener) e).dbAttributeChanged(new AttributeEvent(
+                        this,
+                        this,
+                        e));
+            }
+        }
     }
 }

@@ -87,14 +87,14 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * PrimaryKeyHelper resolves primary key dependencies for entities
- * related to the supported query engine via topological sorting. It is
- * directly based on ASHWOOD. In addition it provides means for primary key
- * generation relying on DbAdapter in this.
- *
+ * PrimaryKeyHelper resolves primary key dependencies for entities related to the
+ * supported query engine via topological sorting. It is directly based on ASHWOOD. In
+ * addition it provides means for primary key generation relying on DbAdapter in this.
+ * 
  * @author Andriy Shapochka
  */
 public class PrimaryKeyHelper {
+
     private Map indexedDbEntities;
     private QueryEngine queryEngine;
     private DbEntityComparator dbEntityComparator;
@@ -120,7 +120,7 @@ public class PrimaryKeyHelper {
     }
 
     public void createPermIdsForObjEntity(ObjEntity objEntity, List dataObjects)
-        throws CayenneException {
+            throws CayenneException {
 
         if (dataObjects.isEmpty()) {
             return;
@@ -129,7 +129,8 @@ public class PrimaryKeyHelper {
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode owner = queryEngine.lookupDataNode(objEntity.getDataMap());
         if (owner == null) {
-            throw new CayenneRuntimeException("No suitable DataNode to handle primary key generation.");
+            throw new CayenneRuntimeException(
+                    "No suitable DataNode to handle primary key generation.");
         }
 
         PkGenerator pkGenerator = owner.getAdapter().getPkGenerator();
@@ -137,26 +138,31 @@ public class PrimaryKeyHelper {
 
         HashMap idMap = null;
         boolean pkFromMaster = true;
-        for (Iterator i = dataObjects.iterator(); i.hasNext();) {
+        Iterator i = dataObjects.iterator();
+        while (i.hasNext()) {
 
             DataObject object = (DataObject) i.next();
             ObjectId id = object.getObjectId();
             if (id == null || !id.isTemporary()) {
                 continue;
-                //If the id is not a temp, then it must be permanent.  Do nothing else
             }
 
             if (id.getReplacementId() != null) {
                 continue;
-                //An id already exists... nothing further required (definitely do not create another)
+                //An id already exists... nothing further required (definitely do not
+                // create another)
             }
 
             idMap = new HashMap(idMap != null ? idMap.size() : 1);
 
             // first get values delivered via relationships
-            if (pkFromMaster)
-                pkFromMaster =
-                    appendPkFromMasterRelationships(idMap, object, objEntity, dbEntity);
+            if (pkFromMaster) {
+                pkFromMaster = appendPkFromMasterRelationships(
+                        idMap,
+                        object,
+                        objEntity,
+                        dbEntity);
+            }
 
             boolean autoPkDone = false;
             Iterator it = pkAttributes.iterator();
@@ -174,7 +180,8 @@ public class PrimaryKeyHelper {
                 }
 
                 if (autoPkDone) {
-                    throw new CayenneException("Primary Key autogeneration only works for a single attribute.");
+                    throw new CayenneException(
+                            "Primary Key autogeneration only works for a single attribute.");
                 }
 
                 // finally, use database generation mechanism
@@ -185,8 +192,8 @@ public class PrimaryKeyHelper {
                 }
                 catch (Exception ex) {
                     throw new CayenneException(
-                        "Error generating PK: " + ex.getMessage(),
-                        ex);
+                            "Error generating PK: " + ex.getMessage(),
+                            ex);
                 }
             }
 
@@ -196,11 +203,10 @@ public class PrimaryKeyHelper {
     }
 
     private boolean appendPkFromMasterRelationships(
-        Map map,
-        DataObject dataObject,
-        ObjEntity objEntity,
-        DbEntity dbEntity)
-        throws CayenneException {
+            Map map,
+            DataObject dataObject,
+            ObjEntity objEntity,
+            DbEntity dbEntity) throws CayenneException {
         boolean useful = false;
         Iterator it = dbEntity.getRelationshipMap().values().iterator();
         while (it.hasNext()) {
@@ -212,24 +218,22 @@ public class PrimaryKeyHelper {
             if (rel == null)
                 continue;
 
-            DataObject targetDo =
-                (DataObject) dataObject.readPropertyDirectly(rel.getName());
+            DataObject targetDo = (DataObject) dataObject.readPropertyDirectly(rel
+                    .getName());
 
             if (targetDo == null)
                 throw new CayenneException(
-                    "Null master object, can't create primary key for: "
-                        + dataObject.getClass()
-                        + "."
-                        + dbRel.getName());
+                        "Null master object, can't create primary key for: "
+                                + dataObject.getClass()
+                                + "."
+                                + dbRel.getName());
 
             ObjectId targetKey = targetDo.getObjectId();
             Map idMap = targetKey.getIdSnapshot();
             if (idMap == null)
-                throw new CayenneException(
-                    noMasterPkMsg(
-                        objEntity.getName(),
-                        targetKey.getObjectClass().toString(),
-                        dbRel.getName()));
+                throw new CayenneException(noMasterPkMsg(objEntity.getName(), targetKey
+                        .getObjectClass()
+                        .toString(), dbRel.getName()));
             map.putAll(dbRel.srcFkSnapshotWithTargetSnapshot(idMap));
             useful = true;
         }
@@ -237,15 +241,10 @@ public class PrimaryKeyHelper {
     }
 
     private String noMasterPkMsg(String src, String dst, String rel) {
-        StringBuffer msg =
-            new StringBuffer("Can't create primary key, master object has no PK snapshot.");
-        msg
-            .append("\nrelationship name: ")
-            .append(rel)
-            .append(", src object: ")
-            .append(src)
-            .append(", target obj: ")
-            .append(dst);
+        StringBuffer msg = new StringBuffer(
+                "Can't create primary key, master object has no PK snapshot.");
+        msg.append("\nrelationship name: ").append(rel).append(", src object: ").append(
+                src).append(", target obj: ").append(dst);
         return msg.toString();
     }
 
@@ -283,20 +282,19 @@ public class PrimaryKeyHelper {
         }
         boolean acyclic = GraphUtils.isAcyclic(pkDependencyGraph);
         if (acyclic) {
-            IndegreeTopologicalSort sorter =
-                new IndegreeTopologicalSort(pkDependencyGraph);
+            IndegreeTopologicalSort sorter = new IndegreeTopologicalSort(
+                    pkDependencyGraph);
             while (sorter.hasNext())
                 indexedDbEntities.put(sorter.next(), new Integer(index++));
         }
         else {
-            StrongConnection contractor =
-                new StrongConnection(
+            StrongConnection contractor = new StrongConnection(
                     pkDependencyGraph,
                     CollectionFactory.ARRAYLIST_FACTORY);
             Digraph contractedDigraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
             contractor.contract(contractedDigraph, CollectionFactory.ARRAYLIST_FACTORY);
-            IndegreeTopologicalSort sorter =
-                new IndegreeTopologicalSort(contractedDigraph);
+            IndegreeTopologicalSort sorter = new IndegreeTopologicalSort(
+                    contractedDigraph);
             while (sorter.hasNext()) {
                 Collection component = (Collection) sorter.next();
                 for (Iterator i = component.iterator(); i.hasNext();)
@@ -306,6 +304,7 @@ public class PrimaryKeyHelper {
     }
 
     private class DbEntityComparator implements Comparator {
+
         public int compare(Object o1, Object o2) {
             if (o1.equals(o2)) {
                 return 0;
@@ -317,6 +316,7 @@ public class PrimaryKeyHelper {
     }
 
     private class ObjEntityComparator implements Comparator {
+
         public int compare(Object o1, Object o2) {
             if (o1.equals(o2)) {
                 return 0;
