@@ -134,7 +134,7 @@ public class PartialProject extends Project {
         filesToSave.addAll(files);
     }
 
-    protected void postInit(File projectFile) {
+    protected void postInitialize(File projectFile) {
         loadDelegate = new LoadDelegate();
         domains = new HashMap();
 
@@ -153,7 +153,7 @@ public class PartialProject extends Project {
             throw new ProjectException("Error creating PartialProject.", ioex);
         }
 
-        super.postInit(projectFile);
+        super.postInitialize(projectFile);
     }
 
     public List getChildren() {

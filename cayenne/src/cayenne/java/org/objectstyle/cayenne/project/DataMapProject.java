@@ -98,7 +98,7 @@ public class DataMapProject extends Project {
     /**
     * Initializes internal <code>map</code> object and then calls super.
     */
-    protected void postInit(File projectFile) {
+    protected void postInitialize(File projectFile) {
         if (projectFile != null) {
             try {
                 InputStream in = new FileInputStream(projectFile.getCanonicalFile());
@@ -121,7 +121,7 @@ public class DataMapProject extends Project {
             map = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
         }
 
-        super.postInit(projectFile);
+        super.postInitialize(projectFile);
     }
 
 

@@ -87,7 +87,7 @@ public class ApplicationProject extends Project {
     /**
      * Initializes internal <code>Configuration</code> object and then calls super.
      */
-    protected void postInit(File projectFile) {
+    protected void postInitialize(File projectFile) {
     	logObj.debug("postInit: " + projectFile);
         try {
         	// if the projectFile is real..
@@ -107,7 +107,7 @@ public class ApplicationProject extends Project {
         } catch (IOException e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
-        super.postInit(projectFile);
+        super.postInitialize(projectFile);
     }
 
     /**

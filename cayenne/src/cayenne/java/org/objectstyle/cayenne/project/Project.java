@@ -131,7 +131,7 @@ public abstract class Project {
             }
         }
 
-        postInit(projectFile);
+        postInitialize(projectFile);
     }
 
     /** 
@@ -139,11 +139,10 @@ public abstract class Project {
      * from constructor. Default implementation builds a file list
      * and checks for upgrades.
      */
-    protected void postInit(File projectFile) {
-		logObj.debug("postInit: " + projectFile);
+    protected void postInitialize(File projectFile) {
+		logObj.debug("didInitialize with: " + projectFile);
         // take a snapshot of files used by the project
         files = Collections.synchronizedList(buildFileList());
-
         upgradeMessages = Collections.synchronizedList(new ArrayList());
         checkForUpgrades();
     }
