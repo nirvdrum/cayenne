@@ -53,8 +53,7 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -69,7 +68,6 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
 
-
 /** Abstract superclass of Query translators.
  *  Defines callback methods for helper classes 
  *  that are delegated tasks of building query parts.
@@ -83,7 +81,7 @@ public abstract class QueryAssembler extends QueryTranslator {
     protected ArrayList values = new ArrayList();
 
     /** PreparedStatement attributes matching entries in <code>values</code> list.. */
-    protected ArrayList attributes =  new ArrayList();
+    protected ArrayList attributes = new ArrayList();
 
     /** Query being translated. */
     protected Query query;
@@ -97,8 +95,11 @@ public abstract class QueryAssembler extends QueryTranslator {
     /** Adapter helping to do SQL literal conversions, etc. */
     protected DbAdapter adapter;
 
-
-    public QueryAssembler(QueryEngine engine, Connection con, DbAdapter adapter, Query query) {
+    public QueryAssembler(
+        QueryEngine engine,
+        Connection con,
+        DbAdapter adapter,
+        Query query) {
         this.engine = engine;
         this.con = con;
         this.query = query;
@@ -118,7 +119,6 @@ public abstract class QueryAssembler extends QueryTranslator {
     * <code>createStatement</code>. Usually there is no need
     * to invoke it explicitly. */
     public abstract String createSqlString() throws java.lang.Exception;
-
 
     /** Returns a name that can be used as column alias.
      *  This can be one of the following:
@@ -157,34 +157,36 @@ public abstract class QueryAssembler extends QueryTranslator {
         values.add(anObject);
     }
 
-
     /** Translates internal query into PreparedStatement. */
-    public PreparedStatement createStatement(Level logLevel) throws java.lang.Exception {
+    public PreparedStatement createStatement(Level logLevel) throws Exception {
+
         String sqlStr = createSqlString();
         QueryLogger.logQuery(logLevel, sqlStr, values);
         PreparedStatement stmt = con.prepareStatement(sqlStr);
 
-        if(values != null && values.size() > 0) {
+        if (values != null && values.size() > 0) {
             int len = values.size();
-            for(int i = 0; i < len; i++) {
+            for (int i = 0; i < len; i++) {
                 Object val = values.get(i);
 
-                DbAttribute attr = (DbAttribute)attributes.get(i);
+                DbAttribute attr = (DbAttribute) attributes.get(i);
 
                 // null DbAttributes are a result of inferior qualifier processing
                 // (qualifier can't map parameters to DbAttributes and therefore
                 // only supports standard java types now)
                 // hence, a special moronic case here:
-                if(attr == null) {
+                if (attr == null) {
                     stmt.setObject(i + 1, val);
-                } else {
+                }
+                else {
                     int type = attr.getType();
                     int precision = attr.getPrecision();
 
-                    if(val == null)
+                    if (val == null)
                         stmt.setNull(i + 1, type);
                     else {
-                        ExtendedType map = ExtendedTypeMap.sharedInstance().getRegisteredType(val.getClass().getName());
+                        ExtendedType map =
+                            ExtendedTypeMap.sharedInstance().getRegisteredType(val.getClass().getName());
                         Object jdbcVal = (map == null) ? val : map.toJdbcObject(val, type);
                         stmt.setObject(i + 1, jdbcVal, type, precision);
                     }

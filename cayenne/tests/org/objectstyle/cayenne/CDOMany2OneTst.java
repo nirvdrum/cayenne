@@ -53,50 +53,56 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.art.*;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public class CDOMany2OneTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(CDOMany2OneTst.class.getName());
-    
+
     public CDOMany2OneTst(String name) {
         super(name);
     }
-    
-     /*   public void testSelectViaRelationship() throws Exception {
-        
+
+    public void testSelectViaRelationship() throws Exception {
+
         // setup test
-        Artist a1 = newArtist(); 
+        Artist a1 = newArtist();
         Painting p1 = newPainting();
         a1.addToPaintingArray(p1);
         ctxt.commitChanges();
-        
-        
+
         // do select
-        Expression e = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        Expression e =
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
         SelectQuery q = new SelectQuery("Painting", e);
-        
+
         // *** TESTING THIS *** 
-        List paints = ctxt.performQuery(q);
+        List paints = ctxt.performQuery(q, Level.SEVERE);
         assertEquals(1, paints.size());
         assertSame(p1, paints.get(0));
-    } */
+    }
     
-    public void testNewAdd() throws Exception { 
-        Artist a1 = newArtist();        
+
+    public void testNewAdd() throws Exception {
+        Artist a1 = newArtist();
         Painting p1 = newPainting();
-        
+
         // *** TESTING THIS *** 
         p1.setToArtist(a1);
-        
+
         // test before save
         assertSame(a1, p1.getToArtist());
-        assertEquals(1, a1.getPaintingArray().size());            
+        assertEquals(1, a1.getPaintingArray().size());
         assertSame(p1, a1.getPaintingArray().get(0));
-        
+
         // do save
         ctxt.commitChanges();
         resetContext();
@@ -107,20 +113,20 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         assertNotNull(a2);
         assertEquals(artistName, a2.getArtistName());
     }
-    
-    public void testRemove() throws Exception {        
+
+    public void testRemove() throws Exception {
         Painting p1 = newPainting();
-        Gallery g1 = newGallery();        
+        Gallery g1 = newGallery();
         p1.setToGallery(g1);
 
         // do save
         ctxt.commitChanges();
         resetContext();
-        
+
         // test database data
         Painting p2 = fetchPainting();
         Gallery g2 = p2.getToGallery();
- 
+
         // *** TESTING THIS *** 
         p2.setToGallery(null);
 
@@ -131,24 +137,24 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         // do save II
         ctxt.commitChanges();
         resetContext();
-        
-        Painting p3= fetchPainting();
+
+        Painting p3 = fetchPainting();
         assertNull(p3.getToGallery());
     }
-    
-    public void testReplace() throws Exception { 
+
+    public void testReplace() throws Exception {
         String altGalleryName = "alt gallery";
-        
+
         Painting p1 = newPainting();
         Gallery g1 = newGallery();
         g1.setGalleryName(altGalleryName);
-        
+
         p1.setToGallery(g1);
-        
+
         // do save
         ctxt.commitChanges();
         resetContext();
-        
+
         // test database data
         Painting p2 = fetchPainting();
         Gallery g21 = p2.getToGallery();
@@ -156,60 +162,58 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         assertEquals(altGalleryName, g21.getGalleryName());
         assertEquals(1, g21.getPaintingArray().size());
         assertSame(p2, g21.getPaintingArray().get(0));
-        
-        
+
         Gallery g22 = newGallery();
-        
+
         // *** TESTING THIS *** 
         p2.setToGallery(g22);
-        
+
         // test before save
         assertEquals(0, g21.getPaintingArray().size());
         assertEquals(1, g22.getPaintingArray().size());
         assertSame(p2, g22.getPaintingArray().get(0));
-        
+
         // do save II
         ctxt.commitChanges();
         resetContext();
-        
-        Painting p3= fetchPainting();
+
+        Painting p3 = fetchPainting();
         Gallery g3 = p3.getToGallery();
         assertNotNull(g3);
         assertEquals(galleryName, g3.getGalleryName());
         assertEquals(1, g3.getPaintingArray().size());
         assertSame(p3, g3.getPaintingArray().get(0));
     }
-    
-    public void testSavedAdd() throws Exception { 
+
+    public void testSavedAdd() throws Exception {
         Painting p1 = newPainting();
-        
+
         // do save
         ctxt.commitChanges();
         resetContext();
-        
+
         // test database data
         Painting p2 = fetchPainting();
-        assertNull(p2.getToGallery());        
-        
+        assertNull(p2.getToGallery());
+
         Gallery g2 = newGallery();
-        
+
         // *** TESTING THIS *** 
         p2.setToGallery(g2);
-        
+
         // test before save
         assertEquals(1, g2.getPaintingArray().size());
         assertSame(p2, g2.getPaintingArray().get(0));
-        
+
         // do save II
         ctxt.commitChanges();
         resetContext();
-        
-        Painting p3= fetchPainting();
+
+        Painting p3 = fetchPainting();
         Gallery g3 = p3.getToGallery();
         assertNotNull(g3);
         assertEquals(galleryName, g3.getGalleryName());
         assertEquals(1, g3.getPaintingArray().size());
         assertSame(p3, g3.getPaintingArray().get(0));
-    }  
+    }
 }
-
