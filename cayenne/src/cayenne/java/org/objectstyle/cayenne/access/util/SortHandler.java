@@ -56,13 +56,13 @@
 
 package org.objectstyle.cayenne.access.util;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * Defines a set of sorting methods based on object dependencies. The actual
@@ -115,8 +115,18 @@ public class SortHandler {
 
         this.sorterClass = sorterClass;
         this.queryEngine = queryEngine;
-        
+
+        // don't immediately index sorter, since parent QueryEngine
+        // may not be ready yet, besides "good program is lazy program"...        
         this.dirty = true;
+    }
+
+    /**
+     * Returns the internal sorting engine instance.
+     */
+    public DependencySorter getSorter() {
+        _indexSorter();
+        return sorter;
     }
 
     /**
@@ -126,14 +136,14 @@ public class SortHandler {
     public void indexSorter() {
         dirty = true;
     }
-    
+
     /**
      * Reindexes internal sorter.
      */
     protected synchronized void _indexSorter() {
-    	if(!dirty) {
-    		return;
-    	}
+        if (!dirty) {
+            return;
+        }
         DependencySorter newSorter;
 
         try {
@@ -151,40 +161,40 @@ public class SortHandler {
     }
 
     /**
-      * Creates and returns an array of queries in the right sorting order from
-      * an unsorted array.
-      */
-    public List sortedQueries(List unsortedQueries) {
-        _indexSorter();
-        
-        Object[] array = unsortedQueries.toArray();
-        Arrays.sort(array, sorter.getQueryComparator());
-        return Arrays.asList(array);
-    }
-
-    /**
-     * Returns a new list containing all the DbEntities in
-     * <code>entities</code>,  in the correct order for inserting objects int,o
-     * or creating the tables of, those entities.
+     * Sorts a list of ObjEntities in the correct order for inserting objects
+     * into a database.
      */
-    public List sortedDbEntitiesInInsertOrder(List dbEntities) {
+    public void sortObjEntitiesInInsertOrder(List objEntities) {
         _indexSorter();
-        
-        Object[] array = dbEntities.toArray();
-        Arrays.sort(array, sorter.getDbEntityComparator(false));
-        return Arrays.asList(array);
+        Collections.sort(objEntities, sorter.getObjEntityComparator(false));
     }
 
     /**
-      *  Returns a new list containing all the DbEntities in <code>entities</code>,
-      *  in the correct order for deleting objects from or removing the tables of, those entities.
+      * Sorts a list of ObjEntities in the correct order for deleting objects
+      * from the database.
       */
-    public List sortedDbEntitiesInDeleteOrder(List dbEntities) {
+    public void sortObjEntitiesInDeleteOrder(List objEntities) {
         _indexSorter();
-        
-        Object[] array = dbEntities.toArray();
-        Arrays.sort(array, sorter.getDbEntityComparator(true));
-        return Arrays.asList(array);
+        Collections.sort(objEntities, sorter.getObjEntityComparator(true));
+    }
+
+    /**
+     * Sorts a list of DbEntities in the correct order for inserting objects
+     * into or creating the tables of, those entities.
+     */
+    public void sortDbEntitiesInInsertOrder(List dbEntities) {
+        _indexSorter();
+        Collections.sort(dbEntities, sorter.getDbEntityComparator(false));
+    }
+
+    /**
+      * Sorts a list of DbEntities in <code>entities</code>, in the correct
+      * order for deleting objects from or removing the tables of, those
+      * entities.
+      */
+    public void sortDbEntitiesInDeleteOrder(List dbEntities) {
+        _indexSorter();
+        Collections.sort(dbEntities, sorter.getDbEntityComparator(true));
     }
 
     /**
@@ -194,10 +204,9 @@ public class SortHandler {
      *  are in place prior to being needed for the dependent
      *  object, and reflexive relationships are correctly handled
      */
-    public void sortObjectsInInsertOrder(List objects) {
+    public void sortObjectsInInsertOrder(ObjEntity entity, List objects) {
         _indexSorter();
-        
-        Collections.sort(objects, sorter.getDataObjectComparator(false));
+        sorter.sortObjectsForEntity(entity, objects, false);
     }
 
     /**
@@ -207,9 +216,8 @@ public class SortHandler {
      *  are in place prior to being needed for the dependent
      *  object and reflexive relationships are correctly handled
      */
-    public void sortObjectsInDeleteOrder(List objects) {
+    public void sortObjectsInDeleteOrder(ObjEntity entity, List objects) {
         _indexSorter();
-        
-        Collections.sort(objects, sorter.getDataObjectComparator(true));
+        sorter.sortObjectsForEntity(entity, objects, true);
     }
 }

@@ -68,6 +68,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.access.util.SortHandler;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -94,7 +95,7 @@ public class DataNode implements QueryEngine {
     protected String dataSourceLocation;
     protected String dataSourceFactory;
     protected EntityResolver entityResolver = new EntityResolver();
-    protected RefIntegritySupport refIntegritySupport;
+    protected SortHandler sortHandler = new SortHandler(this);
 
     /** Creates unnamed DataNode */
     public DataNode() {
@@ -152,8 +153,8 @@ public class DataNode implements QueryEngine {
     }
 
     public void setDataMaps(List dataMaps) {
-        refIntegritySupport = null;
         entityResolver.setDataMaps(dataMaps);
+        sortHandler.indexSorter();
     }
 
     /**
@@ -161,14 +162,14 @@ public class DataNode implements QueryEngine {
      */
     public void addDataMap(DataMap map) {
         entityResolver.addDataMap(map);
-        refIntegritySupport = null;
+        sortHandler.indexSorter();
     }
 
     public void removeDataMap(String mapName) {
         DataMap map = entityResolver.getDataMap(mapName);
         if (map != null) {
             entityResolver.removeDataMap(map);
-            refIntegritySupport = null;
+            sortHandler.indexSorter();
         }
     }
 
@@ -474,18 +475,7 @@ public class DataNode implements QueryEngine {
         return entityResolver;
     }
 
-    public void resetReferentialIntegritySupport() throws CayenneException {
-        if (refIntegritySupport == null) {
-            if (adapter.supportsFkConstraints())
-                refIntegritySupport = new RefIntegritySupport(this);
-        } else
-            refIntegritySupport.reset(this);
-    }
-
-    public RefIntegritySupport getReferentialIntegritySupport()
-        throws CayenneException {
-        if (refIntegritySupport == null)
-            resetReferentialIntegritySupport();
-        return refIntegritySupport;
+    public SortHandler getSortHandler() {
+        return sortHandler;
     }
 }

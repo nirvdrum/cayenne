@@ -58,13 +58,13 @@ package org.objectstyle.cayenne.access.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.collections.comparators.ReverseComparator;
 import org.apache.log4j.Logger;
 import org.objectstyle.ashwood.dbutil.DbUtils;
@@ -75,8 +75,9 @@ import org.objectstyle.ashwood.graph.Digraph;
 import org.objectstyle.ashwood.graph.IndegreeTopologicalSort;
 import org.objectstyle.ashwood.graph.MapDigraph;
 import org.objectstyle.ashwood.graph.StrongConnection;
-import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -88,17 +89,17 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * RefIntegritySupport resolves referential constraints per data node.
- * Presently it works for acyclic database schemas with possible
- * multi-reflexive tables. The class uses topological sorting from ASHWOOD.
- * It is mainly used by ContextCommit.
+ * DefaultSorter is a default implementation of DependencySorter based on
+ * ASHWOOD library. Presently it works for acyclic database schemas with
+ * possible multi-reflexive tables. The class uses topological sorting from
+ * ASHWOOD.
  *
  * @author Andriy Shapochka
  */
 
 public class DefaultSorter implements DependencySorter {
     private static Logger logObj = Logger.getLogger(DefaultSorter.class);
-    
+
     protected QueryEngine queryEngine;
     protected Map dbEntityToTableMap;
     protected Digraph referentialDigraph;
@@ -109,10 +110,6 @@ public class DefaultSorter implements DependencySorter {
     protected TableComparator tableComparator;
     protected DbEntityComparator dbEntityComparator;
     protected ObjEntityComparator objEntityComparator;
-    protected DataObjectComparator dataObjectComparator;
-    protected InsertQueryComparator insertQueryComparator;
-    protected Comparator deleteQueryComparator;
-    protected QueryComparator queryComparator;
 
     public DefaultSorter() {
     }
@@ -166,11 +163,6 @@ public class DefaultSorter implements DependencySorter {
         tableComparator = new TableComparator();
         dbEntityComparator = new DbEntityComparator();
         objEntityComparator = new ObjEntityComparator();
-        dataObjectComparator = new DataObjectComparator();
-        insertQueryComparator = new InsertQueryComparator();
-        deleteQueryComparator =
-            ComparatorUtils.reversedComparator(insertQueryComparator);
-        queryComparator = new QueryComparator();
     }
 
     private void fillInMetadata(Table table, DbEntity entity) {
@@ -180,8 +172,9 @@ public class DefaultSorter implements DependencySorter {
 
         while (i.hasNext()) {
             DbRelationship candidate = (DbRelationship) i.next();
-            if ((!candidate.isToMany() && !candidate.isToDependentPK()) || candidate.isToMasterPK()) {
-              
+            if ((!candidate.isToMany() && !candidate.isToDependentPK())
+                || candidate.isToMasterPK()) {
+
                 DbEntity target = (DbEntity) candidate.getTargetEntity();
                 boolean newReflexive = entity.equals(target);
                 Iterator j = candidate.getJoins().iterator();
@@ -203,9 +196,7 @@ public class DefaultSorter implements DependencySorter {
                                 (List) reflexiveDbEntities.get(entity);
                             if (reflexiveRels == null) {
                                 reflexiveRels = new ArrayList(1);
-                                reflexiveDbEntities.put(
-                                    entity,
-                                    reflexiveRels);
+                                reflexiveDbEntities.put(entity, reflexiveRels);
                             }
                             reflexiveRels.add(candidate);
                             newReflexive = false;
@@ -214,6 +205,128 @@ public class DefaultSorter implements DependencySorter {
                 }
             }
         }
+    }
+    
+
+    public void sortObjectsForEntity(
+        ObjEntity objEntity,
+        List objects,
+        boolean dependentFirst) {
+
+        DbEntity dbEntity = objEntity.getDbEntity();
+
+        // if no sorting is required
+        if (!isReflexive(dbEntity)) {
+            return;
+        }
+
+        int size = objects.size();
+        List reflexiveRels = (List) reflexiveDbEntities.get(dbEntity);
+        String[] objRelNames = new String[reflexiveRels.size()];
+        for (int i = 0; i < objRelNames.length; i++) {
+            DbRelationship dbRel = (DbRelationship) reflexiveRels.get(i);
+            ObjRelationship objRel =
+                (dbRel != null
+                    ? objEntity.getRelationshipForDbRelationship(dbRel)
+                    : null);
+            objRelNames[i] = (objRel != null ? objRel.getName() : null);
+        }
+
+        List sorted = new ArrayList(size);
+
+        Digraph objectDependencyGraph =
+            new MapDigraph(MapDigraph.HASHMAP_FACTORY);
+        DataObject[] masters = new DataObject[objRelNames.length];
+        for (int i = 0; i < size; i++) {
+            DataObject current = (DataObject) objects.get(i);
+            objectDependencyGraph.addVertex(current);
+            int actualMasterCount = 0;
+            for (int k = 0; k < objRelNames.length; k++) {
+                String objRelName = objRelNames[k];
+                if (objRelName == null)
+                    continue;
+                masters[k] =
+                    (objRelName != null
+                        ? (DataObject) current.readPropertyDirectly(objRelName)
+                        : null);
+                if (masters[k] == null) {
+                    masters[k] =
+                        findReflexiveMaster(
+                            current,
+                            (ObjRelationship) objEntity.getRelationship(
+                                objRelName),
+                            current.getObjectId().getObjClass());
+                }
+
+                if (masters[k] != null) {
+                    actualMasterCount++;
+                }
+            }
+            int mastersFound = 0;
+
+            for (int j = 0;
+                j < size && mastersFound < actualMasterCount;
+                j++) {
+
+                if (i == j) {
+                    continue;
+                }
+
+                DataObject masterCandidate = (DataObject) objects.get(j);
+                for (int k = 0; k < masters.length; k++) {
+                    if (masterCandidate.equals(masters[k])) {
+                        objectDependencyGraph.putArc(
+                            masterCandidate,
+                            current,
+                            Boolean.TRUE);
+                        mastersFound++;
+                    }
+                }
+            }
+        }
+
+        IndegreeTopologicalSort sorter =
+            new IndegreeTopologicalSort(objectDependencyGraph);
+            
+        while (sorter.hasNext()) {
+            DataObject o = (DataObject) sorter.next();
+            if (o == null)
+                throw new CayenneRuntimeException(
+                    "Sorting objects for "
+                        + objEntity.getClassName()
+                        + " failed. Cycles found.");
+            sorted.add(o);
+        }
+
+        // since API requires sorting within the same array,
+        // simply replace all objects with objects in the right order... 
+        // may come up with something cleaner later
+        objects.clear();
+        objects.addAll(sorted);
+        
+        if(dependentFirst) {
+        	Collections.reverse(objects);
+        }
+    }
+
+    protected DataObject findReflexiveMaster(
+        DataObject obj,
+        ObjRelationship toOneRel,
+        Class targetClass) {
+        DbRelationship finalRel =
+            (DbRelationship) toOneRel.getDbRelationshipList().get(0);
+        Map snapshot = obj.getCommittedSnapshot();
+        if (snapshot == null) {
+            snapshot = obj.getCurrentSnapshot();
+        }
+
+        Map pksnapshot = finalRel.targetPkSnapshotWithSrcSnapshot(snapshot);
+        if (pksnapshot != null) {
+            ObjectId destId = new ObjectId(targetClass, pksnapshot);
+            return obj.getDataContext().registeredObject(destId);
+        }
+
+        return null;
     }
 
     public Comparator getDbEntityComparator(boolean dependantFirst) {
@@ -230,26 +343,6 @@ public class DefaultSorter implements DependencySorter {
             c = new ReverseComparator(c);
         }
         return c;
-    }
-
-    public Comparator getDataObjectComparator(boolean dependantFirst) {
-        Comparator c = dataObjectComparator;
-        if (dependantFirst) {
-            c = new ReverseComparator(c);
-        }
-        return c;
-    }
-
-    public Comparator getQueryComparator() {
-        return queryComparator;
-    }
-
-    public Comparator getInsertQueryComparator() {
-        return insertQueryComparator;
-    }
-
-    public Comparator getDeleteQueryComparator() {
-        return deleteQueryComparator;
     }
 
     public Comparator getTableComparator() {
@@ -280,81 +373,13 @@ public class DefaultSorter implements DependencySorter {
     }
 
     public Table getTable(Query query) {
-        DbEntity dbEntity = queryEngine.getEntityResolver().lookupDbEntity(query);
+        DbEntity dbEntity =
+            queryEngine.getEntityResolver().lookupDbEntity(query);
         return getTable(dbEntity);
     }
 
     public boolean isReflexive(DbEntity metadata) {
         return reflexiveDbEntities.containsKey(metadata);
-    }
-
-    public List sort(List dataObjects, ObjEntity objEntity)
-        throws CayenneException {
-        DbEntity metadata = objEntity.getDbEntity();
-        if (!isReflexive(metadata))
-            return dataObjects;
-
-        int size = dataObjects.size();
-        List reflexiveRels = (List) reflexiveDbEntities.get(metadata);
-        String[] objRelNames = new String[reflexiveRels.size()];
-        for (int i = 0; i < objRelNames.length; i++) {
-            DbRelationship dbRel = (DbRelationship) reflexiveRels.get(i);
-            ObjRelationship objRel =
-                (dbRel != null
-                    ? objEntity.getRelationshipForDbRelationship(dbRel)
-                    : null);
-            objRelNames[i] = (objRel != null ? objRel.getName() : null);
-        }
-        //HashSet lookup = new HashSet(dataObjects);
-        List sortedObjects = new ArrayList(dataObjects.size());
-        Digraph objectDependencyGraph =
-            new MapDigraph(MapDigraph.HASHMAP_FACTORY);
-        DataObject[] masters = new DataObject[objRelNames.length];
-        for (int i = 0; i < size; i++) {
-            DataObject current = (DataObject) dataObjects.get(i);
-            objectDependencyGraph.addVertex(current);
-            int actualMasterCount = 0;
-            for (int k = 0; k < objRelNames.length; k++) {
-                String objRelName = objRelNames[k];
-                if (objRelName == null)
-                    continue;
-                masters[k] =
-                    (objRelName != null
-                        ? (DataObject) current.readPropertyDirectly(objRelName)
-                        : null);
-                if (masters[k] != null)
-                    actualMasterCount++;
-            }
-            int mastersFound = 0;
-            for (int j = 0;
-                j < size && mastersFound < actualMasterCount;
-                j++) {
-                if (i == j)
-                    continue;
-                DataObject masterCandidate = (DataObject) dataObjects.get(j);
-                for (int k = 0; k < masters.length; k++) {
-                    if (masterCandidate.equals(masters[k])) {
-                        objectDependencyGraph.putArc(
-                            masterCandidate,
-                            current,
-                            Boolean.TRUE);
-                        mastersFound++;
-                    }
-                }
-            }
-        }
-        IndegreeTopologicalSort sorter =
-            new IndegreeTopologicalSort(objectDependencyGraph);
-        while (sorter.hasNext()) {
-            DataObject o = (DataObject) sorter.next();
-            if (o == null)
-                throw new CayenneException(
-                    "Sorting objects for "
-                        + objEntity.getClassName()
-                        + " failed. Cycles found.");
-            sortedObjects.add(o);
-        }
-        return sortedObjects;
     }
 
     private class DbEntityComparator implements Comparator {
@@ -373,66 +398,6 @@ public class DefaultSorter implements DependencySorter {
                 return 0;
             Table t1 = getTable((ObjEntity) o1);
             Table t2 = getTable((ObjEntity) o2);
-            return tableComparator.compare(t1, t2);
-        }
-    }
-
-    private class DataObjectComparator implements Comparator {
-        public int compare(Object o1, Object o2) {
-            if (o1 == o2)
-                return 0;
-            Table t1 = getTable((DataObject) o1);
-            Table t2 = getTable((DataObject) o2);
-            return tableComparator.compare(t1, t2);
-        }
-    }
-
-    private class QueryComparator implements Comparator {
-        public int compare(Object o1, Object o2) {
-            if (o1 == o2)
-                return 0;
-            Query q1 = (Query) o1;
-            Query q2 = (Query) o2;
-            int type1 = q1.getQueryType();
-            int type2 = q2.getQueryType();
-            switch (type1) {
-                case Query.INSERT_QUERY :
-                    if (type2 != Query.INSERT_QUERY)
-                        return -1;
-                    else
-                        return insertQueryComparator.compare(q1, q2);
-                case Query.UPDATE_QUERY :
-                    if (type2 == Query.INSERT_QUERY)
-                        return 1;
-                    else if (type2 == Query.UPDATE_QUERY)
-                        return 0;
-                    else
-                        return -1;
-                case Query.DELETE_QUERY :
-                    if (type2 == Query.INSERT_QUERY
-                        || type2 == Query.UPDATE_QUERY)
-                        return 1;
-                    else if (type2 == Query.DELETE_QUERY)
-                        return deleteQueryComparator.compare(q1, q2);
-                    else
-                        return -1;
-                default :
-                    if (type2 == Query.INSERT_QUERY
-                        || type2 == Query.UPDATE_QUERY
-                        || type2 == Query.DELETE_QUERY)
-                        return 1;
-                    else
-                        return 0;
-            }
-        }
-    }
-
-    private class InsertQueryComparator implements Comparator {
-        public int compare(Object o1, Object o2) {
-            if (o1 == o2)
-                return 0;
-            Table t1 = getTable((Query) o1);
-            Table t2 = getTable((Query) o2);
             return tableComparator.compare(t1, t2);
         }
     }

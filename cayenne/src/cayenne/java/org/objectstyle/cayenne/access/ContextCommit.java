@@ -63,12 +63,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.commons.collections.ComparatorUtils;
 import org.apache.commons.collections.SequencedHashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -80,6 +78,7 @@ import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
+import org.objectstyle.cayenne.access.util.SortHandler;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -282,29 +281,30 @@ class ContextCommit {
             return;
         }
 
-        RefIntegritySupport sorter =
-            commitHelper.getNode().getReferentialIntegritySupport();
-        if (sorter != null)
-            Collections.sort(entities, sorter.getObjEntityComparator());
+        SortHandler sorter = commitHelper.getNode().getSortHandler();
+        sorter.sortObjEntitiesInInsertOrder(entities);
+
         for (Iterator i = entities.iterator(); i.hasNext();) {
             ObjEntity entity = (ObjEntity) i.next();
             List objects =
                 (List) newObjectsByObjEntity.get(entity.getClassName());
-            if (sorter != null)
-                objects = sorter.sort(objects, entity);
+
+            // sort objects for entity
+            sorter.sortObjectsInInsertOrder(entity, objects);
+
             InsertBatchQuery batch =
                 new InsertBatchQuery(entity.getDbEntity(), objects.size());
             batch.setLoggingLevel(logLevel);
 
-            if (logObj.isDebugEnabled())
+            if (logObj.isDebugEnabled()) {
                 logObj.debug(
                     "Creating InsertBatchQuery for DbEntity "
                         + entity.getDbEntity().getName());
+            }
 
             for (Iterator j = objects.iterator(); j.hasNext();) {
                 DataObject o = (DataObject) j.next();
                 batch.add(context.takeObjectSnapshot(o));
-                //queries.add(QueryHelper.insertQuery(context.takeObjectSnapshot(o), o.getObjectId()));
             }
 
             commitHelper.getQueries().add(batch);
@@ -320,19 +320,15 @@ class ContextCommit {
             return;
         }
 
-        RefIntegritySupport sorter =
-            commitHelper.getNode().getReferentialIntegritySupport();
-        if (sorter != null)
-            Collections.sort(
-                entities,
-                ComparatorUtils.reversedComparator(
-                    sorter.getObjEntityComparator()));
+        SortHandler sorter = commitHelper.getNode().getSortHandler();
+        sorter.sortObjEntitiesInDeleteOrder(entities);
+
         for (Iterator i = entities.iterator(); i.hasNext();) {
             ObjEntity entity = (ObjEntity) i.next();
             List objects =
                 (List) objectsToDeleteByObjEntity.get(entity.getClassName());
-            if (sorter != null)
-                objects = sorter.sort(objects, entity);
+
+            sorter.sortObjectsInDeleteOrder(entity, objects);
             DeleteBatchQuery batch =
                 new DeleteBatchQuery(entity.getDbEntity(), objects.size());
             batch.setLoggingLevel(logLevel);
@@ -342,10 +338,9 @@ class ContextCommit {
                     "Creating DeleteBatchQuery for DbEntity "
                         + entity.getDbEntity().getName());
 
-            for (ListIterator j = objects.listIterator(objects.size());
-                j.hasPrevious();
-                ) {
-                DataObject o = (DataObject) j.previous();
+            Iterator it = objects.iterator();
+            while (it.hasNext()) {
+                DataObject o = (DataObject) it.next();
                 Map id = o.getObjectId().getIdSnapshot();
                 if (id != null && !id.isEmpty()) {
                     batch.add(id);
