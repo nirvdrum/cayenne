@@ -151,6 +151,11 @@ public class DataContextTestBase extends CayenneTestCase {
         List ats = context.performQuery(q);
         return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
     }
+    
+    protected int safeId(int i) {
+        // something in the range that we are unlikely to hit
+        return 33000 + i;
+    }
 
     /** Give each artist a single painting. */
     public void populatePaintings() throws Exception {
@@ -165,9 +170,9 @@ public class DataContextTestBase extends CayenneTestCase {
             PreparedStatement stmt = conn.prepareStatement(insertPaint);
 
             for (int i = 1; i <= artistCount; i++) {
-                stmt.setInt(1, i);
+                stmt.setInt(1, safeId(i));
                 stmt.setString(2, "P_" + artistName(i));
-                stmt.setInt(3, i);
+                stmt.setInt(3, safeId(i));
                 stmt.setBigDecimal(4, new BigDecimal(i * 1000));
                 stmt.executeUpdate();
             }
@@ -197,7 +202,8 @@ public class DataContextTestBase extends CayenneTestCase {
             long dateBase = System.currentTimeMillis();
 
             for (int i = 1; i <= artistCount; i++) {
-                stmt.setInt(1, i);
+                // create ID's somewhere outside the range that we can reach
+                stmt.setInt(1, safeId(i));
                 stmt.setString(2, artistName(i, padToConstWidth));
                 stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
@@ -211,7 +217,8 @@ public class DataContextTestBase extends CayenneTestCase {
             stmt = conn.prepareStatement(insertGal);
 
             for (int i = 1; i <= galleryCount; i++) {
-                stmt.setInt(1, i);
+                // create ID's somewhere outside the range that we can reach
+                stmt.setInt(1, safeId(i));
                 stmt.setString(2, galleryName(i, padToConstWidth));
                 stmt.executeUpdate();
             }
