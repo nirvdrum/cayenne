@@ -195,7 +195,7 @@ public class CayenneDataObject implements DataObject {
         return readPropertyDirectly(propName);
     }
 
-    public final Object readPropertyDirectly(String propName) {
+    public Object readPropertyDirectly(String propName) {
         return props.get(propName);
     }
 
@@ -208,7 +208,7 @@ public class CayenneDataObject implements DataObject {
         writePropertyDirectly(propName, val);
     }
 
-    public final void writePropertyDirectly(String propName, Object val) {
+    public void writePropertyDirectly(String propName, Object val) {
         props.put(propName, val);
     }
 
