@@ -23,13 +23,13 @@
         <!-- Welcome section -->
         <section name="Welcome to Cayenne">
         <p>Welcome to Cayenne. Our goal is to provide Java developers with opensource 
-        tools to access relational databases in a an object-oriented way.</p>
+        tools to access relational databases in an object-oriented way.</p>
         
         <p>Cayenne includes a framework that adds persistence features to Java objects.
         It allows mapping classes to database tables. Queries and updates (including 
         atomic updates of all modified objects) are done with a single method call. 
         This is a big advantage over writing SQL code in your Java program.
-        Cayenne also provides GUI mapping tool (called CayenneModeler) to reverse-enginner 
+        Cayenne also provides GUI mapping tool (called CayenneModeler) to reverse-engineer 
         RDBMS schema and create "data maps" - XML files that contain mapping 
         between the database and Java classes. CayenneModeler can also generate 
         Java classes source code to use in your Java application.</p>
@@ -43,7 +43,7 @@
         
         <!-- Status section -->
         <section name="Status and History">
-        <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in Atlanta. 
+        <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in Atlanta, USA. 
         Working prototype was ready
         in July. Current version is based on that prototype and is under active development 
         since December 2001. Right now Cayenne is already a usable tool. Certain things need to
