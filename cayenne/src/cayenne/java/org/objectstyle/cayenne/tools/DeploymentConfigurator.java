@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.project.DataNodeConfigInfo;
 import org.objectstyle.cayenne.project.ProjectConfigInfo;
 import org.objectstyle.cayenne.project.ProjectConfigurator;
 import org.objectstyle.cayenne.project.ProjectException;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * @author Andrei Adamchik
@@ -98,8 +99,23 @@ public class DeploymentConfigurator extends Task {
         try {
             processProject();
         } catch (Exception ex) {
-            super.log("Error during deployment configuration.");
-            throw new BuildException("Error during deployment configuration.", ex);
+        	Throwable th = Util.unwindException(ex);
+            String message = th.getMessage();
+            StringBuffer buf = new StringBuffer();
+
+            if (message != null && message.trim().length() > 0) {
+                buf.append("Error: [").append(message).append("].");
+            } else {
+                buf.append("Error reconfiguring jar file.");
+            }
+
+            buf.append(" Source: ").append(info.getSourceJar()).append(
+                "; target: ").append(
+                info.getDestJar());
+
+            String errorMessage = buf.toString();
+            super.log(errorMessage);
+            throw new BuildException(errorMessage, ex);
         }
     }
 
