@@ -20,36 +20,43 @@ clicking "Save" button multiple times in a webapplication).
 3. Subscequent calls to BasicServletConfiguration.initializeConfiguration(ServletContext)
 will not initialize it over and over again, but rather reuse the instance created on the 
 first call. This is to make webapplications fool-proof in cases when there is a startup 
-race condition. Bug report [727774]:
+race condition. Bug report 727774:
 
   http://sourceforge.net/tracker/index.php?func=detail&aid=727774&group_id=48132&atid=452068
   
 4. Fixed unneeded generation of primary key database support in the modeler, when a
-key is propagated from the parent entity. Bug [648754]:
+key is propagated from the parent entity. Bug 648754:
 
   http://sourceforge.net/tracker/index.php?func=detail&aid=648754&group_id=48132&atid=452068
   
 5. Removed some Oracle-driver specific code from the Oracle adapter (result column naming).
 According to Oracle documentation this feature improves SELECT performance. Our tests show 
-that it actually slows down the fecthes. Bug [699966]:
+that it actually slows down the fecthes. Bug 699966:
   
   http://sourceforge.net/tracker/index.php?func=detail&aid=699966&group_id=48132&atid=452068
   
 6. Database schema generation from partial DataMap now skips invalid/incomplete objects instead of 
-creating invalid SQL. Bug [662038]:
+creating invalid SQL. Bug 662038:
 
   http://sourceforge.net/tracker/index.php?func=detail&aid=662038&group_id=48132&atid=452068
   
 7. Cayenne now checks for file permissions and handles permissions exceptions when reading
 logging configuration files. This is especially important in the web containers where there
-is no direct access to the file system allowed. Bug [723805]:
+is no direct access to the file system allowed. Bug 723805:
 
   http://sourceforge.net/tracker/index.php?func=detail&aid=723805&group_id=48132&atid=452068 
 
 8. Fixed "cgen" ant task incorrect handling of to-many relationships (in target Java code
-they were generated as to-one). Bug [725995]:
+they were generated as to-one). Bug 725995:
 
   http://sourceforge.net/tracker/index.php?func=detail&aid=725995&group_id=48132&atid=452068 
 
 9. Added ability to put Cayenne files in the web application in an arbitrary configurable 
 location (documentation pending).
+
+10. Fixed CayenneModeler Windows startup script (modeler.sh) to handle environments with spaces
+in CLASSPATH. Bug 687570:
+
+  http://sourceforge.net/tracker/index.php?func=detail&aid=687570&group_id=48132&atid=452068
+  
+
