@@ -108,7 +108,7 @@ public interface DataObject extends java.io.Serializable {
      * dot-separated path used to traverse object relationships until the final object 
      * is found. If a null object found while traversing path, null is returned. If a 
      * list is encountered in the middle of the path, CayenneRuntimeException is thrown. 
-     * Unlike @{link #readPropertyDirectly(String)}, this method will resolve an object
+     * Unlike {@link #readPropertyDirectly(String)}, this method will resolve an object
      * if it is HOLLOW.
      *
      * <p>Examples:</p>

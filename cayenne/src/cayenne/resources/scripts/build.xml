@@ -1,14 +1,22 @@
 <?xml version="1.0"?>
 
 <!-- ================================================== -->
-<!-- Buildfile to compile Cayenne from source           -->
-<!-- distribution.                                      -->
+<!-- WARNING:                                           -->
+<!--                                                    -->
+<!-- This buildfile is for user convenience to create   -->
+<!-- quick local patches using source code coming with  -->
+<!-- Cayenne download. If you plan to make more serious -->
+<!-- changes to Cayenne and/or submit them to the       -->
+<!-- project, DO NOT USE THIS FILE!. Instead check out  -->
+<!-- Cayenne source via anonymous CVS and follow        -->
+<!-- Developer Guide instructions to compile it.        -->  
+<!--                                                    -->
 <!--                                                    -->
 <!-- Notes:                                             -->
 <!-- 1. The JAR files built will be called              -->
 <!-- cayenne-cust.jar and cayenne-tests-cust.jar.       -->
 <!-- DO NOT DELETE THE "OFFICIAL"  cayenne.jar FILE     -->
-<!-- in "lib" directory, since it is                   -->
+<!-- in "lib" directory, since it is                    -->
 <!-- used as a source of bundled 3-rd party classes.    -->
 <!--                                                    -->
 <!-- 2. YOU WILL NEED TO COMPILE CAYENNE YOURSELF ONLY  -->
@@ -19,12 +27,12 @@
 <!-- ================================================== -->
 
 <project name="cayenne-src" default="jar">
-     <property name="src" value="."/>
-     <property name="build" value="../build"/>
-     <property name="lib" value="../lib"/>
+	<property name="src" value="."/>
+	<property name="build" value="../build"/>
+	<property name="lib" value="../lib"/>
 
 	<path id="classpath">
-     	<fileset dir="${lib}">
+     		<fileset dir="${lib}">
 			<include name="servlet*.jar"/>
 		</fileset>
 		<pathelement path="${build}/deps"/>
@@ -38,97 +46,120 @@
 		</fileset>
 	</path>        
           
-     <target name="clean">
-         <delete dir="${build}"/>
-         <delete file="${lib}/cayenne-cust.jar"/>
-         <delete file="${lib}/cayenne-nodeps-cust.jar"/>
-         <delete file="${lib}/modeler/cayenne-modeler-cust.jar"/>
-     </target>
+	<target name="clean">
+		<delete dir="${build}"/>
+		<delete file="${lib}/cayenne-cust.jar"/>
+		<delete file="${lib}/cayenne-nodeps-cust.jar"/>
+		<delete file="${lib}/modeler/cayenne-modeler-cust.jar"/>
+	</target>
 
-     <target name="prepare">
-         <mkdir dir="${build}/cayenne"/>
-         <mkdir dir="${build}/modeler"/>
-         <mkdir dir="${build}/deps"/>
-     </target>     
+	<target name="prepare">
+		<mkdir dir="${build}/cayenne"/>
+		<mkdir dir="${build}/modeler"/>
+		<mkdir dir="${build}/deps"/>
+		<mkdir dir="${build}/modeler-deps"/>
+	</target>     
 
-     <target name="compile" depends="prepare,find-official-jar,prepare-dependencies,no-dependencies" 
-             description="compile target for jar with dependencies">
-             
-          <property name="cp" refid="classpath"/>
-          <echo> Java home: ${java.home}</echo>
-          <echo> CLASSPATH: ${cp}</echo>
+	<target name="compile" depends="prepare,find-official-jar,prepare-dependencies,no-dependencies,no-modeler-dependencies" 
+		description="compile target for jar with dependencies">
           
-          <javac srcdir="${src}/cayenne" destdir="${build}/cayenne" debug="on" 
-				deprecation="on">
-              <classpath refid="classpath"/>
-          </javac>
-          
-          <property name="cp-modeler" refid="classpath-modeler"/>
-          <echo> Java home: ${java.home}</echo>
-          <echo> CLASSPATH: ${cp-modeler}</echo>
-          <javac srcdir="${src}/modeler" destdir="${build}/modeler">
-              <classpath refid="classpath-modeler"/>
-          </javac>
-     </target>
+	<!-- Compile Cayenne -->
+		<property name="cp" refid="classpath"/>
+		<echo> Java home: ${java.home}</echo>
+		<echo> CLASSPATH: ${cp}</echo>
+		<javac srcdir="${src}/cayenne" destdir="${build}/cayenne" debug="on" deprecation="on">
+			<classpath refid="classpath"/>
+		</javac>
 
-     <target name="jar" depends="compile,jar-modeler" 
-             description="Creates cayenne-cust.jar">
-          <jar jarfile="${lib}/cayenne-cust.jar" manifest="${build}/deps/META-INF/MANIFEST.MF">
-             <fileset dir="${build}/deps">
-             	<exclude name="**/MANIFEST.MF"/>
-             </fileset>
-             <fileset dir="${build}/cayenne"/>
-          </jar>
-     </target>     
+	<!-- Compile Modeler -->
+		<property name="cp-modeler" refid="classpath-modeler"/>
+		<echo> Java home: ${java.home}</echo>
+		<echo> CLASSPATH: ${cp-modeler}</echo>
+		<javac srcdir="${src}/modeler" destdir="${build}/modeler">
+			<classpath refid="classpath-modeler"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile,jar-modeler" 
+		description="Creates cayenne-cust.jar">
+		<jar jarfile="${lib}/cayenne-cust.jar" manifest="${build}/deps/META-INF/MANIFEST.MF">
+			<fileset dir="${build}/deps">
+				<exclude name="**/MANIFEST.MF"/>
+			</fileset>
+			<fileset dir="${build}/cayenne"/>
+			<fileset dir="${src}/cayenne">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.html"/>
+				<exclude name="**/*.jj"/>
+			</fileset>
+		</jar>
+	</target>     
 
 
-     <target name="jar-nodeps" depends="compile,jar-modeler"  
-             description="Creates cayenne-nodeps-cust.jar (without dependencies)">
-             
-          <jar jarfile="${lib}/cayenne-nodeps-cust.jar" manifest="${build}/deps/META-INF/MANIFEST.MF">
-             <fileset dir="${build}/cayenne"/>
-             <fileset dir="${src}/cayenne">
-             	<exclude name="**/*.java"/>
-             	<exclude name="**/*.html"/>
-             	<exclude name="**/*.jj"/>
-             </fileset>
-              <fileset dir="${build}/deps">
-             	<include name="**/LICENSE"/>
-             </fileset>
-          </jar>
-     </target>
+	<target name="jar-nodeps" depends="compile,jar-modeler">
+		<jar jarfile="${lib}/cayenne-nodeps-cust.jar" manifest="${build}/deps/META-INF/MANIFEST.MF">
+			<fileset dir="${build}/cayenne"/>
+			<fileset dir="${src}/cayenne">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.html"/>
+				<exclude name="**/*.jj"/>
+			</fileset>
+			<fileset dir="${build}/deps">
+				<include name="**/LICENSE"/>
+			</fileset>
+		</jar>
+	</target>
      
-     <target name="jar-modeler">
-          <jar jarfile="${lib}/modeler/cayenne-modeler-cust.jar">
-             <fileset dir="${build}/modeler"/>
-             <fileset dir="${src}/modeler">
-             	<exclude name="**/*.java"/>
-             	<exclude name="**/*.html"/>
-             </fileset>
-             <fileset dir="${build}/deps">
-             	<include name="**/LICENSE"/>
-             </fileset>
-          </jar>
-     </target>     
+	<target name="jar-modeler">
+		<jar jarfile="${lib}/modeler/cayenne-modeler-cust.jar">
+			<fileset dir="${build}/modeler"/>
+			<fileset dir="${build}/deps">
+				<include name="**/LICENSE"/>
+			</fileset>
+			<fileset dir="${build}/modeler-deps">
+				<exclude name="**/MANIFEST.MF"/>
+			</fileset>
+			<fileset dir="${src}/modeler">
+				<exclude name="**/*.java"/>
+				<exclude name="**/*.html"/>
+			</fileset>
 
-     <!-- ============================================= -->
-     <!-- Extract any dependencies needed to compile    -->
-     <!-- Cayenne from the "official" JAR into "deps"   -->
-     <!-- directory.                                    -->
-     <!-- ============================================= -->
-     <target name="prepare-dependencies" if="official-jar">
-			<unjar src="${official-jar}" dest="${build}/deps"/>
-              
-			<delete includeEmptyDirs="true">
-				<fileset dir="${build}/deps">
-					<include name="org/objectstyle/cayenne/**/*.class"/>
-				</fileset>
-			</delete>
-     </target>
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Class-Path" value="../cayenne-cust.jar scope-bin-1.0.1.jar"/>
+			</manifest>
+		</jar>
+	</target>     
+
+	<!-- ============================================= -->
+	<!-- Extract any dependencies needed to compile    -->
+	<!-- Cayenne from the "official" JAR into "deps"   -->
+	<!-- directory.                                    -->
+	<!-- ============================================= -->
+	<target name="prepare-dependencies" if="official-jar">
+		<unjar src="${official-jar}" dest="${build}/deps"/>   
+		<delete includeEmptyDirs="true">
+			<fileset dir="${build}/deps">
+				<include name="org/objectstyle/cayenne/**/*.class"/>
+				<include name="dotemplates/**"/>
+			</fileset>
+		</delete>
+
+		<unjar src="${official-modeler-jar}" dest="${build}/modeler-deps"/>   
+		<delete includeEmptyDirs="true">
+			<fileset dir="${build}/modeler-deps">
+				<include name="org/objectstyle/cayenne/**/*.class"/>
+			</fileset>
+		</delete>
+	</target>
      
-     <target name="no-dependencies" unless="official-jar">
-         <fail message="No 'official' Cayenne JAR file found."/>
-     </target>
+	<target name="no-dependencies" unless="official-jar">
+		<fail message="No 'official' Cayenne JAR file found."/>
+	</target>
+
+	<target name="no-modeler-dependencies" unless="official-jar">
+		<fail message="No 'official' Cayenne JAR file found."/>
+	</target>
      
      <target name="find-official-jar">
          <available property="official-jar" 
@@ -136,6 +167,14 @@
                     classname="org.apache.velocity.app.Velocity">
   		    <classpath>
     	                <pathelement location="${lib}/cayenne.jar"/>
+  		    </classpath>
+         </available>
+
+	<available property="official-modeler-jar" 
+                    value="${lib}/modeler/cayenne-modeler.jar" 
+                    classname="org.objectstyle.cayenne.modeler.action.CayenneAction">
+  		    <classpath>
+    	                <pathelement location="${lib}/modeler/cayenne-modeler.jar"/>
   		    </classpath>
          </available>
      </target>

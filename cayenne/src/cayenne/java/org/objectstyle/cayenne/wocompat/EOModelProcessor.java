@@ -421,7 +421,7 @@ public class EOModelProcessor {
     }
 
     /** 
-     *  Create Flattened ObjRelationships of the specified entity.
+     * Create Flattened ObjRelationships of the specified entity.
      */
     protected void makeFlatRelationships(EOModelHelper helper, ObjEntity e) {
         Map info = helper.entityPListMap(e.getName());
