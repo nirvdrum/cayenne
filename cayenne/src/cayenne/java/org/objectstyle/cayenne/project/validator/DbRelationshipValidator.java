@@ -103,6 +103,13 @@ public class DbRelationshipValidator extends TreeNodeValidator {
                         path);
                 }
             }
+            
+            // validate reverse
+            if (rel.getReverseRelationship() == null) {
+                validator.registerWarning(
+                    "Missing reverse DbRelationship (currently required by Cayenne).",
+                    path);
+            }
         }
 
         if (Util.isEmptyString(rel.getName())) {
