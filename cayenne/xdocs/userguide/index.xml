@@ -59,7 +59,7 @@
                 <li><a href="fetch/exp.html">7.2 Using Qualifier Expressions</a></li>
                 <li><a href="fetch/orderings.html">7.3 Using Orderings</a></li>
                 <li><a href="fetch/other.html">7.4 Controlling SelectQuery Behavior</a></li>
-                <li><a href="fetch/params.html">7.5 Reusing SelectQueries: Parametrized Queries</a></li>
+                <li><a href="fetch/params.html">7.5 Reusing SelectQueries: Parameterized Queries</a></li>
                 <li><a href="fetch/raw.html">7.6 Executing raw SQL: SqlSelectQuery</a></li>
             </ul><br/></li>
             

@@ -8,9 +8,9 @@
 
 <body>
     <section name="7. Using SelectQueries">        
-        <subsection name="7.5 Reusing SelectQueries: Parametrized Queries.">
+        <subsection name="7.5 Reusing SelectQueries: Parameterized Queries.">
 		<p>SelectQuery objects can be rather complex. They may contain big qualifiers
-    	and lots of tuning parameters. <i>Parametrized Queries</i> is a feature in Cayenne
+    	and lots of tuning parameters. <i>Parameterized Queries</i> is a feature in Cayenne
     	that addresses reusability of complex queries. With this feature, for each group of queries
     	that differ only in the values used in the qualifier, a developer may create a single shared
     	"prototype" query, and use it later as a factory for other queries. All settings
@@ -60,7 +60,7 @@ proto.setDistinct(true);
             </li>
         </ul>
         <p>Extending the example above, the following example shows how to
-        build a query from a parametrized prototype:</p>
+        build a query from a parameterized prototype:</p>
         
 <source>import java.util.Map;
 import java.util.HashMap;
