@@ -59,35 +59,21 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DbLoader;
-import org.objectstyle.cayenne.access.DbLoaderDelegate;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.event.DataMapEvent;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
-import org.objectstyle.cayenne.modeler.dialog.db.ChooseSchemaDialog;
-import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.YesNoToAllDialog;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.modeler.dialog.db.DbLoaderHelper;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -101,12 +87,6 @@ public class ImportDbAction extends CayenneAction {
 
     private static final Logger logObj = Logger.getLogger(ImportDbAction.class);
 
-    // TODO: this is a temp hack... need to delegate to DbAdapter, or configurable in
-    // preferences...
-    private static final Collection excludedTables = Arrays.asList(new Object[] {
-            "AUTO_PK_SUPPORT", "auto_pk_support"
-    });
-
     public static String getActionName() {
         return "Reengineer Database Schema";
     }
@@ -115,7 +95,9 @@ public class ImportDbAction extends CayenneAction {
         super(getActionName());
     }
 
-    public void importDb() {
+    public void performAction(ActionEvent event) {
+        // connect to DB and delegate processing to DbLoaderController....
+
         EventController mediator = getMediator();
         DataNode currentNode = mediator.getCurrentDataNode();
 
@@ -140,11 +122,11 @@ public class ImportDbAction extends CayenneAction {
             dsi = new DataSourceInfo();
         }
 
-        Connection conn = null;
+        Connection connection = null;
         DbAdapter adapter = null;
 
         // Get connection
-        while (conn == null) {
+        while (connection == null) {
             InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
             loginObj.collectLoginInfo();
 
@@ -161,39 +143,23 @@ public class ImportDbAction extends CayenneAction {
             }
 
             // open connection
-            conn = openConnection(dsi);
-            if (conn == null) {
+            connection = openConnection(dsi);
+            if (connection == null) {
                 continue;
             }
         }
 
         try {
-            LoaderDelegate delegate = new LoaderDelegate(dsi, mediator);
-            DbLoader loader = new DbLoader(conn, adapter, delegate);
-            List schemas = loadSchemas(loader);
-            if (schemas == null) {
-                return;
-            }
-
-            ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas, dsi.getUserName());
-            dialog.show();
-            if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
-                return;
-            }
-
-            String schemaName = dialog.getSelectedSchema();
-            String tableNamePattern = dialog.getTableNamePattern();
-            dialog.dispose();
-
-            DataMap map = loadMap(loader, schemaName, tableNamePattern);
-            if (map != null) {
-                processMapUpdate(map);
-            }
+            new DbLoaderHelper(mediator, connection, adapter, dsi.getUserName())
+                    .execute();
+        }
+        catch (Throwable th) {
+            logObj.warn("Error on reverse engineering...", th);
         }
         finally {
             try {
-                if (conn != null) {
-                    conn.close();
+                if (connection != null) {
+                    connection.close();
                 }
             }
             catch (SQLException e) {
@@ -281,71 +247,6 @@ public class ImportDbAction extends CayenneAction {
         }
     }
 
-    public List loadSchemas(DbLoader loader) {
-        try {
-            return loader.getSchemas();
-        }
-        catch (SQLException e) {
-            logObj.warn("Error loading schemas", e);
-            JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
-                    e.getMessage(),
-                    "Error loading schemas",
-                    JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-
-    public void processMapUpdate(DataMap map) {
-        EventController mediator = getMediator();
-
-        if (mediator.getCurrentDataMap() != null) {
-            mediator.fireDataMapEvent(new DataMapEvent(
-                    CayenneModelerFrame.getFrame(),
-                    map,
-                    MapEvent.CHANGE));
-            mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(CayenneModelerFrame
-                    .getFrame(), map, mediator.getCurrentDataDomain(), mediator
-                    .getCurrentDataNode()));
-        }
-        else {
-            mediator.addDataMap(CayenneModelerFrame.getFrame(), map);
-        }
-    }
-
-    public DataMap loadMap(DbLoader loader, String schemaName, String tableNamePattern) {
-        EventController mediator = getMediator();
-        try {
-            DataMap map = mediator.getCurrentDataMap();
-            if (map != null) {
-                loader.loadDataMapFromDB(schemaName, tableNamePattern, map);
-                return map;
-            }
-            else {
-                map = loader.createDataMapFromDB(schemaName, tableNamePattern);
-
-                // fix map name
-                map.setName(NamedObjectFactory.createName(DataMap.class, mediator
-                        .getCurrentDataDomain()));
-
-                return map;
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
-                    e.getMessage(),
-                    "Error reverse engineering database",
-                    JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-    }
-
-    public void performAction(ActionEvent e) {
-        importDb();
-    }
-
     /**
      * Returns <code>true</code> if path contains a DataDomain object.
      */
@@ -355,98 +256,5 @@ public class ImportDbAction extends CayenneAction {
         }
 
         return path.firstInstanceOf(DataDomain.class) != null;
-    }
-
-    class LoaderDelegate implements DbLoaderDelegate {
-
-        protected EventController mediator;
-        protected int duplicate = YesNoToAllDialog.UNDEFINED;
-        protected boolean existingMap;
-        protected String userName;
-
-        public LoaderDelegate(DataSourceInfo dsi, EventController mediator) {
-            this.mediator = mediator;
-            this.existingMap = mediator.getCurrentDataMap() != null;
-            this.userName = dsi.getUserName();
-        }
-
-        /**
-         * @see org.objectstyle.cayenne.access.DbLoaderDelegate#overwriteDbEntity(DbEntity)
-         */
-        public boolean overwriteDbEntity(DbEntity ent) throws CayenneException {
-            // the decision may have been made already
-            if (duplicate == YesNoToAllDialog.YES_TO_ALL) {
-                return true;
-            }
-
-            if (duplicate == YesNoToAllDialog.NO_TO_ALL) {
-                return false;
-            }
-
-            YesNoToAllDialog dialog = new YesNoToAllDialog(
-                    "Duplicate Table Name",
-                    "DataMap already contains DBEntity for table '"
-                            + ent.getName()
-                            + "'. Overwrite?");
-            int code = dialog.getStatus();
-            dialog.dispose();
-
-            if (YesNoToAllDialog.YES_TO_ALL == code) {
-                duplicate = YesNoToAllDialog.YES_TO_ALL;
-                return true;
-            }
-            else if (YesNoToAllDialog.NO_TO_ALL == code) {
-                duplicate = YesNoToAllDialog.NO_TO_ALL;
-                return false;
-            }
-            else if (YesNoToAllDialog.YES == code) {
-                return true;
-            }
-            else if (YesNoToAllDialog.NO == code) {
-                return false;
-            }
-            else {
-                throw new CayenneException("Should stop DB import.");
-            }
-        }
-
-        public void dbEntityAdded(DbEntity entity) {
-            // TODO: hack to prevent PK tables from being visible... this should really be
-            // delegated to DbAdapter to decide...
-            if (excludedTables.contains(entity.getName()) && entity.getDataMap() != null) {
-                entity.getDataMap().removeDbEntity(entity.getName());
-            }
-            else if (existingMap) {
-                mediator
-                        .fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-            }
-        }
-
-        public void objEntityAdded(ObjEntity entity) {
-            if (existingMap) {
-                mediator
-                        .fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-            }
-        }
-
-        public void dbEntityRemoved(DbEntity entity) {
-            if (existingMap) {
-                mediator.fireDbEntityEvent(new EntityEvent(
-                        CayenneModelerFrame.getFrame(),
-                        entity,
-                        EntityEvent.REMOVE));
-            }
-        }
-
-        public void objEntityRemoved(ObjEntity entity) {
-            if (existingMap) {
-                mediator.fireObjEntityEvent(new EntityEvent(CayenneModelerFrame
-                        .getFrame(), entity, EntityEvent.REMOVE));
-            }
-        }
-
-        public void setSchema(DbEntity entity, String schema) {
-            // noop, deprecated in the interface
-        }
     }
 }

@@ -53,113 +53,116 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.FlowLayout;
-import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
-import javax.swing.border.Border;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 
-public class YesNoToAllDialog extends JDialog implements ActionListener {
-    public static final int UNDEFINED = -1;
-    public static final int YES = 0;
-    public static final int YES_TO_ALL = 1;
-    public static final int NO = 2;
-    public static final int NO_TO_ALL = 3;
-    public static final int CANCEL = 4;
+/**
+ * @author Andrei Adamchik
+ */
+public class DbLoaderMergeDialog extends CayenneDialog {
 
-    private static final int YN_WIDTH = 380;
-    private static final int YN_HEIGHT = 150;
+    protected DbLoaderHelper helper;
+    protected JCheckBox rememberSelection;
+    protected JLabel message;
+    protected JButton overwriteButton;
+    protected JButton skipButton;
+    protected JButton stopButton;
 
-    JButton yes = new JButton("Yes");
-    JButton yesToAll = new JButton("Yes to all");
-    JButton no = new JButton("No");
-    JButton noToAll = new JButton("No to all");
-    JButton cancel = new JButton("Stop");
+    public DbLoaderMergeDialog(CayenneModelerFrame owner) {
+        super(owner);
+        init();
+        initController();
+    }
 
-    private int status = CANCEL;
+    private void init() {
+        // create widgets
+        this.rememberSelection = new JCheckBox("Remember my decision for other entities.");
+        this.rememberSelection.setSelected(true);
 
-    public YesNoToAllDialog(String title, String msg) {
-        super(
-            CayenneModelerFrame.getFrame(),
-            title != null ? title : "Cayenne Db Import",
-            true);
+        this.overwriteButton = new JButton("Overwrite");
+        this.skipButton = new JButton("Skip");
+        this.stopButton = new JButton("Stop");
+        this.message = new JLabel("DataMap already contains this table. Overwrite?");
 
-        getContentPane().setLayout(new BorderLayout());
+        // assemble
+        JPanel messagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        messagePanel.add(message);
 
-        JTextArea infoArea = new JTextArea(msg);
-        Border border = BorderFactory.createBevelBorder(3);
-        infoArea.setBorder(border);
-        infoArea.setEditable(false);
-        infoArea.setLineWrap(true);
-        infoArea.setBackground(getContentPane().getBackground());
-        getContentPane().add(infoArea, BorderLayout.CENTER);
+        JPanel checkPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
+        checkPanel.add(rememberSelection);
 
-        JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        temp.add(yes);
-        temp.add(yesToAll);
-        temp.add(no);
-        temp.add(noToAll);
-        temp.add(cancel);
-        getContentPane().add(temp, BorderLayout.SOUTH);
+        JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {
+                skipButton, overwriteButton, stopButton
+        });
 
-        yes.addActionListener(this);
-        yesToAll.addActionListener(this);
-        no.addActionListener(this);
-        noToAll.addActionListener(this);
-        cancel.addActionListener(this);
+        Container contentPane = getContentPane();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(messagePanel, BorderLayout.NORTH);
+        contentPane.add(checkPanel, BorderLayout.CENTER);
+        contentPane.add(buttons, BorderLayout.SOUTH);
 
-        Point point;
-
-        if (CayenneModelerFrame.getFrame() != null) {
-            point = CayenneModelerFrame.getFrame().getLocationOnScreen();
-            int width = CayenneModelerFrame.getFrame().getWidth();
-            int x = (width - YN_WIDTH) / 2;
-            int height = CayenneModelerFrame.getFrame().getHeight();
-            int y = (height - YN_HEIGHT) / 2;
-            point.setLocation(point.x + x, point.y + y);
-        }
-        else {
-            point = new Point(250, 250);
-        }
-        setLocation(point);
+        setModal(true);
+        setResizable(false);
+        setSize(250, 150);
+        setTitle("DbEntity Already Exists");
         setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-        this.setSize(YN_WIDTH, YN_HEIGHT);
-        setVisible(true);
     }
 
-    public int getStatus() {
-        return status;
+    private void initController() {
+        overwriteButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateModel(true, false);
+            }
+        });
+
+        skipButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateModel(false, false);
+            }
+        });
+
+        stopButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateModel(false, true);
+            }
+        });
     }
 
-    public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
-        if (src == yes) {
-            status = YES;
+    private void updateModel(boolean overwrite, boolean stop) {
+        if (helper != null) {
+            helper.setOverwritePreferenceSet(rememberSelection.isSelected());
+            helper.setOverwritingEntities(overwrite);
+            helper.setStoppingReverseEngineering(stop);
         }
-        else if (src == yesToAll) {
-            status = YES_TO_ALL;
-        }
-        else if (src == no) {
-            status = NO;
-        }
-        else if (src == noToAll) {
-            status = NO_TO_ALL;
-        }
-        else if (src == cancel) {
-            status = CANCEL;
-        }
-        setVisible(false);
+
+        this.hide();
+    }
+
+    public void initFromModel(DbLoaderHelper helper, String tableName) {
+        this.helper = helper;
+        this.message.setText("DataMap already contains table '"
+                + tableName
+                + "'. Overwrite?");
+
+        validate();
+        pack();
     }
 }

@@ -621,6 +621,8 @@ public class DbLoader {
      * Performs database reverse engineering and generates DataMap
      * that contains default mapping of the tables and views. 
      * By default will include regular tables and views.
+     * 
+     * @deprecated Since 1.1 Use "loadDataMapFromDB"
      */
     public DataMap createDataMapFromDB(String schemaName, String tablePattern)
         throws SQLException {
@@ -637,6 +639,8 @@ public class DbLoader {
      * Performs database reverse engineering and generates DataMap object
      * that contains default mapping of the tables and views. 
      * Allows to limit types of tables to read. 
+     * 
+     * @deprecated Since 1.1 Use "loadDataMapFromDB"
      */
     public DataMap createDataMapFromDB(
         String schemaName,

@@ -80,7 +80,7 @@ import com.jgoodies.forms.layout.FormLayout;
 /**
  * Dialog for selecting database reverse-engineering parameters.
  */
-public class ChooseSchemaDialog extends CayenneDialog {
+public class DbLoaderOptionsDialog extends CayenneDialog {
 
     public static final int CANCEL = 0;
     public static final int SELECT = 1;
@@ -95,7 +95,7 @@ public class ChooseSchemaDialog extends CayenneDialog {
     /**
      * Creates and initializes new ChooseSchemaDialog.
      */
-    public ChooseSchemaDialog(Collection schemas, String dbUserName) {
+    public DbLoaderOptionsDialog(Collection schemas, String dbUserName) {
         super(CayenneModelerFrame.getFrame(), "DB Reengineering Options", true);
 
         init();
