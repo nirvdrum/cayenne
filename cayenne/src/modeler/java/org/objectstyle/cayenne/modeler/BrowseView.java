@@ -227,13 +227,7 @@ public class BrowseView
         if (e.getSource() == this || !e.isEntityChanged()) {
             return;
         }
-
-        DefaultMutableTreeNode treeNode =
-            getEntityNode(e.getDomain(), e.getDataMap(), e.getEntity());
-        if (treeNode == null) {
-            return;
-        }
-        showNode(treeNode);
+        showNode(new Object[] { e.getDomain(), e.getDataMap(), e.getEntity()});
     }
 
     public void domainChanged(DomainEvent e) {
@@ -375,10 +369,6 @@ public class BrowseView
         }
     }
 
-    private List getNodesWithMap(DataMap map) {
-        return null;
-    }
-
     public void objEntityChanged(EntityEvent e) {
         entityChanged(e);
     }
@@ -415,25 +405,18 @@ public class BrowseView
             return;
         }
 
-        DefaultMutableTreeNode node =
-            getEntityNode(
+        updateNode(
+            new Object[] {
                 mediator.getCurrentDataDomain(),
                 mediator.getCurrentDataMap(),
-                e.getEntity());
-        if (node != null) {
-            model.nodeChanged(node);
-        }
+                e.getEntity()});
 
-        node =
-            getEntityNode(
+        updateNode(
+            new Object[] {
                 mediator.getCurrentDataDomain(),
                 mediator.getCurrentDataNode(),
                 mediator.getCurrentDataMap(),
-                e.getEntity());
-
-        if (node != null) {
-            model.nodeChanged(node);
-        }
+                e.getEntity()});
     }
 
     /** 
@@ -478,27 +461,19 @@ public class BrowseView
         }
 
         // remove from DataMap tree
-        DefaultMutableTreeNode treeNode =
-            getEntityNode(
+        removeNode(
+            new Object[] {
                 mediator.getCurrentDataDomain(),
                 mediator.getCurrentDataMap(),
-                e.getEntity());
-
-        if (treeNode != null) {
-            removeNode(treeNode);
-        }
+                e.getEntity()});
 
         // remove from DataMap *reference* tree
-        treeNode =
-            getEntityNode(
+        removeNode(
+            new Object[] {
                 mediator.getCurrentDataDomain(),
                 mediator.getCurrentDataNode(),
                 mediator.getCurrentDataMap(),
-                e.getEntity());
-
-        if (treeNode != null) {
-            removeNode(treeNode);
-        }
+                e.getEntity()});
     }
 
     /** 
@@ -555,26 +530,8 @@ public class BrowseView
 
     /** Get map node by DataDomain and DataMap. */
     private DefaultMutableTreeNode getMapNode(DataDomain domain, DataMap map) {
-        if (null == map)
-            return null;
-        DefaultMutableTreeNode domain_node = getDomainNode(domain);
-        if (null == domain_node)
-            return null;
-        Enumeration maps = domain_node.children();
-        while (maps.hasMoreElements()) {
-            DefaultMutableTreeNode temp_node;
-            temp_node = (DefaultMutableTreeNode) maps.nextElement();
-            Object obj = temp_node.getUserObject();
-            // Skip Data Node-s under domain. Go only for DataMapWrappers.
-            if (!(obj instanceof DataMap)) {
-                continue;
-            }
-
-            if (obj == map) {
-                return temp_node;
-            }
-        }
-        return null;
+        return browseTree.getProjectModel().getNodeForObjectPath(
+            new Object[] { domain, map });
     }
 
     private DefaultMutableTreeNode getDataSourceNode(
@@ -624,66 +581,53 @@ public class BrowseView
         return null;
     }
 
-    /** Get entity node by DataDomain, DataMap and Entity. */
-    private DefaultMutableTreeNode getEntityNode(
-        DataDomain domain,
-        DataMap map,
-        Entity entity) {
-
-        if (null == entity) {
-            return null;
-        }
-
-        DefaultMutableTreeNode map_node = getMapNode(domain, map);
-        if (null == map_node) {
-            return null;
-        }
-
-        Enumeration entities = map_node.children();
-        while (entities.hasMoreElements()) {
-            DefaultMutableTreeNode temp_node;
-            temp_node = (DefaultMutableTreeNode) entities.nextElement();
-            if (temp_node.getUserObject() == entity) {
-                return temp_node;
-            }
-        }
-
-        return null;
-    }
-
-    /** Get entity node by DataDomain, DataNode, DataMap and Entity. */
-    private DefaultMutableTreeNode getEntityNode(
-        DataDomain domain,
-        DataNode data,
-        DataMap map,
-        Entity entity) {
-
-        if (null == entity) {
-            return null;
-        }
-
-        DefaultMutableTreeNode map_node = getMapNode(domain, data, map);
-        if (map_node == null) {
-            return null;
-        }
-
-        Enumeration entities = map_node.children();
-        while (entities.hasMoreElements()) {
-            DefaultMutableTreeNode temp_node;
-            temp_node = (DefaultMutableTreeNode) entities.nextElement();
-            if (temp_node.getUserObject() == entity) {
-                return temp_node;
-            }
-        }
-        return null;
-    }
-
     /** Makes node current, visible and selected.*/
     protected void showNode(DefaultMutableTreeNode node) {
         currentNode = node;
         TreePath path = new TreePath(currentNode.getPath());
         browseTree.scrollPathToVisible(path);
         browseTree.setSelectionPath(path);
+    }
+
+    protected void showNode(Object[] path) {
+        if (path == null) {
+            return;
+        }
+
+        DefaultMutableTreeNode node =
+            browseTree.getProjectModel().getNodeForObjectPath(path);
+
+        if (node == null) {
+            return;
+        }
+        currentNode = node;
+        TreePath treePath = new TreePath(currentNode.getPath());
+        browseTree.scrollPathToVisible(treePath);
+        browseTree.setSelectionPath(treePath);
+    }
+
+    protected void updateNode(Object[] path) {
+        if (path == null) {
+            return;
+        }
+
+        DefaultMutableTreeNode node =
+            browseTree.getProjectModel().getNodeForObjectPath(path);
+        if (node != null) {
+            model.nodeChanged(node);
+        }
+    }
+
+    protected void removeNode(Object[] path) {
+        if (path == null) {
+            return;
+        }
+
+        DefaultMutableTreeNode node =
+            browseTree.getProjectModel().getNodeForObjectPath(path);
+        if (node != null) {
+            removeNode(node);
+        }
     }
 
     /** 

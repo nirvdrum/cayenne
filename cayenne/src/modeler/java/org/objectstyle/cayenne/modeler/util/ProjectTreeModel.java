@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -101,9 +101,61 @@ public class ProjectTreeModel extends DefaultTreeModel {
     public ProjectTreeModel(Project project) {
         super(wrapProject(project));
     }
-    
+
+    /**
+     * Returns root node cast into DefaultMutableTreeNode.
+     */
     public DefaultMutableTreeNode getRootNode() {
-    	return (DefaultMutableTreeNode)super.getRoot();
+        return (DefaultMutableTreeNode) super.getRoot();
+    }
+
+    /** 
+     * Wraps an object into a tree node and inserts it as one 
+     * of the children of supplied node.
+     */
+    public DefaultMutableTreeNode insertObject(
+        Object obj,
+        DefaultMutableTreeNode parent) {
+        DefaultMutableTreeNode node = wrapProjectNode(obj);
+        insertNodeInto(node, parent, parent.getChildCount());
+        return node;
+    }
+
+    public DefaultMutableTreeNode getNodeForObjectPath(Object[] path) {
+        if (path == null || path.length == 0) {
+            return null;
+        }
+
+        DefaultMutableTreeNode currentNode = getRootNode();
+
+        // adjust for root node being in the path
+        int start = 0;
+        if(currentNode.getUserObject() == path[0]) {
+        	start = 1;
+        }
+        
+        for (int i = start; i < path.length; i++) {
+        	DefaultMutableTreeNode foundNode = null;
+        	
+            Enumeration children = currentNode.children();
+            while (children.hasMoreElements()) {
+                DefaultMutableTreeNode child =
+                    (DefaultMutableTreeNode) children.nextElement();
+                if (child.getUserObject() == path[i]) {
+                	foundNode = child;
+                	break;
+                }
+            }
+            
+            if(foundNode == null) {
+            	return null;
+            }
+            else {
+            	currentNode = foundNode;
+            }
+        }
+
+        return currentNode;
     }
 
     static class TraversalHelper implements ProjectTraversalHandler {

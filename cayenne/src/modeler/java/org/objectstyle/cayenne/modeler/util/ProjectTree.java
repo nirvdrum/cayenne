@@ -59,7 +59,6 @@ import java.util.Enumeration;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
@@ -67,7 +66,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.project.DataMapProject;
 import org.objectstyle.cayenne.project.Project;
 
 /**
@@ -162,7 +160,6 @@ public class ProjectTree extends JTree {
     }
 
     public void insertObject(Object obj, DefaultMutableTreeNode parent) {
-        DefaultMutableTreeNode node = ProjectTreeModel.wrapProjectNode(obj);
-        getProjectModel().insertNodeInto(node, parent, parent.getChildCount());
+        getProjectModel().insertObject(obj, parent);
     }
 }
