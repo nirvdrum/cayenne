@@ -512,4 +512,17 @@
 	<obj-relationship name="toParentGroup" source="ArtGroup" target="ArtGroup" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="ARTGROUP" target="ARTGROUP" name="toParentGroup"/>
 	</obj-relationship>
+	<query name="QueryWithOrdering" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="true"/>
+		<ordering descending="true" ignore-case="true"><![CDATA[artistName]]></ordering>
+		<ordering><![CDATA[dateOfBirth]]></ordering>
+	</query>
+	<query name="QueryWithPrefetch" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Gallery">
+		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="true"/>
+		<prefetch>paintingArray</prefetch>
+	</query>
+	<query name="QueryWithQualifier" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="true"/>
+		<qualifier><![CDATA[artistName = $param1]]></qualifier>
+	</query>
 </data-map>
