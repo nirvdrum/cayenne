@@ -3,7 +3,7 @@
 <!-- ================================================= -->
 <!-- Latest release buildfile. Called from build.xml. -->
 <!-- ================================================= -->
-<project name="cayenne-latest" default="site" basedir=".">
+<project default="site">
 
 	<property name="dtd" value="${cayenne.latest}/src/cayenne/dtd"/>
 	<property name="license" value="${cayenne.latest}/doc/licenses"/>
@@ -11,7 +11,7 @@
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site locally -->
     <!-- ============================================= -->
-    <target name="site" depends="dtd,license,grammar"/>
+    <target name="site" depends="dtd,license,grammar,doc,api"/>
     
     <target name="dtd" depends="check-latest">
     	<copy todir="${dist}/dtd">
@@ -25,7 +25,19 @@
     	</copy>
     </target>
     
-	<target name="grammar" depends="check-latest">
+	<target name="grammar" depends="check-latest,doc">
+    
+    </target>
+    
+	<target name="doc" depends="check-latest">
+    	<ant antfile="build-subproject.xml" target="doc">
+    		<property name="cayenne.location" value="${cayenne.latest}"/>
+    		<property name="subproject.name" value="cayenne-latest"/>
+    		<property name="doc.include" value="userguide/**"/>
+    	</ant>
+    </target>
+    
+	<target name="api" depends="check-latest">
     
     </target>
     
@@ -33,7 +45,7 @@
     	<available file="${cayenne.latest}" property="cayenne.latest.present"/>
     	<fail unless="cayenne.latest.present">
     	
-**** FATAL: No latest cayenne checkout found. "cayenne.latest" property: "${cayenne.latest}"
+**** FATAL:No valid Cayenne checkout. "cayenne.latest" property: "${cayenne.latest}"
     	</fail>
     </target>
 </project>

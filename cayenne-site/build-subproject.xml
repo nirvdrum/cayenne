@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!-- Common documentation tasks. -->
+<!-- ================================================= -->
+<project default="userguide">
+    
+    <!-- ============================================= -->
+    <!-- Builds a set of project documentation -->
+    <!-- ============================================= -->
+    <target name="doc" depends="check-properties,assemble-project-xml">
+    
+    	<!-- Anakia is dumb as far as path resolution... so copy all XML files first -->
+    	<copy todir="${build}/${subproject.name}/in">
+			<fileset dir="${cayenne.location}/xdocs" includes="${doc.include}"/>
+        </copy>
+        
+		<anakia 
+			basedir="${build}/${subproject.name}/in" 
+			destdir="${build}/${subproject.name}/out"
+			extension=".html"
+			templatePath="xdocs/templates"
+			style="site.vsl"
+			projectFile="../project.xml"
+			includes="**/*.xml"
+			lastModifiedCheck="true"
+			/>
+    </target>
+    
+    
+	<!-- ============================================= -->
+    <!-- Assembles project.xml file for subproject. -->
+    <!-- ============================================= -->
+    <target name="assemble-project-xml"  depends="check-properties">
+		<loadfile property="project.toc" srcFile="${cayenne.location}/xdocs/stylesheets/toc.xml"/>
+		<copy tofile="${build}/${subproject.name}/project.xml" file="xdocs/templates/project.xml">
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="TOC" value="${project.toc}"/>
+			</filterset>
+        </copy>
+    </target>
+    
+	<!-- ============================================= -->
+    <!-- Verifies the environment. -->
+    <!-- ============================================= -->  
+    <target name="check-properties">
+    	<available file="${cayenne.location}" property="cayenne.location.present"/>
+    	<fail unless="cayenne.location.present">
+    	
+**** FATAL: "cayenne.location" property must point to a cayenne checkout directory. Current value: "${cayenne.location}"
+    	</fail>
+    	
+    	<fail unless="subproject.name">
+    	
+**** FATAL: No "subproject.name" property specified.
+    	</fail>
+    	
+		<fail unless="doc.include">
+    	
+**** FATAL: No "doc.include" property specified.
+    	</fail>
+    </target>
+</project>

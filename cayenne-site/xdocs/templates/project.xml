@@ -25,4 +25,8 @@
         <item name="Mailing Lists"  href="/lists.html"/>
         <item name="Developer Guide"  href="/developerguide/index.html"/>
     </menu>
+    
+	<!-- Embedded TOC Start -->
+    <!--@TOC@-->
+    <!-- Embedded TOC End -->
 </project>

@@ -4,7 +4,7 @@
 <!-- Cayenne Site master build file. -->
 <!-- Serves as a facade to a set of private buildfiles. -->
 <!-- ================================================= -->
-<project name="cayenne" default="site" basedir=".">
+<project default="site">
 
     <!-- ============================================= -->
     <!-- Loads properties from default locations. -->
@@ -44,16 +44,43 @@
          </echo>
     </target>
     
-    <target name="prepare">
+	<!-- ============================================= -->
+    <!-- Prepare to build, define tasks. -->
+    <!-- ============================================= -->
+    <target name="prepare" >
     	<tstamp/>
+    	
+		<taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
+			<classpath>
+				<pathelement path="${ant.home}/lib/ant.jar"/>
+				<fileset dir="${lib.dir}">
+					<include name="**.jar"/>
+			</fileset>
+			</classpath>
+        </taskdef>
     </target>
 
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site locally -->
     <!-- ============================================= -->
     <target name="site" depends="prepare">
-		<ant antfile="build-site.xml" target="site"/>
 		<ant antfile="build-latest.xml" target="site"/>
+		<!-- ant antfile="build-stable.xml" target="site"/ -->
+		<ant antfile="build-site.xml" target="site"/>
+		
+		<!-- assemble -->
+		<copy todir="${dist}">
+			<fileset dir="${build}/cayenne-site/out"  includes="**/*.html"/>
+			<fileset dir="${build}/cayenne-latest/out"  includes="**/*.html"/>
+			<!-- fileset dir="${build}/cayenne-stable/out"  includes="**/*.html"/ -->
+             
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="SFLOGO" value="${sf.logo}"/>
+			</filterset>
+			<filterset begintoken="&lt;!--@" endtoken="@--&gt;">
+				<filter token="JNLOGO" value="${java.net.logo}"/>
+			</filterset>
+		</copy>
     </target>
  
     <!-- ========================================== -->
@@ -62,6 +89,7 @@
     <target name="clean">
         <delete dir="${dist.base}"/>
         <delete dir="${build}"/>
+        <delete file="velocity.log"/>
     </target>
 </project>
 

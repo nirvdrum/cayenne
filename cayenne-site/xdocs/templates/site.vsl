@@ -52,10 +52,10 @@
 search          </form>          </td>
       </tr>
       <tr>
-        <td align="right"><!--SFLOGO--></td>
+        <td align="right"><!--@SFLOGO@--></td>
       </tr>
       <tr>
-        <td align="right"><!--JNLOGO--></td>
+        <td align="right"><!--@JNLOGO@--></td>
       </tr>
     </tbody></table></td>
     <td width="1" bgcolor="#333333"><img src="${relativePath}/images/spacer.gif" width="1" height="1"></td>
@@ -286,7 +286,7 @@ $tag
       <tbody>
        	<tr>
        		<td align="left" class="normal">
-       		#set ($toc = $project.getChild($root.getChild("toc").getAttributeValue("name")))
+       		#set ($toc = $project.getChild("toc").getChild($root.getChild("toc").getAttributeValue("name")))
        		<strong class="body-white">#menuprojectanchor($toc.getAttributeValue("name") $toc.getAttributeValue("href"))</strong><br>
        		<p><strong class="body-white">TABLE OF CONTENTS:</strong></p>
 

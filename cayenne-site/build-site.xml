@@ -3,47 +3,15 @@
 <!-- ================================================= -->
 <!-- Site buildfile. Called from build.xml. -->
 <!-- ================================================= -->
-<project name="cayenne-site" default="site" basedir=".">
-    <path id="classpath">
-    	<pathelement path="${ant.home}/lib/ant.jar"/>
-        <fileset dir="${lib.dir}">
-            <include name="**.jar"/>
-        </fileset>
-    </path>
-    
-	<!-- ========================================== -->
-    <!-- Creates documentation directories.         -->
-    <!-- ========================================== -->
-    <target name="prepare">
-        <mkdir dir="${build}/site"/>
-        <mkdir dir="${dist}/dtd"/>
-    </target>
-    
-    <!-- ============================================= -->
-    <!-- Deploys Cayenne web site locally -->
-    <!-- ============================================= -->
-    <target name="site" depends="prepare,doc,resources">
-         <!-- do replacement in HTML files, strip "xml" subdir -->
-		<copy todir="${dist}">
-			<fileset dir="${build}/site"  includes="**/*.html"/>
-             
-			<filterset begintoken="!--" endtoken="--">
-				<filter token="SFLOGO" value="${sf.logo}"/>
-			</filterset>
-			<filterset begintoken="!--" endtoken="--">
-				<filter token="JNLOGO" value="${java.net.logo}"/>
-			</filterset>
-		</copy>
-    </target>
+<project default="site">
+
+    <target name="site" depends="doc,resources"/>
 
     <!-- ========================================== -->
-    <!-- Builds Cayenne documenatation.             -->
+    <!-- Builds Site documenatation. -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare">
-        <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
-            <classpath refid="classpath"/>
-        </taskdef>
-        <anakia basedir="xdocs/xml" destdir="${build}/site"
+    <target name="doc">
+        <anakia basedir="xdocs/xml" destdir="${build}/cayenne-site/out"
              extension=".html" style="site.vsl"
              projectFile="../templates/project.xml"
              includes="**/*.xml"
@@ -56,7 +24,7 @@
     <!-- Copies documentation resources, such as images -->
     <!-- and styles. -->
     <!-- ========================================== -->
-    <target name="resources" depends="prepare">
+    <target name="resources">
         <!-- copy images -->
         <copy todir="${dist}">
             <fileset dir="xdocs/resources" includes="**/**"/>
