@@ -83,15 +83,26 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 		Logger.getLogger(DriverDataSourceFactory.class.getName());
 
 	private static boolean applyWebAppPatch;
+	private static boolean applyWebAppPatch23;
 
 	static {
-		// determine if servlet environment is even accessible
+
+		// determine what kind of servlet environment is accessible
 		try {
-			Class.forName("javax.servlet.http.HttpSession");
+			Class.forName("javax.servlet.http.HttpSessionListener");
 			applyWebAppPatch = true;
+			applyWebAppPatch23 = true;
 		} catch (Exception ex) {
-			applyWebAppPatch = false;
+			applyWebAppPatch23 = false;
+
+			try {
+				Class.forName("javax.servlet.http.HttpSession");
+				applyWebAppPatch = true;
+			} catch (Exception ex1) {
+				applyWebAppPatch = false;
+			}
 		}
+
 	}
 
 	protected XMLReader parser;
@@ -163,7 +174,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
 	protected InputStream getWebAppInputStream(String location) {
 		// webapp patch - first lookup in WEB-INF
-		if (applyWebAppPatch
+		if (applyWebAppPatch23
 			&& parentConfig != null
 			&& (parentConfig instanceof ServletConfiguration)) {
 			ServletConfiguration servlConf =
