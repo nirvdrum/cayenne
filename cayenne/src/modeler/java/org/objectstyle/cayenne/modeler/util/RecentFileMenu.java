@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.util;
 import java.awt.Component;
 import java.util.Vector;
 
+import javax.swing.Action;
 import javax.swing.JMenu;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
@@ -73,55 +74,59 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
  */
 public class RecentFileMenu extends JMenu {
 
-	/**
-	 * Constructor for RecentFileMenu.
-	 */
-	public RecentFileMenu(String s) {
-		super(s);
-	}
+    /**
+     * Constructor for RecentFileMenu.
+     */
+    public RecentFileMenu(String s) {
+        super(s);
+    }
 
-	/**
-	 * @see javax.swing.JMenu#add(JMenuItem)
-	 */
-	public RecentFileMenuItem add(RecentFileMenuItem menuItem) {
-		return (RecentFileMenuItem) super.add(menuItem);
-	}
+    /**
+     * @see javax.swing.JMenu#add(JMenuItem)
+     */
+    public RecentFileMenuItem add(RecentFileMenuItem menuItem) {
+        return (RecentFileMenuItem) super.add(menuItem);
+    }
 
-	/** 
-	 * Rebuilds internal menu items list with the files stored in
-	 * CayenneModeler properences.
-	 */
-	public void rebuildFromPreferences() {
-		ModelerPreferences pref = ModelerPreferences.getPreferences();		
-		Vector arr = pref.getVector(ModelerPreferences.LAST_PROJ_FILES);
-		while (arr.size() > 4) {
-			arr.remove(arr.size() - 1);
-		}
+    /** 
+     * Rebuilds internal menu items list with the files stored in
+     * CayenneModeler properences.
+     */
+    public void rebuildFromPreferences() {
+        ModelerPreferences pref = ModelerPreferences.getPreferences();
+        Vector arr = pref.getVector(ModelerPreferences.LAST_PROJ_FILES);
+        while (arr.size() > 4) {
+            arr.remove(arr.size() - 1);
+        }
 
-		// readd menus
-		Component[] comps = getMenuComponents();
-		int curSize = comps.length;
-        int prefSize = arr.size(); 
-        
-		for (int i = 0; i < prefSize; i++) {
-			String name = (String) arr.get(i);
+        // readd menus
+        Component[] comps = getMenuComponents();
+        int curSize = comps.length;
+        int prefSize = arr.size();
 
-			if (i < curSize) {
-				// update existing one
-				RecentFileMenuItem item = (RecentFileMenuItem) comps[i];
-				item.setText(name);
-			} else {
-				// add a new one
-				RecentFileMenuItem item = new RecentFileMenuItem(name);
-				item.setAction(
-                CayenneModelerFrame.getFrame().getAction(OpenProjectAction.getActionName()));
-				add(item);
-			}
-		}
+        for (int i = 0; i < prefSize; i++) {
+            String name = (String) arr.get(i);
 
-		// remove any hanging items
-		for (int i = curSize - 1; i >= prefSize; i--) {
+            if (i < curSize) {
+                // update existing one
+                RecentFileMenuItem item = (RecentFileMenuItem) comps[i];
+                item.setText(name);
+            } else {
+                // add a new one
+                RecentFileMenuItem item = new RecentFileMenuItem(name);
+                item.setAction(findAction());
+                add(item);
+            }
+        }
+
+        // remove any hanging items
+        for (int i = curSize - 1; i >= prefSize; i--) {
             remove(i);
-		}
-	}
+        }
+    }
+
+    protected Action findAction() {
+        return CayenneModelerFrame.getFrame().getAction(
+            OpenProjectAction.getActionName());
+    }
 }

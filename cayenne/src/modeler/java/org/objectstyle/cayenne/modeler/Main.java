@@ -98,18 +98,11 @@ public class Main {
             System.exit(1);
         }
 
-        main.execute(args);
+        File projectFile = projectFileFromArgs(args);
+        main.runModeler(projectFile);
     }
 
-    protected void execute(String[] args) {
-        logObj.info("Starting CayenneModeler.");
-
-        // set up UI
-        configureLookAndFeel();
-
-        CayenneModelerFrame frame = new CayenneModelerFrame();
-
-        // load project if filename is supplied as an argument
+    protected static File projectFileFromArgs(String[] args) {
         if (args.length == 1) {
             File f = new File(args[0]);
             if (f.isDirectory()) {
@@ -117,11 +110,26 @@ public class Main {
             }
 
             if (f.isFile() && Configuration.DEFAULT_DOMAIN_FILE.equals(f.getName())) {
-                OpenProjectAction openAction =
-                    (OpenProjectAction) frame.getAction(
-                        OpenProjectAction.getActionName());
-                openAction.openProject(f);
+                return f;
             }
+        }
+
+        return null;
+    }
+
+    protected void runModeler(File projectFile) {
+        logObj.info("Starting CayenneModeler.");
+
+        // set up UI
+        configureLookAndFeel();
+
+        CayenneModelerFrame frame = new CayenneModelerFrame();
+
+        // load project
+        if (projectFile != null) {
+            OpenProjectAction openAction =
+                (OpenProjectAction) frame.getAction(OpenProjectAction.getActionName());
+            openAction.openProject(projectFile);
         }
     }
 

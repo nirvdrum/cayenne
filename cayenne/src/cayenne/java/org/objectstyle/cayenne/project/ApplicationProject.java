@@ -103,20 +103,27 @@ public class ApplicationProject extends Project {
             	projectFile = projectFile.getCanonicalFile();
             }
 
-			ProjectConfiguration conf = new ProjectConfiguration(projectFile);
-
-			// try to initialize configuration
-			if (conf.canInitialize()) {
-				conf.initialize();
-				conf.didInitialize();
-			}
-
-			this.configuration = conf;
+            loadProject(projectFile);
         } catch (Exception e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
 
         super.postInitialize(projectFile);
+    }
+    
+    /**
+     * @since 1.1
+     */
+    protected void loadProject(File projectFile) throws Exception {
+        ProjectConfiguration conf = new ProjectConfiguration(projectFile);
+
+        // try to initialize configuration
+        if (conf.canInitialize()) {
+            conf.initialize();
+            conf.didInitialize();
+        }
+
+        this.configuration = conf;
     }
 
     /**
