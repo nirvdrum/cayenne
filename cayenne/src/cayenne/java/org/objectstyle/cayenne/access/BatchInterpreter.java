@@ -125,6 +125,11 @@ public class BatchInterpreter {
             int[] results = new int[batch.size()];
             int index = 0;
             while (batch.next()) {
+                // log next batch parameters
+                QueryLogger.logBatchQueryParameters(
+                    batch.getLoggingLevel(),
+                    batch);
+
                 for (int i = 0; i < attributeCount; i++) {
                     Object value = batch.getObject(i);
                     int type = attributeTypes[i];
