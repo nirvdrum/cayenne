@@ -33,17 +33,19 @@
      *
      *  1. release      - creates a full Cayenne distribution.
      *  2. release-site - creates a full Cayenne website distribution.
-     *  3. examples     - creates a full cayenne-examples distribution.
-     *  4. build        - (default target) builds all subproject JAR files.
-     *  5. compile      - compiles all subprojects source files.
-     *  6. clean        - cleans temporary build and distribution directories
-     *  7. clean-java   - cleans all build directories, preserving the docs and such
-     *  8. doc          - builds Cayenne documentation including Javadocs.
-     *  9. api          - builds Javdoc API documentation.
-     * 10. javacc       - runs javacc
-     * 11. jjtree       - runs jjtree
-     * 12. test         - runs JUnit tests
-     * 13. performance  - runs performance tests
+     *  3. release-unstable-site - 
+     *                    creates a partial Cayenne website distribution to merge with STABLE release docs.
+     *  4. examples     - creates a full cayenne-examples distribution.
+     *  5. build        - (default target) builds all subproject JAR files.
+     *  6. compile      - compiles all subprojects source files.
+     *  7. clean        - cleans temporary build and distribution directories
+     *  8. clean-java   - cleans all build directories, preserving the docs and such
+     *  9. doc          - builds Cayenne documentation including Javadocs.
+     * 10. api          - builds Javdoc API documentation.
+     * 11. javacc       - runs javacc
+     * 12. jjtree       - runs jjtree
+     * 13. test         - runs JUnit tests
+     * 14. performance  - runs performance tests
      * 14. regression   - runs regression test application
      * 15. help         - prints this message
      *
@@ -94,6 +96,14 @@
 		<ant antfile="build-dvmodeler.xml" target="dist-src"/>
 		<ant antfile="build-tutorials.xml" target="release-site"/>
 		<ant antfile="build-doc.xml" target="release-site"/>
+    </target>
+        
+    <!-- ============================================= -->
+    <!-- Deploys parts of Cayenne web site to merge    -->
+    <!-- with STABLE site.                             -->
+    <!-- ============================================= -->
+    <target name="release-unstable-site" depends="nositedir">
+		<ant antfile="build-doc.xml" target="release-unstable-site"/>
     </target>
         
     <!-- ========================================== -->

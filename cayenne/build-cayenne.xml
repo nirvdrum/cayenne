@@ -19,10 +19,9 @@
 	<property name="parser.base.exp" value="ExpressionParser"/>
     
 	<!-- ========================================== -->
-    <!-- Build targets.                             -->
-    <!-- ========================================== -->
-    
-    <target name="api">
+	<!-- Build targets.                             -->
+	<!-- ========================================== -->
+	<target name="api">
 		<ant antfile="build-subproj.xml" target="api">
 			<property name="subproj" value="cayenne"/>
 		</ant>
@@ -63,7 +62,6 @@
             	<include name="dotemplates/**"/>
 			</fileset>
         </copy>
-        <copy todir="${core.dist.src}/.." file="${core.resources}/scripts/build.xml"/>
 	</target>
 
 	<target name="dist-bin" depends="jar-nodeps,jar">        

@@ -68,7 +68,6 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.util.QueryUtils;
-import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
@@ -113,15 +112,6 @@ public class ToManyList implements List, Serializable {
         if (isTransientSource()) {
             objectList = new LinkedList();
         }
-    }
-
-    /**
-     * @deprecated Since 1.1 ToManyListDataSource is not used.
-     */
-    public ToManyListDataSource getListDataSource() {
-        return source.getDataContext() != null
-            ? new RelationshipDataSource(source.getDataContext())
-            : null;
     }
 
     /**

@@ -82,7 +82,6 @@ import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
 import org.objectstyle.cayenne.access.util.PrefetchHelper;
 import org.objectstyle.cayenne.access.util.QueryUtils;
-import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -371,24 +370,6 @@ public class DataContext implements QueryEngine, Serializable {
      */
     DataContextDelegate nonNullDelegate() {
         return (delegate != null) ? delegate : DataContext.defaultDelegate;
-    }
-
-    /**
-     * @deprecated Since 1.1 all SnapshotManager methods are defined
-     * as static methods in DataRowUtils.
-     */
-    public SnapshotManager getSnapshotManager() {
-        return new SnapshotManager(new RelationshipDataSource(this));
-    }
-
-    /**
-     * Returns ToManyListDataSource instance that uses this DataContext to populate relationships.
-     * 
-     * @return ToManyListDataSource instance that uses this DataContext to populate relationships.
-     * @deprecated Since 1.1 ToManyListDataSource is deprecated
-     */
-    public ToManyListDataSource getRelationshipDataSource() {
-        return new RelationshipDataSource(this);
     }
 
     /**

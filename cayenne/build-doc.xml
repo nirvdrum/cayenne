@@ -32,17 +32,44 @@
              	<include name="**/*.html"/>
              </fileset>
              
-             <filterset begintoken="!--" endtoken="--">
-				<filter token="SFLOGO" value="${sf.logo}"/>
-			 </filterset>
-				 
-			<filterset begintoken="!--" endtoken="--">
-				<filter token="JNLOGO" value="${java.net.logo}"/>
-			 </filterset>
+		<filterset begintoken="!--" endtoken="--">
+			<filter token="SFLOGO" value="${sf.logo}"/>
+		</filterset>
+		<filterset begintoken="!--" endtoken="--">
+			<filter token="JNLOGO" value="${java.net.logo}"/>
+		</filterset>
          </copy>
     </target>
     
-    
+    <target name="release-unstable-site" depends="nositedir,prepare,doc">
+        <!-- make sure we do not override STABLE docs, so update --> 
+	<!-- the frontpage and download page  -->
+         <mkdir dir="${site.dir}/cayenne"/>     
+
+         <!-- copy all but HTML -->
+         <copy todir="${site.dir}/cayenne">
+             <fileset dir="${dist}/doc">
+                <exclude name="**/*.html"/>
+             </fileset>
+         </copy>
+
+         <!-- do replacement in HTML files -->
+         <copy todir="${site.dir}/cayenne">
+             <fileset dir="${dist}/doc">
+                <include name="index.html"/>
+                <include name="download.html"/>
+                <include name="news-archive.html"/>
+             </fileset>
+
+                <filterset begintoken="!--" endtoken="--">
+                        <filter token="SFLOGO" value="${sf.logo}"/>
+                </filterset>
+                <filterset begintoken="!--" endtoken="--">
+                        <filter token="JNLOGO" value="${java.net.logo}"/>
+                </filterset>
+         </copy>
+    </target> 
+
     <!-- ========================================== -->
     <!-- Creates documentation directories.         -->
     <!-- ========================================== -->
