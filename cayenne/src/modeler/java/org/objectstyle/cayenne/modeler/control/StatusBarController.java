@@ -70,6 +70,12 @@ public class StatusBarController extends BasicController {
         setModel(model);
     }
 
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
+            doUpdate((String) control.getParameter());
+        }
+    }
+    
     protected void doUpdate(String message) {
         TopModel model = (TopModel) getModel();
         if (model == null) {
@@ -86,7 +92,6 @@ public class StatusBarController extends BasicController {
             Thread cleanup = new ExpireThread(message, 6);
             cleanup.start();
         }
-
     }
 
     class ExpireThread extends Thread {
@@ -115,12 +120,6 @@ public class StatusBarController extends BasicController {
                     doUpdate(null);
                 }
             }
-        }
-    }
-
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(TopModel.STATUS_MESSAGE_KEY)) {
-            doUpdate((String) control.getParameter());
         }
     }
 }

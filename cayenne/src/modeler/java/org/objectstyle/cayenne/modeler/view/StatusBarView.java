@@ -65,6 +65,9 @@ import org.scopemvc.view.swing.SLabel;
 import org.scopemvc.view.swing.SPanel;
 
 /**
+ * CayenneModeler bottom status bar. Can display messages about 
+ * events happenning in the modeler.
+ * 
  * @author Andrei Adamchik
  */
 public class StatusBarView extends SPanel {

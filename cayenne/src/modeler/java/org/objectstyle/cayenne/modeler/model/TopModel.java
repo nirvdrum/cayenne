@@ -66,7 +66,8 @@ import org.scopemvc.core.Selector;
  */
 public class TopModel {
     public static final String STATUS_MESSAGE_KEY = "statusMessage";
-
+    public static final String CURRENT_PROJECT_KEY = "currentProject";
+    
     protected Project currentProject;
     protected String statusMessage;
     protected Object[] selectedPath;
