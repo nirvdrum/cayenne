@@ -203,7 +203,17 @@ public class CayenneDataObject implements DataObject {
         return obj;
     }
 
-    protected void resolveFault() {
+    /**
+     * Attempts to initialize object with data from cache or from the database,
+     * if this object is a "fault", i.e. not fully resolved.
+     * 
+     * @since 1.1
+     */
+    public void resolveFault() {
+        if (persistenceState != PersistenceState.HOLLOW) {
+            return;
+        }
+        
         // no way to resolve faults outside of DataContext.
         if (dataContext == null) {
             setPersistenceState(PersistenceState.TRANSIENT);
@@ -230,9 +240,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected Object readProperty(String propName) {
-        if (persistenceState == PersistenceState.HOLLOW) {
-            resolveFault();
-        }
+        resolveFault();
 
         Object object = readPropertyDirectly(propName);
 
@@ -252,9 +260,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected void writeProperty(String propName, Object val) {
-        if (persistenceState == PersistenceState.HOLLOW) {
-            resolveFault();
-        }
+        resolveFault();
 
         // 1. retain object snapshot to allow clean changes tracking
         // 2. change object state

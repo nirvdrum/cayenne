@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
 
 import java.util.Map;
@@ -65,95 +65,102 @@ import org.objectstyle.cayenne.access.DataContext;
  * @author Andrei Adamchik
  */
 public interface DataObject extends java.io.Serializable {
-	public static final long DEFAULT_VERSION = Long.MIN_VALUE;
-	
-   /** 
-    * Returns a data context this object is registered with, or null
-    * if this object has no associated DataContext.
-    */
+    public static final long DEFAULT_VERSION = Long.MIN_VALUE;
+
+    /** 
+     * Returns a data context this object is registered with, or null
+     * if this object has no associated DataContext.
+     */
     public DataContext getDataContext();
-    
+
     /** Sets object data context. */
     public void setDataContext(DataContext ctxt);
-    
+
     /** 
      * Returns ObjectId for this data object - piece that
      * uniquely identifies this data object for persistence purposes.
      */
     public ObjectId getObjectId();
-    
+
     /** Sets ObjectId for this data object - piece that uniquely 
      *  identifies this data object for persistence purposes.
      */
     public void setObjectId(ObjectId objectId);
-    
+
     /** Returns current state of this data object.
      *  For valid states look in PersistenceState class.
      */
     public int getPersistenceState();
-    
+
     /** Modifies persistence state of this data object
      *  For valid states look in PersistenceState class.
      */
     public void setPersistenceState(int newState);
-    
-    
+
     /** Allows Cayenne framework classes to modify object property values. */
     public void writePropertyDirectly(String propName, Object val);
-    
+
     /** Allows Cayenne framework classes to read object property values. */
     public Object readPropertyDirectly(String propName);
-    
-	/**
-	 * @deprecated Since 1.0.1 this method is no longer needed.
-	 */
+
+    /**
+     * @deprecated Since 1.0.1 this method is no longer needed.
+     */
     public DataObject readToOneDependentTarget(String relName);
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse);
 
     public void removeToManyTarget(String relName, DataObject val, boolean setReverse);
-    
+
     public void setToOneTarget(String relName, DataObject val, boolean setReverse);
-    
-	/**
-	 * @deprecated Since 1.0.1 this method is no longer needed, since 
-	 * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
-	 * as well.
-	 */
+
+    /**
+     * @deprecated Since 1.0.1 this method is no longer needed, since 
+     * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
+     * as well.
+     */
     public void setToOneDependentTarget(String relName, DataObject val);
 
-	/**
-	 * Returns a snapshot for this object corresponding to the state 
+    /**
+     * Returns a snapshot for this object corresponding to the state 
      * of the database when object was last fetched or committed. 
      * 
-	 * @deprecated Since 1.1 use 
-	 * getDataContext().getObjectStore().getSnapshot(this.getObjectId(), getDataContext())
-	 */
+     * @deprecated Since 1.1 use 
+     * getDataContext().getObjectStore().getSnapshot(this.getObjectId(), getDataContext())
+     */
     public Map getCommittedSnapshot();
-    
-	/**
-	 * Returns a snapshot of object current values.
-	 * 
-	 * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
-	 */
+
+    /**
+     * Returns a snapshot of object current values.
+     * 
+     * @deprecated Since 1.1 use getDataContext().currentSnapshot(this)
+     */
     public Map getCurrentSnapshot();
-    
+
     /**
      * Notification method called by DataContext after the object 
      * was read from the database.
      */
     public void fetchFinished();
-    
-	/**
-	 * Returns a version of a DataRow snapshot that was used to 
-	 * create this object.
-	 * 
-	 * @since 1.1
-	 */
-	public long getSnapshotVersion();
 
-	/**
-	 * @since 1.1
-	 */
-	public void setSnapshotVersion(long snapshotVersion);
+    /**
+     * Returns a version of a DataRow snapshot that was used to 
+     * create this object.
+     * 
+     * @since 1.1
+     */
+    public long getSnapshotVersion();
+
+    /**
+     * @since 1.1
+     */
+    public void setSnapshotVersion(long snapshotVersion);
+
+    /**
+     * Attempts to initialize object with data from cache or from the database,
+     * if this object is a "fault", i.e. not fully resolved.
+     * 
+     * @since 1.1
+     */
+    public void resolveFault();
 }

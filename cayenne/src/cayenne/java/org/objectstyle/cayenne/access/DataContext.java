@@ -860,16 +860,27 @@ public class DataContext implements QueryEngine, Serializable {
      */
 
     public void deleteObject(DataObject anObject) {
-        if (anObject.getPersistenceState() == PersistenceState.DELETED) {
-            //Drop out... we might be about to get into a horrible
+        if (anObject.getPersistenceState() == PersistenceState.DELETED
+            || anObject.getPersistenceState() == PersistenceState.TRANSIENT) {
+                
+            // Drop out... especially in case of DELETED we might be about to get 
+            // into a horrible
             // recursive loop due to CASCADE delete rules.
             // Assume that everything must have been done correctly already
             // and *don't* do it again
             return;
         }
+        
+        
+        
+        // must resolve HOLLOW objects before delete... Right now this is needed
+        // to process relationships, but when we add optimistic locking, this will
+        // be a requirement...
+        anObject.resolveFault();
+       
 
-        //Save the current state in case of a deny, in which case it should be reset.
-        //We cannot delay setting it to deleted, as Cascade deletes might cause
+        // Save the current state in case of a deny, in which case it should be reset.
+        // We cannot delay setting it to deleted, as Cascade deletes might cause
         // recursion, and the "deleted" state is the best way we have of noticing that and bailing out (see above)
         int oldState = anObject.getPersistenceState();
 
@@ -881,57 +892,72 @@ public class DataContext implements QueryEngine, Serializable {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
         Iterator relationshipIterator = entity.getRelationships().iterator();
         while (relationshipIterator.hasNext()) {
-            ObjRelationship thisRelationship =
-                (ObjRelationship) relationshipIterator.next();
-            String thisRelationshipName = thisRelationship.getName();
+            ObjRelationship relationship = (ObjRelationship) relationshipIterator.next();
 
-            List relatedObjects;
-            if (thisRelationship.isToMany()) {
-                //Get an independent copy of the list so that
-                // deleting objects doesn't result in concurrent modification
-                // exceptions
-                relatedObjects =
-                    new ArrayList(
-                        (List) anObject.readPropertyDirectly(thisRelationship.getName()));
+            if (relationship.getDeleteRule() == DeleteRule.NO_ACTION) {
+                continue;
+            }
+
+            String thisRelationshipName = relationship.getName();
+
+            List relatedObjects = Collections.EMPTY_LIST;
+            if (relationship.isToMany()) {
+
+                List toMany =
+                    (List) anObject.readPropertyDirectly(relationship.getName());
+                
+                if (toMany.size() > 0) {
+                    // Get a copy of the list so that deleting objects doesn't 
+                    // result in concurrent modification exceptions
+                    relatedObjects = new ArrayList(toMany);
+                }
             }
             else {
-                //thisRelationship is toOne... make a list of one object
-                relatedObjects = new ArrayList(1);
-                DataObject relatedObject =
-                    (DataObject) anObject.readPropertyDirectly(thisRelationshipName);
+                // thisRelationship is toOne... make a list of one object
+                Object relatedObject =
+                    anObject.readPropertyDirectly(thisRelationshipName);
+
+                // related object maybe a relationship fault
+                if (relatedObject instanceof RelationshipFault) {
+                    relatedObject = ((RelationshipFault) relatedObject).resolveToOne();
+                }
+
                 if (relatedObject != null) {
-                    relatedObjects.add(relatedObject);
+                    relatedObjects = Collections.singletonList(relatedObject);
                 }
             }
 
-            switch (thisRelationship.getDeleteRule()) {
+            if (relatedObjects.size() == 0) {
+                continue;
+            }
+
+            switch (relationship.getDeleteRule()) {
                 case DeleteRule.NULLIFY :
                     ObjRelationship inverseRelationship =
-                        thisRelationship.getReverseRelationship();
-                    if (null == inverseRelationship) {
+                        relationship.getReverseRelationship();
+                    if (inverseRelationship == null) {
+                        // with next relationship... nothing we can do here
                         continue;
-                        //with next relationship... nothing we can do here
                     }
-                    String inverseRelationshipName = inverseRelationship.getName();
 
                     if (inverseRelationship.isToMany()) {
                         Iterator iterator = relatedObjects.iterator();
                         while (iterator.hasNext()) {
                             DataObject relatedObject = (DataObject) iterator.next();
                             relatedObject.removeToManyTarget(
-                                inverseRelationshipName,
+                                inverseRelationship.getName(),
                                 anObject,
                                 true);
                         }
                     }
                     else {
-                        //Inverse is to-one - find all related objects and
+                        // Inverse is to-one - find all related objects and
                         // nullify the reverse relationship
                         Iterator iterator = relatedObjects.iterator();
                         while (iterator.hasNext()) {
                             DataObject relatedObject = (DataObject) iterator.next();
                             relatedObject.setToOneTarget(
-                                inverseRelationshipName,
+                                inverseRelationship.getName(),
                                 null,
                                 true);
                         }
@@ -964,15 +990,11 @@ public class DataContext implements QueryEngine, Serializable {
                                 + "as it's delete rule");
                     }
                     break;
-                case DeleteRule.NO_ACTION :
-                    // no action it is...
-                    break;
                 default :
                     //Clean up - we shouldn't be deleting this object
                     anObject.setPersistenceState(oldState);
                     throw new CayenneRuntimeException(
-                        "Unknown type of delete rule "
-                            + thisRelationship.getDeleteRule());
+                        "Unknown type of delete rule " + relationship.getDeleteRule());
             }
         }
     }
