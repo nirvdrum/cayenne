@@ -131,24 +131,25 @@ public abstract class QueryAssemblerHelper {
                 // it needs special handling
                 if (!it.hasNext()) {
                     processRelTermination(buf, rel);
-                } else {
+                }
+                else {
                     // find and add joins ....
                     Iterator relit = rel.getDbRelationships().iterator();
                     while (relit.hasNext()) {
-                        queryAssembler.dbRelationshipAdded(
-                            (DbRelationship) relit.next());
+                        queryAssembler.dbRelationshipAdded((DbRelationship) relit.next());
                     }
                 }
                 lastRelationship = rel;
-            } else {
+            }
+            else {
                 ObjAttribute objAttr = (ObjAttribute) pathComp;
                 if (lastRelationship != null) {
                     List lastDbRelList = lastRelationship.getDbRelationships();
                     DbRelationship lastDbRel =
-                        (DbRelationship) lastDbRelList.get(
-                            lastDbRelList.size() - 1);
+                        (DbRelationship) lastDbRelList.get(lastDbRelList.size() - 1);
                     processColumn(buf, objAttr.getDbAttribute(), lastDbRel);
-                } else {
+                }
+                else {
                     processColumn(buf, objAttr.getDbAttribute());
                 }
             }
@@ -167,11 +168,13 @@ public abstract class QueryAssemblerHelper {
                 // it needs special handling
                 if (!it.hasNext()) {
                     processRelTermination(buf, rel);
-                } else {
+                }
+                else {
                     // find and add joins ....
                     queryAssembler.dbRelationshipAdded(rel);
                 }
-            } else {
+            }
+            else {
                 DbAttribute dbAttr = (DbAttribute) pathComp;
                 processColumn(buf, dbAttr);
             }
@@ -194,9 +197,7 @@ public abstract class QueryAssemblerHelper {
         DbRelationship rel) {
         String alias =
             (queryAssembler.supportsTableAliases())
-                ? queryAssembler.aliasForTable(
-                    (DbEntity) dbAttr.getEntity(),
-                    rel)
+                ? queryAssembler.aliasForTable((DbEntity) dbAttr.getEntity(), rel)
                 : null;
 
         buf.append(dbAttr.getAliasedName(alias));
@@ -210,7 +211,6 @@ public abstract class QueryAssemblerHelper {
 
         buf.append(dbAttr.getAliasedName(alias));
     }
-
 
     /**
      * Appends SQL code to the query buffer to handle <code>val</code> as a
@@ -239,7 +239,8 @@ public abstract class QueryAssemblerHelper {
         Expression parentExpression) {
         if (val == null) {
             buf.append("NULL");
-        } else if (val instanceof DataObject) {
+        }
+        else if (val instanceof DataObject) {
             ObjectId id = ((DataObject) val).getObjectId();
 
             // check if this id is acceptable to be a parameter
@@ -271,7 +272,8 @@ public abstract class QueryAssemblerHelper {
                 snap.get(snap.keySet().iterator().next()),
                 attr,
                 parentExpression);
-        } else {
+        }
+        else {
             appendLiteralDirect(buf, val, attr, parentExpression);
         }
     }
@@ -313,24 +315,55 @@ public abstract class QueryAssemblerHelper {
         // naive algorithm:
 
         // if at least one of the sibling operands is a
-        // OBJ_PATH expression, use its attribute type as
+        // OBJ_PATH or DB_PATH expression, use its attribute type as
         // a final answer.
 
+        // find attribute or relationship matching the value
+        DbAttribute attribute = null;
+        DbRelationship relationship = null;
         for (int i = 0; i < len; i++) {
             Object op = e.getOperand(i);
+
             if (op instanceof Expression) {
-                Expression ope = (Expression) op;
-                if (ope.getType() == Expression.OBJ_PATH) {
-
-                    Iterator it = getObjEntity().resolvePathComponents(ope);
-                    while (it.hasNext()) {
-                        Object pathComp = it.next();
-
-                        if (pathComp instanceof ObjAttribute) {
-                            return ((ObjAttribute) pathComp).getDbAttribute();
+                Expression expression = (Expression) op;
+                if (expression.getType() == Expression.OBJ_PATH) {
+                    Object last = getObjEntity().lastPathComponent(expression);
+                    if (last instanceof ObjAttribute) {
+                        attribute = ((ObjAttribute) last).getDbAttribute();
+                        break;
+                    }
+                    else if (last instanceof ObjRelationship) {
+                        ObjRelationship objRelationship = (ObjRelationship) last;
+                        List dbPath = objRelationship.getDbRelationships();
+                        if (dbPath.size() > 0) {
+                            relationship = (DbRelationship) dbPath.get(dbPath.size() - 1);
+                            break;
                         }
                     }
                 }
+                else if (expression.getType() == Expression.DB_PATH) {
+                    Object last = getDbEntity().lastPathComponent(expression);
+                    if (last instanceof DbAttribute) {
+                        attribute = (DbAttribute) last;
+                        break;
+                    }
+                    else if (last instanceof DbRelationship) {
+                        relationship = (DbRelationship) last;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (attribute != null) {
+            return attribute;
+        }
+
+        if (relationship != null) {
+            // Can't properly handle multiple joins....
+            if (relationship.getJoins().size() == 1) {
+                DbAttributePair join = (DbAttributePair) relationship.getJoins().get(0);
+                return join.getSource();
             }
         }
 
@@ -342,9 +375,7 @@ public abstract class QueryAssemblerHelper {
       * expression for the target entity primary key. If this is a "to one"
       * relationship, column expresion for the source foreign key is added.
       */
-    protected void processRelTermination(
-        StringBuffer buf,
-        ObjRelationship rel) {
+    protected void processRelTermination(StringBuffer buf, ObjRelationship rel) {
 
         Iterator dbRels = rel.getDbRelationships().iterator();
 
@@ -356,7 +387,8 @@ public abstract class QueryAssemblerHelper {
             // it needs special handling
             if (!dbRels.hasNext()) {
                 processRelTermination(buf, dbRel);
-            } else {
+            }
+            else {
                 // find and add joins ....
                 queryAssembler.dbRelationshipAdded(dbRel);
             }
@@ -369,9 +401,7 @@ public abstract class QueryAssemblerHelper {
      * expression for the target entity primary key. If this is a "to one"
      * relationship, column expresion for the source foreign key is added.
      */
-    protected void processRelTermination(
-        StringBuffer buf,
-        DbRelationship rel) {
+    protected void processRelTermination(StringBuffer buf, DbRelationship rel) {
 
         if (rel.isToMany()) {
             // append joins
@@ -412,7 +442,8 @@ public abstract class QueryAssemblerHelper {
             }
 
             att = (DbAttribute) pk.get(0);
-        } else {
+        }
+        else {
             att = join.getSource();
         }
 

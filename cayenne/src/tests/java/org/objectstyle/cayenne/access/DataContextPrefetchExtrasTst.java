@@ -171,5 +171,4 @@ public class DataContextPrefetchExtrasTst extends CayenneTestCase {
         CayenneDataObject fk2 = (CayenneDataObject) toMany.get(1);
         assertEquals(PersistenceState.COMMITTED, fk2.getPersistenceState());
     }
-
 }

@@ -128,9 +128,9 @@ public class Main {
     public void prepareData() {
 
         // clean up the tables
-        context.performModifyQuery(
+        context.performNonSelectingQuery(
             new SQLTemplate(Painting.class, "delete from PAINTING", false));
-        context.performModifyQuery(
+        context.performNonSelectingQuery(
             new SQLTemplate(Artist.class, "delete from ARTIST", false));
 
         // create test data - 2 artists, one with 3 paintings, another one - with 2

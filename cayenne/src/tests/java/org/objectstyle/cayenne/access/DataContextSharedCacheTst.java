@@ -125,7 +125,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         map.put("newName", newName);
         map.put("oldName", originalName);
         query.setParameters(map);
-        context.performModifyQuery(query);
+        context.performNonSelectingQuery(query);
 
         // fetch updated artist into the new context, and see if the original
         // one gets updated
@@ -603,7 +603,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         map.put("newName", newName);
         map.put("oldName", originalName);
         update.setParameters(map);
-        context.performModifyQuery(update);
+        context.performNonSelectingQuery(update);
 
         // fetch updated artist without refreshing
         Expression qual = ExpressionFactory.matchExp("artistName", newName);
@@ -651,7 +651,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         map.put("newName", newName);
         map.put("oldName", originalName);
         update.setParameters(map);
-        context.performModifyQuery(update);
+        context.performNonSelectingQuery(update);
 
         // fetch updated artist without refreshing
         Expression qual = ExpressionFactory.matchExp("artistName", newName);
@@ -763,7 +763,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         map.put("newName", backendName);
         map.put("oldName", originalName);
         update.setParameters(map);
-        context.performModifyQuery(update);
+        context.performNonSelectingQuery(update);
 
         context.commitChanges();
 

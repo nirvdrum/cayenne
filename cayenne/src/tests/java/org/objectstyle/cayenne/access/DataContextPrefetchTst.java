@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -425,13 +426,9 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         q.addPrefetch("toArtist");
         SelectObserver o = new SelectObserver();
-        try {
-            context.performQueries(Collections.singletonList(q), o);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Should not have failed with exception " + e.getMessage());
-        }
+
+        context.performQueries(Collections.singletonList(q), o);
+
         assertEquals(2, o.getSelectCount());
 
         List results = o.getResultsAsObjects(context, q);
@@ -479,5 +476,17 @@ public class DataContextPrefetchTst extends DataContextTestBase {
          * painting.getToArtist().getPersistenceState());
          */
 
+    }
+
+    public void testCAY119() throws Exception {
+        createTestData("testPaintings");
+
+        Expression e = ExpressionFactory.matchExp("dateOfBirth", new Date());
+        SelectQuery q = new SelectQuery(Artist.class, e);
+        q.addPrefetch("paintingArray");
+
+        // prefetch with query using date in qualifier used to fail on SQL Server
+        // see CAY-119 for details
+        context.performQuery(q);
     }
 }

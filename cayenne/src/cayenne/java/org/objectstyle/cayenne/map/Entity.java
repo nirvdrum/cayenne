@@ -279,6 +279,22 @@ public abstract class Entity extends MapObject {
         String relationshipPath);
 
     /**
+     * Convenience method returning the last component in the path iterator.
+     * 
+     * @since 1.1
+     * @see #resolvePathComponents(Expression)
+     */
+    public Object lastPathComponent(Expression pathExp) {
+        Object last = null;
+        Iterator it = resolvePathComponents(pathExp);
+        while (it.hasNext()) {
+            last = it.next();
+        }
+        
+        return last;
+    }
+
+    /**
      * Processes expression <code>pathExp</code> and returns an Iterator
      * of path components that contains a sequence of Attributes and Relationships.
      * Note that if path is invalid and can not be resolved from this entity,
