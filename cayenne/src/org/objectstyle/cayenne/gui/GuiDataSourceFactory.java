@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.gui;
 
 import java.io.*;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.sql.DataSource;
 
@@ -69,6 +70,8 @@ import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
  * locate file with direct connection info and create data source.
  */
 public class GuiDataSourceFactory extends DriverDataSourceFactory {
+	static Logger logObj = Logger.getLogger(GuiDataSourceFactory.class.getName());
+	
 	public GuiDataSourceFactory() throws Exception {
 		super();
 	}
@@ -78,8 +81,7 @@ public class GuiDataSourceFactory extends DriverDataSourceFactory {
 		try {
 			load(location);
 		} catch (ConfigException e) {
-			System.out.println(
-				"No data source " + location + ": " + e.getMessage());
+			logObj.log(Level.WARNING, "No data source " + location, e);
 		}
 		return new GuiDataSource(getDriverInfo());
 	}

@@ -130,6 +130,12 @@ public class CayenneFileHandler extends FileHandler {
 		super(pattern, limit, count, append);
 	}
 
+    /**
+     * Will use supplied output stream to redirect all stdin and stderr logging.
+     * This is a naive implementation. A better one should use a special PrintStream
+     * that would use this logger for the output instead of writing 
+     * unformatted information to the file.
+     */
 	protected synchronized void setOutputStream(OutputStream out)
 		throws SecurityException {
 			

@@ -59,6 +59,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.*;
@@ -168,7 +169,7 @@ public class DataNodeDetailView
 			new DefaultComboBoxModel(
 				new String[] {
 					DataSourceFactory.JNDI_FACTORY,
-					DataSourceFactory.DIRECT_FACTORY});
+					DataSourceFactory.DIRECT_FACTORY });
 		factory.setModel(model);
 		factory.setSelectedIndex(-1);
 
@@ -396,8 +397,7 @@ public class DataNodeDetailView
 							.newInstance(
 							new Object[0]);
 			} catch (Exception ex) {
-				System.out.println(ex.getMessage());
-				ex.printStackTrace();
+				logObj.log(Level.WARNING, "Error.", ex);
 				adapter.setSelectedIndex(-1);
 				return;
 			}
@@ -443,7 +443,6 @@ public class DataNodeDetailView
 			if (ret_code != JFileChooser.APPROVE_OPTION)
 				return;
 			file = fc.getSelectedFile();
-			System.out.println("File path is " + file.getAbsolutePath());
 			String old_loc = node.getDataSourceLocation();
 			// Get absolute path for old location
 			if (null != proj_dir)
@@ -466,9 +465,7 @@ public class DataNodeDetailView
 			// Node location changed - mark current domain dirty
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 		} catch (Exception e) {
-			System.out.println(
-				"Error setting node file location, " + e.getMessage());
-			e.printStackTrace();
+			logObj.log(Level.WARNING, "Error setting node file location", e);
 		}
 	}
 
@@ -526,7 +523,8 @@ public class DataNodeDetailView
 					// If direct connection, 
 					// show File button and disable text field.
 					// Otherwise hide File button and enable text field.
-					if (selected_class.equals(DataSourceFactory.DIRECT_FACTORY)) {
+					if (selected_class
+						.equals(DataSourceFactory.DIRECT_FACTORY)) {
 						fileBtn.setVisible(true);
 						location.setEditable(false);
 					} else {

@@ -53,43 +53,51 @@ package org.objectstyle.cayenne.gui;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.awt.*;
-import java.util.*;
-import java.io.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
-import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
+import org.objectstyle.cayenne.map.DataMap;
 
-/** Detail view of the DataNode and DataSourceInfo
- * @author Michael Misha Shengaout */
-public class DataMapDetailView extends JPanel 
-implements DocumentListener, ActionListener, DataMapDisplayListener
-{
+/** 
+ * Detail view of the DataNode and DataSourceInfo
+ * 
+ * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
+ */
+public class DataMapDetailView
+	extends JPanel
+	implements DocumentListener, ActionListener, DataMapDisplayListener {
+		
+	static Logger logObj = Logger.getLogger(DataMapDetailView.class.getName());
+
 	Mediator mediator;
-	
-	JLabel		nameLabel;
-	JTextField	name;
-	String		oldName;
-	
-	JLabel		locationLabel;
-	JTextField	location;
-	JButton		fileBtn;	
-	
+
+	JLabel nameLabel;
+	JTextField name;
+	String oldName;
+
+	JLabel locationLabel;
+	JTextField location;
+	JButton fileBtn;
+
 	/** Cludge to prevent marking map as dirty during initial load. */
 	private boolean ignoreChange = false;
-	
+
 	public DataMapDetailView(Mediator temp_mediator) {
-		super();		
+		super();
 		mediator = temp_mediator;
 		mediator.addDataMapDisplayListener(this);
 		// Create and layout components
@@ -100,15 +108,15 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 		fileBtn.addActionListener(this);
 	}
 
-	private void init(){
+	private void init() {
 		BorderLayout layout = new BorderLayout();
 		this.setLayout(layout);
-		nameLabel 		= new JLabel("Data map name: ");
-		name 			= new JTextField(20);
-		locationLabel 	= new JLabel("Location: ");
-		location 		= new JTextField(25);
+		nameLabel = new JLabel("Data map name: ");
+		name = new JTextField(20);
+		locationLabel = new JLabel("Location: ");
+		location = new JTextField(25);
 		location.setEditable(false);
-		fileBtn			= new JButton("...");
+		fileBtn = new JButton("...");
 
 		JPanel fileChooser = this.formatFileChooser(location, fileBtn);
 
@@ -120,23 +128,30 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 		right_comp[0] = name;
 		right_comp[1] = fileChooser;
 
-		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
+		JPanel temp =
+			PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
 		add(temp, BorderLayout.CENTER);
 	}
-	
+
 	private JPanel formatFileChooser(JTextField fld, JButton btn) {
 		JPanel panel = new JPanel();
-		
+
 		panel.setLayout(new BorderLayout());
 		panel.add(fld, BorderLayout.CENTER);
 		panel.add(btn, BorderLayout.EAST);
-		
+
 		return panel;
 	}
 
-	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }
-	public void changedUpdate(DocumentEvent e) { textFieldChanged(e); }
-	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
+	public void insertUpdate(DocumentEvent e) {
+		textFieldChanged(e);
+	}
+	public void changedUpdate(DocumentEvent e) {
+		textFieldChanged(e);
+	}
+	public void removeUpdate(DocumentEvent e) {
+		textFieldChanged(e);
+	}
 
 	private void textFieldChanged(DocumentEvent e) {
 		if (ignoreChange)
@@ -152,7 +167,7 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 			event = new DataMapEvent(this, map, oldName);
 			mediator.fireDataMapEvent(event);
 			oldName = new_name;
-		}// End changedName
+		} // End changedName
 		else if (e.getDocument() == location.getDocument()) {
 			if (map.getLocation().equals(location.getText()))
 				return;
@@ -164,36 +179,35 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		
+
 		if (src == fileBtn) {
 			selectMapLocation();
 		}
-	}// End actionPerformed()
-	
+	} // End actionPerformed()
+
 	private void selectMapLocation() {
 		DataMap map = mediator.getCurrentDataMap();
-        try {
-            // Get the project file name (always cayenne.xml)
-            File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            fc = new JFileChooser(file_view);
-            fc.setDialogType(JFileChooser.SAVE_DIALOG);
-            fc.setDialogTitle("Data Map location");
-			fc.setFileSelectionMode(JFileChooser.FILES_ONLY );
-            if (null != proj_dir)
-            	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showSaveDialog(this);
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fc.getSelectedFile();
-			System.out.println("DataMapDetailView::selectMapLocation(), "
-								+"File path is " + file.getAbsolutePath());
+		try {
+			// Get the project file name (always cayenne.xml)
+			File file = null;
+			String proj_dir_str = mediator.getConfig().getProjDir();
+			File proj_dir = null;
+			if (proj_dir_str != null)
+				proj_dir = new File(proj_dir_str);
+			JFileChooser fc;
+			FileSystemViewDecorator file_view;
+			file_view = new FileSystemViewDecorator(proj_dir);
+			fc = new JFileChooser(file_view);
+			fc.setDialogType(JFileChooser.SAVE_DIALOG);
+			fc.setDialogTitle("Data Map location");
+			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			if (null != proj_dir)
+				fc.setCurrentDirectory(proj_dir);
+			int ret_code = fc.showSaveDialog(this);
+			if (ret_code != JFileChooser.APPROVE_OPTION)
+				return;
+			file = fc.getSelectedFile();
+
 			// Create new file
 			if (!file.exists())
 				file.createNewFile();
@@ -203,21 +217,20 @@ implements DocumentListener, ActionListener, DataMapDisplayListener
 			// If it is set, use path striped of proj dir and following separator
 			// If proj dir not set, use absolute location.
 			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
+				relative_location = new_file_location;
 			else
-				relative_location 
-					= new_file_location.substring(proj_dir_str.length() + 1);
+				relative_location =
+					new_file_location.substring(proj_dir_str.length() + 1);
 			map.setLocation(relative_location);
 			location.setText(relative_location);
-            // Map location changed
+			// Map location changed
 			mediator.fireDataMapEvent(new DataMapEvent(this, map));
 
-        } catch (Exception e) {
-            System.out.println("Error setting map location, " + e.getMessage());
-            e.printStackTrace();
-        }
+		} catch (Exception e) {
+			logObj.log(Level.WARNING, "Error setting map location.", e);
+		}
 	}
-	
+
 	public void currentDataMapChanged(DataMapDisplayEvent e) {
 		DataMap map = e.getDataMap();
 		if (null == map)

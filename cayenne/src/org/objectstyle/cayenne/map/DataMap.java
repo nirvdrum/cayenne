@@ -291,19 +291,19 @@ public class DataMap {
                             rel.removeAllDbRelationships();
                             break;
                         }
-                    } // End looping through DbRelationships
-                } // End looping through ObjRelationships
+                    } 
+                } 
             }
-        } // End looping through ObjEntities
+        }
     }
 
-    /** Clean remove of the ObjEntity from the data map.
-     *  Removes all ObjRelationships referencing this ObjEntity
+    /** 
+     * Clean remove of the ObjEntity from the data map.
+     * Removes all ObjRelationships referencing this ObjEntity
      */
     public void deleteObjEntity(String entity_name) {
         ObjEntity entity = (ObjEntity) objEntityMap.get(entity_name);
         if (null == entity) {
-            System.out.println("Entity " + entity_name + " is not found");
             return;
         }
         objEntityMap.remove(entity_name);
@@ -316,7 +316,7 @@ public class DataMap {
                     obj_entity_arr[i].removeRelationship(rel.getName());
                 }
             }
-        } // End for()
+        }
     }
 
     /** "Dirty" remove of the ObjEntity from the data map.*/

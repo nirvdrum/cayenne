@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.gui;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.ConfigException;
@@ -121,8 +122,7 @@ public class GuiConfiguration extends DefaultConfiguration {
         		return new FileInputStream(projFile);
         	else super.getDomainConfig();
         } catch (Exception e) {
-        	System.out.println(e.getMessage());
-        	e.printStackTrace();
+        	logObj.log(Level.WARNING, "Error", e);
         }
         return null;
     }
@@ -134,16 +134,13 @@ public class GuiConfiguration extends DefaultConfiguration {
     		if (null == projFile)
     			return super.getMapConfig(location);
 	    	String file_name = projFile.getParent() + projFile.separator + location;
-	    	System.out.println("GuiConfiguration::getMapConfig(), file name: " 
-	    					  + file_name);
 	    	File map_file = new File(file_name);
 	    	if (map_file.exists())
 	        	return new FileInputStream(map_file);
 	        else 
 	        	return super.getMapConfig(location);
         } catch (Exception e) {
-        	System.out.println(e.getMessage());
-        	e.printStackTrace();
+        	logObj.log(Level.WARNING, "Error", e);
         }
         return null;
     }

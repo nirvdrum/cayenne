@@ -57,8 +57,9 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.swing.Action;
 import javax.swing.JFileChooser;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -69,7 +70,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 import org.objectstyle.cayenne.util.Preferences;
 
-
 /**
  * Action that creates new DataMap in the project.
  * 
@@ -77,17 +77,18 @@ import org.objectstyle.cayenne.util.Preferences;
  * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
+	static Logger logObj = Logger.getLogger(CreateDataMapAction.class.getName());
+	
 	public static final String ACTION_NAME = "Create DataMap";
-		
+
 	public CreateDataMapAction() {
 		super(ACTION_NAME);
 	}
-	
+
 	public String getIconName() {
 		return "images/icon-datamap.gif";
 	}
-	
-	
+
 	/** Calls addDataMap() or creates new data map if no data node selected.*/
 	protected void createDataMap() {
 		Mediator mediator = getMediator();
@@ -95,59 +96,64 @@ public class CreateDataMapAction extends CayenneAction {
 		if (null == relative_location) {
 			return;
 		}
-		
+
 		DataDomain currentDomain = mediator.getCurrentDataDomain();
-		DataMap map = (DataMap)NamedObjectFactory.createObject(DataMap.class, currentDomain);
+		DataMap map =
+			(DataMap) NamedObjectFactory.createObject(
+				DataMap.class,
+				currentDomain);
 		map.setLocation(relative_location);
 		mediator.addDataMap(this, map);
 	}
-	
+
 	/** Returns location relative to Project or null if nothing selected. */
 	static String getMapLocation(Mediator mediator) {
-    	Preferences pref = Preferences.getPreferences();
-       	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
-       	// Data map file
-   	    File file = null;
-   	    // Map location relative to proj dir
-   	    String relative_location = null;
-        try {
-            String proj_dir_str = mediator.getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            // Get the data map file name
-            fc = new JFileChooser(file_view);
-            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fc.setDialogTitle("Enter data map file name");
-            if (null != init_dir) {
-            	File init_dir_file = new File(init_dir);
-            	if (init_dir_file.exists())
-            		fc.setCurrentDirectory(init_dir_file);
-            }
-            int ret_code = fc.showSaveDialog(Editor.getFrame());
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return relative_location;
-            file = fc.getSelectedFile();
-            if (!file.exists())
-            	file.createNewFile();
+		Preferences pref = Preferences.getPreferences();
+		String init_dir = (String) pref.getProperty(Preferences.LAST_DIR);
+		// Data map file
+		File file = null;
+		// Map location relative to proj dir
+		String relative_location = null;
+		try {
+			String proj_dir_str = mediator.getConfig().getProjDir();
+			File proj_dir = null;
+			if (proj_dir_str != null)
+				proj_dir = new File(proj_dir_str);
+			JFileChooser fc;
+			FileSystemViewDecorator file_view;
+			file_view = new FileSystemViewDecorator(proj_dir);
+			// Get the data map file name
+			fc = new JFileChooser(file_view);
+			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			fc.setDialogTitle("Enter data map file name");
+			if (null != init_dir) {
+				File init_dir_file = new File(init_dir);
+				if (init_dir_file.exists())
+					fc.setCurrentDirectory(init_dir_file);
+			}
+			int ret_code = fc.showSaveDialog(Editor.getFrame());
+			if (ret_code != JFileChooser.APPROVE_OPTION)
+				return relative_location;
+			file = fc.getSelectedFile();
+			if (!file.exists())
+				file.createNewFile();
 			String new_file_location = file.getAbsolutePath();
 			// If it is set, use path striped of proj dir and following separator
 			// If proj dir not set, use absolute location.
 			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
+				relative_location = new_file_location;
 			else
-				relative_location
-					= new_file_location.substring(proj_dir_str.length() + 1);
-        } catch (Exception e) {
-            System.out.println("Error creating data map file, " + e.getMessage());
-            e.printStackTrace();
-        }
-        return relative_location;
+				relative_location =
+					new_file_location.substring(proj_dir_str.length() + 1);
+		} catch (Exception e) {
+			logObj.log(
+				Level.WARNING,
+				"Error creating data map file.",
+				e.getMessage());
+		}
+		return relative_location;
 	}
-	
+
 	public void performAction(ActionEvent e) {
 		createDataMap();
 	}

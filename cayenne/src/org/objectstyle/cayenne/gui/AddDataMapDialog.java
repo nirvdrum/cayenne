@@ -127,7 +127,6 @@ public class AddDataMapDialog extends JDialog implements ActionListener
 		Iterator iter = map_list.iterator();
 		while(iter.hasNext()) {
 			DataMap map = (DataMap)iter.next();
-			System.out.println("map " + map.getName());
 			boolean found = false;
 			for (int i = 0; maps != null && i < maps.length; i++) {
 				if (map == maps[i]) {
