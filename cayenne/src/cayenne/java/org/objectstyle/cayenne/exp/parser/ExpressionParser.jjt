@@ -7,6 +7,8 @@ options {
 	DEBUG_PARSER = false;
 	DEBUG_LOOKAHEAD = false;
 	DEBUG_TOKEN_MANAGER = false;
+	JAVA_UNICODE_ESCAPE = true;
+	UNICODE_INPUT = true;
 }
 
 PARSER_BEGIN(ExpressionParser)
@@ -64,7 +66,7 @@ PARSER_BEGIN(ExpressionParser)
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  * 
- * Some parts of the parser are based on OGNL pareser,
+ * Some parts of the parser are based on OGNL parser,
  * copyright (c) 2002, Drew Davidson and Luke Blanshard
  *
  */
@@ -81,37 +83,13 @@ import org.objectstyle.cayenne.exp.*;
   * @since 1.1
   */ 
 public class ExpressionParser {
-    
-    // TODO: once the implementation is finished, this method must go to ExpressionFactory
-    /**
-     * 
-     * Parses string, converting it to Expression. If string does
-     * not represent a semantically correct expression, an ExpressionException
-     * is thrown.
-     * 
-     * @since 1.1
-     */
-    public static Expression expressionFromString(String expressionString) {
-        if (expressionString == null) {
-            throw new NullPointerException("Null expression string.");
-        }
-
-        Reader reader = new StringReader(expressionString);
-        try {
-            return new ExpressionParser(reader).expression();
-        }
-        catch (ParseException ex) {
-            throw new ExpressionException(ex);
-        }
-    }
-    
     public static void main(String[] arg) {
         // since Main is used for some basic speed measuring,
         // lets run it twice to "warm up" the parser
-        expressionFromString(arg[0]);
+        ExpressionFactory.expressionFromString(arg[0]);
         
         long start = System.currentTimeMillis();
-        Expression exp = expressionFromString(arg[0]);
+        Expression exp = ExpressionFactory.expressionFromString(arg[0]);
         long end = System.currentTimeMillis();
         
         System.out.println(exp);
@@ -250,8 +228,8 @@ void betweenCondition(boolean negating) :  {}
 
 void scalarCommaList() : {}
 {
-	scalarExpression()
-	( ","  scalarExpression() )* #List
+	(scalarExpression()
+	( ","  scalarExpression() )*) #List
 }
 
 void scalarExpression() : {}

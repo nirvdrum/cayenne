@@ -56,12 +56,16 @@
 
 package org.objectstyle.cayenne.exp;
 
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.exp.parser.ExpressionParser;
+import org.objectstyle.cayenne.exp.parser.ParseException;
 
 /** 
  * Helper class to build expressions. 
@@ -181,6 +185,27 @@ public class ExpressionFactory {
         typeLookup[Expression.COUNT] = UnaryExpression.class;
         typeLookup[Expression.MIN] = UnaryExpression.class;
         typeLookup[Expression.MAX] = UnaryExpression.class;
+    }
+    
+    /**
+     * Parses string, converting it to Expression. If string does
+     * not represent a semantically correct expression, an ExpressionException
+     * is thrown.
+     * 
+     * @since 1.1
+     */
+    public static Expression expressionFromString(String expressionString) {
+        if (expressionString == null) {
+            throw new NullPointerException("Null expression string.");
+        }
+
+        Reader reader = new StringReader(expressionString);
+        try {
+            return new ExpressionParser(reader).expression();
+        }
+        catch (ParseException ex) {
+            throw new ExpressionException(ex);
+        }
     }
 
     /** 
