@@ -88,7 +88,7 @@ public abstract class QueryTranslator {
 	protected DbAdapter adapter;
 
 	/** 
-	 * Creates PreparedSatatement. <code>logLevel</code> 
+	 * Creates PreparedStatement. <code>logLevel</code> 
 	 * parameter is supplied to allow
 	 * control of logging of produced SQL. 
 	 */
