@@ -96,6 +96,10 @@ public abstract class QueryAssembler extends QueryTranslator {
      */
     public abstract String createSqlString() throws java.lang.Exception;
 
+    public String aliasForTable(DbEntity ent, DbRelationship rel) {
+        return aliasForTable(ent); //Default implementation
+    }
+    
     /** 
      * Returns a name that can be used as column alias.
      * This can be one of the following:
@@ -127,7 +131,7 @@ public abstract class QueryAssembler extends QueryTranslator {
 
     /** Translates internal query into PreparedStatement. */
     public PreparedStatement createStatement(Level logLevel) throws Exception {
-    	long t1 = System.currentTimeMillis();
+        long t1 = System.currentTimeMillis();
         String sqlStr = createSqlString();
         QueryLogger.logQuery(logLevel, sqlStr, values, System.currentTimeMillis() - t1);
         PreparedStatement stmt = con.prepareStatement(sqlStr);
@@ -154,8 +158,7 @@ public abstract class QueryAssembler extends QueryTranslator {
                 // hence, a special moronic case here:
                 if (attr == null) {
                     stmt.setObject(i + 1, val);
-                }
-                else {
+                } else {
                     int type = attr.getType();
                     int precision = attr.getPrecision();
 
@@ -163,8 +166,10 @@ public abstract class QueryAssembler extends QueryTranslator {
                         stmt.setNull(i + 1, type);
                     else {
                         ExtendedType map =
-                            adapter.getTypeConverter().getRegisteredType(val.getClass().getName());
-                        Object jdbcVal = (map == null) ? val : map.toJdbcObject(val, type);
+                            adapter.getTypeConverter().getRegisteredType(
+                                val.getClass().getName());
+                        Object jdbcVal =
+                            (map == null) ? val : map.toJdbcObject(val, type);
                         stmt.setObject(i + 1, jdbcVal, type, precision);
                     }
                 }
