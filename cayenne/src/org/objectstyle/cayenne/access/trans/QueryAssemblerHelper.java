@@ -69,13 +69,11 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public abstract class QueryAssemblerHelper {
-	static Logger logObj =
-		Logger.getLogger(QueryAssemblerHelper.class.getName());
+	static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class.getName());
 
 	protected QueryAssembler queryAssembler;
 
-	public QueryAssemblerHelper() {
-	}
+	public QueryAssemblerHelper() {}
 
 	/** Creates QueryAssemblerHelper. Sets queryAssembler property. */
 	public QueryAssemblerHelper(QueryAssembler queryAssembler) {
@@ -135,22 +133,26 @@ public abstract class QueryAssemblerHelper {
 	}
 
 	protected void appendDbPath(StringBuffer buf, Expression pathExp) {
-		String attrName = (String) pathExp.getOperand(0);
-		DbAttribute attr = (DbAttribute) getDbEntity().getAttribute(attrName);
+		Iterator it = getDbEntity().resolvePathComponents(pathExp);
 
-		if (attr == null) {
-			DbEntity dbe = getDbEntity();
-			StringBuffer msg = new StringBuffer();
-			msg
-				.append("DbAttribute not found: '")
-				.append(dbe.getName())
-				.append('.')
-				.append(attrName)
-				.append("'.");
-			throw new CayenneRuntimeException(msg.toString());
+		while (it.hasNext()) {
+			Object pathComp = it.next();
+		    if (pathComp instanceof DbRelationship) {
+				DbRelationship rel = (DbRelationship) pathComp;
+
+				// if this is a last relationship in the path,
+				// it needs special handling
+				if (!it.hasNext()) {
+					processRelTermination(buf, rel);
+				} else {
+					// find and add joins ....
+					queryAssembler.dbRelationshipAdded(rel);
+				}
+			} else {
+				DbAttribute dbAttr = (DbAttribute) pathComp;
+				processColumn(buf, dbAttr);
+			}
 		}
-
-		processColumn(buf, attr);
 	}
 
 	/** Appends column name of a column in a root entity. */
@@ -192,10 +194,7 @@ public abstract class QueryAssemblerHelper {
 	 * is being appended.
 	 * 
 	 */
-	protected void appendLiteral(
-		StringBuffer buf,
-		Object val,
-		DbAttribute attr) {
+	protected void appendLiteral(StringBuffer buf, Object val, DbAttribute attr) {
 		if (val == null) {
 			buf.append("NULL");
 		} else if (val instanceof DataObject) {
@@ -225,10 +224,7 @@ public abstract class QueryAssemblerHelper {
 			}
 
 			// checks have been passed, use id value
-			appendLiteralDirect(
-				buf,
-				snap.get(snap.keySet().iterator().next()),
-				attr);
+			appendLiteralDirect(buf, snap.get(snap.keySet().iterator().next()), attr);
 		} else {
 			appendLiteralDirect(buf, val, attr);
 		}
@@ -310,9 +306,7 @@ public abstract class QueryAssemblerHelper {
 	  * expression for the target entity primary key. If this is a "to one"
 	  * relationship, column expresion for the source foreign key is added.
 	  */
-	protected void processRelTermination(
-		StringBuffer buf,
-		ObjRelationship rel) {
+	protected void processRelTermination(StringBuffer buf, ObjRelationship rel) {
 		if (rel.isToMany()) {
 			// append joins
 			processRelParts(rel);
@@ -346,6 +340,60 @@ public abstract class QueryAssemblerHelper {
 				StringBuffer msg = new StringBuffer();
 				msg
 					.append("OBJ_PATH expressions can only support ")
+					.append("targets with a single column PK. ")
+					.append("This entity has ")
+					.append(pk.size())
+					.append(" columns in primary key.");
+
+				throw new CayenneRuntimeException(msg.toString());
+			}
+
+			att = (DbAttribute) pk.get(0);
+		} else {
+			att = join.getSource();
+		}
+
+		processColumn(buf, att);
+	}
+	
+    /** 
+     * Handles case when a DB_NAME expression ends with relationship.
+	 * If this is a "to many" relationship, a join is added and a column
+	 * expression for the target entity primary key. If this is a "to one"
+	 * relationship, column expresion for the source foreign key is added.
+	 */
+	protected void processRelTermination(StringBuffer buf, DbRelationship rel) {
+		if (rel.isToMany()) {
+			// append joins
+			queryAssembler.dbRelationshipAdded(rel);
+		}
+
+
+		// get last DbRelationship on the list
+		List joins = rel.getJoins();
+		if (joins.size() != 1) {
+			StringBuffer msg = new StringBuffer();
+			msg
+				.append("OBJ_PATH expressions are only supported ")
+				.append("for a single-join relationships. ")
+				.append("This relationship has ")
+				.append(joins.size())
+				.append(" joins.");
+
+			throw new CayenneRuntimeException(msg.toString());
+		}
+
+		DbAttributePair join = (DbAttributePair) joins.get(0);
+
+		DbAttribute att = null;
+
+		if (rel.isToMany()) {
+			DbEntity ent = (DbEntity) join.getTarget().getEntity();
+			List pk = ent.getPrimaryKey();
+			if (pk.size() != 1) {
+				StringBuffer msg = new StringBuffer();
+				msg
+					.append("DB_NAME expressions can only support ")
 					.append("targets with a single column PK. ")
 					.append("This entity has ")
 					.append(pk.size())
