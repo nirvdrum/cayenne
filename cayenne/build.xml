@@ -57,9 +57,10 @@
     <!-- Creates a full release of Cayenne.            -->
     <!-- ============================================= -->
     <target name="release">
-		<ant antfile="build-doc.xml" target="dist-src"/>
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-tests.xml" target="dist-src"/>
+		<ant antfile="build-tutorials.xml" target="dist-src"/>
+		<ant antfile="build-doc.xml" target="dist-src"/>
 		
 		<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
 		
@@ -68,6 +69,7 @@
 				<include name="${project.name}-${project.version}/**"/>
 			</tarfileset>
 		</tar>
+		
         <gzip src="${dist.base}/${project.name}-src-${project.version}.tar" 
               zipfile="${dist.base}/${project.name}-src-${project.version}.tar.gz"/>  
         <delete file="${dist.base}/${project.name}-src-${project.version}.tar"/>
@@ -81,12 +83,13 @@
     <target name="release-site">
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-tests.xml" target="dist-src"/>
+		<ant antfile="build-tutorials.xml" target="release-site"/>
 		<ant antfile="build-doc.xml" target="release-site"/>
     </target>
         
 
     <!-- ========================================== -->
-    <!-- Builds all Cayenne Java subprojects.       -->
+    <!-- Builds all Cayenne Java subproject JARS.   -->
     <!-- ========================================== -->
     <target name="build">
 		<ant antfile="build-cayenne.xml" target="dist-bin"/>
@@ -129,6 +132,7 @@
     <!-- ========================================== -->
     <target name="doc">
         <ant antfile="build-doc.xml" target="doc"/>
+        <ant antfile="build-tutorials.xml" target="doc"/>
     </target>
 
 

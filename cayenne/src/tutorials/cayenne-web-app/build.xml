@@ -8,7 +8,7 @@
     <property name="tutorial.subpath" value="tutorials/cayenne-web-app"/>
     <property name="tutorial.build" value="${build}/${tutorial.subpath}/classes"/>
     <property name="tutorial.src" value="src/${tutorial.subpath}/WEB-INF/classes"/>
-    
+    <property name="tutorial.dist" value="${dist}/src/${tutorial.subpath}"/>
     
     <path id="classpath">
 		<fileset dir="otherlib">
@@ -32,11 +32,11 @@
 		</javac>
 	</target>
 	
-	<target name="dist-src">
-	
-	</target>
-
-	<target name="dist-bin" depends="compile">
-
+	<target name="dist-src" depends="prepare">
+		<copy todir="${tutorial.dist}">
+            <fileset dir="src/${tutorial.subpath}">
+            	<exclude name="build.xml"/>
+            </fileset>
+        </copy>
 	</target>
 </project>

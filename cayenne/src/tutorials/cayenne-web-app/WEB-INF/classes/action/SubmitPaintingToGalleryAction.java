@@ -46,8 +46,6 @@ public final class SubmitPaintingToGalleryAction extends Action {
 		List paintings = ctxt.performQuery(query);
 
 		Painting painting = (Painting) paintings.get(0);
-		System.err.println("painting: " + painting);
-
 		qual =
 			ExpressionFactory.binaryPathExp(
 				Expression.EQUAL_TO,
