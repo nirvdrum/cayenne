@@ -140,6 +140,28 @@ public class SelectQuery
         init(rootClass, qualifier);
     }
 
+    /**
+     * Creates a SelectQuery  for the specifed DbEntity.
+     * 
+     * @param root the DbEntity this SelectQuery is for.
+     * @since 1.1
+     */
+    public SelectQuery(DbEntity root) {
+        this(root, null);
+    }
+    
+    /**
+     * Creates a SelectQuery  for the specifed DbEntity with the given qualifier.
+     * 
+     * @param root the DbEntity this SelectQuery is for.
+     * @param qualifier an Expression indicating which objects should be fetched
+     * @since 1.1
+     */
+    public SelectQuery(DbEntity root, Expression qualifier) {
+        this();
+        this.init(root, qualifier);
+    }
+
     /** Creates SelectQuery with <code>objEntityName</code> parameter. */
     public SelectQuery(String objEntityName) {
         this(objEntityName, null);
@@ -608,7 +630,7 @@ public class SelectQuery
     public void setPageSize(int pageSize) {
         this.pageSize = pageSize;
     }
-    
+
     /**
      * Returns true if objects fetched via this query should be fully
      * resolved according to the inheritance hierarchy.

@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.testdo.locking.SimpleLockingTest;
@@ -93,7 +93,7 @@ public class OptimisticLockingTst extends LockingTestCase {
             context.commitChanges();
             fail("Optimistic lock failure expected.");
         }
-        catch (CayenneRuntimeException ex) {
+        catch (OptimisticLockException ex) {
             // optimistic lock failure expected...
         }
     }
@@ -118,7 +118,7 @@ public class OptimisticLockingTst extends LockingTestCase {
             context.commitChanges();
             fail("Optimistic lock failure expected.");
         }
-        catch (CayenneRuntimeException ex) {
+        catch (OptimisticLockException ex) {
             // optimistic lock failure expected...
         }
     }
@@ -143,5 +143,51 @@ public class OptimisticLockingTst extends LockingTestCase {
 
         // TODO: it would be nice to pick inside DataContext to see that 3 batches where generated...
         // this requires refactoring of ContextCommit.
+    }
+
+    public void testRetrieveFailedRow() throws Exception {
+        createTestData("testSimpleLocking");
+
+        List allObjects = context.performQuery(new SelectQuery(SimpleLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        SimpleLockingTest object = (SimpleLockingTest) allObjects.get(0);
+        object.setDescription("first update");
+
+        // change row underneath, change description and save...  optimistic lock failure expected
+        createTestData("SimpleLockUpdate");
+
+        try {
+            context.commitChanges();
+            fail("Optimistic lock failure expected.");
+        }
+        catch (OptimisticLockException ex) {
+            Map freshFailedRow = ex.getFreshSnapshot(context);
+            assertNotNull(freshFailedRow);
+            assertEquals("LockTest1Updated", freshFailedRow.get("NAME"));
+        }
+    }
+
+    public void testRetrieveDeletedRow() throws Exception {
+        createTestData("testSimpleLocking");
+
+        List allObjects = context.performQuery(new SelectQuery(SimpleLockingTest.class));
+        assertEquals(1, allObjects.size());
+
+        SimpleLockingTest object = (SimpleLockingTest) allObjects.get(0);
+
+        object.setDescription("first update");
+
+        // delete row underneath, change description and save...  optimistic lock failure expected
+        createTestData("SimpleLockDelete");
+
+        try {
+            context.commitChanges();
+            fail("Optimistic lock failure expected.");
+        }
+        catch (OptimisticLockException ex) {
+            Map freshFailedRow = ex.getFreshSnapshot(context);
+            assertNull(freshFailedRow);
+        }
     }
 }

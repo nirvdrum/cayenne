@@ -55,10 +55,18 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * An exception thrown on optimistic lock failure.
@@ -68,12 +76,19 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public class OptimisticLockException extends CayenneRuntimeException {
     protected String querySQL;
+    protected DbEntity rootEntity;
     protected Map qualifierSnapshot;
 
-    public OptimisticLockException(String querySQL, Map qualifierSnapshot) {
+    public OptimisticLockException(
+        DbEntity rootEntity,
+        String querySQL,
+        Map qualifierSnapshot) {
         super("Optimistic Lock Failure");
+
+        this.rootEntity = rootEntity;
         this.querySQL = querySQL;
-        this.qualifierSnapshot = qualifierSnapshot;
+        this.qualifierSnapshot =
+            (qualifierSnapshot != null) ? qualifierSnapshot : Collections.EMPTY_MAP;
     }
 
     public Map getQualifierSnapshot() {
@@ -84,6 +99,49 @@ public class OptimisticLockException extends CayenneRuntimeException {
         return querySQL;
     }
 
+    /**
+     * Retrieves fresh snapshot for the failed row.
+     * Null row indicates that it was deleted.
+     */
+    public Map getFreshSnapshot(QueryEngine engine) {
+        // extract PK from the qualifierSnapshot and fetch a row
+        // for PK, ignoring other locking attributes...
+        
+        Expression qualifier = null;
+        Iterator it = rootEntity.getPrimaryKey().iterator();
+        while (it.hasNext()) {
+            DbAttribute attribute = (DbAttribute) it.next();
+            Expression attributeQualifier =
+                ExpressionFactory.matchDbExp(
+                    attribute.getName(),
+                    qualifierSnapshot.get(attribute.getName()));
+
+            qualifier =
+                (qualifier != null)
+                    ? qualifier.andExp(attributeQualifier)
+                    : attributeQualifier;
+        }
+
+        SelectQuery query = new SelectQuery(rootEntity, qualifier);
+        query.setFetchingDataRows(true);
+        SelectObserver observer = new SelectObserver();
+        engine.performQueries(Collections.singletonList(query), observer);
+        List results = observer.getResults(query);
+
+        if (results == null || results.isEmpty()) {
+            return null;
+        }
+        else if (results.size() > 1) {
+            throw new CayenneRuntimeException("More than one row for ObjectId.");
+        }
+        else {
+            return (Map) results.get(0);
+        }
+    }
+
+    /**
+     * Returns descriptive message for this exception.
+     */
     public String getMessage() {
         StringBuffer buffer = new StringBuffer(super.getMessage());
 
@@ -91,7 +149,7 @@ public class OptimisticLockException extends CayenneRuntimeException {
             buffer.append(", SQL: [").append(querySQL.trim()).append("]");
         }
 
-        if (qualifierSnapshot != null && qualifierSnapshot.size() > 0) {
+        if (!qualifierSnapshot.isEmpty()) {
             buffer.append(", WHERE clause bindings: [");
             Iterator it = qualifierSnapshot.entrySet().iterator();
             while (it.hasNext()) {
@@ -108,5 +166,4 @@ public class OptimisticLockException extends CayenneRuntimeException {
 
         return buffer.toString();
     }
-
 }

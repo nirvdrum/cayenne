@@ -1229,7 +1229,13 @@ public class DataContext implements QueryEngine, Serializable {
             }
             catch (CayenneException ex) {
                 Throwable unwound = Util.unwindException(ex);
-                throw new CayenneRuntimeException("Commit Exception", unwound);
+
+                if (unwound instanceof CayenneRuntimeException) {
+                    throw (CayenneRuntimeException) unwound;
+                }
+                else {
+                    throw new CayenneRuntimeException("Commit Exception", unwound);
+                }
             }
         }
     }
@@ -1341,7 +1347,7 @@ public class DataContext implements QueryEngine, Serializable {
                 if (prefetchRels.size() > 0) {
                     ObjEntity entity = getEntityResolver().lookupObjEntity(select);
                     Iterator prIt = prefetchRels.iterator();
-                    
+
                     while (prIt.hasNext()) {
                         PrefetchSelectQuery prefetchQuery =
                             new PrefetchSelectQuery(entity, select, (String) prIt.next());

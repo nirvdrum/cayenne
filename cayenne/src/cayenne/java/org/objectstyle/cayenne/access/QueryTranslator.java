@@ -140,6 +140,10 @@ public abstract class QueryTranslator {
     }
 
     public ObjEntity getRootEntity() {
+        if (query.getRoot() instanceof DbEntity) {
+            return null;
+        }
+
         return engine.getEntityResolver().lookupObjEntity(query);
     }
 

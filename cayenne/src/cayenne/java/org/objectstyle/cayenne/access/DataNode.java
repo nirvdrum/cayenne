@@ -560,12 +560,16 @@ public class DataNode implements QueryEngine {
 
                 int updated = statement.executeUpdate();
                 if (useOptimisticLock && updated != 1) {
+
                     Map snapshot =
                         (query instanceof UpdateBatchQuery)
                             ? ((UpdateBatchQuery) query).getCurrentQualifier()
                             : Collections.EMPTY_MAP;
 
-                    throw new OptimisticLockException(queryStr, snapshot);
+                    throw new OptimisticLockException(
+                        query.getDbEntity(),
+                        queryStr,
+                        snapshot);
                 }
 
                 delegate.nextCount(query, updated);
