@@ -285,7 +285,7 @@ public class DataMapView extends JPanel {
 
         // init default fields
         defaultLockType
-                .setSelected(map.getDefaultLockType() != DataMap.DEFAULT_LOCK_TYPE_VALUE);
+                .setSelected(map.getDefaultLockType() != ObjEntity.LOCK_TYPE_NONE);
         defaultPackage.setText(map.getDefaultPackage());
         defaultSchema.setText(map.getDefaultSchema());
         defaultSuperclass.setText(map.getDefaultSuperclass());

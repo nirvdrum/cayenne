@@ -75,9 +75,9 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * Stores a collection of related mapping objects that describe database and object layers
  * of an application. DataMap contains DbEntities mapping database tables, ObjEntities -
  * mapping persistent Java classes, Procedures - mapping database stored procedures.
- *
+ * 
  * @author Michael Shengaout
- * @author Andrei Adamchik  
+ * @author Andrei Adamchik
  * @author Craig Miskell
  */
 public class DataMap implements XMLSerializable, MappingNamespace {
@@ -88,7 +88,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * @since 1.1
      */
     public static final String DEFAULT_SCHEMA_PROPERTY = "defaultSchema";
-    
+
     /**
      * Defines the name of the property for default Java class package.
      * 
@@ -102,31 +102,22 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      * @since 1.1
      */
     public static final String DEFAULT_SUPERCLASS_PROPERTY = "defaultSuperclass";
-    
+
     /**
      * Defines the name of the property for default DB schema.
      * 
      * @since 1.1
      */
     public static final String DEFAULT_LOCK_TYPE_PROPERTY = "defaultLockType";
-    
-    /**
-     * Defines the default value of DEFAULT_LOCK_TYPE_PROPERTY.
-     * 
-     * @since 1.1
-     */
-    public static final int DEFAULT_LOCK_TYPE_VALUE = ObjEntity.LOCK_TYPE_NONE;
-    
-    
+
     protected String name;
     protected String location;
     protected MappingNamespace namespace;
-    
+
     protected String defaultSchema;
     protected String defaultPackage;
     protected String defaultSuperclass;
     protected int defaultLockType;
-    
 
     // ====================================================
     // DataMaps that provide dependencies for this DataMap
@@ -151,8 +142,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     private SortedMap objEntityMapRef = Collections.unmodifiableSortedMap(objEntityMap);
 
     // read-through reference for public access to the ObjEntities
-    private Collection objEntityValuesRef =
-        Collections.unmodifiableCollection(objEntityMap.values());
+    private Collection objEntityValuesRef = Collections
+            .unmodifiableCollection(objEntityMap.values());
 
     // ====================================================
     // DbEntities
@@ -163,8 +154,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     private SortedMap dbEntityMapRef = Collections.unmodifiableSortedMap(dbEntityMap);
 
     // read-through reference for public access
-    private Collection dbEntityValuesRef =
-        Collections.unmodifiableCollection(dbEntityMap.values());
+    private Collection dbEntityValuesRef = Collections.unmodifiableCollection(dbEntityMap
+            .values());
 
     // ====================================================
     // Procedures
@@ -175,8 +166,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     private SortedMap procedureMapRef = Collections.unmodifiableSortedMap(procedureMap);
 
     // read-through reference for public access
-    private Collection procedureValuesRef =
-        Collections.unmodifiableCollection(procedureMap.values());
+    private Collection procedureValuesRef = Collections
+            .unmodifiableCollection(procedureMap.values());
 
     // ====================================================
     // Queries
@@ -187,11 +178,11 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queryMap);
 
     // read-through reference for public access
-    private Collection queriesValuesRef =
-        Collections.unmodifiableCollection(queryMap.values());
+    private Collection queriesValuesRef = Collections.unmodifiableCollection(queryMap
+            .values());
 
-    /** 
-     * Creates a new DataMap. 
+    /**
+     * Creates a new DataMap.
      */
     public DataMap() {
         // must do this to setup defaults
@@ -205,7 +196,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         this();
         this.setName(mapName);
     }
-    
+
     /**
      * Performs DataMap initialization from a set of properties, using defaults for the
      * missing properties.
@@ -223,9 +214,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         Object schema = properties.get(DEFAULT_SCHEMA_PROPERTY);
         Object superclass = properties.get(DEFAULT_SUPERCLASS_PROPERTY);
 
-        this.defaultLockType = (lockType != null)
-                ? Integer.parseInt(lockType.toString())
-                : DEFAULT_LOCK_TYPE_VALUE;
+        this.defaultLockType = "optimistic".equals(lockType)
+                ? ObjEntity.LOCK_TYPE_OPTIMISTIC
+                : ObjEntity.LOCK_TYPE_NONE;
 
         this.defaultPackage = (packageName != null) ? packageName.toString() : null;
         this.defaultSchema = (schema != null) ? schema.toString() : null;
@@ -256,22 +247,20 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         encoder.println("\">");
 
         encoder.indent(1);
-        
+
         // properties
-        if (defaultLockType != DEFAULT_LOCK_TYPE_VALUE) {
-            encoder.printProperty(
-                DEFAULT_LOCK_TYPE_PROPERTY,
-                defaultLockType);
+        if (defaultLockType == ObjEntity.LOCK_TYPE_OPTIMISTIC) {
+            encoder.printProperty(DEFAULT_LOCK_TYPE_PROPERTY, "optimistic");
         }
-        
+
         if (!Util.isEmptyString(defaultPackage)) {
             encoder.printProperty(DEFAULT_PACKAGE_PROPERTY, defaultPackage);
         }
-        
+
         if (!Util.isEmptyString(defaultSchema)) {
             encoder.printProperty(DEFAULT_SCHEMA_PROPERTY, defaultSchema);
         }
-        
+
         if (!Util.isEmptyString(defaultSuperclass)) {
             encoder.printProperty(DEFAULT_SUPERCLASS_PROPERTY, defaultSuperclass);
         }
@@ -348,21 +337,20 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     /**
      * Adds a data map that has entities used by this map.
      * 
-     * @throws IllegalArgumentException if a <code>map</code> argument
-     * already depends on thsi map directly or indirectly.
-     * 
+     * @throws IllegalArgumentException if a <code>map</code> argument already depends
+     *             on thsi map directly or indirectly.
      * @deprecated since 1.1
      */
     public void addDependency(DataMap map) throws IllegalArgumentException {
         if (map.isDependentOn(this)) {
             StringBuffer buf = new StringBuffer(128);
             buf
-                .append("Attempt to create circular dependency. ")
-                .append('\'')
-                .append(map.getName())
-                .append("' already depends on '")
-                .append(this.getName())
-                .append("'.");
+                    .append("Attempt to create circular dependency. ")
+                    .append('\'')
+                    .append(map.getName())
+                    .append("' already depends on '")
+                    .append(this.getName())
+                    .append("'.");
             throw new IllegalArgumentException(buf.toString());
         }
         dependencies.add(map);
@@ -383,12 +371,10 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns <code>true</code> if this map
-     * depends on DataMap supplied as a <code>map</code>
-     * parameter. Checks for nested dependencies as well.
-     * For instance if the following dependency exists:
-     * map1 -> map2 -> map3, calling <code>map1.isDependentOn(map3)</code>
-     * will return <code>true</code>.
+     * Returns <code>true</code> if this map depends on DataMap supplied as a
+     * <code>map</code> parameter. Checks for nested dependencies as well. For instance
+     * if the following dependency exists: map1 -> map2 -> map3, calling
+     * <code>map1.isDependentOn(map3)</code> will return <code>true</code>.
      * 
      * @deprecated since 1.1
      */
@@ -420,8 +406,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         dependencies.clear();
     }
 
-    /** 
-     * Returns "name" property value. 
+    /**
+     * Returns "name" property value.
      */
     public String getName() {
         return name;
@@ -431,14 +417,13 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         this.name = (name != null ? name : "unnamed");
     }
 
-    /** 
-     * Adds all Object and DB entities from another map
-     * to this map. Overwrites all existing entities with the
-     * new ones.
-     * 
-     * <p><i>TODO: will need to implement advanced merge that allows 
-     * different policies for overwriting entities.
-     * </i></p>
+    /**
+     * Adds all Object and DB entities from another map to this map. Overwrites all
+     * existing entities with the new ones.
+     * <p>
+     * <i>TODO: will need to implement advanced merge that allows different policies for
+     * overwriting entities. </i>
+     * </p>
      */
     public void mergeWithDataMap(DataMap map) {
         Iterator dbs = new ArrayList(map.getDbEntities()).iterator();
@@ -457,9 +442,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns "location" property value. Location is abstract and can depend
-     * on how the DataMap was loaded. E.g. location can be a File on the filesystem
-     * or a location within a JAR.
+     * Returns "location" property value. Location is abstract and can depend on how the
+     * DataMap was loaded. E.g. location can be a File on the filesystem or a location
+     * within a JAR.
      */
     public String getLocation() {
         return location;
@@ -473,16 +458,16 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns a sorted unmodifiable map of ObjEntities
-     * contained in this DataMap, keyed by ObjEntity name.
+     * Returns a sorted unmodifiable map of ObjEntities contained in this DataMap, keyed
+     * by ObjEntity name.
      */
     public SortedMap getObjEntityMap() {
         return objEntityMapRef;
     }
 
     /**
-     * Returns a sorted unmodifiable map of DbEntities
-     * contained in this DataMap, keyed by DbEntity name.
+     * Returns a sorted unmodifiable map of DbEntities contained in this DataMap, keyed by
+     * DbEntity name.
      */
     public SortedMap getDbEntityMap() {
         return dbEntityMapRef;
@@ -549,7 +534,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return queriesValuesRef;
     }
 
-    /** 
+    /**
      * Adds a new ObjEntity to this DataMap.
      */
     public void addObjEntity(ObjEntity objEntity) {
@@ -560,7 +545,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         objEntityMap.put(objEntity.getName(), objEntity);
     }
 
-    /** 
+    /**
      * Adds a new DbEntity to this DataMap.
      */
     public void addDbEntity(DbEntity dbEntity) {
@@ -579,8 +564,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns all ObjEntities in this DataMap, including entities
-     * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+     * Returns all ObjEntities in this DataMap, including entities from dependent maps if
+     * <code>includeDeps</code> is <code>true</code>.
      */
     public Collection getObjEntities(boolean includeDeps) {
         if (!includeDeps || this.getDependencies().isEmpty()) {
@@ -606,8 +591,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns all DbEntities in this DataMap, including entities
-     * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+     * Returns all DbEntities in this DataMap, including entities from dependent maps if
+     * <code>includeDeps</code> is <code>true</code>.
      * 
      * @deprecated since 1.1
      */
@@ -646,9 +631,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return ents;
     }
 
-    /** 
-     * Returns DbEntity matching the <code>name</code> parameter. No
-     * dependencies will be searched.
+    /**
+     * Returns DbEntity matching the <code>name</code> parameter. No dependencies will
+     * be searched.
      */
     public DbEntity getDbEntity(String dbEntityName) {
         DbEntity entity = (DbEntity) dbEntityMap.get(dbEntityName);
@@ -704,8 +689,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns an ObjEntity for a given name. If it is not found in this
-     * DataMap, it will search a parent EntityNamespace.
+     * Returns an ObjEntity for a given name. If it is not found in this DataMap, it will
+     * search a parent EntityNamespace.
      */
     public ObjEntity getObjEntity(String objEntityName) {
         ObjEntity entity = (ObjEntity) objEntityMap.get(objEntityName);
@@ -737,7 +722,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return null;
     }
 
-    /** 
+    /**
      * Returns a list of ObjEntities mapped to the given DbEntity.
      */
     public Collection getMappedEntities(DbEntity dbEntity) {
@@ -757,9 +742,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return result;
     }
 
-    /** 
-     * Removes DbEntity, also removing all DbRelationships and ObjRelationships
-     * that reference it. This method is a "clean" remove.
+    /**
+     * Removes DbEntity, also removing all DbRelationships and ObjRelationships that
+     * reference it. This method is a "clean" remove.
      * 
      * @deprecated Since 1.1 use {@link #removeDbEntity(String, boolean)}
      */
@@ -767,7 +752,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         removeDbEntity(dbEntityName, true);
     }
 
-    /** 
+    /**
      * "Dirty" remove of the DbEntity from the data map.
      * 
      * @deprecated Since 1.1 use {@link #removeDbEntity(String, boolean)}
@@ -776,10 +761,10 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         removeDbEntity(dbEntityName, false);
     }
 
-    /** 
-     * Removes DbEntity from the DataMap. If <code>clearDependencies</code> is true,
-     * all DbRelationships that reference this entity are also removed. ObjEntities
-     * that rely on this entity are cleaned up.
+    /**
+     * Removes DbEntity from the DataMap. If <code>clearDependencies</code> is true, all
+     * DbRelationships that reference this entity are also removed. ObjEntities that rely
+     * on this entity are cleaned up.
      * 
      * @since 1.1
      */
@@ -825,9 +810,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         }
     }
 
-    /** 
-     * Removes ObjEntity, also removing all ObjRelationships that reference it.
-     * This method is a "clean" remove.
+    /**
+     * Removes ObjEntity, also removing all ObjRelationships that reference it. This
+     * method is a "clean" remove.
      * 
      * @deprecated Since 1.1 use {@link #removeObjEntity(String, boolean)}
      */
@@ -835,7 +820,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         removeObjEntity(objEntityName, true);
     }
 
-    /** 
+    /**
      * "Dirty" remove of the ObjEntity from the data map.
      * 
      * @deprecated Since 1.1 use {@link #removeObjEntity(String, boolean)}
@@ -844,7 +829,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         removeObjEntity(objEntityName, false);
     }
 
-    /** 
+    /**
      * Removes ObjEntity from the DataMap. If <code>clearDependencies</code> is true,
      * all ObjRelationships that reference this entity are also removed.
      * 
@@ -862,7 +847,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
                 while (rels.hasNext()) {
                     ObjRelationship rel = (ObjRelationship) rels.next();
                     if (objEntityName.equals(rel.getTargetEntityName())
-                        || objEntityName.equals(rel.getTargetEntityName())) {
+                            || objEntityName.equals(rel.getTargetEntityName())) {
                         ent.removeRelationship(rel.getName());
                     }
                 }
@@ -878,7 +863,7 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns stored procedures associated with this DataMap, including procedures from 
+     * Returns stored procedures associated with this DataMap, including procedures from
      * dependent maps if requested.
      * 
      * @deprecated since 1.1
@@ -900,9 +885,8 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns a Procedure for a given name or null if no such procedure exists.
-     * If Procedure is not found in this DataMap, a parent EntityNamcespace is 
-     * searched.
+     * Returns a Procedure for a given name or null if no such procedure exists. If
+     * Procedure is not found in this DataMap, a parent EntityNamcespace is searched.
      */
     public Procedure getProcedure(String procedureName) {
         Procedure procedure = (Procedure) procedureMap.get(procedureName);
@@ -913,10 +897,9 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         return namespace != null ? namespace.getProcedure(procedureName) : null;
     }
 
-    /** 
-     * Adds stored procedure to the list of procedures.
-     * If there is another procedure registered under the same name,
-     * throws an IllegalArgumentException.
+    /**
+     * Adds stored procedure to the list of procedures. If there is another procedure
+     * registered under the same name, throws an IllegalArgumentException.
      */
     public void addProcedure(Procedure procedure) {
         if (procedure.getName() == null) {
@@ -955,17 +938,15 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Returns a sorted unmodifiable map of Procedures 
-     * in this DataMap keyed by name.
+     * Returns a sorted unmodifiable map of Procedures in this DataMap keyed by name.
      */
     public SortedMap getProcedureMap() {
         return procedureMapRef;
     }
 
     /**
-     * Returns a parent namespace where this DataMap resides.
-     * Parent EntityNamespace is used to establish relationships
-     * with entities in other DataMaps.
+     * Returns a parent namespace where this DataMap resides. Parent EntityNamespace is
+     * used to establish relationships with entities in other DataMaps.
      * 
      * @since 1.1
      */
@@ -974,16 +955,15 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Sets a parent namespace where this DataMap resides.
-     * Parent EntityNamespace is used to establish relationships
-     * with entities in other DataMaps.
+     * Sets a parent namespace where this DataMap resides. Parent EntityNamespace is used
+     * to establish relationships with entities in other DataMaps.
      * 
      * @since 1.1
      */
     public void setNamespace(MappingNamespace namespace) {
         this.namespace = namespace;
     }
-    
+
     /**
      * @since 1.1
      */

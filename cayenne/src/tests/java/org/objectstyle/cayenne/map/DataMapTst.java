@@ -107,7 +107,7 @@ public class DataMapTst extends TestCase {
     }
 
     public void testDefaultLockType() throws Exception {
-        assertEquals(DataMap.DEFAULT_LOCK_TYPE_VALUE, map.getDefaultLockType());
+        assertEquals(ObjEntity.LOCK_TYPE_NONE, map.getDefaultLockType());
         map.setDefaultLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
         assertEquals(ObjEntity.LOCK_TYPE_OPTIMISTIC, map.getDefaultLockType());
 

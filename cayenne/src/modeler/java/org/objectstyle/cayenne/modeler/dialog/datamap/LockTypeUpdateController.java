@@ -103,7 +103,7 @@ public class LockTypeUpdateController extends DefaultsPreferencesController {
         Iterator it = dataMap.getObjEntities().iterator();
         while (it.hasNext()) {
             ObjEntity entity = (ObjEntity) it.next();
-            if (doAll || entity.getLockType() == DataMap.DEFAULT_LOCK_TYPE_VALUE) {
+            if (doAll || entity.getLockType() == ObjEntity.LOCK_TYPE_NONE) {
                 if (defaultLockType != entity.getDeclaredLockType()) {
                     entity.setDeclaredLockType(defaultLockType);
 
