@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
 /** 
@@ -63,20 +63,37 @@ package org.objectstyle.cayenne.exp;
  * @author Andrei Adamchik
  */
 public class TraversalHelper implements TraversalHandler {
-    
-    public void finishedChild(Expression node, int childIndex, boolean hasMoreChildren) {}
-    
-    public void startUnaryNode(Expression node, Expression parentNode) {}
-    
-    public void startBinaryNode(Expression node, Expression parentNode) {}
-    
-    public void startTernaryNode(Expression node, Expression parentNode) {}
-    
-    public void endUnaryNode(Expression node, Expression parentNode) {}
-    
-    public void endBinaryNode(Expression node, Expression parentNode) {}
-    
-    public void endTernaryNode(Expression node, Expression parentNode) {}
-    
-    public void objectNode(Object leaf, Expression parentNode) {}
+
+    public void finishedChild(
+        Expression node,
+        int childIndex,
+        boolean hasMoreChildren) {
+    }
+
+    public void startUnaryNode(Expression node, Expression parentNode) {
+    }
+
+    public void startBinaryNode(Expression node, Expression parentNode) {
+    }
+
+    public void startTernaryNode(Expression node, Expression parentNode) {
+    }
+
+    public void endUnaryNode(Expression node, Expression parentNode) {
+    }
+
+    public void endBinaryNode(Expression node, Expression parentNode) {
+    }
+
+    public void endTernaryNode(Expression node, Expression parentNode) {
+    }
+
+    public void objectNode(Object leaf, Expression parentNode) {
+    }
+
+    public void endListNode(Expression node, Expression parentNode) {
+    }
+
+    public void startListNode(Expression node, Expression parentNode) {
+    }
 }

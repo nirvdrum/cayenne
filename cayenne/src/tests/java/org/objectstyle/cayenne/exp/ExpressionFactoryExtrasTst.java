@@ -79,11 +79,11 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
     public void testBinaryPathExp() throws Exception {
         String path = "path1.path2";
         Object o2 = new Object();
-        Expression e1 = ExpressionFactory.binaryPathExp(Expression.AND, path, o2);
+        Expression e1 = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, path, o2);
         assertTrue(e1 instanceof BinaryExpression);
         assertTrue(e1.getOperand(0) instanceof UnaryExpression);
         assertSame(o2, e1.getOperand(1));
-        assertEquals(Expression.AND, e1.getType());
+        assertEquals(Expression.EQUAL_TO, e1.getType());
         
         Expression pathExp = (Expression)e1.getOperand(0);
         assertEquals(Expression.OBJ_PATH, pathExp.getType());
@@ -94,7 +94,8 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
     public void testMatchAllExp() throws Exception {        
         // create expressions and check the counts,
         // leaf count should be (2N) : 2 leafs for each pair
-        // node count should be (3N - 1) : 2 nodes for each pair + (N - 1) join nodes
+        // node count should be (2N + 1) for nodes with more than 1 pair
+        // and 2N for a single pair : 2 nodes for each pair + 1 list node
         // where N is map size
         
         // check for N in (1..3)
@@ -112,8 +113,8 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
             
             // assert statistics
             handler.assertConsistency();
-            assertEquals(2 * n, handler.getLeafs());
-            assertEquals(3 * n - 1, handler.getNodeCount());
+            assertEquals("Failed: " + exp, 2 * n, handler.getLeafs());
+            assertEquals("Failed: " + exp, n < 2 ? 2 * n : 2 * n + 1, handler.getNodeCount());
         }
     }
     
@@ -122,7 +123,8 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
     public void testJoinExp() throws Exception {        
         // create expressions and check the counts,
         // leaf count should be (2N) : 2 leafs for each expression
-        // node count should be (2N - 1) : 1 node for each expression + (N - 1) join nodes
+        // node count should be (N + 1) for nodes with more than 1 pair
+        // and N for a single pair : 1 node for each pair + 1 list node
         // where N is map size
         
         // check for N in (1..5)
@@ -140,8 +142,8 @@ public class ExpressionFactoryExtrasTst extends CayenneTestCase {
             
             // assert statistics
             handler.assertConsistency();
-            assertEquals(2 * n, handler.getLeafs());
-            assertEquals(2 * n - 1, handler.getNodeCount());
+            assertEquals("Failed: " + exp, 2 * n, handler.getLeafs());
+            assertEquals("Failed: " + exp, n < 2 ? n : n + 1, handler.getNodeCount());
         }
     }
 }

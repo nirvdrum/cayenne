@@ -52,41 +52,50 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
-
 /**
- * Defines callback methods invoked by ExpressionTraversal during
- * Cayenne Expression walk-through.
+ * Defines callback methods invoked by ExpressionTraversal during Cayenne
+ * Expression walk-through.
  * 
- * <p>This interface can be implemented by SQL processors to
- * generate SQL statements out of Cayenne Expressions.
+ * <p>This interface can be implemented by SQL processors to generate SQL
+ * statements out of Cayenne Expressions.
+ * 
+ * @author Andrei Adamchik
  */
 public interface TraversalHandler {
-    
+
     /** Opportunity to insert an operation. */
-    public void finishedChild(Expression node, int childIndex, boolean hasMoreChildren);
-    
+    public void finishedChild(
+        Expression node,
+        int childIndex,
+        boolean hasMoreChildren);
+
+    /** Opportunity to open a bracket. */
+    public void startListNode(Expression node, Expression parentNode);
+
     /** Opportunity to open a bracket. */
     public void startUnaryNode(Expression node, Expression parentNode);
-    
+
     /** Opportunity to open a bracket. */
     public void startBinaryNode(Expression node, Expression parentNode);
-    
+
     /** Opportunity to open a bracket. */
     public void startTernaryNode(Expression node, Expression parentNode);
-    
+
     /** Opportunity to close a bracket. */
     public void endUnaryNode(Expression node, Expression parentNode);
-    
+
+    /** Opportunity to close a bracket. */
+    public void endListNode(Expression node, Expression parentNode);
+
     /** Opportunity to close a bracket. */
     public void endBinaryNode(Expression node, Expression parentNode);
-    
+
     /** Opportunity to close a bracket. */
     public void endTernaryNode(Expression node, Expression parentNode);
-    
+
     /** Opportunity to insert leaf node operand. */
     public void objectNode(Object leaf, Expression parentNode);
 }
-

@@ -105,14 +105,14 @@ public class EvalExpressionTst extends CayenneTestCase {
 
 		Artist match1 = new Artist();
 		match1.setArtistName("abc");
-		assertTrue(eval.evaluate(match1));
+		assertTrue("Failed: " + e, eval.evaluate(match1));
 
 		Artist match2 = new Artist();
 		match2.setArtistName("xyz");
-		assertTrue(eval.evaluate(match2));
+		assertTrue("Failed: " + e, eval.evaluate(match2));
 
 		Artist noMatch = new Artist();
 		noMatch.setArtistName("123");
-		assertTrue(!eval.evaluate(noMatch));
+		assertTrue("Failed: " + e, !eval.evaluate(noMatch));
 	}
 }

@@ -79,11 +79,11 @@ public class ExpressionFactoryTst extends CayenneTestCase {
     public void testBinaryExp() throws Exception {
         Object o1 = new Object();
         Object o2 = new Object();
-        Expression e1 = ExpressionFactory.binaryExp(Expression.AND, o1, o2);
+        Expression e1 = ExpressionFactory.binaryExp(Expression.EQUAL_TO, o1, o2);
         assertTrue(e1 instanceof BinaryExpression);
         assertSame(o1, e1.getOperand(0));
         assertSame(o2, e1.getOperand(1));
-        assertEquals(Expression.AND, e1.getType());
+        assertEquals(Expression.EQUAL_TO, e1.getType());
     }
     
     public void testTernaryExp() throws Exception {
@@ -100,8 +100,8 @@ public class ExpressionFactoryTst extends CayenneTestCase {
     
     
     public void testExpressionOfType() throws java.lang.Exception {
-        assertTrue(ExpressionFactory.expressionOfType(Expression.AND) instanceof BinaryExpression);
-        assertTrue(ExpressionFactory.expressionOfType(Expression.OR) instanceof BinaryExpression);
+        assertTrue(ExpressionFactory.expressionOfType(Expression.AND) instanceof ListExpression);
+        assertTrue(ExpressionFactory.expressionOfType(Expression.OR) instanceof ListExpression);
         assertTrue(ExpressionFactory.expressionOfType(Expression.NOT) instanceof UnaryExpression);
         assertTrue(ExpressionFactory.expressionOfType(Expression.EQUAL_TO) instanceof BinaryExpression);
         assertTrue(ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO) instanceof BinaryExpression);

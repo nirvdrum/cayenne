@@ -53,42 +53,45 @@ package org.objectstyle.cayenne.exp;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
 
-
 /** Class that collects statistics of expression traversal. It is both traversal 
  *  engine and traversal handler. */
-public class TstTraversalHandler extends ExpressionTraversal implements TraversalHandler {
+public class TstTraversalHandler
+    extends ExpressionTraversal
+    implements TraversalHandler {
     protected List treeFlatView = new ArrayList();
     protected int children;
     protected int unaryNodes;
     protected int binaryNodes;
     protected int ternaryNodes;
+    protected int listNodes;
+    protected int listNodesStarted;
     protected int unaryNodesStarted;
     protected int binaryNodesStarted;
     protected int ternaryNodesStarted;
     protected int leafs;
-    
+
     public TstTraversalHandler() {
         setHandler(this);
     }
-    
+
     public void assertConsistency() throws Exception {
         Assert.assertEquals(unaryNodesStarted, unaryNodes);
         Assert.assertEquals(binaryNodesStarted, binaryNodes);
         Assert.assertEquals(ternaryNodesStarted, ternaryNodes);
+        Assert.assertEquals(listNodesStarted, listNodes);
     }
-    
-    
+
     public List getTreeFlatView() {
         return treeFlatView;
     }
-    
+
     public void traverseExpression(Expression exp) {
         reset();
         super.traverseExpression(exp);
@@ -102,19 +105,29 @@ public class TstTraversalHandler extends ExpressionTraversal implements Traversa
         unaryNodesStarted = 0;
         binaryNodesStarted = 0;
         ternaryNodesStarted = 0;
+        listNodes = 0;
+        listNodesStarted = 0;
         leafs = 0;
     }
-    
+
     public int getNodeCount() {
-        return unaryNodes + binaryNodes + ternaryNodes;
+        return unaryNodes + binaryNodes + ternaryNodes + listNodes;
     }
-    
+
     public int getChildren() {
         return children;
     }
-    
+
     public int getUnaryNodes() {
         return unaryNodes;
+    }
+
+    public int getListNodes() {
+        return listNodes;
+    }
+
+    public int getListNodesStarted() {
+        return listNodesStarted;
     }
 
     public int getBinaryNodes() {
@@ -124,60 +137,73 @@ public class TstTraversalHandler extends ExpressionTraversal implements Traversa
     public int getTernaryNodes() {
         return ternaryNodes;
     }
-    
-    
+
     public int getUnaryNodesStarted() {
         return unaryNodesStarted;
     }
-    
-    
+
     public int getBinaryNodesStarted() {
         return binaryNodesStarted;
     }
-    
-    
+
     public int getTernaryNodesStarted() {
         return ternaryNodesStarted;
     }
-    
-    
+
     public int getLeafs() {
         return leafs;
     }
-    
-    public void finishedChild(Expression node, int childIndex, boolean hasMoreChildren) {
+
+    public void finishedChild(
+        Expression node,
+        int childIndex,
+        boolean hasMoreChildren) {
         children++;
     }
-    
+
     public void startUnaryNode(Expression node, Expression parentNode) {
         treeFlatView.add(node);
         unaryNodesStarted++;
     }
-    
+
     public void startBinaryNode(Expression node, Expression parentNode) {
         treeFlatView.add(node);
         binaryNodesStarted++;
     }
-    
+
     public void startTernaryNode(Expression node, Expression parentNode) {
         treeFlatView.add(node);
         ternaryNodesStarted++;
     }
-    
+
     public void endUnaryNode(Expression node, Expression parentNode) {
         unaryNodes++;
     }
-    
+
     public void endBinaryNode(Expression node, Expression parentNode) {
         binaryNodes++;
     }
-    
+
     public void endTernaryNode(Expression node, Expression parentNode) {
         ternaryNodes++;
     }
-    
+
     public void objectNode(Object leaf, Expression parentNode) {
         treeFlatView.add(leaf);
         leafs++;
+    }
+    /**
+     * @see org.objectstyle.cayenne.exp.TraversalHandler#endListNode(org.objectstyle.cayenne.exp.Expression, org.objectstyle.cayenne.exp.Expression)
+     */
+    public void endListNode(Expression node, Expression parentNode) {
+        listNodes++;
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.exp.TraversalHandler#startListNode(org.objectstyle.cayenne.exp.Expression, org.objectstyle.cayenne.exp.Expression)
+     */
+    public void startListNode(Expression node, Expression parentNode) {
+        treeFlatView.add(node);
+        listNodesStarted++;
     }
 }
