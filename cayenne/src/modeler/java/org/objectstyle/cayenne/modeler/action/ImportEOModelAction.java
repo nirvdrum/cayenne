@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -128,6 +129,7 @@ public class ImportEOModelAction extends CayenneAction {
                 addDataMap(map);
             } catch (Exception ex) {
                 logObj.log(Level.INFO, "EOModel Loading Exception", ex);
+                ErrorDebugDialog.guiException(ex);
             }
 
         }
