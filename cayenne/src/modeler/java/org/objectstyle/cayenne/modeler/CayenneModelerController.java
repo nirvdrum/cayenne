@@ -148,6 +148,22 @@ public class CayenneModelerController extends CayenneController {
         }
     }
 
+    public void projectModifiedAction() {
+        String title = (getCurrentProject().isLocationUndefined())
+                ? "[New]"
+                : getCurrentProject().getMainFile().getAbsolutePath();
+
+        frame.setTitle("* - " + ModelerConstants.TITLE + " - " + title);
+    }
+
+    public void projectSavedAction() {
+        projectController.setDirty(false);
+        updateStatus("Project saved...");
+        frame.setTitle(ModelerConstants.TITLE
+                + " - "
+                + getCurrentProject().getMainFile().getAbsolutePath());
+    }
+
     /**
      * Action method invoked on project closing.
      */

@@ -139,7 +139,7 @@ public class SaveAsAction extends CayenneAction {
                 throw new CayenneRuntimeException("Error on save", ex);
             }
 
-            mediator.setDirty(false);
+            getApplication().getFrameController().projectSavedAction();
         }
 
         // If there were errors or warnings at validation, display them

@@ -132,8 +132,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         ObjRelationshipDisplayListener, DbRelationshipDisplayListener,
         QueryDisplayListener, ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
-    private static final String DIRTY_STRING = "* - ";
-
     protected EditorView view;
     protected RecentFileMenu recentFileMenu;
     protected CayenneModelerController controller;
@@ -278,27 +276,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         Iterator iter = arr.iterator();
         while (iter.hasNext()) {
             pref.addProperty(ModelerPreferences.LAST_PROJ_FILES, iter.next());
-        }
-    }
-
-    /**
-     * Adds asterisk to the title of the window to indicate it is dirty.
-     */
-    public void setDirty(boolean flag) {
-        String title = getTitle();
-        if (flag) {
-            getAction(SaveAction.getActionName()).setEnabled(true);
-            getAction(RevertAction.getActionName()).setEnabled(true);
-            if (title == null || !title.startsWith(DIRTY_STRING)) {
-                setTitle(DIRTY_STRING + title);
-            }
-        }
-        else {
-            getAction(SaveAction.getActionName()).setEnabled(false);
-            getAction(RevertAction.getActionName()).setEnabled(false);
-            if (title != null && title.startsWith(DIRTY_STRING)) {
-                setTitle(title.substring(DIRTY_STRING.length(), title.length()));
-            }
         }
     }
 
