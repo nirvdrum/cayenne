@@ -64,10 +64,8 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
 import org.objectstyle.cayenne.ConnectionSetup;
 import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -80,6 +78,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.testui.TestLogin;
 
 /**
  *  Root class of all test cases. When "main" is invoked, 

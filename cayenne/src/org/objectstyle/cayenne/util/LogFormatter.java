@@ -65,6 +65,7 @@ import java.util.regex.Pattern;
 
 /**
  * ObjectStyle log formatter for more readable logs.
+ * 
  * @deprecated Java Logging API is deprecated in Cayenne. 
  */
 public final class LogFormatter extends Formatter {

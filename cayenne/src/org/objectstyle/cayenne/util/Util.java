@@ -52,17 +52,18 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.util;
 
 import java.io.*;
 import java.net.URL;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import org.apache.log4j.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.parsers.*;
-
+import org.apache.oro.text.perl.Perl5Util;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
@@ -70,165 +71,172 @@ import org.xml.sax.XMLReader;
  *  Utility methods sink.
  */
 public class Util {
-    static Logger logObj = Logger.getLogger(Util.class.getName());
+	static Logger logObj = Logger.getLogger(Util.class.getName());
 
-    private static final Pattern BACKSLASH_PAT = Pattern.compile("\\\\");
-    private static final Pattern PKG_PAT = Pattern.compile("\\.");
+	private static final Perl5Util regexUtil = new Perl5Util();
+	// private static final Perl5Util BACKSLASH_PAT = Pattern.compile("\\\\");
+	//  private static final Pattern PKG_PAT = Pattern.compile("\\.");
 
-    /** Makes up for the lack of file copying utilities in Java */
-    public static boolean copy(File from, File to) {
-        BufferedInputStream fin = null;
-        BufferedOutputStream fout = null;
-        try {
-            int bufSize = 8 * 1024;
-            fin = new BufferedInputStream(new FileInputStream(from), bufSize);
-            fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
-            copyPipe(fin, fout, bufSize);
-        } catch(IOException ioex) {
-            return false;
-        }
-        catch(SecurityException sx) {
-            return false;
-        } finally {
-            if(fin != null) {
-                try {
-                    fin.close();
-                } catch(IOException cioex) {}
-            }
-            if(fout != null) {
-                try {
-                    fout.close();
-                } catch(IOException cioex) {}
-            }
-        }
-        return true;
-    }
+	/** Makes up for the lack of file copying utilities in Java */
+	public static boolean copy(File from, File to) {
+		BufferedInputStream fin = null;
+		BufferedOutputStream fout = null;
+		try {
+			int bufSize = 8 * 1024;
+			fin = new BufferedInputStream(new FileInputStream(from), bufSize);
+			fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
+			copyPipe(fin, fout, bufSize);
+		} catch (IOException ioex) {
+			return false;
+		} catch (SecurityException sx) {
+			return false;
+		} finally {
+			if (fin != null) {
+				try {
+					fin.close();
+				} catch (IOException cioex) {
+				}
+			}
+			if (fout != null) {
+				try {
+					fout.close();
+				} catch (IOException cioex) {
+				}
+			}
+		}
+		return true;
+	}
 
+	/** Save URL contents to a file */
+	public static boolean copy(URL from, File to) {
+		BufferedInputStream urlin = null;
+		BufferedOutputStream fout = null;
+		try {
+			int bufSize = 8 * 1024;
+			urlin =
+				new BufferedInputStream(
+					from.openConnection().getInputStream(),
+					bufSize);
+			fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
+			copyPipe(urlin, fout, bufSize);
+		} catch (IOException ioex) {
+			return false;
+		} catch (SecurityException sx) {
+			return false;
+		} finally {
+			if (urlin != null) {
+				try {
+					urlin.close();
+				} catch (IOException cioex) {
+				}
+			}
+			if (fout != null) {
+				try {
+					fout.close();
+				} catch (IOException cioex) {
+				}
+			}
+		}
+		return true;
+	}
 
-    /** Save URL contents to a file */
-    public static boolean copy(URL from, File to) {
-        BufferedInputStream urlin = null;
-        BufferedOutputStream fout = null;
-        try {
-            int bufSize = 8 * 1024;
-            urlin = new BufferedInputStream(from.openConnection().getInputStream(), bufSize);
-            fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
-            copyPipe(urlin, fout, bufSize);
-        } catch(IOException ioex) {
-            return false;
-        }
-        catch(SecurityException sx) {
-            return false;
-        } finally {
-            if(urlin != null) {
-                try {
-                    urlin.close();
-                } catch(IOException cioex) {}
-            }
-            if(fout != null) {
-                try {
-                    fout.close();
-                } catch(IOException cioex) {}
-            }
-        }
-        return true;
-    }
+	private static void copyPipe(
+		InputStream in,
+		OutputStream out,
+		int bufSizeHint)
+		throws IOException {
+		int read = -1;
+		byte[] buf = new byte[bufSizeHint];
+		while ((read = in.read(buf, 0, bufSizeHint)) >= 0) {
+			out.write(buf, 0, read);
+		}
+		out.flush();
+	}
 
+	/** Improved File.delete method that allows recursive directory deletion. */
+	public static boolean delete(String filePath, boolean recursive) {
+		File file = new File(filePath);
+		if (!file.exists())
+			return true;
 
-    private static void copyPipe(InputStream in, OutputStream out, int bufSizeHint) throws IOException {
-        int read = -1;
-        byte[] buf = new byte[bufSizeHint];
-        while((read = in.read(buf, 0, bufSizeHint)) >= 0) {
-            out.write(buf, 0, read);
-        }
-        out.flush();
-    }
+		if (!recursive || !file.isDirectory())
+			return file.delete();
 
+		String[] list = file.list();
+		for (int i = 0; i < list.length; i++) {
+			if (!delete(filePath + File.separator + list[i], true))
+				return false;
+		}
 
+		return file.delete();
+	}
 
-    /** Improved File.delete method that allows recursive directory deletion. */
-    public static boolean delete(String filePath, boolean recursive) {
-        File file = new File(filePath);
-        if(!file.exists())
-            return true;
+	public static String substBackslashes(String str) {
+		if (str == null) {
+			return null;
+		}
 
+		return regexUtil.match("/\\\\/", str)
+			? regexUtil.substitute("s/\\\\/\\//", str)
+			: str;
+	}
 
-        if(!recursive || !file.isDirectory())
-            return file.delete();
+	/** Compare two objects just like "equals" would. Unlike Object.equals,
+	* this method allows any of the 2 objects to be null. */
+	public static boolean nullSafeEquals(Object obj1, Object obj2) {
+		if (obj1 == null && obj2 == null)
+			return true;
+		else if (obj1 != null)
+			return obj1.equals(obj2);
+		else
+			return obj2.equals(obj1);
+	}
 
-        String[] list = file.list();
-        for(int i = 0; i < list.length; i++) {
-            if(!delete(filePath + File.separator + list[i], true))
-                return false;
-        }
+	/** Create object copy using serialization mechanism. */
+	public static Object cloneViaSerialization(Serializable obj)
+		throws Exception {
+		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+		ObjectOutputStream out = new ObjectOutputStream(bytes);
+		out.writeObject(obj);
+		out.close();
 
-        return file.delete();
-    }
+		ObjectInputStream in =
+			new ObjectInputStream(
+				new ByteArrayInputStream(bytes.toByteArray()));
+		Object objCopy = in.readObject();
+		in.close();
+		return objCopy;
+	}
 
+	/** Creates an XMLReader with default feature set. Note that all objectstyle
+	  * internal XML parsers should probably use XMLReader obtained via this
+	  * method for consistency sake, and can customize feature sets as needed. */
+	public static XMLReader createXmlReader()
+		throws SAXException, ParserConfigurationException {
+		SAXParserFactory spf = SAXParserFactory.newInstance();
 
-    public static String substBackslashes(String str) {
-        return (str == null) ? null : BACKSLASH_PAT.matcher(str).replaceAll("/");
-    }
+		// Create a JAXP SAXParser
+		SAXParser saxParser = spf.newSAXParser();
 
+		// Get the encapsulated SAX XMLReader
+		XMLReader reader = saxParser.getXMLReader();
 
-    /** Compare two objects just like "equals" would. Unlike Object.equals,
-    * this method allows any of the 2 objects to be null. */
-    public static boolean nullSafeEquals(Object obj1, Object obj2) {
-        if(obj1 == null && obj2 == null)
-            return true;
-        else if(obj1 != null)
-            return obj1.equals(obj2);
-        else
-            return obj2.equals(obj1);
-    }
+		// set default features
+		reader.setFeature("http://xml.org/sax/features/namespaces", true);
 
+		return reader;
+	}
 
-    /** Create object copy using serialization mechanism. */
-    public static Object cloneViaSerialization(Serializable obj) throws Exception {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        ObjectOutputStream out = new ObjectOutputStream(bytes);
-        out.writeObject(obj);
-        out.close();
-
-        ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
-        Object objCopy = in.readObject();
-        in.close();
-        return objCopy;
-    }
-
-
-
-    /** Creates an XMLReader with default feature set. Note that all objectstyle
-      * internal XML parsers should probably use XMLReader obtained via this
-      * method for consistency sake, and can customize feature sets as needed. */
-    public static XMLReader createXmlReader() throws SAXException, ParserConfigurationException {
-        SAXParserFactory spf = SAXParserFactory.newInstance();
-
-        // Create a JAXP SAXParser
-        SAXParser saxParser = spf.newSAXParser();
-
-        // Get the encapsulated SAX XMLReader
-        XMLReader reader = saxParser.getXMLReader();
-
-        // set default features
-        reader.setFeature("http://xml.org/sax/features/namespaces", true);
-
-        return reader;
-    }
-
-
-    /** Returns package information for the <code>className</code>
-      * parameter as a path separated with forward slash ('/').
-      * For example for class a.b.c.ClassName "a/b/c" will be returned.
-      * Method is used to lookup resources that are located in package subdirectories. */
-    public static String getPackagePath(String className) {
-        Matcher matcher = PKG_PAT.matcher(className);
-        
-        // top level package, return empty string
-        if(!matcher.find())
-            return "";
-
-        String r1 = matcher.replaceAll("/");
-        return r1.substring(0, r1.lastIndexOf("/"));
-    }
+	/** Returns package information for the <code>className</code>
+	  * parameter as a path separated with forward slash ('/').
+	  * For example for class a.b.c.ClassName "a/b/c" will be returned.
+	  * Method is used to lookup resources that are located in package subdirectories. */
+	public static String getPackagePath(String className) {
+		if (regexUtil.match("/\\./", className)) {
+			String path = regexUtil.substitute("s/\\./\\//", className);
+			return path.substring(0, path.lastIndexOf("/"));
+		} else {
+			return "";
+		}
+	}
 }

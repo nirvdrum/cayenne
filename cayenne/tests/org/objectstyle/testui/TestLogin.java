@@ -57,14 +57,13 @@ package org.objectstyle.testui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.*;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.TestConstants;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
@@ -142,16 +141,13 @@ public class TestLogin extends InteractiveLogin implements TestConstants {
                 labelList.add(dbLabels[i]);
             }
         }
-
-
     }
 
     private DataSourceInfo infoForFilePath(String path) {
         try {
             TstDataSourceFactory factory = new TstDataSourceFactory();
             factory.load(path);
-            DataSourceInfo dsi = factory.getDriverInfo();
-            return dsi;
+            return factory.getDriverInfo();
         } catch(Exception ex) {
             logObj.warn("error", ex);
             // ignoring
@@ -159,7 +155,7 @@ public class TestLogin extends InteractiveLogin implements TestConstants {
         }
     }
 
-    private class TstDataSourceFactory extends DriverDataSourceFactory {
+    class TstDataSourceFactory extends DriverDataSourceFactory {
         public TstDataSourceFactory() throws Exception {}
 
         /** Change access to public. */
@@ -167,8 +163,8 @@ public class TestLogin extends InteractiveLogin implements TestConstants {
             super.load(location);
 
             // guess adapter
-            String driver = getDriverInfo().getJdbcDriver();
-            getDriverInfo().setAdapterClass(guessAdapter(driver));
+            Class adapterClass = guessAdapter(getDriverInfo().getJdbcDriver());
+            getDriverInfo().setAdapterClass(adapterClass != null ? adapterClass.getName() : null);
         }
 
         /** Change access to public. */
@@ -176,17 +172,28 @@ public class TestLogin extends InteractiveLogin implements TestConstants {
             return super.getDriverInfo();
         }
 
-        private String guessAdapter(String driver) {
-            if(Pattern.compile("oracle", Pattern.CASE_INSENSITIVE).matcher(driver).find())
-                return "org.objectstyle.cayenne.dba.oracle.OracleAdapter";
-            else if(Pattern.compile("sybase", Pattern.CASE_INSENSITIVE).matcher(driver).find())
-                return "org.objectstyle.cayenne.dba.sybase.SybaseAdapter";
-            else if(Pattern.compile("mysql", Pattern.CASE_INSENSITIVE).matcher(driver).find())
-                return "org.objectstyle.cayenne.dba.mysql.MySQLAdapter";
-            else if(Pattern.compile("postgres", Pattern.CASE_INSENSITIVE).matcher(driver).find())
-                return "org.objectstyle.cayenne.dba.postgres.PostgresAdapter";
-            else
+        private Class guessAdapter(String driver) {
+        	if(driver == null) {
+        		return null;
+        	}
+        	
+        	driver = driver.toLowerCase();
+        	
+            if(driver.indexOf("oracle") >= 0) {
+                return org.objectstyle.cayenne.dba.oracle.OracleAdapter.class;
+            }
+            else if(driver.indexOf("sybase") >= 0) {
+                return org.objectstyle.cayenne.dba.sybase.SybaseAdapter.class;
+            }
+            else if(driver.indexOf("mysql") >= 0) {
+                return org.objectstyle.cayenne.dba.mysql.MySQLAdapter.class;
+            }
+            else if(driver.indexOf("postgres") >= 0) {
+                return org.objectstyle.cayenne.dba.postgres.PostgresAdapter.class;
+            }
+            else {
                 return null;
+            }
         }
     }
 }
