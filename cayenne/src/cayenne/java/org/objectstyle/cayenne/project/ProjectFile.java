@@ -124,12 +124,9 @@ public abstract class ProjectFile {
     }
 
     /**
-    * Builds a filename from the initial name and extension.
+    * Returns saved location of a file.
     */
     public String getOldLocation() {
-        if (location == null) {
-            throw new NullPointerException("Null old name.");
-        }
         return location;
     }
 
@@ -238,10 +235,12 @@ public abstract class ProjectFile {
     /**
      * Returns a file which is a canonical representation of the 
      * file to store a wrapped object. If an object was renamed, 
-     * the <b>old</b> name is returned.
+     * the <b>old</b> name is returned. Returns null if this file 
+     * has never been saved before. 
      */
     public File resolveOldFile() {
-        return getProject().resolveFile(getOldLocation());
+    	String oldLocation = getOldLocation();
+        return (oldLocation != null) ? getProject().resolveFile(oldLocation) : null;
     }
 
     /**

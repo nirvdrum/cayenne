@@ -105,6 +105,14 @@ public class DataMapProject extends Project {
             try {
                 InputStream in = new FileInputStream(projectFile.getCanonicalFile());
                 map = new MapLoader().loadDataMap(new InputSource(in));
+
+                String fileName = resolveSymbolicName(projectFile);
+                String mapName =
+                    (fileName != null && fileName.endsWith(DataMapFile.LOCATION_SUFFIX))
+                        ? fileName.substring(0, fileName.length() - DataMapFile.LOCATION_SUFFIX.length())
+                        : "UntitledMap";
+
+                map.setName(mapName);
             } catch (IOException e) {
                 throw new ProjectException("Error creating ApplicationProject.", e);
             } catch (DataMapException dme) {

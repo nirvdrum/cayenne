@@ -449,7 +449,7 @@ public abstract class Project {
                 // this check is needed, since a file can reuse the name
                 // of a recently deleted file, and we don't want to delete 
                 // new file by mistake
-                if (savedFiles.contains(file)) {
+                if (file == null || savedFiles.contains(file)) {
                     continue;
                 }
 
