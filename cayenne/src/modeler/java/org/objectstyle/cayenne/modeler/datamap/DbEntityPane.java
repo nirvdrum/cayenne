@@ -57,10 +57,10 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
@@ -80,7 +80,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -88,6 +87,9 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
+
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
  * Detail view of the DbEntity properties. 
@@ -115,87 +117,98 @@ public class DbEntityPane
     protected JTextField customPKName;
     protected JTextField customPKSize;
 
-    /** 
-     * Cludge to prevent marking data map as dirty 
-     * during initial load. 
-     */
-    private boolean ignoreChange;
-
     public DbEntityPane(EventController mediator) {
         super();
         this.mediator = mediator;
-        mediator.addDbEntityDisplayListener(this);
 
-        // Create and layout components
-        init();
-
-        // Add listeners
-        InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
-        schema.setInputVerifier(inputCheck);
-        customPKName.setInputVerifier(inputCheck);
-        customPKSize.setInputVerifier(inputCheck);
-
-        parentEntities.addActionListener(this);
-        parentLabel.addActionListener(this);
-        customPKGenerator.addActionListener(this);
+        initView();
+        initController();
     }
 
-    private void init() {
-        setLayout(new BorderLayout());
+    private void initView() {
 
-        JLabel nameLabel = CayenneWidgetFactory.createLabel("DbEntity name: ");
+        // create widgets
         name = CayenneWidgetFactory.createTextField();
-
-        schemaLabel = CayenneWidgetFactory.createLabel("Schema: ");
+        schemaLabel = CayenneWidgetFactory.createLabel("Schema:");
         schema = CayenneWidgetFactory.createTextField();
 
-        parentLabel = CayenneWidgetFactory.createLabelButton("Parent DbEntity: ");
+        parentLabel = CayenneWidgetFactory.createLabelButton("Parent DbEntity:");
         parentLabel.setEnabled(false);
+
         parentEntities = CayenneWidgetFactory.createComboBox();
         parentEntities.setRenderer(CellRenderers.listRendererWithIcons());
         parentEntities.setEditable(false);
         parentEntities.setEnabled(false);
 
-        Component[] leftCol = new Component[] { nameLabel, schemaLabel, parentLabel };
-        Component[] rightCol = new Component[] { name, schema, parentEntities };
-        add(PanelFactory.createForm(leftCol, rightCol), BorderLayout.NORTH);
-
-        JPanel pkGeneratorPanel = new JPanel(new BorderLayout());
-
+        customPKGenerator = new JCheckBox();
         customPKGeneratorLabel =
             CayenneWidgetFactory.createLabel("Customize primary key generation");
         customPKGeneratorNote =
             CayenneWidgetFactory.createLabel(
                 "(currently ignored by all adapters except Oracle)");
         customPKGeneratorNote.setFont(customPKGeneratorNote.getFont().deriveFont(10));
-
-        customPKGenerator = new JCheckBox();
-
-        leftCol = new Component[] { customPKGenerator, new JLabel()};
-        rightCol = new Component[] { customPKGeneratorLabel, customPKGeneratorNote };
-        pkGeneratorPanel.add(
-            PanelFactory.createForm(leftCol, rightCol),
-            BorderLayout.NORTH);
-
-        customPKGeneratorNameLabel = CayenneWidgetFactory.createLabel("Database object name: ");
+        customPKGeneratorNameLabel =
+            CayenneWidgetFactory.createLabel("Database object name: ");
         customPKSizeLabel = CayenneWidgetFactory.createLabel("Cached PK Size: ");
 
         customPKName = CayenneWidgetFactory.createTextField();
         customPKSize = CayenneWidgetFactory.createTextField();
 
-        leftCol = new Component[] { customPKGeneratorNameLabel, customPKSizeLabel };
-        rightCol = new Component[] { customPKName, customPKSize };
-        pkGeneratorPanel.add(
-            PanelFactory.createForm(leftCol, rightCol),
-            BorderLayout.CENTER);
+        // assemble
+        setLayout(new BorderLayout());
+        FormLayout layout =
+            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
 
-        add(pkGeneratorPanel, BorderLayout.CENTER);
+        builder.appendSeparator("DbEntity Configuration");
+        builder.append("DbEntity name:", name);
+        builder.append(schemaLabel, schema);
+        builder.append(parentLabel, parentEntities);
+
+        builder.appendSeparator("PK Generation");
+        builder.append(customPKGenerator, customPKGeneratorLabel);
+        builder.append("", customPKGeneratorNote);
+        builder.append(customPKGeneratorNameLabel, customPKName);
+        builder.append(customPKSizeLabel, customPKSize);
+
+        add(builder.getPanel(), BorderLayout.CENTER);
+    }
+
+    private void initController() {
+        mediator.addDbEntityDisplayListener(this);
+        InputVerifier inputCheck = new FieldVerifier();
+        name.setInputVerifier(inputCheck);
+        schema.setInputVerifier(inputCheck);
+        customPKName.setInputVerifier(inputCheck);
+        customPKSize.setInputVerifier(inputCheck);
+
+        parentEntities.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                DbEntity current = mediator.getCurrentDbEntity();
+
+                if (current instanceof DerivedDbEntity) {
+                    DerivedDbEntity derived = (DerivedDbEntity) current;
+                    DbEntity parent = (DbEntity) parentEntities.getSelectedItem();
+
+                    if (parent != derived.getParentEntity()) {
+                        derived.setParentEntity(parent);
+                        derived.resetToParentView();
+                        MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
+
+                        EntityEvent event = new EntityEvent(this, current);
+                        mediator.fireDbEntityEvent(event);
+                    }
+                }
+            }
+        });
+
+        parentLabel.addActionListener(this);
+        customPKGenerator.addActionListener(this);
     }
 
     public void processExistingSelection() {
-        EntityDisplayEvent e;
-        e =
+        EntityDisplayEvent e =
             new EntityDisplayEvent(
                 this,
                 mediator.getCurrentDbEntity(),
@@ -210,32 +223,27 @@ public class DbEntityPane
             return;
         }
 
-        ignoreChange = true;
         name.setText(entity.getName());
         schema.setText(entity.getSchema());
-        ignoreChange = false;
 
         if (entity instanceof DerivedDbEntity) {
             updateState(true);
 
             // build a list consisting of non-derived entities
-            java.util.List ents = new ArrayList(64);
-            ents.add("");
 
-            Iterator it = mediator.getCurrentDataMap().getDbEntities(true).iterator();
+            Collection allEntities = mediator.getCurrentDataMap().getDbEntities(true);
+            java.util.List entities = new ArrayList(allEntities.size());
+            Iterator it = allEntities.iterator();
+
             while (it.hasNext()) {
-                DbEntity ent = (DbEntity) it.next();
-                if (!(ent instanceof DerivedDbEntity)) {
-                    ents.add(ent.getName());
+                DbEntity parentEntity = (DbEntity) it.next();
+                if (!(parentEntity instanceof DerivedDbEntity)) {
+                    entities.add(parentEntity);
                 }
             }
 
-            DefaultComboBoxModel model = new DefaultComboBoxModel(ents.toArray());
-            DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
-            if (parent != null) {
-                model.setSelectedItem(parent.getName());
-            }
-
+            DefaultComboBoxModel model = new DefaultComboBoxModel(entities.toArray());
+            model.setSelectedItem(((DerivedDbEntity) entity).getParentEntity());
             parentEntities.setModel(model);
         }
         else {
@@ -287,30 +295,7 @@ public class DbEntityPane
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == parentEntities) {
-            DbEntity current = mediator.getCurrentDbEntity();
-
-            if (current instanceof DerivedDbEntity) {
-                DerivedDbEntity derived = (DerivedDbEntity) current;
-                String name = (String) parentEntities.getSelectedItem();
-
-                DbEntity ent =
-                    (name != null && name.trim().length() > 0)
-                        ? mediator.getCurrentDataMap().getDbEntity(name, true)
-                        : null;
-
-                if (ent != null && ent != derived.getParentEntity()) {
-                    derived.setParentEntity(ent);
-                    derived.resetToParentView();
-                    MapUtil.cleanObjMappings(mediator.getCurrentDataMap());
-
-                    EntityEvent event = new EntityEvent(this, current);
-                    mediator.fireDbEntityEvent(event);
-                }
-            }
-
-        }
-        else if (parentLabel == e.getSource()) {
+        if (parentLabel == e.getSource()) {
             DbEntity current = mediator.getCurrentDbEntity();
 
             if (current instanceof DerivedDbEntity) {
