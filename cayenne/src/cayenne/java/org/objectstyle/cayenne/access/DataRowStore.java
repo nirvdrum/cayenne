@@ -68,8 +68,8 @@ import org.shiftone.cache.CacheManager;
  * @author Andrei Adamchik
  * @since 1.1
  */
-public class DataRowCache implements Serializable {
-    private static Logger logObj = Logger.getLogger(DataRowCache.class);
+public class DataRowStore implements Serializable {
+    private static Logger logObj = Logger.getLogger(DataRowStore.class);
 
     protected String name;
     protected Cache snapshots;
@@ -78,7 +78,7 @@ public class DataRowCache implements Serializable {
     /**
 	 * Creates new SnapshotCache, assigning it a specified name.
 	 */
-    public DataRowCache(String name) {
+    public DataRowStore(String name) {
         if (name == null) {
             throw new IllegalArgumentException("SnapshotCache name can't be null.");
         }

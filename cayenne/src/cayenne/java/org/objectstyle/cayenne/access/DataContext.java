@@ -197,7 +197,7 @@ public class DataContext implements QueryEngine, Serializable {
     public DataContext(QueryEngine parent) {
         setParent(parent);
 
-        DataRowCache snapshotCache = null;
+        DataRowStore snapshotCache = null;
         if (parent != null) {
             snapshotCache = ((DataDomain) parent).getSnapshotCache();
         }

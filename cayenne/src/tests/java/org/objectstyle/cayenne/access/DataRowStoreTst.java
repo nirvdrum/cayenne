@@ -6,9 +6,9 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 /**
  * @author Andrei Adamchik
  */
-public class DataRowCacheTst extends CayenneTestCase {
+public class DataRowStoreTst extends CayenneTestCase {
     public void testConstructor() {
-        DataRowCache cache = new DataRowCache("cacheXYZ");
+        DataRowStore cache = new DataRowStore("cacheXYZ");
         assertEquals("cacheXYZ", cache.getName());
         assertNotNull(cache.getSnapshotEventSubject());
         assertTrue(
@@ -16,7 +16,7 @@ public class DataRowCacheTst extends CayenneTestCase {
     }
 
     public void testNotifyingObjectStores() {
-        DataRowCache cache = new DataRowCache("cacheXYZ");
+        DataRowStore cache = new DataRowStore("cacheXYZ");
 
         // notifications are off by default - webapp behavior
         assertFalse(cache.isNotifyingObjectStores());
@@ -26,7 +26,7 @@ public class DataRowCacheTst extends CayenneTestCase {
     }
 
     public void testStartReceiveingSnapshotEvents() {
-        DataRowCache cache = new DataRowCache("cacheXYZ");
+        DataRowStore cache = new DataRowStore("cacheXYZ");
 
         // 1. notifications are on, listeners must be properly registered...
         cache.setNotifyingObjectStores(true);

@@ -75,7 +75,7 @@ public class ObjectStoreTst extends CayenneTestCase {
         this.context = createDataContext();
 
         // create ObjectStore outside of this DataContext
-        DataRowCache cache = new DataRowCache("test");
+        DataRowStore cache = new DataRowStore("test");
         this.objectStore = new ObjectStore(cache);
 
     }

@@ -79,7 +79,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         return cal.getTime();
     }
 
-    protected DataRowCache getDataRowCache() {
+    protected DataRowStore getDataRowCache() {
         return context.getObjectStore().getDataRowCache();
     }
 

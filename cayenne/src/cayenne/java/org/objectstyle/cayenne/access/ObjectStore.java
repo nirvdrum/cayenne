@@ -88,12 +88,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 	 * ObjectStore will not know how to restore the SnapshotCache by itself.
 	 * </p>
 	 */
-    protected transient DataRowCache dataRowCache;
+    protected transient DataRowStore dataRowCache;
 
     public ObjectStore() {
     }
 
-    public ObjectStore(DataRowCache dataRowCache) {
+    public ObjectStore(DataRowStore dataRowCache) {
         this();
         setDataRowCache(dataRowCache);
     }
@@ -136,7 +136,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     /**
 	 * Returns a SnapshotCache associated with this ObjectStore.
 	 */
-    public DataRowCache getDataRowCache() {
+    public DataRowStore getDataRowCache() {
         return dataRowCache;
     }
 
@@ -144,7 +144,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 	 * Sets parent SnapshotCache. Registers to receive SnapshotEvents if the
 	 * cache is configured to allow ObjectStores to receive such events.
 	 */
-    public void setDataRowCache(DataRowCache snapshotCache) {
+    public void setDataRowCache(DataRowStore snapshotCache) {
         if (this.dataRowCache != null) {
             this.dataRowCache.stopReceivingSnapshotEvents(this);
         }

@@ -106,7 +106,7 @@ public class DataDomain implements QueryEngine {
 
     protected PrimaryKeyHelper primaryKeyHelper;
 
-    protected DataRowCache snapshotCache;
+    protected DataRowStore snapshotCache;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -118,7 +118,7 @@ public class DataDomain implements QueryEngine {
 
     /** Creates DataDomain and assigns it a <code>name</code>. */
     public DataDomain(String name) {
-        this.snapshotCache = new DataRowCache(name);
+        this.snapshotCache = new DataRowStore(name);
     }
 
     /** Returns "name" property value. */
@@ -131,11 +131,11 @@ public class DataDomain implements QueryEngine {
         this.snapshotCache.setName(name);
     }
 
-    public DataRowCache getSnapshotCache() {
+    public DataRowStore getSnapshotCache() {
         return snapshotCache;
     }
 
-    public void setSnapshotCache(DataRowCache snapshotCache) {
+    public void setSnapshotCache(DataRowStore snapshotCache) {
         this.snapshotCache = snapshotCache;
     }
 
