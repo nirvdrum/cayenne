@@ -151,7 +151,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * Returns a query built using this query as a prototype, using a set of
      * parameters to build the qualifier. 
      * 
-     * @see org.objectstyle.cayenne.exp.Expression#expWithParams(java.util.Map,
+     * @see org.objectstyle.cayenne.exp.Expression#expWithParameters(java.util.Map,
      * boolean) Explanation on parameter substitution.
      */
     public SelectQuery queryWithParameters(
