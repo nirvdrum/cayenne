@@ -53,80 +53,52 @@
  * <http://objectstyle.org/>.
  *
  */ 
-
 package org.objectstyle.cayenne.access;
 
-import java.util.List;
-import java.util.logging.Level;
+import java.util.Map;
 
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.DataObject;
+
+
 
 /**
- * Interface used by QueryEngine to notify interested object about different 
- * stages of queries execution.
- *
- * Implementing objects are passed to a QueryEngine that will execute
- * one or more queries. QueryEngine will pass results of the execution 
- * of any kind of queries - selects, updates, store proc. calls, etc..
- * to the interested objects. This includes result counts, created objects, 
- * thrown exceptions, etc.
+ * Defines the API to an iterator over the records returned as a result
+ * of SelectQuery execution. Normally a ResultIterator is supported by
+ * an open java.sql.ResultSet, therefore most of the methods would throw
+ * checked exceptions. ResultIterators must be explicitly closed when the
+ * user is done working with them.
  * 
  * <p><i>For more information see <a href="../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
- * @see org.objectstyle.cayenne.access.QueryEngine
- * 
  * @author Andrei Adamchik
  */
-public interface OperationObserver {
-    public void nextCount(Query query, int resultCount);
+public interface ResultIterator {
+	
+	/** 
+	 * Returns true if there is at least one more record
+	 * that can be read from the iterator.
+	 */
+	public boolean hasNextRow() throws CayenneException;
     
-    /** Called when the next query results are read. */
-    public void nextSnapshots(Query query, List resultSnapshots);
+    /** 
+	 * Returns the next result row as a Map.
+	 */
+    public Map nextDataRow() throws CayenneException;
     
-    public void nextQueryException(Query query, Exception ex);
-    public void nextGlobalException(Exception ex);
-    
-    /** Returns a log level level that should be used when logging query execution. */ 
-    public Level queryLogLevel();
-    
-    /** Called when a batch of queries was processed as a single transaction,
-     *  and this transaction was successfully committed.
+    /** 
+     * Returns the next result row as a DataObject. DataContext
+     * passed as a <code>ctxt</code> parameter is used to instantiate 
+     * new DataObject.
      */
-    public void transactionCommitted();
+    public DataObject nextDataObject(DataContext ctxt) throws CayenneException;
     
-    /** Called when a batch of queries was processed as a single transaction,
-     *  and this transaction was failed and was rolled back. 
-    */
-    public void transactionRolledback();
-    
-    
-    /** <p>DataNode executing a list of statements will consult OperationObserver
-     *  about transactional behavior by calling this method.</p>
-     * 
-     *  <ul>
-     *  <li>If this method returns true, each statement in a batch will be run as a separate 
-     *  transaction. OperationObserver methods <code>transactionCommitted</code> and 
-     *  <code>transactionRolledback</code> will not be invoked at all.
-     *
-     *  <li>If this method returns false, the whole batch will be wrapped in a transaction.
-     *   OperationObserver methods <code>transactionCommitted</code> and 
-     *  <code>transactionRolledback</code> will be called depending on the transaction outcome.
-     *  </ul>
-     */
-    public boolean useAutoCommit();
-    
-    
-    /** This method may be called by DataNode. It gives a chance to OperationObserver to order 
-     *  queries to satisfy database referential integrity constraints.
-     *
-     *  @param aNode data node that is about to run a list of queries...
-     *  @param queryList a list of queries being executed by QueryEngine as a single transaction
-     *
-     *  @return ordered query list (of course some implementations may just return unmodified original
-     *  query list if they do not care about ordering)
-     *
-     */
-    public List orderQueries(DataNode aNode, List queryList);
+    /** 
+     * Closes ResultIterator and associated ResultSet. This method must be
+     * called explicitly when the user is finished processing the records.
+     * Otherwise unused database resources will not be released properly.
+     */  
+    public void close() throws CayenneException;
 }
 

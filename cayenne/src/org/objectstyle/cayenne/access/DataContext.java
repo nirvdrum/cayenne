@@ -138,7 +138,7 @@ public class DataContext implements QueryEngine {
     }
 
     /** Filter array of registered objects to return objects in a certian state */
-    Collection objectsInState(int state) {
+    public Collection objectsInState(int state) {
         ArrayList filteredObjects = new ArrayList();
         Iterator it = registeredMap.values().iterator();
 

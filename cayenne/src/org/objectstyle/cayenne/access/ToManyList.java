@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle.cayenne.access;
  * <http://objectstyle.org/>.
  *
  */ 
+
+package org.objectstyle.cayenne.access;
 
 import java.lang.ref.WeakReference;
 import java.util.*;

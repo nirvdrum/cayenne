@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,7 @@ package org.objectstyle.cayenne.access;
  *
  */ 
 
+package org.objectstyle.cayenne.access;
 
 /** 
  * Defines methods called by ToManyList to initialize its data. 
