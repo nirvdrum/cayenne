@@ -10,6 +10,7 @@
     <classpathentry kind="src" path="src/tutorials/cayenne-web-app/WEB-INF/classes"/>
     <classpathentry kind="src" path="src/tutorials/cayenne-tapestry-app/WEB-INF/classes"/>
     <classpathentry kind="src" path="contrib/examples/data-port/src/java"/>
+    <classpathentry kind="src" path="src/dvmodeler/java"/>
     <classpathentry exported="true" kind="lib" path="otherlib/ant-1.5.3.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/ashwood-1.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/bcel-5.0.jar"/>
@@ -28,5 +29,8 @@
     <classpathentry exported="true" kind="lib" path="otherlib/shiftone-cache-1.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/jms-1.0.2b.jar"/>
     <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry kind="lib" path="otherlib/forms-1.0.2.jar"/>
+    <classpathentry kind="lib" path="otherlib/plastic-1.1.2.jar"/>
+    <classpathentry kind="lib" path="otherlib/jdom-b9.jar"/>
     <classpathentry kind="output" path="build/classes"/>
 </classpath>
