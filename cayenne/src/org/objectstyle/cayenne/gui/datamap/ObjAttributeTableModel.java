@@ -60,6 +60,7 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -101,7 +102,7 @@ class ObjAttributeTableModel extends CayenneTableModel {
 	public Class getElementsClass() {
 		return ObjAttribute.class;
 	}
-	
+
 	public DbEntity getDbEntity() {
 		return dbEntity;
 	}
@@ -118,17 +119,17 @@ class ObjAttributeTableModel extends CayenneTableModel {
 			return;
 		}
 
-        boolean wasShowing = isShowingDb();
+		boolean wasShowing = isShowingDb();
 		dbEntity = entity.getDbEntity();
 		boolean isShowing = isShowingDb();
 
 		if (wasShowing != isShowing) {
 			fireTableStructureChanged();
 		}
-		
+
 		fireTableDataChanged();
 	}
-	
+
 	public boolean isShowingDb() {
 		return dbEntity != null;
 	}
@@ -154,7 +155,7 @@ class ObjAttributeTableModel extends CayenneTableModel {
 
 	public Object getValueAt(int row, int column) {
 		ObjAttribute attrib = getAttribute(row);
-		
+
 		// If name column
 		if (column == OBJ_ATTRIBUTE) {
 			return attrib.getName();
@@ -162,8 +163,7 @@ class ObjAttributeTableModel extends CayenneTableModel {
 		// If type column
 		else if (column == OBJ_ATTRIBUTE_TYPE) {
 			return attrib.getType();
-		}
-		else {
+		} else {
 			DbAttribute db_attrib = attrib.getDbAttribute();
 			if (null == db_attrib)
 				return null;
@@ -172,7 +172,7 @@ class ObjAttributeTableModel extends CayenneTableModel {
 			else if (column == DB_ATTRIBUTE_TYPE) {
 				return TypesMapping.getSqlNameByType(db_attrib.getType());
 			}
-		} 
+		}
 		return "";
 	}
 
@@ -183,11 +183,9 @@ class ObjAttributeTableModel extends CayenneTableModel {
 		// If "Obj Name" column
 		if (column == OBJ_ATTRIBUTE) {
 			String old_name = attrib.getName();
-			GuiFacade.setObjAttributeName(
-				mediator.getCurrentDataMap(),
-				attrib,
-				text);
-			AttributeEvent e = new AttributeEvent(eventSource, attrib, entity, old_name);
+			MapUtil.setAttributeName(attrib, text);
+			AttributeEvent e =
+				new AttributeEvent(eventSource, attrib, entity, old_name);
 			mediator.fireObjAttributeEvent(e);
 			fireTableCellUpdated(row, column);
 		}
@@ -197,7 +195,11 @@ class ObjAttributeTableModel extends CayenneTableModel {
 			String type = (text.length() == 0) ? null : text;
 			attrib.setType(type);
 			mediator.fireObjAttributeEvent(
-				new AttributeEvent(eventSource, attrib, entity, AttributeEvent.CHANGE));
+				new AttributeEvent(
+					eventSource,
+					attrib,
+					entity,
+					AttributeEvent.CHANGE));
 			fireTableCellUpdated(row, column);
 		} else {
 			DbAttribute db_attrib = attrib.getDbAttribute();
@@ -211,8 +213,7 @@ class ObjAttributeTableModel extends CayenneTableModel {
 				else if (db_attrib != null && text.length() == 0) {
 					attrib.setDbAttribute(null);
 				}
-			}
-			else {
+			} else {
 				return;
 			}
 			fireTableRowsUpdated(row, row);
@@ -220,7 +221,6 @@ class ObjAttributeTableModel extends CayenneTableModel {
 		AttributeEvent ev = new AttributeEvent(eventSource, attrib, entity);
 		mediator.fireObjAttributeEvent(ev);
 	}
-
 
 	/** Attribute just needs to be removed from the model. 
 	 *  It is already removed from the DataMap. */
@@ -242,6 +242,6 @@ class ObjAttributeTableModel extends CayenneTableModel {
 			// Don't allow editing db attribute parameters
 			else
 				return false;
-		} 
-	} 
-} 
+		}
+	}
+}

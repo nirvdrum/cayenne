@@ -153,7 +153,7 @@ class ObjRelationshipTableModel extends CayenneTableModel {
 		if (column == REL_NAME) {
 			String text = (String) aValue;
 			String old_name = rel.getName();
-			GuiFacade.setObjRelationshipName(entity, rel, text);
+			MapUtil.setRelationshipName(entity, rel, text);
 			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity, old_name);
 			mediator.fireObjRelationshipEvent(e);
 			fireTableCellUpdated(row, column);

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.gui.datamap;
 
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.event.RelationshipEvent;
+import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -154,7 +155,7 @@ class DbRelationshipTableModel extends CayenneTableModel {
 		if (column == NAME) {
 			String text = (String) aValue;
 			String old_name = rel.getName();
-			GuiFacade.setDbRelationshipName(entity, rel, text);
+			MapUtil.setRelationshipName(entity, rel, text);
 			RelationshipEvent e =
 				new RelationshipEvent(eventSource, rel, entity, old_name);
 			mediator.fireDbRelationshipEvent(e);

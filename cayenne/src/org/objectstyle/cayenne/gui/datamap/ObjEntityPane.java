@@ -69,6 +69,7 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.util.EntityWrapper;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -200,7 +201,7 @@ public class ObjEntityPane
 		ObjEntity current_entity = mediator.getCurrentObjEntity();
 		if (doc == name.getDocument()) {
 			// Change the name of the current obj entity
-			GuiFacade.setObjEntityName(
+			MapUtil.setObjEntityName(
 				map,
 				(ObjEntity) current_entity,
 				name.getText());

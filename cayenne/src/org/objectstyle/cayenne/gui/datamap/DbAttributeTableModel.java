@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -179,11 +180,11 @@ class DbAttributeTableModel extends CayenneTableModel {
 		} else if (column == DB_ATTRIBUTE_NAME) {
 			String new_name = ((String) aValue).trim();
 			String old_name = attrib.getName();
-			GuiFacade.setDbAttributeName(dataMap, attrib, new_name);
+			MapUtil.setAttributeName(attrib, new_name);
 			e = new AttributeEvent(eventSource, attrib, entity, old_name);
 			mediator.fireDbAttributeEvent(e);
 			fireTableCellUpdated(row, column);
-		} // End DB_ATTRIBUTE column
+		}
 		else if (column == DB_ATTRIBUTE_TYPE) {
 			String type_str = (String) aValue;
 			int type = TypesMapping.getSqlTypeByName(type_str);

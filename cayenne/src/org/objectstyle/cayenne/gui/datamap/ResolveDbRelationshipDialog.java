@@ -67,6 +67,7 @@ import javax.swing.table.TableColumn;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.event.RelationshipEvent;
+import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -290,8 +291,8 @@ public class ResolveDbRelationshipDialog
 	private void save() {
 		if (!name.getText().equals(dbRel.getName())) {
 			String oldName = dbRel.getName();
-			GuiFacade.setDbRelationshipName(
-				(DbEntity) dbRel.getSourceEntity(),
+			MapUtil.setRelationshipName(
+				dbRel.getSourceEntity(),
 				dbRel,
 				name.getText());
 

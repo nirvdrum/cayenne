@@ -37,3 +37,6 @@ modeler.
 11. "Query" is now an interface to allow more flexibility
 for subclassing of queries. Its default implementation is 
 AbstractQuery.
+
+12. Removed GuiFacade from map package, instead created MapUtil
+in gui.util.

@@ -68,6 +68,7 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -167,7 +168,7 @@ public class DbEntityPane
 		DbEntity current_entity = mediator.getCurrentDbEntity();
 		if (doc == name.getDocument()) {
 			// Change the name of the current db entity
-			GuiFacade.setDbEntityName(
+			MapUtil.setDbEntityName(
 				map,
 				(DbEntity) current_entity,
 				name.getText());

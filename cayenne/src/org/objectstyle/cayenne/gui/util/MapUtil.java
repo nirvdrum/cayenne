@@ -53,15 +53,21 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.gui.util;
 
 import java.util.Iterator;
+
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Provides utility methods to access DataMap, Entities, etc.
  * For example, setName() in Attribute requires changing
- * the keys in attribute Maps in Entities. */
-public class GuiFacade {
+ * the keys in attribute Maps in Entities. 
+ * 
+ * @author Misha Sengaout
+ * @author Andrei Adamchik
+ */
+public class MapUtil {
 
 	public static void setObjEntityName(
 		DataMap map,
@@ -92,73 +98,34 @@ public class GuiFacade {
 	}
 
 	/** Changes the name of the attribute in all places in DataMap. */
-	public static void setObjAttributeName(
-		DataMap map,
-		ObjAttribute attrib,
-		String new_name) {
-		ObjEntity entity = (ObjEntity) attrib.getEntity();
-		String old_name = attrib.getName();
-		entity.attributes.remove(old_name);
-		attrib.setName(new_name);
-		entity.attributes.put(new_name, attrib);
+	public static void setAttributeName(Attribute attrib, String newName) {
+
+		Entity entity = attrib.getEntity();
+		entity.removeAttribute(attrib.getName());
+		attrib.setName(newName);
+		entity.addAttribute(attrib);
 	}
 
 	/** Changes the name of the attribute in all places in DataMap. */
-	public static void setDbAttributeName(
-		DataMap map,
-		DbAttribute attrib,
-		String new_name) {
-		DbEntity entity = (DbEntity) attrib.getEntity();
-		String old_name = attrib.getName();
-		entity.attributes.remove(old_name);
-		attrib.setName(new_name);
-		entity.attributes.put(new_name, attrib);
-	}
+	public static void setRelationshipName(
+		Entity entity,
+		Relationship rel,
+		String newName) {
 
-	/** Changes the name of the attribute in all places in DataMap. */
-	public static void setObjRelationshipName(
-		ObjEntity entity,
-		ObjRelationship rel,
-		String new_name) {
-		ObjRelationship temp_rel;
-		temp_rel = (ObjRelationship) entity.relationships.get(rel.getName());
-		// If rel is not in the entity - we have a problem
-		if (null == temp_rel || temp_rel != rel) {
-			System.out.println(
-				"Cannot find obj relationship "
-					+ rel.getName()
-					+ " in obj entity "
-					+ entity.getName());
-			Thread.currentThread().dumpStack();
+		if (rel == null || rel != entity.getRelationship(rel.getName())) {
 			return;
 		}
-		entity.relationships.remove(rel.getName());
-		rel.setName(new_name);
-		entity.relationships.put(rel.getName(), rel);
+
+		entity.removeRelationship(rel.getName());
+		rel.setName(newName);
+		entity.addRelationship(rel);
 	}
 
-	public static void setDbRelationshipName(
-		DbEntity entity,
-		DbRelationship rel,
-		String new_name) {
-		DbRelationship temp_rel;
-		temp_rel = (DbRelationship) entity.relationships.get(rel.getName());
-		if (null == temp_rel || temp_rel != rel) {
-			System.out.println(
-				"Cannot find db relationship "
-					+ rel.getName()
-					+ " in db entity "
-					+ entity.getName());
-			Thread.currentThread().dumpStack();
-			return;
-		}
-		entity.relationships.remove(rel.getName());
-		rel.setName(new_name);
-		entity.relationships.put(rel.getName(), rel);
-	}
-
-	/** Clears all the mapping between this obj entity and its current db entity.
-	 *  Clears mapping between entities, attributes and relationships. */
+	/** 
+	 * Clears all the mapping between this obj entity and 
+	 * its current db entity. Clears mapping between 
+	 * entities, attributes and relationships. 
+	 */
 	public static void clearDbMapping(ObjEntity entity) {
 		DbEntity db_entity = entity.getDbEntity();
 		if (db_entity == null) {
