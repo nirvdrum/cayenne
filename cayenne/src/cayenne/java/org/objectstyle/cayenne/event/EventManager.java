@@ -85,15 +85,17 @@ public class EventManager extends Object {
 	private Map _subjects;
 
 	/**
-	 * @HH: writeme!
-	 * @return EventManager
+	 * This method will return the shared 'default' EventManager.
+	 * 
+	 * @return EventManager the shared EventManager instance
 	 */
 	public static EventManager getDefaultManager() {
 		return _defaultManager;
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Default constructor for new EventManager instances, in case you need one.
+	 * 
 	 * @return EventManager
 	 */
 	public EventManager() {
@@ -102,7 +104,10 @@ public class EventManager extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Register	an <code>EventListener</code> for events sent by any sender.
+	 * 
+	 * @throws NoSuchMethodException if <code>methodName</code> is not found
+	 * @see #addListener(EventListener, String, Class, EventSubject, Object)
 	 */
 	synchronized public void addListener(EventListener listener,
 											String methodName,
@@ -113,7 +118,17 @@ public class EventManager extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Register	an <code>EventListener</code> for events sent by a specific
+	 * sender.
+	 * 
+	 * @param listener the object to be notified about events
+	 * @param methodName the name of the listener method to be invoked
+	 * @param eventParameterClass the class of the single event argument passed
+	 * to <code>methodName</code>
+	 * @param subject the event subject that the listener is interested in
+	 * @param sender the object whose events the listener is interested in;
+	 * <code>null</code> means 'any sender'.
+	 * @throws NoSuchMethodException if <code>methodName</code> is not found
 	 */
 	synchronized public void addListener(EventListener listener,
 											String methodName,
@@ -153,8 +168,12 @@ public class EventManager extends Object {
 	}
 
 	/**
+	 * Unregister the specified listener from all event subjects handled by this
+	 * <code>EventManager</code> instance.
+	 * 
+	 * @param listener the object to be unregistered
 	 * @return <code>true</code> if <code>listener</code> could be removed for
-	 * all existing subjects, else returns <code>false</code>.
+	 * any existing subjects, else returns <code>false</code>.
 	 */
 	synchronized public boolean removeListener(EventListener listener) {
 		boolean didRemove = false;
@@ -170,6 +189,10 @@ public class EventManager extends Object {
 	}
 
 	/**
+	 * Unregister the specified listener for the events about the given subject.
+	 * 
+	 * @param listener the object to be unregistered
+	 * @param subject the subject from which the listener is to be unregistered
 	 * @return <code>true</code> if <code>listener</code> could be removed for
 	 * the given subject, else returns <code>false</code>.
 	 */
@@ -203,7 +226,11 @@ public class EventManager extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Sends an event to all registered objects about a particular subject.
+	 * 
+	 * @param event the event to be posted to the observers
+	 * @param subject the subject about which observers will be notified
+	 * @throws IllegalArgumentException if event or subject are null
 	 */
 	synchronized public void postEvent(EventObject event, EventSubject subject) {
 		if (event == null) {
@@ -257,10 +284,13 @@ public class EventManager extends Object {
 		}
 	}
 
+	// returns a subject's mapping from senders to registered listener invocations
 	private Map invocationQueuesForSubject(EventSubject subject) {
 		return (Map)_subjects.get(subject);
 	}
 
+	// returns the registered listener invocations for a particular sender;
+	// the owning event manager instance is used as default sender
 	private Set invocationQueueForSubjectAndSender(EventSubject subject, Object sender) {
 		if (sender == null) {
 			sender = this;

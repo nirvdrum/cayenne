@@ -76,7 +76,12 @@ public class EventSubject extends Object {
 	private String _subject;
 
 	/**
-	 * @HH: writeme!
+	 * Creates a new event subject.
+	 * 
+	 * @param subjectOwner the Class used for uniquely identifying this subject
+	 * @param subjectName a String used as name, e.g. "MyEventTopic"
+	 * @throws IllegalArgumentException if subjectOwner/subjectName are
+	 * <code>null</code> or subjectName is empty.
 	 */
 	public static EventSubject getSubject(Class subjectOwner, String subjectName) {
 		if (subjectOwner == null) {
@@ -91,23 +96,25 @@ public class EventSubject extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Private constructor to force use of #getSubject(Class, String)
 	 */
-	// make sure that the only way to create subjects is via the factory method
 	private EventSubject() {
 		super();
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Private constructor for new subjects.
+	 * 
+	 * @param subject the name of the new subject to be created
 	 */
 	private EventSubject(String subject) {
 		this();
 		_subject = subject;
 	}
-	
+
 	/**
-	 * @HH: writeme!
+	 * @return a String in the form <code><ClassName 0x123456> SomeName</code>
+	 * @see Object#toString()
 	 */
 	public String toString() {
         StringBuffer buf = new StringBuffer(64);

@@ -59,7 +59,8 @@ package org.objectstyle.cayenne.access.event;
 import java.util.EventListener;
 
 /**
- * @HH: writeme!
+ * This interface declares callback methods that subscribers to DataContext
+ * events can implement to be notified about transactions.
  */
 
 public interface DataContextTransactionEventListener extends EventListener {
