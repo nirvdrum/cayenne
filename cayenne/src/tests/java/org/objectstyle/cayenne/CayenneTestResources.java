@@ -81,7 +81,10 @@ import org.objectstyle.cayenne.util.Util;
 public class CayenneTestResources {
     static Logger logObj = Logger.getLogger(CayenneTestResources.class);
 
+    public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
+    public static final String TEST_DIR_KEY = "cayenne.test.dir";
     public static final String TEST_MAP_PATH = "test-resources/testmap.xml";
+
     private static boolean initDone;
     protected static CayenneTestResources resources;
     protected static boolean hasJSDK14;
@@ -117,24 +120,10 @@ public class CayenneTestResources {
         } catch (Exception ex) {
             hasJSDK14 = false;
         }
-
-        if (CayenneTestResources.hasJSDK14()) {
-            logObj.info("JDK 1.4 detected.");
-        } else {
-            logObj.info("No JDK 1.4 detected, assuming JDK1.3.");
-        }
     }
 
     protected static void startDbConnections() {
-        String prop = System.getProperty(CayenneTestCase.CONNECTION_NAME_KEY);
-
-        if (prop == null) {
-            logObj.warn(
-                "No property for '"
-                    + CayenneTestCase.CONNECTION_NAME_KEY
-                    + "' set. Good luck running unit tests.");
-        }
-
+        String prop = System.getProperty(CONNECTION_NAME_KEY);
         resources = new CayenneTestResources(prop);
     }
 
@@ -143,6 +132,12 @@ public class CayenneTestResources {
     }
 
     public CayenneTestResources(String connectionKey) {
+        if (hasJSDK14()) {
+            logObj.info("JDK 1.4 detected.");
+        } else {
+            logObj.info("No JDK 1.4 detected, assuming JDK1.3.");
+        }
+
         sharedConnInfo =
             ConnectionProperties.getInstance().getConnectionInfo(connectionKey);
 
@@ -150,6 +145,11 @@ public class CayenneTestResources {
             createSharedDomain();
             createDbSetup();
             createTestDatabase();
+        } else {
+            logObj.warn(
+                "No property for '"
+                    + CONNECTION_NAME_KEY
+                    + "' set. Good luck running unit tests ;-)");
         }
 
         setupTestDir();
@@ -247,14 +247,17 @@ public class CayenneTestResources {
     }
 
     protected void setupTestDir() {
-        String testDirName = System.getProperty(CayenneTestCase.TEST_DIR_KEY);
+        String testDirName = System.getProperty(TEST_DIR_KEY);
+        
         if (testDirName == null) {
             testDirName = "testrun";
+            
             logObj.info(
-                "No test directory defined as property '"
-                    + CayenneTestCase.TEST_DIR_KEY
-                    + "'.");
-            logObj.info("Using default directory: '" + testDirName + "'");
+                "No property '"
+                    + TEST_DIR_KEY
+                    + "' set. Using default directory: '"
+                    + testDirName
+                    + "'");
         }
 
         testDir = new File(testDirName);

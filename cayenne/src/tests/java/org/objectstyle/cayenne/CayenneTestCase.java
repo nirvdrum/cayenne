@@ -75,9 +75,6 @@ import org.objectstyle.cayenne.conf.Configuration;
  */
 public class CayenneTestCase extends TestCase {
     static Logger logObj = Logger.getLogger(CayenneTestCase.class);
-    public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
-    public static final String TEST_DIR_KEY = "cayenne.test.dir";
-
     
     /**
      * Constructor for CayenneTestCase.
