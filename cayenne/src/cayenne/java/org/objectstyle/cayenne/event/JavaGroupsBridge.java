@@ -58,11 +58,11 @@ package org.objectstyle.cayenne.event;
 import java.io.Serializable;
 
 import org.apache.log4j.Logger;
-import org.javagroups.Channel;
-import org.javagroups.JChannel;
-import org.javagroups.Message;
-import org.javagroups.MessageListener;
-import org.javagroups.blocks.PullPushAdapter;
+import org.jgroups.Channel;
+import org.jgroups.JChannel;
+import org.jgroups.Message;
+import org.jgroups.MessageListener;
+import org.jgroups.blocks.PullPushAdapter;
 
 /**
  * Implementation of EventBridge that passes and receives events via JavaGroups 
