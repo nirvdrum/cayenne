@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -70,27 +71,42 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
  * with database data only when it is needed. IncrementalFaultList has
  * an internal page size. On creation list would only read the first "page". 
  * On access to a list element, it will make sure that all pages from
- * the first one to the one containing requested object are resolved.
+ * the first one to the one containing requested object are resolved. Pages are indexed
+ * starting from zero and up.
  * 
- * <code>Note that some operations on the list would cause the whole list 
- * to be faulted. For instance, calling <code>size()</code> method.
+ * <i>Note that some operations on the list would cause the whole list 
+ * to be faulted. For instance, calling <code>size()</code> method.</i>
  * 
  * @author Andrei Adamchik
  */
 public class IncrementalFaultList extends AbstractList {
+	static Logger logObj = Logger.getLogger(IncrementalFaultList.class.getName());
+	
     protected int pagesRead;
+    protected int pageSize;
     protected List elements;
     protected DataContext dataContext;
     protected GenericSelectQuery query;
     protected boolean fullyResolved;
+    
 
     public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
+        if (query.getPageSize() <= 0) {
+            throw new CayenneRuntimeException(
+                "IncrementalFaultList does not support unpaged queries. Query page size is "
+                    + query.getPageSize());
+        }
+
         elements = new ArrayList();
         this.dataContext = dataContext;
         this.query = query;
-        readUpToPage(0);
+        this.pageSize = query.getPageSize();
+        readUpToPage(1);
     }
 
+    /**
+     * Returns a number of pages that are already faulted. 
+     */
     public int getPagesRead() {
         return pagesRead;
     }
@@ -99,21 +115,51 @@ public class IncrementalFaultList extends AbstractList {
      * Completely resolves all list objects.
      */
     public void readAll() {
-        elements = dataContext.performQuery(query);
-        fullyResolved = true;
+        if (fullyResolved) {
+            return;
+        }
+        
+        readPageInterval(pagesRead, Integer.MAX_VALUE);
+    }
+
+    public void readUpToObject(int elementIndex) {
+        int ind = pageIndex(elementIndex);
+
+        // if element is not the first on the page,
+        // fault element page too, otherwise fault
+        // all pages till the element page
+        if (elementIndex % pageSize > 0) {
+            ind++;
+        }
+
+        readUpToPage(ind);
     }
 
     /**
-     * Faults this list resolving pages up to and including
-     * page at <code>pageIndex</code>.
+     * Faults this list resolving pages from the beginning
+     * up to but not including <code>pageIndex</code>. After this
+     * method is successfully called, the list is guaranteed to have
+     * first <code>pageIndex</code> pages resolved.
      */
-    public void readUpToPage(int pageIndex) {
-        if (fullyResolved || pageIndex < pagesRead) {
+    public void readUpToPage(int pageIndex) {    	
+        if (fullyResolved || pageIndex <= pagesRead) {
             return;
         }
+        
+        readPageInterval(pagesRead, pageIndex);
+    }
 
-        int readFrom = pagesRead * query.getPageSize();
-        int readTo = readFrom + query.getPageSize();
+    /**
+     * Faults this list resolving pages starting at <code>fromIndex</code>
+     * up to but not including <code>toIndex</code>.
+     */
+    protected void readPageInterval(int fromIndex, int toIndex) {
+    	if(fromIndex >= toIndex) {
+    		return;
+    	}
+    	
+        int readFrom = fromIndex * pageSize;
+        int readTo = toIndex * pageSize;
 
         try {
 
@@ -123,6 +169,7 @@ public class IncrementalFaultList extends AbstractList {
                 // skip through read
                 for (int i = 0; i < readFrom; i++) {
                     if (!it.hasNextRow()) {
+                    	// results ended before we need to read anything
                         fullyResolved = true;
                         pagesRead = pageIndex(i) + 1;
                         return;
@@ -132,7 +179,7 @@ public class IncrementalFaultList extends AbstractList {
                     it.skipDataRow();
                 }
 
-                // read till the end of the requested page
+                // read all requested pages
                 ObjEntity ent = dataContext.lookupEntity(query.getObjEntityName());
                 for (int i = readFrom; i < readTo; i++) {
                     if (!it.hasNextRow()) {
@@ -145,19 +192,20 @@ public class IncrementalFaultList extends AbstractList {
                     Map row = it.nextDataRow();
                     elements.add(dataContext.objectFromDataRow(ent, row, true));
                 }
-                pagesRead = pageIndex + 1;
+                pagesRead = toIndex;
+                
+                // check if coincidentally we read the whole thing 
+                if (!it.hasNextRow()) {
+                	fullyResolved = true;
+                }
 
             } finally {
                 it.close();
             }
 
         } catch (CayenneException e) {
-            throw new CayenneRuntimeException("Error faulting page " + pageIndex, e);
+            throw new CayenneRuntimeException("Error faulting page.", e);
         }
-    }
-
-    public void readUpToObject(int elementIndex) {
-        readUpToPage(pageIndex(elementIndex));
     }
 
     public int pageIndex(int elementIndex) {
@@ -172,7 +220,11 @@ public class IncrementalFaultList extends AbstractList {
      * @see java.util.List#get(int)
      */
     public Object get(int index) {
-        return null;
+    	if(!fullyResolved && pageIndex(index) <= pagesRead) {
+    		readUpToObject(index);
+    	}
+    	
+        return elements.get(index);
     }
 
     /**
@@ -210,4 +262,11 @@ public class IncrementalFaultList extends AbstractList {
         return query;
     }
 
+    /**
+     * Returns the pageSize.
+     * @return int
+     */
+    public int getPageSize() {
+        return pageSize;
+    }
 }

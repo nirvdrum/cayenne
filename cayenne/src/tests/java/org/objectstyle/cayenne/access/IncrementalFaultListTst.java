@@ -103,10 +103,14 @@ public class IncrementalFaultListTst extends CayenneTestCase {
     }
     
     public void testPagesRead1() throws Exception {
+    	assertTrue(!list.isFullyResolved());
     	assertEquals(1, list.getPagesRead());
     	
     	list.readUpToPage(1);
-    	assertEquals(2, list.getPagesRead());
+    	assertEquals(1, list.getPagesRead());
+    	
+    	list.readUpToObject(5);
+    	assertEquals(1, list.getPagesRead());
     	
     	list.readUpToObject(6);
     	assertEquals(2, list.getPagesRead());
