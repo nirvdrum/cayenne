@@ -32,6 +32,7 @@
 *.er1 -k 'b'
 *.vsd -k 'b'
 *.mdl -k 'b'
+*.psd -k 'b'
 
 *.GIF -k 'b'
 *.JPG -k 'b'
@@ -43,4 +44,5 @@
 *.ER1 -k 'b'
 *.VSD -k 'b'
 *.MDL -k 'b'
+*.PSD -k 'b'
 
