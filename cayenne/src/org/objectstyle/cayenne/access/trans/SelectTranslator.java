@@ -366,9 +366,24 @@ public class SelectTranslator extends SelectQueryAssembler {
 		int aliasIndex = tableList.indexOf(ent);
 
 		if (aliasIndex < 0) {
+			// print some valuable diagnostics in case of translation errors
 			String name = (ent != null) ? ent.getName() : "<null entity>";
-			throw new CayenneRuntimeException(
-				"Alias not found for table: " + name);
+			String attrName = attr.getName();
+			StringBuffer msg = new StringBuffer();
+			msg
+				.append("Alias not found for attribute: ")
+				.append(name)
+				.append('.')
+				.append(attrName)
+				.append("\nExisting aliased entities:");
+		    
+		    Iterator it = tableList.iterator();
+		    while(it.hasNext()) {
+		    	DbEntity en = (DbEntity)it.next();
+		    	msg.append(' ').append(en != null ? en.getName() : "<null entity>");
+		    }
+
+			throw new CayenneRuntimeException(msg.toString());
 		}
 
 		queryBuf.append(
