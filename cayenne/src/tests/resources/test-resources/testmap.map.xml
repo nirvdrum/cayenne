@@ -133,7 +133,8 @@
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="TINYINT_COL" type="TINYINT"/>
 	</db-entity>
-	<db-entity name="ARTIST_ASSETS" parentName="PAINTING"><db-attribute-derived name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isGroupBy="true" spec="%@">
+	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
+		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isGroupBy="true" spec="%@">
 			<db-attribute-ref name="ARTIST_ID"/>
 		</db-attribute-derived>
 		<db-attribute-derived name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2" spec="SUM(%@)">
@@ -263,90 +264,90 @@
 	<obj-entity name="TinyintTest" className="org.objectstyle.art.TinyintTest" dbEntityName="TINYINT_TEST">
 		<obj-attribute name="tinyintCol" type="java.lang.Byte" db-attribute-path="TINYINT_COL"/>
 	</obj-entity>
-	<db-relationship name="artistGroupArray" source="ARTGROUP" target="ARTIST_GROUP" toDependentPK="false" toMany="true">
+	<db-relationship name="artistGroupArray" source="ARTGROUP" target="ARTIST_GROUP" toMany="true">
 		<db-attribute-pair source="GROUP_ID" target="GROUP_ID"/>
 	</db-relationship>
-	<db-relationship name="toChildGroups" source="ARTGROUP" target="ARTGROUP" toDependentPK="false" toMany="true">
+	<db-relationship name="toChildGroups" source="ARTGROUP" target="ARTGROUP" toMany="true">
 		<db-attribute-pair source="GROUP_ID" target="PARENT_GROUP_ID"/>
 	</db-relationship>
-	<db-relationship name="toParentGroup" source="ARTGROUP" target="ARTGROUP" toDependentPK="false" toMany="false">
+	<db-relationship name="toParentGroup" source="ARTGROUP" target="ARTGROUP" toMany="false">
 		<db-attribute-pair source="PARENT_GROUP_ID" target="GROUP_ID"/>
 	</db-relationship>
 	<db-relationship name="artistExhibitArray" source="ARTIST" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="artistGroupArray" source="ARTIST" target="ARTIST_GROUP" toDependentPK="false" toMany="true">
+	<db-relationship name="artistGroupArray" source="ARTIST" target="ARTIST_GROUP" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
+	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="ARTIST_ASSETS" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="ARTIST_ASSETS" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="ARTIST_EXHIBIT" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="ARTIST_EXHIBIT" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toExhibit" source="ARTIST_EXHIBIT" target="EXHIBIT" toDependentPK="false" toMany="false">
+	<db-relationship name="toExhibit" source="ARTIST_EXHIBIT" target="EXHIBIT" toMany="false">
 		<db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="ARTIST_GROUP" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="ARTIST_GROUP" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toGroup" source="ARTIST_GROUP" target="ARTGROUP" toDependentPK="false" toMany="false">
+	<db-relationship name="toGroup" source="ARTIST_GROUP" target="ARTGROUP" toMany="false">
 		<db-attribute-pair source="GROUP_ID" target="GROUP_ID"/>
 	</db-relationship>
-	<db-relationship name="binaryPKDetails" source="BINARY_PK_TEST1" target="BINARY_PK_TEST2" toDependentPK="false" toMany="true">
+	<db-relationship name="binaryPKDetails" source="BINARY_PK_TEST1" target="BINARY_PK_TEST2" toMany="true">
 		<db-attribute-pair source="BIN_ID" target="FK_ID"/>
 	</db-relationship>
-	<db-relationship name="toBinaryPKMaster" source="BINARY_PK_TEST2" target="BINARY_PK_TEST1" toDependentPK="false" toMany="false">
+	<db-relationship name="toBinaryPKMaster" source="BINARY_PK_TEST2" target="BINARY_PK_TEST1" toMany="false">
 		<db-attribute-pair source="FK_ID" target="BIN_ID"/>
 	</db-relationship>
-	<db-relationship name="toCharPK" source="CHAR_FK_TEST" target="CHAR_PK_TEST" toDependentPK="false" toMany="false">
+	<db-relationship name="toCharPK" source="CHAR_FK_TEST" target="CHAR_PK_TEST" toMany="false">
 		<db-attribute-pair source="FK_COL" target="PK_COL"/>
 	</db-relationship>
-	<db-relationship name="charFKs" source="CHAR_PK_TEST" target="CHAR_FK_TEST" toDependentPK="false" toMany="true">
+	<db-relationship name="charFKs" source="CHAR_PK_TEST" target="CHAR_FK_TEST" toMany="true">
 		<db-attribute-pair source="PK_COL" target="FK_COL"/>
 	</db-relationship>
-	<db-relationship name="toCompoundPk" source="COMPOUND_FK_TEST" target="COMPOUND_PK_TEST" toDependentPK="false" toMany="false">
+	<db-relationship name="toCompoundPk" source="COMPOUND_FK_TEST" target="COMPOUND_PK_TEST" toMany="false">
 		<db-attribute-pair source="F_KEY1" target="KEY1"/>
 		<db-attribute-pair source="F_KEY2" target="KEY2"/>
 	</db-relationship>
-	<db-relationship name="compoundFkArray" source="COMPOUND_PK_TEST" target="COMPOUND_FK_TEST" toDependentPK="false" toMany="true">
+	<db-relationship name="compoundFkArray" source="COMPOUND_PK_TEST" target="COMPOUND_FK_TEST" toMany="true">
 		<db-attribute-pair source="KEY1" target="F_KEY1"/>
 		<db-attribute-pair source="KEY2" target="F_KEY2"/>
 	</db-relationship>
 	<db-relationship name="artistExhibitArray" source="EXHIBIT" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="EXHIBIT_ID" target="EXHIBIT_ID"/>
 	</db-relationship>
-	<db-relationship name="toGallery" source="EXHIBIT" target="GALLERY" toDependentPK="false" toMany="false">
+	<db-relationship name="toGallery" source="EXHIBIT" target="GALLERY" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<db-relationship name="exhibitArray" source="GALLERY" target="EXHIBIT" toDependentPK="false" toMany="true">
+	<db-relationship name="exhibitArray" source="GALLERY" target="EXHIBIT" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toDependentPK="false" toMany="true">
+	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<db-relationship name="toMeaningfulPK" source="MEANINGFUL_PK_DEP" target="MEANINGFUL_PK_TEST1" toDependentPK="false" toMany="false">
+	<db-relationship name="toMeaningfulPK" source="MEANINGFUL_PK_DEP" target="MEANINGFUL_PK_TEST1" toMany="false">
 		<db-attribute-pair source="MASTER_PK" target="PK_ATTRIBUTE"/>
 	</db-relationship>
-	<db-relationship name="meaningfulPKDepArray" source="MEANINGFUL_PK_TEST1" target="MEANINGFUL_PK_DEP" toDependentPK="false" toMany="true">
+	<db-relationship name="meaningfulPKDepArray" source="MEANINGFUL_PK_TEST1" target="MEANINGFUL_PK_DEP" toMany="true">
 		<db-attribute-pair source="PK_ATTRIBUTE" target="MASTER_PK"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
+	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
 	<db-relationship name="toPaintingInfo" source="PAINTING" target="PAINTING_INFO" toDependentPK="true" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="PAINTING1" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="PAINTING1" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="painting" source="PAINTING_INFO" target="PAINTING" toDependentPK="false" toMany="false">
+	<db-relationship name="painting" source="PAINTING_INFO" target="PAINTING" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
 	<obj-relationship name="artistArray" source="ArtGroup" target="Artist" deleteRule="Nullify">
@@ -445,16 +446,13 @@
 		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
 	</obj-relationship>
 	<query name="QueryWithOrdering" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Artist">
-		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="true"/>
 		<ordering descending="true" ignore-case="true"><![CDATA[artistName]]></ordering>
 		<ordering><![CDATA[dateOfBirth]]></ordering>
 	</query>
 	<query name="QueryWithPrefetch" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Gallery">
-		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="true"/>
 		<prefetch>paintingArray</prefetch>
 	</query>
 	<query name="QueryWithQualifier" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Artist">
-		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="true"/>
 		<qualifier><![CDATA[artistName = $param1]]></qualifier>
 	</query>
 </data-map>

@@ -27,13 +27,13 @@
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
 	</obj-entity>
-	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
+	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
+	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
 	<obj-relationship name="paintingArray" source="Artist" target="Painting" deleteRule="Cascade">

@@ -67,49 +67,49 @@
 	</obj-entity>
 	<obj-entity name="ToOneFK2" className="org.objectstyle.cayenne.testdo.relationship.ToOneFK2" dbEntityName="TO_ONEFK2">
 	</obj-entity>
-	<db-relationship name="deleteRuleTest3Array" source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST3" toDependentPK="false" toMany="true">
+	<db-relationship name="deleteRuleTest3Array" source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST3" toMany="true">
 		<db-attribute-pair source="DEL_RULE_TEST1_ID" target="DELETE_RULE_TEST_3_FK"/>
 	</db-relationship>
-	<db-relationship name="test2" source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST2" toDependentPK="false" toMany="false">
+	<db-relationship name="test2" source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST2" toMany="false">
 		<db-attribute-pair source="TEST2_ID" target="DEL_RULE_TEST2_ID"/>
 	</db-relationship>
-	<db-relationship name="deleteRuleTest3Array" source="DELETE_RULE_TEST2" target="DELETE_RULE_TEST3" toDependentPK="false" toMany="true">
+	<db-relationship name="deleteRuleTest3Array" source="DELETE_RULE_TEST2" target="DELETE_RULE_TEST3" toMany="true">
 		<db-attribute-pair source="DEL_RULE_TEST2_ID" target="DELETE_RULE_TEST_3_FK"/>
 	</db-relationship>
-	<db-relationship name="test1Array" source="DELETE_RULE_TEST2" target="DELETE_RULE_TEST1" toDependentPK="false" toMany="true">
+	<db-relationship name="test1Array" source="DELETE_RULE_TEST2" target="DELETE_RULE_TEST1" toMany="true">
 		<db-attribute-pair source="DEL_RULE_TEST2_ID" target="TEST2_ID"/>
 	</db-relationship>
-	<db-relationship name="toDeleteRuleTest2" source="DELETE_RULE_TEST3" target="DELETE_RULE_TEST2" toDependentPK="false" toMany="false">
+	<db-relationship name="toDeleteRuleTest2" source="DELETE_RULE_TEST3" target="DELETE_RULE_TEST2" toMany="false">
 		<db-attribute-pair source="DELETE_RULE_TEST_3_FK" target="DEL_RULE_TEST2_ID"/>
 	</db-relationship>
-	<db-relationship name="ft2Array" source="FLATTENED_TEST_1" target="FLATTENED_TEST_2" toDependentPK="false" toMany="true">
+	<db-relationship name="ft2Array" source="FLATTENED_TEST_1" target="FLATTENED_TEST_2" toMany="true">
 		<db-attribute-pair source="FT1_ID" target="FT1_ID"/>
 	</db-relationship>
-	<db-relationship name="ft3Array" source="FLATTENED_TEST_2" target="FLATTENED_TEST_3" toDependentPK="false" toMany="true">
+	<db-relationship name="ft3Array" source="FLATTENED_TEST_2" target="FLATTENED_TEST_3" toMany="true">
 		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
 	</db-relationship>
-	<db-relationship name="toFT1" source="FLATTENED_TEST_2" target="FLATTENED_TEST_1" toDependentPK="false" toMany="false">
+	<db-relationship name="toFT1" source="FLATTENED_TEST_2" target="FLATTENED_TEST_1" toMany="false">
 		<db-attribute-pair source="FT1_ID" target="FT1_ID"/>
 	</db-relationship>
-	<db-relationship name="toFT2" source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" toDependentPK="false" toMany="false">
+	<db-relationship name="toFT2" source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" toMany="false">
 		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
 	</db-relationship>
-	<db-relationship name="children" source="REFLEXIVE_AND_TO_ONE" target="REFLEXIVE_AND_TO_ONE" toDependentPK="false" toMany="true">
+	<db-relationship name="children" source="REFLEXIVE_AND_TO_ONE" target="REFLEXIVE_AND_TO_ONE" toMany="true">
 		<db-attribute-pair source="REFLEXIVE_AND_TO_ONE_ID" target="PARENT_ID"/>
 	</db-relationship>
-	<db-relationship name="toHelper" source="REFLEXIVE_AND_TO_ONE" target="RELATIONSHIP_HELPER" toDependentPK="false" toMany="false">
+	<db-relationship name="toHelper" source="REFLEXIVE_AND_TO_ONE" target="RELATIONSHIP_HELPER" toMany="false">
 		<db-attribute-pair source="RELATIONSHIP_HELPER_ID" target="RELATIONSHIP_HELPER_ID"/>
 	</db-relationship>
-	<db-relationship name="toParent" source="REFLEXIVE_AND_TO_ONE" target="REFLEXIVE_AND_TO_ONE" toDependentPK="false" toMany="false">
+	<db-relationship name="toParent" source="REFLEXIVE_AND_TO_ONE" target="REFLEXIVE_AND_TO_ONE" toMany="false">
 		<db-attribute-pair source="PARENT_ID" target="REFLEXIVE_AND_TO_ONE_ID"/>
 	</db-relationship>
-	<db-relationship name="reflexiveAndToOneArray" source="RELATIONSHIP_HELPER" target="REFLEXIVE_AND_TO_ONE" toDependentPK="false" toMany="true">
+	<db-relationship name="reflexiveAndToOneArray" source="RELATIONSHIP_HELPER" target="REFLEXIVE_AND_TO_ONE" toMany="true">
 		<db-attribute-pair source="RELATIONSHIP_HELPER_ID" target="RELATIONSHIP_HELPER_ID"/>
 	</db-relationship>
-	<db-relationship name="toPK" source="TO_ONEFK1" target="TO_ONEFK2" toDependentPK="false" toMany="false">
+	<db-relationship name="toPK" source="TO_ONEFK1" target="TO_ONEFK2" toMany="false">
 		<db-attribute-pair source="TO_ONEFK1_FK" target="TO_ONEFK2_PK"/>
 	</db-relationship>
-	<db-relationship name="toOneToFK" source="TO_ONEFK2" target="TO_ONEFK1" toDependentPK="false" toMany="false">
+	<db-relationship name="toOneToFK" source="TO_ONEFK2" target="TO_ONEFK1" toMany="false">
 		<db-attribute-pair source="TO_ONEFK2_PK" target="TO_ONEFK1_FK"/>
 	</db-relationship>
 	<obj-relationship name="test2" source="DeleteRuleTest1" target="DeleteRuleTest2" deleteRule="Deny">

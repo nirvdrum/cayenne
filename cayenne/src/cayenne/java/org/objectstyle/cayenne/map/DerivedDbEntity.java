@@ -116,9 +116,9 @@ public class DerivedDbEntity extends DbEntity {
             encoder.print(getCatalog().trim());
         }
 
-        encoder.print(" parentName=\"");
+        encoder.print("\" parentName=\"");
         encoder.print(getParentEntityName());
-        encoder.print("\">");
+        encoder.println("\">");
 
         encoder.indent(1);
         encoder.print(getAttributeMap());

@@ -43,16 +43,16 @@
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 		<obj-attribute name="timeLock" type="java.util.Date" lock="true" db-attribute-path="TIME_LOCK"/>
 	</obj-entity>
-	<db-relationship name="toRelLockingTest" source="LOCKING_HELPER" target="REL_LOCKING_TEST" toDependentPK="false" toMany="false">
+	<db-relationship name="toRelLockingTest" source="LOCKING_HELPER" target="REL_LOCKING_TEST" toMany="false">
 		<db-attribute-pair source="REL_LOCKING_TEST_ID" target="REL_LOCKING_TEST_ID"/>
 	</db-relationship>
-	<db-relationship name="lockingHelpers" source="REL_LOCKING_TEST" target="LOCKING_HELPER" toDependentPK="false" toMany="true">
+	<db-relationship name="lockingHelpers" source="REL_LOCKING_TEST" target="LOCKING_HELPER" toMany="true">
 		<db-attribute-pair source="REL_LOCKING_TEST_ID" target="REL_LOCKING_TEST_ID"/>
 	</db-relationship>
-	<db-relationship name="toSimpleLockingTest" source="REL_LOCKING_TEST" target="SIMPLE_LOCKING_TEST" toDependentPK="false" toMany="false">
+	<db-relationship name="toSimpleLockingTest" source="REL_LOCKING_TEST" target="SIMPLE_LOCKING_TEST" toMany="false">
 		<db-attribute-pair source="SIMPLE_LOCKING_TEST_ID" target="LOCKING_TEST_ID"/>
 	</db-relationship>
-	<db-relationship name="relaLockingTests" source="SIMPLE_LOCKING_TEST" target="REL_LOCKING_TEST" toDependentPK="false" toMany="true">
+	<db-relationship name="relaLockingTests" source="SIMPLE_LOCKING_TEST" target="REL_LOCKING_TEST" toMany="true">
 		<db-attribute-pair source="LOCKING_TEST_ID" target="SIMPLE_LOCKING_TEST_ID"/>
 	</db-relationship>
 	<obj-relationship name="toRelLockingTest" source="LockingHelper" target="RelLockingTest">

@@ -47,28 +47,28 @@
 	<obj-entity name="Manager" superEntityName="Employee" className="org.objectstyle.cayenne.testdo.inherit.Manager">
 		<qualifier><![CDATA[personType = "EM"]]></qualifier>
 	</obj-entity>
-	<db-relationship name="toPerson" source="ADDRESS" target="PERSON" toDependentPK="false" toMany="false">
+	<db-relationship name="toPerson" source="ADDRESS" target="PERSON" toMany="false">
 		<db-attribute-pair source="PERSON_ID" target="PERSON_ID"/>
 	</db-relationship>
-	<db-relationship name="representatives" source="CLIENT_COMPANY" target="PERSON" toDependentPK="false" toMany="true">
+	<db-relationship name="representatives" source="CLIENT_COMPANY" target="PERSON" toMany="true">
 		<db-attribute-pair source="CLIENT_COMPANY_ID" target="CLIENT_COMPANY_ID"/>
 	</db-relationship>
-	<db-relationship name="employees" source="DEPARTMENT" target="PERSON" toDependentPK="false" toMany="true">
+	<db-relationship name="employees" source="DEPARTMENT" target="PERSON" toMany="true">
 		<db-attribute-pair source="DEPARTMENT_ID" target="DEPARTMENT_ID"/>
 	</db-relationship>
-	<db-relationship name="toManager" source="DEPARTMENT" target="PERSON" toDependentPK="false" toMany="false">
+	<db-relationship name="toManager" source="DEPARTMENT" target="PERSON" toMany="false">
 		<db-attribute-pair source="MANAGER_ID" target="PERSON_ID"/>
 	</db-relationship>
-	<db-relationship name="employeeAddresses" source="PERSON" target="ADDRESS" toDependentPK="false" toMany="true">
+	<db-relationship name="employeeAddresses" source="PERSON" target="ADDRESS" toMany="true">
 		<db-attribute-pair source="PERSON_ID" target="PERSON_ID"/>
 	</db-relationship>
-	<db-relationship name="managedDepartments" source="PERSON" target="DEPARTMENT" toDependentPK="false" toMany="true">
+	<db-relationship name="managedDepartments" source="PERSON" target="DEPARTMENT" toMany="true">
 		<db-attribute-pair source="PERSON_ID" target="MANAGER_ID"/>
 	</db-relationship>
-	<db-relationship name="toClientCompany" source="PERSON" target="CLIENT_COMPANY" toDependentPK="false" toMany="false">
+	<db-relationship name="toClientCompany" source="PERSON" target="CLIENT_COMPANY" toMany="false">
 		<db-attribute-pair source="CLIENT_COMPANY_ID" target="CLIENT_COMPANY_ID"/>
 	</db-relationship>
-	<db-relationship name="toDepartment" source="PERSON" target="DEPARTMENT" toDependentPK="false" toMany="false">
+	<db-relationship name="toDepartment" source="PERSON" target="DEPARTMENT" toMany="false">
 		<db-attribute-pair source="DEPARTMENT_ID" target="DEPARTMENT_ID"/>
 	</db-relationship>
 	<obj-relationship name="toEmployee" source="Address" target="Employee">
