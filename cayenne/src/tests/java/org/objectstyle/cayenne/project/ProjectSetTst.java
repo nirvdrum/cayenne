@@ -100,12 +100,4 @@ public class ProjectSetTst extends CayenneTestCase {
     	assertNotNull(set.getProject(p1.getName()));
     	assertNotNull(set.getProject(p2.getName()));
     }
-    
-    public void testCreateCurrentProject() throws Exception {
-    	File f = new File("qqq");
-    	Project p = set.createProject("abc", f, true);
-    	assertSame(p, set.getCurrentProject());
-    	assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
-    	assertEquals("abc", p.getName());
-    }
 }

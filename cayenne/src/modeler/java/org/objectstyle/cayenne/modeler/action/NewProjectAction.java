@@ -53,27 +53,29 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectSet;
 
 /**
  * @author Andrei Adamchik
  */
+
 public class NewProjectAction extends ProjectAction {
+
     static Logger logObj = Logger.getLogger(NewProjectAction.class.getName());
 
     public static final String ACTION_NAME = "New Project";
@@ -93,19 +95,22 @@ public class NewProjectAction extends ProjectAction {
     /**
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
+
     public void performAction(ActionEvent e) {
         newProject();
     }
 
     protected void newProject() {
+
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         String startDir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
+
         try {
             boolean finished = false;
             File file = null;
             File projectFile = null;
-
             while (!finished) {
+
                 fileChooser.setAcceptAllFileFilterUsed(false);
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 fileChooser.setDialogTitle("Choose project location");
@@ -122,7 +127,6 @@ public class NewProjectAction extends ProjectAction {
                 }
 
                 file = fileChooser.getSelectedFile();
-
                 if (!file.exists()) {
                     file.mkdirs();
                 } else if (!file.isDirectory()) {
@@ -134,32 +138,41 @@ public class NewProjectAction extends ProjectAction {
 
                 projectFile = new File(file, Configuration.DOMAIN_FILE);
                 if (projectFile.exists()) {
+
                     int ret =
                         JOptionPane.showConfirmDialog(
                             Editor.getFrame(),
                             "There is already " + "project in this folder. Overwrite?");
+
                     if (ret == JOptionPane.YES_OPTION) {
                         finished = true;
                     } else if (ret == JOptionPane.CANCEL_OPTION) {
                         return;
                     }
+
                 } else {
                     finished = true;
                 }
+
             }
 
             // Save and close (if needed) currently open project.
+
             if (getMediator() != null && !closeProject()) {
                 return;
             }
 
-            Project project = new Project(Editor.DEFAULT_PROJECT_NAME, projectFile);
+            Project project =
+                ProjectSet.createProject(Editor.DEFAULT_PROJECT_NAME, projectFile);
+
             Editor.getFrame().getController().getTopModel().setCurrentProject(project);
 
             // Save dir path to the preferences
+
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getAbsolutePath());
             setMediator(new Mediator());
             Editor.getFrame().projectOpened(project);
+
         } catch (Exception e) {
             logObj.warn("Error loading project file.", e);
         }

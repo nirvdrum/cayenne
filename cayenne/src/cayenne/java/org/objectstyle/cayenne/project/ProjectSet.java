@@ -63,7 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Manages a set of projects.
+ * Manages a set of projects. Serves as a factory for the new projects.
  * 
  * @author Andrei Adamchik
  */
@@ -71,6 +71,11 @@ public class ProjectSet {
     protected List projects = Collections.synchronizedList(new ArrayList());
     protected Project currentProject;
 
+    public static Project createProject(String name, File projectFile) {
+    	return new Project(name, projectFile);
+    }
+    
+    
     /**
      * Returns the first project matching the name, if any.
      */
@@ -145,19 +150,5 @@ public class ProjectSet {
 
     public void removeCurrentProject() {
         removeProject(currentProject);
-    }
-
-    /**
-     * Factory method to create new projects.
-     */
-    public Project createProject(String name, File f, boolean makeCurrent) {
-        Project project = new Project(name, f);
-
-        addProject(project);
-        if (makeCurrent) {
-            setCurrentProject(project);
-        }
-
-        return project;
     }
 }

@@ -84,10 +84,12 @@ public class Project {
     public static final String CURRENT_PROJECT_VERSION = "1.0";
 
     protected String name;
-    protected Configuration config;
+    protected Object rootObject;
     protected File projectDir;
     protected List files;
     protected List upgradeMessages;
+    protected ProjectFile mainProjectFile;
+    
 
     /**
      * Constructor for Project. <code>projectFile</code> must denote 
@@ -108,8 +110,8 @@ public class Project {
         }
 
         try {
-            this.projectDir = parent.getCanonicalFile();
-            this.config = new ProjectConfiguration(projectFile.getCanonicalFile());
+            projectDir = parent.getCanonicalFile();
+            rootObject = new ProjectConfiguration(projectFile.getCanonicalFile());
         } catch (IOException e) {
             throw new ProjectException("Error creating project.", e);
         }
@@ -269,14 +271,14 @@ public class Project {
      * Returns Cayenne configuration object associated with this project. 
      */
     public Configuration getConfig() {
-        return config;
+        return (Configuration)rootObject;
     }
 
     /**
      * Sets Cayenne configuration object associated with this project. 
      */
     public void setConfig(Configuration config) {
-        this.config = config;
+        this.rootObject = config;
     }
 
     /** 
@@ -307,7 +309,7 @@ public class Project {
      * @return File
      */
     public File getMainProjectFile() {
-        return ((ProjectConfiguration) config).getProjectFile();
+        return ((ProjectConfiguration) rootObject).getProjectFile();
     }
 
     /** 

@@ -716,20 +716,6 @@ public class Mediator {
 				new DataMapDisplayEvent(src, map, currentDomain, currentNode));
 	}
 
-	public void addDomain(Object src, DataDomain domain) {
-		addDomain(src, domain, true);
-	}
-
-	public void addDomain(
-		Object src,
-		DataDomain domain,
-		boolean make_current) {
-		Editor.getProject().getConfig().addDomain(domain);
-		fireDomainEvent(new DomainEvent(src, domain, DomainEvent.ADD));
-		if (make_current)
-			fireDomainDisplayEvent(new DomainDisplayEvent(src, domain));
-	}
-
 	private void addListener(Class aClass, EventListener listener) {
 		listenerList.add(aClass, listener);
 
