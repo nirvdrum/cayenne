@@ -218,6 +218,8 @@ public class DbEntityPane
 			java.util.List ents =
 				mediator.getCurrentDataMap().getDbEntityNames(true);
 			ents.remove(entity.getName());
+			ents.add(0, "");
+			
 			DefaultComboBoxModel model =
 				new DefaultComboBoxModel(ents.toArray());
 			DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
@@ -244,6 +246,8 @@ public class DbEntityPane
 
 		parentLabel.setEnabled(isDerivedEntity);
 		parentEntities.setEnabled(isDerivedEntity);
+		parentLabel.setVisible(isDerivedEntity);
+		parentEntities.setVisible(isDerivedEntity);
 	}
 
 	/**
@@ -255,8 +259,9 @@ public class DbEntityPane
 
 			if (current instanceof DerivedDbEntity) {
 				String name = (String) parentEntities.getSelectedItem();
+				
 				DbEntity ent =
-					(name != null)
+					(name != null && name.trim().length() > 0)
 						? mediator.getCurrentDataMap().getDbEntity(name, true)
 						: null;
 				((DerivedDbEntity) current).setParentEntity(ent);
