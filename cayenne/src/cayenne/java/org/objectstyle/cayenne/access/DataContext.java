@@ -757,8 +757,12 @@ public class DataContext implements QueryEngine, Serializable {
      *  persistence information for this object.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
-        ObjEntity objEntity = getEntityResolver().lookupObjEntity(objEntityName);
-        registerNewObjectWithEntity(dataObject, objEntity);
+        ObjEntity entity = getEntityResolver().lookupObjEntity(objEntityName);
+        if (entity == null) {
+            throw new IllegalArgumentException("Invalid ObjEntity name: " + objEntityName);
+        }
+
+        registerNewObjectWithEntity(dataObject, entity);
     }
 
     /** Registers a new object (that is not yet persistent) with itself.
@@ -770,16 +774,15 @@ public class DataContext implements QueryEngine, Serializable {
             throw new NullPointerException("Can't register null object.");
         }
 
-        ObjEntity objEntity = getEntityResolver().lookupObjEntity(dataObject);
-
-        // sanity check 
-        if (objEntity == null) {
-            throw new CayenneRuntimeException(
+        ObjEntity entity = getEntityResolver().lookupObjEntity(dataObject);
+        if (entity == null) {
+            throw new IllegalArgumentException(
                 "Can't find ObjEntity for DataObject class: "
-                    + dataObject.getClass().getName());
+                    + dataObject.getClass().getName()
+                    + ", class is likely not mapped.");
         }
 
-        registerNewObjectWithEntity(dataObject, objEntity);
+        registerNewObjectWithEntity(dataObject, entity);
     }
 
     private void registerNewObjectWithEntity(
