@@ -89,63 +89,42 @@ public class DefaultResultIterator implements ResultIterator {
     private static Logger logObj =
         Logger.getLogger(DefaultResultIterator.class);
 
+    // Connection information
+    protected Connection connection;
     protected Statement statement;
     protected ResultSet resultSet;
-    protected Connection connection;
 
+    // Result descriptor
     protected DbAttribute[] rowDescriptor;
     protected ExtendedType[] converters;
     protected int[] idIndex;
-
-    protected int resultSize;
+    protected int resultWidth;
 
     protected boolean closingConnection;
     protected boolean isClosed;
 
     protected boolean nextRow;
-
     protected int fetchedSoFar;
     protected int fetchLimit;
 
     /** 
-     * Creates new DefaultResultIterator. Initializes it
-     * with ResultSet and query metadata.
+     * Creates new DefaultResultIterator. Initializes it with ResultSet and
+     * query metadata.
      */
     public DefaultResultIterator(
         PreparedStatement statement,
         DbAdapter adapter,
         SelectQueryAssembler assembler)
         throws SQLException, CayenneException {
+
         this.statement = statement;
         this.connection = assembler.getCon();
         this.resultSet = statement.executeQuery();
-        this.rowDescriptor = assembler.getSnapshotDesc(resultSet);
 
-        String[] rowTypes = assembler.getResultTypes(resultSet);
-
-        resultSize = rowDescriptor.length;
-
-        // this list will hold positions of PK atributes
-        List idIndexList = new ArrayList(resultSize);
-
-        converters = new ExtendedType[resultSize];
-        ExtendedTypeMap typeMap = adapter.getTypeConverter();
-
-        for (int i = 0; i < resultSize; i++) {
-            // index id columns
-            if (rowDescriptor[i].isPrimaryKey()) {
-                idIndexList.add(new Integer(i));
-            }
-
-            // initialize converters
-            converters[i] = typeMap.getRegisteredType(rowTypes[i]);
-        }
-
-        int indexSize = idIndexList.size();
-        idIndex = new int[indexSize];
-        for (int i = 0; i < indexSize; i++) {
-            idIndex[i] = ((Integer) idIndexList.get(i)).intValue();
-        }
+        initResultDescriptor(
+            assembler.getSnapshotDesc(resultSet),
+            assembler.getResultTypes(resultSet),
+            adapter.getTypeConverter());
 
         // check fetch limit
         int limit = assembler.getFetchLimit();
@@ -153,6 +132,36 @@ public class DefaultResultIterator implements ResultIterator {
 
         checkNextRow();
     }
+
+    protected void initResultDescriptor(
+        DbAttribute[] rowDescriptor,
+        String[] javaTypes,
+        ExtendedTypeMap typeMap) {
+
+        this.resultWidth = rowDescriptor.length;
+        this.converters = new ExtendedType[resultWidth];
+        this.rowDescriptor = rowDescriptor;
+
+        // this list will hold positions of PK atributes
+        List idIndexList = new ArrayList(resultWidth);
+
+        for (int i = 0; i < resultWidth; i++) {
+            // index id columns
+            if (rowDescriptor[i].isPrimaryKey()) {
+                idIndexList.add(new Integer(i));
+            }
+
+            // initialize converters
+            converters[i] = typeMap.getRegisteredType(javaTypes[i]);
+        }
+
+        int indexSize = idIndexList.size();
+        this.idIndex = new int[indexSize];
+        for (int i = 0; i < indexSize; i++) {
+            this.idIndex[i] = ((Integer) idIndexList.get(i)).intValue();
+        }
+    }
+    
 
     /**
      * @deprecated since 1.0-Beta1 this method is no longer used.
@@ -228,7 +237,7 @@ public class DefaultResultIterator implements ResultIterator {
             Map dataRow = new HashMap();
 
             // process result row columns,
-            for (int i = 0; i < resultSize; i++) {
+            for (int i = 0; i < resultWidth; i++) {
                 // note: jdbc column indexes start from 1, not 0 as in arrays
                 Object val =
                     converters[i].materializeObject(
