@@ -55,42 +55,15 @@
  */
 package org.objectstyle.cayenne.unit;
 
-import java.sql.Connection;
-
-import org.objectstyle.cayenne.access.DataNode;
-
 /**
- * Superclass of test cases that require multiple DataNodes.
+ * A superclass of test cases using "locking" DataMap for its access stack.
  * 
  * @author Andrei Adamchik
  */
-public class MultiNodeTestCase extends CayenneTestCase {
-    public static final String MULTINODE_ACCESS_STACK = "MultiNodeStack";
+public abstract class LockingTestCase extends CayenneTestCase {
+    public static final String LOCKING_ACCESS_STACK = "LockingStack";
 
     protected AccessStack buildAccessStack() {
-        return CayenneTestResources.getResources().getAccessStack(MULTINODE_ACCESS_STACK);
-    }
-
-    /**
-     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
-     */
-    public DataNode getNode() {
-        throw new RuntimeException(
-            "'getNode() makes no sense in multinode environment.. "
-                + "use getNode1() or getNode2()");
-    }
-
-    public Connection getConnection() {
-        throw new RuntimeException(
-            "'getConnection() makes no sense in multinode environment.. "
-                + "obtain it via an appropraite DataNode.");
-    }
-
-    public DataNode getNode1() {
-        return accessStack.getDataDomain().getNode("map-db1");
-    }
-
-    public DataNode getNode2() {
-        return accessStack.getDataDomain().getNode("map-db2");
+        return CayenneTestResources.getResources().getAccessStack(LOCKING_ACCESS_STACK);
     }
 }

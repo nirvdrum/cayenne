@@ -70,7 +70,6 @@ public class FirebirdStackAdapter extends AccessStackAdapter {
 
     public FirebirdStackAdapter(DbAdapter adapter) {
         super(adapter);
-        // TODO Auto-generated constructor stub
     }
 
     public boolean supportsBinaryPK() {

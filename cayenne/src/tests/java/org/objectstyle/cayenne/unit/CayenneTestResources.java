@@ -89,10 +89,6 @@ public class CayenneTestResources implements BeanFactoryAware {
     public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
     public static final String TEST_DIR_KEY = "cayenne.test.dir";
 
-    public static final String TEST_ACCESS_STACK = "TestStack";
-    public static final String PEOPLE_ACCESS_STACK = "PeopleStack";
-    public static final String ONEWAY_ACCESS_STACK = "OneWayStack";
-    public static final String MULTINODE_ACCESS_STACK = "MultiNodeStack";
     public static final String SCHEMA_SETUP_STACK = "SchemaSetupStack";
 
     private static CayenneTestResources resources;

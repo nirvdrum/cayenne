@@ -73,6 +73,8 @@ import org.objectstyle.cayenne.event.EventManager;
  * @author Andrei Adamchik
  */
 public abstract class CayenneTestCase extends BasicTestCase {
+    public static final String TEST_ACCESS_STACK = "TestStack";
+    
     static {
         // create dummy shared config
         Configuration config = new DefaultConfiguration() {
@@ -93,8 +95,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
     }
 
     protected AccessStack buildAccessStack() {
-        return CayenneTestResources.getResources().getAccessStack(
-            CayenneTestResources.TEST_ACCESS_STACK);
+        return CayenneTestResources.getResources().getAccessStack(TEST_ACCESS_STACK);
     }
 
     protected AccessStackAdapter getAccessStackAdapter() {

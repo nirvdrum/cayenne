@@ -62,9 +62,9 @@ package org.objectstyle.cayenne.unit;
  * @author Andrei Adamchik
  */
 public abstract class PeopleTestCase extends CayenneTestCase {
+    public static final String PEOPLE_ACCESS_STACK = "PeopleStack";
 
     protected AccessStack buildAccessStack() {
-        return CayenneTestResources.getResources().getAccessStack(
-            CayenneTestResources.PEOPLE_ACCESS_STACK);
+        return CayenneTestResources.getResources().getAccessStack(PEOPLE_ACCESS_STACK);
     }
 }

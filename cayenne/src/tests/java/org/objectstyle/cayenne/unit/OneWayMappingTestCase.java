@@ -62,9 +62,9 @@ package org.objectstyle.cayenne.unit;
  * @author Andrei Adamchik
  */
 public abstract class OneWayMappingTestCase extends CayenneTestCase {
+    public static final String ONEWAY_ACCESS_STACK = "OneWayStack";
 
     protected AccessStack buildAccessStack() {
-        return CayenneTestResources.getResources().getAccessStack(
-            CayenneTestResources.ONEWAY_ACCESS_STACK);
+        return CayenneTestResources.getResources().getAccessStack(ONEWAY_ACCESS_STACK);
     }
 }
