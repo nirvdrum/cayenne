@@ -12,7 +12,9 @@ Oracle types mapping
    <jdbc-type name="BINARY">
        <db-type name="RAW"/>
    </jdbc-type>
-   <jdbc-type name="BIT"/>
+   <jdbc-type name="BIT">
+       <db-type name="INTEGER"/>
+   </jdbc-type>
    <jdbc-type name="BLOB">
        <db-type name="BLOB"/>
    </jdbc-type>
