@@ -324,13 +324,29 @@ public class ResourceLocator {
 			}
 		}
 
+		if (!additionalFilesystemPaths.isEmpty()) {
+			logObj.debug("searching additional paths: " + this.additionalFilesystemPaths);
+			Iterator pi = this.additionalFilesystemPaths.iterator();
+			while (pi.hasNext()) {
+				File f = new File((File)pi.next(), name);
+				if (f.isAbsolute() && f.exists()) {
+					try {
+						return f.toURL();
+					} catch (MalformedURLException ex) {
+						// ignoring
+						logObj.debug("Malformed url, ignoring.", ex);
+					}
+				}
+			}
+		}
+
 		if (!willSkipClasspath()) {
 			URL url = findURLInClassLoader(name, classLoader);
 			if (url != null) {
 				return url;
 			}
 
-			if (this.additionalClassPaths.size() > 0) {
+			if (!this.additionalClassPaths.isEmpty()) {
 				logObj.debug("searching additional classpaths: " + this.additionalClassPaths);
 				Iterator cpi = this.additionalClassPaths.iterator();
 				while (cpi.hasNext()) {
@@ -440,7 +456,7 @@ public class ResourceLocator {
 	}
 
 	/**
-	 * Sets "skipAbsPath" property.
+	 * Sets "skipAbsolutePath" property.
 	 */
 	public void setSkipAbsolutePath(boolean skipAbsPath) {
 		this.skipAbsolutePath = skipAbsPath;
@@ -448,6 +464,7 @@ public class ResourceLocator {
 
 	/**
 	 * Adds a custom path for class path lookups.
+	 * Format should be "/my/package/name".
 	 */
 	public void addClassPath(String customPath) {
 		this.additionalClassPaths.add(customPath);
@@ -456,98 +473,85 @@ public class ResourceLocator {
 	/**
 	 * Adds a custom path for filesystem lookups.
 	 */
-	public void addFilesystemPath(String customPath) {
-		this.additionalFilesystemPaths.add(customPath);
+	public void addFilesystemPath(File path) {
+		if (path != null && path.isDirectory()) {
+			this.additionalFilesystemPaths.add(path);
+		}
+		else {
+			throw new IllegalArgumentException("Path '" + path + "' is not a directory.");
+		}
 	}
 
 
 	/**
 	 * Custom logger that can be dynamically turned on/off by evaluating a Predicate.
 	 */
-	private static class PredicateLogger extends Logger
-	{
+	private static class PredicateLogger extends Logger {
 		private Logger _target;
 		private Predicate _predicate;
 
-		private PredicateLogger(String name)
-		{
+		private PredicateLogger(String name) {
 			super(name);
 		}
 
-		public PredicateLogger(Class clazz, Predicate condition)
-		{
+		public PredicateLogger(Class clazz, Predicate condition) {
 			this(clazz.getName(), condition);
 		}
 
-		public PredicateLogger(String name, Predicate condition)
-		{
+		public PredicateLogger(String name, Predicate condition) {
 			this(name);
 			_target = Logger.getLogger(name);
 			_predicate = condition;
 		}
 
-		public void debug(Object arg0, Throwable arg1)
-		{
+		public void debug(Object arg0, Throwable arg1) {
 			this.log(Level.DEBUG, arg0, arg1);
 		}
 
-		public void debug(Object arg0)
-		{
+		public void debug(Object arg0) {
 			this.log(Level.DEBUG, arg0);
 		}
 
-		public void info(Object arg0, Throwable arg1)
-		{
+		public void info(Object arg0, Throwable arg1) {
 			this.log(Level.INFO, arg0, arg1);
 		}
 
-		public void info(Object arg0)
-		{
+		public void info(Object arg0) {
 			this.log(Level.INFO, arg0);
 		}
 
-		public void warn(Object arg0, Throwable arg1)
-		{
+		public void warn(Object arg0, Throwable arg1) {
 			this.log(Level.WARN, arg0, arg1);
 		}
 
-		public void warn(Object arg0)
-		{
+		public void warn(Object arg0) {
 			this.log(Level.WARN, arg0);
 		}
 
-		public void error(Object arg0, Throwable arg1)
-		{
+		public void error(Object arg0, Throwable arg1) {
 			this.log(Level.ERROR, arg0, arg1);
 		}
 
-		public void error(Object arg0)
-		{
+		public void error(Object arg0) {
 			this.log(Level.ERROR, arg0);
 		}
 
-		public void fatal(Object arg0, Throwable arg1)
-		{
+		public void fatal(Object arg0, Throwable arg1) {
 			this.log(Level.FATAL, arg0, arg1);
 		}
 
-		public void fatal(Object arg0)
-		{
+		public void fatal(Object arg0) {
 			this.log(Level.FATAL, arg0);
 		}
 
-		public void log(Priority arg0, Object arg1, Throwable arg2)
-		{
-			if (_predicate.evaluate(arg1))
-			{
+		public void log(Priority arg0, Object arg1, Throwable arg2) {
+			if (_predicate.evaluate(arg1)) {
 				_target.log(arg0, arg1);
 			}
 		}
 
-		public void log(Priority arg0, Object arg1)
-		{
-			if (_predicate.evaluate(arg1))
-			{
+		public void log(Priority arg0, Object arg1) {
+			if (_predicate.evaluate(arg1)) {
 				_target.log(arg0, arg1);
 			}
 		}
