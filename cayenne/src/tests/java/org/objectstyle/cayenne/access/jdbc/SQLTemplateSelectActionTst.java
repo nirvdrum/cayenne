@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.access.QueryResult;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 import org.objectstyle.cayenne.unit.util.MockOperationObserver;
@@ -74,7 +73,7 @@ import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 /**
  * @author Andrei Adamchik
  */
-public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
+public class SQLTemplateSelectActionTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
@@ -82,7 +81,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
 
     public void testAdapter() throws Exception {
         DbAdapter adapter = new JdbcAdapter();
-        SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
         assertSame(adapter, plan.getAdapter());
     }
 
@@ -98,13 +97,13 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
         }
         finally {
             c.close();
@@ -136,13 +135,13 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
         }
         finally {
             c.close();
@@ -173,13 +172,13 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
         }
         finally {
             c.close();
@@ -210,13 +209,13 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         template.setParameters(bindings);
 
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
+        SQLTemplateSelectAction plan = new SQLTemplateSelectAction(adapter);
 
         MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
         }
         finally {
             c.close();

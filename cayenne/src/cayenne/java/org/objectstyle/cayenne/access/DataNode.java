@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -73,15 +72,14 @@ import javax.sql.DataSource;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.jdbc.ProcedureExecutionPlan;
-import org.objectstyle.cayenne.access.jdbc.SQLExecutionPlan;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateExecutionPlan;
-import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectExecutionPlan;
-import org.objectstyle.cayenne.access.jdbc.SelectExecutionPlan;
+import org.objectstyle.cayenne.access.jdbc.BatchAction;
+import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
+import org.objectstyle.cayenne.access.jdbc.SQLAction;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
+import org.objectstyle.cayenne.access.jdbc.SelectAction;
+import org.objectstyle.cayenne.access.jdbc.UpdateAction;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
-import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
-import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
-import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -92,22 +90,21 @@ import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
-import org.objectstyle.cayenne.query.DeleteBatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
- * Describes a single physical data source. This can be a database server, LDAP server, etc.
- * When the underlying connection layer is based on JDBC, DataNode works as a Cayenne
+ * Describes a single physical data source. This can be a database server, LDAP server,
+ * etc. When the underlying connection layer is based on JDBC, DataNode works as a Cayenne
  * wrapper of javax.sql.DataSource.
- *
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
- *
+ * <p>
+ * <i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide. </a> </i>
+ * </p>
+ * 
  * @author Andrei Adamchik
  */
 public class DataNode implements QueryEngine {
@@ -127,8 +124,8 @@ public class DataNode implements QueryEngine {
     // DataMaps
     // ====================================================
     protected Map dataMaps = new HashMap();
-    private Collection dataMapsValuesRef =
-        Collections.unmodifiableCollection(dataMaps.values());
+    private Collection dataMapsValuesRef = Collections.unmodifiableCollection(dataMaps
+            .values());
 
     /** Creates unnamed DataNode. */
     public DataNode() {
@@ -212,8 +209,8 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Returns DbAdapter object. This is a plugin
-     * that handles RDBMS vendor-specific features.
+     * Returns DbAdapter object. This is a plugin that handles RDBMS vendor-specific
+     * features.
      */
     public DbAdapter getAdapter() {
         return adapter;
@@ -228,15 +225,13 @@ public class DataNode implements QueryEngine {
         // that enforce constraints, in cases when constraints are
         // defined as deferrable, this may need more fine grained
         // control from the user, maybe via ContextCommitObserver?
-        this.entitySorter =
-            (adapter != null && adapter.supportsFkConstraints())
+        this.entitySorter = (adapter != null && adapter.supportsFkConstraints())
                 ? new AshwoodEntitySorter(getDataMaps())
                 : NULL_SORTER;
     }
 
     /**
-     * Returns a DataNode that should hanlde queries for all
-     * DataMap components.
+     * Returns a DataNode that should hanlde queries for all DataMap components.
      * 
      * @since 1.1
      */
@@ -245,26 +240,25 @@ public class DataNode implements QueryEngine {
         return this;
     }
 
-    /** 
-     * Wraps queries in an internal transaction, and executes them via connection obtained from 
-     * internal DataSource.
+    /**
+     * Wraps queries in an internal transaction, and executes them via connection obtained
+     * from internal DataSource.
      */
     public void performQueries(Collection queries, OperationObserver observer) {
         Transaction transaction = Transaction.internalTransaction(null);
         transaction.performQueries(this, queries, observer);
     }
 
-    /** 
-     * Runs queries using Connection obtained from internal DataSource.
-     * Once Connection is obtained internally, it is added to the Transaction
-     * that will handle its closing.
+    /**
+     * Runs queries using Connection obtained from internal DataSource. Once Connection is
+     * obtained internally, it is added to the Transaction that will handle its closing.
      * 
-     * @since 1.1 
+     * @since 1.1
      */
     public void performQueries(
-        Collection queries,
-        OperationObserver resultConsumer,
-        Transaction transaction) {
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
 
         Level logLevel = resultConsumer.getLoggingLevel();
 
@@ -276,7 +270,8 @@ public class DataNode implements QueryEngine {
 
         // since 1.1 Transaction object is required
         if (transaction == null) {
-            throw new CayenneRuntimeException("No transaction associated with the queries.");
+            throw new CayenneRuntimeException(
+                    "No transaction associated with the queries.");
         }
 
         Connection connection = null;
@@ -285,8 +280,8 @@ public class DataNode implements QueryEngine {
             // check for invalid iterated query
             if (resultConsumer.isIteratedResult() && listSize > 1) {
                 throw new CayenneException(
-                    "Iterated queries are not allowed in a batch. Batch size: "
-                        + listSize);
+                        "Iterated queries are not allowed in a batch. Batch size: "
+                                + listSize);
             }
 
             // check out connection, create statement
@@ -316,10 +311,10 @@ public class DataNode implements QueryEngine {
                 // figure out query type and call appropriate worker method
                 if (nextQuery instanceof SQLTemplate) {
                     SQLTemplate sqlTemplate = (SQLTemplate) nextQuery;
-                    SQLExecutionPlan executionPlan = (sqlTemplate.isSelecting())
-                            ? new SQLTemplateSelectExecutionPlan(getAdapter())
-                            : new SQLTemplateExecutionPlan(getAdapter());
-                    executionPlan.execute(connection, sqlTemplate, resultConsumer);
+                    SQLAction executionPlan = (sqlTemplate.isSelecting())
+                            ? new SQLTemplateSelectAction(getAdapter())
+                            : new SQLTemplateAction(getAdapter());
+                    executionPlan.performAction(connection, sqlTemplate, resultConsumer);
                 }
                 else if (nextQuery instanceof ProcedureQuery) {
                     runStoredProcedure(connection, nextQuery, resultConsumer);
@@ -353,214 +348,84 @@ public class DataNode implements QueryEngine {
     /**
      * Executes select query.
      */
-    protected void runSelect(Connection connection, Query query, OperationObserver observer)
-        throws SQLException, Exception {
+    protected void runSelect(
+            Connection connection,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
 
-        // TODO: execution plans will be created by adapter in the future...
-        new SelectExecutionPlan(getAdapter(), getEntityResolver()).execute(
+        new SelectAction(getAdapter(), getEntityResolver()).performAction(
                 connection,
                 query,
                 observer);
     }
 
     /**
-     * Executes a non-batched update query (including UPDATE, DELETE, INSERT, etc.).
+     * Executes a non-batched updating query.
      */
     protected void runUpdate(Connection con, Query query, OperationObserver delegate)
-        throws SQLException, Exception {
+            throws SQLException, Exception {
 
-        QueryTranslator transl = getAdapter().getQueryTranslator(query);
-        transl.setEntityResolver(this.getEntityResolver());
-        transl.setConnection(con);
-
-        PreparedStatement prepStmt = transl.createStatement(query.getLoggingLevel());
-
-        try {
-            // execute update
-            int count = prepStmt.executeUpdate();
-            QueryLogger.logUpdateCount(query.getLoggingLevel(), count);
-
-            // send results back to consumer
-            delegate.nextCount(transl.getQuery(), count);
-        }
-        finally {
-            prepStmt.close();
-        }
+        new UpdateAction(getAdapter(), getEntityResolver()).performAction(
+                con,
+                query,
+                delegate);
     }
 
     /**
-     * Executes a BatchQuery (including UPDATE, DELETE, INSERT, etc.).
+     * Executes a batch updating query.
      */
     protected void runBatchUpdate(
-        Connection con,
-        BatchQuery query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            Connection connection,
+            BatchQuery query,
+            OperationObserver observer) throws SQLException, Exception {
 
-        // check if adapter wants to run the query itself
-        if (!adapter.shouldRunBatchQuery(this, con, query, delegate)) {
-            return;
-        }
-
-        // create BatchInterpreter
-        // TODO: move all query translation logic to adapter.getQueryTranslator()
-        BatchQueryBuilder queryBuilder;
-        if (query instanceof InsertBatchQuery) {
-            queryBuilder = new InsertBatchQueryBuilder(getAdapter());
-        }
-        else if (query instanceof UpdateBatchQuery) {
-            queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
-        }
-        else if (query instanceof DeleteBatchQuery) {
-            queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
-        }
-        else {
-            throw new CayenneException("Unsupported batch query: " + query);
-        }
-
-        // run batch
+        // check run strategy...
 
         // optimistic locking is not supported in batches due to JDBC driver limitations
-        boolean useOptimisticLock =
-            (query instanceof UpdateBatchQuery)
+        boolean useOptimisticLock = (query instanceof UpdateBatchQuery)
                 && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
 
-        if (useOptimisticLock || !adapter.supportsBatchUpdates()) {
-            runBatchUpdateAsIndividualQueries(con, query, queryBuilder, delegate);
-        }
-        else {
-            runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
-        }
+        boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
+        new BatchAction(getAdapter(), getEntityResolver(), runningAsBatch).performAction(
+                connection,
+                query,
+                observer);
     }
 
     /**
      * Executes batch query using JDBC Statement batching features.
+     * 
+     * @deprecated since 1.2 execution plans are used.
      */
     protected void runBatchUpdateAsBatch(
-        Connection con,
-        BatchQuery query,
-        BatchQueryBuilder queryBuilder,
-        OperationObserver delegate)
-        throws SQLException, Exception {
-
-        String queryStr = queryBuilder.createSqlString(query);
-        Level logLevel = query.getLoggingLevel();
-        boolean isLoggable = QueryLogger.isLoggable(logLevel);
-
-        // log batch SQL execution
-        QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
-        List dbAttributes = query.getDbAttributes();
-
-        // run batch
-        query.reset();
-
-        PreparedStatement statement = con.prepareStatement(queryStr);
-        try {
-            while (query.next()) {
-
-                if (isLoggable) {
-                    QueryLogger.logQueryParameters(
-                        logLevel,
-                        "batch bind",
-                        query.getValuesForUpdateParameters());
-                }
-
-                queryBuilder.bindParameters(statement, query, dbAttributes);
-                statement.addBatch();
-            }
-
-            // execute the whole batch
-            int[] results = statement.executeBatch();
-            delegate.nextBatchCount(query, results);
-
-            if (isLoggable) {
-                QueryLogger.logUpdateCount(logLevel, statement.getUpdateCount());
-            }
-        }
-        finally {
-            try {
-                statement.close();
-            }
-            catch (Exception e) {
-            }
-        }
+            Connection con,
+            BatchQuery query,
+            BatchQueryBuilder queryBuilder,
+            OperationObserver delegate) throws SQLException, Exception {
+        new TempBatchAction(true).runAsBatch(con, query, queryBuilder, delegate);
     }
 
     /**
-     * Executes batch query without using JDBC Statement batching features,
-     * running individual statements in the batch one by one.
+     * Executes batch query without using JDBC Statement batching features, running
+     * individual statements in the batch one by one.
+     * 
+     * @deprecated since 1.2 execution plans are used.
      */
     protected void runBatchUpdateAsIndividualQueries(
-        Connection con,
-        BatchQuery query,
-        BatchQueryBuilder queryBuilder,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            Connection con,
+            BatchQuery query,
+            BatchQueryBuilder queryBuilder,
+            OperationObserver delegate) throws SQLException, Exception {
 
-        Level logLevel = query.getLoggingLevel();
-        boolean isLoggable = QueryLogger.isLoggable(logLevel);
-        boolean useOptimisticLock =
-            (query instanceof UpdateBatchQuery)
-                && ((UpdateBatchQuery) query).isUsingOptimisticLocking();
-
-        String queryStr = queryBuilder.createSqlString(query);
-
-        // log batch SQL execution
-        QueryLogger.logQuery(logLevel, queryStr, Collections.EMPTY_LIST);
-        List dbAttributes = query.getDbAttributes();
-
-        // run batch queries one by one
-        query.reset();
-
-        PreparedStatement statement = con.prepareStatement(queryStr);
-        try {
-            while (query.next()) {
-                if (isLoggable) {
-                    QueryLogger.logQueryParameters(
-                        logLevel,
-                        "bind",
-                        query.getValuesForUpdateParameters());
-                }
-
-                queryBuilder.bindParameters(statement, query, dbAttributes);
-
-                int updated = statement.executeUpdate();
-                if (useOptimisticLock && updated != 1) {
-
-                    Map snapshot =
-                        (query instanceof UpdateBatchQuery)
-                            ? ((UpdateBatchQuery) query).getCurrentQualifier()
-                            : Collections.EMPTY_MAP;
-
-                    throw new OptimisticLockException(
-                        query.getDbEntity(),
-                        queryStr,
-                        snapshot);
-                }
-
-                delegate.nextCount(query, updated);
-
-                if (isLoggable) {
-                    QueryLogger.logUpdateCount(logLevel, updated);
-                }
-            }
-        }
-        finally {
-            try {
-                statement.close();
-            }
-            catch (Exception e) {
-            }
-        }
+        new TempBatchAction(false).runAsBatch(con, query, queryBuilder, delegate);
     }
 
     protected void runStoredProcedure(
-        Connection con,
-        Query query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            Connection con,
+            Query query,
+            OperationObserver delegate) throws SQLException, Exception {
 
-        new ProcedureExecutionPlan(getAdapter(), getEntityResolver()).execute(
+        new ProcedureAction(getAdapter(), getEntityResolver()).performAction(
                 con,
                 query,
                 delegate);
@@ -572,14 +437,13 @@ public class DataNode implements QueryEngine {
      * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
      */
     protected void readStoredProcedureOutParameters(
-        CallableStatement statement,
-        ResultDescriptor descriptor,
-        Query query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            CallableStatement statement,
+            ResultDescriptor descriptor,
+            Query query,
+            OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder
-        new TempStrategy().readStoredProcedureOutParameters(
+        new TempProcedureAction().readStoredProcedureOutParameters(
                 statement,
                 descriptor,
                 query,
@@ -592,14 +456,13 @@ public class DataNode implements QueryEngine {
      * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
      */
     protected void readResultSet(
-        ResultSet resultSet,
-        ResultDescriptor descriptor,
-        GenericSelectQuery query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            ResultSet resultSet,
+            ResultDescriptor descriptor,
+            GenericSelectQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder
-        new TempStrategy().readResultSet(resultSet, descriptor, query, delegate);
+        new TempProcedureAction().readResultSet(resultSet, descriptor, query, delegate);
     }
 
     /**
@@ -610,14 +473,14 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Sets EntityResolver. DataNode relies on externally set EntityResolver, 
-     * so if the node is created outside of DataDomain stack, a valid EntityResolver
-     * must be provided explicitly.
+     * Sets EntityResolver. DataNode relies on externally set EntityResolver, so if the
+     * node is created outside of DataDomain stack, a valid EntityResolver must be
+     * provided explicitly.
      * 
      * @since 1.1
      */
     public void setEntityResolver(
-        org.objectstyle.cayenne.map.EntityResolver entityResolver) {
+            org.objectstyle.cayenne.map.EntityResolver entityResolver) {
         this.entityResolver = entityResolver;
     }
 
@@ -653,9 +516,9 @@ public class DataNode implements QueryEngine {
         }
 
         public void sortObjectsForEntity(
-            ObjEntity entity,
-            List objects,
-            boolean deleteOrder) {
+                ObjEntity entity,
+                List objects,
+                boolean deleteOrder) {
             // do nothing
         }
 
@@ -670,13 +533,13 @@ public class DataNode implements QueryEngine {
 
         }
     }
-    
-    // this class exists to provide deprecated DataNode methods with access to 
-    // various ExecutionPlan implementations. It will be removed once corresponding
-    // DataNode methods are removed
-    final class TempStrategy extends ProcedureExecutionPlan {
 
-        public TempStrategy() {
+    // this class exists to provide deprecated DataNode methods with access to
+    // various SQLAction implementations. It will be removed once corresponding
+    // DataNode methods are removed
+    final class TempProcedureAction extends ProcedureAction {
+
+        public TempProcedureAction() {
             super(DataNode.this.adapter, DataNode.this.entityResolver);
         }
 
@@ -701,6 +564,34 @@ public class DataNode implements QueryEngine {
                 GenericSelectQuery query,
                 OperationObserver delegate) throws SQLException, Exception {
             super.readResultSet(resultSet, descriptor, query, delegate);
+        }
+    }
+
+    // this class exists to provide deprecated DataNode methods with access to
+    // various SQLAction implementations. It will be removed once corresponding
+    // DataNode methods are removed
+    final class TempBatchAction extends BatchAction {
+
+        public TempBatchAction(boolean runningAsBatch) {
+            super(DataNode.this.adapter, DataNode.this.entityResolver, runningAsBatch);
+        }
+
+        // making public to access from DataNode
+        protected void runAsBatch(
+                Connection con,
+                BatchQuery query,
+                BatchQueryBuilder queryBuilder,
+                OperationObserver delegate) throws SQLException, Exception {
+            super.runAsBatch(con, query, queryBuilder, delegate);
+        }
+
+        // making public to access from DataNode
+        public void runAsIndividualQueries(
+                Connection con,
+                BatchQuery query,
+                BatchQueryBuilder queryBuilder,
+                OperationObserver delegate) throws SQLException, Exception {
+            super.runAsIndividualQueries(con, query, queryBuilder, delegate);
         }
     }
 }

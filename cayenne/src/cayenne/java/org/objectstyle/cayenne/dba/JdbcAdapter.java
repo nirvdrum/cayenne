@@ -565,8 +565,9 @@ public class JdbcAdapter implements DbAdapter {
     }
 
     /**
-     * Always returns <code>true</code>, letting DataNode
-     * to handle the query.
+     * Always returns <code>true</code>, letting DataNode to handle the query.
+     * 
+     * @deprecated Since 1.2 this method is obsolete and is ignored across Cayenne.
      */
     public boolean shouldRunBatchQuery(
         DataNode node,

@@ -53,26 +53,83 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.jdbc;
+package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.Connection;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
+import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * SQLExecutionPlan defines an API for query execution strategy over JDBC connection (as
- * in Strategy Pattern).
- * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-public interface SQLExecutionPlan {
+class OracleProcedureAction extends ProcedureAction {
 
-    /**
-     * Executes a query using a strategy defined by the implementation.
-     */
-    public void execute(Connection connection, Query query, OperationObserver observer)
-            throws SQLException, Exception;
+    OracleProcedureAction(DbAdapter adapter, EntityResolver entityResolver) {
+        super(adapter, entityResolver);
+    }
+
+    protected void readStoredProcedureOutParameters(
+            CallableStatement statement,
+            ResultDescriptor descriptor,
+            Query query,
+            OperationObserver delegate) throws SQLException, Exception {
+
+        long t1 = System.currentTimeMillis();
+
+        int resultSetType = OracleAdapter.getOracleCursorType();
+        int resultWidth = descriptor.getResultWidth();
+        if (resultWidth > 0) {
+            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
+            ExtendedType[] converters = descriptor.getConverters();
+            int[] jdbcTypes = descriptor.getJdbcTypes();
+            String[] names = descriptor.getNames();
+            int[] outParamIndexes = descriptor.getOutParamIndexes();
+
+            // process result row columns,
+            for (int i = 0; i < outParamIndexes.length; i++) {
+                int index = outParamIndexes[i];
+
+                if (jdbcTypes[index] == resultSetType) {
+                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
+                    // else
+                    ResultSet rs = (ResultSet) statement.getObject(index + 1);
+                    ResultDescriptor nextDesc = ResultDescriptor.createDescriptor(
+                            rs,
+                            getAdapter().getExtendedTypes());
+
+                    readResultSet(rs, nextDesc, (GenericSelectQuery) query, delegate);
+                }
+                else {
+                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
+                    // else
+                    Object val = converters[index].materializeObject(
+                            statement,
+                            index + 1,
+                            jdbcTypes[index]);
+                    dataRow.put(names[index], val);
+                }
+            }
+
+            if (!dataRow.isEmpty()) {
+                QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
+                        .currentTimeMillis()
+                        - t1);
+                delegate.nextDataRows(query, Collections.singletonList(dataRow));
+            }
+        }
+    }
 }

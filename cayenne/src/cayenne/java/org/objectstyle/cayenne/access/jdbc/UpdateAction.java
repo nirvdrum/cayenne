@@ -55,76 +55,46 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.ResultSet;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.List;
 
-import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * A convenience abstract superclass of SQLExecutionPlan implementations.
- * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-public abstract class AbstractExecutionPlan implements SQLExecutionPlan {
+public class UpdateAction extends BaseSQLAction {
 
-    protected DbAdapter adapter;
-    protected EntityResolver entityResolver;
-
-    public AbstractExecutionPlan(DbAdapter adapter, EntityResolver entityResolver) {
-        this.adapter = adapter;
-        this.entityResolver = entityResolver;
+    public UpdateAction(DbAdapter adapter, EntityResolver entityResolver) {
+        super(adapter, entityResolver);
     }
 
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
+    public void performAction(Connection connection, Query query, OperationObserver observer)
+            throws SQLException, Exception {
 
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
-    }
+        QueryTranslator translator = getAdapter().getQueryTranslator(query);
+        translator.setEntityResolver(getEntityResolver());
+        translator.setConnection(connection);
 
-    /**
-     * Helper method to process a ResultSet.
-     */
-    protected void readResultSet(
-            ResultSet resultSet,
-            ResultDescriptor descriptor,
-            GenericSelectQuery query,
-            OperationObserver delegate) throws SQLException, Exception {
+        PreparedStatement statement = translator.createStatement(query.getLoggingLevel());
 
-        long t1 = System.currentTimeMillis();
-        DefaultResultIterator resultReader = new DefaultResultIterator(
-                null,
-                null,
-                resultSet,
-                descriptor,
-                query.getFetchLimit());
+        try {
+            // execute update
+            int count = statement.executeUpdate();
+            QueryLogger.logUpdateCount(query.getLoggingLevel(), count);
 
-        if (!delegate.isIteratedResult()) {
-            List resultRows = resultReader.dataRows(false);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
-
-            delegate.nextDataRows(query, resultRows);
+            // send results back to consumer
+            observer.nextCount(query, count);
         }
-        else {
-            try {
-                resultReader.setClosingConnection(true);
-                delegate.nextDataRows(query, resultReader);
-            }
-            catch (Exception ex) {
-                resultReader.close();
-                throw ex;
-            }
+        finally {
+            statement.close();
         }
     }
 }

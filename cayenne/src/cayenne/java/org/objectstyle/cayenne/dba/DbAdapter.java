@@ -224,9 +224,7 @@ public interface DbAdapter {
     public String tableTypeForView();
 
     /**
-     * Invoked by DataNode, allowing adapter to customize the execution 
-     * path for the BatchQuery. If adapter returns <code>false</code>,
-     * DataNode will not make any further attempts to run the query.
+     * @deprecated Since 1.2 this method is obsolete and is ignored across Cayenne.
      */
     public boolean shouldRunBatchQuery(
         DataNode node,

@@ -86,22 +86,25 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
 
-/** 
- * DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection 
- * settings</a> to use with Oracle are shown below:
+/**
+ * DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS </a>. Sample
+ * <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection
+ * settings </a> to use with Oracle are shown below:
  * 
-<pre>
-test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
-test-oracle.jdbc.username = test
-test-oracle.jdbc.password = secret
-test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
-test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
-</pre>
- *
+ * <pre>
+ * 
+ *  test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+ *  test-oracle.jdbc.username = test
+ *  test-oracle.jdbc.password = secret
+ *  test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
+ *  test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
+ *  
+ * </pre>
+ * 
  * @author Andrei Adamchik
  */
 public class OracleAdapter extends JdbcAdapter {
+
     private static Logger logObj = Logger.getLogger(OracleAdapter.class);
 
     public static final String ORACLE_FLOAT = "FLOAT";
@@ -117,10 +120,10 @@ public class OracleAdapter extends JdbcAdapter {
     protected static Method outputStreamFromBlobMethod;
     protected static Method writerFromClobMethod;
     protected static boolean supportsOracleLOB;
-    
+
     static {
         // TODO: as CAY-234 shows, having such initialization done in a static fashion
-        // makes it untestable and any potential problems hard to reproduce. Make this 
+        // makes it untestable and any potential problems hard to reproduce. Make this
         // an instance method (with all the affected vars) and write unit tests.
         initDriverInformation();
     }
@@ -134,52 +137,49 @@ public class OracleAdapter extends JdbcAdapter {
             Field cursorField = oraTypes.getField("CURSOR");
             oracleCursorType = cursorField.getInt(null);
 
-            outputStreamFromBlobMethod =
-                Class.forName("oracle.sql.BLOB").getMethod(
+            outputStreamFromBlobMethod = Class.forName("oracle.sql.BLOB").getMethod(
                     "getBinaryOutputStream",
                     new Class[0]);
 
-            writerFromClobMethod =
-                Class.forName("oracle.sql.CLOB").getMethod(
+            writerFromClobMethod = Class.forName("oracle.sql.CLOB").getMethod(
                     "getCharacterOutputStream",
                     new Class[0]);
             supportsOracleLOB = true;
 
-        } catch (Throwable th) {
-            logObj.info(
-                "Error getting Oracle driver information, ignoring. "
-                    + "Note that certain adapter features will be disabled.",
-                Util.unwindException(th));
+        }
+        catch (Throwable th) {
+            logObj.info("Error getting Oracle driver information, ignoring. "
+                    + "Note that certain adapter features will be disabled.", Util
+                    .unwindException(th));
         }
     }
-    
-	public static Method getOutputStreamFromBlobMethod() {
-		return outputStreamFromBlobMethod;
-	}
 
-	// TODO: rename to something that looks like English ...
-	public static boolean isSupportsOracleLOB() {
-		return supportsOracleLOB;
-	}
+    public static Method getOutputStreamFromBlobMethod() {
+        return outputStreamFromBlobMethod;
+    }
 
-	public static Method getWriterFromClobMethod() {
-		return writerFromClobMethod;
-	}
+    // TODO: rename to something that looks like English ...
+    public static boolean isSupportsOracleLOB() {
+        return supportsOracleLOB;
+    }
+
+    public static Method getWriterFromClobMethod() {
+        return writerFromClobMethod;
+    }
 
     /**
      * Returns an Oracle JDBC extension type defined in
-     * oracle.jdbc.driver.OracleTypes.CURSOR. This value is determined
-     * from Oracle driver classes via reflection in runtime, so that
-     * Cayenne code has no compile dependency on the driver. This means
-     * that calling this method when the driver is not available will
-     * result in an exception.
+     * oracle.jdbc.driver.OracleTypes.CURSOR. This value is determined from Oracle driver
+     * classes via reflection in runtime, so that Cayenne code has no compile dependency
+     * on the driver. This means that calling this method when the driver is not available
+     * will result in an exception.
      */
     public static int getOracleCursorType() {
 
         if (oracleCursorType == Integer.MAX_VALUE) {
             throw new CayenneRuntimeException(
-                "No information exists about oracle types. "
-                    + "Check that Oracle JDBC driver is available to the application.");
+                    "No information exists about oracle types. "
+                            + "Check that Oracle JDBC driver is available to the application.");
         }
 
         return oracleCursorType;
@@ -191,8 +191,8 @@ public class OracleAdapter extends JdbcAdapter {
     }
 
     /**
-     * Installs appropriate ExtendedTypes as converters for passing values
-     * between JDBC and Java layers.
+     * Installs appropriate ExtendedTypes as converters for passing values between JDBC
+     * and Java layers.
      */
     protected void configureExtendedTypes(ExtendedTypeMap map) {
         super.configureExtendedTypes(map);
@@ -205,55 +205,49 @@ public class OracleAdapter extends JdbcAdapter {
 
         // override date handler with Oracle handler
         map.registerType(new OracleUtilDateType());
-        
+
         // At least on MacOS X, driver does not handle Short and Byte properly
         map.registerType(new ShortType(true));
         map.registerType(new ByteType(true));
-        
+
         // these two types are needed to replace PreparedStatement binding
         // via "setObject()" to a call to setInt or setDouble to make
         // Oracle happy, esp. with the AST* expression classes
-        // that do not evaluate constants to BigDecimals, but rather 
+        // that do not evaluate constants to BigDecimals, but rather
         // Integer and Double
         map.registerType(new OracleIntegerType());
         map.registerType(new OracleDoubleType());
     }
 
     /**
-     * Creates and returns a primary key generator.
-     * Overrides superclass implementation to return an
-     * instance of OraclePkGenerator.
+     * Creates and returns a primary key generator. Overrides superclass implementation to
+     * return an instance of OraclePkGenerator.
      */
     protected PkGenerator createPkGenerator() {
         return new OraclePkGenerator();
     }
 
     /**
-     * Returns a query string to drop a table corresponding
-     * to <code>ent</code> DbEntity. Changes superclass behavior
-     * to drop all related foreign key constraints.
+     * Returns a query string to drop a table corresponding to <code>ent</code>
+     * DbEntity. Changes superclass behavior to drop all related foreign key constraints.
      */
     public String dropTable(DbEntity ent) {
-        return "DROP TABLE "
-            + ent.getFullyQualifiedName()
-            + " CASCADE CONSTRAINTS";
+        return "DROP TABLE " + ent.getFullyQualifiedName() + " CASCADE CONSTRAINTS";
     }
 
     /**
-     * Fixes some reverse engineering problems. Namely if a columns
-     * is created as DECIMAL and has non-positive precision it is
-     * converted to INTEGER.
+     * Fixes some reverse engineering problems. Namely if a columns is created as DECIMAL
+     * and has non-positive precision it is converted to INTEGER.
      */
     public DbAttribute buildAttribute(
-        String name,
-        String typeName,
-        int type,
-        int size,
-        int precision,
-        boolean allowNulls) {
+            String name,
+            String typeName,
+            int type,
+            int size,
+            int precision,
+            boolean allowNulls) {
 
-        DbAttribute attr =
-            super.buildAttribute(
+        DbAttribute attr = super.buildAttribute(
                 name,
                 typeName,
                 type,
@@ -264,14 +258,17 @@ public class OracleAdapter extends JdbcAdapter {
         if (type == Types.DECIMAL && precision <= 0) {
             attr.setType(Types.INTEGER);
             attr.setPrecision(-1);
-        } else if (type == Types.OTHER) {
-            // in this case we need to guess the attribute type 
+        }
+        else if (type == Types.OTHER) {
+            // in this case we need to guess the attribute type
             // based on its string value
             if (ORACLE_FLOAT.equals(typeName)) {
                 attr.setType(Types.FLOAT);
-            } else if (ORACLE_BLOB.equals(typeName)) {
+            }
+            else if (ORACLE_BLOB.equals(typeName)) {
                 attr.setType(Types.BLOB);
-            } else if (ORACLE_CLOB.equals(typeName)) {
+            }
+            else if (ORACLE_CLOB.equals(typeName)) {
                 attr.setType(Types.CLOB);
             }
         }
@@ -279,13 +276,14 @@ public class OracleAdapter extends JdbcAdapter {
         return attr;
     }
 
-    /** 
-     * Returns Oracle-specific translator for object SELECT queries. 
+    /**
+     * Returns Oracle-specific translator for object SELECT queries.
      */
     protected Class queryTranslatorClass(Query q) {
         if (q instanceof SelectQuery) {
             return OracleSelectTranslator.class;
-        } else {
+        }
+        else {
             return super.queryTranslatorClass(q);
         }
     }
@@ -295,8 +293,8 @@ public class OracleAdapter extends JdbcAdapter {
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new TrimmingQualifierTranslator(
-            queryAssembler,
-            OracleAdapter.TRIM_FUNCTION);
+                queryAssembler,
+                OracleAdapter.TRIM_FUNCTION);
     }
 
     /**
@@ -310,27 +308,30 @@ public class OracleAdapter extends JdbcAdapter {
 
     /**
      * Implements special LOB handling in batches.
+     * 
+     * @deprecated Since 1.2
      */
     public boolean shouldRunBatchQuery(
-        DataNode node,
-        Connection con,
-        BatchQuery query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            DataNode node,
+            Connection con,
+            BatchQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
 
         // special handling for LOB updates
-        if (isSupportsOracleLOB() && BatchQueryUtils.updatesLOBColumns(query)
-            && (node instanceof OracleDataNode)) {
+        if (isSupportsOracleLOB()
+                && BatchQueryUtils.updatesLOBColumns(query)
+                && (node instanceof OracleDataNode)) {
 
             OracleDataNode oracleNode = (OracleDataNode) node;
             oracleNode.runBatchUpdateWithLOBColumns(con, query, delegate);
 
             return false;
-        } else {
+        }
+        else {
             return super.shouldRunBatchQuery(node, con, query, delegate);
         }
     }
-    
+
     /**
      * @since 1.1
      */
@@ -341,12 +342,11 @@ public class OracleAdapter extends JdbcAdapter {
         }
 
         public void setJdbcObject(
-            PreparedStatement st,
-            Object val,
-            int pos,
-            int type,
-            int precision)
-            throws Exception {
+                PreparedStatement st,
+                Object val,
+                int pos,
+                int type,
+                int precision) throws Exception {
 
             if (val != null) {
                 st.setInt(pos, ((Number) val).intValue());
@@ -356,7 +356,7 @@ public class OracleAdapter extends JdbcAdapter {
             }
         }
     }
-    
+
     /**
      * @since 1.1
      */
@@ -367,12 +367,11 @@ public class OracleAdapter extends JdbcAdapter {
         }
 
         public void setJdbcObject(
-            PreparedStatement st,
-            Object val,
-            int pos,
-            int type,
-            int precision)
-            throws Exception {
+                PreparedStatement st,
+                Object val,
+                int pos,
+                int type,
+                int precision) throws Exception {
 
             if (val != null) {
                 st.setDouble(pos, ((Number) val).doubleValue());

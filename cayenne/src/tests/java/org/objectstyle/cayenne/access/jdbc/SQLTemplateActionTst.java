@@ -64,7 +64,6 @@ import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContextTestBase;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -73,15 +72,15 @@ import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 /**
  * @author Andrei Adamchik
  */
-public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
+public class SQLTemplateActionTst extends CayenneTestCase {
+
     protected void setUp() throws Exception {
         super.setUp();
         deleteTestData();
     }
 
     public void testExecuteUpdate() throws Exception {
-        String templateString =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
+        String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
         SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
 
@@ -91,14 +90,14 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
         bindings.put("dob", new Date(System.currentTimeMillis()));
         template.setParameters(bindings);
 
-        SQLTemplateExecutionPlan plan =
-            new SQLTemplateExecutionPlan(getAccessStackAdapter().getAdapter());
+        SQLTemplateAction plan = new SQLTemplateAction(getAccessStackAdapter()
+                .getAdapter());
         assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
 
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -127,14 +126,14 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
 
         SQLTemplate template = new SQLTemplate(Object.class, "delete from ARTIST", false);
 
-        SQLTemplateExecutionPlan plan =
-            new SQLTemplateExecutionPlan(getAccessStackAdapter().getAdapter());
+        SQLTemplateAction plan = new SQLTemplateAction(getAccessStackAdapter()
+                .getAdapter());
         assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
 
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);
@@ -147,8 +146,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
     }
 
     public void testExecuteUpdateBatch() throws Exception {
-        String templateString =
-            "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
+        String templateString = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
                 + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
         SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
 
@@ -161,16 +159,18 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
         bindings2.put("id", new Integer(33));
         bindings2.put("name", "a$$$$$");
         bindings2.put("dob", new Date(System.currentTimeMillis()));
-        template.setParameters(new Map[] { bindings1, bindings2 });
+        template.setParameters(new Map[] {
+                bindings1, bindings2
+        });
 
-        SQLTemplateExecutionPlan plan =
-            new SQLTemplateExecutionPlan(getAccessStackAdapter().getAdapter());
+        SQLTemplateAction plan = new SQLTemplateAction(getAccessStackAdapter()
+                .getAdapter());
         assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
 
         Connection c = getConnection();
         try {
             MockOperationObserver observer = new MockOperationObserver();
-            plan.execute(c, (Query) template, observer);
+            plan.performAction(c, template, observer);
 
             int[] batches = observer.countsForQuery(template);
             assertNotNull(batches);

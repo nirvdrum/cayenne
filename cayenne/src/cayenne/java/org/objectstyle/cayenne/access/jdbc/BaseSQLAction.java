@@ -55,98 +55,77 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.Query;
 
 /**
+ * A convenience superclass for SQLAction implementations.
+ * 
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class ProcedureExecutionPlan extends AbstractExecutionPlan {
+public abstract class BaseSQLAction implements SQLAction {
 
-    public ProcedureExecutionPlan(DbAdapter adapter, EntityResolver entityResolver) {
-        super(adapter, entityResolver);
+    protected DbAdapter adapter;
+    protected EntityResolver entityResolver;
+
+    public BaseSQLAction(DbAdapter adapter, EntityResolver entityResolver) {
+
+        this.adapter = adapter;
+        this.entityResolver = entityResolver;
     }
 
-    public void execute(Connection connection, Query query, OperationObserver observer)
-            throws SQLException, Exception {
+    public DbAdapter getAdapter() {
+        return adapter;
+    }
 
-        ProcedureTranslator transl = (ProcedureTranslator) getAdapter()
-                .getQueryTranslator(query);
-        transl.setEntityResolver(this.getEntityResolver());
-        transl.setConnection(connection);
-
-        CallableStatement statement = (CallableStatement) transl.createStatement(query
-                .getLoggingLevel());
-
-        // stored procedure may contain a mixture of update counts and result sets,
-        // and out parameters. Read out parameters first, then
-        // iterate until we exhaust all results
-        boolean hasResultSet = statement.execute();
-
-        // read out parameters
-        readStoredProcedureOutParameters(
-                statement,
-                transl.getProcedureResultDescriptor(),
-                query,
-                observer);
-
-        // read the rest of the query
-        while (true) {
-            if (hasResultSet) {
-                ResultSet rs = statement.getResultSet();
-
-                readResultSet(
-                        rs,
-                        transl.getResultDescriptor(rs),
-                        (GenericSelectQuery) query,
-                        observer);
-            }
-            else {
-                int updateCount = statement.getUpdateCount();
-                if (updateCount == -1) {
-                    break;
-                }
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
-                observer.nextCount(query, updateCount);
-            }
-
-            hasResultSet = statement.getMoreResults();
-        }
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 
     /**
-     * Helper method that reads OUT parameters of a CallableStatement.
+     * Helper method to process a ResultSet.
      */
-    protected void readStoredProcedureOutParameters(
-            CallableStatement statement,
+    protected void readResultSet(
+            ResultSet resultSet,
             ResultDescriptor descriptor,
-            Query query,
+            GenericSelectQuery query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
-        Map row = DefaultResultIterator.readProcedureOutParameters(statement, descriptor);
+        DefaultResultIterator resultReader = new DefaultResultIterator(
+                null,
+                null,
+                resultSet,
+                descriptor,
+                query.getFetchLimit());
 
-        if (!row.isEmpty()) {
-            // treat out parameters as a separate data row set
-            QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
+        if (!delegate.isIteratedResult()) {
+            List resultRows = resultReader.dataRows(false);
+            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
                     .currentTimeMillis()
                     - t1);
-            delegate.nextDataRows(query, Collections.singletonList(row));
+
+            delegate.nextDataRows(query, resultRows);
+        }
+        else {
+            try {
+                resultReader.setClosingConnection(true);
+                delegate.nextDataRows(query, resultReader);
+            }
+            catch (Exception ex) {
+                resultReader.close();
+                throw ex;
+            }
         }
     }
 }

@@ -53,39 +53,27 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * Implements a stateless strategy for execution of updating {@link SQLTemplate} 
- * queries.
+ * Defines API for query execution strategy over JDBC connection (as in Strategy Pattern).
+ * SQLAction unified interface allows a high degree of customization for JDBC
+ * interactions.
  * 
+ * @since 1.2
  * @author Andrei Adamchik
- * @since 1.1
- * @deprecated Since 1.2 replaced with SQLTemplateAction for naming consistency.
  */
-public class SQLTemplateExecutionPlan extends SQLTemplateAction {
+public interface SQLAction {
 
-    public SQLTemplateExecutionPlan(DbAdapter adapter) {
-        super(adapter);
-    }
-    
     /**
-     * @deprecated Since 1.2 a generic "execute" is used.
+     * Executes a query using a strategy defined by the implementation.
      */
-    public void execute(
-            Connection connection,
-            SQLTemplate query,
-            OperationObserver observer)
-            throws SQLException, Exception {
-        
-        this.performAction(connection, query, observer);
-    }
+    public void performAction(Connection connection, Query query, OperationObserver observer)
+            throws SQLException, Exception;
 }

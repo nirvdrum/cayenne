@@ -55,124 +55,19 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections.IteratorUtils;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.DefaultResultIterator;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 
 /**
- * Implements a stateless strategy for execution of selecting {@link SQLTemplate} queries.
+ * Implements a stateless strategy for execution of selecting {@link SQLTemplate}queries.
  * 
  * @since 1.1
  * @author Andrei Adamchik
+ * @deprecated since 1.2 is replaced with SQLTemplateSelectAction for naming consistency.
  */
-public class SQLTemplateSelectExecutionPlan extends SQLTemplateExecutionPlan {
+public class SQLTemplateSelectExecutionPlan extends SQLTemplateSelectAction {
 
     public SQLTemplateSelectExecutionPlan(DbAdapter adapter) {
         super(adapter);
-    }
-
-    /**
-     * Runs a SQLTemplate query as a select.
-     */
-    public void execute(
-        Connection connection,
-        Query query,
-        OperationObserver observer)
-        throws SQLException, Exception {
-
-        if (!(query instanceof SQLTemplate)) {
-            throw new CayenneException("Query unsupported by the execution plan: "
-                    + query);
-        }
-        
-        SQLTemplate sqlTemplate = (SQLTemplate) query;
-        
-        SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
-        String template = sqlTemplate.getTemplate(adapter.getClass().getName());
-        boolean loggable = QueryLogger.isLoggable(query.getLoggingLevel());
-
-        int size = sqlTemplate.parametersSize();
-
-        // zero size indicates a one-shot query with no parameters
-        // so fake a single entry batch...
-        Iterator it =
-            (size > 0)
-                ? sqlTemplate.parametersIterator()
-                : IteratorUtils.singletonIterator(Collections.EMPTY_MAP);
-        while (it.hasNext()) {
-            Map nextParameters = (Map) it.next();
-
-            SQLSelectStatement compiled =
-                templateProcessor.processSelectTemplate(template, nextParameters);
-
-            if (loggable) {
-                QueryLogger.logQuery(
-                    query.getLoggingLevel(),
-                    compiled.getSql(),
-                    Arrays.asList(compiled.getBindings()));
-            }
-
-            long t1 = System.currentTimeMillis();
-
-            // TODO: we may cache prep statements for this loop, using merged string as a key
-            // since it is very likely that it will be the same for multiple parameter sets...
-            PreparedStatement statement = connection.prepareStatement(compiled.getSql());
-
-            bind(statement, compiled.getBindings());
-            ResultSet rs = statement.executeQuery();
-
-            ResultDescriptor descriptor =
-                (compiled.getResultColumns().length > 0)
-                    ? ResultDescriptor.createDescriptor(
-                        compiled.getResultColumns(),
-                        adapter.getExtendedTypes())
-                    : ResultDescriptor.createDescriptor(rs, adapter.getExtendedTypes());
-
-            DefaultResultIterator result =
-                new DefaultResultIterator(
-                    connection,
-                    statement,
-                    rs,
-                    descriptor,
-                    sqlTemplate.getFetchLimit());
-
-            if (!observer.isIteratedResult()) {
-                // note that we don't need to close ResultIterator
-                // since "dataRows" will do it internally
-                List resultRows = result.dataRows(true);
-                QueryLogger.logSelectCount(
-                    query.getLoggingLevel(),
-                    resultRows.size(),
-                    System.currentTimeMillis() - t1);
-
-                observer.nextDataRows(query, resultRows);
-            }
-            else {
-                try {
-                    result.setClosingConnection(true);
-                    observer.nextDataRows(query, result);
-                }
-                catch (Exception ex) {
-                    result.close();
-                    throw ex;
-                }
-            }
-        }
     }
 }

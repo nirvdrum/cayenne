@@ -81,13 +81,13 @@ import org.objectstyle.cayenne.query.Query;
  * @since 1.2
  * @author Andrei Adamchik
  */
-public class SelectExecutionPlan extends AbstractExecutionPlan {
+public class SelectAction extends BaseSQLAction {
 
-    public SelectExecutionPlan(DbAdapter adapter, EntityResolver entityResolver) {
+    public SelectAction(DbAdapter adapter, EntityResolver entityResolver) {
         super(adapter, entityResolver);
     }
 
-    public void execute(Connection connection, Query query, OperationObserver observer)
+    public void performAction(Connection connection, Query query, OperationObserver observer)
             throws SQLException, Exception {
 
         // sanity check
