@@ -71,6 +71,7 @@ public class ResourceLocator {
     protected boolean skipCurDir;
     protected boolean skipClasspath;
 
+
     /** Returns a resource as InputStream if it is found in CLASSPATH. 
       * Returns null otherwise. Lookup is normally performed in all JAR and
       * ZIP files and directories available to CLassLoader. */
@@ -135,9 +136,14 @@ public class ResourceLocator {
         return file.exists() && file.canRead() ? file : null;
     }
 
-    /** Looks up for resource in CLASSPATH. */
+    /** Looks up for resource using this class ClassLoader. */
     public static URL findURLInClasspath(String name) {
-        return ResourceLocator.class.getClassLoader().getResource(name);
+        return findURLInClassLoader(name, ResourceLocator.class.getClassLoader());
+    }
+    
+   /** Looks up for resource using specified ClassLoader . */
+    public static URL findURLInClassLoader(String name, ClassLoader loader) {
+        return loader.getResource(name);
     }
 
     /** Creates new ResourceLocator with default lookup policy including
