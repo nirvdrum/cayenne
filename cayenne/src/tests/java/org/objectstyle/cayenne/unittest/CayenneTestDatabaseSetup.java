@@ -165,7 +165,7 @@ public class CayenneTestDatabaseSetup {
 
 				try {
 					String dropSql = adapter.dropTable(ent);
-					logObj.warn("Drop table: " + dropSql);
+					logObj.info("Drop table: " + dropSql);
 					stmt.execute(dropSql);
 				} catch (SQLException sqe) {
 					logObj.warn(
@@ -193,7 +193,7 @@ public class CayenneTestDatabaseSetup {
 			Iterator it = tableCreateQueries();
 			while (it.hasNext()) {
 				String query = (String) it.next();
-				logObj.warn("Create table: " + query);
+				logObj.info("Create table: " + query);
 				stmt.execute(query);
 			}
 		    delegate.createdTables(conn, map);
