@@ -285,19 +285,20 @@ public class DomainHelper {
         pw.println("</domain>");
     }
 
-
+	/** Stores DataSolurceInfo to the specified output writer. */
 	public static void storeDataNode(PrintWriter pw, DataSourceInfo info) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<driver class=\"" + info.getJdbcDriver() + "\">");
 		buf.append("\n\t<url value=\"" + info.getDataSourceUrl() + "\"/>");
-		buf.append("\n\t<connectionPool min=\"" + info.getMinConnections() + "\" max=\""
-					+ info.getMaxConnections() + "\" />");
+		buf.append("\n\t<connectionPool min=\"" + info.getMinConnections() 
+					+ "\" max=\""+ info.getMaxConnections() + "\" />");
 		if (info.getUserName() != null && info.getPassword() != null)
 		{
 			buf.append("\n\t<login userName=\"" + info.getUserName() 
 					+ "\" password=\"" + info.getPassword() + "\" />");
 		}
 		buf.append("\n</driver>");
+		pw.println(buf.toString());
 	}
 
     // SAX handlers start below

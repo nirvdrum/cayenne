@@ -454,6 +454,74 @@ implements ActionListener
             e.printStackTrace();
         }
 	}
+
+
+	/** Save data node (DataSourceInfo) to a different location. 
+	  * If there already exists proj tree, saves it under that tree.
+	  * otherwise saves using absolute path. */
+	private void saveNodeAs(DataNode node) {
+		GuiDataSource src = (GuiDataSource)node.getDataSource();
+        try {
+            // Get the project file name (always cayenne.xml)
+            File file = null;
+            String proj_dir_str = mediator.getConfig().getProjDir();
+            File proj_dir = null;
+            if (proj_dir_str != null)
+            	proj_dir = new File(proj_dir_str);
+            JFileChooser fc;
+            FileSystemViewDecorator file_view;
+            file_view = new FileSystemViewDecorator(proj_dir);
+            fc = new JFileChooser(file_view);
+            fc.setFileFilter(xmlFilter);
+            fc.setDialogType(JFileChooser.SAVE_DIALOG);
+            fc.setDialogTitle("Save data node - " + node.getName());
+            if (null != proj_dir)
+            	fc.setCurrentDirectory(proj_dir);
+            int ret_code = fc.showSaveDialog(this);
+            if ( ret_code != JFileChooser.APPROVE_OPTION)
+                return;
+            file = fc.getSelectedFile();
+			System.out.println("File path is " + file.getAbsolutePath());
+            String old_loc = node.getDataSourceLocation();
+            // Get absolute path for old location
+            if (null != proj_dir)
+            	old_loc = proj_dir + File.separator + old_loc;
+			// Create new file
+			if (!file.exists())
+				file.createNewFile();
+			FileWriter fw = new FileWriter(file);
+			PrintWriter pw = new PrintWriter(fw);
+			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
+			pw.close();
+			fw.close();
+			// Determine and set new data map location
+			String new_file_location = file.getAbsolutePath();
+			String relative_location;
+			// If it is set, use path striped of proj dir and following separator
+			// If proj dir not set, use absolute location.
+			if (proj_dir_str == null)
+			 	relative_location = new_file_location;
+			else
+				relative_location 
+					= new_file_location.substring(proj_dir_str.length() + 1);
+			node.setDataSourceLocation(relative_location);
+            // If data map already exists, delete old location after saving new
+            if (null != old_loc) {
+            	System.out.println("Old location is " + old_loc);
+            	File old_loc_file = new File(old_loc);
+            	if (old_loc_file.exists()) {
+            		System.out.println("Deleting old file");
+            		old_loc_file.delete();
+            	}
+            }
+            // Map location changed - mark current domain dirty
+			mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.CHANGE));
+
+        } catch (Exception e) {
+            System.out.println("Error saving DataNode " + node.getName() +": " + e.getMessage());
+            e.printStackTrace();
+        }
+	}
 	
 	private void save() {
 		if (mediator.getCurrentDataMap() != null) {
@@ -464,6 +532,28 @@ implements ActionListener
 	}
 
 	private void saveAll() {
+		Iterator iter = mediator.getDirtyDataMaps().iterator();
+		while (iter.hasNext()) {
+			DataMap map = (DataMap)iter.next();
+			saveDataMap(map);
+			iter.remove();
+		}// End saving maps
+
+		iter = mediator.getDirtyDataNodes().iterator();
+		while (iter.hasNext()) {
+			DataNode node = (DataNode)iter.next();
+			System.out.println("Editor::saveAll(), node name " 
+								+ node.getName() + ", factory " 
+								+ node.getDataSourceFactory());
+			// If using direct connection, save into separate file
+			if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
+				System.out.println("Editor::saveAll(), saving node name " 
+								+ node.getName());
+				saveDataNode(node);
+			}
+			iter.remove();
+		}// End saving DataNode-s
+		
 		saveProject();
 	}
 	
@@ -478,6 +568,7 @@ implements ActionListener
 			DomainHelper.storeDomains(new PrintWriter(fw), mediator.getDomains());
 			fw.flush();
 			fw.close();
+			mediator.getDirtyDomains().clear();
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -503,6 +594,35 @@ implements ActionListener
 		} catch (Exception e) {}
 	}
 	
+
+	/** Save data source info if data source factory is DIRECT_FACTORY. */
+	private void saveDataNode(DataNode node) {
+		try {
+            File file = null;
+            String proj_dir_str = mediator.getConfig().getProjDir();
+			file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
+			if (!file.exists()) {
+				System.out.println("Editor::saveDataNode(), "
+									+"calling save as for node name " 
+									+ node.getName());
+				saveNodeAs(node);
+				return;
+			}
+			FileWriter fw = new FileWriter(file);
+			PrintWriter pw = new PrintWriter(fw);
+			GuiDataSource src = (GuiDataSource)node.getDataSource();
+			System.out.println("Editor::saveDataNode(), node name " 
+								+ node.getName());
+			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
+			pw.close();
+			fw.close();
+		} catch (Exception e) {
+            System.out.println("SaveDataNode(), Error saving DataNode " 
+            				+ node.getName()  +": " + e.getMessage());
+            e.printStackTrace();
+		}
+	}
+
 	private void createDomain() {
 		DataDomain domain = new DataDomain(DataDomainWrapper.sessionUniqueDomainName());
 		mediator.getConfig().addDomain(domain);
@@ -590,6 +710,7 @@ implements ActionListener
 		closeProjectMenu.setEnabled(true);
         openDataMapMenu.setEnabled(true);
 	    saveProjectMenu.setEnabled(true);
+	    saveAllMenu.setEnabled(true);
         importDbMenu.setEnabled(true);
 	}
 	

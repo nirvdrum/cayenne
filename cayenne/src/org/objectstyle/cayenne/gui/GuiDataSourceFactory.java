@@ -8,6 +8,10 @@ import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
+import java.io.File;
+import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 /** Factory creating data sources for GUI. Always tries to 
   * locate file with direct connection info  and create data source.
@@ -23,7 +27,7 @@ public class GuiDataSourceFactory extends DriverDataSourceFactory
     	try {
         	load(location);
         } catch (ConfigException e) {
-        	System.out.println("No data source: " + e.getMessage());
+        	System.out.println("No data source " + location + ": " + e.getMessage());
         }
         return new GuiDataSource(getDriverInfo());
     }
@@ -35,4 +39,22 @@ public class GuiDataSourceFactory extends DriverDataSourceFactory
         }
         return temp;
     }
+    
+	protected InputStream getInputStream(String location) {
+		String proj_dir = GuiConfiguration.getGuiConfig().getProjDir();
+		String absolute_loc = null;;
+		if (null != proj_dir)
+			absolute_loc = proj_dir + File.separator + location;
+		File file = new File(absolute_loc);
+		if (file.exists()) {
+			System.out.println("File " + absolute_loc + " exists");
+		}
+		try {
+			return new FileInputStream(absolute_loc);
+		} catch (FileNotFoundException e) {
+			System.out.println(e.getMessage());
+			return super.getInputStream(location);
+		}
+	}
+
 }

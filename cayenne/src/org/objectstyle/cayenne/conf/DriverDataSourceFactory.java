@@ -113,16 +113,16 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
 
-	public static void store(String location, DataSourceInfo info) {
-		
-	}// End store
+	protected InputStream getInputStream(String location) {
+        return ResourceLocator.findResourceInFileSystem(location);
+	}
 
     /** Loads driver information from the file at <code>location</code>.
       * Called internally from "getDataSource" */
     protected void load(String location) throws Exception {
         logObj.log(logLevel, "loading driver information from (" + location + ").");
 
-        InputStream in = ResourceLocator.findResourceInFileSystem(location);
+        InputStream in = getInputStream(location);
         if (in == null) {
             logObj.log(logLevel, "location not found in filesystem.");
             in = ResourceLocator.findResourceInClasspath(location);

@@ -228,38 +228,52 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		DataNode node = mediator.getCurrentDataNode();
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		DataSourceInfo info = src.getDataSourceInfo();
+		DataNodeEvent event;
 		if (e.getDocument() == name.getDocument()) {
 			String new_name = name.getText();
 			// If name hasn't changed, do nothing
 			if (oldName != null && new_name.equals(oldName))
 				return;
 			node.setName(new_name);
-			DataNodeEvent event;
 			event = new DataNodeEvent(this, node, oldName);
 			mediator.fireDataNodeEvent(event);
 			oldName = new_name;
 		}// End changedName
 		else if (e.getDocument() == location.getDocument()) {
 			node.setDataSourceLocation(location.getText());
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == userName.getDocument()) {
 			info.setUserName(userName.getText());
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == password.getDocument()) {
 			String pswd = new String(password.getPassword());
 			info.setPassword(pswd);
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == driver.getDocument()) {
 			info.setJdbcDriver(driver.getText());
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == url.getDocument()) {
 			info.setDataSourceUrl(url.getText());
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == minConnections.getDocument()) {
 			if (minConnections.getText().trim().length() > 0)
 				info.setMinConnections(Integer.parseInt(minConnections.getText()));
 			else
 				info.setMinConnections(0);
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == maxConnections.getDocument()) {
 			if (maxConnections.getText().trim().length() > 0)
 				info.setMaxConnections(Integer.parseInt(maxConnections.getText()));
 			else
 				info.setMaxConnections(0);
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
 		}
 
 	}
@@ -312,10 +326,10 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
             fc.setFileFilter(new DirectoryFilter());
             fc.setDialogType(JFileChooser.SAVE_DIALOG);
             fc.setDialogTitle("Data Node location");
-			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY );
+			fc.setFileSelectionMode(JFileChooser.FILES_ONLY );
             if (null != proj_dir)
             	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showOpenDialog(this);
+            int ret_code = fc.showSaveDialog(this);
             if ( ret_code != JFileChooser.APPROVE_OPTION)
                 return;
             file = fc.getSelectedFile();
@@ -338,6 +352,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 				relative_location 
 					= new_file_location.substring(proj_dir_str.length() + 1);
 			node.setDataSourceLocation(relative_location);
+			location.setText(relative_location);
             // Node location changed - mark current domain dirty
 			mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
