@@ -68,9 +68,15 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.PanelFactory;
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.event.DbEntityDisplayListener;
+import org.objectstyle.cayenne.gui.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.gui.event.EntityEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.CayenneTextField;
 import org.objectstyle.cayenne.gui.util.MapUtil;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /** 
  * Detail view of the DbEntity properties. 
@@ -80,16 +86,11 @@ import org.objectstyle.cayenne.map.*;
  */
 public class DbEntityPane
 	extends JPanel
-	implements
-		DocumentListener,
-		DbEntityDisplayListener,
-		ExistingSelectionProcessor,
-		ActionListener {
+	implements DbEntityDisplayListener, ExistingSelectionProcessor, ActionListener {
 
 	protected Mediator mediator;
 
 	protected JTextField name;
-	protected String oldName;
 	protected JTextField catalog;
 	protected JTextField schema;
 	protected JComboBox parentEntities;
@@ -112,9 +113,10 @@ public class DbEntityPane
 		init();
 
 		// Add listeners
-		name.getDocument().addDocumentListener(this);
-		catalog.getDocument().addDocumentListener(this);
-		schema.getDocument().addDocumentListener(this);
+		InputVerifier inputCheck = new FieldVerifier();
+		name.setInputVerifier(inputCheck);
+		catalog.setInputVerifier(inputCheck);
+		schema.setInputVerifier(inputCheck);
 
 		parentEntities.addActionListener(this);
 		parentLabel.addActionListener(this);
@@ -124,13 +126,13 @@ public class DbEntityPane
 		setLayout(new BorderLayout());
 
 		JLabel nameLabel = new JLabel("Entity name: ");
-		name = new JTextField(25);
+		name = new CayenneTextField(25);
 
 		catalogLabel = new JLabel("Catalog: ");
-		catalog = new JTextField(25);
+		catalog = new CayenneTextField(25);
 
 		schemaLabel = new JLabel("Schema: ");
-		schema = new JTextField(25);
+		schema = new CayenneTextField(25);
 
 		parentLabel = PanelFactory.createLabelButton("Parent entity: ");
 		parentLabel.setEnabled(false);
@@ -153,45 +155,6 @@ public class DbEntityPane
 			BorderLayout.NORTH);
 	}
 
-	public void insertUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-
-	public void changedUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-
-	public void removeUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-
-	private void textFieldChanged(DocumentEvent e) {
-		if (ignoreChange) {
-			return;
-		}
-
-		Document doc = e.getDocument();
-		DataMap map = mediator.getCurrentDataMap();
-		DbEntity curEntity = mediator.getCurrentDbEntity();
-		EntityEvent event = new EntityEvent(this, curEntity);
-		if (doc == name.getDocument()) {
-			// Change the name of the current db entity
-			MapUtil.setDbEntityName(
-				map,
-				curEntity,
-				name.getText());
-			// Make sure new name is sent out to all listeners.
-			event.setOldName(oldName);
-			oldName = name.getText();
-		} else if (doc == catalog.getDocument()) {
-			curEntity.setCatalog(catalog.getText());
-		} else if (doc == schema.getDocument()) {
-			curEntity.setSchema(schema.getText());
-		}
-		
-		mediator.fireDbEntityEvent(event);
-	}
-
 	public void processExistingSelection() {
 		EntityDisplayEvent e;
 		e =
@@ -211,7 +174,6 @@ public class DbEntityPane
 
 		ignoreChange = true;
 		name.setText(entity.getName());
-		oldName = entity.getName();
 		catalog.setText(entity.getCatalog());
 		schema.setText(entity.getSchema());
 		ignoreChange = false;
@@ -287,6 +249,90 @@ public class DbEntityPane
 				}
 			}
 
+		}
+	}
+
+	class FieldVerifier extends InputVerifier {
+		public boolean verify(JComponent input) {
+			if (input == name) {
+				return verifyName();
+			} else if (input == catalog) {
+				return verifyCatalog();
+			} else if (input == schema) {
+				return verifySchema();
+			} else {
+				return true;
+			}
+		}
+
+		protected boolean verifyName() {
+			String text = name.getText();
+			if (text != null && text.trim().length() == 0) {
+				text = null;
+			}
+
+			DataMap map = mediator.getCurrentDataMap();
+			DbEntity ent = mediator.getCurrentDbEntity();
+
+			DbEntity matchingEnt = map.getDbEntity(text);
+
+			if (matchingEnt == null) {
+				// completely new name, set new name for entity
+				EntityEvent e = new EntityEvent(this, ent, ent.getName());
+				MapUtil.setDbEntityName(map, ent, text);
+				mediator.fireDbEntityEvent(e);
+				return true;
+			} else if (matchingEnt == ent) {
+				// no name changes, just return
+				return true;
+			} else {
+				// there is an entity with the same name
+				return false;
+			}
+		}
+
+		protected boolean verifyCatalog() {
+			String text = catalog.getText();
+			if (text != null && text.trim().length() == 0) {
+				text = null;
+			}
+
+			DbEntity ent = mediator.getCurrentDbEntity();
+
+			if (!org
+				.objectstyle
+				.cayenne
+				.util
+				.Util
+				.nullSafeEquals(ent.getCatalog(), text)) {
+
+				ent.setCatalog(text);
+				mediator.fireDbEntityEvent(new EntityEvent(this, ent));
+			}
+
+			return true;
+		}
+
+		protected boolean verifySchema() {
+			String text = schema.getText();
+			if (text != null && text.trim().length() == 0) {
+				text = null;
+			}
+
+			DbEntity ent = mediator.getCurrentDbEntity();
+
+			if (!org
+				.objectstyle
+				.cayenne
+				.util
+				.Util
+				.nullSafeEquals(ent.getSchema(), text)) {
+
+				ent.setSchema(text);
+				mediator.fireDbEntityEvent(new EntityEvent(this, ent));
+			}
+
+			return true;
 		}
 	}
 }
