@@ -59,10 +59,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.SequencedHashMap;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -82,7 +82,7 @@ import org.apache.log4j.Logger;
 public class ValidationResult {
     private static final Logger logObj = Logger.getLogger(ValidationResult.class);
 
-    private Map errors = new LinkedHashMap();
+    private Map errors = new SequencedHashMap();
 
     /**
      * Convenience method to add a <code>StringValidationFailure</code>.

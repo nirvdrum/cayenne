@@ -56,9 +56,9 @@
 package org.objectstyle.cayenne;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.SequencedHashMap;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -171,11 +171,11 @@ public class ObjectIdTst extends CayenneTestCase {
         
         // create maps with guaranteed iteration order
 
-        Map hm1 = new LinkedHashMap();
+        Map hm1 = new SequencedHashMap();
         hm1.put("KEY1", new Integer(1));
         hm1.put("KEY2", new Integer(2));
 
-        Map hm2 = new LinkedHashMap();
+        Map hm2 = new SequencedHashMap();
         // put same keys but in different order 
         hm2.put("KEY2", new Integer(2));
         hm2.put("KEY1", new Integer(1));
