@@ -3,4 +3,7 @@
 <domain name="default">
 	<map name="testmap" location="testmap.map.xml"/>
 </domain>
+<domain name="one-way">
+	<map name="one-way-map" location="one-way-map.map.xml"/>
+</domain>
 </domains>

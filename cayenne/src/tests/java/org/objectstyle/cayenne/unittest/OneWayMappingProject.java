@@ -79,6 +79,10 @@ public class OneWayMappingProject {
         instance = new OneWayMappingProject();
     }
 
+    public static OneWayMappingProject getInstance() {
+    	return instance;
+    }
+    
     /**
      * Constructor for OneWayMappingProject.
      */

@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.unittest;
 
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+
 /**
  * @author Andrei Adamchik
  */
@@ -62,11 +65,26 @@ public class OneWayMappingTestCase extends CayenneTestCase {
 
     /**
      * Constructor for OneWayMappingTestCase.
+     * 
      * @param name
      */
     public OneWayMappingTestCase(String name) {
         super(name);
+        OneWayMappingProject.init();
     }
 
-}
+    /**
+     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getDomain()
+     */
+    public DataDomain getDomain() {
+        return OneWayMappingProject.getInstance().getDomain();
+    }
 
+
+    /**
+     * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
+     */
+    public DataNode getNode() {
+        return getDomain().getDataNodes()[0];
+    }
+}

@@ -73,11 +73,11 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.*;
 
 public class CayenneDOTestBase extends CayenneTestCase {    
-    static final String artistName = "artist with one painting";
-    static final String galleryName = "my gallery";
-    static final String textReview = "this painting sucks...";
-    static final String paintingName = "painting about nothing";    
-    static final String groupName = "a group";
+    public static final String artistName = "artist with one painting";
+    public static final String galleryName = "my gallery";
+    public static final String textReview = "this painting sucks...";
+    public static final String paintingName = "painting about nothing";    
+    public static final String groupName = "a group";
 
     static final byte[] paintingImage = new byte[] {2, 3, 4, 5};
     
@@ -87,7 +87,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
         super(name);
     }
     
-    public void setUp() throws Exception {
+    protected void setUp() throws Exception {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();        
         DataDomain dom = getDomain();
