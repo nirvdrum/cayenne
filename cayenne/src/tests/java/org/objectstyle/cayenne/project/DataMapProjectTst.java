@@ -56,72 +56,68 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.util.List;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.util.Iterator;
 
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class ApplicationProjectTst extends CayenneTestCase {
-    protected ApplicationProject p;
+public class DataMapProjectTst extends CayenneTestCase {
+    protected DataMapProject p;
     protected File f;
 
     /**
-     * Constructor for ApplicationProjectTst.
+     * Constructor for DataMapProjectTst.
      * @param name
      */
-    public ApplicationProjectTst(String name) {
+    public DataMapProjectTst(String name) {
         super(name);
     }
 
     protected void setUp() throws Exception {
         super.setUp();
-        f = new File("cayenne.xml");
-        p = new ApplicationProject(f);
-    }
 
-    public void testConfig() throws Exception {
-        assertNotNull(p.getConfig());
+        f = new File(getTestDir(), "Untitled.map.xml");
+        if (f.exists()) {
+            if (!f.delete()) {
+                throw new RuntimeException("Can't delete file: " + f);
+            }
+        }
+
+        // copy shared datamap to the test location
+        DataMap m = getSharedNode().getDataMaps()[0];
+
+        PrintWriter out = new PrintWriter(new FileOutputStream(f));
+
+        try {
+            new MapLoader().storeDataMap(out, m);
+        } finally {
+            out.close();
+        }
+
+        p = new DataMapProject(f);
     }
+    
+    
 
     public void testConstructor() throws Exception {
         assertEquals(f.getCanonicalFile(), p.getMainFile());
-        assertTrue(p.getRootNode() instanceof Configuration);
+        assertTrue(p.getRootNode() instanceof DataMap);
     }
 
-    public void testBuildFileList() throws Exception {
-        // build a test project tree
-        DataDomain d1 = new DataDomain("d1");
-        DataMap m1 = new DataMap("m1");
-        DataNode n1 = new DataNode("n1");
-        n1.setDataSourceFactory(DriverDataSourceFactory.class.getName());
+    public void testTreeNodes() throws Exception {
+        Iterator treeNodes = p.treeNodes();
+        int len = 0;
+        while (treeNodes.hasNext()) {
+            len++;
+            treeNodes.next();
+        }
 
-        d1.addMap(m1);
-        d1.addNode(n1);
-
-        ObjEntity oe1 = new ObjEntity("oe1");
-        m1.addObjEntity(oe1);
-
-        n1.addDataMap(m1);
-
-        // initialize project 
-        p.getConfig().addDomain(d1);
-
-        // make assertions
-        List files = p.buildFileList();
-
-        // logObj.warn("Files: " + files);
-
-        assertNotNull(files);
-
-        // list must have 3 files total
-        assertEquals(3, files.size());
+        assertTrue(len > 1);
     }
 }
