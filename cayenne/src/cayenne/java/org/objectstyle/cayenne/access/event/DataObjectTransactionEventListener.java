@@ -59,11 +59,16 @@ package org.objectstyle.cayenne.access.event;
 import java.util.EventListener;
 
 /**
- * @HH: writeme!
+ * This interface declares methods that DataObject classes can implement to be
+ * notified about transactions of their DataContext.
+ * Note: explicit registration with EventManager is not necessary, since the
+ * events are simply forwarded by ContextCommitObserver; stricly speaking these
+ * methods are just regular 'callbacks'. The event argument is passed along for
+ * convenience.
  */
 
 public interface DataObjectTransactionEventListener extends EventListener {
-	public void willCommit();
-	public void didCommit();
+	public void willCommit(DataContextEvent event);
+	public void didCommit(DataContextEvent event);
 }
 
