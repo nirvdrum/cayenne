@@ -373,7 +373,7 @@ public abstract class Expression implements Serializable {
      */
     protected void toStringBuffer(StringBuffer buf) {
         for (int i = 0; i < getOperandCount(); i++) {
-            if (i > 0) {
+            if (i > 0 || getOperandCount() == 1) {
                 buf.append(" ").append(expName()).append(" ");
             }
 

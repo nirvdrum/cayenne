@@ -94,21 +94,4 @@ public class UnaryExpression extends Expression {
         throw new IllegalArgumentException(
             "Invalid operand index for UnaryExpression: " + index);
     }
-
-    public String toString() {
-        if (type == DB_PATH) {
-            return "DB_PATH(" + operand + ")";
-        } else if (type == OBJ_PATH) {
-            return "OBJ_PATH(" + operand + ")";
-        }
-
-        StringBuffer buf = new StringBuffer();
-        buf
-            .append("<UnaryExpression type='")
-            .append(type)
-            .append("' operand='")
-            .append(operand)
-            .append("'>");
-        return buf.toString();
-    }
 }
