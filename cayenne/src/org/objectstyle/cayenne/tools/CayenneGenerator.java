@@ -55,15 +55,20 @@ package org.objectstyle.cayenne.tools;
  *
  */
 
-import java.io.*;
-
-import org.xml.sax.InputSource;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Level;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
-
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DisconnectedConfiguration;
 import org.objectstyle.cayenne.gen.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.xml.sax.InputSource;
 
 /** 
  * Ant task to perform class generation from data map. 
@@ -73,122 +78,163 @@ import org.objectstyle.cayenne.map.*;
  */
 public class CayenneGenerator extends Task {
 
-    protected File map;
-    protected DefaultClassGenerator generator;
+	protected File map;
+	protected File project;
+	protected DefaultClassGenerator generator;
 
-    public CayenneGenerator() {
-        bootstrapVelocity();
-        generator = createGenerator();
-    }
-    
-    /** 
-     * Factory method to create internal class generator. 
-     * Called from constructor.
-     */
-    protected DefaultClassGenerator createGenerator() {
-        AntClassGenerator gen = new AntClassGenerator();
-        gen.setParentTask(this);
-        return gen;
-    }
+	public CayenneGenerator() {
+		bootstrapVelocity();
+		generator = createGenerator();
+	}
 
-    /** Initialize Velocity with class loader of the right class. */
-    protected void bootstrapVelocity() {
-        ClassGenerator.bootstrapVelocity(this.getClass());
-    }
+	/** 
+	 * Factory method to create internal class generator. 
+	 * Called from constructor.
+	 */
+	protected DefaultClassGenerator createGenerator() {
+		AntClassGenerator gen = new AntClassGenerator();
+		gen.setParentTask(this);
+		return gen;
+	}
 
-    /** 
-     * Executes the task. It will be called by ant framework. 
-     */
-    public void execute() throws BuildException {
-        validateAttributes();
+	/** Initialize Velocity with class loader of the right class. */
+	protected void bootstrapVelocity() {
+		ClassGenerator.bootstrapVelocity(this.getClass());
+	}
 
-        try {
-            DataMap dataMap = loadDataMap();
-            generator.setTimestamp(map.lastModified());
-            generator.setObjEntities(dataMap.getObjEntitiesAsList());
-            generator.validateAttributes();
-            generator.execute();
-        }
-        catch (Exception ex) {
-            super.log("Error generating classes.");
-            throw new BuildException("Error generating classes.", ex);
-        }
-    }
+	/** 
+	 * Executes the task. It will be called by ant framework. 
+	 */
+	public void execute() throws BuildException {
+		validateAttributes();
 
-    /** Loads and returns DataMap based on <code>map</code> attribute. */
-    protected DataMap loadDataMap() throws Exception {
-        InputSource in = new InputSource(map.getCanonicalPath());
-        return new MapLoader().loadDataMap(in);
-    }
+		try {
+			if (project != null) {
+				processProject();
+			} else {
+				processMap();
+			}
+		} catch (Exception ex) {
+			super.log("Error generating classes.");
+			throw new BuildException("Error generating classes.", ex);
+		}
+	}
 
-    /** 
-     * Validates atttributes that are not related to internal DefaultClassGenerator. 
-     * Throws BuildException if attributes are invalid. 
-     */
-    protected void validateAttributes() throws BuildException {
-        if (map == null) {
-            throw new BuildException("'map' attribute is missing.");
-        }
+	protected void processProject() throws Exception {
+		DataMap[] dataMaps = loadDataMaps();
 
-        if (!map.canRead()) {
-            throw new BuildException("Can't read the map from " + map);
-        }
-    }
+		for (int i = 0; i < dataMaps.length; i++) {
+			String location = dataMaps[i].getLocation();
+			generator.setTimestamp(new File(location).lastModified());
+			generator.setObjEntities(dataMaps[i].getObjEntitiesAsList());
+			generator.validateAttributes();
+			generator.execute();
+		}
+	}
 
-    /**
-     * Sets the map.
-     * @param map The map to set
-     */
-    public void setMap(File map) {
-        this.map = map;
-    }
+	protected void processMap() throws Exception {
+		DataMap dataMap = loadDataMap();
+		generator.setTimestamp(map.lastModified());
+		generator.setObjEntities(dataMap.getObjEntitiesAsList());
+		generator.validateAttributes();
+		generator.execute();
+	}
 
-    /**
-     * Sets the destDir.
-     */
-    public void setDestDir(File destDir) {
-        generator.setDestDir(destDir);
-    }
+	/** Loads and returns DataMap based on <code>map</code> attribute. */
+	protected DataMap[] loadDataMaps() throws Exception {
+		// Configuration.setLogLevel(Level.SEVERE);
+		Configuration conf = new DisconnectedConfiguration(project);
+		conf.init();
+		
+		ArrayList allMaps = new ArrayList();
+		Iterator domains = conf.getDomainList().iterator();
+		while(domains.hasNext()) {
+			DataDomain dom = (DataDomain)domains.next();
+			allMaps.addAll(dom.getMapList());
+		}
+		
+		DataMap[] maps = new DataMap[allMaps.size()];
+		return (DataMap[])allMaps.toArray(maps);
+	}
 
-    /**
-     * Sets <code>overwrite</code> property.
-     */
-    public void setOverwrite(boolean overwrite) {
-        generator.setOverwrite(overwrite);
-    }
+	/** Loads and returns DataMap based on <code>map</code> attribute. */
+	protected DataMap loadDataMap() throws Exception {
+		InputSource in = new InputSource(map.getCanonicalPath());
+		return new MapLoader().loadDataMap(in);
+	}
 
-    /**
-     * Sets <code>makepairs</code> property.
-     */
-    public void setMakepairs(boolean makepairs) {
-        generator.setMakePairs(makepairs);
-    }
+	/** 
+	 * Validates atttributes that are not related to internal DefaultClassGenerator. 
+	 * Throws BuildException if attributes are invalid. 
+	 */
+	protected void validateAttributes() throws BuildException {
+		if (map == null && project == null) {
+			throw new BuildException("either 'map' or 'project' is required.");
+		}
+	}
 
-    /**
-     * Sets <code>template</code> property.
-     */
-    public void setTemplate(File template) {
-        generator.setTemplate(template);
-    }
+	/**
+	 * Sets the map.
+	 * @param map The map to set
+	 */
+	public void setMap(File map) {
+		this.map = map;
+	}
 
-    /**
-     * Sets <code>supertemplate</code> property.
-     */
-    public void setSupertemplate(File supertemplate) {
-        generator.setSuperTemplate(supertemplate);
-    }
+	/**
+	 * Sets the project.
+	 * @param project The project to set
+	 */
+	public void setProject(File project) {
+		this.project = project;
+	}
 
-    /**
-     * Sets <code>usepkgpath</code> property.
-     */
-    public void setUsepkgpath(boolean usepkgpath) {
-        generator.setUsePkgPath(usepkgpath);
-    }
+	/**
+	 * Sets the destDir.
+	 */
+	public void setDestDir(File destDir) {
+		generator.setDestDir(destDir);
+	}
 
-    /**
-     * Sets <code>superpkg</code> property.
-     */
-    public void setSuperpkg(String superpkg) {
-        generator.setSuperPkg(superpkg);
-    }
+	/**
+	 * Sets <code>overwrite</code> property.
+	 */
+	public void setOverwrite(boolean overwrite) {
+		generator.setOverwrite(overwrite);
+	}
+
+	/**
+	 * Sets <code>makepairs</code> property.
+	 */
+	public void setMakepairs(boolean makepairs) {
+		generator.setMakePairs(makepairs);
+	}
+
+	/**
+	 * Sets <code>template</code> property.
+	 */
+	public void setTemplate(File template) {
+		generator.setTemplate(template);
+	}
+
+	/**
+	 * Sets <code>supertemplate</code> property.
+	 */
+	public void setSupertemplate(File supertemplate) {
+		generator.setSuperTemplate(supertemplate);
+	}
+
+	/**
+	 * Sets <code>usepkgpath</code> property.
+	 */
+	public void setUsepkgpath(boolean usepkgpath) {
+		generator.setUsePkgPath(usepkgpath);
+	}
+
+	/**
+	 * Sets <code>superpkg</code> property.
+	 */
+	public void setSuperpkg(String superpkg) {
+		generator.setSuperPkg(superpkg);
+	}
 }

@@ -178,12 +178,13 @@ public class DomainHelper {
 		this.factory = factory;
 
 		logObj.log(logLevel, "start configuration loading.");
-		if (factory != null)
+		if (factory != null) {
 			logObj.log(
 				logLevel,
 				"factory "
 					+ factory.getClass().getName()
 					+ " will override any configured DataSourceFactory.");
+		}
 
 		domains = new ArrayList();
 		failedMaps = new HashMap();

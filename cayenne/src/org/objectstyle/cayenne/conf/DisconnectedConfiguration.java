@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,59 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
 
+import java.io.File;
+import java.util.logging.Level;
 
+import javax.sql.DataSource;
 
-/** Configuration object used for tests that does not require "cayenne.xml". */
-public class EmptyConfiguration extends DefaultConfiguration {
-    public void init() throws java.lang.Exception {}
+import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.conn.PoolManager;
+
+/**
+ * Configuration object that allows to read Cayenne project files
+ * without attempting to open any database connections.
+ * 
+ * @author Andrei Adamchik
+ */
+public class DisconnectedConfiguration extends DefaultConfiguration {
+
+	public DisconnectedConfiguration() {
+		super();
+	}
+
+	public DisconnectedConfiguration(File file) {
+		super(file);
+	}
+
+	protected DataSourceFactory getOverrideFactory() {
+		try {
+			return new DisconnectedFactory();
+		} catch (Exception ex) {
+            logObj.log(Level.WARNING, "Error initializing factory.", ex);
+            throw new ConfigException("Error initializing factory.", ex);
+		}
+	}
+
+	/** 
+	 * Creates pooled DataSource without actually creating
+	 * database connections.
+	 */
+	class DisconnectedFactory extends DriverDataSourceFactory {
+		public DisconnectedFactory() throws Exception {
+			super();
+		}
+
+		public DataSource getDataSource(String location) throws Exception {
+			load(location);
+			return new PoolManager(
+				getDriverInfo().getJdbcDriver(),
+				getDriverInfo().getDataSourceUrl(),
+				0,
+				0,
+				getDriverInfo().getUserName(),
+				getDriverInfo().getPassword());
+		}
+	}
 }

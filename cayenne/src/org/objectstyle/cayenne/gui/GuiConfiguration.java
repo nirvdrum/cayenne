@@ -72,35 +72,34 @@ import org.objectstyle.cayenne.conf.DomainHelper;
  * @author Misha Shengaout
  */
 public class GuiConfiguration extends DefaultConfiguration {
-    static Logger logObj = Logger.getLogger(DefaultConfiguration.class.getName());
-    
-    private File projFile;
-    private static GuiConfiguration guiConfig;
+	static Logger logObj =
+		Logger.getLogger(DefaultConfiguration.class.getName());
 
-	private GuiConfiguration() {}
+	private File projFile;
+	private static GuiConfiguration guiConfig;
 
+	private GuiConfiguration() {
+	}
 
-    public static void initSharedConfig(File proj_file) throws Exception {
-    	initSharedConfig(proj_file, true);
-    }
+	public static void initSharedConfig(File proj_file) throws Exception {
+		initSharedConfig(proj_file, true);
+	}
 
 	/** Create configuration obj and initialize its state.
 	 * @param proj_file Project file to work with
 	 * @param do_init If true, parse project file*/
-    public static void initSharedConfig(File proj_file, boolean do_init) 
-    throws Exception {
-    	guiConfig = new GuiConfiguration();
-    	guiConfig.projFile = proj_file;
-    	if (do_init)
-    		guiConfig.init();
-    }
+	public static void initSharedConfig(File proj_file, boolean do_init)
+		throws Exception {
+		guiConfig = new GuiConfiguration();
+		guiConfig.projFile = proj_file;
+		if (do_init)
+			guiConfig.init();
+	}
 
-    
-    /** Should never be called before initSharedConfig(). */
-    public static GuiConfiguration getGuiConfig()
-    {
-    	return guiConfig;
-    }
+	/** Should never be called before initSharedConfig(). */
+	public static GuiConfiguration getGuiConfig() {
+		return guiConfig;
+	}
 
 	public File getProjFile() {
 		return projFile;
@@ -113,59 +112,61 @@ public class GuiConfiguration extends DefaultConfiguration {
 		return projFile.getParent();
 	}
 
+	/** Returns domain configuration as a stream or null if it
+	  * can not be found. */
+	public InputStream getDomainConfig() {
+		try {
+			if (null != projFile && projFile.exists() && projFile.isFile())
+				return new FileInputStream(projFile);
+			else
+				super.getDomainConfig();
+		} catch (Exception e) {
+			logObj.log(Level.WARNING, "Error", e);
+		}
+		return null;
+	}
 
-    /** Returns domain configuration as a stream or null if it
-      * can not be found. */
-    public InputStream getDomainConfig() {
-    	try {
-    		if (null != projFile && projFile.exists() && projFile.isFile())
-        		return new FileInputStream(projFile);
-        	else super.getDomainConfig();
-        } catch (Exception e) {
-        	logObj.log(Level.WARNING, "Error", e);
-        }
-        return null;
-    }
-    
-    /** Returns DataMap configuration from a specified location or null if it
-      * can not be found. */
-    public InputStream getMapConfig(String location) {
-    	try {
-    		if (null == projFile)
-    			return super.getMapConfig(location);
-	    	String file_name = projFile.getParent() + projFile.separator + location;
-	    	File map_file = new File(file_name);
-	    	if (map_file.exists())
-	        	return new FileInputStream(map_file);
-	        else 
-	        	return super.getMapConfig(location);
-        } catch (Exception e) {
-        	logObj.log(Level.WARNING, "Error", e);
-        }
-        return null;
-    }
-    
-    /** Initializes all Cayenne resources. Loads all configured domains and their
-      * data maps, initializes all domain Nodes and their DataSources using
-      * GuiDataSourceFactory. */
-    protected void init() throws java.lang.Exception {
-        InputStream in = getDomainConfig();
-        if (in == null)
-            throw new ConfigException("Domain configuration file \""
-                                      + DOMAIN_FILE
-                                      + "\" is not found.");
+	/** Returns DataMap configuration from a specified location or null if it
+	  * can not be found. */
+	public InputStream getMapConfig(String location) {
+		try {
+			if (null == projFile)
+				return super.getMapConfig(location);
+			String file_name =
+				projFile.getParent() + projFile.separator + location;
+			File map_file = new File(file_name);
+			if (map_file.exists())
+				return new FileInputStream(map_file);
+			else
+				return super.getMapConfig(location);
+		} catch (Exception e) {
+			logObj.log(Level.WARNING, "Error", e);
+		}
+		return null;
+	}
 
-        DomainHelper helper = new DomainHelper(this, getLogLevel());
-        if(!helper.loadDomains(in, new GuiDataSourceFactory())) {
-            throw new ConfigException("Failed to load domain and/or its maps/nodes.");
-        }
+	/** 
+	 * Initializes all Cayenne resources. Loads all configured domains and their
+	 * data maps, initializes all domain Nodes and their DataSources using
+	 * GuiDataSourceFactory. 
+	 */
+	public void init() throws java.lang.Exception {
+		InputStream in = getDomainConfig();
+		if (in == null)
+			throw new ConfigException(
+				"Domain configuration file \""
+					+ DOMAIN_FILE
+					+ "\" is not found.");
 
-        Iterator it = helper.getDomains().iterator();
-        while(it.hasNext()) {
-            addDomain((DataDomain)it.next());
-        }
-    }
+		DomainHelper helper = new DomainHelper(this, getLogLevel());
+		if (!helper.loadDomains(in, new GuiDataSourceFactory())) {
+			throw new ConfigException("Failed to load domain and/or its maps/nodes.");
+		}
 
+		Iterator it = helper.getDomains().iterator();
+		while (it.hasNext()) {
+			addDomain((DataDomain) it.next());
+		}
+	}
 
 }
-

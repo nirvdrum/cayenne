@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.conf;
 
 import java.io.InputStream;
 import java.util.*;
@@ -189,7 +189,7 @@ public abstract class Configuration {
 
     /** Initializes all Cayenne resources. Loads all configured domains and their
       * data maps, initializes all domain Nodes and their DataSources. */
-    protected void init() throws java.lang.Exception {
+    public void init() throws Exception {
         InputStream in = getDomainConfig();
         if (in == null) {
             StringBuffer msg = new StringBuffer();
@@ -204,7 +204,7 @@ public abstract class Configuration {
         }
 
         DomainHelper helper = new DomainHelper(this, getLogLevel());
-        if (!helper.loadDomains(in)) {
+        if (!helper.loadDomains(in, getOverrideFactory())) {
             StringBuffer msg = new StringBuffer();
             msg.append("[").append(this.getClass().getName()).append(
                 "] : Failed to load domain and/or its maps/nodes.");
@@ -217,6 +217,13 @@ public abstract class Configuration {
             addDomain((DataDomain) it.next());
         }
     }
+    
+    /**
+     * Default implementation returns null.
+     */
+    protected DataSourceFactory getOverrideFactory() {
+    	return null;
+    } 
 
     /** Adds new DataDomain to the list of registered domains. */
     public void addDomain(DataDomain domain) {
