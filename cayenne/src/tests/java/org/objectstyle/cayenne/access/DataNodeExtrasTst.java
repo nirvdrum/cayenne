@@ -58,63 +58,63 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
+import org.objectstyle.cayenne.unittest.TestDatabaseManager;
 
 public class DataNodeExtrasTst extends CayenneTestCase {
 
-	public void testName() throws Exception {
-		String tstName = "tst_name";
-		DataNode node = new DataNode();
-		assertNull(node.getName());
-		node.setName(tstName);
-		assertEquals(tstName, node.getName());
-	}
+    public void testName() throws Exception {
+        String tstName = "tst_name";
+        DataNode node = new DataNode();
+        assertNull(node.getName());
+        node.setName(tstName);
+        assertEquals(tstName, node.getName());
+    }
 
-	public void testDataSourceLocation() throws Exception {
-		String tstName = "tst_name";
-		DataNode node = new DataNode();
-		assertNull(node.getDataSourceLocation());
-		node.setDataSourceLocation(tstName);
-		assertEquals(tstName, node.getDataSourceLocation());
-	}
+    public void testDataSourceLocation() throws Exception {
+        String tstName = "tst_name";
+        DataNode node = new DataNode();
+        assertNull(node.getDataSourceLocation());
+        node.setDataSourceLocation(tstName);
+        assertEquals(tstName, node.getDataSourceLocation());
+    }
 
-	public void testDataSourceFactory() throws Exception {
-		String tstName = "tst_name";
-		DataNode node = new DataNode();
-		assertNull(node.getDataSourceFactory());
-		node.setDataSourceFactory(tstName);
-		assertEquals(tstName, node.getDataSourceFactory());
-	}
+    public void testDataSourceFactory() throws Exception {
+        String tstName = "tst_name";
+        DataNode node = new DataNode();
+        assertNull(node.getDataSourceFactory());
+        node.setDataSourceFactory(tstName);
+        assertEquals(tstName, node.getDataSourceFactory());
+    }
 
-	public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
-        CayenneTestDatabaseSetup setup = getDatabaseSetup();
-        setup.cleanTableData();        
+    public void testCreatePkSupportForMapEntities() throws Exception {
+        cleanTableData();
 
-		DataNode node = (DataNode)getDomain().getDataNodes().iterator().next();
-		setup.createPkSupportForMapEntities(node);
+        TestDatabaseManager setup = getDatabaseSetup();
+        DataNode node = (DataNode) getDomain().getDataNodes().iterator().next();
+        setup.createPkSupportForMapEntities(node);
 
-		DbEntity artistEnt = node.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
-		assertNotNull(
-			node.getAdapter().getPkGenerator().generatePkForDbEntity(
-				node,
-				artistEnt));
+        DbEntity artistEnt =
+            node.getEntityResolver().lookupObjEntity("Artist").getDbEntity();
+        assertNotNull(
+            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
 
-		DbEntity exhibitEnt = node.getEntityResolver().lookupObjEntity("Exhibit").getDbEntity();
-		assertNotNull(
-			node.getAdapter().getPkGenerator().generatePkForDbEntity(
-				node,
-				exhibitEnt));
-	}
-	
-	public void testPopulatedNodeEntityResolver() {
-		//Test shared node (one loaded with a real model)
-		assertNotNull(((DataNode)getDomain().getDataNodes().iterator().next()).getEntityResolver());
-	}
-	
-	public void testEmptyNodeEntityResolver() {
-		//Test a brand new otherwise empty node
-		DataNode node = new DataNode();
-		assertNotNull(node.getEntityResolver());
-	}
+        DbEntity exhibitEnt =
+            node.getEntityResolver().lookupObjEntity("Exhibit").getDbEntity();
+        assertNotNull(
+            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
+    }
+
+    public void testPopulatedNodeEntityResolver() {
+        //Test shared node (one loaded with a real model)
+        assertNotNull(
+            ((DataNode) getDomain().getDataNodes().iterator().next())
+                .getEntityResolver());
+    }
+
+    public void testEmptyNodeEntityResolver() {
+        //Test a brand new otherwise empty node
+        DataNode node = new DataNode();
+        assertNotNull(node.getEntityResolver());
+    }
 
 }

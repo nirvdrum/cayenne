@@ -96,7 +96,7 @@ public class DataContextTestBase extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         populateTables();
 
         context = createDataContext();

@@ -69,12 +69,8 @@ public abstract class MultiContextTestCase extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-
-        // cleanup database data
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
     }
-
-
 
     /**
      * Helper method to create a new DataContext with the ObjectStore
@@ -83,10 +79,10 @@ public abstract class MultiContextTestCase extends CayenneTestCase {
      */
     protected DataContext mirrorDataContext(DataContext context) throws Exception {
         DataContext mirror = (DataContext) Util.cloneViaSerialization(context);
-        
+
         assertNotSame(context, mirror);
         assertNotSame(context.getObjectStore(), mirror.getObjectStore());
-        
+
         if (context.isUsingSharedSnapshotCache()) {
             assertSame(
                 context.getObjectStore().getDataRowCache(),

@@ -81,28 +81,25 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 /**
  * @author Andrei Adamchik
  */
-public class CayenneTestDatabaseSetup {
-    private static Logger logObj = Logger.getLogger(CayenneTestDatabaseSetup.class);
+public class TestDatabaseManager {
+    private static Logger logObj = Logger.getLogger(TestDatabaseManager.class);
 
     protected DataMap map;
-    protected CayenneTestResources resources;
+    protected DataNode node;
     protected DatabaseSetupDelegate delegate;
 
-    public CayenneTestDatabaseSetup(CayenneTestResources resources, DataMap map)
-        throws Exception {
+    public TestDatabaseManager(DataNode node, DataMap map) throws Exception {
         this.map = map;
-        this.resources = resources;
-        this.delegate =
-            DatabaseSetupDelegate.createDelegate(resources.getSharedNode().getAdapter());
+        this.node = node;
+        this.delegate = DatabaseSetupDelegate.createDelegate(node.getAdapter());
     }
 
     /** Deletes all data from the database tables mentioned in the DataMap. */
     public void cleanTableData() throws Exception {
         // TODO: move this to delegate
-        boolean isFirebird =
-            resources.getSharedNode().getAdapter() instanceof FirebirdAdapter;
+        boolean isFirebird = node.getAdapter() instanceof FirebirdAdapter;
 
-        Connection conn = resources.getSharedConnection();
+        Connection conn = node.getDataSource().getConnection();
 
         List list = this.dbEntitiesInInsertOrder(map);
         try {
@@ -149,8 +146,7 @@ public class CayenneTestDatabaseSetup {
 
     /** Drops all test tables. */
     public void dropTestTables() throws Exception {
-        Connection conn = resources.getSharedConnection();
-        DataNode node = resources.getSharedNode();
+        Connection conn = node.getDataSource().getConnection();
         DbAdapter adapter = node.getAdapter();
         List list = this.dbEntitiesInInsertOrder(map);
 
@@ -204,7 +200,7 @@ public class CayenneTestDatabaseSetup {
 
     /** Creates all test tables in the database. */
     public void setupTestTables() throws Exception {
-        Connection conn = resources.getSharedConnection();
+        Connection conn = node.getDataSource().getConnection();
 
         try {
             delegate.willCreateTables(conn, map);
@@ -225,7 +221,6 @@ public class CayenneTestDatabaseSetup {
         }
 
         // create primary key support
-        DataNode node = resources.getSharedNode();
         DbAdapter adapter = node.getAdapter();
         List filteredEntities =
             this.dbEntitiesInInsertOrder(
@@ -250,7 +245,7 @@ public class CayenneTestDatabaseSetup {
 
     /** Returns iterator of preprocessed table create queries */
     protected Iterator tableCreateQueries(DataMap map) throws Exception {
-        DbAdapter adapter = resources.getSharedNode().getAdapter();
+        DbAdapter adapter = node.getAdapter();
         DbGenerator gen = new DbGenerator(adapter, map);
         List orderedEnts = this.dbEntitiesInInsertOrder(map);
         List queries = new ArrayList();
@@ -340,9 +335,6 @@ public class CayenneTestDatabaseSetup {
                     if (skip) {
                         continue;
                     }
-
-                    // check for FK to bin PK
-
                 }
 
                 filtered.add(ent);
@@ -351,7 +343,6 @@ public class CayenneTestDatabaseSetup {
             entities = filtered;
         }
 
-        DataNode node = resources.getSharedNode();
         node.getDependencySorter().sortDbEntities(entities, false);
         return entities;
     }

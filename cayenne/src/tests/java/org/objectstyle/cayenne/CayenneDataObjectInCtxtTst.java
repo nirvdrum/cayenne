@@ -69,7 +69,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         context = getDomain().createDataContext();
     }
 

@@ -70,7 +70,7 @@ public class DataContextEntityWithMeaningfulPKTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         ctxt = getDomain().createDataContext();
     }
 

@@ -74,6 +74,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapObject;
@@ -88,6 +89,9 @@ import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
+import org.scopemvc.util.convertor.StringConvertor;
+import org.scopemvc.util.convertor.StringConvertors;
+import org.scopemvc.view.swing.ValidationHelper;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
@@ -114,6 +118,7 @@ public class ObjEntityPane
     protected JTextField name;
     protected JTextField className;
     protected JTextField superClassName;
+    protected JTextField qualifier;
     protected JComboBox dbEntityCombo;
     protected JComboBox superEntityCombo;
     protected JButton tableLabel;
@@ -131,6 +136,7 @@ public class ObjEntityPane
         name = CayenneWidgetFactory.createTextField();
         superClassName = CayenneWidgetFactory.createTextField();
         className = CayenneWidgetFactory.createTextField();
+        qualifier = CayenneWidgetFactory.createTextField();
 
         dbEntityCombo = CayenneWidgetFactory.createComboBox();
         dbEntityCombo.setRenderer(CellRenderers.listRendererWithIcons());
@@ -159,6 +165,7 @@ public class ObjEntityPane
 
         builder.append("Java Class:", className);
         builder.append("Superclass:", superClassName);
+        builder.append("Qualifier", qualifier);
         builder.append("Read-Only:", readOnly);
         builder.append("Optimistic Locking:", optimisticLocking);
 
@@ -169,10 +176,107 @@ public class ObjEntityPane
         // initialize events processing and tracking of UI updates...
 
         mediator.addObjEntityDisplayListener(this);
-        InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
-        className.setInputVerifier(inputCheck);
-        superClassName.setInputVerifier(inputCheck);
+
+        qualifier.setInputVerifier(new InputVerifier() {
+            public boolean verify(JComponent input) {
+                String text = qualifier.getText();
+                if (text != null && text.trim().length() == 0) {
+                    text = null;
+                }
+
+                ObjEntity ent = mediator.getCurrentObjEntity();
+
+                if (ent != null) {
+                    Expression exp = null;
+                    StringConvertor convertor =
+                        StringConvertors.forClass(Expression.class);
+
+                    try {
+                        exp = (Expression) convertor.stringAsValue(text);
+                        ent.setQualifier(exp);
+                        mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+
+                        // TODO: this is a hack until we implement a real MVC
+                        qualifier.setBackground(name.getBackground());
+                    }
+                    catch (IllegalArgumentException ex) {
+                        // unparsable qualifier 
+                        qualifier.setBackground(
+                            ValidationHelper.DEFAULT_VALIDATION_FAILED_COLOR);
+                    }
+                }
+
+                return true;
+            }
+        });
+
+        name.setInputVerifier(new InputVerifier() {
+            public boolean verify(JComponent input) {
+                String text = name.getText();
+                if (text == null || text.trim().length() == 0) {
+                    text = "";
+                }
+
+                DataMap map = mediator.getCurrentDataMap();
+                ObjEntity ent = mediator.getCurrentObjEntity();
+
+                ObjEntity matchingEnt = map.getObjEntity(text);
+
+                if (matchingEnt == null) {
+                    // completely new name, set new name for entity
+                    EntityEvent e = new EntityEvent(this, ent, ent.getName());
+                    MapUtil.setObjEntityName(map, ent, text);
+                    mediator.fireObjEntityEvent(e);
+                    return true;
+                }
+                else if (matchingEnt == ent) {
+                    // no name changes, just return
+                    return true;
+                }
+                else {
+                    // there is an entity with the same name
+                    return false;
+                }
+            }
+        });
+
+        className.setInputVerifier(new InputVerifier() {
+            public boolean verify(JComponent input) {
+                String classText = className.getText();
+                if (classText != null && classText.trim().length() == 0) {
+                    classText = null;
+                }
+
+                ObjEntity ent = mediator.getCurrentObjEntity();
+
+                // "ent" may be null if we quit editing by changing tree selection
+                if (ent != null && !Util.nullSafeEquals(ent.getClassName(), classText)) {
+                    ent.setClassName(classText);
+                    mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+                }
+
+                return true;
+            }
+        });
+
+        superClassName.setInputVerifier(new InputVerifier() {
+            public boolean verify(JComponent input) {
+                String parentClassText = superClassName.getText();
+                if (parentClassText != null && parentClassText.trim().length() == 0) {
+                    parentClassText = null;
+                }
+
+                ObjEntity ent = mediator.getCurrentObjEntity();
+
+                if (ent != null
+                    && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
+                    ent.setSuperClassName(parentClassText);
+                    mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+                }
+
+                return true;
+            }
+        });
 
         dbEntityCombo.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -260,11 +364,17 @@ public class ObjEntityPane
      * Invoked when a currently displayed ObjEntity is changed.
      */
     private void initFromModel(final ObjEntity entity) {
+        // TODO: this is a hack until we implement a real MVC
+        qualifier.setBackground(name.getBackground());
+
         name.setText(entity.getName());
         superClassName.setText(
             entity.getSuperClassName() != null ? entity.getSuperClassName() : "");
         className.setText(entity.getClassName() != null ? entity.getClassName() : "");
         readOnly.setSelected(entity.isReadOnly());
+
+        StringConvertor convertor = StringConvertors.forClass(Expression.class);
+        qualifier.setText(convertor.valueAsString(entity.getQualifier()));
 
         // TODO: fix inheritance - we should allow to select optimistic
         // lock if superclass is not already locked, 
@@ -336,84 +446,5 @@ public class ObjEntityPane
         }
 
         initFromModel(entity);
-    }
-
-    class FieldVerifier extends InputVerifier {
-        public boolean verify(JComponent input) {
-            if (input == name) {
-                return verifyName();
-            }
-            else if (input == superClassName) {
-                return verifySuperClassName();
-            }
-            else if (input == className) {
-                return verifyClassName();
-            }
-            else {
-                return true;
-            }
-        }
-
-        protected boolean verifyName() {
-            String text = name.getText();
-            if (text == null || text.trim().length() == 0) {
-                text = "";
-            }
-
-            DataMap map = mediator.getCurrentDataMap();
-            ObjEntity ent = mediator.getCurrentObjEntity();
-
-            ObjEntity matchingEnt = map.getObjEntity(text);
-
-            if (matchingEnt == null) {
-                // completely new name, set new name for entity
-                EntityEvent e = new EntityEvent(this, ent, ent.getName());
-                MapUtil.setObjEntityName(map, ent, text);
-                mediator.fireObjEntityEvent(e);
-                return true;
-            }
-            else if (matchingEnt == ent) {
-                // no name changes, just return
-                return true;
-            }
-            else {
-                // there is an entity with the same name
-                return false;
-            }
-        }
-
-        protected boolean verifyClassName() {
-            String classText = className.getText();
-            if (classText != null && classText.trim().length() == 0) {
-                classText = null;
-            }
-
-            ObjEntity ent = mediator.getCurrentObjEntity();
-
-            // "ent" may be null if we quit editing by changing tree selection
-            if (ent != null && !Util.nullSafeEquals(ent.getClassName(), classText)) {
-                ent.setClassName(classText);
-                mediator.fireObjEntityEvent(new EntityEvent(this, ent));
-            }
-
-            return true;
-        }
-
-        protected boolean verifySuperClassName() {
-            String parentClassText = superClassName.getText();
-            if (parentClassText != null && parentClassText.trim().length() == 0) {
-                parentClassText = null;
-            }
-
-            ObjEntity ent = mediator.getCurrentObjEntity();
-
-            if (ent != null
-                && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
-                ent.setSuperClassName(parentClassText);
-                mediator.fireObjEntityEvent(new EntityEvent(this, ent));
-            }
-
-            return true;
-        }
     }
 }

@@ -69,6 +69,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.project.DataMapFile;
 import org.objectstyle.cayenne.query.QueryBuilder;
 import org.objectstyle.cayenne.query.SelectQueryBuilder;
@@ -415,7 +416,7 @@ public class MapLoader extends DefaultHandler {
             processEndQuerySQL();
         }
         else if (local_name.equals(QUERY_QUALIFIER_TAG)) {
-            processEndQueryQualifier();
+            processEndQualifier();
         }
         else if (local_name.equals(QUERY_ORDERING_TAG)) {
             processEndQueryOrdering();
@@ -905,8 +906,19 @@ public class MapLoader extends DefaultHandler {
         queryBuilder.setSql(charactersBuffer.toString());
     }
 
-    private void processEndQueryQualifier() throws SAXException {
-        queryBuilder.setQualifier(charactersBuffer.toString());
+    private void processEndQualifier() throws SAXException {
+        String qualifier = charactersBuffer.toString();
+        if (qualifier.trim().length() == 0) {
+            return;
+        }
+
+        // qualifier can belong to ObjEntity or a query
+        if (objEntity != null) {
+            objEntity.setQualifier(Expression.fromString(qualifier));
+        }
+        else {
+            queryBuilder.setQualifier(qualifier);
+        }
     }
 
     private void processEndQueryOrdering() throws SAXException {

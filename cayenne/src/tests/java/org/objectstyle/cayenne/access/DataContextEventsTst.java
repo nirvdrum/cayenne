@@ -71,8 +71,8 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     protected DataContext context;
     protected Artist artist;
 
-    public void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+    protected void setUp() throws Exception {
+        cleanTableData();
         context = getDomain().createDataContext();
         
         context.setTransactionEventsEnabled(true);

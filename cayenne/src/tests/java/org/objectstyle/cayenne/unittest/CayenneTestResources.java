@@ -96,7 +96,7 @@ public class CayenneTestResources {
     protected DataSourceInfo sharedConnInfo;
     protected DataSource sharedDataSource;
     protected DataDomain sharedDomain;
-    protected CayenneTestDatabaseSetup sharedDatabaseSetup;
+    protected TestDatabaseManager sharedDatabaseSetup;
     protected File testDir;
 
     public static void init() {
@@ -122,7 +122,8 @@ public class CayenneTestResources {
         try {
             Class.forName("java.sql.Savepoint");
             hasJSDK14 = true;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             hasJSDK14 = false;
         }
     }
@@ -139,7 +140,8 @@ public class CayenneTestResources {
     public CayenneTestResources(String connectionKey) {
         if (hasJSDK14()) {
             logObj.info("JDK 1.4 detected.");
-        } else {
+        }
+        else {
             logObj.info("No JDK 1.4 detected, assuming JDK1.3.");
         }
 
@@ -152,7 +154,8 @@ public class CayenneTestResources {
             createDbSetup();
             createTestDatabase();
             tweakMapping();
-        } else {
+        }
+        else {
             logObj.warn(
                 "No property for '"
                     + CONNECTION_NAME_KEY
@@ -170,7 +173,8 @@ public class CayenneTestResources {
     public Connection getSharedConnection() {
         try {
             return getSharedNode().getDataSource().getConnection();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             ex.printStackTrace();
             throw new RuntimeException("Error unchecking connection: " + ex);
         }
@@ -201,7 +205,8 @@ public class CayenneTestResources {
                 new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
             sharedDataSource =
                 new PoolManager(poolDS, 1, 1, dsi.getUserName(), dsi.getPassword());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.error("Can not create shared data source.", ex);
             throw new CayenneRuntimeException("Can not create shared data source.", ex);
         }
@@ -249,7 +254,8 @@ public class CayenneTestResources {
                 node.setDataSource(sharedDataSource);
                 node.addDataMap(map);
                 domain.addNode(node);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 logObj.error("Can not create domain with map: " + mapPaths[i], ex);
                 throw new CayenneRuntimeException(
                     "Can not create domain with map: " + mapPaths[i],
@@ -264,17 +270,18 @@ public class CayenneTestResources {
      * Gets the sharedDatabaseSetup.
      * @return Returns a DatabaseSetup
      */
-    public CayenneTestDatabaseSetup getSharedDatabaseSetup() {
+    public TestDatabaseManager getDatabaseManager() {
         return sharedDatabaseSetup;
     }
 
     protected void createDbSetup() {
         try {
             sharedDatabaseSetup =
-                new CayenneTestDatabaseSetup(
-                    this,
+                new TestDatabaseManager(
+                    getSharedNode(),
                     (DataMap) getSharedNode().getDataMaps().iterator().next());
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.error("Can not create shared DatabaseSetup.", ex);
             throw new CayenneRuntimeException("Can not create shared DatabaseSetup.", ex);
         }
@@ -286,10 +293,11 @@ public class CayenneTestResources {
 
     protected void createTestDatabase() {
         try {
-            CayenneTestDatabaseSetup dbSetup = getSharedDatabaseSetup();
+            TestDatabaseManager dbSetup = getDatabaseManager();
             dbSetup.dropTestTables();
             dbSetup.setupTestTables();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.error("Error creating test database.", ex);
             throw new CayenneRuntimeException("Error creating test database.", ex);
         }
@@ -297,7 +305,7 @@ public class CayenneTestResources {
 
     protected void tweakMapping() {
         try {
-            DatabaseSetupDelegate delegate = getSharedDatabaseSetup().getDelegate();
+            DatabaseSetupDelegate delegate = getDatabaseManager().getDelegate();
 
             Iterator maps = getSharedDomain().getDataMaps().iterator();
             while (maps.hasNext()) {
@@ -309,7 +317,8 @@ public class CayenneTestResources {
                 }
             }
 
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             logObj.error("Error creating test database.", ex);
             throw new CayenneRuntimeException("Error creating test database.", ex);
         }

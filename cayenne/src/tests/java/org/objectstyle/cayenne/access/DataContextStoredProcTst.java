@@ -275,7 +275,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
             return;
         }
 
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         ctxt = createDataContext();
     }
 }

@@ -75,7 +75,7 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         ctxt = getDomain().createDataContext();
     }
 

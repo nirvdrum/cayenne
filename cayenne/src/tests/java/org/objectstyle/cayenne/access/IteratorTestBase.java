@@ -73,13 +73,13 @@ public class IteratorTestBase extends CayenneTestCase {
 	protected QueryTranslator transl;
 	protected SelectQuery query;
 
-	public void setUp() throws Exception {
+	protected void setUp() throws Exception {
 		conn = null;
 		st = null;
 		transl = null;
 		query = null;
 
-		getDatabaseSetup().cleanTableData();
+		cleanTableData();
 		new DataContextTst().populateTables();
 	}
 

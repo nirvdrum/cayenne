@@ -145,7 +145,6 @@ public abstract class CayenneTestCase extends TestCase {
         return createDataContextWithSharedCache();
     }
 
-
     /**
      * Creates a DataContext that uses shared snapshot cache and is based on default test domain.
      */
@@ -178,11 +177,15 @@ public abstract class CayenneTestCase extends TestCase {
         return context;
     }
 
-    public CayenneTestDatabaseSetup getDatabaseSetup() {
-        return CayenneTestResources.getResources().getSharedDatabaseSetup();
+    public TestDatabaseManager getDatabaseSetup() {
+        return CayenneTestResources.getResources().getDatabaseManager();
     }
 
     public DatabaseSetupDelegate getDatabaseSetupDelegate() {
-        return CayenneTestResources.getResources().getSharedDatabaseSetup().getDelegate();
+        return getDatabaseSetup().getDelegate();
+    }
+
+    public void cleanTableData() throws Exception {
+        getDatabaseSetup().cleanTableData();
     }
 }

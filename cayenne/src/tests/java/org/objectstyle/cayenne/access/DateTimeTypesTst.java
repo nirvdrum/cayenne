@@ -129,7 +129,7 @@ public class DateTimeTypesTst extends CayenneTestCase {
     }
 
     protected void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         context = createDataContext();
     }
 }

@@ -71,7 +71,7 @@ public class CDOOneToOneFKTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         context = createDataContext();
     }
 

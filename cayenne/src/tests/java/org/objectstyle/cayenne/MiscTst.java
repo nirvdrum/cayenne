@@ -64,8 +64,8 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class MiscTst extends CayenneTestCase {
 
-    public void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+    protected void setUp() throws Exception {
+        cleanTableData();
     }
 
     public void testNothing() throws Exception {

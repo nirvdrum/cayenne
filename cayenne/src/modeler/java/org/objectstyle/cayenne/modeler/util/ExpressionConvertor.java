@@ -83,6 +83,10 @@ public class ExpressionConvertor implements StringConvertor {
     }
 
     public Object stringAsValue(String string) throws IllegalArgumentException {
+        if (string == null || string.trim().length() == 0) {
+            return null;
+        }
+
         try {
             return Expression.fromString(string);
         }

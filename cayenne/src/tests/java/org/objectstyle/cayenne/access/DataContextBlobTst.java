@@ -70,17 +70,17 @@ public class DataContextBlobTst extends CayenneTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         ctxt = createDataContext();
     }
 
     protected boolean skipTests() {
         return !super.getDatabaseSetupDelegate().supportsLobs();
     }
-    
-	protected boolean skipEmptyLOBTests() {
-		return !super.getDatabaseSetupDelegate().handlesNullVsEmptyLOBs();
-	}
+
+    protected boolean skipEmptyLOBTests() {
+        return !super.getDatabaseSetupDelegate().handlesNullVsEmptyLOBs();
+    }
 
     public void testEmptyBlob() throws Exception {
         if (skipEmptyLOBTests()) {

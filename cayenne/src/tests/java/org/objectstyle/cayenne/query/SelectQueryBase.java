@@ -65,8 +65,8 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     protected SelectQuery query;
     protected TestOperationObserver opObserver;
     
-    public void setUp() throws Exception {
-        getDatabaseSetup().cleanTableData();
+    protected void setUp() throws Exception {
+        cleanTableData();
         populateTables();
         query = new SelectQuery();
         opObserver = new TestOperationObserver();

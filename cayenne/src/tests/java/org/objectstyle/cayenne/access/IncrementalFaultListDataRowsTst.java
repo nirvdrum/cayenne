@@ -79,7 +79,7 @@ public class IncrementalFaultListDataRowsTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        getDatabaseSetup().cleanTableData();
+        cleanTableData();
         new DataContextTst().populateTables(true);
 
         SelectQuery q = new SelectQuery("Artist");
