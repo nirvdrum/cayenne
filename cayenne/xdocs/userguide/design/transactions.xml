@@ -1,0 +1,61 @@
+<document>
+<title>User Guide - Design</title>
+<toc name="toc-user-guide" chapter="4. Design"/>
+<body>
+    <section name="4. Design">
+        <subsection name="4.9 Understanding Transactions">
+            <p>As of version 1.1, Cayenne implements explicit transaction API. This has a benefit of
+            cleaner design and, most importantly, allows external control over transactions, e.g.
+            by a J2EE container.
+            </p>
+            
+            <panel name="1.0.* Compatibility Note:">
+            New transaction API is transparent to the application unless it specifically wants to customize
+            transactions behavior. Therefore code written for Cayenne 1.0.* that mainly uses DataContext need
+            not be changed.
+            </panel>
+            
+            <subsection name="4.9.1 Transactions Behavior">
+            <p>Transaction control in Cayenne is done via instances of <a href=
+			"../../api/cayenne/org/objectstyle/cayenne/access/Transaction.html">Transaction</a>
+            class.</p>
+            
+            <p><strong>Transactions at the application level - DataContext behavior.</strong> Whenever user calls
+            <code>DataContext.commitChanges()</code>, DataContext creates a new Transaction object by invoking 
+            <code>DataDomain.createTransaction()</code> on the parent DataDomain. It passes this Transaction object 
+            to all DataNodes involved in commit, and after that calls commit or rollback on Transaction, propagating
+            this call to all connections involved.
+            </p>
+            
+            <p><strong>Transactions at the database level - DataNode behavior.</strong> DataNode obtains Transaction object 
+            from OperationObserver passed together with a list of queries
+            to <code>DataNode.performQueries(List, OperationObserver)</code>. If Transaction object is not null, DataNode will
+            not attempt to commit or rollback a connection, rather it would add currently active JDBC Connection
+            to the Transaction by calling <code>Transaction.addConnection(java.sql.Connection)</code>. If Transaction is null,
+            DataNode will handle transaction itself. If connection "autoCommit" mode is set to false, DataNode will commit or
+            rollback at the end of <code>DataNode.performQueries(List, OperationObserver)</code> (this behavior is consistent
+            with 1.0.*).
+            </p>
+            </subsection>
+            
+            <subsection name="4.9.2 User Control over Transactions">
+            <p>J2EE containers implement their own transaction control features (distributed transactions that may span various resources including
+            and beyond JDBC, declarative transactions support, etc.). To alter default Cayenne transactions and integrate Cayenne with container
+            transaction manager, Cayenne provides special public hooks in the form of <a href=
+			"../../api/cayenne/org/objectstyle/cayenne/access/TransactionDelegate.html">TransactionDelegate</a> interface. A delegate can be
+			set per DataDomain, e.g.:</p>
+<source>
+// on startup
+DataDomain defaultDomain = Configuration.getDomain();
+defaultDomain.setTransactionDelegate(new CustomTransactionDelegate());
+</source>
+			<p>TransactionDelegate implements a set of methods that are called during transaction processing. All methods that have a boolean 
+			return type allow the delegate to suppress default transaction processing by returning <code>false</code>, thus preventing Cayenne 
+			from interfering with container
+			TransactionManager. 
+            </p>
+            </subsection>
+        </subsection>
+    </section>
+</body>
+</document>

@@ -64,9 +64,7 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneException;
 
 /**
- * Class responsible for transaction management within Cayenne. Can 
- * manage multiple parallel transactions. Transactions are identified by 
- * a thread that started it.
+ * Class responsible for transaction management within Cayenne.
  * 
  * @author Andrei Adamchik
  * @since 1.1

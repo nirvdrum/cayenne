@@ -142,9 +142,12 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
+     * Initializes TransactionDelegate used by all DataContexts
+     * associated with this DataDomain.
+     * 
      * @since 1.1
      */
-    public void setDelegate(TransactionDelegate transactionDelegate) {
+    public void setTransactionDelegate(TransactionDelegate transactionDelegate) {
         this.transactionDelegate = transactionDelegate;
     }
     

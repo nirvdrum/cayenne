@@ -63,16 +63,45 @@ import java.sql.Connection;
  * @author Andrei Adamchik
  */
 public interface TransactionDelegate {
-   
-   public boolean willCommit(Transaction transaction);
-   
-   public boolean willMarkAsRollbackOnly(Transaction transaction);
-   
-   public boolean willRollback(Transaction transaction);
-   
-   public boolean didCommit(Transaction transaction);
-   
-   public boolean didRollback(Transaction transaction);
-   
-   public boolean willAddConnection(Transaction transaction, Connection connection);
+
+    /**
+     * Called within a context of Transaction before transaction is committed.
+     * Delegate can do its own processing, and optionally suppress further
+     * commit processing by Cayenne by returning <code>false</code>.
+     */
+    public boolean willCommit(Transaction transaction);
+
+    /**
+     * Called within a context of Transaction before transaction is marked as 
+     * "rollback only" (meaning that further commit is impossible).
+     * Delegate can do its own processing, and optionally suppress further
+     * status processing by Cayenne by returning <code>false</code>.
+     */
+    public boolean willMarkAsRollbackOnly(Transaction transaction);
+
+    /**
+     * Called within a context of Transaction before transaction is rolledback.
+     * Delegate can do its own processing, and optionally suppress further
+     * rolledback processing by Cayenne by returning <code>false</code>.
+     */
+    public boolean willRollback(Transaction transaction);
+
+    /**
+     * Called within a context of a Transaction to notify delegate about a successful 
+     * transaction commit.
+     */
+    public void didCommit(Transaction transaction);
+
+    /**
+     * 
+     */
+    public void didRollback(Transaction transaction);
+
+    /**
+     * Called within a context of Transaction when a new Connection is added
+     * to the list of Connections participating in transaction.
+     * Delegate can do its own processing, and optionally suppress further
+     * Connection registration inside Transaction by returning <code>false</code>.
+     */
+    public boolean willAddConnection(Transaction transaction, Connection connection);
 }

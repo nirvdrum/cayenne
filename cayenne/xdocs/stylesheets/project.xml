@@ -54,6 +54,7 @@
     		<item name="4.6 Cross-Database Issues"  href="/userguide/design/crossdb.html"/>
     		<item name="4.7 Primary Key Generation"  href="/userguide/design/autopk.html"/>
     		<item name="4.8 Understanding Caching"  href="/userguide/design/caching.html"/>
+    		<item name="4.9 Understanding Transactions"  href="/userguide/design/transactions.html"/>
     	</item>
     	
     	<item name="5. Generating Classes with Ant"  href="/userguide/javagen.html"/>
