@@ -1,0 +1,40 @@
+<document>
+<title>User Guide - Installation</title>
+
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/install/postinstall.html</prev>
+	<next>/userguide/quickstart/index.html</next>
+</navigator>
+
+<body>
+    <section name="2. Installation">        
+		<subsection name="2.4 Compiling Cayenne from Source" anchor="compile">
+		    <p><strong>JSDK1.4 must be present to compile Cayenne.</strong></p>
+		    
+			<panel name="Note:">Normally users don't need to build Cayenne from source. 
+            Prebuilt JAR's are included with a distribution.</panel>
+
+			<p>For those users who need to recompile Cayenne (for example if they modified the
+			source code to customize or test certain aspects), Cayenne source distribution
+			provides Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). To build
+			custom Cayenne jars execute the following commands. Windows:</p>
+
+		<source>cd %CAYENNE_HOME%\src
+%ANT_HOME%\bin\ant.bat</source>
+
+		<p>UNIX</p>
+
+		<source>cd $CAYENNE_HOME/src
+$ANT_HOME/bin/ant</source>
+
+			<p>Note that the original cayenne.jar file should be present in the
+			<code>[cayenne_install_dir]/lib</code> directory, since it contains dependencies
+			not included as a source code. The result of the build is two new JAR files:
+			<code>[cayenne_install_dir]/lib/cayenne-cust.jar</code> and
+			<code>[cayenne_install_dir]/lib/cayenne-tests-cust.jar</code>.
+			</p>
+		</subsection>
+    </section>
+</body>
+</document>

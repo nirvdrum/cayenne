@@ -11,16 +11,15 @@
                 <li><a href="intro.html#about">1.1 About Cayenne</a></li>
                 <li><a href="intro.html#contrib">1.2 Contributors</a></li>
                 <li><a href="intro.html#license">1.3 License</a></li>
-            </ul></li>  
+            </ul><br/></li>  
             
             <li><a href="install/index.html">2. Installation</a>
             <ul>
                 <li><a href="install/index.html#sys_req">2.1 System Requirements</a></li>
-                <li><a href="install/index.html#inst">2.2 Installation</a></li>
-                <li><a href="install/index.html#db">2.3 Database Configuration</a></li>
-                <li><a href="install/index.html#jar">2.4 Cayenne JAR Files</a></li>
-                <li><a href="install/index.html#compile">2.5 Compiling Cayenne from Source</a></li>
-            </ul></li>
+                <li><a href="install/install.html#inst">2.2 Installation</a></li>
+                <li><a href="install/postinstall.html#jar">2.3 Understanding Cayenne JAR Files</a></li>
+                <li><a href="install/compile.html#compile">2.4 Compiling Cayenne from Source</a></li>
+            </ul><br/></li>
             
             <li><a href="quickstart/index.html">3. Quick Start</a>
             <ul>
@@ -28,7 +27,7 @@
                 <li><a href="quickstart/comline.html">3.2 "Command-line Application" Tutorial</a></li>
                 <li><a href="quickstart/webapp.html">3.3 "JSP/Struts Web Application" Tutorial</a></li>
                 <li><a href="quickstart/webapp.html">3.4 "Tapestry Web Application" Tutorial</a></li>
-            </ul></li>
+            </ul><br/></li>
             
             <li><a href="design/index.html">4. Design</a>
             <ul>
@@ -40,7 +39,7 @@
                 <li><a href="design/datasrc.html#connect">4.6 Cayenne DataSource</a></li>
                 <li><a href="design/crossdb.html#crossdb">4.7 Cross-Database Issues</a></li>
                 <li><a href="design/autopk.html#pk">4.8 Primary Key Generation</a></li>
-            </ul></li>
+            </ul><br/></li>
             
             <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>
             <ul>
@@ -53,7 +52,7 @@
                 <li><a href="appguide/save.html#cayenne_save">5.7 Saving Modified Objects</a></li>
                 <li><a href="appguide/bigqueries.html#big">5.8 Handling Large Result Sets</a></li>
                 <li><a href="appguide/deploy.html#deploy">5.9 Deployment</a></li>
-            </ul></li>
+            </ul><br/></li>
             
             <li><a href="modeler/index.html">6. CayenneModeler GUI Tool</a>
             <ul>
@@ -63,13 +62,13 @@
                 <li><a href="modeler/mapschema.html">6.4. DataMap First, Database Second</a></li>
                 <li><a href="modeler/schemamap.html">6.5 Database First, DataMap Second</a></li>
                 <li><a href="modeler/pksupport.html">6.6 Generating Primary Key Support in the Database</a></li>
-            </ul></li>
+            </ul><br/></li>
             
             <li><a href="webobjects.html">7. Cayenne and WebObjects</a>
             <ul>
                 <li><a href="webobjects.html#intro">7.1 Introduction</a></li>
                 <li><a href="webobjects.html#terms">7.2 Terms Translation</a></li>
-            </ul></li>
+            </ul><br/></li>
         </ul>
     </section>
 </body>

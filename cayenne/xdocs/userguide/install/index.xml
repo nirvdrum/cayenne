@@ -4,7 +4,7 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/intro.html</prev>
-	<next>/userguide/quickstart/index.html</next>
+	<next>/userguide/install/install.html</next>
 </navigator>
 
 <body>
@@ -61,132 +61,6 @@
 			</ul>
 			</p>
         </subsection>
-
-        <subsection name="2.2 Installation" anchor="inst">
-            <p>There is not really an installation of Cayenne, 
-            as Cayenne is not an application but a framework. Thus, installing Cayenne 
-            simply means to understand what jars are needed. This is discussed below. </p>
-            
-            <p>Download Cayenne from <a href=
-            "http://objectstyle.org/cayenne/download.html">
-            http://objectstyle.org/cayenne/download.html</a>. 
-            Choose the type of download that fits your needs. If you need
-            a stable version, download a <strong>release distribution</strong>.
-            To get the latest features, download a <strong>nightly
-            build distribution</strong> (of course when using nightly
-			builds users run into the risks 
-            accociated with running development code). Downloaded file is called 
-            something like <code>cayenne-[release-suffix].tar.gz</code>.
-            </p>
-            
-            <p>Unpack <code>cayenne-[release-suffix].tar.gz</code> into the target installation
-            directory. On Windows you can use <a href=
-            "http://www.winzip.com/">WinZip</a> to unpack the distribution. 
-            WinZip supports UNIX .tar.gz archives, therefore Cayenne is not provided as a zip file. 
-            On UNIX, run the following command:</p>
-            
-            <source># gz -dc [filename].tar.gz | tar xf -</source>
-                
-            <p>or if you happen to have GNU tar</p>
-                
-            <source># tar xzf [filename].tar.gz</source>
-            
-            <p>To take advantage of the scripts located in the <code>bin</code>
-            directory of Cayenne, set the following environment variables:
-            <ul>
-                <li><code>CAYENNE_HOME</code> - should point to
-                the directory created when your unpacked Cayenne distribution in the previous 
-                steps. (Directory named like <code>cayenne-[release-suffix]</code>). </li>
-                    
-                <li><code>JAVA_HOME</code> - should point to your JSDK 1.4 installation. 
-                It may already exist in the environment.</li>
-            </ul>
-            
-            <i>Note that these variables are only necessary to use the scripts
-            that run unit tests and start CayenneModeler. 
-            They are probably not needed on a deployment machine.</i>
-            </p>
-        </subsection>
-        
-        <subsection name="2.3 Database Configuration" anchor="db">
-           	<p>Databases used with Cayenne must be configured appropriately
-           	for Cayenne automatic primary key generation feature. This is 
-           	a part of required configuration, but it is normally
-           	deferred till the first project is created. Detailed instructions on
-           	database configuration via CayenneModeler are given 
-           	<a href="../modeler/pksupport.html">here</a>.</p>
-        </subsection>
-        
-        
-        <subsection name="2.4 Cayenne JAR Files" anchor="jar">
-            <p>There are two JAR files in <code>[cayenne_install_dir]/lib</code>
-            directory: <ul>
-            	<li><strong><code>cayenne.jar</code></strong></li>
-				<li><strong><code>cayenne-nodeps.jar</code></strong></li>
-			</ul>
-			
-            Either one or another should be used (<strong>but not both of them</strong>
-            at the same time).
-            In most cases <code>cayenne.jar</code> is the best choice. It has 
-            Cayenne classes as well as all the needed dependencies. 
-            Dependencies are bundled for easier installation and configuration of Cayenne.
-            They include:
-            
-            <ul>
-            	<li><a href="http://jakarta.apache.org/velocity/">Jakarta Velocity Template 
-            	Engine</a>, version 1.3</li>
-				<li><a href="http://jakarta.apache.org/oro/">Jakarta ORO Regular Expressions 
-				package</a> <i>(also bundled with Velocity)</i></li>
-				<li><a href="http://jakarta.apache.org/oro/">Jakarta Log4J 
-				package</a>, version 1.2.6</li>
-			</ul>
-            
-            If a leaner <code>cayenne-nodeps.jar</code> file is used, all the dependencies
-            must be installed by the user manually.
-            </p>
-            
-            <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by 
-			the applications that use Cayenne. There are a few "standard" ways of doing it in Java,
-			like setting CLASSPATH variable, etc.</p>
-            
-            <panel name="Warning:">It is NOT recommended to put Cayenne JAR files under 
-            JRE extensions directory ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext),
-            though it will probably work for most cases.</panel>
-            
-            <p>The reason for the warning above is that classes loaded from extensions 
-            directory have their own ClassLoader and can't directly 
-            access resources associated with other ClassLoaders. Cayenne allows to "bootstrap"
-            other ClassLoaders for the purpose of resource lookup, but this requires extra code
-            and doesn't solve all problems.</p>
-            
-        </subsection>
-        
-		<subsection name="2.5 Compiling Cayenne from Source" anchor="compile">
-		    <p><strong>JSDK1.4 must be present to compile Cayenne.</strong></p>
-		    
-			<panel name="Note:">Normally users don't need to build Cayenne from source. 
-            Prebuilt JAR's are included with a distribution.</panel>
-
-			<p>For those users who need to recompile Cayenne (for example if they modified the
-			source code to customize or test certain aspects), Cayenne source distribution
-			provides Ant buildfile (<code>[cayenne_install_dir]/src/build.xml</code>). To build
-			custom Cayenne jars execute the following commands. Windows:</p>
-
-		<source>cd %CAYENNE_HOME%\src
-%ANT_HOME%\bin\ant.bat</source>
-
-		<p>UNIX</p>
-
-		<source>cd $CAYENNE_HOME/src
-$ANT_HOME/bin/ant</source>
-
-			<p>Note that the original cayenne.jar file should be present in the
-			<code>[cayenne_install_dir]/lib</code> directory, since it contains dependencies
-			not included as a source code. The result of the build is two new JAR files:
-			<code>[cayenne_install_dir]/lib/cayenne-cust.jar</code> and
-			<code>[cayenne_install_dir]/lib/cayenne-tests-cust.jar</code>.
-			</p>
-		</subsection>
     </section>
 </body>
 </document>

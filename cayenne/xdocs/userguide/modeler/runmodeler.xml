@@ -20,7 +20,7 @@
         	and UNIX platforms. To take advantage of these scripts, user must
         	set
         	CAYENNE_HOME and JAVA_HOME environment variables as described in the
-        	<a href="../install.html#inst">installation section</a>. To run
+        	<a href="../install/install.html#inst">installation section</a>. To run
         	CayenneModeler use the following commands. Windows:
         	</p>
 
