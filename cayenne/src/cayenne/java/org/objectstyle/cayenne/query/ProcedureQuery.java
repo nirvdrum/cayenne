@@ -264,7 +264,7 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #getParameter(String, Object)}.
+     * @deprecated Since 1.1 use {@link #addParameter(String, Object)}.
      */
     public void addParam(String name, Object value) {
         addParameter(name, value);
@@ -285,6 +285,8 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
     }
 
     /**
+     * Adds a named parameter to the internal map of parameters.
+     * 
      * @since 1.1
      */
     public synchronized void addParameter(String name, Object value) {

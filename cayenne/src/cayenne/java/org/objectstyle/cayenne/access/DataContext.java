@@ -113,9 +113,9 @@ import org.objectstyle.cayenne.util.Util;
  * concept in a multiuser application.
  * 
  * </p><p>
- * DataObjects are registered with DataContext either <i>implicitly</i> when they are 
+ * DataObjects are registered with DataContext either implicitly when they are 
  * fetched via a query, or read via a relationship from another object, 
- * or <i>explicitly</i> via calling {@link #createAndRegisterNewObject(Class)} during 
+ * or explicitly via calling {@link #createAndRegisterNewObject(Class)} during 
  * new DataObject creation. DataContext tracks changes made to its DataObjects in memory, 
  * and flushes them to the database when {@link #commitChanges()} is called. Until 
  * DataContext is committed, changes made to its objects are not visible in other 
