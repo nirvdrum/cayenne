@@ -115,7 +115,6 @@
 #end
 
 #macro ( panel $panel)
-<div align="center">
 <p>
     <table cellpadding="1" cellspacing="0" border="0" width="85%" bgcolor="#000000">
     <tr><td><table bgcolor="$panelbg" cellpadding="2" cellspacing="0" border="0" width="100%">
@@ -126,7 +125,6 @@
 #end
     <td bgcolor="$panelbg" align="left">$panel.getText()</td></tr></table></td></tr></table>
 </p>
-</div>
 #end
 
 
