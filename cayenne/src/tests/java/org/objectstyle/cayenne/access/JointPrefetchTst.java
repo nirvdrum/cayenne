@@ -59,8 +59,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
+import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -100,7 +103,7 @@ public class JointPrefetchTst extends CayenneTestCase {
         while (it.hasNext()) {
             DataRow row = (DataRow) it.next();
             assertEquals(rowWidth, row.size());
-            
+
             // assert columns presence
             assertTrue(row + "", row.containsKey("PAINTING_ID"));
             assertTrue(row + "", row.containsKey("ARTIST_ID"));
@@ -134,4 +137,83 @@ public class JointPrefetchTst extends CayenneTestCase {
         }
     }
 
+    public void testJointPrefetchToMany() throws Exception {
+        createTestData("testJointPrefetch1");
+
+        // query with to-many joint prefetches
+        SelectQuery q = new SelectQuery(Artist.class);
+        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY);
+
+        DataContext context = createDataContext();
+
+        List objects = context.performQuery(q);
+
+        // without OUTER join we will get fewer objects...
+        assertEquals(2, objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Artist a = (Artist) it.next();
+            ToManyList list = (ToManyList) a.getPaintingArray();
+
+            assertNotNull(list);
+            assertFalse(list.needsFetch());
+            assertTrue(list.size() > 0);
+
+            Iterator children = list.iterator();
+            while (children.hasNext()) {
+                Painting p = (Painting) children.next();
+                assertEquals(PersistenceState.COMMITTED, p.getPersistenceState());
+            }
+        }
+    }
+
+    public void testJointPrefetchMultiStep() throws Exception {
+        createTestData("testJointPrefetch2");
+
+        // query with to-many joint prefetches
+        SelectQuery q = new SelectQuery(Artist.class);
+        q.addJointPrefetch(Artist.PAINTING_ARRAY_PROPERTY
+                + "."
+                + Painting.TO_GALLERY_PROPERTY);
+
+        DataContext context = createDataContext();
+
+        // sanity check...
+        DataObject g1 = context.getObjectStore().getObject(new ObjectId(
+                Gallery.class,
+                Gallery.GALLERY_ID_PK_COLUMN,
+                33001));
+        assertNull(g1);
+
+        List objects = context.performQuery(q);
+
+        // without OUTER join we will get fewer objects...
+        assertEquals(2, objects.size());
+
+        Iterator it = objects.iterator();
+        while (it.hasNext()) {
+            Artist a = (Artist) it.next();
+            ToManyList list = (ToManyList) a.getPaintingArray();
+
+            assertNotNull(list);
+
+            // intermediate relationship is not fetched...
+            assertTrue(list.needsFetch());
+        }
+
+        // however both galleries must be in memory...
+        g1 = context.getObjectStore().getObject(new ObjectId(
+                Gallery.class,
+                Gallery.GALLERY_ID_PK_COLUMN,
+                33001));
+        assertNotNull(g1);
+        assertEquals(PersistenceState.COMMITTED, g1.getPersistenceState());
+        DataObject g2 = context.getObjectStore().getObject(new ObjectId(
+                Gallery.class,
+                Gallery.GALLERY_ID_PK_COLUMN,
+                33002));
+        assertNotNull(g2);
+        assertEquals(PersistenceState.COMMITTED, g2.getPersistenceState());
+    }
 }
