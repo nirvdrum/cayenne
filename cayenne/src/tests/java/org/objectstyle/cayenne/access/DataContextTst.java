@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TestOperationObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -374,6 +375,12 @@ public class DataContextTst extends CayenneTestCase {
      * Test fetching a derived entity.
      */
     public void testDerivedEntityFetch1() throws Exception {
+		// Skip HSQLDB, since it currently does not support HAVING;
+		// this is supposed to appear in the next release.
+		if (((DataNode)getDomain().getDataNodesAsList().get(0)).getAdapter().getClass() == HSQLDBAdapter.class) {
+			return;
+		}
+
         populatePaintings();
 
         SelectQuery q = new SelectQuery("ArtistAssets");
@@ -389,6 +396,12 @@ public class DataContextTst extends CayenneTestCase {
      * Test fetching a derived entity with complex qualifier including relationships.
      */
     public void testDerivedEntityFetch2() throws Exception {
+		// Skip HSQLDB, since it currently does not support HAVING;
+		// this is supposed to appear in the next release.
+		if (((DataNode)getDomain().getDataNodesAsList().get(0)).getAdapter().getClass() == HSQLDBAdapter.class) {
+			return;
+		}
+
         populatePaintings();
 
         SelectQuery q = new SelectQuery("ArtistAssets");
