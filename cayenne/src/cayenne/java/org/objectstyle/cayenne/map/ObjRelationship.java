@@ -62,22 +62,22 @@ import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
-/** Metadata for the navigational association between the data objects.
- *  For example, if class "Employee" you may need to get to the department
- *  entity by calling "employee.getDepartment()". In this case you navigate
- *  from data object class Employee to Department. In this case Employee is
- *  source and Department is target. The navigation from Department to the
- *  list of employees would be expressed by another instance of
- *  ObjRelationship.
- *  ObjRelationship class also stores the navigation information in terms
- *  of the database entity relationships.
- *  The ObjRelationship objects are stored in the ObjEntitys. */
+/** 
+ * Metadata for the navigational association between the data objects. For
+ * example, if class "Employee" you may need to get to the department  entity by
+ * calling "employee.getDepartment()". In this case you navigate  from data
+ * object class Employee to Department. In this case Employee is  source and
+ * Department is target. The navigation from Department to the  list of
+ * employees would be expressed by another instance of  ObjRelationship.
+ * ObjRelationship class also stores the navigation information in terms  of the
+ * database entity relationships.  The ObjRelationship objects are stored in the
+ * ObjEntities. 
+ */
 public class ObjRelationship extends Relationship {
 
 	//What to do with any inverse relationship when the source object
 	// is deleted
-	//Default value if none is specified is Nullify.
-	private int deleteRule = DeleteRule.NULLIFY;
+	private int deleteRule = DeleteRule.NO_ACTION;
 
 	//Not flattened initially - will be set when dbRels are added that make it flattened
 	private boolean isFlattened = false;
@@ -304,7 +304,8 @@ public class ObjRelationship extends Relationship {
 	public void setDeleteRule(int value) {
 		if ((value != DeleteRule.CASCADE)
 			&& (value != DeleteRule.DENY)
-			&& (value != DeleteRule.NULLIFY)) {
+			&& (value != DeleteRule.NULLIFY) 
+			&& (value != DeleteRule.NO_ACTION)) {
 
 			throw new IllegalArgumentException(
 				"Delete rule value "

@@ -96,7 +96,8 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_ENTITY_TAG = "db-entity";
     public static final String OBJ_ENTITY_TAG = "obj-entity";
     public static final String DB_ATTRIBUTE_TAG = "db-attribute";
-    public static final String DB_ATTRIBUTE_DERIVED_TAG = "db-attribute-derived";
+    public static final String DB_ATTRIBUTE_DERIVED_TAG =
+        "db-attribute-derived";
     public static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
     public static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
     public static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
@@ -111,7 +112,6 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_GENERATOR_NAME_TAG = "db-generator-name";
     public static final String DB_KEY_CACHE_SIZE_TAG = "db-key-cache-size";
 
-
     /* Reading from XML */
     private DataMap dataMap;
     private DbEntity dbEntity;
@@ -123,7 +123,6 @@ public class MapLoader extends DefaultHandler {
 
     private String currentTag;
     private StringBuffer charactersBuffer;
-
 
     /* Saving to XML */
     private List objRelationships;
@@ -145,7 +144,8 @@ public class MapLoader extends DefaultHandler {
 
         while (it.hasNext()) {
             DbAttributePair join = (DbAttributePair) it.next();
-            if (!join.getTarget().isPrimaryKey() || !join.getSource().isPrimaryKey()) {
+            if (!join.getTarget().isPrimaryKey()
+                || !join.getSource().isPrimaryKey()) {
                 return false;
             }
         }
@@ -154,7 +154,8 @@ public class MapLoader extends DefaultHandler {
     }
 
     /** Loads the data map from the input source (usually file). */
-    public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
+    public synchronized DataMap loadDataMap(InputSource src)
+        throws DataMapException {
         return loadDataMap(src, new ArrayList());
     }
 
@@ -236,7 +237,8 @@ public class MapLoader extends DefaultHandler {
         } finally {
             try {
                 in.close();
-            } catch (IOException ioex) {}
+            } catch (IOException ioex) {
+            }
         }
 
     }
@@ -249,9 +251,8 @@ public class MapLoader extends DefaultHandler {
         throws SAXException {
 
         rememberCurrentTag(local_name);
-        if (local_name
-            .equals(DATA_MAP_TAG)) {} else if (local_name
-            .equals(DB_ENTITY_TAG)) {
+        if (local_name.equals(DATA_MAP_TAG)) {
+        } else if (local_name.equals(DB_ENTITY_TAG)) {
             processStartDbEntity(atts);
         } else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
             processStartDbAttribute(atts);
@@ -282,11 +283,13 @@ public class MapLoader extends DefaultHandler {
         }
     }
 
-    public void endElement(String namespaceURI, String local_name, String qName)
+    public void endElement(
+        String namespaceURI,
+        String local_name,
+        String qName)
         throws SAXException {
-        if (local_name
-            .equals(DATA_MAP_TAG)) {} else if (local_name
-            .equals(DB_ENTITY_TAG)) {
+        if (local_name.equals(DATA_MAP_TAG)) {
+        } else if (local_name.equals(DB_ENTITY_TAG)) {
             processEndDbEntity();
         } else if (local_name.equals(OBJ_ENTITY_TAG)) {
             processEndObjEntity();
@@ -300,11 +303,11 @@ public class MapLoader extends DefaultHandler {
             processEndObjRelationship();
         } else if (local_name.equals(DB_KEY_GENERATOR_TAG)) {
         } else if (local_name.equals(DB_GENERATOR_TYPE_TAG)) {
-          processEndDbGeneratorType();
+            processEndDbGeneratorType();
         } else if (local_name.equals(DB_GENERATOR_NAME_TAG)) {
-          processEndDbGeneratorName();
+            processEndDbGeneratorName();
         } else if (local_name.equals(DB_KEY_CACHE_SIZE_TAG)) {
-          processEndDbKeyCacheSize();
+            processEndDbKeyCacheSize();
         }
         resetCurrentTag();
         charactersBuffer = null;
@@ -349,7 +352,10 @@ public class MapLoader extends DefaultHandler {
         dbRelationshipRefs = new ArrayList();
         dbRelationships = new ArrayList();
         out.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-        out.println("<data-map project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\">");
+        out.println(
+            "<data-map project-version=\""
+                + Project.CURRENT_PROJECT_VERSION
+                + "\">");
         storeDbEntities(out, map);
         storeObjEntities(out, map);
         storeDbRelationships(out);
@@ -366,12 +372,14 @@ public class MapLoader extends DefaultHandler {
         while (iter.hasNext()) {
             DbEntity dbe = (DbEntity) iter.next();
             out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-            if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
+            if (dbe.getSchema() != null
+                && dbe.getSchema().trim().length() > 0) {
                 out.print(" schema=\"");
                 out.print(dbe.getSchema());
                 out.print('\"');
             }
-            if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
+            if (dbe.getCatalog() != null
+                && dbe.getCatalog().trim().length() > 0) {
                 out.print(" catalog=\"");
                 out.print(dbe.getCatalog());
                 out.print('\"');
@@ -389,12 +397,14 @@ public class MapLoader extends DefaultHandler {
         while (diter.hasNext()) {
             DerivedDbEntity dbe = (DerivedDbEntity) diter.next();
             out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-            if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
+            if (dbe.getSchema() != null
+                && dbe.getSchema().trim().length() > 0) {
                 out.print(" schema=\"");
                 out.print(dbe.getSchema());
                 out.print('\"');
             }
-            if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
+            if (dbe.getCatalog() != null
+                && dbe.getCatalog().trim().length() > 0) {
                 out.print(" catalog=\"");
                 out.print(dbe.getCatalog());
                 out.print('\"');
@@ -428,7 +438,9 @@ public class MapLoader extends DefaultHandler {
 
     }
 
-    private void storeDerivedDbAttribute(PrintWriter out, DerivedDbAttribute attr) {
+    private void storeDerivedDbAttribute(
+        PrintWriter out,
+        DerivedDbAttribute attr) {
         out.print("\t\t<db-attribute-derived name=\"" + attr.getName() + '\"');
 
         String type = TypesMapping.getSqlNameByType(attr.getType());
@@ -456,7 +468,9 @@ public class MapLoader extends DefaultHandler {
             out.print('\"');
         }
 
-        if (((DerivedDbEntity) attr.getEntity()).getGroupByAttributes().contains(attr)) {
+        if (((DerivedDbEntity) attr.getEntity())
+            .getGroupByAttributes()
+            .contains(attr)) {
             out.print(" isGroupBy=\"true\"");
         }
 
@@ -475,7 +489,8 @@ public class MapLoader extends DefaultHandler {
             Iterator refs = params.iterator();
             while (refs.hasNext()) {
                 DbAttribute ref = (DbAttribute) refs.next();
-                out.println("\t\t\t<db-attribute-ref name=\"" + ref.getName() + "\"/>");
+                out.println(
+                    "\t\t\t<db-attribute-ref name=\"" + ref.getName() + "\"/>");
             }
             out.println("\t\t</db-attribute-derived>");
         } else {
@@ -515,29 +530,32 @@ public class MapLoader extends DefaultHandler {
         out.println("/>");
     }
 
-    private void storeDbKeyGenerator(PrintWriter out, DbKeyGenerator pkGenerator) {
-      if (pkGenerator == null) return;
-      String type = pkGenerator.getGeneratorType();
-      if (type == null) return;
-      String name = pkGenerator.getGeneratorName();
-      Integer cacheSize = pkGenerator.getKeyCacheSize();
-      out.println("\t\t<" + DB_KEY_GENERATOR_TAG + '>');
-      out.print("\t\t\t<" + DB_GENERATOR_TYPE_TAG + '>');
-      out.print(type);
-      out.println("</" + DB_GENERATOR_TYPE_TAG + '>');
-      if (name != null) {
-        out.print("\t\t\t<" + DB_GENERATOR_NAME_TAG + '>');
-        out.print(name);
-        out.println("</" + DB_GENERATOR_NAME_TAG + '>');
-      }
-      if (cacheSize != null) {
-        out.print("\t\t\t<" + DB_KEY_CACHE_SIZE_TAG + '>');
-        out.print(cacheSize);
-        out.println("</" + DB_KEY_CACHE_SIZE_TAG + '>');
-      }
-      out.println("\t\t</" + DB_KEY_GENERATOR_TAG + '>');
+    private void storeDbKeyGenerator(
+        PrintWriter out,
+        DbKeyGenerator pkGenerator) {
+        if (pkGenerator == null)
+            return;
+        String type = pkGenerator.getGeneratorType();
+        if (type == null)
+            return;
+        String name = pkGenerator.getGeneratorName();
+        Integer cacheSize = pkGenerator.getKeyCacheSize();
+        out.println("\t\t<" + DB_KEY_GENERATOR_TAG + '>');
+        out.print("\t\t\t<" + DB_GENERATOR_TYPE_TAG + '>');
+        out.print(type);
+        out.println("</" + DB_GENERATOR_TYPE_TAG + '>');
+        if (name != null) {
+            out.print("\t\t\t<" + DB_GENERATOR_NAME_TAG + '>');
+            out.print(name);
+            out.println("</" + DB_GENERATOR_NAME_TAG + '>');
+        }
+        if (cacheSize != null) {
+            out.print("\t\t\t<" + DB_KEY_CACHE_SIZE_TAG + '>');
+            out.print(cacheSize);
+            out.println("</" + DB_KEY_CACHE_SIZE_TAG + '>');
+        }
+        out.println("\t\t</" + DB_KEY_GENERATOR_TAG + '>');
     }
-
 
     private void storeObjEntities(PrintWriter out, DataMap map) {
         Iterator iter = sortedObjEntities(map).iterator();
@@ -563,11 +581,11 @@ public class MapLoader extends DefaultHandler {
                 out.print('\"');
             }
 
-			if(temp.getSuperClassName() !=null) {
-				out.print(" superClassName=\"");
-				out.print(temp.getSuperClassName());
-				out.print("\"");
-			}
+            if (temp.getSuperClassName() != null) {
+                out.print(" superClassName=\"");
+                out.print(temp.getSuperClassName());
+                out.print("\"");
+            }
 
             out.println('>');
             storeObjAttribute(out, temp);
@@ -606,21 +624,24 @@ public class MapLoader extends DefaultHandler {
         }
     }
 
-    private void storeObjRelationships(PrintWriter out) throws DataMapException {
+    private void storeObjRelationships(PrintWriter out)
+        throws DataMapException {
         Iterator iter = sortedRelationships(objRelationships).iterator();
         while (iter.hasNext()) {
             ObjRelationship rel = (ObjRelationship) iter.next();
             ObjEntity srcEnt = (ObjEntity) rel.getSourceEntity();
             if (srcEnt == null) {
                 logObj.warn(
-                    "No source entity, ignoring ObjRelationship " + rel.getName());
+                    "No source entity, ignoring ObjRelationship "
+                        + rel.getName());
                 return;
             }
 
             ObjEntity targetEnt = (ObjEntity) rel.getTargetEntity();
             if (targetEnt == null) {
                 logObj.warn(
-                    "No target entity, ignoring ObjRelationship " + rel.getName());
+                    "No target entity, ignoring ObjRelationship "
+                        + rel.getName());
                 return;
             }
 
@@ -628,17 +649,20 @@ public class MapLoader extends DefaultHandler {
             out.print(" source=\"" + srcEnt.getName() + '\"');
             out.print(" target=\"" + targetEnt.getName() + '\"');
             out.print(" toMany=\"" + (rel.isToMany() ? TRUE : FALSE) + '\"');
-			out.print(
-				" deleteRule=\""
-					+ DeleteRule.deleteRuleName(rel.getDeleteRule())
-					+ '\"');
+
+            String deleteRule = DeleteRule.deleteRuleName(rel.getDeleteRule());
+            if (rel.getDeleteRule() != DeleteRule.NO_ACTION && deleteRule != null) {
+                out.print(" deleteRule=\"" + deleteRule + '\"');
+            }
             out.println('>');
             storeDbRelationshipRef(out, rel);
             out.println("\t</obj-relationship>");
         }
     }
 
-    private void storeDbRelationshipRef(PrintWriter out, ObjRelationship obj_rel)
+    private void storeDbRelationshipRef(
+        PrintWriter out,
+        ObjRelationship obj_rel)
         throws DataMapException {
         Iterator iter = obj_rel.getDbRelationshipList().iterator();
         while (iter.hasNext()) {
@@ -668,7 +692,8 @@ public class MapLoader extends DefaultHandler {
         } // End while()
     }
 
-    private void storeDbRelationships(PrintWriter out) throws DataMapException {
+    private void storeDbRelationships(PrintWriter out)
+        throws DataMapException {
         Iterator iter = sortedRelationships(dbRelationships).iterator();
         while (iter.hasNext()) {
             DbRelationship temp = (DbRelationship) iter.next();
@@ -738,7 +763,8 @@ public class MapLoader extends DefaultHandler {
         dataMap.addDbEntity(dbEntity);
     }
 
-    private void processStartDbAttributeRef(Attributes atts) throws SAXException {
+    private void processStartDbAttributeRef(Attributes atts)
+        throws SAXException {
         String name = atts.getValue("", "name");
         if ((attrib instanceof DerivedDbAttribute)
             && (dbEntity instanceof DerivedDbEntity)) {
@@ -780,7 +806,8 @@ public class MapLoader extends DefaultHandler {
         }
     }
 
-    private void processStartDerivedDbAttribute(Attributes atts) throws SAXException {
+    private void processStartDerivedDbAttribute(Attributes atts)
+        throws SAXException {
         String name = atts.getValue("", "name");
         String type = atts.getValue("", "type");
         String spec = atts.getValue("", "spec");
@@ -813,11 +840,11 @@ public class MapLoader extends DefaultHandler {
         }
     }
 
-    private void processStartDbKeyGenerator(Attributes atts) throws SAXException {
-      DbKeyGenerator pkGenerator = new DbKeyGenerator();
-      dbEntity.setPrimaryKeyGenerator(pkGenerator);
+    private void processStartDbKeyGenerator(Attributes atts)
+        throws SAXException {
+        DbKeyGenerator pkGenerator = new DbKeyGenerator();
+        dbEntity.setPrimaryKeyGenerator(pkGenerator);
     }
-
 
     private void processStartObjEntity(Attributes atts) {
         objEntity = new ObjEntity(atts.getValue("", "name"));
@@ -832,10 +859,10 @@ public class MapLoader extends DefaultHandler {
             objEntity.setDbEntity(db_temp);
         }
 
-		temp=atts.getValue("", "superClassName");
-		if( null != temp) {
-			objEntity.setSuperClassName(temp);
-		}
+        temp = atts.getValue("", "superClassName");
+        if (null != temp) {
+            objEntity.setSuperClassName(temp);
+        }
         dataMap.addObjEntity(objEntity);
     }
 
@@ -849,7 +876,8 @@ public class MapLoader extends DefaultHandler {
         oa.setDbAttributeName(atts.getValue("", "db-attribute-name"));
     }
 
-    private void processStartDbRelationship(Attributes atts) throws SAXException {
+    private void processStartDbRelationship(Attributes atts)
+        throws SAXException {
         String temp = atts.getValue("", "source");
         if (null == temp) {
             throw new SAXException(
@@ -911,7 +939,8 @@ public class MapLoader extends DefaultHandler {
         source.addRelationship(dbRelationship);
     }
 
-    private void processStartDbRelationshipRef(Attributes atts) throws SAXException {
+    private void processStartDbRelationshipRef(Attributes atts)
+        throws SAXException {
         String source = atts.getValue("", "source");
         if (null == source) {
             throw new SAXException(
@@ -942,7 +971,8 @@ public class MapLoader extends DefaultHandler {
         objRelationship.addDbRelationship(temp);
     }
 
-    private void processStartDbAttributePair(Attributes atts) throws SAXException {
+    private void processStartDbAttributePair(Attributes atts)
+        throws SAXException {
         String source = atts.getValue("", "source");
         if (null == source) {
             throw new SAXException(
@@ -978,7 +1008,8 @@ public class MapLoader extends DefaultHandler {
         dbRelationship.addJoin(pair);
     }
 
-    private void processStartObjRelationship(Attributes atts) throws SAXException {
+    private void processStartObjRelationship(Attributes atts)
+        throws SAXException {
         String temp = atts.getValue("", "source");
         if (null == temp) {
             throw new SAXException(
@@ -1019,13 +1050,11 @@ public class MapLoader extends DefaultHandler {
                     + printAttributes(atts).toString());
         }
 
-        int deleteRule;
-		String deleteRuleName=atts.getValue("", "deleteRule");
-		if(null==deleteRuleName) {
-			deleteRule=DeleteRule.NULLIFY;
-		} else {
-			deleteRule=DeleteRule.deleteRuleForName(deleteRuleName);
-		}
+        int deleteRule = DeleteRule.NO_ACTION;
+        String deleteRuleName = atts.getValue("", "deleteRule");
+        if (null != deleteRuleName) {
+            deleteRule = DeleteRule.deleteRuleForName(deleteRuleName);
+        }
 
         objRelationship = new ObjRelationship(source, target, to_many);
         objRelationship.setName(name);
@@ -1042,31 +1071,38 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void processEndDbGeneratorType() {
-      if (dbEntity == null) return;
-      DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
-      if (pkGenerator == null) return;
-      pkGenerator.setGeneratorType(charactersBuffer.toString());
-      if (pkGenerator.getGeneratorType() == null) {
-        dbEntity.setPrimaryKeyGenerator(null);
-      }
+        if (dbEntity == null)
+            return;
+        DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
+        if (pkGenerator == null)
+            return;
+        pkGenerator.setGeneratorType(charactersBuffer.toString());
+        if (pkGenerator.getGeneratorType() == null) {
+            dbEntity.setPrimaryKeyGenerator(null);
+        }
     }
 
     private void processEndDbGeneratorName() {
-      if (dbEntity == null) return;
-      DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
-      if (pkGenerator == null) return;
-      pkGenerator.setGeneratorName(charactersBuffer.toString());
+        if (dbEntity == null)
+            return;
+        DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
+        if (pkGenerator == null)
+            return;
+        pkGenerator.setGeneratorName(charactersBuffer.toString());
     }
 
     private void processEndDbKeyCacheSize() {
-      if (dbEntity == null) return;
-      DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
-      if (pkGenerator == null) return;
-      try {
-        pkGenerator.setKeyCacheSize(new Integer(charactersBuffer.toString().trim()));
-      } catch (Exception ex) {
-        pkGenerator.setKeyCacheSize(null);
-      }
+        if (dbEntity == null)
+            return;
+        DbKeyGenerator pkGenerator = dbEntity.getPrimaryKeyGenerator();
+        if (pkGenerator == null)
+            return;
+        try {
+            pkGenerator.setKeyCacheSize(
+                new Integer(charactersBuffer.toString().trim()));
+        } catch (Exception ex) {
+            pkGenerator.setKeyCacheSize(null);
+        }
     }
 
     private void processEndObjEntity() {
@@ -1075,7 +1111,8 @@ public class MapLoader extends DefaultHandler {
 
     private void processEndDbRelationship() {
         // validation check: if "toDepPK" is set and source target is NOT a PK, unset it
-        if (dbRelationship.isToDependentPK() && !isValidForDepPk(dbRelationship)) {
+        if (dbRelationship.isToDependentPK()
+            && !isValidForDepPk(dbRelationship)) {
             logObj.warn(
                 "Relationship '"
                     + dbRelationship.getName()
@@ -1112,7 +1149,9 @@ public class MapLoader extends DefaultHandler {
             }
         }
         if (derived.size() > 1) {
-            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
+            Collections.sort(
+                derived,
+                new PropertyComparator("name", DbEntity.class));
         }
         return derived;
     }
@@ -1127,7 +1166,9 @@ public class MapLoader extends DefaultHandler {
             }
         }
         if (derived.size() > 1) {
-            Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
+            Collections.sort(
+                derived,
+                new PropertyComparator("name", DbEntity.class));
         }
         return derived;
     }
@@ -1146,28 +1187,33 @@ public class MapLoader extends DefaultHandler {
 
     protected List sortedRelationships(Entity ent) {
         List list = new ArrayList(ent.getRelationshipList());
-        Collections.sort(list, new PropertyComparator("name", Relationship.class));
+        Collections.sort(
+            list,
+            new PropertyComparator("name", Relationship.class));
         return list;
     }
 
     protected List sortedRelationships(List rels) {
         List list = new ArrayList(rels);
-        Collections.sort(list, new PropertyComparator("name", Relationship.class));
+        Collections.sort(
+            list,
+            new PropertyComparator("name", Relationship.class));
         return list;
     }
 
-    public void characters(char[] text, int start, int length) throws org.xml.sax.SAXException {
-      if (charactersBuffer != null) {
-        charactersBuffer.append(text, start, length);
-      }
+    public void characters(char[] text, int start, int length)
+        throws org.xml.sax.SAXException {
+        if (charactersBuffer != null) {
+            charactersBuffer.append(text, start, length);
+        }
     }
 
     private void rememberCurrentTag(String tag) {
-      currentTag = tag;
+        currentTag = tag;
     }
 
     private void resetCurrentTag() {
-      currentTag = null;
+        currentTag = null;
     }
 }
 

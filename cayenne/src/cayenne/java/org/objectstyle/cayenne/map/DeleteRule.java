@@ -52,7 +52,8 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ package org.objectstyle.cayenne.map;
+ */
+package org.objectstyle.cayenne.map;
 
 /**
  * Defines constants for the possible deleteRule values of an ObjRelationship
@@ -60,29 +61,32 @@
  * @author Craig Miskell
  */
 public class DeleteRule {
+    public static final int NO_ACTION = 0;
+    private static final String NO_ACTION_NAME = "No Action";
+    
     /** 
      * Remove the reference that the destination has to this source (if the 
      * inverse relationship is toOne, nullify, if toMany, remove the source 
      * object)
      */
     public static final int NULLIFY = 1;
-   	private static final String NULLIFY_NAME="Nullify";
-    
+    private static final String NULLIFY_NAME = "Nullify";
+
     /** Delete the destination object(s)
      */
     public static final int CASCADE = 2;
-   	private static final String CASCADE_NAME="Cascade";
-    
+    private static final String CASCADE_NAME = "Cascade";
+
     /** If the relationship has any objects (toOne or toMany), deny the delete.  
      * (Destination objects would therefore have to be deleted manually first)
      */
     public static final int DENY = 3;
-   	private static final String DENY_NAME="Deny";
+    private static final String DENY_NAME = "Deny";
 
     /** 
-     * Returns String label for a delete rule state. 
-     * Used for save/load (xml), display in modeller etc.
-     * Must remain the same, or else great care taken with loading old maps
+     * Returns String label for a delete rule state. Used for save/load (xml),
+     * display in modeler etc. Must remain the same, or else great care taken
+     * with loading old maps.
      */
     public static String deleteRuleName(int deleteRule) {
         switch (deleteRule) {
@@ -92,25 +96,24 @@ public class DeleteRule {
                 return CASCADE_NAME;
             case DeleteRule.DENY :
                 return DENY_NAME;
-             default :
-                return "unknown";
+            default :
+                return NO_ACTION_NAME;
         }
     }
 
-	/**
-	 * Translates a possible delete rule name (typically returned from
-	 * deleteRuleName at some stage), into a deleteRule constant
-	 */
-	public static int deleteRuleForName(String name) {
-		if(DENY_NAME.equals(name)) {
-			return DENY;
-		} else if (CASCADE_NAME.equals(name)) {
-			return CASCADE;
-		} else if (NULLIFY_NAME.equals(name)) {
-			return NULLIFY;
-		}
-		return 0; //Unknown.. maybe this should throw an exception?
-	}
-	
- 
+    /**
+     * Translates a possible delete rule name (typically returned from
+     * deleteRuleName at some stage), into a deleteRule constant
+     */
+    public static int deleteRuleForName(String name) {
+        if (DENY_NAME.equals(name)) {
+            return DENY;
+        } else if (CASCADE_NAME.equals(name)) {
+            return CASCADE;
+        } else if (NULLIFY_NAME.equals(name)) {
+            return NULLIFY;
+        }
+        return NO_ACTION;
+    }
+
 }

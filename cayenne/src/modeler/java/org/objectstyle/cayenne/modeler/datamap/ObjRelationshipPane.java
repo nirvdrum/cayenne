@@ -299,6 +299,7 @@ public class ObjRelationshipPane
 	/** Create DefaultComboBoxModel with all delete rule names. */
 	private DefaultComboBoxModel createDeleteRuleComboModel() {
 		Vector elements = new Vector();
+	    elements.add(DeleteRule.deleteRuleName(DeleteRule.NO_ACTION));
 		elements.add(DeleteRule.deleteRuleName(DeleteRule.NULLIFY));
 		elements.add(DeleteRule.deleteRuleName(DeleteRule.CASCADE));
 		elements.add(DeleteRule.deleteRuleName(DeleteRule.DENY));
