@@ -142,12 +142,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         // send an event for removed snapshots
-        getSnapshotCache().registerSnapshotChanges(this, Collections.EMPTY_MAP, ids);
+        getSnapshotCache().processSnapshotChanges(this, Collections.EMPTY_MAP, ids);
     }
 
     /**
-     * Evicts a collection of DataObjects from this ObjectStore. Changes objects
-     * state to TRANSIENT.
+     * Evicts a collection of DataObjects from the ObjectStore. Object snapshots
+     * are removed as well. Changes objects state to TRANSIENT. This method can be used 
+     * for manual cleanup of Cayenne cache.
      */
     public synchronized void objectsUnregistered(Collection objects) {
         if (objects.isEmpty()) {
@@ -158,15 +159,19 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         while (it.hasNext()) {
             DataObject object = (DataObject) it.next();
 
-            // remove object and snapshot (for now)
-            removeObject(object.getObjectId());
+            // remove object but not snapshot
+			objectMap.remove(object.getObjectId());
+			snapshotCache.forgetSnapshot(object.getObjectId());
 
             object.setDataContext(null);
             object.setObjectId(null);
             object.setPersistenceState(PersistenceState.TRANSIENT);
         }
 
-        // no snapshot events needed... snapshots are not evicted...
+        
+
+        // no snapshot events needed... snapshots maybe cleared, but no database changes
+        // have occured.
     }
 
     /**
@@ -215,7 +220,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         if (modified != null) {
-            getSnapshotCache().registerSnapshotChanges(
+            getSnapshotCache().processSnapshotChanges(
                 this,
                 modified,
                 Collections.EMPTY_LIST);
@@ -322,7 +327,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         // post change event 
         if (deletedIds != null || modifiedSnapshots != null) {
-            getSnapshotCache().registerSnapshotChanges(
+            getSnapshotCache().processSnapshotChanges(
                 this,
                 modifiedSnapshots != null ? modifiedSnapshots : Collections.EMPTY_MAP,
                 deletedIds != null ? deletedIds : Collections.EMPTY_LIST);
@@ -345,7 +350,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             objectMap.put(newId, object);
 
             if (snapshot != null) {
-                getSnapshotCache().registerSnapshotChanges(
+                getSnapshotCache().processSnapshotChanges(
                     this,
                     Collections.singletonMap(newId, snapshot),
                     Collections.singletonList(oldId));
@@ -399,7 +404,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             DataObject dataObj = (DataObject) it.next();
 
             ObjectId oid = dataObj.getObjectId();
-            removeObject(oid);
+			objectMap.remove(oid);
             removeSnapshot(oid);
 
             dataObj.setDataContext(null);
@@ -419,7 +424,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * via ObjectStore are deprecated due to architecture changes.
      */
     public synchronized void addSnapshot(ObjectId id, Map snapshot) {
-        getSnapshotCache().registerSnapshotChanges(
+        getSnapshotCache().processSnapshotChanges(
             this,
             Collections.singletonMap(id, snapshot),
             Collections.EMPTY_LIST);
@@ -436,7 +441,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized void removeObject(ObjectId id) {
         if (id != null) {
             objectMap.remove(id);
-            removeSnapshot(id);
         }
     }
 
@@ -445,7 +449,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * via ObjectStore are deprecated due to architecture changes.
      */
     public synchronized void removeSnapshot(ObjectId id) {
-        getSnapshotCache().registerSnapshotChanges(
+        getSnapshotCache().processSnapshotChanges(
             this,
             Collections.EMPTY_MAP,
             Collections.singletonList(id));

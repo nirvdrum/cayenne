@@ -92,7 +92,7 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getSnapshotCache().registerSnapshotChanges(
+        objectStore.getSnapshotCache().processSnapshotChanges(
             this,
             Collections.singletonMap(object.getObjectId(), row),
             Collections.EMPTY_LIST);
@@ -117,7 +117,7 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.getSnapshotCache().registerSnapshotChanges(
+        objectStore.getSnapshotCache().processSnapshotChanges(
             this,
             Collections.singletonMap(object.getObjectId(), row),
             Collections.EMPTY_LIST);

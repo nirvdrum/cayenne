@@ -123,13 +123,20 @@ public class SnapshotCache implements Serializable {
     public void clear() {
     	snapshots.clear();
     }
+    
+    /**
+     * Evicts a snapshot from cache without generating any SnapshotEvents.
+     */
+    public void forgetSnapshot(ObjectId id) {
+		snapshots.remove(id);
+    }
 
     /**
      * Processes a SnapshotEvent. Modifies internal cache state, and then
      * sends the event to all listeners. Outgoing event will have a source 
      * set ot this SnapshotCache.
      */
-    public void registerSnapshotChanges(
+    public void processSnapshotChanges(
         Object source,
         Map updatedSnapshots,
         Collection deletedSnapshotIds) {
