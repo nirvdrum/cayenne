@@ -15,6 +15,7 @@
         Changes in this release:
         <ul>
         	<li>Full mapping support for stored procedures in CayenneModeler.</li>
+        	<li>Linking DataMaps to DataNodes is moved to the DataMap screen from the menu.</li>
         	<li>CayenneModeler look and feel made more consistent (e.g. dialogs 
         	will close on ESC, scrollbars will appear when needed, UI widgets
         	are made the same size, etc.)</li>
