@@ -5,32 +5,12 @@
     <body>        
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>September 6, 2003:</i></strong> <strong>Cayenne Release Candidate 2 is out</strong></u></p>
+        <p><u><strong><i>September 20, 2003:</i></strong> <strong>Cayenne 1.0 Final Release</strong></u></p>
         
-        <p><a href="RELEASE-NOTES-1.0rc2.txt">Cayenne 1.0 Release Candidate 2</a> is available for download.
-        Download RC2 <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
-        here</a>.
-        
-        Changes in this release:
-        <ul>
-        	<li>All previously deprecated API is removed.</li>
-        	<li>Initial support for FireBird database.</li>
-        	<li>Fixed a number of bugs related to flattened relationships.</li>
-        	<li>Fixed a number of Modeler bugs.</li>
-        	<li>Updated and reworked documentation.</li>
-        </ul>
-        </p>
-        
-        <p><u><strong><i>September 8, 2003:</i></strong> <strong>Cayenne-Examples 1.0b1 is Released</strong></u></p>
-        
-        <p>Initial release of cayenne-examples is available for download
-        from <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">SourceForge</a>.
-        It includes a demo tool called DataPort, demonstrating how Cayenne can be used 
-        to port relational data from one database to another. It shows the operation of the few 
-        internal parts of Cayenne, normally not used in the applications. DataPort also contains 
-        a working Ant task, so it has practical value for some database maintenance tasks. 
-        Documentation for cayenne-examples is bundled with the distribution and is not available 
-        from this site.
+        <p>Cayenne 1.0 is 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
+        download</a>. Cayenne team would like to thank everybody who made it possible. For release
+        notes and the list of known issues please follow <a href="RELEASE-NOTES-1.0.txt">this link</a>.
         </p>
         
         <p>
