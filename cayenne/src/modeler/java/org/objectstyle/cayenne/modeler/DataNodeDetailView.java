@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 
@@ -104,7 +105,7 @@ public class DataNodeDetailView
 
     protected JLabel locationLabel;
     protected JTextField location;
-    
+
     protected JLabel jndiLabel;
     protected JTextField jndiLocation;
 
@@ -123,13 +124,13 @@ public class DataNodeDetailView
     protected JLabel urlLabel;
     protected PreferenceField url;
     protected JLabel minConnectionsLabel;
-    
+
     // FIXME!!! Need to restrict only to numbers
     protected JTextField minConnections;
     protected JLabel maxConnectionsLabel;
     // FIXME!!! Need to restrict only to numbers
     protected JTextField maxConnections;
-    
+
     protected JPanel driverPanel;
 
     /** Cludge to prevent marking domain as dirty during initial load. */
@@ -173,21 +174,22 @@ public class DataNodeDetailView
         locationLabel = new JLabel("Location: ");
         location = new JTextField(25);
         factoryLabel = new JLabel("Data source factory:");
-        factory = new JComboBox();
+        factory = CayenneWidgetFactory.createComboBox();
         factory.setEditable(true);
         DefaultComboBoxModel model =
             new DefaultComboBoxModel(
                 new String[] {
                     JNDIDataSourceFactory.class.getName(),
-                    DriverDataSourceFactory.class.getName() });
+                    DriverDataSourceFactory.class.getName()});
         factory.setModel(model);
         factory.setSelectedIndex(-1);
 
         adapterLabel = new JLabel("DB adapter:");
-        adapter = new JComboBox();
+        adapter =
+            CayenneWidgetFactory.createComboBox(
+                DbAdapter.availableAdapterClassNames,
+                false);
         adapter.setEditable(true);
-        model = new DefaultComboBoxModel(DbAdapter.availableAdapterClassNames);
-        adapter.setModel(model);
         adapter.setSelectedIndex(-1);
 
         Component[] left_comp = new Component[4];
@@ -207,15 +209,17 @@ public class DataNodeDetailView
         location.setEditable(false);
 
         userNameLabel = new JLabel("User name: ");
-        userName = new PreferenceField(ModelerPreferences.USER_NAME);
+        userName =
+            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
         userName.addActionListener(this);
         passwordLabel = new JLabel("Password: ");
         password = new JPasswordField(20);
         driverLabel = new JLabel("Driver class: ");
-        driver = new PreferenceField(ModelerPreferences.JDBC_DRIVER);
+        driver =
+            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         driver.addActionListener(this);
         urlLabel = new JLabel("Database URL: ");
-        url = new PreferenceField(ModelerPreferences.DB_URL);
+        url = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         url.addActionListener(this);
         minConnectionsLabel = new JLabel("Min connections: ");
         minConnections = new JTextField(5);
@@ -272,16 +276,17 @@ public class DataNodeDetailView
             if (oldName != null && oldName.equals(newName)) {
                 return;
             }
-            
+
             node.setName(newName);
-            
+
             mediator.getCurrentDataDomain().removeDataNode(oldName);
             mediator.getCurrentDataDomain().addNode(node);
-            
+
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node, oldName));
             oldName = newName;
 
-        } else if (e.getDocument() == location.getDocument()) {
+        }
+        else if (e.getDocument() == location.getDocument()) {
 
             if (node.getDataSourceLocation() != null
                 && node.getDataSourceLocation().equals(location.getText()))
@@ -289,7 +294,8 @@ public class DataNodeDetailView
             node.setDataSourceLocation(location.getText());
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
-        } else if (e.getDocument() == userName.getDocument()) {
+        }
+        else if (e.getDocument() == userName.getDocument()) {
 
             String nameStr =
                 (userName.getText().trim().length() > 0)
@@ -298,35 +304,40 @@ public class DataNodeDetailView
             info.setUserName(nameStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
-        } else if (e.getDocument() == driver.getDocument()) {
+        }
+        else if (e.getDocument() == driver.getDocument()) {
 
             String driverStr =
                 (driver.getText().trim().length() > 0) ? driver.getText().trim() : null;
             info.setJdbcDriver(driverStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
-        } else if (e.getDocument() == url.getDocument()) {
+        }
+        else if (e.getDocument() == url.getDocument()) {
 
             String urlStr =
                 (url.getText().trim().length() > 0) ? url.getText().trim() : null;
             info.setDataSourceUrl(urlStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
 
-        } else if (e.getDocument() == password.getDocument()) {
+        }
+        else if (e.getDocument() == password.getDocument()) {
 
             char[] pwd = password.getPassword();
             String pwdStr = (pwd != null && pwd.length > 0) ? new String(pwd) : null;
 
             info.setPassword(pwdStr);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-        } else if (e.getDocument() == minConnections.getDocument()) {
+        }
+        else if (e.getDocument() == minConnections.getDocument()) {
 
             if (minConnections.getText().trim().length() > 0)
                 info.setMinConnections(Integer.parseInt(minConnections.getText()));
             else
                 info.setMinConnections(0);
             mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-        } else if (e.getDocument() == maxConnections.getDocument()) {
+        }
+        else if (e.getDocument() == maxConnections.getDocument()) {
 
             if (maxConnections.getText().trim().length() > 0)
                 info.setMaxConnections(Integer.parseInt(maxConnections.getText()));
@@ -352,7 +363,8 @@ public class DataNodeDetailView
                 if (ele.equals(DriverDataSourceFactory.class.getName())) {
                     location.setEditable(false);
                     showDiverInfo(true);
-                } else {
+                }
+                else {
                     location.setEditable(true);
                     showDiverInfo(false);
                 }
@@ -361,47 +373,53 @@ public class DataNodeDetailView
                     aNode.setDataSourceFactory(ele);
                     mediator.setDirty(true);
                 }
-            } else {
+            }
+            else {
                 if (aNode.getDataSourceFactory() != null) {
                     aNode.setDataSourceFactory(null);
                     mediator.setDirty(true);
                 }
             }
 
-        } else if (src == adapter) {
+        }
+        else if (src == adapter) {
             // DBAdapter changed
             String adapterName = (String) adapter.getModel().getSelectedItem();
 
-         	// if (!Util.nullSafeEquals(currentName, adapterName)) {
-            	// instantiate new adapter if needed
-                DbAdapter newAdapter = null;
-                if (adapterName != null && adapterName.trim().length() > 0) {
-                    try {
-                        newAdapter =
-                            (DbAdapter) Class
-                                .forName(adapterName)
-                                .getDeclaredConstructors()[0]
-                                .newInstance(
-                                new Object[0]);
-                    } catch (Exception ex) {
-                        logObj.warn("Error.", ex);
-                        adapter.setSelectedIndex(-1);
-                        return;
-                    }
+            // if (!Util.nullSafeEquals(currentName, adapterName)) {
+            // instantiate new adapter if needed
+            DbAdapter newAdapter = null;
+            if (adapterName != null && adapterName.trim().length() > 0) {
+                try {
+                    newAdapter =
+                        (DbAdapter) Class
+                            .forName(adapterName)
+                            .getDeclaredConstructors()[0]
+                            .newInstance(
+                            new Object[0]);
                 }
+                catch (Exception ex) {
+                    logObj.warn("Error.", ex);
+                    adapter.setSelectedIndex(-1);
+                    return;
+                }
+            }
 
-                mediator.getCurrentDataNode().setAdapter(newAdapter);
-                mediator.setDirty(true);
-         //   }
-        } else if (src == driver) {
+            mediator.getCurrentDataNode().setAdapter(newAdapter);
+            mediator.setDirty(true);
+            //   }
+        }
+        else if (src == driver) {
             ignoreChange = true;
             driver.storePreferences();
             ignoreChange = false;
-        } else if (src == url) {
+        }
+        else if (src == url) {
             ignoreChange = true;
             url.storePreferences();
             ignoreChange = false;
-        } else if (src == userName) {
+        }
+        else if (src == userName) {
             ignoreChange = true;
             userName.storePreferences();
             ignoreChange = false;
@@ -410,11 +428,11 @@ public class DataNodeDetailView
 
     public void currentDataNodeChanged(DataNodeDisplayEvent e) {
         node = e.getDataNode();
-        
+
         if (node == null) {
             return;
         }
-        
+
         ProjectDataSource src = (ProjectDataSource) node.getDataSource();
         oldName = node.getName();
         ignoreChange = true;
@@ -467,7 +485,8 @@ public class DataNodeDetailView
                     if (selected_class.equals(DriverDataSourceFactory.class.getName())) {
                         location.setEditable(false);
                         showDiverInfo(true);
-                    } else {
+                    }
+                    else {
                         location.setEditable(true);
                         showDiverInfo(false);
                     }
@@ -492,14 +511,14 @@ public class DataNodeDetailView
         url.setText(info.getDataSourceUrl());
         minConnections.setText(String.valueOf(info.getMinConnections()));
         maxConnections.setText(String.valueOf(info.getMaxConnections()));
-    } 
-    
+    }
+
     protected void showDiverInfo(boolean show) {
-    	
-    	if(show && driverPanel.isVisible()) {
-    		ProjectDataSource src = (ProjectDataSource) node.getDataSource();
-    		populateDataSourceInfo(src.getDataSourceInfo());
-    	}
-    	driverPanel.setVisible(show);
+
+        if (show && driverPanel.isVisible()) {
+            ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+            populateDataSourceInfo(src.getDataSourceInfo());
+        }
+        driverPanel.setVisible(show);
     }
 }

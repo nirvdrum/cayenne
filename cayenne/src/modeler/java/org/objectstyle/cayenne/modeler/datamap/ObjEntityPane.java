@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -85,7 +84,7 @@ import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.modeler.util.CayenneTextField;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.EntityWrapper;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -132,34 +131,27 @@ public class ObjEntityPane
     private void init() {
         setLayout(new BorderLayout());
 
-        JLabel nameLbl = new JLabel("Entity name: ");
-        name = new CayenneTextField(25);
+        name = CayenneWidgetFactory.createTextField();
+        superClassName = CayenneWidgetFactory.createTextField();
+        className = CayenneWidgetFactory.createTextField();
 
-        JLabel superClassNameLbl = new JLabel("Super class name: ");
-        superClassName = new CayenneTextField(25);
+        dbName = CayenneWidgetFactory.createComboBox();
 
-        JLabel classNameLbl = new JLabel("Class name: ");
-        className = new CayenneTextField(25);
-
-        tableLabel = PanelFactory.createLabelButton("Table name:");
-
-        dbName = new JComboBox();
-        dbName.setBackground(Color.WHITE);
-
-        JLabel checkLabel = new JLabel("Read-only: ");
         readOnly = new JCheckBox();
         readOnly.addItemListener(this);
 
+        tableLabel = PanelFactory.createLabelButton("Table name:");
+
         Component[] leftCol =
             new Component[] {
-                nameLbl,
-                superClassNameLbl,
-                classNameLbl,
+                new JLabel("ObjEntity name: "),
+                new JLabel("Java class: "),
+                new JLabel("Super class name: "),
                 tableLabel,
-                checkLabel };
+                new JLabel("Read-only: ")};
 
         Component[] rightCol =
-            new Component[] { name, superClassName, className, dbName, readOnly };
+            new Component[] { name, className, superClassName, dbName, readOnly };
 
         add(PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5), BorderLayout.NORTH);
     }
@@ -183,7 +175,8 @@ public class ObjEntityPane
             EntityWrapper wrap = (EntityWrapper) dbName.getSelectedItem();
             entity.setDbEntity((DbEntity) wrap.getEntity());
             mediator.fireObjEntityEvent(new EntityEvent(this, entity));
-        } else if (tableLabel == src) {
+        }
+        else if (tableLabel == src) {
             // Jump to DbEntity of the current ObjEntity
             DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
             if (entity != null) {
@@ -265,11 +258,14 @@ public class ObjEntityPane
         public boolean verify(JComponent input) {
             if (input == name) {
                 return verifyName();
-            } else if (input == superClassName) {
+            }
+            else if (input == superClassName) {
                 return verifySuperClassName();
-            } else if (input == className) {
+            }
+            else if (input == className) {
                 return verifyClassName();
-            } else {
+            }
+            else {
                 return true;
             }
         }
@@ -291,10 +287,12 @@ public class ObjEntityPane
                 MapUtil.setObjEntityName(map, ent, text);
                 mediator.fireObjEntityEvent(e);
                 return true;
-            } else if (matchingEnt == ent) {
+            }
+            else if (matchingEnt == ent) {
                 // no name changes, just return
                 return true;
-            } else {
+            }
+            else {
                 // there is an entity with the same name
                 return false;
             }

@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -88,6 +87,7 @@ import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
 
 /** 
@@ -133,11 +133,10 @@ public class DataMapDetailView
         name = new JTextField(25);
         location = new JLabel();
 
-        nodeSelector = new JComboBox();
-        nodeSelector.setBackground(Color.WHITE);
+        nodeSelector = CayenneWidgetFactory.createComboBox();
 
         Component[] leftComp = new Component[3];
-        leftComp[0] = new JLabel("Data map name: ");
+        leftComp[0] = new JLabel("DataMap name: ");
         leftComp[1] = new JLabel("File: ");
         leftComp[2] = new JLabel("Linked to DataNode: ");
 

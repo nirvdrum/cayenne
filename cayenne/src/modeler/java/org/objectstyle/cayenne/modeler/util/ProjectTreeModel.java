@@ -72,19 +72,18 @@ import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.project.ProjectTraversalHandler;
 
 /**
- * ProjectTreeWrapper is a helper that wraps Cayenne project trees into
- * Swing DefaultMutableTreeNode objects.
+ * ProjectTreeModel is a model of Cayenne project tree.
  * 
  * @author Andrei Adamchik
  */
 public class ProjectTreeModel extends DefaultTreeModel {
-	private static Logger logObj = Logger.getLogger(ProjectTreeModel.class);
-	
+    private static Logger logObj = Logger.getLogger(ProjectTreeModel.class);
+
     /**
      * Creates a tree of Swing TreeNodes wrapping Cayenne project.
      * Returns the root node of the tree.
      */
-    public static DefaultMutableTreeNode wrapProject(Project project) {    	
+    public static DefaultMutableTreeNode wrapProject(Project project) {
         return wrapProjectNode(project);
     }
 
@@ -105,12 +104,12 @@ public class ProjectTreeModel extends DefaultTreeModel {
     public ProjectTreeModel(Project project) {
         super(wrapProject(project));
     }
-    
+
     /**
      * Refreshes object subtree.
      */
     public void refreshSubtree(Object[] path) {
-    	
+
     }
 
     /**
@@ -141,28 +140,28 @@ public class ProjectTreeModel extends DefaultTreeModel {
 
         // adjust for root node being in the path
         int start = 0;
-        if(currentNode.getUserObject() == path[0]) {
-        	start = 1;
+        if (currentNode.getUserObject() == path[0]) {
+            start = 1;
         }
-        
+
         for (int i = start; i < path.length; i++) {
-        	DefaultMutableTreeNode foundNode = null;
-        	
+            DefaultMutableTreeNode foundNode = null;
+
             Enumeration children = currentNode.children();
             while (children.hasMoreElements()) {
                 DefaultMutableTreeNode child =
                     (DefaultMutableTreeNode) children.nextElement();
                 if (child.getUserObject() == path[i]) {
-                	foundNode = child;
-                	break;
+                    foundNode = child;
+                    break;
                 }
             }
-            
-            if(foundNode == null) {
-            	return null;
+
+            if (foundNode == null) {
+                return null;
             }
             else {
-            	currentNode = foundNode;
+                currentNode = foundNode;
             }
         }
 
@@ -182,17 +181,18 @@ public class ProjectTreeModel extends DefaultTreeModel {
         }
 
         public void projectNode(ProjectPath nodePath) {
-            if(ProjectTreeModel.logObj.isDebugEnabled()) {
-            	logObj.debug("Read node: " + nodePath);
+            if (ProjectTreeModel.logObj.isDebugEnabled()) {
+                logObj.debug("Read node: " + nodePath);
             }
-            
+
             Object parent = nodePath.getObjectParent();
             Object nodeObj = nodePath.getObject();
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
 
             if (parent == null) {
                 rootNode = node;
-            } else {
+            }
+            else {
                 DefaultMutableTreeNode nodeParent =
                     (DefaultMutableTreeNode) nodesMap.get(parent);
                 nodeParent.add(node);
@@ -202,6 +202,13 @@ public class ProjectTreeModel extends DefaultTreeModel {
         }
 
         public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
+            // do not read deatils of linked maps
+            if ((node instanceof DataMap)
+                && parentPath != null
+                && (parentPath.getObject() instanceof DataNode)) {
+                return false;
+            }
+
             return (node instanceof Project)
                 || (node instanceof DataDomain)
                 || (node instanceof DataMap)

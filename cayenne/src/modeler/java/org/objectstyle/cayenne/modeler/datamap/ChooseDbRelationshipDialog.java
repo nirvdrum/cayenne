@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.RelationshipWrapper;
 
 /** 
@@ -115,7 +116,7 @@ implements ActionListener {
 	private List dbRels;
 	private List relList = new ArrayList();
 	
-	JComboBox relSelect	= new JComboBox();
+	JComboBox relSelect	= CayenneWidgetFactory.createComboBox();
 	JButton select		= new JButton("Select");
 	JButton cancel		= new JButton("Cancel");
 	JButton create		= new JButton("New");

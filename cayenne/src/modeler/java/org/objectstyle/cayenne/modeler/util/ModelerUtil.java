@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -81,15 +83,15 @@ public class ModelerUtil {
      * Returns array of db attribute names for DbEntity mapped to 
      * current ObjEntity. 
      */
-    public static String[] getDbAttributeNames(
+    public static Collection getDbAttributeNames(
         EventController mediator,
         DbEntity entity) {
-        List list = new ArrayList(32);
+
+        Set keys = entity.getAttributeMap().keySet();
+        List list = new ArrayList(keys.size());
         list.add("");
-        list.addAll(entity.getAttributeMap().keySet());
-        String[] arr = (String[]) (list.toArray(new String[list.size()]));
-        Arrays.sort(arr);
-        return arr;
+        list.addAll(keys);
+        return list;
     }
 
     public static String[] getRegisteredTypeNames() {

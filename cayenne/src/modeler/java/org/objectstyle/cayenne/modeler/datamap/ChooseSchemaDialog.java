@@ -56,13 +56,13 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 /** 
  * Dialog that allows to select schema of the database. 
@@ -81,9 +82,7 @@ import org.objectstyle.cayenne.modeler.PanelFactory;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ChooseSchemaDialog
-    extends CayenneDialog
-    implements ActionListener {
+public class ChooseSchemaDialog extends CayenneDialog implements ActionListener {
     public static final int SELECT = 0;
     public static final int CANCEL = 1;
 
@@ -124,15 +123,12 @@ public class ChooseSchemaDialog
 
         Component[] left = null;
         Component[] right = null;
-        JPanel buttons =
-            PanelFactory.createButtonPanel(new JButton[] { select, cancel });
+        JPanel buttons = PanelFactory.createButtonPanel(new JButton[] { select, cancel });
 
         // optionally create schema selector
         if (schemaList != null && schemaList.size() > 0) {
-            schemaSelect =
-                new JComboBox(
-                    schemaList.toArray(new Object[schemaList.size()]));
-            schemaSelect.setBackground(Color.WHITE);
+            schemaSelect = CayenneWidgetFactory.createComboBox();
+            schemaSelect.setModel(new DefaultComboBoxModel(schemaList.toArray()));
 
             // select schema belonging to the user
             if (userName != null) {
@@ -152,13 +148,10 @@ public class ChooseSchemaDialog
                     new JLabel("Schemas: "),
                     new JLabel()};
 
-            right =
-                new Component[] { tabeNamePatternField, schemaSelect, buttons };
-        } else {
-            left =
-                new Component[] {
-                    new JLabel("Table Name Pattern: "),
-                    new JLabel()};
+            right = new Component[] { tabeNamePatternField, schemaSelect, buttons };
+        }
+        else {
+            left = new Component[] { new JLabel("Table Name Pattern: "), new JLabel()};
 
             right = new Component[] { tabeNamePatternField, buttons };
         }
@@ -171,7 +164,8 @@ public class ChooseSchemaDialog
         Object src = e.getSource();
         if (src == select) {
             processSelect();
-        } else if (src == cancel) {
+        }
+        else if (src == cancel) {
             processCancel();
         }
     }

@@ -79,6 +79,7 @@ import javax.swing.text.Keymap;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 
 /**
@@ -166,7 +167,8 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
     protected JPanel initInputArea() {
         // user name line
         JLabel unLabel = new JLabel("User Name:");
-        unInput = new PreferenceField(ModelerPreferences.USER_NAME);
+        unInput =
+            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.USER_NAME);
         disableVKEvents(unInput);
 
         // password line
@@ -176,18 +178,19 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 
         // JDBC driver line
         JLabel drLabel = new JLabel("JDBC Driver Class:");
-        drInput = new PreferenceField(ModelerPreferences.JDBC_DRIVER);
+        drInput =
+            CayenneWidgetFactory.createPreferenceField(ModelerPreferences.JDBC_DRIVER);
         disableVKEvents(drInput);
 
         // Database URL line
         JLabel urlLabel = new JLabel("Database URL:");
-        urlInput = new PreferenceField(ModelerPreferences.DB_URL);
+        urlInput = CayenneWidgetFactory.createPreferenceField(ModelerPreferences.DB_URL);
         disableVKEvents(urlInput);
 
         // Adapter class line
         JLabel adapterLabel = new JLabel("RDBMS Adapter:");
         adapterInput =
-            new PreferenceField(
+            CayenneWidgetFactory.createPreferenceField(
                 ModelerPreferences.RDBMS_ADAPTER,
                 Arrays.asList(DbAdapter.availableAdapterClassNames));
         disableVKEvents(adapterInput);

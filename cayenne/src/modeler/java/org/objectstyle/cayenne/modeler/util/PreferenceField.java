@@ -58,7 +58,8 @@ package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Vector;
 
 import javax.swing.ComboBoxEditor;
@@ -80,17 +81,17 @@ public class PreferenceField extends JComboBox {
      * Values to put in pref field in addition to preference values.
      * These values are not going to be stored to preference file.
      */
-    private List initValues;
+    private Collection initValues;
 
     /** 
      * Creates PreferenceField that will set preferences 
      * only on explicit call to <code>storePreferences()</code>.
      */
     public PreferenceField(String key) {
-        this(key, new Vector());
+        this(key, Collections.EMPTY_LIST);
     }
 
-    public PreferenceField(String key, List initValues) {
+    public PreferenceField(String key, Collection initValues) {
         this.key = key;
 
         setRenderer(new Renderer(40));

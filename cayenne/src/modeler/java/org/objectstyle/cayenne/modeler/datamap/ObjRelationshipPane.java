@@ -59,9 +59,10 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -78,6 +79,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.EntityEvent;
@@ -91,6 +93,7 @@ import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 /** 
  * Displays ObjRelationships for the current obj entity. 
@@ -108,6 +111,15 @@ public class ObjRelationshipPane
         ExistingSelectionProcessor,
         ListSelectionListener,
         TableModelListener {
+
+    private static final Object[] deleteRules =
+        new Object[] {
+            DeleteRule.deleteRuleName(DeleteRule.NO_ACTION),
+            DeleteRule.deleteRuleName(DeleteRule.NULLIFY),
+            DeleteRule.deleteRuleName(DeleteRule.CASCADE),
+            DeleteRule.deleteRuleName(DeleteRule.DENY),
+            };
+
     EventController mediator;
 
     CayenneTable table;
@@ -129,8 +141,7 @@ public class ObjRelationshipPane
         this.setLayout(new BorderLayout());
         table = new CayenneTable();
         resolve = new JButton("Database Mapping");
-        JPanel panel =
-            PanelFactory.createTablePanel(table, new JButton[] { resolve });
+        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
         add(panel, BorderLayout.CENTER);
     }
 
@@ -150,7 +161,8 @@ public class ObjRelationshipPane
                 && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
                 && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
                 resolve.setEnabled(true);
-            } else
+            }
+            else
                 resolve.setEnabled(false);
         }
     }
@@ -163,8 +175,7 @@ public class ObjRelationshipPane
             return;
         }
 
-        ObjRelationshipTableModel model =
-            (ObjRelationshipTableModel) table.getModel();
+        ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
         java.util.List rels = model.getObjectList();
         int relPos = rels.indexOf(rel);
         if (relPos >= 0) {
@@ -182,12 +193,14 @@ public class ObjRelationshipPane
                 && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
                 && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
                 resolve.setEnabled(true);
-            } else
+            }
+            else
                 resolve.setEnabled(false);
 
             // scroll table
             table.scroll(table.getSelectedRow(), 0);
-        } else
+        }
+        else
             resolve.setEnabled(false);
 
         RelationshipDisplayEvent ev =
@@ -241,11 +254,7 @@ public class ObjRelationshipPane
             db_rel_list = new ArrayList();
 
         ResolveDbRelationshipDialog dialog =
-            new ResolveDbRelationshipDialog(
-                db_rel_list,
-                start,
-                end,
-                rel.isToMany());
+            new ResolveDbRelationshipDialog(db_rel_list, start, end, rel.isToMany());
         dialog.setVisible(true);
         // If user pressed "Save"
         if (!dialog.isCancelPressed())
@@ -271,10 +280,7 @@ public class ObjRelationshipPane
         }
 
         mediator.fireObjRelationshipEvent(
-            new RelationshipEvent(
-                Editor.getFrame(),
-                rel,
-                rel.getSourceEntity()));
+            new RelationshipEvent(Editor.getFrame(), rel, rel.getSourceEntity()));
     }
 
     /** Loads obj relationships into table. */
@@ -294,30 +300,22 @@ public class ObjRelationshipPane
         }
     }
 
-    /** Create DefaultComboBoxModel with all obj entity names. */
-    private DefaultComboBoxModel createObjEntityComboModel() {
+    /** 
+     * Creates a lost of ObjEntity names.
+     */
+    private Object[] createObjEntityComboModel() {
         DataMap map = mediator.getCurrentDataMap();
-        Vector elements = new Vector(64);
-        Iterator iter = map.getObjEntities(true).iterator();
-        while (iter.hasNext()) {
-            ObjEntity entity = (ObjEntity) iter.next();
-            String name = entity.getName();
-            elements.add(name);
+        Collection objEntities = map.getObjEntities(true);
+        int len = objEntities.size();
+        Object[] names = objEntities.toArray();
+
+        for (int i = 0; i < len; i++) {
+            // substitute Entities with their names
+            names[i] = ((Entity) names[i]).getName();
         }
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
-        return model;
-    }
-
-    /** Create DefaultComboBoxModel with all delete rule names. */
-    private DefaultComboBoxModel createDeleteRuleComboModel() {
-        Vector elements = new Vector();
-        elements.add(DeleteRule.deleteRuleName(DeleteRule.NO_ACTION));
-        elements.add(DeleteRule.deleteRuleName(DeleteRule.NULLIFY));
-        elements.add(DeleteRule.deleteRuleName(DeleteRule.CASCADE));
-        elements.add(DeleteRule.deleteRuleName(DeleteRule.DENY));
-        DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
-        return model;
+        Arrays.sort(names);
+        return names;
     }
 
     public void objEntityChanged(EntityEvent e) {
@@ -339,8 +337,7 @@ public class ObjRelationshipPane
     }
 
     public void objRelationshipRemoved(RelationshipEvent e) {
-        ObjRelationshipTableModel model =
-            (ObjRelationshipTableModel) table.getModel();
+        ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
         int ind = model.getObjectList().indexOf(e.getRelationship());
         model.removeRelationship(e.getRelationship());
         table.select(ind);
@@ -358,12 +355,10 @@ public class ObjRelationshipPane
         if (mediator.getCurrentObjEntity() == null)
             return;
         TableColumn col;
-        col =
-            table.getColumnModel().getColumn(
-                ObjRelationshipTableModel.REL_TARGET);
+        col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
         JComboBox combo = (JComboBox) editor.getComponent();
-        combo.setModel(createObjEntityComboModel());
+        combo.setModel(new DefaultComboBoxModel(createObjEntityComboModel()));
         ObjRelationshipTableModel model;
         model = (ObjRelationshipTableModel) table.getModel();
         model.fireTableDataChanged();
@@ -378,32 +373,26 @@ public class ObjRelationshipPane
         table.setRowMargin(3);
 
         TableColumn col =
-            table.getColumnModel().getColumn(
-                ObjRelationshipTableModel.REL_NAME);
+            table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_NAME);
         col.setMinWidth(150);
 
-        col =
-            table.getColumnModel().getColumn(
-                ObjRelationshipTableModel.REL_TARGET);
+        col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
         col.setMinWidth(150);
-        JComboBox combo = new JComboBox(createObjEntityComboModel());
+        JComboBox combo =
+            CayenneWidgetFactory.createComboBox(createObjEntityComboModel(), true);
         combo.setEditable(false);
         combo.setSelectedIndex(-1);
         DefaultCellEditor editor = new DefaultCellEditor(combo);
         editor.setClickCountToStart(1);
         col.setCellEditor(editor);
 
-        col =
-            table.getColumnModel().getColumn(
-                ObjRelationshipTableModel.REL_CARDINALITY);
+        col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_CARDINALITY);
         col.setMinWidth(150);
         table.getSelectionModel().addListSelectionListener(this);
 
-        col =
-            table.getColumnModel().getColumn(
-                ObjRelationshipTableModel.REL_DELETERULE);
+        col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
         col.setMinWidth(60);
-        combo = new JComboBox(createDeleteRuleComboModel());
+        combo = CayenneWidgetFactory.createComboBox(deleteRules, false);
         combo.setEditable(false);
         combo.setSelectedIndex(0); //Default to the first value
         editor = new DefaultCellEditor(combo);

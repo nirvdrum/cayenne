@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.CayenneTextField;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.util.Util;
 
@@ -143,15 +143,15 @@ public class DbEntityPane
     private void init() {
         setLayout(new BorderLayout());
 
-        JLabel nameLabel = new JLabel("Entity name: ");
-        name = new CayenneTextField(25);
+        JLabel nameLabel = new JLabel("DbEntity name: ");
+        name = CayenneWidgetFactory.createTextField();
 
         schemaLabel = new JLabel("Schema: ");
-        schema = new CayenneTextField(25);
+        schema = CayenneWidgetFactory.createTextField();
 
-        parentLabel = PanelFactory.createLabelButton("Parent entity: ");
+        parentLabel = PanelFactory.createLabelButton("Parent DbEntity: ");
         parentLabel.setEnabled(false);
-        parentEntities = new JComboBox();
+        parentEntities = CayenneWidgetFactory.createComboBox();
         parentEntities.setEditable(false);
         parentEntities.setEnabled(false);
 
@@ -177,8 +177,8 @@ public class DbEntityPane
         customPKGeneratorNameLabel = new JLabel("Database object name: ");
         customPKSizeLabel = new JLabel("Cached PK Size: ");
 
-        customPKName = new CayenneTextField(25);
-        customPKSize = new CayenneTextField(25);
+        customPKName = CayenneWidgetFactory.createTextField();
+        customPKSize = CayenneWidgetFactory.createTextField();
 
         leftCol = new Component[] { customPKGeneratorNameLabel, customPKSizeLabel };
         rightCol = new Component[] { customPKName, customPKSize };

@@ -76,6 +76,7 @@ import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 /** 
@@ -121,8 +122,7 @@ public class ObjAttributePane
             return;
         }
 
-        ObjAttributeTableModel model =
-            (ObjAttributeTableModel) table.getModel();
+        ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         java.util.List attrs = model.getObjectList();
         int attrPos = attrs.indexOf(attr);
         if (attrPos >= 0) {
@@ -133,8 +133,7 @@ public class ObjAttributePane
     public void processExistingSelection() {
         ObjAttribute rel = null;
         if (table.getSelectedRow() >= 0) {
-            ObjAttributeTableModel model =
-                (ObjAttributeTableModel) table.getModel();
+            ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
             rel = model.getAttribute(table.getSelectedRow());
 
             // scroll table
@@ -165,8 +164,7 @@ public class ObjAttributePane
     }
 
     public void objAttributeRemoved(AttributeEvent e) {
-        ObjAttributeTableModel model =
-            (ObjAttributeTableModel) table.getModel();
+        ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         int ind = model.getObjectList().indexOf(e.getAttribute());
         model.removeRow(e.getAttribute());
         table.select(ind);
@@ -189,8 +187,7 @@ public class ObjAttributePane
     }
 
     protected void rebuildTable(ObjEntity ent) {
-        ObjAttributeTableModel model =
-            new ObjAttributeTableModel(ent, mediator, this);
+        ObjAttributeTableModel model = new ObjAttributeTableModel(ent, mediator, this);
         table.setModel(model);
         table.setRowHeight(25);
         table.setRowMargin(3);
@@ -198,34 +195,32 @@ public class ObjAttributePane
         table.getSelectionModel().addListSelectionListener(this);
     }
 
-    protected void setUpTableStructure(
-        ObjAttributeTableModel model,
-        ObjEntity entity) {
+    protected void setUpTableStructure(ObjAttributeTableModel model, ObjEntity entity) {
 
         TableColumn col =
-            table.getColumnModel().getColumn(
-                ObjAttributeTableModel.OBJ_ATTRIBUTE);
+            table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE);
         col.setMinWidth(150);
-        col =
-            table.getColumnModel().getColumn(
-                ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
+        col = table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
         col.setMinWidth(150);
 
-        JComboBox combo = new JComboBox(ModelerUtil.getRegisteredTypeNames());
+        JComboBox combo =
+            CayenneWidgetFactory.createComboBox(
+                ModelerUtil.getRegisteredTypeNames(),
+                false);
         combo.setEditable(true);
         col.setCellEditor(new DefaultCellEditor(combo));
 
         // If DbEntity is specified, display Database info as well.
         if (entity.getDbEntity() != null) {
-            col =
-                table.getColumnModel().getColumn(
-                    ObjAttributeTableModel.DB_ATTRIBUTE);
+            col = table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE);
             col.setMinWidth(150);
             combo =
-                new JComboBox(
+                CayenneWidgetFactory.createComboBox(
                     ModelerUtil.getDbAttributeNames(
                         mediator,
-                        mediator.getCurrentObjEntity().getDbEntity()));
+                        mediator.getCurrentObjEntity().getDbEntity()),
+                    true);
+                    
             combo.setEditable(false);
             col.setCellEditor(new DefaultCellEditor(combo));
             col =
@@ -241,8 +236,7 @@ public class ObjAttributePane
             return;
         }
 
-        ObjAttributeTableModel model =
-            (ObjAttributeTableModel) table.getModel();
+        ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
         if (model.getDbEntity() != ((ObjEntity) e.getEntity()).getDbEntity()) {
             model.resetDbEntity();
             setUpTableStructure(model, (ObjEntity) e.getEntity());

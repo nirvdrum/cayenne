@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -81,6 +80,7 @@ import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 /** 
  * Detail view of the DbEntity attributes. 
@@ -229,8 +229,7 @@ public class DbAttributePane
         col.setMinWidth(90);
 
         String[] types = TypesMapping.getDatabaseTypes();
-        Arrays.sort(types);
-        JComboBox comboBox = new JComboBox(types);
+        JComboBox comboBox = CayenneWidgetFactory.createComboBox(types, true);
         comboBox.setEditable(true);
         col.setCellEditor(new DefaultCellEditor(comboBox));
 

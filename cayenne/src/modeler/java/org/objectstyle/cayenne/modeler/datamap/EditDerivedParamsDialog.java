@@ -60,7 +60,6 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -81,6 +80,7 @@ import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 /**
  * Dialog window that alows selecting DbAttributes 
@@ -88,119 +88,121 @@ import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
  *  
  * @author Andrei Adamchik
  */
-public class EditDerivedParamsDialog
-	extends CayenneDialog
-	implements ActionListener {
+public class EditDerivedParamsDialog extends CayenneDialog implements ActionListener {
 
-	protected DerivedDbAttribute attr;
+    protected DerivedDbAttribute attr;
 
-	protected JTable table = new CayenneTable();
-	protected JButton add = new JButton("Add");
-	protected JButton remove = new JButton("Remove");
-	protected JButton save = new JButton("Save");
-	protected JButton cancel = new JButton("Cancel");
+    protected JTable table = new CayenneTable();
+    protected JButton add = new JButton("Add");
+    protected JButton remove = new JButton("Remove");
+    protected JButton save = new JButton("Save");
+    protected JButton cancel = new JButton("Cancel");
 
-	/**
-	 * Constructor for EditDerivedParamsDialog.
-	 */
-	public EditDerivedParamsDialog(DerivedDbAttribute attr) {
-		super(Editor.getFrame(), "Edit Derived Attribute Parameters", true);
+    /**
+     * Constructor for EditDerivedParamsDialog.
+     */
+    public EditDerivedParamsDialog(DerivedDbAttribute attr) {
+        super(Editor.getFrame(), "Edit Derived Attribute Parameters", true);
 
-		this.attr = attr;
+        this.attr = attr;
 
-		init();
-		pack();
-		centerWindow();
-	}
+        init();
+        pack();
+        centerWindow();
+    }
 
-	protected void init() {
-		Container pane = getContentPane();
-		pane.setLayout(new BorderLayout());
+    protected void init() {
+        Container pane = getContentPane();
+        pane.setLayout(new BorderLayout());
 
-		buildTable();
+        buildTable();
 
-		JPanel panel =
-			PanelFactory.createTablePanel(
-				table,
-				new JButton[] { add, remove, save, cancel });
-		pane.add(panel, BorderLayout.CENTER);
+        JPanel panel =
+            PanelFactory.createTablePanel(
+                table,
+                new JButton[] { add, remove, save, cancel });
+        pane.add(panel, BorderLayout.CENTER);
 
-		add.addActionListener(this);
-		remove.addActionListener(this);
-		save.addActionListener(this);
-		cancel.addActionListener(this);
-	}
+        add.addActionListener(this);
+        remove.addActionListener(this);
+        save.addActionListener(this);
+        cancel.addActionListener(this);
+    }
 
-	protected void buildTable() {
-		DerivedAttributeParamsTableModel model =
-			new DerivedAttributeParamsTableModel(attr, getMediator(), this);
-		table.setModel(model);
-		table.setRowHeight(25);
-		table.setRowMargin(3);
-		TableColumn nameCol =
-			table.getColumnModel().getColumn(model.nameColumnInd());
-		nameCol.setMinWidth(150);
+    protected void buildTable() {
+        DerivedAttributeParamsTableModel model =
+            new DerivedAttributeParamsTableModel(attr, getMediator(), this);
+        table.setModel(model);
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+        TableColumn nameCol = table.getColumnModel().getColumn(model.nameColumnInd());
+        nameCol.setMinWidth(150);
 
-		TableColumn typeCol =
-			table.getColumnModel().getColumn(model.typeColumnInd());
-		typeCol.setMinWidth(90);
+        TableColumn typeCol = table.getColumnModel().getColumn(model.typeColumnInd());
+        typeCol.setMinWidth(90);
 
-		DbEntity parent = ((DerivedDbEntity)attr.getEntity()).getParentEntity();
+        DbEntity parent = ((DerivedDbEntity) attr.getEntity()).getParentEntity();
 
-		List list = new ArrayList(32);
-		list.add("");
-		list.addAll(parent.getAttributeMap().keySet());
-		String[] names = (String[])(list.toArray(new String[list.size()]));
-		Arrays.sort(names);
+        List list = new ArrayList(32);
+        list.add("");
+        list.addAll(parent.getAttributeMap().keySet());
+        String[] names = (String[]) (list.toArray(new String[list.size()]));
 
-		JComboBox comboBox = new JComboBox(names);
-		comboBox.setEditable(false);
-		nameCol.setCellEditor(new DefaultCellEditor(comboBox));
-	}
+        JComboBox comboBox = CayenneWidgetFactory.createComboBox(names, true);
+        comboBox.setEditable(false);
+        nameCol.setCellEditor(new DefaultCellEditor(comboBox));
+    }
 
-	/**
-	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-	 */
-	public void actionPerformed(ActionEvent e) {
-		Object src = e.getSource();
-		if (src == add) {
-			addRow();
-		} else if (src == remove) {
-			removeRow();
-		} else if (src == save) {
-			save();
-		} else if (src == cancel) {
-			cancel();
-		}
-	}
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+     */
+    public void actionPerformed(ActionEvent e) {
+        Object src = e.getSource();
+        if (src == add) {
+            addRow();
+        }
+        else if (src == remove) {
+            removeRow();
+        }
+        else if (src == save) {
+            save();
+        }
+        else if (src == cancel) {
+            cancel();
+        }
+    }
 
-	protected void removeRow() {
-		DerivedAttributeParamsTableModel model = (DerivedAttributeParamsTableModel) table.getModel();	
-		model.removeRow(model.getAttribute(table.getSelectedRow()));
-	}
+    protected void removeRow() {
+        DerivedAttributeParamsTableModel model =
+            (DerivedAttributeParamsTableModel) table.getModel();
+        model.removeRow(model.getAttribute(table.getSelectedRow()));
+    }
 
-	protected void addRow() {
-		((CayenneTableModel) table.getModel()).addRow(null);
-	}
+    protected void addRow() {
+        ((CayenneTableModel) table.getModel()).addRow(null);
+    }
 
-	protected void save() {
-		// update parameters of the derived attribute
-		attr.clearParams();
-		Iterator it =
-			((CayenneTableModel) table.getModel()).getObjectList().iterator();
-		while (it.hasNext()) {
-			DbAttribute at = (DbAttribute) it.next();
-			attr.addParam(at);
-		}
+    protected void save() {
+        // update parameters of the derived attribute
+        attr.clearParams();
+        Iterator it = ((CayenneTableModel) table.getModel()).getObjectList().iterator();
+        while (it.hasNext()) {
+            DbAttribute at = (DbAttribute) it.next();
+            attr.addParam(at);
+        }
 
-		// notify interested parties about the changes 
-		getMediator().fireDbAttributeEvent(
-			new AttributeEvent(this, attr, (DbEntity)attr.getEntity(), AttributeEvent.CHANGE));
+        // notify interested parties about the changes 
+        getMediator().fireDbAttributeEvent(
+            new AttributeEvent(
+                this,
+                attr,
+                (DbEntity) attr.getEntity(),
+                AttributeEvent.CHANGE));
 
-		hide();
-	}
+        hide();
+    }
 
-	protected void cancel() {
-		hide();
-	}
+    protected void cancel() {
+        hide();
+    }
 }

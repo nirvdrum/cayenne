@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.Arrays;
+import java.util.Collection;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -86,6 +86,7 @@ import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 /** 
  * Displays DbRelationships for the current DbEntity. 
@@ -128,8 +129,7 @@ public class DbRelationshipPane
         //table.setDefaultEditor(Boolean.class, editor);
 
         resolve = new JButton("Database Mapping");
-        JPanel panel =
-            PanelFactory.createTablePanel(table, new JButton[] { resolve });
+        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
         add(panel, BorderLayout.CENTER);
     }
 
@@ -147,8 +147,7 @@ public class DbRelationshipPane
     public void tableChanged(TableModelEvent e) {
         DbRelationship rel = null;
         if (table.getSelectedRow() >= 0) {
-            DbRelationshipTableModel model =
-                (DbRelationshipTableModel) table.getModel();
+            DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
             rel = model.getRelationship(table.getSelectedRow());
             if (rel.getTargetEntity() != null)
                 resolve.setEnabled(true);
@@ -165,8 +164,7 @@ public class DbRelationshipPane
             return;
         }
 
-        DbRelationshipTableModel model =
-            (DbRelationshipTableModel) table.getModel();
+        DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         java.util.List rels = model.getObjectList();
         int relPos = rels.indexOf(rel);
         if (relPos >= 0) {
@@ -184,10 +182,11 @@ public class DbRelationshipPane
                 resolve.setEnabled(true);
             else
                 resolve.setEnabled(false);
-            
+
             // scroll table
             table.scroll(table.getSelectedRow(), 0);
-        } else
+        }
+        else
             resolve.setEnabled(false);
 
         RelationshipDisplayEvent ev =
@@ -208,8 +207,7 @@ public class DbRelationshipPane
         }
 
         // Get DbRelationship
-        DbRelationshipTableModel model =
-            (DbRelationshipTableModel) table.getModel();
+        DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         DbRelationship rel = model.getRelationship(row);
         DbEntity start = (DbEntity) rel.getSourceEntity();
         DbEntity end = (DbEntity) rel.getTargetEntity();
@@ -218,11 +216,7 @@ public class DbRelationshipPane
         dbRelList.add(rel);
 
         ResolveDbRelationshipDialog dialog =
-            new ResolveDbRelationshipDialog(
-                dbRelList,
-                start,
-                end,
-                rel.isToMany());
+            new ResolveDbRelationshipDialog(dbRelList, start, end, rel.isToMany());
         dialog.setVisible(true);
         dialog.dispose();
     }
@@ -248,30 +242,33 @@ public class DbRelationshipPane
         table.setModel(model);
         table.setRowHeight(25);
         table.setRowMargin(3);
-        TableColumn col =
-            table.getColumnModel().getColumn(DbRelationshipTableModel.NAME);
+        TableColumn col = table.getColumnModel().getColumn(DbRelationshipTableModel.NAME);
         col.setMinWidth(150);
         col = table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
         col.setMinWidth(150);
-        JComboBox combo = new JComboBox(createComboModel());
+        JComboBox combo = CayenneWidgetFactory.createComboBox(createComboModel(), false);
         combo.setEditable(false);
         col.setCellEditor(new DefaultCellEditor(combo));
         table.getSelectionModel().addListSelectionListener(this);
     }
 
-    /** Create DefaultComboBoxModel with all db entity names. */
-    private DefaultComboBoxModel createComboModel() {
+    /** 
+     * Creates a list of DbEntity names.
+     */
+    private Object[] createComboModel() {
         DataMap map = mediator.getCurrentDataMap();
-        Vector elements = new Vector(64);
-        Iterator iter = map.getDbEntities(true).iterator();
-        while (iter.hasNext()) {
-            DbEntity entity = (DbEntity) iter.next();
-            String name = entity.getName();
-            elements.add(name);
-        }
+        Collection dbEntities = map.getDbEntities(true);
+        int len = dbEntities.size();
+        Object[] names = dbEntities.toArray();
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
-        return model;
+        for (int i = 0; i < len; i++) {
+        	// substitute DbEntities with their names
+            names[i] = ((DbEntity) names[i]).getName();
+        }
+        
+        Arrays.sort(names);
+
+        return names;
     }
 
     public void dbEntityChanged(EntityEvent e) {
@@ -287,8 +284,7 @@ public class DbRelationshipPane
     public void dbRelationshipChanged(RelationshipEvent e) {
         if (e.getSource() != this) {
             table.select(e.getRelationship());
-            DbRelationshipTableModel model =
-                (DbRelationshipTableModel) table.getModel();
+            DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
             model.fireTableDataChanged();
         }
     }
@@ -299,8 +295,7 @@ public class DbRelationshipPane
     }
 
     public void dbRelationshipRemoved(RelationshipEvent e) {
-        DbRelationshipTableModel model =
-            (DbRelationshipTableModel) table.getModel();
+        DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         int ind = model.getObjectList().indexOf(e.getRelationship());
         model.removeRelationship(e.getRelationship());
         table.select(ind);
@@ -321,9 +316,9 @@ public class DbRelationshipPane
             table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
         JComboBox combo = (JComboBox) editor.getComponent();
-        combo.setModel(createComboModel());
-        DbRelationshipTableModel model;
-        model = (DbRelationshipTableModel) table.getModel();
+        combo.setModel(new DefaultComboBoxModel(createComboModel()));
+        
+        DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         model.fireTableDataChanged();
         table.getSelectionModel().addListSelectionListener(this);
     }
