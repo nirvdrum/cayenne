@@ -64,10 +64,7 @@
         </copy>
 	</target>
 
-	<target name="dist-bin" depends="jar-nodeps,jar">        
-        <!-- Servlet JAR is required to complie Cayenne from src distro. -->
-        <copy file="${otherlib.dir}/${servlet.jar}" todir="${dist}/lib"/>
-	</target>
+	<target name="dist-bin" depends="jar-nodeps,jar"/>
 	
 	
 	<!-- ========================================== -->
