@@ -167,7 +167,7 @@ class PrimaryKeyGenerationSupport {
           throw new CayenneException("Error generating PK: " + ex.getMessage(), ex);
         }
       }
-      ObjectId permId = new ObjectId(objEntity.getClass(), idMap);
+      ObjectId permId = new ObjectId(tempId.getObjClass(), idMap);
       // note that object registration did not changed (new id is not attached to context, only to temp. oid)
       tempId.setPermId(permId);
     }
