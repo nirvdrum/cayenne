@@ -26,10 +26,14 @@
         	<source>$CAYENNE_HOME/bin/modeler.sh</source>
         	
         	<p></p>
-        	<panel name="JDBC Driver Jars Note:">If JDBC drivers are not in the startup CLASSPATH, you can configure
-        	their location in the Modeler. Start CayenneModeler, go to "Tools -> Configure ClassPath" and add all the drivers that you 
-        	are planning to use.
-        	</panel>
+     
+        	<panel name="System CLASSPATH Note:">CayenneModeler startup scripts currently append
+			System CLASSPATH variable value to the Modeler startup CLASSPATH. This behavior is obsolete and 
+			can cause a number conflicts (e.g. if a user machine has different versions of libraries used by CayenneModeler).
+			A reference to the system CLASSPATH will be removed in the future. Currently if you run into one of such conflicts, 
+			you should remove it yourself by manually editing a script file. If you need to make Modeler aware of your external JAR files
+			(such as JDBC drivers), there is a better way -  go to "Tools > Preferences" and configure them under "ClassPath".
+			</panel>
         	</subsection>
     </section>
 </body>

@@ -1,0 +1,15 @@
+<document>
+<title>CayenneModeler Guide</title>
+<toc name="toc-modeler-guide" chapter="9. Preferences Panel"/>
+<body>
+        <section name="9. Preferences Panel">
+			<subsection name="9.3 ClassPath"> 
+			<p>ClassPath Preferences panel allows users to map the locations of the external class libraries (JAR, ZIP, or class directories).
+			These external libraries will be used by CayenneModeler to locate JDBC drivers, custom DB adapters, and other external classes needed
+			for its operation. So if you see any CLASSPATH-related errors on DB reverse engineering, etc., in most cases you simply need to go to
+			preferences ClassPath panel and create an entry pointing to a missing external library.
+			</p>
+		</subsection>
+        </section>
+    </body>
+</document>
