@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.control.RemoteNotificationsConfigController;
+import org.objectstyle.cayenne.modeler.control.CacheSyncConfigController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -126,7 +126,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         this.configRemoteUpdates = new JButton("Configure");
         configRemoteUpdates.setEnabled(false);
 
-        FormLayout layout = new FormLayout("right:150, 3dlu, left:50, 3dlu, left:150", "");
+        FormLayout layout = new FormLayout("right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150", "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
         
@@ -178,7 +178,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
 
         configRemoteUpdates.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-               new RemoteNotificationsConfigController().startup();
+               new CacheSyncConfigController().startup();
             }
         });
     }
