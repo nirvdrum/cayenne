@@ -102,7 +102,7 @@ public class DataDomain implements QueryEngine {
 
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
-    protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
+    protected Map nodesByDataMapName = Collections.synchronizedMap(new HashMap());
     protected Collection nodesRef = Collections.unmodifiableCollection(nodes.values());
 
     /**
@@ -114,14 +114,6 @@ public class DataDomain implements QueryEngine {
     /** Stores DataMaps by name. */
     protected Map maps = Collections.synchronizedMap(new TreeMap());
     protected Map mapsRef = Collections.unmodifiableMap(maps);
-
-    /** 
-     * Stores mapping of DataNodes to ObjEntity names.
-     * Its goal is to speed up lookups for data operation
-     * switching. 
-     */
-    protected Map nodesByEntityName = Collections.synchronizedMap(new HashMap());
-    protected Map nodesByProcedureName = Collections.synchronizedMap(new HashMap());
 
     protected EntityResolver entityResolver;
     protected PrimaryKeyHelper primaryKeyHelper;
@@ -375,38 +367,21 @@ public class DataDomain implements QueryEngine {
     }
 
     /** 
-     * Removes DataNode. 
+     * Removes a DataNode. 
      */
     public synchronized void removeDataNode(String nodeName) {
-        DataNode nodeToRemove = (DataNode) nodes.get(nodeName);
-        if (null == nodeToRemove)
+        DataNode nodeToRemove = (DataNode) nodes.remove(nodeName);
+        if (nodeToRemove == null) {
             return;
-        nodes.remove(nodeName);
+        }
 
-        Iterator it = nodesByEntityName.entrySet().iterator();
+        Iterator it = nodesByDataMapName.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             if (entry.getValue() == nodeToRemove) {
                 it.remove();
             }
         }
-
-        it = nodesByDbEntityName.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            if (entry.getValue() == nodeToRemove) {
-                it.remove();
-            }
-        }
-
-        it = nodesByProcedureName.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            if (entry.getValue() == nodeToRemove) {
-                it.remove();
-            }
-        }
-
     }
 
     /**
@@ -430,9 +405,7 @@ public class DataDomain implements QueryEngine {
     public void reset() {
         synchronized (nodes) {
             nodes.clear();
-            nodesByEntityName.clear();
-            nodesByDbEntityName.clear();
-            nodesByProcedureName.clear();
+            nodesByDataMapName.clear();
 
             if (entityResolver != null) {
                 entityResolver.clearCache();
@@ -462,24 +435,7 @@ public class DataDomain implements QueryEngine {
         while (nodeMaps.hasNext()) {
             DataMap map = (DataMap) nodeMaps.next();
             this.addMap(map);
-
-            Iterator entities = map.getObjEntities().iterator();
-            while (entities.hasNext()) {
-                ObjEntity e = (ObjEntity) entities.next();
-                this.nodesByEntityName.put(e.getName(), node);
-            }
-
-            entities = map.getDbEntities().iterator();
-            while (entities.hasNext()) {
-                DbEntity e = (DbEntity) entities.next();
-                this.nodesByDbEntityName.put(e.getName(), node);
-            }
-
-            Iterator procedures = map.getProcedures().iterator();
-            while (procedures.hasNext()) {
-                Procedure proc = (Procedure) procedures.next();
-                this.nodesByProcedureName.put(proc.getName(), node);
-            }
+            this.nodesByDataMapName.put(map.getName(), node);
         }
     }
 
@@ -536,32 +492,18 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Returns DataNode that should handle database operations for
-     * a specified <code>objEntityName</code>. Method is synchronized
-     * since it can potentially update the index of DataNodes.
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
      */
     public synchronized DataNode dataNodeForObjEntityName(String objEntityName) {
-        DataNode node = (DataNode) nodesByEntityName.get(objEntityName);
-
-        // if lookup fails, it may mean that internal index
-        // in 'nodesByEntityName' might need to be updated;
-        // do it and then try again.
-        if (node == null) {
-            this.reindexNodes();
-            return (DataNode) nodesByEntityName.get(objEntityName);
-        }
-        else {
-            return node;
-        }
+        ObjEntity objEntity = getEntityResolver().lookupObjEntity(objEntityName);
+        return (objEntity != null) ? dataNodeForObjEntity(objEntity) : null;
     }
 
     /**
      * Updates internal index of DataNodes stored by the entity name.
      */
     public synchronized void reindexNodes() {
-        nodesByEntityName.clear();
-        nodesByDbEntityName.clear();
-        nodesByProcedureName.clear();
+        nodesByDataMapName.clear();
 
         Iterator nodes = this.getDataNodes().iterator();
         while (nodes.hasNext()) {
@@ -569,25 +511,8 @@ public class DataDomain implements QueryEngine {
             Iterator nodeMaps = node.getDataMaps().iterator();
             while (nodeMaps.hasNext()) {
                 DataMap map = (DataMap) nodeMaps.next();
-                this.addMap(map);
-
-                Iterator it = map.getObjEntities().iterator();
-                while (it.hasNext()) {
-                    ObjEntity e = (ObjEntity) it.next();
-                    nodesByEntityName.put(e.getName(), node);
-                }
-
-                it = map.getDbEntities().iterator();
-                while (it.hasNext()) {
-                    DbEntity e = (DbEntity) it.next();
-                    nodesByDbEntityName.put(e.getName(), node);
-                }
-
-                it = map.getProcedures().iterator();
-                while (it.hasNext()) {
-                    Procedure proc = (Procedure) it.next();
-                    nodesByProcedureName.put(proc.getName(), node);
-                }
+                addMap(map);
+                nodesByDataMapName.put(map.getName(), node);
             }
         }
     }
@@ -597,51 +522,50 @@ public class DataDomain implements QueryEngine {
      * a specified <code>objEntity</code>.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return dataNodeForObjEntityName(objEntity.getName());
+        return lookupDataNode(objEntity.getDataMap());
     }
 
+ 
     /**
-     * Returns DataNode that should handle database operations for
-     * a specified <code>dbEntity</code>.
+     * Returns a DataNode that should hanlde queries for all
+     * entities in a DataMap.
+     * 
+     * @since 1.1
+     */
+    public DataNode lookupDataNode(DataMap map) {
+        synchronized (nodesByDataMapName) {
+            return (DataNode) nodesByDataMapName.get(map.getName());
+        }
+    }
+    
+    /**
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
      */
     public DataNode dataNodeForDbEntity(DbEntity dbEntity) {
-        return this.dataNodeForDbEntityName(dbEntity.getName());
-    }
-
-    public synchronized DataNode dataNodeForDbEntityName(String dbEntityName) {
-        DataNode node = (DataNode) nodesByDbEntityName.get(dbEntityName);
-        // if lookup fails, it may mean that internal index
-        // in 'nodesByDbEntityName' need to be updated
-        // do it and then try again.
-        if (node == null) {
-            reindexNodes();
-            return (DataNode) nodesByDbEntityName.get(dbEntityName);
-        }
-        else {
-            return node;
-        }
+        return this.lookupDataNode(dbEntity.getDataMap());
     }
 
     /**
-     * Returns DataNode that should handle database operations for
-     * a specified <code>dbEntity</code>.
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
      */
-    public DataNode dataNodeForProcedure(Procedure procedure) {
-        return this.dataNodeForProcedureName(procedure.getName());
+    public DataNode dataNodeForDbEntityName(String dbEntityName) {
+        DbEntity dbEntity = getEntityResolver().lookupDbEntity(dbEntityName);
+        return (dbEntity != null) ? dataNodeForDbEntity(dbEntity) : null;
     }
 
+    /**
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
+     */
+    public DataNode dataNodeForProcedure(Procedure procedure) {
+        return this.lookupDataNode(procedure.getDataMap());
+    }
+
+    /**
+     * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
+     */
     public synchronized DataNode dataNodeForProcedureName(String procedureName) {
-        DataNode node = (DataNode) nodesByProcedureName.get(procedureName);
-        // if lookup fails, it may mean that internal index
-        // in 'nodesByProcedureName' need to be updated
-        // do it and then try again.
-        if (node == null) {
-            reindexNodes();
-            return (DataNode) nodesByProcedureName.get(procedureName);
-        }
-        else {
-            return node;
-        }
+        Procedure procedure = getEntityResolver().lookupProcedure(procedureName);
+        return (procedure != null) ? dataNodeForProcedure(procedure) : null;
     }
 
     /**
@@ -702,19 +626,13 @@ public class DataDomain implements QueryEngine {
                 Query nextQuery = (Query) it.next();
 
                 // try DbEntity root
-                DbEntity dbe = this.getEntityResolver().lookupDbEntity(nextQuery);
-                if (dbe != null) {
-                    node = this.dataNodeForDbEntity(dbe);
+                DataMap dataMap = getEntityResolver().lookupDataMap(nextQuery);
+                if (dataMap == null) {
+                    throw new CayenneRuntimeException(
+                        "No DataMap found for query with root: " + nextQuery.getRoot());
                 }
-                // try StoredProcedure root
-                else {
-                    Procedure procedure =
-                        this.getEntityResolver().lookupProcedure(nextQuery);
-                    if (procedure != null) {
-                        node = this.dataNodeForProcedure(procedure);
-                    }
-                }
-
+                
+                node = lookupDataNode(dataMap);
                 if (node == null) {
                     throw new CayenneRuntimeException(
                         "No suitable DataNode to handle query with root: "

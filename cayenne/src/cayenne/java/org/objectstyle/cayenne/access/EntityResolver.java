@@ -72,7 +72,6 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * EntityResolver encapsulates resolving between ObjEntities, DbEntities,
@@ -266,7 +265,7 @@ public class EntityResolver {
      *
      * @return the required DbEntity, or null if none matches the specifier
      */
-    private synchronized DbEntity _lookupDbEntity(Object object) {
+    private DbEntity _lookupDbEntity(Object object) {
         if (object instanceof DbEntity) {
             return (DbEntity) object;
         }
@@ -337,7 +336,7 @@ public class EntityResolver {
      *
      * @return the required ObjEntity or null if there is none that matches the specifier
      */
-    private synchronized ObjEntity _lookupObjEntity(Object object) {
+    private ObjEntity _lookupObjEntity(Object object) {
         if (object instanceof ObjEntity) {
             return (ObjEntity) object;
         }
@@ -386,8 +385,10 @@ public class EntityResolver {
     /**
      * Searches for the named query associated with the ObjEntity corresponding
      * to the Java class specified. Returns such query if found, null otherwise.
+     * 
+     * @since 1.1 return type is Query instead of SelectQuery
      */
-    public SelectQuery lookupQuery(Class queryRoot, String queryName) {
+    public Query lookupQuery(Class queryRoot, String queryName) {
         Entity ent = lookupObjEntity(queryRoot);
         return (ent != null) ? ent.getQuery(queryName) : null;
     }
@@ -413,5 +414,21 @@ public class EntityResolver {
         }
         
         return result;
+    }
+    
+    /**
+     * Searches for DataMap that holds Query root object.
+     * 
+     * @since 1.1 
+     */
+    public synchronized DataMap lookupDataMap(Query q) {
+        DbEntity entity = lookupDbEntity(q);
+        if (entity != null) {
+            return entity.getDataMap();
+        }
+
+        // try procedure
+        Procedure procedure = lookupProcedure(q);
+        return (procedure != null) ? procedure.getDataMap() : null;
     }
 }

@@ -64,7 +64,6 @@ import java.util.StringTokenizer;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.CayenneMap;
 
 /**
@@ -77,11 +76,27 @@ import org.objectstyle.cayenne.util.CayenneMap;
 public abstract class Entity extends MapObject {
     public static final String PATH_SEPARATOR = ".";
 
+    // ====================================================
+    // Attributes
+    // ====================================================
     protected CayenneMap attributes = new CayenneMap(this);
-	protected Map attributesMapRef = Collections.unmodifiableMap(attributes);
-	protected Collection attributesRef = Collections.unmodifiableCollection(attributes.values());
+    //  read-through reference for public access
+    protected Map attributesMapRef = Collections.unmodifiableMap(attributes);
+    //  read-through reference for public access
+    protected Collection attributesRef =
+        Collections.unmodifiableCollection(attributes.values());
+
+    // ====================================================
+    // Relationships
+    // ====================================================
     protected CayenneMap relationships = new CayenneMap(this);
-    protected Collection relationshipsRef = Collections.unmodifiableCollection(relationships.values());
+    //  read-through reference for public access
+    protected Collection relationshipsRef =
+        Collections.unmodifiableCollection(relationships.values());
+
+    // ====================================================
+    // Queries
+    // ====================================================
     protected CayenneMap queries = new CayenneMap(this);
 
     /**
@@ -100,9 +115,11 @@ public abstract class Entity extends MapObject {
 
     /**
      * Returns a named query associated with this entity.
+     * 
+     * @since 1.1 Return type is changed to Query from SelectQuery.
      */
-    public SelectQuery getQuery(String queryName) {
-        return (SelectQuery) queries.get(queryName);
+    public Query getQuery(String queryName) {
+        return (Query) queries.get(queryName);
     }
 
     /**
@@ -110,13 +127,13 @@ public abstract class Entity extends MapObject {
      * IllegalArgumentException if query root can not be resolved to this
      * entity.
      */
-    public void addQuery(String queryName, SelectQuery query) {
+    public void addQuery(String queryName, Query query) {
         if (query == null) {
-            throw new IllegalArgumentException("Attempt to add null query.");
+            throw new NullPointerException("Can't add null query.");
         }
 
         if (queryName == null) {
-            throw new IllegalArgumentException("Attempt to add query with null name.");
+            throw new NullPointerException("Query name can't be null.");
         }
 
         // check if this is the right query
@@ -128,7 +145,7 @@ public abstract class Entity extends MapObject {
      * Removes a named query from this Entity.
      */
     public void removeQuery(String queryName) {
-    	queries.remove(queryName);
+        queries.remove(queryName);
     }
 
     public void clearQueries() {
@@ -201,7 +218,7 @@ public abstract class Entity extends MapObject {
     public Map getRelationshipMap() {
         return Collections.unmodifiableMap(relationships);
     }
-    
+
     /**
      * Returns a relationship that has a specified entity as a target.
      * If there is more than one relationship for the same target,
@@ -211,40 +228,40 @@ public abstract class Entity extends MapObject {
      */
     public Relationship getAnyRelationship(Entity targetEntity) {
         Collection relationships = getRelationships();
-        if(relationships.isEmpty()) {
+        if (relationships.isEmpty()) {
             return null;
         }
-        
+
         Iterator it = relationships.iterator();
-        while(it.hasNext()) {
-            Relationship r = (Relationship)it.next();
-            if(r.getTargetEntity() == targetEntity) {
+        while (it.hasNext()) {
+            Relationship r = (Relationship) it.next();
+            if (r.getTargetEntity() == targetEntity) {
                 return r;
             }
         }
         return null;
     }
 
-	/**
-	 * Returns a collection of Relationships that exist in this entity.
-	 */
-	public Collection getRelationships() {
-		return relationshipsRef;
-	}
+    /**
+     * Returns a collection of Relationships that exist in this entity.
+     */
+    public Collection getRelationships() {
+        return relationshipsRef;
+    }
 
     /**
      * Returns entity attributes as an unmodifiable map.
      */
     public Map getAttributeMap() {
-    	return attributesMapRef;
+        return attributesMapRef;
     }
 
-	/**
-	 * Returns entity attributes.
-	 */
-	public Collection getAttributes() {
-		return attributesRef;
-	}
+    /**
+     * Returns entity attributes.
+     */
+    public Collection getAttributes() {
+        return attributesRef;
+    }
 
     /**
      * Processes expression <code>objPathExp</code> and returns an Iterator
@@ -278,8 +295,7 @@ public abstract class Entity extends MapObject {
         return new PathIterator(this, (String) pathExp.getOperand(0));
     }
 
-    public Iterator resolvePathComponents(String path)
-        throws ExpressionException {
+    public Iterator resolvePathComponents(String path) throws ExpressionException {
         return new PathIterator(this, path);
     }
 
@@ -289,8 +305,8 @@ public abstract class Entity extends MapObject {
         private Entity currentEnt;
 
         PathIterator(Entity ent, String path) {
-        	super();
-			this.currentEnt = ent;
+            super();
+            this.currentEnt = ent;
             this.toks = new StringTokenizer(path, PATH_SEPARATOR);
         }
 
