@@ -1,13 +1,10 @@
 .medium-menu {
 	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif;
 }
-.medium-menu A:link {
+.medium-menu A:link, a:visited {
 	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
 }
-.medium-menu A:hover {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
-}
-.medium-menu A:active {
+.medium-menu A:hover, A:active {
 	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
 }
 .medium-menu A {
@@ -21,18 +18,14 @@
 .normal-menu {
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif;
 }
-.normal-menu A:link {
+.normal-menu A:link, A:visited {
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
 }
-.normal-menu A:hover {
+.normal-menu A:hover, A:active {
 	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
 }
-.normal-menu A:active {
-	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
-}
-.normal-menu A:visited {
-	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
-}
+
+
 
 .section-title {
 	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 12pt; FONT-WEIGHT: bold
