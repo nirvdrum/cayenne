@@ -63,6 +63,7 @@ public class AllTests {
 		suite.addTestSuite(ProjectTst.class);
 		suite.addTestSuite(ProjectSetTst.class);
 		suite.addTestSuite(ProjectTraversalTst.class);
+		suite.addTestSuite(ProjectFileTst.class);
 		return suite;
 	}
 }

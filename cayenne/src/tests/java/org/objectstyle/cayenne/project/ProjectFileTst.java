@@ -57,102 +57,65 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
- * Represents a file in a Cayenne project.
- * File is characterized by a symbolic OS-neutral 
- * name, that can be resolved to a file in the file system
- * by calling <code>Project.resolveFile()</code>.
- * 
  * @author Andrei Adamchik
  */
-public abstract class ProjectFile {
-    protected String name;
-    protected String extension;
-    protected boolean objectModified;
-    
-    /**
-     * Constructor for ProjectFile.
-     */
-    public ProjectFile(String name, String extension) {
-        this.name = name;
-        this.extension = extension;
-    }
-    
-    /**
-     * Returns the objectModified.
-     * @return boolean
-     */
-    public boolean isObjectModified() {
-        return objectModified;
-    }
-
+public class ProjectFileTst extends CayenneTestCase {
+    protected ProjectFile pf;
 
     /**
-     * Sets the objectModified.
-     * @param objectModified The objectModified to set
+     * Constructor for ProjectFileTst.
+     * @param arg0
      */
-    public void setObjectModified(boolean objectModified) {
-        this.objectModified = objectModified;
+    public ProjectFileTst(String arg0) {
+        super(arg0);
     }
-    
 
-    public String getFileName() {
-        return (extension != null) ? name + '.' + extension : name;
+    /**
+    * @see junit.framework.TestCase#setUp()
+    */
+    protected void setUp() throws Exception {
+        super.setUp();
+        pf = new TestProjectFile("name", "ext");
     }
-    
-    
-    /**
-     * Returns a project object associated with this file.
-     */
-    public abstract Object getObject();
-    
-    /**
-     * Returns a name of associated object, that is also 
-     * used as a file name.
-     */
-    public abstract String getObjectName();
-    
-    /**
-     * Saves an underlying object to the file. 
-     * The procedure is dependent on the type of
-     * object and is implemented by concrete subclasses.
-     */
-    public abstract void saveToFile(File f) throws Exception;
-    
-    /**
-     * Saves ProjectFile's underlying object to a temporary 
-     * file, returning this file to the caller. If any problems are 
-     * encountered during saving, a ProjectException is thrown.
-     */
-    public File saveTemp() throws ProjectException {
-    	return null;
+
+    public void testObjectModified() throws Exception {
+        assertTrue(!pf.isObjectModified());
+        pf.setObjectModified(true);
+        assertTrue(pf.isObjectModified());
     }
-    
-    /**
-     * Finishes saving the underlying object.
-     */
-    public void saveCommit(File tempFile) {
-    	
+
+    class TestProjectFile extends ProjectFile {
+
+        /**
+         * Constructor for TestProjectFile.
+         * @param name
+         * @param extension
+         */
+        public TestProjectFile(String name, String extension) {
+            super(name, extension);
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+         */
+        public Object getObject() {
+            return null;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
+         */
+        public String getObjectName() {
+            return null;
+        }
+
+        /**
+         * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
+         */
+        public void saveToFile(File f) throws Exception {}
+
     }
-    
-    /**
-     * Cleans up after unsuccessful or canceled save attempt.
-     */
-    public void saveUndo(File tempFile) {
-    	
-    }
-    
-    /**
-     * Returns true if renaming a file is required 
-     * as a part of save operation.
-     */
-    public boolean isRenamed() {
-    	return Util.nullSafeEquals(getObjectName(), name);
-    }
-    
-    public boolean needsSave() {
-    	return isObjectModified() || isRenamed();
-    }    
 }

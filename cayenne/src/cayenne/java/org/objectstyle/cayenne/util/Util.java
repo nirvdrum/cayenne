@@ -244,4 +244,29 @@ public class Util {
 			return "";
 		}
 	}
+	
+	
+	/**
+     * Utility method to extract extension out of file name.
+     */
+    public static String extractFileExtension(String fileName) {
+     	int dotInd = fileName.lastIndexOf('.');
+    	
+    	// if dot is in the first position,
+    	// we are dealing with a hidden file rather than an extension
+        return (dotInd > 0 && dotInd < fileName.length()) ? fileName.substring(dotInd + 1) : null;
+    }
+
+
+    /**
+     * Utility method to remove extension out of a file name.
+     */
+    public static String stripFileExtension(String fileName) {
+    	int dotInd = fileName.lastIndexOf('.');
+    	
+    	// if dot is in the first position,
+    	// we are dealing with a hidden file rather than an extension
+        return (dotInd > 0) ? fileName.substring(0, dotInd) : fileName;
+    }
+
 }
