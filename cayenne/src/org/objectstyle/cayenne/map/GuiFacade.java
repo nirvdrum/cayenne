@@ -97,11 +97,6 @@ public class GuiFacade {
 		entity.attributes.remove(old_name);
 		attrib.setName(new_name);
 		entity.attributes.put(new_name, attrib);
-		
-		Iterator iter = entity.attributes.keySet().iterator();
-		while(iter.hasNext()) {
-			System.out.println("Key is {" + (String)iter.next() + "}");
-		}
 	}
 
 
