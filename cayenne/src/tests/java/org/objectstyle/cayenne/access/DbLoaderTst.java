@@ -60,7 +60,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -194,12 +196,27 @@ public class DbLoaderTst extends CayenneTestCase {
 		}			
 
 		// check decimal
-		assertEquals(
-			msgForTypeMismatch(Types.DECIMAL, decimalAttr),
-			Types.DECIMAL,
-			decimalAttr.getType());
+		// postgresql does not have a decimal type, instead columns that
+		// are declared as DECIMAL will be converted to NUMERIC instead
+		// which will be read as Types.NUMERIC when reengineering the
+		// database. 
+		DbAdapter adapter = this.getNode().getAdapter();
+		if (adapter instanceof PostgresAdapter)
+		{
+			assertEquals(
+				msgForTypeMismatch(Types.NUMERIC, decimalAttr),
+				Types.NUMERIC,
+				decimalAttr.getType());
+		}
+		else
+		{
+			assertEquals(
+				msgForTypeMismatch(Types.DECIMAL, decimalAttr),
+				Types.DECIMAL,
+				decimalAttr.getType());
 
-		assertEquals(2, decimalAttr.getPrecision());
+			assertEquals(2, decimalAttr.getPrecision());
+		}
 
 		// check varchar
 		assertEquals(

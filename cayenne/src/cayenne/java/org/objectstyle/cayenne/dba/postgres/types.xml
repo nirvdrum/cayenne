@@ -40,7 +40,7 @@ Broken PostgreSQL types mapping.
        <db-type name="double precision"/>
    </jdbc-type>
    <jdbc-type name="FLOAT">
-       <db-type name="real"/>
+       <db-type name="float"/>
    </jdbc-type>
    <jdbc-type name="INTEGER">
        <db-type name="integer"/>
