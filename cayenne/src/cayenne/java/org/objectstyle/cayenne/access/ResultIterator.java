@@ -55,6 +55,7 @@
  */ 
 package org.objectstyle.cayenne.access;
 
+import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneException;
@@ -74,7 +75,11 @@ import org.objectstyle.cayenne.CayenneException;
  * @author Andrei Adamchik
  */
 public interface ResultIterator {
-	
+    /**
+     * Returns all unread data rows from ResultSet and closes this iterator.
+     */
+    public List dataRows() throws CayenneException;
+           
 	/** 
 	 * Returns true if there is at least one more record
 	 * that can be read from the iterator.

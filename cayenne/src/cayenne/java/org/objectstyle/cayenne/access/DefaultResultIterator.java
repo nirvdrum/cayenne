@@ -62,6 +62,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +89,7 @@ public class DefaultResultIterator implements ResultIterator {
     private static Logger logObj =
         Logger.getLogger(DefaultResultIterator.class);
 
-    protected PreparedStatement prepStmt;
+    protected Statement statement;
     protected ResultSet resultSet;
     protected Connection connection;
 
@@ -111,13 +112,13 @@ public class DefaultResultIterator implements ResultIterator {
      * with ResultSet and query metadata.
      */
     public DefaultResultIterator(
-        PreparedStatement prepStmt,
+        PreparedStatement statement,
         DbAdapter adapter,
         SelectQueryAssembler assembler)
         throws SQLException, CayenneException {
-        this.prepStmt = prepStmt;
+        this.statement = statement;
         this.connection = assembler.getCon();
-        this.resultSet = prepStmt.executeQuery();
+        this.resultSet = statement.executeQuery();
         this.rowDescriptor = assembler.getSnapshotDesc(resultSet);
 
         String[] rowTypes = assembler.getResultTypes(resultSet);
@@ -306,7 +307,7 @@ public class DefaultResultIterator implements ResultIterator {
             }
 
             try {
-                prepStmt.close();
+                statement.close();
             } catch (SQLException e2) {
                 out.println("Error closing PreparedStatement");
                 e2.printStackTrace(out);
