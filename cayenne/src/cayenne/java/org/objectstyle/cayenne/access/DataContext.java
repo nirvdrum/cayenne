@@ -89,6 +89,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -460,20 +461,25 @@ public class DataContext implements QueryEngine, Serializable {
      * @param anObject data object that we want to delete.
      */
 	public void deleteObject(DataObject anObject) {
-		/*if(anObject.getPersistenceState()==PersistenceState.DELETED) {
+		if(anObject.getPersistenceState()==PersistenceState.DELETED) {
 			//Drop out... we might be about to get into a horrible
 			// recursive loop due to CASCADE delete rules.  
 			// Assume that everything must have been done correctly already
 			// and *don't* do it again
 			return;
-		}*/
+		}
 		
+		//Save the current state in case of a deny, in which case it should be reset.
+		//We cannot delay setting it to deleted, as Cascade deletes might cause
+		// recursion, and the "deleted" state is the best way we have of noticing that and bailing out (see above)
+		int oldState=anObject.getPersistenceState();
+
 		//TODO - figure out what to do when an object is still in 
 		//PersistenceState.NEW (unregister maybe?)
 		anObject.setPersistenceState(PersistenceState.DELETED);
 
 		//Do the right thing with all the relationships of the deleted object
-		/*ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
+		ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
 		Iterator relationshipIterator = entity.getRelationshipList().iterator();
 		while (relationshipIterator.hasNext()) {
 			ObjRelationship thisRelationship =
@@ -549,6 +555,8 @@ public class DataContext implements QueryEngine, Serializable {
 				case DeleteRule.DENY :
 					int relatedObjectsCount = relatedObjects.size();
 					if (relatedObjectsCount != 0) {
+						//Clean up - we shouldn't be deleting this object
+						anObject.setPersistenceState(oldState);
 						throw new DeleteDenyException(
 							"Cannot delete a "
 								+ getEntityResolver()
@@ -566,11 +574,13 @@ public class DataContext implements QueryEngine, Serializable {
 					}
 					break;
 				default :
+					//Clean up - we shouldn't be deleting this object
+					anObject.setPersistenceState(oldState);
 					throw new CayenneRuntimeException(
 						"Unknown type of delete rule "
 							+ thisRelationship.getDeleteRule());
 			}
-		}*/
+		}
 	}
 
 	/** 
@@ -685,6 +695,53 @@ public class DataContext implements QueryEngine, Serializable {
 			}
 		}
 
+		//CM: Note on ordering of operations:  The order the queries are created is important
+		// Although there is some ordering code in DataNode.performQueries, it still seems that
+		// the order of the queries in queryList matters (should investigate this, but I don't
+		// have the time - somebody?).   Updates come first, so that any nullify delete rules
+		// will nullify fk's before the other object is deleted (causing grief with integrity constraints
+		// where the fk exists and points to a non-existent record).  Then flattened deletes,
+		// because nothing typically relies on those records (no constraints will hurt), then
+		// other deletions.  Inserts follow, and finally flattenedInserts.  
+		// Inserts/Deletes could probably be swapped (untested), but flattened inserts
+		// must definitely come last, to ensure that the rows they point to are all inserted and ready.
+		
+		//We must create permanent ids before doing the updates, so fk's that point to
+		// new objects will not be set to null
+		if (insObjects.size() > 0) {
+			// create permanent id's and orders insObjects in the correct order for insertion
+			// (which is very important with respect to dependent pk's and reflexive relationships)
+			createPermIds(insObjects);
+		}
+		
+		// prepare updates (filter "fake" updates, update id's, build queries)
+		if (rawUpdObjects.size() > 0) {
+			Iterator updIt = rawUpdObjects.iterator();
+			while (updIt.hasNext()) {
+				DataObject nextObject = (DataObject) updIt.next();
+				UpdateQuery updateQuery = QueryHelper.updateQuery(nextObject);
+				if (updateQuery != null) {
+					queryList.add(updateQuery);
+					updObjects.add(nextObject);
+
+					ObjectId updId =
+						updatedId(nextObject.getObjectId(), updateQuery);
+					if (updId != null) {
+						updatedIds.put(nextObject.getObjectId(), updId);
+					}
+				} else {
+					// object was not really modified,
+					// put this object back in unmodified state right away
+					nextObject.setPersistenceState(PersistenceState.COMMITTED);
+				}
+			}
+		}
+
+		//Flattened relationship deletes happen *before* all other deletes, to be 
+		//sure that if they link to any other records that should be deleted, that 
+		// the deletions happen in the correct order (link records first, 
+		// then linked-to records)
+		queryList.addAll(this.getFlattenedDeleteQueries()); 
 		if (delObjects.size() > 0) {
 			OperationSorter.sortObjectsInDeleteOrder(delObjects);
 			Iterator delIt = delObjects.iterator();
@@ -698,7 +755,7 @@ public class DataContext implements QueryEngine, Serializable {
 		if (insObjects.size() > 0) {
 			// create permanent id's and orders insObjects in the correct order for insertion
 			// (which is very important with respect to dependent pk's and reflexive relationships)
-			createPermIds(insObjects);
+			//createPermIds(insObjects);
 
 			// create insert queries
 			Iterator insIt = insObjects.iterator();
@@ -723,30 +780,9 @@ public class DataContext implements QueryEngine, Serializable {
 			}
 		}
 
-		// prepare updates (filter "fake" updates, update id's, build queries)
-		if (rawUpdObjects.size() > 0) {
-			Iterator updIt = rawUpdObjects.iterator();
-			while (updIt.hasNext()) {
-				DataObject nextObject = (DataObject) updIt.next();
-				UpdateQuery updateQuery = QueryHelper.updateQuery(nextObject);
-				if (updateQuery != null) {
-					queryList.add(updateQuery);
-					updObjects.add(nextObject);
-
-					ObjectId updId =
-						updatedId(nextObject.getObjectId(), updateQuery);
-					if (updId != null) {
-						updatedIds.put(nextObject.getObjectId(), updId);
-					}
-				} else {
-					// object was not really modified,
-					// put this object back in unmodified state right away
-					nextObject.setPersistenceState(PersistenceState.COMMITTED);
-				}
-			}
-		}
-
-		queryList.addAll(this.getFlattenedUpdateQueries());
+		//Flattened relationship inserts happen *after* all other inserts, to be 
+		//sure that the records they are linking to have already been inserted
+		queryList.addAll(this.getFlattenedInsertQueries()); 
 
 		if (queryList.size() > 0) {
 			ContextCommitObserver result =
@@ -1296,11 +1332,11 @@ public class DataContext implements QueryEngine, Serializable {
 	}
 
 	/**
-	 * Returns a list of queries (typically insert/delete types) that should be performed in order
-	 * to commit any changes to flattened relationships that have occurred.
+	 * Returns a list of insert queries that should be performed in order
+	 * to commit any new flattened relationships that have been created
 	 * @return List a list of Query objects to be performed
 	 */
-	public List getFlattenedUpdateQueries() {
+	private List getFlattenedInsertQueries() {
 		List result = new ArrayList();
 		int i;
 		Iterator objectIterator;
@@ -1322,7 +1358,19 @@ public class DataContext implements QueryEngine, Serializable {
 				}
 			}
 		}
-
+		return result;
+	}
+	
+	/**
+	 * Returns a list of delete queries that should be performed in order
+	 * to commit any removed flattened relationships
+	 * @return List a list of Query objects to be performed
+	 */
+	private List getFlattenedDeleteQueries() {
+		List result = new ArrayList();
+		int i;
+		Iterator objectIterator;
+		
 		objectIterator = flattenedDeletes.keySet().iterator();
 		while (objectIterator.hasNext()) {
 			DataObject sourceObject = (DataObject) objectIterator.next();
@@ -1341,13 +1389,13 @@ public class DataContext implements QueryEngine, Serializable {
 			}
 		}
 		return result;
-
 	}
+
 	/**
 	 * Should be called once the queries returned by getFlattenedUpdateQueries have been succesfully executed
 	 * ,or reverted and are no longer needed.
 	 */
-	public void clearFlattenedUpdateQueries() {
+	private void clearFlattenedUpdateQueries() {
 		this.flattenedDeletes = new HashMap();
 		this.flattenedInserts = new HashMap();
 	}

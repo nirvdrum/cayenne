@@ -63,12 +63,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -385,13 +388,28 @@ public class OperationSorter {
 		private final class ReflexiveRelData {
 			private ObjRelationship rel;
 			private List orderedObjects = new ArrayList();
-
+      private Class targetClass;
+      
 			public ReflexiveRelData(ObjRelationship relationship, List allObjects) {
 				super();
 				this.rel = relationship;
+    		ObjEntity targetEntity=(ObjEntity)this.rel.getTargetEntity();
+				try {
+				  this.targetClass =
+						Class.forName(targetEntity.getClassName());
+				} catch (Exception e) {
+					throw new CayenneRuntimeException(
+						"Unable to load class named "
+							+ targetEntity.getClassName()
+							+ " to handle entity "
+							+ targetEntity);
+				}
 				this.createOrderedObjectsList(allObjects);
 			}
 
+			//Creates an ordered list based on obj (i.e. finds other objects
+			// that must come before and after obj), and adds this list to the 
+			// end of orderedList.  Uses recursion to find dependencies.
 			private void addObjectToList(DataObject obj, List allObjects, List orderedList) {
 				//Do toOne relationships first, because any objects on a toOne will need to be 
 				//added prior to obj (but still at the end of the current list)
@@ -405,6 +423,25 @@ public class OperationSorter {
 
 				if (toOneRel != null) {
 					DataObject dest = (DataObject) obj.readPropertyDirectly(toOneRel.getName());
+					//In the case that a relationship had a NULLIFY delete rule, this property may be null
+					// when in fact it used to point to an object that is being deleted (and is hence important
+					// from the perspective of sorting the operations).  So if there is no object, 
+					// we do a quick check at the dbrelationship/snapshot level just to be sure.  If
+					// an object turns up, then it must have been the above situation, so we use that object
+					if(dest==null) {
+						DbRelationship finalRel= (DbRelationship) toOneRel.getDbRelationshipList().get(0);
+						Map snapshot=obj.getCommittedSnapshot();
+						if(snapshot==null) {
+							snapshot=obj.getCurrentSnapshot();
+						}
+					
+						Map pksnapshot=finalRel.targetPkSnapshotWithSrcSnapshot(snapshot);
+						if(pksnapshot!=null) {
+
+							ObjectId destId = new ObjectId(this.targetClass, pksnapshot);
+							dest=obj.getDataContext().registeredObject(destId);
+						}
+					}
 					if (allObjects.contains(dest)) {
 						this.addObjectToList(dest, allObjects, orderedList);
 					}
@@ -438,6 +475,9 @@ public class OperationSorter {
 				}
 			}
 
+			//Finds the objects of interest (with the correct entity) from allObjects
+			// and then iterates over that list, using addObjectToList to build an ordered list.
+			// (ignoring objects that are added as the result of addObjectToList)
 			private void createOrderedObjectsList(List allObjects) {
 				//could use getSourceEntity, but they're the same in this case
 				ObjEntity entity = (ObjEntity) this.rel.getTargetEntity();
@@ -501,7 +541,7 @@ public class OperationSorter {
 			int opType2 = q2.getQueryType();
 
 			// sanity check
-			if (opType1 == Query.SELECT_QUERY || opType1 == Query.SELECT_QUERY)
+			if (opType1 == Query.SELECT_QUERY || opType2 == Query.SELECT_QUERY)
 				throw new RuntimeException("Can not sort select queries...");
 
 			if (opType1 == opType2) {

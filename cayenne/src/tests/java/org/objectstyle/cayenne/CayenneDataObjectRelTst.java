@@ -264,6 +264,7 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 		}
 
 	}
+	
 	public void testRemoveFromFlattenedRelationship() throws Exception {
 		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {groupName});
 		Artist a1 = fetchArtist();
@@ -282,6 +283,26 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 		assertEquals(0, groupList.size());
 	}
 
+	//Shows up a possible bug in ordering of deletes, when a flattened relationships link record is deleted
+	// at the same time (same transaction) as one of the record to which it links.
+	public void testRemoveFlattenedRelationshipAndRootRecord() throws Exception {
+			TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {groupName});
+			Artist a1 = fetchArtist();
+			DataContext dc=a1.getDataContext();
+		
+			ArtGroup group=(ArtGroup)a1.getGroupArray().get(0);
+			a1.removeFromGroupArray(group); //Cause the delete of the link record
+			
+			dc.deleteObject(a1); //Cause the deletion of the artist
+			
+			try {
+				dc.commitChanges();
+			} catch (Exception e) {
+				e.printStackTrace();
+				fail("Should not have thrown the exception :"+e.getMessage());
+			}
+	}
+	
 	public void testReflexiveRelationshipInsertOrder1() {
 		DataContext dc=this.createDataContext();
 		ArtGroup parentGroup=(ArtGroup)dc.createAndRegisterNewObject("ArtGroup");
@@ -372,6 +393,22 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 		
 	}
 
+	public void testComplexInsertUpdateOrdering() {
+		Artist artist=(Artist) ctxt.createAndRegisterNewObject("Artist");
+		artist.setArtistName("a name");
+		
+		ctxt.commitChanges();
+		
+		//Cause an update and an insert that need correct ordering
+		Painting painting=(Painting)ctxt.createAndRegisterNewObject("Painting");
+		painting.setPaintingTitle("a painting");
+		artist.addToPaintingArray(painting);
+		
+		ctxt.commitChanges();
+		
+		ctxt.deleteObject(artist);
+		ctxt.commitChanges();
+	}
 	
 	private Artist newSavedArtist() {
 		Artist o1 = newArtist();
