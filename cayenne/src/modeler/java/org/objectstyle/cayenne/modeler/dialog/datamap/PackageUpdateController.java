@@ -59,6 +59,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Control;
@@ -99,6 +100,12 @@ public class PackageUpdateController extends DefaultsPreferencesController {
     protected void updatePackage() {
         boolean doAll = ((DefaultsPreferencesModel) getModel()).isAllEntities();
         String defaultPackage = dataMap.getDefaultPackage();
+        if (Util.isEmptyString(defaultPackage)) {
+            defaultPackage = "";
+        }
+        else if (!defaultPackage.endsWith(".")) {
+            defaultPackage = defaultPackage + '.';
+        }
 
         Iterator it = dataMap.getObjEntities().iterator();
         while (it.hasNext()) {
@@ -107,7 +114,15 @@ public class PackageUpdateController extends DefaultsPreferencesController {
                 String oldName = entity.getClassName();
                 String className = extractClassName(Util.isEmptyString(oldName) ? entity
                         .getName() : oldName);
+                String newName = defaultPackage + className;
 
+                if (!Util.nullSafeEquals(newName, oldName)) {
+                    entity.setClassName(newName);
+
+                    // any way to batch events, a big change will flood the app with
+                    // entity events..?
+                    mediator.fireDbEntityEvent(new EntityEvent(this, entity));
+                }
             }
         }
 

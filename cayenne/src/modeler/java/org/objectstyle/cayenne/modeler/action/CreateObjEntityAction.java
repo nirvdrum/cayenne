@@ -70,9 +70,9 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class CreateObjEntityAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Create ObjEntity";
-	}
+    public static String getActionName() {
+        return "Create ObjEntity";
+    }
 
     /**
      * Constructor for CreateObjEntityAction.
@@ -94,24 +94,38 @@ public class CreateObjEntityAction extends CayenneAction {
 
     protected void createObjEntity() {
         EventController mediator = getMediator();
-        ObjEntity entity =
-            (ObjEntity) NamedObjectFactory.createObject(
+
+        DataMap dataMap = mediator.getCurrentDataMap();
+        ObjEntity entity = (ObjEntity) NamedObjectFactory.createObject(
                 ObjEntity.class,
                 mediator.getCurrentDataMap());
-        mediator.getCurrentDataMap().addObjEntity(entity);
+
+        // init defaults
+        entity.setSuperClassName(dataMap.getDefaultSuperclass());
+        entity.setDeclaredLockType(dataMap.getDefaultLockType());
+
+        String pkg = dataMap.getDefaultPackage();
+        if (pkg != null) {
+            if (!pkg.endsWith(".")) {
+                pkg = pkg + ".";
+            }
+
+            entity.setClassName(pkg + entity.getName());
+        }
+
+        dataMap.addObjEntity(entity);
         mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-        mediator.fireObjEntityDisplayEvent(
-            new EntityDisplayEvent(
+        mediator.fireObjEntityDisplayEvent(new EntityDisplayEvent(
                 this,
                 entity,
-                mediator.getCurrentDataMap(),
+                dataMap,
                 mediator.getCurrentDataNode(),
                 mediator.getCurrentDataDomain()));
     }
 
     /**
-    * Returns <code>true</code> if path contains a DataMap object.
-    */
+     * Returns <code>true</code> if path contains a DataMap object.
+     */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;

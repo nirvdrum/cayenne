@@ -59,6 +59,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Control;
@@ -104,7 +105,13 @@ public class SuperclassUpdateController extends DefaultsPreferencesController {
         while (it.hasNext()) {
             ObjEntity entity = (ObjEntity) it.next();
             if (doAll || Util.isEmptyString(entity.getSuperClassName())) {
+                if (!Util.nullSafeEquals(defaultSuperclass, entity.getSuperClassName())) {
+                    entity.setSuperClassName(defaultSuperclass);
 
+                    // any way to batch events, a big change will flood the app with
+                    // entity events..?
+                    mediator.fireDbEntityEvent(new EntityEvent(this, entity));
+                }
             }
         }
 

@@ -59,6 +59,7 @@ import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -103,7 +104,13 @@ public class LockTypeUpdateController extends DefaultsPreferencesController {
         while (it.hasNext()) {
             ObjEntity entity = (ObjEntity) it.next();
             if (doAll || entity.getLockType() == DataMap.DEFAULT_LOCK_TYPE_VALUE) {
+                if (defaultLockType != entity.getDeclaredLockType()) {
+                    entity.setDeclaredLockType(defaultLockType);
 
+                    // any way to batch events, a big change will flood the app with
+                    // entity events..?
+                    mediator.fireDbEntityEvent(new EntityEvent(this, entity));
+                }
             }
         }
 
