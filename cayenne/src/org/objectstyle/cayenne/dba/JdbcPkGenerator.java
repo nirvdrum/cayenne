@@ -235,6 +235,11 @@ public class JdbcPkGenerator implements PkGenerator {
         PkRange r = (PkRange) pkCache.get(ent.getName());
         if (r == null || r.isExhausted()) {
             int val = pkFromDatabase(node, ent);
+            
+            if(pkCacheSize == 1)  {
+                return new Integer(val);
+            }
+            
             r = new PkRange(val, val + pkCacheSize - 1);
             pkCache.put(ent.getName(), r);
         }
