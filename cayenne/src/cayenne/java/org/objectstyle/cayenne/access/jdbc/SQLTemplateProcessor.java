@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 class SQLTemplateProcessor {
     private static RuntimeInstance sharedRuntime;
 
+    static final String RESULT_COLUMNS_LIST_KEY = "resultColumns";
     static final String BINDINGS_LIST_KEY = "bindings";
     static final String HELPER_KEY = "helper";
 
@@ -102,6 +103,7 @@ class SQLTemplateProcessor {
         sharedRuntime.addProperty("userdirective", BindDirective.class.getName());
         sharedRuntime.addProperty("userdirective", BindEqualDirective.class.getName());
         sharedRuntime.addProperty("userdirective", BindNotEqualDirective.class.getName());
+        sharedRuntime.addProperty("userdirective", ResultDirective.class.getName());
         try {
             sharedRuntime.init();
         }
@@ -124,6 +126,26 @@ class SQLTemplateProcessor {
         this.renderingUtils = renderingUtils;
     }
 
+    String processSelectTemplate(
+        String template,
+        Map parameters,
+        List resultColumnsHolder,
+        List bindingsHolder)
+        throws Exception {
+        // have to make a copy of parameter map since we are gonna modify it..
+        Map internalParameters =
+            (parameters != null && !parameters.isEmpty())
+                ? new HashMap(parameters)
+                : new HashMap(3);
+
+        internalParameters.put(RESULT_COLUMNS_LIST_KEY, resultColumnsHolder);
+        internalParameters.put(BINDINGS_LIST_KEY, bindingsHolder);
+        internalParameters.put(HELPER_KEY, renderingUtils);
+
+        VelocityContext context = new VelocityContext(internalParameters);
+        return execute(context, template);
+    }
+
     /**
      * Builds and returns a SQL string from template and a set of parameters. As a side effect, 
      * objects that should be used as PreparedStatement bindings are inserted into 
@@ -133,9 +155,6 @@ class SQLTemplateProcessor {
      */
     String processTemplate(String template, Map parameters, List bindingsHolder)
         throws Exception {
-
-        // Note: this method is a reworked version of org.apache.velocity.app.Velocity.evaluate(..)
-        // cleaned up to avoid using any Velocity singletons
 
         // have to make a copy of parameter map since we are gonna modify it..
         Map internalParameters =
@@ -147,6 +166,13 @@ class SQLTemplateProcessor {
         internalParameters.put(HELPER_KEY, renderingUtils);
 
         VelocityContext context = new VelocityContext(internalParameters);
+        return execute(context, template);
+    }
+
+    String execute(VelocityContext context, String template) throws Exception {
+        // Note: this method is a reworked version of org.apache.velocity.app.Velocity.evaluate(..)
+        // cleaned up to avoid using any Velocity singletons
+
         StringWriter out = new StringWriter(template.length());
         SimpleNode nodeTree = null;
 
