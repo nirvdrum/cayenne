@@ -125,7 +125,7 @@ Used in: db-key-generator
 <!ELEMENT obj-attribute EMPTY>
 <!ATTLIST obj-attribute
 	name CDATA #REQUIRED
-	db-attribute-name CDATA #REQUIRED
+	db-attribute-path CDATA #REQUIRED
 	type CDATA #REQUIRED
 >
 

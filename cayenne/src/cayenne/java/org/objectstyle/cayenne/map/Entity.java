@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -69,12 +69,12 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.CayenneMap;
 
-/** 
+/**
  * An Entity is an abstract descriptor for an entity mapping concept.
  * Entity can represent either a descriptor of database table or
- * a persistent object. 
- * 
- * @author Andrei Adamchik 
+ * a persistent object.
+ *
+ * @author Andrei Adamchik
  */
 public abstract class Entity extends MapObject {
     private static Logger logObj = Logger.getLogger(Entity.class);
@@ -124,40 +124,40 @@ public abstract class Entity extends MapObject {
         validateQueryRoot(query);
         queries.put(queryName, query);
     }
-    
+
     /**
      * Removes a named query from this Entity.
      */
     public void removeQuery(String queryName) {
     	queries.remove(queryName);
     }
-    
+
     public void clearQueries() {
         queries.clear();
     }
 
     /**
      * Helper method that checks that a Query belongs to this entity by
-     * validating query root object. 
-     * 
+     * validating query root object.
+     *
      * @throws IllegalArgumentException if query does not belong to this entity.
      */
     protected abstract void validateQueryRoot(Query query)
         throws IllegalArgumentException;
 
-    /** 
+    /**
      * Returns attribute with name <code>attrName</code>.
-     * Will return null if no attribute with this name exists. 
+     * Will return null if no attribute with this name exists.
      */
     public Attribute getAttribute(String attrName) {
         return (Attribute) attributes.get(attrName);
     }
 
-    /** 
+    /**
      * Adds new attribute to the entity. If attribute has no name,
      * IllegalArgumentException is thrown.
-     * 
-     * Also sets <code>attr</code>'s entity to be this entity. 
+     *
+     * Also sets <code>attr</code>'s entity to be this entity.
      */
     public void addAttribute(Attribute attr) {
         if (attr.getName() == null) {
@@ -176,10 +176,10 @@ public abstract class Entity extends MapObject {
         attributes.clear();
     }
 
-    /** 
+    /**
      * Returns relationship with name <code>relName</code>.
-     * Will return null if no relationship with this name 
-     * exists in the entity. 
+     * Will return null if no relationship with this name
+     * exists in the entity.
      */
     public Relationship getRelationship(String relName) {
         return (Relationship) relationships.get(relName);
@@ -230,7 +230,7 @@ public abstract class Entity extends MapObject {
         return list;
     }
 
-    /** 
+    /**
      * Processes expression <code>objPathExp</code> and returns an Iterator
      * of path components that contains a sequence of Attributes and Relationships.
      * Note that if path is invalid and can not be resolved from this entity,
@@ -260,6 +260,11 @@ public abstract class Entity extends MapObject {
         }
 
         return new PathIterator(this, (String) pathExp.getOperand(0));
+    }
+
+    public Iterator resolvePathComponents(String path)
+        throws ExpressionException {
+        return new PathIterator(this, (String) path);
     }
 
     // Used to return an iterator to callers of 'resolvePathComponents'

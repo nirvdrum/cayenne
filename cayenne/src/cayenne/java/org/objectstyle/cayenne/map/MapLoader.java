@@ -616,8 +616,8 @@ public class MapLoader extends DefaultHandler {
 
             // If this obj attribute is mapped to db attribute
             if (temp.getDbAttribute() != null) {
-                out.print(" db-attribute-name=\"");
-                out.print(temp.getDbAttribute().getName());
+                out.print(" db-attribute-path=\"");
+                out.print(temp.getDbAttributePath());
                 out.print('\"');
             }
             out.println("/>");
@@ -873,7 +873,11 @@ public class MapLoader extends DefaultHandler {
         ObjAttribute oa = new ObjAttribute(name);
         oa.setType(type);
         objEntity.addAttribute(oa);
-        oa.setDbAttributeName(atts.getValue("", "db-attribute-name"));
+        String dbPath = atts.getValue("", "db-attribute-path");
+        if (dbPath == null) {
+            dbPath = atts.getValue("", "db-attribute-name");
+        }
+        oa.setDbAttributePath(dbPath);
     }
 
     private void processStartDbRelationship(Attributes atts)
@@ -1215,7 +1219,7 @@ public class MapLoader extends DefaultHandler {
     private void resetCurrentTag() {
         currentTag = null;
     }
-    
+
     /** Used for creating the key in DbRelationship map */
     class SourceTarget {
         public String source;

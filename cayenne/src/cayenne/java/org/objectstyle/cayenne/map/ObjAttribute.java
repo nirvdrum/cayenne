@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -52,14 +52,17 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.map;
 
+import java.util.Iterator;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.IteratorUtils;
 
-/** 
+/**
  * An ObjAttribute is a mapping descriptor of a Java class property.
- * 
+ *
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
@@ -68,10 +71,10 @@ public class ObjAttribute extends Attribute {
     protected String attrType;
 
     // The name of the corresponding database table column
-    protected String dbAttributeName;
+    private String dbAttributePath;
 
 	public ObjAttribute() {}
-	
+
 	public ObjAttribute(String name) {
 		super(name);
 	}
@@ -98,26 +101,42 @@ public class ObjAttribute extends Attribute {
     }
 
 
-	/** 
-	 * Returns an attribute describing a mapped database 
+	/**
+	 * Returns an attribute describing a mapped database
 	 * table column.
 	 */
     public DbAttribute getDbAttribute() {
-    	if(dbAttributeName == null) {
-    		return null;
+        Iterator pathIterator = getDbPathIterator();
+        Object o = null;
+        while (pathIterator.hasNext()) {
+            o = pathIterator.next();
+        }
+        return (DbAttribute)o;
+    }
+
+    public Iterator getDbPathIterator() {
+        if(dbAttributePath == null) {
+            return IteratorUtils.EMPTY_ITERATOR;
+        }
+
+        ObjEntity ent = (ObjEntity)getEntity();
+        if(ent == null) {
+            return IteratorUtils.EMPTY_ITERATOR;
+        }
+
+        DbEntity dbEnt = ent.getDbEntity();
+        if(dbEnt == null) {
+            return IteratorUtils.EMPTY_ITERATOR;
     	}
-    	
-    	ObjEntity ent = (ObjEntity)getEntity();
-    	if(ent == null) {
-    		return null;
-    	}
-    	
-    	DbEntity dbEnt = ent.getDbEntity();
-    	if(dbEnt == null) {
-    		return null;
-    	}
-    	
-        return (DbAttribute)dbEnt.getAttribute(dbAttributeName);
+
+        int lastPartStart = dbAttributePath.lastIndexOf('.');
+        if (lastPartStart < 0) {
+            Attribute attribute = dbEnt.getAttribute(dbAttributePath);
+            if (attribute == null) return IteratorUtils.EMPTY_ITERATOR;
+            return IteratorUtils.singletonIterator(attribute);
+        }
+
+        return dbEnt.resolvePathComponents(dbAttributePath);
     }
 
 
@@ -125,10 +144,10 @@ public class ObjAttribute extends Attribute {
      *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
     public void setDbAttribute(DbAttribute dbAttribute) {
     	if(dbAttribute == null) {
-    		setDbAttributeName(null);
+    		setDbAttributePath(null);
     	}
     	else {
-    		setDbAttributeName(dbAttribute.getName());
+    		setDbAttributePath(dbAttribute.getName());
     	}
     }
 
@@ -138,7 +157,13 @@ public class ObjAttribute extends Attribute {
 	 * @return String
 	 */
 	public String getDbAttributeName() {
-		return dbAttributeName;
+        if (dbAttributePath == null) return null;
+        int lastPartStart = dbAttributePath.lastIndexOf('.');
+        String lastPart = StringUtils.substring(
+                dbAttributePath,
+                lastPartStart + 1,
+                dbAttributePath.length());
+		return lastPart;
 	}
 
 
@@ -147,6 +172,23 @@ public class ObjAttribute extends Attribute {
 	 * @param dbAttributeName The dbAttributeName to set
 	 */
 	public void setDbAttributeName(String dbAttributeName) {
-		this.dbAttributeName = dbAttributeName;
+        if (dbAttributePath == null || dbAttributeName == null) {
+            dbAttributePath = dbAttributeName;
+            return;
+        }
+        int lastPartStart = dbAttributePath.lastIndexOf('.');
+        String newPath = (lastPartStart > 0 ?
+                          StringUtils.chomp(dbAttributePath, ".") :
+                          "");
+        newPath += (newPath.length() > 0 ? "." : "") + dbAttributeName;
+		this.dbAttributePath = newPath;
 	}
+
+    public void setDbAttributePath(String dbAttributePath) {
+        this.dbAttributePath = dbAttributePath;
+    }
+
+    public String getDbAttributePath() {
+        return dbAttributePath;
+    }
 }
