@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockupMappingNamespace;
 
 public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;
@@ -97,5 +98,41 @@ public class DbRelationshipTst extends CayenneTestCase {
         
         assertNotNull(r2);
         assertSame(artistEnt.getRelationship("paintingArray"), r2);
+    }
+    
+    public void testGetReverseRelationshipToSelf() throws Exception {
+        
+        // assemble mockup entity
+        MockupMappingNamespace namespace = new MockupMappingNamespace();
+        DbEntity e = new DbEntity("test");
+        namespace.addDbEntity(e);
+        DbRelationship rforward = new DbRelationship("rforward");
+        e.addRelationship(rforward);
+        rforward.setSourceEntity(e);
+        rforward.setTargetEntity(e);
+        
+        assertNull(rforward.getReverseRelationship());
+        
+        // add a joins
+        e.addAttribute(new DbAttribute("a1"));
+        e.addAttribute(new DbAttribute("a2"));
+        rforward.addJoin(new DbJoin(rforward, "a1", "a2"));
+        
+        assertNull(rforward.getReverseRelationship());
+        
+        // create reverse
+        
+        DbRelationship rback = new DbRelationship("rback");
+        e.addRelationship(rback);
+        rback.setSourceEntity(e);
+        rback.setTargetEntity(e);
+        
+        assertNull(rforward.getReverseRelationship());
+        
+        // create reverse join
+        rback.addJoin(new DbJoin(rback, "a2", "a1"));
+        
+        assertSame(rback, rforward.getReverseRelationship());
+        assertSame(rforward, rback.getReverseRelationship());
     }
 }

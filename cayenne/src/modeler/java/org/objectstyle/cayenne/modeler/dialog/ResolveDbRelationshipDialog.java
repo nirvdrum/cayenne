@@ -70,16 +70,18 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -88,26 +90,17 @@ import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
- * Editor of DbRelationship joins. 
+/**
+ * Editor of DbRelationship joins.
  */
 public class ResolveDbRelationshipDialog extends CayenneDialog {
 
-    protected DataMap map;
-    protected java.util.List originalList;
-    protected java.util.List dbRelList;
-    protected DbEntity start;
-    protected DbEntity end;
     protected DbRelationship relationship;
-    protected boolean isDbRelNew;
-    protected DbRelationship reverseRelationship;
-    protected boolean isReverseDbRelNew;
 
     protected JLabel reverseNameLabel;
     protected JLabel reverseCheckLabel;
@@ -122,26 +115,22 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
 
     private boolean cancelPressed;
 
-    public ResolveDbRelationshipDialog(
-        java.util.List relationships,
-        DbEntity start,
-        DbEntity end,
-        boolean toMany) {
+    public ResolveDbRelationshipDialog(DbRelationship relationship) {
 
         super(CayenneModelerFrame.getFrame(), "", true);
 
-        init();
+        initView();
         initController();
-        initWithModel(relationships, start, end, toMany);
+        initWithModel(relationship);
 
         this.pack();
         this.centerWindow();
     }
 
-    /** 
-     * Creates graphical components. 
+    /**
+     * Creates graphical components.
      */
-    private void init() {
+    private void initView() {
 
         // create widgets
         reverseNameLabel = CayenneWidgetFactory.createLabel("Reverse Relationship:");
@@ -162,11 +151,10 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         getContentPane().setLayout(new BorderLayout());
 
         CellConstraints cc = new CellConstraints();
-        PanelBuilder builder =
-            new PanelBuilder(
+        PanelBuilder builder = new PanelBuilder(
                 new FormLayout(
-                    "right:max(50dlu;pref), 3dlu, fill:min(150dlu;pref), 3dlu, fill:min(150dlu;pref)",
-                    "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, top:14dlu, 3dlu, top:p:grow"));
+                        "right:max(50dlu;pref), 3dlu, fill:min(150dlu;pref), 3dlu, fill:min(150dlu;pref)",
+                        "p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, p, 3dlu, top:14dlu, 3dlu, top:p:grow"));
         builder.setDefaultDialogBorder();
 
         builder.addSeparator("DbRelationship Information", cc.xywh(1, 1, 5, 1));
@@ -183,90 +171,61 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         builder.add(removeButton, cc.xywh(5, 13, 1, 1));
 
         getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
-        getContentPane().add(
-            PanelFactory.createButtonPanel(new JButton[] { saveButton, cancelButton }),
-            BorderLayout.SOUTH);
+        getContentPane().add(PanelFactory.createButtonPanel(new JButton[] {
+                saveButton, cancelButton
+        }), BorderLayout.SOUTH);
     }
 
-    private void initWithModel(
-        java.util.List relationships,
-        DbEntity start,
-        DbEntity end,
-        boolean toMany) {
+    private void initWithModel(DbRelationship relationship) {
 
-        // init model ivars
-
-        this.map = getMediator().getCurrentDataMap();
-        this.originalList = relationships;
-        this.start = start;
-        this.end = end;
-
-        // If DbRelationship does not exist, create it.
-        if (relationships == null || relationships.size() == 0) {
-            dbRelList = new ArrayList();
-            relationship =
-                (DbRelationship) NamedObjectFactory.createRelationship(
-                    start,
-                    end,
-                    toMany);
-            dbRelList.add(relationship);
-            reverseRelationship = null;
-            relationship.setSourceEntity(start);
-            relationship.setTargetEntity(end);
-            relationship.setToMany(toMany);
-            isReverseDbRelNew = true;
-            isDbRelNew = true;
-        }
-        else {
-            dbRelList = new ArrayList(relationships);
-            relationship = (DbRelationship) dbRelList.get(0);
-            reverseRelationship = relationship.getReverseRelationship();
-            isReverseDbRelNew = (reverseRelationship == null);
-            isDbRelNew = false;
+        // sanity check
+        if (relationship.getSourceEntity() == null) {
+            throw new CayenneRuntimeException("Null source entity: " + relationship);
         }
 
-        if (!isReverseDbRelNew) {
+        if (relationship.getTargetEntity() == null) {
+            throw new CayenneRuntimeException("Null target entity: " + relationship);
+        }
+
+        if (relationship.getSourceEntity().getDataMap() == null) {
+            throw new CayenneRuntimeException("Null DataMap: "
+                    + relationship.getSourceEntity());
+        }
+
+        this.relationship = relationship;
+        DbRelationship reverseRelationship = relationship.getReverseRelationship();
+
+        if (reverseRelationship != null) {
             reverseCheckLabel.setText("Update Reverse:");
         }
 
         // init UI components
-        setTitle("DbRelationship Info: " + start.getName() + " to " + end.getName());
+        setTitle("DbRelationship Info: "
+                + relationship.getSourceEntity().getName()
+                + " to "
+                + relationship.getTargetEntityName());
 
         table.setModel(new DbJoinTableModel(relationship, getMediator(), this, true));
-        TableColumn sourceColumn =
-            table.getColumnModel().getColumn(DbJoinTableModel.SOURCE);
+        TableColumn sourceColumn = table.getColumnModel().getColumn(
+                DbJoinTableModel.SOURCE);
         sourceColumn.setMinWidth(150);
-        JComboBox comboBox =
-            CayenneWidgetFactory.createComboBox(
-                ModelerUtil.getDbAttributeNames(getMediator(), start),
-                true);
+        JComboBox comboBox = CayenneWidgetFactory.createComboBox(ModelerUtil
+                .getDbAttributeNames(getMediator(), (DbEntity) relationship
+                        .getSourceEntity()), true);
         comboBox.setEditable(false);
         sourceColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
-        TableColumn targetColumn =
-            table.getColumnModel().getColumn(DbJoinTableModel.TARGET);
+        TableColumn targetColumn = table.getColumnModel().getColumn(
+                DbJoinTableModel.TARGET);
         targetColumn.setMinWidth(150);
-        comboBox =
-            CayenneWidgetFactory.createComboBox(
-                ModelerUtil.getDbAttributeNames(getMediator(), end),
-                true);
+        comboBox = CayenneWidgetFactory.createComboBox(ModelerUtil.getDbAttributeNames(
+                getMediator(),
+                (DbEntity) relationship.getTargetEntity()), true);
         comboBox.setEditable(false);
         targetColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
-        // If this is relationship of DbEntity to itself, disable 
-        // reverse relationship check box
-        if (start == end) {
-            reverseName.setText("");
-            reverseName.setEnabled(false);
-            reverseNameLabel.setEnabled(false);
-            hasReverseDbRel.setSelected(false);
-            hasReverseDbRel.setEnabled(false);
-            reverseCheckLabel.setEnabled(false);
-        }
-        // If reverse relationship doesn't exist, deselect checkbox 
-        // and disable reverseName text field       
-        else if (null == reverseRelationship) {
-            reverseName.setText("");
+        if (reverseRelationship == null) {
+            reverseName.setText(null);
             reverseName.setEnabled(false);
             reverseNameLabel.setEnabled(false);
             hasReverseDbRel.setSelected(false);
@@ -274,10 +233,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         else {
             reverseNameLabel.setEnabled(true);
             reverseName.setEnabled(true);
-            reverseName.setText(
-                (reverseRelationship.getName() != null
-                    ? reverseRelationship.getName()
-                    : ""));
+            reverseName.setText(reverseRelationship.getName());
             hasReverseDbRel.setSelected(true);
         }
 
@@ -286,6 +242,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
 
     private void initController() {
         addButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 DbJoinTableModel model = (DbJoinTableModel) table.getModel();
                 model.addRow(new DbJoin(relationship));
@@ -294,6 +251,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         });
 
         removeButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 DbJoinTableModel model = (DbJoinTableModel) table.getModel();
                 stopEditing();
@@ -303,6 +261,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         });
 
         saveButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 cancelPressed = false;
                 save();
@@ -310,26 +269,24 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         });
 
         cancelButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
-                dbRelList = originalList;
                 cancelPressed = true;
                 hide();
             }
         });
 
         hasReverseDbRel.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 if (!hasReverseDbRel.isSelected()) {
-                    reverseName.setText("");
+                    reverseName.setText(null);
                 }
+
                 reverseName.setEnabled(hasReverseDbRel.isSelected());
                 reverseNameLabel.setEnabled(hasReverseDbRel.isSelected());
             }
         });
-    }
-
-    public List getDbRelationships() {
-        return dbRelList;
     }
 
     public boolean isCancelPressed() {
@@ -346,28 +303,32 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
     }
 
     private void save() {
+        DbJoinTableModel model = (DbJoinTableModel) table.getModel();
+        boolean updatingReverse = hasReverseDbRel.isSelected()
+                && model.getObjectList().size() > 0
+                && reverseName.getText().trim().length() > 0;
+
+        String reverseName = this.reverseName.getText().trim();
+
+        // check if reverse name is valid
+        if (updatingReverse && !validateReverseName(reverseName)) {
+            return;
+        }
+
+        // handle name update
         if (!name.getText().equals(relationship.getName())) {
             String oldName = relationship.getName();
             MapUtil.setRelationshipName(
-                relationship.getSourceEntity(),
-                relationship,
-                name.getText());
+                    relationship.getSourceEntity(),
+                    relationship,
+                    name.getText());
 
             getMediator().fireDbRelationshipEvent(
-                new RelationshipEvent(
-                    this,
-                    relationship,
-                    relationship.getSourceEntity(),
-                    oldName));
+                    new RelationshipEvent(this, relationship, relationship
+                            .getSourceEntity(), oldName));
         }
 
-        DbJoinTableModel model = (DbJoinTableModel) table.getModel();
         model.commit();
-
-        // If new DbRelationship was created, add it to the source.
-        if (isDbRelNew) {
-            start.addRelationship(relationship);
-        }
 
         // check "to dep pk" setting,
         // maybe this is no longer valid
@@ -376,18 +337,31 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         }
 
         // If new reverse DbRelationship was created, add it to the target
-        if (hasReverseDbRel.isSelected()) {
-            if (reverseRelationship == null) {
-                // Check if there is an existing relationship with the same joins
-                reverseRelationship = relationship.getReverseRelationship();
-            }
+        // Don't create reverse with no joins - makes no sense...
+        if (updatingReverse) {
+            DbRelationship reverseRelationship = relationship.getReverseRelationship();
 
             // If didn't find anything, create reverseDbRel
             if (reverseRelationship == null) {
-                reverseRelationship = new DbRelationship();
+                reverseRelationship = new DbRelationship(reverseName);
                 reverseRelationship.setSourceEntity(relationship.getTargetEntity());
                 reverseRelationship.setTargetEntity(relationship.getSourceEntity());
                 reverseRelationship.setToMany(!relationship.isToMany());
+                relationship.getTargetEntity().addRelationship(reverseRelationship);
+
+                // fire only if the relationship is to the same entity...
+                // this is needed to update entity view...
+                if (relationship.getSourceEntity() == relationship.getTargetEntity()) {
+                    getMediator().fireDbRelationshipEvent(
+                            new RelationshipEvent(
+                                    this,
+                                    reverseRelationship,
+                                    reverseRelationship.getSourceEntity(),
+                                    RelationshipEvent.ADD));
+                }
+            }
+            else {
+                reverseRelationship.setName(reverseName);
             }
 
             Collection revJoins = getReverseJoins(reverseRelationship);
@@ -410,15 +384,30 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
                 }
             }
 
-            reverseRelationship.setName(reverseName.getText());
-            if (isReverseDbRelNew) {
-                end.addRelationship(reverseRelationship);
-            }
         }
 
-        getMediator().fireDbRelationshipEvent(
-            new RelationshipEvent(this, relationship, relationship.getSourceEntity()));
+        getMediator()
+                .fireDbRelationshipEvent(
+                        new RelationshipEvent(this, relationship, relationship
+                                .getSourceEntity()));
         hide();
+    }
+
+    private boolean validateReverseName(String newName) {
+        Relationship existingReverse = relationship.getTargetEntity().getRelationship(
+                newName);
+
+        if (existingReverse != null
+                && relationship.getReverseRelationship() != existingReverse) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "There is an existing relationship named \""
+                            + newName
+                            + "\". Select a different name.");
+            return false;
+        }
+
+        return true;
     }
 
     private Collection getReverseJoins(DbRelationship reverse) {
@@ -447,6 +436,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
     }
 
     final class AttributeTable extends CayenneTable {
+
         final Dimension preferredSize = new Dimension(203, 100);
 
         public Dimension getPreferredScrollableViewportSize() {

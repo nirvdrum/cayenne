@@ -59,7 +59,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
@@ -95,22 +94,15 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
-/** 
- * Displays DbRelationships for the current DbEntity. 
+/**
+ * Displays DbRelationships for the current DbEntity.
  * 
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DbRelationshipPane
-    extends JPanel
-    implements
-        ActionListener,
-        DbEntityDisplayListener,
-        DbEntityListener,
-        DbRelationshipListener,
-        ExistingSelectionProcessor,
-        ListSelectionListener,
-        TableModelListener {
+public class DbRelationshipPane extends JPanel implements ActionListener,
+        DbEntityDisplayListener, DbEntityListener, DbRelationshipListener,
+        ExistingSelectionProcessor, ListSelectionListener, TableModelListener {
 
     protected EventController mediator;
     protected CayenneTable table;
@@ -133,7 +125,9 @@ public class DbRelationshipPane
         table = new CayenneTable();
         table.setDefaultRenderer(DbEntity.class, new EntityRenderer());
         resolve = new JButton("Database Mapping");
-        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
+        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] {
+            resolve
+        });
         add(panel, BorderLayout.CENTER);
     }
 
@@ -187,13 +181,9 @@ public class DbRelationshipPane
         else
             resolve.setEnabled(false);
 
-        RelationshipDisplayEvent ev =
-            new RelationshipDisplayEvent(
-                this,
-                rel,
-                mediator.getCurrentDbEntity(),
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain());
+        RelationshipDisplayEvent ev = new RelationshipDisplayEvent(this, rel, mediator
+                .getCurrentDbEntity(), mediator.getCurrentDataMap(), mediator
+                .getCurrentDataDomain());
 
         mediator.fireDbRelationshipDisplayEvent(ev);
     }
@@ -207,14 +197,7 @@ public class DbRelationshipPane
         // Get DbRelationship
         DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
         DbRelationship rel = model.getRelationship(row);
-        DbEntity start = (DbEntity) rel.getSourceEntity();
-        DbEntity end = (DbEntity) rel.getTargetEntity();
-
-        java.util.List dbRelList = new ArrayList();
-        dbRelList.add(rel);
-
-        ResolveDbRelationshipDialog dialog =
-            new ResolveDbRelationshipDialog(dbRelList, start, end, rel.isToMany());
+        ResolveDbRelationshipDialog dialog = new ResolveDbRelationshipDialog(rel);
         dialog.setVisible(true);
         dialog.dispose();
     }
@@ -226,7 +209,7 @@ public class DbRelationshipPane
             rebuildTable(entity);
         }
 
-        // if an entity was selected on a tree, 
+        // if an entity was selected on a tree,
         // unselect currently selected row
         if (e.isUnselectAttributes()) {
             table.clearSelection();
@@ -234,8 +217,10 @@ public class DbRelationshipPane
     }
 
     protected void rebuildTable(DbEntity entity) {
-        DbRelationshipTableModel model =
-            new DbRelationshipTableModel(entity, mediator, this);
+        DbRelationshipTableModel model = new DbRelationshipTableModel(
+                entity,
+                mediator,
+                this);
         model.addTableModelListener(this);
         table.setModel(model);
         table.setRowHeight(25);
@@ -244,7 +229,7 @@ public class DbRelationshipPane
         col.setMinWidth(150);
         col = table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
         col.setMinWidth(150);
-        
+
         JComboBox combo = CayenneWidgetFactory.createComboBox();
         combo.setRenderer(CellRenderers.entityListRendererWithIcons(entity.getDataMap()));
         combo.setModel(createComboModel());
@@ -259,6 +244,7 @@ public class DbRelationshipPane
     public void dbEntityAdded(EntityEvent e) {
         reloadEntityList(e);
     }
+
     public void dbEntityRemoved(EntityEvent e) {
         reloadEntityList(e);
     }
@@ -287,8 +273,10 @@ public class DbRelationshipPane
         table.select(ind);
     }
 
-    /** Refresh the list of db entities (targets). 
-      * Also refresh the table in case some db relationships were deleted.*/
+    /**
+     * Refresh the list of db entities (targets). Also refresh the table in case some db
+     * relationships were deleted.
+     */
     private void reloadEntityList(EntityEvent e) {
         if (e.getSource() == this)
             return;
@@ -298,8 +286,8 @@ public class DbRelationshipPane
         // If this is just loading new currentDbEntity, do nothing
         if (mediator.getCurrentDbEntity() == null)
             return;
-        TableColumn col =
-            table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
+        TableColumn col = table.getColumnModel().getColumn(
+                DbRelationshipTableModel.TARGET);
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
         JComboBox combo = (JComboBox) editor.getComponent();
         combo.setModel(createComboModel());
@@ -309,7 +297,7 @@ public class DbRelationshipPane
         table.getSelectionModel().addListSelectionListener(this);
     }
 
-    /** 
+    /**
      * Creates a list of DbEntities.
      */
     private ComboBoxModel createComboModel() {
@@ -321,12 +309,12 @@ public class DbRelationshipPane
     class EntityRenderer extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column) {
+                JTable table,
+                Object value,
+                boolean isSelected,
+                boolean hasFocus,
+                int row,
+                int column) {
 
             if (value instanceof MapObject) {
                 MapObject mapObject = (MapObject) value;
@@ -346,12 +334,12 @@ public class DbRelationshipPane
             }
 
             super.getTableCellRendererComponent(
-                table,
-                value,
-                isSelected,
-                hasFocus,
-                row,
-                column);
+                    table,
+                    value,
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
 
             return this;
         }

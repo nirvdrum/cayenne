@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.dialog.objentity;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -76,27 +75,24 @@ import org.scopemvc.core.ControlException;
  * @author Andrei Adamchik
  */
 public class ObjRelationshipInfoController extends BasicController {
+
     static final Logger logObj = Logger.getLogger(ObjRelationshipInfoController.class);
 
-    public static final String SAVE_CONTROL =
-        "cayenne.modeler.mapObjRelationship.save.button";
-    public static final String CANCEL_CONTROL =
-        "cayenne.modeler.mapObjRelationship.cancel.button";
-    public static final String NEW_TOONE_CONTROL =
-        "cayenne.modeler.mapObjRelationship.newtoone.button";
-    public static final String NEW_TOMANY_CONTROL =
-        "cayenne.modeler.mapObjRelationship.newtomany.button";
+    public static final String SAVE_CONTROL = "cayenne.modeler.mapObjRelationship.save.button";
+    public static final String CANCEL_CONTROL = "cayenne.modeler.mapObjRelationship.cancel.button";
+    public static final String NEW_TOONE_CONTROL = "cayenne.modeler.mapObjRelationship.newtoone.button";
+    public static final String NEW_TOMANY_CONTROL = "cayenne.modeler.mapObjRelationship.newtomany.button";
 
     protected EventController mediator;
 
-    public ObjRelationshipInfoController(
-        EventController mediator,
-        ObjRelationship relationship) {
+    public ObjRelationshipInfoController(EventController mediator,
+            ObjRelationship relationship) {
 
         this.mediator = mediator;
         Collection objEntities = mediator.getCurrentDataMap().getObjEntities(true);
-        ObjRelationshipInfoModel model =
-            new ObjRelationshipInfoModel(relationship, objEntities);
+        ObjRelationshipInfoModel model = new ObjRelationshipInfoModel(
+                relationship,
+                objEntities);
         setModel(model);
     }
 
@@ -127,19 +123,18 @@ public class ObjRelationshipInfoController extends BasicController {
         ObjRelationshipInfoModel model = (ObjRelationshipInfoModel) getModel();
 
         if (model.savePath()) {
-            mediator.fireObjRelationshipEvent(
-                new RelationshipEvent(
-                    CayenneModelerFrame.getFrame(),
-                    model.getRelationship(),
-                    model.getRelationship().getSourceEntity()));
+            mediator.fireObjRelationshipEvent(new RelationshipEvent(CayenneModelerFrame
+                    .getFrame(), model.getRelationship(), model
+                    .getRelationship()
+                    .getSourceEntity()));
         }
         shutdown();
     }
 
     /**
-     * Creates a new relationship connecting currently selected source entity 
-     * with ObjRelationship target entity. User is allowed to edit the relationship, 
-     * change its name, and create joins.
+     * Creates a new relationship connecting currently selected source entity with
+     * ObjRelationship target entity. User is allowed to edit the relationship, change its
+     * name, and create joins.
      */
     protected void createRelationship(boolean toMany) {
         cancelEditing();
@@ -153,42 +148,32 @@ public class ObjRelationshipInfoController extends BasicController {
             source = (DbEntity) selectedPathComponent.getSourceEntity();
         }
 
-        DbRelationship dbRelationship =
-            (DbRelationship) NamedObjectFactory.createRelationship(
-                source,
-                target,
-                toMany);
+        DbRelationship dbRelationship = (DbRelationship) NamedObjectFactory
+                .createRelationship(source, target, toMany);
         // note: NamedObjectFactory doesn't set source or target, just the name
         dbRelationship.setSourceEntity(source);
         dbRelationship.setTargetEntity(target);
         dbRelationship.setToMany(toMany);
+        source.addRelationship(dbRelationship);
 
         // TODO: creating relationship outside of ResolveDbRelationshipDialog confuses it
         // to send incorrect event - CHANGE instead of ADD
-        ResolveDbRelationshipDialog dialog =
-            new ResolveDbRelationshipDialog(
-                Collections.singletonList(dbRelationship),
-                source,
-                target,
-                toMany);
+        ResolveDbRelationshipDialog dialog = new ResolveDbRelationshipDialog(
+                dbRelationship);
 
         dialog.setVisible(true);
-        if (!dialog.isCancelPressed()) {
-            // use new relationship
-            source.addRelationship(dbRelationship);
-
-            if (!dialog.isCancelPressed()) {
-                // use new relationship
-                source.addRelationship(dbRelationship);
-
-                if (selectedPathComponent == null) {
-                    selectedPathComponent =
-                        (EntityRelationshipsModel) model.getDbRelationshipPath().get(0);
-                    model.setSelectedPathComponent(selectedPathComponent);
-                }
-
-                selectedPathComponent.setRelationshipName(dbRelationship.getName());
+        if (dialog.isCancelPressed()) {
+            source.removeRelationship(dbRelationship.getName());
+        }
+        else {
+            if (selectedPathComponent == null) {
+                selectedPathComponent = (EntityRelationshipsModel) model
+                        .getDbRelationshipPath()
+                        .get(0);
+                model.setSelectedPathComponent(selectedPathComponent);
             }
+
+            selectedPathComponent.setRelationshipName(dbRelationship.getName());
         }
 
         dialog.dispose();

@@ -218,6 +218,12 @@ public class DbRelationship extends Relationship {
         }
 
         Entity src = this.getSourceEntity();
+        
+        // special case - relationship to self with no joins...
+        if(target == src && joins.size() == 0) {
+            return null;
+        }
+        
         DbJoin testJoin = new DbJoin(this);
 
         Iterator it = target.getRelationships().iterator();
@@ -369,8 +375,9 @@ public class DbRelationship extends Relationship {
     }
 
     public void setJoins(Collection newJoins) {
-        if (null != newJoins) {
-            this.removeAllJoins();
+        this.removeAllJoins();
+        
+        if (newJoins != null) {
             joins.addAll(newJoins);
         }
     }
