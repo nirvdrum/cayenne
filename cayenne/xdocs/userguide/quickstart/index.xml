@@ -3,7 +3,7 @@
 	<toc name="toc-user-guide" chapter="3. Quick Start"/>
 	<body>
 		<section name="3. Quick Start">
-			<subsection name="Common Setup Steps">
+			<subsection name="3.1 Common Setup Steps">
 				<p>These setup steps are the same for all tutorials in this 
 					chapter:</p>
 				<p><strong>1. Install Cayenne:</strong><br/> Check <a 

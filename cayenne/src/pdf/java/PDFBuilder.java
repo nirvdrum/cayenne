@@ -68,21 +68,15 @@ import java.util.StringTokenizer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
-import org.apache.avalon.framework.logger.NullLogger;
-import org.apache.fop.apps.Driver;
+import org.apache.xerces.parsers.SAXParser;
+import org.apache.xml.serialize.XMLSerializer;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -92,19 +86,17 @@ import org.xml.sax.SAXException;
  */
 public class PDFBuilder {
 
-    public static final String FO_XSL = "xdocs/stylesheets/fop/genfo.xsl";
-    public static final String PANEL_ICON = "xdocs/stylesheets/fop/panel.gif";
-
-    private ByteArrayOutputStream foResult = new ByteArrayOutputStream();
+    private static final String PANEL_ICON = "xdocs/stylesheets/fop/panel.gif";
     private String initialPath;
     private DocumentBuilder docBuilder;
-    private Document optDoc;
+    private Document xmlDoc;
     private ArrayList sections;
     private String title;
 
     /**
-     * Main method of PDFBuilder tool. Takes three arguments - base directory where source
-     * XML files are located, the title of the generated PDF and the output PDF filename.
+     * Main method of java.org.objectstyle.pdf.pdfDoc.java.PDFBuilder tool. Takes three
+     * arguments - base directory where source XML files are located, the title of the
+     * generated PDF and the output PDF filename.
      */
     public static void main(String[] args) {
         if (args.length != 3) {
@@ -116,36 +108,43 @@ public class PDFBuilder {
         String title = args[1];
         String outputPDF = args[2];
 
+        // this seems to be needed
+        System.setProperty("org.xml.sax.driver", SAXParser.class.getName());
+
         try {
             PDFBuilder pdfBuilder = new PDFBuilder(baseDir, title);
             pdfBuilder.buildPDF(new FileOutputStream(outputPDF));
         }
         catch (Exception e) {
-            throw new RuntimeException("Error gennerating PDF", e);
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 
-    PDFBuilder(String initialPath, String title) throws ParserConfigurationException {
+    private PDFBuilder(String initialPath, String title)
+            throws ParserConfigurationException {
         this.initialPath = initialPath;
         this.title = title;
         this.docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         this.sections = new ArrayList();
+        xmlDoc = docBuilder.newDocument();
     }
 
     /**
-     * Main worker that creates a PDF document, writing it to provided output stream.
+     * Main worker that creates a PDF pdfDoc, writing it to provided output stream.
      */
-    void buildPDF(OutputStream resultStream) throws Exception {
+    private void buildPDF(OutputStream resultStream) throws Exception {
         try {
-            createSectionsList(initialPath);
-            Collections.sort(sections, new CompareSections());
             createOptimizedDocument();
-            buildFO();
-            Driver driver = new Driver(new InputSource(new ByteArrayInputStream(foResult
-                    .toByteArray())), resultStream);
-            driver.setLogger(new NullLogger());
-            driver.setRenderer(Driver.RENDER_PDF);
-            driver.run();
+
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            XMLSerializer serializer = new XMLSerializer();
+            serializer.setOutputByteStream(buffer);
+            serializer.serialize(xmlDoc);
+            ByteArrayInputStream DOMtoSAX = new ByteArrayInputStream(buffer.toByteArray());
+            PDFDocumentCreator PDFDocumentCreator = new PDFDocumentCreator();
+            PDFDocumentCreator.run(DOMtoSAX, resultStream);
+
         }
         finally {
             resultStream.close();
@@ -161,7 +160,6 @@ public class PDFBuilder {
             if (innerContext.isDirectory()) {
                 createSectionsList(initialPath + innerName[i] + "/");
             }
-
             if (innerContext.isFile() && (innerName[i].indexOf(".xml") != -1)) {
                 Document document = docBuilder.parse(innerContext);
                 NodeList imgNodeList = document.getElementsByTagName("img");
@@ -174,8 +172,9 @@ public class PDFBuilder {
                             .substring(1);
                     int index = relativePath.indexOf("images");
                     relativePath = relativePath.substring(index);
-                    imgAttr.getNamedItem("src").setNodeValue(
-                            this.initialPath + "../" + relativePath);
+                    imgAttr.getNamedItem("src").setNodeValue(this.initialPath
+                            + "../"
+                            + relativePath);
                 }
 
                 NodeList panelNodes = document.getElementsByTagName("panel");
@@ -194,46 +193,72 @@ public class PDFBuilder {
     }
 
     private void createOptimizedDocument() throws Exception {
-        optDoc = docBuilder.newDocument();
-        Element root = optDoc.createElement("document");
-        Attr titleAttr = optDoc.createAttribute("title");
+        createSectionsList(initialPath);
+        Collections.sort(sections, new CompareSections());
+        Element root = xmlDoc.createElement("document");
+        Attr titleAttr = xmlDoc.createAttribute("title");
         titleAttr.setValue(title);
         root.setAttributeNode(titleAttr);
-        Element body = optDoc.createElement("body");
+
+        ArrayList otherNodes = new ArrayList();
+        ArrayList subSectionNodes = new ArrayList();
 
         String currentSection = ((Node) sections.get(0)).getNodeName();
-        Node currentNode = optDoc.importNode((Node) sections.get(0), true);
+        Node currentNode = xmlDoc.importNode((Node) sections.get(0), true);
+        NodeList currNodes = currentNode.getChildNodes();
 
+        for (int i = 0; i < currNodes.getLength(); i++) {
+            Node cNode = xmlDoc.importNode(currNodes.item(i), true);
+            if ("subsection".equals(cNode.getNodeName()))
+                subSectionNodes.add(cNode);
+            else
+                otherNodes.add(cNode);
+        }
         for (int i = 1; i < sections.size(); i++) {
-            Node node = optDoc.importNode((Node) sections.get(i), true);
+            Element node = (Element) xmlDoc.importNode((Node) sections.get(i), true);
             if (currentSection.equals(node
                     .getAttributes()
                     .getNamedItem("name")
                     .getNodeValue())) {
                 NodeList chNodes = node.getChildNodes();
                 for (int j = 0; j < chNodes.getLength(); j++) {
-                    Node chNode = optDoc.importNode(chNodes.item(j), true);
-                    currentNode.appendChild(chNode);
+                    Node chNode = xmlDoc.importNode(chNodes.item(j), true);
+                    if ("subsection".equals(chNode.getNodeName()))
+                        subSectionNodes.add(chNode);
+                    else
+                        otherNodes.add(chNode);
                 }
             }
             else {
-                body.appendChild(currentNode);
+                Element element = xmlDoc.createElement("section");
+                Attr name = xmlDoc.createAttribute("name");
+                name.setValue(currentNode
+                        .getAttributes()
+                        .getNamedItem("name")
+                        .getNodeValue());
+                element.setAttributeNode(name);
+                for (int k = 0; k < otherNodes.size(); k++) {
+                    element.appendChild((Node) otherNodes.get(k));
+                }
+                for (int k = 0; k < subSectionNodes.size(); k++)
+                    element.appendChild((Node) subSectionNodes.get(k));
+                root.appendChild(element);
                 currentSection = node.getAttributes().getNamedItem("name").getNodeValue();
                 currentNode = node;
+                otherNodes = new ArrayList();
+                subSectionNodes = new ArrayList();
+
+                NodeList currentNodes = currentNode.getChildNodes();
+                for (int k = 0; k < currentNodes.getLength(); k++) {
+                    Node cNode = xmlDoc.importNode(currentNodes.item(k), true);
+                    if ("subsection".equals(cNode.getNodeName()))
+                        subSectionNodes.add(cNode);
+                    else
+                        otherNodes.add(cNode);
+                }
             }
         }
-
-        root.appendChild(body);
-        optDoc.appendChild(root);
-    }
-
-    private void buildFO() throws Exception {
-        // Andrus: looks like a noop:
-        // docBuilder.parse(initialPath + "index.xml");
-
-        TransformerFactory tFactory = TransformerFactory.newInstance();
-        Transformer transformer = tFactory.newTransformer(new StreamSource(FO_XSL));
-        transformer.transform(new DOMSource(optDoc), new StreamResult(foResult));
+        xmlDoc.appendChild(root);
     }
 
     private class CompareSections implements Comparator {
@@ -241,6 +266,7 @@ public class PDFBuilder {
         public int compare(Object a, Object b) {
             Node node1 = (Node) a;
             Node node2 = (Node) b;
+
             NamedNodeMap mainAttr1 = node1.getAttributes();
             NamedNodeMap mainAttr2 = node2.getAttributes();
             String mainName1 = mainAttr1.getNamedItem("name").getNodeValue();
@@ -262,7 +288,7 @@ public class PDFBuilder {
                     return -1;
             }
             NodeList subNodes1 = node1.getChildNodes();
-            int i = 0, j = 0;
+            int i, j;
             for (i = 0; i < subNodes1.getLength(); i++) {
                 Node node = subNodes1.item(i);
                 if (node.getNodeName().equals("subsection"))
@@ -288,7 +314,7 @@ public class PDFBuilder {
             int spos2 = name2.trim().indexOf(" ");
             StringTokenizer st1 = new StringTokenizer(name1.substring(0, spos1), ".");
             StringTokenizer st2 = new StringTokenizer(name2.substring(0, spos2), ".");
-            int val11 = 0, val22 = 0;
+            int val11, val22;
             while (st1.hasMoreTokens() && st2.hasMoreTokens()) {
                 try {
                     val11 = Integer.parseInt(st1.nextToken());

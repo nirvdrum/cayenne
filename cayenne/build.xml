@@ -198,7 +198,9 @@
     <!-- Builds PDF documenatation.                 -->
     <!-- ========================================== -->
     <target name="pdf" description="builds PDF documentation.">
-		<ant antfile="build-fop.xml"/>
+		<!-- copy images first -->
+		<ant antfile="build-doc.xml" target="doc-img"/>
+		<ant antfile="build-pdf.xml"/>
     </target> 
 </project>
 

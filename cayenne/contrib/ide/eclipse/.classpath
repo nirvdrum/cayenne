@@ -11,7 +11,7 @@
 	<classpathentry kind="src" path="src/tutorials/cayenne-cmd-app/java"/>
 	<classpathentry kind="src" path="src/tutorials/cayenne-web-app/WEB-INF/classes"/>
 	<classpathentry kind="src" path="src/tutorials/cayenne-tapestry-app/WEB-INF/classes"/>
-	<classpathentry kind="src" path="src/fop/java"/>
+	<classpathentry kind="src" path="src/pdf/java"/>
 	<classpathentry excluding="com/*" kind="src" path="src/dvmodeler/java"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ant-1.5.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="otherlib/ashwood-1.1.jar"/>
@@ -40,8 +40,8 @@
 	<classpathentry kind="lib" path="otherlib/hsqldb-1.7.2.jar"/>
 	<classpathentry kind="lib" path="otherlib/commons-pool-1.2.jar"/>
 	<classpathentry kind="lib" path="otherlib/commons-dbcp-1.2.1.jar"/>
-	<classpathentry kind="lib" path="otherlib/fop/fop-0.20.5.jar"/>
-	<classpathentry kind="lib" path="otherlib/fop/avalon-4.1.2.jar"/>
+	<classpathentry kind="lib" path="otherlib/pdf/itext-1.2.jar"/>
+	<classpathentry kind="lib" path="otherlib/pdf/xerces-2.6.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
