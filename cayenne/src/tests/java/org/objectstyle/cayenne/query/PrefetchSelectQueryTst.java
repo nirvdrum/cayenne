@@ -53,73 +53,59 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access.util;
 
-import org.apache.log4j.Logger;
+package org.objectstyle.cayenne.query;
+
+import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
-public class QueryUtilsTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(QueryUtilsTst.class);
+/**
+ * @author Andrei Adamchik
+ */
+public class PrefetchSelectQueryTst extends CayenneTestCase {
 
     public void testSelectPrefetchPath1() throws Exception {
-        SelectQuery q = new SelectQuery("Artist");
-        q.setQualifier(ExpressionFactory.matchExp("artistName", "abc"));
-        SelectQuery reverseQ =
-            QueryUtils.selectPrefetchPath(getDomain(), q, "paintingArray");
-        Object queryRoot = reverseQ.getRoot();
-        if (queryRoot instanceof String) {
-            assertEquals("Painting", queryRoot);
-        }
-        else if (queryRoot instanceof ObjEntity) {
-            assertEquals(
-                getDomain().getEntityResolver().lookupObjEntity(Painting.class),
-                queryRoot);
-        }
-        else if (queryRoot instanceof Class) {
-            assertEquals(Painting.class, queryRoot);
-        }
-        else {
-            fail("Query root is of an untestable type :" + queryRoot.getClass());
-        }
-        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
+        Entity artistEntity =
+            getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+        Entity paintingEntity =
+            getDomain().getEntityResolver().lookupObjEntity(Painting.class);
+        SelectQuery q =
+            new SelectQuery(
+                Artist.class,
+                ExpressionFactory.matchExp("artistName", "abc"));
 
-        Expression newPath = (Expression) reverseQ.getQualifier().getOperand(0);
-        assertNotNull("Null path operand.", newPath);
-        assertEquals("toArtist.ARTIST_NAME", newPath.getOperand(0));
+        PrefetchSelectQuery prefetch =
+            new PrefetchSelectQuery(artistEntity, q, "paintingArray");
+
+        assertSame(paintingEntity, prefetch.getRoot());
+        assertEquals(
+            Expression.fromString("db:toArtist.ARTIST_NAME = 'abc'"),
+            prefetch.getQualifier());
     }
 
     public void testSelectPrefetchPath2() throws Exception {
-        SelectQuery q = new SelectQuery("Artist");
+        Entity artistEntity =
+            getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+        Entity paintingEntity =
+            getDomain().getEntityResolver().lookupObjEntity(Painting.class);
 
-        // modify previous test to us more complex qualifier with 'OR'
-        Expression qual = ExpressionFactory.matchExp("artistName", "abc");
-        qual = qual.orExp(ExpressionFactory.matchExp("artistName", "xyz"));
+        SelectQuery q =
+            new SelectQuery(
+                Artist.class,
+                Expression.fromString("artistName = 'abc' or artistName = 'xyz'"));
 
-        q.setQualifier(qual);
+        PrefetchSelectQuery prefetch =
+            new PrefetchSelectQuery(artistEntity, q, "paintingArray");
 
-        SelectQuery reverseQ =
-            QueryUtils.selectPrefetchPath(getDomain(), q, "paintingArray");
-        logObj.debug("reverse qualifier: " + reverseQ.getQualifier());
-        Object queryRoot = reverseQ.getRoot();
-        if (queryRoot instanceof String) {
-            assertEquals("Painting", queryRoot);
-        }
-        else if (queryRoot instanceof ObjEntity) {
-            assertEquals(
-                getDomain().getEntityResolver().lookupObjEntity(Painting.class),
-                queryRoot);
-        }
-        else if (queryRoot instanceof Class) {
-            assertEquals(Painting.class, queryRoot);
-        }
-        else {
-            fail("Query root is of an untestable type :" + queryRoot.getClass());
-        }
-        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
+        assertSame(paintingEntity, prefetch.getRoot());
+        assertEquals(
+            Expression.fromString(
+                "db:toArtist.ARTIST_NAME = 'abc' or db:toArtist.ARTIST_NAME = 'xyz'"),
+            prefetch.getQualifier());
     }
+
 }

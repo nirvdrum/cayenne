@@ -69,7 +69,6 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.exp.parser.ASTObjPath;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -156,9 +155,8 @@ public class QueryUtils {
 
     /** Returns an update query for the DataObject that can be used to commit
      *  object state changes to the database. If no changes are found, null is returned.
-     *
-     *  @param dataObject data object that potentially can have changes that need
-     *  to be synchronized with the database.
+     *  
+     * @deprecated Unused since 1.1
      */
     public static UpdateQuery updateQuery(DataObject dataObject) {
         UpdateQuery upd = new UpdateQuery();
@@ -181,7 +179,11 @@ public class QueryUtils {
         return null;
     }
 
-    /** Generates a delete query for a specified data object */
+    /** 
+     * Generates a delete query for a specified data object.
+     * 
+     * @deprecated Unused since 1.1
+     */
     public static DeleteQuery deleteQuery(DataObject dataObject) {
         DeleteQuery del = new DeleteQuery();
         ObjectId id = dataObject.getObjectId();
@@ -191,11 +193,10 @@ public class QueryUtils {
         return del;
     }
 
-    /** Generates an insert query for a specified data object.
+    /** 
+     * Generates an insert query for a specified data object.
      *
-     *  @param dataObject new data object that need to be inserted to the database.
-     *  @param permId permanent object id that will be assigned to this data object after
-     *  it is committed to the database.
+     * @deprecated Unused since 1.1
      */
     public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
         InsertQuery ins = new InsertQuery();
@@ -275,38 +276,15 @@ public class QueryUtils {
     /** 
      * Creates and returns SelectQuery for a given SelectQuery and
      * relationship prefetching path.
+     * 
+     * @deprecated Since 1.1 Use PrefetchSelectQuery constructor.
      */
     public static PrefetchSelectQuery selectPrefetchPath(
         QueryEngine e,
         SelectQuery q,
         String prefetchPath) {
         ObjEntity ent = e.getEntityResolver().lookupObjEntity(q);
-        PrefetchSelectQuery newQ = new PrefetchSelectQuery();
-
-        newQ.setRootQuery(q);
-        newQ.setPrefetchPath(prefetchPath);
-        Iterator it = ent.resolvePathComponents(new ASTObjPath(prefetchPath));
-
-        ObjRelationship r = null;
-        while (it.hasNext()) {
-            r = (ObjRelationship) it.next();
-        }
-
-        if (r != null) {
-            newQ.setRoot(r.getTargetEntity());
-            newQ.setQualifier(
-                ent.translateToRelatedEntity(q.getQualifier(), prefetchPath));
-
-            if (r.isToMany() && !r.isFlattened()) {
-                newQ.setLastPrefetchHint(r);
-            }
-
-            return newQ;
-        }
-        else {
-            // TODO: what else could we do here?
-            return null;
-        }
+        return new PrefetchSelectQuery(ent, q, prefetchPath);
     }
 
     /**

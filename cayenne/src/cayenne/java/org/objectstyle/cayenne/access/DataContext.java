@@ -1337,13 +1337,12 @@ public class DataContext implements QueryEngine, Serializable {
                 SelectQuery select = (SelectQuery) it.next();
                 Collection prefetchRels = select.getPrefetches();
                 if (prefetchRels.size() > 0) {
+                    ObjEntity entity = getEntityResolver().lookupObjEntity(select);
                     Iterator prIt = prefetchRels.iterator();
+                    
                     while (prIt.hasNext()) {
                         PrefetchSelectQuery prefetchQuery =
-                            QueryUtils.selectPrefetchPath(
-                                this,
-                                select,
-                                (String) prIt.next());
+                            new PrefetchSelectQuery(entity, select, (String) prIt.next());
 
                         // filter via a delegate
                         GenericSelectQuery filteredPrefetch =

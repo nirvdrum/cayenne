@@ -103,6 +103,16 @@ public class DataContextQualifiedEntityTst extends PeopleTestCase {
         List managers = context.performQuery(new SelectQuery(Manager.class));
         assertEquals(2, managers.size());
     }
+    
+    public void testPrefetch() throws Exception {
+        setupData();
+
+
+        // select Managers.. make sure prefetch query works as expected
+        List managers = context.performQuery(new SelectQuery(Manager.class));
+        assertEquals(2, managers.size());
+    }
+
 
     private void setupData() throws Exception {
         List queries = new ArrayList();

@@ -55,21 +55,25 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
- * Internal query object used to handle prefetching. Shouldn't be
- * used directly.
+ * A SelectQuery to perform a prefetch based on another query. Used internally
+ * by Cayenne and is normally never used directly.
  * 
- * @author Craig Miskell
+ * @author Craig Miskell, Andrei Adamchik
  */
 public class PrefetchSelectQuery extends SelectQuery {
     /** 
-     * The query that provides the "root" objects of the prefetch.
+     * Main query that 
      */
-    protected SelectQuery rootQuery;
+    protected SelectQuery parentQuery;
 
     /** 
      * The relationship path from root objects to the objects being prefetched.
@@ -82,59 +86,79 @@ public class PrefetchSelectQuery extends SelectQuery {
     protected ObjRelationship lastPrefetchHint;
 
     /**
-     * Constructor for PrefetchSelectQuery.
+     * Creates a prefetch query based on parent query.
+     * 
+     * @since 1.1
+     */
+    public PrefetchSelectQuery(Entity entity, SelectQuery parentQuery, String prefetch) {
+        setRootQuery(parentQuery);
+        setPrefetchPath(prefetch);
+        Iterator it = entity.resolvePathComponents(prefetch);
+
+        ObjRelationship r = null;
+        while (it.hasNext()) {
+            r = (ObjRelationship) it.next();
+        }
+
+        if (r == null) {
+            throw new CayenneRuntimeException(
+                "Invalid prefetch '" + prefetch + "' for entity: " + entity.getName());
+        }
+
+        setRoot(r.getTargetEntity());
+        setQualifier(
+            entity.translateToRelatedEntity(parentQuery.getQualifier(), prefetchPath));
+
+        if (r.isToMany() && !r.isFlattened()) {
+            setLastPrefetchHint(r);
+        }
+    }
+
+    /**
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
      */
     public PrefetchSelectQuery() {
         super();
     }
 
     /**
-     * Constructor for PrefetchSelectQuery.
-     * @param root
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(ObjEntity root) {
         super(root);
     }
 
     /**
-     * Constructor for PrefetchSelectQuery.
-     * @param root
-     * @param qualifier
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
         super(root, qualifier);
     }
 
     /**
-     * Constructor for PrefetchSelectQuery.
-     * @param rootClass
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(Class rootClass) {
         super(rootClass);
     }
 
     /**
-     * Constructor for PrefetchSelectQuery.
-     * @param rootClass
-     * @param qualifier
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
         super(rootClass, qualifier);
     }
 
     /**
-     * Constructor for PrefetchSelectQuery.
-     * @param objEntityName
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
      */
     public PrefetchSelectQuery(String objEntityName) {
         super(objEntityName);
     }
 
     /**
-     * Constructor for PrefetchSelectQuery.
-     * @param objEntityName
-     * @param qualifier
-     */
+    * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(Entity,SelectQuery,String)}
+    */
     public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
         super(objEntityName, qualifier);
     }
@@ -156,18 +180,31 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
-     * @return SelectQuery
+     * @deprecated Since 1.1 use getParentQuery()
      */
     public SelectQuery getRootQuery() {
-        return rootQuery;
+        return parentQuery;
     }
 
     /**
-     * Sets the rootQuery.
-     * @param rootQuery The rootQuery to set
+     * @deprecated Since 1.1 use setparentQuery(..)
      */
-    public void setRootQuery(SelectQuery rootQuery) {
-        this.rootQuery = rootQuery;
+    public void setRootQuery(SelectQuery parentQuery) {
+        this.parentQuery = parentQuery;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public SelectQuery getParentQuery() {
+        return parentQuery;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setParentQuery(SelectQuery parentQuery) {
+        this.parentQuery = parentQuery;
     }
 
     /**
@@ -200,5 +237,4 @@ public class PrefetchSelectQuery extends SelectQuery {
     public void setLastPrefetchHint(ObjRelationship relationship) {
         lastPrefetchHint = relationship;
     }
-
 }
