@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!--         Cayenne dependencies buildfile.           -->
+<!--             (called from build.xml)               -->
+<!-- ================================================= -->
+<project name="cayenne-dep" default="unjar" basedir=".">
+    <property name="unjar.dir" value="src/${build}/unjar"/>
+
+	<target name="unjar" depends="check-unjar,unjar-deps"/>    	
+	
+	<target name="unjar-deps" unless="unjar.exists"> 
+		<mkdir dir="${unjar.dir}"/>
+        <unjar src="${velocity.jar}" dest="${unjar.dir}"/>
+        
+        <delete dir="${unjar.dir}" includeEmptyDirs="true">
+        	<include name="**/META-INF/**"/>
+        </delete>
+    </target>
+    
+    <target name="check-unjar">
+		<available file="${unjar.dir}/org" type="dir" property="unjar.exists"/>
+    </target>
+    
+</project>
