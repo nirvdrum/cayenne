@@ -980,7 +980,7 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * "Invalidates" a Collection of DataObject. This operation would remove each object's
      * snapshot from cache and change object's state to HOLLOW. On the next access to this
-     * object, it will be refeched.
+     * object, it will be refetched.
      */
     public void invalidateObjects(Collection dataObjects) {
         getObjectStore().objectsInvalidated(dataObjects);
