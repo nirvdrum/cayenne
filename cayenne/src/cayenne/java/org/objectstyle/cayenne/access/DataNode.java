@@ -315,7 +315,7 @@ public class DataNode implements QueryEngine {
         catch (Exception globalEx) {
             QueryLogger.logQueryError(logLevel, globalEx);
 
-            if (!usesAutoCommit) {
+            if (!usesAutoCommit && con != null) {
                 // rollback failed transaction
                 rolledBackFlag = true;
 

@@ -16,9 +16,25 @@ if [ "$JAVA_HOME" = "" ] ; then
     exit 1
 fi
 
+# Guess from startup directory
 if [ "$CAYENNE_HOME" = "" ] ; then
-	CAYENNE_HOME=..
+	# resolve links - $0 may be a softlink
+	PRG="$0"
+
+	while [ -h "$PRG" ] ; do
+  		ls=`ls -ld "$PRG"`
+  		link=`expr "$ls" : '.*-> \(.*\)$'`
+  		if expr "$link" : '.*/.*' > /dev/null; then
+    		PRG="$link"
+  		else
+			PRG=`dirname "$PRG"`/"$link"
+		fi
+	done
+ 
+	CAYENNE_HOME=`dirname "$PRG"`
+	CAYENNE_HOME=`dirname "$CAYENNE_HOME"`
 fi
+
 
 if [ ! -f $CAYENNE_HOME/bin/modeler.sh ] ; then
     echo "Please define CAYENNE_HOME to point to your Cayenne installation."

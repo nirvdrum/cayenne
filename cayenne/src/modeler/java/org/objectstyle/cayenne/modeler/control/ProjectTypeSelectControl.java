@@ -92,6 +92,7 @@ public class ProjectTypeSelectControl extends BasicController {
         setView(new ProjectTypeSelectDialog());
         super.startup();
     }
+    
     /**
      * @see org.scopemvc.controller.basic.BasicController#doHandleControl(Control)
      */
