@@ -309,6 +309,12 @@ class DataRowUtils {
         DataObject toOneTarget = (DataObject) targetObject;
         ObjectId currentId = (toOneTarget != null) ? toOneTarget.getObjectId() : null;
 
+        // if ObjectId is temporary, target is definitely modified...
+        // this would cover NEW objects (what are the other cases of temp id??)
+        if (currentId != null && currentId.isTemporary()) {
+            return true;
+        }
+
         // check if ObjectId map is a subset of a stored snapshot;
         // this is an equality condition
         Iterator it =
