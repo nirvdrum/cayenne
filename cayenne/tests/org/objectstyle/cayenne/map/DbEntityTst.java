@@ -86,6 +86,20 @@ public class DbEntityTst extends TestCase {
         ent.setSchema(tstName);
         assertEquals(tstName, ent.getSchema());
     }
+    
+    public void testFullyQualifiedName() throws Exception {
+        String tstName = "tst_name";
+        String schemaName = "tst_schema_name";
+        ent.setName(tstName);
+        
+        assertEquals(tstName, ent.getName());
+        assertEquals(tstName, ent.getFullyQualifiedName());
+        
+        ent.setSchema(schemaName);
+        
+        assertEquals(tstName, ent.getName());
+        assertEquals(schemaName + "." + tstName, ent.getFullyQualifiedName());
+    }
 
     public void testGetPrimaryKey() throws Exception  {
         DbAttribute a1 = new DbAttribute();
