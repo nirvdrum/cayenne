@@ -64,12 +64,11 @@ import java.util.logging.Logger;
 
 import javax.sql.*;
 
-
 /**
  * PoolManager is a DataSource impementation that hides connection pooling logic
- * from the users, acting as a normal DataSource. Application servers may provide their own
- * DataSources that handle pooling. In this case Cayenne should not use PoolManager, and should
- * use app server specific implementation instead.
+ * from the users, acting as a normal DataSource. Application servers may provide 
+ * their own DataSources that handle pooling. In such cases Cayenne should 
+ * use app server specific implementation instead of PoolManager.
  *
  * <p>TODO: create a low priority thread that will do pool maintenance.</p>
  *
@@ -89,22 +88,22 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     private ArrayList unusedPool;
     private ArrayList usedPool;
 
-
     /** Creates new PoolManager using org.objectstyle.cayenne.conn.PoolDataSource
       * for an underlying ConnectionPoolDataSource. */
-    public PoolManager(String jdbcDriver,
-                       String dataSourceUrl,
-                       int minCons,
-                       int maxCons,
-                       String userName,
-                       String password) throws SQLException {
+    public PoolManager(
+        String jdbcDriver,
+        String dataSourceUrl,
+        int minCons,
+        int maxCons,
+        String userName,
+        String password)
+        throws SQLException {
 
         this.jdbcDriver = jdbcDriver;
         this.dataSourceUrl = dataSourceUrl;
         PoolDataSource poolDS = new PoolDataSource(jdbcDriver, dataSourceUrl);
         init(poolDS, minCons, maxCons, userName, password);
     }
-
 
     /** Creates new PoolManager with the specified policy for
      *  connection pooling and a ConnectionPoolDataSource object.
@@ -116,30 +115,35 @@ public class PoolManager implements DataSource, ConnectionEventListener {
      *
      *  @throws SQLException if pool manager can not be created.
      */
-    public PoolManager(ConnectionPoolDataSource poolDataSource,
-                       int minCons,
-                       int maxCons,
-                       String userName,
-                       String password) throws SQLException {
+    public PoolManager(
+        ConnectionPoolDataSource poolDataSource,
+        int minCons,
+        int maxCons,
+        String userName,
+        String password)
+        throws SQLException {
         init(poolDataSource, minCons, maxCons, userName, password);
     }
 
-
     /** Initializes pool. Normally called from constructor. */
-    private void init(ConnectionPoolDataSource poolDataSource,
-                      int minCons,
-                      int maxCons,
-                      String userName,
-                      String password) throws SQLException {
+    private void init(
+        ConnectionPoolDataSource poolDataSource,
+        int minCons,
+        int maxCons,
+        String userName,
+        String password)
+        throws SQLException {
 
         // do sanity checks...
-        if(maxConnections < 0)
-            throw new SQLException("Maximum number of connections can not be negative (" + maxCons +").");
+        if (maxConnections < 0)
+            throw new SQLException(
+                "Maximum number of connections can not be negative (" + maxCons + ").");
 
-        if(minConnections < 0)
-            throw new SQLException("Minimum number of connections can not be negative (" + minCons +").");
+        if (minConnections < 0)
+            throw new SQLException(
+                "Minimum number of connections can not be negative (" + minCons + ").");
 
-        if(minConnections > maxConnections)
+        if (minConnections > maxConnections)
             throw new SQLException("Minimum number of connections can not be bigger then maximum.");
 
         // init properties
@@ -155,22 +159,21 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         growPool(minConnections, userName, password);
     }
 
-
-    private PooledConnection newPooledConnection(String userName, String password) throws SQLException {
-        if(userName != null)
+    /** Creates and returns new PooledConnection object. */
+    private PooledConnection newPooledConnection(String userName, String password)
+        throws SQLException {
+        if (userName != null)
             return poolDataSource.getPooledConnection(userName, password);
         else
             return poolDataSource.getPooledConnection();
     }
 
-
     /** Closes all existing connections, removes them from the pool. */
     public void dispose() throws SQLException {
         // clean connections from the pool
-
         ListIterator unusedIterator = unusedPool.listIterator();
         while (unusedIterator.hasNext()) {
-            PooledConnection con = (PooledConnection)unusedIterator.next();
+            PooledConnection con = (PooledConnection) unusedIterator.next();
             // close connection
             con.close();
             // remove connection from the list
@@ -178,10 +181,9 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         }
 
         // clean used connections
-
         ListIterator usedIterator = usedPool.listIterator();
         while (usedIterator.hasNext()) {
-            PooledConnection con = (PooledConnection)usedIterator.next();
+            PooledConnection con = (PooledConnection) usedIterator.next();
             // stop listening for connection events
             con.removeConnectionEventListener(this);
             // close connection
@@ -189,25 +191,25 @@ public class PoolManager implements DataSource, ConnectionEventListener {
             // remove connection from the list
             usedIterator.remove();
         }
-
     }
-
 
     /** Increase connection pool by the specified number of connections..
      *  Throw SQLException if no more connections are allowed, or if
      *  an error happens when creating a new connection.
      */
-    private void growPool(int addConnections, String userName, String password) throws SQLException {
-        if(unusedPool.size() + usedPool.size() + addConnections > maxConnections)
+    private void growPool(int addConnections, String userName, String password)
+        throws SQLException {
+        if (unusedPool.size() + usedPool.size() + addConnections > maxConnections) {
             throw new SQLException("An attempt to open more connections then pool is allowed to handle.");
+        }
 
-        for(int i = 0; i < addConnections; i++) {
+        for (int i = 0; i < addConnections; i++) {
             PooledConnection newConnection = newPooledConnection(userName, password);
             newConnection.addConnectionEventListener(this);
             unusedPool.add(newConnection);
         }
     }
-
+    
 
     /** Returns maximum number of connections this pool can keep.
       * This parameter when configured allows to limit the number of simultaneously
@@ -216,13 +218,11 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         return maxConnections;
     }
 
-
     /** Returns the absolute minimum number of connections allowed 
       * in this pool at any moment in time. */
     public int getMinConnections() {
         return minConnections;
     }
-
 
     /** Returns a database URL used to initialize this pool.
       * Will return null if the pool was initialized with ConnectionPoolDataSource. */
@@ -230,49 +230,57 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         return dataSourceUrl;
     }
 
-
     /** Returns a name of a JDBC driver used to initialize this pool.
       * Will return null if the pool was initialized with ConnectionPoolDataSource. */
     public String getJdbcDriver() {
         return jdbcDriver;
     }
 
-
     /** Returns a data source password used to initialize this pool. */
     public String getPassword() {
         return password;
     }
-
 
     /** Returns a data source user name used to initialize this pool. */
     public String getUserName() {
         return userName;
     }
 
+    /** 
+     * Returns the number of connections obtained via this DataSource
+     * that are currently in use by the DataSource clients. 
+     */
     public int getCurrentlyInUse() {
         return usedPool.size();
     }
 
+    /** 
+     * Returns the number of connections maintained in the 
+     * pool that are currently not used by any clients and are
+     * available immediately via <code>getConnection</code> method. 
+     */
     public int getCurrentlyUnused() {
         return unusedPool.size();
     }
 
-    public synchronized Connection getConnection()
-    throws SQLException {
+    /** Returns connection from the pool. */
+    public synchronized Connection getConnection() throws SQLException {
         return getConnection(null, null);
     }
 
     /** Returns connection from the pool. */
-    public Connection getConnection(String userName, String password)  throws SQLException {
+    public Connection getConnection(String userName, String password)
+        throws SQLException {
         // increase pool if needed
         // if further increase is not possible
         // (say we exceed the maximum number of connections)
         // this will throw an SQL exception...
-        if(unusedPool.size() == 0)
+        if (unusedPool.size() == 0)
             growPool(1, userName, password);
 
         int lastObjectInd = unusedPool.size() - 1;
-        PooledConnection pooledConn = (PooledConnection)unusedPool.remove(lastObjectInd);
+        PooledConnection pooledConn =
+            (PooledConnection) unusedPool.remove(lastObjectInd);
         usedPool.add(pooledConn);
         return pooledConn.getConnection();
     }
@@ -293,16 +301,15 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         poolDataSource.setLogWriter(out);
     }
 
-
     /** Returns closed connection to the pool. */
     public synchronized void connectionClosed(ConnectionEvent event) {
         // return connection to the pool
-        PooledConnection closedConn = (PooledConnection)event.getSource();
+        PooledConnection closedConn = (PooledConnection) event.getSource();
 
         // remove this connection from the list of connections
         // managed by this pool...
         int usedInd = usedPool.indexOf(closedConn);
-        if(usedInd >= 0) {
+        if (usedInd >= 0) {
             usedPool.remove(usedInd);
             unusedPool.add(closedConn);
         }
@@ -311,23 +318,26 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         // since it was unregistered in "connectionErrorOccurred"
     }
 
-
+    /** 
+     * Removes connection with an error from the pool. This method
+     * is called by PoolManager connections on connection errors
+     * to notify PoolManager that connection is in invalid state.
+     */
     public synchronized void connectionErrorOccurred(ConnectionEvent event) {
         // later on we should analize the error to see if this
         // is fatal... right now just kill this PooledConnection
 
-        PooledConnection errorSrc = (PooledConnection)event.getSource();
+        PooledConnection errorSrc = (PooledConnection) event.getSource();
 
         // remove this connection from the list of connections
         // managed by this pool...
 
-
         int usedInd = usedPool.indexOf(errorSrc);
-        if(usedInd >= 0)
+        if (usedInd >= 0)
             usedPool.remove(usedInd);
         else {
             int unusedInd = unusedPool.indexOf(errorSrc);
-            if(unusedInd >= 0)
+            if (unusedInd >= 0)
                 unusedPool.remove(unusedInd);
         }
 

@@ -69,11 +69,6 @@ public class PooledConnectionImplTst extends TestCase {
         super(name);
     }
     
-    
-    public void setUp() throws java.lang.Exception {
-        
-    }
-    
     public void testConnectionErrorNotificationConcurrency() throws java.lang.Exception {
         // test for bugfix...
         
