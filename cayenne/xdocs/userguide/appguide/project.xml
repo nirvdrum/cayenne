@@ -8,9 +8,12 @@
             needed for a Java application to work with Cayenne. While project
             files can be edited by hand, there is a 
             <a href="../../modelerguide/index.html">CayenneModeler GUI tool</a>
-            that is intended to work with project files. CayenneModeler is still 
-            under active development, so there is a good chance that
-            the features that are missing now will be added to it soon.</p>
+            that is intended to work with project files. Loaded Cayenne project 
+            has the following structure:</p>
+            
+            <img src="/images/cayenne-project.gif" width="400" height="235" alt="Cayenne Project"/>
+            
+            <p>This structure is saved in the following set of files:</p>
             
             <p><strong>- cayenne.xml file: </strong> This is a main project file
             in each application. It should always be called <code>cayenne.xml</code>.
