@@ -5,8 +5,8 @@ import org.objectstyle.cayenne.exp.ExpressionException;
 /**
  * @author Andrei Adamchik
  */
-public abstract class AggregatedConditionNode extends SimpleNode {
-    AggregatedConditionNode(int i) {
+public abstract class AggregateConditionNode extends SimpleNode {
+    AggregateConditionNode(int i) {
         super(i);
     }
 
@@ -15,7 +15,7 @@ public abstract class AggregatedConditionNode extends SimpleNode {
         // in the grammar... do it here...
 
         // disallow non-aggregated condition parents...
-        if (!(n instanceof AggregatedConditionNode)) {
+        if (!(n instanceof AggregateConditionNode)) {
             String label =
                 (n instanceof SimpleNode)
                     ? ((SimpleNode) n).expName()
