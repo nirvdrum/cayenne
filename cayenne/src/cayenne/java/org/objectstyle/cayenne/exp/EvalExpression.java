@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class EvalExpression extends ExpressionTraversal {
-	static Logger logObj = Logger.getLogger(EvalExpression.class.getName());
+	static Logger logObj = Logger.getLogger(EvalExpression.class);
 
 	protected Expression exp;
 

@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.dba;
 
 import java.util.ArrayList;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -72,7 +71,7 @@ public class PkGeneratorTst extends CayenneTestCase {
     }
 
     protected void setUp() throws java.lang.Exception {
-        TestMain.getSharedDatabaseSetup().cleanTableData();
+        getSharedDatabaseSetup().cleanTableData();
 
         node = getSharedDomain().getDataNodes()[0];
         pkGen = node.getAdapter().getPkGenerator();

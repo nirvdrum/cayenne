@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.gen;
 import java.io.Writer;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -73,6 +74,8 @@ import org.objectstyle.cayenne.util.ResourceLocator;
   * @author Andrei Adamchik
   */
 public class ClassGenerator {
+	static Logger logObj = Logger.getLogger(ClassGenerator.class);
+	
 	private static boolean initDone;
 
 	/** 
@@ -116,7 +119,7 @@ public class ClassGenerator {
 				loaderProp += ",file";
 			}
 
-			// use custome file loader
+			// use custom file loader
 			props.put(
 				"file.resource.loader.class",
 				"org.objectstyle.cayenne.gen.AbsFileResourceLoader");
@@ -153,6 +156,7 @@ public class ClassGenerator {
 		}
 		velCtxt = new VelocityContext();
 		velCtxt.put("classGen", this);
+		
 		classTemplate = Velocity.getTemplate(template);
 	}
 

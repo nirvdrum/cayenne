@@ -67,7 +67,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.access.OperationSorter;

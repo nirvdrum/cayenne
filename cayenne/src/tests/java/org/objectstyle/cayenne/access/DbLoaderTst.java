@@ -58,9 +58,8 @@ package org.objectstyle.cayenne.access;
 import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
-import org.apache.log4j.Logger;
 
-import org.objectstyle.TestMain;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMap;
@@ -93,7 +92,7 @@ public class DbLoaderTst extends CayenneTestCase {
 	public void testLoad() throws Exception {
 		try {
 			boolean supportsFK =
-				TestMain.getSharedNode().getAdapter().supportsFkConstraints();
+				getSharedNode().getAdapter().supportsFkConstraints();
 
 			DataMap map = new DataMap();
 
@@ -150,7 +149,7 @@ public class DbLoaderTst extends CayenneTestCase {
 	}
 
 	private DataMap originalMap() {
-		return TestMain.getSharedNode().getDataMaps()[0];
+		return getSharedNode().getDataMaps()[0];
 	}
 
 	/** Selectively check how different types were processed. */

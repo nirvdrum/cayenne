@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.conn;
 
 import java.sql.Connection;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 
@@ -68,8 +67,8 @@ public class PoolManagerTst extends CayenneTestCase {
     }    
     
     public void testDataSourceUrl() throws Exception {
-        String driverName = org.objectstyle.TestMain.getFreshConnInfo().getJdbcDriver();
-        String url = org.objectstyle.TestMain.getFreshConnInfo().getDataSourceUrl();
+        String driverName = getFreshConnInfo().getJdbcDriver();
+        String url = getFreshConnInfo().getDataSourceUrl();
 
         PoolManager pm = new PoolManager(driverName, url, 0, 3, "", "");
         assertEquals(url, pm.getDataSourceUrl());
@@ -97,7 +96,7 @@ public class PoolManagerTst extends CayenneTestCase {
     }
 
     public void testPooling() throws Exception {
-        DataSourceInfo dsi = TestMain.getFreshConnInfo();
+        DataSourceInfo dsi = getFreshConnInfo();
         PoolManager pm =
             new PoolManager(
                 dsi.getJdbcDriver(),

@@ -127,7 +127,7 @@ public class EntityTst extends CayenneTestCase {
         
         // itertator should be returned, but when trying to read 1st component,
         // it should throw an exception....
-        ObjEntity galleryEnt = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Gallery");
+        ObjEntity galleryEnt = getSharedDomain().lookupEntity("Gallery");
         Iterator it = galleryEnt.resolvePathComponents(pathExpr);
         assertTrue(it.hasNext());
         
@@ -145,7 +145,7 @@ public class EntityTst extends CayenneTestCase {
         // test invalid expression type
         Expression badPathExpr = ExpressionFactory.expressionOfType(Expression.IN); 
         badPathExpr.setOperand(0, "a.b.c");
-        ObjEntity galleryEnt = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Gallery");
+        ObjEntity galleryEnt = getSharedDomain().lookupEntity("Gallery");
         
         try {
             galleryEnt.resolvePathComponents(badPathExpr);
@@ -161,7 +161,7 @@ public class EntityTst extends CayenneTestCase {
         Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "galleryName");
         
-        ObjEntity galleryEnt = org.objectstyle.TestMain.getSharedDomain().lookupEntity("Gallery");
+        ObjEntity galleryEnt = getSharedDomain().lookupEntity("Gallery");
         Iterator it = galleryEnt.resolvePathComponents(pathExpr);
         
         // iterator must contain a single ObjAttribute

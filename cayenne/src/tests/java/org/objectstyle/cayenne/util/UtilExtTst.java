@@ -55,13 +55,11 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.io.File;
 import org.apache.log4j.Logger;
-
 import org.objectstyle.cayenne.CayenneTestCase;
 
 public class UtilExtTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(UtilTst.class.getName());
+    static Logger logObj = Logger.getLogger(UtilExtTst.class);
 
     public UtilExtTst(String name) {
         super(name);
@@ -74,9 +72,10 @@ public class UtilExtTst extends CayenneTestCase {
 
     public void testPackagePath2() throws java.lang.Exception {
         // inner class
-        class Tst extends Object {};
+        class TmpTest extends Object {};
+        
         String expectedPath = "org/objectstyle/cayenne/util";
-        assertEquals(expectedPath, Util.getPackagePath(Tst.class.getName()));
+        assertEquals(expectedPath, Util.getPackagePath(TmpTest.class.getName()));
     }
 
     public void testPackagePath3() throws java.lang.Exception {
@@ -104,6 +103,7 @@ public class UtilExtTst extends CayenneTestCase {
     public void testNullSafeEquals() throws java.lang.Exception {
         // need a special subclass of Object to make "clone" method public
         class CloneableObject implements Cloneable {
+
             public Object clone() throws CloneNotSupportedException {
                 return super.clone();
             }

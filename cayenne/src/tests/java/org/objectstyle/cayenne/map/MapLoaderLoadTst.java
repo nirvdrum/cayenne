@@ -55,8 +55,8 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.TestConstants;
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.CayenneTestResources;
 import org.xml.sax.InputSource;
 
 
@@ -72,7 +72,7 @@ public class MapLoaderLoadTst extends CayenneTestCase {
 
     public void setUp() throws Exception {
         mapLoader = new MapLoader();
-        testDataMap = ClassLoader.getSystemResource(TestConstants.TEST_MAP_PATH).toExternalForm();
+        testDataMap = ClassLoader.getSystemResource(CayenneTestResources.TEST_MAP_PATH).toExternalForm();
     }
 
 

@@ -97,7 +97,7 @@ public class ResourceLocatorTst extends CayenneTestCase {
     public void testClassBaseUrl() throws java.lang.Exception {
         String me = ResourceLocator.classBaseUrl(this.getClass());
         assertNotNull(me);
-        assertTrue("Expected jar:.. URL, got " + me, me.startsWith("jar:"));
+        assertTrue("Expected 'jar:' or 'file:' URL, got " + me, me.startsWith("jar:") || me.startsWith("file:"));
     }
 
     public void testFindResourceWithJarUrl() throws java.lang.Exception {

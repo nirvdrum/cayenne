@@ -9,11 +9,16 @@
 	<property name="test.report" value="${test.build}/report"/>
 	
 	<path id="classpath">
-		<fileset dir="otherlib">
-			<include name="*.jar"/>
+	   	<fileset dir="otherlib">
+			<include name="junit.jar"/>
 		</fileset>
-		<pathelement path="build/cayenne/classes"/>
-		<pathelement path="build/modeler/classes"/>
+	   	<fileset dir="${ant.home}/lib">
+			<include name="ant.jar"/>
+			<include name="optional.jar"/>
+		</fileset>
+		<fileset dir="${dist}/lib">
+			<include name="**/*.jar"/>
+		</fileset>
 		<pathelement path="build/tests-modeler/classes"/>
     </path>
     
@@ -27,7 +32,18 @@
     <!-- ============================================= -->
     <!-- Runs and reports on tests.                    -->
     <!-- ============================================= -->
-    <target name="test" depends="compile,unit-test,unit-test-report"/>    
+    <target name="test" depends="compile">
+        <!-- Run Java on itself to avoid classloader weirdness in JUnit -->
+    	<java fork="true" classname="org.apache.tools.ant.Main" failonerror="true">
+    		<arg value="-f"/>
+    		<arg value="build-tests-modeler.xml"/>
+    		<arg value="unit-test-report"/>
+    		
+			<sysproperty key="ant.home" value="${ant.home}"/>
+			<sysproperty key="dist" value="${dist}"/>
+			<classpath refid="classpath"/>
+    	</java>
+    </target>    
     
     <!-- ============================================= -->
     <!-- Runs Unit tests.                              -->
@@ -70,7 +86,6 @@
 			</fileset>
 			<report format="frames" todir="${test.report}"/>
 		</junitreport>
-		
 		
         <fail message="CayenneModeler tests failed, see files in ${test.output} for details"/>
     </target>

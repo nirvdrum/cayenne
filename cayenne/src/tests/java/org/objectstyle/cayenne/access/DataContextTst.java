@@ -66,13 +66,12 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.DatabaseSetup;
+import org.objectstyle.cayenne.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TestOperationObserver;
@@ -99,7 +98,7 @@ public class DataContextTst extends CayenneTestCase {
 	protected void setUp() throws java.lang.Exception {
 		super.setUp();
 
-        DatabaseSetup setup = TestMain.getSharedDatabaseSetup();
+        CayenneTestDatabaseSetup setup = getSharedDatabaseSetup();
         setup.cleanTableData();        
 		populateTables();
 

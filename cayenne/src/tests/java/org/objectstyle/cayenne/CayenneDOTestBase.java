@@ -56,13 +56,17 @@ package org.objectstyle.cayenne;
  */ 
 
 import java.util.List;
+
 import org.apache.log4j.Level;
-
-import junit.framework.TestCase;
-
-import org.objectstyle.TestMain;
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.Exhibit;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
+import org.objectstyle.art.PaintingInfo;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -80,8 +84,8 @@ public class CayenneDOTestBase extends CayenneTestCase {
         super(name);
     }
     
-    public void setUp() throws java.lang.Exception {
-        DatabaseSetup setup = TestMain.getSharedDatabaseSetup();
+    public void setUp() throws Exception {
+        CayenneTestDatabaseSetup setup = getSharedDatabaseSetup();
         setup.cleanTableData();        
         DataDomain dom = getSharedDomain();
         Level oldLevel = QueryLogger.getLoggingLevel();

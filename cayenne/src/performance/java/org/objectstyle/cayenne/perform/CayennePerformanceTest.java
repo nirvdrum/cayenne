@@ -56,70 +56,68 @@
 
 package org.objectstyle.cayenne.perform;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 
-import org.objectstyle.TestConstants;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.perform.test.InsertTest;
 import org.objectstyle.perform.PerformanceTest;
 
 /**
  * @author Andrei Adamchik
  */
-public abstract class CayennePerformanceTest
-	extends PerformanceTest
-	implements TestConstants {
-		
-	public static final int objCount = 2000;	
+public abstract class CayennePerformanceTest extends PerformanceTest {
 
-	/**
-	 * Constructor for CayennePerformanceTest.
-	 * @param name
-	 */
-	public CayennePerformanceTest(String name) {
-		super(name);
-	}
+    public static final int objCount = 2000;
+
+    /**
+     * Constructor for CayennePerformanceTest.
+     * @param name
+     */
+    public CayennePerformanceTest(String name) {
+        super(name);
+    }
 
     /** 
      * Inserts 2000 artist records to the database.
      */
-	protected void insertArtists() throws Exception {
-		Connection con = getConnection();
-		try {
-			con.setAutoCommit(false);
-			PreparedStatement st =
-				con.prepareStatement(
-					"INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
-			for (int i = 1; i <= objCount; i++) {
-				st.setInt(1, i);
-				st.setString(2, "name_" + i);
-				st.executeUpdate();
-			}
+    protected void insertArtists() throws Exception {
+        Connection con = getConnection();
+        try {
+            con.setAutoCommit(false);
+            PreparedStatement st =
+                con.prepareStatement(
+                    "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME) VALUES (?, ?)");
+            for (int i = 1; i <= objCount; i++) {
+                st.setInt(1, i);
+                st.setString(2, "name_" + i);
+                st.executeUpdate();
+            }
 
-			// save all at once
-			con.commit();
-		} finally {
-			con.close();
-		}
-	}
+            // save all at once
+            con.commit();
+        } finally {
+            con.close();
+        }
+    }
 
-	protected void deleteArtists() throws Exception {
-		Connection c = getConnection();
+    protected void deleteArtists() throws Exception {
+        Connection c = getConnection();
 
-		try {
-			Statement st = c.createStatement();
-			st.executeUpdate("DELETE FROM ARTIST");
-			st.close();
-		} finally {
-			c.close();
-		}
-	}
+        try {
+            Statement st = c.createStatement();
+            st.executeUpdate("DELETE FROM ARTIST");
+            st.close();
+        } finally {
+            c.close();
+        }
+    }
 
-	public DataDomain getDomain() {
-		return PerformMain.sharedDomain;
-	}
+    public DataDomain getDomain() {
+        return PerformMain.sharedDomain;
+    }
 
-	public Connection getConnection() throws Exception {
-		return getDomain().getDataNodes()[0].getDataSource().getConnection();
-	}
+    public Connection getConnection() throws Exception {
+        return getDomain().getDataNodes()[0].getDataSource().getConnection();
+    }
 }

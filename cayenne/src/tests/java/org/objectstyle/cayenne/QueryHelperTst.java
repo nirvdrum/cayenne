@@ -55,9 +55,6 @@ package org.objectstyle.cayenne;
  *
  */
 
-import junit.framework.TestCase;
-
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -72,7 +69,7 @@ public class QueryHelperTst extends CayenneTestCase {
         q.setQualifier(
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
         SelectQuery reverseQ =
-            QueryHelper.selectPrefetchPath(TestMain.getSharedDomain(), q, "paintingArray");
+            QueryHelper.selectPrefetchPath(getSharedDomain(), q, "paintingArray");
             assertEquals("Painting", reverseQ.getObjEntityName());
         assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
         

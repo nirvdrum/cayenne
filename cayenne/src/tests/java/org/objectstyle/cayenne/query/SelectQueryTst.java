@@ -57,9 +57,10 @@ package org.objectstyle.cayenne.query;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 
@@ -143,7 +144,7 @@ public class SelectQueryTst extends SelectQueryBase {
         query.setObjEntityName("Artist");
         query.addCustDbAttribute("ARTIST_NAME");
 
-        List results = TestMain.getSharedDomain().createDataContext().performQuery(query);
+        List results = getSharedDomain().createDataContext().performQuery(query);
 
         // check query results
         assertEquals(_artistCount, results.size());

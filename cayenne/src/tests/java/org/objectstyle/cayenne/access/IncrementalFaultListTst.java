@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.access;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.DataObject;
@@ -85,7 +84,7 @@ public class IncrementalFaultListTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        TestMain.getSharedDatabaseSetup().cleanTableData();
+        getSharedDatabaseSetup().cleanTableData();
         new DataContextTst("Helper").populateTables();
 
         SelectQuery q = new SelectQuery("Artist");

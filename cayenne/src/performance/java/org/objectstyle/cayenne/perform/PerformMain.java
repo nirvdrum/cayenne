@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.perform;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.TestConstants;
-import org.objectstyle.cayenne.ConnectionSetup;
+import org.objectstyle.cayenne.CayenneTestResources;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -76,8 +75,8 @@ import org.objectstyle.perform.PerformanceTestSuite;
 import org.objectstyle.perform.ResultRenderer;
 
 /** Runs performance tests. */
-public class PerformMain implements TestConstants {
-    static Logger logObj = Logger.getLogger(PerformMain.class.getName());
+public class PerformMain {
+    static Logger logObj = Logger.getLogger(PerformMain.class);
 
     public static DataDomain sharedDomain;
 
@@ -199,7 +198,7 @@ public class PerformMain implements TestConstants {
                     dsi.getPassword());
 
             // map
-            DataMap map = new MapLoader().loadDataMap(TEST_MAP_PATH);
+            DataMap map = new MapLoader().loadDataMap(CayenneTestResources.TEST_MAP_PATH);
 
             // node
             DataNode node = new DataNode("node");

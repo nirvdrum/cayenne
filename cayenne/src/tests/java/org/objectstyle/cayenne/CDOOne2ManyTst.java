@@ -55,14 +55,12 @@ package org.objectstyle.cayenne;
  *
  */
 
-import java.util.List;
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.Exhibit;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
 
 public class CDOOne2ManyTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(CDOOne2ManyTst.class.getName());

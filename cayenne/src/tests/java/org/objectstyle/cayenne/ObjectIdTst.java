@@ -56,11 +56,8 @@
 package org.objectstyle.cayenne;
 
 import java.util.HashMap;
+
 import org.apache.log4j.Logger;
-
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.map.DbAttribute;
 
 public class ObjectIdTst extends CayenneTestCase {
 	static Logger logObj = Logger.getLogger(ObjectIdTst.class.getName());

@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Level;
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.query.Query;
@@ -116,7 +115,7 @@ public class DataNodeTst extends IteratorTestBase {
 		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
 
 		try {
-			TestMain.getSharedNode().performQueries(queries, observer);
+			getSharedNode().performQueries(queries, observer);
 
 			assertEquals(0, observer.getResultCount());
 			assertTrue(
@@ -129,7 +128,7 @@ public class DataNodeTst extends IteratorTestBase {
 
 	protected DataNode newDataNode() {
 		DataNode node = new DataNode("dummy");
-		node.setAdapter(TestMain.getSharedNode().getAdapter());
+		node.setAdapter(getSharedNode().getAdapter());
 		return node;
 	}
 

@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.perform;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -56,18 +56,18 @@ package org.objectstyle.cayenne;
  */
 
 import java.io.InputStream;
-import org.apache.log4j.Logger;
 
 import javax.sql.DataSource;
 
-import org.objectstyle.TestConstants;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataSourceInfo;
-import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DefaultConfiguration;
+import org.objectstyle.cayenne.conf.DomainHelper;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.testui.TestLogin;
 
 
 /** Creates database connection info to run tests.
@@ -77,8 +77,8 @@ import org.objectstyle.testui.TestLogin;
   *
   * @author Andrei Adamchik
   */
-public class ConnectionSetup implements TestConstants {
-    static Logger logObj = Logger.getLogger(ConnectionSetup.class.getName());
+public class ConnectionSetup  {
+    static Logger logObj = Logger.getLogger(ConnectionSetup.class);
 
     private boolean interactive;
  
@@ -87,9 +87,7 @@ public class ConnectionSetup implements TestConstants {
     }
 
     public DataSourceInfo buildConnectionInfo() throws Exception {
-        return (interactive)
-               ? getInfoInteractively()
-               : getInfoFromFile();
+        return getInfoFromFile();
     }
 
 
@@ -111,13 +109,6 @@ public class ConnectionSetup implements TestConstants {
         DataDomain dom = (DataDomain)helper.getDomains().get(0);
         dsi.setAdapterClass(dom.getDataNodes()[0].getAdapter().getClass().getName());
         return dsi;
-    }
-
-
-    private DataSourceInfo getInfoInteractively() {
-        InteractiveLogin loginObj = TestLogin.getTestGuiLoginObject();
-        loginObj.collectLoginInfo();
-        return loginObj.getDataSrcInfo();
     }
 
 

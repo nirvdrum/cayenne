@@ -66,6 +66,7 @@ import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.CayenneTestResources;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
@@ -76,7 +77,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 
 	private static final Perl5Util regexUtil = new Perl5Util();
 	private static final Project project = new Project();
-	private static final File baseDir = new File(".");
+	private static final File baseDir = CayenneTestResources.getResources().getTestDir();
 	private static final File map = new File(baseDir, "antmap.xml");
 	private static final File template = new File(baseDir, "velotemplate.vm");
 

@@ -57,9 +57,8 @@
 package org.objectstyle.cayenne;
 
 import java.util.List;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.exp.Expression;

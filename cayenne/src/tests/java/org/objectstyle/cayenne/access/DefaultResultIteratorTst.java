@@ -57,157 +57,155 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Map;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 
 public class DefaultResultIteratorTst extends IteratorTestBase {
-	protected DefaultResultIterator it;
+    protected DefaultResultIterator it;
 
-	public DefaultResultIteratorTst(String name) {
-		super(name);
-	}
+    public DefaultResultIteratorTst(String name) {
+        super(name);
+    }
 
-	public void setUp() throws Exception {
-		super.setUp();
-		it = null;
-	}
+    public void setUp() throws Exception {
+        super.setUp();
+        it = null;
+    }
 
-	protected void init() throws Exception {
-		super.init();
-		it =
-			new DefaultResultIterator(
-				st,
-				TestMain.getSharedNode().getAdapter(),
-				(SelectQueryAssembler) transl);
-	}
-	
+    protected void init() throws Exception {
+        super.init();
+        it =
+            new DefaultResultIterator(
+                st,
+                getSharedNode().getAdapter(),
+                (SelectQueryAssembler) transl);
+    }
 
-	protected void cleanup() throws Exception {
-		if (it != null) {
-			it.close();
-			st = null;
-		}
+    protected void cleanup() throws Exception {
+        if (it != null) {
+            it.close();
+            st = null;
+        }
 
-		super.cleanup();
-	}
+        super.cleanup();
+    }
 
-	public void testClose1() throws Exception {
-		try {
-			init();
-			assertTrue(!conn.isClosed());
+    public void testClose1() throws Exception {
+        try {
+            init();
+            assertTrue(!conn.isClosed());
 
-			it.setClosingConnection(false);
-			it.close();
+            it.setClosingConnection(false);
+            it.close();
 
-			// caller must close the connection
-			assertTrue(!conn.isClosed());
-		} finally {
-			conn.close();
-		}
-	}
+            // caller must close the connection
+            assertTrue(!conn.isClosed());
+        } finally {
+            conn.close();
+        }
+    }
 
-	public void testClose2() throws Exception {
-		init();
-		assertTrue(!conn.isClosed());
+    public void testClose2() throws Exception {
+        init();
+        assertTrue(!conn.isClosed());
 
-		it.setClosingConnection(true);
-		it.close();
+        it.setClosingConnection(true);
+        it.close();
 
-		// iterator must close the connection
-		assertTrue(conn.isClosed());
-	}
+        // iterator must close the connection
+        assertTrue(conn.isClosed());
+    }
 
-	public void testCheckNextRow() throws Exception {
-		try {
-			init();
+    public void testCheckNextRow() throws Exception {
+        try {
+            init();
 
-			assertTrue(it.hasNextRow());
-			it.checkNextRow();
-			assertTrue(it.hasNextRow());
+            assertTrue(it.hasNextRow());
+            it.checkNextRow();
+            assertTrue(it.hasNextRow());
 
-		} finally {
-			cleanup();
-		}
-	}
+        } finally {
+            cleanup();
+        }
+    }
 
-	public void testHasNextRow() throws java.lang.Exception {
-		try {
-			init();
-			assertTrue(it.hasNextRow());
-		} finally {
-			cleanup();
-		}
-	}
+    public void testHasNextRow() throws java.lang.Exception {
+        try {
+            init();
+            assertTrue(it.hasNextRow());
+        } finally {
+            cleanup();
+        }
+    }
 
-	public void testNextDataRow() throws java.lang.Exception {
-		try {
-			init();
+    public void testNextDataRow() throws java.lang.Exception {
+        try {
+            init();
 
-			// must be as many rows as we have artists
-			// inserted in the database
-			for (int i = 0; i < DataContextTst.artistCount; i++) {
-				assertTrue(it.hasNextRow());
-				it.nextDataRow();
-			}
+            // must be as many rows as we have artists
+            // inserted in the database
+            for (int i = 0; i < DataContextTst.artistCount; i++) {
+                assertTrue(it.hasNextRow());
+                it.nextDataRow();
+            }
 
-			// rows must end here
-			assertTrue(!it.hasNextRow());
+            // rows must end here
+            assertTrue(!it.hasNextRow());
 
-		} finally {
-			cleanup();
-		}
-	}
-	
-	public void testNextObjectId() throws java.lang.Exception {
-		try {
-			init();
+        } finally {
+            cleanup();
+        }
+    }
 
-			// must be as many rows as we have artists
-			// inserted in the database
-			for (int i = 0; i < DataContextTst.artistCount; i++) {
-				assertTrue(it.hasNextRow());
-				it.nextObjectId();
-			}
+    public void testNextObjectId() throws java.lang.Exception {
+        try {
+            init();
 
-			// rows must end here
-			assertTrue(!it.hasNextRow());
+            // must be as many rows as we have artists
+            // inserted in the database
+            for (int i = 0; i < DataContextTst.artistCount; i++) {
+                assertTrue(it.hasNextRow());
+                it.nextObjectId();
+            }
 
-		} finally {
-			cleanup();
-		}
-	}
+            // rows must end here
+            assertTrue(!it.hasNextRow());
 
-	public void testIsClosingConnection() throws java.lang.Exception {
-		try {
-			init();
-			assertTrue(!it.isClosingConnection());
-			it.setClosingConnection(true);
-			assertTrue(it.isClosingConnection());
-		} finally {
-			it.setClosingConnection(false);
-			cleanup();
-		}
-	}
+        } finally {
+            cleanup();
+        }
+    }
 
-	public void testReadDataRow() throws java.lang.Exception {
-		try {
-			init();
+    public void testIsClosingConnection() throws java.lang.Exception {
+        try {
+            init();
+            assertTrue(!it.isClosingConnection());
+            it.setClosingConnection(true);
+            assertTrue(it.isClosingConnection());
+        } finally {
+            it.setClosingConnection(false);
+            cleanup();
+        }
+    }
 
-			// must be as many rows as we have artists
-			// inserted in the database
-			Map dataRow = null;
-			for (int i = 1; i <= DataContextTst.artistCount; i++) {
-				assertTrue(it.hasNextRow());
-				dataRow = it.nextDataRow();
-			}
+    public void testReadDataRow() throws java.lang.Exception {
+        try {
+            init();
 
-			assertEquals(
-				"Failed row: " + dataRow,
-				new DataContextTst("noop").artistName(9),
-				dataRow.get("ARTIST_NAME"));
+            // must be as many rows as we have artists
+            // inserted in the database
+            Map dataRow = null;
+            for (int i = 1; i <= DataContextTst.artistCount; i++) {
+                assertTrue(it.hasNextRow());
+                dataRow = it.nextDataRow();
+            }
 
-		} finally {
-			cleanup();
-		}
-	}
+            assertEquals(
+                "Failed row: " + dataRow,
+                new DataContextTst("noop").artistName(9),
+                dataRow.get("ARTIST_NAME"));
+
+        } finally {
+            cleanup();
+        }
+    }
 }

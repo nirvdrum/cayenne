@@ -55,12 +55,12 @@
  */
 package org.objectstyle.cayenne;
 
+import java.io.File;
 import java.sql.Connection;
 
 import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -76,74 +76,49 @@ import org.objectstyle.cayenne.conf.Configuration;
 public class CayenneTestCase extends TestCase {
     static Logger logObj = Logger.getLogger(CayenneTestCase.class);
     public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
+    public static final String TEST_DIR_KEY = "cayenne.test.dir";
 
-    protected static boolean hasJSDK14;
-    protected static CayenneTestResources resources;
-
-    static {
-    	Configuration.configCommonLogging();
-        probeJDKVersion();
-        startDbConnections();
-    }
-
-    protected static void startDbConnections() {
-        String prop = System.getProperty(CONNECTION_NAME_KEY);
-
-        if (prop == null) {
-            logObj.warn(
-                "No property for '"
-                    + CONNECTION_NAME_KEY
-                    + "' set. Good luck running unit tests.");
-        }
-
-        resources = new CayenneTestResources(prop);
-    }
-
-    protected static void probeJDKVersion() {
-        try {
-            Class c = Class.forName("java.sql.Savepoint");
-            hasJSDK14 = true;
-        } catch (Exception ex) {
-            hasJSDK14 = false;
-        }
-
-        if (CayenneTestCase.hasJSDK14()) {
-            logObj.info("JDK 1.4 detected.");
-        } else {
-            logObj.info("No JDK 1.4 detected, assuming JDK1.3.");
-        }
-    }
-
-
+    
     /**
      * Constructor for CayenneTestCase.
      * @param arg0
      */
-    public CayenneTestCase(String arg0) {
-        super(arg0);
+    public CayenneTestCase(String name) {
+        super(name);
+        
+        // init resources if needed
+        CayenneTestResources.init();
     }
 
-    public static boolean hasJSDK14() {
-        return hasJSDK14;
+    /**
+     * Returns directory that should be used by all test 
+     * cases that perform file operations.
+     */
+    public File getTestDir() {
+    	return CayenneTestResources.getResources().getTestDir();
     }
-
+    
     public Connection getSharedConnection() {
-        return TestMain.getResources().getSharedConnection();
+        return CayenneTestResources.getResources().getSharedConnection();
     }
 
     public DataDomain getSharedDomain() {
-        return TestMain.getResources().getSharedDomain();
+        return CayenneTestResources.getResources().getSharedDomain();
     }
 
     public DataNode getSharedNode() {
-        return TestMain.getResources().getSharedNode();
+        return CayenneTestResources.getResources().getSharedNode();
     }
 
     public DataSourceInfo getFreshConnInfo() throws Exception {
-        return TestMain.getResources().getFreshConnInfo();
+        return CayenneTestResources.getResources().getFreshConnInfo();
     }
 
     public DataContext createDataContext() {
         return getSharedDomain().createDataContext();
     }
+    
+    public CayenneTestDatabaseSetup getSharedDatabaseSetup() {
+    	return CayenneTestResources.getResources().getSharedDatabaseSetup();
+    } 
 }

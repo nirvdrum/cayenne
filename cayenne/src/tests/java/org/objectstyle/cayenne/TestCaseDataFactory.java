@@ -68,7 +68,7 @@ public class TestCaseDataFactory {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
 
-        Connection conn = org.objectstyle.TestMain.getSharedConnection();
+        Connection conn = CayenneTestResources.getResources().getSharedConnection();
 
         try {   
             conn.setAutoCommit(false);

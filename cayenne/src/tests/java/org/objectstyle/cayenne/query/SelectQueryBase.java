@@ -56,8 +56,6 @@
 package org.objectstyle.cayenne.query;
 
 import org.apache.log4j.Logger;
-
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.TestOperationObserver;
 
@@ -73,15 +71,15 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     }
     
     
-    public void setUp() throws java.lang.Exception {
-        TestMain.getSharedDatabaseSetup().cleanTableData();
+    public void setUp() throws Exception {
+        getSharedDatabaseSetup().cleanTableData();
         populateTables();
         query = new SelectQuery();
         opObserver = new TestOperationObserver();
     }
     
     
-    protected void performQuery() throws java.lang.Exception {
+    protected void performQuery() throws Exception {
         // run query
         getSharedDomain().performQuery(getQuery(), opObserver);
         

@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -84,7 +83,7 @@ public class IteratorTestBase extends CayenneTestCase {
 		st = null;
 		transl = null;
 
-		TestMain.getSharedDatabaseSetup().cleanTableData();
+		getSharedDatabaseSetup().cleanTableData();
 		new DataContextTst("Helper").populateTables();
 	}
 
@@ -98,8 +97,8 @@ public class IteratorTestBase extends CayenneTestCase {
 		SelectQuery q = new SelectQuery("Artist");
 		q.addOrdering("artistName", true);
 
-		transl = TestMain.getSharedNode().getAdapter().getQueryTranslator(q);
-		transl.setEngine(TestMain.getSharedNode());
+		transl = getSharedNode().getAdapter().getQueryTranslator(q);
+		transl.setEngine(getSharedNode());
 		transl.setCon(conn);
 
 		st = transl.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);

@@ -55,15 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Properties;
-
 import org.apache.log4j.Logger;
-import org.objectstyle.TestMain;
 
 /**
  * Tests issues not directly related to Cayenne.
@@ -81,8 +73,8 @@ public class MiscTst extends CayenneTestCase {
         super(arg0);
     }
 
-    public void setUp() throws java.lang.Exception {
-        TestMain.getSharedDatabaseSetup().cleanTableData();
+    public void setUp() throws Exception {
+        getSharedDatabaseSetup().cleanTableData();
     }
 
     public void testNothing() throws Exception {

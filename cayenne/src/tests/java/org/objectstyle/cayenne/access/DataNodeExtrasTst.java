@@ -56,9 +56,8 @@
 
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
-import org.objectstyle.cayenne.DatabaseSetup;
+import org.objectstyle.cayenne.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.map.DbEntity;
 
 public class DataNodeExtrasTst extends CayenneTestCase {
@@ -92,7 +91,7 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 	}
 
 	public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
-        DatabaseSetup setup = TestMain.getSharedDatabaseSetup();
+        CayenneTestDatabaseSetup setup = getSharedDatabaseSetup();
         setup.cleanTableData();        
 
 		DataNode node = getSharedDomain().getDataNodes()[0];

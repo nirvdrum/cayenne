@@ -94,9 +94,12 @@
     <!-- Builds all Cayenne Java subproject JARS.   -->
     <!-- ========================================== -->
     <target name="test">
-		<ant antfile="build-cayenne.xml" target="compile"/>
-		<ant antfile="build-modeler.xml" target="compile"/>
+    	<!-- Cayenne must be fully built -->
+		<ant antfile="build-cayenne.xml" target="dist-bin"/>
 		<ant antfile="build-tests.xml" target="test"/>
+		
+		<!-- Modeler must be fully compiled, with scripts -->
+		<ant antfile="build-modeler.xml" target="dist-bin"/>
 		<ant antfile="build-tests-modeler.xml" target="test"/>
     </target>
 

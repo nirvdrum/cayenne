@@ -59,13 +59,17 @@ package org.objectstyle.cayenne.access.trans;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
 
-import org.objectstyle.TestMain;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneTestResources;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.query.DeleteQuery;
+import org.objectstyle.cayenne.query.InsertQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.UpdateQuery;
 
 public class TstQueryAssembler extends QueryAssembler {
     static Logger logObj = Logger.getLogger(TstQueryAssembler.class.getName());
@@ -88,8 +92,8 @@ public class TstQueryAssembler extends QueryAssembler {
     }
 
     public TstQueryAssembler(QueryEngine e, Query q) {
-        super.setAdapter(TestMain.getSharedNode().getAdapter());
-        super.setCon(TestMain.getSharedConnection());
+        super.setAdapter(CayenneTestResources.getResources().getSharedNode().getAdapter());
+        super.setCon(CayenneTestResources.getResources().getSharedConnection());
         super.setEngine(e);
         super.setQuery(q);
     }

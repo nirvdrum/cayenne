@@ -77,7 +77,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 	}
 	
 	public void testListPlist() throws Exception {
-		File plistFile = new File("test-array.plist");
+		File plistFile = new File(super.getTestDir(), "test-array.plist");
 		List list = new ArrayList();
 		list.add("str");
 		list.add(new Integer(5));
@@ -92,7 +92,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 	}
 	
 	public void testMapPlist() throws Exception {
-		File plistFile = new File("test-map.plist");
+		File plistFile = new File(super.getTestDir(), "test-map.plist");
 		Map map = new HashMap();
 		map.put("key1", "val");
 		map.put("key2", new Integer(5));
@@ -107,7 +107,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 	}
 
 	public void testStringWithQuotes() throws Exception {
-		File plistFile = new File("test-quotes.plist");
+		File plistFile = new File(super.getTestDir(), "test-quotes.plist");
 		List list = new ArrayList();
 		list.add("s\"tr");
 		list.add(new Integer(5));
@@ -122,7 +122,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 	}
 
 	public void testNestedPlist() throws Exception {
-		File plistFile = new File("test-nested.plist");
+		File plistFile = new File(super.getTestDir(), "test-nested.plist");
 		Map map = new HashMap();
 		map.put("key1", "val");
 		map.put("key2", new Integer(5));
@@ -142,7 +142,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 	}
 	
 	public void testStringWithSpaces() throws Exception {
-		File plistFile = new File("test-spaces.plist");
+		File plistFile = new File(super.getTestDir(), "test-spaces.plist");
 		List list = new ArrayList();
 		list.add("s tr");
 		list.add(new Integer(5));
@@ -157,7 +157,7 @@ public class PropertyListSerializationTst extends CayenneTestCase {
 	}
 	
 	public void testStringWithBraces() throws Exception {
-		File plistFile = new File("test-braces.plist");
+		File plistFile = new File(super.getTestDir(), "test-braces.plist");
 		List list = new ArrayList();
 		list.add("s{t)r");
 		list.add(new Integer(5));
