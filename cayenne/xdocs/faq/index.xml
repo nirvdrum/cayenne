@@ -43,6 +43,8 @@
     					How do I log an output of a single query?</a></li>
     					<li><a href="develop.html#auto_commit">Q 3.4
     					I am on MySQL and I keep getting "Can't disable AUTO_COMMIT" error. How do I fix it?</a></li>
+    					<li><a href="develop.html#not-query">Q 3.5
+    					How do I select objects that do not have a certain other object in its to-many relationship?</a></li>
     				</ul>
     				<br/>
     			</li>
