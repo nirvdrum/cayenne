@@ -47,9 +47,11 @@
                 <li><a href="appguide/index.html#intro">5.1 Introduction</a></li>
                 <li><a href="appguide/project.html#datamap">5.2 Cayenne Project</a></li>
                 <li><a href="appguide/javagen.html#javagen">5.3 Generating Java Classes</a></li>
-                <li><a href="appguide/cayenne.html#cayenne">5.4 Using Cayenne</a></li>
-                <li><a href="appguide/exp.html#exp">5.5 Expressions</a></li>
-                <li><a href="appguide/deploy.html#deploy">5.6 Deployment</a></li>
+                <li><a href="appguide/datacontext.html#cayenne_dc">5.4 Cayenne DataContext</a></li>
+                <li><a href="appguide/fetch.html#cayenne_fetch">5.5 Fetching Objects</a></li>
+                <li><a href="appguide/save.html#cayenne_save">5.6 Saving Modified Objects</a></li>
+                <li><a href="appguide/exp.html#exp">5.7 Expressions</a></li>
+                <li><a href="appguide/deploy.html#deploy">5.8 Deployment</a></li>
             </ul></li>
             
             <li><a href="modeler/index.html">6. CayenneModeler GUI Tool</a>

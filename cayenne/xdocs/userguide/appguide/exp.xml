@@ -6,12 +6,12 @@
     </properties>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/cayenne.html</prev>
+	<prev>/userguide/appguide/save.html</prev>
 	<next>/userguide/appguide/deploy.html</next>
 </navigator>    
 <body>
     <section name="5. Writing Cayenne Applications">        
-        <subsection name="5.5 Expressions" anchor="exp">
+        <subsection name="5.7 Expressions" anchor="exp">
             <p>To Be Done.
             </p>
         </subsection>

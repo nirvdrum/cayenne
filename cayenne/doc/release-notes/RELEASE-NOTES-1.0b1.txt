@@ -27,3 +27,4 @@ directory due to resource loation issues.
 
 7. Renamed SelectOperationObserver to SelectObserver for consistency reasons.
 
+8. Updated User Guide

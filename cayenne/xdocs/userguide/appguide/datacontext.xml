@@ -1,0 +1,52 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+<properties>
+      <author>Andrei Adamchik</author>
+</properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/appguide/javagen.html</prev>
+	<next>/userguide/appguide/fetch.html</next>
+</navigator>    
+<body>
+    <section name="5. Writing Cayenne Applications">      
+    	
+        <subsection name="5.4 Cayenne DataContext" anchor="cayenne_dc">
+		<p>In a Cayenne application most of the database work is done via a 
+		<a href="../../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
+		instance. It isolates changes made by a single user from other users. In
+		web application speak this means that DataContext usually has a "session
+		scope". <a 
+		href="../../api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
+		usually serves as a factory for DataContext objects. In a simple
+		case of a standalone application, DataContext can be obtained with the following
+		lines of code:</p>
+            
+<source>
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.access.DataContext;
+...
+
+DataContext ctxt = Configuration.getSharedConfig().getDomain().createDataContext();
+...
+</source>
+        
+        <p>This context is usually preserved for the duration of the user session. 
+        In case of web applications Cayenne can be configured to set a default DataContext
+        inside each of HttpSession automatically (this is explained in "Deployment" 
+        chapter below). To obtain session DataContext the following code can be used:</p>
+
+<source>
+import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.access.DataContext;
+...
+
+// assume this exists
+HttpSession session;
+DataContext ctxt = ServletConfiguration.getDefaultContext(session);
+...
+</source>
+            </subsection>
+    </section>
+</body>
+</document>
