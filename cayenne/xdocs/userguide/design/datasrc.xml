@@ -5,9 +5,9 @@
     <section name="4. Design">
         <subsection name="4.5 Cayenne DataSource">
         
-        	<p>At the very bottom of Cayenne access stack, database connections are 
-        	obtained via <code>javax.sql.DataSource</code>. If an application is deployed
-        	in a J2EE container, DataSource is normally provided by container via JNDI.
+        	<p>Default implementation of DataNode accesses persistent storage via JDBC.
+        	Database connections are obtained via <code>javax.sql.DataSource</code>. If an
+        	application is deployed in a J2EE container, DataSource is normally provided by container via JNDI.
         	For standalone applications Cayenne includes a full implementation of 
         	DataSource functionality, including connection pooling. Cayenne DataSource is 
         	implemented as <a href=

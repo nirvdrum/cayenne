@@ -76,9 +76,11 @@
             	one of the included adapters. Current Cayenne adapters use the following mechanisms:
             	
             	<ul>
-            		<li>MySQL Adapter: uses select/update from a special AUTO_PK_TABLE lookup table.</li>
-            		<li>Oracle Adapter: uses oracle sequences.</li>
+            		<li>MySQL, PostgreSQL, HSQL Adapter: use select/update from a special AUTO_PK_TABLE lookup table.</li>
+            		<li>Oracle Adapter: uses Oracle sequences.</li>
+            		<li>DB2 Adapter: uses DB2 sequences.</li>
             		<li>Sybase Adapter: uses a strored procedure tied to AUTO_PK_TABLE lookup table.</li>
+            		<li>OpenBase Adapter: uses OpenBase specific NEWID mechanism.</li>
             	</ul>
             	</p>
             	
@@ -86,8 +88,7 @@
             	use CayenneModeler and follow the instructions given 
             	<a href="../../modelerguide/common-tasks/pksupport.html">here</a>.</p>
             	
-            	<p><i>Note: Cayenne would only support a PK generation for a single 
-            	column per table.</i></p>
+            	<p><i>Note: Cayenne only supports automatic PK generation for a single column per table.</i></p>
             	
             </subsection>
         </subsection>

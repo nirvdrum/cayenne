@@ -11,22 +11,23 @@
             </p>
             
             <ul>
-            <li><b>DataObject</b><br/>
+            <li><b><a href="../../api/cayenne/org/objectstyle/cayenne/DataObject.html">DataObject</a></b><br/>
             Any persistent object, tracks the version of snapshot it was last updated with.
             <p></p>
             </li>
             
-            <li><b>DataRow</b><br/>
+            <li><b><a href="../../api/cayenne/org/objectstyle/cayenne/DataRow.html">DataRow</a></b><br/>
             Immutable snapshot of a database row. Has a VM-unique version identifier.
             <p></p>
             </li>
             
-            <li><b>ObjectStore</b><br/>
+            <li><b><a href="../../api/cayenne/org/objectstyle/cayenne/access/ObjectStore.html">ObjectStore</a></b><br/>
             Stores DataObjects using ObjectIds as keys.
             <p></p>
             </li>
             
-            <li><b>DataRowStore</b><br/>
+            <li><b><a href=
+        	 "../../api/cayenne/org/objectstyle/cayenne/access/DataRowStore.html">DataRowStore</a></b><br/>
             Stores snapshots as DataRows using ObjectIds as keys.
             <p></p>
             </li>

@@ -5,15 +5,15 @@
     <section name="4. Design">
         <subsection name="4.3 Data Objects" anchor="do">
             <p>Cayenne's main function is to provide object-based access
-            to relational data sources. Data objects in Cayenne are fully portable and contain
+            to relational data sources. DataObjects in Cayenne are fully portable and contain
             only data and business logic. It is a task of the framework to perform operations 
             required to provide objects persistence.</p>
             
-            <p>All objects that represent database data in Cayenne must implement <a href=
+            <p>All objects that represent persistent data in Cayenne must implement <a href=
             "../../api/cayenne/org/objectstyle/cayenne/DataObject.html">DataObject</a> interface.
             Default implementation of DataObject is <a href=
             "../../api/cayenne/org/objectstyle/cayenne/CayenneDataObject.html">CayenneDataObject</a>.
-            Normally application classes that are used for data access would extend 
+            In most cases application classes that are used for data access would extend 
             CayenneDataObject. DataContext provides persistence services to DataObjects:
             </p>
             

@@ -49,6 +49,7 @@
         	<p>Most common functions of DbAdapter are to:</p>
         	<ul>
         		<li>map database data types to JDBC "standard" types.</li>
+        		<li>serve as a factory of DataNodes.</li>
         		<li>serve as a factory of <a href=
         	    "../../api/cayenne/org/objectstyle/cayenne/access/QueryTranslator.html">QueryTranslators</a>.</li>
         	    <li>provide information about the features supported by a target database.</li>
@@ -62,8 +63,12 @@
         	</p>
         	</subsection>
         	
+        	<subsection name="4.6.2 Non-SQL Adapters.">
+        	<p>Since DbAdapter serves as a factory of DataNodes, it is possible to implement adapters to non-JDBC and even non-SQL 
+        	data sources, such as XML feeds, LDAP, flat files, etc.</p>
+        	</subsection>
         	
-        	<subsection name="4.6.2 Porting Cayenne to a new RDBMS">
+        	<subsection name="4.6.3 Porting Cayenne to a New RDBMS">
         	<p>To Be Done...</p>
         	</subsection>
         </subsection>
