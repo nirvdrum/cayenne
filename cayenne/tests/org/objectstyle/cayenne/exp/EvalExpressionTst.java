@@ -72,17 +72,48 @@ public class EvalExpressionTst extends TestCase {
 		super(arg0);
 	}
 
-    public void testEvaluateEquals() throws Exception {
-    	Expression e = ExpressionFactory.matchExp("artistName", "abc");
-    	EvalExpression eval = new EvalExpression(e);
-    	
-    	Artist match = new Artist();
-    	match.setArtistName("abc");
-    	assertTrue(eval.evaluate(match));
-    	
-    	Artist noMatch = new Artist();
-    	noMatch.setArtistName("123");
-    	assertTrue(!eval.evaluate(noMatch));
-    }
-}
+	public void testEvaluateEqualTo() throws Exception {
+		Expression e = ExpressionFactory.matchExp("artistName", "abc");
+		EvalExpression eval = new EvalExpression(e);
 
+		Artist match = new Artist();
+		match.setArtistName("abc");
+		assertTrue(eval.evaluate(match));
+
+		Artist noMatch = new Artist();
+		noMatch.setArtistName("123");
+		assertTrue(!eval.evaluate(noMatch));
+	}
+
+	public void testEvaluateAnd() throws Exception {
+		Expression e = ExpressionFactory.matchExp("artistName", "abc");
+		e = e.andExp(ExpressionFactory.matchExp("artistName", "abc"));
+		EvalExpression eval = new EvalExpression(e);
+
+		Artist match = new Artist();
+		match.setArtistName("abc");
+		assertTrue(eval.evaluate(match));
+
+		Artist noMatch = new Artist();
+		noMatch.setArtistName("123");
+		assertTrue(!eval.evaluate(noMatch));
+	}
+
+	public void testEvaluateOr() throws Exception {
+		Expression e = ExpressionFactory.matchExp("artistName", "abc");
+		e = e.orExp(ExpressionFactory.matchExp("artistName", "xyz"));
+		EvalExpression eval = new EvalExpression(e);
+
+		Artist match1 = new Artist();
+		match1.setArtistName("abc");
+		assertTrue(eval.evaluate(match1));
+
+		Artist match2 = new Artist();
+		match2.setArtistName("xyz");
+		assertTrue(eval.evaluate(match2));
+
+		Artist noMatch = new Artist();
+		noMatch.setArtistName("123");
+		assertTrue(!eval.evaluate(noMatch));
+	}
+}

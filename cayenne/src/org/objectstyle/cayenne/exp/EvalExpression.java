@@ -71,7 +71,6 @@ public class EvalExpression extends ExpressionTraversal {
 	static Logger logObj = Logger.getLogger(EvalExpression.class.getName());
 
 	protected Expression exp;
-	protected boolean stop;
 
 	/**
 	 * Constructor for EvalExpression.
@@ -95,7 +94,6 @@ public class EvalExpression extends ExpressionTraversal {
 	}
 
 	protected void reinit(Object o) {
-		stop = false;
 		((EvalHandler) getHandler()).reinit(o);
 	}
 
@@ -103,10 +101,6 @@ public class EvalExpression extends ExpressionTraversal {
 	 * Stops early if needed.
 	 */
 	protected void traverseExpression(Object expObj, Expression parentExp) {
-		if (stop) {
-			return;
-		}
-
 		super.traverseExpression(expObj, parentExp);
 	}
 
@@ -135,14 +129,19 @@ public class EvalExpression extends ExpressionTraversal {
 		 * the result on the stack.
 		 */
 		public void endBinaryNode(Expression node, Expression parentNode) {
-			Object v2 = pop();
-			Object v1 = pop();
-
-	//		logObj.severe("compare: " + v1 + ", " + v2);
-
 			int type = node.getType();
 			if (type == Expression.EQUAL_TO) {
+				Object v2 = pop();
+				Object v1 = pop();
 				push(Util.nullSafeEquals(v1, v2));
+			} else if (type == Expression.AND) {
+				boolean v2 = popBoolean();
+				boolean v1 = popBoolean();
+				push(v2 && v1);
+			} else if (type == Expression.OR) {
+				boolean v2 = popBoolean();
+				boolean v1 = popBoolean();
+				push(v2 || v1);
 			} else {
 				push(null);
 			}
@@ -175,9 +174,19 @@ public class EvalExpression extends ExpressionTraversal {
 			return stack.remove(stack.size() - 1);
 		}
 
+		/** 
+		 * Pops a value from the stack, converting it to boolean.
+		 */
 		public final boolean popBoolean() {
 			Object obj = pop();
 			return (obj != null) ? ((Boolean) obj).booleanValue() : false;
+		}
+
+		/** 
+		 * Pops a value from the stack, converting it to int.
+		 */
+		public final int popInt() {
+			return ((Integer) pop()).intValue();
 		}
 
 		/**
