@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler.model;
 
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * A top level MVC model object in CayenneModeler.
@@ -64,7 +65,7 @@ import org.objectstyle.cayenne.project.Project;
  */
 public class TopModel {
     public static final String STATUS_MESSAGE_KEY = "statusMessage";
-    
+
     protected Project currentProject;
     protected String statusMessage;
     protected Object[] selectedPath;
@@ -107,6 +108,14 @@ public class TopModel {
      */
     public void setSelectedPath(Object[] selectedPath) {
         this.selectedPath = selectedPath;
+    }
+
+    public void setSelectedPath(Object obj) {
+        selectedPath = ProjectTraversal.buildPath(obj, null);
+    }
+
+    public void appendToSelectedPath(Object obj) {
+        selectedPath = ProjectTraversal.buildPath(obj, selectedPath);
     }
 
     /**

@@ -147,9 +147,9 @@ public abstract class Project {
      * when project was created in memory and is not tied to a file yet.
      */
     public boolean isLocationUndefined() {
-    	return getMainFile() == null;
+        return getMainFile() == null;
     }
-    
+
     /**
      * Returns true if the project needs to be upgraded.
      */
@@ -264,20 +264,18 @@ public abstract class Project {
     public String resolveSymbolicName(File file) {
         String symbolicName = null;
         try {
-            if (file.isAbsolute()) {
-                // accept absolute files only when 
-                // they are in the project directory
-                String otherPath = file.getCanonicalFile().getPath();
-                String thisPath = projectDir.getPath();
+            // accept absolute files only when 
+            // they are in the project directory
+            String otherPath = file.getCanonicalFile().getPath();
+            String thisPath = projectDir.getPath();
 
-                // invalid absolute pathname, can't continue
-                if (otherPath.length() + 1 <= thisPath.length()
-                    || !otherPath.startsWith(thisPath)) {
-                    return null;
-                }
-
-                symbolicName = otherPath.substring(thisPath.length() + 1);
+            // invalid absolute pathname, can't continue
+            if (otherPath.length() + 1 <= thisPath.length()
+                || !otherPath.startsWith(thisPath)) {
+                return null;
             }
+
+            symbolicName = otherPath.substring(thisPath.length() + 1);
 
             // substitute Windows backslashes if needed
             if ((symbolicName != null) && (File.separatorChar != '/')) {
@@ -300,19 +298,19 @@ public abstract class Project {
     public File getProjectDir() {
         return projectDir;
     }
-    
+
     public void setProjectDir(File dir) {
-    	this.projectDir = dir;
+        this.projectDir = dir;
     }
 
     /**
      * Returns a canonical form of a main file associated with this project.
      */
     public File getMainFile() {
-    	if(projectDir == null) {
-    		return null;
-    	}
-    	
+        if (projectDir == null) {
+            return null;
+        }
+
         ProjectFile f = ProjectFile.projectFileForObject(this, getRootNode());
         return (f != null) ? resolveFile(f.getLocation()) : null;
     }
@@ -333,9 +331,8 @@ public abstract class Project {
      * Returns an Iterator over project tree of objects.
      */
     public Iterator treeNodes() {
-    	return FlatProjectView.getInstance().flattenProjectTree(getRootNode()).iterator();
+        return FlatProjectView.getInstance().flattenProjectTree(getRootNode()).iterator();
     }
-    	
 
     /**
      * Determines if a 
@@ -347,11 +344,11 @@ public abstract class Project {
      * as needed, unused files are deleted.
      */
     public void save() throws ProjectException {
-    	
-    	// sanity check
-    	if(isLocationUndefined()) {
-    		throw new ProjectException("Project location is undefined.");
-    	}
+
+        // sanity check
+        if (isLocationUndefined()) {
+            throw new ProjectException("Project location is undefined.");
+        }
 
         // 1. Traverse project tree to find file wrappers that require update.
         List filesToSave = new ArrayList();

@@ -60,6 +60,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
@@ -72,6 +73,8 @@ import org.xml.sax.InputSource;
  * @author Andrei Adamchik
  */
 public class DataMapProject extends Project {
+	private static Logger logObj = Logger.getLogger(DataMapProject.class);
+	
     protected DataMap map;
 
     /**
@@ -107,6 +110,7 @@ public class DataMapProject extends Project {
                 map = new MapLoader().loadDataMap(new InputSource(in));
 
                 String fileName = resolveSymbolicName(projectFile);
+                logObj.error("resolving: " + projectFile + " to " + fileName);
                 String mapName =
                     (fileName != null && fileName.endsWith(DataMapFile.LOCATION_SUFFIX))
                         ? fileName.substring(0, fileName.length() - DataMapFile.LOCATION_SUFFIX.length())

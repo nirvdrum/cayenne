@@ -78,6 +78,8 @@ import org.objectstyle.cayenne.map.Relationship;
  * @author Andrei Adamchik
  */
 public class ProjectTraversal {
+    public static final Object[] EMPTY_PATH = new Object[0];
+    
     protected ProjectTraversalHandler handler;
 
     /**
@@ -85,9 +87,13 @@ public class ProjectTraversal {
       */
     public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
         if (parentTreeNodePath == null || parentTreeNodePath.length == 0) {
-            return new Object[] { treeNode };
+            return (treeNode != null) ? new Object[] { treeNode } : EMPTY_PATH;
         }
 
+        if(treeNode == null) {
+        	return parentTreeNodePath;
+        }
+        
         Object[] newPath = new Object[parentTreeNodePath.length + 1];
         System.arraycopy(parentTreeNodePath, 0, newPath, 0, parentTreeNodePath.length);
         newPath[parentTreeNodePath.length] = treeNode;
@@ -203,7 +209,7 @@ public class ProjectTraversal {
             handler.projectNode(mapPath);
 
             if (handler.shouldReadChildren(map, path)) {
-            	traverseEntities(map.getObjEntitiesAsList(), mapPath);
+                traverseEntities(map.getObjEntitiesAsList(), mapPath);
                 traverseEntities(map.getDbEntitiesAsList(), mapPath);
             }
         }

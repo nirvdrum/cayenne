@@ -101,6 +101,7 @@ import org.objectstyle.cayenne.modeler.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.model.TopModel;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /** 
  * Implementation of event dispatching in CayenneModeler using <i>mediator</i>
@@ -115,7 +116,7 @@ import org.objectstyle.cayenne.modeler.model.TopModel;
  */
 public class EventController {
 
-    private static Logger logObj = Logger.getLogger(EventController.class);
+    static Logger logObj = Logger.getLogger(EventController.class);
 
     protected EventListenerList listenerList;
     protected TopModel model;
@@ -139,15 +140,7 @@ public class EventController {
     }
 
     public void reset() {
-        currentDomain = null;
-        currentNode = null;
-        currentMap = null;
-        currentObjEntity = null;
-        currentDbEntity = null;
-        currentObjAttr = null;
-        currentDbAttr = null;
-        currentObjRel = null;
-        currentDbRel = null;
+        clearState();
         setDirty(false);
         listenerList = new EventListenerList();
     }
@@ -167,6 +160,7 @@ public class EventController {
         currentDbAttr = null;
         currentObjRel = null;
         currentDbRel = null;
+        model.setSelectedPath(ProjectTraversal.EMPTY_PATH);
     }
 
     public DataNode getCurrentDataNode() {
@@ -275,7 +269,10 @@ public class EventController {
         }
 
         clearState();
+        
         currentDomain = e.getDomain();
+        model.setSelectedPath(currentDomain);
+        
         EventListener[] list;
         list = getListeners(DomainDisplayListener.class);
         for (int i = 0; i < list.length; i++) {
