@@ -61,6 +61,8 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.trans.QualifierTranslator;
+import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -131,6 +133,13 @@ public class OpenBaseAdapter extends JdbcAdapter {
     public String tableTypeForView() {
         // TODO: according to OpenBase docs views *ARE* supported.
         return null;
+    }
+    
+    /** 
+     * Returns OpenBase-specific translator for queries.
+     */
+    public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
+        return new OpenBaseQualifierTranslator(queryAssembler);
     }
 
     /**

@@ -64,7 +64,6 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 
-
 public class SelectQueryTst extends SelectQueryBase {
     private static final int _artistCount = 20;
 
@@ -130,7 +129,7 @@ public class SelectQueryTst extends SelectQueryBase {
         List objects = opObserver.objectsForQuery(query);
         assertEquals(_artistCount - 1, objects.size());
     }
-    
+
     public void testSelectNotLikeIgnoreCaseSingleWildcardMatch() throws Exception {
         query.setRoot(Artist.class);
         Expression qual =
@@ -142,7 +141,17 @@ public class SelectQueryTst extends SelectQueryBase {
         List objects = opObserver.objectsForQuery(query);
         assertEquals(_artistCount - 1, objects.size());
     }
-    
+
+    public void testSelectLikeCasesensitive() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual = ExpressionFactory.likeExp("artistName", "aRtIsT%");
+        query.setQualifier(qual);
+        performQuery();
+
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertEquals(0, objects.size());
+    }
 
     public void testSelectLikeSingleWildcardMatch() throws Exception {
         query.setRoot(Artist.class);

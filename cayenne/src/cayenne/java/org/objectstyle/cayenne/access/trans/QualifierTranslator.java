@@ -80,7 +80,7 @@ public class QualifierTranslator
     implements TraversalHandler {
 
     private ExpressionTraversal treeWalker = new ExpressionTraversal();
-    private StringBuffer qualBuf = new StringBuffer();
+    protected StringBuffer qualBuf = new StringBuffer();
 
     protected boolean translateParentQual;
     protected DataObjectMatchTranslator objectMatchTranslator;
@@ -365,7 +365,7 @@ public class QualifierTranslator
         }
     }
 
-    private boolean parenthesisNeeded(Expression node, Expression parentNode) {
+    protected boolean parenthesisNeeded(Expression node, Expression parentNode) {
         if (parentNode == null)
             return false;
 

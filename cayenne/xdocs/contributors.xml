@@ -16,7 +16,6 @@
             The most obvious first step is joining the developer mailing list.</p>
 
             <subsection name="Committers">
-            <p></p> 
             <table>
             <tr>
                 <th>Name</th>
@@ -56,11 +55,52 @@
                 <td><a href="http://www.centralparksoftware.com/">http://www.centralparksoftware.com/</a></td>
             </tr>
             </table>
+            <p> </p>  
             </subsection>
             
             
             <subsection name="Contributors">
-            <p></p>  
+            <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Web</th>
+            </tr>
+            <tr>
+                <td>Arndt Brenschede</td>
+                <td>Arndt dot Brenschede at diamos dot com</td>
+                <td><a href="http://www.diamos.com/">http://www.diamos.com</a></td>
+            </tr>
+            <tr>
+                <td>Anna Drapeza</td>
+                <td>anna at ipm dot by</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Scott Finnery</td>
+                <td>scott at codefuey dot com</td>
+				<td>-</td>
+            </tr>
+            <tr>
+                <td>Mike Kienenberger</td>
+                <td>mkienenb at alaska dot net</td>
+				<td>-</td>
+            </tr>
+            <tr>
+                <td>Nataliya Kholodna</td>
+                <td>nkholodna at mail dot ru</td>
+				<td>-</td>
+            </tr>
+            <tr>
+                <td>Dirk Olmes</td>
+                <td>dirk dot olmes at gmx dot de</td>
+                <td>-</td>
+            </tr>
+            </table>
+            <p> </p>  
+            </subsection>
+        
+        <subsection name="Others Who Helped Us in the Past">
             <table>
             <tr>
                 <th>Name</th>
@@ -73,33 +113,18 @@
                 <td>-</td>
             </tr>
             <tr>
-                <td>Arndt Brenschede</td>
-                <td>Arndt dot Brenschede at diamos dot com</td>
-                <td><a href="http://www.diamos.com/">http://www.diamos.com</a></td>
-            </tr>
-            <tr>
                 <td>David Cooper</td>
                 <td>snowbladin at yahoo dot com</td>
                 <td><a href="http://livingroad.com/">http://livingroad.com</a></td>
             </tr>
-            <tr>
-                <td>Anna Drapeza</td>
-                <td>anna at ipm dot by</td>
-                <td>-</td>
-            </tr>
-            <tr>
-                <td>Nataliya Kholodna</td>
-                <td>nkholodna at mail dot ru</td>
-				<td>-</td>
-            </tr>            
-            <tr>
-                <td>Dirk Olmes</td>
-                <td>dirk dot olmes at gmx dot de</td>
-                <td>-</td>
-            </tr>
              <tr>
                 <td>Maria Vashkevich</td>
                 <td>m dot vashkevich at zaval dot org</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>Fabricio Voznika</td>
+                <td>-</td>
                 <td>-</td>
             </tr>
             </table>
