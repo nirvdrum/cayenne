@@ -55,13 +55,26 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.sql.Types;
+
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * @author Andrei Adamchik
  */
 public class ObjEntityInheritanceTst extends BasicTestCase {
+
     protected DataMap map;
+
+    protected DbEntity dbEntity;
+
+    protected DbAttribute dbAttribute1;
+    protected DbAttribute dbAttribute2;
+    protected DbAttribute dbAttribute3;
+
+    protected DbRelationship dbRelationship1;
+    protected DbRelationship dbRelationship2;
+    protected DbRelationship dbRelationship3;
 
     protected ObjEntity entity1;
     protected ObjEntity entity2;
@@ -77,6 +90,27 @@ public class ObjEntityInheritanceTst extends BasicTestCase {
 
     public void setUp() throws Exception {
         map = new DataMap();
+
+        // create common DbEntity
+        dbEntity = new DbEntity("DB");
+        dbAttribute1 = new DbAttribute("ATTRIBUTE1", Types.INTEGER, dbEntity);
+        dbAttribute2 = new DbAttribute("ATTRIBUTE2", Types.INTEGER, dbEntity);
+        dbAttribute3 = new DbAttribute("ATTRIBUTE3", Types.INTEGER, dbEntity);
+
+        dbEntity.addAttribute(dbAttribute1);
+        dbEntity.addAttribute(dbAttribute2);
+        dbEntity.addAttribute(dbAttribute3);
+
+        dbRelationship1 = new DbRelationship("DBR1");
+        dbRelationship2 = new DbRelationship("DBR2");
+        dbRelationship3 = new DbRelationship("DBR3");
+
+        dbEntity.addRelationship(dbRelationship1);
+        dbEntity.addRelationship(dbRelationship2);
+        dbEntity.addRelationship(dbRelationship3);
+
+        map.addDbEntity(dbEntity);
+
         entity1 = new ObjEntity("e1");
         entity2 = new ObjEntity("e2");
         entity3 = new ObjEntity("e3");
@@ -124,5 +158,37 @@ public class ObjEntityInheritanceTst extends BasicTestCase {
 
         entity2.setSuperEntityName("e3");
         assertSame(relationship3, entity1.getRelationship("r3"));
+    }
+
+    public void testAttributeForDbAttribute() throws Exception {
+        entity1.setSuperEntityName("e2");
+        entity2.setDbEntityName(dbEntity.getName());
+
+        attribute1.setDbAttribute(dbAttribute1);
+        attribute2.setDbAttribute(dbAttribute2);
+
+        assertNull(entity2.getAttributeForDbAttribute(dbAttribute1));
+        assertSame(attribute2, entity2.getAttributeForDbAttribute(dbAttribute2));
+
+        assertSame(attribute1, entity1.getAttributeForDbAttribute(dbAttribute1));
+        assertNotNull(entity1.getAttributeForDbAttribute(dbAttribute2));
+        assertSame(attribute2, entity1.getAttributeForDbAttribute(dbAttribute2));
+    }
+
+    public void testRelationshipForDbRelationship() throws Exception {
+        entity1.setSuperEntityName("e2");
+        entity2.setDbEntityName(dbEntity.getName());
+
+        relationship1.addDbRelationship(dbRelationship1);
+        relationship2.addDbRelationship(dbRelationship2);
+
+        assertNull(entity2.getRelationshipForDbRelationship(dbRelationship1));
+        assertSame(relationship2, entity2
+                .getRelationshipForDbRelationship(dbRelationship2));
+
+        assertSame(relationship1, entity1
+                .getRelationshipForDbRelationship(dbRelationship1));
+        assertSame(relationship2, entity1
+                .getRelationshipForDbRelationship(dbRelationship2));
     }
 }

@@ -369,6 +369,11 @@ public class ResultDescriptor {
             String javaType = null;
             DbAttribute attr = (DbAttribute) dbAttributes.get(i);
             ObjAttribute objAttr = rootEntity.getAttributeForDbAttribute(attr);
+
+            // TODO: [See CAY-207 for details] This setup doesn't allow to correctly
+            // determine the Java class of an attribute if it is defined in a sub-entity
+            // of the query root entity... Hence all inherited attributes will be fetched
+            // as generic types, ignoring any possible custom type.
             if (objAttr != null) {
                 javaType = objAttr.getType();
             }
