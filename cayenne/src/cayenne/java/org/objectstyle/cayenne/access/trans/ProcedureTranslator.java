@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParam;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 
 /**
@@ -140,7 +140,7 @@ public class ProcedureTranslator
     public PreparedStatement createStatement(Level logLevel) throws Exception {
         long t1 = System.currentTimeMillis();
 
-        this.callParams = getProcedure().getCallParams();
+        this.callParams = getProcedure().getCallParameters();
         this.values = new ArrayList(callParams.size());
 
         initValues();
@@ -182,11 +182,11 @@ public class ProcedureTranslator
      */
     protected void initStatement(CallableStatement stmt) throws Exception {
         if (values != null && values.size() > 0) {
-            List params = getProcedure().getCallParams();
+            List params = getProcedure().getCallParameters();
 
             int len = values.size();
             for (int i = 0; i < len; i++) {
-                ProcedureParam param = (ProcedureParam) params.get(i);
+                ProcedureParameter param = (ProcedureParameter) params.get(i);
 
                 // !Stored procedure parameter can be both in and out 
                 // at the same time
@@ -194,7 +194,7 @@ public class ProcedureTranslator
                     setOutParam(stmt, param, i + 1);
                 }
 
-                if (param.isInParam()) {
+                if (param.isInParameter()) {
                     setInParam(stmt, param, values.get(i), i + 1);
                 }
             }
@@ -210,11 +210,11 @@ public class ProcedureTranslator
 
         Iterator it = callParams.iterator();
         while (it.hasNext()) {
-            ProcedureParam param = (ProcedureParam) it.next();
+            ProcedureParameter param = (ProcedureParameter) it.next();
 
-            if (param.getDirection() == ProcedureParam.OUT_PARAM) {
+            if (param.getDirection() == ProcedureParameter.OUT_PARAMETER) {
                 values.add(OUT_PARAM);
-            } else if (param.getDirection() == ProcedureParam.VOID_PARAM) {
+            } else if (param.getDirection() == ProcedureParameter.VOID_PARAMETER) {
                 values.add(VOID_PARAM);
             } else {
                 values.add(queryValues.get(param.getName()));
@@ -227,7 +227,7 @@ public class ProcedureTranslator
      */
     protected void setInParam(
         CallableStatement stmt,
-        ProcedureParam param,
+        ProcedureParameter param,
         Object val,
         int pos)
         throws Exception {
@@ -254,7 +254,7 @@ public class ProcedureTranslator
      */
     protected void setOutParam(
         CallableStatement stmt,
-        ProcedureParam param,
+        ProcedureParameter param,
         int pos)
         throws Exception {
 

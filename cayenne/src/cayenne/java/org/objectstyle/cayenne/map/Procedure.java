@@ -60,13 +60,15 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A mapping descriptor for a database stored procedure.
+ * A mapping descriptor for a database stored procedure. 
  * 
  * @author Andrei Adamchik
  */
-public class Procedure extends DbEntity {
+public class Procedure extends MapObject {
+    protected String catalog;
+    protected String schema;
     protected boolean returningValue;
-    protected List callParams = new ArrayList();
+    protected List callParameters = new ArrayList();
 
     /**
      * Default constructor for StoredProcedure.
@@ -78,39 +80,53 @@ public class Procedure extends DbEntity {
     public Procedure(String name) {
         super(name);
     }
+    
+    /**
+     * @return parent DataMap of this entity.
+     */
+    public DataMap getDataMap() {
+        return (DataMap) getParent();
+    }
+
+    /**
+     * Sets parent DataMap of this entity.
+     */
+    public void setDataMap(DataMap dataMap) {
+        this.setParent(dataMap);
+    }
 
     /**
      * Adds new call parameter to the stored procedure. Also sets
      * <code>param</code>'s parent to be this procedure.
      */
-    public void addCallParam(ProcedureParam param) {
+    public void addCallParameter(ProcedureParameter param) {
         if (param.getName() == null) {
             throw new IllegalArgumentException("Attempt to add unnamed parameter.");
         }
 
-        if (callParams.contains(param)) {
+        if (callParameters.contains(param)) {
             throw new IllegalArgumentException(
                 "Attempt to add the same parameter more than once:" + param);
         }
 
-        param.setEntity(this);
-        callParams.add(param);
+        param.setProcedure(this);
+        callParameters.add(param);
     }
     
 
     /** Removes a named call parameter. */
-    public void removeCallParam(String name) {
-        for (int i = 0; i < callParams.size(); i++) {
-            ProcedureParam nextParam = (ProcedureParam) callParams.get(i);
+    public void removeCallParameter(String name) {
+        for (int i = 0; i < callParameters.size(); i++) {
+            ProcedureParameter nextParam = (ProcedureParameter) callParameters.get(i);
             if (name.equals(nextParam.getName())) {
-                callParams.remove(i);
+                callParameters.remove(i);
                 break;
             }
         }
     }
 
-    public void clearCallParams() {
-        callParams.clear();
+    public void clearCallParameters() {
+        callParameters.clear();
     }
 
     /**
@@ -118,8 +134,8 @@ public class Procedure extends DbEntity {
      * 
      * @return List
      */
-    public List getCallParams() {
-        return callParams;
+    public List getCallParameters() {
+        return callParameters;
     }
     
     /**
@@ -128,10 +144,10 @@ public class Procedure extends DbEntity {
      * @return
      */
     public List getCallOutParams() {
-        List outParams = new ArrayList(callParams.size());
-        Iterator it = callParams.iterator();
+        List outParams = new ArrayList(callParameters.size());
+        Iterator it = callParameters.iterator();
         while(it.hasNext()) {
-            ProcedureParam param = (ProcedureParam)it.next();
+            ProcedureParameter param = (ProcedureParameter)it.next();
             if(param.isOutParam()) {
                 outParams.add(param);
             }
@@ -142,13 +158,14 @@ public class Procedure extends DbEntity {
 
     /**
      * Returns parameter describing the return value of the StoredProcedure, or
-     * null if procedure does not support return values.
+     * null if procedure does not support return values. If procedure supports return parameters,
+     * its first parameter is always assumed to be a return result.
      */
-    public ProcedureParam getResultParam() {
+    public ProcedureParameter getResultParam() {
         // if procedure returns parameters, this must be the first parameter
         // otherwise, return null
-        return (returningValue && callParams.size() > 0)
-            ? (ProcedureParam) callParams.get(0)
+        return (returningValue && callParameters.size() > 0)
+            ? (ProcedureParameter) callParameters.get(0)
             : null;
     }
     
@@ -166,15 +183,5 @@ public class Procedure extends DbEntity {
      */
     public void setReturningValue(boolean returningValue) {
         this.returningValue = returningValue;
-    }
-
-    /**
-     * Does extra validation of the added attribute.
-     */
-    public void addAttribute(Attribute attr) {
-        if (attr instanceof ProcedureParam) {
-            throw new IllegalArgumentException("Attempt to set ProcedureParam as attribute. Use 'addCallParam' instead.");
-        }
-        super.addAttribute(attr);
     }
 }

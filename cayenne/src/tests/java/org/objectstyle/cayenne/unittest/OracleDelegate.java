@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParam;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 
 /**
  * @author Andrei Adamchik
@@ -113,14 +113,14 @@ public class OracleDelegate extends DatabaseSetupDelegate {
     
     public void willRunProcedure(Procedure proc) {
       if(DataContextStoredProcTst.SELECT_STORED_PROCEDURE.equals(proc.getName())) {
-          List params = new ArrayList(proc.getCallParams());
+          List params = new ArrayList(proc.getCallParameters());
         
-          proc.clearCallParams();
-          proc.addCallParam(new ProcedureParam("result", OracleAdapter.getOracleCursorType(), ProcedureParam.OUT_PARAM));
+          proc.clearCallParameters();
+          proc.addCallParameter(new ProcedureParameter("result", OracleAdapter.getOracleCursorType(), ProcedureParameter.OUT_PARAMETER));
           Iterator it = params.iterator();
           while(it.hasNext()) {
-              ProcedureParam param = (ProcedureParam)it.next();
-              proc.addCallParam(param);
+              ProcedureParameter param = (ProcedureParameter)it.next();
+              proc.addCallParameter(param);
           }
           
           proc.setReturningValue(true);

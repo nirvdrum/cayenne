@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParam;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 
 /**
  * Contains information about the ResultSet used to process fetched rows. 
@@ -151,9 +151,9 @@ public class ResultDescriptor {
         Procedure procedure,
         ExtendedTypeMap typeConverters) {
         ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
-        Iterator it = procedure.getCallParams().iterator();
+        Iterator it = procedure.getCallParameters().iterator();
         while (it.hasNext()) {
-            descriptor.addDbAttribute((DbAttribute) it.next());
+            descriptor.addDbAttribute(new ProcedureParameterWrapper((ProcedureParameter) it.next()));
         }
 
         descriptor.index();
@@ -171,7 +171,7 @@ public class ResultDescriptor {
         this.rootEntity = rootEntity;
     }
 
-    public void addDbAttributes(Collection dbAttributes) {
+    public void addColumns(Collection dbAttributes) {
         this.dbAttributes.addAll(dbAttributes);
     }
 
@@ -212,8 +212,8 @@ public class ResultDescriptor {
             }
 
             // check if this is a stored procedure OUT parameter
-            if (attr instanceof ProcedureParam) {
-                if (((ProcedureParam) attr).isOutParam()) {
+            if (attr instanceof ProcedureParameterWrapper) {
+                if (((ProcedureParameterWrapper) attr).getParameter().isOutParam()) {
                     outWidth++;
                 }
             }
@@ -257,8 +257,8 @@ public class ResultDescriptor {
                 DbAttribute attr = (DbAttribute) dbAttributes.get(i);
                 jdbcTypes[i] = attr.getType();
 
-                if (attr instanceof ProcedureParam) {
-                    if (((ProcedureParam) attr).isOutParam()) {
+                if (attr instanceof ProcedureParameterWrapper) {
+                    if (((ProcedureParameterWrapper) attr).getParameter().isOutParam()) {
                         outParamIndexes[j++] = i;
                     }
                 }
@@ -353,5 +353,41 @@ public class ResultDescriptor {
 
     public int[] getOutParamIndexes() {
         return outParamIndexes;
+    }
+    
+    // [UGLY HACK AHEAD] wrapper to make a ProcedureParameter
+    // look like a DbAttribute. A better implementation would
+    // probably be a common interface for both.
+    static class ProcedureParameterWrapper extends DbAttribute {
+        ProcedureParameter parameter;
+        
+        ProcedureParameterWrapper(ProcedureParameter parameter) {
+            this.parameter = parameter;
+        }
+        
+        public int getMaxLength() {
+            return parameter.getMaxLength();
+        }
+
+        public int getPrecision() {
+            return parameter.getPrecision();
+        }
+
+        public int getType() {
+            return parameter.getType();
+        }
+
+        public String getName() {
+            return parameter.getName();
+        }
+
+        public Object getParent() {
+            return parameter.getParent();
+        }
+        
+        public ProcedureParameter getParameter() {
+            return parameter;
+        }
+
     }
 }

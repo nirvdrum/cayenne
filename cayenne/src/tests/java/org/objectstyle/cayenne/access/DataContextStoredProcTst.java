@@ -66,7 +66,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParam;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -93,12 +93,12 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         // create and run stored procedure
         Procedure proc = new Procedure(UPDATE_STORED_PROCEDURE);
-        ProcedureParam param =
-            new ProcedureParam(
+        ProcedureParameter param =
+            new ProcedureParameter(
                 "paintingPrice",
                 Types.INTEGER,
-                ProcedureParam.IN_PARAM);
-        proc.addCallParam(param);
+                ProcedureParameter.IN_PARAMETER);
+        proc.addCallParameter(param);
 
         // allow delegate to tweak procedure
         getDatabaseSetupDelegate().willRunProcedure(proc);
@@ -131,15 +131,15 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         // create and run stored procedure
         Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
-        ProcedureParam param1 =
-            new ProcedureParam("aName", Types.VARCHAR, ProcedureParam.IN_PARAM);
-        ProcedureParam param2 =
-            new ProcedureParam(
+        ProcedureParameter param1 =
+            new ProcedureParameter("aName", Types.VARCHAR, ProcedureParameter.IN_PARAMETER);
+        ProcedureParameter param2 =
+            new ProcedureParameter(
                 "paintingPrice",
                 Types.INTEGER,
-                ProcedureParam.IN_PARAM);
-        proc.addCallParam(param1);
-        proc.addCallParam(param2);
+                ProcedureParameter.IN_PARAMETER);
+        proc.addCallParameter(param1);
+        proc.addCallParameter(param2);
 
         // allow delegate to tweak procedure
         getDatabaseSetupDelegate().willRunProcedure(proc);
@@ -172,15 +172,15 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         // create and run stored procedure
         Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
-        ProcedureParam param1 =
-            new ProcedureParam("aName", Types.VARCHAR, ProcedureParam.IN_PARAM);
-        ProcedureParam param2 =
-            new ProcedureParam(
+        ProcedureParameter param1 =
+            new ProcedureParameter("aName", Types.VARCHAR, ProcedureParameter.IN_PARAMETER);
+        ProcedureParameter param2 =
+            new ProcedureParameter(
                 "paintingPrice",
                 Types.INTEGER,
-                ProcedureParam.IN_PARAM);
-        proc.addCallParam(param1);
-        proc.addCallParam(param2);
+                ProcedureParameter.IN_PARAMETER);
+        proc.addCallParameter(param1);
+        proc.addCallParameter(param2);
 
         // allow delegate to tweak procedure
         getDatabaseSetupDelegate().willRunProcedure(proc);
@@ -215,18 +215,18 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         // create and run stored procedure
         Procedure proc = new Procedure(OUT_STORED_PROCEDURE);
-        ProcedureParam param1 =
-            new ProcedureParam(
+        ProcedureParameter param1 =
+            new ProcedureParameter(
                 "in_param",
                 Types.INTEGER,
-                ProcedureParam.IN_PARAM);
-        ProcedureParam param2 =
-            new ProcedureParam(
+                ProcedureParameter.IN_PARAMETER);
+        ProcedureParameter param2 =
+            new ProcedureParameter(
                 "out_param",
                 Types.INTEGER,
-                ProcedureParam.OUT_PARAM);
-        proc.addCallParam(param1);
-        proc.addCallParam(param2);
+                ProcedureParameter.OUT_PARAMETER);
+        proc.addCallParameter(param1);
+        proc.addCallParameter(param2);
 
         // allow delegate to tweak procedure
         getDatabaseSetupDelegate().willRunProcedure(proc);

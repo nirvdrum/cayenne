@@ -55,75 +55,92 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.dba.TypesMapping;
+
 /**
  * A descriptor for the StoredProcedure parameter.
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureParam extends DbAttribute {
+public class ProcedureParameter extends MapObject {
+    public static final int IN_OUT_PARAMETER = 3;
 
-    public static final int IN_PARAM = 1;
-    public static final int OUT_PARAM = 2;
-    public static final int IN_OUT_PARAM = 3;
+    public static final int IN_PARAMETER = 1;
+    public static final int OUT_PARAMETER = 2;
 
     /** 
      * Defines a stored procedure parameter with unknown direction.
      */
-    public static final int VOID_PARAM = 4;
+    public static final int VOID_PARAMETER = 4;
 
-    protected int direction = VOID_PARAM;
+    protected int direction = VOID_PARAMETER;
+
+    // The length of CHAR or VARCHAR or max num of digits for DECIMAL.
+    protected int maxLength = -1;
+
+    // The number of digits after period for DECIMAL.
+    protected int precision = -1;
+    protected int type = TypesMapping.NOT_DEFINED;
+
  
     /**
      * Constructor for ProcedureParam.
      */
-    public ProcedureParam() {
+    public ProcedureParameter() {
         super();
     }
 
-    public ProcedureParam(String name) {
+    public ProcedureParameter(String name) {
         super(name);
     }
 
-    public ProcedureParam(
+    public ProcedureParameter(
         String name,
         int type,
         int direction) {
+            
         super(name);
         setType(type);
         setDirection(direction);
+    }
+
+    /**
+     * Returns the direction of this parameter. Possible values 
+     * can be IN_PARAMETER, OUT_PARAMETER, IN_OUT_PARAMETER, VOID_PARAMETER.
+     */
+    public int getDirection() {
+        return direction;
+    }
+
+    /** Returns the procedure that holds this parameter. */
+    public Procedure getEntity() {
+        return (Procedure) getParent();
+    }
+    
+    public int getMaxLength() {
+        return maxLength;
+    }
+
+    public int getPrecision() {
+        return precision;
+    }
+
+    public int getType() {
+        return type;
+    }
+    
+    /**
+     * @return <code>true</code> if this is IN or INOUT parameter.
+     */
+    public boolean isInParameter() {
+        return direction == IN_PARAMETER || direction == IN_OUT_PARAMETER;
     }
     
     /**
      * @return <code>true</code> if this is OUT or INOUT parameter.
      */
     public boolean isOutParam() {
-    	return direction == OUT_PARAM || direction == IN_OUT_PARAM;
-    }
-    
-    /**
-     * @return <code>true</code> if this is IN or INOUT parameter.
-     */
-    public boolean isInParam() {
-        return direction == IN_PARAM || direction == IN_OUT_PARAM;
-    }
-
-    /**
-     * Throws an exception if the entity is not a Procedure.
-     */
-    public void setEntity(Entity entity) {
-        if (entity != null && !(entity instanceof Procedure)) {
-            throw new IllegalArgumentException("Only Procedure can be a parent of ProcedureParam.");
-        }
-
-        super.setEntity(entity);
-    }
-
-    /**
-     * Returns the direction.
-     * @return int
-     */
-    public int getDirection() {
-        return direction;
+    	return direction == OUT_PARAMETER || direction == IN_OUT_PARAMETER;
     }
 
     /**
@@ -133,14 +150,31 @@ public class ProcedureParam extends DbAttribute {
      * is thrown by this method.
      */
     public void setDirection(int direction) {
-        if (direction != IN_PARAM
-            && direction != OUT_PARAM
-            && direction != IN_OUT_PARAM
-            && direction != VOID_PARAM) {
+        if (direction != IN_PARAMETER
+            && direction != OUT_PARAMETER
+            && direction != IN_OUT_PARAMETER
+            && direction != VOID_PARAMETER) {
             throw new IllegalArgumentException(
                 "Unknown parameter type: " + direction);
         }
 
         this.direction = direction;
+    }
+
+    public void setMaxLength(int i) {
+        maxLength = i;
+    }
+
+    public void setPrecision(int i) {
+        precision = i;
+    }
+
+    /** Sets the procedure that holds this parameter. */
+    public void setProcedure(Procedure procedure) {
+        setParent(procedure);
+    }
+
+    public void setType(int i) {
+        type = i;
     }
 }

@@ -502,7 +502,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             new ResultDescriptor(
                 getAdapter().getExtendedTypes(),
                 getRootEntity());
-        descriptor.addDbAttributes(columnList);
+        descriptor.addColumns(columnList);
         descriptor.index();
         return descriptor;
     }
