@@ -56,26 +56,65 @@
 
 package org.objectstyle.cayenne.modeler.util;
 
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import org.objectstyle.cayenne.validation.ValidationException;
 
 /**
+ * An adapter for JTextArea editors. In addition to tracking an event when a TextArea
+ * looses focus, TextAreaAdapter tracks each document change and calls
+ * {@link #initModel(DocumentEvent)}every time the text is modified.
+ * 
  * @author Andrei Adamchik
  */
-public abstract class TextFieldAdapter extends TextComponentAdapter {
+public abstract class TextAreaAdapter extends TextComponentAdapter {
 
-    public TextFieldAdapter() {
-        this(new JTextField());
+    public TextAreaAdapter() {
+        this(new JTextArea());
     }
 
-    public TextFieldAdapter(int columns) {
-        this(new JTextField(columns));
+    public TextAreaAdapter(int rows, int columns) {
+        this(new JTextArea(rows, columns));
     }
 
-    public TextFieldAdapter(JTextField textField) {
-        super(textField);
+    public TextAreaAdapter(JTextArea textArea) {
+        super(textArea);
+
+        textArea.getDocument().addDocumentListener(new DocumentListener() {
+
+            public void insertUpdate(DocumentEvent e) {
+                verifyTextChange(e);
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                verifyTextChange(e);
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                verifyTextChange(e);
+            }
+        });
     }
 
-    public JTextField getTextField() {
-        return (JTextField) super.getTextComponent();
+    public JTextArea getTextArea() {
+        return (JTextArea) super.getTextComponent();
     }
+
+    protected abstract void initModel(DocumentEvent e) throws ValidationException;
+
+    protected void verifyTextChange(DocumentEvent e) {
+
+        try {
+            initModel(e);
+            clear();
+        }
+        catch (ValidationException vex) {
+
+            textComponent.setBackground(errorColor);
+            textComponent.setToolTipText(vex.getUnlabeledMessage());
+        }
+    }
+
 }

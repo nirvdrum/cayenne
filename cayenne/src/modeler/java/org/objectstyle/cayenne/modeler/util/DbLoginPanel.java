@@ -182,7 +182,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
         disableVKEvents(urlInput);
 
         adapterInput = CayenneWidgetFactory.createComboBox(DbAdapterInfo
-                .standardAdapters(), false);
+                .getStandardAdapters(), false);
         adapterInput.setEditable(true);
 
         FormLayout layout = new FormLayout(

@@ -108,7 +108,7 @@ public final class DbAdapterInfo {
         return new DbAdapterListRenderer(DEFAULT_ADAPTER_LABELS);
     }
 
-    public static Object[] standardAdapters() {
+    public static Object[] getStandardAdapters() {
         return standardAdapters;
     }
 

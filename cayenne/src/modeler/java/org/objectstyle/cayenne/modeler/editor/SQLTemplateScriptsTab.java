@@ -56,19 +56,34 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
+import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
+import org.objectstyle.cayenne.modeler.util.TextAreaAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
+import org.objectstyle.cayenne.util.Util;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -81,12 +96,14 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class SQLTemplateScriptsTab extends JPanel {
 
+    private static final String DEFAULT_LABEL = "Default";
+
     protected EventController mediator;
 
     protected JComboBox adapters;
 
     protected JList scripts;
-    protected JTextArea script;
+    protected TextAreaAdapter script;
 
     protected JButton addScript;
     protected JButton removeScript;
@@ -100,22 +117,40 @@ public class SQLTemplateScriptsTab extends JPanel {
 
     protected void initView() {
         // create widgets
-        addScript = new JButton("Add");
-        removeScript = new JButton("Remove");
+        addScript = new JButton("Add Adapter Template");
+        removeScript = new JButton("Remove Adapter Template");
+
         scripts = new JList();
-        script = new JTextArea();
-        adapters = new JComboBox();
+        scripts.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        scripts.setCellRenderer(DbAdapterInfo.getListRenderer());
+
+        script = new TextAreaAdapter(15, 30) {
+
+            protected void initModel(String text) {
+                setSQL(text);
+            }
+
+            protected void initModel(DocumentEvent e) {
+                setSQL(e);
+            }
+        };
+
+        adapters = CayenneWidgetFactory.createComboBox();
+        adapters.setModel(new DefaultComboBoxModel(DbAdapterInfo.getStandardAdapters()));
+        adapters.setRenderer(DbAdapterInfo.getListRenderer());
 
         // assemble
-
         CellConstraints cc = new CellConstraints();
         PanelBuilder builder = new PanelBuilder(new FormLayout(
                 "fill:100dlu, 3dlu, fill:pref:grow, 3dlu, fill:100dlu",
                 "3dlu, p, 3dlu, p, 10dlu, top:100dlu:grow"));
 
         // orderings table must grow as the panel is resized
-        builder.add(scripts, cc.xywh(1, 2, 1, 5));
-        builder.add(new JScrollPane(script), cc.xywh(3, 2, 1, 5));
+        builder.add(new JScrollPane(
+                scripts,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), cc.xywh(1, 2, 1, 5));
+        builder.add(new JScrollPane(script.getTextArea()), cc.xywh(3, 2, 1, 5));
         builder.add(adapters, cc.xy(5, 2, "d, top"));
         builder.add(addScript, cc.xy(5, 4, "d, top"));
         builder.add(removeScript, cc.xy(5, 6, "d, top"));
@@ -135,9 +170,23 @@ public class SQLTemplateScriptsTab extends JPanel {
                 }
             }
         });
+
+        addScript.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                addAdapterScript();
+            }
+        });
+
+        removeScript.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                removeAdapterScript();
+            }
+        });
     }
 
-    protected void initFromModel() {
+    void initFromModel() {
         Query query = mediator.getCurrentQuery();
 
         if (!(query instanceof SQLTemplate)) {
@@ -145,8 +194,11 @@ public class SQLTemplateScriptsTab extends JPanel {
             return;
         }
 
-        SQLTemplate template = (SQLTemplate) query;
-        Object[] keys = template.getTemplateKeys().toArray();
+        initScriptsFromModel();
+
+        // select default script
+        scripts.setSelectedIndex(0);
+        script.getTextArea().setEnabled(true);
 
         setVisible(true);
     }
@@ -155,10 +207,133 @@ public class SQLTemplateScriptsTab extends JPanel {
         return (SQLTemplate) mediator.getCurrentQuery();
     }
 
+    void initScriptsFromModel() {
+        SQLTemplate template = getQuery();
+
+        List keys = new ArrayList(template.getTemplateKeys());
+        Collections.sort(keys);
+        keys.add(0, DEFAULT_LABEL);
+
+        scripts.setModel(new DefaultComboBoxModel(keys.toArray()));
+    }
+
+    /**
+     * Adds an empty SQL script for selected DbAdapter.
+     */
+    void addAdapterScript() {
+        String key = (String) adapters.getSelectedItem();
+        if (key == null) {
+            return;
+        }
+
+        SQLTemplate query = getQuery();
+        if (!query.getTemplateKeys().contains(key)) {
+            query.setTemplate(key, "");
+            initScriptsFromModel();
+            mediator.fireQueryEvent(new QueryEvent(this, query));
+        }
+
+        scripts.setSelectedValue(key, true);
+    }
+
+    /**
+     * Removes existing SQL script for selected DbAdapter.
+     */
+    void removeAdapterScript() {
+        String key = (String) scripts.getSelectedValue();
+        if (key == null || key.equals(DEFAULT_LABEL)) {
+            return;
+        }
+
+        getQuery().removeTemplate(key);
+        initScriptsFromModel();
+        mediator.fireQueryEvent(new QueryEvent(this, getQuery()));
+    }
+
+    /**
+     * Shows selected script in the editor.
+     */
     void displayScript() {
         SQLTemplate query = getQuery();
         if (query == null) {
+            disableEditor();
             return;
+        }
+
+        String key = (String) scripts.getSelectedValue();
+        if (key == null) {
+            disableEditor();
+            return;
+        }
+
+        enableEditor();
+        if (key.equals(DEFAULT_LABEL)) {
+            script.setText(query.getDefaultTemplate());
+        }
+        else {
+            script.setText(query.getCustomTemplate(key));
+        }
+    }
+
+    void disableEditor() {
+        script.setText(null);
+        script.getTextArea().setEnabled(false);
+        script.getTextArea().setEditable(false);
+        script.getTextArea().setBackground(getBackground());
+    }
+
+    void enableEditor() {
+        script.getTextArea().setEnabled(true);
+        script.getTextArea().setEditable(true);
+        script.getTextArea().setBackground(Color.WHITE);
+    }
+
+    void setSQL(DocumentEvent e) {
+        Document doc = e.getDocument();
+
+        try {
+            setSQL(doc.getText(0, doc.getLength()));
+        }
+        catch (BadLocationException e1) {
+            e1.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sets the value of SQL template for the currently selected script.
+     */
+    void setSQL(String text) {
+        SQLTemplate query = getQuery();
+        if (query == null) {
+            return;
+        }
+
+        String key = (String) scripts.getSelectedValue();
+        if (key == null) {
+            return;
+        }
+
+        if (text != null) {
+            text = text.trim();
+            if (text.length() == 0) {
+                text = null;
+            }
+        }
+
+        // Compare the value before modifying the query - text area
+        // will call "verify" even if no changes have occured....
+        if (key.equals(DEFAULT_LABEL)) {
+            if (!Util.nullSafeEquals(text, query.getDefaultTemplate())) {
+                query.setDefaultTemplate(text);
+                mediator.fireQueryEvent(new QueryEvent(this, query));
+            }
+        }
+        else {
+            if (!Util.nullSafeEquals(text, query.getTemplate(key))) {
+                query.setTemplate(key, text);
+                mediator.fireQueryEvent(new QueryEvent(this, query));
+            }
         }
 
     }

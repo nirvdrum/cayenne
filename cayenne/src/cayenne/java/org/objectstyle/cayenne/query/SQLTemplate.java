@@ -87,7 +87,11 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * 
  *  
  *   
- *       SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a=
+ *    
+ *     
+ *         SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a=
+ *      
+ *     
  *    
  *   
  *  
@@ -230,8 +234,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
 
         // encode default SQL
         if (defaultTemplate != null) {
-            encoder.println("<sql><![CDATA[");
-            encoder.println(defaultTemplate);
+            encoder.print("<sql><![CDATA[");
+            encoder.print(defaultTemplate);
             encoder.println("]]></sql>");
         }
 
@@ -244,11 +248,14 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
                 Object value = entry.getValue();
 
                 if (key != null && value != null) {
-                    encoder.print("<sql adapter-class=\"");
-                    encoder.print(key.toString());
-                    encoder.println("\"><![CDATA[");
-                    encoder.println(value.toString());
-                    encoder.println("]]></sql>");
+                    String sql = value.toString().trim();
+                    if (sql.length() > 0) {
+                        encoder.print("<sql adapter-class=\"");
+                        encoder.print(key.toString());
+                        encoder.print("\"><![CDATA[");
+                        encoder.print(sql);
+                        encoder.println("]]></sql>");
+                    }
                 }
             }
         }
@@ -405,6 +412,16 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         String template = (String) templates.get(key);
         return (template != null) ? template : defaultTemplate;
     }
+    
+    /**
+     * Returns template for key, or null if there is no template
+     * configured for this key. Unlike {@link #getTemplate(String)}
+     * this method does not return a default template as a failover strategy,
+     * rather it returns null.
+     */
+    public synchronized String getCustomTemplate(String key) {
+        return (templates != null) ? (String) templates.get(key) : null;
+    }
 
     /**
      * Adds a SQL template string for a given key.
@@ -419,11 +436,18 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
         templates.put(key, template);
     }
 
+    public synchronized void removeTemplate(String key) {
+        if (templates != null) {
+            templates.remove(key);
+        }
+    }
+
     /**
-     * Returns a collection of configured template keys. 
+     * Returns a collection of configured template keys.
      */
     public synchronized Collection getTemplateKeys() {
-        return Collections.unmodifiableCollection(templates.keySet());
+        return (templates != null) ? Collections.unmodifiableCollection(templates
+                .keySet()) : Collections.EMPTY_LIST;
     }
 
     /**

@@ -179,7 +179,7 @@ public class DataNodeView extends JPanel implements DocumentListener, ActionList
 
         adapterLabel = CayenneWidgetFactory.createLabel("DB Adapter:");
         adapter = CayenneWidgetFactory.createComboBox(
-                DbAdapterInfo.standardAdapters(),
+                DbAdapterInfo.getStandardAdapters(),
                 false);
         adapter.setEditable(true);
         adapter.setSelectedIndex(-1);
