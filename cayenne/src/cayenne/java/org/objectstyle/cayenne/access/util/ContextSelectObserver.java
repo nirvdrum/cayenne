@@ -91,7 +91,7 @@ public class ContextSelectObserver extends SelectObserver {
 	 * object. Registers objects with parent DataContext.
 	 */
 	public void nextDataRows(Query query, List dataRows) {
-		List result = new ArrayList();
+		List result = null;
 		if (dataRows != null && dataRows.size() > 0) {
 			ObjEntity ent = context.getEntityResolver().lookupObjEntity(query);
 			
@@ -110,11 +110,15 @@ public class ContextSelectObserver extends SelectObserver {
 				+ "' has no Primary Key defined.");
 			}
 			
+			result = new ArrayList(dataRows.size());
 			Iterator it = dataRows.iterator();
 			while (it.hasNext()) {
 				result.add(
 					context.objectFromDataRow(ent, (Map) it.next(), true));
 			}
+		}
+		else {
+			result = new ArrayList();
 		}
 
 		if (query instanceof PrefetchSelectQuery) {
