@@ -102,7 +102,8 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     protected List unusedPool;
     protected List usedPool;
 
-    private PoolMaintenanceThread poolResizeThread;
+    private PoolMaintenanceThread poolMaintenanceThread;
+
 
     /** 
      * Creates new PoolManager using org.objectstyle.cayenne.conn.PoolDataSource
@@ -208,46 +209,59 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         startMaintenanceThread();
     }
     
-    protected void startMaintenanceThread() {
-        this.poolResizeThread = new PoolMaintenanceThread(this);
-        this.poolResizeThread.start();
+    protected synchronized void startMaintenanceThread() {
+        disposeOfMaintenanceThread();
+        this.poolMaintenanceThread = new PoolMaintenanceThread(this);
+        this.poolMaintenanceThread.start();
     }
 
-    /** Creates and returns new PooledConnection object. */
+    /** 
+     * Creates and returns new PooledConnection object, adding itself as a listener 
+     * for connection events. 
+     */
     protected PooledConnection newPooledConnection(String userName, String password)
         throws SQLException {
-        return (userName != null)
-            ? poolDataSource.getPooledConnection(userName, password)
-            : poolDataSource.getPooledConnection();
+        PooledConnection connection =
+            (userName != null)
+                ? poolDataSource.getPooledConnection(userName, password)
+                : poolDataSource.getPooledConnection();
+        connection.addConnectionEventListener(this);
+        return connection;
     }
 
     /** Closes all existing connections, removes them from the pool. */
-    public synchronized void dispose() throws SQLException {
+    public void dispose() throws SQLException {
+        synchronized (this) {
+            // clean connections from the pool
+            ListIterator unusedIterator = unusedPool.listIterator();
+            while (unusedIterator.hasNext()) {
+                PooledConnection con = (PooledConnection) unusedIterator.next();
+                // close connection
+                con.close();
+                // remove connection from the list
+                unusedIterator.remove();
+            }
 
-        // clean connections from the pool
-        ListIterator unusedIterator = unusedPool.listIterator();
-        while (unusedIterator.hasNext()) {
-            PooledConnection con = (PooledConnection) unusedIterator.next();
-            // close connection
-            con.close();
-            // remove connection from the list
-            unusedIterator.remove();
+            // clean used connections
+            ListIterator usedIterator = usedPool.listIterator();
+            while (usedIterator.hasNext()) {
+                PooledConnection con = (PooledConnection) usedIterator.next();
+                // stop listening for connection events
+                con.removeConnectionEventListener(this);
+                // close connection
+                con.close();
+                // remove connection from the list
+                usedIterator.remove();
+            }
         }
 
-        // clean used connections
-        ListIterator usedIterator = usedPool.listIterator();
-        while (usedIterator.hasNext()) {
-            PooledConnection con = (PooledConnection) usedIterator.next();
-            // stop listening for connection events
-            con.removeConnectionEventListener(this);
-            // close connection
-            con.close();
-            // remove connection from the list
-            usedIterator.remove();
+        disposeOfMaintenanceThread();
+    }
+    
+    protected void disposeOfMaintenanceThread() {
+        if (poolMaintenanceThread != null) {
+            this.poolMaintenanceThread.dispose();
         }
-
-        this.poolResizeThread.dispose();
-        notifyAll();
     }
 
     /**
@@ -273,7 +287,6 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         int startPoolSize = getPoolSize();
         for (; i < addConnections && startPoolSize + i < maxConnections; i++) {
             PooledConnection newConnection = newPooledConnection(userName, password);
-            newConnection.addConnectionEventListener(this);
             unusedPool.add(newConnection);
         }
 
@@ -281,12 +294,8 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     }
 
     protected synchronized void shrinkPool(int closeConnections) {
-        
-        int close =
-            unusedPool.size() < closeConnections ? unusedPool.size() : closeConnections;
-        int lastInd = unusedPool.size() - close;
-
-        for (int i = unusedPool.size() - 1; i >= lastInd; i--) {
+        int idleSize = unusedPool.size();
+        for (int i = 0; i < closeConnections && i < idleSize; i++) {
             PooledConnection con = (PooledConnection) unusedPool.remove(i);
 
             try {
@@ -384,6 +393,16 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         // to bump the pool size...
 
         if (unusedPool.size() == 0) {
+            
+            // first try to open a new connection
+            if (canGrowPool()) {
+                PooledConnection newConnection = newPooledConnection(userName, password);
+                usedPool.add(newConnection);
+                return newConnection.getConnection();
+            }
+            
+            // can't open no more... will have to wait for others to return a connection
+            
             // note that if we were woken up 
             // before the full wait period expired, and no connections are
             // available yet, go back to sleep. Otherwise we don't give a maintenance
@@ -393,9 +412,6 @@ public class PoolManager implements DataSource, ConnectionEventListener {
                 + MAX_QUEUE_WAIT;
 
             do {
-                // awake manager thread...
-                notifyAll();
-
                 try {
                     wait(MAX_QUEUE_WAIT);
                 } catch (InterruptedException iex) {
@@ -487,56 +503,44 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     static class PoolMaintenanceThread extends Thread {
         protected boolean shouldDie;
         protected PoolManager pool;
-        protected long lastClosed;
 
         PoolMaintenanceThread(PoolManager pool) {
+            super.setName("PoolManagerCleanup-" + pool.hashCode());
+            super.setDaemon(true);
             this.pool = pool;
         }
 
         public void run() {
-
             // periodically wakes up to check if the pool should grow or shrink 
-            synchronized (pool) {
-                while (!shouldDie) {
+            while (true) {
+
+                try {
+                    // don't do it too often
+                    sleep(600000);
+                } catch (InterruptedException iex) {
+                    // ignore...
+                }
+
+                if (shouldDie) {
+                    break;
+                }
+
+                synchronized (pool) {
+                    // TODO: implement a smarter algorithm for pool management... 
+                    // right now it will simply close one connection if the count is
+                    // above median and there are any idle connections.
 
                     int unused = pool.getCurrentlyUnused();
                     int used = pool.getCurrentlyInUse();
                     int total = unused + used;
+                    int median =
+                        pool.minConnections
+                            + 1
+                            + (pool.maxConnections - pool.minConnections) / 2;
 
-                    // should grow
-                    if (unused == 0 || total < pool.minConnections) {
-                        try {
-                            int i = pool.growPool(1, pool.userName, pool.password);
-                            if (i > 0) {
-                                logObj.debug("Increased pool size by " + i + " to " + (total + i));
-                            }
-                        } catch (SQLException ex) {
-                            logObj.info(
-                                "Exception growing the pool, ignoring."
-                                    + ex.getMessage());
-                        }
-                    } else if (
-                        unused > 0
-                            && total
-                                > pool.minConnections
-                                    + 1
-                                    + (pool.maxConnections - pool.minConnections) / 2
-                            && lastClosed > System.currentTimeMillis() - 600000) {
+                    if (unused > 0 && total > median) {
                         pool.shrinkPool(1);
-
-                        lastClosed = System.currentTimeMillis();
-                        logObj.debug("decreased pool size by one to " + (total - 1));
-                    }
-
-                    // notify waiting threads
-                    pool.notifyAll();
-
-                    try {
-                        // wait for really long time, since stuck threads
-                        // will send notify anyway
-                        pool.wait(60000);
-                    } catch (InterruptedException iex) {
-                        // ignore...
+                        logObj.debug("decreased pool size to " + (total - 1) + " connections.");
                     }
                 }
             }

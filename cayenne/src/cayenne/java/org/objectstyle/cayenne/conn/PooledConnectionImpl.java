@@ -89,6 +89,9 @@ public class PooledConnectionImpl implements PooledConnection {
 	private String password;
 
 	protected PooledConnectionImpl() {
+        // TODO: maybe remove synchronization and use
+        // FastArrayList from commons-collections? After
+        // all the only listener is usually pool manager.
 		this.connectionEventListeners =
 			Collections.synchronizedList(new ArrayList(10));
 	}
