@@ -155,20 +155,29 @@ public abstract class Configuration {
                 logObj.debug("configured log4j with BasicConfigurator.");
             }
 
-			// remember configuraton success
+			// remember configuration success
             Configuration.setLoggingConfigured(true);
         }
     }
 
 	/**
-	 * Indicates whether log4j has been initialized.
+	 * Indicates whether Log4j has been initialized, either by cayenne
+	 * or otherwise. If an external setup has been detected,
+	 * {@link #setLoggingConfigured} will be called to remember this.
 	 */
 	public static boolean isLoggingConfigured() {
+		if (!loggingConfigured) {
+			// check for existing log4j setup
+			if (Logger.getRootLogger().getAllAppenders().hasMoreElements()) {
+				Configuration.setLoggingConfigured(true);
+			}
+		}
+
 		return loggingConfigured;
 	}
 
 	/**
-	 * Indicate whether log4j has been initialized. Can be used when
+	 * Indicate whether Log4j has been initialized. Can be used when
 	 * subclasses customize the initialization process, or to configure
      * Log4J outside of Cayenne.
 	 */

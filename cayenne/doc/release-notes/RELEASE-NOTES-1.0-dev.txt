@@ -28,7 +28,6 @@ to be displayed on the DataMap panel instead.
 7. {Modeler}: Fixed visual inconsistencies happenning on delete of rows in tables, 
 such as Attributes and relationships. Bugs 707926, 664516.
 
-
-
-
+8. Configuration will detect an existing Log4j setup and use it instead of trying
+to reconfigure itself.
 
