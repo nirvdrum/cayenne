@@ -96,27 +96,21 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
 
-/** 
- * Displays ObjRelationships for the edited ObjEntity. 
+/**
+ * Displays ObjRelationships for the edited ObjEntity.
  * 
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ObjEntityRelationshipTab
-    extends JPanel
-    implements
-        ObjEntityDisplayListener,
-        ObjEntityListener,
-        ObjRelationshipListener,
-        ExistingSelectionProcessor {
+public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplayListener,
+        ObjEntityListener, ObjRelationshipListener, ExistingSelectionProcessor {
 
-    private static final Object[] deleteRules =
-        new Object[] {
+    private static final Object[] deleteRules = new Object[] {
             DeleteRule.deleteRuleName(DeleteRule.NO_ACTION),
             DeleteRule.deleteRuleName(DeleteRule.NULLIFY),
             DeleteRule.deleteRuleName(DeleteRule.CASCADE),
             DeleteRule.deleteRuleName(DeleteRule.DENY),
-            };
+    };
 
     EventController mediator;
 
@@ -137,7 +131,9 @@ public class ObjEntityRelationshipTab
 
         resolve = new JButton("Edit Relationship");
 
-        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
+        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] {
+            resolve
+        });
 
         this.setLayout(new BorderLayout());
         add(panel, BorderLayout.CENTER);
@@ -149,24 +145,27 @@ public class ObjEntityRelationshipTab
         mediator.addObjRelationshipListener(this);
 
         resolve.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 int row = table.getSelectedRow();
                 if (row < 0) {
                     return;
                 }
 
-                ObjRelationshipTableModel model =
-                    (ObjRelationshipTableModel) table.getModel();
+                ObjRelationshipTableModel model = (ObjRelationshipTableModel) table
+                        .getModel();
                 new ObjRelationshipInfoController(mediator, model.getRelationship(row))
-                    .startup();
+                        .startup();
 
-                // need to refresh selected row... do this by unselecting/selecting the row
+                // need to refresh selected row... do this by unselecting/selecting the
+                // row
                 table.getSelectionModel().clearSelection();
                 table.select(row);
             }
         });
 
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
             public void valueChanged(ListSelectionEvent e) {
                 processExistingSelection();
             }
@@ -192,12 +191,12 @@ public class ObjEntityRelationshipTab
     public void processExistingSelection() {
         ObjRelationship rel = null;
         if (table.getSelectedRow() >= 0) {
-            ObjRelationshipTableModel model =
-                (ObjRelationshipTableModel) table.getModel();
+            ObjRelationshipTableModel model = (ObjRelationshipTableModel) table
+                    .getModel();
             rel = model.getRelationship(table.getSelectedRow());
             if (rel.getTargetEntity() != null
-                && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
-                && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
+                    && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
+                    && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
                 resolve.setEnabled(true);
             }
             else
@@ -209,13 +208,9 @@ public class ObjEntityRelationshipTab
         else
             resolve.setEnabled(false);
 
-        RelationshipDisplayEvent ev =
-            new RelationshipDisplayEvent(
-                this,
-                rel,
-                mediator.getCurrentObjEntity(),
-                mediator.getCurrentDataMap(),
-                mediator.getCurrentDataDomain());
+        RelationshipDisplayEvent ev = new RelationshipDisplayEvent(this, rel, mediator
+                .getCurrentObjEntity(), mediator.getCurrentDataMap(), mediator
+                .getCurrentDataDomain());
         mediator.fireObjRelationshipDisplayEvent(ev);
     }
 
@@ -232,14 +227,14 @@ public class ObjEntityRelationshipTab
             rebuildTable(entity);
         }
 
-        // if an entity was selected on a tree, 
+        // if an entity was selected on a tree,
         // unselect currently selected row
         if (e.isUnselectAttributes()) {
             table.clearSelection();
         }
     }
 
-    /** 
+    /**
      * Creates a list of ObjEntity names.
      */
     private Object[] createObjEntityComboModel() {
@@ -275,8 +270,8 @@ public class ObjEntityRelationshipTab
         table.select(ind);
     }
 
-    /** 
-     * Refresh the list of ObjEntity targets. Also refresh the table in case some 
+    /**
+     * Refresh the list of ObjEntity targets. Also refresh the table in case some
      * ObjRelationships were deleted.
      */
     private void reloadEntityList(EntityEvent e) {
@@ -289,8 +284,8 @@ public class ObjEntityRelationshipTab
             return;
         }
 
-        TableColumn col =
-            table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
+        TableColumn col = table.getColumnModel().getColumn(
+                ObjRelationshipTableModel.REL_TARGET);
         DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
 
         JComboBox combo = (JComboBox) editor.getComponent();
@@ -302,16 +297,19 @@ public class ObjEntityRelationshipTab
     }
 
     protected void rebuildTable(ObjEntity entity) {
-        final ObjRelationshipTableModel model =
-            new ObjRelationshipTableModel(entity, mediator, this);
+        final ObjRelationshipTableModel model = new ObjRelationshipTableModel(
+                entity,
+                mediator,
+                this);
 
         model.addTableModelListener(new TableModelListener() {
+
             public void tableChanged(TableModelEvent e) {
                 if (table.getSelectedRow() >= 0) {
                     ObjRelationship rel = model.getRelationship(table.getSelectedRow());
                     if (rel.getTargetEntity() != null
-                        && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
-                        && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
+                            && ((ObjEntity) rel.getSourceEntity()).getDbEntity() != null
+                            && ((ObjEntity) rel.getTargetEntity()).getDbEntity() != null) {
                         resolve.setEnabled(true);
                     }
                     else
@@ -324,20 +322,21 @@ public class ObjEntityRelationshipTab
         table.setRowHeight(25);
         table.setRowMargin(3);
 
-        TableColumn lockColumn =
-            table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_LOCKING);
+        TableColumn lockColumn = table.getColumnModel().getColumn(
+                ObjRelationshipTableModel.REL_LOCKING);
         lockColumn.setMinWidth(100);
 
-        TableColumn col =
-            table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_NAME);
+        TableColumn col = table.getColumnModel().getColumn(
+                ObjRelationshipTableModel.REL_NAME);
         col.setMinWidth(150);
 
         col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
         col.setMinWidth(150);
-        JComboBox targetCombo =
-            CayenneWidgetFactory.createComboBox(createObjEntityComboModel(), false);
-        targetCombo.setRenderer(
-            CellRenderers.entityListRendererWithIcons(entity.getDataMap()));
+        JComboBox targetCombo = CayenneWidgetFactory.createComboBox(
+                createObjEntityComboModel(),
+                false);
+        targetCombo.setRenderer(CellRenderers.entityListRendererWithIcons(entity
+                .getDataMap()));
         targetCombo.setEditable(false);
         targetCombo.setSelectedIndex(-1);
         DefaultCellEditor editor = new DefaultCellEditor(targetCombo);
@@ -349,8 +348,9 @@ public class ObjEntityRelationshipTab
 
         col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
         col.setMinWidth(60);
-        JComboBox deleteRulesCombo =
-            CayenneWidgetFactory.createComboBox(deleteRules, false);
+        JComboBox deleteRulesCombo = CayenneWidgetFactory.createComboBox(
+                deleteRules,
+                false);
         deleteRulesCombo.setEditable(false);
         deleteRulesCombo.setSelectedIndex(0); //Default to the first value
         editor = new DefaultCellEditor(deleteRulesCombo);
@@ -361,12 +361,12 @@ public class ObjEntityRelationshipTab
     class EntityRenderer extends StringRenderer {
 
         public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column) {
+                JTable table,
+                Object value,
+                boolean isSelected,
+                boolean hasFocus,
+                int row,
+                int column) {
 
             if (value instanceof MapObject) {
                 MapObject mapObject = (MapObject) value;
@@ -385,53 +385,49 @@ public class ObjEntityRelationshipTab
                 value = label;
             }
 
-            super.getTableCellRendererComponent(
-                table,
-                value,
-                isSelected,
-                hasFocus,
-                row,
-                column);
-
-            setForeground(foreground(row));
-            return this;
+            return super.getTableCellRendererComponent(
+                    table,
+                    value,
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
         }
     }
 
     class StringRenderer extends DefaultTableCellRenderer {
 
         public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
-            boolean isSelected,
-            boolean hasFocus,
-            int row,
-            int column) {
+                JTable table,
+                Object value,
+                boolean isSelected,
+                boolean hasFocus,
+                int row,
+                int column) {
 
             super.getTableCellRendererComponent(
-                table,
-                value,
-                isSelected,
-                hasFocus,
-                row,
-                column);
+                    table,
+                    value,
+                    isSelected,
+                    hasFocus,
+                    row,
+                    column);
 
-            setForeground(foreground(row));
-
-            return this;
-        }
-
-        // set grey foreground for inherited rows...
-        Color foreground(int row) {
-            ObjRelationshipTableModel model =
-                (ObjRelationshipTableModel) table.getModel();
+            ObjRelationshipTableModel model = (ObjRelationshipTableModel) table
+                    .getModel();
             ObjRelationship relationship = model.getRelationship(row);
 
-            return (
-                relationship != null
-                    && relationship.getSourceEntity() != model.getEntity())
-                ? Color.GRAY
-                : Color.BLACK;
+            if (relationship != null
+                    && relationship.getSourceEntity() != model.getEntity()) {
+                setForeground(Color.GRAY);
+            }
+            else {
+                setForeground(isSelected && !hasFocus
+                        ? table.getSelectionForeground()
+                        : table.getForeground());
+            }
+
+            return this;
         }
     }
 }
