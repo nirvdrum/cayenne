@@ -74,7 +74,7 @@ OpenBase types mapping
        <db-type name="time"/>
    </jdbc-type>
    <jdbc-type name="TIMESTAMP">
-       <db-type name="datetime"/>
+       <db-type name="timestamp"/>
    </jdbc-type>
    <jdbc-type name="TINYINT">
        <db-type name="int"/>

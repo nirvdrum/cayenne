@@ -114,6 +114,10 @@ public class DateTimeTypesTst extends CayenneTestCase {
         Calendar cal = Calendar.getInstance();
         cal.clear();
         cal.set(2003, 1, 1, 1, 20, 30);
+        
+        // most databases fail millisecond accuracy
+        // cal.set(Calendar.MILLISECOND, 55);
+        
         Date now = cal.getTime();
         test.setTimestampColumn(now);
         context.commitChanges();
