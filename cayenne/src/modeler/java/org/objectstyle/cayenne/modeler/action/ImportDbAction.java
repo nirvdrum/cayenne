@@ -446,14 +446,7 @@ public class ImportDbAction extends CayenneAction {
         }
 
         public void setSchema(DbEntity entity, String schema) {
-            entity.setSchema(useSchema(schema) ? schema : null);
-        }
-
-        /**
-         * Schema should not be used if the user is the owner of this schema.
-         */
-        protected boolean useSchema(String schema) {
-            return userName == null || !userName.equalsIgnoreCase(schema);
+            // noop, deprecated in the interface
         }
     }
 }

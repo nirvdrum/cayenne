@@ -60,33 +60,36 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * DbLoaderDelegate defines API that allows to control the behavior of
- * DbLoader during the database reverse-engineering. Delegate is also notified
- * of the progress of reverse-engineering.
+ * DbLoaderDelegate defines API that allows to control the behavior of DbLoader during the
+ * database reverse-engineering. Delegate is also notified of the progress of
+ * reverse-engineering.
  * 
  * @author Andrei Adamchik
  */
 public interface DbLoaderDelegate {
-    
+
     /**
-     * Returns true to tell DbLoader that it is OK to overwrite 
-     * DbEntity that already exists in the model. If loading process
-     * should be stopped immediately, an exception is thrown.
+     * Returns true to tell DbLoader that it is OK to overwrite DbEntity that already
+     * exists in the model. If loading process should be stopped immediately, an exception
+     * is thrown.
      */
     public boolean overwriteDbEntity(DbEntity ent) throws CayenneException;
-    
+
     public void dbEntityAdded(DbEntity ent);
-    
+
     public void dbEntityRemoved(DbEntity ent);
-    
+
     public void objEntityAdded(ObjEntity ent);
-    
+
     public void objEntityRemoved(ObjEntity ent);
-    
+
     /**
-     * This method allows delegate to do its own processing of schema of the
-     * loaded entity. For instance if a user is the schema owner, schema may be
-     * ignored.
+     * This method allows delegate to do its own processing of schema of the loaded
+     * entity. For instance if a user is the schema owner, schema may be ignored.
+     * 
+     * @deprecated Since 1.1 this method is not used by DbLoader. Suppressing schema
+     *             during reverse-engineering has undesired consequences, such as
+     *             incorrectly reengineered relationships.
      */
     public void setSchema(DbEntity ent, String schema);
 }

@@ -11,8 +11,10 @@ http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
 Changes, Features And Improvements:
 
 - Added "File -> Revert" menu to the modeler.
+- Changed behavior of DbGenerator to stop guessing what tables should be dropped/created. Instead now
+  it runs all generated SQL statements, and catches any problems. This is more reliable, as old 
+  behavior didn't work well when a user had default access to multiple schemas (e.g. a DBA user on Oracle).
   
-
 
 Bugs Fixed:
 

@@ -304,13 +304,7 @@ public class DbLoader {
 
             DbEntity dbEntity = new DbEntity();
             dbEntity.setName(table.getName());
-
-            if (delegate != null) {
-                delegate.setSchema(dbEntity, table.getSchema());
-            }
-            else {
-                dbEntity.setSchema(table.getSchema());
-            }
+            dbEntity.setSchema(table.getSchema());
             dbEntity.setCatalog(table.getCatalog());
 
             // Create DbAttributes from column information  --

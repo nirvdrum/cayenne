@@ -390,6 +390,7 @@ public class DbGenerator {
             }
 
             failures.addFailure(new SimpleValidationFailure(sql, ex.getMessage()));
+            QueryLogger.logQueryError(Level.INFO, ex);
             return false;
         }
         finally {
