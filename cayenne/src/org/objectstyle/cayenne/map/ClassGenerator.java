@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 
 import java.io.*;
@@ -67,7 +67,10 @@ import org.apache.velocity.context.*;
 
 
 /** Generates Java class source code using VTL (Velocity template engine) based on
-  * template and ObjEntity. */
+  * template and ObjEntity.
+  *
+  * @author Andrei Adamchik
+  */
 public class ClassGenerator {
     static Logger logObj = Logger.getLogger(ClassGenerator.class.getName());
 
@@ -100,10 +103,12 @@ public class ClassGenerator {
 
 
     /** Loads Velocity template used for class generation. */
-    public ClassGenerator(String template) throws Exception {
+    public ClassGenerator(String template)
+    throws Exception {
         velCtxt = new VelocityContext();
         velCtxt.put("classGen", this);
-        classTemplate = Velocity.getTemplate(template);
+        classTemplate = Velocity.getTemplate(template)
+                        ;
     }
 
 
@@ -115,6 +120,7 @@ public class ClassGenerator {
     }
 
 
+    /** Returns Java package name of the class associated with this generator. */
     public String getPackageName() {
         return packageName;
     }
@@ -122,7 +128,8 @@ public class ClassGenerator {
         this.packageName = packageName;
     }
 
-
+    /** Returns class name (without a package)
+      * of the class associated with this generator. */
     public String getClassName() {
         return className;
     }
@@ -134,35 +141,44 @@ public class ClassGenerator {
     public void setSuperPrefix(String superPrefix) {
         this.superPrefix = superPrefix;
     }
+
+    /** Returns prefix used to distinguish between superclass
+      * and subclass when generating classes in pairs. */
     public String getSuperPrefix() {
         return superPrefix;
     }
 
 
+    /** Sets current class property name. This method
+      * is calledduring template parsing for each of the 
+      * class properties. */
     public void setProp(String prop) {
         this.prop = prop;
     }
     public String getProp() {
         return prop;
     }
-    
-    
+
+
     /** Returns current property name with capitalized first letter */
     public String getCappedProp() {
         if(prop == null || prop.length() == 0)
             return prop;
-        
+
         char c = Character.toUpperCase(prop.charAt(0));
-        return (prop.length() == 1) ? Character.toString(c) : c + prop.substring(1);  
+        return (prop.length() == 1) ? Character.toString(c) : c + prop.substring(1);
     }
 
 
+    /** Returns true if a class associated with this generator
+      * is located in a package. */
     public boolean isUsingPackage() {
         return packageName != null;
     }
-    
-   
-   public ObjEntity getEntity() {
-       return entity;
-   }
+
+
+    /** Returns entity for the class associated with this generator. */
+    public ObjEntity getEntity() {
+        return entity;
+    }
 }

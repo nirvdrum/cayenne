@@ -63,15 +63,18 @@ import org.objectstyle.util.*;
 import org.objectstyle.cayenne.dba.TypesMapping;
 
 
-/** Utility class reverse engineering of the database. Builds
- * DataMaps using database meta data obtained via JDBC driver.
- * Can be used from command line as well as from GUI tools. */
+/** Utility class that does reverse engineering of the database. 
+  * It can create DataMaps using database meta data obtained via JDBC driver.
+  *
+  * @author Michael Shengaout
+  * @author Andrei Adamchik
+ */
 public class DbLoader {
     static Logger logObj = Logger.getLogger(DbLoader.class.getName());
 
     public static final String WILDCARD = "%";
 
-    // creates default name for loaded relationship
+    /** Creates default name for loaded relationship */
     private static String defaultDbRelName(String dstName, boolean toMany) {
         String uglyName = (toMany) ? dstName + "_ARRAY" : "to_" + dstName;
         return NameConverter.undescoredToJava(uglyName, false);
@@ -81,18 +84,24 @@ public class DbLoader {
     private DatabaseMetaData metaData;
 
 
+    /** Creates new DbLoader. */
     public DbLoader(Connection temp) {
         this.con = temp;
     }
 
+
+    /** Returns DatabaseMetaData object associated with this DbLoader. */
     public DatabaseMetaData getMetaData() throws SQLException {
         if (null == metaData)
             metaData = con.getMetaData();
         return metaData;
     }
 
-    /** Retrieves the catalogues for the database.
-     *  @return ArrayList with the catalog names, empty Array if none found.*/
+    
+    /**  Retrieves catalogues for the database associated with this DbLoader.
+      *
+      *  @return ArrayList with the catalog names, empty Array if none found.
+      */
     public ArrayList getCatalogs() throws SQLException  {
         ArrayList catalogs = new ArrayList();
         ResultSet rs = getMetaData().getCatalogs();
