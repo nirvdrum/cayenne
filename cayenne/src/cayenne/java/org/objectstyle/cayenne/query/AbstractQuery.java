@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public abstract class AbstractQuery implements Query {
-    /** The root object this query is bsaed on - maybe an entity name , class, ObjEntity or 
+    /** The root object this query is based on - maybe an entity name , class, ObjEntity or 
      * DbEntity, depending on the specific query and how it was constructed */
     protected Object root;
 
