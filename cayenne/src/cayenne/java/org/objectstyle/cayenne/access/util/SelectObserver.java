@@ -452,7 +452,7 @@ public class SelectObserver extends DefaultOperationObserver {
                     (ToManyList) root.readProperty(incomingRelationship.getName());
 
                 // TODO: if a list is modified, should we
-                // merge to-many instead of simply overriting it
+                // merge to-many instead of simply overwriting it?
                 toManyList.setObjectList(related);
             }
         }
