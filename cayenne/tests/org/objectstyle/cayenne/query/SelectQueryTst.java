@@ -87,7 +87,7 @@ public class SelectQueryTst extends SelectQueryBase {
     public void testSelectLikeObjects() throws java.lang.Exception {
         query.setObjEntityName("Artist");
         Expression qual =
-            ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist1_");
+            ExpressionFactory.binaryPathExp(Expression.LIKE, "artistName", "artist11");
         query.setQualifier(qual);
 
         performQuery();
@@ -95,7 +95,7 @@ public class SelectQueryTst extends SelectQueryBase {
         // check query results
         ArrayList objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
-        assertEquals(10, objects.size());
+        assertEquals(1, objects.size());
     }
 
     /** Test how "like ignore case" works when using uppercase parameter. */

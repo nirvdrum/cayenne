@@ -61,6 +61,7 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -75,7 +76,7 @@ public class OracleAdapter extends JdbcAdapter {
 
     public OracleAdapter() {
         super();
-        typeConverter.registerType(new OracleCharType());
+        typeConverter.registerType(new CharType());
     }
     
     /** 

@@ -54,16 +54,16 @@
  *
  */
 
-package org.objectstyle.cayenne.dba.oracle;
+package org.objectstyle.cayenne.access.types;
 
 import java.sql.ResultSet;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.access.types.ExtendedType;
 
-/** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
-public class OracleCharType implements ExtendedType {
-    static Logger logObj = Logger.getLogger(OracleCharType.class.getName());
+/** Handles CHAR type for JDBC drivers that don't trim trailing spaces. */
+public class CharType implements ExtendedType {
+    static Logger logObj = Logger.getLogger(CharType.class.getName());
 
     public String getClassName() {
         return "java.lang.String";
@@ -78,5 +78,4 @@ public class OracleCharType implements ExtendedType {
         String val = rs.getString(index);
         return (val != null) ? val.trim() : null;
     }
-
 }

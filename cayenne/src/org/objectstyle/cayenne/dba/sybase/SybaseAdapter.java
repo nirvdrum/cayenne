@@ -59,6 +59,7 @@ import java.util.HashMap;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 
@@ -71,7 +72,11 @@ import org.objectstyle.cayenne.dba.PkGenerator;
 public class SybaseAdapter extends JdbcAdapter {
     protected HashMap sorters = new HashMap();
 
-
+    public SybaseAdapter() {
+        super();
+        typeConverter.registerType(new CharType());
+    }
+    
     /** 
      * Creates and returns a primary key generator. 
      * Overrides superclass implementation to return an
