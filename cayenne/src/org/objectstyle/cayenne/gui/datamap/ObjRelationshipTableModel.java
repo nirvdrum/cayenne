@@ -179,7 +179,7 @@ class ObjRelationshipTableModel extends CayenneTableModel {
 				target = null;
 			else {
 				DataMap map = mediator.getCurrentDataMap();
-				target = map.getObjEntity(target_name);
+				target = map.getObjEntity(target_name, true);
 			}
 			rel.setTargetEntity(target);
 			RelationshipEvent e;
@@ -192,7 +192,7 @@ class ObjRelationshipTableModel extends CayenneTableModel {
 			mediator.fireObjRelationshipEvent(e);
 		}
 		fireTableRowsUpdated(row, row);
-	} // End setValueAt()
+	} 
 
 
 	public void removeRow(int row) {

@@ -261,13 +261,13 @@ public class ObjRelationshipPane
 	private DefaultComboBoxModel createComboModel() {
 		DataMap map = mediator.getCurrentDataMap();
 		Vector elements = new Vector();
-		java.util.List obj_entities = map.getObjEntitiesAsList();
+		java.util.List obj_entities = map.getObjEntitiesAsList(true);
 		Iterator iter = obj_entities.iterator();
 		while (iter.hasNext()) {
 			ObjEntity entity = (ObjEntity) iter.next();
 			String name = entity.getName();
 			elements.add(name);
-		} // End while()
+		}
 
 		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
 		return model;

@@ -27,4 +27,5 @@ and array filtering
 
 8. Simplified MapLoader API, got rid of interface-implementation pair.
 
-9. Added support for entities in different maps
+9. Added support for relationships accross DataMaps, 
+and other cross-map communications

@@ -802,7 +802,7 @@ public class MapLoader extends DefaultHandler {
 					+ " Unable to parse target. Attributes:\n"
 					+ printAttributes(atts).toString());
 		}
-		ObjEntity target = dataMap.getObjEntity(temp);
+		ObjEntity target = dataMap.getObjEntity(temp, true);
 		if (null == target) {
 			throw new SAXException(
 				"MapLoaderImpl::processStartObjRelationship(),"

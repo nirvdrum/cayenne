@@ -223,9 +223,29 @@ public class DataMap {
 
 	/** Returns a list of ObjEntities stored in this DataMap. */
 	public List getObjEntitiesAsList() {
-		return new ArrayList(objEntityMap.values());
+		return getObjEntitiesAsList(false);
 	}
 
+    /**
+	 * Returns all ObjEntities in this DataMap, including entities
+	 * from dependent maps if <code>includeDeps</code> is <code>true</code>.
+	 */
+	public List getObjEntitiesAsList(boolean includeDeps) {
+		ArrayList ents = new ArrayList(objEntityMap.values());
+		
+		if (includeDeps) {
+			Iterator it = dependencies.iterator();
+			while (it.hasNext()) {
+				DataMap dep = (DataMap) it.next();
+				// using "false" to avoid problems with circular dependencies
+				ents.addAll(dep.getObjEntitiesAsList(false));
+			}
+		}
+		return ents;
+	}
+	
+	
+	
 	/**
 	 * Returns all DbEntities in this DataMap.
 	 */
@@ -294,6 +314,25 @@ public class DataMap {
 	/** Get ObjEntity by its name. */
 	public ObjEntity getObjEntity(String name) {
 		return (ObjEntity) objEntityMap.get(name);
+	}
+	
+	
+    public ObjEntity getObjEntity(String name, boolean searchDependencies) {
+		ObjEntity ent = (ObjEntity) objEntityMap.get(name);
+		if (ent != null || !searchDependencies) {
+			return ent;
+		}
+
+		Iterator it = dependencies.iterator();
+		while (it.hasNext()) {
+			DataMap dep = (DataMap) it.next();
+			// using "false" to avoid problems with circular dependencies
+			ObjEntity e = dep.getObjEntity(name, false);
+			if (e != null) {
+				return e;
+			}
+		}
+		return null;
 	}
 
 	/** Get the object entity mapped to the specified database table.
