@@ -53,80 +53,40 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.perform;
+ 
+ 
+package org.objectstyle.perform;
 
-import java.util.logging.Logger;
+/**
+ * @author Andrei Adamchik
+ */
+public class PerformanceTestPair {
+	protected PerformanceTest mainTest;
+	protected PerformanceTest referenceTest;
 
-import javax.sql.DataSource;
-
-import org.objectstyle.TestConstants;
-import org.objectstyle.cayenne.ConnectionSetup;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conn.PoolDataSource;
-import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoaderImpl;
-import org.objectstyle.perform.*;
-
-/** Runs performance tests. */
-public class PerformMain implements TestConstants {
-	static Logger logObj = Logger.getLogger(PerformMain.class.getName());
-
-	public static DataDomain sharedDomain;
-
-	public static void main(String[] args) {
-		prepareDomain();
-		
-		
-		PerformanceTestSuite suite = new PerformanceTestSuite();
-		suite.addTestPair(
-			"org.objectstyle.cayenne.perform.SimpleTest",
-			"org.objectstyle.cayenne.perform.SimpleRefTest");
-		ResultRenderer renderer = new ResultRenderer();
-		new PerformanceTestRunner(renderer).runSuite(suite);
-		renderer.showResults();
+	/**
+	 * Constructor for PerformanceTestPair.
+	 */
+	public PerformanceTestPair(PerformanceTest mainTest, PerformanceTest referenceTest) {
+		super();
+		this.referenceTest = referenceTest;
+		this.mainTest = mainTest;
 	}
 
-	public static void prepareDomain() {
-		try {
-			DataSourceInfo dsi =
-				new ConnectionSetup(true, true).buildConnectionInfo();
+	public PerformanceTest getMainTest() {
+		return mainTest;
+	}
 
-			PoolDataSource poolDS =
-				new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
-
-			DataSource ds =
-				new PoolManager(
-					poolDS,
-					dsi.getMinConnections(),
-					dsi.getMaxConnections(),
-					dsi.getUserName(),
-					dsi.getPassword());
-
-			// map
-			String[] maps = new String[] { TEST_MAP_PATH };
-			DataMap map = new MapLoaderImpl().loadDataMaps(maps)[0];
-
-			// node
-			DataNode node = new DataNode("node");
-			node.setDataSource(ds);
-			String adapterClass = dsi.getAdapterClass();
-			if (adapterClass == null)
-				adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-			node.setAdapter(
-				(DbAdapter) Class.forName(adapterClass).newInstance());
-			node.addDataMap(map);
-
-			// generate pk's
-			node.createPkSupportForMapEntities();
-
-			// domain
-			sharedDomain = new DataDomain("Shared Domain");
-			sharedDomain.addNode(node);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			System.exit(1);
-		}
+	public PerformanceTest getReferenceTest() {
+		return referenceTest;
+	}
+	
+	public String getName() {
+		return mainTest.getName();
+	}
+	
+	public String getDesc() {
+		return mainTest.getDesc();
 	}
 }
+
