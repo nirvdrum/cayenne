@@ -603,7 +603,7 @@ public class DbGenerator {
         }
 
         // sort the list
-        this.node.getDependencySorter().sortDbEntities(tables, false);
+        this.node.getEntitySorter().sortDbEntities(tables, false);
 
         this.dbEntitiesInInsertOrder = tables;
         this.dbEntitiesRequiringAutoPK = tablesWithAutoPk;

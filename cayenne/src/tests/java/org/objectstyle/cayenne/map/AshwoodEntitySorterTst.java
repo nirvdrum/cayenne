@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,44 +53,23 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.map;
 
-package org.objectstyle.cayenne.access.util;
-
-import java.util.List;
-
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * Interface that defines API to algorithms used for sorting Cayenne entities
- * based on their dependencies.
- * 
- * <p>Note that since 1.1 this interface is moved to {@link org.objectstyle.cayenne.map.EntitySorter}
- * and should be considered deprecated.
- * </p>
- * 
  * @author Andrei Adamchik
  */
-public interface DependencySorter {
-    /**
-     * Sorts a list of DbEntities.
-     */
-    public void sortDbEntities(List dbEntities, boolean deleteOrder);
+public class AshwoodEntitySorterTst extends CayenneTestCase {
+    protected AshwoodEntitySorter sorter;
+    
+    protected void setUp() throws Exception {
+        super.setUp();
+        
+        
+    }
 
-    /**
-     * Sorts a list of ObjEntities.
-     */
-    public void sortObjEntities(List objEntities, boolean deleteOrder);
+    public void testSortDeletedObjectsForEntity() throws Exception {
 
-    /**
-     * Sorts a list of objects belonging to the ObjEntity. 
-     */
-    public void sortObjectsForEntity(ObjEntity entity, List objects, boolean deleteOrder);
-
-    /**
-     * Reindexes sorter for the query engine.
-     * 
-     * @deprecated Since 1.1. Use EntitySorter.setDataMaps(Collection)
-     */
-    public void indexSorter(QueryEngine queryEngine);
+    }
 }

@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * required.
  * 
  * @author Andrei Adamchik
+ * @deprecated Since 1.1 NullSorter is an inner class of DataNode.
  */
 public class NullSorter implements DependencySorter {
 	public static final DependencySorter NULL_SORTER = new NullSorter();

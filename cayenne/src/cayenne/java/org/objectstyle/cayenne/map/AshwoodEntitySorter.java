@@ -54,43 +54,44 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.access.util;
+package org.objectstyle.cayenne.map;
 
+import java.util.Collection;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.access.util.DefaultSorter;
 
 /**
- * Interface that defines API to algorithms used for sorting Cayenne entities
- * based on their dependencies.
- * 
- * <p>Note that since 1.1 this interface is moved to {@link org.objectstyle.cayenne.map.EntitySorter}
- * and should be considered deprecated.
- * </p>
- * 
- * @author Andrei Adamchik
+ * Implements dependency sorting algorithms for ObjEntities,
+ * DbEntities and DataObjects. Presently it works for acyclic database 
+ * schemas with possible multi-reflexive tables. The class uses topological 
+ * sorting from <a href="http://objectstyle.org/ashwood/">ASHWOOD library</a>.
+ *
+ * @author Andriy Shapochka, Andrei Adamchik
+ * @since 1.1
  */
-public interface DependencySorter {
-    /**
-     * Sorts a list of DbEntities.
-     */
-    public void sortDbEntities(List dbEntities, boolean deleteOrder);
+public class AshwoodEntitySorter extends DefaultSorter implements EntitySorter {
 
-    /**
-     * Sorts a list of ObjEntities.
-     */
-    public void sortObjEntities(List objEntities, boolean deleteOrder);
+    public AshwoodEntitySorter(Collection dataMaps) {
+        setDataMaps(dataMaps);
+    }
 
-    /**
-     * Sorts a list of objects belonging to the ObjEntity. 
-     */
-    public void sortObjectsForEntity(ObjEntity entity, List objects, boolean deleteOrder);
+    public void setDataMaps(Collection dataMaps) {
+        super.setDataMaps(dataMaps);
+    }
 
-    /**
-     * Reindexes sorter for the query engine.
-     * 
-     * @deprecated Since 1.1. Use EntitySorter.setDataMaps(Collection)
-     */
-    public void indexSorter(QueryEngine queryEngine);
+    public void sortDbEntities(List dbEntities, boolean deleteOrder) {
+        super.sortDbEntities(dbEntities, deleteOrder);
+    }
+
+    public void sortObjEntities(List objEntities, boolean deleteOrder) {
+        super.sortObjEntities(objEntities, deleteOrder);
+    }
+
+    public void sortObjectsForEntity(
+        ObjEntity objEntity,
+        List objects,
+        boolean deleteOrder) {
+        super.sortObjectsForEntity(objEntity, objects, deleteOrder);
+    }
 }

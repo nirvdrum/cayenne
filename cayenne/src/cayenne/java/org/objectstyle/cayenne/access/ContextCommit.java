@@ -79,12 +79,12 @@ import org.objectstyle.cayenne.access.ObjectStore.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
-import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.access.util.PrimaryKeyHelper;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -239,7 +239,7 @@ class ContextCommit {
         Map objEntitiesByDbEntity = new HashMap(entities.size());
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
 
-        DependencySorter sorter = commitHelper.getNode().getDependencySorter();
+        EntitySorter sorter = commitHelper.getNode().getEntitySorter();
         sorter.sortDbEntities(dbEntities, false);
 
         for (Iterator i = dbEntities.iterator(); i.hasNext();) {
@@ -303,7 +303,7 @@ class ContextCommit {
         Map objEntitiesByDbEntity = new HashMap(entities.size());
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
 
-        DependencySorter sorter = commitHelper.getNode().getDependencySorter();
+        EntitySorter sorter = commitHelper.getNode().getEntitySorter();
         //        sorter.sortObjEntities(entities, true);
         sorter.sortDbEntities(dbEntities, true);
 

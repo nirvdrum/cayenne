@@ -96,10 +96,11 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * ASHWOOD.
  *
  * @author Andriy Shapochka
+ * @deprecated Since 1.1 use {@link org.objectstyle.cayenne.map.EntitySorter}
  */
 public class DefaultSorter implements DependencySorter {
 
-    protected QueryEngine queryEngine;
+    protected Collection dataMaps;
     protected Map dbEntityToTableMap;
     protected Digraph referentialDigraph;
     protected Digraph contractedReferentialDigraph;
@@ -113,8 +114,19 @@ public class DefaultSorter implements DependencySorter {
     // used for lazy initialization
     protected boolean dirty;
 
+    protected DefaultSorter() {
+    }
+    
     public DefaultSorter(QueryEngine queryEngine) {
-        indexSorter(queryEngine);
+        setDataMaps(queryEngine.getDataMaps());
+    }
+
+    /**
+     * @since 1.1
+     */
+    public synchronized void setDataMaps(Collection dataMaps) {
+        this.dirty = true;
+        this.dataMaps = dataMaps != null ? dataMaps : Collections.EMPTY_LIST;
     }
 
     /**
@@ -122,8 +134,7 @@ public class DefaultSorter implements DependencySorter {
       * the next invocation.
       */
     public void indexSorter(QueryEngine queryEngine) {
-        this.dirty = true;
-        this.queryEngine = queryEngine;
+        setDataMaps(queryEngine.getDataMaps());
     }
 
     /**
@@ -137,7 +148,7 @@ public class DefaultSorter implements DependencySorter {
         Collection tables = new ArrayList(64);
         dbEntityToTableMap = new HashMap(64);
         reflexiveDbEntities = new HashMap(32);
-        for (Iterator i = queryEngine.getDataMaps().iterator(); i.hasNext();) {
+        for (Iterator i = dataMaps.iterator(); i.hasNext();) {
             DataMap map = (DataMap) i.next();
             Iterator entitiesToConvert = map.getDbEntities().iterator();
             while (entitiesToConvert.hasNext()) {
@@ -242,7 +253,7 @@ public class DefaultSorter implements DependencySorter {
                     actualMasterCount++;
                 }
             }
-            
+
             int mastersFound = 0;
             for (int j = 0; j < size && mastersFound < actualMasterCount; j++) {
 
@@ -338,7 +349,8 @@ public class DefaultSorter implements DependencySorter {
         // IMPORTANT: don't try to get snapshots for new objects, this will result in exception
         if (object.getPersistenceState() != PersistenceState.NEW) {
             DataContext context = object.getDataContext();
-            snapshot = context.getObjectStore().getSnapshot(object.getObjectId(), context);
+            snapshot =
+                context.getObjectStore().getSnapshot(object.getObjectId(), context);
         }
 
         if (snapshot == null) {

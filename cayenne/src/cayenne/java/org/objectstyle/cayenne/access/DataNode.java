@@ -78,14 +78,13 @@ import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
-import org.objectstyle.cayenne.access.util.DefaultSorter;
-import org.objectstyle.cayenne.access.util.DependencySorter;
-import org.objectstyle.cayenne.access.util.NullSorter;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.AshwoodEntitySorter;
+import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -106,6 +105,7 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 public class DataNode implements QueryEngine {
 
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
+    private static final EntitySorter NULL_SORTER = new NullSorter();
 
     protected String name;
     protected DataSource dataSource;
@@ -114,7 +114,7 @@ public class DataNode implements QueryEngine {
     protected String dataSourceFactory;
     protected org.objectstyle.cayenne.map.EntityResolver entityResolver =
         new org.objectstyle.cayenne.map.EntityResolver();
-    protected DependencySorter dependencySorter = NullSorter.NULL_SORTER;
+    protected EntitySorter entitySorter = NULL_SORTER;
 
     /** Creates unnamed DataNode. */
     public DataNode() {
@@ -162,7 +162,7 @@ public class DataNode implements QueryEngine {
 
     public void setDataMaps(Collection dataMaps) {
         entityResolver.setDataMaps(dataMaps);
-        dependencySorter.indexSorter(this);
+        entitySorter.setDataMaps(dataMaps);
     }
 
     /**
@@ -170,14 +170,14 @@ public class DataNode implements QueryEngine {
      */
     public void addDataMap(DataMap map) {
         entityResolver.addDataMap(map);
-        dependencySorter.indexSorter(this);
+        entitySorter.setDataMaps(getDataMaps());
     }
 
     public void removeDataMap(String mapName) {
         DataMap map = entityResolver.getDataMap(mapName);
         if (map != null) {
             entityResolver.removeDataMap(map);
-            dependencySorter.indexSorter(this);
+            entitySorter.setDataMaps(getDataMaps());
         }
     }
 
@@ -206,12 +206,10 @@ public class DataNode implements QueryEngine {
         // that enforce constraints, in cases when constraints are
         // defined as deferrable, this may need more fine grained
         // control from the user, maybe via ContextCommitObserver?
-        if (adapter != null && adapter.supportsFkConstraints()) {
-            this.dependencySorter = new DefaultSorter(this);
-        }
-        else {
-            this.dependencySorter = NullSorter.NULL_SORTER;
-        }
+        this.entitySorter =
+            (adapter != null && adapter.supportsFkConstraints())
+                ? new AshwoodEntitySorter(getDataMaps())
+                : NULL_SORTER;
     }
 
     /** 
@@ -708,8 +706,18 @@ public class DataNode implements QueryEngine {
         return entityResolver;
     }
 
-    public DependencySorter getDependencySorter() {
-        return dependencySorter;
+    /**
+     * @deprecated Since 1.1 use #getEntitySorter()
+     */
+    public org.objectstyle.cayenne.access.util.DependencySorter getDependencySorter() {
+        return entitySorter;
+    }
+
+    /**
+     * Returns EntitySorter used by the DataNode.
+     */
+    public EntitySorter getEntitySorter() {
+        return entitySorter;
     }
 
     /**
@@ -723,6 +731,35 @@ public class DataNode implements QueryEngine {
             }
         }
         catch (SQLException ex) {
+        }
+    }
+
+    static class NullSorter implements EntitySorter {
+
+        public void sortDbEntities(List dbEntities, boolean deleteOrder) {
+            // do nothing
+        }
+
+        public void sortObjEntities(List objEntities, boolean deleteOrder) {
+            // do nothing
+        }
+
+        public void sortObjectsForEntity(
+            ObjEntity entity,
+            List objects,
+            boolean deleteOrder) {
+            // do nothing
+        }
+
+        /**
+         * @deprecated Since 1.1
+         */
+        public void indexSorter(QueryEngine queryEngine) {
+            // do nothing
+        }
+
+        public void setDataMaps(Collection dataMaps) {
+
         }
     }
 }

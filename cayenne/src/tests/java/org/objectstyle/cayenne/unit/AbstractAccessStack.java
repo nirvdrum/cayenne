@@ -157,7 +157,7 @@ public abstract class AbstractAccessStack {
             entities = filtered;
         }
 
-        node.getDependencySorter().sortDbEntities(entities, false);
+        node.getEntitySorter().sortDbEntities(entities, false);
         return entities;
     }
 

@@ -1,5 +1,3 @@
-package org.objectstyle.cayenne.access;
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -55,6 +53,8 @@ package org.objectstyle.cayenne.access;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
+package org.objectstyle.cayenne.access;
 
 import java.util.List;
 
