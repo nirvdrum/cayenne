@@ -56,35 +56,39 @@
 
 package org.objectstyle.cayenne.dba;
 
-/** 
- * Represents data structure to maintain a range of cached
- * primary keys.
- * 
+import junit.framework.TestCase;
+
+/**
  * @author Andrei Adamchik
  */
-public final class PkRange {
-	private int curValue;
-	private int maxValue;
+public class PkRangeTst extends TestCase {
 
-	public PkRange(int curValue, int maxValue) {
-		reset(curValue, maxValue);
+	public void testExhausted1() throws Exception {
+		PkRange range = new PkRange(1, 0);
+		assertTrue(range.isExhausted());
 	}
 
-	public void reset(int curValue, int maxValue) {
-		this.curValue = curValue;
-		this.maxValue = maxValue;
+	public void testExhausted2() throws Exception {
+		PkRange range = new PkRange(0, 1);
+		assertTrue(!range.isExhausted());
 	}
 
-	public boolean isExhausted() {
-		return curValue > maxValue;
+	public void testExhausted3() throws Exception {
+		PkRange range = new PkRange(0, 2);
+		assertTrue(!range.isExhausted());
+
+		assertEquals(0, range.getNextPrimaryKey().intValue());
+		assertEquals(1, range.getNextPrimaryKey().intValue());
+		assertEquals(2, range.getNextPrimaryKey().intValue());
+		assertTrue(range.isExhausted());
+	}
+	
+	public void testReset() throws Exception {
+		PkRange range = new PkRange(1, 0);
+		assertTrue(range.isExhausted());
+		
+		range.reset(0, 2);
+		assertTrue(!range.isExhausted());
 	}
 
-	public Integer getNextPrimaryKey() {
-		// do bound checking
-		if (isExhausted()) {
-			throw new RuntimeException("PkRange is exhausted and can not be used anymore.");
-		}
-
-		return new Integer(curValue++);
-	}
 }

@@ -58,33 +58,52 @@ package org.objectstyle.cayenne.dba;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class PkGeneratorTst extends CayenneTestCase {
-    protected PkGenerator pkGen;
-    protected DataNode node;
-    protected DbEntity paintEnt;
+	private static Logger logObj = Logger.getLogger(PkGeneratorTst.class);
+	
+	protected PkGenerator pkGen;
+	protected DataNode node;
+	protected DbEntity paintEnt;
 
-    protected void setUp() throws java.lang.Exception {
-        getDatabaseSetup().cleanTableData();
-        node = (DataNode)getDomain().getDataNodes().iterator().next();
-        pkGen = node.getAdapter().getPkGenerator();
-        paintEnt = node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
-        List list = new ArrayList();
-        list.add(paintEnt);
-        pkGen.createAutoPk(node, list);
-    }
+	protected void setUp() throws java.lang.Exception {
+		getDatabaseSetup().cleanTableData();
+		node = (DataNode) getDomain().getDataNodes().iterator().next();
+		pkGen = node.getAdapter().getPkGenerator();
+		paintEnt =
+			node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
+		List list = new ArrayList();
+		list.add(paintEnt);
+		pkGen.createAutoPk(node, list);
+		pkGen.reset();
+	}
 
-    public void testGeneratePkForDbEntity() throws java.lang.Exception {
-        List pkList = new ArrayList();
-
-        for (int i = 0; i < 6; i++) {
-            Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
-            assertNotNull(pk);
-            assertFalse(pkList.contains(pk));
-            pkList.add(pk);
+	public void testGeneratePkForDbEntity() throws Exception {
+		List pkList = new ArrayList();
+    
+        int testSize = (pkGen instanceof JdbcPkGenerator) ? ((JdbcPkGenerator)pkGen).getPkCacheSize() * 2 : 25;
+        if(testSize < 25) {
+        	testSize = 25;
         }
-    }
+ 
+		for (int i = 0; i < testSize; i++) {
+			Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
+			assertNotNull(pk);
+			assertTrue(pk instanceof Number);
+			assertFalse(pkList.contains(pk));
+
+			// check that the number is continuous
+			// of course this assumes a single-threaded test
+			if (pkList.size() > 0) {
+               Number last = (Number)pkList.get(pkList.size() - 1);
+               assertEquals(last.intValue() + 1, ((Number)pk).intValue());
+			}
+
+			pkList.add(pk);
+		}
+	}
 }

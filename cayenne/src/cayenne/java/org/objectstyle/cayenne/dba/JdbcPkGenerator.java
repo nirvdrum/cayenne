@@ -319,7 +319,7 @@ public class JdbcPkGenerator implements PkGenerator {
 			
 			if (r.isExhausted()) {
 				int val = pkFromDatabase(node, ent);
-				r = new PkRange(val, val + cacheSize - 1);
+				r.reset(val, val + cacheSize - 1);
 			}
 			
 			return r.getNextPrimaryKey();
