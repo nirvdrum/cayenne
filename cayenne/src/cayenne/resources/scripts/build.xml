@@ -90,7 +90,7 @@
          <unjar src="${official-jar}" dest="${build}/deps"/>
          <delete includeEmptyDirs="true">
          	<fileset dir="${build}/deps">
-         	    <include name="org/objectstyle/**/*.class"/>
+         	    <include name="org/objectstyle/cayenne/**/*.class"/>
          	</fileset>
          </delete>
      </target>
