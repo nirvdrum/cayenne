@@ -16,6 +16,12 @@
 	<target name="dist-src">
 		<ant antfile="src/tutorials/cayenne-cmd-app/build.xml" target="dist-src"/>
 		<ant antfile="src/tutorials/cayenne-web-app/build.xml" target="dist-src"/>
+		
+		 <mkdir dir="${dist}/doc/tutorials"/>
+	     
+         <copy todir="${dist}/doc/tutorials">
+             <fileset dir="${dist}/src/tutorials"/> 
+         </copy>
 	</target>
 	
 	<target name="release-site" depends="nositedir,dist-src">
@@ -26,13 +32,7 @@
          </copy>
 	</target>
 	
-	<target name="doc" depends="dist-src">
-	     <mkdir dir="${dist}/doc/tutorials"/>
-	     
-         <copy todir="${dist}/doc/tutorials">
-             <fileset dir="${dist}/src/tutorials"/> 
-         </copy>
-	</target>
+	<target name="doc" depends="dist-src"/>
 	
 	
 	<!-- Simply calls compile task. Exists in the project  -->

@@ -62,9 +62,9 @@ public class Main {
                 likePattern);
 
         SelectQuery query = new SelectQuery("Gallery", qual);
-        // using log level of ERROR to make sure that query 
+        // using log level of INFO to make sure that query 
         // execution is logged to STDOUT
-        query.setLoggingLevel(Level.ERROR);
+        query.setLoggingLevel(Level.INFO);
         
         List galleries = ctxt.performQuery(query);
         if (galleries.size() == 1) {
@@ -97,6 +97,6 @@ public class Main {
        
        // commit to the database
        // using log level of ERROR to show the query execution
-       ctxt.commitChanges(Level.ERROR); 
+       ctxt.commitChanges(Level.INFO); 
     }
 }
