@@ -82,9 +82,9 @@ public class DerivedDbAttributeTableModel extends DbAttributeTableModel {
 	 * @param eventSource
 	 */
 	public DerivedDbAttributeTableModel(
-		DbEntity entity,
-		EventController mediator,
-		Object eventSource) {
+			DbEntity entity,
+			EventController mediator,
+			Object eventSource) {
 		super(entity, mediator, eventSource);
 	}
 

@@ -330,7 +330,7 @@ public class EOModelProcessor {
         protected String eoAttributeName;
 
         public static DbAttribute findForEOAttributeName(DbEntity e, String name) {
-            Iterator it = e.getAttributeList().iterator();
+            Iterator it = e.getAttributes().iterator();
             while (it.hasNext()) {
                 EODbAttribute attr = (EODbAttribute) it.next();
                 if (name.equals(attr.getEoAttributeName())) {

@@ -306,7 +306,6 @@ public class DefaultSorter implements DependencySorter {
             DbRelationship candidate = (DbRelationship) i.next();
             if ((!candidate.isToMany() && !candidate.isToDependentPK())
                 || candidate.isToMasterPK()) {
-
                 DbEntity target = (DbEntity) candidate.getTargetEntity();
                 boolean newReflexive = entity.equals(target);
                 Iterator j = candidate.getJoins().iterator();
@@ -343,8 +342,7 @@ public class DefaultSorter implements DependencySorter {
         DataObject obj,
         ObjRelationship toOneRel,
         Class targetClass) {
-        DbRelationship finalRel =
-            (DbRelationship) toOneRel.getDbRelationshipList().get(0);
+        DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
         Map snapshot = obj.getCommittedSnapshot();
         if (snapshot == null) {
             snapshot = obj.getCurrentSnapshot();

@@ -139,11 +139,9 @@ public abstract class QueryAssemblerHelper {
             } else {
                 ObjAttribute objAttr = (ObjAttribute) pathComp;
                 if (lastRelationship != null) {
-                    DbRelationship lastDbRel =
-                        (DbRelationship) lastRelationship
-                            .getDbRelationshipList()
-                            .get(
-                            0);
+                    DbRelationship lastDbRel = (DbRelationship)lastRelationship
+                    								.getDbRelationships()
+                    								.get(0);
                     processColumn(buf, objAttr.getDbAttribute(), lastDbRel);
                 } else {
                     processColumn(buf, objAttr.getDbAttribute());
@@ -335,7 +333,7 @@ public abstract class QueryAssemblerHelper {
      *  and appends parts to the query buffer. 
      */
     protected void processRelParts(ObjRelationship rel) {
-        Iterator it = rel.getDbRelationshipList().iterator();
+        Iterator it = rel.getDbRelationships().iterator();
         while (it.hasNext()) {
             queryAssembler.dbRelationshipAdded((DbRelationship) it.next());
         }
@@ -354,10 +352,10 @@ public abstract class QueryAssemblerHelper {
             processRelParts(rel);
         }
 
-        List dbRels = rel.getDbRelationshipList();
+        List dbRels = rel.getDbRelationships();
 
         // get last DbRelationship on the list
-        DbRelationship dbRel = (DbRelationship) dbRels.get(dbRels.size() - 1);
+        DbRelationship dbRel = (DbRelationship)dbRels.get(dbRels.size() - 1);
         List joins = dbRel.getJoins();
         if (joins.size() != 1) {
             StringBuffer msg = new StringBuffer();
@@ -371,18 +369,14 @@ public abstract class QueryAssemblerHelper {
             throw new CayenneRuntimeException(msg.toString());
         }
 
-        DbAttributePair join = (DbAttributePair) joins.get(0);
+        DbAttributePair join = (DbAttributePair)joins.get(0);
 
         if (rel.isToMany()) {
             DbEntity dest = (DbEntity) join.getTarget().getEntity();
             List pk = dest.getPrimaryKey();
             
             if (pk.size() != 1) {
-                StringBuffer msg = new StringBuffer();
-                msg.append(
-                    "Multi-column PK is not supported in relationship joins.");
-
-                throw new CayenneRuntimeException(msg.toString());
+                throw new CayenneRuntimeException("Multi-column PK is not supported in relationship joins.");
             }
             
             processColumn(buf, (DbAttribute)pk.get(0));
@@ -420,7 +414,7 @@ public abstract class QueryAssemblerHelper {
             throw new CayenneRuntimeException(msg.toString());
         }
 
-        DbAttributePair join = (DbAttributePair) joins.get(0);
+        DbAttributePair join = (DbAttributePair)joins.get(0);
 
         DbAttribute att = null;
 

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.query;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +94,7 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 		this.relationshipName = relName;
 		
 		ObjRelationship relationship = this.getRelationship();
-		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
+		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationships().get(0);
 		this.setRoot((DbEntity)firstRel.getTargetEntity());
 		
 		this.createQualifier();
@@ -113,15 +114,17 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 		List pkExpressions = new ArrayList();
 
 		ObjRelationship relationship = this.getRelationship();
-		DbRelationship dbRel = (DbRelationship) relationship.getDbRelationshipList().get(0);
+		List dbRels = relationship.getDbRelationships();
+		DbRelationship dbRel = (DbRelationship)dbRels.get(0);
 
-		//First relationship - use source of joins to get a value, target of joins to get attribute name
+		// first relationship - use source of joins to get a value,
+		// target of joins to get attribute name
 		Map id = this.getSource().getObjectId().getIdSnapshot();
 		List joins = dbRel.getJoins();
-		int i;
+		int i, numJoins;
 
-		for (i = 0; i < joins.size(); i++) {
-			DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
+		for (i = 0, numJoins = joins.size(); i < numJoins; i++) {
+			DbAttributePair thisJoin = (DbAttributePair)joins.get(i);
 			DbAttribute sourceAttribute = thisJoin.getSource();
 			DbAttribute targetAttribute = thisJoin.getTarget();
 			Expression thisExpression =
@@ -132,12 +135,13 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 			pkExpressions.add(thisExpression);
 		}
 
-		//Second relationship- use target of joins to get a value, source of joins to get attribute name
+		// second relationship - use target of joins to get a value,
+		// source of joins to get attribute name
 		id = this.getDestination().getObjectId().getIdSnapshot();
-		dbRel = (DbRelationship) relationship.getDbRelationshipList().get(1);
+		dbRel = (DbRelationship)dbRels.get(1);
 		joins = dbRel.getJoins();
-		for (i = 0; i < joins.size(); i++) {
-			DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
+		for (i = 0, numJoins = joins.size(); i < numJoins; i++) {
+			DbAttributePair thisJoin = (DbAttributePair)joins.get(i);
 			DbAttribute sourceAttribute = thisJoin.getSource();
 			DbAttribute targetAttribute = thisJoin.getTarget();
 			Expression thisExpression =
@@ -148,7 +152,7 @@ public class FlattenedRelationshipDeleteQuery extends QualifiedQuery {
 			pkExpressions.add(thisExpression);
 		}
 
-		//Plug them all togehter... voila
+		// plug them all together... voila
 		this.setQualifier(ExpressionFactory.joinExp(Expression.AND, pkExpressions));
 	}
 	/**

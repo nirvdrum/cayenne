@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -143,8 +144,8 @@ public class EntityMergeSupport {
 	 */
 	protected List getAttributesToAdd() {
 		List missing = new ArrayList();
-		Iterator it = objEntity.getDbEntity().getAttributeList().iterator();
-		List rels = objEntity.getDbEntity().getRelationshipList();
+		Iterator it = objEntity.getDbEntity().getAttributes().iterator();
+		Collection rels = objEntity.getDbEntity().getRelationships();
 
 		while (it.hasNext()) {
 			DbAttribute dba = (DbAttribute) it.next();
@@ -185,7 +186,7 @@ public class EntityMergeSupport {
 
 	protected List getRelationshipsToAdd() {
 		List missing = new ArrayList();
-		Iterator it = objEntity.getDbEntity().getRelationshipList().iterator();
+		Iterator it = objEntity.getDbEntity().getRelationships().iterator();
 		while (it.hasNext()) {
 			DbRelationship dbrel = (DbRelationship) it.next();
 			// check if adding it makes sense at all

@@ -236,7 +236,7 @@ public class ObjRelationship extends Relationship {
 		dbRelationships.clear();
 	}
 
-	//Implements logic to calculate a new readonly value after having added/removed dbRelationships
+	// calculates a new readonly value after having added/removed dbRelationships
 	private boolean newReadOnlyValue() {
 		//Quickly filter the single dbrel case
 		if (dbRelationships.size() < 2) {

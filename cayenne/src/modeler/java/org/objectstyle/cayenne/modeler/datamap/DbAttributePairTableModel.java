@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -81,7 +81,7 @@ public class DbAttributePairTableModel extends AbstractTableModel
 	private DbRelationship rel;
 	private DbEntity source;
 	private DbEntity target;
-	private java.util.List joins = new ArrayList();
+	private List joins;
 
 	/** Is the table editable. */
 	private boolean editable = false;
@@ -92,26 +92,25 @@ public class DbAttributePairTableModel extends AbstractTableModel
 	static final int TARGET = 2;
 	static final int TARGET_TYPE = 3;
 	
-	public DbAttributePairTableModel(DbRelationship temp_rel
-	, EventController temp_mediator, Object temp_src)
-	{
+	public DbAttributePairTableModel(DbRelationship temp_rel,
+										EventController temp_mediator,
+										Object temp_src) {
 		mediator = temp_mediator;
 		src = temp_src;
 		rel = temp_rel;
 		source = (DbEntity)rel.getSourceEntity();
 		target = (DbEntity)rel.getTargetEntity();
-		if (rel.getJoins() != null) {
-			Iterator iter = rel.getJoins().iterator();
-			while(iter.hasNext()) {
-				DbAttributePair pair = (DbAttributePair)iter.next();
-				joins.add(pair);
-			}
+		joins = new ArrayList();
+		List relJoins = rel.getJoins();
+		if (relJoins != null) {
+			joins.addAll(relJoins);
 		}
 	}
 
-	public DbAttributePairTableModel(DbRelationship temp_rel
-	,EventController temp_mediator, Object temp_src, boolean temp_editable)
-	{
+	public DbAttributePairTableModel(DbRelationship temp_rel,
+										EventController temp_mediator,
+										Object temp_src,
+										boolean temp_editable) {
 		this(temp_rel, temp_mediator, temp_src);
 		editable = temp_editable;
 	}	

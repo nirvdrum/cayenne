@@ -237,7 +237,7 @@ public class OperationSorter {
 			Iterator entityIterator = allObjEntities.iterator();
 			while (entityIterator.hasNext()) {
 				ObjEntity thisEntity = (ObjEntity) entityIterator.next();
-				Iterator relIterator = thisEntity.getRelationshipList().iterator();
+				Iterator relIterator = thisEntity.getRelationships().iterator();
 				Set handledRelationships = new HashSet();
 
 				while (relIterator.hasNext()) {
@@ -349,7 +349,7 @@ public class OperationSorter {
 					// from the perspective of sorting the operations).  So if there is no object,
 					// we do a quick check at the dbrelationship/snapshot level just to be sure.  If
 					// an object turns up, then it must have been the above situation, so we use that object
-					if(dest==null) {
+					if (dest == null) {
 						DbRelationship finalRel = (DbRelationship)toOneRel.getDbRelationships().get(0);
 						Map snapshot=obj.getCommittedSnapshot();
 						if(snapshot==null) {
@@ -575,7 +575,7 @@ public class OperationSorter {
 				// only added to the end, all will be processed eventually
 				for (i = 0; i < thisSet.size(); i++) {
 					DbEntity thisEntity = (DbEntity) thisSet.get(i);
-					Iterator relIterator = thisEntity.getRelationshipList().iterator();
+					Iterator relIterator = thisEntity.getRelationships().iterator();
 					while (relIterator.hasNext()) {
 						DbRelationship thisRel = (DbRelationship) relIterator.next();
 						DbEntity target = (DbEntity) thisRel.getTargetEntity();
@@ -589,7 +589,7 @@ public class OperationSorter {
 					//And check unassigned entities to see if any have a direct relationship to thisEntity (maybe one way)
 					for (int j = unassignedEntities.size() - 1; j >= 0; j--) {
 						DbEntity unassignedEntity = (DbEntity) unassignedEntities.get(j);
-						Iterator reverseRelIterator = unassignedEntity.getRelationshipList().iterator();
+						Iterator reverseRelIterator = unassignedEntity.getRelationships().iterator();
 						while (reverseRelIterator.hasNext()) {
 							DbRelationship thisRel = (DbRelationship) reverseRelIterator.next();
 							DbEntity target = (DbEntity) thisRel.getTargetEntity();

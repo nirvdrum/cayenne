@@ -62,6 +62,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -368,25 +369,27 @@ public class ResolveDbRelationshipDialog
 			}
 		}
 
-		getMediator().fireDbRelationshipEvent(
-			new RelationshipEvent(this, dbRel, dbRel.getSourceEntity()));
+		getMediator().fireDbRelationshipEvent(new RelationshipEvent(this,dbRel, dbRel.getSourceEntity()));
 		hide();
 	}
 
-	private java.util.List getReverseJoins() {
-		java.util.List rev_list = new ArrayList();
-		java.util.List list =
-			(dbRel.getJoins() != null ? dbRel.getJoins() : new ArrayList());
-		Iterator iter = list.iterator();
+	private List getReverseJoins() {
+		List joins = dbRel.getJoins();
+
+		if ((joins == null) || (joins.size() == 0)) {
+			return Collections.EMPTY_LIST;
+		}
+
+		List reverseJoins = new ArrayList(joins.size());
+
 		// Loop through the list of attribute pairs, create reverse pairs
 		// and put them to the reverse list.
-		while (iter.hasNext()) {
-			DbAttributePair pair = (DbAttributePair) iter.next();
-			DbAttributePair rev_pair;
-			rev_pair = new DbAttributePair(pair.getTarget(), pair.getSource());
-			rev_list.add(rev_pair);
+		for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
+			DbAttributePair pair = (DbAttributePair)joins.get(i);
+			reverseJoins.add(new DbAttributePair(pair.getTarget(), pair.getSource()));
 		}
-		return rev_list;
+
+		return reverseJoins;
 	}
 
 }

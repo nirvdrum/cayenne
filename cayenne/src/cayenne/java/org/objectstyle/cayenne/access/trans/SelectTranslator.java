@@ -374,7 +374,7 @@ public class SelectTranslator extends SelectQueryAssembler {
                 List joins = dbRel.getJoins();
                 int jLen = joins.size();
                 for (int j = 0; j < jLen; j++) {
-                    DbAttributePair join = (DbAttributePair) joins.get(j);
+                    DbAttributePair join = (DbAttributePair)joins.get(j);
                     DbAttribute src = join.getSource();
                     if (!columnList.contains(src)) {
                         columnList.add(src);
@@ -407,7 +407,7 @@ public class SelectTranslator extends SelectQueryAssembler {
                     List joins = dbRel.getJoins();
                     int jLen = joins.size();
                     for (int j = 0; j < jLen; j++) {
-                        DbAttributePair join = (DbAttributePair) joins.get(j);
+                        DbAttributePair join = (DbAttributePair)joins.get(j);
                         DbAttribute target = join.getTarget();
                         if (!columnList.contains(target)) {
                             columnList.add(target);
@@ -445,15 +445,18 @@ public class SelectTranslator extends SelectQueryAssembler {
 
         boolean andFlag = false;
 
-        List joins = rel.getJoins();
-        int len = joins.size();
-        for (int i = 0; i < len; i++) {
-            if (andFlag)
-                queryBuf.append(" AND ");
-            else
-                andFlag = true;
+		List joins = rel.getJoins();
+		int len = joins.size();
+		for (int i = 0; i < len; i++) {
+			DbAttributePair join = (DbAttributePair)joins.get(i);
 
-            DbAttributePair join = (DbAttributePair) joins.get(i);
+            if (andFlag) {
+				queryBuf.append(" AND ");
+            }
+            else {
+				andFlag = true;
+            }
+
             queryBuf
                 .append(srcAlias)
                 .append('.')

@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.conf;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -135,7 +137,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
             }
         };
 
-        List maps = findDomain(domainName).getDataMapsAsList();
+        List maps = new ArrayList(findDomain(domainName).getDataMaps());
 
         // sort to satisfy dependencies
         DataMap.sortMaps(maps);
@@ -163,7 +165,7 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
             }
         };
 
-        List nodes = findDomain(domainName).getDataNodesAsList();
+        Collection nodes = findDomain(domainName).getDataNodes();
         return new TransformIterator(nodes.iterator(), tr);
     }
 
@@ -173,7 +175,8 @@ public class RuntimeSaveDelegate implements ConfigSaverDelegate {
                 return ((DataMap) input).getName();
             }
         };
-        List maps = findNode(domainName, nodeName).getDataMapsAsList();
+
+        Collection maps = findNode(domainName, nodeName).getDataMaps();
         return new TransformIterator(maps.iterator(), tr);
     }
 }

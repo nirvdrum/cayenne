@@ -342,12 +342,13 @@ public class QueryUtils {
         ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
         ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
 
-        List dbRels = rel.getDbRelationshipList();
+        List dbRels = rel.getDbRelationships();
 
         // sanity check
         if (dbRels == null || dbRels.size() == 0) {
-            throw new CayenneRuntimeException(
-                "ObjRelationship '" + rel.getName() + "' is unmapped.");
+            throw new CayenneRuntimeException("ObjRelationship '"
+            				+ rel.getName()
+            				+ "' is unmapped.");
         }
 
         // build a reverse DB path
@@ -364,10 +365,9 @@ public class QueryUtils {
 
             // another sanity check
             if (reverse == null) {
-                throw new CayenneRuntimeException(
-                    "DbRelatitionship '"
-                        + dbRel.getName()
-                        + "' has no reverse relationship");
+                throw new CayenneRuntimeException("DbRelatitionship '"
+                			+ dbRel.getName()
+                			+ "' has no reverse relationship");
             }
 
             buf.append(reverse.getName());
@@ -450,7 +450,7 @@ public class QueryUtils {
 
             while (it.hasNext()) {
                 ObjRelationship rel = (ObjRelationship) it.next();
-                Iterator dbRels = rel.getDbRelationshipList().iterator();
+                Iterator dbRels = rel.getDbRelationships().iterator();
                 while (dbRels.hasNext()) {
                     DbRelationship r = (DbRelationship) dbRels.next();
                     if (buf.length() > 0) {
@@ -478,7 +478,7 @@ public class QueryUtils {
             while (it.hasNext()) {
                 ObjRelationship rel = (ObjRelationship) it.next();
 
-                Iterator dbRels = rel.getDbRelationshipList().iterator();
+                Iterator dbRels = rel.getDbRelationships().iterator();
                 while (dbRels.hasNext()) {
                     DbRelationship dbRel = (DbRelationship) dbRels.next();
                     DbRelationship reverse = dbRel.getReverseRelationship();

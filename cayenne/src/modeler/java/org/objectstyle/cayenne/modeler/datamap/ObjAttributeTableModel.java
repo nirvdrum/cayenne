@@ -91,9 +91,9 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 	protected DbEntity dbEntity;
 
 	public ObjAttributeTableModel(
-		ObjEntity entity,
-		EventController mediator,
-		Object eventSource) {
+			ObjEntity entity,
+			EventController mediator,
+			Object eventSource) {
 		super(mediator, eventSource, new ArrayList(entity.getAttributes())); // take a copy
 		this.entity = entity;
 		this.dbEntity = entity.getDbEntity();

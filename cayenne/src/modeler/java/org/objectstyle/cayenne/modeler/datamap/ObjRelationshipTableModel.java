@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
+import java.util.ArrayList;
+
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -81,11 +83,10 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 	protected ObjEntity entity;
 
 	public ObjRelationshipTableModel(
-		ObjEntity entity,
-		EventController mediator,
-		Object eventSource) {
-			
-		super(mediator, eventSource, entity.getRelationshipList());
+			ObjEntity entity,
+			EventController mediator,
+			Object eventSource) {
+		super(mediator, eventSource, new ArrayList(entity.getRelationships()));
 		this.entity = entity;
 	}
 	

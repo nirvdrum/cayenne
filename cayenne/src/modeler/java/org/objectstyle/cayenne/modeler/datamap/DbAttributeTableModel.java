@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
+import java.util.ArrayList;
+
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -84,20 +86,18 @@ public class DbAttributeTableModel extends CayenneTableModel {
 	protected DbEntity entity;
 
 	public DbAttributeTableModel(
-		DbEntity entity,
-		EventController mediator,
-		Object eventSource) {
-
-		this(entity, mediator, eventSource, entity.getAttributeList());
+			DbEntity entity,
+			EventController mediator,
+			Object eventSource) {
+		this(entity, mediator, eventSource, new ArrayList(entity.getAttributes()));
 		this.entity = entity;
 	}
 	
    public DbAttributeTableModel(
-		DbEntity entity,
-		EventController mediator,
-		Object eventSource,
-		java.util.List objectList) {
-
+			DbEntity entity,
+			EventController mediator,
+			Object eventSource,
+			java.util.List objectList) {
 		super(mediator, eventSource, objectList);
 	}
 

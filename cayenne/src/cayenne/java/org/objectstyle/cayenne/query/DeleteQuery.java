@@ -1,5 +1,3 @@
-
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,17 +53,21 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 public class DeleteQuery extends QualifiedQuery {
+
     /** Creates empty DeleteQuery. */
-    public DeleteQuery() {}
+    public DeleteQuery(){
+    	super();
+    }
     
     private void init(Object root, Expression qualifier) {
-    	setRoot(root);
-    	setQualifier(qualifier);
+    	this.setRoot(root);
+    	this.setQualifier(qualifier);
     }
     
     /**
@@ -82,7 +84,8 @@ public class DeleteQuery extends QualifiedQuery {
      * @param qualifier an Expression indicating which objects should be deleted
      */
    public DeleteQuery(ObjEntity root, Expression qualifier) {
-		init(root, qualifier);
+   		this();
+		this.init(root, qualifier);
     }
     
      /**
@@ -99,7 +102,7 @@ public class DeleteQuery extends QualifiedQuery {
      * @param qualifier an Expression indicating which objects should be deleted
      */
    public DeleteQuery(Class rootClass, Expression qualifier) {
-    	init(rootClass, qualifier);
+    	this.init(rootClass, qualifier);
     }
     
     /** Creates DeleteQuery with <code>objEntityName</code> parameter. */
@@ -109,10 +112,9 @@ public class DeleteQuery extends QualifiedQuery {
     
     /** Creates DeleteQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
     public DeleteQuery(String objEntityName, Expression qualifier) {
-		init(objEntityName, qualifier);
+		this.init(objEntityName, qualifier);
     }
 
-    
     public int getQueryType() {
         return DELETE_QUERY;
     }

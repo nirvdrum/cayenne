@@ -79,6 +79,7 @@ public class DbRelationship extends Relationship {
 	protected boolean toDependentPK;
 
 	public DbRelationship() {
+		super();
 	}
 
 	public DbRelationship(String name) {
@@ -86,9 +87,9 @@ public class DbRelationship extends Relationship {
 	}
 
 	public DbRelationship(DbEntity src, DbEntity target, DbAttributePair pr) {
-		setSourceEntity(src);
-		setTargetEntity(target);
-		addJoin(pr);
+		this.setSourceEntity(src);
+		this.setTargetEntity(target);
+		this.addJoin(pr);
 	}
 
 	public Entity getTargetEntity() {
@@ -115,8 +116,8 @@ public class DbRelationship extends Relationship {
 	 * join semantics. Returns null if no such relationship exists. 
 	 */
 	public DbRelationship getReverseRelationship() {
-		Entity target = getTargetEntity();
-		Entity src = getSourceEntity();
+		Entity target = this.getTargetEntity();
+		Entity src = this.getSourceEntity();
 		DbAttributePair testJoin = new DbAttributePair(null, null);
 
 		Iterator it = target.getRelationships().iterator();
@@ -183,21 +184,23 @@ public class DbRelationship extends Relationship {
 	}
 
 	/** Adds a join. */
-	public void addJoin(DbAttributePair temp) {
-		joins.add(temp);
+	public void addJoin(DbAttributePair join) {
+		joins.add(join);
 	}
 
-	public void removeJoin(DbAttributePair temp) {
-		joins.remove(temp);
+	public void removeJoin(DbAttributePair join) {
+		joins.remove(join);
 	}
 
 	public void removeAllJoins() {
 		joins.clear();
 	}
 
-	public void setJoins(java.util.List new_joins) {
-		if (null != new_joins)
-			joins = new_joins;
+	public void setJoins(List newJoins) {
+		if (null != newJoins) {
+			this.removeAllJoins();
+			joins.addAll(newJoins);
+		}
 	}
 
 	/** Creates a snapshot of primary key attributes of a target
@@ -208,27 +211,35 @@ public class DbRelationship extends Relationship {
 	  * if snapshot is missing id components. */
 	public Map targetPkSnapshotWithSrcSnapshot(Map srcSnapshot) {
 
-		if (isToMany())
+		if (isToMany()) {
 			throw new CayenneRuntimeException("Only 'to one' relationships support this method.");
-
-		Map idMap = new HashMap();
-		int len = joins.size();
-		int nulls = 0;
-		for (int i = 0; i < len; i++) {
-			DbAttributePair join = (DbAttributePair) joins.get(i);
-			Object val = srcSnapshot.get(join.getSource().getName());
-			if (val == null)
-				nulls++;
-			else
-				idMap.put(join.getTarget().getName(), val);
 		}
 
-		if (nulls == 0)
+		Map idMap = new HashMap();
+
+		int numJoins = joins.size();
+		int foundNulls = 0;
+
+		for (int i = 0; i < numJoins; i++) {
+			DbAttributePair join = (DbAttributePair)joins.get(i);
+			Object val = srcSnapshot.get(join.getSource().getName());
+			if (val == null) {
+				foundNulls++;
+			}
+			else {
+				idMap.put(join.getTarget().getName(), val);
+			}
+		}
+
+		if (foundNulls == 0) {
 			return idMap;
-		else if (nulls == len)
+		}
+		else if (foundNulls == numJoins) {
 			return null;
-		else
+		}
+		else {
 			throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
+		}
 	}
 
 	/** Common code to src?kSnapshotWithTargetSnapshot.  Both are functionally the
@@ -239,10 +250,12 @@ public class DbRelationship extends Relationship {
 		for (int i = 0; i < len; i++) {
 			DbAttributePair join = (DbAttributePair) joins.get(i);
 			Object val = targetSnapshot.get(join.getTarget().getName());
-			if (val == null)
+			if (val == null) {
 				throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
-			else
+			}
+			else {
 				idMap.put(join.getSource().getName(), val);
+			}
 		}
 
 		return idMap;

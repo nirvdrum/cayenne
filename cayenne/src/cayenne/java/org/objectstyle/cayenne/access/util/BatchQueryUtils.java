@@ -124,22 +124,27 @@ public class BatchQueryUtils {
         return builder.toHashCode();
     }
 
-    public static Map buildFlattenedSnapshot(Map sourceId, Map destinationId, DbRelationship firstRelationship, DbRelationship secondRelationship) {
+    public static Map buildFlattenedSnapshot(Map sourceId,
+											    Map destinationId,
+											    DbRelationship firstRelationship,
+											    DbRelationship secondRelationship) {
         Map snapshot = new HashMap(sourceId.size() + destinationId.size());
         List joins = firstRelationship.getJoins();
-        for(int i=0; i<joins.size(); i++) {
+        for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
             DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
             DbAttribute sourceAttribute = thisJoin.getSource();
             DbAttribute targetAttribute = thisJoin.getTarget();
             snapshot.put(targetAttribute.getName(), sourceId.get(sourceAttribute.getName()));
         }
-        joins=secondRelationship.getJoins();
-        for(int i=0; i<joins.size(); i++) {
+
+        joins = secondRelationship.getJoins();
+		for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
             DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
             DbAttribute sourceAttribute = thisJoin.getSource();
             DbAttribute targetAttribute = thisJoin.getTarget();
             snapshot.put(sourceAttribute.getName(), destinationId.get(targetAttribute.getName()));
         }
+
         return snapshot;
     }
 
@@ -171,7 +176,7 @@ public class BatchQueryUtils {
             Iterator itr = relMap.keySet().iterator();
             while (itr.hasNext()) {
                 String relName = (String) itr.next();
-                ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+                ObjRelationship rel = (ObjRelationship)relMap.get(relName);
 
                 // to-many will be handled on the other side
                 if (rel.isToMany()) {
@@ -188,8 +193,7 @@ public class BatchQueryUtils {
                     continue;
                 }
 
-                DbRelationship dbRel =
-                        (DbRelationship) rel.getDbRelationshipList().get(0);
+                DbRelationship dbRel = (DbRelationship)rel.getDbRelationships().get(0);
                 Map idParts = target.getObjectId().getIdSnapshot();
 
                 // this may happen in uncommitted objects

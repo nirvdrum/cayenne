@@ -91,7 +91,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
 				path);
 		} else {
 			// check for missing DbRelationship mappings
-			List dbRels = rel.getDbRelationshipList();
+			List dbRels = rel.getDbRelationships();
 			if (dbRels.size() == 0) {
 				validator.registerWarning(
 					"ObjRelationship has no DbRelationship mapping.",
@@ -119,8 +119,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
 		if (rel.isToMany() && (rel.getDeleteRule() == DeleteRule.NULLIFY)) {
 			ObjRelationship inverse = rel.getReverseRelationship();
 			if (inverse != null) {
-				DbRelationship firstRel =
-					(DbRelationship) inverse.getDbRelationshipList().get(0);
+				DbRelationship firstRel = (DbRelationship)inverse.getDbRelationships().get(0);
 				Iterator attributePairIterator = firstRel.getJoins().iterator();
 				while (attributePairIterator.hasNext()) {
 					DbAttributePair pair =

@@ -248,7 +248,7 @@ public class JdbcAdapter implements DbAdapter {
             " (");
 
         // columns
-        Iterator it = ent.getAttributeList().iterator();
+        Iterator it = ent.getAttributes().iterator();
         boolean first = true;
         while (it.hasNext()) {
             if (first) {

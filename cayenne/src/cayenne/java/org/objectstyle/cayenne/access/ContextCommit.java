@@ -657,7 +657,7 @@ class ContextCommit {
 			Map batchesByDbEntity = commitHelper.getFlattenedInsertQueries();
 
 			ObjRelationship flattenedRel = info.getBaseRelationship();
-			List relList = flattenedRel.getDbRelationshipList();
+			List relList = flattenedRel.getDbRelationships();
 			DbRelationship firstDbRel = (DbRelationship) relList.get(0);
 			DbRelationship secondDbRel = (DbRelationship) relList.get(1);
 			DbEntity flattenedEntity = (DbEntity) firstDbRel.getTargetEntity();
@@ -709,7 +709,7 @@ class ContextCommit {
 			Map batchesByDbEntity = commitHelper.getFlattenedDeleteQueries();
 
 			ObjRelationship flattenedRel = info.getBaseRelationship();
-			List relList = flattenedRel.getDbRelationshipList();
+			List relList = flattenedRel.getDbRelationships();
 			DbRelationship firstDbRel = (DbRelationship) relList.get(0);
 			DbRelationship secondDbRel = (DbRelationship) relList.get(1);
 			DbEntity flattenedEntity = (DbEntity) firstDbRel.getTargetEntity();
