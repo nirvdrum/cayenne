@@ -181,27 +181,22 @@ public class Invocation extends Object {
 	public boolean fire(Object[] arguments) {
 		boolean success = false;
 
-		if (_parameterTypes == null) {
-			if (arguments != null) {
-				throw new IllegalArgumentException("arguments unexpectedly != null");
-			}
-		}
-		else {
-			if (arguments == null) {
-				throw new IllegalArgumentException("arguments must not be null");
-			}
-			else {
-				if (_parameterTypes.length != arguments.length) {
-					throw new IllegalArgumentException("inconsistent number of arguments: expected"
-														+ _parameterTypes.length
-														+ ", got "
-														+ arguments.length);
-				}
-			}
-		}
+        if (_parameterTypes == null) {
+            if (arguments != null) {
+                throw new IllegalArgumentException("arguments unexpectedly != null");
+            }
+        } else if (arguments == null) {
+            throw new IllegalArgumentException("arguments must not be null");
+        } else if (_parameterTypes.length != arguments.length) {
+            throw new IllegalArgumentException(
+                "inconsistent number of arguments: expected"
+                    + _parameterTypes.length
+                    + ", got "
+                    + arguments.length);
+        }
 
+       
 		Object currentTarget = _target.get();
-
 		if (currentTarget != null) {
 			try {	
 				_method.invoke(currentTarget, arguments);
@@ -249,14 +244,15 @@ public class Invocation extends Object {
 	 * @see Object#hashCode()
 	 */
 	public int hashCode() {
+        // IMPORTANT: DO NOT include Invocation target into whatever
+        // algorithm is used to compute hashCode, since it is using a 
+        // WeakReference and can be released at a later time, altering
+        // hashCode, and breaking collections using Invocation as a key
+        // (e.g. event DispatchQueue)
+        
+        // TODO: use Jakarta commons HashBuilder
 		int hash = 42, hashMultiplier = 59;
-		hash = hash * hashMultiplier + _method.hashCode();
-
-		if (_target.get() != null) {
-			hash = hash * hashMultiplier + _target.get().hashCode();
-		}
-
-		return hash;
+		return hash * hashMultiplier + _method.hashCode();
 	}
 
 	/**

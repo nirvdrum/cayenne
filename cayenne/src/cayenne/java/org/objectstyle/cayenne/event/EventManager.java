@@ -169,6 +169,8 @@ public class EventManager extends Object {
         if (subject == null) {
             throw new IllegalArgumentException("Subject must not be null.");
         }
+        
+        logObj.debug("adding listener: " + listener.getClass().getName() + "." + methodName);
 
         Invocation invocation = new Invocation(listener, methodName, eventParameterClass);
         dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);

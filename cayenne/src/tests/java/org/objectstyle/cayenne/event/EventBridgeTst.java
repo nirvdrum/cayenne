@@ -78,7 +78,7 @@ public class EventBridgeTst extends CayenneTestCase {
         TestBridge bridge = new TestBridge(local, external);
 
         EventManager manager = new EventManager();
-        bridge.startup(manager);
+        bridge.startup(manager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
 
         assertSame(manager, bridge.eventManager);
         assertEquals(1, bridge.startupCalls);
@@ -86,7 +86,7 @@ public class EventBridgeTst extends CayenneTestCase {
 
         // try startup again
         EventManager newManager = new EventManager();
-        bridge.startup(newManager);
+        bridge.startup(newManager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
 
         assertSame(newManager, bridge.eventManager);
         assertEquals(2, bridge.startupCalls);
@@ -99,7 +99,7 @@ public class EventBridgeTst extends CayenneTestCase {
         TestBridge bridge = new TestBridge(local, external);
 
         EventManager manager = new EventManager();
-        bridge.startup(manager);
+        bridge.startup(manager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
         bridge.shutdown();
 
         assertNull(bridge.eventManager);
@@ -113,7 +113,7 @@ public class EventBridgeTst extends CayenneTestCase {
         TestBridge bridge = new TestBridge(local, external);
 
         EventManager manager = EventManager.getDefaultManager();
-        bridge.startup(manager);
+        bridge.startup(manager, EventBridge.RECEIVE_LOCAL_EXTERNAL);
 
         SnapshotEvent event = new SnapshotEvent(this, this, null, null);
 

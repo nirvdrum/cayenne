@@ -81,6 +81,8 @@ import org.objectstyle.cayenne.util.Invocation;
 class DispatchQueue {
     private static Logger logObj = Logger.getLogger(DispatchQueue.class);
 
+    // TODO: implement a maintenance thread to cleanup dead invocations with deallocated targets
+    
     private Set subjectInvocations = new HashSet();
     private Map invocationsBySender = new WeakHashMap();
 
@@ -100,8 +102,7 @@ class DispatchQueue {
     synchronized void addInvocation(Invocation invocation, Object sender) {
         if (sender == null) {
             subjectInvocations.add(invocation);
-        }
-        else {
+        } else {
             invocationsForSender(sender, true).add(invocation);
         }
     }
@@ -179,13 +180,12 @@ class DispatchQueue {
         Iterator it = invocations.iterator();
         while (it.hasNext()) {
             Invocation invocation = (Invocation) it.next();
-
             // fire invocation, detect if anything went wrong
             // (e.g. GC'ed invocation targets)
             if (!invocation.fire(eventArgument)) {
+                it.remove();
                 logObj.debug(
                     "Failed invocation, removing: " + invocation.getMethod().getName());
-                it.remove();
             }
         }
     }

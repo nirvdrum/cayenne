@@ -71,7 +71,9 @@ public class SnapshotEvent extends CayenneEvent {
     protected long timestamp;
     protected Collection deletedIds;
     protected Map modifiedDiffs;
-    protected Object rootSource;
+    
+    // don't serialize the root, it can be a heavy object like ObjectStore
+    protected transient Object rootSource;
 
     public SnapshotEvent(
         Object postedBy,

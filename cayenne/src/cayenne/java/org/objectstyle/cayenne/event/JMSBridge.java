@@ -74,6 +74,7 @@ import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.IDUtil;
 
 /**
  * Implementation of EventBridge that passes and receives events via JMS 
@@ -84,6 +85,8 @@ import org.apache.log4j.Logger;
  */
 public class JMSBridge extends EventBridge implements MessageListener {
     private static Logger logObj = Logger.getLogger(JMSBridge.class);
+    public static final String VM_ID = new String(IDUtil.pseudoUniqueByteSequence16());
+    public static final String VM_ID_PROPERRTY = "VM_ID";
 
     protected String topicConnectionFactoryName;
 
@@ -125,6 +128,11 @@ public class JMSBridge extends EventBridge implements MessageListener {
     public void onMessage(Message message) {
 
         try {
+            if (VM_ID.equals(message.getObjectProperty(VM_ID_PROPERRTY))) {
+                logObj.debug("Message from same VM ignoring.");
+                return;
+            }
+
             if (!(message instanceof ObjectMessage)) {
                 if (logObj.isDebugEnabled()) {
                     logObj.debug(
@@ -184,20 +192,24 @@ public class JMSBridge extends EventBridge implements MessageListener {
         }
 
         // config publisher
-        this.sendConnection = connectionFactory.createTopicConnection();
-        this.sendSession =
-            sendConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-        this.publisher = sendSession.createPublisher(topic);
+        if (receivesLocalEvents()) {
+            this.sendConnection = connectionFactory.createTopicConnection();
+            this.sendSession =
+                sendConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+            this.publisher = sendSession.createPublisher(topic);
+        }
 
         // config subscriber
-        this.receivedConnection = connectionFactory.createTopicConnection();
-        this.subscriber =
-            receivedConnection.createTopicSession(
-                false,
-                Session.AUTO_ACKNOWLEDGE).createSubscriber(
-                topic);
-        this.subscriber.setMessageListener(this);
-        this.receivedConnection.start();
+        if (receivesExternalEvents()) {
+            this.receivedConnection = connectionFactory.createTopicConnection();
+            this.subscriber =
+                receivedConnection.createTopicSession(
+                    false,
+                    Session.AUTO_ACKNOWLEDGE).createSubscriber(
+                    topic);
+            this.subscriber.setMessageListener(this);
+            this.receivedConnection.start();
+        }
     }
 
     /**
@@ -215,42 +227,62 @@ public class JMSBridge extends EventBridge implements MessageListener {
     protected void shutdownExternal() throws Exception {
         Exception lastException = null;
 
-        try {
-            publisher.close();
-        } catch (Exception ex) {
-            lastException = ex;
+        if (publisher != null) {
+            try {
+                publisher.close();
+            } catch (Exception ex) {
+                lastException = ex;
+            }
         }
 
-        try {
-            subscriber.close();
-        } catch (Exception ex) {
-            lastException = ex;
+        if (subscriber != null) {
+            try {
+                subscriber.close();
+            } catch (Exception ex) {
+                lastException = ex;
+            }
         }
 
-        try {
-            receivedConnection.close();
-        } catch (Exception ex) {
-            lastException = ex;
+        if (receivedConnection != null) {
+            try {
+                receivedConnection.close();
+            } catch (Exception ex) {
+                lastException = ex;
+            }
         }
 
-        try {
-            sendConnection.close();
-        } catch (Exception ex) {
-            lastException = ex;
+        if (sendSession != null) {
+            try {
+                sendSession.close();
+            } catch (Exception ex) {
+                lastException = ex;
+            }
+        }
+
+        if (sendConnection != null) {
+            try {
+                sendConnection.close();
+            } catch (Exception ex) {
+                lastException = ex;
+            }
         }
 
         publisher = null;
         subscriber = null;
         receivedConnection = null;
         sendConnection = null;
+        sendSession = null;
+
         if (lastException != null) {
             throw lastException;
         }
     }
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
+        logObj.debug("Sending message");
         ObjectMessage message =
             sendSession.createObjectMessage(eventToMessageObject(localEvent));
+        message.setObjectProperty(VM_ID_PROPERRTY, VM_ID);
         publisher.publish(message);
     }
 
