@@ -98,6 +98,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     protected transient Map newObjectMap = null;
 
     protected Map objectMap = new HashMap();
+    protected Map queryResultMap = new HashMap();
 
     // TODO: we may implement more fine grained tracking of related objects
     // changes, requiring more sophisticated data structure to hold them
@@ -173,7 +174,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * Returns a SnapshotCache associated with this ObjectStore.
+     * Returns a DataRowStore associated with this ObjectStore.
      */
     public DataRowStore getDataRowCache() {
         return dataRowCache;
@@ -644,10 +645,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public synchronized DataObject getObject(ObjectId id) {
         return (DataObject) objectMap.get(id);
     }
+    
 
     /**
-     * @deprecated Since 1.1 all methods for snapshot manipulation via
-     *             ObjectStore are deprecated due to architecture changes.
+     * @deprecated Since 1.1 all methods for snapshot manipulation via ObjectStore are
+     *             deprecated due to architecture changes.
      */
     public void addSnapshot(ObjectId id, Map snapshot) {
         getDataRowCache().processSnapshotChanges(
@@ -679,12 +681,35 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         DataRow retained = getRetainedSnapshot(oid);
         return (retained != null) ? retained : getDataRowCache().getCachedSnapshot(oid);
     }
+    
+    /**
+     * Returns cached query results for a given query, or null if no results are cached.
+     * Note that ObjectStore will only lookup results in its local cache, and not the 
+     * shared cache associated with the underlying DataRowStore.
+     * 
+     * @since 1.1
+     */
+    public synchronized List getCachedQueryResult(String name) {
+        // results should have been stored as rows or objects when
+        // they were originally cached... do no conversions here
+        return (List) queryResultMap.get(name);
+    }
+    
+    /**
+     * Caches a list of query results.
+     * 
+     * @since 1.1
+     */
+    public synchronized void cacheQueryResult(String name, List results) {
+        queryResultMap.put(name, results);
+    }
+
 
     /**
-     * Returns a snapshot for ObjectId from the underlying snapshot cache. If
-     * cache contains no snapshot, it will attempt fetching it using provided
-     * QueryEngine. If fetch attempt fails or inconsistent data is returned,
-     * underlying cache will throw a CayenneRuntimeException.
+     * Returns a snapshot for ObjectId from the underlying snapshot cache. If cache
+     * contains no snapshot, it will attempt fetching it using provided QueryEngine. If
+     * fetch attempt fails or inconsistent data is returned, underlying cache will throw a
+     * CayenneRuntimeException.
      * 
      * @since 1.1
      */
@@ -692,10 +717,11 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         DataRow retained = getRetainedSnapshot(oid);
         return (retained != null) ? retained : getDataRowCache().getSnapshot(oid, engine);
     }
-
+    
+ 
     /**
-     * @deprecated Since 1.1 all methods for snapshot manipulation via
-     *             ObjectStore are deprecated due to architecture changes.
+     * @deprecated Since 1.1 all methods for snapshot manipulation via ObjectStore are
+     *             deprecated due to architecture changes.
      */
     public synchronized void removeObject(ObjectId id) {
         if (id != null) {
@@ -810,13 +836,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-     * SnapshotEventListener implementation that processes snapshot change
-     * event, updating DataObjects that have the changes.
-     * 
+     * SnapshotEventListener implementation that processes snapshot change event, updating
+     * DataObjects that have the changes.
      * <p>
-     * <i>Implementation note:</i> This method should not attempt to alter
-     * the underlying DataRowStore, since it is normally invoked *AFTER* the
-     * DataRowStore was modified as a result of some external interaction.
+     * <i>Implementation note: </i> This method should not attempt to alter the underlying
+     * DataRowStore, since it is normally invoked *AFTER* the DataRowStore was modified as
+     * a result of some external interaction.
      * </p>
      * 
      * @since 1.1

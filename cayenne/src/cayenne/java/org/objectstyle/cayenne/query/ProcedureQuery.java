@@ -74,7 +74,7 @@ public class ProcedureQuery
         
     protected Map params = new HashMap();
     protected int fetchLimit;
-
+ 
     public ProcedureQuery() {
     }
 
@@ -147,5 +147,14 @@ public class ProcedureQuery
      */
     public boolean isResolvingInherited() {
         return false;
+    }
+    
+    /**
+     * Currently always returns NO_CACHE.
+     * 
+     * @since 1.1
+     */
+    public String getCachePolicy() {
+        return GenericSelectQuery.NO_CACHE;
     }
 }

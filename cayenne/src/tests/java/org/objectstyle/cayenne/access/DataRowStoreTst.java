@@ -98,7 +98,7 @@ public class DataRowStoreTst extends CayenneTestCase {
 
         assertNull(resultStore.getCachedSnapshots("key"));
 
-        resultStore.registerSnapshotList("key", list);
+        resultStore.cacheSnapshots("key", list);
         assertSame(list, resultStore.getCachedSnapshots("key"));
     }
 }

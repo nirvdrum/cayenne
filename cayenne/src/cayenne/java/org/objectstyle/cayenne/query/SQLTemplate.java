@@ -188,6 +188,14 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
 
         return query;
     }
+    
+    public String getCachePolicy() {
+        return selectProperties.getCachePolicy();
+    }
+
+    public void setCachePolicy(String policy) {
+        this.selectProperties.setCachePolicy(policy);
+    }
 
     public int getFetchLimit() {
         return selectProperties.getFetchLimit();

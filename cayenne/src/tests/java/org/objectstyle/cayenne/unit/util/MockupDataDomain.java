@@ -53,94 +53,41 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.unit.util;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
 
 /**
+ * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
+ * there should be no need to use MockupDataDomain for testing, since MockupQueryEngine
+ * should safice. Unfortunately DataContext currently assumes that its parent QueryEngine
+ * is a DataDomain...
+ * 
  * @author Andrei Adamchik
  */
-public class MockupQueryEngine implements QueryEngine {
+public class MockupDataDomain extends DataDomain {
 
-    // mockup the actual results
-    protected Map results = new HashMap();
-    protected EntityResolver entityResolver;
-    protected int runCount;
-    
-    public void reset() {
-        runCount = 0;
-        results.clear();
+    protected QueryEngine engine;
+
+    public MockupDataDomain(QueryEngine engine) {
+        super("test");
+        this.engine = engine;
+        this.entityResolver = engine.getEntityResolver();
     }
 
-    public int getRunCount() {
-        return runCount;
-    }
-
-    public void addExpectedResult(Query query, List result) {
-        results.put(query, result);
-    }
-
+    /**
+     * Delegates query to the internal engine.
+     */
     public void performQueries(
             Collection queries,
             OperationObserver resultConsumer,
             Transaction transaction) {
-        initWithPresetResults(queries, resultConsumer);
-    }
-
-    public void performQueries(Collection queries, OperationObserver resultConsumer) {
-        initWithPresetResults(queries, resultConsumer);
-    }
-
-    private void initWithPresetResults(
-            Collection queries,
-            OperationObserver resultConsumer) {
-
-        runCount++;
-
-        // stick preset results to the consumer
-        Iterator it = queries.iterator();
-        while (it.hasNext()) {
-            Query query = (Query) it.next();
-            resultConsumer.nextDataRows(query, (List) results.get(query));
-        }
-    }
-
-    public void performQuery(Query query, OperationObserver resultConsumer) {
-    }
-
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return null;
-    }
-
-    public DataNode lookupDataNode(DataMap dataMap) {
-        return null;
-    }
-
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
-    }
-
-    public void setEntityResolver(EntityResolver resolver) {
-        this.entityResolver = resolver;
-    }
-
-    public Collection getDataMaps() {
-        return (entityResolver != null)
-                ? entityResolver.getDataMaps()
-                : Collections.EMPTY_LIST;
+        engine.performQueries(queries, resultConsumer, transaction);
     }
 }

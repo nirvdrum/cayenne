@@ -323,9 +323,9 @@ public class DataRowStore implements Serializable {
     }
 
     /**
-     * Registers a list of snapshots using a String key.
+     * Registers a list of snapshots with internal cache, using a String key.
      */
-    public void registerSnapshotList(String key, List snapshots) {
+    public void cacheSnapshots(String key, List snapshots) {
         snapshotLists.put(key, snapshots);
     }
 

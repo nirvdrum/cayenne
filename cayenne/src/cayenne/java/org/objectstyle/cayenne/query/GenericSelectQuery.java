@@ -63,21 +63,86 @@ package org.objectstyle.cayenne.query;
  * @author Andrei Adamchik
  */
 public interface GenericSelectQuery extends Query {
+    
+    /**
+     * @since 1.1
+     */
+    public static final String NO_CACHE = "nocache";
+    
+    /**
+     * @since 1.1
+     */
+    public static final String LOCAL_CACHE = "localcache";
+    
+    /**
+     * @since 1.1
+     */
+    public static final String SHARED_CACHE = "sharedcache";
 
+    /**
+     * @since 1.1
+     */
     public static final String FETCH_LIMIT_PROPERTY = "cayenne.GenericSelectQuery.fetchLimit";
+    
+    /**
+     * @since 1.1
+     */
     public static final int FETCH_LIMIT_DEFAULT = 0;
 
+    /**
+     * @since 1.1
+     */
     public static final String PAGE_SIZE_PROPERTY = "cayenne.GenericSelectQuery.pageSize";
+    
+    /**
+     * @since 1.1
+     */
     public static final int PAGE_SIZE_DEFAULT = 0;
 
+    /**
+     * @since 1.1
+     */
     public static final String FETCHING_DATA_ROWS_PROPERTY = "cayenne.GenericSelectQuery.fetchingDataRows";
+    
+    /**
+     * @since 1.1
+     */
     public static final boolean FETCHING_DATA_ROWS_DEFAULT = false;
 
+    /**
+     * @since 1.1
+     */
     public static final String REFRESHING_OBJECTS_PROPERTY = "cayenne.GenericSelectQuery.refreshingObjects";
+    
+    /**
+     * @since 1.1
+     */
     public static final boolean REFRESHING_OBJECTS_DEFAULT = true;
 
+    /**
+     * @since 1.1
+     */
     public static final String RESOLVING_INHERITED_PROPERTY = "cayenne.GenericSelectQuery.resolvingInherited";
+    
+    /**
+     * @since 1.1
+     */
     public static final boolean RESOLVING_INHERITED_DEFAULT = true;
+    
+    /**
+     * @since 1.1
+     */
+    public static final String CACHE_POLICY_PROPERTY = "cayenne.GenericSelectQuery.cachePolicy";
+    
+    /**
+     * @since 1.1
+     */
+    public static final String CACHE_POLICY_DEFAULT = NO_CACHE;
+    
+    /**
+     * @since 1.1
+     */
+    public String getCachePolicy();
 
     /**
      * Returns <code>true</code> if this query should produce a list of data rows as

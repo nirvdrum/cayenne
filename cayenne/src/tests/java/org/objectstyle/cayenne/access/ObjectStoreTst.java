@@ -56,8 +56,10 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
@@ -81,6 +83,19 @@ public class ObjectStoreTst extends CayenneTestCase {
         DataRowStore cache = new DataRowStore("test");
         this.objectStore = new ObjectStore(cache);
 
+    }
+    
+    public void testCachedQueryResult() throws Exception {
+        assertNull(objectStore.getCachedQueryResult("result"));
+        
+        List result = new ArrayList();
+        objectStore.cacheQueryResult("result", result);
+        assertSame(result, objectStore.getCachedQueryResult("result"));
+        
+        // test refreshing the cache
+        List freshResult = new ArrayList();
+        objectStore.cacheQueryResult("result", freshResult);
+        assertSame(freshResult, objectStore.getCachedQueryResult("result"));
     }
 
     public void testObjectsInvalidated() throws Exception {

@@ -75,6 +75,7 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
     boolean fetchingDataRows = GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
     boolean refreshingObjects = GenericSelectQuery.REFRESHING_OBJECTS_DEFAULT;
     boolean resolvingInherited = GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
+    String cachePolicy = GenericSelectQuery.CACHE_POLICY_DEFAULT;
 
     /**
      * Copies values of this object to another SelectQueryProperties object.
@@ -85,6 +86,7 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         anotherProperties.pageSize = this.pageSize;
         anotherProperties.refreshingObjects = this.refreshingObjects;
         anotherProperties.resolvingInherited = this.resolvingInherited;
+        anotherProperties.cachePolicy = this.cachePolicy;
     }
 
     void initWithProperties(Map properties) {
@@ -102,6 +104,8 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
 
         Object resolvingInherited =
             properties.get(GenericSelectQuery.RESOLVING_INHERITED_PROPERTY);
+        
+        Object cachePolicy = properties.get(GenericSelectQuery.CACHE_POLICY_PROPERTY);
 
         // init ivars from properties
         this.fetchLimit =
@@ -124,10 +128,13 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
                 ? "true".equalsIgnoreCase(fetchingDataRows.toString())
                 : GenericSelectQuery.FETCHING_DATA_ROWS_DEFAULT;
 
-        this.resolvingInherited =
-            (resolvingInherited != null)
+        this.resolvingInherited = (resolvingInherited != null)
                 ? "true".equalsIgnoreCase(resolvingInherited.toString())
                 : GenericSelectQuery.RESOLVING_INHERITED_DEFAULT;
+
+        this.cachePolicy = (cachePolicy != null)
+                ? cachePolicy.toString()
+                : GenericSelectQuery.CACHE_POLICY_DEFAULT;
     }
 
     public void encodeAsXML(XMLEncoder encoder) {
@@ -156,6 +163,18 @@ final class SelectExecutionProperties implements XMLSerializable, Serializable {
         if (pageSize != GenericSelectQuery.PAGE_SIZE_DEFAULT) {
             encoder.printProperty(GenericSelectQuery.PAGE_SIZE_PROPERTY, pageSize);
         }
+        
+        if (cachePolicy != null && !GenericSelectQuery.CACHE_POLICY_DEFAULT.equals(cachePolicy)) {
+            encoder.printProperty(GenericSelectQuery.CACHE_POLICY_PROPERTY, cachePolicy);
+        }
+    }
+    
+    String getCachePolicy() {
+        return cachePolicy;
+    }
+    
+    void setCachePolicy(String policy) {
+        this.cachePolicy = policy;
     }
 
     boolean isFetchingDataRows() {

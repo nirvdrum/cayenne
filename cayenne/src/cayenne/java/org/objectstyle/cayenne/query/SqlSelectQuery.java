@@ -190,6 +190,15 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     public boolean isRefreshingObjects() {
         return true;
     }
+    
+    /**
+     * Currently always returns NO_CACHE.
+     * 
+     * @since 1.1
+     */
+    public String getCachePolicy() {
+        return GenericSelectQuery.NO_CACHE;
+    }
 
     /**
      * Currently always returns false.

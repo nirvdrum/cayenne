@@ -137,5 +137,14 @@ public class GenericSelectQueryTst extends BasicTestCase {
 
         PropertyUtils.setProperty(q, "pageSize", new Integer(0));
         assertEquals(0, q.getPageSize());
+        
+        // caching policy
+        assertEquals(GenericSelectQuery.CACHE_POLICY_DEFAULT, q.getCachePolicy());
+
+        PropertyUtils.setProperty(q, "cachePolicy", GenericSelectQuery.LOCAL_CACHE);
+        assertEquals(GenericSelectQuery.LOCAL_CACHE, q.getCachePolicy());
+
+        PropertyUtils.setProperty(q, "cachePolicy", GenericSelectQuery.SHARED_CACHE);
+        assertEquals(GenericSelectQuery.SHARED_CACHE, q.getCachePolicy());
     }
 }

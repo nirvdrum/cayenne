@@ -161,12 +161,16 @@ public class SelectQuery
         this.init(root, qualifier);
     }
 
-    /** Creates SelectQuery with <code>objEntityName</code> parameter. */
+    /** 
+     * Creates SelectQuery with <code>objEntityName</code> parameter. 
+     */
     public SelectQuery(String objEntityName) {
         this(objEntityName, null);
     }
 
-    /** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+    /** 
+     * Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. 
+     */
     public SelectQuery(String objEntityName, Expression qualifier) {
         init(objEntityName, qualifier);
     }
@@ -490,9 +494,24 @@ public class SelectQuery
     public void setRefreshingObjects(boolean flag) {
         selectProperties.setRefreshingObjects(flag);
     }
+    
+    /**
+     * @since 1.1
+     */
+    public String getCachePolicy() {
+        return selectProperties.getCachePolicy();
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setCachePolicy(String policy) {
+        this.selectProperties.setCachePolicy(policy);
+    }
 
     /**
      * Returns the fetchLimit.
+     * 
      * @return int
      */
     public int getFetchLimit() {

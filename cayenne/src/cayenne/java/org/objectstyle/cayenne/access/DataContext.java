@@ -714,7 +714,7 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
      * Converts a list of DataRows to a List of DataObject registered with this
-     * DataContext. Interbnally calls {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}.
+     * DataContext. Internally calls {@link #objectsFromDataRows(ObjEntity,List,boolean,boolean)}.
      * 
      * @since 1.1
      * @see DataRow
@@ -1255,28 +1255,6 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Performs a single database select query.
-     *
-     * @return A list of DataObjects or a list of data rows
-     * depending on the value returned by <code>query.isFetchingDataRows()</code>.
-     */
-    public List performQuery(GenericSelectQuery query) {
-
-        // check if result pagination is requested
-        // let a list handle fetch in this case
-        if (query.getPageSize() > 0) {
-            return new IncrementalFaultList(this, query);
-        }
-
-        SelectObserver observer = new SelectObserver(query.getLoggingLevel());
-        performQueries(Collections.singletonList(query), observer);
-
-        return (query.isFetchingDataRows())
-            ? observer.getResults(query)
-            : observer.getResultsAsObjects(this, query);
-    }
-
-    /**
      * Performs a single database select query returning result as a ResultIterator.
      * Returned ResultIterator will provide access to DataRows.
      */
@@ -1437,10 +1415,148 @@ public class DataContext implements QueryEngine, Serializable {
     public void performQuery(Query query, OperationObserver operationObserver) {
         this.performQueries(Collections.singletonList(query), operationObserver);
     }
+    
 
     /**
-     *  Populates the <code>map</code> with ObjectId values from master objects
-     *  related to this object.
+     * Performs a single selecting query. Various query setting control the behavior
+     * of this method and the results returned:
+     * 
+     * <ul>
+     * <li>Query caching policy defines whether
+     * the results are retrieved from cache or fetched from the database. Note that
+     * queries that use caching must have a name that is used as a caching key.</li>
+     * <li>Query refreshing policy controls whether to refresh existing data objects
+     * and ignore any cached values.</li>
+     * <li>Query data rows policy defines whether the result should be returned as 
+     * DataObjects or DataRows.</li>
+     * </ul>
+     * 
+     * @return A list of DataObjects or a DataRows, depending on the value returned by
+     *         {@link GenericSelectQuery#isFetchingDataRows()}.
+     */
+    public List performQuery(GenericSelectQuery query) {
+
+        // check if result pagination is requested
+        // let a list handle fetch in this case
+        if (query.getPageSize() > 0) {
+            return new IncrementalFaultList(this, query);
+        }
+        
+        boolean refresh = query.isRefreshingObjects();
+        boolean localCache = GenericSelectQuery.LOCAL_CACHE
+                .equals(query.getCachePolicy());
+        boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(query
+                .getCachePolicy());
+        boolean useCache = localCache || sharedCache;
+
+        String name = query.getName();
+        
+        // sanity check
+        if (useCache && name == null) {
+            throw new CayenneRuntimeException(
+                    "Caching of unnamed queries is not supported.");
+        }
+        
+
+        // get results from cache...
+        if (!refresh && useCache) {
+            List results = null;
+
+            if (localCache) {
+                // results should have been stored as rows or objects when
+                // they were originally cached... do no conversions now
+                results = getObjectStore().getCachedQueryResult(name);
+            }
+            else if (sharedCache) {
+
+                List rows = getObjectStore().getDataRowCache().getCachedSnapshots(name);
+                if (rows != null) {
+
+                    // decorate shared cached lists with immutable list to avoid messing
+                    // up the cache
+                    if (rows.size() == 0) {
+                        results = Collections.EMPTY_LIST;
+                    }
+                    else if (query.isFetchingDataRows()) {
+                        results = Collections.unmodifiableList(rows);
+                    }
+                    else {
+                        ObjEntity root = getEntityResolver().lookupObjEntity(query);
+                        results = objectsFromDataRows(root, rows, query
+                                .isRefreshingObjects(), query.isResolvingInherited());
+                    }
+                }
+            }
+
+            if (results != null) {
+                return results;
+            }
+        }
+        
+        // must fetch...
+        SelectObserver observer = new SelectObserver(query.getLoggingLevel());
+        performQueries(Collections.singletonList(query), observer);
+        
+        List results = (query.isFetchingDataRows())
+                ? observer.getResults(query)
+                : observer.getResultsAsObjects(this, query);
+        
+        
+        // cache results if needed
+        if (useCache) {
+            if (localCache) {
+                getObjectStore().cacheQueryResult(name, results);
+            }
+            else if (sharedCache) {
+                getObjectStore().getDataRowCache().cacheSnapshots(
+                        name,
+                        observer.getResults(query));
+            }
+        }
+
+        return results;
+    }
+
+    
+    /**
+     * Returns a list of objects or DataRows for a named query stored in one of the DataMaps.
+     * Internally Cayenne uses a caching policy defined in the named query. If refresh
+     * flag is true, a refresh is forced no matter what the caching policy is.
+     * 
+     * @param queryName a name of a GenericSelectQuery defined in one of the DataMaps. If no such
+     * query is defined, this method will throw a CayenneRuntimeException.
+     * 
+     * @since 1.1
+     */
+    public List performQuery(String queryName, boolean refresh) {
+
+        // find query...
+        Query query = getEntityResolver().getQuery(queryName);
+        if (query == null) {
+            throw new CayenneRuntimeException("There is no saved query for name '"
+                    + queryName
+                    + "'.");
+        }
+
+        if (!(query instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException("Query for name '"
+                    + queryName
+                    + "' is not a GenericSelectQuery: "
+                    + query);
+        }
+
+        GenericSelectQuery selectQuery = (GenericSelectQuery) query;
+
+        if (refresh) {
+            // TODO: decorate the query with refresh flag
+        }
+
+        return performQuery(selectQuery);
+    }
+
+    /**
+     * Populates the <code>map</code> with ObjectId values from master objects related
+     * to this object.
      */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
         ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(dataObject);
