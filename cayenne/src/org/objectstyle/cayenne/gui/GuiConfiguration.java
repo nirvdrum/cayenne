@@ -80,10 +80,20 @@ public class GuiConfiguration extends DefaultConfiguration {
 
 
     public static void initSharedConfig(File proj_file) throws Exception {
+    	initSharedConfig(proj_file, false);
+    }
+
+	/** Create configuration obj and initialize its state.
+	 * @param proj_file Project file to work with
+	 * @param do_init If true, parse project file*/
+    public static void initSharedConfig(File proj_file, boolean do_init) 
+    throws Exception {
     	guiConfig = new GuiConfiguration();
     	guiConfig.projFile = proj_file;
-    	guiConfig.init();
+    	if (do_init)
+    		guiConfig.init();
     }
+
     
     /** Should never be called before initSharedConfig(). */
     public static GuiConfiguration getGuiConfig()
