@@ -120,10 +120,7 @@ public class IdentityColumnsTst extends CayenneTestCase {
 
         context.commitChanges();
 
-        // this will throw an exception if id wasn't generated
-
         int[] ids = new int[idObjects.length];
-
         for (int i = 0; i < idObjects.length; i++) {
             ids[i] = DataObjectUtils.intPKForObject(idObjects[i]);
             assertTrue(ids[i] > 0);
@@ -146,9 +143,41 @@ public class IdentityColumnsTst extends CayenneTestCase {
     }
 
     public void testUpdateDependentWithNewMaster() throws Exception {
-        if (getAccessStackAdapter().getAdapter().supportsGeneratedKeys()) {
-            fail("TODO: build test case for a committed dependent object switching master...");
-        }
+        DataContext context = createDataContext();
+        GeneratedColumnTest master1 = (GeneratedColumnTest) context
+                .createAndRegisterNewObject(GeneratedColumnTest.class);
+        master1.setName("aaa");
+
+        GeneratedColumnDep dependent = (GeneratedColumnDep) context
+                .createAndRegisterNewObject(GeneratedColumnDep.class);
+        dependent.setName("aaa");
+        dependent.setToMaster(master1);
+
+        context.commitChanges();
+
+        // change master
+        GeneratedColumnTest master2 = (GeneratedColumnTest) context
+                .createAndRegisterNewObject(GeneratedColumnTest.class);
+        master2.setName("bbb");
+        
+        // TESTING THIS
+        dependent.setToMaster(master2);
+        context.commitChanges();
+        
+        int id1 = DataObjectUtils.intPKForObject(master2);
+        assertTrue(id1 >= 0);
+
+        int id2 = DataObjectUtils.intPKForObject(dependent);
+        assertTrue(id2 >= 0);
+        assertEquals(id1, id2);
+        
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                master2, dependent
+        }));
+
+        assertNotNull(DataObjectUtils
+                .objectForPK(context, GeneratedColumnTest.class, id1));
+        assertNotNull(DataObjectUtils.objectForPK(context, GeneratedColumnDep.class, id2));
     }
 
     public void testGeneratedDefaultValue() throws Exception {
@@ -158,7 +187,8 @@ public class IdentityColumnsTst extends CayenneTestCase {
     }
 
     public void testPropagateToDependent() throws Exception {
-        GeneratedColumnTest idObject = (GeneratedColumnTest) createDataContext()
+        DataContext context = createDataContext();
+        GeneratedColumnTest idObject = (GeneratedColumnTest) context
                 .createAndRegisterNewObject(GeneratedColumnTest.class);
         idObject.setName("aaa");
 
@@ -168,12 +198,24 @@ public class IdentityColumnsTst extends CayenneTestCase {
         dependent.setName("aaa");
         dependent.setToMaster(idObject);
 
-        idObject.getDataContext().commitChanges();
+        context.commitChanges();
 
         // this will throw an exception if id wasn't generated
-        assertTrue(DataObjectUtils.intPKForObject(idObject) >= 0);
-        assertTrue(DataObjectUtils.intPKForObject(dependent) >= 0);
-        assertEquals(DataObjectUtils.intPKForObject(idObject), DataObjectUtils
-                .intPKForObject(dependent));
+        int id1 = DataObjectUtils.intPKForObject(idObject);
+        assertTrue(id1 >= 0);
+
+        int id2 = DataObjectUtils.intPKForObject(dependent);
+        assertTrue(id2 >= 0);
+
+        assertEquals(id1, id2);
+
+        // refetch from DB
+        context.invalidateObjects(Arrays.asList(new Object[] {
+                idObject, dependent
+        }));
+
+        assertNotNull(DataObjectUtils
+                .objectForPK(context, GeneratedColumnTest.class, id1));
+        assertNotNull(DataObjectUtils.objectForPK(context, GeneratedColumnDep.class, id2));
     }
 }
