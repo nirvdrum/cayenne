@@ -142,8 +142,6 @@ implements ActionListener, DbEntityDisplayListener
 		TableColumn col;
 		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_NAME);
 		col.setMinWidth(150);
-		TextFieldCellEditor editor = new TextFieldCellEditor();
-		col.setCellEditor(editor);
 		col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_TYPE);
 		col.setMinWidth(90);
 		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());
