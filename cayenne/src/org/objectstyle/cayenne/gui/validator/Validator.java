@@ -110,8 +110,10 @@ public class Validator {
 		return errMsg;
 	}
 
-	/** Checks if there are empty or duplicate domain names. 
-	  * Also checks data nodes. */
+	/** 
+	 * Checks if there are empty or duplicate domain names. 
+	 * Also checks data nodes. 
+	 */
 	private int validateDomains(DataDomain[] domains) {
 		int status = ErrorMsg.NO_ERROR;
 		DomainErrorMsg msg;
@@ -119,12 +121,7 @@ public class Validator {
 		HashMap name_map = new HashMap();
 
 		for (int i = 0; i < domains.length; i++) {
-			String name = domains[i].getName().trim();
-			if (name == null) {
-				name = "";
-			} else {
-				name = name.trim();
-			}
+			String name = (domains[i].getName() != null) ? domains[i].getName().trim() : "";
 
 			if (name.length() == 0) {
 				msg =

@@ -77,7 +77,7 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
 	}
 
 	/** 
-	 * Open hyperlink in the default browser.
+	 * Opens hyperlink in the default browser.
 	 */
 	public void hyperlinkUpdate(HyperlinkEvent event) {
 		if (event.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
