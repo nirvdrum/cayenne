@@ -64,7 +64,6 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -92,7 +91,6 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultList implements List {
-    private static Logger logObj = Logger.getLogger(IncrementalFaultList.class);
 
     protected int pageSize;
     protected List elements;
@@ -916,5 +914,5 @@ public class IncrementalFaultList implements List {
         public void set(Object o) {
             throw new UnsupportedOperationException("set operation not supported");
         }
-    };
+    }
 }

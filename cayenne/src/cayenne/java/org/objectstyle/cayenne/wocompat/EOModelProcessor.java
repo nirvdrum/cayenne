@@ -200,13 +200,13 @@ public class EOModelProcessor {
 			Map prototypeAttrMap = helper.getPrototypeAttributeMapFor(prototypeName);
 			
 			String dbAttrName = (String) attrMap.get("columnName");
-			if (null == dbAttrName)  dbAttrName = (String) prototypeAttrMap.get("columnName");;
+			if (null == dbAttrName)  dbAttrName = (String) prototypeAttrMap.get("columnName");
 			
             String attrName = (String) attrMap.get("name");
-			if (null == attrName)  attrName = (String) prototypeAttrMap.get("name");;
+			if (null == attrName)  attrName = (String) prototypeAttrMap.get("name");
 			
             String attrType = (String) attrMap.get("valueClassName");
-			if (null == attrType)  attrType = (String) prototypeAttrMap.get("valueClassName");;
+			if (null == attrType)  attrType = (String) prototypeAttrMap.get("valueClassName");
 			
             String javaType = helper.javaTypeForEOModelerType(attrType);
             EODbAttribute dbAttr = null;

@@ -58,8 +58,6 @@ package org.objectstyle.cayenne.modeler;
 
 import java.io.File;
 
-import org.apache.log4j.Logger;
-
 /** 
  * Main frame of CayenneModeler. Responsibilities include 
  * coordination of enabling/disabling of menu and toolbar.
@@ -69,7 +67,6 @@ import org.apache.log4j.Logger;
  * @deprecated Since 1.1 Main and CayenneModelerFrame supercede this class
  */
 public class Editor extends CayenneModelerFrame {
-    private static Logger logObj = Logger.getLogger(Editor.class);
 
     /**
      * Main method that starts the CayenneModeler.
