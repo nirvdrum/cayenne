@@ -1,0 +1,120 @@
+<document>
+<title>User Guide - Working with DataObjects</title>
+<toc name="toc-user-guide" chapter="8. Working with DataObjects"/>
+<body>
+    <section name="8. Working with DataObjects">
+    	<subsection name="8.6 Handling Inheritance">
+    	<p>Persistent objects can form an inheritance hierarchy, mapping to the same base table, as
+    	described in the Modeler Guide. DataObjects that use inheritance do not differ too much from
+    	"regular" DataObjects, however there are a few things to keep in mind when working with such objects.
+    	
+    	</p>
+    	
+    	<subsection name="8.6.1 Inheritance and SelectQueries">
+    	<p>
+    	Consider the following class hierarchy also used in the Modeler Guide example: 
+    	</p>
+    	<img src="/images/modelerguide/inheritance-diagram.jpg" width="300" height="249"/>
+    	
+    	<p>Executing a SelectQuery with Employee class as root will potentially return a mix of 
+    	Employees and Managers (who are also Employees of course), but no CustomerContact objects:</p>
+    	
+<source>DataContext context;
+...
+SelectQuery query = new SelectQuery(Employee.class);
+List employees = context.performQuery(query);
+ 
+// employees list will contain "regular" employees and managers
+Iterator it = employees.iterator();
+while(it.hasNext()) {
+   Employee e = (Employee) it.next();
+   if(e instanceof Manager) {
+   	// do something with manager...
+   }
+}</source>
+ 
+ 		<p>The need to determine the correct class for each fetched database row makes 
+ 		queries on entities that use inheritance somewhat slower than the regular queries. 
+ 		If the application doesn't care about subclasses below the query root class, such 
+ 		queries can be optimized by explicitly turning off inheritance resolution. If this is done,
+ 		the example above will return all Managers as instances of Employee superclass:</p>
+ <source>DataContext context;
+...
+SelectQuery query = new SelectQuery(Employee.class);
+ 
+// *** explicitly turn off inheritance resolution
+query.setResolvingInherited(false);
+ 
+List employees = context.performQuery(query);
+ 
+// employees list will contain no Manager instances...
+// all Managers will be returned as regular Employees</source>
+ 
+ 		<p> </p>  	
+    	<panel name="Relationship Note:">Whenever an object is obtained via a relationship, 
+    	it is always fully resolved to the lowest possible subclass in an entity inheritance tree.
+    	</panel>
+    	<p> </p>
+    	<panel name="Warning:">Use "setResolvingInherited(false)" with caution, and only if you never
+    	plan to work with subclasses. The downside of it is that the DataContext may end up with two
+    	objects pointing to the same database row, thus violating uniquing principle. For instance
+    	in the example above this may happen if at a later time user decides to fetch Managers directly,
+    	or if a Manager is returned from a relationship.
+    	</panel>
+    	</subsection>
+    	
+		<subsection name="8.6.2 Inheritance and new DataObjects">
+    	<p>Assigning correct property values to the new DataObjects in the inheritance hierarchy,
+    	that will later define the "class" of the database row, is one task that is not currently automated 
+    	in Cayenne and requires manual coding. In the future versions of Cayenne such properties will 
+    	likely be handled in the mapping outside of Java classes, and the advise below will be obsolete.</p>
+    	
+    	<p>In the example above AbstractPerson may have a property called "personType" that 
+    	designates the type of person in the database. In Java this property is rather meanigless,
+    	since person type is defined already by the Java class, however we still have to keep it around
+    	for the sake of database consistency.  The only time when you need to care about 
+    	such "class designator" properties is when the object is created and registered with DataContext.
+    	One way to do it is to override "setPersistenceState(..)" method on each DataObject class in the 
+    	inheritance hierarchy:
+    	</p>
+<source>public class Employee extends _Employee {
+    public void setPersistenceState(int state) {
+        super.setPersistenceState(state);
+        
+        // if object was just created
+        if(state == PersistenceState.NEW) {
+           setPersonType("EMPLOYEE");
+        }
+    }
+...
+}
+
+public class Manager extends _Manager {
+    public void setPersistenceState(int state) {
+        super.setPersistenceState(state);
+        
+        // if object was just created
+        if(state == PersistenceState.NEW) {
+           setPersonType("MANAGER");
+        }
+    }
+...
+}
+
+public class CustomerContact extends _CustomerContact {
+    public void setPersistenceState(int state) {
+        super.setPersistenceState(state);
+        
+        // if object was just created
+        if(state == PersistenceState.NEW) {
+           setPersonType("CUSTOMER");
+        }
+    }
+...
+}</source>
+    	</subsection>
+    	</subsection>
+    </section>
+</body>
+</document>
+
