@@ -184,9 +184,10 @@ public class QueryLogger {
         String userName,
         String password) {
         if (isLoggable(logLevel)) {
-            StringBuffer buf = new StringBuffer("Opening connection -");
+            StringBuffer buf = new StringBuffer("Opening connection: ");
 
-            buf.append("\n\tDatabase URL: ").append(url);
+            // append URL on the same line to make log somewhat grep-friendly
+            buf.append(url);
             buf.append("\n\tLogin: ").append(userName);
             buf.append("\n\tPassword: *******");
 
@@ -207,10 +208,12 @@ public class QueryLogger {
     public static void logPoolCreated(Level logLevel, DataSourceInfo dsi) {
         if (isLoggable(logLevel)) {
             StringBuffer buf =
-                new StringBuffer("Created connection pool -");
+                new StringBuffer("Created connection pool: ");
 
             if (dsi != null) {
-
+            	// append URL on the same line to make log somewhat grep-friendly
+				buf.append(dsi.getDataSourceUrl());
+				
                 if (dsi.getAdapterClassName() != null) {
                     buf.append("\n\tCayenne DbAdapter: ").append(
                         dsi.getAdapterClassName());
@@ -226,7 +229,7 @@ public class QueryLogger {
                     buf.append("\n\tMax. connections in the pool: ").append(
                         dsi.getMaxConnections());
                 }
-                buf.append("\n\tDatabase URL: ").append(dsi.getDataSourceUrl());
+               
                 buf.append("\n\tLogin: ").append(dsi.getUserName());
                 buf.append("\n\tPassword: *******");
             } else {

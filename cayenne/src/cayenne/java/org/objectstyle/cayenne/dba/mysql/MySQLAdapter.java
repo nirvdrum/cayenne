@@ -52,29 +52,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.dba.mysql;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbRelationship;
 
 /** DbAdapter implementation for <a href="http://mysql.com">MySQL RDBMS</a>. */
 public class MySQLAdapter extends JdbcAdapter {
-    public boolean supportsFkConstraints() {
-        return false;
-    }
+	public boolean supportsFkConstraints() {
+		return false;
+	}
 
-    /** Throws an exception, since FK constraints are not supported by MySQL. */
-    public String createFkConstraint(DbRelationship rel) {
-        throw new CayenneRuntimeException("FK constraints are not supported.");
-    }
-    
-    /** 
-     * Returns null, since views are not yet supported in MySQL. Views
-     * support is promised in MySQL 4.1.
-     */
-    public String tableTypeForView() {
-        return null;
-    }
+	/** Throws an exception, since FK constraints are not supported by MySQL. */
+	public String createFkConstraint(DbRelationship rel) {
+		throw new CayenneRuntimeException("FK constraints are not supported.");
+	}
+
+	/** 
+	 * Returns null, since views are not yet supported in MySQL. Views
+	 * support is promised in MySQL 4.1.
+	 */
+	public String tableTypeForView() {
+		return null;
+	}
+
+	/**
+	  * Creates and returns a primary key generator. Overrides superclass 
+	  * implementation to return an
+	  * instance of MySQLPkGenerator that does the correct table locking.
+	  */
+	protected PkGenerator createPkGenerator() {
+		return new MySQLPkGenerator();
+	}
 }

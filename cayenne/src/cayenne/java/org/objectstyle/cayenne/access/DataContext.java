@@ -712,18 +712,21 @@ public class DataContext implements QueryEngine, Serializable {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
 
-		// is there anything to do?
-		if (this.hasChanges() == false) {
-			return;
-		}
+        // prevent multiple commits occuring simulteneously 
+		synchronized (objectStore) {
+			// is there anything to do?
+			if (this.hasChanges() == false) {
+				return;
+			}
 
-		ContextCommit worker = new ContextCommit(this);
+			ContextCommit worker = new ContextCommit(this);
 
-		try {
-			worker.commit(logLevel);
-			this.clearFlattenedUpdateQueries();
-		} catch (CayenneException ex) {
-			throw new CayenneRuntimeException(ex);
+			try {
+				worker.commit(logLevel);
+				this.clearFlattenedUpdateQueries();
+			} catch (CayenneException ex) {
+				throw new CayenneRuntimeException(ex);
+			}
 		}
 	}
 
@@ -841,7 +844,7 @@ public class DataContext implements QueryEngine, Serializable {
 
 		int prefetchSize = prefetches.size();
 		ObjEntity entity = getEntityResolver().lookupObjEntity(query);
-		
+
 		for (int i = 0; i < prefetchSize; i++) {
 			String prefetchKey = (String) prefetches.get(i);
 			if (prefetchKey.indexOf(Entity.PATH_SEPARATOR) >= 0) {
@@ -865,7 +868,7 @@ public class DataContext implements QueryEngine, Serializable {
 						+ "Can't prefetch to-many: "
 						+ prefetchKey);
 			}
-			
+
 			PrefetchHelper.resolveToOneRelations(this, objects, prefetchKey);
 		}
 

@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.util.WebApplicationResourceLocator;
   * @author Scott Finnerty
   */
 public class BasicServletConfiguration extends DefaultConfiguration {
-	private static Logger logObj = Logger.getLogger(DefaultConfiguration.class);
+	private static Logger logObj = Logger.getLogger(BasicServletConfiguration.class);
 
 	public static final String CONFIGURATION_PATH_KEY =
 		"cayenne.configuration.path";
@@ -88,7 +88,22 @@ public class BasicServletConfiguration extends DefaultConfiguration {
 
 	protected ServletContext servletContext;
 
-	public static BasicServletConfiguration initializeConfiguration(ServletContext ctxt) {
+	public synchronized static BasicServletConfiguration initializeConfiguration(ServletContext ctxt) {
+		// check if this web application already has a servlet configuration
+		// sometimes multiple initializations are done by mistake...
+		
+		// Andrus: are there any cases when reinitialization is absolutely required?
+		Configuration oldConfiguration = Configuration.getSharedConfiguration();
+		if (oldConfiguration instanceof BasicServletConfiguration) {
+			BasicServletConfiguration basicConfiguration =
+				(BasicServletConfiguration) oldConfiguration;
+			if (basicConfiguration.getServletContext() == ctxt) {
+				logObj.info(
+					"BasicServletConfiguration is already initialized, reusing.");
+				return basicConfiguration;
+			}
+		}
+
 		BasicServletConfiguration conf = new BasicServletConfiguration(ctxt);
 		Configuration.initializeSharedConfiguration(conf);
 
@@ -103,7 +118,7 @@ public class BasicServletConfiguration extends DefaultConfiguration {
 		synchronized (session) {
 			DataContext ctxt =
 				(DataContext) session.getAttribute(DATA_CONTEXT_KEY);
-				
+
 			if (ctxt == null) {
 				ctxt = DataContext.createDataContext();
 				session.setAttribute(
