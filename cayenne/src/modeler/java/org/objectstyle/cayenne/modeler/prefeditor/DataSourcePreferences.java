@@ -112,25 +112,31 @@ public class DataSourcePreferences extends CayenneController {
                 DBConnectionInfo.class);
 
         int len = sources.size();
-        Object[] keys = new Object[len + 1];
-        keys[0] = "";
+        Object[] keys = new Object[len];
         Iterator it = sources.iterator();
-        for (int i = 1; i <= len; i++) {
+        for (int i = 0; i < len; i++) {
             DBConnectionInfo info = (DBConnectionInfo) it.next();
             keys[i] = info.getKey();
             dataSources.put(keys[i], info);
         }
 
         Arrays.sort(keys);
-        view.getDataSources().setModel(new DefaultComboBoxModel(keys));
+        DefaultComboBoxModel dataSourceModel = new DefaultComboBoxModel(keys);
+        view.getDataSources().setModel(dataSourceModel);
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(DbAdapterInfo
+        DefaultComboBoxModel adapterModel = new DefaultComboBoxModel(DbAdapterInfo
                 .getStandardAdapters());
-        model.insertElementAt("", 0);
-        view.getDataSourceEditor().getAdapters().setModel(model);
+        adapterModel.insertElementAt("", 0);
+        view.getDataSourceEditor().getAdapters().setModel(adapterModel);
         view.getDataSourceEditor().getAdapters().setSelectedIndex(0);
 
         initBindings();
+
+        // show first item
+        if (len > 0) {
+            view.getDataSources().setSelectedIndex(0);
+            editDataSourceAction();
+        }
     }
 
     public Component getView() {
@@ -229,6 +235,7 @@ public class DataSourcePreferences extends CayenneController {
 
     public void editDataSourceAction() {
         Object selected = view.getDataSources().getSelectedItem();
+
         currentDataSource = (DBConnectionInfo) dataSources.get(selected);
         DataSourceEditorView subview = view.getDataSourceEditor();
 

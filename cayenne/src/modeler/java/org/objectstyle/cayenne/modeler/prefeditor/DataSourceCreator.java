@@ -214,9 +214,15 @@ public class DataSourceCreator extends CayenneController {
      * Pops up a dialog and blocks current thread until the dialog is closed.
      */
     public DBConnectionInfo startupAction() {
+        // this should handle closing via ESC
+        canceled = true;
+
         view.setModal(true);
         view.pack();
+        view.setResizable(false);
+        makeCloseableOnEscape();
         centerView();
+
         view.show();
         return createDataSource();
     }

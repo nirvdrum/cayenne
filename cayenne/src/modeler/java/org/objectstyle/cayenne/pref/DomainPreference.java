@@ -61,7 +61,6 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.objectstyle.cayenne.DataObjectUtils;
-import org.objectstyle.cayenne.pref.auto._DomainPreference;
 import org.objectstyle.cayenne.util.Util;
 
 /**

@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.pref.auto._Domain;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**

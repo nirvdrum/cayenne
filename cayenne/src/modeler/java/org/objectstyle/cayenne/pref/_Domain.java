@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.pref.auto;
+package org.objectstyle.cayenne.pref;
 
 import java.util.List;
 
@@ -42,19 +42,19 @@ public class _Domain extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void setParentDomain(org.objectstyle.cayenne.pref.Domain parentDomain) {
+    public void setParentDomain(Domain parentDomain) {
         setToOneTarget("parentDomain", parentDomain, true);
     }
 
-    public org.objectstyle.cayenne.pref.Domain getParentDomain() {
-        return (org.objectstyle.cayenne.pref.Domain)readProperty("parentDomain");
+    public Domain getParentDomain() {
+        return (Domain)readProperty("parentDomain");
     } 
     
     
-    public void addToPreferences(org.objectstyle.cayenne.pref.DomainPreference obj) {
+    public void addToPreferences(DomainPreference obj) {
         addToManyTarget("preferences", obj, true);
     }
-    public void removeFromPreferences(org.objectstyle.cayenne.pref.DomainPreference obj) {
+    public void removeFromPreferences(DomainPreference obj) {
         removeToManyTarget("preferences", obj, true);
     }
     public List getPreferences() {
@@ -62,10 +62,10 @@ public class _Domain extends org.objectstyle.cayenne.CayenneDataObject {
     }
     
     
-    public void addToSubdomains(org.objectstyle.cayenne.pref.Domain obj) {
+    public void addToSubdomains(Domain obj) {
         addToManyTarget("subdomains", obj, true);
     }
-    public void removeFromSubdomains(org.objectstyle.cayenne.pref.Domain obj) {
+    public void removeFromSubdomains(Domain obj) {
         removeToManyTarget("subdomains", obj, true);
     }
     public List getSubdomains() {
