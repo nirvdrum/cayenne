@@ -60,7 +60,21 @@ import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbRelationship;
 
-/** DbAdapter implementation for <a href="http://mysql.com">MySQL RDBMS</a>. */
+/**
+ * DbAdapter implementation for <a href="http://www.mysql.com">MySQL RDBMS</a>.
+ * Sample <a target="_top" href="../../../../../../../developer.html#unit">connection 
+ * settings</a> to use with MySQL are shown below:
+ * 
+<pre>
+test-mysql.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
+test-mysql.jdbc.username = test
+test-mysql.jdbc.password = secret
+test-mysql.jdbc.url = jdbc:mysql://serverhostname/cayenne
+test-mysql.jdbc.driver = org.gjt.mm.mysql.Driver
+</pre>
+ * 
+ * @author Andrei Adamchik
+ */
 public class MySQLAdapter extends JdbcAdapter {
 	public boolean supportsFkConstraints() {
 		return false;

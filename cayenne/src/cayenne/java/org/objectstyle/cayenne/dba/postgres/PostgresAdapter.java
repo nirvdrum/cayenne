@@ -65,7 +65,21 @@ import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
 
-/** DbAdapter implementation for <a href="http://postgresql.org">PostgreSQL RDBMS</a>. */
+/**
+ * DbAdapter implementation for <a href="http://www.postgresql.org">PostgreSQL RDBMS</a>.
+ * Sample <a target="_top" href="../../../../../../../developer.html#unit">connection 
+ * settings</a> to use with PostgreSQL are shown below:
+ * 
+<pre>
+test-postgresql.cayenne.adapter = org.objectstyle.cayenne.dba.postgres.PostgresAdapter
+test-postgresql.jdbc.username = test
+test-postgresql.jdbc.password = secret
+test-postgresql.jdbc.url = jdbc:postgresql://serverhostname/cayenne
+test-postgresql.jdbc.driver = org.postgresql.Driver
+</pre>
+ * 
+ * @author Dirk Olmes, Holger Hoffstätte
+ */
 public class PostgresAdapter extends JdbcAdapter
 {
     /**

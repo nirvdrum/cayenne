@@ -66,8 +66,7 @@ import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 
 /** 
- * DbAdapter implementation for 
- * <a href="http://www.sybase.com">Sybase RDBMS</a>.
+ * DbAdapter implementation for <a href="http://www.sybase.com">Sybase RDBMS</a>.
  *
  * @author Andrei Adamchik
  */

@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
  * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/">
  * HSQLDB RDBMS</a>. Sample <a target="_top" 
  * href="../../../../../../../developer.html#unit">connection 
- * settings</a> to use with HSQLDB adapter are shown below:
+ * settings</a> to use with HSQLDB are shown below:
  * 
 <pre>
 test-hsqldb.cayenne.adapter = org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter
@@ -76,6 +76,8 @@ test-hsqldb.jdbc.password = secret
 test-hsqldb.jdbc.url = jdbc:hsqldb:hsql://serverhostname
 test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
 </pre>
+ *
+ * @author Holger Hoffstätte
  */
 public class HSQLDBAdapter extends JdbcAdapter {
 

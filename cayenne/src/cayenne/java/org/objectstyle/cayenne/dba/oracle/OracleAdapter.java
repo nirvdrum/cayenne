@@ -76,10 +76,9 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
- * DbAdapter implementation for <a href="http://www.oracle.com">Oracle
- * RDBMS</a>. Sample <a target="_top" 
- * href="../../../../../../../developer.html#unit">connection 
- * settings</a> to use with Oracle adapter are shown below:
+ * DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>.
+ * Sample <a target="_top" href="../../../../../../../developer.html#unit">connection 
+ * settings</a> to use with Oracle are shown below:
  * 
 <pre>
 test-oracle.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
@@ -88,6 +87,8 @@ test-oracle.jdbc.password = secret
 test-oracle.jdbc.url = jdbc:oracle:thin:@192.168.0.20:1521:ora1 
 test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
 </pre>
+ *
+ * @author Andrei Adamchik
  */
 public class OracleAdapter extends JdbcAdapter {
     private static Logger logObj = Logger.getLogger(OracleAdapter.class);
