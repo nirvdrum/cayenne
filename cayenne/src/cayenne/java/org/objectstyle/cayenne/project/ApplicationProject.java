@@ -57,51 +57,19 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class RootProjectFileTst extends CayenneTestCase {
-    protected RootProjectFile rpf;
-    protected ProjectConfiguration conf;
-    protected Project pr;
-    
-    
-    /**
-     * Constructor for RootProjectFileTst.
-     * @param arg0
-     */
-    public RootProjectFileTst(String arg0) {
-        super(arg0);
-    }
+public class ApplicationProject extends Project {
 
     /**
-     * @see junit.framework.TestCase#setUp()
+     * Constructor for ApplicationProject.
+     * @param name
+     * @param projectFile
      */
-    protected void setUp() throws Exception {
-        super.setUp();
-        pr = new TstProject("abc", new File("xyz"));
-        conf = new ProjectConfiguration(new File("tstproj.123"));
-        rpf = new RootProjectFile(pr, conf);
-    }
-    
-    public void testProjectFileForObject() throws Exception {
-    	ProjectFile pf = ProjectFile.projectFileForObject(pr, conf);
-    	assertNotNull(pf);
-    	assertTrue(pf instanceof RootProjectFile);
-    	assertSame(conf, pf.getObject());
-    }
-
-    public void testGetObject() throws Exception {
-    	assertSame(conf, rpf.getObject());
-    }
-    
-    public void testGetObjectName() throws Exception {
-    	assertEquals("cayenne", rpf.getObjectName());
-    }
-    
-    public void testGetFileName() throws Exception {
-    	assertEquals("cayenne.xml", rpf.getLocation());
+    public ApplicationProject(String name, File projectFile) {
+        super(name, projectFile);
     }
 }
+

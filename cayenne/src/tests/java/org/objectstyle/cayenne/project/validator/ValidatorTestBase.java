@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.TstProject;
 
 /**
  * @author Andrei Adamchik
@@ -91,7 +92,7 @@ public class ValidatorTestBase extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        Project project = new Project("abc", new File(System.getProperty("user.dir")));
+        Project project = new TstProject("abc", new File(System.getProperty("user.dir")));
         validator = new Validator(project);
         conf = project.getConfig();
     }

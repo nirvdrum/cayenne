@@ -72,7 +72,7 @@ public class ProjectSet {
     protected Project currentProject;
 
     public static Project createProject(String name, File projectFile) {
-    	return new Project(name, projectFile);
+    	return new ApplicationProject(name, projectFile);
     }
     
     

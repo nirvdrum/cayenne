@@ -92,7 +92,7 @@ public class ProjectTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         f = new File("xyz");
-        p = new Project("abc", f);
+        p = new TstProject("abc", f);
     }
     
     public void testBuildFileList() throws Exception {

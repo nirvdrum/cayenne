@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * 
  * @author Andrei Adamchik
  */
-public class Project {
+public abstract class Project {
     static Logger logObj = Logger.getLogger(Project.class);
  
     public static final String CURRENT_PROJECT_VERSION = "1.0";

@@ -82,7 +82,7 @@ public class ProjectSetTst extends CayenneTestCase {
     }
 
     public void testProject() throws Exception {
-    	Project p = new Project("abc", new File("xyz"));
+    	Project p = new TstProject("abc", new File("xyz"));
     	set.addProject(p);
     	
     	assertSame(p, set.getProject(p.getName()));
@@ -91,8 +91,8 @@ public class ProjectSetTst extends CayenneTestCase {
     }
 
     public void testAllProjects() throws Exception {
-    	Project p1 = new Project("abc1", new File("xyz"));
-    	Project p2 = new Project("abc2", new File("xyz"));
+    	Project p1 = new TstProject("abc1", new File("xyz"));
+    	Project p2 = new TstProject("abc2", new File("xyz"));
     	set.addProject(p1);
     	set.addProject(p2);
     	

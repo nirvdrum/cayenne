@@ -82,7 +82,7 @@ public class DataNodeFileTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        pr = new Project("abc", new File("xyz"));
+        pr = new TstProject("abc", new File("xyz"));
         node = new DataNode("n1");
         dnf = new DataNodeFile(pr, node);
     }
