@@ -1232,11 +1232,11 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Performs a single database query that does not return the result.
      * This is a shortcut for <code>performQueries(Collections.singletonList(query), 
-     * new DefaultOperationObserver())</code>.
+     * new QueryResult())</code>.
      * 
      * @since 1.1
      */
-    public void performModifyQuery(Query query) {
+    public void performNonSelectingQuery(Query query) {
         performQueries(Collections.singletonList(query), new QueryResult());
     }
 
