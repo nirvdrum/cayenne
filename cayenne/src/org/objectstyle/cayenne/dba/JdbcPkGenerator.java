@@ -107,7 +107,31 @@ public class JdbcPkGenerator implements PkGenerator {
     }
 
     public String generatePkForDbEntityString(DbEntity ent) {
-        return null;
+        StringBuffer buf = new StringBuffer();
+        buf.append(pkSelectString(ent.getName())).append('\n').append(
+            pkUpdateString(ent.getName()));
+        return buf.toString();
+    }
+
+    private String pkSelectString(String entName) {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = '")
+            .append(entName)
+            .append('\'');
+        return buf.toString();
+    }
+
+    private String pkUpdateString(String entName) {
+        StringBuffer buf = new StringBuffer();
+        buf
+            .append("UPDATE AUTO_PK_SUPPORT")
+            .append(" SET NEXT_ID = NEXT_ID + ")
+            .append(pkCacheSize)
+            .append(" WHERE TABLE_NAME = '")
+            .append(entName)
+            .append('\'');
+        return buf.toString();
     }
 
     /** Generates database objects to provide
@@ -280,14 +304,8 @@ public class JdbcPkGenerator implements PkGenerator {
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
         ArrayList queries = new ArrayList(2);
 
-        StringBuffer b1 = new StringBuffer();
-        b1
-            .append("SELECT NEXT_ID FROM AUTO_PK_SUPPORT WHERE TABLE_NAME = '")
-            .append(ent.getName())
-            .append("'");
-
         SqlSelectQuery sel = new SqlSelectQuery();
-        sel.setSqlString(b1.toString());
+        sel.setSqlString(pkSelectString(ent.getName()));
         sel.setResultDesc(resultDesc);
         queries.add(sel);
 
@@ -369,16 +387,7 @@ public class JdbcPkGenerator implements PkGenerator {
             }
 
             // while transaction is still in progress, modify update query that will be executed next
-
-            StringBuffer buf = new StringBuffer();
-            buf
-                .append("UPDATE AUTO_PK_SUPPORT SET NEXT_ID = ")
-                .append(nextId.intValue() + pkCacheSize)
-                .append(" WHERE TABLE_NAME = '")
-                .append(entName)
-                .append("' AND NEXT_ID = ")
-                .append(nextId);
-            queryTemplate.setSqlString(buf.toString());
+            queryTemplate.setSqlString(pkUpdateString(entName));
         }
 
         public void nextCount(Query query, int resultCount) {
