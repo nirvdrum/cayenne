@@ -64,6 +64,12 @@ import java.util.Map;
  * @author Andrei Adamchik
  */
 public interface ConfigStatus {
+	/**
+	 * Returns a list of error messages not directly associated with project
+	 * objects, such as XML pare exceptions, IOExceptions, etc.
+	 */
+	public List getOtherFailures();
+	
     /** 
      * Returns a list of map reference names that failed to load.
      */

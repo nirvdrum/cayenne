@@ -98,6 +98,8 @@ public class ConfigLoader implements ConfigStatus {
     protected XMLReader parser;
     protected Locator locator;
     protected List domains;
+
+    protected List otherFailures;
     protected Map failedMaps;
     protected Map failedAdapters;
     protected Map failedDataSources;
@@ -180,7 +182,7 @@ public class ConfigLoader implements ConfigStatus {
        * @return true if no failures happened during domain loading,
        * false - if at least one non-fatal failure ocurred.
        */
-    public boolean loadDomains(InputStream in) throws IOException, SAXException {
+    public boolean loadDomains(InputStream in) {
         logObj.log(logLevel, "start configuration loading.");
         if (factory != null) {
             logObj.log(
@@ -195,11 +197,20 @@ public class ConfigLoader implements ConfigStatus {
         failedDataSources = new HashMap();
         failedAdapters = new HashMap();
         failedMapRefs = new ArrayList();
+        otherFailures = new ArrayList();
 
         DefaultHandler handler = new RootHandler();
         parser.setContentHandler(handler);
         parser.setErrorHandler(handler);
-        parser.parse(new InputSource(in));
+
+        try {
+            parser.parse(new InputSource(in));
+        } catch (IOException ioex) {
+            otherFailures.add(
+                "Error reading configuration: " + ioex.getMessage());
+        } catch (SAXException saxex) {
+            otherFailures.add("XML Error: " + saxex.getMessage());
+        }
 
         // return true if no failures
         return !hasFailures();
@@ -213,6 +224,13 @@ public class ConfigLoader implements ConfigStatus {
             || (failedDataSources != null && failedDataSources.size() > 0)
             || (failedAdapters != null && failedAdapters.size() > 0)
             || (failedMapRefs != null && failedMapRefs.size() > 0);
+    }
+
+    /**
+      * @see org.objectstyle.cayenne.conf.ConfigStatus#getOtherFailures()
+      */
+    public List getOtherFailures() {
+        return otherFailures;
     }
 
     // SAX handlers start below

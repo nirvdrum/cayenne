@@ -60,6 +60,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.conf.ConfigStatus;
+
 /**
  * Concrete subclass of Project used for testing purposes.
  * 
@@ -99,6 +101,13 @@ public class TstProject extends Project {
      * @see org.objectstyle.cayenne.project.Project#projectFileForObject(Object)
      */
     public ProjectFile projectFileForObject(Object obj) {
+        return null;
+    }
+    
+    /**
+     * @see org.objectstyle.cayenne.project.Project#projectLoadStatus()
+     */
+    public ConfigStatus projectLoadStatus() {
         return null;
     }
 }
