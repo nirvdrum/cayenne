@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.wocompat;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -140,16 +141,19 @@ public class EOModelProcessor {
         // create DbEntity...since EOF allows the same table to be 
         // associated with multiple EOEntities, check for name duplicates
         String dbEntityName = (String) helper.entityInfo(name).get("externalName");
-        int i = 0;
-        String dbEntityBaseName = dbEntityName;
-        while (dataMap.getDbEntity(dbEntityName, false) != null) {
-            dbEntityName = dbEntityBaseName + i++;
+
+        if (dbEntityName != null) {
+            int i = 0;
+            String dbEntityBaseName = dbEntityName;
+            while (dataMap.getDbEntity(dbEntityName, false) != null) {
+                dbEntityName = dbEntityBaseName + i++;
+            }
+
+            DbEntity de = new DbEntity(dbEntityName);
+            dataMap.addDbEntity(de);
+            e.setDbEntity(de);
         }
 
-        DbEntity de = new DbEntity(dbEntityName);
-        e.setDbEntity(de);
-
-        dataMap.addDbEntity(de);
         dataMap.addObjEntity(e);
 
         return e;
@@ -163,9 +167,22 @@ public class EOModelProcessor {
         Map entityMap = helper.entityInfo(e.getName());
         List pks = (List) entityMap.get("primaryKeyAttributes");
         List classProps = (List) entityMap.get("classProperties");
+        List attributes = (List) entityMap.get("attributes");
+
+        if (pks == null) {
+            pks = Collections.EMPTY_LIST;
+        }
+
+        if (classProps == null) {
+            classProps = Collections.EMPTY_LIST;
+        }
+
+        if (attributes == null) {
+            attributes = Collections.EMPTY_LIST;
+        }
 
         // process attribute list creating both Db and Obj attributes
-        List attributes = (List) entityMap.get("attributes");
+
         if (attributes == null) {
             return;
         }
@@ -177,25 +194,29 @@ public class EOModelProcessor {
             String attrName = (String) attrMap.get("name");
             String attrType = (String) attrMap.get("valueClassName");
             String javaType = helper.javaTypeForEOModelerType(attrType);
+            EODbAttribute dbAttr = null;
 
-            EODbAttribute dbAttr =
-                new EODbAttribute(
-                    dbAttrName,
-                    TypesMapping.getSqlTypeByJava(javaType),
-                    e.getDbEntity());
-            dbAttr.setEoAttributeName(attrName);
-            e.getDbEntity().addAttribute(dbAttr);
+            if (dbAttrName != null && e.getDbEntity() != null) {
+                dbAttr =
+                    new EODbAttribute(
+                        dbAttrName,
+                        TypesMapping.getSqlTypeByJava(javaType),
+                        e.getDbEntity());
+                dbAttr.setEoAttributeName(attrName);
+                e.getDbEntity().addAttribute(dbAttr);
 
-            Integer width = (Integer) attrMap.get("width");
-            if (width != null)
-                dbAttr.setMaxLength(width.intValue());
+                Integer width = (Integer) attrMap.get("width");
+                if (width != null)
+                    dbAttr.setMaxLength(width.intValue());
 
-            if (pks.contains(attrName))
-                dbAttr.setPrimaryKey(true);
+                if (pks.contains(attrName))
+                    dbAttr.setPrimaryKey(true);
 
-            Object allowsNull = attrMap.get("allowsNull");
-            dbAttr.setMandatory(!"Y".equals(allowsNull));
-            if (classProps != null && classProps.contains(attrName)) {
+                Object allowsNull = attrMap.get("allowsNull");
+                dbAttr.setMandatory(!"Y".equals(allowsNull));
+            }
+
+            if (classProps.contains(attrName)) {
                 ObjAttribute attr = new ObjAttribute(attrName, javaType, e);
                 attr.setDbAttribute(dbAttr);
                 e.addAttribute(attr);
@@ -209,11 +230,18 @@ public class EOModelProcessor {
      */
     protected void makeRelationships(EOModelHelper helper, ObjEntity e) {
         Map info = helper.entityInfo(e.getName());
+        List classProps = (List) info.get("classProperties");
         List rinfo = (List) info.get("relationships");
+
         if (rinfo == null) {
             return;
         }
 
+        if (classProps == null) {
+            classProps = Collections.EMPTY_LIST;
+        }
+
+        DbEntity dbSrc = e.getDbEntity();
         Iterator it = rinfo.iterator();
         while (it.hasNext()) {
             Map relMap = (Map) it.next();
@@ -228,45 +256,53 @@ public class EOModelProcessor {
             boolean toMany = "Y".equals(relMap.get("isToMany"));
             boolean toDependentPK = "Y".equals(relMap.get("propagatesPrimaryKey"));
             ObjEntity target = helper.getDataMap().getObjEntity(targetName);
-            DbEntity dbSrc = e.getDbEntity();
-            DbEntity dbTarget = target.getDbEntity();
 
+            if (target == null) {
+                continue;
+            }
+
+            DbEntity dbTarget = target.getDbEntity();
+            DbRelationship dbRel = null;
             // process underlying DbRelationship
             // Note - there is no flattened rel. support here....
-            DbRelationship dbRel = new DbRelationship();
-            dbRel.setSourceEntity(dbSrc);
-            dbRel.setTargetEntity(dbTarget);
-            dbRel.setToMany(toMany);
-            dbRel.setName(relName);
-            dbRel.setToDependentPK(toDependentPK);
-            dbSrc.addRelationship(dbRel);
+            if (dbTarget != null) {
+                dbRel = new DbRelationship();
+                dbRel.setSourceEntity(dbSrc);
+                dbRel.setTargetEntity(dbTarget);
+                dbRel.setToMany(toMany);
+                dbRel.setName(relName);
+                dbRel.setToDependentPK(toDependentPK);
+                dbSrc.addRelationship(dbRel);
 
-            List joins = (List) relMap.get("joins");
-            Iterator jIt = joins.iterator();
-            while (jIt.hasNext()) {
-                Map joinMap = (Map) jIt.next();
-                String srcAttrName = (String) joinMap.get("sourceAttribute");
-                String targetAttrName = (String) joinMap.get("destinationAttribute");
+                List joins = (List) relMap.get("joins");
+                Iterator jIt = joins.iterator();
+                while (jIt.hasNext()) {
+                    Map joinMap = (Map) jIt.next();
+                    String srcAttrName = (String) joinMap.get("sourceAttribute");
+                    String targetAttrName = (String) joinMap.get("destinationAttribute");
 
-                DbAttribute srcAttr =
-                    EODbAttribute.findForEOAttributeName(dbSrc, srcAttrName);
-                DbAttribute targetAttr =
-                    EODbAttribute.findForEOAttributeName(dbTarget, targetAttrName);
+                    DbAttribute srcAttr =
+                        EODbAttribute.findForEOAttributeName(dbSrc, srcAttrName);
+                    DbAttribute targetAttr =
+                        EODbAttribute.findForEOAttributeName(dbTarget, targetAttrName);
 
-                DbAttributePair join = new DbAttributePair(srcAttr, targetAttr);
-                dbRel.addJoin(join);
+                    DbAttributePair join = new DbAttributePair(srcAttr, targetAttr);
+                    dbRel.addJoin(join);
+                }
             }
 
             // only create obj relationship if it is a class property
-            Map entityMap = helper.entityInfo(e.getName());
-            List classProps = (List) entityMap.get("classProperties");
-            if (classProps != null && classProps.contains(relName)) {
+
+            if (classProps.contains(relName)) {
                 ObjRelationship rel = new ObjRelationship();
                 rel.setName(relName);
                 rel.setSourceEntity(e);
                 rel.setTargetEntity(target);
                 e.addRelationship(rel);
-                rel.addDbRelationship(dbRel);
+
+                if (dbRel != null) {
+                    rel.addDbRelationship(dbRel);
+                }
             }
         }
     }
