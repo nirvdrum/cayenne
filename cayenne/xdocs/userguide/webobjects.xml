@@ -4,7 +4,10 @@
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
-    
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/modeler/index.html</prev>
+</navigator>        
 <body>
     <section name="6. Cayenne and WebObjects">
         <subsection name="6.1 Introduction" anchor="intro">

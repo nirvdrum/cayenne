@@ -5,6 +5,12 @@
         <author>Andrei Adamchik</author>
     </properties>
     
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/design/config.html</prev>
+	<next>/userguide/appguide/project.html</next>
+</navigator>
+
 <body>
     <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">
         <subsection name="4.1 Introduction" anchor="intro">

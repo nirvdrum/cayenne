@@ -4,7 +4,11 @@
     <properties>
         <author>Andrei Adamchik</author>
     </properties>
-    
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/appguide/cayenne.html</prev>
+	<next>/userguide/appguide/deploy.html</next>
+</navigator>    
 <body>
     <section name="4. Writing Cayenne Applications" toc="/userguide/index.html">        
         <subsection name="4.5 Expressions" anchor="exp">
