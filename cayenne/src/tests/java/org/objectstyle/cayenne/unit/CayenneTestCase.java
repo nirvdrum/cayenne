@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.unit;
 
-import java.io.File;
 import java.sql.Connection;
 
 import org.objectstyle.cayenne.access.DataContext;
@@ -101,14 +100,6 @@ public abstract class CayenneTestCase extends BasicTestCase {
 
     protected AccessStackAdapter getAccessStackAdapter() {
         return accessStack.getAdapter(getNode());
-    }
-
-    /**
-     * Returns directory that should be used by all test 
-     * cases that perform file operations.
-     */
-    protected File getTestDir() {
-        return CayenneTestResources.getResources().getTestDir();
     }
 
     protected DataSourceInfo getConnectionInfo() throws Exception {

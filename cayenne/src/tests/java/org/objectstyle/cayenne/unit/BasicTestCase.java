@@ -76,4 +76,12 @@ public class BasicTestCase extends TestCase {
     protected File getTestResourcesDir() {
         return CayenneTestResources.getResources().getTestResourcesDir();
     }
+
+    /**
+     * Returns directory that should be used by all test 
+     * cases that perform file operations.
+     */
+    protected File getTestDir() {
+        return CayenneTestResources.getResources().getTestDir();
+    }
 }

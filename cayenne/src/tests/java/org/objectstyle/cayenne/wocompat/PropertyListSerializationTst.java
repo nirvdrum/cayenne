@@ -61,108 +61,108 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class PropertyListSerializationTst extends CayenneTestCase {
+public class PropertyListSerializationTst extends BasicTestCase {
 
-	public void testListPlist() throws Exception {
-		File plistFile = new File(super.getTestDir(), "test-array.plist");
-		List list = new ArrayList();
-		list.add("str");
-		list.add(new Integer(5));
-		
-		assertFalse(plistFile.exists());
-		PropertyListSerialization.propertyListToFile(plistFile, list);
-		assertTrue(plistFile.exists());
-		
-		Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
-		assertTrue(readList instanceof List);
-		assertTrue(list.equals(readList));
-	}
-	
-	public void testMapPlist() throws Exception {
-		File plistFile = new File(super.getTestDir(), "test-map.plist");
-		Map map = new HashMap();
-		map.put("key1", "val");
-		map.put("key2", new Integer(5));
-		
-		assertFalse(plistFile.exists());
-		PropertyListSerialization.propertyListToFile(plistFile, map);
-		assertTrue(plistFile.exists());
-		
-		Object readMap = PropertyListSerialization.propertyListFromFile(plistFile);
-		assertTrue(readMap instanceof Map);
-		assertTrue(map.equals(readMap));
-	}
+    public void testListPlist() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-array.plist");
+        List list = new ArrayList();
+        list.add("str");
+        list.add(new Integer(5));
 
-	public void testStringWithQuotes() throws Exception {
-		File plistFile = new File(super.getTestDir(), "test-quotes.plist");
-		List list = new ArrayList();
-		list.add("s\"tr");
-		list.add(new Integer(5));
-		
-		assertFalse(plistFile.exists());
-		PropertyListSerialization.propertyListToFile(plistFile, list);
-		assertTrue(plistFile.exists());
-		
-		Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
-		assertTrue(readList instanceof List);
-		assertTrue(list.equals(readList));
-	}
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, list);
+        assertTrue(plistFile.exists());
 
-	public void testNestedPlist() throws Exception {
-		File plistFile = new File(super.getTestDir(), "test-nested.plist");
-		Map map = new HashMap();
-		map.put("key1", "val");
-		map.put("key2", new Integer(5));
-		
-		List list = new ArrayList();
-		list.add("str");
-		list.add(new Integer(5));
-		map.put("key3", list);
-		
-		assertFalse(plistFile.exists());
-		PropertyListSerialization.propertyListToFile(plistFile, map);
-		assertTrue(plistFile.exists());
-		
-		Object readMap = PropertyListSerialization.propertyListFromFile(plistFile);
-		assertTrue(readMap instanceof Map);
-		assertTrue(map.equals(readMap));
-	}
-	
-	public void testStringWithSpaces() throws Exception {
-		File plistFile = new File(super.getTestDir(), "test-spaces.plist");
-		List list = new ArrayList();
-		list.add("s tr");
-		list.add(new Integer(5));
-		
-		assertFalse(plistFile.exists());
-		PropertyListSerialization.propertyListToFile(plistFile, list);
-		assertTrue(plistFile.exists());
-		
-		Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
-		assertTrue(readList instanceof List);
-		assertTrue(list.equals(readList));
-	}
-	
-	public void testStringWithBraces() throws Exception {
-		File plistFile = new File(super.getTestDir(), "test-braces.plist");
-		List list = new ArrayList();
-		list.add("s{t)r");
-		list.add(new Integer(5));
-		
-		assertFalse(plistFile.exists());
-		PropertyListSerialization.propertyListToFile(plistFile, list);
-		assertTrue(plistFile.exists());
-		
-		Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
-		assertTrue(readList instanceof List);
-		assertTrue(list.equals(readList));
-	}
-	
+        Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readList instanceof List);
+        assertTrue(list.equals(readList));
+    }
+
+    public void testMapPlist() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-map.plist");
+        Map map = new HashMap();
+        map.put("key1", "val");
+        map.put("key2", new Integer(5));
+
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, map);
+        assertTrue(plistFile.exists());
+
+        Object readMap = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readMap instanceof Map);
+        assertTrue(map.equals(readMap));
+    }
+
+    public void testStringWithQuotes() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-quotes.plist");
+        List list = new ArrayList();
+        list.add("s\"tr");
+        list.add(new Integer(5));
+
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, list);
+        assertTrue(plistFile.exists());
+
+        Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readList instanceof List);
+        assertTrue(list.equals(readList));
+    }
+
+    public void testNestedPlist() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-nested.plist");
+        Map map = new HashMap();
+        map.put("key1", "val");
+        map.put("key2", new Integer(5));
+
+        List list = new ArrayList();
+        list.add("str");
+        list.add(new Integer(5));
+        map.put("key3", list);
+
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, map);
+        assertTrue(plistFile.exists());
+
+        Object readMap = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readMap instanceof Map);
+        assertTrue(map.equals(readMap));
+    }
+
+    public void testStringWithSpaces() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-spaces.plist");
+        List list = new ArrayList();
+        list.add("s tr");
+        list.add(new Integer(5));
+
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, list);
+        assertTrue(plistFile.exists());
+
+        Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readList instanceof List);
+        assertTrue(list.equals(readList));
+    }
+
+    public void testStringWithBraces() throws Exception {
+        File plistFile = new File(super.getTestDir(), "test-braces.plist");
+        List list = new ArrayList();
+        list.add("s{t)r");
+        list.add(new Integer(5));
+
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, list);
+        assertTrue(plistFile.exists());
+
+        Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readList instanceof List);
+        assertTrue(list.equals(readList));
+    }
+
     public void testStringWithSlashes() throws Exception {
         File plistFile = new File(super.getTestDir(), "test-slashes.plist");
         List list = new ArrayList();
@@ -178,5 +178,20 @@ public class PropertyListSerializationTst extends CayenneTestCase {
         assertTrue(list.equals(readList));
     }
 
-}
+    public void testStringWithQuotes1() throws Exception {
+        // this case is submitted by Nikhil
+        File plistFile = new File(super.getTestDir(), "test-quotes1.plist");
+        List list = new ArrayList();
+        list.add("like");
+        list.add("key");
+        list.add("\"*003*\"");
 
+        assertFalse(plistFile.exists());
+        PropertyListSerialization.propertyListToFile(plistFile, list);
+        assertTrue(plistFile.exists());
+
+        Object readList = PropertyListSerialization.propertyListFromFile(plistFile);
+        assertTrue(readList instanceof List);
+        assertTrue(list.equals(readList));
+    }
+}
