@@ -410,9 +410,20 @@ public class DbLoader {
         Iterator it = dbEntityList.iterator();
         while (it.hasNext()) {
             DbEntity dbEntity = (DbEntity) it.next();
-            ObjEntity objEntity =
-                new ObjEntity(
-                    NameConverter.undescoredToJava(dbEntity.getName(), true));
+
+            String objEntityName =
+                NameConverter.undescoredToJava(dbEntity.getName(), true);
+            // this loop will terminate even if no valid name is found
+            // to prevent loader from looping forever (though such case is very unlikely)
+
+            String baseName = objEntityName;
+            for (int i = 1;
+                i < 1000 && map.getObjEntity(objEntityName) != null;
+                i++) {
+                objEntityName = baseName + i;
+            }
+
+            ObjEntity objEntity = new ObjEntity(objEntityName);
             objEntity.setDbEntity(dbEntity);
             objEntity.setClassName(objEntity.getName());
             map.addObjEntity(objEntity);
@@ -564,12 +575,21 @@ public class DbLoader {
         }
     }
 
+    /**
+     * @deprecated Since Beta 1 use <code>createDataMapFromDB</code> with table
+     * name pattern parameter.
+     */
+     public DataMap createDataMapFromDB(String schemaName) throws SQLException {
+     	return createDataMapFromDB(schemaName, WILDCARD);
+     }
+     	
+     	
     /** 
      * Performs database reverse engineering and generates DataMap
      * that contains default mapping of the tables and views. 
      * By default will include regular tables and views.
      */
-    public DataMap createDataMapFromDB(String schemaName) throws SQLException {
+    public DataMap createDataMapFromDB(String schemaName, String tablePattern) throws SQLException {
 
         String viewType = adapter.tableTypeForView();
         String tableType = adapter.tableTypeForTable();
@@ -590,7 +610,16 @@ public class DbLoader {
         String[] types = new String[list.size()];
         list.toArray(types);
 
-        return createDataMapFromDB(schemaName, types);
+        return createDataMapFromDB(schemaName, tablePattern, types);
+    }
+
+    /**
+     * @deprecated Since 1.0 Beta1 use <code>createDataMapFromDB</code> versions that takes table
+     * name pattern.
+     */
+    public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
+        throws SQLException {
+        return createDataMapFromDB(schemaName, WILDCARD, tableTypes);
     }
 
     /** 
@@ -598,13 +627,28 @@ public class DbLoader {
      * that contains default mapping of the tables and views. 
      * Allows to limit types of tables to read. 
      */
-    public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
+    public DataMap createDataMapFromDB(
+        String schemaName,
+        String tablePattern,
+        String[] tableTypes)
         throws SQLException {
         DataMap dataMap =
             (DataMap) NamedObjectFactory.createObject(
                 DataMap.class,
                 new DataDomain());
-        return loadDataMapFromDB(schemaName, tableTypes, dataMap);
+        return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
+    }
+
+    /**
+     * @deprecated Since 1.0 Beta1 use <code>loadDataMapFromDB</code> versions
+     * that takes table name pattern.
+     */
+    public DataMap loadDataMapFromDB(
+        String schemaName,
+        String[] tableTypes,
+        DataMap dataMap)
+        throws SQLException {
+        return loadDataMapFromDB(schemaName, WILDCARD, tableTypes, dataMap);
     }
 
     /** 
@@ -614,12 +658,17 @@ public class DbLoader {
      */
     public DataMap loadDataMapFromDB(
         String schemaName,
+        String tablePattern,
         String[] tableTypes,
         DataMap dataMap)
         throws SQLException {
 
+        if(tablePattern == null) {
+            tablePattern = WILDCARD;
+        }
+        
         if (!loadDbEntities(dataMap,
-            getTables(null, schemaName, "%", tableTypes))) {
+            getTables(null, schemaName, tablePattern, tableTypes))) {
             return dataMap;
         }
 

@@ -137,23 +137,17 @@ public class ImportDbAction extends CayenneAction {
                 return;
             }
 
-            String schemaName = null;
-            if (schemas.size() != 0) {
-                ChooseSchemaDialog dialog =
-                    new ChooseSchemaDialog(schemas, dsi);
-                dialog.show();
-                if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
-                    dialog.dispose();
-                    return;
-                }
-                schemaName = dialog.getSchemaName();
-                dialog.dispose();
-            }
-            if (schemaName != null && schemaName.length() == 0) {
-                schemaName = null;
+            ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas, dsi);
+            dialog.show();
+            String schemaName = dialog.getSchemaName();
+            String tableNamePattern = dialog.getTableNamePattern();
+            dialog.dispose();
+
+            if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
+                return;
             }
 
-            DataMap map = loadMap(loader, schemaName);
+            DataMap map = loadMap(loader, schemaName, tableNamePattern);
             if (map == null) {
                 return;
             }
@@ -259,15 +253,22 @@ public class ImportDbAction extends CayenneAction {
         }
     }
 
-    public DataMap loadMap(DbLoader loader, String schemaName) {
+    public DataMap loadMap(
+        DbLoader loader,
+        String schemaName,
+        String tableNamePattern) {
         EventController mediator = getMediator();
         try {
             DataMap map = mediator.getCurrentDataMap();
             if (map != null) {
-                loader.loadDataMapFromDB(schemaName, null, map);
+                loader.loadDataMapFromDB(
+                    schemaName,
+                    tableNamePattern,
+                    null,
+                    map);
                 return map;
             } else {
-                map = loader.createDataMapFromDB(schemaName);
+                map = loader.createDataMapFromDB(schemaName, tableNamePattern);
 
                 // fix map name
                 map.setName(
