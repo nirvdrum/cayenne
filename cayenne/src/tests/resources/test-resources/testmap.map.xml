@@ -81,6 +81,9 @@
 		<db-attribute name="GALLERY_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GALLERY_NAME" type="VARCHAR" isMandatory="true" length="100"/>
 	</db-entity>
+	<db-entity name="NO_PK_TEST">
+		<db-attribute name="ATTRIBUTE1" type="INTEGER"/>
+	</db-entity>
 	<db-entity name="PAINTING">
 		<db-attribute name="ARTIST_ID" type="INTEGER"/>
 		<db-attribute name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2"/>
@@ -177,6 +180,9 @@
 		<obj-attribute name="artistId" type="java.lang.Integer" db-attribute-path="ARTIST_ID"/>
 		<obj-attribute name="artistName" type="java.lang.String" db-attribute-path="ARTIST_NAME"/>
 		<obj-attribute name="dateOfBirth" type="java.util.Date" db-attribute-path="DATE_OF_BIRTH"/>
+	</obj-entity>
+	<obj-entity name="NoPkTest" className="org.objectstyle.art.NoPkTest" dbEntityName="NO_PK_TEST">
+		<obj-attribute name="attribute1" type="java.lang.Integer" db-attribute-path="ATTRIBUTE1"/>
 	</obj-entity>
 	<obj-entity name="Painting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING" superClassName="org.objectstyle.art.ArtDataObject">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>

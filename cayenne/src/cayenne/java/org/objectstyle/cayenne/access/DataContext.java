@@ -324,6 +324,7 @@ public class DataContext implements QueryEngine, Serializable {
 		ObjEntity objEntity,
 		Map dataRow,
 		boolean refresh) {
+	
 		ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
 
 		// synchronized on objectstore, since read/write

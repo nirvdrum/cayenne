@@ -75,9 +75,15 @@ public class InsertQuery extends AbstractQuery {
     }
 
     /** Creates InsertQuery with the <code>rootClass</code> as the root object */
-   public InsertQuery(Class rootClass) {
+    public InsertQuery(Class rootClass) {
     	this.setRoot(rootClass);
     }
+    
+	/** Creates InsertQuery with the <code>rootClass</code> as the root object */
+	public InsertQuery(Class rootClass, Map dataRow) {
+		this.setRoot(rootClass);
+		this.setObjectSnapshot(dataRow);
+	}
     
     /** Creates InsertQuery with <code>objEntityName</code> parameter. */
     public InsertQuery(String objEntityName) {

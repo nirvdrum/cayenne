@@ -63,6 +63,7 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -93,6 +94,22 @@ public class ContextSelectObserver extends SelectObserver {
 		List result = new ArrayList();
 		if (dataRows != null && dataRows.size() > 0) {
 			ObjEntity ent = context.getEntityResolver().lookupObjEntity(query);
+			
+			// do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
+			// we can't build a valid ObjectId
+			DbEntity dbEntity = ent.getDbEntity();
+			if(dbEntity == null) {
+				throw new CayenneRuntimeException("ObjEntity '" + ent.getName() + "' has no DbEntity.");			
+			}
+			
+			if(dbEntity.getPrimaryKey().size() == 0) {
+				throw new CayenneRuntimeException("Can't create ObjectId for '" 
+				+ ent.getName() 
+				+ "'. Reason: DbEntity '" 
+				+ dbEntity.getName() 
+				+ "' has no Primary Key defined.");
+			}
+			
 			Iterator it = dataRows.iterator();
 			while (it.hasNext()) {
 				result.add(
