@@ -27,6 +27,12 @@
             </li>
         </ul>
         
+        <panel name="Limitation of In-Memory Expressions">
+        Current limitation of in-memory expressions is that no collections are permitted in the object property
+        path. In case of DataObjects that means that path containing to-many relationships may not work for
+        in-memory evaluation.
+        </panel>
+        
         <p>Here is an example of evaluating expression with a single object:</p>
         
 <source>
