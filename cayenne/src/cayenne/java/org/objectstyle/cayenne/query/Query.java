@@ -70,10 +70,6 @@ public interface Query {
 	public static final int UPDATE_QUERY = 3;
 	public static final int DELETE_QUERY = 4;
 	public static final int UNKNOWN_QUERY = 5;
-    public static final int INSERT_BATCH_QUERY = 6;
-    public static final int UPDATE_BATCH_QUERY = 7;
-	public static final int DELETE_BATCH_QUERY = 8;
-    public static final int STORED_PROCEDURE_QUERY = 9;
 
 
 	/**

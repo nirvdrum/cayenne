@@ -79,7 +79,7 @@ public class DataNodeTst extends IteratorTestBase {
 
 		try {
 			init();
-			sharedNode.runSelect(conn, query, observer);
+			sharedNode.runSelect(conn, query, observer, true);
 			assertEquals(
 				DataContextTst.artistCount,
 				observer.getResults(transl.getQuery()).size());
@@ -96,7 +96,7 @@ public class DataNodeTst extends IteratorTestBase {
 		// first assert that created node is valid
 		assertNotNull(sharedNode.getEntityResolver().lookupObjEntity(query));
 		
-		sharedNode.runIteratedSelect(conn, query, observer);
+		sharedNode.runSelect(conn, query, observer, false);
 		assertEquals(DataContextTst.artistCount, observer.getResultCount());
 
 		// no cleanup is needed, since observer will close the iterator

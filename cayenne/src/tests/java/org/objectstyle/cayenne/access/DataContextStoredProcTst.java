@@ -122,7 +122,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         }
 
         // create an artist with painting in the database
-     /*   createArtist(1000.0);
+    /*    createArtist(1000.0);
 
         // create and run stored procedure
         Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);

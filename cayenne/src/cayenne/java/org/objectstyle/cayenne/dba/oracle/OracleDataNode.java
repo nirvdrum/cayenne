@@ -110,13 +110,13 @@ public class OracleDataNode extends DataNode {
 
         BatchQueryBuilder queryBuilder;
         switch (query.getQueryType()) {
-            case Query.INSERT_BATCH_QUERY :
+            case Query.INSERT_QUERY :
                 queryBuilder = new InsertBatchQueryBuilder(getAdapter());
                 break;
-            case Query.UPDATE_BATCH_QUERY :
+            case Query.UPDATE_QUERY :
                 queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
                 break;
-            case Query.DELETE_BATCH_QUERY :
+            case Query.DELETE_QUERY :
                 queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
                 ;
                 break;

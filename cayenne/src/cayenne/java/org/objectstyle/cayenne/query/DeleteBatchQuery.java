@@ -118,6 +118,6 @@ public class DeleteBatchQuery extends BatchQuery {
     }
 
     public int getQueryType() {
-        return Query.DELETE_BATCH_QUERY;
+        return Query.DELETE_QUERY;
     }
 }

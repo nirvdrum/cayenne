@@ -159,6 +159,6 @@ public class UpdateBatchQuery extends BatchQuery {
     }
 
     public int getQueryType() {
-        return Query.UPDATE_BATCH_QUERY;
+        return Query.UPDATE_QUERY;
     }
 }

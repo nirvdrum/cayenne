@@ -119,6 +119,6 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     public int getQueryType() {
-        return Query.INSERT_BATCH_QUERY;
+        return Query.INSERT_QUERY;
     }
 }

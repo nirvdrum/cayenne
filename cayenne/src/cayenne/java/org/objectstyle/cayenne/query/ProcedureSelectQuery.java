@@ -144,4 +144,9 @@ public class ProcedureSelectQuery
     public void clearResultParams() {
         resultParams.clear();
     }
+
+    public int getQueryType() {
+        return Query.SELECT_QUERY;
+    }
+
 }

@@ -83,6 +83,8 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.ProcedureQuery;
+import org.objectstyle.cayenne.query.ProcedureSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -264,32 +266,50 @@ public class DataNode implements QueryEngine {
                 // catch exceptions for each individual query
                 try {
 
-                    if (nextQuery instanceof BatchQuery) {
-                        runBatchUpdate(con, (BatchQuery) nextQuery, opObserver);
-                    }
                     // figure out query type and call appropriate worker method
-                    else if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
 
-                        // if ResultIterator is returned to the user,
-                        // DataNode is not responsible for closing the connections
-                        // exception handling, and other housekeeping
-                        if (opObserver.isIteratedResult()) {
+                    // 1. All kinds of SELECT
+                    if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                        boolean isIterated = opObserver.isIteratedResult();
+                        Connection localCon = con;
+
+                        if (isIterated) {
+                            // if ResultIterator is returned to the user,
+                            // DataNode is not responsible for closing the connections
+                            // exception handling, and other housekeeping.
                             // trick "finally" to avoid closing connection here
                             // it will be closed by the ResultIterator
-                            Connection localCon = con;
                             con = null;
-                            runIteratedSelect(localCon, nextQuery, opObserver);
-                            return;
-                        } else {
-                            runSelect(con, nextQuery, opObserver);
                         }
 
-                    } else if (
-                        nextQuery.getQueryType()
-                            != Query.STORED_PROCEDURE_QUERY) {
-                        runUpdate(con, nextQuery, opObserver);
-                    } else {
-                        runStoredProcedureUpdate(con, nextQuery, opObserver);
+                        if (nextQuery instanceof ProcedureSelectQuery) {
+                            runStoredProcedureSelect(
+                                localCon,
+                                nextQuery,
+                                opObserver,
+                                !isIterated);
+                        } else {
+                            runSelect(
+                                localCon,
+                                nextQuery,
+                                opObserver,
+                                !isIterated);
+                        }
+                    }
+                    // 2. All kinds of MODIFY - INSERT, DELETE, UPDATE, UNKNOWN
+                    else {
+
+                        if (nextQuery instanceof BatchQuery) {
+                            runBatchUpdate(
+                                con,
+                                (BatchQuery) nextQuery,
+                                opObserver);
+                        } else if(nextQuery instanceof ProcedureQuery) {
+                        	runStoredProcedureUpdate(con, nextQuery, opObserver); 
+                        }
+                        else {
+                            runUpdate(con, nextQuery, opObserver);
+                        }
                     }
 
                 } catch (Exception queryEx) {
@@ -357,12 +377,13 @@ public class DataNode implements QueryEngine {
     }
 
     /**
-     * Executes a regular select query.
+     * Executes select query.
      */
     protected void runSelect(
         Connection con,
         Query query,
-        OperationObserver delegate)
+        OperationObserver delegate,
+        boolean readAll)
         throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
@@ -376,53 +397,27 @@ public class DataNode implements QueryEngine {
 
         SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
         DefaultResultIterator it =
-            new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+            new DefaultResultIterator(prepStmt, getAdapter(), assembler);
 
-        // note that we don't need to close ResultIterator
-        // since "dataRows" will do it internally
-        List resultRows = it.dataRows();
-        QueryLogger.logSelectCount(
-            query.getLoggingLevel(),
-            resultRows.size(),
-            System.currentTimeMillis() - t1);
+        if (readAll) {
+            // note that we don't need to close ResultIterator
+            // since "dataRows" will do it internally
+            List resultRows = it.dataRows();
+            QueryLogger.logSelectCount(
+                query.getLoggingLevel(),
+                resultRows.size(),
+                System.currentTimeMillis() - t1);
 
-        delegate.nextDataRows(query, resultRows);
-    }
+            delegate.nextDataRows(query, resultRows);
+        } else {
+            try {
 
-    /**
-     * Executes a select query, with result being an open ResultIterator. 
-     */
-    protected void runIteratedSelect(
-        Connection con,
-        Query query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
-
-        QueryTranslator transl = getAdapter().getQueryTranslator(query);
-        transl.setEngine(this);
-        transl.setCon(con);
-
-        PreparedStatement prepStmt =
-            transl.createStatement(query.getLoggingLevel());
-
-        DefaultResultIterator it = null;
-
-        try {
-            SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-            it =
-                new DefaultResultIterator(
-                    prepStmt,
-                    this.getAdapter(),
-                    assembler);
-
-            it.setClosingConnection(true);
-            delegate.nextDataRows(transl.getQuery(), it);
-        } catch (Exception ex) {
-            if (it != null) {
+                it.setClosingConnection(true);
+                delegate.nextDataRows(transl.getQuery(), it);
+            } catch (Exception ex) {
                 it.close();
+                throw ex;
             }
-
-            throw ex;
         }
     }
 
@@ -467,13 +462,13 @@ public class DataNode implements QueryEngine {
         // TODO: move all query translation logic to adapter.getQueryTranslator()
         BatchQueryBuilder queryBuilder;
         switch (query.getQueryType()) {
-            case Query.INSERT_BATCH_QUERY :
+            case Query.INSERT_QUERY :
                 queryBuilder = new InsertBatchQueryBuilder(getAdapter());
                 break;
-            case Query.UPDATE_BATCH_QUERY :
+            case Query.UPDATE_QUERY :
                 queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
                 break;
-            case Query.DELETE_BATCH_QUERY :
+            case Query.DELETE_QUERY :
                 queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
                 ;
                 break;
@@ -565,35 +560,29 @@ public class DataNode implements QueryEngine {
     protected void runStoredProcedureSelect(
         Connection con,
         Query query,
-        OperationObserver delegate)
+        OperationObserver delegate,
+        boolean readAll)
         throws SQLException, Exception {
 
-    /*    QueryTranslator transl = getAdapter().getQueryTranslator(query);
-        transl.setEngine(this);
-        transl.setCon(con);
-
-        PreparedStatement prepStmt =
-            transl.createStatement(query.getLoggingLevel());
-
-        DefaultResultIterator it =
-            new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
-
-        // note that we don't need to close ResultIterator
-        // since "dataRows" will do it internally
-        List resultRows = it.dataRows();
-        QueryLogger.logSelectCount(
-            query.getLoggingLevel(),
-            resultRows.size(),
-            System.currentTimeMillis() - t1);
-
-        delegate.nextDataRows(query, resultRows); */
-    }
-
-    protected void runStoredProcedureIteratedSelect(
-        Connection con,
-        Query query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+        /*    QueryTranslator transl = getAdapter().getQueryTranslator(query);
+            transl.setEngine(this);
+            transl.setCon(con);
+        
+            PreparedStatement prepStmt =
+                transl.createStatement(query.getLoggingLevel());
+        
+            DefaultResultIterator it =
+                new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+        
+            // note that we don't need to close ResultIterator
+            // since "dataRows" will do it internally
+            List resultRows = it.dataRows();
+            QueryLogger.logSelectCount(
+                query.getLoggingLevel(),
+                resultRows.size(),
+                System.currentTimeMillis() - t1);
+        
+            delegate.nextDataRows(query, resultRows); */
     }
 
     /**

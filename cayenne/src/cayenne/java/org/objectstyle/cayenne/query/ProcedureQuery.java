@@ -83,7 +83,7 @@ public class ProcedureQuery extends AbstractQuery {
      * Returns Query.STORED_PROCEDURE_QUERY.
      */
     public int getQueryType() {
-        return STORED_PROCEDURE_QUERY;
+        return UNKNOWN_QUERY;
     }
 
     public Procedure getProcedure() {
