@@ -85,7 +85,7 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         SelectQuery q = new SelectQuery("Painting", e);
 
         // *** TESTING THIS *** 
-        List paints = ctxt.performQuery(q, Level.SEVERE);
+        List paints = ctxt.performQuery(q);
         assertEquals(1, paints.size());
         assertSame(p1, paints.get(0));
     }

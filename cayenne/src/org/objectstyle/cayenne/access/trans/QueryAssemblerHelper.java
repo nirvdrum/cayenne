@@ -90,21 +90,24 @@ public abstract class QueryAssemblerHelper {
 
     /** Processes parts of the OBJ_PATH expression. */
     protected void appendObjPath(StringBuffer buf, Expression pathExp) {
+
         Iterator it =
             getQueryAssembler().getRootEntity().resolvePathComponents(pathExp);
 
         while (it.hasNext()) {
             Object pathComp = it.next();
+
             if (pathComp instanceof ObjRelationship) {
+                ObjRelationship rel = (ObjRelationship) pathComp;
 
                 // if this is a last relationship in the path,
-                // instead of join, just append foreign key attribute
+                // it needs special handling
                 if (!it.hasNext()) {
-                    processRelTermination(buf, (ObjRelationship) pathComp);
+                    processRelTermination(buf, rel);
                 }
                 else {
                     // find and add joins ....
-                    processRelParts((ObjRelationship) pathComp);
+                    processRelParts(rel);
                 }
             }
             else {
@@ -225,7 +228,17 @@ public abstract class QueryAssemblerHelper {
         }
     }
 
+    /** Processes case when an OBJ_PATH expression ends with relationship.
+      * If this is a "to many" relationship, a join is added and a column
+      * expression for the target entity primary key. If this is a "to one"
+      * relationship, column expresion for the source foreign key is added.
+      */
     protected void processRelTermination(StringBuffer buf, ObjRelationship rel) {
+        if (rel.isToMany()) {
+            // append joins
+            processRelParts(rel);
+        }
+
         List dbRels = rel.getDbRelationshipList();
 
         // get last DbRelationship on the list
@@ -243,7 +256,32 @@ public abstract class QueryAssemblerHelper {
             throw new CayenneRuntimeException(msg.toString());
         }
 
-        DbAttribute srcAtt = ((DbAttributePair) joins.get(0)).getSource();
-        processColumn(buf, srcAtt);
+        DbAttributePair join = (DbAttributePair) joins.get(0);
+
+        DbAttribute att = null;
+
+        if (rel.isToMany()) {
+            DbEntity ent = (DbEntity) join.getTarget().getEntity();
+            List pk = ent.getPrimaryKey();
+            if (pk.size() != 1) {
+                StringBuffer msg = new StringBuffer();
+                msg
+                    .append("OBJ_PATH expressions can only support ")
+                    .append("targets with a single column PK. ")
+                    .append("This entity has ")
+                    .append(pk.size())
+                    .append(" columns in primary key.");
+
+                throw new CayenneRuntimeException(msg.toString());
+            }
+            
+            att = (DbAttribute)pk.get(0);
+        }
+        else {
+            att = join.getSource();
+        }
+
+
+        processColumn(buf, att);
     }
 }
