@@ -1,26 +1,34 @@
            Cayenne Release Notes 1.0a2 (Alpha 2)
-                 Date: July 15, 2002
+                 Date: July 16, 2002
          ============================================
 
 For the latest information go to the project web site at 
 http://objectstyle.org/cayenne/
 
-Release Objective:
+Summary:
 ============================================
-To give Cayenne users immediate access to the newest CayenneModeler 
-GUI features, various bug fixes and performance improvements. 
-All users of 1.0a1 are strongly encouraged to upgrade. 
+*Major* CayenneModeler GUI improvement, various bug fixes,
+new performance improvement features, new tutorials, improved
+documentation.
+
+* All users of 1.0a1 are strongly encouraged to upgrade.*
+
+
+Bug Fixes
+============================================
+A total of 29 bugs were fixed, for details see SourceForge tracker at 
+http://sourceforge.net/tracker/?group_id=48132&atid=452068 
 
 
 
 Changes in this release:
 ============================================
-1. Added support for Data Rows.
+1. Performance improvement: added support for Data Rows.
 
-2. Added ResultIterator - now it is possible to retrieve data rows one at a time.
+2. Performance improvement: Added ResultIterator - now it is possible to 
+retrieve data rows one at a time.
 
-3. Added public method DataContext.objectFromDataRow (rather exposed 
-another private method).
+3. Added public method DataContext.objectFromDataRow 
 
 4. Term "Snapshot" is changed to "DataRow" in most places.
    - OperationObserver and its implementations: nextSnapshots became nextDataRows
@@ -28,8 +36,8 @@ another private method).
 5. Removed public DataNode.snapshotsFromResultSet refactored into 
 DefaultResultIterator
 
-6. It is no longer recommended to install Cayenne in JVM extension 
-directory due to resource loation issues.
+6. *IMPORTANT*: It is no longer recommended to install Cayenne in JVM extension 
+directory due to resource location issues.
 
 7. Split OperationObserver into OperationObserver and OperationHints for clearer API.
 
@@ -61,4 +69,8 @@ to allow more flexibility in defining how the generation should work.
 19. Added "public String createTable(DbEntity ent)" method to DbAdapter
 with default implementation in JdbcAdapter.
 
-19. PkGenerator API has changed.
+20. PkGenerator API has changed.
+
+21. Moved DbLoader to "access" package from "map".
+
+

@@ -9,8 +9,8 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><font color="#AAAAAA"><i>July 16:</i></font> <strong>Cayenne Alpha 2 Is Out.</strong> 
-        This is a second Alpha release. Everybody is incouraged to upgrade. You won't 
+        <p><strong><font color="#AAAAAA"><i>July 16:</i></font></strong> <strong>Cayenne Alpha 2 Is Out.</strong> 
+        This is a second Alpha release. Everybody is encouraged to upgrade. You won't 
         regret - CayenneModeler GUI is much better now. Source and binary packages
         can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
         Release notes are located <a href="RELEASE-NOTES-1.0a2.txt">here</a>.
@@ -22,7 +22,7 @@
         Release notes are located <a href="RELEASE-NOTES-1.0a1.txt">here</a>.
         </p>
               
-        <p><i>March 16:</i> <strong>Cayenne at SourceForge and Freshmeat.</strong> 
+        <p><font color="#AAAAAA"><i>March 16:</i></font> <strong>Cayenne at SourceForge and Freshmeat.</strong> 
         Cayenne is still hosted 
         at objectstyle.org, but we also registered the project at 
         <a href="http://sourceforge.net/projects/cayenne/">SourceForge.net</a>. 
@@ -54,11 +54,10 @@
         </section>
         
         <!-- Status section -->
-        <section name="Status and History">
+        <section name="History">
         <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in 
         Atlanta, USA. Current version is based on that original idea and is under active 
-        development since December 2001. Current Cayenne version is 1.0a1 (alpha).
-        It can be downloaded from <a href="download.html">here</a>.</p>
+        development since December 2001.</p>
         </section>
     </body>
 </document>
