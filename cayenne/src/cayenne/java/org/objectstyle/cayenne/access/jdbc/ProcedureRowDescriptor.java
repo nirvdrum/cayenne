@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,118 +53,72 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.util.List;
 
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.DbAttribute;
-import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 
 /**
- * A descriptor of a ResultSet column.
+ * A descriptor of a stored procedure parameters, including IN, OUT and INOUT.
  * 
- * @since 1.1
+ * @since 1.2
  * @author Andrei Adamchik
  */
-public class ColumnDescriptor {
+public class ProcedureRowDescriptor extends RowDescriptor {
 
-    protected int jdbcType;
-    protected String javaClass;
-    protected String name;
-    protected boolean primaryKey;
+    protected int[] outIndices;
 
     /**
-     * Creates a ColumnDescriptor
+     * Creates a row descriptor for stored procedure.
      */
-    public ColumnDescriptor() {
-    }
+    public ProcedureRowDescriptor(Procedure procedure, ExtendedTypeMap types,
+            String[] javaTypeOverrides) {
 
-    /**
-     * Creates a ColumnDescriptor from Cayenne ObjAttribute and DbAttribute.
-     */
-    public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
-        this.name = dbAttribute.getName();
-        this.jdbcType = dbAttribute.getType();
-        this.primaryKey = dbAttribute.isPrimaryKey();
-        this.javaClass = objAttribute.getType();
-    }
+        List parameters = procedure.getCallParameters();
+        int outWidth = 0;
 
-    /**
-     * Creates a ColumnDescriptor from stored procedure parameter.
-     * 
-     * @since 1.2
-     */
-    public ColumnDescriptor(ProcedureParameter parameter) {
-        this.name = parameter.getName();
-        this.jdbcType = parameter.getType();
-        this.javaClass = getDefaultJavaClass(parameter.getMaxLength(), parameter
-                .getPrecision());
-    }
+        // create columns
+        this.columns = new ColumnDescriptor[parameters.size()];
 
-    /**
-     * Creates a ColumnDescriptor using ResultSetMetaData.
-     * 
-     * @since 1.2
-     */
-    public ColumnDescriptor(ResultSetMetaData metaData, int position) throws SQLException {
-        String name = metaData.getColumnLabel(position);
-        if (name == null || name.length() == 0) {
-            name = metaData.getColumnName(position);
+        for (int i = 0; i < columns.length; i++) {
+            ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
+            columns[i] = new ColumnDescriptor(parameter);
 
-            if (name == null || name.length() == 0) {
-                name = "column_" + position;
+            if (parameter.isOutParam()) {
+                outWidth++;
             }
         }
 
-        this.name = name;
-        this.jdbcType = metaData.getColumnType(position);
-        this.javaClass = getDefaultJavaClass(
-                metaData.getColumnDisplaySize(position),
-                metaData.getScale(position));
+        // index out parameters...
+        if (outWidth == 0) {
+            this.outIndices = new int[0];
+        }
+        else {
+            this.outIndices = new int[outWidth];
+            for (int i = 0, j = 0; i < columns.length; i++) {
+                ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
+                if (parameter.isOutParam()) {
+                    outIndices[j++] = i;
+                }
+            }
+        }
+
+        // override default types
+        if (javaTypeOverrides != null) {
+            overrideJavaTypes(javaTypeOverrides);
+        }
+
+        // index Java classes.
+        indexTypes(types);
     }
 
     /**
-     * Returns a default Java class for an internal JDBC type.
-     * 
-     * @since 1.2
+     * Returns indices of columns representing procedure OUT parameters.
      */
-    public String getDefaultJavaClass(int size, int scale) {
-        return TypesMapping.getJavaBySqlType(getJdbcType(), size, scale);
-    }
-
-    public int getJdbcType() {
-        return jdbcType;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setJdbcType(int i) {
-        jdbcType = i;
-    }
-
-    public void setName(String string) {
-        name = string;
-    }
-
-    public boolean isPrimaryKey() {
-        return primaryKey;
-    }
-
-    public String getJavaClass() {
-        return javaClass;
-    }
-
-    public void setPrimaryKey(boolean b) {
-        primaryKey = b;
-    }
-
-    public void setJavaClass(String string) {
-        javaClass = string;
+    public int[] getOutIndices() {
+        return outIndices;
     }
 }
