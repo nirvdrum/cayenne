@@ -15,7 +15,7 @@
 			obtain results in the form of <a href=
 			"../../api/cayenne/org/objectstyle/cayenne/access/ResultIterator.html"><code>ResultIterator</code></a>. 
 			<code>ResultIterator</code> is connected
-			to an open <code>java.sql.ResultSet</code>, therefore it's methods may throw checked 
+			to an open <code>java.sql.ResultSet</code>, therefore its methods may throw checked 
 			exceptions. ResultIterator returns data rows (not DataObjects) one at a time, reading them
 			on demand from the open ResultSet. Each data row can be converted to a DataObject or accessed
 			directly. <strong>Open ResultIterator locks the database connection, therefore 
