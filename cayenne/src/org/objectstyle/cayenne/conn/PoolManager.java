@@ -215,8 +215,8 @@ public class PoolManager implements DataSource, ConnectionEventListener {
     }
 
 
-    /** Returns the absolute minimum number of connections in this pool at
-      * any moment in time. */
+    /** Returns the absolute minimum number of connections allowed 
+      * in this pool at any moment in time. */
     public int getMinConnections() {
         return minConnections;
     }

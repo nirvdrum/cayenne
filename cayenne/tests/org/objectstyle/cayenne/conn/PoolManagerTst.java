@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.conn;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import junit.runner.*;
@@ -64,18 +64,37 @@ import org.objectstyle.util.*;
 
 
 public class PoolManagerTst extends TestCase {
-    
+
     public PoolManagerTst(String name) {
         super(name);
     }
-    
-    
-    public void setUp() throws java.lang.Exception {
+
+    public void testDataSourceUrl() throws java.lang.Exception {
+        String driverName = org.objectstyle.TestMain.getFreshConnInfo().getJdbcDriver();
+        String url = org.objectstyle.TestMain.getFreshConnInfo().getDataSourceUrl();
         
+        PoolManager pm = new PoolManager(driverName, url, 0, 3, "", "");
+        assertEquals(url, pm.getDataSourceUrl());
+        assertEquals(driverName, pm.getJdbcDriver());
     }
-    
-    
-    public void testGetMaxConnections() throws java.lang.Exception {
+
+
+    public void testPassword() throws java.lang.Exception {
+        PoolManager pm = new PoolManager(null, 0, 3, "", "b");
+        assertEquals("b", pm.getPassword());
+    }
+
+    public void testUserName() throws java.lang.Exception {
+        PoolManager pm = new PoolManager(null, 0, 3, "a", "");
+        assertEquals("a", pm.getUserName());
+    }
+
+    public void testMinConnections() throws java.lang.Exception {
+        PoolManager pm = new PoolManager(null, 0, 3, "", "");
+        assertEquals(0, pm.getMinConnections());
+    }
+
+    public void testMaxConnections() throws java.lang.Exception {
         PoolManager pm = new PoolManager(null, 0, 3, "", "");
         assertEquals(3, pm.getMaxConnections());
     }
