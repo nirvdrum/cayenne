@@ -58,3 +58,6 @@ DefaultConfiguration now properly handles files in packages or other paths.
 15. significantly better logging in ResourceLocator; this should help when
 diagnosing e.g. Configuration loading problems.
 
+16. Modeler's logfile path can be customized or disabled by editing
+$HOME/.cayenne/modeler.preferences.
+
