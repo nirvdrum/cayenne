@@ -89,6 +89,10 @@ public class SaveAction extends CayenneAction {
 		super(ACTION_NAME);
 	}
 	
+	public String getIconName() {
+		return "images/icon-save.gif";
+	}
+	
 	protected void saveAll() {
 		Mediator mediator = getMediator();
 		Validator val = new Validator(mediator);
