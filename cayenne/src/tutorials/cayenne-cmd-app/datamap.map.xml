@@ -27,28 +27,20 @@
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
 	</obj-entity>
-	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
+	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toDependentPK="false" toMany="true">
+	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
+	<db-relationship name="toArtist" source="PAINTING" target="ARTIST" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toDependentPK="false" toMany="false">
+	<db-relationship name="toGallery" source="PAINTING" target="GALLERY" toMany="false">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<obj-relationship name="paintingArray" source="Artist" target="Painting" toMany="true">
-		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
-	</obj-relationship>
-	<obj-relationship name="paintingArray" source="Gallery" target="Painting" toMany="true">
-		<db-relationship-ref source="GALLERY" target="PAINTING" name="paintingArray"/>
-	</obj-relationship>
-	<obj-relationship name="toArtist" source="Painting" target="Artist" toMany="false">
-		<db-relationship-ref source="PAINTING" target="ARTIST" name="toArtist"/>
-	</obj-relationship>
-	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false">
-		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>
-	</obj-relationship>
+	<obj-relationship name="paintingArray" source="Artist" target="Painting" db-relationship-path="paintingArray"/>
+	<obj-relationship name="paintingArray" source="Gallery" target="Painting" db-relationship-path="paintingArray"/>
+	<obj-relationship name="toArtist" source="Painting" target="Artist" db-relationship-path="toArtist"/>
+	<obj-relationship name="toGallery" source="Painting" target="Gallery" db-relationship-path="toGallery"/>
 </data-map>
