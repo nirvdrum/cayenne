@@ -64,7 +64,6 @@ import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
 
 /** DbAdapter implementation for <a href="http://postgresql.org">PostgreSQL RDBMS</a>. */
 public class PostgresAdapter extends JdbcAdapter
