@@ -159,7 +159,8 @@ public abstract class EventBridge implements EventListener {
         this.mode = mode;
 
         if (receivesLocalEvents()) {
-            eventManager.addListener(
+            // by default set as a non-blockign listener
+            eventManager.addNonBlockingListener(
                 this,
                 "onLocalEvent",
                 CayenneEvent.class,

@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.event;
 
 import java.util.Collection;
-import java.util.EventObject;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -65,6 +64,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.event.EventManager.Dispatch;
 import org.objectstyle.cayenne.util.Invocation;
 
 /**
@@ -81,7 +81,7 @@ class DispatchQueue {
     private static Logger logObj = Logger.getLogger(DispatchQueue.class);
 
     // TODO: implement a maintenance thread to cleanup dead invocations with deallocated targets
-    
+
     private Set subjectInvocations = new HashSet();
     private Map invocationsBySender = new WeakHashMap();
 
@@ -91,17 +91,18 @@ class DispatchQueue {
      */
     synchronized void dispatchEvent(Dispatch dispatch) {
         // dispatch to "any sender" listeners
-        dispatchEvent(subjectInvocations, dispatch.event);
+        dispatchEvent(subjectInvocations, dispatch);
 
         // dispatch to the given sender listeners
-        Object sender = dispatch.event.getSource();
-        dispatchEvent(invocationsForSender(sender, false), dispatch.event);
+        Object sender = dispatch.getSender();
+        dispatchEvent(invocationsForSender(sender, false), dispatch);
     }
 
     synchronized void addInvocation(Invocation invocation, Object sender) {
         if (sender == null) {
             subjectInvocations.add(invocation);
-        } else {
+        }
+        else {
             invocationsForSender(sender, true).add(invocation);
         }
     }
@@ -169,33 +170,21 @@ class DispatchQueue {
     }
 
     // dispatches event to a list of listeners
-    private void dispatchEvent(Collection invocations, EventObject event) {
+    private void dispatchEvent(Collection invocations, Dispatch dispatch) {
         if (invocations == null || invocations.isEmpty()) {
             return;
         }
 
-        Object[] eventArgument = new Object[] { event };
-
         Iterator it = invocations.iterator();
         while (it.hasNext()) {
             Invocation invocation = (Invocation) it.next();
-            // fire invocation, detect if anything went wrong
-            // (e.g. GC'ed invocation targets)
-            if (!invocation.fire(eventArgument)) {
+
+            // fire invocation, detect if anything went wrong (e.g. GC'ed invocation targets)
+            if (!dispatch.fire(invocation)) {
                 it.remove();
                 logObj.debug(
                     "Failed invocation, removing: " + invocation.getMethod().getName());
             }
-        }
-    }
-
-    static final class Dispatch {
-        EventObject event;
-        EventSubject subject;
-
-        public Dispatch(EventObject event, EventSubject subject) {
-            this.event = event;
-            this.subject = subject;
         }
     }
 }

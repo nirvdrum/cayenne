@@ -65,7 +65,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.event.DispatchQueue.Dispatch;
 import org.objectstyle.cayenne.util.Invocation;
 import org.objectstyle.cayenne.util.Util;
 
@@ -83,7 +82,7 @@ public class EventManager extends Object {
 
     private static final EventManager defaultManager = new EventManager();
 
-    public static final int DEFAULT_DISPATCH_THREAD_COUNT = 5;
+    public static final int DEFAULT_DISPATCH_THREAD_COUNT = 3;
 
     // keeps weak references to subjects
     protected Map subjects;
@@ -131,7 +130,15 @@ public class EventManager extends Object {
         String methodName,
         Class eventParameterClass,
         EventSubject subject) {
-        this.addListener(listener, methodName, eventParameterClass, subject, null);
+        this.addListener(listener, methodName, eventParameterClass, subject, null, true);
+    }
+
+    public void addNonBlockingListener(
+        Object listener,
+        String methodName,
+        Class eventParameterClass,
+        EventSubject subject) {
+        this.addListener(listener, methodName, eventParameterClass, subject, null, false);
     }
 
     /**
@@ -153,6 +160,26 @@ public class EventManager extends Object {
         Class eventParameterClass,
         EventSubject subject,
         Object sender) {
+        addListener(listener, methodName, eventParameterClass, subject, sender, true);
+    }
+
+    public void addNonBlockingListener(
+        Object listener,
+        String methodName,
+        Class eventParameterClass,
+        EventSubject subject,
+        Object sender) {
+        addListener(listener, methodName, eventParameterClass, subject, sender, false);
+    }
+
+    protected void addListener(
+        Object listener,
+        String methodName,
+        Class eventParameterClass,
+        EventSubject subject,
+        Object sender,
+        boolean blocking) {
+
         if (listener == null) {
             throw new IllegalArgumentException("Listener must not be null.");
         }
@@ -165,12 +192,17 @@ public class EventManager extends Object {
             throw new IllegalArgumentException("Subject must not be null.");
         }
 
-        logObj.debug(
-            "adding listener: " + listener.getClass().getName() + "." + methodName);
+        if (logObj.isDebugEnabled()) {
+            String label =
+                (blocking) ? "adding listener: " : "adding non-blocking listener: ";
+            logObj.debug(label + listener.getClass().getName() + "." + methodName);
+        }
 
         try {
             Invocation invocation =
-                new Invocation(listener, methodName, eventParameterClass);
+                (blocking)
+                    ? new Invocation(listener, methodName, eventParameterClass)
+                    : new NonBlockingInvocation(listener, methodName, eventParameterClass);
             dispatchQueueForSubject(subject, true).addInvocation(invocation, sender);
         }
         catch (NoSuchMethodException nsm) {
@@ -307,8 +339,83 @@ public class EventManager extends Object {
         }
     }
 
+    class Dispatch {
+        EventObject[] eventArgument;
+        EventSubject subject;
+
+        Dispatch(EventObject event, EventSubject subject) {
+            this(new EventObject[] { event }, subject);
+        }
+
+        Dispatch(EventObject[] eventArgument, EventSubject subject) {
+            this.eventArgument = eventArgument;
+            this.subject = subject;
+        }
+
+        Object getSender() {
+            return eventArgument[0].getSource();
+        }
+
+        void fire() {
+            EventManager.this.dispatchEvent(Dispatch.this);
+        }
+
+        boolean fire(Invocation invocation) {
+            if (invocation instanceof NonBlockingInvocation) {
+
+                // do minimal checks first...
+                if (invocation.getTarget() == null) {
+                    return false;
+                }
+
+                // inject single invocation dispatch into the queue
+                synchronized (eventQueue) {
+                    eventQueue.add(
+                        new InvocationDispatch(eventArgument, subject, invocation));
+                    eventQueue.notifyAll();
+                }
+
+                return true;
+            }
+            else {
+                return invocation.fire(eventArgument);
+            }
+        }
+    }
+
+    class InvocationDispatch extends Dispatch {
+        Invocation target;
+
+        InvocationDispatch(
+            EventObject[] eventArgument,
+            EventSubject subject,
+            Invocation target) {
+            super(eventArgument, subject);
+            this.target = target;
+        }
+
+        void fire() {
+            // there is no way to kill the invocation if it is bad...
+            // so don't check for status
+            target.fire(eventArgument);
+        }
+    }
+
+    // subclass exists only to tag invocations that should be
+    // dispatched in a separate thread
+    final class NonBlockingInvocation extends Invocation {
+
+        public NonBlockingInvocation(
+            Object target,
+            String methodName,
+            Class parameterType)
+            throws NoSuchMethodException {
+            super(target, methodName, parameterType);
+        }
+    }
+
     final class DispatchThread extends Thread {
-        public DispatchThread(String name) {
+        DispatchThread(String name) {
             super(name);
             setDaemon(true);
             logObj.debug("starting event dispatch thread: " + name);
@@ -338,11 +445,10 @@ public class EventManager extends Object {
 
                 // dispatch outside of synchronized block
                 if (dispatch != null) {
-
                     // this try/catch is needed to prevent DispatchThread
                     // from dying on dispatch errors
                     try {
-                        EventManager.this.dispatchEvent(dispatch);
+                        dispatch.fire();
                     }
                     catch (Throwable th) {
                         // ignoring exception
