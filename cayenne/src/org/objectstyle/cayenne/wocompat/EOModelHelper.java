@@ -83,6 +83,7 @@ public class EOModelHelper {
         locator.setSkipClasspath(false);
         locator.setSkipCurDir(false);
         locator.setSkipHomeDir(true);
+        locator.setSkipAbsPath(false);
     }
 
     /** 

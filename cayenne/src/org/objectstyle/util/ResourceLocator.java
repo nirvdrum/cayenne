@@ -69,6 +69,7 @@ public class ResourceLocator {
     protected boolean skipHomeDir;
     protected boolean skipCurDir;
     protected boolean skipClasspath;
+    protected boolean skipAbsPath;
     protected ClassLoader classLoader;
 
     /** Returns a resource as InputStream if it is found in CLASSPATH. 
@@ -167,9 +168,23 @@ public class ResourceLocator {
         }
     }
 
+
     /** Returns resource URL using lookup strategy configured for this object or
      *  null if no readable resource can be found for name. */
     public URL findResource(String name) {
+        if (!isSkipAbsPath()) {
+            File f = new File(name);
+            if (f.isAbsolute() && f.exists()) {
+                try {
+                    return f.toURL();
+                }
+                catch (MalformedURLException ex) {
+                    ex.printStackTrace();
+
+                    // ignoring...
+                }
+            }
+        }
 
         if (!isSkipHomeDir()) {
             File f = findFileInHomeDir(name);
@@ -282,6 +297,20 @@ public class ResourceLocator {
 
     public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
+    }
+
+    /**
+     * Returns true if no lookups are performed using path as absolute path.
+     */
+    public boolean isSkipAbsPath() {
+        return skipAbsPath;
+    }
+
+    /**
+     * Sets "skipAbsPath" property.
+     */
+    public void setSkipAbsPath(boolean skipAbsPath) {
+        this.skipAbsPath = skipAbsPath;
     }
 
 }
