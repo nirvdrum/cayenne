@@ -364,16 +364,21 @@ class ContextCommit {
             List objects =
                 (List) objectsToUpdateByObjEntity.get(entity.getClassName());
             Map batches = new SequencedHashMap();
+            
             for (Iterator j = objects.iterator(); j.hasNext();) {
                 DataObject o = (DataObject) j.next();
                 Map snapshot = BatchUtils.buildSnapshotForUpdate(o);
+                
                 if (snapshot.isEmpty()) {
                     o.setPersistenceState(PersistenceState.COMMITTED);
                     continue;
                 }
+                
                 TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
+                
                 Integer hashCode =
                     new Integer(BatchUtils.hashCode(updatedAttributeNames));
+                    
                 UpdateBatchQuery batch =
                     (UpdateBatchQuery) batches.get(hashCode);
                 if (batch == null) {
@@ -382,12 +387,7 @@ class ContextCommit {
                             entity.getDbEntity(),
                             new ArrayList(snapshot.keySet()),
                             10);
-                    batch.setLoggingLevel(logLevel);
-
-                    if (logObj.isDebugEnabled())
-                        logObj.debug(
-                            "Creating UpdateBatchQuery for DbEntity "
-                                + entity.getDbEntity().getName());
+                    batch.setLoggingLevel(logLevel);                    
                     batches.put(hashCode, batch);
                 }
                 Map idSnapshot = o.getObjectId().getIdSnapshot();
@@ -397,8 +397,10 @@ class ContextCommit {
                         o.getObjectId().getObjClass(),
                         idSnapshot,
                         snapshot);
-                if (updId != null)
+                if (updId != null) {
                     updatedIds.put(o.getObjectId(), updId);
+                }
+                
                 updObjects.add(o);
             }
 

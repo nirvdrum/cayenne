@@ -198,7 +198,7 @@ public class Main {
                         robot.generate();
                         try {
                             long start = System.currentTimeMillis();
-                            ctxt.commit(null);
+                            ctxt.commitChanges(null);
                             long end = System.currentTimeMillis();
                             printCommitSuccess(console, j, end - start);
                             if (out != null)

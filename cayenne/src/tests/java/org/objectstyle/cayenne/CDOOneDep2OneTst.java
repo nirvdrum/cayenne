@@ -55,7 +55,6 @@ package org.objectstyle.cayenne;
  *
  */
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
@@ -146,10 +145,11 @@ public class CDOOneDep2OneTst extends CayenneDOTestBase {
         // test before save
         assertNull(p21.getToPaintingInfo());
         assertSame(pi2, p22.getToPaintingInfo());
+        assertSame(p22, pi2.getPainting());
         assertEquals(PersistenceState.MODIFIED, pi2.getPersistenceState());
 
         // do save II
-        ctxt.commitChanges(Level.WARN);
+        ctxt.commitChanges();
         ObjectId pi2oid = pi2.getObjectId();
         resetContext();
 

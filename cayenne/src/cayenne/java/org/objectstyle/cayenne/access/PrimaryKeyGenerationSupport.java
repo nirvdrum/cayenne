@@ -195,42 +195,6 @@ class PrimaryKeyGenerationSupport {
         }
     }
 
-    public ObjectId createPermId(DataObject object) throws CayenneException {
-        TempObjectId tempId = (TempObjectId) object.getObjectId();
-        ObjEntity objEntity =
-            supportedQueryEngine.getEntityResolver().lookupObjEntity(
-                tempId.getObjClass());
-        DbEntity dbEntity = objEntity.getDbEntity();
-
-        HashMap idMap = new HashMap();
-        // first get values delivered via relationships
-        appendPkFromMasterRelationships(idMap, object, objEntity, dbEntity);
-        boolean autoPkDone = false;
-        Iterator it = dbEntity.getPrimaryKey().iterator();
-        while (it.hasNext()) {
-            DbAttribute dbAttr = (DbAttribute) it.next();
-            String dbAttrName = dbAttr.getName();
-            if (idMap.containsKey(dbAttrName))
-                continue;
-            ObjAttribute objAttr = objEntity.getAttributeForDbAttribute(dbAttr);
-            if (objAttr != null) {
-                idMap.put(
-                    dbAttrName,
-                    object.readPropertyDirectly(objAttr.getName()));
-                continue;
-            }
-            if (autoPkDone)
-                throw new CayenneException("Primary Key autogeneration only works for a single attribute.");
-            Object pkValue = generatePrimaryKeyValue(objEntity);
-            idMap.put(dbAttrName, pkValue);
-            autoPkDone = true;
-        }
-        ObjectId permId = new ObjectId(objEntity.getClass(), idMap);
-        // note that object registration did not changed (new id is not attached to context, only to temp. oid)
-        tempId.setPermId(permId);
-        return permId;
-    }
-
     private boolean appendPkFromMasterRelationships(
         Map map,
         DataObject dataObject,
