@@ -82,6 +82,7 @@ public class DbAttributePane
 		ListSelectionListener,
 		DbAttributeListener,
 		ExistingSelectionProcessor {
+			
 	Mediator mediator;
 
 	JTable table;

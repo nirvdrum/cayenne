@@ -223,20 +223,10 @@ class ObjAttributeTableModel extends CayenneTableModel {
 		mediator.fireObjAttributeEvent(ev);
 	}
 
-	public void removeRow(int row) {
-		if (row < 0)
-			return;
-		Attribute attrib = getAttribute(row);
-		AttributeEvent e = new AttributeEvent(eventSource, attrib, entity, AttributeEvent.REMOVE);
-		objectList.remove(row);
-		entity.removeAttribute(attrib.getName());
-		mediator.fireObjAttributeEvent(e);
-		fireTableDataChanged();
-	}
 
 	/** Attribute just needs to be removed from the model. 
 	 *  It is already removed from the DataMap. */
-	void removeAttribute(Attribute attrib) {
+	public void removeAttribute(Attribute attrib) {
 		objectList.remove(attrib);
 		fireTableDataChanged();
 	}

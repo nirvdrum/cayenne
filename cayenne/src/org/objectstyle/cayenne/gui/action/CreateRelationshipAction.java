@@ -57,12 +57,16 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
+
 /**
  * @author Andrei Adamchik
  */
 public class CreateRelationshipAction extends CayenneAction {
 	public static final String ACTION_NAME = "Create Relationship";
-	
+
 	/**
 	 * Constructor for CreateRelationshipAction.
 	 */
@@ -73,12 +77,62 @@ public class CreateRelationshipAction extends CayenneAction {
 	public String getIconName() {
 		return "images/icon-relationship.gif";
 	}
-	
+
 	/**
 	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
 	 */
 	public void performAction(ActionEvent e) {
+		ObjEntity objEnt = getMediator().getCurrentObjEntity();
+		if (objEnt != null) {
+			createObjRelationship(objEnt);
+		} else {
+			DbEntity dbEnt = getMediator().getCurrentDbEntity();
+			if (dbEnt != null) {
+				createDbRelationship(dbEnt);
+			}
+		}
+	}
+
+	public void createObjRelationship(ObjEntity objEnt) {
+		Mediator mediator = getMediator();
+
+		ObjAttribute attr =
+			(ObjAttribute) NamedObjectFactory.createObject(
+				ObjAttribute.class,
+				objEnt);
+		objEnt.addAttribute(attr);
+		mediator.fireObjAttributeEvent(
+			new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
+
+		mediator.fireObjAttributeDisplayEvent(
+			new AttributeDisplayEvent(
+				this,
+				attr,
+				objEnt,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain()));
+	}
+
+	public void createDbRelationship(DbEntity dbEnt) {
+		Mediator mediator = getMediator();
+
+		DbRelationship rel =
+			(DbRelationship) NamedObjectFactory.createObject(
+				DbRelationship.class,
+				dbEnt);
+
+		rel.setSourceEntity(dbEnt);
+		dbEnt.addRelationship(rel);
+
+		mediator.fireDbRelationshipEvent(
+			new RelationshipEvent(this, rel, dbEnt, RelationshipEvent.ADD));
+		mediator.fireDbRelationshipDisplayEvent(
+			new RelationshipDisplayEvent(
+				this,
+				rel,
+				dbEnt,
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain()));
 	}
 
 }
-

@@ -90,7 +90,6 @@ public class DbRelationshipPane
 	Mediator mediator;
 
 	JTable table;
-	JButton add;
 	JButton resolve;
 
 	public DbRelationshipPane(Mediator temp_mediator) {
@@ -102,7 +101,6 @@ public class DbRelationshipPane
 		// Set up graphical components
 		init();
 		// Add listeners		
-		add.addActionListener(this);
 		resolve.addActionListener(this);
 	}
 
@@ -110,22 +108,15 @@ public class DbRelationshipPane
 		setLayout(new BorderLayout());
 		// Create table
 		table = new CayenneTable();
-		add = new JButton("Add");
 		resolve = new JButton("Database Mapping");
 		JPanel panel =
-			PanelFactory.createTablePanel(
-				table,
-				new JButton[] { add, resolve });
+			PanelFactory.createTablePanel(table, new JButton[] { resolve });
 		add(panel, BorderLayout.CENTER);
 	}
 
 	public void performAction(ActionEvent e) {
 		Object src = e.getSource();
-		DbRelationshipTableModel model;
-		model = (DbRelationshipTableModel) table.getModel();
-		if (src == add) {
-			model.addRow();
-		} else if (src == resolve) {
+		if (src == resolve) {
 			resolveRelationship();
 		}
 	}
@@ -208,10 +199,13 @@ public class DbRelationshipPane
 	/** Loads obj relationships into table. */
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
 		DbEntity entity = (DbEntity) e.getEntity();
-		if (null == entity || e.isEntityChanged() == false)
+		if (null == entity || !e.isEntityChanged())
 			return;
-		DbRelationshipTableModel model;
-		model = new DbRelationshipTableModel(entity, mediator, this);
+		rebuildTable(entity);
+	}
+
+	protected void rebuildTable(DbEntity dbEnt) {
+		DbRelationshipTableModel model = new DbRelationshipTableModel(dbEnt, mediator, this);
 		model.addTableModelListener(this);
 		table.setModel(model);
 		table.setRowHeight(25);
@@ -260,7 +254,9 @@ public class DbRelationshipPane
 	}
 
 	public void dbRelationshipAdded(RelationshipEvent e) {
+		rebuildTable((DbEntity) e.getEntity());
 	}
+
 	public void dbRelationshipRemoved(RelationshipEvent e) {
 		DbRelationshipTableModel model;
 		model = (DbRelationshipTableModel) table.getModel();
@@ -278,8 +274,8 @@ public class DbRelationshipPane
 		// If this is just loading new currentDbEntity, do nothing
 		if (mediator.getCurrentDbEntity() == null)
 			return;
-		TableColumn col;
-		col = table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
+		TableColumn col =
+			table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
 		DefaultCellEditor editor = (DefaultCellEditor) col.getCellEditor();
 		JComboBox combo = (JComboBox) editor.getComponent();
 		combo.setModel(createComboModel());

@@ -192,37 +192,6 @@ class DbRelationshipTableModel extends CayenneTableModel {
 			mediator.fireDbRelationshipEvent(e);
 		}
 		fireTableRowsUpdated(row, row);
-	} // End setValueAt()
-
-	/** @return true if new row was added, false if not. */
-	public boolean addRow() {
-		DbRelationship temp =
-			(DbRelationship) NamedObjectFactory.createObject(
-				DbRelationship.class,
-				entity);
-
-		temp.setSourceEntity(entity);
-		objectList.add(temp);
-		entity.addRelationship(temp);
-		RelationshipEvent e;
-		e = new RelationshipEvent(eventSource, temp, entity, RelationshipEvent.ADD);
-		mediator.fireDbRelationshipEvent(e);
-		fireTableDataChanged();
-		return true;
-	}
-
-	public void removeRow(int row) {
-		if (row < 0)
-			return;
-		System.out.println("DbRelationshipTableModel::removeRow()");
-		Relationship rel = this.getRelationship(row);
-		RelationshipEvent e;
-		e = new RelationshipEvent(eventSource, rel, entity, RelationshipEvent.REMOVE);
-		mediator.fireDbRelationshipEvent(e);
-		objectList.remove(row);
-		String name = rel.getName();
-		entity.removeRelationship(name);
-		fireTableRowsDeleted(row, row);
 	}
 
 	/** Relationship just needs to be removed from the model. 
