@@ -71,6 +71,9 @@ public class PreferenceField extends JComboBox
     static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
 
 	private String key;
+	/** Values to put in pref field in addition to preference values.
+	 *  These values are not going to be stored to preference file.*/
+	private List initValues;
 	
 	/** Sets preference only on explicit call to storePreferences().*/
 	public PreferenceField(String temp_key) {
@@ -82,17 +85,29 @@ public class PreferenceField extends JComboBox
 	  * @param set_on_focus If true, stores preferences each time focus is lost.
 	  */
 	public PreferenceField(String temp_key, boolean set_on_focus) {
+		this(temp_key, set_on_focus, new Vector());
+	}
+	
+	public PreferenceField(String temp_key, boolean set_on_focus
+						 , List init_values)
+	{
 		key = temp_key;
 		setEditable(true);
 		setSelectedIndex(-1);
 		Preferences pref = Preferences.getPreferences();
-		// If has key, populate combo box
+		initValues = init_values;
+		Vector v = new Vector(init_values);
+		// If has key, append preference values to init values
 		if (pref.containsKey(key)) {
 			String[] options = pref.getStringArray(key);
-			if (options != null) {
-				DefaultComboBoxModel model = new DefaultComboBoxModel(options);
-				setModel(model);
+			if (options != null ) {
+				v.addAll(Arrays.asList(options));
 			}
+		}
+		// If any values (init or pref), put them in the model
+		if (v.size() > 0) {
+			DefaultComboBoxModel model = new DefaultComboBoxModel(v);
+			setModel(model);
 		}
 		setSelectedItem(null);
 	}
@@ -138,16 +153,18 @@ public class PreferenceField extends JComboBox
 		pref.remove(key);
 		Iterator iter = items.iterator();
 		
-		if(logObj.isLoggable(Level.FINER)) {
-		    StringBuffer buf = new StringBuffer("PreferenceField::storePreferences(), "
-					+"key "+ key + ":\n");
-		    while (iter.hasNext()) {
-			    String str = (String)iter.next();
-			    pref.addProperty(key, str);
-			    buf.append(str + "\n");
-		    }// End while
-		    logObj.finer(buf.toString());
-		}
+	    StringBuffer buf;
+	    buf = new StringBuffer("PreferenceField::storePreferences()"
+								+", key "+ key + ":\n");
+	    while (iter.hasNext()) {
+		    String str = (String)iter.next();
+		    // Skip initial items (not from preferences)
+		    if (initValues.contains(str))
+		    	continue;
+		    pref.addProperty(key, str);
+		    buf.append(str + "\n");
+	    }// End while
+	    logObj.finer(buf.toString());
 		DefaultComboBoxModel model = new DefaultComboBoxModel(items);
 		model.setSelectedItem(item);
 		setModel(model);
