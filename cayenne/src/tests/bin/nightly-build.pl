@@ -48,7 +48,7 @@ my $ant = "$ENV{'ANT_HOME'}/bin/ant";
 die_with_email("No Ant installation at $ant") unless -f $ant;
 
 # Upload path on the server
-my $rel_path = "/var/sites/objectstyle/downloads/cayenne/nightly";
+my $rel_path = "/var/sites/objectstyle/html/downloads/cayenne/nightly";
 
 # print timestamp for log
 print "\n\n===================================================\n";
