@@ -74,7 +74,6 @@ import org.objectstyle.cayenne.query.DeleteQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
 import org.objectstyle.cayenne.query.InsertQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.ProcedureSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
@@ -131,12 +130,6 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
     public void testProcedureQuery() throws Exception {
         assertQuery(
             new ProcedureQuery(Artist.class, new Procedure()),
-            "runStoredProcedure");
-    }
-
-    public void testSelectProcedureQuery() throws Exception {
-        assertQuery(
-            new ProcedureSelectQuery(Artist.class, new Procedure()),
             "runStoredProcedure");
     }
 

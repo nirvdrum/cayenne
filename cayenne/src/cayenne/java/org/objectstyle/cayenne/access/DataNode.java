@@ -86,7 +86,6 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.ProcedureSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -284,11 +283,7 @@ public class DataNode implements QueryEngine {
                             con = null;
                         }
 
-                        if (nextQuery instanceof ProcedureSelectQuery) {
-                            runStoredProcedure(localCon, nextQuery, opObserver);
-                        } else {
-                            runSelect(localCon, nextQuery, opObserver);
-                        }
+                        runSelect(localCon, nextQuery, opObserver);
                     }
                     // 2. All kinds of MODIFY - INSERT, DELETE, UPDATE, UNKNOWN
                     else {
@@ -558,7 +553,8 @@ public class DataNode implements QueryEngine {
                 ResultSet rs = prepStmt.getResultSet();
 
                 // sanity check 
-                SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
+                SelectQueryTranslator assembler =
+                    (SelectQueryTranslator) transl;
                 DefaultResultIterator it =
                     new DefaultResultIterator(
                         con,

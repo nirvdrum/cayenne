@@ -65,9 +65,10 @@ import org.objectstyle.cayenne.map.Procedure;
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureQuery extends AbstractQuery {
+public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery {
     protected Procedure procedure;
     protected Map params = new HashMap();
+    protected int fetchLimit;
 
     public ProcedureQuery() {
     }
@@ -80,7 +81,8 @@ public class ProcedureQuery extends AbstractQuery {
     }
 
     /**
-     * Returns Query.STORED_PROCEDURE_QUERY.
+     * Returns Query.UNKNOWN_QUERY. StoredProcedure can perform any kinds of
+     * database operations, not directly controlled by the O/R layer.
      */
     public int getQueryType() {
         return UNKNOWN_QUERY;
@@ -108,5 +110,24 @@ public class ProcedureQuery extends AbstractQuery {
 
     public void clearParams() {
         params.clear();
+    }
+    
+    public int getFetchLimit() {
+        return fetchLimit;
+    }
+
+    /**
+     * Always returns zero, since paged queries are currently not supported for 
+     * stored procedures.
+     */
+    public int getPageSize() {
+        return 0;
+    }
+
+    /**
+     * Currently always returns <code>true</code>.
+     */
+    public boolean isFetchingDataRows() {
+        return true;
     }
 }
