@@ -381,14 +381,14 @@
 	<obj-relationship name="painting" source="PaintingInfo" target="Painting" deleteRule="Nullify" db-relationship-path="painting"/>
 	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" deleteRule="Deny" db-relationship-path="paintingArray"/>
 	<obj-relationship name="toArtist" source="ROPainting" target="Artist" deleteRule="Nullify" db-relationship-path="toArtist"/>
-	<query name="QueryWithOrdering" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+	<query name="QueryWithOrdering" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
 		<ordering descending="true" ignore-case="true"><![CDATA[artistName]]></ordering>
 		<ordering><![CDATA[dateOfBirth]]></ordering>
 	</query>
-	<query name="QueryWithPrefetch" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Gallery">
+	<query name="QueryWithPrefetch" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Gallery">
 		<prefetch>paintingArray</prefetch>
 	</query>
-	<query name="QueryWithQualifier" factory="org.objectstyle.cayenne.query.SelectQueryBuilder" root="obj-entity" root-name="Artist">
+	<query name="QueryWithQualifier" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Artist">
 		<qualifier><![CDATA[artistName = $param1]]></qualifier>
 	</query>
 </data-map>

@@ -86,7 +86,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Andriy Shapochka
  */
 public class MapLoader extends DefaultHandler {
-    private static Logger logObj = Logger.getLogger(MapLoader.class);
+    private static final Logger logObj = Logger.getLogger(MapLoader.class);
 
     public static final String DATA_MAP_TAG = "data-map";
     public static final String PROPERTY_TAG = "property";

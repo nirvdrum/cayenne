@@ -61,25 +61,26 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
- * A DerivedDbAttribute is a DbAttribute that resolves to an SQL expression based on 
- * a set of other attributes. DerivedDbAttribute's allow to build
- * expressions like "<code>count(id)</code>", "<code>sum(price)</code>", etc.
- * 
+ * A DerivedDbAttribute is a DbAttribute that resolves to an SQL expression based on a set
+ * of other attributes. DerivedDbAttribute's allow to build expressions like "
+ * <code>count(id)</code>", "<code>sum(price)</code>", etc.
  * <p>
  * Internally DerivedDbAttribute is defined as a specification string and a set of
- * substitution DbAttribute parameters. Specification string is an SQL expression that contains
- * placeholders (<code>%@</code>) for attribute parameters, for example:
+ * substitution DbAttribute parameters. Specification string is an SQL expression that
+ * contains placeholders (<code>%@</code>) for attribute parameters, for example:
  * </p>
- * 
- * <p><code>sum(%@) + sum(%@)</code></p>
- * 
+ * <p>
+ * <code>sum(%@) + sum(%@)</code>
+ * </p>
  * 
  * @author Andrei Adamchik
  */
 public class DerivedDbAttribute extends DbAttribute {
+
     public static final String ATTRIBUTE_TOKEN = "%@";
 
     protected String expressionSpec;
@@ -102,7 +103,6 @@ public class DerivedDbAttribute extends DbAttribute {
 
     /**
      * Constructor for DerivedDbAttribute.
-     * 
      */
     public DerivedDbAttribute(String name, int type, DbEntity entity, String spec) {
         super(name, type, entity);
@@ -110,8 +110,7 @@ public class DerivedDbAttribute extends DbAttribute {
     }
 
     /**
-     * Creates and initializes a derived attribute with 
-     * an attribute of a parent entity.
+     * Creates and initializes a derived attribute with an attribute of a parent entity.
      */
     public DerivedDbAttribute(DbEntity entity, DbAttribute parentProto) {
         setName(parentProto.getName());
@@ -132,7 +131,9 @@ public class DerivedDbAttribute extends DbAttribute {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<db-attribute-derived name=\"" + getName() + '\"');
+        encoder.print("<db-attribute-derived name=\""
+                + Util.encodeXmlAttribute(getName())
+                + '\"');
 
         String type = TypesMapping.getSqlNameByType(getType());
         if (type != null) {
@@ -180,7 +181,9 @@ public class DerivedDbAttribute extends DbAttribute {
             Iterator refs = params.iterator();
             while (refs.hasNext()) {
                 DbAttribute ref = (DbAttribute) refs.next();
-                encoder.println("<db-attribute-ref name=\"" + ref.getName() + "\"/>");
+                encoder.println("<db-attribute-ref name=\""
+                        + Util.encodeXmlAttribute(ref.getName())
+                        + "\"/>");
             }
 
             encoder.indent(-1);
@@ -219,8 +222,7 @@ public class DerivedDbAttribute extends DbAttribute {
     }
 
     /**
-     * Returns true if this attribute is used in GROUP BY
-     * clause of the parent entity.
+     * Returns true if this attribute is used in GROUP BY clause of the parent entity.
      */
     public boolean isGroupBy() {
         return groupBy;
@@ -232,6 +234,7 @@ public class DerivedDbAttribute extends DbAttribute {
 
     /**
      * Returns the params.
+     * 
      * @return List
      */
     public List getParams() {

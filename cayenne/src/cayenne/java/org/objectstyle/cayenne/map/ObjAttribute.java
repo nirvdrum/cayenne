@@ -61,6 +61,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
@@ -108,7 +109,7 @@ public class ObjAttribute extends Attribute {
         // If this obj attribute is mapped to db attribute
         if (getDbAttribute() != null) {
             encoder.print(" db-attribute-path=\"");
-            encoder.print(getDbAttributePath());
+            encoder.print(Util.encodeXmlAttribute(getDbAttributePath()));
             encoder.print('\"');
         }
 

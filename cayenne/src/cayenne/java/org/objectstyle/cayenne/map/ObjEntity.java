@@ -135,7 +135,7 @@ public class ObjEntity extends Entity {
 
         if (getSuperEntityName() == null && getDbEntity() != null) {
             encoder.print("\" dbEntityName=\"");
-            encoder.print(getDbEntityName());
+            encoder.print(Util.encodeXmlAttribute(getDbEntityName()));
         }
 
         if (getSuperEntityName() == null && getSuperClassName() != null) {

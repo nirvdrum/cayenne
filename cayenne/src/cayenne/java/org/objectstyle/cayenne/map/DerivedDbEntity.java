@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
@@ -104,20 +105,20 @@ public class DerivedDbEntity extends DbEntity {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<db-entity name=\"" + getName());
+        encoder.print("<db-entity name=\"" + Util.encodeXmlAttribute(getName()));
 
         if (getSchema() != null && getSchema().trim().length() > 0) {
             encoder.print("\" schema=\"");
-            encoder.print(getSchema().trim());
+            encoder.print(Util.encodeXmlAttribute(getSchema().trim()));
         }
 
         if (getCatalog() != null && getCatalog().trim().length() > 0) {
             encoder.print("\" catalog=\"");
-            encoder.print(getCatalog().trim());
+            encoder.print(Util.encodeXmlAttribute(getCatalog().trim()));
         }
 
         encoder.print("\" parentName=\"");
-        encoder.print(getParentEntityName());
+        encoder.print(Util.encodeXmlAttribute(getParentEntityName()));
         encoder.println("\">");
 
         encoder.indent(1);
