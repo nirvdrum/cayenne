@@ -12,7 +12,7 @@
             to write a Cayenne application:</p>
             
             <p><strong>- Create DataMap : </strong> 
-            <a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            <a href="/api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
             is stored in an XML file 
             used to desribe your database schema and map it to the Java classes
             in your application. DataMap can be created either manually or using
@@ -20,16 +20,16 @@
             </p>
             
             <p><strong>- Generate Java classes : </strong> In Cayenne
-            <a href="../api/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
+            <a href="/api/org/objectstyle/cayenne/map/ObjEntity.html">ObjEntities</a>
             map to Java classes that implement 
-            <a href="../api/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
+            <a href="/api/org/objectstyle/cayenne/DataObject.html">DataObject interface</a>. 
             CayenneModeler can be used to generate and maintain such Java classes.            
             </p>
             
             <p><strong>- Access Cayenne classes from your Java code : </strong> 
             Access to Cayenne functionality at the user (Java developer) level 
             is done via  <a 
-            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
+            href="/api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>   
             class.      
             </p>
             
@@ -38,10 +38,12 @@
             approaches in configuring Cayenne. Possible deployment scenarious are: 
             standalone application, web application, EJB application.
             </p>
+            <p>Database schema used in examples in this chapter is shown below:</p>
+            <img src="/images/schema.jpg" border="0" align="middle" alt="Art Catalog Schema"/>
         </subsection>
         
         <subsection name="4.2 Create DataMap" anchor="datamap">
-            <p><a href="../api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
+            <p><a href="/api/org/objectstyle/cayenne/map/DataMap.html">DataMap</a>
             is stored in an XML file 
             used to desribe a database schema and map it to the Java classes
             in the Java application. DataMap can be created either manually or using
@@ -51,18 +53,123 @@
         </subsection>
         
         <subsection name="4.3 Generate Java Classes" anchor="javagen">
-            <p>To Be Done</p>
+            <p>Java classes can be generated from an existing DataMap using CayenneModeler
+            tool. <i>More information is coming.</i></p>
         </subsection>
         
         <subsection name="4.4 Using Cayenne Classes" anchor="cayenne">
-            <p>All Cayenne features are usually accessed via a 
+        
+            <subsection name="4.4.1 Getting DataContext" anchor="cayenne_dc">
+            <p>In Cayenne application most of the database work is done via a 
             <a 
-            href="../api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
+            href="/api/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
             instance. It isolates changes made by a single user from other users. In
             web application speak this means that DataContext usually has a "session
             scope". <a 
-            href="../api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
-            usually serves as a factory for DataContext objects. </p>
+            href="/api/org/objectstyle/cayenne/access/DataDomain.html">DataDomain</a>
+            usually serves as a factory for DataContext objects. In a simple
+            case of a standalone application, DataContext can be obtained with the following
+            lines of code:</p>
+            
+<source>
+import org.objectstyle.conf.Configuration;
+import org.objectstyle.access.DataContext;
+...
+
+DataContext ctxt = Configuration.getSharedConfig().getDomain().createDataContext();
+...
+</source>
+        
+        <p>This context is usually preserved for the duration of the user session. 
+        In case of web applications Cayenne can be configured to set a default DataContext
+        inside each of HttpSession automatically (this is explained in "Deployment" 
+        chapter below). To obtain session DataContext the following code can be used:</p>
+
+<source>
+import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.access.DataContext;
+...
+
+// assume this exists
+HttpSession session;
+DataContext ctxt = ServletConfiguration.getDefaultContext(session);
+...
+</source>
+            </subsection>
+            
+            <subsection name="4.4.2 Fetching Objects" anchor="cayenne_fetch">
+            <p>To fetch a list of objects matching a certain criteria, a SelectQuery
+            object should be created. It can be executed using DataContext, bringing
+            back a list of DataObjects:</p>
+            
+<source>
+import java.util.List;
+import org.objectstyle.access.DataContext;
+import org.objectstyle.query.SelectQuery;
+import org.objectstyle.exp.Expression;
+import org.objectstyle.exp.ExpressionFactory;
+...
+
+// assume this exists and initialized
+DataContext ctxt;
+...
+Expression e = ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
+SelectQuery q = new SelectQuery("Painting", e);
+List realArt = ctxt.performQuery(q);
+...
+</source>           
+            </subsection>
+            
+            <subsection name="4.4.3 Saving Modified Objects" anchor="cayenne_save">
+            <p>Continuing the previous example, this section shows how to save changes made to
+            DataObjects. Lets do the following operations: double the price of the first
+            retrieved painting, add new painting that belongs to the same artist as the 
+            painting fetched before, save all changes:</p>
+            
+<source>
+import java.math.BigDecimal;
+import java.util.List;
+import org.objectstyle.access.DataContext;
+import org.objectstyle.query.SelectQuery;
+import org.objectstyle.exp.Expression;
+import org.objectstyle.exp.ExpressionFactory;
+import org.objectstyle.art.Painting;
+import org.objectstyle.art.Artist;
+...
+
+// assume this exists and initialized
+DataContext ctxt;
+...
+Expression e = ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, "estimatedPrice", 100000);
+SelectQuery q = new SelectQuery("Painting", e);
+List realArt = ctxt.performQuery(q);
+if(realArt.size() > 0) {
+  Painting firstPainting = (Painting)realArt.get(0);
+  
+  // double the price
+  double oldPrice = firstPainting.getEstimatedPrice().doubleValue();
+  firstPainting.setEstimatedPrice(new BigDecimal(oldPrice * 2.00));
+  
+  // create new painting and register it with DataContext
+  // "Painting" string is a name of ObjEntity in the DataMap
+  Painting newPainting = (Painting)ctxt.createAndRegisterNewObject("Painting");
+  newPainting.setTitle("Sunset as it is");
+  
+  // get artist via relationship
+  // "toArtist" is a relationship property name
+  // that is being accessed via getter
+  Artist artist = firstPainting.getToArtist();
+  
+  // assign new painting to an artist
+  artist.addToPaintingArray(newPinting);
+  
+  // save all the changes we've made so far
+  ctxt.commitChanges();
+}
+...
+</source> 
+              <p>Notice that all this is done without writing any SQL.</p>
+            </subsection>
         </subsection>
         
         <subsection name="4.5 Deployment" anchor="deploy">
