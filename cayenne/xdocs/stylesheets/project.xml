@@ -26,7 +26,7 @@
 
 
     <menu name="Developer">
-        <item name="CVS"  href="/developer.html"/>
+        <item name="Developer Guide"  href="/developer.html"/>
         <item name="Bugs"  href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068"/>
         <item name="Mailing Lists"  href="http://objectstyle.org/cayenne/lists.html"/>
     </menu>

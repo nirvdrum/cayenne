@@ -3,6 +3,29 @@
     <title>Overview</title>
 
     <body>
+        <!-- Welcome section -->
+        <section name="About Cayenne">
+        <p>Cayenne is a high-quality OpenSource Object/Relational framework. 
+        Cayenne is written in Java and is intended for Java developers working with
+        relational databases. Though its current release status is Alpha, Cayenne
+        has been already successfully deployed in production environment on high 
+        volume sites.</p>
+        
+        <p>Among Cayenne features are management of persistent Java objects
+        using mapping to relational database, single method call queries and updates 
+        (including atomic updates of all modified objects), seamless integration
+        of multiple databases into a single virtual data source. 
+        Cayenne is distributed with CayenneModeler -
+        a complete GUI mapping tool to reverse-engineer RDBMS schema and to work with database
+        mappings. CayenneModeler also supports generation of Java source code for the 
+        persistent objects.</p>
+        
+        <p>Cayenne is an OpenSource project and as such encourages the 
+        community to participate in development, testing and writing documentation.
+        This way we can produce a better product that will benefit its contributors
+        as well as everybody else.</p>
+        </section>
+        
         <!-- News section -->
         <section name="Cayenne News">
         <p><img src="images/other/nhl_logo.gif"/> 
@@ -34,26 +57,6 @@
         </p>
         </section>
         
-        <!-- Welcome section -->
-        <section name="Welcome to Cayenne">
-        <p>Welcome to Cayenne. Our goal is to provide Java developers with opensource 
-        tools to access relational databases in an object-oriented way.</p>
-        
-        <p>Cayenne includes a framework that adds persistence features to Java objects.
-        It allows mapping classes to database tables. Queries and updates (including 
-        atomic updates of all modified objects) are done with a single method call. 
-        This is a big advantage over writing SQL code in your Java program.
-        Cayenne also provides GUI mapping tool (called CayenneModeler) to reverse-engineer 
-        RDBMS schema and create "data maps" - XML files that contain mapping 
-        between the database and Java classes. CayenneModeler can also generate 
-        Java classes source code to use in your Java application.</p>
-        
-        
-        <p>Cayenne is an opensource project and therefore encourages developer and user 
-        community to participate in development, testing and writing documentation.
-        This way we can produce a better product that will benefit its contributors
-        as well as everybody else.</p>
-        </section>
         
         <!-- Status section -->
         <section name="History">

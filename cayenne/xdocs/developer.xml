@@ -7,24 +7,88 @@
     </properties>
 
     <body>
+        <section name="Developer Guide">
+        <p>This section is intended for current and future Cayenne developers. "Developers" in this
+        context means people who contribute code to Cayenne. If you simply downloaded Cayenne and want to
+        use it on your Java project, please visit <a href="userguide/index.html">User Guide section</a>.        
+        </p>
+        
         <!-- CVS section -->
-        <section name="CVS Access">
-            <p>To get Cayenne code via CVS, follow the instructions on 
-            <a href="http://sourceforge.net/cvs/?group_id=48132">this page</a>. 
+        <subsection name="CVS Access">
+            <p>To get the source code via CVS, follow the instructions on Cayenne
+            <a href="http://sourceforge.net/cvs/?group_id=48132">CVS SourceForge page</a>. 
             Module name is <code>cayenne</code>. Also you may find <a href="http://objectstyle.org/developer/cvs.html">
             this page</a> helpful if you are trying to setup CVS/SSH
             access on Windows.</p>
-        </section>
+        </subsection>
         
         <!-- Compile section -->
-        <section name="Compiling Cayenne">
+        <subsection name="Compiling Cayenne">
             <p>To compile Cayenne, run ant (must be version 1.4.1 or higher) on the main buildfile:</p>
-            <source>cd cayenne
-ant</source>
+            
+            <source># cd cayenne
+# ant</source>
+		</subsection>
+		
+		<subsection name="Unit Tests">
+            <p>Cayenne provides a comprehensive suite of unit tests. To execute
+            unit tests do the following:</p>
+            
+            <p><strong>Step 1.</strong> Configure one or more datasources. To do this, create a directory 
+            <code>$HOME/.cayenne/</code> and place a file called <code>connection.properties</code>
+            in this directory. File contents should be similar to this example:</p>
+            
+<source>
+example1.cayenne.adapter = org.objectstyle.cayenne.dba.mysql.MySQLAdapter
+example1.jdbc.username = someuser
+example1.jdbc.password = somepasswd
+example1.jdbc.url = jdbc:someurl1
+example1.jdbc.driver = com.xyz.MyDriverClass
 
-            <p>To run unit tests do the following (commands are given for UNIX, on Windows do something similar):</p>
-            <source>export CAYENNE_HOME=`pwd`/dist/cayenne
-$CAYENNE_HOME/bin/runtests.sh</source>
+example2.cayenne.adapter = org.objectstyle.cayenne.dba.oracle.OracleAdapter
+example2.jdbc.username = someuser
+example2.jdbc.password = somepasswd
+example2.jdbc.url = jdbc:someurl2
+example2.jdbc.driver = com.xyz.MyDriverClass 
+</source>
+
+		<p>Each key starts with an identifier for a datasource. In the file above, "example1" 
+		and "example2" are such identifiers. They can be arbitrary strings without "." (dot) 
+		symbols.
+		</p>
+        
+        <p><strong>Step 2.</strong> Run unit tests for one of the configured datasources:</p>
+<source># cd cayenne
+# ant test -Dcayenne.test.connection=example1</source>
+
+		<p>Substitute "example1" with a name of your data source configured in the 
+		previous step. In case of total success, one of the last messages Ant prints
+		on console is <code>BUILD SUCCESSFUL</code>. If build fails, failure report is 
+		generated in HTML format under <code>....cayenne/build/tests/report/example1/index.html</code>
+		and can be viewed using a web browser (again, substitute "example1" in this
+		path with the name of data source used).</p>
+
+        </subsection>
+        <subsection name="Using Eclipse IDE">
+        	<p>Many of the current Cayenne developers use <a href="http://eclipse.org">Eclipse 
+        	IDE</a>. This is by no means a requirement. This section simply documents the 
+        	process of setting up Eclipse for Cayenne project.
+        	</p>
+        	
+        	<p>To setup Cayenne as an eclipse project, check out the code, and copy the two
+            files in <code>cayenne/contrib/ide/eclipse/</code> directory 
+            (.classpath and .project) into the root "cayenne" directory, then import the 
+            project into eclipse.</p>
+
+			<p>If you have used eclipse to check out the tree (much easier!) you can use
+			the Resource Navigator to copy the files. Either use copy/paste via the
+			context menu or drag-and-CTRL-drop them to the root of the directory.</p>
+
+			<p>If you have copied the files from outside eclipse (Windows Explorer,
+			command line..) you will need to restart in order to have the project 
+			recognized as 'Java project'.
+        	</p>
+        </subsection>
         </section>
     </body>
 </document>
