@@ -55,4 +55,7 @@ setSortPathSpec and getSortPathSpec are deprecated.
 
 16. Added "read-only" object entities
 
+17. Switched to Log4J to be JDK 1.3 compatible. All Java logging 
+public API is deprecated.
 
+18. Switched to Jakarta ORO from Java regex to be JDK 1.3 compatible. 

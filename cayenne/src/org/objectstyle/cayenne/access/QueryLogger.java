@@ -192,6 +192,15 @@ public class QueryLogger {
 					buf.append("\nCayenne DbAdapter: ").append(
 						dsi.getAdapterClass());
 				}
+				
+			    if (dsi.getMinConnections() >= 0) {
+					buf.append("\nMin. Pool Size: ").append(
+						dsi.getMinConnections());
+			    }
+			    if (dsi.getMaxConnections() >= 0) {
+					buf.append("\nMax. Pool Size: ").append(
+						dsi.getMaxConnections());
+				}
 				buf.append("\nDatabase URL: ").append(dsi.getDataSourceUrl());
 				buf.append("\nLogin: ").append(dsi.getUserName());
 				buf.append("\nPassword: *******");

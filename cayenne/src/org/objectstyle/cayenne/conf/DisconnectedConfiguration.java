@@ -97,7 +97,8 @@ public class DisconnectedConfiguration extends DefaultConfiguration {
 			super();
 		}
 
-		public DataSource getDataSource(String location) throws Exception {
+		public DataSource getDataSource(String location, Level logLevel) throws Exception {
+			this.logLevel = logLevel;
 			load(location);
 			return new PoolManager(
 				getDriverInfo().getJdbcDriver(),

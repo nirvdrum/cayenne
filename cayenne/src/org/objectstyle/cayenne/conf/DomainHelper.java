@@ -116,13 +116,12 @@ public class DomainHelper {
 		this(config, Level.DEBUG);
 	}
 
-    /**
-     * @deprecated Java logging API is deprectaed in Cayenne. Use corresponding
-     * Log4J-based constructor.
-     */
-	public DomainHelper(
-		Configuration config,
-		java.util.logging.Level logLevel) throws Exception {
+	/**
+	 * @deprecated Java logging API is deprectaed in Cayenne. Use corresponding
+	 * Log4J-based constructor.
+	 */
+	public DomainHelper(Configuration config, java.util.logging.Level logLevel)
+		throws Exception {
 		this(config, Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
@@ -643,8 +642,9 @@ public class DomainHelper {
 			// unlike other parameters, adapter class is optional
 			// default is used when none is specified.
 			String adapterClass = attrs.getValue("", "adapter");
-			if (adapterClass == null)
+			if (adapterClass == null) {
 				adapterClass = "org.objectstyle.cayenne.dba.JdbcAdapter";
+			}
 
 			logObj.log(logLevel, "node DbAdapter: " + adapterClass);
 
@@ -663,6 +663,10 @@ public class DomainHelper {
 							.forName(factoryName)
 							.newInstance();
 
+				logObj.log(
+					logLevel,
+					"using factory: " + localFactory.getClass().getName());
+					
 				localFactory.setParentConfig(DomainHelper.this.config);
 				DataSource ds =
 					localFactory.getDataSource(dataSrcLocation, logLevel);

@@ -205,7 +205,7 @@ public abstract class Configuration {
 		// possible runtime exceptions thown in initSharedConfig
 		try {
 			conf = (Configuration) Class.forName(configClass).newInstance();
-		} catch (java.lang.Exception ex) {
+		} catch (Exception ex) {
 			logObj.error("Error initializing shared Configuration", ex);
 			throw new RuntimeException("Error initializing shared Configuration");
 		}
@@ -274,7 +274,10 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Default implementation returns null.
+	 * Default implementation returns null. Subclasses
+	 * may override this method to provide a special factory
+	 * for DataSource creation that will override any factories configured
+	 * in cayenne project.
 	 */
 	protected DataSourceFactory getOverrideFactory() {
 		return null;
