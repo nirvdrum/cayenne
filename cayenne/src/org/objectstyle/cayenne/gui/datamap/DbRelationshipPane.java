@@ -189,8 +189,7 @@ implements DbEntityDisplayListener
 		db_rel_list.add(rel);
 
 		DataMap map = mediator.getCurrentDataMap();
-		ResolveDbRelationshipDialog dialog;
-		dialog = new ResolveDbRelationshipDialog(mediator, db_rel_list, start
+		ResolveDbRelationshipDialog dialog = new ResolveDbRelationshipDialog(mediator, db_rel_list, start
 												, end, rel.isToMany());
 		dialog.setVisible(true);
 		dialog.dispose();

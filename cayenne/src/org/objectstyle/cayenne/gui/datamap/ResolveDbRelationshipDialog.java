@@ -64,12 +64,12 @@ import java.util.Iterator;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.RelationshipEvent;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** 
  * Edit DbRelationship and DbAttributePair-s for this DbRelationship.
@@ -296,8 +296,7 @@ implements ActionListener
 			name.requestFocus(true);
 			return;
 		}
-		DbAttributePairTableModel model;
-		model = (DbAttributePairTableModel)table.getModel();
+		DbAttributePairTableModel model = (DbAttributePairTableModel)table.getModel();
 		if (model.getRowCount() == 0) {
 			JOptionPane.showMessageDialog(Editor.getFrame()
 										, "Enter join attributes ");
@@ -314,8 +313,9 @@ implements ActionListener
 			return;
 		}
 		// If new DbRelationship was created, add it to the source.
-		if (isDbRelNew)
+		if (isDbRelNew) {
 			start.addRelationship(dbRel);
+		}
 			
 		// If new reverse DbRelationship was created, add it to the target
 		if (hasReverseDbRel.isSelected()) {
@@ -346,7 +346,8 @@ implements ActionListener
 				end.addRelationship(reverseDbRel);
 			}
 		}
-		// Unblock the dialog
+		
+		mediator.fireDbRelationshipEvent(new RelationshipEvent(this, dbRel, dbRel.getSourceEntity()));
 		hide();
 	}
 
