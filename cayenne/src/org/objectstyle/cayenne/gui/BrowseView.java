@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.gui;
 import java.awt.Component;
 import java.util.*;
 import java.io.*;
+import java.net.URL;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
@@ -635,16 +636,22 @@ class BrowseViewRenderer extends DefaultTreeCellRenderer {
     ImageIcon objEntityIcon;
 
     public BrowseViewRenderer() {
-    	String path = "org/objectstyle/cayenne/gui/";
-    	File file = new File(path + "images/domain.jpg");
-    	if (!file.exists()){
-    		System.out.println("File "+file.getAbsolutePath()+" doesn't exist");
+    	String path = "org/objectstyle/gui/";
+    	ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
+    	URL url = cl.getResource(path+"images/domain.jpg");
+    	if (null == url) {
+    		System.out.println("Cannot find domain.jpg");
+    		return;
     	}
-        domainIcon = new ImageIcon(path + "images/domain.jpg");
-        nodeIcon = new ImageIcon(path + "images/node.jpg");
-        mapIcon = new ImageIcon(path + "images/map.jpg");
-        dbEntityIcon = new ImageIcon(path + "images/dbentity.jpg");
-        objEntityIcon = new ImageIcon(path + "images/objentity.jpg");
+        domainIcon = new ImageIcon(url);
+    	url = cl.getResource(path+"images/node.jpg");
+    	nodeIcon = new ImageIcon(url);
+    	url = cl.getResource(path+"images/map.jpg");
+    	mapIcon = new ImageIcon(url);
+    	url = cl.getResource(path+"images/dbentity.jpg");
+    	dbEntityIcon = new ImageIcon(url);
+    	url = cl.getResource(path+"images/objentity.jpg");
+    	objEntityIcon = new ImageIcon(url);
     }
 
     public Component getTreeCellRendererComponent(
