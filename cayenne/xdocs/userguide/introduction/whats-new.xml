@@ -193,11 +193,10 @@
             </subsection>
            
             <subsection name="1.1.22 CayenneModeler Enhancements.">
-            <p>The following is the incomplete list of enhancements: includes new professional look and feel, 
-            reenginnering of stored procedures, the ability to specify JDBC drivers location without the need 
-            to restart the modeler or set it in the command line, custom class generation templates, etc.
-            A number of Modeler tasks and dialogs have been redesigned to be more user-friendly
-            and consistent. </p>
+            <p>The following is an incomplete list of enhancements: new professional look and feel, preference engine,
+            reenginnering of stored procedures, local DataSources, configurable locations of JDBC drivers, custom 
+            class generation templates, etc.  A number of Modeler tasks and dialogs have been redesigned and improved 
+            to be more user-friendly and consistent. </p>
             
             <p>Also CayenneModeler supports mapping of all the new 1.1 framework features, such as DataMap queries,
             cache synchronization configuration, etc.

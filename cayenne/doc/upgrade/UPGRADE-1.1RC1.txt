@@ -1,6 +1,22 @@
 Upgrade Information
 ============================================
 
+0. Preferences Engine:
+
+Warning: CLASSPATH settings that stored the locations of local drivers will be lost. 
+Go to "Tools -> Preferences -> ClassPath" to configure them again.
+
+General Preferences Notes:
+
+Since RC1, CayenneModeler 1.1 uses a preferences system based on embedded 
+HSQLDB. Old preferences file (~/.cayenne/modeler.preferences) is still used in a few places,
+but is being gradually factored out. When switching to RC1 and newer you may lose some of your 
+existing preferences (some are really minor - such as the main Window size, some may be more
+important). Users are encouraged to check out "Tools -> Preferences" menu for
+a new and more powerful way to configure many of the useful shortcuts.
+
+
+
 1. General Upgrade Advise:
 
 -  Upgrading Project XML Files: Opening a 1.0 projects in CayenneModeler would 

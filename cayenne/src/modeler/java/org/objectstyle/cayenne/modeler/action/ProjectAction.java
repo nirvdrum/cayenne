@@ -95,6 +95,11 @@ public class ProjectAction extends CayenneAction {
 
     /** Returns true if successfully closed project, false otherwise. */
     public boolean closeProject() {
+        // check if there is a project...
+        if (getProjectController() == null || getProjectController().getProject() == null) {
+            return true;
+        }
+
         if (!checkSaveOnClose()) {
             return false;
         }
@@ -111,8 +116,8 @@ public class ProjectAction extends CayenneAction {
      * Returns false if cancel closing the window, true otherwise.
      */
     public boolean checkSaveOnClose() {
-        ProjectController mediator = getProjectController();
-        if (mediator != null && mediator.isDirty()) {
+        ProjectController projectController = getProjectController();
+        if (projectController != null && projectController.isDirty()) {
             UnsavedChangesDialog dialog = new UnsavedChangesDialog(Application.getFrame());
             dialog.show();
 
@@ -130,7 +135,7 @@ public class ProjectAction extends CayenneAction {
                         .getFrame()
                         .getAction(SaveAction.getActionName())
                         .actionPerformed(e);
-                if (mediator.isDirty()) {
+                if (projectController.isDirty()) {
                     // save was canceled... do not close
                     return false;
                 }
