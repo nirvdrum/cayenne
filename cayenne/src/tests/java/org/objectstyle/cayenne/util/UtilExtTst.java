@@ -216,21 +216,4 @@ public class UtilExtTst extends CayenneTestCase {
 		assertEquals("1...67", Util.prettyTrim("1234567", 6));
 		assertEquals("1...78", Util.prettyTrim("12345678", 6));
 	}
-
-	public void testUnzip() throws Exception {
-		// try unzipping the JAR
-		File jar = new File(getTestResourceDir(), "jar-test.jar");
-		File unjarDir = getTestDir();
-		File unjarRootDir = new File(unjarDir, "jar-test");
-		File manifest = new File(unjarRootDir.getParentFile(), "META-INF" + File.separator + "MANIFEST.MF");
-		assertTrue(!unjarRootDir.exists());
-		assertTrue(!manifest.exists());
-		
-		Util.unzip(jar, unjarDir);
-
-		assertTrue(unjarRootDir.isDirectory());
-		assertTrue(new File(unjarRootDir, "jar-test1.txt").length() > 0);
-		assertTrue(new File(unjarRootDir, "jar-test2.txt").length() > 0);
-        assertTrue(manifest.isFile());
-	}
 }

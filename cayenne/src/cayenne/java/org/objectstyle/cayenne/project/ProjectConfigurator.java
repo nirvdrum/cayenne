@@ -60,6 +60,7 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.ZipUtil;
 
 /**
  * Performs on the fly reconfiguration of Cayenne projects.
@@ -88,7 +89,7 @@ public class ProjectConfigurator {
 			}
 			validate();
 			tmpDir = makeTempDirectory();
-			Util.unzip(info.getSourceJar(), tmpDir);
+			ZipUtil.unzip(info.getSourceJar(), tmpDir);
 		} catch (Exception ex) {
 			throw new ProjectException("Error performing reconfiguration.", ex);
 		} finally {

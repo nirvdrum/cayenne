@@ -69,9 +69,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -88,330 +85,295 @@ import org.xml.sax.XMLReader;
  *  Utility methods sink.
  */
 public class Util {
-	private static Logger logObj = Logger.getLogger(Util.class);
+    private static Logger logObj = Logger.getLogger(Util.class);
 
-	private static final Perl5Util regexUtil = new Perl5Util();
+    private static final Perl5Util regexUtil = new Perl5Util();
 
-	/** Makes up for the lack of file copying utilities in Java */
-	public static boolean copy(File from, File to) {
-		BufferedInputStream fin = null;
-		BufferedOutputStream fout = null;
-		try {
-			int bufSize = 8 * 1024;
-			fin = new BufferedInputStream(new FileInputStream(from), bufSize);
-			fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
-			copyPipe(fin, fout, bufSize);
-		} catch (IOException ioex) {
-			return false;
-		} catch (SecurityException sx) {
-			return false;
-		} finally {
-			if (fin != null) {
-				try {
-					fin.close();
-				} catch (IOException cioex) {
-				}
-			}
-			if (fout != null) {
-				try {
-					fout.close();
-				} catch (IOException cioex) {
-				}
-			}
-		}
-		return true;
-	}
+    /** Makes up for the lack of file copying utilities in Java */
+    public static boolean copy(File from, File to) {
+        BufferedInputStream fin = null;
+        BufferedOutputStream fout = null;
+        try {
+            int bufSize = 8 * 1024;
+            fin = new BufferedInputStream(new FileInputStream(from), bufSize);
+            fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
+            copyPipe(fin, fout, bufSize);
+        } catch (IOException ioex) {
+            return false;
+        } catch (SecurityException sx) {
+            return false;
+        } finally {
+            if (fin != null) {
+                try {
+                    fin.close();
+                } catch (IOException cioex) {
+                }
+            }
+            if (fout != null) {
+                try {
+                    fout.close();
+                } catch (IOException cioex) {
+                }
+            }
+        }
+        return true;
+    }
 
-	/** Save URL contents to a file */
-	public static boolean copy(URL from, File to) {
-		BufferedInputStream urlin = null;
-		BufferedOutputStream fout = null;
-		try {
-			int bufSize = 8 * 1024;
-			urlin =
-				new BufferedInputStream(
-					from.openConnection().getInputStream(),
-					bufSize);
-			fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
-			copyPipe(urlin, fout, bufSize);
-		} catch (IOException ioex) {
-			return false;
-		} catch (SecurityException sx) {
-			return false;
-		} finally {
-			if (urlin != null) {
-				try {
-					urlin.close();
-				} catch (IOException cioex) {
-				}
-			}
-			if (fout != null) {
-				try {
-					fout.close();
-				} catch (IOException cioex) {
-				}
-			}
-		}
-		return true;
-	}
+    /** Save URL contents to a file */
+    public static boolean copy(URL from, File to) {
+        BufferedInputStream urlin = null;
+        BufferedOutputStream fout = null;
+        try {
+            int bufSize = 8 * 1024;
+            urlin =
+                new BufferedInputStream(
+                    from.openConnection().getInputStream(),
+                    bufSize);
+            fout = new BufferedOutputStream(new FileOutputStream(to), bufSize);
+            copyPipe(urlin, fout, bufSize);
+        } catch (IOException ioex) {
+            return false;
+        } catch (SecurityException sx) {
+            return false;
+        } finally {
+            if (urlin != null) {
+                try {
+                    urlin.close();
+                } catch (IOException cioex) {
+                }
+            }
+            if (fout != null) {
+                try {
+                    fout.close();
+                } catch (IOException cioex) {
+                }
+            }
+        }
+        return true;
+    }
 
-	private static void copyPipe(
-		InputStream in,
-		OutputStream out,
-		int bufSizeHint)
-		throws IOException {
-		int read = -1;
-		byte[] buf = new byte[bufSizeHint];
-		while ((read = in.read(buf, 0, bufSizeHint)) >= 0) {
-			out.write(buf, 0, read);
-		}
-		out.flush();
-	}
+    /**
+     * Reads from input and writes read data to the output, until the stream
+     * end.
+     * 
+     * @param in
+     * @param out
+     * @param bufSizeHint
+     * @throws IOException
+     */
+    public static void copyPipe(
+        InputStream in,
+        OutputStream out,
+        int bufSizeHint)
+        throws IOException {
+        int read = -1;
+        byte[] buf = new byte[bufSizeHint];
+        while ((read = in.read(buf, 0, bufSizeHint)) >= 0) {
+            out.write(buf, 0, read);
+        }
+        out.flush();
+    }
 
-	/** Improved File.delete method that allows recursive directory deletion. */
-	public static boolean delete(String filePath, boolean recursive) {
-		File file = new File(filePath);
-		if (!file.exists())
-			return true;
+    /** Improved File.delete method that allows recursive directory deletion. */
+    public static boolean delete(String filePath, boolean recursive) {
+        File file = new File(filePath);
+        if (!file.exists())
+            return true;
 
-		if (!recursive || !file.isDirectory())
-			return file.delete();
+        if (!recursive || !file.isDirectory())
+            return file.delete();
 
-		String[] list = file.list();
-		for (int i = 0; i < list.length; i++) {
-			if (!delete(filePath + File.separator + list[i], true))
-				return false;
-		}
+        String[] list = file.list();
+        for (int i = 0; i < list.length; i++) {
+            if (!delete(filePath + File.separator + list[i], true))
+                return false;
+        }
 
-		return file.delete();
-	}
+        return file.delete();
+    }
 
-	public static String substBackslashes(String str) {
-		if (str == null) {
-			return null;
-		}
+    public static String substBackslashes(String str) {
+        if (str == null) {
+            return null;
+        }
 
-		return regexUtil.match("/\\\\/", str)
-			? regexUtil.substitute("s/\\\\/\\//g", str)
-			: str;
-	}
+        return regexUtil.match("/\\\\/", str)
+            ? regexUtil.substitute("s/\\\\/\\//g", str)
+            : str;
+    }
 
-	/**
-	 * Attempts to find an underlying exception of a given exception.
-	 * If none is found, returns given throwable object, otherwise unwraps
-	 * the root cause of an exception and returns it. Currently
-	 * supports unwinding Cayenne-specific exceptions.
-	 */
-	public static Throwable unwindException(Throwable th) {
-		if (th instanceof CayenneException) {
-			CayenneException e = (CayenneException) th;
-			if (e.getCause() != null) {
-				return unwindException(e.getCause());
-			}
-		} else if (th instanceof CayenneRuntimeException) {
-			CayenneRuntimeException e = (CayenneRuntimeException) th;
-			if (e.getCause() != null) {
-				return unwindException(e.getCause());
-			}
-		}
+    /**
+     * Attempts to find an underlying exception of a given exception.
+     * If none is found, returns given throwable object, otherwise unwraps
+     * the root cause of an exception and returns it. Currently
+     * supports unwinding Cayenne-specific exceptions.
+     */
+    public static Throwable unwindException(Throwable th) {
+        if (th instanceof CayenneException) {
+            CayenneException e = (CayenneException) th;
+            if (e.getCause() != null) {
+                return unwindException(e.getCause());
+            }
+        } else if (th instanceof CayenneRuntimeException) {
+            CayenneRuntimeException e = (CayenneRuntimeException) th;
+            if (e.getCause() != null) {
+                return unwindException(e.getCause());
+            }
+        }
 
-		return th;
-	}
+        return th;
+    }
 
-	/** Compare two objects just like "equals" would. Unlike Object.equals,
-	* this method allows any of the 2 objects to be null. */
-	public static boolean nullSafeEquals(Object obj1, Object obj2) {
-		if (obj1 == null && obj2 == null)
-			return true;
-		else if (obj1 != null)
-			return obj1.equals(obj2);
-		else
-			return obj2.equals(obj1);
-	}
+    /** Compare two objects just like "equals" would. Unlike Object.equals,
+    * this method allows any of the 2 objects to be null. */
+    public static boolean nullSafeEquals(Object obj1, Object obj2) {
+        if (obj1 == null && obj2 == null)
+            return true;
+        else if (obj1 != null)
+            return obj1.equals(obj2);
+        else
+            return obj2.equals(obj1);
+    }
 
-	/**
-	 * Returns true, if the String is null or an empty string.
-	 */
-	public static boolean isEmptyString(String str) {
-		return str == null || str.length() == 0;
-	}
+    /**
+     * Returns true, if the String is null or an empty string.
+     */
+    public static boolean isEmptyString(String str) {
+        return str == null || str.length() == 0;
+    }
 
-	/** Create object copy using serialization mechanism. */
-	public static Object cloneViaSerialization(Serializable obj)
-		throws Exception {
-		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-		ObjectOutputStream out = new ObjectOutputStream(bytes);
-		out.writeObject(obj);
-		out.close();
+    /** Create object copy using serialization mechanism. */
+    public static Object cloneViaSerialization(Serializable obj)
+        throws Exception {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        ObjectOutputStream out = new ObjectOutputStream(bytes);
+        out.writeObject(obj);
+        out.close();
 
-		ObjectInputStream in =
-			new ObjectInputStream(
-				new ByteArrayInputStream(bytes.toByteArray()));
-		Object objCopy = in.readObject();
-		in.close();
-		return objCopy;
-	}
+        ObjectInputStream in =
+            new ObjectInputStream(
+                new ByteArrayInputStream(bytes.toByteArray()));
+        Object objCopy = in.readObject();
+        in.close();
+        return objCopy;
+    }
 
-	/** Creates an XMLReader with default feature set. Note that all Cayenne
-	  * internal XML parsers should probably use XMLReader obtained via this
-	  * method for consistency sake, and can customize feature sets as needed. */
-	public static XMLReader createXmlReader()
-		throws SAXException, ParserConfigurationException {
-		SAXParserFactory spf = SAXParserFactory.newInstance();
+    /** Creates an XMLReader with default feature set. Note that all Cayenne
+      * internal XML parsers should probably use XMLReader obtained via this
+      * method for consistency sake, and can customize feature sets as needed. */
+    public static XMLReader createXmlReader()
+        throws SAXException, ParserConfigurationException {
+        SAXParserFactory spf = SAXParserFactory.newInstance();
 
-		// Create a JAXP SAXParser
-		SAXParser saxParser = spf.newSAXParser();
+        // Create a JAXP SAXParser
+        SAXParser saxParser = spf.newSAXParser();
 
-		// Get the encapsulated SAX XMLReader
-		XMLReader reader = saxParser.getXMLReader();
+        // Get the encapsulated SAX XMLReader
+        XMLReader reader = saxParser.getXMLReader();
 
-		// set default features
-		reader.setFeature("http://xml.org/sax/features/namespaces", true);
+        // set default features
+        reader.setFeature("http://xml.org/sax/features/namespaces", true);
 
-		return reader;
-	}
+        return reader;
+    }
 
-	/** Returns package information for the <code>className</code>
-	  * parameter as a path separated with forward slash ('/').
-	  * For example for class a.b.c.ClassName "a/b/c" will be returned.
-	  * Method is used to lookup resources that are located in package subdirectories. */
-	public static String getPackagePath(String className) {
-		if (regexUtil.match("/\\./", className)) {
-			String path = regexUtil.substitute("s/\\./\\//g", className);
-			return path.substring(0, path.lastIndexOf("/"));
-		} else {
-			return "";
-		}
-	}
+    /** Returns package information for the <code>className</code>
+      * parameter as a path separated with forward slash ('/').
+      * For example for class a.b.c.ClassName "a/b/c" will be returned.
+      * Method is used to lookup resources that are located in package subdirectories. */
+    public static String getPackagePath(String className) {
+        if (regexUtil.match("/\\./", className)) {
+            String path = regexUtil.substitute("s/\\./\\//g", className);
+            return path.substring(0, path.lastIndexOf("/"));
+        } else {
+            return "";
+        }
+    }
 
-	/**
-	 * Utility method to extract extension from of file name.
-	 */
-	public static String extractFileExtension(String fileName) {
-		int dotInd = fileName.lastIndexOf('.');
+    /**
+     * Utility method to extract extension from of file name.
+     */
+    public static String extractFileExtension(String fileName) {
+        int dotInd = fileName.lastIndexOf('.');
 
-		// if dot is in the first position,
-		// we are dealing with a hidden file rather than an extension
-		return (dotInd > 0 && dotInd < fileName.length())
-			? fileName.substring(dotInd + 1)
-			: null;
-	}
+        // if dot is in the first position,
+        // we are dealing with a hidden file rather than an extension
+        return (dotInd > 0 && dotInd < fileName.length())
+            ? fileName.substring(dotInd + 1)
+            : null;
+    }
 
-	/**
-	 * Utility method to remove extension from a file name.
-	 */
-	public static String stripFileExtension(String fileName) {
-		int dotInd = fileName.lastIndexOf('.');
+    /**
+     * Utility method to remove extension from a file name.
+     */
+    public static String stripFileExtension(String fileName) {
+        int dotInd = fileName.lastIndexOf('.');
 
-		// if dot is in the first position,
-		// we are dealing with a hidden file rather than an extension
-		return (dotInd > 0) ? fileName.substring(0, dotInd) : fileName;
-	}
+        // if dot is in the first position,
+        // we are dealing with a hidden file rather than an extension
+        return (dotInd > 0) ? fileName.substring(0, dotInd) : fileName;
+    }
 
-	/** 
-	 * Encodes a string so that it can be used as an attribute value in an XML document.
-	 * Will do conversion of the greater/less signs, quotes and ampersands.
-	 */
-	public static String encodeXmlAttribute(String str) {
-		if (str == null)
-			return null;
+    /** 
+     * Encodes a string so that it can be used as an attribute value in an XML document.
+     * Will do conversion of the greater/less signs, quotes and ampersands.
+     */
+    public static String encodeXmlAttribute(String str) {
+        if (str == null)
+            return null;
 
-		int len = str.length();
-		if (len == 0)
-			return str;
+        int len = str.length();
+        if (len == 0)
+            return str;
 
-		StringBuffer encoded = new StringBuffer();
-		for (int i = 0; i < len; i++) {
-			char c = str.charAt(i);
-			if (c == '<')
-				encoded.append("&lt;");
-			else if (c == '\"')
-				encoded.append("&quot;");
-			else if (c == '>')
-				encoded.append("&gt;");
-			else if (c == '\'')
-				encoded.append("&apos;");
-			else if (c == '&')
-				encoded.append("&amp;");
-			else
-				encoded.append(c);
-		}
+        StringBuffer encoded = new StringBuffer();
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+            if (c == '<')
+                encoded.append("&lt;");
+            else if (c == '\"')
+                encoded.append("&quot;");
+            else if (c == '>')
+                encoded.append("&gt;");
+            else if (c == '\'')
+                encoded.append("&apos;");
+            else if (c == '&')
+                encoded.append("&amp;");
+            else
+                encoded.append(c);
+        }
 
-		return encoded.toString();
-	}
+        return encoded.toString();
+    }
 
-	/**
-	 * Trims long strings substituting middle part with "...".
-	 * 
-	 * @param str String to trim.
-	 * @param maxLength maximum allowable length. Must be at least 5,
-	 * or an IllegalArgumentException is thrown.
-	 * 
-	 * @return String
-	 */
-	public static String prettyTrim(String str, int maxLength) {
-		if (maxLength < 5) {
-			throw new IllegalArgumentException(
-				"Algorithm for 'prettyTrim' works only with length >= 5. "
-					+ "Supplied length is "
-					+ maxLength);
-		}
+    /**
+     * Trims long strings substituting middle part with "...".
+     * 
+     * @param str String to trim.
+     * @param maxLength maximum allowable length. Must be at least 5,
+     * or an IllegalArgumentException is thrown.
+     * 
+     * @return String
+     */
+    public static String prettyTrim(String str, int maxLength) {
+        if (maxLength < 5) {
+            throw new IllegalArgumentException(
+                "Algorithm for 'prettyTrim' works only with length >= 5. "
+                    + "Supplied length is "
+                    + maxLength);
+        }
 
-		if (str == null || str.length() <= maxLength) {
-			return str;
-		}
+        if (str == null || str.length() <= maxLength) {
+            return str;
+        }
 
-		// find a section to cut off
-		int len = maxLength - 3;
-		int startLen = len / 2;
-		int endLen = len - startLen;
+        // find a section to cut off
+        int len = maxLength - 3;
+        int startLen = len / 2;
+        int endLen = len - startLen;
 
-		return str.substring(0, startLen)
-			+ "..."
-			+ str.substring(str.length() - endLen);
-	}
-
-	/**
-	 * Unjars a zip file to the target directory.
-	 * 
-	 * @param zipFile
-	 * @param destDir
-	 * @throws IOException
-	 */
-	public static void unzip(File zipFile, File destDir) throws IOException {
-		ZipFile zip = new ZipFile(zipFile);
-		Enumeration en = zip.entries();
-		int bufSize = 8 * 1024;
-
-		while (en.hasMoreElements()) {
-			ZipEntry entry = (ZipEntry) en.nextElement();
-			File file =
-				(destDir != null)
-					? new File(destDir, entry.getName())
-					: new File(entry.getName());
-
-			if (entry.isDirectory()) {
-				if (!file.mkdirs()) {
-					throw new IOException("Error creating directory: " + file);
-				}
-			} else {
-				InputStream in = zip.getInputStream(entry);
-				try {
-					OutputStream out =
-						new BufferedOutputStream(
-							new FileOutputStream(file),
-							bufSize);
-
-					try {
-						copyPipe(in, out, bufSize);
-					} finally {
-						out.close();
-					}
-
-				} finally {
-					in.close();
-				}
-			}
-		}
-	}
+        return str.substring(0, startLen)
+            + "..."
+            + str.substring(str.length() - endLen);
+    }
 }
