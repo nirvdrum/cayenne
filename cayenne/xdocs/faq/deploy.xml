@@ -1,0 +1,34 @@
+<document>
+<title>Frequently Asked Questions: Deploy Cayenne Applications</title>
+
+<body>
+    <section name="FAQ 5. Deploy Cayenne Applications">
+    	<subsection name="Q 5.1 
+    					When my application is idle for a long period of time,
+    					I get 'connection was lost' or similar errors?" 
+    	anchor="reconnect">
+    	
+    	<p>Some database servers will automatically drop idle client connections.
+    	So an opened pooled connection may become invalid over a period of time. An exception 
+    	is thrown when such connection is used for any operations. Since there is no JDBC API
+    	that would allow to validate a connection before using it, various connection pool implementations 
+    	use various tricks to perform such check. E.g. they may run a simple test query over the connection
+    	before hanging it to the user. Since such checks are time consuming and degrade pool performance, Cayenne 
+    	connection pool currently does not perform them. There is a few solutions to this problem:
+    	
+    	<ul>
+    		<li>If you are using MySQL, MYSQL JDBC driver offers "auto-reconnect" feature. Use a URL parameter "autoReconnect" set to "true"
+    		to enable reconnection. E.g.: <i>jdbc:mysql://localhost/test?autoReconnect=true</i> Unfortunately other
+    		databases do not have such feature.</li>
+    		
+    		<li>Configure your database server to prevent idle connections from being automatically closed.</li>
+    		
+    		<li>Use a third party connection pool implementation, that performs explicit connection validation.
+    		It can be configured in many different ways, e.g. as a DataSource accessible via JNDI.
+    		</li>
+    	</ul>
+    	</p>
+    	</subsection>
+    </section>
+</body>
+</document>

@@ -53,7 +53,17 @@
     					Why do application objects have to extend 'CayenneDataObject?'? 
     					What about an arbitrary Java class persistence?</a></li>
     				</ul>
+    			 	<br/>
     			</li>
+    			
+    			<li><a href="deploy.html">FAQ 5. Deploy Cayenne Applications</a>
+    				<ul>
+    					<li><a href="deploy.html#reconnect">Q 5.1 
+    					When my application is idle for a long period of time,
+    					I get "connection was lost" or similar errors?</a></li>
+    				</ul>
+    			</li>
+    			<br/>
     		</ul>
 		</p>
     </section>
