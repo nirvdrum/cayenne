@@ -56,10 +56,20 @@
 
 package org.objectstyle.cayenne.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Properties;
+import java.util.Vector;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,7 +80,9 @@ import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.RecentFileMenu;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.objectstyle.cayenne.util.Preferences;
 
@@ -392,7 +404,7 @@ public class Editor
 		mediator.addObjRelationshipDisplayListener(this);
 		mediator.addDbRelationshipDisplayListener(this);
 
-        enableProjectMenu();
+		enableProjectMenu();
 		this.validate();
 	}
 
@@ -701,6 +713,15 @@ public class Editor
 			while ((p2 = p1.getParent()) != null) {
 				p1 = p2;
 			}
+
+			// remove any other handlers and replace with our file handler
+			Handler[] handlers = p1.getHandlers();
+			if (handlers != null) {
+				for (int i = 0; i < handlers.length; i++) {
+					p1.removeHandler(handlers[i]);
+				}
+			}
+
 			p1.addHandler(
 				new CayenneFileHandler(log, 2 * 1024 * 1024, 4, true));
 		} catch (IOException ioex) {
