@@ -116,6 +116,13 @@ public class DataContext implements QueryEngine, Serializable {
     private Map flattenedDeletes = new HashMap();
 
     protected transient QueryEngine parent;
+    //When deserialized, the parent domain name is stored in 
+    // this variable until the parent is actually needed.  This helps 
+    // avoid an issue with certain servlet engines (e.g. Tomcat) where
+    // HttpSessions with DataContext's are deserialized at startup
+    // before the configuration has been read.
+    protected transient String lazyInitParentDomainName;
+    
     protected transient ObjectStore objectStore;
     protected transient SnapshotManager snapshotManager;
 
@@ -161,9 +168,14 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /** Returns parent QueryEngine object. */
-    public QueryEngine getParent() {
-        return parent;
-    }
+	public QueryEngine getParent() {
+		if (parent == null && lazyInitParentDomainName != null) {
+			this.parent =
+				Configuration.getSharedConfig().getDomain(
+					lazyInitParentDomainName);
+		}
+		return parent;
+	}
 
     /**
      * Sets parent QueryEngine of this DataContext.
@@ -661,7 +673,7 @@ public class DataContext implements QueryEngine, Serializable {
 	 * set for QueryLogger, statements execution will be logged. 
 	 */
 	public void commitChanges(Level logLevel) throws CayenneRuntimeException {
-		if (parent == null) {
+		if (this.getParent() == null) {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
 		List queryList = new ArrayList();
@@ -792,7 +804,7 @@ public class DataContext implements QueryEngine, Serializable {
 					insObjects,
 					updObjects,
 					delObjects);
-			parent.performQueries(queryList, result);
+			this.getParent().performQueries(queryList, result);
 			if (!result.isTransactionCommitted())
 				throw new CayenneRuntimeException("Error committing transaction.");
 			else if (result.isTransactionRolledback())
@@ -866,10 +878,10 @@ public class DataContext implements QueryEngine, Serializable {
 
 	/** Delegates node lookup to parent QueryEngine. */
 	public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-		if (parent == null) {
+		if (this.getParent() == null) {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
-		return parent.dataNodeForObjEntity(objEntity);
+		return this.getParent().dataNodeForObjEntity(objEntity);
 	}
 
 	/** 
@@ -880,7 +892,7 @@ public class DataContext implements QueryEngine, Serializable {
 	public void performQueries(
 		List queries,
 		OperationObserver resultConsumer) {
-		if (parent == null) {
+		if (this.getParent() == null) {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
 
@@ -917,7 +929,7 @@ public class DataContext implements QueryEngine, Serializable {
 			finalQueries = prefetch;
 		}
 
-		parent.performQueries(finalQueries, resultConsumer);
+		this.getParent().performQueries(finalQueries, resultConsumer);
 	}
 
 	/**
@@ -1197,7 +1209,9 @@ public class DataContext implements QueryEngine, Serializable {
 		// from the shared configuration (which will either load it if need be, or return 
 		// an existing one.
 		out.defaultWriteObject();
-		if (this.parent instanceof DataDomain) {
+		if (this.parent==null && this.lazyInitParentDomainName!=null) {
+			out.writeObject(lazyInitParentDomainName);
+		} else if (this.parent instanceof DataDomain) {
 			DataDomain domain = (DataDomain) this.parent;
 			out.writeObject(domain.getName());
 		} else {
@@ -1212,7 +1226,7 @@ public class DataContext implements QueryEngine, Serializable {
 
 	private void readObject(ObjectInputStream in)
 		throws IOException, ClassNotFoundException {
-		boolean failed = false;
+
 		in.defaultReadObject();
 		Object value = in.readObject();
 		if (value instanceof QueryEngine) {
@@ -1220,16 +1234,9 @@ public class DataContext implements QueryEngine, Serializable {
 			this.parent = (QueryEngine) value;
 		} else if (value instanceof String) {
 			//Must be the name of a DataDomain - use it
-			this.parent =
-				Configuration.getSharedConfig().getDomain((String) value);
-			if (this.parent == null) {
-				failed = true;
-			}
+			this.lazyInitParentDomainName=(String)value;
 		} else {
-			failed = true;
-		}
-		if (failed) {
-			throw new IOException(
+			throw new CayenneRuntimeException(
 				"Parent attribute of DataContext was neither a QueryEngine nor "
 					+ "the name of a valid DataDomain:"
 					+ value);
@@ -1257,10 +1264,10 @@ public class DataContext implements QueryEngine, Serializable {
 	}
 
 	public EntityResolver getEntityResolver() {
-		if (parent == null) {
+		if (this.getParent() == null) {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
-		return parent.getEntityResolver();
+		return this.getParent().getEntityResolver();
 	}
 
 	public void registerFlattenedRelationshipInsert(
