@@ -507,7 +507,14 @@ public class QueryUtils {
 				while (dbRels.hasNext()) {
 					DbRelationship dbRel = (DbRelationship) dbRels.next();
 					DbRelationship reverse = dbRel.getReverseRelationship();
-
+					if (null == reverse)
+					{ 
+						throw new CayenneRuntimeException(
+							"Unable to find reverse dbRelationship for dbRelationship "
+							+ dbRel.getName()  + " on Entity " + dbRel.getSourceEntity().getName()
+							+ ".");
+					}
+					
 					if (hasRels) {
 						buf.insert(0, Entity.PATH_SEPARATOR);
 					}
