@@ -34,6 +34,6 @@ set JAVACMD=%JAVA_HOME%\bin\javaw
 set DEFAULT_CLASSPATH=%CAYENNE_HOME%\lib\dvmodeler\cayenne-dvmodeler.jar
 
 :run_modeler
-start "DVModeler" "%JAVACMD%" -cp "%CLASSPATH%;%DEFAULT_CLASSPATH%" %MAIN_CLASS% %*
+start "DVModeler" "%JAVACMD%" -cp "%DEFAULT_CLASSPATH%" %MAIN_CLASS% %*
 
 :eof

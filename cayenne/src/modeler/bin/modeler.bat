@@ -34,6 +34,6 @@ set JAVACMD=%JAVA_HOME%\bin\javaw
 set DEFAULT_CLASSPATH=%CAYENNE_HOME%\lib\modeler\cayenne-modeler.jar
 
 :run_modeler
-start "CayenneModeler" "%JAVACMD%" -cp "%CLASSPATH%;%DEFAULT_CLASSPATH%" %MAIN_CLASS% %*
+start "CayenneModeler" "%JAVACMD%" -cp "%DEFAULT_CLASSPATH%" %MAIN_CLASS% %*
 
 :eof

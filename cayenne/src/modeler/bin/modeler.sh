@@ -64,9 +64,6 @@ else
 fi
     
 OPTIONS="-classpath $CAYENNE_CLASSPATH"
-if [ "$CLASSPATH" != "" ] ; then
-	OPTIONS="$OPTIONS$PATH_SEPARATOR$CLASSPATH"
-fi
 
 # Mac OS X Specific property - application name
 PROPERTIES="-Dcom.apple.mrj.application.apple.menu.about.name=CayenneModeler"

@@ -56,9 +56,6 @@ if [ ! -f $JAVACMD ] ; then
 fi
 
 OPTIONS="-classpath $CAYENNE_HOME/lib/dvmodeler/cayenne-dvmodeler.jar"
-if [ "$CLASSPATH" != "" ] ; then
-	OPTIONS="$OPTIONS$PATH_SEPARATOR$CLASSPATH"
-fi
 
 $JAVACMD $OPTIONS $MAIN_CLASS $1 $2 $3 & 
 

@@ -12,6 +12,7 @@ Changes:
 
 - Started removal of classes and methods deprecated in 1.1. This is still not complete.
 - Upgraded JDOM library to v. 1.0
+- Removed system CLASSPATH from Modeler startup scripts.
 
 
 Bugs Fixed:
