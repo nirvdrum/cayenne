@@ -60,36 +60,79 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.QueryBuilder;
+import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * A query based on Procedure. Can be used as a select query,
- * or as a query of an arbitrary complexity, performing data modification, selecting 
- * data (possibly with multiple result sets per call), returning values via OUT parameters.
+ * A query based on Procedure. Can be used as a select query, or as a query of an
+ * arbitrary complexity, performing data modification, selecting data (possibly with
+ * multiple result sets per call), returning values via OUT parameters.
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureQuery
-    extends AbstractQuery
-    implements GenericSelectQuery {
-        
+public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
+        XMLSerializable {
+
     protected Map params = new HashMap();
     protected int fetchLimit;
- 
+
     public ProcedureQuery() {
     }
 
     public ProcedureQuery(Procedure procedure) {
         setRoot(procedure);
     }
-    
+
     public ProcedureQuery(String procedureName) {
         setRoot(procedureName);
     }
 
     /**
-     * Returns <code>Query.UNKNOWN_QUERY</code>. StoredProcedure can perform any kind of
-     * database operations, not directly controlled by the O/R layer. Therefore in general
-     * it is impossible to categorize procedure as a particular query type.
+     * Prints itself as XML to the provided PrintWriter.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<query name=\"");
+        encoder.print(getName());
+        encoder.print("\" factory=\"");
+        encoder.print("org.objectstyle.cayenne.map.ProcedureQueryBuilder");
+
+        encoder.print("\" root=\"");
+        encoder.print(QueryBuilder.PROCEDURE_ROOT);
+
+        String rootString = null;
+
+        if (root instanceof String) {
+            rootString = root.toString();
+        }
+        else if (root instanceof Procedure) {
+            rootString = ((Procedure) root).getName();
+        }
+
+        if (rootString != null) {
+            encoder.print("\" root-name=\"");
+            encoder.print(rootString);
+        }
+
+        encoder.println("\">");
+
+        encoder.indent(1);
+
+        // encode default SQL
+        if (fetchLimit > 0) {
+            encoder.printProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, fetchLimit);
+        }
+
+        encoder.indent(-1);
+        encoder.println("</query>");
+    }
+
+    /**
+     * Returns <code>Query.UNKNOWN_QUERY</code>. StoredProcedure can perform any kind
+     * of database operations, not directly controlled by the O/R layer. Therefore in
+     * general it is impossible to categorize procedure as a particular query type.
      */
     public int getQueryType() {
         return UNKNOWN_QUERY;
@@ -116,8 +159,8 @@ public class ProcedureQuery
     }
 
     /**
-     * Always returns zero, since paged queries are currently not supported for 
-     * stored procedures.
+     * Always returns zero, since paged queries are currently not supported for stored
+     * procedures.
      */
     public int getPageSize() {
         return 0;
@@ -129,8 +172,7 @@ public class ProcedureQuery
     public boolean isFetchingDataRows() {
         return true;
     }
-    
-    
+
     /**
      * Currently always returns <code>true</code>.
      * 
@@ -139,7 +181,7 @@ public class ProcedureQuery
     public boolean isRefreshingObjects() {
         return true;
     }
-    
+
     /**
      * Currently always returns false.
      * 
@@ -148,7 +190,7 @@ public class ProcedureQuery
     public boolean isResolvingInherited() {
         return false;
     }
-    
+
     /**
      * Currently always returns NO_CACHE.
      * 

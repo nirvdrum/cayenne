@@ -63,57 +63,86 @@ import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.collections.Transformer;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.QueryBuilder;
+import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
- * A generic raw SQL query that can be either a DML/DDL or a select. 
+ * A generic raw SQL query that can be either a DML/DDL or a select.
+ * <p>
+ * <strong>Template Script </strong>
+ * </p>
+ * <p>
+ * SQLTemplate stores a dynamic template for the SQL query that supports parameters and
+ * customization using Velocity scripting language. The most straightforward use of
+ * scripting abilities is to build parameterized queries. For example:
+ * </p>
  * 
- * <p><strong>Template Script</strong></p>
- * <p>SQLTemplate stores a dynamic template for the SQL query that supports 
- * parameters and customization using Velocity scripting language. The most 
- * straightforward use of scripting abilities is to build parameterized queries. For example:</p>
+ * <pre>
  * 
- * <pre>SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a</pre>
+ *  
+ *      SELECT ID, NAME FROM SOME_TABLE WHERE NAME LIKE $a=
+ *   
+ *  
+ * </pre>
  * 
- * <p>Another area where scripting is needed is "dynamic SQL" - SQL that changes its structure 
- * depending on parameter values. E.g. if a value is null, a string 
- * <code>"COLUMN_X = ?"</code> must be replaced with <code>"COLUMN_X IS NULL"</code>. </p>
- * 
- * <p><strong>Customizing Template by DB.</strong></p>
- * <p>SQLTemplate has a {@link #getDefaultTemplate() default template script}, but also
- * it allows to configure multiple templates and switch them dynamically. This way a single 
- * query can have multiple "dialects" specific to a given database.</p>
- * 
- * <p><strong>Parameter Sets</strong></p>
- * <p>SQLTemplate supports multiple sets of parameters, so a single query can be executed
- * multiple times with different parameters. "Scrolling" through parameter list is done by 
- * calling {@link #parametersIterator()}. This iterator goes over parameter
- * sets, returning a Map on each call to "next()"</p>
+ * <p>
+ * Another area where scripting is needed is "dynamic SQL" - SQL that changes its
+ * structure depending on parameter values. E.g. if a value is null, a string
+ * <code>"COLUMN_X = ?"</code> must be replaced with <code>"COLUMN_X IS NULL"</code>.
+ * </p>
+ * <p>
+ * <strong>Customizing Template by DB. </strong>
+ * </p>
+ * <p>
+ * SQLTemplate has a {@link #getDefaultTemplate() default template script}, but also it
+ * allows to configure multiple templates and switch them dynamically. This way a single
+ * query can have multiple "dialects" specific to a given database.
+ * </p>
+ * <p>
+ * <strong>Parameter Sets </strong>
+ * </p>
+ * <p>
+ * SQLTemplate supports multiple sets of parameters, so a single query can be executed
+ * multiple times with different parameters. "Scrolling" through parameter list is done by
+ * calling {@link #parametersIterator()}. This iterator goes over parameter sets,
+ * returning a Map on each call to "next()"
+ * </p>
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
+public class SQLTemplate extends AbstractQuery implements GenericSelectQuery,
+        XMLSerializable {
 
     private static final Transformer nullMapTransformer = new Transformer() {
+
         public Object transform(Object input) {
             return (input != null) ? input : Collections.EMPTY_MAP;
         }
     };
 
-    protected SelectExecutionProperties selectProperties =
-        new SelectExecutionProperties();
+    protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
     protected String defaultTemplate;
     protected Map templates;
     protected Map[] parameters;
     protected boolean selecting;
 
-    /** 
-     * Creates an empty SQLTemplate. 
+    /**
+     * Creates an empty SQLTemplate.
      */
     public SQLTemplate(boolean selecting) {
         setSelecting(selecting);
+    }
+
+    public SQLTemplate(DataMap rootMap, String defaultTemplate, boolean selecting) {
+        setDefaultTemplate(defaultTemplate);
+        setSelecting(selecting);
+        setRoot(rootMap);
     }
 
     public SQLTemplate(ObjEntity rootEntity, String defaultTemplate, boolean selecting) {
@@ -139,7 +168,94 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
         setRoot(objEntityName);
         setDefaultTemplate(defaultTemplate);
     }
-    
+
+    /**
+     * Prints itself as XML to the provided PrintWriter.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<query name=\"");
+        encoder.print(getName());
+        encoder.print("\" factory=\"");
+        encoder.print("org.objectstyle.cayenne.map.SQLTemplateBuilder");
+
+        String rootString = null;
+        String rootType = null;
+
+        if (root instanceof String) {
+            rootType = QueryBuilder.OBJ_ENTITY_ROOT;
+            rootString = root.toString();
+        }
+        else if (root instanceof ObjEntity) {
+            rootType = QueryBuilder.OBJ_ENTITY_ROOT;
+            rootString = ((ObjEntity) root).getName();
+        }
+        else if (root instanceof DbEntity) {
+            rootType = QueryBuilder.DB_ENTITY_ROOT;
+            rootString = ((DbEntity) root).getName();
+        }
+        else if (root instanceof Procedure) {
+            rootType = QueryBuilder.PROCEDURE_ROOT;
+            rootString = ((Procedure) root).getName();
+        }
+        else if (root instanceof Class) {
+            rootType = QueryBuilder.JAVA_CLASS_ROOT;
+            rootString = ((Class) root).getName();
+        }
+        else if (root instanceof DataMap) {
+            rootType = QueryBuilder.DATA_MAP_ROOT;
+            rootString = ((DataMap) root).getName();
+        }
+
+        if (rootType != null) {
+            encoder.print("\" root=\"");
+            encoder.print(rootType);
+            encoder.print("\" root-name=\"");
+            encoder.print(rootString);
+        }
+
+        if (!selecting) {
+            encoder.print("\" selecting=\"false");
+        }
+
+        encoder.println("\">");
+
+        encoder.indent(1);
+
+        selectProperties.encodeAsXML(encoder);
+
+        // encode default SQL
+        if (defaultTemplate != null) {
+            encoder.println("<sql><![CDATA[");
+            encoder.println(defaultTemplate);
+            encoder.println("]]></sql>");
+        }
+
+        // encode adapter SQL
+        if (templates != null && !templates.isEmpty()) {
+            Iterator it = templates.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+                Object key = entry.getKey();
+                Object value = entry.getValue();
+
+                if (key != null && value != null) {
+                    encoder.print("<sql adapter-class=\"");
+                    encoder.print(key.toString());
+                    encoder.println("\"><![CDATA[");
+                    encoder.println(value.toString());
+                    encoder.println("]]></sql>");
+                }
+            }
+        }
+
+        // TODO: support parameter encoding
+
+        encoder.indent(-1);
+        encoder.println("</query>");
+    }
+
     /**
      * Initializes query parameters using a set of properties.
      * 
@@ -156,15 +272,13 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     /**
-     * Returns an iterator over parameter sets. Each element returned
-     * from the iterator is a java.util.Map.
+     * Returns an iterator over parameter sets. Each element returned from the iterator is
+     * a java.util.Map.
      */
     public Iterator parametersIterator() {
-        return (parameters == null || parameters.length == 0)
-            ? IteratorUtils.emptyIterator()
-            : IteratorUtils.transformedIterator(
-                IteratorUtils.arrayIterator(parameters),
-                nullMapTransformer);
+        return (parameters == null || parameters.length == 0) ? IteratorUtils
+                .emptyIterator() : IteratorUtils.transformedIterator(IteratorUtils
+                .arrayIterator(parameters), nullMapTransformer);
     }
 
     /**
@@ -175,16 +289,18 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     /**
-     * Returns a new query built using this query as a prototype 
-     * and a new set of parameters.
+     * Returns a new query built using this query as a prototype and a new set of
+     * parameters.
      */
     public SQLTemplate queryWithParameters(Map parameters) {
-        return queryWithParameters(new Map[] { parameters });
+        return queryWithParameters(new Map[] {
+            parameters
+        });
     }
 
     /**
-     * Returns a new query built using this query as a prototype 
-     * and a new set of parameters.
+     * Returns a new query built using this query as a prototype and a new set of
+     * parameters.
      */
     public SQLTemplate queryWithParameters(Map[] parameters) {
         // create a query replica
@@ -203,7 +319,7 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
 
         return query;
     }
-    
+
     public String getCachePolicy() {
         return selectProperties.getCachePolicy();
     }
@@ -253,8 +369,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     /**
-     * Returns query type as select or unknowns depending on whether
-     * result columns are defined.
+     * Returns query type as select or unknowns depending on whether result columns are
+     * defined.
      */
     public int getQueryType() {
         return isSelecting() ? SELECT_QUERY : UNKNOWN_QUERY;
@@ -275,8 +391,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     /**
-     * Returns a template for key, or a default template if a template
-     * for key is not found.
+     * Returns a template for key, or a default template if a template for key is not
+     * found.
      */
     public synchronized String getTemplate(String key) {
         if (templates == null) {
@@ -301,8 +417,8 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     /**
-     * Utility method to get the first set of parameters, since
-     * most queries will only have one.
+     * Utility method to get the first set of parameters, since most queries will only
+     * have one.
      */
     public Map getParameters() {
         Map map = (parameters != null && parameters.length > 0) ? parameters[0] : null;
@@ -310,13 +426,14 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
     }
 
     /**
-     * Utility method to initialize query with only a single set of parameters. 
-     * Useful, since most queries will only have one set. Internally calls
+     * Utility method to initialize query with only a single set of parameters. Useful,
+     * since most queries will only have one set. Internally calls
      * {@link #setParameters(Map[])}.
      */
     public void setParameters(Map map) {
-        setParameters(map != null ? new Map[] { map }
-        : null);
+        setParameters(map != null ? new Map[] {
+            map
+        } : null);
     }
 
     public void setParameters(Map[] parameters) {
