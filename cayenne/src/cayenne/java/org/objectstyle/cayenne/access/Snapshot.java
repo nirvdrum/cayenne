@@ -65,6 +65,9 @@ import java.util.HashMap;
  * @author Andrei Adamchik
  * @since 1.1
  */
+
+// TODO: Maybe implement "locking" of snapshot after it has been created,
+// since snapshots are expected to be immutable 
 public class Snapshot extends HashMap {
     protected long lastUpdated;
 
@@ -80,9 +83,5 @@ public class Snapshot extends HashMap {
 
     public long getLastUpdated() {
         return lastUpdated;
-    }
-
-    public void setLastUpdated(long l) {
-        lastUpdated = l;
     }
 }

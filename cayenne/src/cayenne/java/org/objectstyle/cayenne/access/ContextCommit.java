@@ -91,13 +91,13 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * ContextCommit implements commit logic. It is used internally by
- * DataContext as a commit delegate.
- * Currently ContextCommit resolves primary key dependencies,
- * referential integrity dependencies including multi-reflexive entities,
+ * ContextCommit implements DataContext commit logic. DataContext internally delegates
+ * commit operations to an instance of ContextCommit. ContextCommit resolves 
+ * primary key dependencies,
+ * referential integrity dependencies (including multi-reflexive entities),
  * generates primary keys, creates batches for massive data modifications,
  * assigns operations to data nodes. It indirectly relies on graph
- * algorithms provided by ASHWOOD.
+ * algorithms provided by ASHWOOD library.
  *
  * @author Andriy Shapochka
  */

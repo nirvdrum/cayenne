@@ -253,10 +253,14 @@ public class CayenneDataObject implements DataObject {
         if (persistenceState == PersistenceState.HOLLOW) {
             resolveFault();
         }
-
+        
+        // 1. retain object snapshot to allow clean changes tracking
+        // 2. change object state
         if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
+            dataContext.getObjectStore().retainSnapshot(this);
         }
+        // else....
         // other persistence states can't be changed to MODIFIED
 
         writePropertyDirectly(propName, val);

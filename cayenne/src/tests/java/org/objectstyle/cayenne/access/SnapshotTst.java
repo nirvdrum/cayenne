@@ -64,7 +64,5 @@ public class SnapshotTst extends CayenneTestCase {
     public void testLastUpdated() throws Exception {
          Snapshot snapshot = new Snapshot(10, 1000);
          assertEquals(1000, snapshot.getLastUpdated());
-         snapshot.setLastUpdated(2000);
-         assertEquals(2000, snapshot.getLastUpdated());
     }
 }

@@ -83,8 +83,14 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     private static Logger logObj = Logger.getLogger(ObjectStore.class);
 
     private long lastCachSync = System.currentTimeMillis();
-    protected Map objectMap = new HashMap();
     protected transient Map newObjectMap = null;
+    protected Map objectMap = new HashMap();
+
+    /**
+     * Ensures access to the versions of DataObject snapshots
+     * taken when an object was first modified. 
+     */
+    protected Map retainedSnapshotMap = new HashMap();
 
     /**
      * Stores a reference to the SnapshotCache. 
@@ -112,6 +118,27 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         this.lastCachSync = System.currentTimeMillis();
 
         // TODO: do the actual synchronization
+    }
+
+    /**
+     * Saves a committed snapshot for an object in a non-expiring cache. 
+     * This ensures that Cayenne can track object changes even if the underlying 
+     * cache entry has expired or replaced with a newer version. Retained snapshots
+     * are evicted when an object is committed or rolled back.
+     * 
+     * @since 1.1
+     */
+    public synchronized void retainSnapshot(DataObject dataObject) {
+        ObjectId oid = dataObject.getObjectId();
+        Snapshot snapshot = getCachedSnapshot(oid);
+
+        // if cached snapshot is newer or absent, use snapshot built from object
+        if (snapshot == null || snapshot.getLastUpdated() > this.lastCachSync) {
+            snapshot =
+                (Snapshot) dataObject.getDataContext().takeObjectSnapshot(dataObject);
+        }
+
+        this.retainedSnapshotMap.put(oid, snapshot);
     }
 
     /**
@@ -349,6 +376,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
 
+        // clear retained snapshots
+        this.retainedSnapshotMap.clear();
+
         // post change event 
         if (deletedIds != null || modifiedSnapshots != null) {
             getSnapshotCache().processSnapshotChanges(
@@ -462,10 +492,21 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         return getCachedSnapshot(id);
     }
 
+
+	/**
+	 * Returns a snapshot for ObjectId from the underlying snapshot cache.
+	 * If cache contains no snapshot, a null is returned.
+	 */
     public Snapshot getCachedSnapshot(ObjectId id) {
         return getSnapshotCache().getCachedSnapshot(id);
     }
 
+    /**
+     * Returns a snapshot for ObjectId from the underlying snapshot cache.
+     * If cache contains no snapshot, it will attempt fetching it 
+     * using provided QueryEngine. If fetch attempt fails or inconsistent
+     * data is returned, underlying cache will throw a CayenneRuntimeException.
+     */
     public Snapshot getSnapshot(ObjectId id, QueryEngine engine) {
         return getSnapshotCache().getSnapshot(id, engine);
     }

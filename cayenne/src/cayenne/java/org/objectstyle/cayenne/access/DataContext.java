@@ -797,7 +797,7 @@ public class DataContext implements QueryEngine, Serializable {
                         //Do the same as for modified... deleted is only a persistence state, so
                         // rolling the object back will set the state to committed
                     case PersistenceState.MODIFIED :
-                        // this will clean any modifications and deferrefresh from snapshot
+                        // this will clean any modifications and defer refresh from snapshot
                         // till the next object accessor is called
                         thisObject.setPersistenceState(PersistenceState.HOLLOW);
                         break;
