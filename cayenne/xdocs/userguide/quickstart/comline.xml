@@ -18,7 +18,7 @@
     	<ul>
     		<li><strong><a href=
     		"http://objectstyle.org/cayenne/doc/tutorial/cayenne-cmd-app.tar.gz">Download
-    		full tutorial source.</a></strong></li>
+    		full tutorial source</a></strong></li>
     	</ul>
     		
     	
@@ -50,7 +50,7 @@
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
-    		<p>Run the <a href="../../tutorial/cayenne-cmd-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		<p>Run <a href="../../tutorial/cayenne-cmd-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
     		script located in the project directory to create test tables. 
     		This script is tested on MySQL, but it should be easy to port to any other RDBMS.</p>
     	</subsection>

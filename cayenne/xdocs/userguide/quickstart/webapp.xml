@@ -16,12 +16,46 @@
     	
     	<ul>
     		<li><strong><a href=
-    		"http://objectstyle.org/cayenne/doc/tutorial/cayenne-tutorial-1.tar.gz">Download
-    		full tutorial source.</a></strong></li>
+    		"http://objectstyle.org/cayenne/doc/tutorial/cayenne-web-app.tar.gz">Download
+    		full tutorial source</a></strong></li>
     	</ul>
 
+   	<p>Tutorial steps:</p>
+    	
+    	<ul>
+    		<li><a href="#1">Tutorial Setup.</a></li>
+    		<li><a href="#2">Prepare Tutorial Database.</a></li>
+    		<li><a href="#3">Setup Cayenne Configuration Files.</a></li>
+    		<li><a href="#4">Create Database Primary Key Support.</a></li>
+    		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
+    		<li><a href="#6">Application Code.</a></li>
+    		<li><a href="#7">Compile and Run the Application.</a></li>
+    	</ul>
+    	
+       	<subsection name="3.2.1 Tutorial Setup" anchor="1">
+       		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
+       		installation instructions</a>. In particular, JSDK 1.4 must be installed.
+       		</p>
+    		
+    		<p>- Unpack downloaded tutorial file (<code>cayenne-cmd-app.tar.gz</code>)
+    		anywhere in the filesystem. A new directory named <code>cayenne-web-app</code>
+    		will be created. This directory is referred to as "project directory" further in 
+    		this tutorial.</p>
+    		
+    		<p>- Copy <code>cayenne.jar</code> to the <code>lib</code> subdirectory of 
+    		the tutorial project directory.</p>
     	</subsection>
     	
+    	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
+    		<p>Run <a href="../../tutorial/cayenne-web-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		script located in the project directory to create test tables. 
+    		This script is tested on MySQL, but it should be easy to port to any other RDBMS. Also
+    		note that if you already tried "Command Line Application" tutorial in
+    		this chapter, you may already have tables with the same names in your database.
+    		In this case you may uncomment "DROP TABLE..." statements in the beginning
+    		of this script to recreate tables from scratch.</p>
+    	</subsection>
+    	</subsection>
     </section>
 </body>
 </document>
