@@ -110,7 +110,7 @@ public class ProjectPath {
     }
 
     /**
-     * Returns a ne winstance of the path, expanding this one by 
+     * Returns an instance of the path, expanding this one by 
      * appending an object at the end.
      */
     public ProjectPath appendToPath(Object object) {
