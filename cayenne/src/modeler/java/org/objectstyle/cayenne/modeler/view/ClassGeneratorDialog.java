@@ -58,13 +58,10 @@ package org.objectstyle.cayenne.modeler.view;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ItemEvent;
 
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -72,7 +69,6 @@ import javax.swing.table.TableCellRenderer;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.ClassGeneratorController;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.ScopeWidgetFactory;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.scopemvc.core.PropertyManager;
@@ -85,6 +81,9 @@ import org.scopemvc.view.swing.STable;
 import org.scopemvc.view.swing.STableModel;
 import org.scopemvc.view.swing.STextField;
 import org.scopemvc.view.swing.SwingView;
+
+import com.jgoodies.forms.extras.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
 
 /** 
  * Dialog for generating Java classes from the DataMap.
@@ -99,11 +98,74 @@ public class ClassGeneratorDialog extends SPanel {
     }
 
     private void init() {
+        // **** build widgets
+        final STextField superClassPackage = ScopeWidgetFactory.createTextField(30);
+        superClassPackage.setSelector("superClassPackage");
+
+        final STextField superClassTemplate = ScopeWidgetFactory.createTextField(30);
+        superClassTemplate.setSelector("customSuperclassTemplate");
+
+        STextField classTemplate = ScopeWidgetFactory.createTextField(30);
+        classTemplate.setSelector("customClassTemplate");
+
+        STextField folder = ScopeWidgetFactory.createTextField(30);
+        folder.setSelector("outputDir");
+
+        SButton chooseButton =
+            new SButton(new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL));
+        chooseButton.setEnabled(true);
+
+        SButton chooseTemplateButton =
+            new SButton(new SAction(ClassGeneratorController.CHOOSE_TEMPLATE_CONTROL));
+        chooseTemplateButton.setEnabled(true);
+
+        final SButton chooseSuperTemplateButton =
+            new SButton(
+                new SAction(ClassGeneratorController.CHOOSE_SUPERTEMPLATE_CONTROL));
+        chooseSuperTemplateButton.setEnabled(true);
+
+        SButton generateButton =
+            new SButton(new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL));
+        generateButton.setEnabled(true);
+
+        SButton cancelButton =
+            new SButton(new SAction(ClassGeneratorController.CANCEL_CONTROL));
+        cancelButton.setEnabled(true);
+
+        SCheckBox generateSuperclass = new SCheckBox() {
+                // (de)activate the text fields
+    public void itemStateChanged(ItemEvent inEvent) {
+                boolean enabled = inEvent.getStateChange() == ItemEvent.SELECTED;
+                superClassPackage.setEnabled(enabled);
+                superClassTemplate.setEnabled(enabled);
+                chooseSuperTemplateButton.setEnabled(enabled);
+
+                super.itemStateChanged(inEvent);
+            }
+        };
+        generateSuperclass.setSelector("pairs");
+
+        // **** build entry form
         setDisplayMode(SwingView.MODAL_DIALOG);
         setTitle("Generate Java Classes");
         setLayout(new BorderLayout());
 
-        // build entity table
+        FormLayout layout =
+            new FormLayout(
+                "right:max(50dlu;pref), 3dlu, left:max(180dlu;pref), 3dlu, left:70",
+                "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
+
+        builder.append("Output Directory:", folder, chooseButton);
+        builder.append("Custom Template:", classTemplate, chooseTemplateButton);
+
+        builder.appendSeparator("Superclass Settings");
+        builder.append("Generate Superclass:", generateSuperclass, 3);
+        builder.append("Superclass Package:", superClassPackage, 3);
+        builder.append("Custom Template:", superClassTemplate, chooseSuperTemplateButton);
+
+        // **** build entity table
         STable table = new ClassGeneratorTable();
         table.setRowHeight(25);
         table.setRowMargin(3);
@@ -123,63 +185,10 @@ public class ClassGeneratorDialog extends SPanel {
         table.getColumnModel().getColumn(1).setMinWidth(100);
         table.getColumnModel().getColumn(3).setMinWidth(250);
 
-        // build superclass package
-        JLabel superClassPackageLabel =
-            CayenneWidgetFactory.createLabel("Superclass Package:");
-        final STextField superClassPackage = ScopeWidgetFactory.createTextField();
-        superClassPackage.setSelector("superClassPackage");
-
-        // build pair checkbox
-        JLabel generatePairLabel =
-            CayenneWidgetFactory.createLabel("Generate parent/child class pairs:");
-        SCheckBox generatePair = new SCheckBox() {
-                // (de)activate the text field
-    public void itemStateChanged(ItemEvent inEvent) {
-                superClassPackage.setEnabled(
-                    inEvent.getStateChange() == ItemEvent.SELECTED);
-                super.itemStateChanged(inEvent);
-            }
-        };
-        generatePair.setSelector("pairs");
-
-        // build folder selector
-        JLabel folderLabel = CayenneWidgetFactory.createLabel("Output directory:");
-        JPanel folderPanel = new JPanel();
-        folderPanel.setLayout(new FlowLayout(FlowLayout.LEADING, 0, 0));
-        STextField folder = ScopeWidgetFactory.createTextField();
-        folder.setSelector("outputDir");
-        SAction chooseAction =
-            new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL);
-        SButton chooseButton = new SButton(chooseAction);
-        chooseButton.setEnabled(true);
-        folderPanel.add(folder);
-        folderPanel.add(Box.createHorizontalStrut(5));
-        folderPanel.add(chooseButton);
-
-        // build action buttons
-        SAction generateAction =
-            new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL);
-        SButton generateButton = new SButton(generateAction);
-        generateButton.setEnabled(true);
-
-        SAction cancelAction = new SAction(ClassGeneratorController.CANCEL_CONTROL);
-        SButton cancelButton = new SButton(cancelAction);
-        cancelButton.setEnabled(true);
-
-        // assemble
-        JPanel formPanel =
-            PanelFactory.createForm(
-                new Component[] {
-                    generatePairLabel,
-                    superClassPackageLabel,
-                    folderLabel },
-                new Component[] { generatePair, superClassPackage, folderPanel });
-
-        JPanel panel =
-            PanelFactory.createTablePanel(
-                table,
-                new JComponent[] { formPanel },
-                new JButton[] { generateButton, cancelButton });
+        // **** assemble
+        add(builder.getPanel(), BorderLayout.NORTH);
+        JPanel panel = PanelFactory.createTablePanel(table, new JComponent[] {
+        }, new JButton[] { generateButton, cancelButton });
         add(panel, BorderLayout.CENTER);
     }
 

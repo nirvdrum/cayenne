@@ -76,11 +76,10 @@ public class ModelerPreferences extends ExtendedProperties {
     static final Logger logObj = Logger.getLogger(ModelerPreferences.class);
 
     /** Name of the preferences file. */
-	public static final String PREFERENCES_NAME = "modeler.preferences";
+    public static final String PREFERENCES_NAME = "modeler.preferences";
 
-	/** Name of the log file. */
-	public static final String LOGFILE_NAME = "modeler.log";
-
+    /** Name of the log file. */
+    public static final String LOGFILE_NAME = "modeler.log";
 
     // Keys for the preference file.
 
@@ -97,6 +96,9 @@ public class ModelerPreferences extends ExtendedProperties {
     public static final String LAST_GENERATED_CLASSES_DIR =
         "gui.datamap.GenerateClassDialog.lastDir";
 
+    public static final String LAST_CLASS_GENERATION_TEMPLATE =
+        "gui.datamap.GenerateClassDialog.lastTemplate";
+
     /** User name */
     public static final String USER_NAME = "DbLoginPanel.unInput";
 
@@ -109,23 +111,23 @@ public class ModelerPreferences extends ExtendedProperties {
     /** RDBMS Adapter */
     public static final String RDBMS_ADAPTER = "DbLoginPanel.adapterInput";
 
-	/** GUI layout */
-	public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";
-	public static final String EDITOR_THEMENAME = "Editor.theme";
-	public static final String EDITOR_FRAME_WIDTH = "Editor.frameWidth";
-	public static final String EDITOR_FRAME_HEIGHT = "Editor.frameHeight";
-	public static final String EDITOR_FRAME_X  = "Editor.frameX";
-	public static final String EDITOR_FRAME_Y = "Editor.frameY";
-	public static final String EDITOR_TREE_WIDTH = "Editor.treeWidth";
+    /** GUI layout */
+    public static final String EDITOR_LAFNAME = "Editor.lookAndFeel";
+    public static final String EDITOR_THEMENAME = "Editor.theme";
+    public static final String EDITOR_FRAME_WIDTH = "Editor.frameWidth";
+    public static final String EDITOR_FRAME_HEIGHT = "Editor.frameHeight";
+    public static final String EDITOR_FRAME_X = "Editor.frameX";
+    public static final String EDITOR_FRAME_Y = "Editor.frameY";
+    public static final String EDITOR_TREE_WIDTH = "Editor.treeWidth";
 
-	/** Log file */
-	public static final String EDITOR_LOGFILE_ENABLED = "Editor.logfileEnabled";
-	public static final String EDITOR_LOGFILE = "Editor.logfile";
+    /** Log file */
+    public static final String EDITOR_LOGFILE_ENABLED = "Editor.logfileEnabled";
+    public static final String EDITOR_LOGFILE = "Editor.logfile";
 
+    protected static ModelerPreferences sharedInstance;
 
-	protected static ModelerPreferences sharedInstance;
-
-    protected ModelerPreferences() {}
+    protected ModelerPreferences() {
+    }
 
     /**
      * Returns Cayenne preferences singleton.
@@ -135,7 +137,7 @@ public class ModelerPreferences extends ExtendedProperties {
             sharedInstance = new ModelerPreferences();
             sharedInstance.loadPreferences();
         }
-        
+
         return sharedInstance;
     }
 
@@ -161,7 +163,8 @@ public class ModelerPreferences extends ExtendedProperties {
                 return;
             }
             save(new FileOutputStream(prefFile), "");
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logObj.debug("Error saving preferences: ", e);
         }
     }
@@ -180,7 +183,8 @@ public class ModelerPreferences extends ExtendedProperties {
             }
 
             load(new FileInputStream(prefsFile));
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             logObj.warn("Error creating preferences file.", e);
         }
     }

@@ -5,6 +5,61 @@ import java.io.File;
 import java.util.List;
 
 import javax.swing.JFileChooser;
+/* ====================================================================
+ * 
+ * The ObjectStyle Group Software License, Version 1.0 
+ *
+ * Copyright (c) 2002-2004 The ObjectStyle Group 
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer. 
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:  
+ *       "This product includes software developed by the 
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne" 
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written 
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
@@ -12,6 +67,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.model.ClassGeneratorModel;
+import org.objectstyle.cayenne.modeler.util.VelotemplateFileFilter;
 import org.objectstyle.cayenne.modeler.view.ClassGeneratorDialog;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -32,7 +88,16 @@ public class ClassGeneratorController extends BasicController {
     public static final String CHOOSE_LOCATION_CONTROL =
         "cayenne.modeler.classgenerator.choose.button";
 
-    public ClassGeneratorController(Project project, DataMap map, ObjEntity selectedEntity) {
+    public static final String CHOOSE_TEMPLATE_CONTROL =
+        "cayenne.modeler.classgenerator.choosetemplate.button";
+
+    public static final String CHOOSE_SUPERTEMPLATE_CONTROL =
+        "cayenne.modeler.classgenerator.choosesupertemplate.button";
+
+    public ClassGeneratorController(
+        Project project,
+        DataMap map,
+        ObjEntity selectedEntity) {
         setModel(prepareModel(project, map, selectedEntity));
     }
 
@@ -40,31 +105,22 @@ public class ClassGeneratorController extends BasicController {
         Project project,
         DataMap map,
         ObjEntity selectedEntity) {
-        	
+
         // validate entities
         Validator validator = project.getValidator();
         validator.validate();
 
         ClassGeneratorModel model =
-            new ClassGeneratorModel(
-                map,
-                selectedEntity,
-                validator.validationResults());
+            new ClassGeneratorModel(map, selectedEntity, validator.validationResults());
 
         // by default generate pairs of classes
-        // this may come from preferences later
-        boolean setPairs = true;
-        
-        model.setPairs(setPairs);
-        if(setPairs) {
-        	model.updateDefaultSuperClassPackage();
-        }
+        model.setPairs(true);
+        model.updateDefaultSuperClassPackage();
 
         // figure out default out directory
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         String startDir =
-            (String) pref.getProperty(
-                ModelerPreferences.LAST_GENERATED_CLASSES_DIR);
+            (String) pref.getProperty(ModelerPreferences.LAST_GENERATED_CLASSES_DIR);
 
         if (startDir != null) {
             model.setOutputDir(startDir);
@@ -72,7 +128,6 @@ public class ClassGeneratorController extends BasicController {
 
         return model;
     }
-
 
     /**
      * Creates and runs the class generation dialog.
@@ -85,10 +140,18 @@ public class ClassGeneratorController extends BasicController {
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(CANCEL_CONTROL)) {
             shutdown();
-        } else if (control.matchesID(GENERATE_CLASSES_CONTROL)) {
+        }
+        else if (control.matchesID(GENERATE_CLASSES_CONTROL)) {
             generateClasses();
-        } else if (control.matchesID(CHOOSE_LOCATION_CONTROL)) {
+        }
+        else if (control.matchesID(CHOOSE_LOCATION_CONTROL)) {
             chooseLocation();
+        }
+        else if (control.matchesID(CHOOSE_TEMPLATE_CONTROL)) {
+            chooseClassTemplate();
+        }
+        else if (control.matchesID(CHOOSE_SUPERTEMPLATE_CONTROL)) {
+            chooseSuperclassTemplate();
         }
     }
 
@@ -108,9 +171,7 @@ public class ClassGeneratorController extends BasicController {
         if (!outputDir.exists() && !outputDir.mkdirs()) {
             JOptionPane.showMessageDialog(
                 (Component) this.getView(),
-                "Can't create directory "
-                    + outputDir
-                    + ". Select a different one.");
+                "Can't create directory " + outputDir + ". Select a different one.");
             return;
         }
 
@@ -122,11 +183,37 @@ public class ClassGeneratorController extends BasicController {
             return;
         }
 
+        File classTemplate = null;
+        if (model.getCustomClassTemplate() != null) {
+            classTemplate = new File(model.getCustomClassTemplate());
+
+            if (!classTemplate.canRead()) {
+                JOptionPane.showMessageDialog(
+                    (Component) this.getView(),
+                    model.getCustomClassTemplate() + " is not a valid template file.");
+                return;
+            }
+        }
+
+        File superClassTemplate = null;
+        if (model.getCustomSuperclassTemplate() != null) {
+            superClassTemplate = new File(model.getCustomSuperclassTemplate());
+
+            if (!superClassTemplate.canRead()) {
+                JOptionPane.showMessageDialog(
+                    (Component) this.getView(),
+                    model.getCustomClassTemplate() + " is not a valid template file.");
+                return;
+            }
+        }
+
         List selected = model.getSelectedEntities();
         DefaultClassGenerator generator = new DefaultClassGenerator(selected);
         generator.setDestDir(outputDir);
         generator.setMakePairs(model.isPairs());
         generator.setSuperPkg(model.getSuperClassPackage());
+        generator.setSuperTemplate(superClassTemplate);
+        generator.setTemplate(classTemplate);
 
         try {
             generator.execute();
@@ -134,7 +221,8 @@ public class ClassGeneratorController extends BasicController {
                 (Component) this.getView(),
                 "Class generation finished");
             shutdown();
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(
                 (Component) this.getView(),
@@ -185,5 +273,74 @@ public class ClassGeneratorController extends BasicController {
             // update model
             model.setOutputDir(selected.getAbsolutePath());
         }
+    }
+
+    protected void chooseSuperclassTemplate() {
+        ClassGeneratorModel model = (ClassGeneratorModel) getModel();
+        String template =
+            chooseTemplate(
+                model.getCustomSuperclassTemplate(),
+                "Select Custom Superclass Template");
+        model.setCustomSuperclassTemplate(template);
+    }
+
+    protected void chooseClassTemplate() {
+        ClassGeneratorModel model = (ClassGeneratorModel) getModel();
+        String template =
+            chooseTemplate(
+                model.getCustomClassTemplate(),
+                "Select Custom Class Template");
+        model.setCustomClassTemplate(template);
+    }
+
+    /**
+     * Picks and returns class generation velocity template.
+     */
+    private String chooseTemplate(String oldTemplate, String title) {
+        File startDir =
+            (oldTemplate != null) ? new File(oldTemplate).getParentFile() : null;
+
+        // guess start directory
+        if (startDir == null) {
+            String lastUsed =
+                (String) ModelerPreferences.getPreferences().getProperty(
+                    ModelerPreferences.LAST_CLASS_GENERATION_TEMPLATE);
+            if (lastUsed != null) {
+                startDir = new File(lastUsed).getParentFile();
+            }
+        }
+
+        if (startDir == null) {
+            String lastUsed =
+                (String) ModelerPreferences.getPreferences().getProperty(
+                    ModelerPreferences.LAST_DIR);
+            if (lastUsed != null) {
+                startDir = new File(lastUsed);
+            }
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setAcceptAllFileFilterUsed(true);
+        chooser.addChoosableFileFilter(VelotemplateFileFilter.getInstance());
+
+        chooser.setDialogTitle(title);
+
+        if (startDir != null) {
+            chooser.setCurrentDirectory(startDir);
+        }
+
+        File selected = null;
+        int result = chooser.showOpenDialog((Component) this.getView());
+        if (result == JFileChooser.APPROVE_OPTION) {
+            selected = chooser.getSelectedFile();
+            // Set preferences
+            ModelerPreferences.getPreferences().setProperty(
+                ModelerPreferences.LAST_CLASS_GENERATION_TEMPLATE,
+                selected.getAbsolutePath());
+        }
+
+        return (selected != null) ? selected.getAbsolutePath() : null;
     }
 }
