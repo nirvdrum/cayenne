@@ -43,12 +43,17 @@
      ******************************************************
          </echo>
     </target>
+    
+    <target name="prepare">
+    	<tstamp/>
+    </target>
 
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site locally -->
     <!-- ============================================= -->
-    <target name="site">
-		<ant antfile="build-doc.xml" target="site"/>
+    <target name="site" depends="prepare">
+		<ant antfile="build-site.xml" target="site"/>
+		<ant antfile="build-latest.xml" target="site"/>
     </target>
  
     <!-- ========================================== -->

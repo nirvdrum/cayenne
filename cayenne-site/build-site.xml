@@ -1,11 +1,9 @@
 <?xml version="1.0"?>
 
 <!-- ================================================= -->
-<!--         Cayenne documentation buildfile.          -->
-<!--             (called from build.xml)               -->
+<!-- Site buildfile. Called from build.xml. -->
 <!-- ================================================= -->
-<project name="cayenne-doc" default="site" basedir=".">
-	
+<project name="cayenne-site" default="site" basedir=".">
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
         <fileset dir="${lib.dir}">
@@ -17,9 +15,8 @@
     <!-- Creates documentation directories.         -->
     <!-- ========================================== -->
     <target name="prepare">
-        <tstamp/>
         <mkdir dir="${build}/site"/>
-        <mkdir dir="${dist}"/>
+        <mkdir dir="${dist}/dtd"/>
     </target>
     
     <!-- ============================================= -->
@@ -66,5 +63,3 @@
         </copy>
     </target>
 </project>
-
-

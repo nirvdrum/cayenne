@@ -3,12 +3,12 @@
     <title>Cayenne</title>
     
     <menu name="ABOUT">
-        <item name="Home"       href="/index.html"/>
-        <item name="Download"       href="/download.html"/>
-        <item name="Contributors"   href="/contributors.html"/>
+        <item name="Home" href="/index.html"/>
+        <item name="Download" href="/download.html"/>
+        <item name="Contributors" href="/contributors.html"/>
         <item name="How Can I Help" href="/how-can-i-help.html"/>
         <item name="Success Stories" href="/poweredby.html"/>
-        <item name="License"        href="/LICENSE"/>
+        <item name="License" href="/licenses/LICENSE"/>
         <item name="Commercial Support" href="/cayenne-commercial-support.html"/>
     </menu>
 

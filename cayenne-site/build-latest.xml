@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+
+<!-- ================================================= -->
+<!-- Latest release buildfile. Called from build.xml. -->
+<!-- ================================================= -->
+<project name="cayenne-latest" default="site" basedir=".">
+
+	<property name="dtd" value="${cayenne.latest}/src/cayenne/dtd"/>
+	<property name="license" value="${cayenne.latest}/doc/licenses"/>
+    
+    <!-- ============================================= -->
+    <!-- Deploys Cayenne web site locally -->
+    <!-- ============================================= -->
+    <target name="site" depends="dtd,license,grammar"/>
+    
+    <target name="dtd" depends="check-latest">
+    	<copy todir="${dist}/dtd">
+    		<fileset dir="${dtd}" includes="**/*.dtd"/>
+    	</copy>
+    </target>
+ 
+    <target name="license" depends="check-latest">
+		<copy todir="${dist}/licenses">
+    		<fileset dir="${license}" includes="**/**"/>
+    	</copy>
+    </target>
+    
+	<target name="grammar" depends="check-latest">
+    
+    </target>
+    
+    <target name="check-latest">
+    	<available file="${cayenne.latest}" property="cayenne.latest.present"/>
+    	<fail unless="cayenne.latest.present">
+    	
+**** FATAL: No latest cayenne checkout found. "cayenne.latest" property: "${cayenne.latest}"
+    	</fail>
+    </target>
+</project>
