@@ -207,6 +207,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
             // exception expected
         } finally {
             observerLogger.setLevel(oldLevel);
+			gen.createAutoPk(getNode(), new ArrayList(map.getDbEntities()));
         }
     }
 

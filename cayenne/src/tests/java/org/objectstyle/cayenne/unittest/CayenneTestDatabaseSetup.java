@@ -125,17 +125,6 @@ public class CayenneTestDatabaseSetup {
         } finally {
             conn.close();
         }
-
-        // lets recreate pk support, since there is no
-        // generic way to reset pk info
-        DataNode node = resources.getSharedNode();
-        DbAdapter adapter = node.getAdapter();
-
-        // drop
-        adapter.getPkGenerator().dropAutoPk(node, list);
-
-        // create
-        adapter.getPkGenerator().createAutoPk(node, list);
     }
 
     /** Drops all test tables. */
