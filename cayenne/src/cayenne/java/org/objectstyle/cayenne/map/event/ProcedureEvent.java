@@ -88,4 +88,8 @@ public class ProcedureEvent extends MapEvent {
     public void setProcedure(Procedure procedure) {
         this.procedure = procedure;
     }
+
+    public String getNewName() {
+        return (procedure != null) ? procedure.getName() : null;
+    }
 }

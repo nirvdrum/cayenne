@@ -98,4 +98,8 @@ public class DataNodeEvent extends MapEvent {
 	public void setDataNode(DataNode dataNode) {
 		this.dataNode = dataNode;
 	}
+	
+	public String getNewName() {
+		return (dataNode != null) ? dataNode.getName() : null;
+	}
 }

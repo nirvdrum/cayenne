@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class MapEvent extends CayenneEvent {
+public abstract class MapEvent extends CayenneEvent {
 
 	/** Signifies a changed object. */
 	public static final int CHANGE = 1;
@@ -76,7 +76,6 @@ public class MapEvent extends CayenneEvent {
 
 	protected int id = CHANGE;
 	protected String oldName;
-	protected String newName;
 
 	/**
 	 * Constructor for MapEvent.
@@ -90,16 +89,25 @@ public class MapEvent extends CayenneEvent {
 	/**
 	 * Constructor for MapEvent.
 	 * 
-	 * @param source event source
+	 * @deprecated Since 1.0b4, use MapEvent(Object, String)
 	 */
 	public MapEvent(Object source, String oldName, String newName) {
-		super(source);
-		setOldName(oldName);
-		setNewName(newName);
+		this(source, oldName);
 	}
 	
+	/**
+	 * Constructor for MapEvent.
+	 * 
+	 * @param source event source
+	 */
+	public MapEvent(Object source, String oldName) {
+		super(source);
+		setOldName(oldName);
+	}
+	
+	
 	public boolean isNameChange() {
-		return Util.nullSafeEquals(getOldName(), getNewName());
+		return !Util.nullSafeEquals(getOldName(), getNewName());
 	}
 	
 	/**
@@ -112,12 +120,9 @@ public class MapEvent extends CayenneEvent {
 
 
 	/**
-	 * Returns the newName.
-	 * @return String
+	 * Returns the newName of the object that caused this event.
 	 */
-	public String getNewName() {
-		return newName;
-	}
+	public abstract String getNewName();
 
 
 	/**
@@ -136,16 +141,6 @@ public class MapEvent extends CayenneEvent {
 	public void setId(int id) {
 		this.id = id;
 	}
-
-
-	/**
-	 * Sets the newName.
-	 * @param newName The newName to set
-	 */
-	public void setNewName(String newName) {
-		this.newName = newName;
-	}
-
 
 	/**
 	 * Sets the oldName.

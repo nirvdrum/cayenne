@@ -98,4 +98,8 @@ public class DomainEvent extends MapEvent {
 	public void setDomain(DataDomain domain) {
 		this.domain = domain;
 	}
+	
+	public String getNewName() {
+		return (domain != null) ? domain.getName() : null;
+	}
 }

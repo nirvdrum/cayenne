@@ -66,24 +66,32 @@ public class ModelerEventTst extends TestCase {
 
     public void testConstructor1() throws Exception {
     	Object src = new Object();
-    	MapEvent e = new MapEvent(src);
+    	MapEvent e = new TestMapEvent(src);
     	assertSame(src, e.getSource());
-    }
-    
-    public void testConstructor2() throws Exception  {
-    	Object src = new Object();
-    	MapEvent e = new MapEvent(src, "oldname", "newname");
-    	assertSame(src, e.getSource());
-    	assertEquals("oldname", e.getOldName());
-    	assertEquals("newname", e.getNewName());
     }
     
     public void testId() throws Exception  {
-    	MapEvent e = new MapEvent(new Object());
+    	MapEvent e = new TestMapEvent(new Object());
     	assertEquals(MapEvent.CHANGE, e.getId());
     	
     	e.setId(MapEvent.ADD);
     	assertEquals(MapEvent.ADD, e.getId());
+    }
+    
+    class TestMapEvent extends MapEvent {
+        public TestMapEvent(Object source) {
+            super(source);
+            // TODO Auto-generated constructor stub
+        }
+
+        public TestMapEvent(Object source, String oldName) {
+            super(source, oldName);
+            // TODO Auto-generated constructor stub
+        }
+
+    	public String getNewName() {
+    		return "";
+    	}
     }
 }
 

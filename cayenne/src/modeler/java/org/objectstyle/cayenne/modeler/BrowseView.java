@@ -56,9 +56,10 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.Component;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -71,7 +72,6 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
@@ -137,10 +137,9 @@ public class BrowseView
 
     protected EventController mediator;
     protected ProjectTree browseTree;
-    protected DefaultMutableTreeNode rootNode;
     protected DefaultMutableTreeNode currentNode;
 
-    protected DefaultTreeModel model;
+    protected boolean reorderOnFocus;
 
     public BrowseView(EventController mediator) {
         super();
@@ -150,11 +149,8 @@ public class BrowseView
         browseTree.setCellRenderer(new BrowseViewRenderer());
         setViewportView(browseTree);
 
-        model = (DefaultTreeModel) browseTree.getModel();
-        rootNode = (DefaultMutableTreeNode) model.getRoot();
-
         // listen for mouse events
-        MouseListener ml = new MouseAdapter() {
+        browseTree.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent e) {
                 int selRow = browseTree.getRowForLocation(e.getX(), e.getY());
                 if (selRow != -1) {
@@ -164,17 +160,26 @@ public class BrowseView
                     }
                 }
             }
-        };
-        browseTree.addMouseListener(ml);
+        });
 
-        // listen to tree events (since not al selections
+        // listen to tree events (since not all selections
         // are done by clicking tree with mouse)
-        TreeSelectionListener tsl = new TreeSelectionListener() {
+        browseTree.addTreeSelectionListener(new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent e) {
                 processSelection(e.getPath());
             }
-        };
-        browseTree.addTreeSelectionListener(tsl);
+        });
+
+        // listen to focus events to reorder list
+        browseTree.addFocusListener(new FocusListener() {
+            public void focusGained(FocusEvent e) {
+                fixOrdering();
+            }
+
+            public void focusLost(FocusEvent e) {
+                fixOrdering();
+            }
+        });
 
         mediator.addDomainListener(this);
         mediator.addDomainDisplayListener(this);
@@ -256,8 +261,9 @@ public class BrowseView
     }
 
     public void procedureChanged(ProcedureEvent e) {
-        // TODO Auto-generated method stub
-
+        if (e.isNameChange()) {
+            reorderOnFocus = true;
+        }
     }
 
     public void procedureRemoved(ProcedureEvent e) {
@@ -270,12 +276,18 @@ public class BrowseView
             return;
 
         updateNode(new Object[] { e.getDomain()});
+
+        if (e.isNameChange()) {
+            reorderOnFocus = true;
+        }
     }
 
     public void domainAdded(DomainEvent e) {
         if (e.getSource() == this)
             return;
-        browseTree.insertObject(e.getDomain(), rootNode);
+        browseTree.insertObject(
+            e.getDomain(),
+            (DefaultMutableTreeNode) browseTree.getProjectModel().getRoot());
     }
 
     public void domainRemoved(DomainEvent e) {
@@ -289,12 +301,17 @@ public class BrowseView
     public void dataNodeChanged(DataNodeEvent e) {
         if (e.getSource() == this)
             return;
+
+        if (e.isNameChange()) {
+            reorderOnFocus = true;
+        }
+
         DefaultMutableTreeNode node =
             browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] { mediator.getCurrentDataDomain(), e.getDataNode()});
 
         if (null != node) {
-            model.nodeChanged(node);
+            browseTree.getProjectModel().nodeChanged(node);
             List maps = new ArrayList(e.getDataNode().getDataMaps());
             int mapCount = maps.size();
             // If added map to this node
@@ -362,6 +379,10 @@ public class BrowseView
         }
 
         updateNode(new Object[] { mediator.getCurrentDataDomain(), e.getDataMap()});
+
+        if (e.isNameChange()) {
+            reorderOnFocus = true;
+        }
     }
 
     public void dataMapAdded(DataMapEvent e) {
@@ -437,6 +458,10 @@ public class BrowseView
                 e.getEntity()};
 
         updateNode(path);
+
+        if (e.isNameChange()) {
+            reorderOnFocus = true;
+        }
     }
 
     /** 
@@ -461,7 +486,10 @@ public class BrowseView
 
             if (mapNode != null) {
                 currentNode = new DefaultMutableTreeNode(entity, false);
-                model.insertNodeInto(currentNode, mapNode, mapNode.getChildCount());
+                browseTree.getProjectModel().insertNodeInto(
+                    currentNode,
+                    mapNode,
+                    mapNode.getChildCount());
             }
         }
 
@@ -540,7 +568,7 @@ public class BrowseView
         }
 
         // remove this node
-        model.removeNodeFromParent(toBeRemoved);
+        browseTree.getProjectModel().removeNodeFromParent(toBeRemoved);
     }
 
     /** Makes node current, visible and selected.*/
@@ -574,7 +602,7 @@ public class BrowseView
         DefaultMutableTreeNode node =
             browseTree.getProjectModel().getNodeForObjectPath(path);
         if (node != null) {
-            model.nodeChanged(node);
+            browseTree.getProjectModel().nodeChanged(node);
         }
     }
 
@@ -684,6 +712,13 @@ public class BrowseView
         return list.toArray();
     }
 
+    private synchronized void fixOrdering() {
+        if (reorderOnFocus) {
+            logObj.warn("View items names have changed, must reorder the view..");
+            reorderOnFocus = false;
+        }
+    }
+
     /** 
      * Inserts entity node in alphabetical order. 
      * Assumes that the tree is already ordered, except for one node. 
@@ -730,14 +765,14 @@ public class BrowseView
 
         // remove
         if (rm >= 0) {
-            model.removeNodeFromParent(entityNode);
+            browseTree.getProjectModel().removeNodeFromParent(entityNode);
             if (rm < ins) {
                 ins--;
             }
         }
 
         // insert
-        model.insertNodeInto(entityNode, parent, ins);
+        browseTree.getProjectModel().insertNodeInto(entityNode, parent, ins);
     }
 
     static class MapObjectsComparator {

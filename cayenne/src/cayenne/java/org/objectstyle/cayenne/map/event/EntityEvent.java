@@ -96,4 +96,8 @@ public class EntityEvent extends MapEvent {
 	public void setEntity(Entity entity) {
 		this.entity = entity;
 	}
+	
+	public String getNewName() {
+		return (entity != null) ? entity.getName() : null;
+	}
 }

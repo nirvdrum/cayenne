@@ -97,4 +97,8 @@ public class DataMapEvent extends MapEvent {
 	public void setDataMap(DataMap dataMap) {
 		this.dataMap = dataMap;
 	}
+
+    public String getNewName() {
+        return (dataMap != null) ? dataMap.getName() : null;
+    }
 }
