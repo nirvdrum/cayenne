@@ -53,13 +53,10 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.control;
 
-import junit.swingui.StatusLine;
-
+import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.scopemvc.controller.basic.BasicController;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
 
 /**
  * @author Andrei Adamchik

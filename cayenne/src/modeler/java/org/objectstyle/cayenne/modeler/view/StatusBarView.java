@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.view;
 
 import java.awt.FlowLayout;
 import java.awt.Font;
