@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.access.event;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 
-import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.event.CayenneEvent;
 
 /**
@@ -67,44 +67,102 @@ import org.objectstyle.cayenne.event.CayenneEvent;
  * 
  * @author Andrei Adamchik
  */
-public class SnapshotEvent extends CayenneEvent implements Serializable {
-    protected SnapshotEvent eventCause;
-    protected Collection objectIds;
+public abstract class SnapshotEvent extends CayenneEvent implements Serializable {
 
-    public SnapshotEvent(Object source, ObjectId objectId) {
-        super(source);
-        this.objectIds =
-            (objectId != null)
-                ? Collections.singletonList(objectId)
-                : Collections.EMPTY_LIST;
+    public static SnapshotEvent createEvent(
+        Object source,
+        Map modifiedDiffs,
+        Map insertedSnapshots,
+        Collection deletedIds) {
+
+        RootSnapshotEvent event = new RootSnapshotEvent(source);
+        event.modifiedDiffs = modifiedDiffs;
+        event.insertedSnapshots = insertedSnapshots;
+        event.deletedIds = deletedIds;
+
+        return event;
     }
 
-    public SnapshotEvent(Object source, Collection objectIds) {
-        super(source);
-        this.objectIds = (objectIds != null) ? objectIds : Collections.EMPTY_LIST;
+    public static SnapshotEvent createEvent(Object source, SnapshotEvent rootEvent) {
+        return new ChainedSnapshotEvent(source, rootEvent);
     }
 
-    public SnapshotEvent(Object source, SnapshotEvent eventCause) {
-        this(source, eventCause.getObjectIds());
-        this.eventCause = eventCause;
+    protected SnapshotEvent(Object source) {
+        super(source);
+    }
+
+    public abstract Object getRootSource();
+
+    public abstract Map modifiedDiffs();
+
+    public abstract Map insertedSnapshots();
+
+    public abstract Collection deletedIds();
+
+    /**
+     * Subclass of SnapshotEvent representing an event resent
+     * as a result of receiving another event.
+     */
+    static class ChainedSnapshotEvent extends SnapshotEvent {
+        protected SnapshotEvent rootEvent;
+
+        ChainedSnapshotEvent(Object source, SnapshotEvent rootEvent) {
+            super(source);
+            this.rootEvent = rootEvent;
+        }
+
+        /**
+          * Returns the source of the event that started this sequence of events.
+          */
+        public Object getRootSource() {
+            return rootEvent.getRootSource();
+        }
+
+        public Map modifiedDiffs() {
+            return rootEvent.modifiedDiffs();
+        }
+
+        public Map insertedSnapshots() {
+            return rootEvent.insertedSnapshots();
+        }
+
+        public Collection deletedIds() {
+            return rootEvent.deletedIds();
+        }
     }
 
     /**
-     * Returns a SnapshotEvent that triggered this event, or null
-     * if no such evbent existed.
+     * Subclass of SnapshotEvent representing an event
+     * generated from scratch by the sender.
      */
-    public SnapshotEvent getEventCause() {
-        return eventCause;
-    }
+    static class RootSnapshotEvent extends SnapshotEvent {
+        protected Collection deletedIds;
+        protected Map modifiedDiffs;
+        protected Map insertedSnapshots;
 
-    /**
-     * Returns the source of the event that started this sequence of events.
-     */
-    public Object getRootSource() {
-        return (eventCause != null) ? eventCause.getRootSource() : this.getSource();
-    }
+        RootSnapshotEvent(Object source) {
+            super(source);
+        }
 
-    public Collection getObjectIds() {
-        return objectIds;
+        /**
+          * Returns the source of the event that started this sequence of events.
+          */
+        public Object getRootSource() {
+            return getSource();
+        }
+
+        public Map modifiedDiffs() {
+            return (modifiedDiffs != null) ? modifiedDiffs : Collections.EMPTY_MAP;
+        }
+
+        public Map insertedSnapshots() {
+            return (insertedSnapshots != null)
+                ? insertedSnapshots
+                : Collections.EMPTY_MAP;
+        }
+
+        public Collection deletedIds() {
+            return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
+        }
     }
 }

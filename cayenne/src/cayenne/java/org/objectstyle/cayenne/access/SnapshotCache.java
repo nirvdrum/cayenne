@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.event.EventSubject;
  */
 public class SnapshotCache {
     protected String name;
-    protected EventSubject snapshotChangeSubject;
+    protected EventSubject snapshotEventSubject;
 
     public SnapshotCache(String name) {
         if (name == null) {
@@ -72,12 +72,24 @@ public class SnapshotCache {
         }
 
         this.name = name;
-        this.snapshotChangeSubject = EventSubject.getSubject(this.getClass(), name);
+        this.snapshotEventSubject = EventSubject.getSubject(this.getClass(), name);
     }
 
+    /**
+     * Returns the name of this SnapshotCache. Name allows to create
+     * EventSubjects for event notifications addressed to or sent from 
+     * this SnapshotCache.
+     */
     public String getName() {
         return name;
     }
+    
+    /**
+     * Returns EventSubject used by this SnapshotCache to notify of snapshot changes.
+     */
+	public EventSubject getSnapshotEventSubject() {
+		return snapshotEventSubject;
+	}
 
     protected void processSnapshotsChangeEvent(SnapshotEvent event) {
         // TODO: implement me
@@ -95,7 +107,7 @@ public class SnapshotCache {
         // now notify children;
         // create a chained event so that its source is SnapshotCache.
         EventManager.getDefaultManager().postEvent(
-            new SnapshotEvent(this, event),
-            snapshotChangeSubject);
+            SnapshotEvent.createEvent(this, event),
+            snapshotEventSubject);
     }
 }

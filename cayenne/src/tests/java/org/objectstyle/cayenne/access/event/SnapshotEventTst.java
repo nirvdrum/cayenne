@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.access.event;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -64,26 +66,35 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class SnapshotEventTst extends CayenneTestCase {
-    public void testEventConstructor1() {
+    public void testRootEvent() {
         Object source = new Object();
-        List ids = new ArrayList();
+        Collection deleted = new ArrayList();
+        Map modified = new HashMap();
+        Map inserted = new HashMap();
 
-        SnapshotEvent event = new SnapshotEvent(source, ids);
+        SnapshotEvent event =
+            SnapshotEvent.createEvent(source, modified, inserted, deleted);
         assertSame(source, event.getSource());
         assertSame(source, event.getRootSource());
-        assertSame(ids, event.getObjectIds());
-        assertNull(event.getEventCause());
+        assertSame(deleted, event.deletedIds());
+        assertSame(modified, event.modifiedDiffs());
+        assertSame(inserted, event.insertedSnapshots());
     }
 
-    public void testEventConstructor2() {
+    public void testChainedEvent() {
         Object rootSource = new Object();
         Object source = new Object();
-        List ids = new ArrayList();
-        SnapshotEvent eventCause = new SnapshotEvent(rootSource, ids);
-        SnapshotEvent event = new SnapshotEvent(source, eventCause);
+        Collection deleted = new ArrayList();
+        Map modified = new HashMap();
+        Map inserted = new HashMap();
+
+        SnapshotEvent rootEvent =
+            SnapshotEvent.createEvent(rootSource, modified, inserted, deleted);
+        SnapshotEvent event = SnapshotEvent.createEvent(source, rootEvent);
         assertSame(source, event.getSource());
-        assertSame(eventCause, event.getEventCause());
-        assertSame(ids, event.getObjectIds());
         assertSame(rootSource, event.getRootSource());
+        assertSame(deleted, event.deletedIds());
+        assertSame(modified, event.modifiedDiffs());
+        assertSame(inserted, event.insertedSnapshots());
     }
 }
