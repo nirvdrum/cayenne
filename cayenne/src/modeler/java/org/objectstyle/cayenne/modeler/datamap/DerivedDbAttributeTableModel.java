@@ -186,8 +186,10 @@ public class DerivedDbAttributeTableModel extends DbAttributeTableModel {
 				setGroupBy((Boolean) newVal, attr);
 				break;
 			case DB_ATTRIBUTE_PRIMARY_KEY :
-				setPrimaryKey((Boolean) newVal, attr);
-				fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
+				if(!setPrimaryKey((Boolean) newVal, attr, row)) {
+					return;
+				}
+
 				break;
 			case DB_ATTRIBUTE_MANDATORY :
 				setMandatory((Boolean) newVal, attr);

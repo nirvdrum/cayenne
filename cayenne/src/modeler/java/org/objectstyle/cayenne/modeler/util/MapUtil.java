@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -65,6 +67,7 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
@@ -78,9 +81,10 @@ import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
- * Provides utility methods to access DataMap, Entities, etc.
- * For example, setName() in Attribute requires changing
- * the keys in attribute Maps in Entities. 
+ * Provides utility methods to perform complex actions on objects
+ * in the org.objectstyle.cayenne.map package.
+ * 
+ * <p>TODO: this class is a good candidate to be included in the map package.</p> 
  * 
  * @author Misha Sengaout
  * @author Andrei Adamchik
@@ -101,7 +105,7 @@ public class MapUtil {
         Procedure procedure = parameter.getEntity();
         procedure.removeCallParameter(parameter.getName());
         parameter.setName(newName);
-		procedure.addCallParameter(parameter);
+        procedure.addCallParameter(parameter);
     }
 
     public static void setDataMapName(DataDomain domain, DataMap map, String newName) {
@@ -301,5 +305,109 @@ public class MapUtil {
      */
     public static boolean isValidForDepPk(DbRelationship rel) {
         return MapLoader.isValidForDepPk(rel);
+    }
+
+    /**
+      * Returns true if one of relationship joins uses a given attribute
+      * as a source.
+      */
+    public static boolean containsSourceAttribute(
+        DbRelationship relationship,
+        DbAttribute attribute) {
+        if (attribute.getEntity() != relationship.getSourceEntity()) {
+            return false;
+        }
+
+        Iterator it = relationship.getJoins().iterator();
+        while (it.hasNext()) {
+            DbAttributePair join = (DbAttributePair) it.next();
+            if (join.getSource() == attribute) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if one of relationship joins uses a given attribute
+     * as a target.
+     */
+    public static boolean containsTargetAttribute(
+        DbRelationship relationship,
+        DbAttribute attribute) {
+        if (attribute.getEntity() != relationship.getTargetEntity()) {
+            return false;
+        }
+
+        Iterator it = relationship.getJoins().iterator();
+        while (it.hasNext()) {
+            DbAttributePair join = (DbAttributePair) it.next();
+            if (join.getTarget() == attribute) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns a collection of DbRelationships that use
+     * this attribute as a source.
+     */
+    public static Collection getRelationshipsUsingAttributeAsSource(DbAttribute attribute) {
+        Entity parent = attribute.getEntity();
+
+        if (parent == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        Collection parentRelationships = parent.getRelationships();
+        Collection relationships = new ArrayList(parentRelationships.size());
+        Iterator it = parentRelationships.iterator();
+        while (it.hasNext()) {
+            DbRelationship relationship = (DbRelationship) it.next();
+            if (MapUtil.containsSourceAttribute(relationship, attribute)) {
+                relationships.add(relationship);
+            }
+        }
+        return relationships;
+    }
+
+    /**
+     * Returns a collection of DbRelationships that use
+     * this attribute as a source.
+     */
+    public static Collection getRelationshipsUsingAttributeAsTarget(DbAttribute attribute) {
+        Entity parent = attribute.getEntity();
+
+        if (parent == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        DataMap map = parent.getDataMap();
+        if (map == null) {
+            return Collections.EMPTY_LIST;
+        }
+
+        Collection relationships = new ArrayList();
+
+        Iterator it = map.getDbEntities().iterator();
+        while (it.hasNext()) {
+            Entity entity = (Entity) it.next();
+            if (entity == parent) {
+                continue;
+            }
+
+            Collection entityRelationships = entity.getRelationships();
+            Iterator relationshipsIt = entityRelationships.iterator();
+            while (relationshipsIt.hasNext()) {
+                DbRelationship relationship = (DbRelationship) relationshipsIt.next();
+                if (MapUtil.containsTargetAttribute(relationship, attribute)) {
+                    relationships.add(relationship);
+                }
+            }
+        }
+        return relationships;
     }
 }

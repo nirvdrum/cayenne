@@ -56,13 +56,18 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.JOptionPane;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
@@ -75,6 +80,8 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class DbAttributeTableModel extends CayenneTableModel {
+    private static Logger logObj = Logger.getLogger(DbAttributeTableModel.class);
+
     // Columns
     private static final int DB_ATTRIBUTE_NAME = 0;
     private static final int DB_ATTRIBUTE_TYPE = 1;
@@ -205,8 +212,9 @@ public class DbAttributeTableModel extends CayenneTableModel {
                 setAttributeType((String) newVal, attr);
                 break;
             case DB_ATTRIBUTE_PRIMARY_KEY :
-                setPrimaryKey((Boolean) newVal, attr);
-                fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
+                if (!setPrimaryKey(((Boolean) newVal), attr, row)) {
+                    return;
+                }
                 break;
             case DB_ATTRIBUTE_PRECISION :
                 setPrecision((String) newVal, attr);
@@ -292,11 +300,57 @@ public class DbAttributeTableModel extends CayenneTableModel {
         }
     }
 
-    public void setPrimaryKey(Boolean newVal, DbAttribute attr) {
-        attr.setPrimaryKey(newVal.booleanValue());
-        if (newVal.booleanValue()) {
-            attr.setMandatory(true);
+    public boolean setPrimaryKey(Boolean newVal, DbAttribute attr, int row) {
+
+        boolean flag = newVal.booleanValue();
+
+        // make sure "to-dep-pk" relationships are fixed when the primary key is unset.
+        if (!flag) {
+            Collection relationships =
+                MapUtil.getRelationshipsUsingAttributeAsTarget(attr);
+            relationships.addAll(MapUtil.getRelationshipsUsingAttributeAsSource(attr));
+
+            if (relationships.size() > 0) {
+                Iterator it = relationships.iterator();
+                while (it.hasNext()) {
+                    DbRelationship relationship = (DbRelationship) it.next();
+                    if (!relationship.isToDependentPK()) {
+                        it.remove();
+                    }
+                }
+
+                // filtered only those that are to dep PK
+                if (relationships.size() > 0) {
+                    String message =
+                        (relationships.size() == 1)
+                            ? "Fix \"To Dep PK\" relationship using this attribute?"
+                            : "Fix "
+                                + relationships.size()
+                                + " \"To Dep PK\" relationships using this attribute?";
+
+                    int answer =
+                        JOptionPane.showConfirmDialog(Editor.getFrame(), message);
+                    if (answer != JOptionPane.YES_OPTION) {
+                        // no action needed
+                        return false;
+                    }
+
+                    // fix target relationships
+                    Iterator fixIt = relationships.iterator();
+                    while (fixIt.hasNext()) {
+                        DbRelationship relationship = (DbRelationship) fixIt.next();
+                        relationship.setToDependentPK(false);
+                    }
+                }
+            }
         }
+
+        attr.setPrimaryKey(flag);
+        if (flag) {
+            attr.setMandatory(true);
+            fireTableCellUpdated(row, DB_ATTRIBUTE_MANDATORY);
+        }
+        return true;
     }
 
     public void setMandatory(Boolean newVal, DbAttribute attr) {

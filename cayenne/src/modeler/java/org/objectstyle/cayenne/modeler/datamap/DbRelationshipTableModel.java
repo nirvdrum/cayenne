@@ -57,10 +57,13 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
+
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
@@ -72,144 +75,165 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class DbRelationshipTableModel extends CayenneTableModel {
-	// Columns
-	static final int NAME = 0;
-	static final int TARGET = 1;
-	static final int TO_DEPENDENT_KEY = 2;
-	static final int CARDINALITY = 3;
+    // Columns
+    static final int NAME = 0;
+    static final int TARGET = 1;
+    static final int TO_DEPENDENT_KEY = 2;
+    static final int CARDINALITY = 3;
 
-	protected DbEntity entity;
+    protected DbEntity entity;
 
-	public DbRelationshipTableModel(
-		DbEntity entity,
-		EventController mediator,
-		Object eventSource) {
+    public DbRelationshipTableModel(
+        DbEntity entity,
+        EventController mediator,
+        Object eventSource) {
 
-		super(mediator, eventSource, new ArrayList(entity.getRelationships()));
-		this.entity = entity;
-	}
+        super(mediator, eventSource, new ArrayList(entity.getRelationships()));
+        this.entity = entity;
+    }
 
-	/**
-	 * Returns DbRelationship class.
-	 */
-	public Class getElementsClass() {
-		return DbRelationship.class;
-	}
+    /**
+     * Returns DbRelationship class.
+     */
+    public Class getElementsClass() {
+        return DbRelationship.class;
+    }
 
-	public int getColumnCount() {
-		return 4;
-	}
+    public int getColumnCount() {
+        return 4;
+    }
 
-	public String getColumnName(int col) {
-		switch (col) {
-			case NAME :
-				return "Name";
-			case TARGET :
-				return "Target";
-			case TO_DEPENDENT_KEY :
-				return "To Dep PK";
-			case CARDINALITY :
-				return "To Many";
-			default :
-				return null;
-		}
-	}
+    public String getColumnName(int col) {
+        switch (col) {
+            case NAME :
+                return "Name";
+            case TARGET :
+                return "Target";
+            case TO_DEPENDENT_KEY :
+                return "To Dep PK";
+            case CARDINALITY :
+                return "To Many";
+            default :
+                return null;
+        }
+    }
 
-	public Class getColumnClass(int col) {
-		switch (col) {
-			case TO_DEPENDENT_KEY :
-			case CARDINALITY :
-				return Boolean.class;
-			default :
-				return String.class;
-		}
-	}
+    public Class getColumnClass(int col) {
+        switch (col) {
+            case TO_DEPENDENT_KEY :
+            case CARDINALITY :
+                return Boolean.class;
+            default :
+                return String.class;
+        }
+    }
 
-	public DbRelationship getRelationship(int row) {
-		return (row >= 0 && row < objectList.size())
-			? (DbRelationship) objectList.get(row)
-			: null;
-	}
+    public DbRelationship getRelationship(int row) {
+        return (row >= 0 && row < objectList.size())
+            ? (DbRelationship) objectList.get(row)
+            : null;
+    }
 
-	public Object getValueAt(int row, int col) {
-		DbRelationship rel = getRelationship(row);
-		if (rel == null) {
-			return null;
-		}
+    public Object getValueAt(int row, int col) {
+        DbRelationship rel = getRelationship(row);
+        if (rel == null) {
+            return null;
+        }
 
-		switch (col) {
-			case NAME :
-				return rel.getName();
-			case TARGET :
-				DbEntity target = (DbEntity) rel.getTargetEntity();
-				return (target != null) ? target.getName() : null;
-			case TO_DEPENDENT_KEY :
-				return new Boolean(rel.isToDependentPK());
-			case CARDINALITY :
-				return new Boolean(rel.isToMany());
-			default :
-				return null;
-		}
-	}
+        switch (col) {
+            case NAME :
+                return rel.getName();
+            case TARGET :
+                DbEntity target = (DbEntity) rel.getTargetEntity();
+                return (target != null) ? target.getName() : null;
+            case TO_DEPENDENT_KEY :
+                return new Boolean(rel.isToDependentPK());
+            case CARDINALITY :
+                return new Boolean(rel.isToMany());
+            default :
+                return null;
+        }
+    }
 
-	public void setUpdatedValueAt(Object aValue, int row, int column) {
+    public void setUpdatedValueAt(Object aValue, int row, int column) {
 
-		DbRelationship rel = getRelationship(row);
-		// If name column
-		if (column == NAME) {
-			String text = (String) aValue;
-			String old_name = rel.getName();
-			MapUtil.setRelationshipName(entity, rel, text);
-			RelationshipEvent e =
-				new RelationshipEvent(eventSource, rel, entity, old_name);
-			mediator.fireDbRelationshipEvent(e);
-			fireTableCellUpdated(row, column);
-		}
-		// If target column
-		else if (column == TARGET) {
-			if (null == aValue)
-				return;
-			String target_name = aValue.toString();
-			if (target_name == null)
-				target_name = "";
-			target_name = target_name.trim();
-			// Set new target, if applicable
-			DbEntity target = null;
-			if ("".equals(target_name))
-				target = null;
-			else
-				target = mediator.getCurrentDataMap().getDbEntity(target_name, true);
-			rel.setTargetEntity(target);
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-			mediator.fireDbRelationshipEvent(e);
-		} else if (column == TO_DEPENDENT_KEY) {
-			Boolean temp = (Boolean) aValue;
-			rel.setToDependentPK(temp.booleanValue());
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-			mediator.fireDbRelationshipEvent(e);
-		} else if (column == CARDINALITY) {
-			Boolean temp = (Boolean) aValue;
-			rel.setToMany(temp.booleanValue());
-			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
-			mediator.fireDbRelationshipEvent(e);
-		}
-		fireTableRowsUpdated(row, row);
-	}
+        DbRelationship rel = getRelationship(row);
+        // If name column
+        if (column == NAME) {
+            String text = (String) aValue;
+            String old_name = rel.getName();
+            MapUtil.setRelationshipName(entity, rel, text);
+            RelationshipEvent e =
+                new RelationshipEvent(eventSource, rel, entity, old_name);
+            mediator.fireDbRelationshipEvent(e);
+            fireTableCellUpdated(row, column);
+        }
+        // If target column
+        else if (column == TARGET) {
+            if (null == aValue)
+                return;
+            String target_name = aValue.toString();
+            if (target_name == null)
+                target_name = "";
+            target_name = target_name.trim();
+            // Set new target, if applicable
+            DbEntity target = null;
+            if ("".equals(target_name))
+                target = null;
+            else
+                target = mediator.getCurrentDataMap().getDbEntity(target_name, true);
+            rel.setTargetEntity(target);
+            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
+            mediator.fireDbRelationshipEvent(e);
+        }
+        else if (column == TO_DEPENDENT_KEY) {
+            boolean flag = ((Boolean) aValue).booleanValue();
 
-	/** Relationship just needs to be removed from the model. 
-	 *  It is already removed from the DataMap. */
-	void removeRelationship(Relationship rel) {
-		objectList.remove(rel);
-		fireTableDataChanged();
-	}
+            // make sure reverse relationship "to-dep-pk" is unset.
+            if (flag) {
+                DbRelationship reverse = rel.getReverseRelationship();
+                if (reverse != null && reverse.isToDependentPK()) {
+                	String message = "Unset reverse relationship's \"To Dep PK\" setting?";
+                    int answer =
+                        JOptionPane.showConfirmDialog(Editor.getFrame(), message);
+                    if(answer != JOptionPane.YES_OPTION) {
+                    	// no action needed
+                    	return;
+                    }
+                    
+                    // unset reverse
+					reverse.setToDependentPK(false);
+                }
+            }
 
-	public boolean isCellEditable(int row, int col) {
-		DbRelationship rel = getRelationship(row);
-		if (rel == null) {
-			return false;
-		} else if (col == TO_DEPENDENT_KEY) {
-			return MapUtil.isValidForDepPk(rel);
-		}
-		return true;
-	}
+            rel.setToDependentPK(flag);
+            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
+            mediator.fireDbRelationshipEvent(e);
+        }
+        else if (column == CARDINALITY) {
+            Boolean temp = (Boolean) aValue;
+            rel.setToMany(temp.booleanValue());
+            RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
+            mediator.fireDbRelationshipEvent(e);
+        }
+        fireTableRowsUpdated(row, row);
+    }
+
+    /** Relationship just needs to be removed from the model. 
+     *  It is already removed from the DataMap. */
+    void removeRelationship(Relationship rel) {
+        objectList.remove(rel);
+        fireTableDataChanged();
+    }
+
+    public boolean isCellEditable(int row, int col) {
+        DbRelationship rel = getRelationship(row);
+        if (rel == null) {
+            return false;
+        }
+        else if (col == TO_DEPENDENT_KEY) {
+            return MapUtil.isValidForDepPk(rel);
+        }
+        return true;
+    }
 }
