@@ -53,63 +53,73 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.sql.*;
 
 import junit.framework.TestCase;
 
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.map.ObjEntity;
+
 public class JdbcAdapterTst extends TestCase {
-    protected JdbcAdapter adapter;
+	protected JdbcAdapter adapter;
 
-    public JdbcAdapterTst(String name) {
-        super(name);
-    }
+	public JdbcAdapterTst(String name) {
+		super(name);
+	}
 
+	protected void setUp() throws java.lang.Exception {
+		adapter = new JdbcAdapter();
+	}
 
-    protected void setUp() throws java.lang.Exception {
-        adapter = new JdbcAdapter();
-    }
+	public void testExternalTypesForJdbcType() throws Exception {
+		// check a few types
+		checkType(Types.BLOB);
+		checkType(Types.ARRAY);
+		checkType(Types.DATE);
+		checkType(Types.VARCHAR);
+	}
 
+	public void testCreateTable() throws Exception {
+		// an attempt to create a derived table must generate an exception
+		try {
+			ObjEntity e = TestMain.getSharedDomain().lookupEntity("ArtistAssets");
+			adapter.createTable(e.getDbEntity());
+			fail("Derived tables shouldn't be allowed in 'create'."); 
+		} catch (Exception ex) {
+			// exception expected
+		}
+	}
 
-    public void testExternalTypesForJdbcType() throws java.lang.Exception {
-        // check a few types
-        checkType(Types.BLOB);
-        checkType(Types.ARRAY);
-        checkType(Types.DATE);
-        checkType(Types.VARCHAR);
-    }
+	private void checkType(int type) throws java.lang.Exception {
+		String[] types = adapter.externalTypesForJdbcType(type);
+		assertNotNull(types);
+		assertEquals(1, types.length);
+		assertEquals(TypesMapping.getSqlNameByType(type), types[0]);
+	}
 
-    private void checkType(int type) throws java.lang.Exception {
-        String[] types = adapter.externalTypesForJdbcType(type);
-        assertNotNull(types);
-        assertEquals(1, types.length);
-        assertEquals(TypesMapping.getSqlNameByType(type), types[0]);
-    }
-    
-    
-    // check for Oracle open cursors - used for debugging. 
-    public static void testOpenCursors(Connection c) {
-        try {
-            Statement st = c.createStatement();
-            ResultSet rs =
-                st.executeQuery(
-                    "select user_name, status, osuser, machine, a.sql_text "
-                        + "from v$session b, v$open_cursor a where user_name = 'GOYA'");
-            System.out.println("results..");
-            System.out.println("==================");
-            while (rs.next()) {
-                System.out.print(rs.getString(1));
-                System.out.print(":" + rs.getString(2));
-                System.out.print(":" + rs.getString(3));
-                System.out.print(":" + rs.getString(4));
-                System.out.println(":" + rs.getString(5));
-            }
-            rs.close();
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-            System.exit(1);
-        }
-    } 
+	// check for Oracle open cursors - used for debugging. 
+	public static void testOpenCursors(Connection c) {
+		try {
+			Statement st = c.createStatement();
+			ResultSet rs =
+				st.executeQuery(
+					"select user_name, status, osuser, machine, a.sql_text "
+						+ "from v$session b, v$open_cursor a where user_name = 'GOYA'");
+			System.out.println("results..");
+			System.out.println("==================");
+			while (rs.next()) {
+				System.out.print(rs.getString(1));
+				System.out.print(":" + rs.getString(2));
+				System.out.print(":" + rs.getString(3));
+				System.out.print(":" + rs.getString(4));
+				System.out.println(":" + rs.getString(5));
+			}
+			rs.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			System.exit(1);
+		}
+	}
 }

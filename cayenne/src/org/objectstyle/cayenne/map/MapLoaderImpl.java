@@ -494,20 +494,31 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			out.print(" source=\"");
 			out.print(pair.getSource().getName());
 			out.println("\" target=\"" + pair.getTarget().getName() + "\"/>");
-		} // End while()
+		}
 	}
 
-	/* * * LOAD FROM XML PART * * */
-
-	private void processStartDbEntity(Attributes atts) {
+	private void processStartDbEntity(Attributes atts) throws SAXException {
 		String name = atts.getValue("", "name");
-		dbEntity = new DbEntity(name);
-		String schema = atts.getValue("", "schema");
-		if (null != schema)
-			dbEntity.setSchema(schema);
-		String catalog = atts.getValue("", "catalog");
-		if (null != catalog)
-			dbEntity.setCatalog(catalog);
+		String parentName = atts.getValue("", "parentName");
+
+		if (parentName != null) {
+			DbEntity parent = dataMap.getDbEntity(parentName);
+			if (parent == null) {
+				throw new SAXException(
+					"Can't find parent DbEntity '"
+						+ parentName
+						+ "' for derived entity '"
+						+ name
+						+ "'.");
+			}
+			dbEntity = new DerivedDbEntity(name);
+			((DerivedDbEntity) dbEntity).setParentEntity(parent);
+		} else {
+			dbEntity = new DbEntity(name);
+		}
+
+		dbEntity.setSchema(atts.getValue("", "schema"));
+		dbEntity.setCatalog(atts.getValue("", "catalog"));
 	}
 
 	private void processStartDbAttribute(Attributes atts) {
@@ -533,7 +544,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 		temp = atts.getValue("", "isMandatory");
 		if (null != temp && temp.equalsIgnoreCase(TRUE))
 			attrib.setMandatory(true);
-
 	}
 
 	private void processStartObjEntity(Attributes atts) {
@@ -544,7 +554,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 			DbEntity db_temp = dataMap.getDbEntity(temp);
 			objEntity.setDbEntity(db_temp);
 		}
-	} // End processStartObjEntity
+	}
 
 	private void processStartObjAttribute(Attributes atts) {
 		String name = atts.getValue("", "name");
@@ -561,8 +571,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 					(DbAttribute) objEntity.getDbEntity().getAttribute(temp);
 				attrib.setDbAttribute(db_temp);
 			}
-		} // End if db attribute
-	} // End processStartObjAttribute
+		}
+	}
 
 	private void processStartDbRelationship(Attributes atts)
 		throws SAXException {

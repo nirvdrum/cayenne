@@ -128,6 +128,12 @@ public class DbGenerator {
 		boolean supportsFK = adapter.supportsFkConstraints();
 		while (it.hasNext()) {
 			DbEntity dbe = (DbEntity) it.next();
+			
+			// view creation support is pending
+			if(dbe instanceof DerivedDbEntity) {
+				continue;
+			}
+			
 			String name = dbe.getName();
 
 			// build "DROP TABLE"

@@ -90,6 +90,10 @@ public class DatabaseSetup {
 			ListIterator it = list.listIterator(list.size());
 			while (it.hasPrevious()) {
 				DbEntity ent = (DbEntity) it.previous();
+				if(ent instanceof DerivedDbEntity) {
+					continue;
+				}
+				
 				String deleteSql = "DELETE FROM " + ent.getName();
 				stmt.executeUpdate(deleteSql);
 			}
@@ -210,6 +214,10 @@ public class DatabaseSetup {
 		Iterator it = dbEntitiesInInsertOrder().iterator();
 		while (it.hasNext()) {
 			DbEntity ent = (DbEntity) it.next();
+			if(ent instanceof DerivedDbEntity) {
+				continue;
+			}
+			
 			queries.add(adapter.createTable(ent));
 		}
 
