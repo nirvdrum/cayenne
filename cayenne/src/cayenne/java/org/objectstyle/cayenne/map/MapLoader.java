@@ -61,6 +61,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -88,6 +89,7 @@ public class MapLoader extends DefaultHandler {
     private static Logger logObj = Logger.getLogger(MapLoader.class);
 
     public static final String DATA_MAP_TAG = "data-map";
+    public static final String PROPERTY_TAG = "property";
     public static final String DB_ENTITY_TAG = "db-entity";
     public static final String OBJ_ENTITY_TAG = "obj-entity";
     public static final String DB_ATTRIBUTE_TAG = "db-attribute";
@@ -103,7 +105,6 @@ public class MapLoader extends DefaultHandler {
 
     // Query-related
     public static final String QUERY_TAG = "query";
-    public static final String QUERY_PROPERTY_TAG = "property";
     public static final String QUERY_RESULT_COLUMN_TAG = "result-column";
     public static final String QUERY_SQL_TAG = "sql";
     public static final String QUERY_QUALIFIER_TAG = "qualifier";
@@ -133,7 +134,7 @@ public class MapLoader extends DefaultHandler {
 
     private String currentTag;
     private StringBuffer charactersBuffer;
-    private Map attributes;
+    private Map mapProperties;
 
     /** 
      * Prints DataMap encoded as XML to a provided PrintWriter.
@@ -218,7 +219,6 @@ public class MapLoader extends DefaultHandler {
             catch (IOException ioex) {
             }
         }
-
     }
 
     /**
@@ -269,91 +269,98 @@ public class MapLoader extends DefaultHandler {
     }
 
     public void startElement(
-        String namespace_uri,
-        String local_name,
-        String q_name,
-        Attributes atts)
+        String namespaceUri,
+        String localName,
+        String qName,
+        Attributes attributes)
         throws SAXException {
-
-        rememberCurrentTag(local_name);
-        if (local_name.equals(DATA_MAP_TAG)) {
+        
+        rememberCurrentTag(localName);
+        if (localName.equals(DATA_MAP_TAG)) {
         }
-        else if (local_name.equals(DB_ENTITY_TAG)) {
-            processStartDbEntity(atts);
+        else if (localName.equals(DB_ENTITY_TAG)) {
+            processStartDbEntity(attributes);
         }
-        else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
-            processStartDbAttribute(atts);
+        else if (localName.equals(DB_ATTRIBUTE_TAG)) {
+            processStartDbAttribute(attributes);
         }
-        else if (local_name.equals(DB_ATTRIBUTE_DERIVED_TAG)) {
-            processStartDerivedDbAttribute(atts);
+        else if (localName.equals(DB_ATTRIBUTE_DERIVED_TAG)) {
+            processStartDerivedDbAttribute(attributes);
         }
-        else if (local_name.equals(DB_ATTRIBUTE_REF_TAG)) {
-            processStartDbAttributeRef(atts);
+        else if (localName.equals(DB_ATTRIBUTE_REF_TAG)) {
+            processStartDbAttributeRef(attributes);
         }
-        else if (local_name.equals(OBJ_ENTITY_TAG)) {
-            processStartObjEntity(atts);
+        else if (localName.equals(OBJ_ENTITY_TAG)) {
+            processStartObjEntity(attributes);
         }
-        else if (local_name.equals(OBJ_ATTRIBUTE_TAG)) {
-            processStartObjAttribute(atts);
+        else if (localName.equals(OBJ_ATTRIBUTE_TAG)) {
+            processStartObjAttribute(attributes);
         }
-        else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
-            processStartDbRelationship(atts);
+        else if (localName.equals(DB_RELATIONSHIP_TAG)) {
+            processStartDbRelationship(attributes);
         }
-        else if (local_name.equals(DB_ATTRIBUTE_PAIR_TAG)) {
-            processStartDbAttributePair(atts);
+        else if (localName.equals(DB_ATTRIBUTE_PAIR_TAG)) {
+            processStartDbAttributePair(attributes);
         }
-        else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
-            processStartObjRelationship(atts);
+        else if (localName.equals(OBJ_RELATIONSHIP_TAG)) {
+            processStartObjRelationship(attributes);
         }
-        else if (local_name.equals(DB_RELATIONSHIP_REF_TAG)) {
-            processStartDbRelationshipRef(atts);
+        else if (localName.equals(DB_RELATIONSHIP_REF_TAG)) {
+            processStartDbRelationshipRef(attributes);
         }
-        else if (local_name.equals(PROCEDURE_PARAMETER_TAG)) {
-            processStartProcedureParameter(atts);
+        else if (localName.equals(PROCEDURE_PARAMETER_TAG)) {
+            processStartProcedureParameter(attributes);
         }
-        else if (local_name.equals(PROCEDURE_TAG)) {
-            processStartProcedure(atts);
+        else if (localName.equals(PROCEDURE_TAG)) {
+            processStartProcedure(attributes);
         }
-        else if (local_name.equals(QUERY_TAG)) {
-            processStartQuery(atts);
+        else if (localName.equals(QUERY_TAG)) {
+            processStartQuery(attributes);
         }
-        else if (local_name.equals(QUERY_PROPERTY_TAG)) {
-            processStartQueryProperty(atts);
+        else if (localName.equals(QUERY_RESULT_COLUMN_TAG)) {
+            processStartQueryResultColumn(attributes);
         }
-        else if (local_name.equals(QUERY_RESULT_COLUMN_TAG)) {
-            processStartQueryResultColumn(atts);
-        }
-        else if (local_name.equals(QUERY_SQL_TAG)) {
+        else if (localName.equals(QUERY_SQL_TAG)) {
             charactersBuffer = new StringBuffer();
-            processStartQuerySQL(atts);
+            processStartQuerySQL(attributes);
         }
-        else if (local_name.equals(QUERY_ORDERING_TAG)) {
+        else if (localName.equals(QUERY_ORDERING_TAG)) {
             charactersBuffer = new StringBuffer();
-            processStartQueryOrdering(atts);
+            processStartQueryOrdering(attributes);
         }
-        else if (local_name.equals(QUERY_PREFETCH_TAG)) {
+        else if (localName.equals(QUERY_PREFETCH_TAG)) {
             charactersBuffer = new StringBuffer();
         }
-        else if (local_name.equals(QUERY_QUALIFIER_TAG)) {
+        else if (localName.equals(QUERY_QUALIFIER_TAG)) {
             charactersBuffer = new StringBuffer();
         }
-        else if (local_name.equals(DB_KEY_GENERATOR_TAG)) {
-            processStartDbKeyGenerator(atts);
+        else if (localName.equals(DB_KEY_GENERATOR_TAG)) {
+            processStartDbKeyGenerator(attributes);
         }
-        else if (local_name.equals(DB_GENERATOR_TYPE_TAG)) {
+        else if (localName.equals(DB_GENERATOR_TYPE_TAG)) {
             charactersBuffer = new StringBuffer();
         }
-        else if (local_name.equals(DB_GENERATOR_NAME_TAG)) {
+        else if (localName.equals(DB_GENERATOR_NAME_TAG)) {
             charactersBuffer = new StringBuffer();
         }
-        else if (local_name.equals(DB_KEY_CACHE_SIZE_TAG)) {
+        else if (localName.equals(DB_KEY_CACHE_SIZE_TAG)) {
             charactersBuffer = new StringBuffer();
+        }
+        // properties can belong to query or DataMap
+        else if (localName.equals(PROPERTY_TAG)) {
+            if (queryBuilder != null) {
+                processStartQueryProperty(attributes);
+            }
+            else {
+                processStartDataMapProperty(attributes);
+            }
         }
     }
 
     public void endElement(String namespaceURI, String local_name, String qName)
         throws SAXException {
         if (local_name.equals(DATA_MAP_TAG)) {
+            processEndDataMap();
         }
         else if (local_name.equals(DB_ENTITY_TAG)) {
             processEndDbEntity();
@@ -797,6 +804,24 @@ public class MapLoader extends DefaultHandler {
 
         queryBuilder.addProperty(name, value);
     }
+    
+    private void processStartDataMapProperty(Attributes attributes) throws SAXException {
+        String name = attributes.getValue("", "name");
+        if (null == name) {
+            throw new SAXException("MapLoader::processStartDataMapProperty(), no property name.");
+        }
+
+        String value = attributes.getValue("", "value");
+        if (null == value) {
+            throw new SAXException("MapLoader::processStartDataMapProperty(), no property value.");
+        }
+
+        if(mapProperties == null) {
+            mapProperties = new TreeMap();
+        }
+        
+        mapProperties.put(name, value);
+    }
 
     private void processStartQueryResultColumn(Attributes attributes)
         throws SAXException {
@@ -905,6 +930,14 @@ public class MapLoader extends DefaultHandler {
         catch (Exception ex) {
             pkGenerator.setKeyCacheSize(null);
         }
+    }
+    
+    private void processEndDataMap() {
+        if(mapProperties != null) {
+            dataMap.initWithProperties(mapProperties);
+        }
+        
+        mapProperties = null;
     }
 
     private void processEndObjEntity() {

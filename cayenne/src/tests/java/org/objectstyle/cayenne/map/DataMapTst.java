@@ -64,15 +64,55 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-/** 
+/**
  * DataMap unit tests.
  */
 public class DataMapTst extends TestCase {
+
     protected DataMap map;
 
     protected void setUp() throws Exception {
         super.setUp();
         map = new DataMap();
+    }
+
+    public void testDefaultSchema() throws Exception {
+        String tstSchema = "tst_schema";
+        assertNull(map.getDefaultSchema());
+        map.setDefaultSchema(tstSchema);
+        assertEquals(tstSchema, map.getDefaultSchema());
+
+        map.setDefaultSchema(null);
+        assertNull(map.getDefaultSchema());
+    }
+
+    public void testDefaultPackage() throws Exception {
+        String tstPackage = "tst.pkg";
+        assertNull(map.getDefaultPackage());
+        map.setDefaultPackage(tstPackage);
+        assertEquals(tstPackage, map.getDefaultPackage());
+
+        map.setDefaultPackage(null);
+        assertNull(map.getDefaultPackage());
+    }
+
+    public void testDefaultSuperclass() throws Exception {
+        String tstSuperclass = "tst_superclass";
+        assertNull(map.getDefaultSuperclass());
+        map.setDefaultSuperclass(tstSuperclass);
+        assertEquals(tstSuperclass, map.getDefaultSuperclass());
+
+        map.setDefaultSuperclass(null);
+        assertNull(map.getDefaultSuperclass());
+    }
+
+    public void testDefaultLockType() throws Exception {
+        assertEquals(DataMap.DEFAULT_LOCK_TYPE_VALUE, map.getDefaultLockType());
+        map.setDefaultLockType(ObjEntity.LOCK_TYPE_OPTIMISTIC);
+        assertEquals(ObjEntity.LOCK_TYPE_OPTIMISTIC, map.getDefaultLockType());
+
+        map.setDefaultLockType(ObjEntity.LOCK_TYPE_NONE);
+        assertEquals(ObjEntity.LOCK_TYPE_NONE, map.getDefaultLockType());
     }
 
     public void testName() throws Exception {
@@ -97,7 +137,8 @@ public class DataMapTst extends TestCase {
     }
 
     public void testAddEntityWithSameName() throws Exception {
-        //Give them different class-names... we are only testing for the same entity name being a problem
+        //Give them different class-names... we are only testing for the same entity name
+        // being a problem
         ObjEntity e1 = new ObjEntity("c");
         e1.setClassName("c1");
         ObjEntity e2 = new ObjEntity("c");
@@ -157,7 +198,7 @@ public class DataMapTst extends TestCase {
     }
 
     public void testMultipleNullClassNames() {
-        // Now possible to have more than one objEntity with a null class name. 
+        // Now possible to have more than one objEntity with a null class name.
         // This test proves it
 
         ObjEntity e1 = new ObjEntity("g");
@@ -277,18 +318,21 @@ public class DataMapTst extends TestCase {
         DbEntity e2 = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
         e2.setName("e2");
 
-        DbRelationship r1 =
-            (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, e1);
+        DbRelationship r1 = (DbRelationship) NamedObjectFactory.createObject(
+                DbRelationship.class,
+                e1);
         r1.setName("r1");
         r1.setTargetEntity(e2);
 
-        DbRelationship r2 =
-            (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, e2);
+        DbRelationship r2 = (DbRelationship) NamedObjectFactory.createObject(
+                DbRelationship.class,
+                e2);
         r2.setName("r2");
         r2.setTargetEntity(e1);
 
-        DbRelationship r3 =
-            (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, e1);
+        DbRelationship r3 = (DbRelationship) NamedObjectFactory.createObject(
+                DbRelationship.class,
+                e1);
         r3.setName("r3");
         r3.setTargetEntity(e2);
 
@@ -314,13 +358,19 @@ public class DataMapTst extends TestCase {
         checkProcedures(new String[0]);
 
         map.addProcedure(new Procedure("proc1"));
-        checkProcedures(new String[] { "proc1" });
+        checkProcedures(new String[] {
+            "proc1"
+        });
 
         map.addProcedure(new Procedure("proc2"));
-        checkProcedures(new String[] { "proc1", "proc2" });
+        checkProcedures(new String[] {
+                "proc1", "proc2"
+        });
 
         map.removeProcedure("proc2");
-        checkProcedures(new String[] { "proc1" });
+        checkProcedures(new String[] {
+            "proc1"
+        });
     }
 
     protected void checkProcedures(String[] expectedNames) throws Exception {

@@ -64,10 +64,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -81,11 +81,52 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * @author Craig Miskell
  */
 public class DataMap implements XMLSerializable, MappingNamespace {
-    private static Logger logObj = Logger.getLogger(DataMap.class);
 
+    /**
+     * Defines the name of the property for default DB schema.
+     * 
+     * @since 1.1
+     */
+    public static final String DEFAULT_SCHEMA_PROPERTY = "defaultSchema";
+    
+    /**
+     * Defines the name of the property for default Java class package.
+     * 
+     * @since 1.1
+     */
+    public static final String DEFAULT_PACKAGE_PROPERTY = "defaultPackage";
+
+    /**
+     * Defines the name of the property for default DB schema.
+     * 
+     * @since 1.1
+     */
+    public static final String DEFAULT_SUPERCLASS_PROPERTY = "defaultSuperclass";
+    
+    /**
+     * Defines the name of the property for default DB schema.
+     * 
+     * @since 1.1
+     */
+    public static final String DEFAULT_LOCK_TYPE_PROPERTY = "defaultLockType";
+    
+    /**
+     * Defines the default value of DEFAULT_LOCK_TYPE_PROPERTY.
+     * 
+     * @since 1.1
+     */
+    public static final int DEFAULT_LOCK_TYPE_VALUE = ObjEntity.LOCK_TYPE_NONE;
+    
+    
     protected String name;
     protected String location;
     protected MappingNamespace namespace;
+    
+    protected String defaultSchema;
+    protected String defaultPackage;
+    protected String defaultSuperclass;
+    protected int defaultLockType;
+    
 
     // ====================================================
     // DataMaps that provide dependencies for this DataMap
@@ -150,22 +191,51 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         Collections.unmodifiableCollection(queryMap.values());
 
     /** 
-     * Creates an new DataMap. 
+     * Creates a new DataMap. 
      */
     public DataMap() {
+        // must do this to setup defaults
+        initWithProperties(Collections.EMPTY_MAP);
     }
 
     /**
-     * Creates an empty DataMap and assigns it a <code>name</code>.
+     * Creates a new named DataMap.
      */
     public DataMap(String mapName) {
+        this();
         this.setName(mapName);
+    }
+    
+    /**
+     * Performs DataMap initialization from a set of properties, using defaults for the
+     * missing properties.
+     * 
+     * @since 1.1
+     */
+    public void initWithProperties(Map properties) {
+        // must init defaults even if properties are empty
+        if (properties == null) {
+            properties = Collections.EMPTY_MAP;
+        }
+
+        Object lockType = properties.get(DEFAULT_LOCK_TYPE_PROPERTY);
+        Object packageName = properties.get(DEFAULT_PACKAGE_PROPERTY);
+        Object schema = properties.get(DEFAULT_SCHEMA_PROPERTY);
+        Object superclass = properties.get(DEFAULT_SUPERCLASS_PROPERTY);
+
+        this.defaultLockType = (lockType != null)
+                ? Integer.parseInt(lockType.toString())
+                : DEFAULT_LOCK_TYPE_VALUE;
+
+        this.defaultPackage = (packageName != null) ? packageName.toString() : null;
+        this.defaultSchema = (schema != null) ? schema.toString() : null;
+        this.defaultSuperclass = (superclass != null) ? superclass.toString() : null;
     }
 
     /**
      * Prints itself as a well-formed complete XML document. In comparison,
-     * {@link #encodeAsXML(XMLEncoder)} stores DataMap assuming it is 
-     * a part of a bigger document.
+     * {@link #encodeAsXML(XMLEncoder)}stores DataMap assuming it is a part of a bigger
+     * document.
      * 
      * @since 1.1
      */
@@ -186,6 +256,25 @@ public class DataMap implements XMLSerializable, MappingNamespace {
         encoder.println("\">");
 
         encoder.indent(1);
+        
+        // properties
+        if (defaultLockType != DEFAULT_LOCK_TYPE_VALUE) {
+            encoder.printProperty(
+                DEFAULT_LOCK_TYPE_PROPERTY,
+                defaultLockType);
+        }
+        
+        if (!Util.isEmptyString(defaultPackage)) {
+            encoder.printProperty(DEFAULT_PACKAGE_PROPERTY, defaultPackage);
+        }
+        
+        if (!Util.isEmptyString(defaultSchema)) {
+            encoder.printProperty(DEFAULT_SCHEMA_PROPERTY, defaultSchema);
+        }
+        
+        if (!Util.isEmptyString(defaultSuperclass)) {
+            encoder.printProperty(DEFAULT_SUPERCLASS_PROPERTY, defaultSuperclass);
+        }
 
         // procedures
         encoder.print(getProcedureMap());
@@ -277,7 +366,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
             throw new IllegalArgumentException(buf.toString());
         }
         dependencies.add(map);
-        logObj.debug("added dependency: '" + map.getName() + "'");
     }
 
     /**
@@ -285,7 +373,6 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      */
     public void removeDependency(DataMap map) {
         dependencies.remove(map);
-        logObj.debug("removed dependency: '" + map.getName() + "'");
     }
 
     /**
@@ -895,5 +982,61 @@ public class DataMap implements XMLSerializable, MappingNamespace {
      */
     public void setNamespace(MappingNamespace namespace) {
         this.namespace = namespace;
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public int getDefaultLockType() {
+        return defaultLockType;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setDefaultLockType(int defaultLockType) {
+        this.defaultLockType = defaultLockType;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public String getDefaultPackage() {
+        return defaultPackage;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setDefaultPackage(String defaultPackage) {
+        this.defaultPackage = defaultPackage;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public String getDefaultSchema() {
+        return defaultSchema;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setDefaultSchema(String defaultSchema) {
+        this.defaultSchema = defaultSchema;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public String getDefaultSuperclass() {
+        return defaultSuperclass;
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void setDefaultSuperclass(String defaultSuperclass) {
+        this.defaultSuperclass = defaultSuperclass;
     }
 }

@@ -16,9 +16,18 @@ may reference objects from other DataMaps.
 -->
 
 <!-- ===================================================
+A generic property used by other configuration objects.
+-->
+<!ELEMENT property>
+<!ATTLIST property
+	name CDATA #REQUIRED
+	value CDATA #REQUIRED
+>
+
+<!-- ===================================================
 Root element.
 -->
-<!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*, procedure*, query*)>
+<!ELEMENT data-map (property*, db-entity*, obj-entity*, db-relationship*, obj-relationship*, procedure*, query*)>
 <!ATTLIST data-map
 	project-version CDATA #REQUIRED
 >
@@ -145,16 +154,6 @@ level, or linked to an entity or procedure.
         root-name CDATA #IMPLIED
         result-class CDATA #IMPLIED
         selecting (true | false) "true"
->
-
-<!-- ===================================================
-Defines a property of an object. For example this can be
-a query pageSize or fetchLimit.
--->
-<!ELEMENT property>
-<!ATTLIST property
-	name CDATA #REQUIRED
-	value CDATA #REQUIRED
 >
 
 <!-- ===================================================
