@@ -154,6 +154,9 @@
             <fileset dir="src/${build}/classes"/>
             <fileset dir="src/${build}/templates"/>
             <metainf dir="doc" includes="LICENSE"/>
+            <manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+            </manifest>
         </jar>
     </target>
   
@@ -172,6 +175,10 @@
             <fileset dir="src/${build}/unjar"/>
             <metainf dir="doc" includes="LICENSE"/>
             <metainf dir="otherlib" includes="LICENSE.txt.velocity"/>
+            
+            <manifest>
+               <attribute name="Built-By" value="${user.name}"/>
+            </manifest>
         </jar>
     </target>
 
