@@ -70,7 +70,7 @@ public class DataSourceInfoTst extends CayenneTestCase {
         dsi.setMaxConnections(2);
         dsi.setJdbcDriver("b");
         dsi.setDataSourceUrl("c");
-        dsi.setAdapterClass("d");
+        dsi.setAdapterClassName("d");
     }
 
     public void testDefaultValues() throws java.lang.Exception {

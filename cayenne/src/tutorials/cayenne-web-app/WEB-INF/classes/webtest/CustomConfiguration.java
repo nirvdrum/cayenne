@@ -1,6 +1,7 @@
 package webtest;
 
 import org.apache.log4j.Level;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.ServletConfiguration;
 
 /** 
@@ -15,8 +16,8 @@ public class CustomConfiguration extends ServletConfiguration {
         this.configureLogging();
     }
 
-    private void configureLogging() {
+    protected void configureLogging() {
         // debug configuration
-        setLoggingLevel(Level.WARN);
+        Configuration.setLoggingLevel(Level.WARN);
     }
 }

@@ -134,7 +134,7 @@ public class ProjectConfigurator {
      */
     protected void reconfigureProject(File projectDir)
         throws ProjectException {
-        File projectFile = new File(projectDir, Configuration.DOMAIN_FILE);
+        File projectFile = new File(projectDir, Configuration.DEFAULT_DOMAIN_FILE);
 
         // process alternative project file
         if (info.getAltProjectFile() != null) {

@@ -236,10 +236,10 @@ public class Editor
         if (args.length == 1) {
             File f = new File(args[0]);
             if (f.isDirectory()) {
-                f = new File(f, Configuration.DOMAIN_FILE);
+                f = new File(f, Configuration.DEFAULT_DOMAIN_FILE);
             }
 
-            if (f.isFile() && Configuration.DOMAIN_FILE.equals(f.getName())) {
+            if (f.isFile() && Configuration.DEFAULT_DOMAIN_FILE.equals(f.getName())) {
                 OpenProjectAction openAction =
                     (OpenProjectAction) frame.getAction(
                         OpenProjectAction.ACTION_NAME);

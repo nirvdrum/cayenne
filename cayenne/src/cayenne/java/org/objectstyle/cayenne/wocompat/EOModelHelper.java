@@ -84,9 +84,9 @@ public class EOModelHelper {
     static {
         // configure locator 
         locator.setSkipClasspath(false);
-        locator.setSkipCurDir(false);
-        locator.setSkipHomeDir(true);
-        locator.setSkipAbsPath(false);
+        locator.setSkipCurrentDirectory(false);
+        locator.setSkipHomeDirectory(true);
+        locator.setSkipAbsolutePath(false);
     }
 
     /** 

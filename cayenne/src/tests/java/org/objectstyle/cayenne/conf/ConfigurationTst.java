@@ -60,6 +60,7 @@ import java.io.InputStream;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.project.ProjectDataSourceFactory;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 public class ConfigurationTst extends CayenneTestCase {
 
@@ -86,13 +87,18 @@ public class ConfigurationTst extends CayenneTestCase {
 
     /** Concrete Configuration subclass used for tests. */
     public static class Config extends Configuration {
-        public InputStream getDomainConfig() {
+
+		public ResourceLocator getResourceLocator() {
+			return null;
+		}
+
+        public InputStream getDomainConfiguration() {
             return null;
         }
 
         /** Returns DataMap configuration from a specified location or null if it
           * can not be found. */
-        public InputStream getMapConfig(String location) {
+        public InputStream getMapConfiguration(String location) {
             return null;
         }
     }

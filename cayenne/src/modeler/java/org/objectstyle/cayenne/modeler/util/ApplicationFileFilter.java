@@ -77,13 +77,13 @@ public class ApplicationFileFilter extends FileFilter {
      * Accepts all directories and all cayenne.xml files.
      */
     public boolean accept(File f) {
-        return f.isDirectory() || Configuration.DOMAIN_FILE.equals(f.getName());
+        return f.isDirectory() || Configuration.DEFAULT_DOMAIN_FILE.equals(f.getName());
     }
 
     /**
      *  Returns description of this filter.
      */
     public String getDescription() {
-        return "Cayenne Applications (" + Configuration.DOMAIN_FILE + ")";
+        return "Cayenne Applications (" + Configuration.DEFAULT_DOMAIN_FILE + ")";
     }
 }

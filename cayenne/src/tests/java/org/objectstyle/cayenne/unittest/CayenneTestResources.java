@@ -228,8 +228,8 @@ public class CayenneTestResources {
             // adapter/node
             Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
-            if (sharedConnInfo.getAdapterClass() != null) {
-                adapterClass = Class.forName(sharedConnInfo.getAdapterClass());
+            if (sharedConnInfo.getAdapterClassName() != null) {
+                adapterClass = Class.forName(sharedConnInfo.getAdapterClassName());
             }
 
             DbAdapter adapter = (DbAdapter) adapterClass.newInstance();

@@ -182,9 +182,9 @@ public class QueryLogger {
             if (dsi != null) {
                 buf.append("\nDriver class: ").append(dsi.getJdbcDriver());
 
-                if (dsi.getAdapterClass() != null) {
+                if (dsi.getAdapterClassName() != null) {
                     buf.append("\nCayenne DbAdapter: ").append(
-                        dsi.getAdapterClass());
+                        dsi.getAdapterClassName());
                 }
 
                 if (dsi.getMinConnections() >= 0) {

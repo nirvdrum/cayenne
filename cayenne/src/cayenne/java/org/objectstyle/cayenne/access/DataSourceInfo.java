@@ -73,7 +73,7 @@ public class DataSourceInfo implements Cloneable, Serializable {
 	protected String password;
 	protected String jdbcDriver;
 	protected String dataSourceUrl;
-	protected String adapterClass;
+	protected String adapterClassName;
 	protected int minConnections = 1;
 	protected int maxConnections = 1;
 
@@ -100,7 +100,7 @@ public class DataSourceInfo implements Cloneable, Serializable {
 		if (!Util.nullSafeEquals(this.dataSourceUrl, dsi.dataSourceUrl))
 			return false;
 
-		if (!Util.nullSafeEquals(this.adapterClass, dsi.adapterClass))
+		if (!Util.nullSafeEquals(this.adapterClassName, dsi.adapterClassName))
 			return false;
 
 		if (this.minConnections != dsi.minConnections)
@@ -139,7 +139,7 @@ public class DataSourceInfo implements Cloneable, Serializable {
 			.append("\n   driver: ")
 			.append(jdbcDriver)
 			.append("\n   db adapter class: ")
-			.append(adapterClass)
+			.append(adapterClassName)
 			.append("\n   url: ")
 			.append(dataSourceUrl)
 			.append("\n   min. connections: ")
@@ -151,12 +151,12 @@ public class DataSourceInfo implements Cloneable, Serializable {
 		return buf.toString();
 	}
 
-	public String getAdapterClass() {
-		return adapterClass;
+	public String getAdapterClassName() {
+		return adapterClassName;
 	}
 
-	public void setAdapterClass(String adapterClass) {
-		this.adapterClass = adapterClass;
+	public void setAdapterClassName(String adapterClassName) {
+		this.adapterClassName = adapterClassName;
 	}
 
 	public void setMinConnections(int minConnections) {

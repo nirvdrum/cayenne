@@ -201,7 +201,7 @@ public class ConnectionProperties {
     protected DataSourceInfo buildDataSourceInfo(ExtendedProperties props) {
         DataSourceInfo dsi = new DataSourceInfo();
 
-        dsi.setAdapterClass(props.getString(ADAPTER_KEY));
+        dsi.setAdapterClassName(props.getString(ADAPTER_KEY));
         dsi.setUserName(props.getString(USER_NAME_KEY));
         dsi.setPassword(props.getString(PASSWORD_KEY));
         dsi.setDataSourceUrl(props.getString(URL_KEY));

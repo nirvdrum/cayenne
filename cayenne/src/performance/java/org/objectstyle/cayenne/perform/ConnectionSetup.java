@@ -94,10 +94,12 @@ public class ConnectionSetup  {
         DefaultConfiguration conf = new DefaultConfiguration();
 		conf.setOverrideFactory(factory);
         ConfigLoader loader = new ConfigLoader(conf.getLoaderDelegate());
-        InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DOMAIN_FILE);
-        if(in == null)
-            throw new RuntimeException("Can't find '" + Configuration.DOMAIN_FILE + "'.");
-
+        InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DEFAULT_DOMAIN_FILE);
+        if(in == null) {
+            throw new RuntimeException("Can't find '"
+            							+ Configuration.DEFAULT_DOMAIN_FILE
+            							+ "'.");
+		}
         
         if(!loader.loadDomains(in)) {
             throw new RuntimeException("Error loading configuration.");
@@ -105,7 +107,8 @@ public class ConnectionSetup  {
 
         DataSourceInfo dsi = factory.getDriverInfo();            
         DataDomain dom = conf.getDomain();
-        dsi.setAdapterClass(((DataNode)(dom.getDataNodes().iterator().next())).getAdapter().getClass().getName());
+        dsi.setAdapterClassName(((DataNode)(dom.getDataNodes().iterator().next()))
+        						.getAdapter().getClass().getName());
         return dsi;
     }
 

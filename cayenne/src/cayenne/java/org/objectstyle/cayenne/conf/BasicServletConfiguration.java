@@ -59,6 +59,8 @@ import java.io.InputStream;
 
 import javax.servlet.ServletContext;
 
+import org.objectstyle.cayenne.util.ResourceLocator;
+
 /**
   * BasicServletConfiguration is a Configuration that uses ServletContext 
   * to locate resources. 
@@ -79,7 +81,7 @@ public class BasicServletConfiguration extends Configuration {
 
     public static BasicServletConfiguration initConfig(ServletContext ctxt) {
         BasicServletConfiguration conf = new BasicServletConfiguration(ctxt);
-        Configuration.initSharedConfig(conf);
+        Configuration.initSharedConfiguration(conf);
         return conf;
     }
 
@@ -102,16 +104,26 @@ public class BasicServletConfiguration extends Configuration {
         return servletContext;
     }
 
-    /** Locates domain configuration file in a web application
-      * looking for "cayenne.xml" in application "WEB-INF" directory. */
-    public InputStream getDomainConfig() {
-        return servletContext.getResourceAsStream("/WEB-INF/" + DOMAIN_FILE);
-    }
+	/**
+	 * @see org.objectstyle.cayenne.conf.Configuration#getResourceLocator()
+	 */
+	public ResourceLocator getResourceLocator()
+	{
+		// @HH: create a suitable ResourceLoader here
+		return null;
+	}
 
-    /** Locates data map configuration file via ServletContext
-      * associated with this Configuration treating 
-      * <code>location</code> as relative to application "WEB-INF" directory.. */
-    public InputStream getMapConfig(String location) {
-        return servletContext.getResourceAsStream("/WEB-INF/" + location);
-    }
+	/** Locates domain configuration file in a web application
+	  * looking for "cayenne.xml" in application "WEB-INF" directory. */
+	public InputStream getDomainConfiguration() {
+		return servletContext.getResourceAsStream("/WEB-INF/" + DEFAULT_DOMAIN_FILE);
+	}
+
+	/** Locates data map configuration file via ServletContext
+	  * associated with this Configuration treating 
+	  * <code>location</code> as relative to application "WEB-INF" directory.. */
+	public InputStream getMapConfiguration(String location) {
+		return servletContext.getResourceAsStream("/WEB-INF/" + location);
+	}
+
 }

@@ -168,7 +168,7 @@ public class ImportDbAction extends CayenneAction {
         // load adapter
         try {
             return (DbAdapter) Class
-                .forName(dsi.getAdapterClass())
+                .forName(dsi.getAdapterClassName())
                 .newInstance();
         } catch (Exception e) {
             e.printStackTrace();

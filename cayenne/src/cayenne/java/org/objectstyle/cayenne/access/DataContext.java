@@ -150,7 +150,7 @@ public class DataContext implements QueryEngine, Serializable {
      * must be used.
      */
     public static DataContext createDataContext() {
-        return Configuration.getSharedConfig().getDomain().createDataContext();
+        return Configuration.getSharedConfiguration().getDomain().createDataContext();
     }
 
     /**
@@ -160,8 +160,7 @@ public class DataContext implements QueryEngine, Serializable {
      * an exception is thrown.
      */
     public static DataContext createDataContext(String domainName) {
-        DataDomain domain =
-            Configuration.getSharedConfig().getDomain(domainName);
+        DataDomain domain = Configuration.getSharedConfiguration().getDomain(domainName);
         if (domain == null) {
             throw new IllegalArgumentException(
                 "Non-existent domain: " + domainName);
@@ -192,9 +191,8 @@ public class DataContext implements QueryEngine, Serializable {
     /** Returns parent QueryEngine object. */
     public QueryEngine getParent() {
         if (parent == null && lazyInitParentDomainName != null) {
-            this.parent =
-                Configuration.getSharedConfig().getDomain(
-                    lazyInitParentDomainName);
+            this.parent = Configuration.getSharedConfiguration()
+            				.getDomain(lazyInitParentDomainName);
         }
         return parent;
     }

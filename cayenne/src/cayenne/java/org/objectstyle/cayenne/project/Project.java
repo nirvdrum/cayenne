@@ -94,7 +94,7 @@ public abstract class Project {
     public static Project createProject(File projectFile) {
         String fileName = projectFile.getName();
 
-        if (Configuration.DOMAIN_FILE.equals(fileName)) {
+        if (Configuration.DEFAULT_DOMAIN_FILE.equals(fileName)) {
             return new ApplicationProject(projectFile);
         } else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
             return new DataMapProject(projectFile);

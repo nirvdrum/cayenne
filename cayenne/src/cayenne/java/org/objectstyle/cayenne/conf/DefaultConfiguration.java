@@ -60,8 +60,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Subclass of Configuration that uses System CLASSPATH to locate resources.
@@ -82,12 +83,16 @@ public class DefaultConfiguration extends Configuration {
 
 	public DefaultConfiguration() {
 		// configure CLASSPATH-only locator
-		ResourceLocator.setLoggingLevel(Configuration.getLoggingLevel());
 		locator = new ResourceLocator();
-		locator.setSkipAbsPath(true);
+		locator.setSkipAbsolutePath(true);
 		locator.setSkipClasspath(false);
-		locator.setSkipCurDir(true);
-		locator.setSkipHomeDir(true);
+		locator.setSkipCurrentDirectory(true);
+		locator.setSkipHomeDirectory(true);
+
+		// add the current Configuration subclass' package as additional path.
+		if (!(this.getClass().equals(DefaultConfiguration.class))) {
+			locator.addClassPath(Util.getPackagePath(this.getClass().getName()));
+		}
 
 		// Configuration superclass statically defines what 
 		// ClassLoader to use for resources. This
@@ -103,24 +108,7 @@ public class DefaultConfiguration extends Configuration {
 	public DefaultConfiguration(File projectFile) {
 		this();
 		this.projectFile = projectFile;
-	}
-
-	/** Returns domain configuration as a stream or null if it
-	  * can not be found. This method will look for "cayenne.xml"
-	  * file in locations accessible to ClassLoader (in Java CLASSPATH).
-	  * This can be a standalone file or an entry in a JAR file. */
-	public InputStream getDomainConfig() {
-		try {
-			File pfile = this.projectFile();
-			if (pfile != null) {
-				return new FileInputStream(pfile);
-			}
-		} catch (Throwable ex) {
-            logObj.warn("Error opening project file.", ex);
-            throw new ConfigException("Error opening project file.", ex);
-		}
-
-		return locator.findResourceStream(DOMAIN_FILE);
+		this.locator.addFilesystemPath(this.projectDir().getPath());
 	}
 
 	public ResourceLocator getResourceLocator() {
@@ -133,14 +121,39 @@ public class DefaultConfiguration extends Configuration {
 
 	public File projectDir() {
 		File pfile = this.projectFile();
-		return (pfile != null) ? pfile.getParentFile() : null;
+		if (pfile != null) {
+			return pfile.getParentFile();
+		}
+		else {
+			return null;
+		}
+	}
+
+	/** Returns domain configuration as a stream or null if it
+	  * can not be found. This method will look for "cayenne.xml"
+	  * file in locations accessible to ClassLoader (in Java CLASSPATH).
+	  * This can be a standalone file or an entry in a JAR file. */
+	public InputStream getDomainConfiguration() {
+		File pfile = this.projectFile();
+		if (pfile != null) {
+			try {
+				return new FileInputStream(pfile);
+			}
+			catch (Throwable ex) {
+	            logObj.warn("Error opening project file.", ex);
+	            throw new ConfigurationException("Error opening project file.", ex);
+			}
+		}
+		else {
+			return locator.findResourceStream(DEFAULT_DOMAIN_FILE);
+		}
 	}
 
 	/** Returns DataMap configuration from a specified location or null if it
 	  * can not be found. This method will look for resource identified by
 	  * <code>location</code> in places accessible to ClassLoader (in Java CLASSPATH).
 	  * This can be a standalone file or an entry in a JAR file. */
-	public InputStream getMapConfig(String location) {
+	public InputStream getMapConfiguration(String location) {
 		try {
 			File dir = this.projectDir();
 			if (dir != null) {
@@ -148,9 +161,9 @@ public class DefaultConfiguration extends Configuration {
 			}
 		} catch (Throwable ex) {
             logObj.warn("Error opening map file.", ex);
-            throw new ConfigException("Error opening map file.", ex);
+            throw new ConfigurationException("Error opening map file.", ex);
 		}
-		
+
 		return locator.findResourceStream(location);
 	}
 

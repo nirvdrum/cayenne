@@ -59,6 +59,7 @@ import java.io.InputStream;
 
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
  * @author Andrei Adamchik
@@ -104,11 +105,15 @@ public class DataContextStaticsTst extends CayenneTestCase {
             Configuration.sharedConfig = savedConfig;
         }
 
-        public InputStream getDomainConfig() {
+		public ResourceLocator getResourceLocator() {
+			return null;
+		}
+
+        public InputStream getDomainConfiguration() {
             return null;
         }
 
-        public InputStream getMapConfig(String location) {
+        public InputStream getMapConfiguration(String location) {
             return null;
         }
     }

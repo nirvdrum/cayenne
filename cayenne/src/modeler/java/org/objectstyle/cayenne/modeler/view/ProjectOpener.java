@@ -96,7 +96,7 @@ public class ProjectOpener extends JFileChooser {
         	// configure for application project
             return newProjectDir(
                 f,
-                Configuration.DOMAIN_FILE,
+                Configuration.DEFAULT_DOMAIN_FILE,
                 ApplicationFileFilter.getInstance());
         } else if (p instanceof DataMapProject) {
         	// configure for DataMap project

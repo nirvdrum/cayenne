@@ -64,7 +64,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 
@@ -86,7 +86,7 @@ public class ProjectDataSourceFactory extends DriverDataSourceFactory {
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         try {
             load(location);
-        } catch (ConfigException e) {
+        } catch (ConfigurationException e) {
             logObj.info("No data source at '" + location + "', ignoring.");
         }
         return new ProjectDataSource(getDriverInfo());

@@ -87,7 +87,7 @@ public class ConnectionPropertiesTst extends TestCase {
 
         DataSourceInfo dsi = ps.buildDataSourceInfo(props);   
         
-        assertEquals("1", dsi.getAdapterClass());     
+        assertEquals("1", dsi.getAdapterClassName());     
         assertEquals("2", dsi.getJdbcDriver());     
         assertEquals("3", dsi.getPassword());     
         assertEquals("4", dsi.getDataSourceUrl());     

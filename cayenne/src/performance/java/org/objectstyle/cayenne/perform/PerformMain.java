@@ -203,8 +203,8 @@ public class PerformMain {
             // node
             Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
-            if (dsi.getAdapterClass() != null) {
-                adapterClass = Class.forName(dsi.getAdapterClass());
+            if (dsi.getAdapterClassName() != null) {
+                adapterClass = Class.forName(dsi.getAdapterClassName());
             }
  
             DbAdapter adapter = (DbAdapter) adapterClass.newInstance();

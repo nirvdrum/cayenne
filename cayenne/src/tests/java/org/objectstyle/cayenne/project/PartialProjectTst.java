@@ -78,7 +78,7 @@ public class PartialProjectTst extends CayenneTestCase {
                     throw new Exception("Can't create " + tmpDir);
                 }
 
-                testProjectFile = new File(tmpDir, Configuration.DOMAIN_FILE);
+                testProjectFile = new File(tmpDir, Configuration.DEFAULT_DOMAIN_FILE);
                 break;
             }
         }

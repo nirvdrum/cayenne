@@ -61,52 +61,88 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /** 
   * Utility class to find resources. (Resources are usually files).
-  * Lookup is done using preconfigured strategy.
+  * Lookup is done using a preconfigured strategy.
   * 
   * @author Andrei Adamchik
   */
 public class ResourceLocator {
-	private static Logger logObj = Logger.getLogger(ResourceLocator.class);
+	private static Logger logObj;
 
-	protected boolean skipHomeDir;
-	protected boolean skipCurDir;
+	static {
+		Predicate p = new Predicate() {
+			public boolean evaluate(Object o) {
+				return Configuration.isLoggingConfigured();
+			}
+		};
+
+		logObj = new PredicateLogger(ResourceLocator.class, p);
+	}
+
+	protected boolean skipHomeDirectory;
+	protected boolean skipCurrentDirectory;
 	protected boolean skipClasspath;
-	protected boolean skipAbsPath;
+	protected boolean skipAbsolutePath;
+	protected List additionalClassPaths;
+	protected List additionalFilesystemPaths;
 	protected ClassLoader classLoader;
-	protected static Level logLevel = Level.DEBUG;
 
-	/** Returns a resource as InputStream if it is found in CLASSPATH. 
-	  * Returns null otherwise. Lookup is normally performed in all JAR and
-	  * ZIP files and directories available to CLassLoader. */
+	/**
+	 * Returns a resource as InputStream if it is found in CLASSPATH. 
+	 * Returns null otherwise. Lookup is normally performed in all JAR and
+	 * ZIP files and directories available to CLassLoader.
+	 */
 	public static InputStream findResourceInClasspath(String name) {
 		try {
 			URL url = findURLInClasspath(name);
-			return (url != null) ? url.openStream() : null;
+			if (url != null) {
+				logObj.debug("resource found in classpath: " + url);
+				return url.openStream();
+			}
+			else {
+				logObj.debug("resource not found in classpath: " + name);
+				return null;
+			}
 		} catch (IOException ioex) {
 			return null;
 		}
 	}
 
-	/** Returns a resource as InputStream if it is found in the filesystem. 
-	  * Returns null otherwise. Lookup is first performed relative to the user 
-	  * home directory (as defined by "user.home" system property), and then
-	  * relative to the current directory. */
+	/**
+	 * Returns a resource as InputStream if it is found in the filesystem.
+ 	 * Returns null otherwise. Lookup is first performed relative to the user 
+ 	 * home directory (as defined by "user.home" system property), and then
+ 	 * relative to the current directory.
+ 	 */
 	public static InputStream findResourceInFileSystem(String name) {
 		try {
-			File f = findFileInFileSystem(name);
-			return (f != null) ? new FileInputStream(f) : null;
+			File file = findFileInFileSystem(name);
+			if (file != null) {
+				logObj.debug("resource found in file system: " + file);
+				return new FileInputStream(file);
+			}
+			else {
+				logObj.debug("resource not found in file system: " + name);
+				return null;
+			}
 		} catch (IOException ioex) {
 			return null;
 		}
 	}
 
-	/** Looks up a file in the filesystem. 
+	/**
+	 *  Looks up a file in the filesystem. 
 	 *  First looks in the user home directory, then in the current directory.
 	 *  
 	 *  @return file object matching the name, or null if file can not be found
@@ -116,44 +152,89 @@ public class ResourceLocator {
 	 *  @see #findFileInCurDir(String)
 	 */
 	public static File findFileInFileSystem(String name) {
-		File f = findFileInHomeDir(name);
-		return (f != null) ? f : findFileInCurDir(name);
+		File file = findFileInHomeDir(name);
+
+		if (file == null) {
+			file = findFileInCurrentDirectory(name);
+		}
+
+		if (file != null) {
+			logObj.debug("file found in file system: " + file);
+		}
+		else {
+			logObj.debug("file not found in file system: " + name);
+		}
+
+		return file;
 	}
 
-	/** Looks up a file in the user home directory.
+	/**
+	 * Looks up a file in the user home directory.
 	 *  
 	 *  @return file object matching the name, or null if file can not be found
 	 *  or if it is not readable.
 	 */
 	public static File findFileInHomeDir(String name) {
 		// look in home directory
-		String homeDirPath =
-			System.getProperty("user.home") + File.separator + name;
+		String homeDirPath = System.getProperty("user.home") + File.separator + name;
 		File file = new File(homeDirPath);
-		return file.exists() && file.canRead() ? file : null;
+		if (!(file.exists() && file.canRead())) {
+			file = null;
+		}
+
+		if (file != null) {
+			logObj.debug("file found in home directory: " + file);
+		}
+		else {
+			logObj.debug("file not found in home directory: " + name);
+		}
+
+		return file;
 	}
 
-	/** Looks up a file in the current directory.
+	/**
+	 * Looks up a file in the current directory.
 	 *  
 	 *  @return file object matching the name, or null if file can not be found
 	 *  or if it is not readable.
 	 */
-	public static File findFileInCurDir(String name) {
+	public static File findFileInCurrentDirectory(String name) {
 		// look in current directory
 		File file = new File('.' + File.separator + name);
-		return file.exists() && file.canRead() ? file : null;
+
+		if (file.exists() && file.canRead()) {
+			logObj.debug("file found in current directory: " + file);
+		}
+		else {
+			logObj.debug("file not found in current directory: " + name);
+			file = null;
+		} 
+
+		return file;
 	}
 
-	/** Looks up for resource using this class ClassLoader. */
+	/**
+	 * Looks up for resource using this class ClassLoader.
+	 */
 	public static URL findURLInClasspath(String name) {
-		return findURLInClassLoader(
-			name,
-			ResourceLocator.class.getClassLoader());
+		URL url = findURLInClassLoader(name, ResourceLocator.class.getClassLoader());
+		return url;
 	}
 
-	/** Looks up for resource using specified ClassLoader . */
+	/**
+	 * Looks up for resource using the specified ClassLoader.
+	 */
 	public static URL findURLInClassLoader(String name, ClassLoader loader) {
-		return loader.getResource(name);
+		URL url = loader.getResource(name);
+		
+		if (url != null) {
+			logObj.debug("URL found with classloader: " + url);
+		}
+		else {
+			logObj.debug("URL not found with classloader: " + name);
+		}
+
+		return url;
 	}
 
 	/** 
@@ -168,19 +249,23 @@ public class ResourceLocator {
 		}
 
 		String urlString = selfUrl.toExternalForm();
-		return urlString.substring(
-			0,
-			urlString.length() - pathToClass.length());
+		return urlString.substring( 0, urlString.length() - pathToClass.length());
 	}
 
-	/** Creates new ResourceLocator with default lookup policy including
-	 *  user home directory, current directory and CLASSPATH. */
+	/**
+	 * Creates new ResourceLocator with default lookup policy including
+	 * user home directory, current directory and CLASSPATH.
+	 */
 	public ResourceLocator() {
-		setClassLoader(this.getClass().getClassLoader());
+		this.setClassLoader(this.getClass().getClassLoader());
+		this.additionalClassPaths = new ArrayList();
+		this.additionalFilesystemPaths = new ArrayList();
 	}
 
-	/** Returns resource URL using lookup strategy configured for this object or
-	 *  null if no readable resource can be found for name. */
+	/**
+	 * Returns resource URL using lookup strategy configured for this object or
+	 * null if no readable resource can be found for name.
+	 */
 	public InputStream findResourceStream(String name) {
 		URL url = findResource(name);		
 		if (url == null) {
@@ -190,7 +275,7 @@ public class ResourceLocator {
 		try {
 			return url.openStream();
 		} catch (IOException ioex) {
-			logObj.log(logLevel, "Error reading URL, ignoring", ioex);
+			logObj.debug("Error reading URL, ignoring", ioex);
 			return null;
 		}
 	}
@@ -201,19 +286,19 @@ public class ResourceLocator {
 	 * can be found for name. 
 	 */
 	public URL findResource(String name) {
-		if (!isSkipAbsPath()) {
+		if (!willSkipAbsolutePath()) {
 			File f = new File(name);
 			if (f.isAbsolute() && f.exists()) {
 				try {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
-					logObj.log(logLevel, "Malformed url, ignoring.", ex);
+					logObj.debug("Malformed url, ignoring.", ex);
 				}
 			}
 		}
 
-		if (!isSkipHomeDir()) {
+		if (!willSkipHomeDirectory()) {
 			File f = findFileInHomeDir(name);
 			if (f != null) {
 
@@ -221,35 +306,52 @@ public class ResourceLocator {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
-					logObj.log(logLevel, "Malformed url, ignoring", ex);
+					logObj.debug("Malformed url, ignoring", ex);
 				}
 			}
 		}
 
-		if (!isSkipCurDir()) {
-			File f = findFileInCurDir(name);
+		if (!willSkipCurrentDirectory()) {
+			File f = findFileInCurrentDirectory(name);
 			if (f != null) {
 
 				try {
 					return f.toURL();
 				} catch (MalformedURLException ex) {
 					// ignoring
-					logObj.log(logLevel, "Malformed url, ignoring", ex);
+					logObj.debug("Malformed url, ignoring", ex);
 				}
 			}
 		}
 
-		if (!isSkipClasspath()) {
-			return findURLInClassLoader(name, classLoader);
+		if (!willSkipClasspath()) {
+			URL url = findURLInClassLoader(name, classLoader);
+			if (url != null) {
+				return url;
+			}
+
+			if (this.additionalClassPaths.size() > 0) {
+				logObj.debug("searching additional classpaths: " + this.additionalClassPaths);
+				Iterator cpi = this.additionalClassPaths.iterator();
+				while (cpi.hasNext()) {
+					String fullName = cpi.next() + "/" + name;
+					url = findURLInClassLoader(fullName, classLoader);
+					if (url != null) {
+						return url;
+					}
+				}
+			}
 		}
 
 		return null;
 	}
 
-	/** Returns resource URL using lookup strategy configured for this object or
-	 *  null if no readable resource can be found for name. Resource returned is
-	 *  assumed to be a directory, so URL returned will be in a directory format 
-	 *  (with "/" at the end. */
+	/**
+	 * Returns resource URL using lookup strategy configured for this object or
+	 * null if no readable resource can be found for name. Resource returned is
+	 * assumed to be a directory, so URL returned will be in a directory format 
+	 * (with "/" at the end.
+	 */
 	public URL findDirectoryResource(String name) {
 		URL url = findResource(name);
 		if (url == null) {
@@ -271,35 +373,35 @@ public class ResourceLocator {
 	/**
 	 * Returns true if no lookups are performed in the user home directory.
 	 */
-	public boolean isSkipHomeDir() {
-		return skipHomeDir;
+	public boolean willSkipHomeDirectory() {
+		return skipHomeDirectory;
 	}
 
 	/**
 	 * Sets "skipHomeDir" property.
 	 */
-	public void setSkipHomeDir(boolean skipHomeDir) {
-		this.skipHomeDir = skipHomeDir;
+	public void setSkipHomeDirectory(boolean skipHomeDir) {
+		this.skipHomeDirectory = skipHomeDir;
 	}
 
 	/**
 	 * Returns true if no lookups are performed in the current directory.
 	 */
-	public boolean isSkipCurDir() {
-		return skipCurDir;
+	public boolean willSkipCurrentDirectory() {
+		return skipCurrentDirectory;
 	}
 
 	/**
 	 * Sets "skipCurDir" property.
 	 */
-	public void setSkipCurDir(boolean skipCurDir) {
-		this.skipCurDir = skipCurDir;
+	public void setSkipCurrentDirectory(boolean skipCurDir) {
+		this.skipCurrentDirectory = skipCurDir;
 	}
 
 	/**
 	 * Returns true if no lookups are performed in the classpath.
 	 */
-	public boolean isSkipClasspath() {
+	public boolean willSkipClasspath() {
 		return skipClasspath;
 	}
 
@@ -322,40 +424,134 @@ public class ResourceLocator {
 	 * is passed, ClassLoader of ResourceLocator class will be used.
 	 */
 	public void setClassLoader(ClassLoader classLoader) {
-		this.classLoader =
-			(classLoader != null)
-				? classLoader
-				: this.getClass().getClassLoader();
+		if (classLoader != null) {
+			this.classLoader = classLoader;
+		}
+		else {
+			this.classLoader = this.getClass().getClassLoader();
+		}
 	}
 
 	/**
 	 * Returns true if no lookups are performed using path as absolute path.
 	 */
-	public boolean isSkipAbsPath() {
-		return skipAbsPath;
+	public boolean willSkipAbsolutePath() {
+		return skipAbsolutePath;
 	}
 
 	/**
 	 * Sets "skipAbsPath" property.
 	 */
-	public void setSkipAbsPath(boolean skipAbsPath) {
-		this.skipAbsPath = skipAbsPath;
+	public void setSkipAbsolutePath(boolean skipAbsPath) {
+		this.skipAbsolutePath = skipAbsPath;
 	}
 
 	/**
-	 * Returns the logLevel.
-	 * @return Level
+	 * Adds a custom path for class path lookups.
 	 */
-	public static Level getLoggingLevel() {
-		return logLevel;
+	public void addClassPath(String customPath) {
+		this.additionalClassPaths.add(customPath);
+	}
+
+	/**
+	 * Adds a custom path for filesystem lookups.
+	 */
+	public void addFilesystemPath(String customPath) {
+		this.additionalFilesystemPaths.add(customPath);
 	}
 
 
 	/**
-	 * Sets the logLevel.
-	 * @param logLevel The logLevel to set
+	 * Custom logger that can be dynamically turned on/off by evaluating a Predicate.
 	 */
-	public static void setLoggingLevel(Level logLevel) {
-		ResourceLocator.logLevel = logLevel;
+	private static class PredicateLogger extends Logger
+	{
+		private Logger _target;
+		private Predicate _predicate;
+
+		private PredicateLogger(String name)
+		{
+			super(name);
+		}
+
+		public PredicateLogger(Class clazz, Predicate condition)
+		{
+			this(clazz.getName(), condition);
+		}
+
+		public PredicateLogger(String name, Predicate condition)
+		{
+			this(name);
+			_target = Logger.getLogger(name);
+			_predicate = condition;
+		}
+
+		public void debug(Object arg0, Throwable arg1)
+		{
+			this.log(Level.DEBUG, arg0, arg1);
+		}
+
+		public void debug(Object arg0)
+		{
+			this.log(Level.DEBUG, arg0);
+		}
+
+		public void info(Object arg0, Throwable arg1)
+		{
+			this.log(Level.INFO, arg0, arg1);
+		}
+
+		public void info(Object arg0)
+		{
+			this.log(Level.INFO, arg0);
+		}
+
+		public void warn(Object arg0, Throwable arg1)
+		{
+			this.log(Level.WARN, arg0, arg1);
+		}
+
+		public void warn(Object arg0)
+		{
+			this.log(Level.WARN, arg0);
+		}
+
+		public void error(Object arg0, Throwable arg1)
+		{
+			this.log(Level.ERROR, arg0, arg1);
+		}
+
+		public void error(Object arg0)
+		{
+			this.log(Level.ERROR, arg0);
+		}
+
+		public void fatal(Object arg0, Throwable arg1)
+		{
+			this.log(Level.FATAL, arg0, arg1);
+		}
+
+		public void fatal(Object arg0)
+		{
+			this.log(Level.FATAL, arg0);
+		}
+
+		public void log(Priority arg0, Object arg1, Throwable arg2)
+		{
+			if (_predicate.evaluate(arg1))
+			{
+				_target.log(arg0, arg1);
+			}
+		}
+
+		public void log(Priority arg0, Object arg1)
+		{
+			if (_predicate.evaluate(arg1))
+			{
+				_target.log(arg0, arg1);
+			}
+		}
+
 	}
+
 }

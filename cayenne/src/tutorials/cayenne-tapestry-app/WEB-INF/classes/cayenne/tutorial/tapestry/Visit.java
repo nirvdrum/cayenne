@@ -18,9 +18,8 @@ public class Visit implements Serializable {
 
 	public Visit() {
 		super();
-
-		dataContext =
-			Configuration.getSharedConfig().getDomain().createDataContext();
+		dataContext = Configuration.getSharedConfiguration()
+						.getDomain().createDataContext();
 	}
 
 	public DataContext getDataContext() {

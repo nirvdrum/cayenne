@@ -66,7 +66,7 @@ import org.apache.log4j.Level;
 public interface DataSourceFactory {
     
     /** Initializes factory with the parent configuration object. */
-    public void setParentConfig(Configuration conf);
+    public void initWithParentConfiguration(Configuration conf);
     
     /** Returns DataSource object corresponding to <code>location</code>.
       * Concrete implementations may treat location differently - as a

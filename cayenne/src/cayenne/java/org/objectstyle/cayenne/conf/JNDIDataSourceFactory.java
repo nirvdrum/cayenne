@@ -82,7 +82,7 @@ public class JNDIDataSourceFactory implements DataSourceFactory {
         return getDataSource(location, Level.DEBUG);
     }
     
-    public void setParentConfig(Configuration conf) {
+    public void initWithParentConfiguration(Configuration conf) {
 		this.parentConfig = conf;
 	}
 

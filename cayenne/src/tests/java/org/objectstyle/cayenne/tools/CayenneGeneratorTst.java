@@ -87,10 +87,10 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 
 	private static void extractFiles() {
 		ResourceLocator locator = new ResourceLocator();
-		locator.setSkipAbsPath(true);
+		locator.setSkipAbsolutePath(true);
 		locator.setSkipClasspath(false);
-		locator.setSkipCurDir(true);
-		locator.setSkipHomeDir(true);
+		locator.setSkipCurrentDirectory(true);
+		locator.setSkipHomeDirectory(true);
 
 		// Configuration superclass statically defines what 
 		// ClassLoader to use for resources. This

@@ -201,10 +201,10 @@ public class MapLoader extends DefaultHandler {
      */
     protected ResourceLocator configLocator() {
         ResourceLocator locator = new ResourceLocator();
-        locator.setSkipAbsPath(true);
+        locator.setSkipAbsolutePath(true);
         locator.setSkipClasspath(false);
-        locator.setSkipCurDir(false);
-        locator.setSkipHomeDir(false);
+        locator.setSkipCurrentDirectory(false);
+        locator.setSkipHomeDirectory(false);
 
         // Configuration superclass statically defines what
         // ClassLoader to use for resources. This

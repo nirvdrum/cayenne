@@ -63,27 +63,27 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class ConfigExceptionTst extends CayenneTestCase {
 
 	public void testConstructor1() throws Exception {
-		ConfigException ex = new ConfigException();
+		ConfigurationException ex = new ConfigurationException();
 		assertNull(ex.getCause());
 		assertNull(ex.getMessage());
 	}
 
 	public void testConstructor2() throws Exception {
-		ConfigException ex = new ConfigException("abc");
+		ConfigurationException ex = new ConfigurationException("abc");
 		assertNull(ex.getCause());
 		assertEquals("abc", ex.getMessage());
 	}
 
 	public void testConstructor3() throws Exception {
 		Throwable cause = new Throwable();
-		ConfigException ex = new ConfigException(cause);
+		ConfigurationException ex = new ConfigurationException(cause);
 		assertSame(cause, ex.getCause());
 		assertEquals(cause.toString(), ex.getMessage());
 	}
 
 	public void testConstructor4() throws Exception {
 	    Throwable cause = new Throwable();
-		ConfigException ex = new ConfigException("abc", cause);
+		ConfigurationException ex = new ConfigurationException("abc", cause);
 		assertSame(cause, ex.getCause());
 		assertSame("abc", ex.getMessage());
 	}

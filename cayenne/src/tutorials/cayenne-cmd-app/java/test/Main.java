@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -45,8 +44,7 @@ public class Main {
     /** Creates and returns DataContext object. */
     private DataContext createContext() {
         Configuration.bootstrapSharedConfig(this.getClass());
-        DataDomain sharedDomain = Configuration.getSharedConfig().getDomain();
-        return sharedDomain.createDataContext();
+        return Configuration.getSharedConfiguration().getDomain().createDataContext();
     }
 
     /** 

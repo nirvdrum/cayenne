@@ -61,7 +61,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conn.PoolManager;
@@ -101,25 +101,13 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     protected XMLReader parser;
     protected DataSourceInfo driverInfo;
     protected Level logLevel = Level.DEBUG;
-    protected ResourceLocator locator;
     protected Configuration parentConfig;
 
     public DriverDataSourceFactory() throws Exception {
         parser = Util.createXmlReader();
-
-        // CLASSPATH and filesystem locator
-        // (by default ResourceLocator is configured to find files 
-        // everywhere it can
-        locator = new ResourceLocator();
-
-        // Configuration statically defines what 
-        // ClassLoader to use for resources. This
-        // allows applications to control where resources 
-        // are loaded from.
-        locator.setClassLoader(Configuration.getResourceLoader());
     }
 
-    public void setParentConfig(Configuration conf) {
+    public void initWithParentConfiguration(Configuration conf) {
         this.parentConfig = conf;
     }
 
@@ -132,7 +120,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         this.logLevel = logLevel;
-        load(location);
+        this.load(location);
 
         QueryLogger.logConnect(logLevel, driverInfo);
         try {
@@ -158,10 +146,19 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     protected InputStream getInputStream(String location) {
-        InputStream in = getWebAppInputStream(location);
+    	if (parentConfig == null) {
+    		throw new ConfigurationException("No parentConfig set - cannot continue.");
+    	}
+
+		// check for web application
+        InputStream is = getWebAppInputStream(location);
 
         // if not a web app, return to normal behavior
-        return (in != null) ? in : locator.findResourceStream(location);
+        if (is == null) {
+        	is = parentConfig.getResourceLocator().findResourceStream(location);
+        }
+
+        return is;
     }
 
     protected InputStream getWebAppInputStream(String location) {
@@ -171,7 +168,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 && (parentConfig instanceof BasicServletConfiguration)) {
                 BasicServletConfiguration servlConf =
                     (BasicServletConfiguration) parentConfig;
-                return servlConf.getMapConfig(location);
+                return servlConf.getMapConfiguration(location);
             }
         }
 
@@ -181,19 +178,19 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     /** Loads driver information from the file at <code>location</code>.
       * Called internally from "getDataSource" */
     protected void load(String location) throws Exception {
-        logObj.log(logLevel, "loading driver information from (" + location + ").");
+        logObj.log(logLevel, "loading driver information from '" + location + "'.");
 
-        InputStream in = getInputStream(location);
+        InputStream in = this.getInputStream(location);
         if (in == null) {
-            logObj.log(logLevel, "location not found in filesystem.");
+            logObj.log(logLevel, "location not found in file system, trying classpath.");
             in = ResourceLocator.findResourceInClasspath(location);
         } else {
-            logObj.log(logLevel, "location found in filesystem.");
+            logObj.log(logLevel, "location found in file system.");
         }
 
         if (in == null) {
-            logObj.log(logLevel, "error: location not found.");
-            throw new ConfigException(
+            logObj.log(logLevel, "error: location '" + location + "' not found.");
+            throw new ConfigurationException(
                 "Can't find DataSource configuration file at " + location);
         }
 

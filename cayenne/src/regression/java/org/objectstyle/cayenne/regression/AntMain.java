@@ -121,8 +121,8 @@ public class AntMain extends Main {
 
         Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
-        if (info.getAdapterClass() != null) {
-            adapterClass = Class.forName(info.getAdapterClass());
+        if (info.getAdapterClassName() != null) {
+            adapterClass = Class.forName(info.getAdapterClassName());
         }
         
         DbAdapter adapter = (DbAdapter) adapterClass.newInstance();
