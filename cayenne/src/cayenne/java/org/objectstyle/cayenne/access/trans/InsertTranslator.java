@@ -63,6 +63,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.query.InsertQuery;
@@ -130,11 +131,11 @@ public class InsertTranslator extends QueryAssembler {
 			Iterator idIt = id.keySet().iterator();
 			while (idIt.hasNext()) {
 				String attrName = (String) idIt.next();
-				Attribute attr = dbE.getAttribute(attrName);
+				DbAttribute attr = (DbAttribute)dbE.getAttribute(attrName);
 				Object attrValue = id.get(attrName);
 				columnList.add(attrName);
-				values.add(attrValue);
-				attributes.add(attr);
+				
+			    addToParamList(attr, attrValue);
 			}
 		}
 
@@ -147,11 +148,10 @@ public class InsertTranslator extends QueryAssembler {
 			if (id != null && id.get(attrName) != null)
 				continue;
 
-			Attribute attr = dbE.getAttribute(attrName);
+			DbAttribute attr = (DbAttribute)dbE.getAttribute(attrName);
 			Object attrValue = snapshot.get(attrName);
 			columnList.add(attrName);
-			values.add(attrValue);
-			attributes.add(attr);
+			addToParamList(attr, attrValue);
 		}
 	}
 }

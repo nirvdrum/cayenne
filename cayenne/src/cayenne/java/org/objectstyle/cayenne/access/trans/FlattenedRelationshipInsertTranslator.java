@@ -105,8 +105,8 @@ public class FlattenedRelationshipInsertTranslator extends InsertTranslator {
 			DbAttribute sourceAttribute=thisJoin.getSource();
 			DbAttribute targetAttribute=thisJoin.getTarget();
 			columnList.add(targetAttribute.getName());
-			values.add(id.get(sourceAttribute.getName()));
-			attributes.add(targetAttribute);
+			
+			addToParamList(targetAttribute, id.get(sourceAttribute.getName()));
 		}
 		
 		//Second relationship- use target of joins to get a value, source of joins to get attribute name for insert
@@ -119,8 +119,8 @@ public class FlattenedRelationshipInsertTranslator extends InsertTranslator {
 			DbAttribute sourceAttribute=thisJoin.getSource();
 			DbAttribute targetAttribute=thisJoin.getTarget();
 			columnList.add(sourceAttribute.getName());
-			values.add(id.get(targetAttribute.getName()));
-			attributes.add(sourceAttribute);
+			
+			addToParamList(sourceAttribute, id.get(targetAttribute.getName()));
 		}
 		
 	}
