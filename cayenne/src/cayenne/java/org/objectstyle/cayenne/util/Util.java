@@ -284,7 +284,7 @@ public class Util {
         else if (obj1 != null)
             return obj1.equals(obj2);
         else
-            return obj2.equals(obj1);
+            return false;
     }
 
     /**

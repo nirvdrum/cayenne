@@ -438,8 +438,20 @@ public class DataContext implements QueryEngine, Serializable {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
 
-        // TODO: maybe do a sanity check against class/entity mismatch?
-        SnapshotManager.getSharedInstance().prepareForInsert(this, objEntity, dataObject);
+        // initialize to-many relationships with empty lists
+        Iterator it = objEntity.getRelationships().iterator();
+        while (it.hasNext()) {
+            ObjRelationship rel = (ObjRelationship) it.next();
+            if (rel.isToMany()) {
+                ToManyList relList =
+                    new ToManyList(
+                        relationshipDataSource,
+                        dataObject.getObjectId(),
+                        rel.getName());
+                dataObject.writePropertyDirectly(rel.getName(), relList);
+            }
+        }
+
         objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
         dataObject.setPersistenceState(PersistenceState.NEW);

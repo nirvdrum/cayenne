@@ -135,7 +135,7 @@ public class BatchQueryUtils {
 			// if snapshot exists, compare old values and new values,
 			// only add attribute to the update clause if the value has changed
 			Object oldValue = committedSnapshot.get(attrName);
-			if (valueChanged(oldValue, newValue))
+			if (!Util.nullSafeEquals(oldValue, newValue))
 				snapshot.put(attrName, newValue);
 		}
 
@@ -288,134 +288,6 @@ public class BatchQueryUtils {
 		return map;
 	}
 
-	//    public static Map buildSnapshotForUpdate(ObjEntity ent,
-	//            DataObject o,
-	//            DbRelationship masterDependentRel) {
-	//        boolean isMasterDbEntity = (masterDependentRel == null);
-	//        Map committedSnapshot = o.getCommittedSnapshot();
-	//        committedSnapshot = (committedSnapshot == null ||
-	//                             committedSnapshot.isEmpty() ?
-	//                             Collections.EMPTY_MAP :
-	//                             committedSnapshot);
-	//        Map map = new HashMap();
-	//
-	//        Map attrMap = ent.getAttributeMap();
-	//        Iterator it = attrMap.keySet().iterator();
-	//        while (it.hasNext()) {
-	//            String attrName = (String) it.next();
-	//            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
-	//
-	//            Object oldValue = committedSnapshot.get(objAttr.getDbAttributePath());
-	//            Object newValue = o.readPropertyDirectly(attrName);
-	//
-	//            // if snapshot exists, compare old values and new values,
-	//            // only add attribute to the update clause if the value has changed
-	//            if (!valueChanged(oldValue, newValue)) continue;
-	//
-	//            if (isMasterDbEntity && !objAttr.isCompound()) {
-	//                map.put(objAttr.getDbAttributePath(), newValue);
-	//            } else if (!isMasterDbEntity && objAttr.isCompound()) {
-	//                DbAttribute dbAttr = objAttr.getDbAttribute();
-	//                if (dbAttr.getEntity() == masterDependentRel.getTargetEntity())
-	//                    map.put(dbAttr.getName(), newValue);
-	//            }
-	//        }
-	//
-	//        if (isMasterDbEntity) {
-	//            Map relMap = ent.getRelationshipMap();
-	//            Iterator itr = relMap.keySet().iterator();
-	//            while (itr.hasNext()) {
-	//                String relName = (String) itr.next();
-	//                ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-	//
-	//                // to-many will be handled on the other side
-	//                if (rel.isToMany() || rel.isToDependentEntity()) continue;
-	//
-	//                DbRelationship dbRel =
-	//                        (DbRelationship) rel.getDbRelationshipList().get(0);
-	//
-	//                DataObject target = (DataObject) o.readPropertyDirectly(relName);
-	//
-	//                if (target == null) {
-	//                    for (Iterator i = dbRel.getJoins().iterator(); i.hasNext(); ) {
-	//                        DbAttributePair join = (DbAttributePair)i.next();
-	//                        String dbAttrName = join.getSource().getName();
-	//                        if (committedSnapshot.get(dbAttrName) != null) {
-	//                            map.put(dbAttrName, null);
-	//                        }
-	//                    }
-	//                    continue;
-	//                }
-	//
-	//                Map idParts = target.getObjectId().getIdSnapshot();
-	//
-	//                // this may happen in uncommitted objects
-	//                if (idParts == null) {
-	//                    continue;
-	//                }
-	//
-	//                Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-	//                for (Iterator i = fk.entrySet().iterator(); i.hasNext(); ) {
-	//                    Map.Entry entry = (Map.Entry)i.next();
-	//                    Object key = entry.getKey();
-	//                    Object oldValue = committedSnapshot.get(key);
-	//                    Object newValue = entry.getValue();
-	//
-	//                    // if snapshot exists, compare old values and new values,
-	//                    // only add attribute to the update clause if the value has changed
-	//                    if (!valueChanged(oldValue, newValue)) continue;
-	//
-	//                    map.put(key, newValue);
-	//                }
-	//            }
-	//        }
-	//
-	//        // process object id map
-	//        // we should ignore any object id values if a corresponding attribute
-	//        // is a part of relationship "toMasterPK", since those values have been
-	//        // set above when db relationships where processed.
-	//        Map thisIdParts = o.getObjectId().getIdSnapshot();
-	//        if (thisIdParts != null) {
-	//            Map id = (isMasterDbEntity ?
-	//                      thisIdParts :
-	//                      masterDependentRel.
-	//                      targetPkSnapshotWithSrcSnapshot(thisIdParts));
-	//            // put only thise that do not exist in the map
-	//            Iterator itm = id.keySet().iterator();
-	//            while (itm.hasNext()) {
-	//                Object nextKey = itm.next();
-	//                Object newValue = id.get(nextKey);
-	//                if (!map.containsKey(nextKey)) {
-	//                    Object committedKey = (isMasterDbEntity ?
-	//                            nextKey :
-	//                            getSrcDbAttributeName((String)nextKey, masterDependentRel));
-	//                    Object oldValue = committedSnapshot.get(committedKey);
-	//                    if (!valueChanged(oldValue, newValue)) continue;
-	//                    map.put(nextKey, newValue);
-	//                }
-	//            }
-	//        }
-	//        return map;
-	//	}
-
-	private static boolean valueChanged(Object oldValue, Object newValue) {
-		return (
-			(newValue == null && oldValue != null)
-				|| (newValue != null && !newValue.equals(oldValue)));
-	}
-
-	/*
-	    private static String getSrcDbAttributeName(
-	            String targetDbAttributeName,
-	            DbRelationship masterDependentRel) {
-	        for (Iterator i = masterDependentRel.getJoins().iterator(); i.hasNext(); ) {
-	            DbAttributePair join = (DbAttributePair)i.next();
-	            if (targetDbAttributeName.equals(join.getTarget().getName()))
-	                return join.getSource().getName();
-	        }
-	        return null;
-	    }
-	*/
 
 	private static String getTargetDbAttributeName(
 		String srcDbAttributeName,
@@ -480,7 +352,7 @@ public class BatchQueryUtils {
 			// if snapshot exists, compare old values and new values,
 			// only add attribute to the update clause if the value has changed
 			Object oldValue = committedSnapshot.get(dbAttrPath);
-			if (valueChanged(oldValue, newValue)) {
+			if (!Util.nullSafeEquals(oldValue, newValue)) {
 				if (isMasterDbEntity && !compoundDbAttr) {
 					snapshot.put(dbAttrPath, newValue);
 				} else if (!isMasterDbEntity && compoundDbAttr) {

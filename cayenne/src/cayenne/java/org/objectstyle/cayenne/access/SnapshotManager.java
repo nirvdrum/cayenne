@@ -348,25 +348,6 @@ public class SnapshotManager {
     }
 
     /**
-     * Initializes to-many relationships of a DataObject
-     * with empty lists.
-     */
-    public void prepareForInsert(DataContext context, ObjEntity ent, DataObject anObject) {
-        Iterator it = ent.getRelationships().iterator();
-        while (it.hasNext()) {
-            ObjRelationship rel = (ObjRelationship) it.next();
-            if (rel.isToMany()) {
-                ToManyList relList =
-                    new ToManyList(
-                        context.getRelationshipDataSource(),
-                        anObject.getObjectId(),
-                        rel.getName());
-                anObject.writePropertyDirectly(rel.getName(), relList);
-            }
-        }
-    }
-
-    /**
      * Takes a snapshot of current object state.
      */
     public Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
