@@ -100,9 +100,8 @@ class ObjectDeleteHandler {
             return false;
         }
 
-        // must resolve HOLLOW objects before delete... Right now this is needed
-        // to process relationships, but when we add optimistic locking, this will
-        // be a requirement...
+        // must resolve HOLLOW objects before delete... needed
+        // to process relationships and optimistric locking...
         object.resolveFault();
 
         if (oldState == PersistenceState.NEW) {
