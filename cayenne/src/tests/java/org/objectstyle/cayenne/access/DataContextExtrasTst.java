@@ -100,7 +100,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
 	public void testCreateAndRegisterNewObject() throws Exception {
 		Artist a1 = (Artist) ctxt.createAndRegisterNewObject("Artist");
-		assertTrue(ctxt.registeredObjects().contains(a1));
+		assertTrue(ctxt.getObjectStore().getObjects().contains(a1));
 		assertTrue(ctxt.newObjects().contains(a1));
 	}
 
@@ -114,7 +114,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 		
 		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
 		assertSame(ctxt, obj.getDataContext());
-		assertSame(obj, ctxt.registeredExistingObject(oid));
+		assertSame(obj, ctxt.getObjectStore().getObject(oid));
 		
 		ctxt.unregisterObject(obj);
 		
@@ -134,7 +134,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 		
 		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
 		assertSame(ctxt, obj.getDataContext());
-		assertSame(obj, ctxt.registeredExistingObject(oid));
+		assertSame(obj, ctxt.getObjectStore().getObject(oid));
 		
 		ctxt.invalidateObject(obj);
 		
@@ -174,7 +174,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 		row.put("DATE_OF_BIRTH", new Date());
 		DataObject obj = ctxt.objectFromDataRow("Artist", row);
 
-		assertTrue(ctxt.registeredObjects().contains(obj));
+		assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
 		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
 		assertNotNull(ctxt.getCommittedSnapshot(obj));
 	}

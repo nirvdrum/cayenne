@@ -153,7 +153,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
         ctxt.commitChanges();
         assertEquals(PersistenceState.TRANSIENT, o1.getPersistenceState());
-        assertTrue(!ctxt.registeredObjects().contains(o1));
+        assertTrue(!ctxt.getObjectStore().getObjects().contains(o1));
         assertNull(o1.getDataContext());
     }
 
@@ -196,7 +196,7 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
         assertNotNull(a1);
         assertNotNull(a2);
-        assertEquals(1, ctxt.registeredObjects().size());
+        assertEquals(1, ctxt.getObjectStore().getObjects().size());
         assertSame(a1, a2);
     }
 

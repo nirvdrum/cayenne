@@ -147,6 +147,9 @@ public class DataContext implements QueryEngine, Serializable {
         this.parent = parent;
     }
     
+    /**
+     * Returns ObjectStore associated with this DataContext.
+     */
     public ObjectStore getObjectStore() {
     	return objectStore;
     }
@@ -155,6 +158,9 @@ public class DataContext implements QueryEngine, Serializable {
      * Returns a collection of objects that are registered
      * with this DataContext, regardless of their persistence state.
      * Collection is returned by copy and can be modified by caller.
+     * 
+     * @deprecated (Since 1.0 Alpha 4) 
+     * Use DataContext.getObjectStore().getObjects() instead
      */
     public Collection registeredObjects() {
         return objectStore.getObjects();
@@ -164,20 +170,18 @@ public class DataContext implements QueryEngine, Serializable {
      * Returns <code>true</code> if there are any modified,
      * deleted or new objects registered with this DataContext,
      * <code>false</code> otherwise.
-     * 
-     * <p><i>
-     * This implementation is rather naive and would scan all registered
-     * objects. A better implementation based on catching context events
-     * may be needed.</i></p>
      */
     public boolean hasChanges() {
         return objectStore.hasChanges();
     }
 
     /** 
-     * Return a subset of registered objects that are in a 
+     * Returns a subset of registered objects that are in a 
      * certian persistence state. Collection is returned by
      * copy.
+     * 
+     * @deprecated (Since 1.0 Alpha 4) 
+     * Use DataContext.getObjectStore().objectsInState(int) instead
      */
     public Collection objectsInState(int state) {
         return objectStore.objectsInState(state);
@@ -187,21 +191,21 @@ public class DataContext implements QueryEngine, Serializable {
      *  with this DataContext and have a state PersistenceState.NEW
      */
     public Collection newObjects() {
-        return objectsInState(PersistenceState.NEW);
+        return objectStore.objectsInState(PersistenceState.NEW);
     }
 
     /** Returns a list of objects that are registered
      *  with this DataContext and have a state PersistenceState.DELETED
      */
     public Collection deletedObjects() {
-        return objectsInState(PersistenceState.DELETED);
+        return objectStore.objectsInState(PersistenceState.DELETED);
     }
 
     /** Returns a list of objects that are registered
      *  with this DataContext and have a state PersistenceState.MODIFIED
      */
     public Collection modifiedObjects() {
-        return objectsInState(PersistenceState.MODIFIED);
+        return objectStore.objectsInState(PersistenceState.MODIFIED);
     }
 
     /** 
@@ -209,6 +213,8 @@ public class DataContext implements QueryEngine, Serializable {
      * If object is not registered with this context, 
      * it is being fetched. If no such object exists,
      * a <code>CayenneRuntimeException</code> is thrown. 
+     * 
+     * @deprecated Use refecthObject instead.
      */
     public DataObject registeredExistingObject(ObjectId oid) {
         DataObject obj = objectStore.getObject(oid);
@@ -254,13 +260,6 @@ public class DataContext implements QueryEngine, Serializable {
             .getResourceLoader()
             .loadClass(className)
             .newInstance();
-    }
-
-    protected void refreshObjectWithSnapshot(DataObject anObject, Map snapshot) {
-        refreshObjectWithSnapshot(
-            lookupEntity(anObject.getObjectId().getObjEntityName()),
-            anObject,
-            snapshot);
     }
 
     /** 
@@ -312,14 +311,6 @@ public class DataContext implements QueryEngine, Serializable {
             anObject.writePropertyDirectly(rel.getName(), registeredObject(destId));
         }
         anObject.setPersistenceState(PersistenceState.COMMITTED);
-    }
-
-    /** Merge a potentially modified object with provided data row values. */
-    protected void mergeObjectWithSnapshot(DataObject anObject, Map snapshot) {
-        mergeObjectWithSnapshot(
-            lookupEntity(anObject.getObjectId().getObjEntityName()),
-            anObject,
-            snapshot);
     }
 
     protected void mergeObjectWithSnapshot(
@@ -1019,7 +1010,7 @@ public class DataContext implements QueryEngine, Serializable {
         TempObjectId tempId = (TempObjectId) anObject.getObjectId();
         ObjEntity objEntity = parent.lookupEntity(tempId.getObjEntityName());
         DbEntity dbEntity = objEntity.getDbEntity();
-        DataNode aNode = dataNodeForObjEntity(objEntity);
+        DataNode aNode = parent.dataNodeForObjEntity(objEntity);
 
         HashMap idMap = new HashMap();
         // first get values delivered via relationships
