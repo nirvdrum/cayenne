@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.ExtendedProperties;
+import org.apache.commons.collections.LRUMap;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
@@ -77,8 +78,6 @@ import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.util.Util;
-import org.shiftone.cache.Cache;
-import org.shiftone.cache.lru.LruCacheFactory;
 
 /**
  * Represents a fixed size cache of DataRows keyed by ObjectId. 
@@ -115,7 +114,7 @@ public class DataRowStore implements Serializable {
         "org.objectstyle.cayenne.event.JavaGroupsBridgeFactory";
 
     protected String name;
-    protected Cache snapshots;
+    protected LRUMap snapshots;
     protected boolean notifyingRemoteListeners;
     protected EventBridge remoteNotificationsHandler;
 
@@ -194,10 +193,10 @@ public class DataRowStore implements Serializable {
 
         // init ivars from properties
         this.notifyingRemoteListeners = notifyRemote;
-        this.snapshots =
-            new LruCacheFactory().newInstance(
-                snapshotsExpiration * 1000,
-                snapshotsCacheSize);
+        
+        // TODO: ENTRY EXPIRATION is not supported by commons LRU Map
+        this.snapshots = new LRUMap(snapshotsCacheSize);
+          
 
         // init event bridge only if we are notifying remote listeners
         if (notifyingRemoteListeners) {
@@ -251,7 +250,7 @@ public class DataRowStore implements Serializable {
      * the given ObjectId.
      */
     public synchronized DataRow getCachedSnapshot(ObjectId oid) {
-        return (DataRow) snapshots.getObject(oid);
+        return (DataRow) snapshots.get(oid);
     }
 
     /**
@@ -286,7 +285,7 @@ public class DataRowStore implements Serializable {
         }
         else {
             DataRow snapshot = (DataRow) results.get(0);
-            snapshots.addObject(oid, snapshot);
+            snapshots.put(oid, snapshot);
             return snapshot;
         }
     }
@@ -387,7 +386,7 @@ public class DataRowStore implements Serializable {
                         }
                     }
 
-                    snapshots.addObject(key, newSnapshot);
+                    snapshots.put(key, newSnapshot);
                 }
             }
 

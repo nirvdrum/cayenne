@@ -173,6 +173,7 @@ public class DataContext implements QueryEngine, Serializable {
     private List flattenedInserts = new ArrayList();
     private List flattenedDeletes = new ArrayList();
 
+    protected boolean usingSharedSnaphsotCache;
     protected ObjectStore objectStore;
 
     protected transient QueryEngine parent;
@@ -185,7 +186,7 @@ public class DataContext implements QueryEngine, Serializable {
      * before Cayenne stack is fully initialized.
      */
     protected transient String lazyInitParentDomainName;
-
+    
     protected transient ToManyListDataSource relationshipDataSource;
 
     /**
@@ -256,10 +257,13 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataContext(QueryEngine parent, DataRowStore snapshotCache) {
         setParent(parent);
-        
+
         this.objectStore = new ObjectStore(snapshotCache);
         this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
+        this.usingSharedSnaphsotCache =
+            getParentDataDomain() != null
+                && snapshotCache == getParentDataDomain().getSharedSnapshotCache();
     }
 
     /**
@@ -268,13 +272,14 @@ public class DataContext implements QueryEngine, Serializable {
     private final void awakeFromDeserialization() {
         if (parent == null && lazyInitParentDomainName != null) {
 
-            this.parent =
+            DataDomain domain =
                 Configuration.getSharedConfiguration().getDomain(
                     lazyInitParentDomainName);
+                    
+            this.parent = domain;
 
-            if (parent instanceof DataDomain) {
-                this.objectStore.setDataRowCache(
-                    ((DataDomain) parent).getSharedSnapshotCache());
+            if (isUsingSharedSnapshotCache() && domain != null) {
+                this.objectStore.setDataRowCache(domain.getSharedSnapshotCache());
             }
         }
     }
@@ -1394,12 +1399,15 @@ public class DataContext implements QueryEngine, Serializable {
         return permId;
     }
 
+    // serialization support
     private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+
         // If the "parent" of this datacontext is a DataDomain, then just write the
         // name of it.  Then when deserialization happens, we can get back the DataDomain by name,
         // from the shared configuration (which will either load it if need be, or return
         // an existing one.
-        out.defaultWriteObject();
+
         if (this.parent == null && this.lazyInitParentDomainName != null) {
             out.writeObject(lazyInitParentDomainName);
         }
@@ -1411,19 +1419,28 @@ public class DataContext implements QueryEngine, Serializable {
             // Hope that whatever this.parent is, that it is Serializable
             out.writeObject(this.parent);
         }
+
+        // Serialize local snapshots cache
+        if (!isUsingSharedSnapshotCache()) {
+            out.writeObject(objectStore.getDataRowCache());
+        }
     }
 
+    //serialization support
     private void readObject(ObjectInputStream in)
         throws IOException, ClassNotFoundException {
 
+        // 1. read non-transient properties
         in.defaultReadObject();
+
+        // 2. read parent or its name
         Object value = in.readObject();
         if (value instanceof QueryEngine) {
-            //Must be a real QueryEngine object - use it
+            // A real QueryEngine object - use it
             this.parent = (QueryEngine) value;
         }
         else if (value instanceof String) {
-            //Must be the name of a DataDomain - use it
+            // The name of a DataDomain - use it
             this.lazyInitParentDomainName = (String) value;
         }
         else {
@@ -1432,6 +1449,14 @@ public class DataContext implements QueryEngine, Serializable {
                     + "the name of a valid DataDomain:"
                     + value);
         }
+        
+        // 3. Deserialize local snapshots cache
+        if(!isUsingSharedSnapshotCache()) {
+            DataRowStore cache = (DataRowStore) in.readObject();
+            objectStore.setDataRowCache(cache);
+        }
+        
+        
 
         // initialized new relationship datasource
         this.relationshipDataSource = new RelationshipDataSource(this);
@@ -1441,7 +1466,7 @@ public class DataContext implements QueryEngine, Serializable {
         // than the one at serialize time (for programmer defined reasons).
         // So, when a dataobject is resurrected because it's datacontext was
         // serialized, it will then set the objects datacontext to the correctone
-        // If deser'd "otherwise", it will not have a datacontext (good)
+        // If deserialized "otherwise", it will not have a datacontext (good)
 
         synchronized (getObjectStore()) {
             Iterator it = objectStore.getObjectIterator();
@@ -1452,6 +1477,9 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
+    /**
+     * Returns EntityResolver object used to resolve and route queries.
+     */
     public EntityResolver getEntityResolver() {
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
@@ -1541,14 +1569,25 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Enable/disable posting of transaction events by this DataContext.
+     * Enables or disables posting of transaction events by this DataContext.
      */
     public void setTransactionEventsEnabled(boolean flag) {
         this.transactionEventsEnabled = flag;
     }
 
+  
     public boolean isTransactionEventsEnabled() {
         return this.transactionEventsEnabled;
+    }
+    
+    /**
+     * Returns <code>true</code> if the ObjectStore uses
+     * shared cache of a parent DataDomain.
+     * 
+     * @since 1.1
+     */
+    public boolean isUsingSharedSnapshotCache() {
+        return usingSharedSnaphsotCache;
     }
 
     public Collection getDataMaps() {

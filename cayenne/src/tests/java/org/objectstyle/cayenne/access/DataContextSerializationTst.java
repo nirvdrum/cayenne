@@ -76,8 +76,46 @@ public class DataContextSerializationTst extends CayenneTestCase {
         super.setUp();
     }
 
+    public void testSerializeWithSharedCache() throws Exception {
+        DataContext context = createDataContextWithSharedCache();
+        DataContext deserializedContext =
+            (DataContext) Util.cloneViaSerialization(context);
+
+        assertNotSame(context, deserializedContext);
+        assertNotSame(context.getObjectStore(), deserializedContext.getObjectStore());
+        assertSame(context.getParent(), deserializedContext.getParent());
+        assertSame(
+            context.getObjectStore().getDataRowCache(),
+            deserializedContext.getObjectStore().getDataRowCache());
+        assertSame(
+            deserializedContext.getParentDataDomain().getSharedSnapshotCache(),
+            deserializedContext.getObjectStore().getDataRowCache());
+    }
+
+    public void testSerializeWithLocalCache() throws Exception {
+        DataContext context = createDataContextWithLocalCache();
+
+        assertNotSame(
+            context.getParentDataDomain().getSharedSnapshotCache(),
+            context.getObjectStore().getDataRowCache());
+
+        DataContext deserializedContext =
+            (DataContext) Util.cloneViaSerialization(context);
+
+        assertNotSame(context, deserializedContext);
+        assertNotSame(context.getObjectStore(), deserializedContext.getObjectStore());
+
+        assertSame(context.getParent(), deserializedContext.getParent());
+        assertNotSame(
+            context.getObjectStore().getDataRowCache(),
+            deserializedContext.getObjectStore().getDataRowCache());
+        assertNotSame(
+            deserializedContext.getParentDataDomain().getSharedSnapshotCache(),
+            deserializedContext.getObjectStore().getDataRowCache());
+    }
+
     public void testSerializeNew() throws Exception {
-        DataContext context = super.createDataContext();
+        DataContext context = createDataContextWithSharedCache();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");
@@ -99,7 +137,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
     }
 
     public void testSerializeCommitted() throws Exception {
-        DataContext context = DataContext.createDataContext();
+        DataContext context = createDataContextWithSharedCache();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");
@@ -148,7 +186,7 @@ public class DataContextSerializationTst extends CayenneTestCase {
     }
 
     public void testSerializeModified() throws Exception {
-        DataContext context = super.createDataContext();
+        DataContext context = createDataContextWithSharedCache();
 
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");
