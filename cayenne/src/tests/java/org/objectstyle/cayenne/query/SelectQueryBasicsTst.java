@@ -61,121 +61,124 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 
 public class SelectQueryBasicsTst extends CayenneTestCase {
-	protected SelectQuery q;
+    protected SelectQuery q;
 
-	public SelectQueryBasicsTst(String name) {
-		super(name);
-	}
+    public SelectQueryBasicsTst(String name) {
+        super(name);
+    }
 
-	public void setUp() throws java.lang.Exception {
-		q = new SelectQuery();
-	}
+    public void setUp() throws java.lang.Exception {
+        q = new SelectQuery();
+    }
 
-	public void testFetchLimit1() throws Exception {
-		q.setFetchLimit(5);
-		assertEquals(5, q.getFetchLimit());
-	}
+    public void testPageSize() throws java.lang.Exception {
+        q.setPageSize(10);
+        assertEquals(10, q.getPageSize());
+    }
 
-	public void testAddOrdering1() throws Exception {
-		Ordering ord = new Ordering();
-		q.addOrdering(ord);
-		assertEquals(1, q.getOrderingList().size());
-		assertSame(ord, q.getOrderingList().get(0));
-	}
+    public void testFetchLimit1() throws Exception {
+        q.setFetchLimit(5);
+        assertEquals(5, q.getFetchLimit());
+    }
 
-	public void testAddPrefetching() throws Exception {
-		String path = "a.b.c";
-		q.addPrefetch(path);
-		assertEquals(1, q.getPrefetchList().size());
-		assertSame(path, q.getPrefetchList().get(0));
-	}
+    public void testAddOrdering1() throws Exception {
+        Ordering ord = new Ordering();
+        q.addOrdering(ord);
+        assertEquals(1, q.getOrderingList().size());
+        assertSame(ord, q.getOrderingList().get(0));
+    }
 
-	public void testAddOrdering2() throws Exception {
-		String path = "a.b.c";
-		q.addOrdering(path, Ordering.DESC);
-		assertEquals(1, q.getOrderingList().size());
+    public void testAddPrefetching() throws Exception {
+        String path = "a.b.c";
+        q.addPrefetch(path);
+        assertEquals(1, q.getPrefetchList().size());
+        assertSame(path, q.getPrefetchList().get(0));
+    }
 
-		Ordering ord = (Ordering) q.getOrderingList().get(0);
-		assertEquals(path, ord.getSortSpec().getOperand(0));
-		assertEquals(Ordering.DESC, ord.isAscending());
-	}
+    public void testAddOrdering2() throws Exception {
+        String path = "a.b.c";
+        q.addOrdering(path, Ordering.DESC);
+        assertEquals(1, q.getOrderingList().size());
 
-	public void testDistinct() throws Exception {
-		assertTrue(!q.isDistinct());
-		q.setDistinct(true);
-		assertTrue(q.isDistinct());
-	}
+        Ordering ord = (Ordering) q.getOrderingList().get(0);
+        assertEquals(path, ord.getSortSpec().getOperand(0));
+        assertEquals(Ordering.DESC, ord.isAscending());
+    }
 
-	public void testFetchingDataRows1() {
-		assertTrue(!q.isFetchingDataRows());
-		q.setFetchingDataRows(true);
-		assertTrue(q.isFetchingDataRows());
-	}
+    public void testDistinct() throws Exception {
+        assertTrue(!q.isDistinct());
+        q.setDistinct(true);
+        assertTrue(q.isDistinct());
+    }
 
-	public void testFetchingDataRows2() {
-		assertTrue(!q.isFetchingDataRows());
-		q.addCustDbAttribute("ARTIST_ID");
-		assertTrue(q.isFetchingDataRows());
+    public void testFetchingDataRows1() {
+        assertTrue(!q.isFetchingDataRows());
+        q.setFetchingDataRows(true);
+        assertTrue(q.isFetchingDataRows());
+    }
 
-		// this shouldn't have any effect, since custom attributes are fetched
-		q.setFetchingDataRows(false);
-		assertTrue(q.isFetchingDataRows());
-	}
+    public void testFetchingDataRows2() {
+        assertTrue(!q.isFetchingDataRows());
+        q.addCustDbAttribute("ARTIST_ID");
+        assertTrue(q.isFetchingDataRows());
 
-	public void testQueryAttributes() throws Exception {
-		assertEquals(0, q.getCustDbAttributes().size());
+        // this shouldn't have any effect, since custom attributes are fetched
+        q.setFetchingDataRows(false);
+        assertTrue(q.isFetchingDataRows());
+    }
 
-		q.addCustDbAttribute("ARTIST_ID");
-		assertEquals(1, q.getCustDbAttributes().size());
-		assertEquals("ARTIST_ID", q.getCustDbAttributes().get(0));
-	}
+    public void testQueryAttributes() throws Exception {
+        assertEquals(0, q.getCustDbAttributes().size());
 
-	public void testUsingRootEntityAttributes() throws Exception {
-		assertTrue(!q.isFetchingCustAttributes());
+        q.addCustDbAttribute("ARTIST_ID");
+        assertEquals(1, q.getCustDbAttributes().size());
+        assertEquals("ARTIST_ID", q.getCustDbAttributes().get(0));
+    }
 
-		q.addCustDbAttribute("ARTIST_ID");
-		assertTrue(q.isFetchingCustAttributes());
-	}
+    public void testUsingRootEntityAttributes() throws Exception {
+        assertTrue(!q.isFetchingCustAttributes());
 
-	public void testSetParentQualifier() throws Exception {
-		assertNull(q.getParentQualifier());
+        q.addCustDbAttribute("ARTIST_ID");
+        assertTrue(q.isFetchingCustAttributes());
+    }
 
-		Expression qual = ExpressionFactory.expressionOfType(Expression.AND);
-		q.setParentQualifier(qual);
-		assertNotNull(q.getParentQualifier());
-		assertSame(qual, q.getParentQualifier());
-	}
+    public void testSetParentQualifier() throws Exception {
+        assertNull(q.getParentQualifier());
 
-	public void testAndParentQualifier() throws Exception {
-		assertNull(q.getParentQualifier());
+        Expression qual = ExpressionFactory.expressionOfType(Expression.AND);
+        q.setParentQualifier(qual);
+        assertNotNull(q.getParentQualifier());
+        assertSame(qual, q.getParentQualifier());
+    }
 
-		Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
-		q.andParentQualifier(e1);
-		assertSame(e1, q.getParentQualifier());
+    public void testAndParentQualifier() throws Exception {
+        assertNull(q.getParentQualifier());
 
-		Expression e2 =
-			ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
-		q.andParentQualifier(e2);
-		assertEquals(Expression.AND, q.getParentQualifier().getType());
-	}
+        Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+        q.andParentQualifier(e1);
+        assertSame(e1, q.getParentQualifier());
 
-	public void testOrParentQualifier() throws Exception {
-		assertNull(q.getParentQualifier());
+        Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+        q.andParentQualifier(e2);
+        assertEquals(Expression.AND, q.getParentQualifier().getType());
+    }
 
-		Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
-		q.orParentQualifier(e1);
-		assertSame(e1, q.getParentQualifier());
+    public void testOrParentQualifier() throws Exception {
+        assertNull(q.getParentQualifier());
 
-		Expression e2 =
-			ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
-		q.orParentQualifier(e2);
-		assertEquals(Expression.OR, q.getParentQualifier().getType());
-	}
+        Expression e1 = ExpressionFactory.expressionOfType(Expression.EQUAL_TO);
+        q.orParentQualifier(e1);
+        assertSame(e1, q.getParentQualifier());
 
-	public void testParentObjEntityName() throws Exception {
-		assertNull(q.getParentObjEntityName());
+        Expression e2 = ExpressionFactory.expressionOfType(Expression.NOT_EQUAL_TO);
+        q.orParentQualifier(e2);
+        assertEquals(Expression.OR, q.getParentQualifier().getType());
+    }
 
-		q.setParentObjEntityName("SomeEntity");
-		assertSame("SomeEntity", q.getParentObjEntityName());
-	}
+    public void testParentObjEntityName() throws Exception {
+        assertNull(q.getParentObjEntityName());
+
+        q.setParentObjEntityName("SomeEntity");
+        assertSame("SomeEntity", q.getParentObjEntityName());
+    }
 }

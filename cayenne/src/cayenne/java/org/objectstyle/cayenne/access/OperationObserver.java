@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.List;
-import org.apache.log4j.Level;
 
 import org.objectstyle.cayenne.query.Query;
 

@@ -83,6 +83,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	protected int fetchLimit;
 	protected Expression parentQualifier;
 	protected String parentObjEntityName;
+	protected int pageSize;
 
 	/** Creates empty SelectQuery. */
 	public SelectQuery() {
@@ -284,4 +285,26 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public boolean isQualifiedOnParent() {
 		return getParentObjEntityName() != null && parentQualifier != null;
 	}
+	
+    /**
+     * Returns <code>pageSize</code> property.
+     * Page size is a hint telling Cayenne QueryEngine 
+     * that query result should use paging instead of
+     * reading the whole result in the memory.
+     * 
+     * @return int
+     */
+    public int getPageSize() {
+        return pageSize;
+    }
+
+
+    /**
+     * Sets  <code>pageSize</code> property.
+     * 
+     * @param pageSize The pageSize to set
+     */
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
 }

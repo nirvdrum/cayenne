@@ -70,7 +70,7 @@ public class SelectQueryTst extends SelectQueryBase {
         super(name);
     }
 
-   public void testFetchLimit() throws java.lang.Exception {
+    public void testFetchLimit() throws java.lang.Exception {
         query.setObjEntityName("Artist");
         query.setFetchLimit(7);
         performQuery();
@@ -80,7 +80,7 @@ public class SelectQueryTst extends SelectQueryBase {
         assertNotNull(objects);
         assertEquals(7, objects.size());
     }
-    
+
     public void testSelectAllObjects() throws java.lang.Exception {
         query.setObjEntityName("Artist");
         performQuery();
@@ -138,21 +138,20 @@ public class SelectQueryTst extends SelectQueryBase {
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
     }
-    
+
     public void testSelectCustAttributes() throws java.lang.Exception {
         query.setObjEntityName("Artist");
         query.addCustDbAttribute("ARTIST_NAME");
-        
+
         List results = TestMain.getSharedDomain().createDataContext().performQuery(query);
 
         // check query results
         assertEquals(_artistCount, results.size());
-        
-        Map row = (Map)results.get(0);
+
+        Map row = (Map) results.get(0);
         assertNotNull(row.get("ARTIST_NAME"));
         assertEquals(1, row.size());
     }
-    
 
     protected void populateTables() throws java.lang.Exception {
         String insertArtist =
@@ -174,8 +173,7 @@ public class SelectQueryTst extends SelectQueryBase {
 
             stmt.close();
             conn.commit();
-        }
-        finally {
+        } finally {
             conn.close();
         }
     }
