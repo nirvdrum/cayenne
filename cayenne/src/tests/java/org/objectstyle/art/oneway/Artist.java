@@ -1,5 +1,6 @@
 package org.objectstyle.art.oneway;
 
+import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.event.DataObjectTransactionEventListener;
 
 public class Artist
@@ -12,11 +13,11 @@ public class Artist
         super();
     }
 
-    public void didCommit() {
+    public void didCommit(DataContextEvent event) {
         _receivedDidCommit = true;
     }
 
-    public void willCommit() {
+    public void willCommit(DataContextEvent event) {
         _receivedWillCommit = true;
     }
 
