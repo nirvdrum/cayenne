@@ -52,9 +52,6 @@
 	</target>
 
 	<target name="dist-bin" depends="jar-nodeps,jar">        
-        <!-- Ant JAR is required for the Ant-specific tests to run. -->
-        <copy file="${otherlib.dir}/${ant.jar}" todir="${dist}/lib"/>
-        
         <!-- Servlet JAR is required to complie Cayenne from src distro. -->
         <copy file="${otherlib.dir}/${servlet.jar}" todir="${dist}/lib"/>
 	</target>

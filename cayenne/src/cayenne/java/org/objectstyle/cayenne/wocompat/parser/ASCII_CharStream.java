@@ -5,7 +5,6 @@ package org.objectstyle.cayenne.wocompat.parser;
  * An implementation of interface CharStream, where the stream is assumed to
  * contain only ASCII characters (without unicode processing).
  */
-
 public final class ASCII_CharStream
 {
   public static final boolean staticFlag = false;
@@ -327,7 +326,7 @@ public final class ASCII_CharStream
   }
 
   /**
-   * Method to adjust line and column numbers for the start of a token.<BR>
+   * Adjusts line and column numbers for the start of a token.
    */
   public void adjustBeginLineColumn(int newLine, int newCol)
   {
