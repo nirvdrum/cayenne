@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.AboutDialog;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.view.AboutDialog;
 
 /**
  * @author Andrei Adamchik
