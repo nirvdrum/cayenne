@@ -70,7 +70,8 @@ import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.PanelFactory;
 
 
-/** Wizard for generating the classes from the data map. */
+/** Wizard for generating the classes from the data map. 
+  * @author Michael Misha Shengaout */
 public class GenerateClassDialog extends JDialog
 implements ActionListener
 {
