@@ -59,7 +59,7 @@ import java.sql.Connection;
 
 import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.*;
-import org.objectstyle.util.Util;
+import org.objectstyle.cayenne.util.Util;
 
 /** Keeps references to all the test resources needed by Test Cases.
   *

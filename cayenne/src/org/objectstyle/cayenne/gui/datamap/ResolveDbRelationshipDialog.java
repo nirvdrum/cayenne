@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.gui.*;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 
 /** 
  * Edit DbRelationship and DbAttributePair-s for this DbRelationship.

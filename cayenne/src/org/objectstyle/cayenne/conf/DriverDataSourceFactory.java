@@ -67,6 +67,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import org.objectstyle.cayenne.ConfigException;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.util.*;
 import org.objectstyle.util.*;
 
 /** 

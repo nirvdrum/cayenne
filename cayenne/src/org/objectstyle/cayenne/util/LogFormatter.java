@@ -1,4 +1,3 @@
-package org.objectstyle.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,25 +53,61 @@ package org.objectstyle.util;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.util;
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
-public class NameConverterTst extends TestCase {
+/** ObjectStyle log formatter for more readable logs. */
+public final class LogFormatter extends Formatter {
+    private static final Pattern classNamePat = Pattern.compile("\\.(\\w+\\.\\w+)$");
+    private static final long ts = System.currentTimeMillis();
 
-    public NameConverterTst(String name) {
-        super(name);
+   /** Will trim long class names to only the last 2 components
+    * that should be enough to identify where the call originated from. */
+    public static String trimClassName(String className) {
+        if(className == null)
+            return null;
+        Matcher match = classNamePat.matcher(className);
+        return (match.find()) ? match.group(1) : className;
     }
-
-    public void testUndescoredToJava1() throws java.lang.Exception {
-        String expected = "ClassNameIdentifier";
-        assertEquals(expected, NameConverter.undescoredToJava("_CLASS_name_IdeNTIFIER_", true));
+    
+    
+    /** Logs exception stack trace in provided StringBuffer. */
+    public static void logThrown(StringBuffer buf, Throwable th) {
+        StringWriter out = new StringWriter();
+        PrintWriter pout = new PrintWriter(out);
+        th.printStackTrace(pout);
+        pout.flush();
+        pout.close();
+        
+        buf.append(out.getBuffer());
     }
-
-    public void testUndescoredToJava2() throws java.lang.Exception {
-        String expected = "propNameIdentifier123";
-        assertEquals(expected, NameConverter.undescoredToJava("_prop_name_IdeNTIFIER_123", false));
+    
+    
+    /** Format output message */    
+    public String format(LogRecord record) {
+        StringBuffer buf = new StringBuffer();
+        buf.append(record.getLevel().getName())
+        .append(' ')
+        .append(trimClassName(record.getSourceClassName()))
+        .append(' ')
+        .append(record.getMillis() - ts)
+        .append(": ")
+        .append(record.getMessage())
+        .append('\n');
+        
+        Throwable th = record.getThrown();
+        if(th != null)
+            logThrown(buf, th);
+        
+        return buf.toString();
     }
 }
+
+

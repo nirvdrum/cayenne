@@ -64,7 +64,7 @@ import javax.swing.AbstractAction;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.util.*;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.AddDataMapDialog;
 import org.objectstyle.cayenne.gui.event.*;

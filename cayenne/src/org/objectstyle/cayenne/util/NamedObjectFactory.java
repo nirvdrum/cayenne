@@ -53,7 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.util;
 
 import java.util.HashMap;
 

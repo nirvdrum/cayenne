@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.util.Preferences;
 
 
 /** Wizard for generating the classes from the data map. 

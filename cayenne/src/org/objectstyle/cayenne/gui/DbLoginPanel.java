@@ -67,7 +67,7 @@ import javax.swing.text.Keymap;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.util.Preferences;
 
 /**
  * Database login panel.

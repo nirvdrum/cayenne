@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.gui.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.util.*;
 
 /** 
  * Main frame of CayenneModeler. Responsibilities include 

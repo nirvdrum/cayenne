@@ -80,7 +80,7 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
 		// configure test suites, run them independently
 
 		ArrayList suites = new ArrayList();
-		suites.add(org.objectstyle.util.AllTests.suite());
+		suites.add(org.objectstyle.cayenne.util.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.gui.AllTests.suite());
 		suites.add(org.objectstyle.cayenne.gui.util.AllTests.suite());

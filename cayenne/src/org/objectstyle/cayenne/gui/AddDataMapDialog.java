@@ -66,9 +66,9 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import javax.swing.*;
 import org.apache.commons.collections.ExtendedProperties;
-import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.Preferences;
 import org.objectstyle.cayenne.gui.util.*;
 
 

@@ -62,8 +62,8 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.util.ResourceLocator;
-import org.objectstyle.util.Util;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 

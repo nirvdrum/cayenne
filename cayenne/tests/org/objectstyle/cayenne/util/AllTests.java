@@ -1,4 +1,4 @@
-package org.objectstyle.util;
+package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,59 +55,19 @@ package org.objectstyle.util;
  *
  */ 
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.objectstyle.util.*;
 
+import junit.framework.*;
+import junit.runner.*;
 
-/** ObjectStyle log formatter for more readable logs. */
-public final class LogFormatter extends Formatter {
-    private static final Pattern classNamePat = Pattern.compile("\\.(\\w+\\.\\w+)$");
-    private static final long ts = System.currentTimeMillis();
-
-   /** Will trim long class names to only the last 2 components
-    * that should be enough to identify where the call originated from. */
-    public static String trimClassName(String className) {
-        if(className == null)
-            return null;
-        Matcher match = classNamePat.matcher(className);
-        return (match.find()) ? match.group(1) : className;
-    }
-    
-    
-    /** Logs exception stack trace in provided StringBuffer. */
-    public static void logThrown(StringBuffer buf, Throwable th) {
-        StringWriter out = new StringWriter();
-        PrintWriter pout = new PrintWriter(out);
-        th.printStackTrace(pout);
-        pout.flush();
-        pout.close();
-        
-        buf.append(out.getBuffer());
-    }
-    
-    
-    /** Format output message */    
-    public String format(LogRecord record) {
-        StringBuffer buf = new StringBuffer();
-        buf.append(record.getLevel().getName())
-        .append(' ')
-        .append(trimClassName(record.getSourceClassName()))
-        .append(' ')
-        .append(record.getMillis() - ts)
-        .append(": ")
-        .append(record.getMessage())
-        .append('\n');
-        
-        Throwable th = record.getThrown();
-        if(th != null)
-            logThrown(buf, th);
-        
-        return buf.toString();
+public class AllTests {
+	public static TestSuite suite() {
+        TestSuite suite = new TestSuite("Util Package Tests");
+        suite.addTestSuite(UtilTst.class);
+        suite.addTestSuite(UtilExtTst.class);
+        suite.addTestSuite(LogFormatterTst.class);
+        suite.addTestSuite(NameConverterTst.class);
+        suite.addTestSuite(ResourceLocatorTst.class);
+        return suite;
     }
 }
-
-

@@ -72,8 +72,8 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.EOModelFileFilter;
 import org.objectstyle.cayenne.gui.util.EOModelSelectFilter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.util.Preferences;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
-import org.objectstyle.util.Preferences;
 
 /**
  * Action handler for WebObjects EOModel import function.

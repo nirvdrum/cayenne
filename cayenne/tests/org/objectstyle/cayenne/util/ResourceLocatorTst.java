@@ -1,4 +1,4 @@
-package org.objectstyle.util;
+package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,41 +53,59 @@ package org.objectstyle.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.StringTokenizer;
+import junit.framework.*;
+import java.util.*;
+import java.io.*;
 
-/** Utility class to convert from different naming styles to Java convention.
- *  For example names like "ABCD_EFG" can be converted to "abcdEfg" */
-public class NameConverter {
+public class ResourceLocatorTst extends TestCase {
+    private File fTmpFileInCurrentDir;
+    private String fTmpFileName;
 
-    /** Converts names like "ABCD_EFG_123" to java-style names like "abcdEfg123".
-     *  If <code>capitalize</code> is true, returned name is capitalized
-     *  (for instance if this is a class name). */
-    public static String undescoredToJava(String name, boolean capitalize) {
-        StringTokenizer st = new StringTokenizer(name, "_");
-        StringBuffer buf = new StringBuffer();
+    public ResourceLocatorTst(String name) {
+        super(name);
+    }
 
-        boolean first = true;
-        while(st.hasMoreTokens()) {
-            String token = st.nextToken().toLowerCase();
-            if(first) {
-                first = false;
-                if(!capitalize) {
-                    buf.append(token);
-                    continue;
-                }
-            }
-            
-            int len = token.length();
-            if(len == 0)
-                continue;
-            
-            buf.append(Character.toUpperCase(token.charAt(0)));
-            
-            if(len > 1)
-                buf.append(token.substring(1, len));
+    protected void setUp() throws java.lang.Exception {
+        fTmpFileName = System.currentTimeMillis() + ".tmp";
+        fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);
+
+        // right some garbage to the temp file, so that it is not empty
+        FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
+        fout.write("This is total grabage..");
+        fout.close();
+    }
+
+    protected void tearDown() throws java.lang.Exception {
+        if (!fTmpFileInCurrentDir.delete())
+            throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
+    }
+
+    public void testFindResourceInCurDir() throws java.lang.Exception {
+        InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
+        try {
+            assertNotNull(in);
         }
-        return buf.toString();
+        finally {
+            in.close();
+        }
+    }
+
+    public void testClassBaseUrl() throws java.lang.Exception {
+        String me = ResourceLocator.classBaseUrl(this.getClass());
+        assertNotNull(me);
+        assertTrue("Expected jar:.. URL, got " + me, me.startsWith("jar:"));
+    }
+
+    public void testFindResourceWithJarUrl() throws java.lang.Exception {
+        InputStream in =
+            ResourceLocator.findResourceInClasspath("test_resources/testfile1.txt");
+        try {
+            assertNotNull(in);
+        }
+        finally {
+            in.close();
+        }
     }
 }

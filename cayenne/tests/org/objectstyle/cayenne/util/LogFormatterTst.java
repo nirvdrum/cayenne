@@ -1,4 +1,4 @@
-package org.objectstyle.util;
+package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,59 +53,55 @@ package org.objectstyle.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */
+ */ 
 
-import junit.framework.*;
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
-public class ResourceLocatorTst extends TestCase {
-    private File fTmpFileInCurrentDir;
-    private String fTmpFileName;
+import junit.framework.TestCase;
 
-    public ResourceLocatorTst(String name) {
+
+public class LogFormatterTst extends TestCase {
+    
+    public LogFormatterTst(String name) {
         super(name);
     }
-
-    protected void setUp() throws java.lang.Exception {
-        fTmpFileName = System.currentTimeMillis() + ".tmp";
-        fTmpFileInCurrentDir = new File("." + File.separator + fTmpFileName);
-
-        // right some garbage to the temp file, so that it is not empty
-        FileWriter fout = new FileWriter(fTmpFileInCurrentDir);
-        fout.write("This is total grabage..");
-        fout.close();
-    }
-
-    protected void tearDown() throws java.lang.Exception {
-        if (!fTmpFileInCurrentDir.delete())
-            throw new Exception("Error deleting temporary file: " + fTmpFileInCurrentDir);
-    }
-
-    public void testFindResourceInCurDir() throws java.lang.Exception {
-        InputStream in = ResourceLocator.findResourceInFileSystem(fTmpFileName);
+    
+    public void testLogThrown() throws java.lang.Exception {
         try {
-            assertNotNull(in);
+            throw new Exception("test exception.");
         }
-        finally {
-            in.close();
+        catch(Exception ex) {
+            // reference log
+            StringWriter out = new StringWriter();
+            PrintWriter pout = new PrintWriter(out);
+            ex.printStackTrace(pout);
+            pout.flush();
+            pout.close();
+            
+            // test log
+            StringBuffer buf = new StringBuffer();
+            LogFormatter.logThrown(buf, ex);
+            assertEquals(out.toString(), buf.toString());
         }
     }
-
-    public void testClassBaseUrl() throws java.lang.Exception {
-        String me = ResourceLocator.classBaseUrl(this.getClass());
-        assertNotNull(me);
-        assertTrue("Expected jar:.. URL, got " + me, me.startsWith("jar:"));
+    
+    public void testFormatLog() throws java.lang.Exception {
+        // test that logged message is part of output 
+        // do not test format, since it may vary...
+        
+        LogRecord log = new LogRecord(Level.SEVERE, "random msg abcd443543");
+        LogFormatter formatter = new LogFormatter();
+        assertTrue(formatter.format(log).indexOf(log.getMessage()) >= 0);
     }
-
-    public void testFindResourceWithJarUrl() throws java.lang.Exception {
-        InputStream in =
-            ResourceLocator.findResourceInClasspath("test_resources/testfile1.txt");
-        try {
-            assertNotNull(in);
-        }
-        finally {
-            in.close();
-        }
+    
+    public void testTrimClassName() throws java.lang.Exception {
+        // test that logged message is part of output 
+        // do not test format, since it may vary...
+        
+        assertEquals("xyz.abc", LogFormatter.trimClassName("xyz.abc"));
+        assertEquals("abc.123", LogFormatter.trimClassName("xyz.abc.123"));
     }
 }

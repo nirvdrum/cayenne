@@ -70,6 +70,7 @@ import javax.swing.filechooser.FileFilter;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
 
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;

@@ -66,7 +66,7 @@ import org.apache.velocity.context.Context;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.util.ResourceLocator;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 /** Generates Java class source code using VTL (Velocity template engine) based on
   * template and ObjEntity.

@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 
 
 /** Model for the Db Entity attributes.

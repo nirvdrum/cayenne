@@ -63,7 +63,7 @@ import javax.swing.*;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.util.Preferences;
 
 public class PreferenceField extends JComboBox {
 	static Logger logObj = Logger.getLogger(PreferenceField.class.getName());

@@ -62,6 +62,7 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;

@@ -66,8 +66,8 @@ import javax.sql.DataSource;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.AbstractHandler;
-import org.objectstyle.util.Util;
+import org.objectstyle.cayenne.util.AbstractHandler;
+import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 

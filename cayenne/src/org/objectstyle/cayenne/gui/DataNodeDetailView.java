@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
-import org.objectstyle.util.Preferences;
+import org.objectstyle.cayenne.util.Preferences;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo.

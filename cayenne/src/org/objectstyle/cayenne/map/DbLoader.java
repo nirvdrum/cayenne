@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
-import org.objectstyle.util.NameConverter;
+import org.objectstyle.cayenne.util.*;
 
 /** Utility class that does reverse engineering of the database. 
   * It can create DataMaps using database meta data obtained via JDBC driver.

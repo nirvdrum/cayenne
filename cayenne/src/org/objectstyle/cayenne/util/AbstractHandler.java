@@ -1,4 +1,3 @@
-package org.objectstyle.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.util;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.util;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;

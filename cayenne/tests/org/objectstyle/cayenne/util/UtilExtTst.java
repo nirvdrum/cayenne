@@ -1,4 +1,3 @@
-package org.objectstyle.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,12 +53,76 @@ package org.objectstyle.util;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.util;
 
-public class SerializableObject implements java.io.Serializable { 
-	public boolean equals(Object obj) {
-	   if(obj == null)
-	   	return false;
-	   
-	   return obj.getClass() == this.getClass();
-	}
+import java.io.File;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+
+
+public class UtilExtTst extends TestCase {
+    static Logger logObj = Logger.getLogger(UtilTst.class.getName());
+
+    private File fTmpFileInCurrentDir;
+    private String fTmpFileName;
+    private File fTmpFileCopy;
+
+    public UtilExtTst(String name) {
+        super(name);
+    }
+
+    public void testPackagePath1() throws java.lang.Exception {
+        String expectedPath = "org/objectstyle/cayenne/util";
+        assertEquals(expectedPath, Util.getPackagePath(UtilExtTst.class.getName()));
+    }
+
+    public void testPackagePath2() throws java.lang.Exception {
+        // inner class
+        class Tst extends Object {};
+        String expectedPath = "org/objectstyle/cayenne/util";
+        assertEquals(expectedPath, Util.getPackagePath(Tst.class.getName()));
+    }
+
+    public void testPackagePath3() throws java.lang.Exception {
+        assertEquals("", Util.getPackagePath("ClassWithNoPackage"));
+    }
+
+    public void testBackslashFix() throws java.lang.Exception {
+        String strBefore = "abcd\\12345\\";
+        String strAfter = "abcd/12345/";
+        assertEquals(strAfter, Util.substBackslashes(strBefore));
+    }
+
+    public void testNullSafeEquals()  throws java.lang.Exception {
+        // need a special subclass of Object to make "clone" method public
+        class CloneableObject implements Cloneable {
+            public Object clone() throws CloneNotSupportedException {
+                return super.clone();
+            }
+
+            public boolean equals(Object obj) {
+                if(obj == null)
+                    return false;
+
+                // for the purpose of this test
+                // all objects of this class considered equal
+                // (since they carry no state)
+                return obj.getClass() == this.getClass();
+            }
+        }
+
+        CloneableObject o1 = new CloneableObject();
+        Object o2 = new Object();
+        Object o3 = o1.clone();
+
+        assertTrue(o3.equals(o1));
+        assertTrue(Util.nullSafeEquals(o1, o1));
+        assertTrue(!Util.nullSafeEquals(o1, o2));
+        assertTrue(Util.nullSafeEquals(o1, o3));
+        assertTrue(!Util.nullSafeEquals(o1, null));
+        assertTrue(!Util.nullSafeEquals(null, o1));
+        assertTrue(Util.nullSafeEquals(null, null));
+    }
 }

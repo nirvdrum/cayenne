@@ -1,4 +1,4 @@
-package org.objectstyle.util;
+package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -60,6 +60,9 @@ import java.util.logging.*;
 import java.util.*;
 import java.net.*;
 import javax.naming.*;
+
+import org.objectstyle.cayenne.util.*;
+
 import java.io.*;
 import java.util.jar.*;
 

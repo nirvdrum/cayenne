@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.conf;
 import java.io.InputStream;
 import java.util.logging.Level;
 
-import org.objectstyle.util.ResourceLocator;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
   * Subclass of Configuration that locates resources using internal reference

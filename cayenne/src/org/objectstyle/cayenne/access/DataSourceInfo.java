@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.util.Util;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * Helper JavaBean class that holds datasource login information. 

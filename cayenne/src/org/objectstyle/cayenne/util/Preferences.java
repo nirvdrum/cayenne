@@ -1,4 +1,4 @@
-package org.objectstyle.util;
+package org.objectstyle.cayenne.util;
 
 /* ====================================================================
  * 

@@ -73,6 +73,7 @@ import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.EntityWrapper;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.*;
 
 /** 
  * Detail view of the ObjEntity properties. 

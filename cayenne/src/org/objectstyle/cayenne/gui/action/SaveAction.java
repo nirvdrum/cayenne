@@ -66,8 +66,8 @@ import javax.swing.AbstractAction;
 
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.Preferences;
 import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.GuiDataSource;
 import org.objectstyle.cayenne.gui.event.*;

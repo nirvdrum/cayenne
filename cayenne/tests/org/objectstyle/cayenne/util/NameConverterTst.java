@@ -1,4 +1,4 @@
-package org.objectstyle.util;
+package org.objectstyle.cayenne.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -57,15 +57,22 @@ package org.objectstyle.util;
 
 import junit.framework.*;
 import junit.runner.*;
+import java.util.logging.*;
 
-public class AllTests {
-	public static TestSuite suite() {
-        TestSuite suite = new TestSuite("Util Package Tests");
-        suite.addTestSuite(UtilTst.class);
-        suite.addTestSuite(UtilExtTst.class);
-        suite.addTestSuite(LogFormatterTst.class);
-        suite.addTestSuite(NameConverterTst.class);
-        suite.addTestSuite(ResourceLocatorTst.class);
-        return suite;
+
+public class NameConverterTst extends TestCase {
+
+    public NameConverterTst(String name) {
+        super(name);
+    }
+
+    public void testUndescoredToJava1() throws java.lang.Exception {
+        String expected = "ClassNameIdentifier";
+        assertEquals(expected, NameConverter.undescoredToJava("_CLASS_name_IdeNTIFIER_", true));
+    }
+
+    public void testUndescoredToJava2() throws java.lang.Exception {
+        String expected = "propNameIdentifier123";
+        assertEquals(expected, NameConverter.undescoredToJava("_prop_name_IdeNTIFIER_123", false));
     }
 }

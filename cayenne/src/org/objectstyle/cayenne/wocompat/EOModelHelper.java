@@ -60,8 +60,8 @@ import java.net.URL;
 import java.util.*;
 
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.wocompat.parser.Parser;
-import org.objectstyle.util.ResourceLocator;
 
 /**
  *  Helper class used by EOModelProcessor. During creation, it loads

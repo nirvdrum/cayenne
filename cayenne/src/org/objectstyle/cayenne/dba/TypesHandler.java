@@ -66,8 +66,8 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.util.ResourceLocator;
-import org.objectstyle.util.Util;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 
 
 /** Provides JDBC-RDBMS types mapping. Loads types info from a xml file.

@@ -68,9 +68,9 @@ import javax.swing.border.Border;
 import javax.swing.table.*;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.util.Preferences;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.util.Preferences;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.event.Mediator;
