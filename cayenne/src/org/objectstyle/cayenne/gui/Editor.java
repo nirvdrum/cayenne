@@ -316,6 +316,8 @@ public class Editor
 		toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(RemoveAction.ACTION_NAME).buildButton());
+		
+		toolBar.addSeparator();
 
 		toolBar.add(getAction(CreateDomainAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());

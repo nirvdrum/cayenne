@@ -30,13 +30,15 @@
 	
 	<!-- derived entity -->
 	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
-		<db-attribute name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2" spec="SUM(%@)">
+		<db-attribute-derived name="ESTIMATED_PRICE" type="DECIMAL" length="10" precision="2" spec="SUM(%@)">
 			<db-attribute-ref name="ESTIMATED_PRICE"/>
-		</db-attribute>
-		<db-attribute name="PAINTINGS_COUNT" type="INTEGER" length="10" precision="2" spec="COUNT(%@)">
+		</db-attribute-derived>
+		<db-attribute-derived name="PAINTINGS_COUNT" type="INTEGER" length="10" precision="2" spec="COUNT(%@)">
 			<db-attribute-ref name="PAINTING_ID"/>
-		</db-attribute>
-		<db-attribute name="ARTIST_ID" type="INTEGER" isGroupBy="true"/>
+		</db-attribute-derived>
+		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isGroupBy="true" spec="%@">
+			<db-attribute-ref name="ARTIST_ID"/>
+		</db-attribute-derived>
 	</db-entity>
 	
 	<db-entity name="PAINTING_INFO">

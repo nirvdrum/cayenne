@@ -6,7 +6,7 @@
 
 <!ELEMENT data-map (db-entity*, obj-entity*, db-relationship*, obj-relationship*)>
 
-<!ELEMENT db-entity (db-attribute+)>
+<!ELEMENT db-entity (db-attribute+, db-attribute-derived+)>
 <!ATTLIST db-entity
 	name CDATA #REQUIRED
 	schema CDATA #IMPLIED
@@ -14,8 +14,17 @@
 	parentName CDATA #IMPLIED
 >
 
-<!ELEMENT db-attribute (db-attribute-ref*)>
+<!ELEMENT db-attribute EMPTY>
 <!ATTLIST db-attribute
+	name CDATA #REQUIRED
+	isPrimaryKey (true | false) "false"
+	isMandatory (true | false) "false"
+	type CDATA #REQUIRED
+	length CDATA #IMPLIED
+	precision CDATA #IMPLIED
+>
+<!ELEMENT db-attribute-derived (db-attribute-ref*)>
+<!ATTLIST db-attribute-derived
 	name CDATA #REQUIRED
 	isPrimaryKey (true | false) "false"
 	isMandatory (true | false) "false"

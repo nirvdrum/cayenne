@@ -116,11 +116,14 @@ public class CreateAttributeAction extends CayenneAction {
 
 	public void createDbAttribute(DbEntity dbEnt) {
 		Mediator mediator = getMediator();
+		Class attrClass =
+			(dbEnt instanceof DerivedDbEntity)
+				? DerivedDbAttribute.class
+				: DbAttribute.class;
 		DbAttribute attr =
-			(DbAttribute) NamedObjectFactory.createObject(
-				DbAttribute.class,
-				dbEnt);
+			(DbAttribute) NamedObjectFactory.createObject(attrClass, dbEnt);
 		dbEnt.addAttribute(attr);
+		
 		mediator.fireDbAttributeEvent(
 			new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
 		mediator.fireDbAttributeDisplayEvent(

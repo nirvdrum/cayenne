@@ -80,6 +80,8 @@ public class MapLoader extends DefaultHandler {
 	private static final String DB_ENTITY_TAG = "db-entity";
 	private static final String OBJ_ENTITY_TAG = "obj-entity";
 	private static final String DB_ATTRIBUTE_TAG = "db-attribute";
+	private static final String DB_ATTRIBUTE_DERIVED_TAG =
+		"db-attribute-derived";
 	private static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
 	private static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
 	private static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
@@ -207,6 +209,8 @@ public class MapLoader extends DefaultHandler {
 			processStartDbEntity(atts);
 		} else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
 			processStartDbAttribute(atts);
+		} else if (local_name.equals(DB_ATTRIBUTE_DERIVED_TAG)) {
+			processStartDerivedDbAttribute(atts);
 		} else if (local_name.equals(DB_ATTRIBUTE_REF_TAG)) {
 			processStartDbAttributeRef(atts);
 		} else if (local_name.equals(OBJ_ENTITY_TAG)) {
@@ -235,6 +239,8 @@ public class MapLoader extends DefaultHandler {
 		} else if (local_name.equals(OBJ_ENTITY_TAG)) {
 			processEndObjEntity();
 		} else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
+			processEndDbAttribute();
+		} else if (local_name.equals(DB_ATTRIBUTE_DERIVED_TAG)) {
 			processEndDbAttribute();
 		} else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
 			processEndDbRelationship();
@@ -297,21 +303,21 @@ public class MapLoader extends DefaultHandler {
 		Collection db_entities = map.getDbEntityMap().values();
 		Iterator iter = db_entities.iterator();
 		while (iter.hasNext()) {
-			DbEntity temp = (DbEntity) iter.next();
-			out.print("\t<db-entity name=\"" + temp.getName() + '\"');
-			if (null != temp.getSchema()) {
+			DbEntity dbe = (DbEntity) iter.next();
+			out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
+			if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
 				out.print(" schema=\"");
-				out.print(temp.getSchema());
+				out.print(dbe.getSchema());
 				out.print('\"');
 			}
-			if (null != temp.getCatalog()) {
+			if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
 				out.print(" catalog=\"");
-				out.print(temp.getCatalog());
+				out.print(dbe.getCatalog());
 				out.print('\"');
 			}
 
-			if (temp instanceof DerivedDbEntity) {
-				DbEntity parent = ((DerivedDbEntity) temp).getParentEntity();
+			if (dbe instanceof DerivedDbEntity) {
+				DbEntity parent = ((DerivedDbEntity) dbe).getParentEntity();
 				String name = (parent != null) ? parent.getName() : "";
 				out.print(" parentName=\"");
 				out.print(name);
@@ -320,9 +326,9 @@ public class MapLoader extends DefaultHandler {
 
 			out.println('>');
 
-			storeDbAttribute(out, temp);
+			storeDbAttribute(out, dbe);
 			out.println("\t</db-entity>");
-			dbRelationships.addAll(temp.getRelationshipList());
+			dbRelationships.addAll(dbe.getRelationshipList());
 		}
 	}
 
@@ -331,73 +337,106 @@ public class MapLoader extends DefaultHandler {
 		Iterator iter = db_attributes.iterator();
 
 		while (iter.hasNext()) {
-			DbAttribute temp = (DbAttribute) iter.next();
-			out.print("\t\t<db-attribute name=\"" + temp.getName() + '\"');
-
-			String type = TypesMapping.getSqlNameByType(temp.getType());
-			if (type != null) {
-				out.print(" type=\"" + type + '\"');
-			}
-
-			// If attribute is part of primary key
-			if (temp.isPrimaryKey()) {
-				out.print(" isPrimaryKey=\"true\"");
-			}
-
-			if (temp.isMandatory())
-				out.print(" isMandatory=\"true\"");
-
-			if (temp.getMaxLength() > 0) {
-				out.print(" length=\"");
-				out.print(temp.getMaxLength());
-				out.print('\"');
-			}
-
-			if (temp.getPrecision() > 0) {
-				out.print(" precision=\"");
-				out.print(temp.getPrecision());
-				out.print('\"');
-			}
-
-			if (dbEntity instanceof DerivedDbEntity) {
-				if (((DerivedDbEntity) dbEntity)
-					.getGroupByAttributes()
-					.contains(temp)) {
-					out.print(" isGroupBy=\"true\"");
-				}
-			}
-
-			if (temp instanceof DerivedDbAttribute) {
-				DerivedDbAttribute derived = (DerivedDbAttribute) temp;
-				String spec = derived.getExpressionSpec();
-				if (spec != null && spec.trim().length() > 0) {
-					out.print(" spec=\"");
-					out.print(spec);
-					out.print('\"');
-				}
-
-				List params = derived.getParams();
-
-				if (params.size() > 0) {
-					out.println(">");
-
-					Iterator refs = params.iterator();
-					while (refs.hasNext()) {
-						DbAttribute ref = (DbAttribute) refs.next();
-						out.println(
-							"\t\t\t<db-attribute-ref name=\""
-								+ ref.getName()
-								+ "\"/>");
-					}
-					out.println("\t\t</db-attribute>");
-				} else {
-					out.println("/>");
-				}
+			DbAttribute attr = (DbAttribute) iter.next();
+			if (attr instanceof DerivedDbAttribute) {
+				storeDerivedDbAttribute(out, (DerivedDbAttribute) attr);
 			} else {
-				out.println("/>");
+				storeRegularDbAttribute(out, attr);
 			}
 		}
 
+	}
+
+	private void storeDerivedDbAttribute(
+		PrintWriter out,
+		DerivedDbAttribute attr) {
+		out.print("\t\t<db-attribute-derived name=\"" + attr.getName() + '\"');
+
+		String type = TypesMapping.getSqlNameByType(attr.getType());
+		if (type != null) {
+			out.print(" type=\"" + type + '\"');
+		}
+
+		// If attribute is part of primary key
+		if (attr.isPrimaryKey()) {
+			out.print(" isPrimaryKey=\"true\"");
+		}
+
+		if (attr.isMandatory())
+			out.print(" isMandatory=\"true\"");
+
+		if (attr.getMaxLength() > 0) {
+			out.print(" length=\"");
+			out.print(attr.getMaxLength());
+			out.print('\"');
+		}
+
+		if (attr.getPrecision() > 0) {
+			out.print(" precision=\"");
+			out.print(attr.getPrecision());
+			out.print('\"');
+		}
+
+		if (((DerivedDbEntity) attr.getEntity())
+			.getGroupByAttributes()
+			.contains(attr)) {
+			out.print(" isGroupBy=\"true\"");
+		}
+
+		String spec = attr.getExpressionSpec();
+		if (spec != null && spec.trim().length() > 0) {
+			out.print(" spec=\"");
+			out.print(spec);
+			out.print('\"');
+		}
+
+		List params = attr.getParams();
+
+		if (params.size() > 0) {
+			out.println(">");
+
+			Iterator refs = params.iterator();
+			while (refs.hasNext()) {
+				DbAttribute ref = (DbAttribute) refs.next();
+				out.println(
+					"\t\t\t<db-attribute-ref name=\"" + ref.getName() + "\"/>");
+			}
+			out.println("\t\t</db-attribute-derived>");
+		} else {
+			out.println("/>");
+		}
+	}
+
+	private void storeRegularDbAttribute(PrintWriter out, DbAttribute attr) {
+		out.print("\t\t<db-attribute name=\"" + attr.getName() + '\"');
+
+		String type = TypesMapping.getSqlNameByType(attr.getType());
+		if (type != null) {
+			out.print(" type=\"" + type + '\"');
+		}
+
+		// If attribute is part of primary key
+		if (attr.isPrimaryKey()) {
+			out.print(" isPrimaryKey=\"true\"");
+		}
+
+		if (attr.isMandatory()) {
+			out.print(" isMandatory=\"true\"");
+		}
+
+		if (attr.getMaxLength() > 0) {
+			out.print(" length=\"");
+			out.print(attr.getMaxLength());
+			out.print('\"');
+		}
+
+		if (attr.getPrecision() > 0) {
+			out.print(" precision=\"");
+			out.print(attr.getPrecision());
+			out.print('\"');
+		}
+
+		out.println("/>");
 	}
 
 	private void storeObjEntities(PrintWriter out, DataMap map) {
@@ -575,7 +614,8 @@ public class MapLoader extends DefaultHandler {
 			((DerivedDbAttribute) attrib).addParam(ref);
 		} else {
 			throw new SAXException(
-				"Referenced attributes are not supported by regular DbAttributes. Offending attribute name '"
+				"Referenced attributes are not supported by regular DbAttributes. "
+					+ " Offending attribute name '"
 					+ attrib.getName()
 					+ "'.");
 		}
@@ -584,19 +624,45 @@ public class MapLoader extends DefaultHandler {
 	private void processStartDbAttribute(Attributes atts) throws SAXException {
 		String name = atts.getValue("", "name");
 		String type = atts.getValue("", "type");
+
+		attrib =
+			new DbAttribute(
+				name,
+				TypesMapping.getSqlTypeByName(type),
+				dbEntity);
+
+		dbEntity.addAttribute(attrib);
+
+		String temp = atts.getValue("", "length");
+		if (temp != null) {
+			attrib.setMaxLength(Integer.parseInt(temp));
+		}
+		temp = atts.getValue("", "precision");
+		if (temp != null) {
+			attrib.setPrecision(Integer.parseInt(temp));
+		}
+		temp = atts.getValue("", "isPrimaryKey");
+		if (temp != null && temp.equalsIgnoreCase(TRUE)) {
+			attrib.setPrimaryKey(true);
+		}
+		temp = atts.getValue("", "isMandatory");
+		if (temp != null && temp.equalsIgnoreCase(TRUE)) {
+			attrib.setMandatory(true);
+		}
+	}
+
+	private void processStartDerivedDbAttribute(Attributes atts)
+		throws SAXException {
+		String name = atts.getValue("", "name");
+		String type = atts.getValue("", "type");
 		String spec = atts.getValue("", "spec");
 
 		attrib =
-			(dbEntity instanceof DerivedDbEntity)
-				? new DerivedDbAttribute(
-					name,
-					TypesMapping.getSqlTypeByName(type),
-					dbEntity,
-					spec)
-				: new DbAttribute(
-					name,
-					TypesMapping.getSqlTypeByName(type),
-					dbEntity);
+			new DerivedDbAttribute(
+				name,
+				TypesMapping.getSqlTypeByName(type),
+				dbEntity,
+				spec);
 
 		dbEntity.addAttribute(attrib);
 

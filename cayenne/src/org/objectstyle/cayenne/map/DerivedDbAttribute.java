@@ -74,7 +74,7 @@ import java.util.*;
  * @author Andrei Adamchik
  */
 public class DerivedDbAttribute extends DbAttribute {
-	private static final String ATTRIBUTE_TOKEN = "%@";
+	public static final String ATTRIBUTE_TOKEN = "%@";
 	
 	protected String expressionSpec;
 	protected ArrayList params = new ArrayList();
