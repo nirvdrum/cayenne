@@ -53,7 +53,7 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.*;
@@ -65,18 +65,41 @@ import java.io.*;
 import java.net.*;
 import java.util.logging.*;
 
-/** Setup database connection info to run tests. */
+
+/** Creates database connection info to run tests.
+  * Can build connection info either using an interactive 
+  * login procedure or loading this information from
+  * the XML file.
+  *
+  * @author Andrei Adamchik
+  */
 public class ConnectionSetup implements TestConstants {
     static Logger logObj = Logger.getLogger(ConnectionSetup.class.getName());
 
+    private boolean interactive;
+    private boolean allowGui;
 
+    public ConnectionSetup(boolean interactive, boolean allowGui) {
+        this.interactive = interactive;
+        this.allowGui = allowGui;
+    }
 
-    public DataSourceInfo buildConnectionInfo(boolean useGui) {
-        InteractiveLogin loginObj = (useGui)
+    public DataSourceInfo buildConnectionInfo() {
+        return (interactive)
+               ? getInfoInteractively()
+               : getInfoFromFile();
+    }
+
+    private DataSourceInfo getInfoFromFile() {
+        return null;
+    }
+    
+    private DataSourceInfo getInfoInteractively() {
+        InteractiveLogin loginObj = (allowGui)
                                     ? TestLogin.getTestGuiLoginObject()
                                     : InteractiveLogin.getLoginObject(new DataSourceInfo());
 
-        if(!useGui) {
+        if(!allowGui) {
             System.out.println("*********************************************");
             System.out.println("Collecting database connection information...");
         }

@@ -71,7 +71,6 @@ import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.util.*;
 
 
-
 /** Creates DataSource objects from XML configuration files that
   * describe a JDBC driver. Wraps JDBC driver in a generic DataSource 
   * implementation.
@@ -100,6 +99,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                                driverInfo.getUserName(),
                                driverInfo.getPassword());
     }
+
 
     /** Returns DataSourceInfo property. */
     protected DataSourceInfo getDriverInfo() {

@@ -70,13 +70,17 @@ public class DefaultConfiguration extends Configuration {
 
 
     /** Returns domain configuration as a stream or null if it
-      * can not be found. */
+      * can not be found. This method will look for "cayenne.xml"
+      * file in locations accessible to ClassLoader (in Java CLASSPATH).
+      * This can be a standalone file or an entry in a JAR file. */
     public InputStream getDomainConfig() {
         return ResourceLocator.findResourceInClasspath(DOMAIN_FILE);
     }
     
     /** Returns DataMap configuration from a specified location or null if it
-      * can not be found. */
+      * can not be found. This method will look for resource identified by
+      * <code>location</code> in places accessible to ClassLoader (in Java CLASSPATH).
+      * This can be a standalone file or an entry in a JAR file. */
     public InputStream getMapConfig(String location) {
         return ResourceLocator.findResourceInClasspath(location);
     }

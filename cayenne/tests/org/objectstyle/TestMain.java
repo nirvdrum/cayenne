@@ -97,7 +97,7 @@ public class TestMain implements TestConstants {
         if(args != null && args.length > 0) {
             if("-nogui".equals(args[0]))
                 noGui = true;
-            else 
+            else if("-xml".equals(args[0]))
                 xmlDataSource = true;
         }
 
@@ -105,7 +105,10 @@ public class TestMain implements TestConstants {
         configureProps();
 
         // initialize shared resources
-        DataSourceInfo dsi = new ConnectionSetup().buildConnectionInfo(!noGui);
+        DataSourceInfo dsi = (xmlDataSource)
+                             ? new ConnectionSetup(false, false).buildConnectionInfo()
+                             : new ConnectionSetup(true, !noGui).buildConnectionInfo();
+
         resources.setSharedConnInfo(dsi);
         resources.setSharedConnection(openConnection());
         resources.setSharedDomain(createSharedDomain());
