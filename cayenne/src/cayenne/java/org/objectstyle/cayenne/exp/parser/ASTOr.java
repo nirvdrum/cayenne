@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTOr extends AggregatedConditionNode {
+public class ASTOr extends AggregateConditionNode {
 
     public ASTOr(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTAND);

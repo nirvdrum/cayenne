@@ -102,15 +102,10 @@ PARSER_END(ExpressionParser)
 
 Expression expression() : {}
 {
-	aggregatedCondition() <EOF> 
+	orCondition() <EOF> 
     { 
         return (Expression) jjtree.rootNode(); 
     }
-}
-
-void aggregatedCondition() : {}
-{
-	orCondition()
 }
 
 void orCondition() : {}
@@ -247,7 +242,7 @@ void numericPrimary() : {}
 		// technically we shouldn't make a condition a child of scalar expression
 		// but this will be handled in the code to avoid long lookaheads
 		
-		"(" aggregatedCondition() ")"
+		"(" orCondition() ")"
 	|
 		pathExpression()
 	|

@@ -84,14 +84,10 @@ public class ExpressionParser/*@bgen(jjtree)*/implements ExpressionParserTreeCon
     }
 
   final public Expression expression() throws ParseException {
-    aggregatedCondition();
+    orCondition();
     jj_consume_token(0);
         {if (true) return (Expression) jjtree.rootNode();}
     throw new Error("Missing return statement in function");
-  }
-
-  final public void aggregatedCondition() throws ParseException {
-    orCondition();
   }
 
   final public void orCondition() throws ParseException {
@@ -1071,7 +1067,7 @@ public class ExpressionParser/*@bgen(jjtree)*/implements ExpressionParserTreeCon
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 16:
       jj_consume_token(16);
-      aggregatedCondition();
+      orCondition();
       jj_consume_token(17);
       break;
     case 25:

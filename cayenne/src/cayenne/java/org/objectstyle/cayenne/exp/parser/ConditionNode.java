@@ -16,7 +16,7 @@ public abstract class ConditionNode extends SimpleNode {
         // in the grammar... do it here...
 
         // disallow non-aggregated condition parents...
-        if (!(n instanceof AggregatedConditionNode)) {
+        if (!(n instanceof AggregateConditionNode)) {
             String label = (n instanceof SimpleNode) ? ((SimpleNode)n).expName() : String.valueOf(n);
             throw new ExpressionException(expName() + ": invalid parent - " + label);
         }

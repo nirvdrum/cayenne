@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.exp.Expression;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTAnd extends AggregatedConditionNode {
+public class ASTAnd extends AggregateConditionNode {
 
     public ASTAnd(Object[] nodes) {
         super(ExpressionParserTreeConstants.JJTAND);
