@@ -38,3 +38,15 @@ Configuration customization should be done directly on the used subclass instead
 appropriate methods have been added.
 
 8. Updated the User Guide to explain Configuration customizing.
+
+9. New method in DbAdapter: 
+
+  public boolean shouldRunBatchQuery(DataNode, Connection, BatchQuery, OperationObserver)
+  
+This allows DbAdapter to act as a delegate for batch queries. This allows advanced customization of
+query processing flow beyond simple subsclassing of DataNode.
+
+10. Fixed [C|B]LOB handling, per bug report 734906. Now there is no arbitrary size limitation
+on LOB columns in Oracle, null LOBs are handled properly, etc. 
+
+   http://sourceforge.net/tracker/?func=detail&aid=734906&group_id=48132&atid=452068
