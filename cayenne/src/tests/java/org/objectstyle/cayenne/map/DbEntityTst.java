@@ -119,6 +119,38 @@ public class DbEntityTst extends CayenneTestCase {
         assertSame(a2, pk.get(0));
     }
 
+	public void testAddPKAttribute() {
+		DbAttribute a1 = new DbAttribute();
+		a1.setName("a1");
+		a1.setPrimaryKey(false);
+
+		assertTrue(ent.getPrimaryKey().isEmpty());
+		ent.addAttribute(a1);
+		assertTrue(ent.getPrimaryKey().isEmpty());
+	}
+
+	public void testChangeAttributeToPK() {
+		DbAttribute a1 = new DbAttribute();
+		a1.setName("a1");
+		a1.setPrimaryKey(false);
+		ent.addAttribute(a1);
+
+		assertFalse(ent.getPrimaryKey().contains(a1));
+		a1.setPrimaryKey(true);
+		assertTrue(ent.getPrimaryKey().contains(a1));
+	}
+
+	public void testChangePKAttribute() {
+		DbAttribute a1 = new DbAttribute();
+		a1.setName("a1");
+		a1.setPrimaryKey(true);
+		ent.addAttribute(a1);
+
+		assertTrue(ent.getPrimaryKey().contains(a1));
+		a1.setPrimaryKey(false);
+		assertFalse(ent.getPrimaryKey().contains(a1));
+	}
+
     public void testRemovAttribute() throws Exception {
         DataMap map = new DataMap("map");
         ent.setName("ent");
