@@ -128,8 +128,7 @@ public class DbRelationshipPane
 	public void tableChanged(TableModelEvent e) {
 		DbRelationship rel = null;
 		if (table.getSelectedRow() >= 0) {
-			DbRelationshipTableModel model;
-			model = (DbRelationshipTableModel) table.getModel();
+			DbRelationshipTableModel model = (DbRelationshipTableModel) table.getModel();
 			rel = model.getRelationship(table.getSelectedRow());
 			if (rel.getTargetEntity() != null)
 				resolve.setEnabled(true);
@@ -150,14 +149,14 @@ public class DbRelationshipPane
 				resolve.setEnabled(false);
 		} else
 			resolve.setEnabled(false);
-		RelationshipDisplayEvent ev;
-		ev =
+		RelationshipDisplayEvent ev =
 			new RelationshipDisplayEvent(
 				this,
 				rel,
 				mediator.getCurrentDbEntity(),
 				mediator.getCurrentDataMap(),
 				mediator.getCurrentDataDomain());
+				
 		mediator.fireDbRelationshipDisplayEvent(ev);
 	}
 

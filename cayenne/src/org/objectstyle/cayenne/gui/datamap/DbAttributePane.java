@@ -56,10 +56,11 @@
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -80,19 +81,24 @@ public class DbAttributePane
 		DbEntityDisplayListener,
 		ListSelectionListener,
 		DbAttributeListener,
-		ExistingSelectionProcessor {
+		ExistingSelectionProcessor,
+		ActionListener,
+		TableModelListener {
 
-	Mediator mediator;
-
-	JTable table;
+	protected Mediator mediator;
+	protected JTable table;
+	protected JButton editParams;
 
 	public DbAttributePane(Mediator temp_mediator) {
 		super();
 		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);
 		mediator.addDbAttributeListener(this);
+
 		// Create and layout components
 		init();
+
+		editParams.addActionListener(this);
 	}
 
 	private void init() {
@@ -100,30 +106,47 @@ public class DbAttributePane
 
 		// Create table with two columns and no rows.
 		table = new CayenneTable();
-		JPanel panel = PanelFactory.createTablePanel(table, null);
+		editParams = new JButton("Edit Parameters");
+		JPanel panel =
+			PanelFactory.createTablePanel(table, new JButton[] { editParams });
 		add(panel, BorderLayout.CENTER);
 	}
 
+	/**
+	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+	}
+
+
+	/**
+	 * @see javax.swing.event.TableModelListener#tableChanged(TableModelEvent)
+	 */
+	public void tableChanged(TableModelEvent e) {
+		processExistingSelection();
+	}
+	
+	public void valueChanged(ListSelectionEvent e) {
+		processExistingSelection();
+	}
+	
 	public void processExistingSelection() {
 		DbAttribute att = null;
 		if (table.getSelectedRow() >= 0) {
 			DbAttributeTableModel model =
 				(DbAttributeTableModel) table.getModel();
 			att = model.getAttribute(table.getSelectedRow());
+			editParams.setEnabled(att instanceof DerivedDbAttribute);
 		}
-		AttributeDisplayEvent ev;
-		ev =
+		AttributeDisplayEvent ev =
 			new AttributeDisplayEvent(
 				this,
 				att,
 				mediator.getCurrentDbEntity(),
 				mediator.getCurrentDataMap(),
 				mediator.getCurrentDataDomain());
-		mediator.fireDbAttributeDisplayEvent(ev);
-	}
 
-	public void valueChanged(ListSelectionEvent e) {
-		processExistingSelection();
+		mediator.fireDbAttributeDisplayEvent(ev);
 	}
 
 	private void stopEditing() {
@@ -149,13 +172,15 @@ public class DbAttributePane
 
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
 		DbEntity entity = (DbEntity) e.getEntity();
-		if (entity == null || !e.isEntityChanged())
-			return;
-
-		rebuildTable(entity);
+		if (entity != null && e.isEntityChanged()) {
+			rebuildTable(entity);
+		}
 	}
 
 	protected void rebuildTable(DbEntity ent) {
+		editParams.setVisible(ent instanceof DerivedDbEntity);
+		editParams.setEnabled(false);
+		
 		DbAttributeTableModel model =
 			(ent instanceof DerivedDbEntity)
 				? new DerivedDbAttributeTableModel(ent, mediator, this)
@@ -173,6 +198,8 @@ public class DbAttributePane
 		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());
 		comboBox.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
+		
 		table.getSelectionModel().addListSelectionListener(this);
+		model.addTableModelListener(this);
 	}
 }

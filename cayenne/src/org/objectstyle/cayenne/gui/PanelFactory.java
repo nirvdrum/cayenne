@@ -216,22 +216,13 @@ public class PanelFactory {
 		table.getSelectionModel().setSelectionMode(
 			ListSelectionModel.SINGLE_SELECTION);
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		JScrollPane scroll_pane = new JScrollPane(table);
+
 		// Panel to add space between table and EAST/WEST borders
-		panel.add(scroll_pane, BorderLayout.CENTER);
+		panel.add(new JScrollPane(table), BorderLayout.CENTER);
 
 		// Add Add and Remove buttons
 		if (buttons != null) {
-			JPanel button_panel = new JPanel();
-			button_panel.setLayout(
-				new BoxLayout(button_panel, BoxLayout.X_AXIS));
-			button_panel.add(Box.createHorizontalGlue());
-			for (int i = 0; i < buttons.length; i++) {
-				button_panel.add(buttons[i]);
-				button_panel.add(Box.createHorizontalStrut(5));
-			}
-			button_panel.add(Box.createHorizontalGlue());
-			panel.add(button_panel, BorderLayout.SOUTH);
+			panel.add(createButtonPanel(buttons), BorderLayout.SOUTH);
 		}
 		return panel;
 	}
@@ -247,6 +238,7 @@ public class PanelFactory {
 		panel.setLayout(new BorderLayout(5, 5));
 
 		JPanel temp_panel = new JPanel(new BorderLayout());
+		
 		// Create table with two columns and no rows.
 		table.getSelectionModel().setSelectionMode(
 			ListSelectionModel.SINGLE_SELECTION);
@@ -259,22 +251,12 @@ public class PanelFactory {
 			temp.add(temp_panel, BorderLayout.CENTER);
 			temp.add(components[i], BorderLayout.SOUTH);
 			temp_panel = temp;
-		} // End for()
+		}
 
 		panel.add(temp_panel, BorderLayout.CENTER);
 
-		// Add Add and Remove buttons
 		if (buttons != null) {
-			JPanel button_panel = new JPanel();
-			button_panel.setLayout(
-				new BoxLayout(button_panel, BoxLayout.X_AXIS));
-			button_panel.add(Box.createHorizontalGlue());
-			for (int i = 0; i < buttons.length; i++) {
-				button_panel.add(buttons[i]);
-				button_panel.add(Box.createHorizontalStrut(5));
-			}
-			button_panel.add(Box.createHorizontalGlue());
-			panel.add(button_panel, BorderLayout.SOUTH);
+			panel.add(createButtonPanel(buttons), BorderLayout.SOUTH);
 		}
 		return panel;
 	}

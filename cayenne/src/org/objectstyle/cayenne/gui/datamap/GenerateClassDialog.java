@@ -105,7 +105,7 @@ public class GenerateClassDialog
 		mediator = temp_mediator;
 
 		init();
-		setSize(400, 400);
+		setSize(500, 400);
 		centerWindow();
 
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
