@@ -159,6 +159,11 @@ sub set_release_label() {
 			copy("doc/release-notes/RELEASE-NOTES-$1.txt", 
                              "doc/release-notes/RELEASE-NOTES-$version.txt") 
                              or die_with_email("Can't copy RELEASE-NOTES: $!\n");	
+			# copy UPGRADE
+			copy("doc/release-notes/UPGRADE-$1.txt", 
+                             "doc/release-notes/UPGRADE-$version.txt") 
+                             or die_with_email("Can't copy UPGRADE: $!\n");	
+
 
 			print LABELED_PROPS "project.version = $version\n";
 		}
