@@ -56,10 +56,9 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.objectstyle.cayenne.util.Util;
 
 /**
  * ProjectFile is an adapter from an object in Cayenne project
@@ -79,6 +78,7 @@ public abstract class ProjectFile {
     protected String extension;
     protected int status;
     protected File tempFile;
+    protected Project project;
 
     static {
         fileTypes.add(new RootProjectFile());
@@ -155,25 +155,80 @@ public abstract class ProjectFile {
      * encountered during saving, an Exception is thrown.
      */
     public void saveTemp() throws Exception {
+        if (tempFile != null && tempFile.isFile()) {
+            tempFile.delete();
+            tempFile = null;
+        }
+
+        File finalFile = resolveFile();
+        checkWritePermissions(finalFile);
+        tempFile = tempFileForFile(finalFile);
+        saveToFile(tempFile);
+    }
+
+    public File resolveFile() {
+        return getProject().resolveFile(getFileName());
     }
 
     /**
      * Finishes saving the underlying object.
      */
     public boolean saveDelete() {
-    	return false;
+        File finalFile = resolveFile();
+        if (finalFile.exists()) {
+            return finalFile.delete();
+        } else {
+            return true;
+        }
     }
-    
+
     /**
      * Finishes saving the underlying object.
      */
-    public void saveCommit() {}
+    public void saveCommit() throws ProjectException {
+        if(tempFile == null) {
+        	return;
+        }
+        
+        File finalFile = resolveFile();
+        if (finalFile.exists()) {
+            if (!finalFile.delete()) {
+                throw new ProjectException("Unable to remove old master file : " + finalFile);
+            }
+        }
 
+        if (!tempFile.renameTo(finalFile)) {
+            throw new ProjectException("Unable to move " + tempFile + " to " + finalFile);
+        }
+        
+        tempFile = null;
+    }
 
     /**
      * Cleans up after unsuccessful or canceled save attempt.
      */
-    public void saveUndo() {}
+    public void saveUndo() {
+        if (tempFile != null && tempFile.isFile()) {
+            tempFile.delete();
+            tempFile = null;
+        }
+    }
+
+    /**
+      * Returns the project.
+      * @return Project
+      */
+    public Project getProject() {
+        return project;
+    }
+
+    /**
+     * Sets the project.
+     * @param project The project to set
+     */
+    public void setProject(Project project) {
+        this.project = project;
+    }
 
     /**
      * Returns the status.
@@ -189,5 +244,29 @@ public abstract class ProjectFile {
      */
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    /** 
+     * Creates a temporary file for the master file.
+     */
+    protected File tempFileForFile(File f) throws IOException {
+        File parent = f.getParentFile();
+        String name = f.getName();
+
+        if (name == null || name.length() < 3) {
+            name = "cayenne-project";
+        }
+
+        return File.createTempFile(name, null, parent);
+    }
+
+    protected void checkWritePermissions(File file) throws IOException {
+        if (file.isDirectory()) {
+            throw new IOException("Target file is a directory: " + file);
+        }
+
+        if (!file.canWrite()) {
+            throw new IOException("Can't write to file: " + file);
+        }
     }
 }

@@ -188,10 +188,6 @@ public class Project {
         }
     }
 
-    public File resolveFile(ProjectFile file) {
-        return resolveFile(file.getFileName());
-    }
-
     /**
       * Returns a "symbolic" name of a file. Returns null if file 
       * is invalid. Symbolic name is a string path of a file relative
