@@ -22,7 +22,8 @@ configurable in modeler.preferences (for now).
 
 5. Modeler remembers window size, position and tree view width.
 
-6. updated to commons-beanutils 1.6.1, log4j 1.2.8, junit 3.8.1 and ant 1.5.2
+6. updated to commons-beanutils 1.6.1, commons-logging 1.0.3, log4j 1.2.8,
+junit 3.8.1 and ant 1.5.3 (+ fix for junitreport, which will be in ant 1.6)
 
 7. DbAdapter.buildAttribute now takes an extra parameter - a 
 database specific strint typeName to allow reverse engineering of 

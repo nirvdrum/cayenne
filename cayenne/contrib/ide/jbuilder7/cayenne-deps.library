@@ -3,7 +3,7 @@
   <!--JBuilder Library Definition File-->
   <fullname>cayenne-deps</fullname>
   <class>
-    <path>[otherlib/ant-1.5.2.jar]</path>
+    <path>[otherlib/ant-1.5.3.jar]</path>
     <path>[otherlib/ashwood-28012003.jar]</path>
     <path>[otherlib/bcel-5.0.jar]</path>
     <path>[otherlib/commons-beanutils-1.6.1.jar]</path>
