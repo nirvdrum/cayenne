@@ -56,43 +56,126 @@
 package org.objectstyle.cayenne.dba.postgres;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.dba.JdbcPkGenerator;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.dba.oracle.OraclePkGenerator;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbKeyGenerator;
 
-public class PostgresPkGenerator extends JdbcPkGenerator {
-    public PostgresPkGenerator() {
-        super();
+/**
+ * Default PK generator for PostgreSQL. Since Cayenne 1.2 inhertis from OraclePkGenerator
+ * and uses sequences instead of AUTO_PK_TABLE.
+ */
+public class PostgresPkGenerator extends OraclePkGenerator {
+
+    protected String createSequenceString(DbEntity ent) {
+        // note that PostgreSQL 7.4 and newer supports INCREMENT BY and START WITH
+        // however 7.3 doesn't like BY and WITH, so using older more neutral syntax
+        // that works with all tested versions.
+        StringBuffer buf = new StringBuffer();
+        buf
+                .append("CREATE SEQUENCE ")
+                .append(sequenceName(ent))
+                .append(" INCREMENT ")
+                .append(pkCacheSize(ent))
+                .append(" START 200");
+        return buf.toString();
     }
 
     /**
-     * Checks if AUTO_PK_TABLE already exists in the database.
+     * Generates primary key by calling Oracle sequence corresponding to the
+     * <code>dbEntity</code>. Executed SQL looks like this:
+     * 
+     * <pre>
+     * 
+     *  
+     *   SELECT pk_table_name.nextval FROM DUAL
+     *   
+     *  
+     * </pre>
      */
-    protected boolean autoPkTableExists(DataNode node) throws SQLException {
-        if (super.autoPkTableExists(node) == false) {
-            Connection con = node.getDataSource().getConnection();
-            boolean exists = false;
+    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
 
+        DbKeyGenerator pkGenerator = ent.getPrimaryKeyGenerator();
+        String pkGeneratingSequenceName;
+        if (pkGenerator != null
+                && DbKeyGenerator.ORACLE_TYPE.equals(pkGenerator.getGeneratorType())
+                && pkGenerator.getGeneratorName() != null)
+            pkGeneratingSequenceName = pkGenerator.getGeneratorName();
+        else
+            pkGeneratingSequenceName = sequenceName(ent);
+
+        Connection con = node.getDataSource().getConnection();
+        try {
+            Statement st = con.createStatement();
             try {
-                DatabaseMetaData md = con.getMetaData();
-                ResultSet tables = md.getTables(null, null, "auto_pk_support", null);
-
+                String sql = "SELECT nextval('" + pkGeneratingSequenceName + "')";
+                QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL,
+                        sql,
+                        Collections.EMPTY_LIST);
+                ResultSet rs = st.executeQuery(sql);
                 try {
-                    exists = tables.next();
+                    //Object pk = null;
+                    if (!rs.next()) {
+                        throw new CayenneRuntimeException(
+                                "Error generating pk for DbEntity " + ent.getName());
+                    }
+                    return rs.getInt(1);
                 }
                 finally {
-                    tables.close();
+                    rs.close();
                 }
             }
             finally {
-                // return connection to the pool
-                con.close();
+                st.close();
             }
-            return exists;
         }
-        return true;
+        finally {
+            con.close();
+        }
+    }
+
+    /**
+     * Fetches a list of existing sequences that might match Cayenne generated ones.
+     */
+    protected List getExistingSequences(DataNode node) throws SQLException {
+
+        // check existing sequences
+        Connection con = node.getDataSource().getConnection();
+
+        try {
+            Statement sel = con.createStatement();
+            try {
+                String sql = "SELECT relname FROM pg_class WHERE relkind='S'";
+                QueryLogger.logQuery(QueryLogger.DEFAULT_LOG_LEVEL,
+                        sql,
+                        Collections.EMPTY_LIST);
+                ResultSet rs = sel.executeQuery(sql);
+                try {
+                    List sequenceList = new ArrayList();
+                    while (rs.next()) {
+                        sequenceList.add(rs.getString(1));
+                    }
+                    return sequenceList;
+                }
+                finally {
+                    rs.close();
+                }
+            }
+            finally {
+                sel.close();
+            }
+        }
+        finally {
+            con.close();
+        }
     }
 }
