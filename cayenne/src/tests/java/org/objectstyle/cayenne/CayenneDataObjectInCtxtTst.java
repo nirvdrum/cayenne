@@ -74,10 +74,27 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();
 
-		DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
+        DataDomain dom = getDomain();
+        setup.createPkSupportForMapEntities(
+            (DataNode) dom.getDataNodes().iterator().next());
 
         ctxt = dom.createDataContext();
+    }
+
+    public void testCommitChangesInBatch() throws Exception {
+        Artist a1 = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        a1.setArtistName("abc1");
+
+        Artist a2 = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        a2.setArtistName("abc2");
+
+        Artist a3 = (Artist) ctxt.createAndRegisterNewObject("Artist");
+        a3.setArtistName("abc3");
+
+        ctxt.commitChanges();
+
+        List artists = ctxt.performQuery(new SelectQuery(Artist.class));
+        assertEquals(3, artists.size());
     }
 
     public void testSetObjectId() throws Exception {
@@ -159,15 +176,16 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
     public void testFetchByAttr() throws Exception {
         String artistName = "artist with one painting";
-        TestCaseDataFactory.createArtistWithPainting(
-            artistName,
-            new String[] {},
-            false);
+        TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {
+        }, false);
 
         SelectQuery q =
             new SelectQuery(
                 "Artist",
-                ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName));
+                ExpressionFactory.binaryPathExp(
+                    Expression.EQUAL_TO,
+                    "artistName",
+                    artistName));
 
         List artists = ctxt.performQuery(q);
         assertEquals(1, artists.size());
@@ -178,10 +196,8 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
 
     public void testUniquing() throws Exception {
         String artistName = "unique artist with no paintings";
-        TestCaseDataFactory.createArtistWithPainting(
-            artistName,
-            new String[] {},
-            false);
+        TestCaseDataFactory.createArtistWithPainting(artistName, new String[] {
+        }, false);
 
         Artist a1 = fetchArtist(artistName);
         Artist a2 = fetchArtist(artistName);
