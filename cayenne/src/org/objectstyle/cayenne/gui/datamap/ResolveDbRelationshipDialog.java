@@ -89,7 +89,7 @@ implements ActionListener
 	JTextField name		= new JTextField(20);
 	JLabel reverseNameLabel = new JLabel("Reverse Relationship Name:");
 	JTextField reverseName = new JTextField(20);
-	JCheckBox  hasReverseDbRel = new JCheckBox("Force reverse relationship", false);
+	JCheckBox  hasReverseDbRel = new JCheckBox("Create reverse relationship", false);
 	JTable dbAttributes	= new JTable();
 	JButton add			= new JButton("Add");
 	JButton remove		= new JButton("Remove");
