@@ -212,6 +212,10 @@ public class EntityResolver {
         if (object instanceof DbEntity) {
             return (DbEntity) object;
         }
+        
+        if (object instanceof DataObject) {
+            object = object.getClass();
+        }
 
         DbEntity result = (DbEntity) dbEntityCache.get(object);
         if (result == null) {
