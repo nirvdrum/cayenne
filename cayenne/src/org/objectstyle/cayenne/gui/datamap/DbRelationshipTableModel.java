@@ -152,15 +152,13 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		return rel;		
 	}
 	
-	public Object getValueAt(int row, int col)
-	{
+	public Object getValueAt(int row, int col) {
 		if (null == relList || relList.size() <= row)
 			return null;
 		DbRelationship rel = getRelationship(row);
 		if (rel == null)
 			return null;
-		switch (col)
-		{
+		switch (col) {
 			case NAME:
 				return rel.getName();
 			case TARGET:
@@ -175,7 +173,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 				return new Boolean(rel.isToMany());
 			default:
 				return null;
-		}// End switch
+		}
 	}
 	
 	
@@ -212,6 +210,8 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		else if (column == TO_DEPENDENT_KEY) {
 			Boolean temp = (Boolean)aValue;
 			rel.setToDependentPK(temp.booleanValue());
+			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			mediator.fireDbRelationshipEvent(e);
 		}
 		else if (column == CARDINALITY) {
 			Boolean temp = (Boolean)aValue;
