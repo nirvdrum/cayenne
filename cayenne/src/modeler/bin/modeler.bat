@@ -31,12 +31,9 @@ goto eof
 
 :check_cp
 set JAVACMD=%JAVA_HOME%\bin\javaw
-set OPTIONS=-classpath %CAYENNE_HOME%\lib\modeler\cayenne-modeler.jar
-if "%CLASSPATH%" == "" goto run_modeler
-set OPTIONS=%OPTIONS%;%CLASSPATH%
-goto run_modeler 
+set DEFAULT_CLASSPATH=%CAYENNE_HOME%\lib\modeler\cayenne-modeler.jar
 
 :run_modeler
-start %JAVACMD% %OPTIONS% %MAIN_CLASS%  %*
+start %JAVACMD% -cp "%CLASSPATH%;%DEFAULT_CLASSPATH%" %MAIN_CLASS%  %*
 
 :eof
