@@ -185,6 +185,45 @@ public class CayenneTestResources {
     }
 
     /**
+     * Utility method to create Cayenne stack (Domain/Map/Node) using
+     * shared connection information and a location of a DataMap.
+     * This is uneful when testing alternative mappings on the same 
+     * underlying database.
+     */
+    public DataDomain createCayenneStack(String mapPath) {
+        try {
+            // data source
+            DataSourceInfo dsi = getFreshConnInfo();
+            PoolDataSource poolDS =
+                new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
+            DataSource ds =
+                new PoolManager(poolDS, 1, 1, dsi.getUserName(), dsi.getPassword());
+
+            // map
+            DataMap map = new MapLoader().loadDataMap(mapPath);
+
+            // node
+            DataNode node = new DataNode("node");
+            node.setDataSource(ds);
+            Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
+
+            if (dsi.getAdapterClass() != null) {
+                adapterClass = Class.forName(dsi.getAdapterClass());
+            }
+
+            node.setAdapter((DbAdapter) adapterClass.newInstance());
+            node.addDataMap(map);
+
+            // domain
+            DataDomain domain = new DataDomain("domain");
+            domain.addNode(node);
+            return domain;
+        } catch (Exception ex) {
+            logObj.error("Can not create domain with map: " + mapPath, ex);
+            throw new CayenneRuntimeException("Can not create domain with map: " + mapPath, ex);
+        }
+    }
+    /**
      * Gets the sharedDatabaseSetup.
      * @return Returns a DatabaseSetup
      */
@@ -203,37 +242,7 @@ public class CayenneTestResources {
     }
 
     protected void createSharedDomain() {
-        try {
-            // data source
-            DataSourceInfo dsi = getFreshConnInfo();
-            PoolDataSource poolDS =
-                new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
-            DataSource ds =
-                new PoolManager(poolDS, 1, 1, dsi.getUserName(), dsi.getPassword());
-
-            // map
-            String[] maps = new String[] { TEST_MAP_PATH };
-            DataMap map = new MapLoader().loadDataMap(TEST_MAP_PATH);
-
-            // node
-            DataNode node = new DataNode("node");
-            node.setDataSource(ds);
-            Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-
-            if (dsi.getAdapterClass() != null) {
-                adapterClass = Class.forName(dsi.getAdapterClass());
-            }
-
-            node.setAdapter((DbAdapter) adapterClass.newInstance());
-            node.addDataMap(map);
-
-            // domain
-            sharedDomain = new DataDomain("Shared Domain");
-            sharedDomain.addNode(node);
-        } catch (Exception ex) {
-            logObj.error("Can not create shared domain.", ex);
-            throw new CayenneRuntimeException("Error creating test database.", ex);
-        }
+    	sharedDomain = createCayenneStack(TEST_MAP_PATH);
     }
 
     protected void createTestDatabase() {
@@ -249,10 +258,10 @@ public class CayenneTestResources {
 
     protected void setupTestDir() {
         String testDirName = System.getProperty(TEST_DIR_KEY);
-        
+
         if (testDirName == null) {
             testDirName = "testrun";
-            
+
             logObj.info(
                 "No property '"
                     + TEST_DIR_KEY
