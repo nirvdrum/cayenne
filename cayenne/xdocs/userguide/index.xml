@@ -25,7 +25,7 @@
             <ul>
                 <li><a href="quickstart/comline.html">3.1 "Command-line Application" Tutorial</a></li>
                 <li><a href="quickstart/webapp.html">3.2 "JSP/Struts Web Application" Tutorial</a></li>
-                <li><a href="quickstart/webapp.html">3.3 "Tapestry Web Application" Tutorial</a></li>
+                <li><a href="quickstart/tapestrywebapp.html">3.3 "Tapestry Web Application" Tutorial</a></li>
             </ul><br/></li>
             
             <li><a href="design/index.html">4. Design</a>
