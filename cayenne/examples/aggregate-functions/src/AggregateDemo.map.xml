@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data-map project-version="1.0">
+<data-map project-version="1.1">
 	<db-entity name="ARTIST">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true" length="11"/>
 		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="254"/>
@@ -36,25 +36,19 @@
 		<obj-attribute name="minPrice" type="java.math.BigDecimal" db-attribute-path="MIN_PRICE"/>
 		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-path="PAINTINGS_COUNT"/>
 	</obj-entity>
-	<db-relationship name="artist" source="PAINTING" target="ARTIST" toDependentPK="false" toMany="false">
-		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
-	</db-relationship>
-	<db-relationship name="artist" source="PAINTING_STATS" target="ARTIST" toDependentPK="false" toMany="false">
-		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
-	</db-relationship>
 	<db-relationship name="paintingStats" source="ARTIST" target="PAINTING_STATS" toDependentPK="true" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<db-relationship name="paintings" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
+	<db-relationship name="paintings" source="ARTIST" target="PAINTING" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
 	</db-relationship>
-	<obj-relationship name="artist" source="Painting" target="Artist" toMany="false">
-		<db-relationship-ref source="PAINTING" target="ARTIST" name="artist"/>
-	</obj-relationship>
-	<obj-relationship name="artist" source="PaintingStats" target="Artist" toMany="false">
-		<db-relationship-ref source="PAINTING_STATS" target="ARTIST" name="artist"/>
-	</obj-relationship>
-	<obj-relationship name="paintings" source="Artist" target="Painting" toMany="true">
-		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintings"/>
-	</obj-relationship>
+	<db-relationship name="artist" source="PAINTING" target="ARTIST" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<db-relationship name="artist" source="PAINTING_STATS" target="ARTIST" toMany="false">
+		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
+	</db-relationship>
+	<obj-relationship name="paintings" source="Artist" target="Painting" db-relationship-path="paintings"/>
+	<obj-relationship name="artist" source="Painting" target="Artist" db-relationship-path="artist"/>
+	<obj-relationship name="artist" source="PaintingStats" target="Artist" db-relationship-path="artist"/>
 </data-map>
