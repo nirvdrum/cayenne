@@ -177,15 +177,13 @@ public class DataMap {
     }
 
     /** Get DbEntity by its name.*/
-    public DbEntity getDbEntity(String db_entity_name) {
-        DbEntity temp = (DbEntity) getDbEntityMap().get(db_entity_name);
-        return temp;
+    public DbEntity getDbEntity(String name) {
+        return (DbEntity) dbEntityMap.get(name);
     }
 
     /** Get ObjEntity by its name. */
-    public ObjEntity getObjEntity(String obj_entity_name) {
-        ObjEntity temp = (ObjEntity) getObjEntityMap().get(obj_entity_name);
-        return temp;
+    public ObjEntity getObjEntity(String name) {
+        return (ObjEntity) objEntityMap.get(name);
     }
 
     /** Get the object entity mapped to the specified database table.

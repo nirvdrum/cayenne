@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.map;
 
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /** Metadata for the navigational association between the data objects.
  *  For example, if class "Employee" you may need to get to the department
@@ -70,7 +69,6 @@ import java.util.logging.Logger;
  *  of the database entity relationships.
  *  The ObjRelationship objects are stored in the ObjEntitys. */
 public class ObjRelationship extends Relationship {
-    static Logger logObj = Logger.getLogger(ObjRelationship.class.getName());
 
 	private List dbRelationships = new ArrayList();
 

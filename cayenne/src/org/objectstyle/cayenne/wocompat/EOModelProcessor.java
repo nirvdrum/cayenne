@@ -55,20 +55,19 @@ package org.objectstyle.cayenne.wocompat;
  *
  */ 
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.wocompat.parser.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.*;
-import java.util.logging.*;
-import org.objectstyle.cayenne.dba.*;
+
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 
 /**
  *  Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
  */
 public class EOModelProcessor {
-    static Logger logObj = Logger.getLogger(EOModelProcessor.class.getName());
-    
     public static String eomodelNameForPath(String path) {
         // strip trailing "/" if needed
         if(path.endsWith(File.separator))

@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.dba;
 
 import java.sql.*;
 import java.util.*;
-import java.util.logging.Logger;
 
 
 /** Handles mappings of JDBC data types to the database types 
@@ -70,8 +69,6 @@ import java.util.logging.Logger;
   * @author Andrei Adamchik
   */
 public class TypesMapping {
-    static Logger logObj = Logger.getLogger(TypesMapping.class.getName());
-
     // Never use "-1" or any other normal integer, since there
     // is a big chance it is being reserved in java.sql.Types
     public static final int NOT_DEFINED = Integer.MAX_VALUE;
