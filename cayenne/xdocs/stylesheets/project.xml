@@ -96,7 +96,7 @@
     		<item name="11.1 Prefetching"  href="/userguide/perform/prefetching.html"/>
     		<item name="11.2 Data Rows"  href="/userguide/perform/data-rows.html"/>
     		<item name="11.3 Iterating Through Data Rows"  href="/userguide/perform/result-iterator.html"/>
-    		<item name="11.4 Paged Queries"  href="/userguide/perform/paged-queries.html"/>
+    		<item name="11.4 Paginated Queries"  href="/userguide/perform/paged-queries.html"/>
     	</item>
     	
     	<item name="12. Deployment"  href="/userguide/deploy/index.html">

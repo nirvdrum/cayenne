@@ -105,8 +105,19 @@ public class DataContextTestBase extends CayenneTestCase {
         opObserver = new TestOperationObserver();
     }
 
+    // TODO: deprecate me
     public String artistName(int ind) {
-        return "artist" + ind;
+        return artistName(ind, false);
+    }
+
+    public String artistName(int ind, boolean padToConstWidth) {
+        String prefix = (padToConstWidth && ind < 10) ? "artist0" : "artist";
+        return prefix + ind;
+    }
+
+    public String galleryName(int ind, boolean padToConstWidth) {
+        String prefix = (padToConstWidth && ind < 10) ? "gallery0" : "gallery";
+        return prefix + ind;
     }
 
     protected Painting fetchPainting(String name, boolean prefetchArtist) {
@@ -163,13 +174,17 @@ public class DataContextTestBase extends CayenneTestCase {
 
             stmt.close();
             conn.commit();
-        }
-        finally {
+        } finally {
             conn.close();
         }
     }
 
+    // TODO: deprecate me
     public void populateTables() throws Exception {
+        populateTables(false);
+    }
+    
+    public void populateTables(boolean padToConstWidth) throws Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
 
@@ -183,7 +198,7 @@ public class DataContextTestBase extends CayenneTestCase {
 
             for (int i = 1; i <= artistCount; i++) {
                 stmt.setInt(1, i);
-                stmt.setString(2, artistName(i));
+                stmt.setString(2, artistName(i, padToConstWidth));
                 stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
             }
@@ -197,14 +212,13 @@ public class DataContextTestBase extends CayenneTestCase {
 
             for (int i = 1; i <= galleryCount; i++) {
                 stmt.setInt(1, i);
-                stmt.setString(2, "gallery" + i);
+                stmt.setString(2, galleryName(i, padToConstWidth));
                 stmt.executeUpdate();
             }
 
             stmt.close();
             conn.commit();
-        }
-        finally {
+        } finally {
             conn.close();
         }
     }

@@ -64,6 +64,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
@@ -72,6 +73,7 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * A synchronized list that serves as a container of DataObjects. It is returned
@@ -90,6 +92,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultList implements List {
+    private static Logger logObj = Logger.getLogger(IncrementalFaultList.class);
 
     protected int pageSize;
     protected List elements;
@@ -97,6 +100,14 @@ public class IncrementalFaultList implements List {
     protected ObjEntity rootEntity;
     protected SelectQuery internalQuery;
     protected int unfetchedObjects;
+
+    /**
+     * Stores a hint allowing to distinguish data rows from unfetched ids
+     * when the query fetches data rows.
+     */
+    protected int rowWidth;
+
+    private IncrementalListHelper helper;
 
     /** 
      * Defines the upper limit on the size of fetches. This is needed to avoid where clause size limitations.
@@ -118,9 +129,18 @@ public class IncrementalFaultList implements List {
         this.dataContext = list.dataContext;
         this.rootEntity = list.rootEntity;
         this.maxFetchSize = list.maxFetchSize;
+        this.rowWidth = list.rowWidth;
+        this.helper = list.helper;
         elements = Collections.synchronizedList(new ArrayList());
     }
 
+    /**
+     * Creates a new IncrementalFaultList using a given DataContext and query.
+     * 
+     * @param dataContext DataContext used by IncrementalFaultList to fill itself with objects.
+     * @param query Main query used to retrieve data. Must have "pageSize" property set to a
+     * value greater than zero.
+     */
     public IncrementalFaultList(DataContext dataContext, GenericSelectQuery query) {
         if (query.getPageSize() <= 0) {
             throw new CayenneRuntimeException(
@@ -139,8 +159,16 @@ public class IncrementalFaultList implements List {
         this.internalQuery = new SelectQuery();
         this.internalQuery.setRoot(query.getRoot());
         this.internalQuery.setLoggingLevel(query.getLoggingLevel());
-        if (query instanceof SelectQuery) {
+        this.internalQuery.setFetchingDataRows(query.isFetchingDataRows());
+
+        if (!query.isFetchingDataRows() && (query instanceof SelectQuery)) {
             this.internalQuery.addPrefetches(((SelectQuery) query).getPrefetches());
+        }
+
+        if (query.isFetchingDataRows()) {
+            helper = new DataRowListHelper();
+        } else {
+            helper = new DataObjectListHelper();
         }
 
         fillIn(query);
@@ -154,20 +182,33 @@ public class IncrementalFaultList implements List {
     protected void fillIn(GenericSelectQuery query) {
         synchronized (elements) {
 
+            boolean fetchesDataRows = internalQuery.isFetchingDataRows();
+
             // start fresh
             elements.clear();
+            rowWidth = 0;
 
             try {
                 long t1 = System.currentTimeMillis();
                 ResultIterator it = dataContext.performIteratedQuery(query);
                 try {
                     // read first page completely, the rest as ObjectIds
-                    List firstPage = new ArrayList(pageSize);
+                    List firstPage =
+                        (fetchesDataRows) ? elements : new ArrayList(pageSize);
                     for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
                         firstPage.add(it.nextDataRow());
                     }
-                    elements.addAll(
-                        dataContext.objectsFromDataRows(rootEntity, firstPage, true));
+
+                    // store row width
+                    if (firstPage.size() > 0) {
+                        rowWidth = ((Map) firstPage.get(0)).size();
+                    }
+
+                    // convert rows to objects
+                    if (!fetchesDataRows) {
+                        elements.addAll(
+                            dataContext.objectsFromDataRows(rootEntity, firstPage, true));
+                    }
 
                     // continue reading ids
                     while (it.hasNextRow()) {
@@ -179,12 +220,10 @@ public class IncrementalFaultList implements List {
                         elements.size(),
                         System.currentTimeMillis() - t1);
 
-                }
-                finally {
+                } finally {
                     it.close();
                 }
-            }
-            catch (CayenneException e) {
+            } catch (CayenneException e) {
                 throw new CayenneRuntimeException("Error performing query.", e);
             }
 
@@ -205,6 +244,46 @@ public class IncrementalFaultList implements List {
      */
     public void resolveAll() {
         resolveInterval(0, size());
+    }
+
+    /**
+     * @param object
+     * @return <code>true</code> if the object corresponds to an unresolved 
+     * state and doesn require a fetch before being returned to the user.
+     */
+    private boolean isUnresolved(Object object) {
+        if (object instanceof DataObject) {
+            return false;
+        }
+
+        if (internalQuery.isFetchingDataRows()) {
+            // both unresolved and resolved objects are represented
+            // as Maps, so no instanceof check is possible.
+            Map map = (Map) object;
+            int size = map.size();
+            return size < rowWidth;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks that an object is of the same type as
+     * the rest of objects (DataObject or DataRows depending on the query type).
+     */
+    private void validateListObject(Object object) throws IllegalArgumentException {
+
+        // I am not sure if such a check makes sense???
+
+        if (internalQuery.isFetchingDataRows()) {
+            if (!(object instanceof Map)) {
+                throw new IllegalArgumentException("Only Map objects can be stored in this list.");
+            }
+        } else {
+            if (!(object instanceof DataObject)) {
+                throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
+            }
+        }
     }
 
     /**
@@ -235,7 +314,7 @@ public class IncrementalFaultList implements List {
             List ids = new ArrayList(pageSize);
             for (int i = fromIndex; i < toIndex; i++) {
                 Object obj = elements.get(i);
-                if (obj instanceof Map) {
+                if (isUnresolved(obj)) {
                     ids.add(obj);
                     quals.add(
                         ExpressionFactory.matchAllDbExp((Map) obj, Expression.EQUAL_TO));
@@ -248,6 +327,7 @@ public class IncrementalFaultList implements List {
             }
 
             // fetch the range of objects in fetchSize chunks
+            boolean fetchesDataRows = internalQuery.isFetchingDataRows();
             List objects = new ArrayList(qualsSize);
             int fetchEnd = Math.min(qualsSize, maxFetchSize);
             int fetchBegin = 0;
@@ -258,6 +338,8 @@ public class IncrementalFaultList implements List {
                         ExpressionFactory.joinExp(
                             Expression.OR,
                             quals.subList(fetchBegin, fetchEnd)));
+
+                query.setFetchingDataRows(fetchesDataRows);
 
                 objects.addAll(dataContext.performQuery(query));
                 fetchBegin = fetchEnd;
@@ -291,8 +373,7 @@ public class IncrementalFaultList implements List {
                     if (!found) {
                         if (first) {
                             first = false;
-                        }
-                        else {
+                        } else {
                             buf.append(", ");
                         }
 
@@ -301,8 +382,7 @@ public class IncrementalFaultList implements List {
                 }
 
                 throw new CayenneRuntimeException(buf.toString());
-            }
-            else if (objects.size() > ids.size()) {
+            } else if (objects.size() > ids.size()) {
                 throw new CayenneRuntimeException(
                     "Expected " + ids.size() + " objects, retrieved " + objects.size());
             }
@@ -310,21 +390,7 @@ public class IncrementalFaultList implements List {
             // replace ids in the list with objects
             Iterator it = objects.iterator();
             while (it.hasNext()) {
-                DataObject obj = (DataObject) it.next();
-                Map idMap = obj.getObjectId().getIdSnapshot();
-
-                boolean found = false;
-                for (int i = fromIndex; i < toIndex; i++) {
-                    if (idMap.equals(elements.get(i))) {
-                        elements.set(i, obj);
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    throw new CayenneRuntimeException("Can't find id for " + idMap);
-                }
+                helper.updateWithResolvedObjectInRange(it.next(), fromIndex, toIndex);
             }
 
             unfetchedObjects -= objects.size();
@@ -344,10 +410,10 @@ public class IncrementalFaultList implements List {
      * array element index.
      */
     public int pageIndex(int elementIndex) {
-		if (elementIndex < 0 || elementIndex > size()) {
-			throw new IndexOutOfBoundsException("Index: " + elementIndex);
-		}
-		
+        if (elementIndex < 0 || elementIndex > size()) {
+            throw new IndexOutOfBoundsException("Index: " + elementIndex);
+        }
+
         if (pageSize <= 0 || elementIndex < 0) {
             return -1;
         }
@@ -447,9 +513,7 @@ public class IncrementalFaultList implements List {
      * @see java.util.List#add(int, Object)
      */
     public void add(int index, Object element) {
-        if (!(element instanceof DataObject)) {
-            throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
-        }
+        validateListObject(element);
 
         synchronized (elements) {
             elements.add(index, element);
@@ -460,9 +524,7 @@ public class IncrementalFaultList implements List {
      * @see java.util.Collection#add(Object)
      */
     public boolean add(Object o) {
-        if (!(o instanceof DataObject)) {
-            throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
-        }
+        validateListObject(o);
 
         synchronized (elements) {
             return elements.add(o);
@@ -521,14 +583,13 @@ public class IncrementalFaultList implements List {
         synchronized (elements) {
             Object o = elements.get(index);
 
-            if (o instanceof Map) {
+            if (isUnresolved(o)) {
                 // read this page
                 int pageStart = pageIndex(index) * pageSize;
                 resolveInterval(pageStart, pageStart + pageSize);
 
                 return elements.get(index);
-            }
-            else {
+            } else {
                 return o;
             }
         }
@@ -538,44 +599,7 @@ public class IncrementalFaultList implements List {
      * @see java.util.List#indexOf(Object)
      */
     public int indexOf(Object o) {
-        if (!(o instanceof DataObject)) {
-            return -1;
-        }
-
-        DataObject dataObj = (DataObject) o;
-        if (dataObj.getDataContext() != dataContext) {
-            return -1;
-        }
-
-        if (!dataObj
-            .getObjectId()
-            .getObjClass()
-            .getName()
-            .equals(rootEntity.getClassName())) {
-            return -1;
-        }
-
-        Map idMap = dataObj.getObjectId().getIdSnapshot();
-
-        synchronized (elements) {
-            for (int i = 0; i < elements.size(); i++) {
-                // objects are in the same context, 
-                // just comparing ids should be enough
-                Object obj = elements.get(i);
-                if (obj == dataObj) {
-                    return i;
-                }
-
-                Map otherIdMap =
-                    (obj instanceof DataObject)
-                        ? ((DataObject) obj).getObjectId().getIdSnapshot()
-                        : (Map) obj;
-                if (idMap.equals(otherIdMap)) {
-                    return i;
-                }
-            }
-        }
-        return -1;
+        return helper.indexOfObject(o);
     }
 
     /**
@@ -591,44 +615,7 @@ public class IncrementalFaultList implements List {
      * @see java.util.List#lastIndexOf(Object)
      */
     public int lastIndexOf(Object o) {
-        if (!(o instanceof DataObject)) {
-            return -1;
-        }
-
-        DataObject dataObj = (DataObject) o;
-        if (dataObj.getDataContext() != dataContext) {
-            return -1;
-        }
-
-        if (!dataObj
-            .getObjectId()
-            .getObjClass()
-            .getName()
-            .equals(rootEntity.getClassName())) {
-            return -1;
-        }
-
-        Map idMap = dataObj.getObjectId().getIdSnapshot();
-
-        synchronized (elements) {
-            for (int i = elements.size() - 1; i <= 0; i--) {
-                // objects are in the same context, 
-                // just comparing ids should be enough
-                Object obj = elements.get(i);
-                if (obj == dataObj) {
-                    return i;
-                }
-
-                Map otherIdMap =
-                    (obj instanceof DataObject)
-                        ? ((DataObject) obj).getObjectId().getIdSnapshot()
-                        : (Map) obj;
-                if (idMap.equals(otherIdMap)) {
-                    return i;
-                }
-            }
-        }
-        return -1;
+        return helper.lastIndexOfObject(o);
     }
 
     /**
@@ -671,9 +658,7 @@ public class IncrementalFaultList implements List {
      * @see java.util.List#set(int, Object)
      */
     public Object set(int index, Object element) {
-        if (!(element instanceof DataObject)) {
-            throw new IllegalArgumentException("Only DataObjects can be stored in this list.");
-        }
+        validateListObject(element);
 
         synchronized (elements) {
             return elements.set(index, element);
@@ -716,6 +701,168 @@ public class IncrementalFaultList implements List {
      */
     public int getUnfetchedObjects() {
         return unfetchedObjects;
+    }
+
+    abstract class IncrementalListHelper {
+        int indexOfObject(Object object) {
+            if (incorrectObjectType(object)) {
+                return -1;
+            }
+
+            synchronized (elements) {
+                for (int i = 0; i < elements.size(); i++) {
+                    if (objectsAreEqual(object, elements.get(i))) {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        int lastIndexOfObject(Object object) {
+            if (incorrectObjectType(object)) {
+                return -1;
+            }
+
+            synchronized (elements) {
+                for (int i = elements.size() - 1; i >= 0; i--) {
+                    if (objectsAreEqual(object, elements.get(i))) {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
+        void updateWithResolvedObjectInRange(Object object, int from, int to) {
+            boolean found = false;
+
+            synchronized (elements) {
+
+                for (int i = from; i < to; i++) {
+                    if (replacesObject(object, elements.get(i))) {
+                        elements.set(i, object);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!found) {
+                throw new CayenneRuntimeException("Can't find id for " + object);
+            }
+        }
+
+        abstract boolean incorrectObjectType(Object object);
+
+        abstract boolean objectsAreEqual(Object object, Object objectInTheList);
+
+        abstract boolean replacesObject(Object object, Object objectInTheList);
+    }
+
+    class DataObjectListHelper extends IncrementalListHelper {
+        boolean incorrectObjectType(Object object) {
+            if (!(object instanceof DataObject)) {
+
+                return true;
+            }
+
+            DataObject dataObj = (DataObject) object;
+            if (dataObj.getDataContext() != dataContext) {
+                return true;
+            }
+
+            if (!dataObj
+                .getObjectId()
+                .getObjClass()
+                .getName()
+                .equals(rootEntity.getClassName())) {
+                return true;
+            }
+
+            return false;
+        }
+
+        boolean objectsAreEqual(Object object, Object objectInTheList) {
+
+            if (objectInTheList instanceof DataObject) {
+                // due to object uniquing this should be sufficient
+                return object == objectInTheList;
+            } else {
+                return ((DataObject) object).getObjectId().getIdSnapshot().equals(
+                    objectInTheList);
+            }
+        }
+
+        boolean replacesObject(Object object, Object objectInTheList) {
+            if (objectInTheList instanceof DataObject) {
+                return false;
+            }
+
+            DataObject dataObject = (DataObject) object;
+            return dataObject.getObjectId().getIdSnapshot().equals(objectInTheList);
+        }
+    }
+
+    class DataRowListHelper extends IncrementalListHelper {
+        boolean incorrectObjectType(Object object) {
+            if (!(object instanceof Map)) {
+                return true;
+            }
+
+            Map map = (Map) object;
+            return map.size() != rowWidth;
+        }
+
+        boolean objectsAreEqual(Object object, Object objectInTheList) {
+            if (object == null && objectInTheList == null) {
+                return true;
+            }
+
+            if (object != null && objectInTheList != null) {
+
+                Map id = (Map) objectInTheList;
+                Map map = (Map) object;
+
+                // id must be a subset of this map
+                Iterator it = id.keySet().iterator();
+
+                while (it.hasNext()) {
+                    Object key = it.next();
+                    Object value = id.get(key);
+                    if (!Util.nullSafeEquals(value, map.get(key))) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        boolean replacesObject(Object object, Object objectInTheList) {
+
+            Map id = (Map) objectInTheList;
+            if (id.size() == rowWidth) {
+                return false;
+            }
+
+            // id must be a subset of this map
+            Map map = (Map) object;
+            Iterator it = id.keySet().iterator();
+
+            while (it.hasNext()) {
+                Object key = it.next();
+                Object value = id.get(key);
+                if (!Util.nullSafeEquals(value, map.get(key))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
     class IncrementalListIterator implements ListIterator {
