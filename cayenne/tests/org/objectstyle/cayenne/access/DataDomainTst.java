@@ -123,6 +123,7 @@ public class DataDomainTst extends TestCase {
         node.addDataMap(map);
 
         domain.addNode(node);
+        assertNotNull(domain.dataNodeForObjEntity(oe));
         assertSame(node, domain.dataNodeForObjEntity(oe));
     }
 
@@ -137,6 +138,7 @@ public class DataDomainTst extends TestCase {
         node.addDataMap(map);
 
         domain.addNode(node);
+        assertNotNull(domain.dataNodeForObjEntityName(oe.getName()));
         assertSame(node, domain.dataNodeForObjEntityName(oe.getName()));
     }
 

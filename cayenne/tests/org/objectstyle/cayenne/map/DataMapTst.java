@@ -83,4 +83,11 @@ public class DataMapTst extends TestCase {
         assertEquals(tstName, map.getLocation());
     }
     
+    public void testAddObjEntity() throws Exception {
+        DataMap map = new DataMap("a");
+        ObjEntity e = new ObjEntity("b");
+        map.addObjEntity(e);
+        assertSame(map, e.getDataMap());
+    }
+    
 }
