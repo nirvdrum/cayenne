@@ -108,4 +108,9 @@ public class EntityEvent extends EventObject
 	
 	/** Returns the new entity name. Used only in CHANGE event.*/
 	public String getNewName() {return newName;}
+	
+	/** Returns true if this event indicates a name change. */
+	public boolean isNameChange() {
+	    return (oldName == null) ? newName != null : !oldName.equals(newName);
+	}
 }

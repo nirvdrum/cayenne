@@ -427,7 +427,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		map_node = getMapNode(mediator.getCurrentDataDomain()
 							, mediator.getCurrentDataMap());
 		currentNode = new DefaultMutableTreeNode(wrapper, false);
-		model.insertNodeInto(currentNode, map_node, map_node.getChildCount());
+		// model.insertNodeInto(currentNode, map_node, map_node.getChildCount());
+		fixEntityPosition(map_node, currentNode);
 		showNode(currentNode);
 	}
 
@@ -662,6 +663,72 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		}// End while()
 		return list.toArray();
 	}
+	
+	
+	/** 
+     * Inserts entity node in alphabetical order. 
+     * Assumes that the tree is already ordered, except for one node. 
+     */
+    private void fixEntityPosition(
+        DefaultMutableTreeNode parent,
+        DefaultMutableTreeNode entityNode) {
+        Entity curEnt = ((EntityWrapper) entityNode.getUserObject()).getEntity();
+        boolean isObj = curEnt instanceof ObjEntity;
+
+        int len = parent.getChildCount();
+        int ins = -1;
+        int rm = -1;
+
+        for (int i = 0; i < len; i++) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
+
+            // remeber to remove node
+            if (node == entityNode) {
+                rm = i;
+                continue;
+            }
+
+            // no more insert checks
+            if (ins >= 0) {
+                continue;
+            }
+
+            Entity e = ((EntityWrapper) node.getUserObject()).getEntity();
+
+            // ObjEntities go before DbEntities
+            if (isObj && (e instanceof DbEntity)) {
+                ins = i;
+            }
+            if (!isObj && (e instanceof ObjEntity)) {
+                continue;
+            }
+
+            // Ignore unnamed
+            if (e.getName() == null) {
+                continue;
+            }
+
+            // Do alphabetical comparison
+            if (e.getName().compareTo(curEnt.getName()) > 0) {
+                ins = i;
+            }
+        }
+
+        if (ins < 0) {
+            ins = len;
+        }
+
+        // remove
+        if (rm >= 0) {
+            model.removeNodeFromParent(entityNode);
+            if (rm < ins) {
+                ins--;
+            }
+        }
+
+        // insert
+        model.insertNodeInto(entityNode, parent, ins);
+    }
 }
 
 

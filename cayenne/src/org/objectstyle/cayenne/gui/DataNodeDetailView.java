@@ -75,7 +75,8 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
 /** Detail view of the DataNode and DataSourceInfo
- * @author Michael Misha Shengaout */
+ * @author Michael Misha Shengaout 
+ */
 public class DataNodeDetailView extends JPanel 
 implements DocumentListener, ActionListener, DataNodeDisplayListener
 {
