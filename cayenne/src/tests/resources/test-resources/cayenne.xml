@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<domains>
+<domain name="default">
+	<map name="testmap" location="testmap.xml"/>
+</domain>
+</domains>
