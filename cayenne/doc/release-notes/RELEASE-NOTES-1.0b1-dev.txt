@@ -48,6 +48,7 @@ with correct implementation: org.objectstyle.cayenne.access.util.DefaultSorter, 
 on Ashwood library. 
 
 13. DbAdapter is now serves as a factory of DataNodes. This allows adapters to create
-their own DataNode implementations.
+their own DataNode implementations. This opens the way for implementations interfacing
+with non-JDBC data sources, such as LDAP.
 
 

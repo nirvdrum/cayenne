@@ -356,6 +356,9 @@ public class DataNode implements QueryEngine {
         }
     }
 
+    /**
+     * Executes a regular select query.
+     */
     protected void runSelect(
         Connection con,
         Query query,
@@ -386,6 +389,9 @@ public class DataNode implements QueryEngine {
         delegate.nextDataRows(query, resultRows);
     }
 
+    /**
+     * Executes a select query, with result being an open ResultIterator. 
+     */
     protected void runIteratedSelect(
         Connection con,
         Query query,
@@ -420,6 +426,9 @@ public class DataNode implements QueryEngine {
         }
     }
 
+    /**
+     * Executes a non-batched update query (including UPDATE, DELETE, INSERT, etc.).
+     */
     protected void runUpdate(
         Connection con,
         Query query,
@@ -446,7 +455,11 @@ public class DataNode implements QueryEngine {
             prepStmt.close();
         }
     }
-
+    
+    
+	/**
+	 * Executes a batched update query (including UPDATE, DELETE, INSERT, etc.).
+	 */
     protected void runBatchUpdate(
         Connection con,
         BatchQuery query,
