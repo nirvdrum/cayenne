@@ -171,17 +171,24 @@ public abstract class Entity {
 	 * @throws org.objectstyle.cayenne.exp.ExpressionException Exception is thrown if
 	 * <code>objPathExp</code> is not of type OBJ_PATH
 	 */
-	public Iterator resolvePathComponents(Expression objPathExp)
+	public Iterator resolvePathComponents(Expression pathExp)
 		throws ExpressionException {
-		if (objPathExp.getType() != Expression.OBJ_PATH)
-			throw new ExpressionException(
-				"Invalid expression type: '"
-					+ objPathExp.getType()
-					+ "' ('"
-					+ Expression.OBJ_PATH
-					+ "' is expected).");
+		if (pathExp.getType() != Expression.OBJ_PATH
+			&& pathExp.getType() != Expression.DB_NAME) {
+			StringBuffer msg = new StringBuffer();
+			msg
+				.append("Invalid expression type: '")
+				.append(pathExp.getType())
+				.append("' ('")
+				.append(Expression.OBJ_PATH)
+				.append(" or ")
+				.append(Expression.DB_NAME)
+				.append("' is expected).");
 
-		return new PathIterator(this, (String) objPathExp.getOperand(0));
+			throw new ExpressionException(msg.toString());
+		}
+
+		return new PathIterator(this, (String) pathExp.getOperand(0));
 	}
 
 	// Used to return an iterator to callers of 'resolvePathComponents'

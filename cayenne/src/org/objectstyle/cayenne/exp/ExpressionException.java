@@ -56,48 +56,50 @@
 
 package org.objectstyle.cayenne.exp;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+
 /** 
  * RuntimeException subclass thrown in cases of errors during 
  * expressions creation/parsing.
  * 
  * @author Andrei Adamchik
  */
-public class ExpressionException extends RuntimeException {
-    private Exception exception;
-    
-    /**
-     * Creates new <code>ExpressionException</code> without detail message.
-     */
-    public ExpressionException() { }
-    
-    
-    /**
-     * Constructs an <code>ExpressionException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public ExpressionException(String msg) {
-        super(msg);
-    }
-    
-    /**
-     * Constructs an <code>ExpressionException</code> that wraps <code>exception</code>
-     * thrown elsewhere.
-     */
-    public ExpressionException(Exception exception) {
-        this.exception = exception;
-    }
-    
-    public ExpressionException(String msg, Exception exception) {
-        super(msg);
-        this.exception = exception;
-    }
-    
-    public String toString() {
-        if(exception != null)
-            return exception.toString();
-        else
-            return super.toString();
-    }
+public class ExpressionException extends CayenneRuntimeException {
+ 
+	/**
+	 * Constructor for ExpressionException.
+	 */
+	public ExpressionException() {
+		super();
+	}
+
+
+	/**
+	 * Constructor for ExpressionException.
+	 * @param msg
+	 */
+	public ExpressionException(String msg) {
+		super(msg);
+	}
+
+
+	/**
+	 * Constructor for ExpressionException.
+	 * @param th
+	 */
+	public ExpressionException(Throwable th) {
+		super(th);
+	}
+
+
+	/**
+	 * Constructor for ExpressionException.
+	 * @param msg
+	 * @param th
+	 */
+	public ExpressionException(String msg, Throwable th) {
+		super(msg, th);
+	}
 }
 
 
