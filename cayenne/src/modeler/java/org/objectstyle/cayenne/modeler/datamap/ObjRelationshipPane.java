@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.control.MapObjRelationshipController;
+import org.objectstyle.cayenne.modeler.control.ObjRelationshipInfoController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
@@ -135,7 +135,7 @@ public class ObjRelationshipPane
     private void init() {
         this.setLayout(new BorderLayout());
         table = new CayenneTable();
-        resolve = new JButton("Database Mapping");
+        resolve = new JButton("Edit Relationship");
         JPanel panel = PanelFactory.createTablePanel(table, new JButton[] { resolve });
         add(panel, BorderLayout.CENTER);
     }
@@ -219,7 +219,7 @@ public class ObjRelationshipPane
         }
 
         ObjRelationshipTableModel model = (ObjRelationshipTableModel) table.getModel();
-        new MapObjRelationshipController(mediator, model.getRelationship(row)).startup();
+        new ObjRelationshipInfoController(mediator, model.getRelationship(row)).startup();
 
         // need to refresh selected row... do this by unselecting/selecting the row
         table.getSelectionModel().clearSelection();
