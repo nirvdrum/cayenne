@@ -84,7 +84,7 @@ public class DbLoaderTst extends TestCase {
         DataMap map = new DataMap();
 
         // *** TESTING THIS ***
-        loader.loadDbEntities(map, loader.getTables(null, null, "%", null));
+        loader.loadDbEntities(map, loader.getTables(null, null, "%", new String[] {"TABLE"}));
         DbEntity dae = map.getDbEntity("ARTIST");
         
         // sometimes table names get converted to lowercase
