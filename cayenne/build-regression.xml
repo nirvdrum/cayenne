@@ -7,7 +7,6 @@
 	<property name="regression.dist.src" value="${dist}/src/regression"/>
 	<property name="regression.build" value="build/regression"/>
 	<property name="regression.src" value="src/regression/java"/>
-	<property name="regression.bin" value="src/regression/bin"/>
 	<property environment="regression.env"/>
     
     <path id="classpath">
@@ -55,16 +54,6 @@
 	</target>
 
 	<target name="dist-bin" depends="jar">
-	    <copy todir="${dist}/bin">
-            <fileset dir="${regression.bin}" includes="*.bat,*.sh,*.ico"/>
-        </copy>
-
-        <chmod perm="gu+x">
-            <fileset dir="${dist}/bin">
-                <include name="**/*.sh"/>
-            </fileset>
-        </chmod>
-        
         <copy file="${otherlib.dir}/${bcel.jar}" todir="${dist}/lib/regression"/>
 	</target>
 	
