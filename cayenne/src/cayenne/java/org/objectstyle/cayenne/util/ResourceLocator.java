@@ -385,14 +385,12 @@ public class ResourceLocator {
 			return null;
 		}
 
-		String urlSt = url.toExternalForm();
-
 		try {
+			String urlSt = url.toExternalForm();
 			return (urlSt.endsWith("/")) ? url : new URL(urlSt + "/");
 		} catch (MalformedURLException ex) {
-			ex.printStackTrace();
-
 			// ignoring...
+			logObj.debug("Malformed URL, ignoring.", ex);
 			return null;
 		}
 	}
