@@ -77,87 +77,107 @@ import org.apache.commons.collections.FastTreeMap;
  * @author Andrei Adamchik
  */
 public class CayenneMap extends FastTreeMap {
-	protected Object parent;
+    protected Object parent;
 
-	/**
-	 * Constructor for CayenneMap.
-	 */
-	public CayenneMap(Object parent) {
-		this.parent = parent;
-	}
+    /**
+     * Constructor for CayenneMap.
+     */
+    public CayenneMap(Object parent) {
+        this.parent = parent;
+    }
 
-	/**
-	 * Constructor for CayenneMap.
-	 * @param c
-	 */
-	public CayenneMap(Object parent, Comparator c) {
-		super(c);
-		this.parent = parent;
-	}
+    /**
+     * Constructor for CayenneMap.
+     * @param c
+     */
+    public CayenneMap(Object parent, Comparator c) {
+        super(c);
+        this.parent = parent;
+    }
 
-	/**
-	 * Constructor for CayenneMap.
-	 * @param m
-	 */
-	public CayenneMap(Object parent, Map m) {
-		// !IMPORTANT - set parent before populating the map
-		this.parent = parent;
-		putAll(m);
-	}
+    /**
+     * Constructor for CayenneMap.
+     * @param m
+     */
+    public CayenneMap(Object parent, Map m) {
+        // !IMPORTANT - set parent before populating the map
+        this.parent = parent;
+        putAll(m);
+    }
 
-	/**
-	 * Constructor for CayenneMap.
-	 * @param m
-	 */
-	public CayenneMap(Object parent, SortedMap m) {
-		// !IMPORTANT - set parent before populating the map
-		this.parent = parent;
-		putAll(m);
-	}
+    /**
+     * Constructor for CayenneMap.
+     * @param m
+     */
+    public CayenneMap(Object parent, SortedMap m) {
+        // !IMPORTANT - set parent before populating the map
+        this.parent = parent;
+        putAll(m);
+    }
 
-	/** 
-	 * Maps specified key-value pair. If value is a
-	 * CayenneMapEntry, sets its parent to this map.
-	 * 
-	 * @see java.util.Map#put(Object, Object)
-	 */
-	public Object put(Object key, Object value) {
-		if (containsKey(key) && get(key) != value) {
-			throw new IllegalArgumentException("Map already contains a key " + key);
-		}
+    /** 
+     * Maps specified key-value pair. If value is a
+     * CayenneMapEntry, sets its parent to this map.
+     * 
+     * @see java.util.Map#put(Object, Object)
+     */
+    public Object put(Object key, Object value) {
 
-		if (value instanceof CayenneMapEntry) {
-			((CayenneMapEntry) value).setParent(parent);
-		}
+        if (containsKey(key) && get(key) != value) {
+            // build descriptive failure message
+            StringBuffer message = new StringBuffer();
+            message.append("Attempt to insert duplicate key. [key '");
+            message.append(key);
+            message.append("'");
 
-		super.put(key, value);
-		return null;
-	}
+            if (parent instanceof CayenneMapEntry) {
+                message.append(", parent '").append(
+                    ((CayenneMapEntry) parent).getName()).append(
+                    "'");
+            }
 
-	/**
-	 * @see java.util.Map#putAll(Map)
-	 */
-	public void putAll(Map t) {
-		Iterator it = t.keySet().iterator();
-		while (it.hasNext()) {
-			Object key = it.next();
-			put(key, t.get(key));
-		}
-	}
+            if (value instanceof CayenneMapEntry) {
+                message.append(", child '").append(
+                    ((CayenneMapEntry) value).getName()).append(
+                    "'");
+            }
+            message.append("]");
 
-	/**
-	 * Returns the parent.
-	 * @return Object
-	 */
-	public Object getParent() {
-		return parent;
-	}
+            throw new IllegalArgumentException(message.toString());
+        }
 
-	/**
-	 * Sets the parent.
-	 * @param parent The parent to set
-	 */
-	public void setParent(Object mapParent) {
-		this.parent = mapParent;
-	}
+        if (value instanceof CayenneMapEntry) {
+            ((CayenneMapEntry) value).setParent(parent);
+        }
+
+        super.put(key, value);
+        return null;
+    }
+
+    /**
+     * @see java.util.Map#putAll(Map)
+     */
+    public void putAll(Map t) {
+        Iterator it = t.keySet().iterator();
+        while (it.hasNext()) {
+            Object key = it.next();
+            put(key, t.get(key));
+        }
+    }
+
+    /**
+     * Returns the parent.
+     * @return Object
+     */
+    public Object getParent() {
+        return parent;
+    }
+
+    /**
+     * Sets the parent.
+     * @param parent The parent to set
+     */
+    public void setParent(Object mapParent) {
+        this.parent = mapParent;
+    }
 }
