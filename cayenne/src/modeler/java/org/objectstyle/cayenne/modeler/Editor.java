@@ -176,7 +176,7 @@ public class Editor
 		// set L&F
 		try {
 			ModelerPreferences prefs = ModelerPreferences.getPreferences();
-			String laf = (String)prefs.get(ModelerPreferences.EDITOR_LAFNAME);
+			String laf = (String)prefs.getString(ModelerPreferences.EDITOR_LAFNAME, "");
 			LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
 
 			for (int i = 0; i < installed.length; i++) {
