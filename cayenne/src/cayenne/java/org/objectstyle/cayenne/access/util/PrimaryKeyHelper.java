@@ -95,7 +95,6 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  *
  * @author Andriy Shapochka
  */
-
 public class PrimaryKeyHelper {
     private Map indexedDbEntities;
     private QueryEngine queryEngine;

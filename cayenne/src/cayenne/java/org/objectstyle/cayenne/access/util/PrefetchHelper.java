@@ -76,42 +76,54 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
+ * A helper class to resolve relationships in batches for the lists of objects. Used for
+ * performance tuning.
+ * 
  * @author Arndt Brenschede
  */
 public class PrefetchHelper {
 
     /**
-     * Resolves a toOne relationship for a list of objects. (performance tuning only)
+     * Resolves a to-one relationship for a list of objects.
      */
     public static void resolveToOneRelations(
             DataContext context,
             List objects,
             String relName) {
-        
-        int nobjects = objects.size();
-        if (nobjects == 0)
+
+        int len = objects.size();
+        if (len == 0) {
             return;
+        }
 
-        List oids = new ArrayList(nobjects);
+        List oids = null;
 
-        for (int i = 0; i < nobjects; i++) {
+        for (int i = 0; i < len; i++) {
             DataObject sourceObject = (DataObject) objects.get(i);
             DataObject targetObject = (DataObject) sourceObject.readProperty(relName);
 
             if (targetObject.getPersistenceState() == PersistenceState.HOLLOW) {
                 ObjectId oid = targetObject.getObjectId();
+
+                if (oids == null) {
+                    oids = new ArrayList(len);
+                }
+
                 oids.add(oid);
             }
         }
-        // this maybe suboptimal, cause it uses an OR .. OR .. OR .. expression
-        // instead of IN (..) - to be compatble with compound keys -
-        // however, it seems to be quite fast as well
-        SelectQuery sel = QueryUtils.selectQueryForIds(oids);
-        context.performQuery(sel);
+
+        if (oids != null) {
+            // this maybe suboptimal, cause it uses an OR .. OR .. OR .. expression
+            // instead of IN (..) - to be compatble with compound keys -
+            // however, it seems to be quite fast as well
+            SelectQuery sel = QueryUtils.selectQueryForIds(oids);
+            context.performQuery(sel);
+        }
     }
 
     /**
-     * Resolves a toMany relation for a list of objects. (performance tuning only)
+     * Resolves a toMany relation for a list of objects.
      * <p>
      * WARNING: this is a bit of a hack - it works for my toMany's, but it possibly
      * doesn't work in all cases.

@@ -105,4 +105,25 @@ public class PrefetchHelperTst extends CayenneTestCase {
             assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
         }
     }
+
+    public void testResolveToOneRelationsResolved() throws Exception {
+        // mainly testing CAY-188 - a case when related objects are already resolved
+        // ..
+
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
+
+        DataContext context = createDataContext();
+        SelectQuery q = new SelectQuery(Painting.class);
+        q.addPrefetch(Painting.TO_ARTIST_PROPERTY);
+
+        List paintings = context.performQuery(q);
+
+
+        // this shouldn't fail, even though artists are prefetched...
+        PrefetchHelper.resolveToOneRelations(
+                context,
+                paintings,
+                Painting.TO_ARTIST_PROPERTY);
+    }
 }
