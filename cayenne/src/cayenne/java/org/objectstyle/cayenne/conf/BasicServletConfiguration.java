@@ -93,7 +93,9 @@ public class BasicServletConfiguration extends DefaultConfiguration {
 		// sometimes multiple initializations are done by mistake...
 		
 		// Andrus: are there any cases when reinitialization is absolutely required?
-		Configuration oldConfiguration = Configuration.getSharedConfiguration();
+		
+		// don't use static getter, since it will do initialization on demand!!!
+		Configuration oldConfiguration = Configuration.sharedConfiguration;
 		if (oldConfiguration instanceof BasicServletConfiguration) {
 			BasicServletConfiguration basicConfiguration =
 				(BasicServletConfiguration) oldConfiguration;
