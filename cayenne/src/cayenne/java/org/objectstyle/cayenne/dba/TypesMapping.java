@@ -137,8 +137,6 @@ public class TypesMapping {
      *  Values:  SQL int type definitions from java.sql.Types */
     private static final Map javaSqlEnum = new HashMap();
 
-    private static final String[] emptyArray = new String[0];
-
     static {
         sqlStringType.put(SQL_ARRAY, new Integer(Types.ARRAY));
         sqlStringType.put(SQL_BIGINT, new Integer(Types.BIGINT));
@@ -459,37 +457,6 @@ public class TypesMapping {
 
         if (lvbInfo != null && blobInfo == null)
             databaseTypes.put(blob, lvbInfo);
-    }
-
-    /** Returns name of data type in a database described by this object corresponding
-     *  to a standard JDBC data type defined in java.sql.Types */
-    public String[] getDatabaseTypes(int jdbcType) {
-        List infos = (List) databaseTypes.get(new Integer(jdbcType));
-        if (infos == null || infos.size() == 0)
-            return emptyArray;
-
-        int len = infos.size();
-        String[] types = new String[len];
-        for (int i = 0; i < len; i++) {
-            types[i] = ((TypeInfo) infos.get(i)).name;
-        }
-
-        return types;
-    }
-
-    /** Database might have more then 1 type mapping to a single JDBC type.
-     *  try to guess the one that matches the best. */
-    public String getFuzzyDataType(int jdbcType) {
-        if (jdbcType == NOT_DEFINED)
-            return null;
-
-        List alts = (List) databaseTypes.get(new Integer(jdbcType));
-        if (alts == null)
-            return null;
-
-        TypeInfo[] altArray =
-            (TypeInfo[]) alts.toArray(new TypeInfo[alts.size()]);
-        return pickDataType(jdbcType, altArray);
     }
 
     /** Stores (incomplete) information about database data type */
