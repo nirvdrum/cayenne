@@ -18,6 +18,14 @@
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GROUP_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="BLOB_TEST">
+		<db-attribute name="BLOB_COL" type="BLOB"/>
+		<db-attribute name="BLOB_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="CLOB_TEST">
+		<db-attribute name="CLOB_COL" type="CLOB"/>
+		<db-attribute name="CLOB_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="DATE_TEST">
 		<db-attribute name="DATE_COLUMN" type="DATE"/>
 		<db-attribute name="DATE_TEST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -90,6 +98,12 @@
 	</obj-entity>
 	<obj-entity name="ArtistPaintingCounts" className="org.objectstyle.art.ArtistPaintingCounts" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
+	</obj-entity>
+	<obj-entity name="BlobTest" className="org.objectstyle.art.BlobTest" dbEntityName="BLOB_TEST">
+		<obj-attribute name="blobCol" type="byte[]" db-attribute-name="BLOB_COL"/>
+	</obj-entity>
+	<obj-entity name="ClobTest" className="org.objectstyle.art.ClobTest" dbEntityName="CLOB_TEST">
+		<obj-attribute name="clobCol" type="java.lang.String" db-attribute-name="CLOB_COL"/>
 	</obj-entity>
 	<obj-entity name="DateTest" className="org.objectstyle.art.DateTest" dbEntityName="DATE_TEST">
 		<obj-attribute name="dateColumn" type="java.util.Date" db-attribute-name="DATE_COLUMN"/>

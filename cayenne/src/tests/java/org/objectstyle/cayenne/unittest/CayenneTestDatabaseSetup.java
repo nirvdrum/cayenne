@@ -60,6 +60,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +72,7 @@ import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
@@ -78,198 +80,230 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * @author Andrei Adamchik
  */
 public class CayenneTestDatabaseSetup {
-	private static Logger logObj = Logger.getLogger(CayenneTestDatabaseSetup.class);
+    private static Logger logObj =
+        Logger.getLogger(CayenneTestDatabaseSetup.class);
 
-	protected DataMap map;
-	protected CayenneTestResources resources;
-	protected DatabaseSetupDelegate delegate;
+    protected DataMap map;
+    protected CayenneTestResources resources;
+    protected DatabaseSetupDelegate delegate;
 
-	public CayenneTestDatabaseSetup(CayenneTestResources resources, DataMap map) throws Exception {
-		this.map = map;
-		this.resources = resources;
-		this.delegate = DatabaseSetupDelegate.createDelegate(resources.getSharedNode().getAdapter());
-	}
+    public CayenneTestDatabaseSetup(
+        CayenneTestResources resources,
+        DataMap map)
+        throws Exception {
+        this.map = map;
+        this.resources = resources;
+        this.delegate =
+            DatabaseSetupDelegate.createDelegate(
+                resources.getSharedNode().getAdapter());
+    }
 
-	/** Deletes all data from the database tables mentioned in the DataMap. */
-	public void cleanTableData() throws Exception {
-		Connection conn = resources.getSharedConnection();
+    /** Deletes all data from the database tables mentioned in the DataMap. */
+    public void cleanTableData() throws Exception {
+        Connection conn = resources.getSharedConnection();
 
-		List list = dbEntitiesInInsertOrder();
-		try {
-			if (conn.getAutoCommit()) {
-				conn.setAutoCommit(false);
-			}
+        List list = dbEntitiesInInsertOrder();
+        try {
+            if (conn.getAutoCommit()) {
+                conn.setAutoCommit(false);
+            }
 
-			Statement stmt = conn.createStatement();
+            Statement stmt = conn.createStatement();
 
-			ListIterator it = list.listIterator(list.size());
-			while (it.hasPrevious()) {
-				DbEntity ent = (DbEntity) it.previous();
-				if (ent instanceof DerivedDbEntity) {
-					continue;
-				}
+            ListIterator it = list.listIterator(list.size());
+            while (it.hasPrevious()) {
+                DbEntity ent = (DbEntity) it.previous();
+                if (ent instanceof DerivedDbEntity) {
+                    continue;
+                }
 
-				String deleteSql = "DELETE FROM " + ent.getName();
-				stmt.executeUpdate(deleteSql);
-			}
-			conn.commit();
-			stmt.close();
-		} finally {
-			conn.close();
-		}
+                String deleteSql = "DELETE FROM " + ent.getName();
+                stmt.executeUpdate(deleteSql);
+            }
+            conn.commit();
+            stmt.close();
+        } finally {
+            conn.close();
+        }
 
-		// lets recreate pk support, since there is no
-		// generic way to reset pk info
-		DataNode node = resources.getSharedNode();
-		DbAdapter adapter = node.getAdapter();
+        // lets recreate pk support, since there is no
+        // generic way to reset pk info
+        DataNode node = resources.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
 
-		// drop
-		adapter.getPkGenerator().dropAutoPk(node, list);
+        // drop
+        adapter.getPkGenerator().dropAutoPk(node, list);
 
-		// create
-		adapter.getPkGenerator().createAutoPk(node, list);
-	}
+        // create
+        adapter.getPkGenerator().createAutoPk(node, list);
+    }
 
-	/** Drops all test tables. */
-	public void dropTestTables() throws Exception {
-		Connection conn = resources.getSharedConnection();
-		DataNode node = resources.getSharedNode();
-		DbAdapter adapter = node.getAdapter();
-		List list = dbEntitiesInInsertOrder();
+    /** Drops all test tables. */
+    public void dropTestTables() throws Exception {
+        Connection conn = resources.getSharedConnection();
+        DataNode node = resources.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
+        List list = dbEntitiesInInsertOrder();
 
-		try {
-		    delegate.willDropTables(conn, map);
-		    
-			DatabaseMetaData md = conn.getMetaData();
-			ResultSet tables = md.getTables(null, null, "%", null);
-			List allTables = new ArrayList();
+        try {
+            delegate.willDropTables(conn, map);
 
-			while (tables.next()) {
-				// 'toUpperCase' is needed since most databases
-				// are case insensitive, and some will convert names to lower case (PostgreSQL)
-				String name = tables.getString("TABLE_NAME");
-				if (name != null)
-					allTables.add(name.toUpperCase());
-			}
-			tables.close();
+            DatabaseMetaData md = conn.getMetaData();
+            ResultSet tables = md.getTables(null, null, "%", null);
+            List allTables = new ArrayList();
 
-			// drop all tables in the map
-			Statement stmt = conn.createStatement();
+            while (tables.next()) {
+                // 'toUpperCase' is needed since most databases
+                // are case insensitive, and some will convert names to lower case (PostgreSQL)
+                String name = tables.getString("TABLE_NAME");
+                if (name != null)
+                    allTables.add(name.toUpperCase());
+            }
+            tables.close();
 
-			ListIterator it = list.listIterator(list.size());
-			while (it.hasPrevious()) {
-				DbEntity ent = (DbEntity) it.previous();
-				if (!allTables.contains(ent.getName())) {
-					continue;
-				}
+            // drop all tables in the map
+            Statement stmt = conn.createStatement();
 
-				try {
-					String dropSql = adapter.dropTable(ent);
-					logObj.info("Drop table: " + dropSql);
-					stmt.execute(dropSql);
-				} catch (SQLException sqe) {
-					logObj.warn(
-						"Can't drop table " + ent.getName() + ", ignoring...",
-						sqe);
-				}
-			}
-			
-		    delegate.droppedTables(conn, map);
-		} finally {
-			conn.close();
-		}
+            ListIterator it = list.listIterator(list.size());
+            while (it.hasPrevious()) {
+                DbEntity ent = (DbEntity) it.previous();
+                if (!allTables.contains(ent.getName())) {
+                    continue;
+                }
 
-		// drop primary key support
-		adapter.getPkGenerator().dropAutoPk(node, list);
-	}
+                try {
+                    String dropSql = adapter.dropTable(ent);
+                    logObj.info("Drop table: " + dropSql);
+                    stmt.execute(dropSql);
+                } catch (SQLException sqe) {
+                    logObj.warn(
+                        "Can't drop table " + ent.getName() + ", ignoring...",
+                        sqe);
+                }
+            }
 
-	/** Creates all test tables in the database. */
-	public void setupTestTables() throws Exception {
-		Connection conn = resources.getSharedConnection();
+            delegate.droppedTables(conn, map);
+        } finally {
+            conn.close();
+        }
 
-		try {
-			delegate.willCreateTables(conn, map);
-			Statement stmt = conn.createStatement();
-			Iterator it = tableCreateQueries();
-			while (it.hasNext()) {
-				String query = (String) it.next();
-				logObj.info("Create table: " + query);
-				stmt.execute(query);
-			}
-		    delegate.createdTables(conn, map);
-		} finally {
-			conn.close();
-		}
+        // drop primary key support
+        adapter.getPkGenerator().dropAutoPk(node, list);
+    }
 
-		// create primary key support
-		DataNode node = resources.getSharedNode();
-		DbAdapter adapter = node.getAdapter();
-		adapter.getPkGenerator().createAutoPk(
-			node,
-			((DataMap)node.getDataMapsAsList().get(0)).getDbEntitiesAsList());
-	}
+    /** Creates all test tables in the database. */
+    public void setupTestTables() throws Exception {
+        Connection conn = resources.getSharedConnection();
 
-	/** 
-	 * Creates primary key support for all node DbEntities.
-	 * Will use its facilities provided by DbAdapter to generate
-	 * any necessary database objects and data for primary
-	 * key support.
-	 */
-	public void createPkSupportForMapEntities(DataNode node) throws Exception {
-		Iterator dataMaps = node.getDataMapsAsList().iterator();
-		while (dataMaps.hasNext()) {
-			node.getAdapter().getPkGenerator().createAutoPk(
-				node,
-				((DataMap)dataMaps.next()).getDbEntitiesAsList());
-		}
-	}
+        try {
+            delegate.willCreateTables(conn, map);
+            Statement stmt = conn.createStatement();
+            Iterator it = tableCreateQueries();
+            while (it.hasNext()) {
+                String query = (String) it.next();
+                logObj.info("Create table: " + query);
+                stmt.execute(query);
+            }
+            delegate.createdTables(conn, map);
+        } finally {
+            conn.close();
+        }
 
-	/** Returns iterator of preprocessed table create queries */
-	public Iterator tableCreateQueries() throws Exception {
-		List queries = new ArrayList();
-		DbAdapter adapter = resources.getSharedNode().getAdapter();
-		DbGenerator gen = new DbGenerator(adapter, map);
+        // create primary key support
+        DataNode node = resources.getSharedNode();
+        DbAdapter adapter = node.getAdapter();
+        adapter.getPkGenerator().createAutoPk(
+            node,
+            ((DataMap) node.getDataMapsAsList().get(0)).getDbEntitiesAsList());
+    }
 
-		// table definitions
-		Iterator it = dbEntitiesInInsertOrder().iterator();
-		while (it.hasNext()) {
-			DbEntity ent = (DbEntity) it.next();
-			if (ent instanceof DerivedDbEntity) {
-				continue;
-			}
+    /** 
+     * Creates primary key support for all node DbEntities.
+     * Will use its facilities provided by DbAdapter to generate
+     * any necessary database objects and data for primary
+     * key support.
+     */
+    public void createPkSupportForMapEntities(DataNode node) throws Exception {
+        Iterator dataMaps = node.getDataMapsAsList().iterator();
+        while (dataMaps.hasNext()) {
+            node.getAdapter().getPkGenerator().createAutoPk(
+                node,
+                ((DataMap) dataMaps.next()).getDbEntitiesAsList());
+        }
+    }
 
-			queries.add(adapter.createTable(ent));
-		}
+    /** Returns iterator of preprocessed table create queries */
+    public Iterator tableCreateQueries() throws Exception {
+        List queries = new ArrayList();
+        DbAdapter adapter = resources.getSharedNode().getAdapter();
+        DbGenerator gen = new DbGenerator(adapter, map);
 
-		// FK constraints
-		if (adapter.supportsFkConstraints()) {
-			it = dbEntitiesInInsertOrder().iterator();
-			while (it.hasNext()) {
-				DbEntity ent = (DbEntity) it.next();
-				if (ent instanceof DerivedDbEntity) {
-					continue;
-				}
+        // table definitions
+        Iterator it = dbEntitiesInInsertOrder().iterator();
+        while (it.hasNext()) {
+            DbEntity ent = (DbEntity) it.next();
+            if (ent instanceof DerivedDbEntity) {
+                continue;
+            }
 
-				List qs = gen.createFkConstraintsQueries(ent);
-				queries.addAll(qs);
-			}
-		}
+            queries.add(adapter.createTable(ent));
+        }
 
-		return queries.iterator();
-	}
+        // FK constraints
+        if (adapter.supportsFkConstraints()) {
+            it = dbEntitiesInInsertOrder().iterator();
+            while (it.hasNext()) {
+                DbEntity ent = (DbEntity) it.next();
+                if (ent instanceof DerivedDbEntity) {
+                    continue;
+                }
 
-	/** Helper method that orders DbEntities to satisfy referential
-	 *  constraints and returns an ordered list. */
-	private List dbEntitiesInInsertOrder() {
-		List list = map.getDbEntitiesAsList();
+                List qs = gen.createFkConstraintsQueries(ent);
+                queries.addAll(qs);
+            }
+        }
 
-		DataNode node = resources.getSharedNode();
-		OperationSorter sorter = node.getAdapter().getOpSorter(node);
-		if (sorter != null) {
-			list=sorter.sortedEntitiesInInsertOrder(list);
-		}
-		return list;
-	}
+        return queries.iterator();
+    }
+
+    /** Helper method that orders DbEntities to satisfy referential
+     *  constraints and returns an ordered list. */
+    private List dbEntitiesInInsertOrder() {
+        List list = map.getDbEntitiesAsList();
+
+        // filter out BLOB/CLOB tables if database does not support them
+        if (!delegate.supportsLobs()) {
+            Iterator it = list.iterator();
+            List filtered = new ArrayList();
+            while (it.hasNext()) {
+                DbEntity ent = (DbEntity)it.next();
+                
+                // check for LOB attributes
+                boolean hasLob = false;
+                Iterator attrs = ent.getAttributeList().iterator();
+                while(attrs.hasNext()) {
+                	DbAttribute attr = (DbAttribute)attrs.next();
+                	if(attr.getType() == Types.BLOB || attr.getType() == Types.CLOB) {
+                	    hasLob = true;
+                	    break;
+                	}
+                }
+                
+                if(!hasLob) {
+                    filtered.add(ent);
+                }
+            }
+
+            list = filtered;
+        }
+
+        DataNode node = resources.getSharedNode();
+        OperationSorter sorter = node.getAdapter().getOpSorter(node);
+        if (sorter != null) {
+            list = sorter.sortedEntitiesInInsertOrder(list);
+        }
+        return list;
+    }
 
     /**
      * Returns the delegate.
@@ -286,6 +320,4 @@ public class CayenneTestDatabaseSetup {
     public void setDelegate(DatabaseSetupDelegate delegate) {
         this.delegate = delegate;
     }
-
 }
-

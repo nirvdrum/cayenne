@@ -133,6 +133,14 @@ public class DatabaseSetupDelegate {
     public boolean supportsStoredProcedures() {
         return false;
     }
+    
+    /**
+     * Returns true if the target database has support for large objects (BLOB,
+     * CLOB).
+     */
+    public boolean supportsLobs() {
+    	return false;
+    }
 
     protected void executeDDL(Connection con, String ddl) throws Exception {
         logObj.info(ddl);
