@@ -102,6 +102,12 @@ public abstract class Configuration {
      * explicitly.
      */
 	protected static ClassLoader resourceLoader = Configuration.class.getClassLoader();
+	
+	static {
+		if(Configuration.resourceLoader == null) {
+			Configuration.resourceLoader = ClassLoader.getSystemClassLoader();
+		}
+	}
 
     /** Lookup map that stores DataDomains with names as keys. */
 	protected CayenneMap dataDomains = new CayenneMap(this);
@@ -119,7 +125,12 @@ public abstract class Configuration {
 	 * this method call will have no effect on how resources are loaded.
 	 */
 	public static void bootstrapSharedConfiguration(Class cl) {
-		resourceLoader = cl.getClassLoader();
+		if(cl.getClassLoader() != null) {
+		    resourceLoader = cl.getClassLoader();
+		}
+		else {
+			logObj.debug("An attempt to bootstrap configuration with null class loader for class " + cl.getName());
+		}
 	}
 
     /**
