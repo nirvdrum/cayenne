@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-map project-version="1.1">
+	<property name="defaultPackage" value="org.objectstyle.cayenne.testdo.relationship"/>
 	<db-entity name="COMPLEX_JOIN">
 		<db-attribute name="EXTRA_COLUMN" type="VARCHAR" length="50"/>
 		<db-attribute name="FT1_FK" type="INTEGER"/>
@@ -30,6 +31,10 @@
 		<db-attribute name="FT2_ID" type="INTEGER"/>
 		<db-attribute name="FT3_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="NAME" type="VARCHAR" isMandatory="true" length="100"/>
+	</db-entity>
+	<db-entity name="MEANINGFUL_FK">
+		<db-attribute name="MEANIGNFUL_FK_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="RELATIONSHIP_HELPER_ID" type="INTEGER" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="REFLEXIVE_AND_TO_ONE">
 		<db-attribute name="NAME" type="VARCHAR" length="100"/>
@@ -62,6 +67,9 @@
 	</obj-entity>
 	<obj-entity name="FlattenedTest3" className="org.objectstyle.cayenne.testdo.relationship.FlattenedTest3" dbEntityName="FLATTENED_TEST_3">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="MeaningfulFK" className="org.objectstyle.cayenne.testdo.relationship.MeaningfulFK" dbEntityName="MEANINGFUL_FK">
+		<obj-attribute name="relationshipHelperID" type="java.lang.Integer" db-attribute-path="RELATIONSHIP_HELPER_ID"/>
 	</obj-entity>
 	<obj-entity name="ReflexiveAndToOne" className="org.objectstyle.cayenne.testdo.relationship.ReflexiveAndToOne" dbEntityName="REFLEXIVE_AND_TO_ONE">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
@@ -112,6 +120,9 @@
 	<db-relationship name="toFT2" source="FLATTENED_TEST_3" target="FLATTENED_TEST_2" toMany="false">
 		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
 	</db-relationship>
+	<db-relationship name="toRelationshipHelper" source="MEANINGFUL_FK" target="RELATIONSHIP_HELPER" toMany="false">
+		<db-attribute-pair source="RELATIONSHIP_HELPER_ID" target="RELATIONSHIP_HELPER_ID"/>
+	</db-relationship>
 	<db-relationship name="children" source="REFLEXIVE_AND_TO_ONE" target="REFLEXIVE_AND_TO_ONE" toMany="true">
 		<db-attribute-pair source="REFLEXIVE_AND_TO_ONE_ID" target="PARENT_ID"/>
 	</db-relationship>
@@ -120,6 +131,9 @@
 	</db-relationship>
 	<db-relationship name="toParent" source="REFLEXIVE_AND_TO_ONE" target="REFLEXIVE_AND_TO_ONE" toMany="false">
 		<db-attribute-pair source="PARENT_ID" target="REFLEXIVE_AND_TO_ONE_ID"/>
+	</db-relationship>
+	<db-relationship name="meanigfulFKs" source="RELATIONSHIP_HELPER" target="MEANINGFUL_FK" toMany="true">
+		<db-attribute-pair source="RELATIONSHIP_HELPER_ID" target="RELATIONSHIP_HELPER_ID"/>
 	</db-relationship>
 	<db-relationship name="reflexiveAndToOneArray" source="RELATIONSHIP_HELPER" target="REFLEXIVE_AND_TO_ONE" toMany="true">
 		<db-attribute-pair source="RELATIONSHIP_HELPER_ID" target="RELATIONSHIP_HELPER_ID"/>
@@ -141,6 +155,7 @@
 	<obj-relationship name="toFT1" source="FlattenedTest2" target="FlattenedTest1" db-relationship-path="toFT1"/>
 	<obj-relationship name="toFT1" source="FlattenedTest3" target="FlattenedTest1" db-relationship-path="toFT2.toFT1"/>
 	<obj-relationship name="toFT2" source="FlattenedTest3" target="FlattenedTest2" db-relationship-path="toFT2"/>
+	<obj-relationship name="toRelationshipHelper" source="MeaningfulFK" target="RelationshipHelper" db-relationship-path="toRelationshipHelper"/>
 	<obj-relationship name="children" source="ReflexiveAndToOne" target="ReflexiveAndToOne" db-relationship-path="children"/>
 	<obj-relationship name="toHelper" source="ReflexiveAndToOne" target="RelationshipHelper" db-relationship-path="toHelper"/>
 	<obj-relationship name="toParent" source="ReflexiveAndToOne" target="ReflexiveAndToOne" db-relationship-path="toParent"/>

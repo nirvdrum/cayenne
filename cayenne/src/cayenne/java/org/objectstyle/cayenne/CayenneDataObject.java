@@ -80,13 +80,13 @@ import org.objectstyle.cayenne.validation.ValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * A default implementation of DataObject interface. It is normally used as a
- * superclass of Cayenne persistent objects.
+ * A default implementation of DataObject interface. It is normally used as a superclass
+ * of Cayenne persistent objects.
  * 
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
-    
+
     protected long snapshotVersion = DEFAULT_VERSION;
 
     protected ObjectId objectId;
@@ -95,9 +95,9 @@ public class CayenneDataObject implements DataObject {
     protected Map values = new HashMap();
 
     /**
-     * Returns a DataContext that holds this object. Object becomes assocaiated
-     * with a DataContext either when the object is fetched using a query, or
-     * when a new object is registered explicitly with a DataContext.
+     * Returns a DataContext that holds this object. Object becomes assocaiated with a
+     * DataContext either when the object is fetched using a query, or when a new object
+     * is registered explicitly with a DataContext.
      */
     public DataContext getDataContext() {
         return dataContext;
@@ -166,7 +166,9 @@ public class CayenneDataObject implements DataObject {
 
         // take a shortcut for simple properties
         if (path.indexOf(".") < 0) {
-            return new String[] { path };
+            return new String[] {
+                path
+            };
         }
 
         StringTokenizer tokens = new StringTokenizer(path, ".");
@@ -190,14 +192,14 @@ public class CayenneDataObject implements DataObject {
                 object = PropertyComparator.readProperty(property, this);
             }
             catch (IllegalAccessException e) {
-                throw new CayenneRuntimeException(
-                    "Error reading property '" + property + "'.",
-                    e);
+                throw new CayenneRuntimeException("Error reading property '"
+                        + property
+                        + "'.", e);
             }
             catch (InvocationTargetException e) {
-                throw new CayenneRuntimeException(
-                    "Error reading property '" + property + "'.",
-                    e);
+                throw new CayenneRuntimeException("Error reading property '"
+                        + property
+                        + "'.", e);
             }
             catch (NoSuchMethodException e) {
                 // ignoring, no such property exists
@@ -266,10 +268,7 @@ public class CayenneDataObject implements DataObject {
         return (DataObject) readProperty(relName);
     }
 
-    public void removeToManyTarget(
-        String relName,
-        DataObject value,
-        boolean setReverse) {
+    public void removeToManyTarget(String relName, DataObject value, boolean setReverse) {
 
         ObjRelationship relationship = this.getRelationshipNamed(relName);
 
@@ -279,10 +278,10 @@ public class CayenneDataObject implements DataObject {
 
         // if "setReverse" is false, avoid unneeded processing of flattened relationship
         getDataContext().getObjectStore().objectRelationshipUnset(
-            this,
-            value,
-            relationship,
-            setReverse);
+                this,
+                value,
+                relationship,
+                setReverse);
 
         // Now do the rest of the normal handling (regardless of whether it was
         // flattened or not)
@@ -299,8 +298,7 @@ public class CayenneDataObject implements DataObject {
 
     public void addToManyTarget(String relName, DataObject value, boolean setReverse) {
         if ((value != null) && (dataContext != value.getDataContext())) {
-            throw new CayenneRuntimeException(
-                "Cannot add object to relationship "
+            throw new CayenneRuntimeException("Cannot add object to relationship "
                     + relName
                     + " because it is in a different DataContext");
         }
@@ -311,10 +309,10 @@ public class CayenneDataObject implements DataObject {
         }
 
         getDataContext().getObjectStore().objectRelationshipSet(
-            this,
-            value,
-            relationship,
-            setReverse);
+                this,
+                value,
+                relationship,
+                setReverse);
 
         // Now do the rest of the normal handling (regardless of whether it was
         // flattened or not)
@@ -330,22 +328,22 @@ public class CayenneDataObject implements DataObject {
 
     /**
      * @deprecated Since 1.0.1 this method is no longer needed, since
-     *             "setToOneTarget(String, DataObject, boolean)" supports
-     *             dependent targets as well.
+     *             "setToOneTarget(String, DataObject, boolean)" supports dependent
+     *             targets as well.
      */
     public void setToOneDependentTarget(String relName, DataObject val) {
         setToOneTarget(relName, val, true);
     }
 
     public void setToOneTarget(
-        String relationshipName,
-        DataObject value,
-        boolean setReverse) {
+            String relationshipName,
+            DataObject value,
+            boolean setReverse) {
         if ((value != null) && (dataContext != value.getDataContext())) {
             throw new CayenneRuntimeException(
-                "Cannot set object as destination of relationship "
-                    + relationshipName
-                    + " because it is in a different DataContext");
+                    "Cannot set object as destination of relationship "
+                            + relationshipName
+                            + " because it is in a different DataContext");
         }
 
         Object oldTarget = readProperty(relationshipName);
@@ -355,16 +353,15 @@ public class CayenneDataObject implements DataObject {
 
         ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
         if (relationship == null) {
-            throw new NullPointerException(
-                "Can't find relationship: " + relationshipName);
+            throw new NullPointerException("Can't find relationship: " + relationshipName);
         }
 
         // if "setReverse" is false, avoid unneeded processing of flattened relationship
         getDataContext().getObjectStore().objectRelationshipSet(
-            this,
-            value,
-            relationship,
-            setReverse);
+                this,
+                value,
+                relationship,
+                setReverse);
 
         if (setReverse) {
             // unset old reverse relationship
@@ -383,21 +380,18 @@ public class CayenneDataObject implements DataObject {
 
     private ObjRelationship getRelationshipNamed(String relName) {
         return (ObjRelationship) dataContext
-            .getEntityResolver()
-            .lookupObjEntity(this)
-            .getRelationship(relName);
+                .getEntityResolver()
+                .lookupObjEntity(this)
+                .getRelationship(relName);
     }
 
     /**
-     * Initializes reverse relationship from object <code>val</code> to this
-     * object.
+     * Initializes reverse relationship from object <code>val</code> to this object.
      * 
-     * @param relName
-     *            name of relationship from this object to <code>val</code>.
+     * @param relName name of relationship from this object to <code>val</code>.
      */
     protected void setReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel =
-            (ObjRelationship) dataContext
+        ObjRelationship rel = (ObjRelationship) dataContext
                 .getEntityResolver()
                 .lookupObjEntity(objectId.getObjClass())
                 .getRelationship(relName);
@@ -411,8 +405,8 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Removes current object from reverse relationship of object <code>val</code>
-     * to this object.
+     * Removes current object from reverse relationship of object <code>val</code> to
+     * this object.
      */
     protected void unsetReverseRelationship(String relName, DataObject val) {
         Class aClass = objectId.getObjClass();
@@ -421,8 +415,8 @@ public class CayenneDataObject implements DataObject {
 
         if (entity == null) {
             String className = (aClass != null) ? aClass.getName() : "<null>";
-            throw new IllegalStateException(
-                "DataObject's class is unmapped: " + className);
+            throw new IllegalStateException("DataObject's class is unmapped: "
+                    + className);
         }
 
         ObjRelationship rel = (ObjRelationship) entity.getRelationship(relName);
@@ -452,8 +446,8 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * A variation of "toString" method, that may be more efficient in some
-     * cases. For example when printing a list of objects into the same String.
+     * A variation of "toString" method, that may be more efficient in some cases. For
+     * example when printing a list of objects into the same String.
      */
     public StringBuffer toStringBuffer(StringBuffer buf, boolean fullDesc) {
         // log all properties
@@ -462,12 +456,8 @@ public class CayenneDataObject implements DataObject {
         if (fullDesc)
             appendProperties(buf);
 
-        buf
-            .append("<oid: ")
-            .append(objectId)
-            .append("; state: ")
-            .append(PersistenceState.persistenceStateName(persistenceState))
-            .append(">}\n");
+        buf.append("<oid: ").append(objectId).append("; state: ").append(
+                PersistenceState.persistenceStateName(persistenceState)).append(">}\n");
         return buf;
     }
 
@@ -512,10 +502,10 @@ public class CayenneDataObject implements DataObject {
         switch (persistenceState) {
             //New, modified or transient or deleted - write the whole shebang
             //The other states (committed, hollow) all need just ObjectId
-            case PersistenceState.TRANSIENT :
-            case PersistenceState.NEW :
-            case PersistenceState.MODIFIED :
-            case PersistenceState.DELETED :
+            case PersistenceState.TRANSIENT:
+            case PersistenceState.NEW:
+            case PersistenceState.MODIFIED:
+            case PersistenceState.DELETED:
                 out.writeObject(values);
                 break;
         }
@@ -523,19 +513,19 @@ public class CayenneDataObject implements DataObject {
         out.writeObject(objectId);
     }
 
-    private void readObject(ObjectInputStream in)
-        throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException,
+            ClassNotFoundException {
         this.persistenceState = in.readInt();
 
         switch (persistenceState) {
-            case PersistenceState.TRANSIENT :
-            case PersistenceState.NEW :
-            case PersistenceState.MODIFIED :
-            case PersistenceState.DELETED :
+            case PersistenceState.TRANSIENT:
+            case PersistenceState.NEW:
+            case PersistenceState.MODIFIED:
+            case PersistenceState.DELETED:
                 values = (Map) in.readObject();
                 break;
-            case PersistenceState.COMMITTED :
-            case PersistenceState.HOLLOW :
+            case PersistenceState.COMMITTED:
+            case PersistenceState.HOLLOW:
                 this.persistenceState = PersistenceState.HOLLOW;
                 //props will be populated when required (readProperty called)
                 values = new HashMap();
@@ -550,8 +540,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Returns a version of a DataRow snapshot that was used to create this
-     * object.
+     * Returns a version of a DataRow snapshot that was used to create this object.
      * 
      * @since 1.1
      */
@@ -567,24 +556,31 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Performs property validation of the object, appending any validation failures
-     * to the provided validationResult object. This method is invoked from "validateFor.."
-     * before committing a NEW or MODIFIED object to the database. Validation includes checking for
-     * null values and value sizes. CayenneDataObject subclasses may override this method,
-     * calling super.
+     * Performs property validation of the object, appending any validation failures to
+     * the provided validationResult object. This method is invoked from "validateFor.."
+     * before committing a NEW or MODIFIED object to the database. Validation includes
+     * checking for null values and value sizes. CayenneDataObject subclasses may override
+     * this method, calling super.
      * 
      * @since 1.1
      */
     protected void validateForSave(ValidationResult validationResult) {
 
         ObjEntity objEntity = getDataContext().getEntityResolver().lookupObjEntity(this);
-        ExtendedTypeMap types =
-            getDataContext()
+        ExtendedTypeMap types = getDataContext()
                 .lookupDataNode(objEntity.getDataMap())
                 .getAdapter()
                 .getExtendedTypes();
 
         // validate mandatory attributes
+
+        // handling a special case - meaningful mandatory FK... defer failures until
+        // relationship validation is done... This is just a temporary solution, as
+        // handling meaningful keys within the object lifecycle requires something more,
+        // namely read/write methods for relationships and direct values should be
+        // synchronous with each other..
+        Map failedDbAttributes = null;
+
         Iterator attributes = objEntity.getAttributes().iterator();
         while (attributes.hasNext()) {
             ObjAttribute objAttribute = (ObjAttribute) attributes.next();
@@ -592,14 +588,18 @@ public class CayenneDataObject implements DataObject {
 
             Object value = this.readPropertyDirectly(objAttribute.getName());
             if (dbAttribute.isMandatory()) {
-                ValidationFailure failure =
-                    BeanValidationFailure.validateNotNull(
+                ValidationFailure failure = BeanValidationFailure.validateNotNull(
                         this,
                         objAttribute.getName(),
                         value);
 
                 if (failure != null) {
-                    validationResult.addFailure(failure);
+
+                    if (failedDbAttributes == null) {
+                        failedDbAttributes = new HashMap();
+                    }
+
+                    failedDbAttributes.put(dbAttribute.getName(), failure);
                     continue;
                 }
             }
@@ -610,15 +610,15 @@ public class CayenneDataObject implements DataObject {
                 // if so, class can be obtained from ObjAttribute...
 
                 types.getRegisteredType(value.getClass()).validateProperty(
-                    this,
-                    objAttribute.getName(),
-                    value,
-                    dbAttribute,
-                    validationResult);
+                        this,
+                        objAttribute.getName(),
+                        value,
+                        dbAttribute,
+                        validationResult);
             }
         }
 
-        // validate maandatory relationships
+        // validate mandatory relationships
         Iterator relationships = objEntity.getRelationships().iterator();
         while (relationships.hasNext()) {
             ObjRelationship relationship = (ObjRelationship) relationships.next();
@@ -628,28 +628,41 @@ public class CayenneDataObject implements DataObject {
             }
 
             List dbRels = relationship.getDbRelationships();
-            if (dbRels.size() < 1) {
+            if (dbRels.isEmpty()) {
                 // Wha?
                 continue;
             }
 
-            // if db relationship is not based on a PK and is based on mandatory 
+            // if db relationship is not based on a PK and is based on mandatory
             // attributes, see if we have a target object set
             boolean validate = false;
             DbRelationship dbRelationship = (DbRelationship) dbRels.get(0);
             Iterator joins = dbRelationship.getJoins().iterator();
             while (joins.hasNext()) {
                 DbJoin join = (DbJoin) joins.next();
-                if (join.getSource().isMandatory()) {
+                DbAttribute source = join.getSource();
+
+                if (source.isMandatory()) {
                     validate = true;
+
+                    // clear attribute failures...
+                    if (failedDbAttributes != null && !failedDbAttributes.isEmpty()) {
+                        failedDbAttributes.remove(source.getName());
+
+                        // loop through all joins if there were previous mandatory
+                        // attribute failures.... otherwise we can safely break away
+                        if (!failedDbAttributes.isEmpty()) {
+                            continue;
+                        }
+                    }
+
                     break;
                 }
             }
 
             if (validate) {
                 Object value = this.readPropertyDirectly(relationship.getName());
-                ValidationFailure failure =
-                    BeanValidationFailure.validateNotNull(
+                ValidationFailure failure = BeanValidationFailure.validateNotNull(
                         this,
                         relationship.getName(),
                         value);
@@ -659,14 +672,22 @@ public class CayenneDataObject implements DataObject {
                     continue;
                 }
             }
+
+        }
+
+        // deal with previously found attribute failures...
+        if (failedDbAttributes != null && !failedDbAttributes.isEmpty()) {
+            Iterator failedAttributes = failedDbAttributes.values().iterator();
+            while (failedAttributes.hasNext()) {
+                validationResult.addFailure((ValidationFailure) failedAttributes.next());
+            }
         }
     }
 
     /**
-     * Calls {@link #validateForSave(ValidationResult)}. 
-     * CayenneDataObject subclasses may override it providing validation 
-     * logic that should be executed for the newly created objects before 
-     * saving them.
+     * Calls {@link #validateForSave(ValidationResult)}. CayenneDataObject subclasses may
+     * override it providing validation logic that should be executed for the newly
+     * created objects before saving them.
      * 
      * @since 1.1
      */
@@ -675,9 +696,9 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * Calls {@link #validateForSave(ValidationResult)}. CayenneDataObject 
-     * subclasses may override it providing validation logic that should 
-     * be executed for the modified objects before saving them.
+     * Calls {@link #validateForSave(ValidationResult)}. CayenneDataObject subclasses may
+     * override it providing validation logic that should be executed for the modified
+     * objects before saving them.
      * 
      * @since 1.1
      */
@@ -686,13 +707,13 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * This implementation does nothing. CayenneDataObject subclasses may override
-     * it providing validation logic that should be executed for the deleted
-     * objects before committing them.
+     * This implementation does nothing. CayenneDataObject subclasses may override it
+     * providing validation logic that should be executed for the deleted objects before
+     * committing them.
      * 
      * @since 1.1
      */
     public void validateForDelete(ValidationResult validationResult) {
-        // does nothing   
+        // does nothing
     }
 }
