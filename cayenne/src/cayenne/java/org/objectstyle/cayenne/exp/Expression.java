@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.Util;
 
 /** Defines basic API of a generic data expression. */
 public abstract class Expression implements Serializable {
@@ -219,6 +220,28 @@ public abstract class Expression implements Serializable {
             default :
                 return "other";
         }
+    }
+    
+    public boolean equals(Object object) {
+        if(!(object instanceof Expression)) {
+            return false;
+        }
+        
+        Expression e = (Expression)object;
+        
+        if(e.getType() != getType() || e.getOperandCount() != getOperandCount()) {
+            return false;
+        }
+        
+        // compare operands
+        int len = e.getOperandCount();
+        for(int i = 0; i < len; i++) {
+            if(!Util.nullSafeEquals(e.getOperand(i), getOperand(i))) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     /** 
