@@ -8,6 +8,8 @@ public class Artist
     implements DataObjectTransactionEventListener {
     private boolean _receivedWillCommit = false;
     private boolean _receivedDidCommit = false;
+    
+    protected String someOtherProperty;
 
     public Artist() {
         super();
@@ -33,4 +35,13 @@ public class Artist
         _receivedWillCommit = false;
         _receivedDidCommit = false;
     }
+    
+    public String getSomeOtherProperty() {
+        return someOtherProperty;
+    }
+
+    public void setSomeOtherProperty(String string) {
+        someOtherProperty = string;
+    }
+
 }

@@ -58,12 +58,15 @@ package org.objectstyle.cayenne;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
 import org.objectstyle.cayenne.access.util.QueryUtils;
@@ -78,6 +81,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
+    private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
+
     // used for dependent to one relationships
     // to indicate that destination relationship was fetched and is null
     private static final CayenneDataObject nullValue = new CayenneDataObject();
@@ -156,6 +161,25 @@ public class CayenneDataObject implements DataObject {
             String pathComp = toks.nextToken();
             obj = dataObj.readProperty(pathComp);
 
+            // if a null value is returned, 
+            // there is still a chance to find a non-persistent property
+            // via reflection
+            if (obj == null && !props.containsKey(pathComp)) {
+                try {
+                    obj = BeanUtils.getSimpleProperty(dataObj, pathComp);
+                } catch (IllegalAccessException e) {
+                    throw new CayenneRuntimeException(
+                        "Error reading property '" + pathComp + "'.",
+                        e);
+                } catch (InvocationTargetException e) {
+                    throw new CayenneRuntimeException(
+                        "Error reading property '" + pathComp + "'.",
+                        e);
+                } catch (NoSuchMethodException e) {
+                    // ignoring, no such property exists
+                }
+            }
+
             if (obj == null) {
                 return null;
             } else if (obj instanceof CayenneDataObject) {
@@ -174,10 +198,10 @@ public class CayenneDataObject implements DataObject {
                 dataContext.refetchObject(objectId);
             }
         } catch (Exception ex) {
-        	ex.printStackTrace();
-        	System.out.println("Exception "+ex.getMessage());
+            logObj.info("Error refetching object, making transient.", ex);
             setPersistenceState(PersistenceState.TRANSIENT);
         }
+
         return readPropertyDirectly(propName);
     }
 
