@@ -11,6 +11,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -26,7 +27,7 @@ public final class ArtistPageAction extends Action {
 		throws Exception {
 
 		DataContext ctxt =
-			(DataContext) request.getSession().getAttribute("context");
+			BasicServletConfiguration.getDefaultContext(request.getSession());
 
 		SelectQuery query = new SelectQuery(Artist.class);
 		Ordering ordering = new Ordering("artistName", Ordering.ASC);
@@ -35,7 +36,7 @@ public final class ArtistPageAction extends Action {
 		// set a relatively high logging level, 
 		// to show the query execution progress
 		query.setLoggingLevel(Level.WARN);
-		
+
 		List artists = ctxt.performQuery(query);
 
 		System.out.println("artists: " + artists);

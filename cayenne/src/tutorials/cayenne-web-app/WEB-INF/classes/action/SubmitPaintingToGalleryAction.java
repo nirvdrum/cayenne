@@ -11,6 +11,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -28,7 +29,7 @@ public final class SubmitPaintingToGalleryAction extends Action {
 		throws Exception {
 
 		DataContext ctxt =
-			(DataContext) request.getSession().getAttribute("context");
+			BasicServletConfiguration.getDefaultContext(request.getSession());
 
 		String paintingTitle = request.getParameter("title");
 		String galleryName = request.getParameter("galleryName");
@@ -54,9 +55,9 @@ public final class SubmitPaintingToGalleryAction extends Action {
 				galleryName);
 
 		query = new SelectQuery("Gallery", qual);
-	    // using log level of WARN to show the query execution
+		// using log level of WARN to show the query execution
 		query.setLoggingLevel(Level.WARN);
-		
+
 		List galleries = ctxt.performQuery(query);
 		Gallery gallery = (Gallery) galleries.get(0);
 

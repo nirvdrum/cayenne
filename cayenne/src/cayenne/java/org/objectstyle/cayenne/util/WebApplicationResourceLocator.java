@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.conf.Configuration;
 /**
  * @author Andrei Adamchik
  */
-public class WebappResourceLocator extends ResourceLocator {
+public class WebApplicationResourceLocator extends ResourceLocator {
     private static Logger logObj;
 
     // Create a Predicate that will enable logging only when
@@ -80,12 +80,12 @@ public class WebappResourceLocator extends ResourceLocator {
             }
         };
 
-        logObj = new PredicateLogger(WebappResourceLocator.class, p);
+        logObj = new PredicateLogger(WebApplicationResourceLocator.class, p);
     }
     
     protected ServletContext context;
 
-    public WebappResourceLocator(ServletContext context) {
+    public WebApplicationResourceLocator(ServletContext context) {
         this.context = context;
     }
 

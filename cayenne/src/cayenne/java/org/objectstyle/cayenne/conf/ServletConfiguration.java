@@ -61,7 +61,7 @@ package org.objectstyle.cayenne.conf;
  * 
  * @deprecated
  */
-public class ServletConfiguration extends WebappCayenneListener {
+public class ServletConfiguration extends WebApplicationListener {
 
     public ServletConfiguration() {
         super();

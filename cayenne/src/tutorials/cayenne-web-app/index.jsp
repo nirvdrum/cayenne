@@ -7,12 +7,6 @@
 <%@ taglib uri="/WEB-INF/struts-html.tld" prefix="html" %>
 <%@ taglib uri="/WEB-INF/struts-logic.tld" prefix="logic" %>
 
-<%
-	DataContext ctxt = ServletConfiguration.getDefaultContext(request.getSession());
-	session.setAttribute("context", ctxt);
-%>
-
-
 <html:html locale="true">
 
 <head>

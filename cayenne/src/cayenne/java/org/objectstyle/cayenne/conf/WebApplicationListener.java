@@ -59,15 +59,11 @@ package org.objectstyle.cayenne.conf;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.Configuration;
-
 /**
- * WebappCayenneListener utilizes Servlet specification 2.3 features to react on 
+ * WebApplicationListener utilizes Servlet specification 2.3 features to react on 
  * webapplication container events inializing Cayenne.
  * 
   * <p>It performs the following tasks:
@@ -77,13 +73,13 @@ import org.objectstyle.cayenne.conf.Configuration;
   * </ul>
   * </p>
   * 
-  * <p>WebappCayenneListener must be configured in <code>web.xml</code> deployment
+  * <p>CayenneWebappListener must be configured in <code>web.xml</code> deployment
   * descriptor as a listener of context and session events:</p>
   *<pre>&lt;listener&gt;
-     &lt;listener-class&gt;org.objectstyle.cayenne.conf.WebappCayenneListener&lt;/listener-class&gt;
+     &lt;listener-class&gt;org.objectstyle.cayenne.conf.WebApplicationListener&lt;/listener-class&gt;
 &lt;/listener&gt;</pre>
   *
-  * <p>Note that to set WebappCayenneListener as a listener of web application events, 
+  * <p>Note that to set WebApplicationListener as a listener of web application events, 
   *  you must use servlet containers 
   * compatible with Servlet Specification 2.3 (such as Tomcat 4.0). Listeners were only added 
   * to servlet specification in 2.3. If you are using an older container. You will need
@@ -91,59 +87,57 @@ import org.objectstyle.cayenne.conf.Configuration;
   *
   * @author Andrei Adamchik
   */
-public class WebappCayenneListener
-    implements HttpSessionListener, ServletContextListener {
+public class WebApplicationListener
+	implements HttpSessionListener, ServletContextListener {
 
-    public static final String DATA_CONTEXT_KEY = "cayenne.datacontext";
+	public WebApplicationListener() {
+	}
 
-    public WebappCayenneListener() {}
+	/** Establishes a Cayenne shared Configuration object that can later be obtained by calling 
+	  * <code>Configuration.getSharedConfiguration()</code>.
+	  * This method is a part of ServletContextListener interface and is called
+	  * on application startup. */
+	public void contextInitialized(ServletContextEvent sce) {
+		setConfiguration(newConfiguration(sce.getServletContext()));
+	}
 
-    /** Returns default Cayenne DataContext associated with session <code>s</code>. */
-    public static DataContext getDefaultContext(HttpSession s) {
-        return (DataContext) s.getAttribute(DATA_CONTEXT_KEY);
-    }
+	/** Currently does nothing. <i>In the future it should close down
+	  * any database connections if they wheren't obtained via JNDI.</i>
+	  * This method is a part of ServletContextListener interface and is called
+	  * on application shutdown. */
+	public void contextDestroyed(ServletContextEvent sce) {
+	}
 
-    /** Establishes a Cayenne shared Configuration object that can later be obtained by calling 
-      * <code>Configuration.getSharedConfiguration()</code>.
-      * This method is a part of ServletContextListener interface and is called
-      * on application startup. */
-    public void contextInitialized(ServletContextEvent sce) {
-        setConfiguration(newConfiguration(sce.getServletContext()));
-    }
+	/** Creates and assigns a new data context based on default domain
+	  * to the session object  associated with this event. This method
+	  * is a part of HttpSessionListener interface and is called every time
+	  * when a new session is created. */
+	public void sessionCreated(HttpSessionEvent se) {
+		se.getSession().setAttribute(
+			BasicServletConfiguration.DATA_CONTEXT_KEY,
+			getConfiguration().getDomain().createDataContext());
+	}
 
-    /** Currently does nothing. <i>In the future it should close down
-      * any database connections if they wheren't obtained via JNDI.</i>
-      * This method is a part of ServletContextListener interface and is called
-      * on application shutdown. */
-    public void contextDestroyed(ServletContextEvent sce) {}
+	/** Does nothing. This method
+	  * is a part of HttpSessionListener interface and is called every time
+	  * when a session is destroyed. */
+	public void sessionDestroyed(HttpSessionEvent se) {
+	}
 
-    /** Creates and assigns a new data context based on default domain
-      * to the session object  associated with this event. This method
-      * is a part of HttpSessionListener interface and is called every time
-      * when a new session is created. */
-    public void sessionCreated(HttpSessionEvent se) {
-        se.getSession().setAttribute(DATA_CONTEXT_KEY, getConfiguration().getDomain().createDataContext());
-    }
+	/** Return an instance of Configuration that will be initialized as the shared configuration.
+	  * Provides an extension point for the developer to provide their own custom configuration.
+	  */
+	protected Configuration newConfiguration(ServletContext sc) {
+		return new BasicServletConfiguration(sc);
+	}
 
-    /** Does nothing. This method
-      * is a part of HttpSessionListener interface and is called every time
-      * when a session is destroyed. */
-    public void sessionDestroyed(HttpSessionEvent se) {}
+	/** Initializes the configuration.  */
+	protected void setConfiguration(Configuration configuration) {
+		Configuration.initializeSharedConfiguration(configuration);
+	}
 
-    /** Return an instance of Configuration that will be initialized as the shared configuration.
-      * Provides an extension point for the developer to provide their own custom configuration.
-      */
-    protected Configuration newConfiguration(ServletContext sc) {
-        return new BasicServletConfiguration(sc);
-    }
-
-    /** Initializes the configuration.  */
-    protected void setConfiguration(Configuration configuration) {
-        Configuration.initializeSharedConfiguration(configuration);
-    }
-
-    /** Returns the current configuration. */
-    protected Configuration getConfiguration() {
-        return Configuration.getSharedConfiguration();
-    }
+	/** Returns the current configuration. */
+	protected Configuration getConfiguration() {
+		return Configuration.getSharedConfiguration();
+	}
 }
