@@ -59,6 +59,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.ToManyListDataSource;
@@ -71,6 +72,8 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @author Andrei Adamchik
  */
 public class RelationshipDataSource implements ToManyListDataSource, Serializable {
+	private static Logger logObj = Logger.getLogger(RelationshipDataSource.class);
+	
 	protected DataContext context;
 	
 	public RelationshipDataSource(DataContext context) {
@@ -85,7 +88,7 @@ public class RelationshipDataSource implements ToManyListDataSource, Serializabl
     public void updateListData(ToManyList list) {
         if (list.getSrcObjectId().isTemporary())
             list.setObjectList(new ArrayList());
-        else {
+        else {        	
              SelectQuery sel =
                 QueryUtils.selectRelationshipObjects(
                     context,

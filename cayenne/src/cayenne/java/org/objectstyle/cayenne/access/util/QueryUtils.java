@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.FlattenedObjectId;
@@ -92,7 +93,8 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  *
  */
 public class QueryUtils {
-
+	private static Logger logObj = Logger.getLogger(QueryUtils.class);
+	
 	private static Map putModifiedAttribute(
 		Map aMap,
 		String name,
@@ -396,7 +398,7 @@ public class QueryUtils {
 			// another sanity check
 			if (reverse == null) {
 				throw new CayenneRuntimeException(
-					"DbRelatitionship '"
+					"DbRelationship '"
 						+ dbRel.getName()
 						+ "' has no reverse relationship");
 			}

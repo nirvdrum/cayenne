@@ -93,6 +93,15 @@
 		<db-attribute name="GALLERY_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GALLERY_NAME" type="VARCHAR" isMandatory="true" length="100"/>
 	</db-entity>
+	<db-entity name="MEANINGFUL_PK_DEP">
+		<db-attribute name="DESCR" type="VARCHAR" length="50"/>
+		<db-attribute name="MASTER_PK" type="INTEGER"/>
+		<db-attribute name="PK_ATTRIBUTE" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="MEANINGFUL_PK_TEST1">
+		<db-attribute name="DESCR" type="VARCHAR" length="50"/>
+		<db-attribute name="PK_ATTRIBUTE" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="NO_PK_TEST">
 		<db-attribute name="ATTRIBUTE1" type="INTEGER"/>
 	</db-entity>
@@ -192,10 +201,12 @@
 	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="GALLERY_NAME"/>
 	</obj-entity>
-	<obj-entity name="MeaningfulPKTest1" className="org.objectstyle.art.MeaningfulPKTest1" dbEntityName="ARTIST">
-		<obj-attribute name="artistId" type="java.lang.Integer" db-attribute-path="ARTIST_ID"/>
-		<obj-attribute name="artistName" type="java.lang.String" db-attribute-path="ARTIST_NAME"/>
-		<obj-attribute name="dateOfBirth" type="java.util.Date" db-attribute-path="DATE_OF_BIRTH"/>
+	<obj-entity name="MeaningfulPKDep" className="org.objectstyle.art.MeaningfulPKDep" dbEntityName="MEANINGFUL_PK_DEP">
+		<obj-attribute name="descr" type="java.lang.String" db-attribute-path="DESCR"/>
+	</obj-entity>
+	<obj-entity name="MeaningfulPKTest1" className="org.objectstyle.art.MeaningfulPKTest1" dbEntityName="MEANINGFUL_PK_TEST1">
+		<obj-attribute name="descr" type="java.lang.String" db-attribute-path="DESCR"/>
+		<obj-attribute name="pkAttribute" type="java.lang.Integer" db-attribute-path="PK_ATTRIBUTE"/>
 	</obj-entity>
 	<obj-entity name="NoPkTest" className="org.objectstyle.art.NoPkTest" dbEntityName="NO_PK_TEST">
 		<obj-attribute name="attribute1" type="java.lang.Integer" db-attribute-path="ATTRIBUTE1"/>
@@ -253,6 +264,9 @@
 	<db-relationship name="ft3Array" source="FLATTENED_TEST_2" target="FLATTENED_TEST_3" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="FT2_ID" target="FT2_ID"/>
 	</db-relationship>
+	<db-relationship name="meaningfulPKDepArray" source="MEANINGFUL_PK_TEST1" target="MEANINGFUL_PK_DEP" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="PK_ATTRIBUTE" target="MASTER_PK"/>
+	</db-relationship>
 	<db-relationship name="painting" source="PAINTING_INFO" target="PAINTING" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
@@ -308,6 +322,9 @@
 	<db-relationship name="toGroup" source="ARTIST_GROUP" target="ARTGROUP" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="GROUP_ID" target="GROUP_ID"/>
 	</db-relationship>
+	<db-relationship name="toMeaningfulPK" source="MEANINGFUL_PK_DEP" target="MEANINGFUL_PK_TEST1" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="MASTER_PK" target="PK_ATTRIBUTE"/>
+	</db-relationship>
 	<db-relationship name="toPaintingInfo" source="PAINTING" target="PAINTING_INFO" toDependentPK="true" toMany="false">
 		<db-attribute-pair source="PAINTING_ID" target="PAINTING_ID"/>
 	</db-relationship>
@@ -323,9 +340,6 @@
 	</obj-relationship>
 	<obj-relationship name="artistExhibitArray" source="Exhibit" target="ArtistExhibit" toMany="true" deleteRule="Cascade">
 		<db-relationship-ref source="EXHIBIT" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
-	</obj-relationship>
-	<obj-relationship name="artistExhibitArray" source="MeaningfulPKTest1" target="ArtistExhibit" toMany="true">
-		<db-relationship-ref source="ARTIST" target="ARTIST_EXHIBIT" name="artistExhibitArray"/>
 	</obj-relationship>
 	<obj-relationship name="childGroupsArray" source="ArtGroup" target="ArtGroup" toMany="true" deleteRule="Nullify">
 		<db-relationship-ref source="ARTGROUP" target="ARTGROUP" name="toChildGroups"/>
@@ -350,6 +364,9 @@
 		<db-relationship-ref source="ARTIST" target="ARTIST_GROUP" name="artistGroupArray"/>
 		<db-relationship-ref source="ARTIST_GROUP" target="ARTGROUP" name="toGroup"/>
 	</obj-relationship>
+	<obj-relationship name="meaningfulPKDepArray" source="MeaningfulPKTest1" target="MeaningfulPKDep" toMany="true">
+		<db-relationship-ref source="MEANINGFUL_PK_TEST1" target="MEANINGFUL_PK_DEP" name="meaningfulPKDepArray"/>
+	</obj-relationship>
 	<obj-relationship name="painting" source="PaintingInfo" target="Painting" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="PAINTING_INFO" target="PAINTING" name="painting"/>
 	</obj-relationship>
@@ -358,9 +375,6 @@
 	</obj-relationship>
 	<obj-relationship name="paintingArray" source="Gallery" target="Painting" toMany="true" deleteRule="Deny">
 		<db-relationship-ref source="GALLERY" target="PAINTING" name="paintingArray"/>
-	</obj-relationship>
-	<obj-relationship name="paintingArray" source="MeaningfulPKTest1" target="CompoundPainting" toMany="true">
-		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
 	</obj-relationship>
 	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" toMany="true" deleteRule="Deny">
 		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
@@ -413,6 +427,9 @@
 	</obj-relationship>
 	<obj-relationship name="toGallery" source="Painting" target="Gallery" toMany="false" deleteRule="Nullify">
 		<db-relationship-ref source="PAINTING" target="GALLERY" name="toGallery"/>
+	</obj-relationship>
+	<obj-relationship name="toMeaningfulPK" source="MeaningfulPKDep" target="MeaningfulPKTest1" toMany="false">
+		<db-relationship-ref source="MEANINGFUL_PK_DEP" target="MEANINGFUL_PK_TEST1" name="toMeaningfulPK"/>
 	</obj-relationship>
 	<obj-relationship name="toPaintingInfo" source="CompoundPainting" target="PaintingInfo" toMany="false" deleteRule="Cascade">
 		<db-relationship-ref source="PAINTING" target="PAINTING_INFO" name="toPaintingInfo"/>

@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  */
 public class InsertTranslatorTst extends CayenneTestCase {
 
-	public void testMeningfulPrimaryKey() throws Exception {
+	public void testMeaningfulPrimaryKey() throws Exception {
 		Map id = new HashMap();
 		Map object = new HashMap();
 		
