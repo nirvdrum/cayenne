@@ -105,14 +105,14 @@ public class DataContextStaticsTst extends CayenneTestCase {
             Configuration.sharedConfiguration = savedConfig;
         }
 
-		protected boolean shouldInitialize() {
+		public boolean canInitialize() {
 			return true;
 		}
 
-		protected void initialize() throws Exception {
+		public void initialize() throws Exception {
 		}
 
-		protected void didInitialize() {
+		public void didInitialize() {
 		}
 
 		public ResourceLocator getResourceLocator() {

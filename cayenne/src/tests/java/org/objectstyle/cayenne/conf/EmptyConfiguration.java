@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.conf;
 
-import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.access.DataDomain;
 
 /**
@@ -66,26 +65,12 @@ public class EmptyConfiguration extends DefaultConfiguration {
 
 	public EmptyConfiguration() {
 		super();
-	}
 
-	/**
-	 * Adds the directory with test resource sto the CLASSPATH.
-	 */
-	protected boolean shouldInitialize() {
-		if (!super.shouldInitialize()) {
-			throw new ConfigurationException("expected successfull shouldInitialize().");
-		}
-		else {
-			// add "test-resources" directory to CLASSPATH
-			this.getResourceLocator().addClassPath("test-resources");
+		// add "test-resources" directory to CLASSPATH
+		this.getResourceLocator().addClassPath("test-resources");
 
-			// ignore any loading failures
-			this.setIgnoringLoadFailures(true);
-
-			// proceed
-			return true;
-		}
-		
+		// ignore any loading failures
+		this.setIgnoringLoadFailures(true);
 	}
 
 	public void addDomain(DataDomain domain) {

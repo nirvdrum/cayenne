@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.conf;
 
+import java.io.File;
 import java.io.InputStream;
 
 import org.objectstyle.cayenne.ConfigurationException;
@@ -87,7 +88,7 @@ public class ConfigurationTst extends CayenneTestCase {
 
 	public void testFileConfigurationConstructorWithNullFile() {
 		try {
-			new FileConfiguration(null);
+			new FileConfiguration((File)null);
 			fail("expected ConfigurationException!");
 		}
 		catch (ConfigurationException ex) {
@@ -95,18 +96,27 @@ public class ConfigurationTst extends CayenneTestCase {
 		}
 	}
 
+	public void testFileConfigurationConstructorWithNullName() {
+		try {
+			new FileConfiguration((String)null);
+			fail("expected ConfigurationException!");
+		}
+		catch (ConfigurationException ex) {
+			// OK
+		}
+	}
 
     /** Concrete Configuration subclass used for tests. */
     public static class Config extends Configuration {
 
-		protected boolean shouldInitialize() {
+		public boolean canInitialize() {
 			return true;
 		}
 
-		protected void initialize() throws Exception {
+		public void initialize() throws Exception {
 		}
 
-		protected void didInitialize() {
+		public void didInitialize() {
 		}
 
 		public ResourceLocator getResourceLocator() {
