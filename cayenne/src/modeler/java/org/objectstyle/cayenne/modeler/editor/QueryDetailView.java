@@ -170,6 +170,7 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
                 Query query = eventController.getCurrentQuery();
                 if (query != null) {
                     query.setRoot(queryRoot.getModel().getSelectedItem());
+                    eventController.fireQueryEvent(new QueryEvent(this, query));
                 }
             }
         });
@@ -194,20 +195,17 @@ public class QueryDetailView extends JPanel implements QueryDisplayListener {
 
         // init root choices
 
+        // TODO: in the future we will allow all kinds of "roots"
+        // for now just allow ObjEntity
+
         DataMap map = eventController.getCurrentDataMap();
         Object[] entities = map.getObjEntities().toArray();
 
-        // add data map to the front
-        Object[] objects = new Object[entities.length + 1];
-        objects[0] = map;
-
-        // now add the entities
-        if (entities.length > 0) {
-            System.arraycopy(entities, 0, objects, 1, entities.length);
+        if (entities.length > 1) {
+            Arrays.sort(entities, Comparators.getDataMapChildrenComparator());
         }
-        Arrays.sort(objects, Comparators.getDataMapChildrenComparator());
 
-        DefaultComboBoxModel model = new DefaultComboBoxModel(objects);
+        DefaultComboBoxModel model = new DefaultComboBoxModel(entities);
         model.setSelectedItem(query.getRoot());
         queryRoot.setModel(model);
     }
