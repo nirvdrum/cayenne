@@ -311,21 +311,26 @@ public class ObjEntity extends Entity {
      * Returns a DbEntity associated with this ObjEntity. 
      */
     public DbEntity getDbEntity() {
+
+        // since 1.2 - allow overriding DbEntity in the inheritance hierarchy...
+        if (dbEntityName != null) {
+            return getNonNullNamespace().getDbEntity(dbEntityName);
+        }
+
         ObjEntity superEntity = getSuperEntity();
         if (superEntity != null) {
             return superEntity.getDbEntity();
         }
 
-        return (dbEntityName != null)
-            ? getNonNullNamespace().getDbEntity(dbEntityName)
-            : null;
+        return null;
     }
 
-    /** 
+    /**
      * Sets the DbEntity used by this ObjEntity.
-     * 
-     * <p><i>Setting DbEntity on an inherited entity has no effect, 
-     * since a class of the super entity is always used as a superclass.</i></p>
+     * <p>
+     * <i>Setting DbEntity on an inherited entity has no effect, since a class of the
+     * super entity is always used as a superclass. </i>
+     * </p>
      */
     public void setDbEntity(DbEntity dbEntity) {
         this.dbEntityName = (dbEntity != null) ? dbEntity.getName() : null;
@@ -693,7 +698,7 @@ public class ObjEntity extends Entity {
     }
 
     /**
-     * Returns the name of underlying DbEntity.
+     * Returns the name of the underlying DbEntity.
      * 
      * @since 1.1
      */

@@ -67,6 +67,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Predicate;
+import org.apache.commons.collections.PredicateUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.exp.Expression;
@@ -86,6 +89,23 @@ import org.objectstyle.cayenne.wocompat.parser.Parser;
  * Class for converting stored Apple EOModel mapping files to Cayenne DataMaps.
  */
 public class EOModelProcessor {
+
+    protected Predicate prototypeChecker;
+
+    public EOModelProcessor() {
+        prototypeChecker = new Predicate() {
+
+            public boolean evaluate(Object object) {
+                if (object == null) {
+                    return false;
+                }
+
+                String entityName = object.toString();
+
+                return entityName.startsWith("EO") && entityName.endsWith("Prototypes");
+            }
+        };
+    }
 
     /**
      * Returns index.eomodeld contents as a Map.
@@ -148,75 +168,50 @@ public class EOModelProcessor {
         // create empty map
         DataMap dataMap = helper.getDataMap();
 
-        // process enitities
-        Iterator it = helper.modelNames();
+        // process enitities ... throw out prototypes ... for now
+        List modelNames = new ArrayList(helper.modelNamesAsList());
+        CollectionUtils.filter(modelNames, PredicateUtils.notPredicate(prototypeChecker));
+
+        Iterator it = modelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            
-            // skip EOPrototypes
-            if(isPrototypesEntity(name)) {
-                continue;
-            }
-            
+
             // create and register entity
             makeEntity(helper, name, generateClientClass);
         }
- 
-        List sortedModelNames = helper.modelNamesAsList();
-        Collections.sort(sortedModelNames, new InheritanceComparator(dataMap));
-        
+
+        // now sort following inheritance hierarchy
+        Collections.sort(modelNames, new InheritanceComparator(dataMap));
+
         // after all entities are loaded, process attributes
-        it = sortedModelNames.iterator();
+        it = modelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            
-            // skip EOPrototypes
-            if(isPrototypesEntity(name)) {
-                continue;
-            }
-            
+
             EOObjEntity e = (EOObjEntity) dataMap.getObjEntity(name);
             // process entity attributes
             makeAttributes(helper, e);
         }
 
         // after all entities are loaded, process relationships
-        it = sortedModelNames.iterator();
+        it = modelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            
-            // skip EOPrototypes
-            if(isPrototypesEntity(name)) {
-                continue;
-            }
-            
             makeRelationships(helper, dataMap.getObjEntity(name));
         }
 
-        // after all normal relationships are loaded, process falttened relationships
-        it = sortedModelNames.iterator();
+        // after all normal relationships are loaded, process flattened relationships
+        it = modelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            
-            // skip EOPrototypes
-            if(isPrototypesEntity(name)) {
-                continue;
-            }
-            
             makeFlatRelationships(helper, dataMap.getObjEntity(name));
         }
 
         // now create missing reverse DB (but not OBJ) relationships
         // since Cayenne requires them
-        it = sortedModelNames.iterator();
+        it = modelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            
-            // skip EOPrototypes
-            if(isPrototypesEntity(name)) {
-                continue;
-            }
-            
             DbEntity dbEntity = dataMap.getObjEntity(name).getDbEntity();
 
             if (dbEntity != null) {
@@ -225,15 +220,9 @@ public class EOModelProcessor {
         }
 
         // build SelectQueries out of EOFetchSpecifications...
-        it = sortedModelNames.iterator();
+        it = modelNames.iterator();
         while (it.hasNext()) {
             String name = (String) it.next();
-            
-            // skip EOPrototypes
-            if(isPrototypesEntity(name)) {
-                continue;
-            }
-            
             Iterator queries = helper.queryNames(name);
             while (queries.hasNext()) {
                 String queryName = (String) queries.next();
@@ -247,16 +236,14 @@ public class EOModelProcessor {
     }
 
     /**
-     * Returns whether an Entity is an EOF EOPrototypes entity. According to EOF 
-     * conventions EOPrototypes and EO[Adapter]Prototypes entities are considered 
-     * to be prototypes.
+     * Returns whether an Entity is an EOF EOPrototypes entity. According to EOF
+     * conventions EOPrototypes and EO[Adapter]Prototypes entities are considered to be
+     * prototypes.
      * 
-     * @since 1.1 
+     * @since 1.1
      */
     protected boolean isPrototypesEntity(String entityName) {
-        return entityName != null
-                && entityName.startsWith("EO")
-                && entityName.endsWith("Prototypes");
+        return prototypeChecker.evaluate(entityName);
     }
 
     /**
@@ -504,7 +491,6 @@ public class EOModelProcessor {
                         || "Y".equals(attributeReadOnlyString)) {
                     attr.setReadOnly(true);
                 }
-                
 
                 // set name instead of the actual attribute, as it may be inherited....
                 attr.setDbAttributeName(dbAttrName);
@@ -671,15 +657,20 @@ public class EOModelProcessor {
                 continue;
             }
 
-            DbEntity dbEntity = e.getDbEntity();
-            if(dbEntity == null) {
-                throw new CayenneRuntimeException("no DbEntity for ObjEntity " + e.getName());
-            }
-            Expression exp = new ASTDbPath(targetPath);
-            Iterator path = dbEntity.resolvePathComponents(exp);
-
             ObjRelationship flatRel = new ObjRelationship();
             flatRel.setName((String) relMap.get("name"));
+            flatRel.setSourceEntity(e);
+            e.addRelationship(flatRel);
+
+            DbEntity dbEntity = e.getDbEntity();
+            if (dbEntity == null) {
+                // not ready to handle inheritance from abstract entities...
+                continue;
+            }
+
+            // determine DB relationship mapping...
+            Expression exp = new ASTDbPath(targetPath);
+            Iterator path = dbEntity.resolvePathComponents(exp);
 
             DbRelationship firstRel = null;
             DbRelationship lastRel = null;
@@ -693,8 +684,6 @@ public class EOModelProcessor {
             }
 
             if ((firstRel != null) && (lastRel != null)) {
-                flatRel.setSourceEntity(e);
-
                 Collection potentialTargets = e.getDataMap().getMappedEntities(
                         (DbEntity) lastRel.getTargetEntity());
 
@@ -709,7 +698,6 @@ public class EOModelProcessor {
                 }
 
                 flatRel.setTargetEntity((ObjEntity) potentialTargets.iterator().next());
-                e.addRelationship(flatRel);
             }
             else {
                 throw new CayenneRuntimeException("relationship in the path was null!");

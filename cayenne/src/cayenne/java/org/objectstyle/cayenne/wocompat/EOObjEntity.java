@@ -89,8 +89,8 @@ public class EOObjEntity extends ObjEntity {
    
     public EOObjEntity(String s) {
         super(s);
-    }
-
+    } 
+    
     /**
      * Sets the the superclass state.
      * 
