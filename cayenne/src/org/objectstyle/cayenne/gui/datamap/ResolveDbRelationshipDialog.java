@@ -155,10 +155,10 @@ public class ResolveDbRelationshipDialog
 		getContentPane().setLayout(
 			new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
-        if(!isReverseDbRelNew) {
-        	reverseCheckLabel.setText("Update Reverse:");
-        }
-        
+		if (!isReverseDbRelNew) {
+			reverseCheckLabel.setText("Update Reverse:");
+		}
+
 		// If this is relationship of DbEntity to itself, disable 
 		// reverse relationship check box
 		if (start == end) {
@@ -229,10 +229,7 @@ public class ResolveDbRelationshipDialog
 		col.setMinWidth(150);
 
 		setTitle(
-			"DbRelationship Info: "
-				+ start.getName()
-				+ " to "
-				+ end.getName());
+			"DbRelationship Info: " + start.getName() + " to " + end.getName());
 
 		JPanel buttons =
 			PanelFactory.createButtonPanel(
@@ -291,13 +288,21 @@ public class ResolveDbRelationshipDialog
 	}
 
 	private void save() {
-		if (dbRel.getName() == null) {
-			JOptionPane.showMessageDialog(
-				Editor.getFrame(),
-				"Enter Relationship Name");
-			name.requestFocus(true);
-			return;
+		if (!name.getText().equals(dbRel.getName())) {
+			String oldName = dbRel.getName();
+			GuiFacade.setDbRelationshipName(
+				(DbEntity) dbRel.getSourceEntity(),
+				dbRel,
+				name.getText());
+
+			mediator.fireDbRelationshipEvent(
+				new RelationshipEvent(
+					this,
+					dbRel,
+					dbRel.getSourceEntity(),
+					oldName));
 		}
+
 		DbAttributePairTableModel model =
 			(DbAttributePairTableModel) table.getModel();
 		if (model.getRowCount() == 0) {
@@ -314,20 +319,15 @@ public class ResolveDbRelationshipDialog
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 			return;
-		}
-		// If new DbRelationship was created, add it to the source.
+		} // If new DbRelationship was created, add it to the source.
 		if (isDbRelNew) {
 			start.addRelationship(dbRel);
-		}
-
-		// If new reverse DbRelationship was created, add it to the target
+		} // If new reverse DbRelationship was created, add it to the target
 		if (hasReverseDbRel.isSelected()) {
 			if (reverseDbRel == null) {
 				// Check if there is an existing relationship with the same joins
 				reverseDbRel = dbRel.getReverseRelationship();
-			}
-
-			// If didn't find anything, create reverseDbRel
+			} // If didn't find anything, create reverseDbRel
 			if (reverseDbRel == null) {
 				reverseDbRel = new DbRelationship();
 				reverseDbRel.setSourceEntity(dbRel.getTargetEntity());
