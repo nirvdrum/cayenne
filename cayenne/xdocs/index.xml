@@ -5,19 +5,19 @@
     <body>
         <!-- Welcome section -->
         <section name="About Cayenne">
-        <p>Cayenne is a high-quality OpenSource Object/Relational framework. 
+        <p>Cayenne is a powerful, full-featured OpenSource Object/Relational framework. 
         Cayenne is written in Java and is intended for Java developers working with
         relational databases. Though its current release status is Alpha, Cayenne
         has been already successfully deployed in production environment on high 
         volume sites.</p>
         
-        <p>Among Cayenne features are management of persistent Java objects
-        using mapping to relational database, single method call queries and updates 
+        <p>Among other things Cayenne provides management of persistent Java objects
+        mapped to relational databases, single method call queries and updates 
         (including atomic updates of all modified objects), seamless integration
         of multiple databases into a single virtual data source. 
         Cayenne is distributed with CayenneModeler -
-        a complete GUI mapping tool to reverse-engineer RDBMS schema and to work with database
-        mappings. CayenneModeler also supports generation of Java source code for the 
+        a complete GUI mapping tool that supports reverse-engineering of RDBMS schema, 
+        working with database mappings and generation of Java source code for the 
         persistent objects.</p>
         
         <p>Cayenne is an OpenSource project and as such encourages the 

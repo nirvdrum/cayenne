@@ -31,16 +31,18 @@
     			</li>
     			<li><a href="develop.html">FAQ 3. Develop with Cayenne</a>
     				<ul>
-    				   	<li><a href="develop.html#lazy_connection">Q 3.1 
+    					<li><a href="develop.html#db">Q 3.1 
+    					What databases are currently supported?</a></li>
+    				   	<li><a href="develop.html#lazy_connection">Q 3.2 
     					When I start my application, Cayenne immediately connects to the database. 
     					How about lazy connection that happens on the first database call?</a></li>
-    					<li><a href="develop.html#linking">Q 3.2 
+    					<li><a href="develop.html#linking">Q 3.3 
     					I am getting exceptions similar to 'Error generating PK' or 
     					'No suitable DataNode to handle entity 'XYZ'.</a></li>
-    					<li><a href="develop.html#float">Q 3.3 
+    					<li><a href="develop.html#float">Q 3.4 
     					I reverse-engineered my Oracle database. Why is that all FLOAT columns are 
     					not showing properly?</a></li>
-    					<li><a href="develop.html#log_query">Q 3.4 
+    					<li><a href="develop.html#log_query">Q 3.5 
     					How do I log an output of a single query?</a></li>
     				</ul>
     				<br/>
