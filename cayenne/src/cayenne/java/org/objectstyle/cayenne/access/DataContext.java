@@ -78,7 +78,6 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
-import org.objectstyle.cayenne.access.event.DataContextTransactionEventHandler;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
@@ -120,6 +119,7 @@ public class DataContext implements QueryEngine, Serializable {
 	// DataContext events
 	public static final ObserverSubject WILL_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextWillCommit");
 	public static final ObserverSubject DID_COMMIT = ObserverSubject.getSubject(DataContext.class, "DataContextDidCommit");
+	public static final ObserverSubject DID_ROLLBACK = ObserverSubject.getSubject(DataContext.class, "DataContextDidRollback");
 
 	// event posting default for new DataContexts
 	private static boolean postDataContextTransactionEventsDefault = true;
@@ -706,14 +706,6 @@ public class DataContext implements QueryEngine, Serializable {
 		List insObjects = new ArrayList();
 		Map updatedIds = new HashMap();
 
-		DataContextEvent commitChangesEvent = null;
-
-		// post observer events
-		if (this.postDataContextTransactionEvents) {
-			commitChangesEvent = new DataContextEvent(this, null);
-			ObserverManager.getDefaultManager().postObserverEvent(WILL_COMMIT, commitChangesEvent);
-		}
-
 		synchronized (objectStore) {
 			Iterator it = objectStore.getObjectIterator();
 			while (it.hasNext()) {
@@ -830,16 +822,31 @@ public class DataContext implements QueryEngine, Serializable {
 		if (queryList.size() > 0) {
 			ContextCommitObserver result =
 				new ContextCommitObserver(
-					logLevel,
-					this,
-					insObjects,
-					updObjects,
-					delObjects);
+						logLevel,
+						this,
+						insObjects,
+						updObjects,
+						delObjects);
+
+			// post event: WILL_COMMIT
+			ObserverManager eventMgr = ObserverManager.getDefaultManager();
+			DataContextEvent commitChangesEvent = null;
+			if (this.postDataContextTransactionEvents) {
+				commitChangesEvent = new DataContextEvent(this);
+				eventMgr.postObserverEvent(WILL_COMMIT, commitChangesEvent);
+			}
+
 			this.getParent().performQueries(queryList, result);
-			if (!result.isTransactionCommitted())
+			if (!result.isTransactionCommitted()) {
 				throw new CayenneRuntimeException("Error committing transaction.");
-			else if (result.isTransactionRolledback())
-				throw new CayenneRuntimeException("Transaction was rolledback.");
+			}
+			else if (result.isTransactionRolledback()) {
+				// post event: DID_ROLLBACK
+				if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
+					eventMgr.postObserverEvent(DID_ROLLBACK, commitChangesEvent);
+				}
+				throw new CayenneRuntimeException("Transaction was rolled back.");
+			}
 
 			// re-register objects whose id's where updated
 			Iterator idIt = updatedIds.keySet().iterator();
@@ -853,11 +860,11 @@ public class DataContext implements QueryEngine, Serializable {
 				}
 			}
 			this.clearFlattenedUpdateQueries();
-		}
 
-		// post observer event
-		if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
-			ObserverManager.getDefaultManager().postObserverEvent(DID_COMMIT, commitChangesEvent);
+			// post event: DID_COMMIT
+			if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
+				eventMgr.postObserverEvent(DID_COMMIT, commitChangesEvent);
+			}
 		}
 	}
 
@@ -1454,8 +1461,6 @@ public class DataContext implements QueryEngine, Serializable {
 	 * Enable/disable posting of transaction events by this DataContext.
 	 */
 	public void setTransactionEventsEnabled(boolean onOrOff) {
-		// make sure the event handler is properly initialized
-		DataContextTransactionEventHandler.initialize();
 		this.postDataContextTransactionEvents = onOrOff;
 	}
 
