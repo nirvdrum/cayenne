@@ -1,3 +1,5 @@
+package org.objectstyle.cayenne.access;
+
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -53,47 +55,47 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.access;
 
-import org.objectstyle.art.oneway.Gallery;
-import org.objectstyle.art.oneway.Painting;
-import org.objectstyle.cayenne.unit.OneWayMappingTestCase;
+import java.util.List;
+
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unit.RelationshipTestCase;
 
 /**
- * 
- * @author Craig Miskell
+ * @author Andrei Adamchik
  */
-public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
+public class DeleteObjectTst extends RelationshipTestCase {
     private DataContext context;
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         deleteTestData();
-        context = getDomain().createDataContext();
+        context = createDataContext();
     }
 
-    public void testNullifyToOne() {
-        Painting aPainting = (Painting) context.createAndRegisterNewObject("Painting");
-        aPainting.setPaintingTitle("A Title");
+    public void testDeleteHollow() throws Exception {
+        populatePaintings();
+        List paintings = context.performQuery(new SelectQuery(Painting.class));
+        Painting p = (Painting) paintings.get(0);
+        Artist a = p.getToArtist();
 
-        Gallery aGallery = (Gallery) context.createAndRegisterNewObject("Gallery");
-        aGallery.setGalleryName("Gallery Name");
-
-        aPainting.setToGallery(aGallery);
-        context.commitChanges();
-
-        try {
-            context.deleteObject(aPainting);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            fail("Should not have thrown an exception");
-        }
-        //There's no reverse relationship, so there's nothing else to test
-        // except to be sure that the commit works
-        context.commitChanges();
-
+        assertEquals(PersistenceState.HOLLOW, a.getPersistenceState());
+        context.deleteObject(a);
+        assertEquals(PersistenceState.DELETED, a.getPersistenceState());
     }
 
+    public void testDeleteNew() throws Exception {
+        Artist artist = (Artist) context.createAndRegisterNewObject(Artist.class);
+        artist.setArtistName("a");
+
+        assertEquals(PersistenceState.NEW, artist.getPersistenceState());
+        context.deleteObject(artist);
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+        context.rollbackChanges();
+        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
+    }
 }

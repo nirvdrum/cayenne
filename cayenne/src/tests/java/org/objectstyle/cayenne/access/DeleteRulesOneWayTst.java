@@ -53,89 +53,41 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.art.oneway.Gallery;
+import org.objectstyle.art.oneway.Painting;
+import org.objectstyle.cayenne.unit.OneWayMappingTestCase;
 
-/**
- * Tests issues not directly related to Cayenne.
- * 
- * @author Andrei Adamchik
- */
-public class MiscTst extends CayenneTestCase {
+public class DeleteRulesOneWayTst extends OneWayMappingTestCase {
+    private DataContext context;
 
     protected void setUp() throws Exception {
+        super.setUp();
+
         deleteTestData();
+        context = getDomain().createDataContext();
     }
 
-    public void testNothing() throws Exception {
-    	// noop to keep class from failing
-    }
-    
-   /* public void testUTFJDBC() throws Exception {        
-        Connection c = super.getSharedConnection();
+    public void testNullifyToOne() {
+        Painting aPainting = (Painting) context.createAndRegisterNewObject("Painting");
+        aPainting.setPaintingTitle("A Title");
+
+        Gallery aGallery = (Gallery) context.createAndRegisterNewObject("Gallery");
+        aGallery.setGalleryName("Gallery Name");
+
+        aPainting.setToGallery(aGallery);
+        context.commitChanges();
+
         try {
-            PreparedStatement st =
-                c.prepareStatement(
-                    "insert into ARTIST (ARTIST_ID, ARTIST_NAME) " + "values (1, ?)");
-
-            try {
-                st.setString(1, "\u0424");
-                st.execute();
-            } finally {
-                st.close();
-            }
-
-            Statement st1 = c.createStatement();
-
-            try {
-                ResultSet rs = st1.executeQuery("select ARTIST_NAME from ARTIST");
-                rs.next();
-                
-                
-                String inStr = rs.getString(1);
-                assertEquals("Not a unicode.", 1, inStr.length());
-                
-                char c1 = inStr.charAt(0);
-                assertTrue("Bad UNICODE char: " + charToHex(c1), c1 == '\u0424');
-            } finally {
-                st1.close();
-            }
-
-        } finally {
-            c.close();
+            context.deleteObject(aPainting);
         }
-    }
-*/
-    static public String byteToHex(byte b) {
-        // Returns hex String representation of byte b
-
-        char hexDigit[] =
-            {
-                '0',
-                '1',
-                '2',
-                '3',
-                '4',
-                '5',
-                '6',
-                '7',
-                '8',
-                '9',
-                'a',
-                'b',
-                'c',
-                'd',
-                'e',
-                'f' };
-        char[] array = { hexDigit[(b >> 4) & 0x0f], hexDigit[b & 0x0f] };
-        return new String(array);
-    }
-
-    static public String charToHex(char c) {
-        // Returns hex String representation of char c
-        byte hi = (byte) (c >>> 8);
-        byte lo = (byte) (c & 0xff);
-        return byteToHex(hi) + byteToHex(lo);
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have thrown an exception");
+        }
+        // There's no reverse relationship, so there's nothing else to test
+        // except to be sure that the commit works
+        context.commitChanges();
     }
 }

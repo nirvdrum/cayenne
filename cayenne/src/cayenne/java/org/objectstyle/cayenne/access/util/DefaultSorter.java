@@ -242,8 +242,8 @@ public class DefaultSorter implements DependencySorter {
                     actualMasterCount++;
                 }
             }
+            
             int mastersFound = 0;
-
             for (int j = 0; j < size && mastersFound < actualMasterCount; j++) {
 
                 if (i == j) {
@@ -328,7 +328,7 @@ public class DefaultSorter implements DependencySorter {
     }
 
     protected DataObject findReflexiveMaster(
-        DataObject obj,
+        DataObject object,
         ObjRelationship toOneRel,
         Class targetClass) {
         DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
@@ -336,17 +336,17 @@ public class DefaultSorter implements DependencySorter {
         DataRow snapshot = null;
 
         // IMPORTANT: don't try to get snapshots for new objects, this will result in exception
-        if (obj.getPersistenceState() != PersistenceState.NEW) {
-            DataContext context = obj.getDataContext();
-            snapshot = context.getObjectStore().getSnapshot(obj.getObjectId(), context);
+        if (object.getPersistenceState() != PersistenceState.NEW) {
+            DataContext context = object.getDataContext();
+            snapshot = context.getObjectStore().getSnapshot(object.getObjectId(), context);
         }
 
         if (snapshot == null) {
-            snapshot = obj.getDataContext().currentSnapshot(obj);
+            snapshot = object.getDataContext().currentSnapshot(object);
         }
 
         ObjectId id = snapshot.createTargetObjectId(targetClass, finalRel);
-        return (id != null) ? obj.getDataContext().registeredObject(id) : null;
+        return (id != null) ? object.getDataContext().registeredObject(id) : null;
     }
 
     protected Comparator getDbEntityComparator(boolean dependantFirst) {

@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.access;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -65,8 +64,6 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
   * @author Andrei Adamchik
   */
 public class DbGeneratorTst extends CayenneTestCase {
-    Logger logObj = Logger.getLogger(DbGeneratorTst.class);
-
     protected DbGenerator gen;
 
     public void setUp() throws Exception {

@@ -88,28 +88,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class DataContextTst extends DataContextTestBase {
     private static Logger logObj = Logger.getLogger(DataContextTst.class);
 
-    public void testDeleteHollow() throws Exception {
-        populatePaintings();
-        List paintings = context.performQuery(new SelectQuery(Painting.class));
-        Painting p = (Painting) paintings.get(0);
-        Artist a = p.getToArtist();
-
-        assertEquals(PersistenceState.HOLLOW, a.getPersistenceState());
-        context.deleteObject(a);
-        assertEquals(PersistenceState.DELETED, a.getPersistenceState());
-    }
-
-    public void testDeleteNew() throws Exception {
-        Artist artist = (Artist) context.createAndRegisterNewObject(Artist.class);
-        artist.setArtistName("a");
-
-        assertEquals(PersistenceState.NEW, artist.getPersistenceState());
-        context.deleteObject(artist);
-        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
-        context.rollbackChanges();
-        assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
-    }
-
     public void testLocalObjects() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
 
