@@ -62,8 +62,10 @@ public class Main {
                 likePattern);
 
         SelectQuery query = new SelectQuery("Gallery", qual);
-        // using log level of SEVERE to show the query execution
-        List galleries = ctxt.performQuery(query, Level.SEVERE);
+        // using log level of SEVERE to make sure that query execution is looged to STDOUT
+        query.setLogLevel(Level.SEVERE);
+        
+        List galleries = ctxt.performQuery(query);
         if (galleries.size() == 1) {
             Gallery gallery = (Gallery) galleries.get(0);
             System.out.println("\nFound gallery '" + gallery.getGalleryName() + "'.\n");

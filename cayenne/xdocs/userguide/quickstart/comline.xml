@@ -115,11 +115,13 @@
     		<p>Compile the source code (assume that JAVA_HOME variable points to the JSDK 1.4 installation). 
     		On Windows:</p>
 <source>
+projectdir> set CLASSPATH=%CLASSPATH%;%CAYENNE_HOME%\lib\cayenne.jar
 projectdir> %JAVA_HOME%\bin\javac test\*.java
 </source>
 
     		<p>On UNIX:</p>
 <source>
+projectdir# export CLASSPATH=$CLASSPATH:$CAYENNE_HOME/lib/cayenne.jar
 projectdir# $JAVA_HOME/bin/javac test/*.java
 </source>
 
@@ -130,6 +132,7 @@ projectdir# $JAVA_HOME/bin/javac test/*.java
 			to the found gallery. To run the tutorial do something like this (example given for Windows):
 			</p>
 <source>
+projectdir> set CLASSPATH=%CLASSPATH%;.
 projectdir> %JAVA_HOME%\bin\java -classpath . test.Main metro
 </source>
 			
