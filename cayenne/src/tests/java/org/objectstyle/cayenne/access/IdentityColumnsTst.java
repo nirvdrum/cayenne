@@ -145,6 +145,18 @@ public class IdentityColumnsTst extends CayenneTestCase {
         }
     }
 
+    public void testUpdateDependentWithNewMaster() throws Exception {
+        if (getAccessStackAdapter().getAdapter().supportsGeneratedKeys()) {
+            fail("TODO: build test case for a committed dependent object switching master...");
+        }
+    }
+
+    public void testGeneratedDefaultValue() throws Exception {
+
+        // fail("TODO: test insert with DEFAULT generated column...need custom SQL to
+        // build such table");
+    }
+
     public void testPropagateToDependent() throws Exception {
         GeneratedColumnTest idObject = (GeneratedColumnTest) createDataContext()
                 .createAndRegisterNewObject(GeneratedColumnTest.class);
