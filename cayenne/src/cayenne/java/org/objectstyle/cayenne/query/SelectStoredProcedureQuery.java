@@ -53,64 +53,75 @@
  * <http://objectstyle.org/>.
  *
  */
+
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
+import org.objectstyle.cayenne.map.StoredProcedure;
 
 /**
- * Generic query interface.
- *
+ * Select query based on a stored procedure.
+ *  
  * @author Andrei Adamchik
  */
-public interface Query {
-	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+public class SelectStoredProcedureQuery
+    extends StoredProcedureQuery
+    implements GenericSelectQuery {
 
-	public static final int SELECT_QUERY = 1;
-	public static final int INSERT_QUERY = 2;
-	public static final int UPDATE_QUERY = 3;
-	public static final int DELETE_QUERY = 4;
-	public static final int UNKNOWN_QUERY = 5;
-    public static final int INSERT_BATCH_QUERY = 6;
-    public static final int UPDATE_BATCH_QUERY = 7;
-	public static final int DELETE_BATCH_QUERY = 8;
-    public static final int STORED_PROCEDURE_QUERY = 9;
-
-
-	/**
-	 * Returns the <code>logLevel</code> property of this query.
-	 * Log level is a hint to QueryEngine that performs this query
-	 * to log execution with a certain priority.
-	 */
-	public Level getLoggingLevel();
-
-	public void setLoggingLevel(Level level);
-
-	/** Returns the name of root ObjEntity associated with the query.
-	 * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
-	 * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
-	public String getObjEntityName();
-
-    /** Sets the name of root ObjEntity associated with the query.
-     * @deprecated use setRoot instead
-     * */
-	public void setObjEntityName(String name);
-
-	/**
-	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY,
-	 * UPDATE_QUERY, DELETE_QUERY
-	 */
-    public int getQueryType();
+    protected int pageSize;
+    protected boolean fetchingDataRows;
 
     /**
-	 * Returns the root object of this query.  Might be a String, ObjEntity, DbEntity or Class,
-	 * depending on the query in question
-	 * @return Object
-	 */
-	public Object getRoot();
+     * Constructor for SelectStoredProcedureQuery.
+     */
+    public SelectStoredProcedureQuery() {
+        super();
+    }
 
-	/**
-	 * Sets the root of the query
-	 * @param value The new root
-	 */
-	public void setRoot(Object value);
+    /**
+     * Constructor for SelectStoredProcedureQuery.
+     */
+    public SelectStoredProcedureQuery(
+        Class root,
+        StoredProcedure storedProcedure) {
+        setStoredProcedure(storedProcedure);
+        setRoot(root);
+    }
+
+    public boolean isFetchingDataRows() {
+        return fetchingDataRows;
+    }
+
+    /**
+     * Sets query result type. If <code>flag</code> parameter is
+     * <code>true</code>, then results will be in the form of data rows.
+     *
+     * <p><i>Note that if <code>isFetchingCustAttributes()</code>
+     * returns <code>true</code>, this setting has no effect, and data
+     * rows are always fetched.</i></p>
+     */
+    public void setFetchingDataRows(boolean flag) {
+        this.fetchingDataRows = flag;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    /**
+      * Sets  <code>pageSize</code> property.
+      *
+      * @param pageSize The pageSize to set
+      */
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public void setStoredProcedure(StoredProcedure storedProcedure) {
+        if (storedProcedure != null && !storedProcedure.isReturningRows()) {
+            throw new IllegalArgumentException(
+                "StoredProcedure for SelectStoredProcedureQuery "
+                    + "must return a ResultSet.");
+        }
+        super.setStoredProcedure(storedProcedure);
+    }
 }

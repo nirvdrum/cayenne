@@ -65,6 +65,7 @@ import java.util.List;
  */
 public class StoredProcedure {
     protected String name;
+    protected String schema;
     protected boolean returningRows;
     protected List params = new ArrayList();
     protected List resultAttrs = new ArrayList();
@@ -80,7 +81,8 @@ public class StoredProcedure {
      * Creates an instance of StoredProcedure with the specified name and select
      * behaviour.
      */
-    public StoredProcedure(String name, boolean returningRows) {
+    public StoredProcedure(String schema, String name, boolean returningRows) {
+        this.schema = schema;
         this.name = name;
         this.returningRows = returningRows;
     }
@@ -93,18 +95,34 @@ public class StoredProcedure {
     }
 
     /**
+     * Sets the name of the StoredProcedure.
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+      * Returns the schema.
+      * @return String
+      */
+    public String getSchema() {
+        return schema;
+    }
+
+    /**
+     * Sets the schema.
+     * @param schema The schema to set
+     */
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
+
+    /**
      * Returns <code>true</code> if the StoredProcedure is expected to return a
      * ResultSet, <code>false</code> otherwise.
      */
     public boolean isReturningRows() {
         return returningRows;
-    }
-
-    /**
-     * Sets the name of the StoredProcedure.
-     */
-    public void setName(String name) {
-        this.name = name;
     }
 
     /**
@@ -137,6 +155,13 @@ public class StoredProcedure {
         resultAttrs.clear();
     }
 
+    /**
+     * Creates and adds a StoredProcedureParam to the list of parameters.
+     */
+    public void addParam(String name, int type) {
+        addParam(new StoredProcedureParam(name, type)); 
+    }
+    
     /**
       * Adds a StoredProcedureParam to the list of parameters.
       */

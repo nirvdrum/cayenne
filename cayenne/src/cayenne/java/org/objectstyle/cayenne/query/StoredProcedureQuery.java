@@ -51,66 +51,59 @@
  * individuals on behalf of the ObjectStyle Group.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- *
  */
+
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.objectstyle.cayenne.map.StoredProcedure;
 
 /**
- * Generic query interface.
- *
+ * A query based on StoredProcedure.
+ * 
  * @author Andrei Adamchik
  */
-public interface Query {
-	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+public class StoredProcedureQuery extends AbstractQuery {
+    protected StoredProcedure storedProcedure;
+    protected Map params = new HashMap();
 
-	public static final int SELECT_QUERY = 1;
-	public static final int INSERT_QUERY = 2;
-	public static final int UPDATE_QUERY = 3;
-	public static final int DELETE_QUERY = 4;
-	public static final int UNKNOWN_QUERY = 5;
-    public static final int INSERT_BATCH_QUERY = 6;
-    public static final int UPDATE_BATCH_QUERY = 7;
-	public static final int DELETE_BATCH_QUERY = 8;
-    public static final int STORED_PROCEDURE_QUERY = 9;
+    public StoredProcedureQuery() {
+    }
 
-
-	/**
-	 * Returns the <code>logLevel</code> property of this query.
-	 * Log level is a hint to QueryEngine that performs this query
-	 * to log execution with a certain priority.
-	 */
-	public Level getLoggingLevel();
-
-	public void setLoggingLevel(Level level);
-
-	/** Returns the name of root ObjEntity associated with the query.
-	 * @deprecated will only work on queries created with an ObjEntity or entityName as the root.<BR>
-	 * use getRoot and QueryEngine.getEntityResolver().lookupObjEntity() instead*/
-	public String getObjEntityName();
-
-    /** Sets the name of root ObjEntity associated with the query.
-     * @deprecated use setRoot instead
-     * */
-	public void setObjEntityName(String name);
-
-	/**
-	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY,
-	 * UPDATE_QUERY, DELETE_QUERY
-	 */
-    public int getQueryType();
+    public StoredProcedureQuery(StoredProcedure storedProcedure) {
+        this.storedProcedure = storedProcedure;
+    }
 
     /**
-	 * Returns the root object of this query.  Might be a String, ObjEntity, DbEntity or Class,
-	 * depending on the query in question
-	 * @return Object
-	 */
-	public Object getRoot();
+     * Returns Query.STORED_PROCEDURE_QUERY.
+     */
+    public int getQueryType() {
+        return STORED_PROCEDURE_QUERY;
+    }
 
-	/**
-	 * Sets the root of the query
-	 * @param value The new root
-	 */
-	public void setRoot(Object value);
+    public StoredProcedure getStoredProcedure() {
+        return storedProcedure;
+    }
+
+    public void setStoredProcedure(StoredProcedure storedProcedure) {
+        this.storedProcedure = storedProcedure;
+    }
+
+    public Map getParams() {
+        return params;
+    }
+
+    public void addParam(String name, Object value) {
+        params.put(name, value);
+    }
+    
+    public void removeParam(String name) {
+        params.remove(name);
+    }
+    
+    public void clearParams() {
+    	params.clear();
+    }
 }
