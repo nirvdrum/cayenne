@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -81,12 +82,12 @@ public class SaveAsAction extends CayenneAction {
         return "Save As...";
     }
 
-    public SaveAsAction() {
-        super(getActionName());
+    public SaveAsAction(Application application) {
+        super(getActionName(), application);
     }
 
-    public SaveAsAction(String name) {
-        super(name);
+    protected SaveAsAction(String name, Application application) {
+        super(name, application);
     }
 
     /**
@@ -94,16 +95,14 @@ public class SaveAsAction extends CayenneAction {
      * successful save, master files are replaced with new versions.
      */
     protected boolean saveAll() throws Exception {
-        Project p = Application.getProject();
+        Project p = getCurrentProject();
 
-        if(!chooseDestination(p)) {
+        if (!chooseDestination(p)) {
             return false;
         }
-      
+
         p.save();
-        Application.getFrame().updateTitle();
-        Application.getFrame().addToLastProjList(
-                p.getMainFile().getAbsolutePath());
+        Application.getFrame().addToLastProjList(p.getMainFile().getAbsolutePath());
         return true;
     }
 
@@ -125,8 +124,8 @@ public class SaveAsAction extends CayenneAction {
     }
 
     public synchronized void performAction(int warningLevel) {
-        ProjectController mediator = getMediator();
-        Validator val = Application.getProject().getValidator();
+        ProjectController mediator = getProjectController();
+        Validator val = getCurrentProject().getValidator();
         int validationCode = val.validate();
 
         // If no serious errors, perform save.

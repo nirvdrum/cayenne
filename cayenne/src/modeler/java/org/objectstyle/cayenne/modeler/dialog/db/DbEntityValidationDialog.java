@@ -64,9 +64,9 @@ import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.dialog.db.GenerateDbController;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
+import org.objectstyle.cayenne.modeler.swing.PanelFactory;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SPanel;

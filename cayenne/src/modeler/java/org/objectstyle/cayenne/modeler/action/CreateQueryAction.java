@@ -57,7 +57,9 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.query.QueryTypeController;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 
 /**
  * @since 1.1
@@ -72,8 +74,8 @@ public class CreateQueryAction extends CayenneAction {
     /**
      * Constructor for CreateQueryAction.
      */
-    public CreateQueryAction() {
-        super(getActionName());
+    public CreateQueryAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -85,6 +87,6 @@ public class CreateQueryAction extends CayenneAction {
     }
 
     protected void createQuery() {
-        new QueryTypeController(getMediator()).startup();
+        new QueryTypeController(getProjectController()).startup();
     }
 }

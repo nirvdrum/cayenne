@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.swing;
 
 import java.awt.Component;
 
@@ -78,6 +78,7 @@ import org.objectstyle.cayenne.map.MappingNamespace;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.Relationship;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.query.Query;
 
 /**

@@ -91,8 +91,8 @@ public class OpenProjectAction extends ProjectAction {
     /**
      * Constructor for OpenProjectAction.
      */
-    public OpenProjectAction() {
-        super(getActionName());
+    public OpenProjectAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -105,7 +105,7 @@ public class OpenProjectAction extends ProjectAction {
 
     public void performAction(ActionEvent e) {
         // Save and close (if needed) currently open project.
-        if (getMediator() != null && !closeProject()) {
+        if (getProjectController() != null && !closeProject()) {
             return;
         }
         File f = null;

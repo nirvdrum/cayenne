@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.LongRunningTask;
+import org.objectstyle.cayenne.modeler.swing.LongRunningTask;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.Util;
 

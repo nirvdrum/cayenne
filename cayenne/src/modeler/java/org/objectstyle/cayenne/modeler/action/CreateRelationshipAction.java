@@ -63,8 +63,10 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -80,8 +82,8 @@ public class CreateRelationshipAction extends CayenneAction {
     /**
      * Constructor for CreateRelationshipAction.
      */
-    public CreateRelationshipAction() {
-        super(getActionName());
+    public CreateRelationshipAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -89,14 +91,14 @@ public class CreateRelationshipAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
-        ObjEntity objEnt = getMediator().getCurrentObjEntity();
+        ObjEntity objEnt = getProjectController().getCurrentObjEntity();
         if (objEnt != null) {
             createObjRelationship(objEnt);
         } else {
-            DbEntity dbEnt = getMediator().getCurrentDbEntity();
+            DbEntity dbEnt = getProjectController().getCurrentDbEntity();
             if (dbEnt != null) {
                 createDbRelationship(dbEnt);
             }
@@ -104,7 +106,7 @@ public class CreateRelationshipAction extends CayenneAction {
     }
 
     public void createObjRelationship(ObjEntity objEnt) {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
 
         ObjRelationship rel =
             (ObjRelationship) NamedObjectFactory.createObject(
@@ -125,7 +127,7 @@ public class CreateRelationshipAction extends CayenneAction {
     }
 
     public void createDbRelationship(DbEntity dbEnt) {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
 
         DbRelationship rel =
             (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, dbEnt);

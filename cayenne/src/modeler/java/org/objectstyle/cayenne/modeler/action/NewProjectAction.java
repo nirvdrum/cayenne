@@ -75,8 +75,8 @@ public class NewProjectAction extends ProjectAction {
         return "New Project";
     }
 
-    public NewProjectAction() {
-        super(getActionName());
+    public NewProjectAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {

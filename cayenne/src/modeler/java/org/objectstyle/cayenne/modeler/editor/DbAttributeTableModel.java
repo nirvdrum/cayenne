@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.swing.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
 /** 

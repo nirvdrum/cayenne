@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.UnsavedChangesDialog;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -72,8 +73,8 @@ public class ProjectAction extends CayenneAction {
         return "Close Project";
     }
 
-    public ProjectAction() {
-        super(getActionName());
+    public ProjectAction(Application application) {
+        super(getActionName(), application);
     }
 
     /**
@@ -81,8 +82,8 @@ public class ProjectAction extends CayenneAction {
      * 
      * @param name
      */
-    public ProjectAction(String name) {
-        super(name);
+    public ProjectAction(String name, Application application) {
+        super(name, application);
     }
 
     /**
@@ -110,7 +111,7 @@ public class ProjectAction extends CayenneAction {
      * Returns false if cancel closing the window, true otherwise.
      */
     public boolean checkSaveOnClose() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         if (mediator != null && mediator.isDirty()) {
             UnsavedChangesDialog dialog = new UnsavedChangesDialog(Application.getFrame());
             dialog.show();

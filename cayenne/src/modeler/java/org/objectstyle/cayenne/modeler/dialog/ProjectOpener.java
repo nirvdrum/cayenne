@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.DataMapProject;
 import org.objectstyle.cayenne.project.Project;
@@ -78,6 +77,7 @@ import org.objectstyle.cayenne.project.ProjectFile;
  * @author Andrei Adamchik
  */
 public class ProjectOpener extends JFileChooser {
+
     private static Logger logObj = Logger.getLogger(ProjectOpener.class);
 
     /**
@@ -93,22 +93,17 @@ public class ProjectOpener extends JFileChooser {
     public File newProjectDir(Frame f, Project p) {
         if (p instanceof ApplicationProject) {
             // configure for application project
-            return newProjectDir(
-                f,
-                Configuration.DEFAULT_DOMAIN_FILE,
-                FileFilters.getApplicationFilter());
+            return newProjectDir(f, Configuration.DEFAULT_DOMAIN_FILE, FileFilters
+                    .getApplicationFilter());
         }
         else if (p instanceof DataMapProject) {
             // configure for DataMap project
             ProjectFile projFileWrapper = p.projectFileForObject(p);
-            return newProjectDir(
-                f,
-                projFileWrapper.getLocation(),
-                FileFilters.getDataMapFilter());
+            return newProjectDir(f, projFileWrapper.getLocation(), FileFilters
+                    .getDataMapFilter());
         }
         else {
-            String message =
-                (p == null)
+            String message = (p == null)
                     ? "Null project."
                     : "Unrecognized project class: " + p.getClass().getName();
             throw new CayenneRuntimeException(message);
@@ -199,16 +194,8 @@ public class ProjectOpener extends JFileChooser {
     }
 
     /**
-     * Builds a title that contains the name of the application.
-     */
-    public void setDialogTitle(String dialogTitle) {
-        super.setDialogTitle(ModelerUtil.buildTitle(dialogTitle));
-    }
-
-    /**
-     * Returns directory where file search should start. 
-     * This is either coming from saved preferences, or a current directory is
-     * used.
+     * Returns directory where file search should start. This is either coming from saved
+     * preferences, or a current directory is used.
      */
     public File getDefaultStartDir() {
         File startDir = null;

@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -68,7 +68,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;

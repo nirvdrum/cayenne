@@ -61,7 +61,7 @@ import java.awt.Dimension;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 
-import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.swing.PanelFactory;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SPanel;

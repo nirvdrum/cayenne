@@ -87,17 +87,15 @@ import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * Removes currently selected object from the project. This can be 
- * Domain, DataNode, Entity, Attribute or Relationship.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
+/**
+ * Removes currently selected object from the project. This can be Domain, DataNode,
+ * Entity, Attribute or Relationship.
  */
 public class RemoveAction extends CayenneAction {
 
@@ -105,8 +103,8 @@ public class RemoveAction extends CayenneAction {
         return "Remove";
     }
 
-    public RemoveAction() {
-        super(getActionName());
+    public RemoveAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -122,7 +120,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     private void remove() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
 
         if (mediator.getCurrentObjAttribute() != null) {
             removeObjAttribute();
@@ -170,97 +168,100 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDomain() {
-        ApplicationProject project =
-            (ApplicationProject) Application.getProject();
-        ProjectController mediator = getMediator();
+        ApplicationProject project = (ApplicationProject) getCurrentProject();
+        ProjectController mediator = getProjectController();
         DataDomain domain = mediator.getCurrentDataDomain();
         project.getConfiguration().removeDomain(domain.getName());
-        mediator.fireDomainEvent(
-            new DomainEvent(Application.getFrame(), domain, MapEvent.REMOVE));
+        mediator.fireDomainEvent(new DomainEvent(
+                Application.getFrame(),
+                domain,
+                MapEvent.REMOVE));
     }
 
     protected void removeDataMap() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DataMap map = mediator.getCurrentDataMap();
         DataDomain domain = mediator.getCurrentDataDomain();
         domain.removeMap(map.getName());
-        mediator.fireDataMapEvent(
-            new DataMapEvent(Application.getFrame(), map, MapEvent.REMOVE));
+        mediator.fireDataMapEvent(new DataMapEvent(
+                Application.getFrame(),
+                map,
+                MapEvent.REMOVE));
     }
 
     protected void removeDataNode() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DataNode node = mediator.getCurrentDataNode();
         DataDomain domain = mediator.getCurrentDataDomain();
         domain.removeDataNode(node.getName());
-        mediator.fireDataNodeEvent(
-            new DataNodeEvent(Application.getFrame(), node, MapEvent.REMOVE));
+        mediator.fireDataNodeEvent(new DataNodeEvent(
+                Application.getFrame(),
+                node,
+                MapEvent.REMOVE));
     }
 
-    /** 
-     * Removes current DbEntity from its DataMap and fires 
-     * "remove" EntityEvent.
+    /**
+     * Removes current DbEntity from its DataMap and fires "remove" EntityEvent.
      */
     protected void removeDbEntity() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DbEntity ent = mediator.getCurrentDbEntity();
         DataMap map = mediator.getCurrentDataMap();
         map.removeDbEntity(ent.getName(), true);
-        mediator.fireDbEntityEvent(
-            new EntityEvent(Application.getFrame(), ent, MapEvent.REMOVE));
+        mediator.fireDbEntityEvent(new EntityEvent(
+                Application.getFrame(),
+                ent,
+                MapEvent.REMOVE));
     }
-    
-    /** 
-       * Removes current Query from its DataMap and fires 
-       * "remove" QueryEvent.
-       */
+
+    /**
+     * Removes current Query from its DataMap and fires "remove" QueryEvent.
+     */
     protected void removeQuery() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         Query query = mediator.getCurrentQuery();
         DataMap map = mediator.getCurrentDataMap();
         map.removeQuery(query.getName());
-        mediator.fireQueryEvent(
-            new QueryEvent(
+        mediator.fireQueryEvent(new QueryEvent(
                 Application.getFrame(),
                 query,
                 MapEvent.REMOVE));
     }
 
-    /** 
-       * Removes current Procedure from its DataMap and fires 
-       * "remove" ProcedureEvent.
-       */
+    /**
+     * Removes current Procedure from its DataMap and fires "remove" ProcedureEvent.
+     */
     protected void removeProcedure() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         Procedure procedure = mediator.getCurrentProcedure();
         DataMap map = mediator.getCurrentDataMap();
         map.removeProcedure(procedure.getName());
-        mediator.fireProcedureEvent(
-            new ProcedureEvent(
+        mediator.fireProcedureEvent(new ProcedureEvent(
                 Application.getFrame(),
                 procedure,
                 MapEvent.REMOVE));
     }
 
-    /** 
-     * Removes current object entity from its DataMap. 
+    /**
+     * Removes current object entity from its DataMap.
      */
     protected void removeObjEntity() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         ObjEntity ent = mediator.getCurrentObjEntity();
 
         DataMap map = mediator.getCurrentDataMap();
         map.removeObjEntity(ent.getName(), true);
-        mediator.fireObjEntityEvent(
-            new EntityEvent(Application.getFrame(), ent, MapEvent.REMOVE));
+        mediator.fireObjEntityEvent(new EntityEvent(
+                Application.getFrame(),
+                ent,
+                MapEvent.REMOVE));
     }
 
     protected void removeProcedureParameter() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
         mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
-        ProcedureParameterEvent e =
-            new ProcedureParameterEvent(
+        ProcedureParameterEvent e = new ProcedureParameterEvent(
                 Application.getFrame(),
                 parameter,
                 MapEvent.REMOVE);
@@ -268,13 +269,12 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeObjAttribute() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         ObjEntity entity = mediator.getCurrentObjEntity();
         ObjAttribute attrib = mediator.getCurrentObjAttribute();
 
         entity.removeAttribute(attrib.getName());
-        AttributeEvent e =
-            new AttributeEvent(
+        AttributeEvent e = new AttributeEvent(
                 Application.getFrame(),
                 attrib,
                 entity,
@@ -283,14 +283,13 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDbAttribute() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DbEntity entity = mediator.getCurrentDbEntity();
         DbAttribute attrib = mediator.getCurrentDbAttribute();
         entity.removeAttribute(attrib.getName());
         ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
-        AttributeEvent e =
-            new AttributeEvent(
+        AttributeEvent e = new AttributeEvent(
                 Application.getFrame(),
                 attrib,
                 entity,
@@ -299,12 +298,11 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeObjRelationship() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         ObjEntity entity = mediator.getCurrentObjEntity();
         ObjRelationship rel = mediator.getCurrentObjRelationship();
         entity.removeRelationship(rel.getName());
-        RelationshipEvent e =
-            new RelationshipEvent(
+        RelationshipEvent e = new RelationshipEvent(
                 Application.getFrame(),
                 rel,
                 entity,
@@ -313,14 +311,13 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDbRelationship() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DbEntity entity = mediator.getCurrentDbEntity();
         DbRelationship rel = mediator.getCurrentDbRelationship();
         entity.removeRelationship(rel.getName());
         ProjectUtil.cleanObjMappings(mediator.getCurrentDataMap());
 
-        RelationshipEvent e =
-            new RelationshipEvent(
+        RelationshipEvent e = new RelationshipEvent(
                 Application.getFrame(),
                 rel,
                 entity,
@@ -329,19 +326,17 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDataMapFromDataNode() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DataNode node = mediator.getCurrentDataNode();
         DataMap map = mediator.getCurrentDataMap();
         node.removeDataMap(map.getName());
 
         // Force reloading of the data node in the browse view
-        mediator.fireDataNodeEvent(
-            new DataNodeEvent(Application.getFrame(), node));
+        mediator.fireDataNodeEvent(new DataNodeEvent(Application.getFrame(), node));
     }
 
     /**
-     * Returns <code>true</code> if last object in the path contains
-     * a removable object.
+     * Returns <code>true</code> if last object in the path contains a removable object.
      */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {

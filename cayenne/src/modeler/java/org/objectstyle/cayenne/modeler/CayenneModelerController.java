@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -67,6 +68,7 @@ import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.editor.EditorView;
+import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.validator.Validator;
@@ -76,7 +78,7 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneModelerController extends Controller {
+public class CayenneModelerController extends CayenneController {
 
     protected ProjectController projectController;
     protected ActionController actionController;
@@ -95,7 +97,7 @@ public class CayenneModelerController extends Controller {
         actionController = new ActionController(application);
     }
 
-    public CayenneModelerFrame getFrame() {
+    public Component getView() {
         return frame;
     }
 
@@ -155,14 +157,14 @@ public class CayenneModelerController extends Controller {
         // repaint is needed, since sometimes there is a
         // trace from menu left on the screen
         frame.repaint();
-        frame.updateTitle();
+        frame.setTitle(ModelerConstants.TITLE);
 
         setCurrentProject(null);
 
         projectController.reset();
         actionController.projectClosed();
 
-        doUpdate("Project Closed...");
+        updateStatus("Project Closed...");
     }
 
     /**
@@ -173,22 +175,22 @@ public class CayenneModelerController extends Controller {
 
         setCurrentProject(project);
 
-        // update main view
+        if (project.isLocationUndefined()) {
+            updateStatus("New project created...");
+            frame.setTitle(ModelerConstants.TITLE + "- [New]");
+        }
+        else {
+            updateStatus("Project opened...");
+            frame.setTitle(ModelerConstants.TITLE
+                    + " - "
+                    + project.getMainFile().getAbsolutePath());
+        }
+
         frame.setView(new EditorView(projectController));
         frame.getContentPane().add(frame.getView(), BorderLayout.CENTER);
         frame.validate();
-        frame.updateTitle();
 
-        if (project.isLocationUndefined()) {
-            doUpdate("New project created...");
-        }
-        else {
-            doUpdate("Project opened...");
-        }
-
-        // --- propagate control to child controllers
-        projectController.projectOpened(getFrame());
-
+        projectController.projectOpened();
         actionController.projectOpened();
 
         // --- check for load errors
@@ -214,7 +216,7 @@ public class CayenneModelerController extends Controller {
     /**
      * Performs status bar update with a message. Message will dissappear in 6 seconds.
      */
-    protected void doUpdate(String message) {
+    protected void updateStatus(String message) {
         frame.getStatus().setText(message);
 
         // start message cleanup thread that would remove the message after X seconds
@@ -243,7 +245,7 @@ public class CayenneModelerController extends Controller {
             }
 
             if (message.equals(frame.getStatus().getText())) {
-                doUpdate(null);
+                updateStatus(null);
             }
         }
     }

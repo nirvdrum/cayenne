@@ -59,6 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.dialog.AboutDialog;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 
 /**
  * @author Andrei Adamchik
@@ -73,8 +74,8 @@ public class AboutAction extends CayenneAction {
      * Constructor for AboutMenuAction.
      * @param name
      */
-    public AboutAction() {
-        super(getActionName());
+    public AboutAction(Application application) {
+        super(getActionName(), application);
     }
 
     /**

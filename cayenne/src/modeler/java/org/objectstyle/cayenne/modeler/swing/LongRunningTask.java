@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

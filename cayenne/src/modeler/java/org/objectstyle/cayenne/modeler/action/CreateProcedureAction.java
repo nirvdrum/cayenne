@@ -61,8 +61,10 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -77,12 +79,12 @@ public class CreateProcedureAction extends CayenneAction {
         return "Create Stored Procedure";
     }
 
-    public CreateProcedureAction() {
-        super(getActionName());
+    public CreateProcedureAction(Application application) {
+        super(getActionName(), application);
     }
 
     public void performAction(ActionEvent e) {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         Procedure procedure = createProcedure(mediator.getCurrentDataMap());
 
         mediator.fireProcedureEvent(new ProcedureEvent(this, procedure, MapEvent.ADD));

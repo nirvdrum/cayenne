@@ -62,8 +62,10 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -82,8 +84,8 @@ public class CreateNodeAction extends CayenneAction {
      * 
      * @param name
      */
-    public CreateNodeAction() {
-        super(getActionName());
+    public CreateNodeAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -91,7 +93,7 @@ public class CreateNodeAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         createDataNode();
@@ -107,7 +109,7 @@ public class CreateNodeAction extends CayenneAction {
      * should be stored in the separate file if the factory requires it.
      */
     protected void createDataNode() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DataDomain domain = mediator.getCurrentDataDomain();
 
         // use domain name as DataNode base, as node names must be unique across the

@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -71,36 +72,33 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class CreateDomainAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Create DataDomain";
-	}
+    public static String getActionName() {
+        return "Create DataDomain";
+    }
 
     /**
      * Constructor for CreateDomainAction.
+     * 
      * @param name
      */
-    public CreateDomainAction() {
-        super(getActionName());
+    public CreateDomainAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
         return "icon-dom.gif";
     }
 
-    /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
     public void performAction(ActionEvent e) {
         createDomain();
     }
 
     protected void createDomain() {
         // only ApplicationProjects can have domains, so this cast is reasonable
-        ApplicationProject project = (ApplicationProject) Application.getProject();
+        ApplicationProject project = (ApplicationProject) getCurrentProject();
 
-        ProjectController mediator = getMediator();
-        DataDomain domain =
-            (DataDomain) NamedObjectFactory.createObject(
+        ProjectController mediator = getProjectController();
+        DataDomain domain = (DataDomain) NamedObjectFactory.createObject(
                 DataDomain.class,
                 project.getConfiguration());
         domain.getEntityResolver().setIndexedByClass(false);
@@ -109,10 +107,9 @@ public class CreateDomainAction extends CayenneAction {
         mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
     }
 
-
     /**
-    * Returns <code>true</code> if path contains a ApplicationProject object.
-    */
+     * Returns <code>true</code> if path contains a ApplicationProject object.
+     */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;

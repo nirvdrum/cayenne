@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.swing.CayenneTableModel;
 
 /** Model for editing DbAttributePair-s. Changes in the join attributes
  *  don't take place until commit() is called. Creation of the new

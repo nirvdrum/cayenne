@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.modeler;
 
+import java.awt.Component;
+
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -63,7 +65,6 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDomainAction;
 import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
@@ -76,15 +77,21 @@ import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
  * @author Andrei Adamchik
  */
-public class ActionController extends Controller {
+public class ActionController extends CayenneController {
 
     public ActionController(Application application) {
         super(application);
+    }
+
+    public Component getView() {
+        throw new UnsupportedOperationException("ActionController is 'headless'");
     }
 
     public void domainSelected(DataDomain domain) {

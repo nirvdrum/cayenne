@@ -1,8 +1,8 @@
 package org.objectstyle.cayenne.modeler;
 
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 
 import com.apple.eawt.ApplicationAdapter;
 import com.apple.eawt.ApplicationEvent;

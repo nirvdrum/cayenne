@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.swing;
 
 import java.awt.Dialog;
 import java.awt.Frame;
@@ -73,6 +73,7 @@ import javax.swing.event.HyperlinkListener;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.util.BrowserControl;
 import org.scopemvc.view.awt.AWTUtilities;
 
 /**

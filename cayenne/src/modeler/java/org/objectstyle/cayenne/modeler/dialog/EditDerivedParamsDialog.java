@@ -76,12 +76,12 @@ import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.editor.DerivedAttributeParamsTableModel;
-import org.objectstyle.cayenne.modeler.util.CayenneDialog;
-import org.objectstyle.cayenne.modeler.util.CayenneTable;
-import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
+import org.objectstyle.cayenne.modeler.swing.CayenneTable;
+import org.objectstyle.cayenne.modeler.swing.CayenneTableModel;
+import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.swing.PanelFactory;
 
 /**
  * Dialog window that alows selecting DbAttributes 

@@ -61,6 +61,7 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.project.Project;
 
 /**
@@ -72,8 +73,8 @@ public class SaveAction extends SaveAsAction {
         return "Save";
     }
 
-    public SaveAction() {
-        super(getActionName());
+    public SaveAction(Application application) {
+        super(getActionName(), application);
     }
 
     public KeyStroke getAcceleratorKey() {

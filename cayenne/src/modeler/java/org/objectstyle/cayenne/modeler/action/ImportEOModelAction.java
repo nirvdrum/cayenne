@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.wocompat.EOModelProcessor;
@@ -99,8 +100,8 @@ public class ImportEOModelAction extends CayenneAction {
 
     protected JFileChooser eoModelChooser;
 
-    public ImportEOModelAction() {
-        super(getActionName());
+    public ImportEOModelAction(Application application) {
+        super(getActionName(), application);
     }
 
     /**
@@ -156,8 +157,8 @@ public class ImportEOModelAction extends CayenneAction {
      * Adds DataMap into the project.
      */
     protected void addDataMap(DataMap map) {
-        DataMap currentMap = getMediator().getCurrentDataMap();
-        ProjectController mediator = getMediator();
+        DataMap currentMap = getProjectController().getCurrentDataMap();
+        ProjectController mediator = getProjectController();
 
         if (currentMap != null) {
             // merge with existing map... have to memorize map state before and after

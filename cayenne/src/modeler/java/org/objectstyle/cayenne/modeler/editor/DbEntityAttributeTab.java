@@ -75,14 +75,14 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.dialog.EditDerivedParamsDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.CayenneTable;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.UIUtil;
+import org.objectstyle.cayenne.modeler.swing.CayenneTable;
+import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.swing.PanelFactory;
+import org.objectstyle.cayenne.modeler.swing.UIUtil;
 
 /** 
  * Detail view of the DbEntity attributes. 

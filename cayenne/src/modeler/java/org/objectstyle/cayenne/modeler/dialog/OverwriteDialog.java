@@ -61,17 +61,17 @@ import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
-
 /**
  * @author Andrei Adamchik
  */
 public class OverwriteDialog {
+
     private static final String SELECT_ANOTHER = "Select Another";
     private static final String OVERWRITE = "Overwrite";
     private static final String CANCEL = "Cancel";
-    private static final String[] OPTIONS =
-        new String[] { SELECT_ANOTHER, OVERWRITE, CANCEL };
+    private static final String[] OPTIONS = new String[] {
+            SELECT_ANOTHER, OVERWRITE, CANCEL
+    };
 
     protected File file;
     protected Component parent;
@@ -83,13 +83,11 @@ public class OverwriteDialog {
     }
 
     public void show() {
-        JOptionPane pane =
-            new JOptionPane(
-                "Do you want to overwrite an existing file: " + file,
-                JOptionPane.QUESTION_MESSAGE);
+        JOptionPane pane = new JOptionPane("Do you want to overwrite an existing file: "
+                + file, JOptionPane.QUESTION_MESSAGE);
         pane.setOptions(OPTIONS);
 
-        JDialog dialog = pane.createDialog(parent, ModelerUtil.buildTitle("File exists"));
+        JDialog dialog = pane.createDialog(parent, "File exists");
         dialog.show();
 
         Object selectedValue = pane.getValue();

@@ -1,0 +1,161 @@
+package org.objectstyle.cayenne.pref;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObjectUtils;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.pref.auto._Domain;
+import org.objectstyle.cayenne.query.SelectQuery;
+
+/**
+ * Preferences "domain" is logical area for preferences storage. Domains are organized in
+ * a tree hierarchy allowing cascading preferences lookup.
+ * 
+ * @author Andrei Adamchik
+ */
+public class Domain extends _Domain {
+
+    /**
+     * Returns a direct child of this domain that should handle preferences for Java
+     * class. Creates such subdomain if it doesn't exist.
+     */
+    public Domain getSubdomain(Class javaClass) {
+        List subdomains = getSubdomains();
+
+        if (subdomains.size() > 0) {
+            List matching = ExpressionFactory.matchExp(
+                    Domain.NAME_PROPERTY,
+                    javaClass.getName()).filterObjects(subdomains);
+            if (matching.size() > 0) {
+                return (Domain) matching.get(0);
+            }
+        }
+
+        Domain childSubdomain = (Domain) getDataContext().createAndRegisterNewObject(
+                Domain.class);
+        addToSubdomains(childSubdomain);
+        childSubdomain.setName(javaClass.getName());
+
+        if (getLevel() == null) {
+            throw new CayenneRuntimeException("Null level, can't create child");
+        }
+
+        int level = getLevel().intValue() + 1;
+        childSubdomain.setLevel(new Integer(level));
+        getDataContext().commitChanges();
+
+        return childSubdomain;
+    }
+
+    /**
+     * Returns all generic preferences for the domain.
+     */
+    public List getPreferenceDetails() {
+        Collection domainPrefs = getPreferences();
+
+        if (domainPrefs.isEmpty()) {
+            // return mutable list
+            return new ArrayList(1);
+        }
+
+        List details = new ArrayList(domainPrefs.size());
+        Iterator it = domainPrefs.iterator();
+        while (it.hasNext()) {
+            DomainPreference preference = (DomainPreference) it.next();
+            details.add(preference.getPreference());
+        }
+        return details;
+    }
+
+    /**
+     * Returns a preference object used to read/write properties.
+     */
+    public PreferenceDetail getPreferenceDetail(String key, boolean create) {
+        return getPreferenceDetail(key, null, create);
+    }
+
+    /**
+     * Returns all stored PreferenceDetails for a given class in this Domain.
+     */
+    public Collection getPreferenceDetails(Class javaClass) {
+        // extract preference ids, and then fetch matching prefrences...
+        Collection preferences = getPreferences();
+        if (preferences.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        Collection ids = new ArrayList(preferences.size());
+        Iterator it = preferences.iterator();
+        while (it.hasNext()) {
+            DomainPreference pref = (DomainPreference) it.next();
+            ids.add(DataObjectUtils.pkForObject(pref));
+        }
+
+        DataContext context = getDataContext();
+        DbEntity entity = context.getEntityResolver().lookupDbEntity(javaClass);
+        DbAttribute pk = (DbAttribute) entity.getPrimaryKey().get(0);
+
+        Expression qualifier = Expression.fromString("db:" + pk.getName() + " in $ids");
+        Map params = Collections.singletonMap("ids", ids);
+        SelectQuery query = new SelectQuery(javaClass, qualifier
+                .expWithParameters(params));
+        return context.performQuery(query);
+    }
+
+    /**
+     * Locates a PreferenceDetail in a current Domain for a given key and Java class. If
+     * no such preference found, and "create" is true, a new preference is created. If an
+     * existing preference class does not match supplied class, PreferenceException is
+     * thrown.
+     */
+    public PreferenceDetail getPreferenceDetail(
+            String key,
+            Class javaClass,
+            boolean create) {
+        DomainPreference preferenceLink = getDomainPreference(key);
+
+        if (preferenceLink == null) {
+
+            if (!create) {
+                return null;
+            }
+
+            preferenceLink = (DomainPreference) getDataContext()
+                    .createAndRegisterNewObject(DomainPreference.class);
+            preferenceLink.setDomain(this);
+            preferenceLink.setKey(key);
+            getDataContext().commitChanges();
+        }
+
+        return (javaClass == null) ? preferenceLink.getPreference() : preferenceLink
+                .getPreference(javaClass, create);
+    }
+
+    /**
+     * Looks up a preference for key in the domain hierarchy.
+     */
+    DomainPreference getDomainPreference(String key) {
+        // query sorts preferences by subdomain level, so the first object is the lowest
+        // one
+        Map params = new HashMap();
+        params.put("key", key);
+        params.put("domain", this);
+        List results = getDataContext().performQuery(
+                "DomainPreferenceForKey",
+                params,
+                false);
+        return (results.size() < 1) ? null : (DomainPreference) results.get(0);
+    }
+}
+

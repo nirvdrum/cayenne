@@ -68,7 +68,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.swing.PanelFactory;
 import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;

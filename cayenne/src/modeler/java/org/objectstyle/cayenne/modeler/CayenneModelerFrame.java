@@ -76,8 +76,8 @@ import javax.swing.JToolBar;
 
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.ConfigureClasspathAction;
+import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
@@ -124,9 +124,8 @@ import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenu;
-import org.objectstyle.cayenne.project.Project;
 
 /**
  * Main frame of CayenneModeler. Responsibilities include coordination of
@@ -210,19 +209,10 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     protected void initMenus() {
         getContentPane().setLayout(new BorderLayout());
 
-        // Setup menu bar
-        JMenuBar menuBar = new JMenuBar();
-        setJMenuBar(menuBar);
-
         JMenu fileMenu = new JMenu("File");
         JMenu projectMenu = new JMenu("Project");
         JMenu toolMenu = new JMenu("Tools");
         JMenu helpMenu = new JMenu("Help");
-
-        menuBar.add(fileMenu);
-        menuBar.add(projectMenu);
-        menuBar.add(toolMenu);
-        menuBar.add(helpMenu);
 
         fileMenu.add(getAction(NewProjectAction.getActionName()).buildMenu());
         fileMenu.add(getAction(OpenProjectAction.getActionName()).buildMenu());
@@ -267,8 +257,18 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         toolMenu.add(getAction(GenerateDbAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
         toolMenu.add(getAction(ConfigureClasspathAction.getActionName()).buildMenu());
+        toolMenu.add(getAction(ConfigurePreferencesAction.getActionName()).buildMenu());
 
         helpMenu.add(getAction(AboutAction.getActionName()).buildMenu());
+
+        JMenuBar menuBar = new JMenuBar();
+
+        menuBar.add(fileMenu);
+        menuBar.add(projectMenu);
+        menuBar.add(toolMenu);
+        menuBar.add(helpMenu);
+
+        setJMenuBar(menuBar);
     }
 
     protected void initStatusBar() {
@@ -484,22 +484,6 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         // Andrus: Temp hack till moved to controller
         controller.getActionController().domainSelected(
                 controller.getProjectController().getCurrentDataDomain());
-    }
-
-    public void updateTitle() {
-        String title = null;
-        Project project = Application.getProject();
-
-        if (project != null) {
-            if (project.isLocationUndefined()) {
-                title = "[New]";
-            }
-            else {
-                title = project.getMainFile().getAbsolutePath();
-            }
-        }
-
-        setTitle(ModelerUtil.buildTitle(title));
     }
 
     /**

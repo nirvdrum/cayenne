@@ -60,8 +60,10 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -77,8 +79,8 @@ public class CreateObjEntityAction extends CayenneAction {
     /**
      * Constructor for CreateObjEntityAction.
      */
-    public CreateObjEntityAction() {
-        super(getActionName());
+    public CreateObjEntityAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -86,14 +88,14 @@ public class CreateObjEntityAction extends CayenneAction {
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
         createObjEntity();
     }
 
     protected void createObjEntity() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
 
         DataMap dataMap = mediator.getCurrentDataMap();
         ObjEntity entity = (ObjEntity) NamedObjectFactory.createObject(

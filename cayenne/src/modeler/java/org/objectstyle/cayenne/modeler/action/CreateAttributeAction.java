@@ -69,9 +69,11 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -88,8 +90,8 @@ public class CreateAttributeAction extends CayenneAction {
      * Constructor for CreateAttributeAction.
      * @param name
      */
-    public CreateAttributeAction() {
-        super(getActionName());
+    public CreateAttributeAction(Application application) {
+        super(getActionName(), application);
     }
 
     public String getIconName() {
@@ -100,19 +102,19 @@ public class CreateAttributeAction extends CayenneAction {
      * Creates ObjAttribute, DbAttribute or ProcedureParameter depending on context.
      */
     public void performAction(ActionEvent e) {
-        if (getMediator().getCurrentProcedure() != null) {
+        if (getProjectController().getCurrentProcedure() != null) {
             createProcedureParameter();
         }
-        else if (getMediator().getCurrentObjEntity() != null) {
+        else if (getProjectController().getCurrentObjEntity() != null) {
             createObjAttribute();
         }
-        else if (getMediator().getCurrentDbEntity() != null) {
+        else if (getProjectController().getCurrentDbEntity() != null) {
             createDbAttribute();
         }
     }
 
     public void createProcedureParameter() {
-        Procedure procedure = getMediator().getCurrentProcedure();
+        Procedure procedure = getProjectController().getCurrentProcedure();
 
         ProcedureParameter parameter =
             (ProcedureParameter) NamedObjectFactory.createObject(
@@ -120,7 +122,7 @@ public class CreateAttributeAction extends CayenneAction {
                 procedure);
         procedure.addCallParameter(parameter);
 
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         mediator.fireProcedureParameterEvent(
             new ProcedureParameterEvent(this, parameter, MapEvent.ADD));
         mediator.fireProcedureParameterDisplayEvent(
@@ -133,7 +135,7 @@ public class CreateAttributeAction extends CayenneAction {
     }
 
     public void createObjAttribute() {
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         ObjEntity objEntity = mediator.getCurrentObjEntity();
 
         ObjAttribute attr =
@@ -154,7 +156,7 @@ public class CreateAttributeAction extends CayenneAction {
     public void createDbAttribute() {
         Class attrClass = null;
 
-        DbEntity dbEntity = getMediator().getCurrentDbEntity();
+        DbEntity dbEntity = getProjectController().getCurrentDbEntity();
         if (dbEntity instanceof DerivedDbEntity) {
             if (((DerivedDbEntity) dbEntity).getParentEntity() == null) {
                 return;
@@ -169,7 +171,7 @@ public class CreateAttributeAction extends CayenneAction {
             (DbAttribute) NamedObjectFactory.createObject(attrClass, dbEntity);
         dbEntity.addAttribute(attr);
 
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         mediator.fireDbAttributeEvent(
             new AttributeEvent(this, attr, dbEntity, AttributeEvent.ADD));
         mediator.fireDbAttributeDisplayEvent(

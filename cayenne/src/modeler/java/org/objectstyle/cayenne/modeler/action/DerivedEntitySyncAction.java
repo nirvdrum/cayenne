@@ -59,6 +59,8 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -75,25 +77,25 @@ public class DerivedEntitySyncAction extends CayenneAction {
      * Constructor for DerivedEntitySyncAction.
      * @param name
      */
-    public DerivedEntitySyncAction() {
-        super(getActionName());
+    public DerivedEntitySyncAction(Application application) {
+        super(getActionName(), application);
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
-        DerivedDbEntity ent = (DerivedDbEntity) getMediator().getCurrentDbEntity();
+        DerivedDbEntity ent = (DerivedDbEntity) getProjectController().getCurrentDbEntity();
 
         if (ent != null && ent.getParentEntity() != null) {
             ent.resetToParentView();
-            ProjectUtil.cleanObjMappings(getMediator().getCurrentDataMap());
+            ProjectUtil.cleanObjMappings(getProjectController().getCurrentDataMap());
 
             // fire a chain of "remove/add" events for entity
             // this seems to be the only way to refresh the view
-            getMediator().fireObjEntityEvent(
+            getProjectController().fireObjEntityEvent(
                 new EntityEvent(this, ent, EntityEvent.REMOVE));
-            getMediator().fireObjEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+            getProjectController().fireObjEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
         }
     }
 

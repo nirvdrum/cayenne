@@ -78,8 +78,8 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.swing.TextAreaAdapter;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
-import org.objectstyle.cayenne.modeler.util.TextAreaAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.util.Util;

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler;
 
+import java.awt.Component;
 import java.util.EventListener;
 import java.util.EventObject;
 
@@ -115,6 +116,7 @@ import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayListener;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.swing.CayenneController;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -126,7 +128,7 @@ import org.objectstyle.cayenne.query.Query;
  * the selection model (currentXYZ ivars), rather it should update internal model.
  * </p>
  */
-public class ProjectController extends Controller {
+public class ProjectController extends CayenneController {
 
     private static Logger logObj = Logger.getLogger(ProjectController.class);
 
@@ -153,7 +155,12 @@ public class ProjectController extends Controller {
         this.listenerList = new EventListenerList();
     }
 
-    public void projectOpened(CayenneModelerFrame frame) {
+    public Component getView() {
+        return parent.getView();
+    }
+
+    public void projectOpened() {
+        CayenneModelerFrame frame = (CayenneModelerFrame) getView();
         addDataNodeDisplayListener(frame);
         addDataMapDisplayListener(frame);
         addObjEntityDisplayListener(frame);

@@ -109,18 +109,8 @@ public final class ModelerUtil {
     }
 
     /**
-     * Builds a consistent title that starts with the application name.
-     */
-    public static String buildTitle(String title) {
-        return (title != null)
-            ? ModelerConstants.TITLE + " - " + title
-            : ModelerConstants.TITLE;
-    }
-    
-
-    /**
-     * Returns an icon, building it from an image file located 
-     * at the shared resources folder for the modeler.
+     * Returns an icon, building it from an image file located at the shared resources
+     * folder for the modeler.
      */
     public static ImageIcon buildIcon(String path) {
         ClassLoader cl = ModelerUtil.class.getClassLoader();
@@ -128,14 +118,12 @@ public final class ModelerUtil {
         return new ImageIcon(url);
     }
 
-
-    /** 
-     * Returns array of db attribute names for DbEntity mapped to 
-     * current ObjEntity. 
+    /**
+     * Returns array of db attribute names for DbEntity mapped to current ObjEntity.
      */
     public static Collection getDbAttributeNames(
-        ProjectController mediator,
-        DbEntity entity) {
+            ProjectController mediator,
+            DbEntity entity) {
 
         Set keys = entity.getAttributeMap().keySet();
         List list = new ArrayList(keys.size());
@@ -159,7 +147,7 @@ public final class ModelerUtil {
         Collection nodes = domain.getDataNodes();
 
         // go via an iterator in an indexed loop, since
-        // we already obtained the size 
+        // we already obtained the size
         // (and index is required to initialize array)
         Iterator nodesIt = nodes.iterator();
         while (nodesIt.hasNext()) {

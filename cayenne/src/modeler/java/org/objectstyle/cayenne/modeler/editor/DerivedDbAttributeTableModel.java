@@ -219,7 +219,7 @@ public class DerivedDbAttributeTableModel extends DbAttributeTableModel {
 	
 	
 	/**
-	 * @see org.objectstyle.cayenne.modeler.util.CayenneTableModel#getElementsClass()
+	 * @see org.objectstyle.cayenne.modeler.swing.CayenneTableModel#getElementsClass()
 	 */
 	public Class getElementsClass() {
 		return DerivedDbAttribute.class;

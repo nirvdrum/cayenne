@@ -14,6 +14,7 @@ import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.modeler.util.FileFilters;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.ResourceLocator;
@@ -32,8 +33,8 @@ public class ImportDataMapAction extends CayenneAction {
         return "Import DataMap";
     }
 
-    public ImportDataMapAction() {
-        super(getActionName());
+    public ImportDataMapAction(Application application) {
+        super(getActionName(), application);
     }
 
     public void performAction(ActionEvent e) {
@@ -60,7 +61,7 @@ public class ImportDataMapAction extends CayenneAction {
             };
 
             DataMap newMap = mapLoader.loadDataMap(dataMapFile.getAbsolutePath());
-            DataDomain domain = getMediator().getCurrentDataDomain();
+            DataDomain domain = getProjectController().getCurrentDataDomain();
 
             if (newMap.getName() != null) {
                 newMap.setName(
@@ -73,7 +74,7 @@ public class ImportDataMapAction extends CayenneAction {
                 newMap.setName(NamedObjectFactory.createName(DataMap.class, domain));
             }
 
-            getMediator().addDataMap(this, newMap);
+            getProjectController().addDataMap(this, newMap);
         }
         catch (DataMapException ex) {
             logObj.info("Error importing DataMap.", ex);

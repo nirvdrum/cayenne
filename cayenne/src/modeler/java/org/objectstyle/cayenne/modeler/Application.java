@@ -62,11 +62,12 @@ import java.io.File;
 
 import javax.swing.ActionMap;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JRootPane;
 
 import org.objectstyle.cayenne.modeler.action.AboutAction;
-import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.action.ConfigureClasspathAction;
+import org.objectstyle.cayenne.modeler.action.ConfigurePreferencesAction;
 import org.objectstyle.cayenne.modeler.action.CreateAttributeAction;
 import org.objectstyle.cayenne.modeler.action.CreateDataMapAction;
 import org.objectstyle.cayenne.modeler.action.CreateDbEntityAction;
@@ -93,7 +94,14 @@ import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
-import org.objectstyle.cayenne.modeler.util.CayenneDialog;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
+import org.objectstyle.cayenne.modeler.swing.CayenneDialog;
+import org.objectstyle.cayenne.pref.Domain;
+import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceEditor;
+import org.objectstyle.cayenne.pref.HSQLEmbeddedPreferenceService;
+import org.objectstyle.cayenne.pref.PreferenceEditor;
+import org.objectstyle.cayenne.pref.PreferenceService;
+import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
 import org.scopemvc.controller.basic.ViewContext;
 import org.scopemvc.controller.swing.SwingContext;
@@ -103,21 +111,35 @@ import org.scopemvc.view.swing.SwingView;
 
 /**
  * A main modeler application class that provides a number of services to the Modeler
- * components.
+ * components. Configuration properties:
+ * <ul>
+ * <li>cayenne.modeler.application.name - name of the application, 'CayenneModeler' is
+ * default. Used to locate prerferences domain among other things.</li>
+ * <li>cayenne.modeler.pref.db - a full path to the preferences HSQL database. Default is
+ * "$HOME/.cayennne/pref/db".</li>
+ * </ul>
  * 
  * @author Andrei Adamchik
  */
 public class Application {
 
+    public static final String APPLICATION_NAME_PROPERTY = "cayenne.modeler.application.name";
+    public static final String PREFERENCE_DB_PROPERTY = "cayenne.modeler.pref.db";
+
+    public static final String DEFAULT_APPLICATION_NAME = "CayenneModeler";
+
     // TODO: implement cleaner IoC approach to avoid using this singleton...
     protected static Application instance;
 
+    protected HSQLEmbeddedPreferenceService preferenceService;
     protected CayenneModelerController frameController;
     protected ActionMap actionMap;
     protected File initialProject;
+    protected String name;
+    protected String preferencesDB;
 
     public static CayenneModelerFrame getFrame() {
-        return getInstance().getFrameController().getFrame();
+        return (CayenneModelerFrame) getInstance().getFrameController().getView();
     }
 
     public static Project getProject() {
@@ -128,12 +150,21 @@ public class Application {
         return instance;
     }
 
-    public Application() {
-        this(null);
+    public Application(File initialProject) {
+        this.initialProject = initialProject;
+
+        // configure startup settings
+        String configuredName = System.getProperty(APPLICATION_NAME_PROPERTY);
+        this.name = (configuredName != null) ? configuredName : DEFAULT_APPLICATION_NAME;
+
+        String configuredPrefsDB = System.getProperty(PREFERENCE_DB_PROPERTY);
+        this.preferencesDB = (configuredPrefsDB != null) ? configuredPrefsDB : new File(
+                CayenneUserDir.getInstance().resolveFile("prefs"),
+                "db").getAbsolutePath();
     }
 
-    public Application(File projectFile) {
-        this.initialProject = projectFile;
+    public String getName() {
+        return name;
     }
 
     /**
@@ -143,129 +174,143 @@ public class Application {
         return (CayenneAction) actionMap.get(key);
     }
 
+    /**
+     * Returns Application ActionMap.
+     */
     public ActionMap getActionMap() {
         return actionMap;
     }
 
+    /**
+     * Returns controller for the main frame.
+     */
     public CayenneModelerController getFrameController() {
         return frameController;
     }
 
+    /**
+     * Starts the application.
+     */
     public void startup() {
         // init subsystems
 
-        // actions
+        // ...preferences
+        HSQLEmbeddedPreferenceService service = new HSQLEmbeddedPreferenceService(
+                preferencesDB,
+                "pref",
+                getName());
+        service.stopOnShutdown();
+        this.preferenceService = service;
+        this.preferenceService.startService();
+
+        // ...actions
         initActions();
 
-        // setup Scope.. TODO: this will go away if switch away from Scope
+        // ...Scope
+
+        // TODO: this will go away if switch away from Scope
         // force Scope to use CayenneModeler properties
         UIStrings.setPropertiesName(ModelerConstants.DEFAULT_MESSAGE_BUNDLE);
         ViewContext.clearThreadContext();
 
-        // start main frame
+        // ...start main frame
         this.frameController = new CayenneModelerController(this, initialProject);
 
-        // update scope to work nicely with main frame
+        // update Scope to work nicely with main frame
         ViewContext.setGlobalContext(new ModelerContext(frameController.getFrame()));
 
         frameController.startupAction();
+    }
+
+    /**
+     * Returns application preferences editor. A new editor instance is created every
+     * time.
+     */
+    public PreferenceEditor getPreferenceEditor() {
+        HSQLEmbeddedPreferenceEditor editor = new HSQLEmbeddedPreferenceEditor(
+                preferenceService);
+        editor.setDelegate(PreferencesDelegate.sharedInstance);
+        return editor;
+    }
+
+    /**
+     * Returns Application preferences service.
+     */
+    public PreferenceService getPreferenceService() {
+        return preferenceService;
+    }
+
+    /**
+     * Returns top preferences Domain for the application.
+     */
+    public Domain getApplicationPreferences() {
+        return getPreferenceService().getDomain(getName(), true);
     }
 
     protected void initActions() {
         // build action map
         actionMap = new ActionMap();
 
-        CayenneAction closeProjectAction = new ProjectAction();
-        actionMap.put(closeProjectAction.getKey(), closeProjectAction);
-
-        CayenneAction newProjectAction = new NewProjectAction();
-        newProjectAction.setAlwaysOn(true);
-        actionMap.put(newProjectAction.getKey(), newProjectAction);
-
-        CayenneAction openProjectAction = new OpenProjectAction();
-        openProjectAction.setAlwaysOn(true);
-        actionMap.put(openProjectAction.getKey(), openProjectAction);
-
-        CayenneAction importMapAction = new ImportDataMapAction();
-        actionMap.put(importMapAction.getKey(), importMapAction);
-
-        CayenneAction saveAction = new SaveAction();
-        actionMap.put(saveAction.getKey(), saveAction);
-
-        CayenneAction saveAsAction = new SaveAsAction();
-        actionMap.put(saveAsAction.getKey(), saveAsAction);
-
-        CayenneAction revertAction = new RevertAction();
-        actionMap.put(revertAction.getKey(), revertAction);
-
-        CayenneAction validateAction = new ValidateAction();
-        actionMap.put(validateAction.getKey(), validateAction);
-
-        CayenneAction removeAction = new RemoveAction();
-        actionMap.put(removeAction.getKey(), removeAction);
-
-        CayenneAction createDomainAction = new CreateDomainAction();
-        actionMap.put(createDomainAction.getKey(), createDomainAction);
-
-        CayenneAction createNodeAction = new CreateNodeAction();
-        actionMap.put(createNodeAction.getKey(), createNodeAction);
-
-        CayenneAction createMapAction = new CreateDataMapAction();
-        actionMap.put(createMapAction.getKey(), createMapAction);
-
-        CayenneAction genClassesAction = new GenerateClassesAction();
-        actionMap.put(genClassesAction.getKey(), genClassesAction);
-
-        CayenneAction createOEAction = new CreateObjEntityAction();
-        actionMap.put(createOEAction.getKey(), createOEAction);
-
-        CayenneAction createDEAction = new CreateDbEntityAction();
-        actionMap.put(createDEAction.getKey(), createDEAction);
-
-        CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
-        actionMap.put(createDDEAction.getKey(), createDDEAction);
-
-        CayenneAction createSPAction = new CreateProcedureAction();
-        actionMap.put(createSPAction.getKey(), createSPAction);
-
-        CayenneAction createQueryAction = new CreateQueryAction();
-        actionMap.put(createQueryAction.getKey(), createQueryAction);
-
-        CayenneAction createAttrAction = new CreateAttributeAction();
-        actionMap.put(createAttrAction.getKey(), createAttrAction);
-
-        CayenneAction createRelAction = new CreateRelationshipAction();
-        actionMap.put(createRelAction.getKey(), createRelAction);
-
-        CayenneAction entSyncAction = new ObjEntitySyncAction();
-        actionMap.put(entSyncAction.getKey(), entSyncAction);
-
-        CayenneAction derivedResetAction = new DerivedEntitySyncAction();
-        actionMap.put(derivedResetAction.getKey(), derivedResetAction);
-
-        CayenneAction importDbAction = new ImportDbAction();
-        actionMap.put(importDbAction.getKey(), importDbAction);
-
-        CayenneAction importEOModelAction = new ImportEOModelAction();
-        actionMap.put(importEOModelAction.getKey(), importEOModelAction);
-
-        CayenneAction genDbAction = new GenerateDbAction();
-        actionMap.put(genDbAction.getKey(), genDbAction);
-
-        CayenneAction aboutAction = new AboutAction();
-        aboutAction.setAlwaysOn(true);
-        actionMap.put(aboutAction.getKey(), aboutAction);
-
-        CayenneAction configClasspath = new ConfigureClasspathAction();
-        configClasspath.setAlwaysOn(true);
-        actionMap.put(configClasspath.getKey(), configClasspath);
-
-        CayenneAction exitAction = new ExitAction();
-        exitAction.setAlwaysOn(true);
-        actionMap.put(exitAction.getKey(), exitAction);
+        registerAction(new ProjectAction(this));
+        registerAction(new NewProjectAction(this)).setAlwaysOn(true);
+        registerAction(new OpenProjectAction(this)).setAlwaysOn(true);
+        registerAction(new ImportDataMapAction(this));
+        registerAction(new SaveAction(this));
+        registerAction(new SaveAsAction(this));
+        registerAction(new RevertAction(this));
+        registerAction(new ValidateAction(this));
+        registerAction(new RemoveAction(this));
+        registerAction(new CreateDomainAction(this));
+        registerAction(new CreateNodeAction(this));
+        registerAction(new CreateDataMapAction(this));
+        registerAction(new GenerateClassesAction(this));
+        registerAction(new CreateObjEntityAction(this));
+        registerAction(new CreateDbEntityAction(this));
+        registerAction(new CreateDerivedDbEntityAction(this));
+        registerAction(new CreateProcedureAction(this));
+        registerAction(new CreateQueryAction(this));
+        registerAction(new CreateAttributeAction(this));
+        registerAction(new CreateRelationshipAction(this));
+        registerAction(new ObjEntitySyncAction(this));
+        registerAction(new DerivedEntitySyncAction(this));
+        registerAction(new ImportDbAction(this));
+        registerAction(new ImportEOModelAction(this));
+        registerAction(new GenerateDbAction(this));
+        registerAction(new AboutAction(this)).setAlwaysOn(true);
+        registerAction(new ConfigureClasspathAction(this)).setAlwaysOn(true);
+        registerAction(new ConfigurePreferencesAction(this)).setAlwaysOn(true);
+        registerAction(new ExitAction(this)).setAlwaysOn(true);
     }
 
-    class ModelerContext extends SwingContext {
+    private CayenneAction registerAction(CayenneAction action) {
+        actionMap.put(action.getKey(), action);
+        return action;
+    }
+
+    static final class PreferencesDelegate implements
+            HSQLEmbeddedPreferenceEditor.Delegate {
+
+        static final String message = "Preferences Database is locked by another application. "
+                + "Do you want to remove the lock?";
+        static final String failureMessage = "Failed to remove database lock. "
+                + "Preferences will we saved for this session only.";
+
+        static final HSQLEmbeddedPreferenceEditor.Delegate sharedInstance = new PreferencesDelegate();
+
+        public boolean deleteMasterLock(File lock) {
+            int result = JOptionPane.showConfirmDialog(null, message);
+            if (result == JOptionPane.YES_OPTION || result == JOptionPane.OK_OPTION) {
+                if (!lock.delete()) {
+                    JOptionPane.showMessageDialog(null, failureMessage);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    final class ModelerContext extends SwingContext {
 
         JFrame frame;
 

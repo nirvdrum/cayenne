@@ -53,71 +53,29 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler.action;
 
-import java.awt.Color;
+import java.awt.event.ActionEvent;
 
-import javax.swing.InputVerifier;
-import javax.swing.JComponent;
-import javax.swing.text.JTextComponent;
-
-import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
-import org.objectstyle.cayenne.validation.ValidationException;
+import org.objectstyle.cayenne.modeler.Application;
+import org.objectstyle.cayenne.modeler.prefeditor.PreferenceDialog;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 
 /**
- * A validating adapter for JTextField. Override {@link #initModel(String)}to initialize
- * model on text change.
- * 
  * @author Andrei Adamchik
  */
-public abstract class TextComponentAdapter extends InputVerifier {
+public class ConfigurePreferencesAction extends CayenneAction {
 
-    protected Color defaultBGColor;
-    protected Color errorColor;
-    protected JTextComponent textComponent;
-    protected String defaultToolTip;
-
-    protected TextComponentAdapter(JTextComponent textComponent) {
-        this.errorColor = ValidatorDialog.WARNING_COLOR;
-        this.defaultBGColor = textComponent.getBackground();
-        this.defaultToolTip = textComponent.getToolTipText();
-        this.textComponent = textComponent;
-
-        textComponent.setInputVerifier(this);
+    public static String getActionName() {
+        return "Preferences";
     }
 
-    public JTextComponent getTextComponent() {
-        return textComponent;
+    public ConfigurePreferencesAction(Application application) {
+        super(getActionName(), application);
     }
 
-    /**
-     * Sets the text of the underlying text field.
-     */
-    public void setText(String text) {
-        clear();
-        textComponent.setText(text);
+    public void performAction(ActionEvent e) {
+        new PreferenceDialog(getApplication().getFrameController()).startupAction();
     }
-
-    public boolean verify(JComponent c) {
-        try {
-            initModel(textComponent.getText());
-            clear();
-        }
-        catch (ValidationException vex) {
-
-            textComponent.setBackground(errorColor);
-            textComponent.setToolTipText(vex.getUnlabeledMessage());
-        }
-
-        // release focus after coloring the field...
-        return true;
-    }
-
-    protected void clear() {
-        textComponent.setBackground(defaultBGColor);
-        textComponent.setToolTipText(defaultToolTip);
-    }
-
-    protected abstract void initModel(String text) throws ValidationException;
 
 }

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -72,8 +73,8 @@ public class ExitAction extends ProjectAction {
     /**
      * Constructor for ExitAction.
      */
-    public ExitAction() {
-        super(getActionName());
+    public ExitAction(Application application) {
+        super(getActionName(), application);
     }
 
     public void performAction(ActionEvent e) {

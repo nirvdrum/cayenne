@@ -60,19 +60,18 @@ import java.awt.Component;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import org.objectstyle.cayenne.modeler.util.ModelerUtil;
-
 /**
  * @author Andrei Adamchik
  */
 public class UnsavedChangesDialog {
-	
+
     private static final String SAVE_AND_CLOSE = "Save Changes";
     private static final String CLOSE_WITHOUT_SAVE = "Ignore Changes";
     private static final String CANCEL = "Cancel";
-    
-    private static final String[] OPTIONS =
-        new String[] { SAVE_AND_CLOSE, CLOSE_WITHOUT_SAVE, CANCEL };
+
+    private static final String[] OPTIONS = new String[] {
+            SAVE_AND_CLOSE, CLOSE_WITHOUT_SAVE, CANCEL
+    };
 
     protected Component parent;
     protected String result = CANCEL;
@@ -82,26 +81,25 @@ public class UnsavedChangesDialog {
     }
 
     public void show() {
-        JOptionPane pane =
-            new JOptionPane(
+        JOptionPane pane = new JOptionPane(
                 "You have unsaved changes. Do you want to save them?",
                 JOptionPane.QUESTION_MESSAGE);
         pane.setOptions(OPTIONS);
 
-        JDialog dialog = pane.createDialog(parent, ModelerUtil.buildTitle("Unsaved Changes"));
+        JDialog dialog = pane.createDialog(parent, "Unsaved Changes");
         dialog.show();
 
         Object selectedValue = pane.getValue();
         // need to do an if..else chain, since
         // sometimes values are unexpected
-        if(SAVE_AND_CLOSE.equals(selectedValue)) {
-        	result = SAVE_AND_CLOSE;
+        if (SAVE_AND_CLOSE.equals(selectedValue)) {
+            result = SAVE_AND_CLOSE;
         }
-        else if(CLOSE_WITHOUT_SAVE.equals(selectedValue)){
-        	result = CLOSE_WITHOUT_SAVE;
+        else if (CLOSE_WITHOUT_SAVE.equals(selectedValue)) {
+            result = CLOSE_WITHOUT_SAVE;
         }
         else {
-        	result = CANCEL;
+            result = CANCEL;
         }
     }
 

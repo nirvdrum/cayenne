@@ -60,6 +60,7 @@ import javax.swing.Action;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
@@ -74,7 +75,8 @@ public class CreateDerivedDbEntityAction extends CreateDbEntityAction {
 	/**
 	 * Constructor for CreateDerivedDbEntityAction.
 	 */
-	public CreateDerivedDbEntityAction() {
+	public CreateDerivedDbEntityAction(Application application) {
+	    super(application);
 		super.setName(getActionName());
 		super.putValue(Action.DEFAULT, getActionName());
 	}

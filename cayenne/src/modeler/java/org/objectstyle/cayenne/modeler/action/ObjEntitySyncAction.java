@@ -60,7 +60,9 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 
@@ -76,19 +78,19 @@ public class ObjEntitySyncAction extends CayenneAction {
 		return "Sync ObjEntity with DbEntity";
 	}
 
-	public ObjEntitySyncAction() {
-		super(getActionName());
+	public ObjEntitySyncAction(Application application) {
+		super(getActionName(), application);
 	}
 
 	/**
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+	 * @see org.objectstyle.cayenne.modeler.swing.CayenneAction#performAction(ActionEvent)
 	 */
 	public void performAction(ActionEvent e) {
 		synchObjEntity();
 	}
 
 	protected void synchObjEntity() {
-		ProjectController mediator = getMediator();
+		ProjectController mediator = getProjectController();
 		DataMap map = mediator.getCurrentDataMap();
 		ObjEntity ent = mediator.getCurrentObjEntity();
 

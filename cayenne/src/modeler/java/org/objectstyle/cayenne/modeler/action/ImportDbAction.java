@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.dialog.db.DbLoaderHelper;
+import org.objectstyle.cayenne.modeler.swing.CayenneAction;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -91,14 +92,14 @@ public class ImportDbAction extends CayenneAction {
         return "Reengineer Database Schema";
     }
 
-    public ImportDbAction() {
-        super(getActionName());
+    public ImportDbAction(Application application) {
+        super(getActionName(), application);
     }
 
     public void performAction(ActionEvent event) {
         // connect to DB and delegate processing to DbLoaderController....
 
-        ProjectController mediator = getMediator();
+        ProjectController mediator = getProjectController();
         DataNode currentNode = mediator.getCurrentDataNode();
 
         // try a node that belongs to the current DataMap ...

@@ -83,10 +83,10 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
-import org.objectstyle.cayenne.modeler.util.CellRenderers;
+import org.objectstyle.cayenne.modeler.swing.CayenneWidgetFactory;
+import org.objectstyle.cayenne.modeler.swing.CellRenderers;
+import org.objectstyle.cayenne.modeler.swing.TextFieldAdapter;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
-import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 

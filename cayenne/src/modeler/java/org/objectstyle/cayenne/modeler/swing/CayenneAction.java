@@ -54,7 +54,7 @@
  * <http://objectstyle.org/>.
  */
 
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.swing;
 
 import java.awt.event.ActionEvent;
 
@@ -68,8 +68,8 @@ import javax.swing.KeyStroke;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
-import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -81,13 +81,16 @@ import org.objectstyle.cayenne.project.ProjectPath;
 public abstract class CayenneAction extends AbstractAction {
 
     protected boolean alwaysOn;
+    protected Application application;
 
     /**
      * Creates a named CayenneAction.
      */
-    public CayenneAction(String name) {
+    public CayenneAction(String name, Application application) {
         super(name);
         super.putValue(Action.DEFAULT, name);
+
+        this.application = application;
 
         Icon icon = createIcon();
         if (icon != null) {
@@ -100,6 +103,14 @@ public abstract class CayenneAction extends AbstractAction {
         }
 
         setEnabled(false);
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    protected Project getCurrentProject() {
+        return application.getFrameController().getCurrentProject();
     }
 
     /**
@@ -160,10 +171,10 @@ public abstract class CayenneAction extends AbstractAction {
     }
 
     /**
-     * Returns shared CayenneModeler mediator.
+     * Returns current project controller.
      */
-    public ProjectController getMediator() {
-        return Application.getInstance().getFrameController().getProjectController();
+    public ProjectController getProjectController() {
+        return application.getFrameController().getProjectController();
     }
 
     /**
@@ -221,6 +232,55 @@ public abstract class CayenneAction extends AbstractAction {
     public void setEnabled(boolean b) {
         if (!isAlwaysOn()) {
             super.setEnabled(b);
+        }
+    }
+
+    /**
+     * On changes in action text, will update toolbar tip instead.
+     */
+    final class CayenneToolbarButton extends JButton {
+
+        protected boolean showingText;
+
+        /**
+         * Constructor for CayenneMenuItem.
+         */
+        public CayenneToolbarButton(Action a) {
+            super();
+            setAction(a);
+        }
+
+        /**
+         * Returns the showingText.
+         */
+        public boolean isShowingText() {
+            return showingText;
+        }
+
+        /**
+         * Sets the showingText.
+         */
+        public void setShowingText(boolean showingText) {
+            this.showingText = showingText;
+        }
+
+        /**
+         * @see javax.swing.AbstractButton#getText()
+         */
+        public String getText() {
+            return (showingText) ? super.getText() : null;
+        }
+
+        /**
+         * @see javax.swing.AbstractButton#setText(String)
+         */
+        public void setText(String text) {
+            if (showingText) {
+                super.setText(text);
+            }
+            else {
+                super.setToolTipText(text);
+            }
         }
     }
 }

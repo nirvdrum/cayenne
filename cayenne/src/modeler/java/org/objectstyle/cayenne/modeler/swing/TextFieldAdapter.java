@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,82 +53,39 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
+package org.objectstyle.cayenne.modeler.swing;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.SwingConstants;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-import org.scopemvc.view.awt.AWTUtilities;
-
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
+import javax.swing.JTextField;
 
 /**
- * A dialog rendering a progress bar. It is normally controlled by a subclass of
- * LongRunningTask.
- * 
  * @author Andrei Adamchik
  */
-public class ProgressDialog extends JDialog {
+public abstract class TextFieldAdapter extends TextComponentAdapter {
 
-    protected JProgressBar progressBar;
-    protected JLabel statusLabel;
-    protected JButton cancelButton;
-
-    public ProgressDialog(JFrame parent, String title, String message) {
-        super(parent, title);
-        init(message);
+    public TextFieldAdapter() {
+        this(new JTextField());
     }
 
-    private void init(String message) {
-        progressBar = new JProgressBar();
-        statusLabel = new JLabel(message, SwingConstants.LEFT);
-        JLabel messageLabel = new JLabel(message, SwingConstants.LEFT);
-        cancelButton = new JButton("Cancel");
-
-        // assemble
-        CellConstraints cc = new CellConstraints();
-        FormLayout layout = new FormLayout("fill:max(250dlu;pref)", "p, 3dlu, p, 3dlu, p");
-        PanelBuilder builder = new PanelBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.add(messageLabel, cc.xy(1, 1));
-        builder.add(progressBar, cc.xy(1, 3));
-        builder.add(statusLabel, cc.xy(1, 5));
-
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttons.add(cancelButton);
-
-        Container root = getContentPane();
-        root.setLayout(new BorderLayout(5, 5));
-
-        root.add(builder.getPanel(), BorderLayout.CENTER);
-        root.add(buttons, BorderLayout.SOUTH);
-
-        setResizable(false);
-        pack();
-        AWTUtilities.centreOnWindow(getOwner(), this);
+    public TextFieldAdapter(int columns) {
+        this(new JTextField(columns));
     }
 
-    public JButton getCancelButton() {
-        return cancelButton;
+    public TextFieldAdapter(JTextField textField) {
+        super(textField);
+
+        getTextField().addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                verify(textComponent);
+            }
+        });
     }
 
-    public JLabel getStatusLabel() {
-        return statusLabel;
-    }
-
-    public JProgressBar getProgressBar() {
-        return progressBar;
+    public JTextField getTextField() {
+        return (JTextField) super.getTextComponent();
     }
 }
