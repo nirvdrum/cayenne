@@ -57,8 +57,9 @@
 package org.objectstyle.cayenne.gen;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,14 +67,15 @@ import java.util.List;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
-/** 
- * Extends MapClassGenerator to allow target-specific filesystem locations 
- * where the files should go. Adds "execute" method that performs class 
- * generation based on the internal state of this object.
+/**
+ * Extends MapClassGenerator to allow target-specific filesystem locations where the files
+ * should go. Adds "execute" method that performs class generation based on the internal
+ * state of this object.
  * 
  * @author Andrei Adamchik
  */
 public class DefaultClassGenerator extends MapClassGenerator {
+
     protected File destDir;
     protected boolean overwrite;
     protected boolean usePkgPath = true;
@@ -82,20 +84,27 @@ public class DefaultClassGenerator extends MapClassGenerator {
     protected File superTemplate;
     protected long timestamp = System.currentTimeMillis();
 
-    public DefaultClassGenerator() {}
+    /**
+     * Stores the encoding of the generated file.
+     * 
+     * @since 1.2
+     */
+    protected String encoding;
 
-    /** 
-     * Creates class generator and initializes it with DataMap.
-     * This will ensure generation of classes for all ObjEntities
-     * in the DataMap.
+    public DefaultClassGenerator() {
+    }
+
+    /**
+     * Creates class generator and initializes it with DataMap. This will ensure
+     * generation of classes for all ObjEntities in the DataMap.
      */
     public DefaultClassGenerator(DataMap map) {
         this(new ArrayList(map.getObjEntities()));
     }
 
-    /** 
-     * Creates class generator and initializes it with the list of ObjEntities
-     * that will be used in class generation.
+    /**
+     * Creates class generator and initializes it with the list of ObjEntities that will
+     * be used in class generation.
      */
     public DefaultClassGenerator(List objEntities) {
         super(objEntities);
@@ -109,14 +118,15 @@ public class DefaultClassGenerator extends MapClassGenerator {
             String t = getTemplateForPairs();
             String st = getSupertemplateForPairs();
             generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
-        } else {
+        }
+        else {
             generateSingleClasses(getTemplateForSingles());
         }
     }
 
-    /** 
-     * Validates the state of this class generator. Throws exception if 
-     * it is in inconsistent state. Called internally from "execute".
+    /**
+     * Validates the state of this class generator. Throws exception if it is in
+     * inconsistent state. Called internally from "execute".
      */
     public void validateAttributes() throws Exception {
         if (destDir == null) {
@@ -186,31 +196,46 @@ public class DefaultClassGenerator extends MapClassGenerator {
         out.close();
     }
 
+    /**
+     * Opens a Writer to write generated output. Writer encoding is determined from the
+     * value of the "encoding" property.
+     */
     public Writer openWriter(ObjEntity entity, String pkgName, String className)
-        throws Exception {
-        File outFile =
-            (className.startsWith(SUPERCLASS_PREFIX))
+            throws Exception {
+        File outFile = (className.startsWith(SUPERCLASS_PREFIX))
                 ? fileForSuperclass(pkgName, className)
                 : fileForClass(pkgName, className);
-        return (outFile != null) ? new FileWriter(outFile) : null;
+
+        if (outFile == null) {
+            return null;
+        }
+
+        // return writer with specified encoding
+        FileOutputStream out = new FileOutputStream(outFile);
+
+        return (getEncoding() != null)
+                ? new OutputStreamWriter(out, getEncoding())
+                : new OutputStreamWriter(out);
     }
 
     /**
-     * Returns a target file where a generated superclass must be saved. If null is returned,
-     * class shouldn't be generated.
+     * Returns a target file where a generated superclass must be saved. If null is
+     * returned, class shouldn't be generated.
      */
     protected File fileForSuperclass(String pkgName, String className) throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
 
-		// Ignore if the destination is newer than the map
-		// (internal timestamp), i.e. has been generated after the map was
-		// last saved AND the template is older than the destination file
-		if (dest.exists() && !isOld(dest)
-			&& (superTemplate == null || superTemplate.lastModified() < dest.lastModified())) {
-			return null;
-		}
-		
+        // Ignore if the destination is newer than the map
+        // (internal timestamp), i.e. has been generated after the map was
+        // last saved AND the template is older than the destination file
+        if (dest.exists()
+                && !isOld(dest)
+                && (superTemplate == null || superTemplate.lastModified() < dest
+                        .lastModified())) {
+            return null;
+        }
+
         return dest;
     }
 
@@ -237,7 +262,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
             // (internal timestamp), i.e. has been generated after the map was
             // last saved AND the template is older than the destination file
             if (!isOld(dest)
-                && (template == null || template.lastModified() < dest.lastModified())) {
+                    && (template == null || template.lastModified() < dest.lastModified())) {
                 return null;
             }
         }
@@ -245,18 +270,18 @@ public class DefaultClassGenerator extends MapClassGenerator {
         return dest;
     }
 
-    /** 
-     * Returns true if <code>file</code> parameter is older than internal 
-     * timestamp of this class generator.
+    /**
+     * Returns true if <code>file</code> parameter is older than internal timestamp of
+     * this class generator.
      */
     protected boolean isOld(File file) {
         return file.lastModified() <= getTimestamp();
     }
 
-    /** 
-     *  Returns a File object corresponding to a directory where files
-     *  that belong to <code>pkgName</code> package should reside. 
-     *  Creates any missing diectories below <code>dest</code>.
+    /**
+     * Returns a File object corresponding to a directory where files that belong to
+     * <code>pkgName</code> package should reside. Creates any missing diectories below
+     * <code>dest</code>.
      */
     protected File mkpath(File dest, String pkgName) throws Exception {
 
@@ -273,35 +298,32 @@ public class DefaultClassGenerator extends MapClassGenerator {
         return fullPath;
     }
 
-    /** 
-    *  Returns template file path for Java class 
-    *  when generating single classes. 
-    */
+    /**
+     * Returns template file path for Java class when generating single classes.
+     */
     protected String getTemplateForSingles() throws IOException {
         return (template != null) ? template.getPath() : defaultSingleClassTemplate();
     }
 
-    /** 
-     *  Returns template file path for Java subclass 
-     *  when generating class pairs. 
+    /**
+     * Returns template file path for Java subclass when generating class pairs.
      */
     protected String getTemplateForPairs() throws IOException {
         return (template != null) ? template.getPath() : defaultSubclassTemplate();
     }
 
-    /** 
-     *  Returns template file path for Java superclass 
-     *  when generating class pairs. 
+    /**
+     * Returns template file path for Java superclass when generating class pairs.
      */
     protected String getSupertemplateForPairs() throws IOException {
         return (superTemplate != null)
-            ? superTemplate.getPath()
-            : defaultSuperclassTemplate();
+                ? superTemplate.getPath()
+                : defaultSuperclassTemplate();
     }
 
     /**
-     * Returns internal timestamp of this generator used to make
-     * decisions about overwriting individual files. 
+     * Returns internal timestamp of this generator used to make decisions about
+     * overwriting individual files.
      */
     public long getTimestamp() {
         return timestamp;
@@ -309,5 +331,23 @@ public class DefaultClassGenerator extends MapClassGenerator {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+
+    /**
+     * Returns file encoding for the generated files.
+     * 
+     * @since 1.2
+     */
+    public String getEncoding() {
+        return encoding;
+    }
+
+    /**
+     * Sets file encoding. If set to null, default system encoding will be used.
+     * 
+     * @since 1.2
+     */
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
     }
 }
