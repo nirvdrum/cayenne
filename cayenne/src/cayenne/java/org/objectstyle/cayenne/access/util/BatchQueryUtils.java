@@ -267,13 +267,14 @@ public class BatchQueryUtils {
         DataObject o,
         DbRelationship masterDependentRel) {
 
-        boolean isMasterDbEntity = (masterDependentRel == null);
+        boolean isRootDbEntity = (masterDependentRel == null);
         DataContext context = o.getDataContext();
         DataRow committedSnapshot =
             context.getObjectStore().getSnapshot(o.getObjectId(), context);
         DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 
+        // no committed snapshot (why?) - just use values from current snapshot
         if (committedSnapshot == null || committedSnapshot.isEmpty()) {
             Iterator i = currentSnapshot.entrySet().iterator();
             while (i.hasNext()) {
@@ -281,10 +282,10 @@ public class BatchQueryUtils {
                 String dbAttrPath = (String) entry.getKey();
                 boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
                 Object newValue = entry.getValue();
-                if (isMasterDbEntity && !compoundDbAttr) {
+                if (isRootDbEntity && !compoundDbAttr) {
                     snapshot.put(dbAttrPath, newValue);
                 }
-                else if (!isMasterDbEntity && compoundDbAttr) {
+                else if (!isRootDbEntity && compoundDbAttr) {
                     Iterator pathIterator =
                         entity.getDbEntity().resolvePathComponents(dbAttrPath);
                     if (pathIterator.hasNext()
@@ -293,7 +294,7 @@ public class BatchQueryUtils {
                         snapshot.put(dbAttr.getName(), newValue);
                     }
                 }
-                else if (!isMasterDbEntity && !compoundDbAttr) {
+                else if (!isRootDbEntity && !compoundDbAttr) {
                     String pkAttrName =
                         getTargetDbAttributeName(dbAttrPath, masterDependentRel);
                     if (pkAttrName != null)
@@ -313,10 +314,10 @@ public class BatchQueryUtils {
             // only add attribute to the update clause if the value has changed
             Object oldValue = committedSnapshot.get(dbAttrPath);
             if (!Util.nullSafeEquals(oldValue, newValue)) {
-                if (isMasterDbEntity && !compoundDbAttr) {
+                if (isRootDbEntity && !compoundDbAttr) {
                     snapshot.put(dbAttrPath, newValue);
                 }
-                else if (!isMasterDbEntity && compoundDbAttr) {
+                else if (!isRootDbEntity && compoundDbAttr) {
                     Iterator pathIterator =
                         entity.getDbEntity().resolvePathComponents(dbAttrPath);
                     if (pathIterator.hasNext()
@@ -325,7 +326,7 @@ public class BatchQueryUtils {
                         snapshot.put(dbAttr.getName(), newValue);
                     }
                 }
-                else if (!isMasterDbEntity && !compoundDbAttr) {
+                else if (!isRootDbEntity && !compoundDbAttr) {
                     String pkAttrName =
                         getTargetDbAttributeName(dbAttrPath, masterDependentRel);
                     if (pkAttrName != null)
@@ -340,14 +341,16 @@ public class BatchQueryUtils {
         while (origit.hasNext()) {
             Map.Entry entry = (Map.Entry) origit.next();
             String dbAttrPath = (String) entry.getKey();
-            boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
-            Object oldValue = entry.getValue();
-            if (oldValue == null || currentSnapshot.containsKey(dbAttrPath))
+            if (entry.getValue() == null || currentSnapshot.containsKey(dbAttrPath)) {
                 continue;
-            if (isMasterDbEntity && !compoundDbAttr) {
+            }
+            
+            boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
+           
+            if (isRootDbEntity && !compoundDbAttr) {
                 snapshot.put(dbAttrPath, null);
             }
-            else if (!isMasterDbEntity && compoundDbAttr) {
+            else if (!isRootDbEntity && compoundDbAttr) {
                 Iterator pathIterator =
                     entity.getDbEntity().resolvePathComponents(dbAttrPath);
                 if (pathIterator.hasNext()
@@ -356,7 +359,7 @@ public class BatchQueryUtils {
                     snapshot.put(dbAttr.getName(), null);
                 }
             }
-            else if (!isMasterDbEntity && !compoundDbAttr) {
+            else if (!isRootDbEntity && !compoundDbAttr) {
                 String pkAttrName =
                     getTargetDbAttributeName(dbAttrPath, masterDependentRel);
                 if (pkAttrName != null)

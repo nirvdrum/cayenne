@@ -482,28 +482,28 @@ public class DataContext implements QueryEngine, Serializable {
 
         DataRow snapshot = new DataRow(10);
 
-        Map attrMap = entity.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
-            //processing compound attributes correctly
+        Iterator attributes = entity.getAttributeMap().entrySet().iterator();
+        while (attributes.hasNext()) {
+            Map.Entry entry = (Map.Entry) attributes.next();
+            String attrName = (String) entry.getKey();
+            ObjAttribute objAttr = (ObjAttribute) entry.getValue();
+
+            // processing compound attributes correctly
             snapshot.put(objAttr.getDbAttributePath(), anObject
                     .readPropertyDirectly(attrName));
         }
 
-        Map relMap = entity.getRelationshipMap();
-        Iterator itr = relMap.keySet().iterator();
-        while (itr.hasNext()) {
-            String relName = (String) itr.next();
-            ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+        Iterator relationships = entity.getRelationshipMap().entrySet().iterator();
+        while (relationships.hasNext()) {
+            Map.Entry entry = (Map.Entry) relationships.next();
+            ObjRelationship rel = (ObjRelationship) entry.getValue();
 
-            // to-many will be handled on the other side
+            // if target doesn't propagates its key value, skip it
             if (rel.isSourceIndependentFromTargetChange()) {
                 continue;
             }
 
-            Object targetObject = anObject.readPropertyDirectly(relName);
+            Object targetObject = anObject.readPropertyDirectly(rel.getName());
             if (targetObject == null) {
                 continue;
             }
@@ -532,8 +532,8 @@ public class DataContext implements QueryEngine, Serializable {
                 continue;
             }
 
-            // target is resolved regular to-one, so extract
-            // FK from PK of the target object
+            // target is resolved and we have an FK->PK to it, 
+            // so extract it from target...
             DataObject target = (DataObject) targetObject;
             Map idParts = target.getObjectId().getIdSnapshot();
 
@@ -553,15 +553,18 @@ public class DataContext implements QueryEngine, Serializable {
         // set above when db relationships where processed.
         Map thisIdParts = anObject.getObjectId().getIdSnapshot();
         if (thisIdParts != null) {
-            // put only thise that do not exist in the map
-            Iterator itm = thisIdParts.keySet().iterator();
-            while (itm.hasNext()) {
-                Object nextKey = itm.next();
+            
+            // put only those that do not exist in the map
+            Iterator idIterator = thisIdParts.entrySet().iterator();
+            while (idIterator.hasNext()) {
+                Map.Entry entry = (Map.Entry) idIterator.next();
+                Object nextKey = entry.getKey();
                 if (!snapshot.containsKey(nextKey)) {
-                    snapshot.put(nextKey, thisIdParts.get(nextKey));
+                    snapshot.put(nextKey, entry.getValue());
                 }
             }
         }
+        
         return snapshot;
     }
 

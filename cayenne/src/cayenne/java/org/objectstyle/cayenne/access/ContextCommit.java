@@ -364,9 +364,9 @@ class ContextCommit {
 
                 List qualifierAttributes = qualifierAttributes(entity, optimisticLocking);
 
-                boolean isMasterDbEntity = (entity.getDbEntity() == dbEntity);
+                boolean isRootDbEntity = entity.getDbEntity() == dbEntity;
 
-                DbRelationship masterDependentDbRel = (isMasterDbEntity)
+                DbRelationship masterDependentDbRel = (isRootDbEntity)
                         ? null
                         : findMasterToDependentDbRelationship(
                                 entity.getDbEntity(),
@@ -398,7 +398,7 @@ class ContextCommit {
                     // build qualifier snapshot
                     Map idSnapshot = o.getObjectId().getIdSnapshot();
 
-                    if (!isMasterDbEntity && masterDependentDbRel != null) {
+                    if (!isRootDbEntity && masterDependentDbRel != null) {
                         idSnapshot = masterDependentDbRel
                                 .targetPkSnapshotWithSrcSnapshot(idSnapshot);
                     }
@@ -443,7 +443,7 @@ class ContextCommit {
 
                     batch.add(qualifierSnapshot, snapshot);
 
-                    if (isMasterDbEntity) {
+                    if (isRootDbEntity) {
                         ObjectId updId = updatedId(
                                 o.getObjectId().getObjClass(),
                                 idSnapshot,
@@ -776,9 +776,12 @@ class ContextCommit {
             List dbEntities,
             Map objEntitiesByDbEntity,
             List objEntities) {
-        for (Iterator i = objEntities.iterator(); i.hasNext();) {
+        
+        Iterator i = objEntities.iterator();
+        while (i.hasNext()) {
             ObjEntity objEntity = (ObjEntity) i.next();
             DbEntity dbEntity = objEntity.getDbEntity();
+            
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
             if (objEntitiesForDbEntity == null) {
                 objEntitiesForDbEntity = new ArrayList(1);
