@@ -136,6 +136,7 @@ public class RandomDomainBuilder {
 
   private void generateSchema(File dir) throws CayenneException {
     if (schemaGenerated) throw new CayenneException("Schema already exists");
+    
     randomSchema.generate();
     List tables = randomSchema.getTables();
     Map sequencesByTable = randomSchema.getSequencesByTable();
@@ -210,6 +211,8 @@ public class RandomDomainBuilder {
       dropSchema();
       throw new CayenneException(ex);
     }
+    
+    domain.getPrimaryKeyHelper().reset();
   }
 
   private void dropSchema() throws CayenneException {

@@ -464,8 +464,7 @@ public class DataDomain implements QueryEngine {
 	 */
 	public synchronized PrimaryKeyHelper getPrimaryKeyHelper() {
 		// TODO instead of on the spot generation, we can
-		// use lazy initialization features of DefaultSorter once PrimaryKeyHelper
-		// is switched to use DefaultSorter
+		// use lazy initialization features similar to DefaultSorter
 		if(primaryKeyHelper == null) {
 			createKeyGenerator();
 		}
