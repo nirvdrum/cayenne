@@ -52,41 +52,72 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.util;
 
 import java.util.StringTokenizer;
 
-/** Utility class to convert from different naming styles to Java convention.
- *  For example names like "ABCD_EFG" can be converted to "abcdEfg" */
+/** 
+ * Utility class to convert from different naming styles to Java convention.
+ * For example names like "ABCD_EFG" can be converted to "abcdEfg".
+ * 
+ * @author Andrei Adamchik
+ */
 public class NameConverter {
 
-    /** Converts names like "ABCD_EFG_123" to java-style names like "abcdEfg123".
-     *  If <code>capitalize</code> is true, returned name is capitalized
-     *  (for instance if this is a class name). */
+    /** 
+     * Converts names like "ABCD_EFG_123" to Java-style names like "abcdEfg123".
+     * If <code>capitalize</code> is true, returned name is capitalized
+     * (for instance if this is a class name). 
+     */
     public static String undescoredToJava(String name, boolean capitalize) {
         StringTokenizer st = new StringTokenizer(name, "_");
         StringBuffer buf = new StringBuffer();
 
         boolean first = true;
-        while(st.hasMoreTokens()) {
-            String token = st.nextToken().toLowerCase();
-            if(first) {
-                first = false;
-                if(!capitalize) {
-                    buf.append(token);
-                    continue;
+        while (st.hasMoreTokens()) {
+            String token = st.nextToken();
+            
+            int len = token.length();
+            if (len == 0) {
+                continue;
+            }
+            
+            // sniff mixed case vs. single case styles
+            boolean hasLowerCase = false;
+            boolean hasUpperCase = false;
+            for(int i = 0; i < len && !(hasUpperCase && hasLowerCase); i++) {
+                if(Character.isUpperCase(token.charAt(i))) {
+                    hasUpperCase = true;
+                }
+                else if(Character.isLowerCase(token.charAt(i))) {
+                    hasLowerCase = true;
                 }
             }
             
-            int len = token.length();
-            if(len == 0)
-                continue;
+            // if mixed case, preserve it, if all upper, convert to lower
+            if(hasUpperCase && !hasLowerCase) {
+                token = token.toLowerCase();
+            }
             
-            buf.append(Character.toUpperCase(token.charAt(0)));
+            if (first) {
+                // apply explicit capitalization rules, if this is the first token
+                first = false;
+                if (capitalize) {
+                    buf.append(Character.toUpperCase(token.charAt(0)));
+                }
+                else {
+                    buf.append(Character.toLowerCase(token.charAt(0)));
+                }
+            }
+            else {
+                buf.append(Character.toUpperCase(token.charAt(0)));
+            }
             
-            if(len > 1)
+
+            if (len > 1) {
                 buf.append(token.substring(1, len));
+            }
         }
         return buf.toString();
     }

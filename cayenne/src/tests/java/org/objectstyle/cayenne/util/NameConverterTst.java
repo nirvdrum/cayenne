@@ -53,20 +53,44 @@ package org.objectstyle.cayenne.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import junit.framework.TestCase;
 
+public class NameConverterTst extends TestCase {
 
-public class NameConverterTst extends CayenneTestCase {
-
-    public void testUndescoredToJava1() throws java.lang.Exception {
+    public void testUndescoredToJava1() throws Exception {
         String expected = "ClassNameIdentifier";
-        assertEquals(expected, NameConverter.undescoredToJava("_CLASS_name_IdeNTIFIER_", true));
+        assertEquals(
+            expected,
+            NameConverter.undescoredToJava("_CLASS_NAME_IDENTIFIER_", true));
     }
 
-    public void testUndescoredToJava2() throws java.lang.Exception {
+    public void testUndescoredToJava2() throws Exception {
         String expected = "propNameIdentifier123";
-        assertEquals(expected, NameConverter.undescoredToJava("_prop_name_IdeNTIFIER_123", false));
+        assertEquals(
+            expected,
+            NameConverter.undescoredToJava("_prop_name_Identifier_123", false));
+    }
+
+    public void testUndescoredToJava3() throws Exception {
+        String expected = "lastName";
+        assertEquals(
+            expected,
+            NameConverter.undescoredToJava("lastName", false));
+    }
+
+    public void testUndescoredToJava4() throws Exception {
+        String expected = "lastName";
+        assertEquals(
+            expected,
+            NameConverter.undescoredToJava("LastName", false));
+    }
+
+    public void testUndescoredToJava5() throws Exception {
+        String expected = "LastName";
+        assertEquals(
+            expected,
+            NameConverter.undescoredToJava("LastName", true));
     }
 }

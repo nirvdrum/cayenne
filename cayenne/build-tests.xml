@@ -88,7 +88,7 @@
     <!-- Defines testing sequence                      -->
     <!-- ============================================= -->
     <target name="unit-test-run" depends="unit-test,unit-test-report-needed,unit-test-report">
-    	<fail message="Cayenne tests failed, see files in ${test.output} for details." if="test.cayenne.failure"/>
+    	<fail message="Cayenne tests failed, see files in ${test.output} for details." if="cayenne.test.failure"/>
     </target>
     
     <!-- ============================================= -->
