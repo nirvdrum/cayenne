@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.access.util;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -68,7 +67,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.SnapshotManager;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.PrefetchSelectQuery;
@@ -172,7 +170,8 @@ public class SelectObserver extends DefaultOperationObserver {
                 "Can't find results for query: " + rootQuery);
         }
 
-        List objects = convertToObjects(dataContext, rootQuery, dataRows);
+        ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(rootQuery);
+        List objects = dataContext.objectsFromDataRows(entity, dataRows, true);
 
         // handle prefetches for this query results
         Iterator queries = results.keySet().iterator();
@@ -185,8 +184,11 @@ public class SelectObserver extends DefaultOperationObserver {
                     "Can't find results for query: " + nextQuery);
             }
 
+            ObjEntity nextEntity =
+                dataContext.getEntityResolver().lookupObjEntity(nextQuery);
+
             List nextObjects =
-                convertToObjects(dataContext, nextQuery, nextDataRows);
+                dataContext.objectsFromDataRows(nextEntity, nextDataRows, true);
 
             // now deal with to-many prefetching
             if (!(nextQuery instanceof PrefetchSelectQuery)) {
@@ -214,56 +216,13 @@ public class SelectObserver extends DefaultOperationObserver {
         return objects;
     }
 
-    /**
-     * Converts a list of data rows to a list of DataObjects. 
-     */
-    protected List convertToObjects(
-        DataContext dataContext,
-        Query query,
-        List dataRows) {
-
-        if (dataRows == null && dataRows.size() == 0) {
-            return new ArrayList(1);
-        }
-
-        ObjEntity ent = dataContext.getEntityResolver().lookupObjEntity(query);
-
-        // do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
-        // we can't build a valid ObjectId
-        DbEntity dbEntity = ent.getDbEntity();
-        if (dbEntity == null) {
-            throw new CayenneRuntimeException(
-                "ObjEntity '" + ent.getName() + "' has no DbEntity.");
-        }
-
-        if (dbEntity.getPrimaryKey().size() == 0) {
-            throw new CayenneRuntimeException(
-                "Can't create ObjectId for '"
-                    + ent.getName()
-                    + "'. Reason: DbEntity '"
-                    + dbEntity.getName()
-                    + "' has no Primary Key defined.");
-        }
-
-        List results = new ArrayList(dataRows.size());
-        Iterator it = dataRows.iterator();
-        while (it.hasNext()) {
-            results.add(
-                dataContext.objectFromDataRow(ent, (Map) it.next(), true));
-        }
-
-        return results;
-    }
-
     /** 
-     * Overrides superclass implementation to rethrow an exception
-     *  immediately. 
-     */
+         * Overrides superclass implementation to rethrow an exception
+         *  immediately. 
+         */
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
-        throw new CayenneRuntimeException(
-            "Query exception.",
-            Util.unwindException(ex));
+        throw new CayenneRuntimeException("Query exception.", Util.unwindException(ex));
     }
 
     /** 
@@ -272,8 +231,6 @@ public class SelectObserver extends DefaultOperationObserver {
      */
     public void nextGlobalException(Exception ex) {
         super.nextGlobalException(ex);
-        throw new CayenneRuntimeException(
-            "Global exception.",
-            Util.unwindException(ex));
+        throw new CayenneRuntimeException("Global exception.", Util.unwindException(ex));
     }
 }

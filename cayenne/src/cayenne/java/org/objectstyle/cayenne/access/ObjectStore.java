@@ -127,7 +127,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * Evicts a collection of DataObjects from this ObjectStore. Changes objects
      * state to TRANSIENT.
      */
-    public void objectsUnregistered(Collection objects) {
+    public synchronized void objectsUnregistered(Collection objects) {
         if (objects.isEmpty()) {
             return;
         }
@@ -138,18 +138,46 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
             // remove object and snapshot (for now)
             removeObject(object.getObjectId());
-            
+
             object.setDataContext(null);
             object.setObjectId(null);
             object.setPersistenceState(PersistenceState.TRANSIENT);
         }
     }
 
-    public void objectsFetched(Collection objects) {
+    /**
+     * Updates underlying SnapshotCache. If <code>refresh</code> is true,
+     * all snapshots in <code>snapshots</code> will be loaded into SnapshotCache,
+     * regardless of the existing cache state. If <code>refresh</code> is false,
+     * only missing snapshots are loaded.
+     */
+    public synchronized void snapshotsUpdatedForObjects(
+        List objects,
+        List snapshots,
+        boolean refresh) {
+        	
+        // sanity check
+        if (objects.size() != snapshots.size()) {
+            throw new IllegalArgumentException(
+                "Counts of objects and corresponding snapshots do not match. "
+                    + "Objects count: "
+                    + objects.size()
+                    + ", snapshots count: "
+                    + snapshots.size());
+        }
 
+        int size = objects.size();
+        for (int i = 0; i < size; i++) {
+            DataObject object = (DataObject) objects.get(i);
+     
+            // add snapshots if refresh is forced, or if a snapshot is missing
+            if (refresh || getSnapshot(object.getObjectId()) == null) {
+                addSnapshot(object.getObjectId(), (Map) snapshots.get(i));
+            }
+        }
     }
 
-    public void objectsCommitted() {
+    public synchronized void objectsCommitted() {
 
     }
 

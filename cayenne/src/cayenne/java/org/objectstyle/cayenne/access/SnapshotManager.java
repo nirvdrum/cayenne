@@ -187,14 +187,14 @@ public class SnapshotManager {
         while (rit.hasNext()) {
             ObjRelationship rel = (ObjRelationship) rit.next();
             if (rel.isToMany()) {
-            	
+
                 // "to many" relationships have no information to collect from snapshot
                 // initialize a new empty list if requested, but otherwise 
                 // ignore snapshot data
 
                 ToManyList toManyList =
                     (ToManyList) object.readPropertyDirectly(rel.getName());
-                    
+
                 if (toManyList == null) {
                     object.writePropertyDirectly(
                         rel.getName(),
@@ -203,8 +203,8 @@ public class SnapshotManager {
                             object.getObjectId(),
                             rel.getName()));
                 }
-                else if(invalidateToManyRelationships) {
-					toManyList.invalidateObjectList();
+                else if (invalidateToManyRelationships) {
+                    toManyList.invalidateObjectList();
                 }
 
                 continue;
@@ -405,6 +405,24 @@ public class SnapshotManager {
      * Takes a snapshot of current object state.
      */
     public static Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
+
+        // for a HOLLOW object return snapshot from cache
+        if (anObject.getPersistenceState() == PersistenceState.HOLLOW
+            && anObject.getDataContext() != null) {
+
+            DataContext context = anObject.getDataContext();
+            ObjectId id = anObject.getObjectId();
+            Map snapshot = context.getObjectStore().getSnapshot(id);
+            if (snapshot != null) {
+                return snapshot;
+            }
+            else {
+                // resolve object
+                context.refetchObject(id);
+                return context.getObjectStore().getSnapshot(id);
+            }
+        }
+
         Map map = new HashMap();
 
         Map attrMap = ent.getAttributeMap();

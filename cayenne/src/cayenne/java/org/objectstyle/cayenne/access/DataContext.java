@@ -295,6 +295,75 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
+     * Converts a list of data rows to a list of DataObjects. 
+     */
+    public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
+
+        if (dataRows == null && dataRows.size() == 0) {
+            return new ArrayList(1);
+        }
+
+        // do a sanity check on ObjEntity... if it's DbEntity has no PK defined,
+        // we can't build a valid ObjectId
+        DbEntity dbEntity = entity.getDbEntity();
+        if (dbEntity == null) {
+            throw new CayenneRuntimeException(
+                "ObjEntity '" + entity.getName() + "' has no DbEntity.");
+        }
+
+        if (dbEntity.getPrimaryKey().size() == 0) {
+            throw new CayenneRuntimeException(
+                "Can't create ObjectId for '"
+                    + entity.getName()
+                    + "'. Reason: DbEntity '"
+                    + dbEntity.getName()
+                    + "' has no Primary Key defined.");
+        }
+
+        List results = new ArrayList(dataRows.size());
+        Iterator it = dataRows.iterator();
+        while (it.hasNext()) {
+            Map dataRow = (Map) it.next();
+            ObjectId anId = SnapshotManager.objectIdFromSnapshot(entity, dataRow);
+
+            // synchronized on objectstore, since read/write
+            // must be performed atomically
+
+            // this will create a HOLLOW object if it is not registered yet
+            DataObject object = registeredObject(anId);
+
+            // deal with object state
+            if (refresh) {
+                // make all COMMITTED objects HOLLOW
+                if (object.getPersistenceState() == PersistenceState.COMMITTED) {
+                    // TODO: temporary hack - should do lazy conversion - make an object HOLLOW
+                    // and resolve on first read... unfortunately lots of other things break...
+
+                    SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);
+                    // object.setPersistenceState(PersistenceState.HOLLOW);
+                }
+                // merge all MODIFIED objects immediately 
+                else if (object.getPersistenceState() == PersistenceState.MODIFIED) {
+                    SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);
+                }
+                // TODO: temporary hack - should do lazy conversion - keep an object HOLLOW
+                // and resolve on first read...unfortunately lots of other things break...
+                else if (object.getPersistenceState() == PersistenceState.HOLLOW) {
+                    SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);
+                }
+            }
+
+            object.fetchFinished();
+            results.add(object);
+        }
+
+        // now deal with snapshots 
+        objectStore.snapshotsUpdatedForObjects(results, dataRows, refresh);
+
+        return results;
+    }
+
+    /**
      * Creates and returns a DataObject from a data row (snapshot).
      * Newly created object is registered with this DataContext.
      *
@@ -681,7 +750,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
 
             // unregister candidates
-			unregisterObjects(objectsToUnregister);
+            unregisterObjects(objectsToUnregister);
 
             // finally clear flattened inserts & deletes
             this.clearFlattenedUpdateQueries();
