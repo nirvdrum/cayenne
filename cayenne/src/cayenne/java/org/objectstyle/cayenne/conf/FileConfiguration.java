@@ -228,5 +228,4 @@ public class FileConfiguration extends DefaultConfiguration {
 			return null;
 		}
 	}
-
 }

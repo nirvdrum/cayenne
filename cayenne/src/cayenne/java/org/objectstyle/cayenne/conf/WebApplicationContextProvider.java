@@ -113,12 +113,10 @@ public class WebApplicationContextProvider extends WebApplicationListener implem
         if (req instanceof HttpServletRequest) {
 
             HttpSession session = ((HttpServletRequest) req).getSession();
-            DataContext dataContext = BasicServletConfiguration
-                    .getDefaultContext(session);
+            DataContext dataContext = ServletConfiguration.getDefaultContext(session);
 
             // even if null, reset to null is a good thing here...
             DataContext.bindThreadDataContext(dataContext);
-
             if (dataContext == null) {
                 throw new IllegalStateException(
                         "DataContext is null for the session, cannot bind to thread.");

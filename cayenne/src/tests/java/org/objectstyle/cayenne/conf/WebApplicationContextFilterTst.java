@@ -55,48 +55,94 @@
  */
 package org.objectstyle.cayenne.conf;
 
+import java.io.IOException;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
 
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unit.util.MockConfiguration;
 
+import com.mockrunner.mock.web.MockFilterChain;
+import com.mockrunner.mock.web.MockFilterConfig;
+import com.mockrunner.mock.web.MockHttpServletRequest;
+import com.mockrunner.mock.web.MockHttpServletResponse;
 import com.mockrunner.mock.web.MockHttpSession;
+import com.mockrunner.mock.web.MockServletContext;
 
 /**
  * @author Andrei Adamchik
  */
-public class WebApplicationListenerTst extends TestCase {
+public class WebApplicationContextFilterTst extends TestCase {
 
-    public void testSessionCreated() throws Exception {
+    public void testDoFilter() throws Exception {
+        // assemble filter..
+        MockServletContext context = new MockServletContext();
+        MockFilterConfig config = new MockFilterConfig();
+        config.setupServletContext(context);
+
+        WebApplicationContextFilter filter = new WebApplicationContextFilter();
+        // don't call init as it sets Configuration sigleton.
+        filter.config = config;
+
+        // assemble session
+        DataContext dataContext = new DataContext();
         HttpSession session = new MockHttpSession();
-        assertNull(session.getAttribute(ServletConfiguration.DATA_CONTEXT_KEY));
-        WebApplicationListener listener = createTestListener();
+        session.setAttribute(ServletConfiguration.DATA_CONTEXT_KEY, dataContext);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setSession(session);
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        MockFilterChain chain = new MockFilterChain();
 
-        // testing this..
-        listener.sessionCreated(new HttpSessionEvent(session));
+        TestFilter testFilter = new TestFilter();
 
-        // session must have a DataContext now...
+        chain.addFilter(filter);
+        chain.addFilter(testFilter);
 
-        Object context = session.getAttribute(ServletConfiguration.DATA_CONTEXT_KEY);
-        assertTrue(
-                "DataContext was expected to be created, instead iot was " + context,
-                context instanceof DataContext);
+        // check no thread DC before
+        try {
+            DataContext.getThreadDataContext();
+            fail("There is a DataContext bound to thread already.");
+        }
+        catch (IllegalStateException ex) {
+            //expected
+        }
+
+        chain.doFilter(request, response);
+
+        assertSame(dataContext, testFilter.threadContext);
+
+        // check no thread DC after
+        try {
+            DataContext.getThreadDataContext();
+            fail("DataContext was not unbound from the thread.");
+        }
+        catch (IllegalStateException ex) {
+            //expected
+        }
     }
 
-    protected WebApplicationListener createTestListener() throws Exception {
-        // configure mockup objects for the web listener environment...
+    class TestFilter implements Filter {
 
-        final Configuration config = new MockConfiguration();
-        config.addDomain(new DataDomain("mockup"));
-        return new WebApplicationListener() {
+        DataContext threadContext;
 
-            protected Configuration getConfiguration() {
-                return config;
-            }
-        };
+        public void destroy() {
+        }
+
+        public void doFilter(
+                ServletRequest request,
+                ServletResponse response,
+                FilterChain chain) throws IOException, ServletException {
+            threadContext = DataContext.getThreadDataContext();
+        }
+
+        public void init(FilterConfig arg0) throws ServletException {
+        }
     }
 }

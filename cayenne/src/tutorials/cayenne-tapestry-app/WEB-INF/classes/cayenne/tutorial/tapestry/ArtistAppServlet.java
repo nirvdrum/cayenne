@@ -5,7 +5,7 @@ import javax.servlet.ServletException;
 
 import org.apache.log4j.Level;
 import org.apache.tapestry.ApplicationServlet;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletConfiguration;
 import org.objectstyle.cayenne.conf.Configuration;
 
 /**
@@ -25,6 +25,6 @@ public class ArtistAppServlet extends ApplicationServlet {
         // [OPTIONAL STEP] Set up shared Cayenne configuration object
         // to be org.objectstyle.cayenne.conf.BasicServletConfiguration
         // to locate Cayenne config files under WEB-INF instead of CLASSPATH
-        BasicServletConfiguration.initializeConfiguration(config.getServletContext());
+        ServletConfiguration.initializeConfiguration(config.getServletContext());
     }
 }

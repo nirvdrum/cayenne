@@ -68,9 +68,12 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 
 /**
+ * A ResourceLocator that can find resources relative to web application context.
+ * 
  * @author Andrei Adamchik
  */
 public class WebApplicationResourceLocator extends ResourceLocator {
+
     private static Logger logObj;
 
     // Create a Predicate that will enable logging only when
@@ -78,6 +81,7 @@ public class WebApplicationResourceLocator extends ResourceLocator {
     // The passed predicate argument is ignored.
     static {
         Predicate p = new Predicate() {
+
             public boolean evaluate(Object o) {
                 return Configuration.isLoggingConfigured();
             }
@@ -85,9 +89,26 @@ public class WebApplicationResourceLocator extends ResourceLocator {
 
         logObj = new PredicateLogger(WebApplicationResourceLocator.class, p);
     }
-    
+
     protected ServletContext context;
     protected List additionalContextPaths;
+
+    /**
+     * @since 1.2
+     */
+    public WebApplicationResourceLocator() {
+        this.additionalContextPaths = new ArrayList();
+        this.addFilesystemPath("/WEB-INF/");
+    }
+
+    /**
+     * Creates new WebApplicationResourceLocator with default lookup policy including user
+     * home directory, current directory and CLASSPATH.
+     */
+    public WebApplicationResourceLocator(ServletContext context) {
+        this();
+        setServletContext(context);
+    }
 
     /**
      * Sets the ServletContext used to locate resources.
@@ -104,60 +125,47 @@ public class WebApplicationResourceLocator extends ResourceLocator {
     }
 
     /**
-     * Creates new WebApplicationResourceLocator with default lookup policy including
-     * user home directory, current directory and CLASSPATH.
-     */
-    public WebApplicationResourceLocator(ServletContext context) {
-        super();
-
-        // store the ServletContext for use in finding resources
-        this.setServletContext(context);
-
-        this.additionalContextPaths = new ArrayList();
-
-        this.addFilesystemPath("/WEB-INF/");
-    }
-
-    /**
-     * Looks for resources relative to /WEB-INF/ directory using ServletContext.
+     * Looks for resources relative to /WEB-INF/ directory or any extra context paths
+     * configured. Internal ServletContext is used to find resources.
      */
     public URL findResource(String location) {
-        if (!this.additionalContextPaths.isEmpty()) {
-            logObj.debug("searching additional context paths: " + this.additionalContextPaths);
+        if (!additionalContextPaths.isEmpty() && getServletContext() != null) {
+
             Iterator cpi = this.additionalContextPaths.iterator();
             while (cpi.hasNext()) {
                 String fullName = cpi.next() + "/" + location;
                 logObj.debug("searching for: " + fullName);
                 try {
-                    URL url = this.getServletContext().getResource(fullName);
+                    URL url = getServletContext().getResource(fullName);
                     if (url != null) {
                         return url;
                     }
-                } catch (MalformedURLException ex) {
+                }
+                catch (MalformedURLException ex) {
                     // ignoring
                     logObj.debug("Malformed URL, ignoring.", ex);
                 }
             }
         }
+
         return super.findResource(location);
     }
 
     /**
-     * Override ResourceLocator.addFilesystemPath(String) to intercept context 
-     * paths starting with "/WEB-INF/" to place in additionalContextPaths.
+     * Override ResourceLocator.addFilesystemPath(String) to intercept context paths
+     * starting with "/WEB-INF/" to place in additionalContextPaths.
      */
     public void addFilesystemPath(String path) {
         if (path != null) {
             if (path.startsWith("/WEB-INF/")) {
                 this.additionalContextPaths.add(path);
             }
-            else
-            {
+            else {
                 super.addFilesystemPath(path);
             }
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Path must not be null.");
         }
     }
-
 }

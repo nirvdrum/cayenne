@@ -82,7 +82,7 @@ public class WebApplicationContextProviderTst extends TestCase {
         final DataContext dataContext = new DataContext();
 
         final HttpSession session = new MockHttpSession();
-        session.setAttribute(BasicServletConfiguration.DATA_CONTEXT_KEY, dataContext);
+        session.setAttribute(ServletConfiguration.DATA_CONTEXT_KEY, dataContext);
 
         ThreadedTestHelper helper = new ThreadedTestHelper() {
 
@@ -111,10 +111,10 @@ public class WebApplicationContextProviderTst extends TestCase {
         final DataContext dataContext2 = new DataContext();
 
         final HttpSession session1 = new MockHttpSession();
-        session1.setAttribute(BasicServletConfiguration.DATA_CONTEXT_KEY, dataContext1);
+        session1.setAttribute(ServletConfiguration.DATA_CONTEXT_KEY, dataContext1);
 
         final HttpSession session2 = new MockHttpSession();
-        session2.setAttribute(BasicServletConfiguration.DATA_CONTEXT_KEY, dataContext2);
+        session2.setAttribute(ServletConfiguration.DATA_CONTEXT_KEY, dataContext2);
 
         ThreadedTestHelper helper1 = new ThreadedTestHelper() {
 

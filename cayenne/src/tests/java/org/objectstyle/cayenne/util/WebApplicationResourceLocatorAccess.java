@@ -53,50 +53,33 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.conf;
+package org.objectstyle.cayenne.util;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionEvent;
-
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unit.util.MockConfiguration;
-
-import com.mockrunner.mock.web.MockHttpSession;
+import java.util.List;
 
 /**
+ * Provides access to protected fields of WebApplicationResourceLocator.
+ * 
  * @author Andrei Adamchik
  */
-public class WebApplicationListenerTst extends TestCase {
+public class WebApplicationResourceLocatorAccess {
 
-    public void testSessionCreated() throws Exception {
-        HttpSession session = new MockHttpSession();
-        assertNull(session.getAttribute(ServletConfiguration.DATA_CONTEXT_KEY));
-        WebApplicationListener listener = createTestListener();
+    protected WebApplicationResourceLocator locator;
 
-        // testing this..
-        listener.sessionCreated(new HttpSessionEvent(session));
-
-        // session must have a DataContext now...
-
-        Object context = session.getAttribute(ServletConfiguration.DATA_CONTEXT_KEY);
-        assertTrue(
-                "DataContext was expected to be created, instead iot was " + context,
-                context instanceof DataContext);
+    public WebApplicationResourceLocatorAccess(WebApplicationResourceLocator locator) {
+        this.locator = locator;
     }
 
-    protected WebApplicationListener createTestListener() throws Exception {
-        // configure mockup objects for the web listener environment...
-
-        final Configuration config = new MockConfiguration();
-        config.addDomain(new DataDomain("mockup"));
-        return new WebApplicationListener() {
-
-            protected Configuration getConfiguration() {
-                return config;
-            }
-        };
+    public List getAdditionalContextPaths() {
+        return locator.additionalContextPaths;
     }
+
+    public List getAdditionalClassPaths() {
+        return locator.additionalClassPaths;
+    }
+
+    public List getAdditionalFilesystemPaths() {
+        return locator.additionalFilesystemPaths;
+    }
+
 }

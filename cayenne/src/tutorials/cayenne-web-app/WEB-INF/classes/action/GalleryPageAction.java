@@ -10,7 +10,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletConfiguration;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 import webtest.Gallery;
@@ -25,7 +25,7 @@ public class GalleryPageAction extends Action {
         throws Exception {
 
         DataContext ctxt =
-            BasicServletConfiguration.getDefaultContext(request.getSession());
+            ServletConfiguration.getDefaultContext(request.getSession());
 
         SelectQuery query = new SelectQuery(Gallery.class);
 

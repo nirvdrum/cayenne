@@ -9,7 +9,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletConfiguration;
 
 import webtest.Artist;
 import formbean.ArtistForm;
@@ -37,7 +37,7 @@ public class SaveArtistAction extends Action {
         }
 
         DataContext ctxt =
-            BasicServletConfiguration.getDefaultContext(request.getSession());
+            ServletConfiguration.getDefaultContext(request.getSession());
 
         Artist anArtist = (Artist) ctxt.createAndRegisterNewObject("Artist");
         anArtist.setArtistName(artistForm.getArtistName());

@@ -123,7 +123,7 @@ public class WebApplicationListener implements HttpSessionListener,
      */
     public void sessionCreated(HttpSessionEvent se) {
         se.getSession().setAttribute(
-                BasicServletConfiguration.DATA_CONTEXT_KEY,
+                ServletConfiguration.DATA_CONTEXT_KEY,
                 getConfiguration().getDomain().createDataContext());
     }
 
@@ -140,7 +140,7 @@ public class WebApplicationListener implements HttpSessionListener,
      * custom configuration.
      */
     protected Configuration newConfiguration(ServletContext sc) {
-        return new BasicServletConfiguration(sc);
+        return new ServletConfiguration(sc);
     }
 
     /** Initializes the configuration. */

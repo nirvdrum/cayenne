@@ -10,7 +10,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+import org.objectstyle.cayenne.conf.ServletConfiguration;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -31,7 +31,7 @@ public class SavePaintingAction extends Action {
         PaintingForm paintingForm = (PaintingForm) form;
 
         DataContext ctxt =
-            BasicServletConfiguration.getDefaultContext(request.getSession());
+            ServletConfiguration.getDefaultContext(request.getSession());
 
         String anArtistName = paintingForm.getArtistName();
 
