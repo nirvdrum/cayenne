@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.query;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,24 +69,100 @@ import org.objectstyle.cayenne.util.XMLSerializable;
  * A query based on Procedure. Can be used as a select query, or as a query of an
  * arbitrary complexity, performing data modification, selecting data (possibly with
  * multiple result sets per call), returning values via OUT parameters.
+ * <h3>Execution with DataContext</h3>
+ * <h4>Reading OUT parameters</h4>
+ * <p>
+ * If a ProcedureQuery has OUT parameters, they are wrapped in a separate List in the
+ * query result. Such list will contain a single Map with OUT parameter values.
+ * </p>
+ * <h4>Using ProcedureQuery as a GenericSelectQuery</h4>
+ * <p>
+ * Executing ProcedureQuery via
+ * {@link org.objectstyle.cayenne.access.DataContext#performQuery(GenericSelectQuery)}
+ * makes sense only if the stored procedure returns a single result set (or alternatively
+ * returns a result via OUT parameters and no other result sets). It is still OK if data
+ * modification occurs as a side effect. However if the query returns more then one result
+ * set, a more generic form should be used:
+ * {@link org.objectstyle.cayenne.access.DataContext#performQueries(java.util.Collection, 
+ * org.objectstyle.cayenne.access.OperationObserver) DataContextperformQueries(Collection,
+ * OperationObserver)}. Use {@link org.objectstyle.cayenne.access.QueryResult}as a
+ * convenient generic OperationObserver implementation.
+ * </p>
  * 
  * @author Andrei Adamchik
  */
 public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
         XMLSerializable {
 
-    protected Map params = new HashMap();
-    protected int fetchLimit;
+    /**
+     * If set, allows to fetch results as DataObjects.
+     * 
+     * @since 1.1
+     */
+    protected Class resultType;
 
+    protected Map parameters = new HashMap();
+    protected SelectExecutionProperties selectProperties = new SelectExecutionProperties();
+
+    /**
+     * Creates an empty procedure query.
+     */
     public ProcedureQuery() {
+        // for backwards compatibility we go against usual default...
+        selectProperties.setFetchingDataRows(true);
     }
 
+    /**
+     * Creates a ProcedureQuery based on a Procedure object.
+     */
     public ProcedureQuery(Procedure procedure) {
+        // for backwards compatibility we go against usual default...
+        selectProperties.setFetchingDataRows(true);
         setRoot(procedure);
     }
 
+    /**
+     * Creates a ProcedureQuery based on a stored procedure.
+     * 
+     * @param procedureName A name of the stored procedure. For this query to work, a
+     *            procedure with this name must be mapped in Cayenne.
+     */
     public ProcedureQuery(String procedureName) {
+        // for backwards compatibility we go against usual default...
+        selectProperties.setFetchingDataRows(true);
+
         setRoot(procedureName);
+    }
+
+    /**
+     * @since 1.1
+     */
+    public ProcedureQuery(Procedure procedure, Class resultType) {
+        setRoot(procedure);
+        setResultType(resultType);
+    }
+
+    /**
+     * @since 1.1
+     */
+    public ProcedureQuery(String procedureName, Class resultType) {
+        setRoot(procedureName);
+        setResultType(resultType);
+    }
+
+    /**
+     * Initializes query parameters using a set of properties.
+     * 
+     * @since 1.1
+     */
+    public void initWithProperties(Map properties) {
+
+        // must init defaults even if properties are empty
+        if (properties == null) {
+            properties = Collections.EMPTY_MAP;
+        }
+
+        selectProperties.initWithProperties(properties);
     }
 
     /**
@@ -116,78 +193,158 @@ public class ProcedureQuery extends AbstractQuery implements GenericSelectQuery,
             encoder.print(rootString);
         }
 
+        if (resultType != null) {
+            encoder.print("\" result-type=\"");
+            encoder.print(resultType.getName());
+        }
+
         encoder.println("\">");
 
         encoder.indent(1);
 
-        // encode default SQL
-        if (fetchLimit > 0) {
-            encoder.printProperty(GenericSelectQuery.FETCH_LIMIT_PROPERTY, fetchLimit);
-        }
+        selectProperties.encodeAsXML(encoder);
 
         encoder.indent(-1);
         encoder.println("</query>");
     }
 
-    public Map getParams() {
-        return params;
+    public String getCachePolicy() {
+        return selectProperties.getCachePolicy();
     }
 
-    public void addParam(String name, Object value) {
-        params.put(name, value);
-    }
-
-    public void removeParam(String name) {
-        params.remove(name);
-    }
-
-    public void clearParams() {
-        params.clear();
+    public void setCachePolicy(String policy) {
+        this.selectProperties.setCachePolicy(policy);
     }
 
     public int getFetchLimit() {
-        return fetchLimit;
+        return selectProperties.getFetchLimit();
     }
 
-    /**
-     * Always returns zero, since paged queries are currently not supported for stored
-     * procedures.
-     */
+    public void setFetchLimit(int fetchLimit) {
+        this.selectProperties.setFetchLimit(fetchLimit);
+    }
+
     public int getPageSize() {
-        return 0;
+        return selectProperties.getPageSize();
     }
 
-    /**
-     * Currently always returns <code>true</code>.
-     */
+    public void setPageSize(int pageSize) {
+        selectProperties.setPageSize(pageSize);
+    }
+
+    public void setFetchingDataRows(boolean flag) {
+        selectProperties.setFetchingDataRows(flag);
+    }
+
     public boolean isFetchingDataRows() {
-        return true;
+        return selectProperties.isFetchingDataRows();
     }
 
-    /**
-     * Currently always returns <code>true</code>.
-     * 
-     * @since 1.1
-     */
     public boolean isRefreshingObjects() {
-        return true;
+        return selectProperties.isRefreshingObjects();
     }
 
-    /**
-     * Currently always returns false.
-     * 
-     * @since 1.1
-     */
+    public void setRefreshingObjects(boolean flag) {
+        selectProperties.setRefreshingObjects(flag);
+    }
+
     public boolean isResolvingInherited() {
-        return false;
+        return selectProperties.isResolvingInherited();
+    }
+
+    public void setResolvingInherited(boolean b) {
+        selectProperties.setResolvingInherited(b);
     }
 
     /**
-     * Currently always returns NO_CACHE.
+     * @deprecated Since 1.1 use {@link #getParameters()}.
+     */
+    public Map getParams() {
+        return getParameters();
+    }
+
+    /**
+     * @deprecated Since 1.1 use {@link #getParameter(String, Object)}.
+     */
+    public void addParam(String name, Object value) {
+        addParameter(name, value);
+    }
+
+    /**
+     * @deprecated Since 1.1 use {@link #removeParameter(String)}.
+     */
+    public void removeParam(String name) {
+        removeParameter(name);
+    }
+
+    /**
+     * @deprecated Since 1.1 use {@link #clearParameters()}.
+     */
+    public void clearParams() {
+        clearParameters();
+    }
+
+    /**
+     * @since 1.1
+     */
+    public synchronized void addParameter(String name, Object value) {
+        parameters.put(name, value);
+    }
+
+    /**
+     * @since 1.1
+     */
+    public synchronized void removeParameter(String name) {
+        parameters.remove(name);
+    }
+
+    /**
+     * Returns a map of procedure parameters.
      * 
      * @since 1.1
      */
-    public String getCachePolicy() {
-        return GenericSelectQuery.NO_CACHE;
+    public Map getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Sets a map of parameters.
+     * 
+     * @since 1.1
+     */
+    public synchronized void setParameters(Map parameters) {
+        this.parameters.clear();
+
+        if (parameters != null) {
+            this.parameters.putAll(parameters);
+        }
+    }
+
+    /**
+     * Cleans up all configured parameters.
+     * 
+     * @since 1.1
+     */
+    public synchronized void clearParameters() {
+        this.parameters.clear();
+    }
+
+    /**
+     * Returns an optional result type of the query.
+     * 
+     * @since 1.1
+     */
+    public Class getResultType() {
+        return resultType;
+    }
+
+    /**
+     * Sets optional result type of the query. A Class of the result type must be a
+     * DataObject implementation mapped in Cayenne.
+     * 
+     * @since 1.1
+     */
+    public void setResultType(Class resultType) {
+        this.resultType = resultType;
     }
 }

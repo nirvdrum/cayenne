@@ -212,7 +212,7 @@ public class ProcedureTranslator
     }
 
     protected void initValues() {
-        Map queryValues = getProcedureQuery().getParams();
+        Map queryValues = getProcedureQuery().getParameters();
 
         // match values with parameters in the correct order.
         // make an assumption that a missing value is NULL

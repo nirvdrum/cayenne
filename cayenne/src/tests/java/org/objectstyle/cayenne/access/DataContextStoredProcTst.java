@@ -104,7 +104,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         createArtist(1000.0);
 
         ProcedureQuery q = new ProcedureQuery(UPDATE_STORED_PROCEDURE);
-        q.addParam("paintingPrice", new Integer(3000));
+        q.addParameter("paintingPrice", new Integer(3000));
         DefaultOperationObserver observer = new DefaultOperationObserver();
 
         // since stored procedure commits its stuff, we must use an explicit 
@@ -136,8 +136,8 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         createArtist(1000.0);
 
         ProcedureQuery q = new ProcedureQuery(SELECT_STORED_PROCEDURE);
-        q.addParam("aName", "An Artist");
-        q.addParam("paintingPrice", new Integer(3000));
+        q.addParameter("aName", "An Artist");
+        q.addParameter("paintingPrice", new Integer(3000));
         List artists = null;
 
         // since stored procedure commits its stuff, we must use an explicit 
@@ -171,8 +171,8 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         createArtist(1000.0);
 
         ProcedureQuery q = new ProcedureQuery(SELECT_STORED_PROCEDURE);
-        q.addParam("aName", "An Artist");
-        q.addParam("paintingPrice", new Integer(3000));
+        q.addParameter("aName", "An Artist");
+        q.addParameter("paintingPrice", new Integer(3000));
 
         QueryResult result = new QueryResult();
 
@@ -209,8 +209,8 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         // test ProcedureQuery with Procedure as root
         Procedure proc = ctxt.getEntityResolver().getProcedure(SELECT_STORED_PROCEDURE);
         ProcedureQuery q = new ProcedureQuery(proc);
-        q.addParam("aName", "An Artist");
-        q.addParam("paintingPrice", new Integer(3000));
+        q.addParameter("aName", "An Artist");
+        q.addParameter("paintingPrice", new Integer(3000));
 
         QueryResult result = new QueryResult();
 
@@ -242,7 +242,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         }
 
         ProcedureQuery q = new ProcedureQuery(OUT_STORED_PROCEDURE);
-        q.addParam("in_param", new Integer(20));
+        q.addParameter("in_param", new Integer(20));
 
         QueryResult resultHolder = new QueryResult();
         // since stored procedure commits its stuff, we must use an explicit 

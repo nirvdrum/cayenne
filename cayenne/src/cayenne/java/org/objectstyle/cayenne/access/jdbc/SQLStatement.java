@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.access.jdbc;
 
 /**
  * A PreparedStatement descriptor containing a String of SQL and 
- * an array of parameters. SQLStatement is essentially a "complied"
+ * an array of parameters. SQLStatement is essentially a "compiled"
  * version of any non-selecting query.
  * 
  * @since 1.1
