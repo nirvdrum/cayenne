@@ -75,8 +75,14 @@
             <p></p>
             </subsection>
             
-            <subsection name="1.1.12 CayenneModeler Support for UI Customizable Classpath for jars.">
+            <subsection name="1.1.12 CayenneModeler Support for UI Customizable Classpath for Jars.">
             <p></p>
+            </subsection>
+            
+            <subsection name="1.1.13 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
+            <p>A dialog used to select mapping of ObjRelationship to one DbRelationship (simple relationship)
+            or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
+            can be selected. This dialog has been completely redesigned to remove this limitation.</p>
             </subsection>
         </subsection>
     </section>

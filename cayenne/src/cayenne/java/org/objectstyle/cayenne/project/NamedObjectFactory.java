@@ -133,7 +133,6 @@ public abstract class NamedObjectFactory {
         return ((NamedObjectFactory) factories.get(objectClass)).makeName(namingContext, nameBase);
     }
 
-
     /**
      * Creates an object using an appropriate factory class.
      * If no factory is found for the object, NullPointerException is 

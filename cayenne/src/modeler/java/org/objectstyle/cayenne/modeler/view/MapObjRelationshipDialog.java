@@ -95,6 +95,8 @@ import com.jgoodies.forms.layout.FormLayout;
 public class MapObjRelationshipDialog extends SPanel {
     static final Logger logObj = Logger.getLogger(MapObjRelationshipDialog.class);
 
+    protected STable pathTable;
+
     public MapObjRelationshipDialog() {
         init();
     }
@@ -137,12 +139,13 @@ public class MapObjRelationshipDialog extends SPanel {
         builder.append("Source ObjEntity:", srcEntityLabel);
         builder.append("Target ObjEntity:", targetEntityLabel);
 
-        STable pathTable = new ObjRelationshipPathTable();
+        pathTable = new ObjRelationshipPathTable();
         STableModel pathTableModel = new STableModel(pathTable);
         pathTableModel.setSelector(MapObjRelationshipModel.DB_RELATIONSHIP_PATH_SELECTOR);
         pathTableModel.setColumnNames(new String[] { "DbRelationship Path" });
         pathTableModel.setColumnSelectors(
-            new Selector[] { EntityRelationshipsModel.RELATIONSHIP_DISPLAY_NAME_SELECTOR });
+            new Selector[] {
+                 EntityRelationshipsModel.RELATIONSHIP_DISPLAY_NAME_SELECTOR });
 
         pathTable.setModel(pathTableModel);
         pathTable.setSelectionSelector(
@@ -169,6 +172,26 @@ public class MapObjRelationshipDialog extends SPanel {
         add(
             PanelFactory.createButtonPanel(new JButton[] { saveButton, cancelButton }),
             BorderLayout.SOUTH);
+    }
+
+    /**
+     * Cancels any editing that might be going on in the path table.
+     */
+    public void cancelTableEditing() {
+        int row = pathTable.getEditingRow();
+        if (row < 0) {
+            return;
+        }
+
+        int column = pathTable.getEditingColumn();
+        if (column < 0) {
+            return;
+        }
+
+        TableCellEditor editor = pathTable.getCellEditor(row, column);
+        if (editor != null) {
+            editor.cancelCellEditing();
+        }
     }
 
     class ObjRelationshipPathTable extends STable {

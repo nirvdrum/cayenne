@@ -140,6 +140,8 @@ public class MapObjRelationshipController extends BasicController {
      * change its name, and create joins.
      */
     protected void createRelationship(boolean toMany) {
+        cancelEditing();
+
         MapObjRelationshipModel model = (MapObjRelationshipModel) getModel();
         DbEntity source = model.getStartEntity();
         DbEntity target = model.getEndEntity();
@@ -149,13 +151,18 @@ public class MapObjRelationshipController extends BasicController {
             source = (DbEntity) selectedPathComponent.getSourceEntity();
         }
 
-        DbRelationship dbRelationship = new DbRelationship();
+        DbRelationship dbRelationship =
+            (DbRelationship) NamedObjectFactory.createRelationship(
+                source,
+                target,
+                toMany);
+        // note: NamedObjectFactory doesn't set source or target, just the name
         dbRelationship.setSourceEntity(source);
         dbRelationship.setTargetEntity(target);
-        dbRelationship.setName(
-            NamedObjectFactory.createName(DbRelationship.class, source));
         dbRelationship.setToMany(toMany);
 
+        // TODO: creating relationship outside of ResolveDbRelationshipDialog confuses it
+        // to send incorrect event - CHANGE instead of ADD
         ResolveDbRelationshipDialog dialog =
             new ResolveDbRelationshipDialog(
                 Collections.singletonList(dbRelationship),
@@ -183,5 +190,9 @@ public class MapObjRelationshipController extends BasicController {
         }
 
         dialog.dispose();
+    }
+
+    protected void cancelEditing() {
+        ((MapObjRelationshipDialog) getView()).cancelTableEditing();
     }
 }
