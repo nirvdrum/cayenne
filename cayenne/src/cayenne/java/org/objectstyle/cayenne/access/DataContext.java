@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.event.DataContextTransactionEventHandler;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
@@ -84,7 +85,6 @@ import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.PkGenerator;
-import org.objectstyle.cayenne.event.DataContextTransactionEventHandler;
 import org.objectstyle.cayenne.event.ObserverManager;
 import org.objectstyle.cayenne.event.ObserverSubject;
 import org.objectstyle.cayenne.exp.Expression;
@@ -122,11 +122,6 @@ public class DataContext implements QueryEngine, Serializable {
 
 	// event posting default for new DataContexts
 	private static boolean postDataContextTransactionEventsDefault = true;
-
-	// need to call this at least once in order to initialize the event handler
-	static {
-		DataContextTransactionEventHandler.registerForDataContextEvents();
-	}
 
 	// enable/disable event handling for individual instances
 	private boolean postDataContextTransactionEvents;
@@ -184,7 +179,7 @@ public class DataContext implements QueryEngine, Serializable {
         this.parent = parent;
         this.objectStore = new ObjectStore();
         this.snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
-        this.postDataContextTransactionEvents = postDataContextTransactionEventsDefault;
+        this.setTransactionEventsEnabled(postDataContextTransactionEventsDefault);
     }
 
     /** Returns parent QueryEngine object. */
@@ -705,7 +700,7 @@ public class DataContext implements QueryEngine, Serializable {
 
 		// post observer events
 		if (this.postDataContextTransactionEvents) {
-			ObserverManager.getInstance().postObserverEvent(WILL_COMMIT, this);
+			ObserverManager.getDefaultManager().postObserverEvent(WILL_COMMIT, this);
 		}
 
 		synchronized (objectStore) {
@@ -851,7 +846,7 @@ public class DataContext implements QueryEngine, Serializable {
 
 		// post observer event
 		if (this.postDataContextTransactionEvents) {
-			ObserverManager.getInstance().postObserverEvent(DID_COMMIT, this);
+			ObserverManager.getDefaultManager().postObserverEvent(DID_COMMIT, this);
 		}
 	}
 
@@ -1448,6 +1443,7 @@ public class DataContext implements QueryEngine, Serializable {
 	 * Enable/disable posting of transaction events by this DataContext.
 	 */
 	public void setTransactionEventsEnabled(boolean onOrOff) {
+		DataContextTransactionEventHandler.registerForDataContextEvents();
 		this.postDataContextTransactionEvents = onOrOff;
 	}
 
