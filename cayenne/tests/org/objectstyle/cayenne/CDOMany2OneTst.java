@@ -66,6 +66,25 @@ public class CDOMany2OneTst extends CayenneDOTestBase {
         super(name);
     }
     
+     /*   public void testSelectViaRelationship() throws Exception {
+        
+        // setup test
+        Artist a1 = newArtist(); 
+        Painting p1 = newPainting();
+        a1.addToPaintingArray(p1);
+        ctxt.commitChanges();
+        
+        
+        // do select
+        Expression e = ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "toArtist", a1);
+        SelectQuery q = new SelectQuery("Painting", e);
+        
+        // *** TESTING THIS *** 
+        List paints = ctxt.performQuery(q);
+        assertEquals(1, paints.size());
+        assertSame(p1, paints.get(0));
+    } */
+    
     public void testNewAdd() throws Exception { 
         Artist a1 = newArtist();        
         Painting p1 = newPainting();
