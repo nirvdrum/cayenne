@@ -1,14 +1,6 @@
 <document>
 <title>User Guide - Performance Tuning</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/perform/index.html</prev>
-	<next>/userguide/perform/data-rows.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>
     <section name="11. Performance Tuning">
     <subsection name="11.1 Prefetching">

@@ -1,12 +1,6 @@
 <document>
 <title>User Guide - Installation</title>
-
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/intro.html</prev>
-	<next>/userguide/install/install.html</next>
-</navigator>
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="2. Installation">
         <subsection name="2.1 System Requirements" anchor="sys_req">

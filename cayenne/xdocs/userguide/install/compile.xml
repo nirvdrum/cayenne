@@ -1,15 +1,9 @@
 <document>
 <title>User Guide - Installation</title>
-
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/install/postinstall.html</prev>
-	<next>/userguide/quickstart/index.html</next>
-</navigator>
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="2. Installation">        
-		<subsection name="2.4 Compiling Cayenne from Source" anchor="compile">	
+		<subsection name="2.4 Compiling from Source" anchor="compile">	
 			<panel name="Note:">JSDK1.4 and Ant must be present to compile Cayenne.</panel>
 	    
 			<p>Normally users wouldn't need to build Cayenne from source. 

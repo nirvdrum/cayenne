@@ -1,11 +1,6 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/fetch/params.html</prev>
-	<next>/userguide/modify/index.html</next>
-</navigator>    
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="7. Using SelectQueries">        
         <subsection name="7.6 Executing raw SQL: SqlSelectQuery">

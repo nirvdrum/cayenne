@@ -1,60 +1,49 @@
-.medium-menu {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif;
-}
-.medium-menu A:link, .medium-menu a:visited {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
-}
-.medium-menu A:hover, .medium-menu A:active {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
-}
-.medium-menu A {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
-}
-.medium-menu A:unknown {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
-}
-
-
-.normal-menu {
-	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif;
-}
-.normal-menu A:link, .normal-menu A:visited {
-	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: none
-}
-.normal-menu A:hover, .normal-menu A:active {
-	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; TEXT-DECORATION: underline
-}
-
-
-
-.section-title {
-	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 12pt; FONT-WEIGHT: bold
-}
-.subsection-title {
-	COLOR: black; FONT-FAMILY: arial,helvetica,sanserif; FONT-SIZE: 11pt; FONT-WEIGHT: bold 
-}
-
-.large-dkblue {
-	COLOR: #28314f; FONT-SIZE: 14pt; FONT-FAMILY: arial,helvetica,sanserif; LINE-HEIGHT: 15pt; 
-}
-
-.medium-dkblue {
-	COLOR: #28314f; FONT-SIZE: 12pt; FONT-FAMILY: arial,helvetica,sanserif;
-}
-
-
-.normal-black {
-	COLOR: black; FONT-SIZE: 10pt; LINE-HEIGHT: 11pt; 
-}
-.normal-dkblue {
-	COLOR: #28314f; FONT-SIZE: 10pt; FONT-FAMILY: arial,helvetica,sanserif; LINE-HEIGHT: 11pt; 
-}
-
-
-
-.small-dkblue {
-	COLOR: #28314f; FONT-SIZE: 8pt; FONT-FAMILY: arial,helvetica,sanserif; LINE-HEIGHT: 9pt;
-}
-.small-black {
-	COLOR: black; FONT-SIZE: 8pt; LINE-HEIGHT: 9pt;
-}
+  .body {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 10pt; letter-spacing: normal } 
+  .body-black {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#000000; font-size: 10pt; letter-spacing: normal }
+  .body-black:hover {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#000000; font-size: 10pt; letter-spacing: normal }
+  .body-white {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#ffffff; font-size: 10pt; letter-spacing: normal }
+  .small {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 10px; letter-spacing: normal }
+  .big {font-family: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size: 12pt }
+  .normal {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; font-size:  11pt; letter-spacing: normal}
+  .normal-red {font-family:  Verdana, Arial, Arial Cyr, Helvetica, sans-serif; color:#cc0000; font-size:  10pt; letter-spacing: normal}
+  
+  A  {
+      FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; LETTER-SPACING: normal
+     }
+    
+  A:hover {
+      FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; LETTER-SPACING: normal; TEXT-DECORATION: none;
+     }
+  
+  .input {
+      BACKGROUND: #ffffff; 
+      BORDER-BOTTOM: #000000 1px solid; 
+      BORDER-LEFT: #000000 1px solid; 
+      BORDER-RIGHT: #000000 1px solid; 
+      BORDER-TOP: #000000 1px solid; 
+      COLOR: #000000; 
+      FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; 
+      FONT-SIZE: 8pt;
+     }
+     
+ .note { 
+      BACKGROUND: #cccccc;
+      BORDER-BOTTOM: #000000 1px solid; 
+      BORDER-LEFT: #000000 1px solid; 
+      BORDER-RIGHT: #000000 1px solid; 
+      BORDER-TOP: #000000 1px solid; 
+      COLOR: #000000; 
+      FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; 
+      FONT-SIZE: 10pt;
+     }
+      
+ .source { 
+     BACKGROUND: #ffffcc; 
+     BORDER-BOTTOM: #999966 1px solid; 
+     BORDER-LEFT: #999966 1px solid; 
+     BORDER-RIGHT: #999966 1px solid; 
+     BORDER-TOP: #999966 1px solid; 
+     COLOR: #000000; 
+     FONT-FAMILY: Verdana, Arial, Arial Cyr, Helvetica, sans-serif; 
+     FONT-SIZE: 10pt;
+    }

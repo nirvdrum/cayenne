@@ -1,11 +1,6 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/fetch/other.html</prev>
-	<next>/userguide/fetch/raw.html</next>
-</navigator>    
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="7. Using SelectQueries">        
         <subsection name="7.5 Reusing SelectQueries: Parameterized Queries.">

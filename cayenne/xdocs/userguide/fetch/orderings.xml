@@ -1,10 +1,5 @@
 <document>
-<title>User Guide - Using SelectQueries</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/fetch/exp.html</prev>
-	<next>/userguide/fetch/other.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 
 <body>
     <section name="7. Using SelectQueries">        

@@ -1,11 +1,6 @@
 <document>
 <title>User Guide - Modifying DataObjects</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/fetch/raw.html</prev>
-	<next>/userguide/modify/data-context.html</next>
-</navigator>    
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="8. Modifying DataObjects">
     	<p>Normally changes to DataObjects are done via simple "set*" method calls.

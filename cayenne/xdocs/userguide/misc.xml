@@ -1,13 +1,6 @@
 <document>
 <title>User Guide - Miscellaneous Information</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/deploy/logging.html</prev>
-</navigator>        
+<toc name="toc-user-guide"/>
 <body>
     <section name="14. Miscellaneous Information">
     	<p>This section contains information not directly related to 

@@ -1,13 +1,6 @@
 <document>
 <title>User Guide - Quick Start</title>
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/install/compile.html</prev>
-	<next>/userguide/quickstart/comline.html</next>
-</navigator> 
+<toc name="toc-user-guide"/>
 <body>
     <section name="3. Quick Start">
       	<p>Before getting any deeper into details of Cayenne design, it may be helpful to go through

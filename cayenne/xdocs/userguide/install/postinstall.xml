@@ -1,15 +1,9 @@
 <document>
 <title>User Guide - Installation</title>
-
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/install/install.html</prev>
-	<next>/userguide/install/compile.html</next>
-</navigator>
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="2. Installation">       
-    	<subsection name="2.3 Understanding Cayenne JAR Files" anchor="jar">
+    	<subsection name="2.3 Understanding JAR Files" anchor="jar">
     		<p>This sections explains where all the relevant jar files are
     		located. It also lists Cayenne dependencies.</p>
     	

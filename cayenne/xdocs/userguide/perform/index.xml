@@ -1,14 +1,6 @@
 <document>
 <title>User Guide - Performance Tuning</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/expressions/nulls.html</prev>
-	<next>/userguide/perform/prefetching.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>   
 <body>
     <section name="11. Performance Tuning">        
     <p>Most performance problems in database applications, including those using ORM,

@@ -1,14 +1,5 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/deploy/index.html</prev>
-	<next>/userguide/deploy/web-application.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>
      <section name="13. Deployment">        
            <subsection name="13.1 Standalone Applications" anchor="standalone">

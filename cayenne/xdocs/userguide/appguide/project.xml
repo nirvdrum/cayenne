@@ -1,14 +1,6 @@
 <document>
 <title>User Guide - Writing Cayenne Applications</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/index.html</prev>
-	<next>/userguide/appguide/javagen.html</next>
-</navigator>
+<toc name="toc-user-guide"/>
 <body>
     <section name="5. Writing Cayenne Applications">        
         <subsection name="5.1 Cayenne Project" anchor="datamap">

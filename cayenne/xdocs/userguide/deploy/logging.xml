@@ -1,14 +1,5 @@
 <document>
-<title>User Guide - Deployment</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/deploy/cdeploy.html</prev>
-	<next>/userguide/misc.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>
     <section name="13. Deployment">        
            <subsection name="13.6 Configuring Logging">

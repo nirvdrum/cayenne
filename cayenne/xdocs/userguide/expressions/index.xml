@@ -1,10 +1,6 @@
 <document>
 <title>User Guide - Using Expressions</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/stored-procedures/any.html</prev>
-	<next>/userguide/expressions/common.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>
     <section name="10. Using Expressions">
     	<p>Expressions in Cayenne are used to build query qualifiers and to perform

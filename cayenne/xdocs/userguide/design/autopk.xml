@@ -1,10 +1,6 @@
 <document>
 <title>User Guide - Design</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/design/crossdb.html</prev>
-	<next>/userguide/appguide/index.html</next>
-</navigator>
+<toc name="toc-user-guide"/>
 <body>
     <section name="4. Design">
         <subsection name="4.7 Primary Key Generation" anchor="pk">

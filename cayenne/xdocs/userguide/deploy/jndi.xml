@@ -1,14 +1,5 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/deploy/custom.html</prev>
-	<next>/userguide/deploy/cdeploy.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>
      <section name="13. Deployment">              
                <subsection name="13.4 Using JNDI">

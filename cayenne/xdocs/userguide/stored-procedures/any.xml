@@ -1,11 +1,6 @@
 <document>
 <title>User Guide - Using SelectQueries</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/stored-procedures/select.html</prev>
-	<next>/userguide/expressions/index.html</next>
-</navigator>    
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="9. Using Stored Procedures">
     <subsection name="9.2 Executing an Arbitrary Stored Procedure">

@@ -1,13 +1,6 @@
 <document>
 <title>User Guide - Using DataContext</title>
-<properties>
-      <author>Andrei Adamchik</author>
-</properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/appguide/javagen.html</prev>
-	<next>/userguide/datactxt/create.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>   	
     <section name="6. Using DataContext" anchor="cayenne_dc">
     	<p>In most applications <a href=

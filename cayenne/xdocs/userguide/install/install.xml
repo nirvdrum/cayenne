@@ -1,12 +1,6 @@
 <document>
 <title>User Guide - Installation</title>
-
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/install/index.html</prev>
-	<next>/userguide/install/postinstall.html</next>
-</navigator>
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="2. Installation">
         <subsection name="2.2 Installation" anchor="inst">

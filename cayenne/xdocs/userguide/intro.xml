@@ -1,11 +1,6 @@
 <document>
 <title>User Guide - Introduction</title>
-
-<navigator>
-	<up>/userguide/index.html</up>
-	<next>/userguide/install/index.html</next>
-</navigator>
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="1. Introduction">
     

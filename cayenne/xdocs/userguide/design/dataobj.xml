@@ -1,10 +1,6 @@
 <document>
 <title>User Guide - Design</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/design/graph.html</prev>
-	<next>/userguide/design/access.html</next>
-</navigator>
+<toc name="toc-user-guide"/>
 <body>
     <section name="4. Design">
         <subsection name="4.3 Data Objects" anchor="do">

@@ -1,11 +1,6 @@
 <document>
 <title>User Guide - Advanced modelling</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/perform/paged-queries.html</prev>
-	<next>/userguide/advmodel/flattenedrel.html</next>
-</navigator>    
-
+<toc name="toc-user-guide"/>
 <body>
     <section name="12. Advanced modelling">
     	<p>Although you can do a lot of things very easily with basic modelling,

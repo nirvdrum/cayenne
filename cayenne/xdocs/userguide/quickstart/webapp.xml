@@ -1,13 +1,6 @@
 <document>
 <title>User Guide - Quick Start</title>
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/quickstart/comline.html</prev>
-       <next>/userguide/quickstart/tapestrywebapp.html</next>
-</navigator> 
+<toc name="toc-user-guide"/>
 <body>
     <section name="3. Quick Start">
        <subsection name="3.2 &quot;JSP/Struts Web Application&quot; Tutorial">

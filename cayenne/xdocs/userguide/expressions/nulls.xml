@@ -1,10 +1,6 @@
 <document>
 <title>User Guide - Using Expressions</title>
-<navigator>
-	<up>/userguide/index.html</up>
-	<prev>/userguide/expressions/shortcut.html</prev>
-	<next>/userguide/perform/index.html</next>
-</navigator>    
+<toc name="toc-user-guide"/>
 <body>
     <section name="10. Using Expressions">        
 		<subsection name="10.4 NULL handling.">
