@@ -53,45 +53,53 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.ArrayList;
-
-import junit.framework.TestCase;
-
-import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DbEntity;
 
+/** 
+ * Interface that defines methods for automatic primary key generation
+ * support. 
+ * 
+ * @author Andrei Adamchik
+ */
+public interface PkGenerator {
 
-public class PkGeneratorTst extends TestCase {
-    protected JdbcPkGenerator pkGen;
-    protected DataNode node;
-    protected DbEntity paintEnt;
-    
-    public PkGeneratorTst(String name) {
-        super(name);
-    }
-    
-    
-    protected void setUp() throws java.lang.Exception {     
-        TestMain.getSharedDatabaseSetup().cleanTableData();
-           
-        pkGen = new JdbcPkGenerator();
-        node = TestMain.getSharedDomain().getDataNodes()[0];
-        paintEnt = node.lookupEntity("Painting").getDbEntity();
-        pkGen.createAutoPkSupportForDbEntity(node, paintEnt);
-    }
-    
-    
-    public void testGeneratePkForDbEntity() throws java.lang.Exception {
-        ArrayList pkList = new ArrayList();
-        
-        for(int i = 0; i < 6; i++) {
-            Object pk = pkGen.generatePkForDbEntity(node, paintEnt);
-            assertNotNull(pk);
-            assertTrue(!pkList.contains(pk));
-            pkList.add(pk);
-        }
-    }
+    /** 
+     * Generates necessary database objects to provide
+     * automatic primary key support. 
+     * 
+     * @param node node that provides access to a DataSource.
+     */
+    public void createAutoPkSupport(DataNode node) throws Exception;
+
+
+    /** 
+     * Drops table named "AUTO_PK_SUPPORT" if it exists in the database. 
+     */
+    public void dropAutoPkSupport(DataNode node) throws Exception;
+
+    /** 
+     * Performs necessary database operations to do primary key generation
+     * for a particular DbEntity. This may require a prior call 
+     * to <code>createAutoPkSupport<code> method.
+     * 
+     * <p>This operation should be "safe" in that it shouldn't override any 
+     * existing database objects.</p>
+     * 
+     * @param node node that provides connection layer for PkGenerator.
+     * @param ent DbEntity that needs an auto PK support
+     */
+    public void createAutoPkSupportForDbEntity(DataNode node, DbEntity ent)
+        throws Exception;
+
+    /**
+     * <p>Generate new (unique and non-repeating) primary key for specified 
+     * DbEntity.</p>
+     *
+     *  @param ent DbEntity for which automatic PK is generated.
+     */
+    public Object generatePkForDbEntity(DataNode dataNode, DbEntity ent)
+        throws Exception;
 }

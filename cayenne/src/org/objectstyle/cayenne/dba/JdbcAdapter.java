@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.map.*;
 public class JdbcAdapter implements DbAdapter {
     static Logger logObj = Logger.getLogger(JdbcAdapter.class.getName());
 
-    protected PKGenerator pkGen;
+    protected PkGenerator pkGen;
     protected TypesHandler typesHandler;
 
     public JdbcAdapter() {
@@ -86,8 +86,8 @@ public class JdbcAdapter implements DbAdapter {
      * method should be overriden by JdbcAdapter subclasses to
      * provide custom implementations of PKGenerator. 
      */
-    protected PKGenerator createPkGenerator() {
-        return new DefaultPKGenerator();
+    protected PkGenerator createPkGenerator() {
+        return new JdbcPkGenerator();
     }
 
     /** Returns true. */

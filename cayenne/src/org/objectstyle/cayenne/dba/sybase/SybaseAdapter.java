@@ -61,6 +61,7 @@ import java.util.HashMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbEntity;
 
@@ -124,11 +125,11 @@ public class SybaseAdapter extends JdbcAdapter {
     public void createAutoPkSupport(DataNode node) throws Exception {
 
         // need to drop procedure first
-        pkGen.runSchemaUpdate(node, safePkProcDrop());
+        ((JdbcPkGenerator)pkGen).runSchemaUpdate(node, safePkProcDrop());
 
         // create objects
         super.createAutoPkSupport(node);
-        pkGen.runSchemaUpdate(node, unsafePkProcCreate());
+        ((JdbcPkGenerator)pkGen).runSchemaUpdate(node, unsafePkProcCreate());
     }
 
 
@@ -153,8 +154,8 @@ public class SybaseAdapter extends JdbcAdapter {
      *  @param node node that provides access to a DataSource.
      */
     public void dropAutoPkSupport(DataNode node) throws Exception {
-        pkGen.runSchemaUpdate(node, safePkProcDrop());
-        pkGen.runSchemaUpdate(node, safePkTableDrop());
+        ((JdbcPkGenerator)pkGen).runSchemaUpdate(node, safePkProcDrop());
+        ((JdbcPkGenerator)pkGen).runSchemaUpdate(node, safePkTableDrop());
     }
 
     public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity)

@@ -107,7 +107,7 @@ public class OracleAdapter extends JdbcAdapter {
      * sequence exists in the database:
      * 
      * <pre>
-     * SElECT SEQUENCE_NAME FROM USER_SEQUENCES 
+     * SELECT SEQUENCE_NAME FROM USER_SEQUENCES 
      * </pre>
      * 
      * If a DbEntity doesn't have PK support yet, executes the 
@@ -145,7 +145,7 @@ public class OracleAdapter extends JdbcAdapter {
      * sequence exists in the database:
      * 
      * <pre>
-     * SElECT SEQUENCE_NAME FROM USER_SEQUENCES 
+     * SELECT SEQUENCE_NAME FROM USER_SEQUENCES 
      * </pre>
      * 
      * For each DbEntity, that has PK sequence (named like "pk_table_name", 
