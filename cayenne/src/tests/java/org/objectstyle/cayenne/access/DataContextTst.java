@@ -91,11 +91,13 @@ public class DataContextTst extends CayenneTestCase {
 
 	protected void setUp() throws java.lang.Exception {
 		super.setUp();
-		TestMain.getSharedDatabaseSetup().cleanTableData();
+
+        DatabaseSetup setup = TestMain.getSharedDatabaseSetup();
+        setup.cleanTableData();        
 		populateTables();
 
 		DataDomain dom = getSharedDomain();
-		dom.getDataNodes()[0].createPkSupportForMapEntities();
+		setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
 
 		ctxt = dom.createDataContext();
 		opObserver = new TestOperationObserver();

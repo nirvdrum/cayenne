@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.map.DbEntity;
 
 public class DataNodeExtrasTst extends CayenneTestCase {
@@ -90,11 +91,12 @@ public class DataNodeExtrasTst extends CayenneTestCase {
 		assertEquals(tstName, node.getDataSourceFactory());
 	}
 
-	public void testCreatePkSupportForMapEntities()
-		throws java.lang.Exception {
-		TestMain.getSharedDatabaseSetup().cleanTableData();
+	public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
+        DatabaseSetup setup = TestMain.getSharedDatabaseSetup();
+        setup.cleanTableData();        
+
 		DataNode node = getSharedDomain().getDataNodes()[0];
-		node.createPkSupportForMapEntities();
+		setup.createPkSupportForMapEntities(node);
 
 		DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();
 		assertNotNull(

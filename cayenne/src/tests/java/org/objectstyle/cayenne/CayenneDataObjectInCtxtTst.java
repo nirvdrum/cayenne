@@ -79,10 +79,13 @@ public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     }
 
     public void setUp() throws java.lang.Exception {
-        TestMain.getSharedDatabaseSetup().cleanTableData();
-        DataDomain dom = getSharedDomain();
-        dom.getDataNodes()[0].createPkSupportForMapEntities();
-        ctxt = getSharedDomain().createDataContext();
+        DatabaseSetup setup = TestMain.getSharedDatabaseSetup();
+        setup.cleanTableData();
+
+		DataDomain dom = getSharedDomain();
+        setup.createPkSupportForMapEntities(dom.getDataNodes()[0]);
+
+        ctxt = dom.createDataContext();
     }
 
     public void testSetObjectId() throws Exception {
