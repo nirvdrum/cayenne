@@ -81,14 +81,14 @@ public abstract class Configuration {
     static Logger logObj = Logger.getLogger(Configuration.class.getName());
 
     public static final String DOMAIN_FILE = "cayenne.xml";
-    public static final String DEFAULT_CONFIG_CLASS = "org.objectstyle.cayenne.conf.DefaultConfiguration";
+    public static final String DEFAULT_CONFIG_CLASS =
+        "org.objectstyle.cayenne.conf.DefaultConfiguration";
 
     private static Configuration sharedConfig;
 
     /** Lookup map that stores DataDomains with names as keys. */
     protected HashMap dataDomains = new HashMap();
     protected Level logLevel = Level.FINER;
-
 
     /** Use this method as an entry point to all Cayenne access objects.
       * <p>Note that if you want to provide custom Configuration,
@@ -117,8 +117,9 @@ public abstract class Configuration {
         // separate instantiation exceptions from the
         // possible runtime exceptions thown in initSharedConfig
         try {
-            conf = (Configuration)Class.forName(configClass).newInstance();
-        } catch (java.lang.Exception ex) {
+            conf = (Configuration) Class.forName(configClass).newInstance();
+        }
+        catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Error initializing shared Configuration", ex);
             throw new RuntimeException("Error initializing shared Configuration");
         }
@@ -126,19 +127,18 @@ public abstract class Configuration {
         initSharedConfig(conf);
     }
 
-
     /** Sets shared Configuration object to a new Configuration object.
       * calls <code>init</code> method of <code>conf</code> object. */
     public static void initSharedConfig(Configuration conf) {
         try {
             sharedConfig = conf;
             sharedConfig.init();
-        } catch (java.lang.Exception ex) {
+        }
+        catch (java.lang.Exception ex) {
             logObj.log(Level.SEVERE, "Error initializing shared Configuration", ex);
             throw new RuntimeException("Error initializing shared Configuration");
         }
     }
-
 
     /** Returns domain configuration as a stream or null if it
       * can not be found. */
@@ -148,8 +148,6 @@ public abstract class Configuration {
       * can not be found. */
     public abstract InputStream getMapConfig(String location);
 
-
-    
     /** Returns default log level of this configuration object. */
     public Level getLogLevel() {
         return logLevel;
@@ -160,40 +158,49 @@ public abstract class Configuration {
         this.logLevel = logLevel;
     }
 
-
     /** Initializes all Cayenne resources. Loads all configured domains and their
       * data maps, initializes all domain Nodes and their DataSources. */
     protected void init() throws java.lang.Exception {
         InputStream in = getDomainConfig();
-        if (in == null)
-            throw new ConfigException("Domain configuration file \""
-                                      + DOMAIN_FILE
-                                      + "\" is not found.");
+        if (in == null) {
+            StringBuffer msg = new StringBuffer();
+            msg
+                .append("[")
+                .append(this.getClass().getName())
+                .append("] : Domain configuration file \"")
+                .append(DOMAIN_FILE)
+                .append("\" is not found.");
+
+            throw new ConfigException(msg.toString());
+        }
 
         DomainHelper helper = new DomainHelper(this, getLogLevel());
-        if(!helper.loadDomains(in)) {
-            throw new ConfigException("Failed to load domain and/or its maps/nodes.");
+        if (!helper.loadDomains(in)) {
+            StringBuffer msg = new StringBuffer();
+            msg
+                .append("[")
+                .append(this.getClass().getName())
+                .append("] : Failed to load domain and/or its maps/nodes.");
+
+            throw new ConfigException(msg.toString());
         }
 
         Iterator it = helper.getDomains().iterator();
-        while(it.hasNext()) {
-            addDomain((DataDomain)it.next());
+        while (it.hasNext()) {
+            addDomain((DataDomain) it.next());
         }
     }
-
 
     /** Adds new DataDomain to the list of registered domains. */
     public void addDomain(DataDomain domain) {
         dataDomains.put(domain.getName(), domain);
     }
 
-
     /** Returns registered domain matching <code>name</code>
       * or null if no such domain is found. */
     public DataDomain getDomain(String name) {
-        return (DataDomain)dataDomains.get(name);
+        return (DataDomain) dataDomains.get(name);
     }
-
 
     /** Returns default domain of this configuration. If no domains
       * are configured, null is returned. If more then 1 domain exists
@@ -201,16 +208,17 @@ public abstract class Configuration {
       * <code>getDomain(String name)</code> method must be used. */
     public DataDomain getDomain() {
         int size = dataDomains.size();
-        if(size == 0) {
+        if (size == 0) {
             return null;
-        } else if(size == 1) {
+        }
+        else if (size == 1) {
             Iterator it = dataDomains.keySet().iterator();
-            return (DataDomain)dataDomains.get(it.next());
-        } else {
+            return (DataDomain) dataDomains.get(it.next());
+        }
+        else {
             throw new CayenneRuntimeException("More then 1 domain is configured, use 'getDomain(String name)' instead.");
         }
     }
-
 
     /** Unregisters DataDomain matching <code>name<code> from
       * this Configuration object. Note that any domain database
@@ -219,7 +227,6 @@ public abstract class Configuration {
     public void removeDomain(String name) {
         dataDomains.remove(name);
     }
-
 
     /** Returns a list of registered DataDomain objects. */
     public List getDomainList() {
@@ -231,4 +238,3 @@ public abstract class Configuration {
         return list;
     }
 }
-

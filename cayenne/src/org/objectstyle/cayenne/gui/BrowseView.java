@@ -729,10 +729,8 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
         // insert
         model.insertNodeInto(entityNode, parent, ins);
     }
-}
-
-
-class BrowseViewRenderer extends DefaultTreeCellRenderer {
+    
+    static class BrowseViewRenderer extends DefaultTreeCellRenderer {
     ImageIcon domainIcon;
     ImageIcon nodeIcon;
     ImageIcon mapIcon;
@@ -794,4 +792,6 @@ class BrowseViewRenderer extends DefaultTreeCellRenderer {
         } 
         return this;
     }
+}
+
 }

@@ -216,7 +216,7 @@ implements ActionListener
     private void initToolBar() {
     	String path = "org/objectstyle/gui/";
     	
-    	ClassLoader cl = BrowseViewRenderer.class.getClassLoader();
+    	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
     	URL url = cl.getResource(path + "images/domain24.jpg");
         ImageIcon domainIcon = new ImageIcon(url);
         createDomainBtn = new JButton(domainIcon);
