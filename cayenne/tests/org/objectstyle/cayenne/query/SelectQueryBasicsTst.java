@@ -94,7 +94,7 @@ public class SelectQueryBasicsTst extends TestCase {
 		assertEquals(1, q.getOrderingList().size());
 
 		Ordering ord = (Ordering) q.getOrderingList().get(0);
-		assertEquals(path, ord.getSortPathSpec());
+		assertEquals(path, ord.getSortSpec().getOperand(0));
 		assertEquals(Ordering.DESC, ord.isAscending());
 	}
 

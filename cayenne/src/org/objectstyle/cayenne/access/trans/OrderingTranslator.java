@@ -53,51 +53,63 @@ package org.objectstyle.cayenne.access.trans;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** Translates query qualifier to SQL. */
 public class OrderingTranslator extends QueryAssemblerHelper {
-    static Logger logObj = Logger.getLogger(OrderingTranslator.class.getName());
-    
-    public OrderingTranslator(QueryAssembler queryAssembler) {
-        super(queryAssembler);
-    }
-    
-    
-    /** Translates query Ordering list to SQL ORDER BY clause. 
-     *  Ordering list is obtained from <code>queryAssembler</code>'s query object. 
-     *  In a process of building of ORDER BY clause, <code>queryAssembler</code> 
-     *  is notified when a join needs to be added. */
-    public String doTranslation() {
-        Query q = queryAssembler.getQuery();
-        
-        // only select queries can have ordering...
-        if(q == null || !(q instanceof SelectQuery))
-            return null;
-        
-        StringBuffer buf = new StringBuffer();        
-        List list = ((SelectQuery)q).getOrderingList();
-        int len = list.size();
-        
-        for(int i = 0; i < len; i++) {
-            if(i > 0)
-                buf.append(", ");
-            
-            Ordering ord = (Ordering)list.get(i);
-            appendObjPath(buf, ExpressionFactory.unaryExp(Expression.OBJ_PATH, ord.getSortPathSpec()));
-            
-            // "ASC" is a noop, omit it from the query 
-            if(!ord.isAscending())
-                buf.append(" DESC");        
-        }        
-        
-        return buf.length() > 0 ? buf.toString() : null;
-    }
+	static Logger logObj = Logger.getLogger(OrderingTranslator.class.getName());
+
+	public OrderingTranslator(QueryAssembler queryAssembler) {
+		super(queryAssembler);
+	}
+
+	/** Translates query Ordering list to SQL ORDER BY clause. 
+	 *  Ordering list is obtained from <code>queryAssembler</code>'s query object. 
+	 *  In a process of building of ORDER BY clause, <code>queryAssembler</code> 
+	 *  is notified when a join needs to be added. */
+	public String doTranslation() {
+		Query q = queryAssembler.getQuery();
+
+		// only select queries can have ordering...
+		if (q == null || !(q instanceof SelectQuery))
+			return null;
+
+		StringBuffer buf = new StringBuffer();
+		List list = ((SelectQuery) q).getOrderingList();
+		int len = list.size();
+
+		for (int i = 0; i < len; i++) {
+			if (i > 0)
+				buf.append(", ");
+
+			Ordering ord = (Ordering) list.get(i);
+			Expression exp = ord.getSortSpec();
+
+			if (exp.getType() == Expression.OBJ_PATH) {
+				appendObjPath(buf, exp);
+			}
+			else if(exp.getType() == Expression.DB_NAME) {
+				appendDbPath(buf, exp);
+			}
+			else {
+				throw new CayenneRuntimeException("Unsupported ordering expression: " + exp);
+			}
+
+			// "ASC" is a noop, omit it from the query 
+			if (!ord.isAscending()) {
+				buf.append(" DESC");
+			}
+		}
+
+		return buf.length() > 0 ? buf.toString() : null;
+	}
 }

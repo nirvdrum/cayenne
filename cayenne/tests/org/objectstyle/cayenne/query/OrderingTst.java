@@ -71,17 +71,17 @@ public class OrderingTst extends TestCase {
     public void testPathSpec1() throws Exception {
         String pathSpec = "a.b.c";
         Ordering ord = new Ordering();
-        assertNull(ord.getSortPathSpec());
+        assertNull(ord.getSortSpec());
         
-        ord.setSortPathSpec(pathSpec);
-        assertEquals(pathSpec, ord.getSortPathSpec());
+        ord.setSortSpec(pathSpec);
+        assertEquals(pathSpec, ord.getSortSpec().getOperand(0));
     }
     
     
     public void testPathSpec2() throws Exception {
         String pathSpec = "a.b.c";
         Ordering ord = new Ordering(pathSpec, false);
-        assertEquals(pathSpec, ord.getSortPathSpec());
+        assertEquals(pathSpec, ord.getSortSpec().getOperand(0));
     }
     
     

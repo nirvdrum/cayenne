@@ -1,4 +1,8 @@
 package org.objectstyle.cayenne.query;
+
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,51 +57,80 @@ package org.objectstyle.cayenne.query;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
-
+ */
 
 /** Defines ordering policy. Queries can have multiple Ordering's. */
 public class Ordering {
-    /** Symbolic representation of ascending ordering criterion. */ 
-    public static final boolean ASC = true;
-    
-    /** Symbolic representation of descending ordering criterion. */ 
-    public static final boolean DESC = false;  
-    
-    
-    protected String sortPathSpec;
-    protected boolean ascending;
-    
-    public Ordering() {}
-    
-    public Ordering(String sortPathSpec, boolean ascending) {
-        this.sortPathSpec = sortPathSpec;
-        this.ascending = ascending;
-    }
-    
-    /** Returns sortPathSpec property used in ordering. 
-     * See {@link org.objectstyle.cayenne.exp.Expression#OBJ_PATH OBJ_PATH} 
-     * for the definition of "object path". */ 
-    public String getSortPathSpec() {
-        return sortPathSpec;
-    }
-    
-    
-    /** Sets sortPathSpec property. */
-    public void setSortPathSpec(String sortPathSpec) {
-        this.sortPathSpec = sortPathSpec;
-    }
-    
-    
-    /** Returns true if sorting is done in ascending order. */
-    public boolean isAscending() {
-        return ascending;
-    }
-    
-    
-    /** Sets <code>ascending</code> property of this Ordering. */
-    public void setAscending(boolean ascending) {
-        this.ascending = ascending;
-    }
+	/** Symbolic representation of ascending ordering criterion. */
+	public static final boolean ASC = true;
+
+	/** Symbolic representation of descending ordering criterion. */
+	public static final boolean DESC = false;
+
+	protected Expression sortSpec;
+	protected boolean ascending;
+
+	public Ordering() {
+	}
+
+	public Ordering(String sortPathSpec, boolean ascending) {
+		setSortSpec(sortPathSpec);
+		this.ascending = ascending;
+	}
+
+	/** 
+	 * Returns sortPathSpec OBJ_PATH specification used in ordering.
+	 * 
+	 * @deprecated Since ordering now supports expression types other than OBJ_PATH,
+	 * this method is deprected. Use <code>getSortSpec().getOperand(0)</code> instead.
+     */
+	public String getSortPathSpec() {
+		return (String)getSortSpec().getOperand(0);
+	}
+
+	/** 
+	 * Sets path of the sort specification. 
+	 * 
+	 * @deprecated Since ordering now supports expression types other than OBJ_PATH,
+	 * this method is deprected. Use <code>setSortSpec()</code> instead.
+	 */
+	public void setSortPathSpec(String sortPathSpec) {
+		setSortSpec(sortPathSpec);
+	}
+
+	/** 
+	 * Sets sortSpec to be OBJ_PATH expression. 
+	 * with path specified as <code>sortPathSpec</code>
+	 * parameter.
+	 */
+	public void setSortSpec(String sortPathSpec) {
+		this.sortSpec =
+			ExpressionFactory.unaryExp(Expression.OBJ_PATH, sortPathSpec);
+	}
+
+	/** Returns true if sorting is done in ascending order. */
+	public boolean isAscending() {
+		return ascending;
+	}
+
+	/** Sets <code>ascending</code> property of this Ordering. */
+	public void setAscending(boolean ascending) {
+		this.ascending = ascending;
+	}
+
+	/**
+	 * Returns the sortSpec.
+	 * @return Expression
+	 */
+	public Expression getSortSpec() {
+		return sortSpec;
+	}
+
+	/**
+	 * Sets the sortSpec.
+	 * @param sortSpec The sortSpec to set
+	 */
+	public void setSortSpec(Expression sortSpec) {
+		this.sortSpec = sortSpec;
+	}
 }
