@@ -91,13 +91,13 @@ public class QueryTst extends CayenneTestCase {
     	assertNull(query.getRoot());
     	ObjEntity e= getDomain().getEntityResolver().lookupObjEntity("Artist");
     	query.setRoot(e);
-    	this.assertSame(e, query.getRoot());
+    	assertSame(e, query.getRoot());
     }
     
     public void testSetRootClass() {
     	assertNull(query.getRoot());
 	   	query.setRoot(Artist.class);
-    	this.assertSame(Artist.class, query.getRoot());
+    	assertSame(Artist.class, query.getRoot());
     }
 
     public void testSetInvalidRoot() {
