@@ -57,11 +57,10 @@ package org.objectstyle.cayenne.access.jdbc;
 
 import java.sql.Types;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
+import junit.framework.TestCase;
+
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
-
-import junit.framework.TestCase;
 
 /**
  * @author Andrei Adamchik
