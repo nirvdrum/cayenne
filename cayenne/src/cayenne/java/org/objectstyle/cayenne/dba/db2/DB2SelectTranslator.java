@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.sqlserver;
+package org.objectstyle.cayenne.dba.db2;
 
 import java.sql.Types;
 import java.util.Iterator;
@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @author Andrei Adamchik
  */
 // class has to be public as instances are created via reflection...
-public class SQLServerSelectTranslator extends SelectTranslator {
+public class DB2SelectTranslator extends SelectTranslator {
 
     private static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
             Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR

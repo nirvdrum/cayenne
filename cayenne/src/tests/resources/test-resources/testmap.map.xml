@@ -384,6 +384,7 @@
 	<query name="NonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap" selecting="false">
 		<sql><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE)
 VALUES (512, 'No Painting Like This', 12.5)]]></sql>
+		<sql adapter-class="org.objectstyle.cayenne.dba.db2.DB2Adapter"><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE) VALUES (512, 'No Painting Like This', 12.5)]]></sql>
 	</query>
 	<query name="ObjectQuery" factory="org.objectstyle.cayenne.map.SelectQueryBuilder" root="obj-entity" root-name="Painting">
 		<property name="cayenne.GenericSelectQuery.refreshingObjects" value="false"/>
@@ -393,6 +394,7 @@ VALUES (512, 'No Painting Like This', 12.5)]]></sql>
 	<query name="ParameterizedNonSelectingQuery" factory="org.objectstyle.cayenne.map.SQLTemplateBuilder" root="data-map" root-name="testmap" selecting="false">
 		<sql><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE)
 VALUES (#bind($id), #bind($title), #bind($price))]]></sql>
+		<sql adapter-class="org.objectstyle.cayenne.dba.db2.DB2Adapter"><![CDATA[INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ESTIMATED_PRICE) values (#bind($id), #bind($title), #bind($price))]]></sql>
 	</query>
 	<query name="ProcedureQuery" factory="org.objectstyle.cayenne.map.ProcedureQueryBuilder" root="procedure" root-name="cayenne_tst_select_proc" result-type="org.objectstyle.art.Artist">
 	</query>

@@ -62,6 +62,7 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.AbstractType;
@@ -73,6 +74,8 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
@@ -225,6 +228,31 @@ public class DB2Adapter extends JdbcAdapter {
      */
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new DB2QualifierTranslator(queryAssembler, "RTRIM");
+    }
+    
+    /**
+     * Returns DB2SelectTranslator class for object SELECT queries.
+     * 
+     * @since 1.1
+     */
+    protected Class queryTranslatorClass(Query q) {
+        if (q instanceof SelectQuery) {
+            return DB2SelectTranslator.class;
+        }
+        else {
+            return super.queryTranslatorClass(q);
+        }
+    }
+    
+    /**
+     * Returns SQLServerDataNode instance.
+     * 
+     * @since 1.1
+     */
+    public DataNode createDataNode(String name) {
+        DataNode node = new DB2DataNode(name);
+        node.setAdapter(this);
+        return node;
     }
     
     final class DB2BooleanType extends AbstractType {
