@@ -93,22 +93,12 @@ public class CayenneGenerator extends Task {
             AntClassGenerator gen = new AntClassGenerator(dataMap);
 
             if (makepairs) {
-                String t =
-                    (template != null)
-                        ? template.getCanonicalPath()
-                        : MapClassGenerator.SUBCLASS_TEMPLATE;
-
-                String st =
-                    (supertemplate != null)
-                        ? supertemplate.getCanonicalPath()
-                        : MapClassGenerator.SUPERCLASS_TEMPLATE;
+                String t = getTemplateForPairs();
+                String st = getSupertemplateForPairs();
                 gen.generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
             }
             else {
-                String t =
-                    (template != null)
-                        ? template.getCanonicalPath()
-                        : MapClassGenerator.SINGLE_CLASS_TEMPLATE;
+                String t = getTemplateForSingles();
                 gen.generateSingleClasses(t);
             }
         }
@@ -117,10 +107,41 @@ public class CayenneGenerator extends Task {
             throw new BuildException("Error generating classes.", ex);
         }
     }
+
+
+    /** 
+     *  Returns template file path for Java class 
+     *  when generating single classes. 
+     */
+    protected String getTemplateForSingles() throws IOException {
+        return (template != null)
+            ? template.getCanonicalPath()
+            : MapClassGenerator.SINGLE_CLASS_TEMPLATE;
+    }
     
-    
+
+    /** 
+     *  Returns template file path for Java subclass 
+     *  when generating class pairs. 
+     */
+    protected String getTemplateForPairs() throws IOException {
+        return (template != null)
+            ? template.getCanonicalPath()
+            : MapClassGenerator.SUBCLASS_TEMPLATE;
+    }
+
+    /** 
+     *  Returns template file path for Java superclass 
+     *  when generating class pairs. 
+     */
+    protected String getSupertemplateForPairs() throws IOException {
+        return (supertemplate != null)
+            ? supertemplate.getCanonicalPath()
+            : MapClassGenerator.SUPERCLASS_TEMPLATE;
+    }
+
     /** Loads and returns DataMap based on <code>map</code> attribute. */
-    protected DataMap loadDataMap()throws Exception {
+    protected DataMap loadDataMap() throws Exception {
         InputSource in = new InputSource(map.getCanonicalPath());
         return new MapLoaderImpl().loadDataMap(in);
     }
