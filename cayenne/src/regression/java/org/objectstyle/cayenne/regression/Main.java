@@ -46,6 +46,8 @@ public class Main {
       rndSchema.setTableCount(prefs.getTableCount());
       rndSchema.setMaxReferencesPerTable(prefs.getMaxReferencesPerTable());
       rndSchema.setMaxForeignKeysPerTable(prefs.getMaxForeignKeysPerTable());
+      rndSchema.setLoopCount(prefs.getLoopCount());
+      rndSchema.setMaxLoopsPerTable(prefs.getMaxLoopsPerTable());
       Random randomizer = new Random(prefs.getSeed());
       rndSchema.setRandomizer(randomizer);
       File workDir = prefs.getWorkDirectory();

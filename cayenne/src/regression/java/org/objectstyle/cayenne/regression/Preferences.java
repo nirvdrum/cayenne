@@ -15,6 +15,8 @@ test.new_objects_per_table=10
 test.delete_objects_per_table=5
 test.max_references_per_table=3
 test.max_foreign_keys_per_table=3
+test.loop_count=10
+test.max_loops_per_table=3
 test.record_all=yes
 test.out=test_log.txt
 test.schema_count=1
@@ -32,6 +34,8 @@ public class Preferences {
   private int deleteObjectPerTableCount = 5;
   private int maxReferencesPerTable = 3;
   private int maxForeignKeysPerTable = 3;
+  private int loopCount = 10;
+  private int maxLoopsPerTable = 3;
   private java.io.File configFile;
   private boolean recordAll = true;
   private java.io.File outFile;
@@ -81,6 +85,10 @@ public class Preferences {
     catch (Exception e) {}
     try {maxForeignKeysPerTable = conf.getInt("test.max_foreign_keys_per_table", maxForeignKeysPerTable);}
     catch (Exception e) {}
+    try {loopCount = conf.getInt("test.loop_count", loopCount);}
+    catch (Exception e) {}
+    try {maxLoopsPerTable = conf.getInt("test.max_loops_per_table", maxLoopsPerTable);}
+    catch (Exception e) {}
     try {schemaCount = conf.getInt("test.schema_count", schemaCount);}
     catch (Exception e) {}
     try {commitsPerSchema = conf.getInt("test.commits_per_schema", commitsPerSchema);}
@@ -122,6 +130,12 @@ public class Preferences {
   public int getMaxForeignKeysPerTable() {
     return maxForeignKeysPerTable;
   }
+  public int getLoopCount() {
+    return loopCount;
+  }
+  public int getMaxLoopsPerTable() {
+    return maxLoopsPerTable;
+  }
   public java.io.File getConfigFile() {
     return configFile;
   }
@@ -150,6 +164,8 @@ public class Preferences {
     out.println("delete objects per table: " + deleteObjectPerTableCount);
     out.println("max references per table: " + maxReferencesPerTable);
     out.println("max foreign keys per table: " + maxForeignKeysPerTable);
+    out.println("loop count: " + loopCount);
+    out.println("max loops per table: " + maxLoopsPerTable);
     out.println("record all: " + recordAll);
     out.println("out file: " + outFile);
     out.println("count of schemas to generate: " + schemaCount);

@@ -251,7 +251,7 @@ public class RandomDomainBuilder {
     for (Iterator i = foreignKeys.iterator(); i.hasNext();) {
       ForeignKey fk = (ForeignKey)i.next();
       if (fk.getPkTableName().equals(pkTable.getName())) {
-        DbRelationship forwardRelation = new DbRelationship(pkEntity.getName() + '_' + fkEntity.getName());
+        DbRelationship forwardRelation = new DbRelationship(pkEntity.getName() + '_' + fkEntity.getName() + '_' + fk.getName());
         forwardRelation.setToMany(true);
         for (Iterator j = primaryKeys.iterator(); j.hasNext();) {
           PrimaryKey pk = (PrimaryKey)j.next();
@@ -263,7 +263,7 @@ public class RandomDomainBuilder {
         forwardRelation.setSourceEntity(pkEntity);
         forwardRelation.setTargetEntity(fkEntity);
         pkEntity.addRelationship(forwardRelation);
-        DbRelationship backwardRelation = new DbRelationship(fkEntity.getName() + '_' + pkEntity.getName());
+        DbRelationship backwardRelation = new DbRelationship(fkEntity.getName() + '_' + fk.getName() + '_' + pkEntity.getName());
         backwardRelation.setToMany(false);
         backwardRelation.setSourceEntity(fkEntity);
         backwardRelation.setTargetEntity(pkEntity);
@@ -285,7 +285,7 @@ public class RandomDomainBuilder {
         objBackwardRel.setSourceEntity(fkObjEntity);
         objBackwardRel.setTargetEntity(pkObjEntity);
         fkObjEntity.addRelationship(objBackwardRel);
-        return;
+        //return;
       }
     }
   }
