@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.gui.validator.ErrorMsg;
 public class SaveHandler {
 	protected String message =
 		"The project has changes and must be saved "
-			+ "before the operation can continue.\n "
+			+ "before the operation can continue.\n"
 			+ "Do you want to save project?";
 
 	protected String title = "Operation Requires Saving Project";
