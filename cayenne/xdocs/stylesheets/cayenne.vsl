@@ -295,6 +295,7 @@ $tag
 
 
 #macro ( leftMenu )
+	#if( $project.getAttributeValue("menu") )
     #set ($menus = $project.getChildren("menu"))
     #foreach ( $menu in $menus )
     <table bgcolor="$menuborder" border="0" cellpadding="3" cellspacing="2">
@@ -322,5 +323,6 @@ $tag
             <input name="q" type="hidden"><input size="16" id="query" type="text"></td></tr>
     </table>
     </form>
+    #end
 #end
 

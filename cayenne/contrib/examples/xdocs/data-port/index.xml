@@ -1,12 +1,18 @@
 <document>
-<title>cdataport task</title>
+<title>DataPort</title>
 <body>
-    <section name="Cayenne Data Porting Example">        
+    <section name="Data Port Example">
+            
 	<p>This example demonstrates how porting the data from one database to another 
 	can be done with Cayenne. It shows the operations of some of the internal parts of 
-	Cayenne, normally not used in the applications. This example also 
-	contains Ant interface to perform data porting. It is documented <a href="dbport.html">here</a>.
+	Cayenne, normally not used in the applications. It also 
+	contains Ant interface to perform data porting. Links:
 	</p>
+	
+	<ul>
+		<li>'cdatatport' Ant task <a href="dbport.html">documentation</a>.</li>
+		<li>JavaDoc API <a href="../api/data-port/index.html">documentation</a>.</li>
+	</ul>
     </section>
 </body>
 </document>

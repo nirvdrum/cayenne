@@ -1,8 +1,10 @@
 <document>
 <title>cdataport task</title>
 <body>
-    <section name="Cayenne Data Porting Tool (cdataport)">        
-            <p>Sometimes it is necessary to recreate a database, copying data
+    <section name="'cdataport' Ant Task">
+			<h3>Description</h3>
+			
+			<p>Sometimes it is necessary to recreate a database, copying data
             from another existing database. For instance, recreating development database 
             instance from production data, etc. While most RDBMS provide data import/export
             tools, they normally require advanced DBA skills to use and are most often not
@@ -10,9 +12,6 @@
             between the databases with identical schema, using DataMap information.
             </p>
             
-            <subsection name="cdataport Ant Task">
-			<h3>Description</h3>
-			
 			<p><code>CDataPort</code> is an Ant task uses Cayenne project with at least one 
 			DataMap and two DataNodes to port data from source DataNode to a destination DataNode. 
 			Only DataMaps linked to the source DataNode will be considered for porting.
@@ -77,8 +76,6 @@
 &amp;lt;/taskdef&amp;gt;
 &amp;lt;cdataport projectFile="subdir/cayenne.xml" srcNode="ProductionNode" destNode="DevNode" excludeTables="BILL_*"/&amp;gt;
 </source>
-
-			</subsection>
     </section>
 </body>
 </document>

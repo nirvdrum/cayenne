@@ -22,6 +22,13 @@
     <property name="dist" value="${dist.base}/${project.name}-${project.version}"/>
 
 
+    <path id="classpath-docs">
+    	<pathelement path="${ant.home}/lib/ant.jar"/>
+        <fileset dir="${root}/otherlib">
+            <include name="**.jar"/>
+        </fileset>
+    </path>
+    
     <!-- ============================================= -->
     <!-- Prints help message describing build.xml use. -->
     <!-- ============================================= -->
@@ -83,7 +90,30 @@
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
     <target name="doc">
-        <ant antfile="build-data-port.xml" target="doc"/>
+        <!-- copy images -->
+        <copy todir="${dist}/doc/images" filtering="no">
+            <fileset dir="${root}/xdocs/images">
+                <include name="**/spacer.gif"/>
+                <include name="**/cayenne_logo.gif"/>
+                <include name="**/os_logo.gif"/>                
+                <include name="**/objectstyle.css"/>
+            </fileset>
+        </copy>
+        
+        <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
+            <classpath refid="classpath-docs"/>
+        </taskdef>
+        
+        <!-- Build docs for all examples -->
+        <anakia basedir="xdocs" 
+             destdir="${dist}/doc"
+             extension=".html" 
+             style="xdocs/stylesheets/cayenne.vsl"
+             excludes="**/stylesheets/**"
+             includes="**/*.xml"
+             lastModifiedCheck="true"
+             projectFile="stylesheets/project.xml"
+             templatePath="${root}"/>
     </target>
 
 
