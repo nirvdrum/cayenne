@@ -5,3 +5,14 @@
 For the latest information go to the project web site at
 http://objectstyle.org/cayenne/
 
+
+Changes Since 1.0:
+
+1. QueryEngine.performQuery(Query, OperationObserver) is deprecated
+as redundant.
+
+2. ContextSelectObserver is deprecated. Its functionality is now implemented in 
+the superclass.
+
+3. SnapshotManager is now stateless and is used as a singelton.
+
