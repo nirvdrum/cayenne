@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.*;
@@ -64,6 +64,7 @@ import java.util.List;
 import javax.swing.*;
 
 import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.util.GUIUtil;
 
 /** 
@@ -72,72 +73,66 @@ import org.objectstyle.cayenne.gui.util.GUIUtil;
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ChooseSchemaDialog extends JDialog
-implements ActionListener
-{
-	public static final int SELECT 	= 0;
-	public static final int CANCEL 	= 1;
+public class ChooseSchemaDialog extends JDialog implements ActionListener {
+	public static final int SELECT = 0;
+	public static final int CANCEL = 1;
 
 	private List schemaList = new ArrayList();
-	private String	  schemaName = null;
-	
-	JComboBox schemaSelect;
-	JButton select		= new JButton("Select");
-	JButton cancel		= new JButton("Cancel");
-	private int choice  = CANCEL;
+	private String schemaName = null;
 
-	public ChooseSchemaDialog(List schema_list) {
-		super(Editor.getFrame(), "Select Schema", true);
-		schemaList = schema_list;
-				
+	JComboBox schemaSelect;
+	JButton select = new JButton("Continue");
+	JButton cancel = new JButton("Cancel");
+	private int choice = CANCEL;
+
+    /** 
+     * Creates and initializes new ChooseSchemaDialog.
+     */
+	public ChooseSchemaDialog(List schemaList) {
+		super(Editor.getFrame(), "Schema Selector", true);
+		setResizable(false);
+		
+		this.schemaList = schemaList;
+		
 		init();
 		
-		setSize(380, 150);
-		Point point = Editor.getFrame().getLocationOnScreen();
-		this.setLocation(point);
-		
+		select.addActionListener(this);
+		cancel.addActionListener(this);
+
+        this.pack();
+        
 		// display dialog in the center
 		GUIUtil.centerWindow(this);
 	}
-	
-	/** Set up the graphical components. */
+
+	/** Sets up the graphical components. */
 	private void init() {
 		getContentPane().setLayout(new BorderLayout());
 		
-		// Name text field
-		JPanel temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		JLabel label = new JLabel("Schema list: ");
-		Object[] arr = new Object[schemaList.size()];
-		arr = schemaList.toArray(arr);
-		schemaSelect = new JComboBox(arr);
-		temp.add(label);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(schemaSelect);
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp, BorderLayout.NORTH);		
-				
-		temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		temp.add(select);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(cancel);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp, BorderLayout.SOUTH);
-				
-		select.addActionListener(this);
-		cancel.addActionListener(this);
-	}// End init()
-	
+        // create schema selector
+        schemaSelect = new JComboBox(schemaList.toArray(new Object[schemaList.size()]));
+        schemaSelect.setBackground(Color.WHITE);
+        
+        // add buttons
+		JPanel buttons = GUIUtil.createButtonPanel(new JButton[] {select, cancel});
+		
+		Component[] left = new Component[] {
+			new JLabel("Schemas: "), new JLabel()
+		};
+
+		Component[] right = new Component[] {
+			schemaSelect, buttons
+		};
+		
+		JPanel panel = PanelFactory.createForm(left, right, 5, 5, 5, 5);
+		getContentPane().add(panel, BorderLayout.CENTER);
+	}
 	
 	public String getSchemaName() {
 		if (getChoice() != SELECT)
 			return null;
 		return schemaName;
 	}
-
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
@@ -153,7 +148,7 @@ implements ActionListener
 	}
 
 	private void processSelect() {
-		schemaName = (String)schemaSelect.getSelectedItem();
+		schemaName = (String) schemaSelect.getSelectedItem();
 		choice = SELECT;
 		hide();
 	}
@@ -162,5 +157,5 @@ implements ActionListener
 		schemaName = null;
 		choice = CANCEL;
 		hide();
-	}	
+	}
 }

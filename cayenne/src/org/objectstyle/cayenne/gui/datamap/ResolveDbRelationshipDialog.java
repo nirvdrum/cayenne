@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,23 +53,25 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
+import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.map.*;
 
-/** Edit DbRelationship and DbAttributePair-s for this DbRelationship.
- *  Also allows specifying the reverse relationship. */
+/** 
+ * Edit DbRelationship and DbAttributePair-s for this DbRelationship.
+ * Also allows specifying the reverse relationship. */
 public class ResolveDbRelationshipDialog extends JDialog
 implements ActionListener
 {
@@ -95,18 +96,20 @@ implements ActionListener
 	JButton remove		= new JButton("Remove");
 	JButton save		= new JButton("Save");
 	JButton cancel		= new JButton("Cancel");
-	//JButton reset		= new JButton("New");
+
+
 	private boolean cancelPressed = false;
 
-	public ResolveDbRelationshipDialog(Mediator temp_mediator, List db_rel_list
+	public ResolveDbRelationshipDialog(Mediator mediator, List db_rel_list
 	, DbEntity temp_start, DbEntity temp_end, boolean to_many)
 	{		
 		super(Editor.getFrame(), "", true);
-		mediator = temp_mediator;
-		map = temp_mediator.getCurrentDataMap();
-		originalList = db_rel_list;
-		start = temp_start;
-		end = temp_end;
+		
+		this.mediator = mediator;
+		this.map = mediator.getCurrentDataMap();
+		this.originalList = db_rel_list;
+		this.start = temp_start;
+		this.end = temp_end;
 
 		// If DbRelationship does not exist, create it.
 		if (null == db_rel_list || db_rel_list.size() <= 0)  {
@@ -133,16 +136,16 @@ implements ActionListener
 		}
 		
 		init();
-		setSize(400, 300);
-		Point point = Editor.getFrame().getLocationOnScreen();
-		this.setLocation(point);
-	}// End ResolveDbRelationshipDialog
+		
+		this.pack();
+        GUIUtil.centerWindow(this);
+	}
 	
 	/** Set up the graphical components. */
 	private void init() {
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		
-		// Name text field
+
 		JPanel temp = new JPanel();
 		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
 		JLabel label = new JLabel("Name: ");
@@ -196,7 +199,7 @@ implements ActionListener
 		table.setModel(model);
 		table.getSelectionModel().setSelectionMode(
 										ListSelectionModel.SINGLE_SELECTION);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);		
+		// table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);		
 		JScrollPane scroll_pane = new JScrollPane(table);
 		getContentPane().add(scroll_pane, BorderLayout.CENTER);
 
@@ -214,42 +217,25 @@ implements ActionListener
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 		col = table.getColumnModel().getColumn(3);
 		col.setMinWidth(150);
-
-		temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		temp.add(add);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(remove);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
+		
 		// Make label for save button Create or Update
 		if (isDbRelNew) {
-//			save.setText("Create");
 			setTitle("Create relationship between table " 
 				+ start.getName() + " and " + end.getName());
 		}
 		else {
 			setTitle("Change relationship between table " 
 				+ start.getName() + " and " + end.getName());
-//			save.setText("Update");
 		}
-		temp.add(save);		
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(cancel);
-//		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-//		temp.add(Box.createHorizontalGlue());
-//		temp.add(reset);
-		temp.add(Box.createHorizontalGlue());
+		
+		temp = GUIUtil.createButtonPanel(new JButton[] {add, remove, save, cancel});
 		getContentPane().add(temp, BorderLayout.SOUTH);
 				
 		add.addActionListener(this);
 		remove.addActionListener(this);
 		save.addActionListener(this);
 		cancel.addActionListener(this);
-//		reset.addActionListener(this);
-	}// End init()
+	}
 	
 	
 	public java.util.List getDbRelList() {

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,7 +54,10 @@ package org.objectstyle.cayenne.gui;
  *
  */ 
 
+package org.objectstyle.cayenne.gui;
+
 import java.awt.*;
+
 import javax.swing.*;
 
 /** Utility methods for laying out components on the panels.*/

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,20 +53,20 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.event.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
 
-import org.objectstyle.cayenne.gui.*;
+import javax.swing.*;
+
+import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.gui.PanelFactory;
+import org.objectstyle.cayenne.gui.util.GUIUtil;
+import org.objectstyle.cayenne.gui.util.RelationshipWrapper;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
 
 /** 	Used to select the DbRelationship for ObjRelationship mapping. 
  *  	Allows selecting the relaitonship, canceling, edit the relationship and
@@ -105,51 +104,46 @@ implements ActionListener
 	JButton edit		= new JButton("Edit");
 	private int choice  = CANCEL;
 
-	public ChooseDbRelationshipDialog(DataMap temp_map, List db_rel_list
+	public ChooseDbRelationshipDialog(DataMap temp_map, java.util.List db_rel_list
 				, DbEntity temp_start, DbEntity temp_end, boolean to_many)
 	{
 		super(Editor.getFrame(), "Select DbRelationship", true);
 		map = temp_map;
 		start = temp_start;
 		end = temp_end;
+		
 		// Find matching relationship in the start DbEntity
 		java.util.List list = temp_start.getRelationshipList();
 		Iterator iter = list.iterator();
 		while (iter.hasNext()) {
 			DbRelationship db_rel = (DbRelationship)iter.next();
-			if (db_rel.getTargetEntity() == temp_end)
+			if (db_rel.getTargetEntity() == temp_end) {
 				relList.add(db_rel);
-		}// End while()
+			}
+		}
 
 		// If DbRelationship does not exist, create it.
-		if (null != db_rel_list && db_rel_list.size() > 0)
+		if (null != db_rel_list && db_rel_list.size() > 0) {
 			dbRel = (DbRelationship)db_rel_list.get(0);
+		}
 		
 		init();
-		setSize(380, 150);
-		Point point = Editor.getFrame().getLocationOnScreen();
-		this.setLocation(point);
+		
+		this.pack();
+        GUIUtil.centerWindow(this);
 
 		select.addActionListener(this);
 		cancel.addActionListener(this);
 		create.addActionListener(this);
 		edit.addActionListener(this);
-
-	}// End ChooseDbRelationshipDialog
+	}
 	
-	/** Set up the graphical components. */
+	
+	/** Sets up the graphical components. */
 	private void init() {
-		getContentPane().setLayout(new BorderLayout());
+		getContentPane().setLayout(new BorderLayout());	
 		
-		// Name text field
-		JPanel temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		JLabel label = new JLabel("Relationships: ");
-		temp.add(label);
-		temp.add(Box.createHorizontalStrut(5));
-		temp.add(relSelect);
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp, BorderLayout.NORTH);		
+		relSelect.setBackground(Color.WHITE);		
 		
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
 		RelationshipWrapper sel_item = new RelationshipWrapper(null);
@@ -159,29 +153,27 @@ implements ActionListener
 			DbRelationship db_rel = (DbRelationship) iter.next();
 			RelationshipWrapper wrap = new RelationshipWrapper(db_rel);
 			model.addElement(wrap);
-			if (dbRel != null && db_rel == dbRel)
+			if (dbRel != null && db_rel == dbRel) {	
 				sel_item = wrap;
+			}
 		}		
 		model.setSelectedItem(sel_item);
 		relSelect.setModel(model);
 		
-		temp = new JPanel();
-		temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
-		temp.add(select);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(cancel);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(create);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		temp.add(edit);
-		temp.add(Box.createRigidArea(new Dimension(6, 0)));
-		temp.add(Box.createHorizontalGlue());
-		getContentPane().add(temp, BorderLayout.SOUTH);
-				
-	}// End init()
+		
+		JPanel buttons = GUIUtil.createButtonPanel(new JButton[] {select, cancel, create, edit});		
+		
+		Component[] left = new Component[] {
+			new JLabel("Relationships: "), new JLabel()
+		};
+
+		Component[] right = new Component[] {
+			relSelect, buttons
+		};
+		
+		JPanel panel = PanelFactory.createForm(left, right, 5, 5, 5, 5);
+		getContentPane().add(panel, BorderLayout.CENTER);
+	}
 	
 	
 	public java.util.List getDbRelationshipList() {

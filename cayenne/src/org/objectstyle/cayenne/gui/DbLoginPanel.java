@@ -105,8 +105,8 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 		pane.add(inputPanel, BorderLayout.CENTER);
 
 		// buttons go here
-		JPanel buttonsPanel = new JPanel();
-		this.getRootPane().setDefaultButton(initButtons(buttonsPanel));
+		JPanel buttonsPanel = initButtons();
+		this.getRootPane().setDefaultButton(ok);
 		pane.add(buttonsPanel, BorderLayout.SOUTH);
 
 		this.pack();
@@ -180,41 +180,30 @@ public class DbLoginPanel extends JDialog implements ActionListener {
 				Arrays.asList(adapter_arr));
 		disableVKEvents(adapterInput);
 
-		Component[] left = new Component[5];
-		left[0] = unLabel;
-		left[1] = pwdLabel;
-		left[2] = drLabel;
-		left[3] = urlLabel;
-		left[4] = adapterLabel;
+		Component[] left = new Component[] {
+			unLabel, pwdLabel, drLabel, urlLabel, adapterLabel
+		};
 
-		Component[] right = new Component[5];
-		right[0] = unInput;
-		right[1] = pwdInput;
-		right[2] = drInput;
-		right[3] = urlInput;
-		right[4] = adapterInput;
+		Component[] right = new Component[] {
+			unInput, pwdInput, drInput, urlInput, adapterInput 
+		};
 
 		return PanelFactory.createForm(left, right, 5, 5, 5, 5);
 	}
 
-	/** Returns default button */
-	private JButton initButtons(JPanel panel) {
-		panel.setBorder(BorderFactory.createEmptyBorder(3, 20, 3, 7));
-		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
-
+	private JPanel initButtons() {
 		// buttons
 		ok = new JButton("Ok");
 		ok.setActionCommand("ok");
-		panel.add(ok);
 
 		cancel = new JButton("Cancel");
 		cancel.setActionCommand("cancel");
-		panel.add(cancel);
+
 
 		ok.addActionListener(this);
 		cancel.addActionListener(this);
 
-		return ok;
+		return GUIUtil.createButtonPanel(new JButton[] {ok, cancel});
 	}
 
 	protected JPanel initMessagePanel() {

@@ -55,12 +55,14 @@ package org.objectstyle.cayenne.gui;
  *
  */ 
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URL;
+
 import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.event.*;
+import javax.swing.border.Border;
+
+import org.objectstyle.cayenne.gui.util.GUIUtil;
 
 /** Used to select schema of the database. */
 public class AboutDialog extends JDialog
@@ -151,18 +153,12 @@ implements ActionListener
 		view.addActionListener(this);
 		
 		setSize(WIDTH, HEIGHT);
-		Point point = frame.getLocationOnScreen();
-		int width = frame.getWidth();
-		int x = (width - WIDTH)/2;
-		int height = frame.getHeight();
-		int y = (height - HEIGHT)/2;
-		
-		point.setLocation(point.x + x, point.y + y);
-		this.setLocation(point);
+        GUIUtil.centerWindow(this);
+
 		this.getContentPane().doLayout();
 		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		this.setVisible(true);		
-	}// End AboutDialog
+	}
 	
 	/** Set up the graphical components. */
 	private void init() {

@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.gui.util;
 
 import java.awt.*;
 
+import javax.swing.*;
+
 /**
  * Collection of GUI utility methods that didn't fit anywhere else.
  * 
@@ -75,5 +77,20 @@ public class GUIUtil {
 		int x = (screen.width - width) / 2;
 		int y = (screen.height - height) / 2;
 		win.setBounds(x, y, width, height);
+	}
+	
+	/** 
+	 * Creates and returns a panel with right-centered buttons.
+	 */
+	public static JPanel createButtonPanel(JButton[] buttons) {
+		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createEmptyBorder(3, 20, 3, 7));
+		panel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		
+		for(int i = 0; i < buttons.length; i++) {
+			panel.add(buttons[i]);
+		}
+		
+		return panel;
 	}
 }

@@ -89,7 +89,6 @@ implements DocumentListener, ActionListener
 	JTextField	className;
 	JPanel		dbPane;
 	JComboBox	dbName;
-	JButton		dbNew;
 	
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
@@ -99,13 +98,14 @@ implements DocumentListener, ActionListener
 		super();		
 		mediator = temp_mediator;		
 		mediator.addObjEntityDisplayListener(this);
-		// Create and laout components
+		
+		// Create and layout components
 		init();
+		
 		// Add listeners
 		name.getDocument().addDocumentListener(this);
 		className.getDocument().addDocumentListener(this);
 		dbName.addActionListener(this);
-		dbNew.addActionListener(this);
 	}
 
 	private void init() {
@@ -122,17 +122,13 @@ implements DocumentListener, ActionListener
 		dbName 	= new JComboBox();
 		dbName.setBackground(Color.WHITE);
 		
-		dbNew = new JButton("New");
-		JPanel dbNewContainer = new JPanel();
-		dbNewContainer.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		dbNewContainer.add(dbNew);
 		
 		Component[] leftCol = new Component[] {
-			nameLbl, classNameLbl, dbNameLbl, new JLabel()
+			nameLbl, classNameLbl, dbNameLbl
 		};
 		
 		Component[] rightCol = new Component[] {
-			name, className, dbName, dbNewContainer
+			name, className, dbName
 		};
 		
 		JPanel formPanel = PanelFactory.createForm(leftCol, rightCol, 5,5,5,5);
@@ -154,11 +150,9 @@ implements DocumentListener, ActionListener
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		if (src == dbNew) {
-			createDbEntity();			
-		} 
+
 		// Change db entity for current obj entity
-		else if (src == dbName) {
+		if (src == dbName) {
 			ObjEntity entity = mediator.getCurrentObjEntity();
 			DbEntity db_entity;
 			EntityWrapper wrap;
@@ -228,9 +222,13 @@ implements DocumentListener, ActionListener
 		ignoreChange = false;
 	}
 	
-	/** Creates DefaultComboBoxModel from the list of DbEntities.
-	 *  Model contains DbEntityWrapper-s.
-	 * @param select DbEntity to make selected. If null, empty element is selected. */
+	/** 
+	 * Creates DefaultComboBoxModel from the list of DbEntities.
+	 * Model contains <code>DbEntityWrapper's</code>.
+	 * 
+	 * @param select DbEntity to make selected. If null, empty 
+	 * element is selected.
+	 */
 	private DefaultComboBoxModel createComboBoxModel(DbEntity select) {
 		EntityWrapper selected_entry = null;
 
@@ -249,7 +247,7 @@ implements DocumentListener, ActionListener
 				selected_entry = wrap;
 			}
 			combo_entries.add(wrap);
-		}// End while()
+		}
 
 		DefaultComboBoxModel model = new DefaultComboBoxModel(combo_entries);
 		model.setSelectedItem(selected_entry);
