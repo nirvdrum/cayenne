@@ -78,6 +78,9 @@ public class RelationshipTst extends CayenneTestCase {
 
     public void testSourceEntity() throws Exception {
         Entity tstEntity = new Entity() {
+            /**
+             * @deprecated
+             */
             protected void validateQueryRoot(Query query) {
             }
         };
@@ -87,6 +90,9 @@ public class RelationshipTst extends CayenneTestCase {
 
     public void testTargetEntity() throws Exception {
         Entity tstEntity = new Entity() {
+            /**
+             * @deprecated
+             */
             protected void validateQueryRoot(Query query) {
             }
         };

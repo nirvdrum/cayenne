@@ -62,16 +62,38 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
 
 /** 
- * Superclass of all query classes. 
+ * Superclass of Cayenne queries.
  * 
  * @author Andrei Adamchik
  */
 public abstract class AbstractQuery implements Query {
-    /** The root object this query is based on - maybe an entity name , class, ObjEntity or 
-     * DbEntity, depending on the specific query and how it was constructed */
+    /** 
+     * The root object this query. May be an entity name, Java class, ObjEntity or 
+     * DbEntity, depending on the specific query and how it was constructed.
+     */
     protected Object root;
+    protected String name;
 
     protected Level logLevel = DEFAULT_LOG_LEVEL;
+
+    /**
+     * Returns a symbolic name of the query.
+     * 
+     * @since 1.1
+     */
+    public String getName() {
+        return name;
+    }
+    
+    /**
+     * Sets a symbolic name of the query.
+     * 
+     * @since 1.1
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     /**
      * Returns the <code>logLevel</code> property of this query.
@@ -122,5 +144,4 @@ public abstract class AbstractQuery implements Query {
         
         this.root = value;
     }
-
 }

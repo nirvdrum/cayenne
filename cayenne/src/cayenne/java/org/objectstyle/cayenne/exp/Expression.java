@@ -67,9 +67,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /** Defines basic API of a generic data expression. */
-public abstract class Expression implements Serializable {
+public abstract class Expression implements Serializable, XMLSerializable {
     private static Logger logObj = Logger.getLogger(Expression.class);
 
     /** Corresponds to SQL "A AND B" expression. */
@@ -388,6 +389,17 @@ public abstract class Expression implements Serializable {
         }
 
         return filtered;
+    }
+    
+    /**
+     * Encodes itself as a query qualifier.
+     * @since 1.1
+     */
+    public void encodeAsXML(PrintWriter pw, String linePadding) {
+        pw.print(linePadding);
+        pw.print("<qualifier><![CDATA[");
+        encodeAsString(pw);
+        pw.println("]]></qualifier>");
     }
     
     /**

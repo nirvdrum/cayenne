@@ -87,6 +87,10 @@ public class AttributeTst extends CayenneTestCase {
             public String getTypenameToDisplay() {
                 return null;
             }
+            
+            /**
+             * @deprecated
+             */
             protected void validateQueryRoot(Query query) {
             }
         };

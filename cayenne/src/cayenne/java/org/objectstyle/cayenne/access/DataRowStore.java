@@ -145,14 +145,14 @@ public class DataRowStore implements Serializable {
 
         this.name = name;
         this.eventSubject = createSubject();
-        initFromProperties(properties);
+        initWithProperties(properties);
     }
 
     private EventSubject createSubject() {
         return EventSubject.getSubject(this.getClass(), name);
     }
 
-    protected void initFromProperties(Map properties) {
+    protected void initWithProperties(Map properties) {
         ExtendedProperties propertiesWrapper = new ExtendedProperties();
 
         if (properties != null) {

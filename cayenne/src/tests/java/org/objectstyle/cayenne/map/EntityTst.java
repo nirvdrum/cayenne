@@ -76,6 +76,10 @@ public class EntityTst extends CayenneTestCase {
             public String getTypenameToDisplay() {
                 return null;
             }
+            
+            /**
+             * @deprecated 
+             */
             protected void validateQueryRoot(Query query) {
             }
         };
@@ -108,7 +112,13 @@ public class EntityTst extends CayenneTestCase {
         assertNull(ent.getAttribute(attr.getName()));
     }
 
+    /**
+     * @deprecated Since 1.1 Entity.addQuery() is deprecated.
+     * @throws Exception
+     */
     public void testQuery() throws Exception {
+        ent.setDataMap(new DataMap("t"));
+        
         SelectQuery q = new SelectQuery("Abc");
         ent.addQuery("Query1", q);
         assertSame(q, ent.getQuery("Query1"));
@@ -193,6 +203,9 @@ public class EntityTst extends CayenneTestCase {
 
     public void testRemoveAttribute() {
         Entity entity = new Entity() {
+            /**
+             * @deprecated
+             */
             protected void validateQueryRoot(Query query) {
             }
         };

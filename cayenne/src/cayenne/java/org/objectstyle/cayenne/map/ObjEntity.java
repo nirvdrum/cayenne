@@ -278,6 +278,9 @@ public class ObjEntity extends Entity {
         this.readOnly = readOnly;
     }
 
+    /**
+     * @deprecated Unused since 1.1
+     */
     protected void validateQueryRoot(Query query) throws IllegalArgumentException {
 
         if ((query.getRoot() instanceof Class)

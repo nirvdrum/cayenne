@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -64,6 +65,7 @@ import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 
 /** 
@@ -72,7 +74,7 @@ import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
  * @author Andrei Adamchik
  * @author Craig Miskell
  */
-public class Ordering implements Comparator {
+public class Ordering implements Comparator, XMLSerializable {
 	private static Logger logObj = Logger.getLogger(Ordering.class);
 	
     /** Symbolic representation of ascending ordering criterion. */
@@ -224,5 +226,22 @@ public class Ordering implements Comparator {
         } else {
             return -compareResult;
         }
+    }
+    
+    /**
+     * Encodes itself as a query ordering.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(PrintWriter pw, String linePadding) {
+        pw.print(linePadding);
+        pw.print("<ordering path=\"");
+        pw.print(sortSpec);
+        
+        if(!ascending) {
+            pw.println("\" ascending=\"false");
+        }
+        
+        pw.println("\"/>");
     }
 }

@@ -221,6 +221,9 @@ public class DbEntity extends Entity implements DbAttributeListener {
 		this.dbAttributeRemoved(new AttributeEvent(this, null, this, MapEvent.REMOVE));
 	}
 
+    /**
+     * @deprecated Unused since 1.1
+     */
     protected void validateQueryRoot(Query query) throws IllegalArgumentException {
         if (query.getRoot() != this) {
             throw new IllegalArgumentException("Wrong query root for DbEntity: " + query.getRoot());

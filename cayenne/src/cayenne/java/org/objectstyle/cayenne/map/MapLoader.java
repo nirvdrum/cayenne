@@ -68,13 +68,17 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.project.DataMapFile;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.XMLSerializable;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -91,7 +95,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * @author Andriy Shapochka
  */
 public class MapLoader extends DefaultHandler {
-    private static volatile Logger logObj = Logger.getLogger(MapLoader.class);
+    private static Logger logObj = Logger.getLogger(MapLoader.class);
 
     public static final String DATA_MAP_TAG = "data-map";
     public static final String DB_ENTITY_TAG = "db-entity";
@@ -106,6 +110,16 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_ATTRIBUTE_PAIR_TAG = "db-attribute-pair";
     public static final String PROCEDURE_TAG = "procedure";
     public static final String PROCEDURE_PARAMETER_TAG = "procedure-parameter";
+    
+    // Query-related
+    public static final String QUERY_TAG = "query";
+    public static final String QUERY_PROPERTY_TAG = "property";
+    public static final String QUERY_RESULT_COLUMN_TAG = "result-column";
+    public static final String QUERY_SQL_TAG = "sql";
+    public static final String QUERY_QUALIFIER_TAG = "qualifier";
+    public static final String QUERY_ORDERING_TAG = "ordering";
+    public static final String QUERY_PREFETCH_TAG = "prefetch";
+    
 
     public static final String TRUE = "true";
     public static final String FALSE = "false";
@@ -115,7 +129,7 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_GENERATOR_NAME_TAG = "db-generator-name";
     public static final String DB_KEY_CACHE_SIZE_TAG = "db-key-cache-size";
 
-    /* Reading from XML */
+    // Reading from XML
     private DataMap dataMap;
     private DbEntity dbEntity;
     private ObjEntity objEntity;
@@ -124,11 +138,12 @@ public class MapLoader extends DefaultHandler {
     private DbAttribute attrib;
     private Map dbRelationshipMap;
     private Procedure procedure;
+    private QueryBuilder queryBuilder;
 
     private String currentTag;
     private StringBuffer charactersBuffer;
 
-    /* Saving to XML */
+    // Saving to XML
     private List objRelationships;
     private List dbRelationships;
     private List dbRelationshipRefs;
@@ -177,7 +192,6 @@ public class MapLoader extends DefaultHandler {
             parser.setContentHandler(this);
             parser.setErrorHandler(this);
             parser.parse(src);
-
         }
         catch (SAXException e) {
             logObj.log(Level.INFO, "Wrapped Exception.", e.getException());
@@ -316,6 +330,27 @@ public class MapLoader extends DefaultHandler {
         else if (local_name.equals(PROCEDURE_TAG)) {
             processStartProcedure(atts);
         }
+        else if (local_name.equals(QUERY_TAG)) {
+            processStartQuery(atts);
+        }
+        else if (local_name.equals(QUERY_PROPERTY_TAG)) {
+            processStartQueryProperty(atts);
+        }
+        else if (local_name.equals(QUERY_RESULT_COLUMN_TAG)) {
+            processStartQueryResultColumn(atts);
+        }
+        else if (local_name.equals(QUERY_ORDERING_TAG)) {
+            processStartQueryOrdering(atts);
+        }
+        else if (local_name.equals(QUERY_PREFETCH_TAG)) {
+            processStartQueryPrefetch(atts);
+        }
+        else if (local_name.equals(QUERY_SQL_TAG)) {
+            charactersBuffer = new StringBuffer();
+        }
+        else if (local_name.equals(QUERY_QUALIFIER_TAG)) {
+            charactersBuffer = new StringBuffer();
+        }
         else if (local_name.equals(DB_KEY_GENERATOR_TAG)) {
             processStartDbKeyGenerator(atts);
         }
@@ -369,6 +404,15 @@ public class MapLoader extends DefaultHandler {
         else if (local_name.equals(PROCEDURE_TAG)) {
             processEndProcedure();
         }
+        else if (local_name.equals(QUERY_TAG)) {
+            processEndQuery();
+        }
+        else if (local_name.equals(QUERY_SQL_TAG)) {
+            processEndQuerySQL();
+        }
+        else if (local_name.equals(QUERY_QUALIFIER_TAG)) {
+            processEndQueryQualifier();
+        }
 
         resetCurrentTag();
         charactersBuffer = null;
@@ -406,7 +450,9 @@ public class MapLoader extends DefaultHandler {
 
     /* * * STORE TO XML PART * * */
 
-    /** Archives provided <code>map</code> to XML and stores it to <code>out</code> PrintStream. */
+    /** 
+     * Prints DataMap encoded as XML to a provided PrintWriter.
+     */
     public synchronized void storeDataMap(PrintWriter out, DataMap map)
         throws DataMapException {
         objRelationships = new ArrayList();
@@ -420,10 +466,28 @@ public class MapLoader extends DefaultHandler {
         storeObjEntities(out, map);
         storeDbRelationships(out);
         storeObjRelationships(out);
+        storeQueries(out, map);
         out.println("</data-map>");
         objRelationships = null;
         dbRelationships = null;
         dbRelationshipRefs = null;
+    }
+    
+    private void storeQueries(PrintWriter out, DataMap map) {
+
+        // entry set must be sorted alphabetically, since the map is SortedMap
+        Iterator it = map.getQueryMap().entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Query query = (Query) entry.getValue();
+
+            if (!(query instanceof XMLSerializable)) {
+                throw new CayenneRuntimeException(
+                    "Query can't be serialized to XML - " + entry.getKey());
+            }
+
+            ((XMLSerializable) query).encodeAsXML(out, "\t");
+        }
     }
 
     private void storeProcedures(PrintWriter out, DataMap map) {
@@ -1223,6 +1287,99 @@ public class MapLoader extends DefaultHandler {
 
         procedure.addCallParameter(parameter);
     }
+    
+    private void processStartQuery(Attributes attributes) throws SAXException {
+        String name = attributes.getValue("", "name");
+        if (null == name) {
+            throw new SAXException("MapLoader::processStartQuery(), no query name.");
+        }
+
+        String builder = attributes.getValue("", "factory");
+        if (builder == null) {
+            queryBuilder = new SelectQueryBuilder();
+        }
+        else {
+            try {
+                queryBuilder = (QueryBuilder) Class.forName(builder).newInstance();
+            }
+            catch (Exception ex) {
+                throw new SAXException(
+                    "MapLoader::processStartQuery(), invalid query builder: " + builder);
+            }
+        }
+        
+        String rootType = attributes.getValue("", "root");
+        String rootName = attributes.getValue("", "root-name");
+        
+        queryBuilder.setName(name);
+        queryBuilder.setRoot(dataMap, rootType, rootName);
+    }
+    
+    private void processStartQueryProperty(Attributes attributes) throws SAXException {
+        String name = attributes.getValue("", "name");
+        if (null == name) {
+            throw new SAXException("MapLoader::processStartQueryProperty(), no property name.");
+        }
+
+        String value = attributes.getValue("", "value");
+        if (null == value) {
+            throw new SAXException("MapLoader::processStartQueryProperty(), no property value.");
+        }
+
+        queryBuilder.addProperty(name, value);
+    }
+    
+    private void processStartQueryResultColumn(Attributes attributes)
+        throws SAXException {
+        String label = attributes.getValue("", "label");
+        if (label == null) {
+            throw new SAXException("MapLoader::processStartQueryResultColumn(), no label.");
+        }
+
+        String dbType = attributes.getValue("", "db-type");
+        if (dbType == null) {
+            throw new SAXException("MapLoader::processStartQueryResultColumn(), no db-type.");
+        }
+
+        String javaType = attributes.getValue("", "java-type");
+        if (javaType == null) {
+            throw new SAXException("MapLoader::processStartQueryResultColumn(), no java-type.");
+        }
+
+        queryBuilder.addResultColumn(label, dbType, javaType);
+    }
+    
+    private void processStartQueryOrdering(Attributes attributes) throws SAXException {
+        String path = attributes.getValue("", "path");
+        if (path == null) {
+            throw new SAXException("MapLoader::processStartQueryOrdering(), no path.");
+        }
+
+        String ascending = attributes.getValue("", "ascending");
+        queryBuilder.addOrdering(path, ascending);
+    }
+    
+    private void processStartQueryPrefetch(Attributes attributes) throws SAXException {
+        String path = attributes.getValue("", "path");
+        if (path == null) {
+            throw new SAXException("MapLoader::processStartQueryPrefetch(), no path.");
+        }
+        
+        queryBuilder.addPrefetch(path);
+    }
+    
+    private void processEndQuery() throws SAXException {
+        dataMap.addQuery(queryBuilder.getQuery());
+        queryBuilder = null;
+    }
+    
+    private void processEndQuerySQL() throws SAXException {
+       queryBuilder.setSql(charactersBuffer.toString());
+    }
+    
+    private void processEndQueryQualifier() throws SAXException {
+       queryBuilder.setQualifier(charactersBuffer.toString());
+    }
 
     private void processEndDbAttribute() throws SAXException {
         attrib = null;
@@ -1309,7 +1466,7 @@ public class MapLoader extends DefaultHandler {
 
     protected List sortedProcedures(DataMap map) {
         List list = new ArrayList(map.getProcedures());
-        Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
+        Collections.sort(list, new PropertyComparator("name", Procedure.class));
         return list;
     }
 

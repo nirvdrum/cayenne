@@ -151,14 +151,18 @@ public class EntityResolverTst extends CayenneTestCase {
         assertSame(oe2, resolver.lookupObjEntity(String.class));
     }
 
+    /**
+     * @deprecated since 1.1 lookupQuery is deprecated.
+     */
     public void testLookupObjQuery() throws Exception {
         // create a resolver with a single map
         DataMap m1 = new DataMap();
         ObjEntity oe1 = new ObjEntity("test1");
         oe1.setClassName(Object.class.getName());
         SelectQuery q = new SelectQuery(oe1);
-        oe1.addQuery("abc", q);
         m1.addObjEntity(oe1);
+        oe1.addQuery("abc", q);
+        
         List list = new ArrayList();
         list.add(m1);
         EntityResolver resolver = new EntityResolver(list);

@@ -123,9 +123,9 @@ level, or linked to an entity or procedure.
 <!ELEMENT query (property*, result-column*, (sql* | (qualifier?, ordering*, prefetch*)? )>
 <!ATTLIST query
         name CDATA #REQUIRED
-        class CDATA #REQUIRED
-	root (db-entity | obj-entity | procedure | data-map) "data-map"
-        rootName CDATA #IMPLIED
+        factory CDATA #IMPLIED
+		root (db-entity | obj-entity | procedure | data-map | java-class) "data-map"
+        root-name CDATA #IMPLIED
 >
 
 <!-- ===================================================
@@ -146,7 +146,7 @@ a stripped down combination of ObjAttribute and DbAttribute.
 <!ATTLIST result-column
 	label CDATA #IMPLIED
 	db-type CDATA #REQUIRED
-	obj-type CDATA #REQUIRED
+	java-type CDATA #REQUIRED
 >
 
 <!-- ===================================================
@@ -157,6 +157,23 @@ $param2".
 <!ELEMENT qualifier (#PCDATA)>
 
 <!-- ===================================================
+Defines a query ordering.
+-->
+<!ELEMENT ordering>
+<!ATTLIST ordering
+	path CDATA #REQUIRED
+	ascending  (true | false) "true"
+>
+
+<!-- ===================================================
+Defines a query prefetch.
+-->
+<!ELEMENT prefetch>
+<!ATTLIST prefetch
+	path CDATA #REQUIRED
+>
+
+<!-- ===================================================
 Defines arbitrary SQL statement, normally wrapped in 
 CDATA section. Note that SQL statement can be customized
 for different SQL dialects per DbAdapter class. If no
@@ -165,7 +182,7 @@ adapter label is used by default
 -->
 <!ELEMENT sql (#PCDATA)>
 <!ATTLIST sql
-        adapterClass CDATA #IMPLIED
+        adapter-class CDATA #IMPLIED
 >
 
 

@@ -65,6 +65,21 @@ package org.objectstyle.cayenne.query;
  * @author Andrei Adamchik
  */
 public interface GenericSelectQuery extends Query {
+    public static final String FETCH_LIMIT_PROPERTY =
+        "cayenne.GenericSelectQuery.fetchLimit";
+    public static final int FETCH_LIMIT_DEFAULT = 0;
+
+    public static final String PAGE_SIZE_PROPERTY = "cayenne.GenericSelectQuery.pageSize";
+    public static final int PAGE_SIZE_DEFAULT = 0;
+
+    public static final String FETCHING_DATA_ROWS_PROPERTY =
+        "cayenne.GenericSelectQuery.fetchingDataRows";
+    public static final boolean FETCHING_DATA_ROWS_DEFAULT = false;
+
+    public static final String REFRESHING_OBJECTS_PROPERTY =
+        "cayenne.GenericSelectQuery.refreshingObjects";
+    public static final boolean REFRESHING_OBJECTS_DEFAULT = false;
+    
 	/**
 	 * Returns <code>true</code> if this query 
 	 * should produce a list of data rows as opposed

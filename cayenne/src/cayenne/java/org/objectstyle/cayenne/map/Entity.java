@@ -94,11 +94,6 @@ public abstract class Entity extends MapObject {
     protected Collection relationshipsRef =
         Collections.unmodifiableCollection(relationships.values());
 
-    // ====================================================
-    // Queries
-    // ====================================================
-    protected CayenneMap queries = new CayenneMap(this);
-
     /**
      * @return parent DataMap of this entity.
      */
@@ -117,39 +112,41 @@ public abstract class Entity extends MapObject {
      * Returns a named query associated with this entity.
      * 
      * @since 1.1 Return type is changed to Query from SelectQuery.
+     * @deprecated Since 1.1 Queries are stored at the DataMap level.
      */
     public Query getQuery(String queryName) {
-        return (Query) queries.get(queryName);
+        return getDataMap().getQuery(getName() + ":" + queryName);
     }
 
     /**
      * Creates a named association of a SelectQuery with this entity. Throws
      * IllegalArgumentException if query root can not be resolved to this
      * entity.
+     * 
+     * @deprecated Since 1.1 Queries are stored at the DataMap level.
      */
     public void addQuery(String queryName, Query query) {
-        if (query == null) {
-            throw new NullPointerException("Can't add null query.");
-        }
-
-        if (queryName == null) {
-            throw new NullPointerException("Query name can't be null.");
-        }
-
-        // check if this is the right query
-        this.validateQueryRoot(query);
-        queries.put(queryName, query);
+        query.setName(getName() + ":" + queryName);
+        getDataMap().addQuery(query);
     }
 
     /**
      * Removes a named query from this Entity.
+     * 
+     * @deprecated Since 1.1 Queries are stored at the DataMap level.
      */
     public void removeQuery(String queryName) {
-        queries.remove(queryName);
+        getDataMap().removeQuery(getName() + ":" + queryName);
     }
 
+    /**
+     * @deprecated Since 1.1 Queries are stored at the DataMap level.
+     */
     public void clearQueries() {
-        queries.clear();
+        // TODO: for backwards compatibility
+        // we must scan all queries that start with this entity
+        // name and only clean those.
+        getDataMap().clearQueries();
     }
 
     /**
@@ -157,6 +154,7 @@ public abstract class Entity extends MapObject {
      * validating query root object.
      *
      * @throws IllegalArgumentException if query does not belong to this entity.
+     * @deprecated Unused since 1.1
      */
     protected abstract void validateQueryRoot(Query query)
         throws IllegalArgumentException;

@@ -61,6 +61,8 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
  * DataMap unit tests.
@@ -166,6 +168,31 @@ public class DataMapTst extends TestCase {
         assertSame(map, e.getDataMap());
     }
 
+    public void testAddQuery() throws Exception {
+        Query q = new SelectQuery();
+        q.setName("a");
+        map.addQuery(q);
+        assertSame(q, map.getQuery("a"));
+    }
+    
+    public void testRemoveQuery() throws Exception {
+        Query q = new SelectQuery();
+        q.setName("a");
+        map.addQuery(q);
+        assertSame(q, map.getQuery("a"));
+        map.removeQuery("a");
+        assertNull(map.getQuery("a"));
+    }
+    
+    public void testGetQueryMap() throws Exception {
+        Query q = new SelectQuery();
+        q.setName("a");
+        map.addQuery(q);
+        Map queries = map.getQueryMap();
+        assertEquals(1, queries.size());
+        assertSame(q, queries.get("a"));
+    }
+    
     public void testAddDependency1() throws Exception {
         map.setName("m1");
         DataMap map2 = new DataMap("m2");
@@ -213,7 +240,7 @@ public class DataMapTst extends TestCase {
 
     // make sure deleting a DbEntity & other entity's relationships to it
     // works & does not cause a ConcurrentModificationException
-    public void testDeleteDbEntity() {
+    public void testRemoveDbEntity() {
 
         // create a twisty maze of intermingled relationships.
         DbEntity e1 =

@@ -60,9 +60,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
 
 /**
@@ -124,6 +126,14 @@ public class DataMap {
     private Collection procedureValuesRef =
         Collections.unmodifiableCollection(procedureMap.values());
 
+    // ====================================================
+    // Queries
+    // ====================================================
+    protected CayenneMap queries = new CayenneMap(this);
+    
+    // read-through reference for public access
+     private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queries);
+    
     /** 
      * Creates an new unnamed DataMap. 
      */
@@ -274,6 +284,56 @@ public class DataMap {
     public SortedMap getDbEntityMap() {
         return dbEntityMapRef;
     }
+    
+    
+    /**
+     * Returns a named query associated with this DataMap.
+     * 
+     * @since 1.1
+     */
+    public Query getQuery(String queryName) {
+        return (Query) queries.get(queryName);
+    }
+
+    /**
+     * Stores a query under its name.
+     * 
+     * @since 1.1
+     */
+    public void addQuery(Query query) {
+        if (query == null) {
+            throw new NullPointerException("Can't add null query.");
+        }
+
+        if (query.getName() == null) {
+            throw new NullPointerException("Query name can't be null.");
+        }
+
+        queries.put(query.getName(), query);
+    }
+
+    /**
+     * Removes a named query from the DataMap.
+     * 
+     * @since 1.1
+     */
+    public void removeQuery(String queryName) {
+        queries.remove(queryName);
+    }
+
+    /**
+     * @since 1.1
+     */
+    public void clearQueries() {
+        queries.clear();
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public SortedMap getQueryMap() {
+        return queryMapRef;
+    }
 
     /** 
      * Adds a new ObjEntity to this DataMap.
@@ -393,9 +453,31 @@ public class DataMap {
         }
         return null;
     }
+    
+    /**
+     * Returns an ObjEntity for a DataObject class name.
+     * 
+     * @since 1.1
+     */
+    public ObjEntity getObjEntityForJavaClass(String javaClassName) {
+        if(javaClassName == null) {
+            return null;
+        }
+        
+        Iterator it = getObjEntityMap().entrySet().iterator();
+        while(it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            ObjEntity entity = (ObjEntity) entry.getValue();
+            if(javaClassName.equals(entity.getClassName())) {
+                return entity;
+            }
+        }
+        
+        return null;
+    }
 
     /**
-     * Get ObjEntity by its name.
+     * Returns an ObjEntity for a given name.
      */
     public ObjEntity getObjEntity(String objEntityName) {
         return (ObjEntity) objEntityMap.get(objEntityName);

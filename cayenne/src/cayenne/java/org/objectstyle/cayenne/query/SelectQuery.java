@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.query;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -67,6 +69,8 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
  * SelectQuery is a Query object describing what rows to retrieve from the 
@@ -78,7 +82,11 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * 
  * @author Andrei Adamchik
  */
-public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
+public class SelectQuery
+    extends QualifiedQuery
+    implements GenericSelectQuery, XMLSerializable {
+    public static final String DISTINCT_PROPERTY = "cayenne.SelectQuery.distinct";
+    public static final boolean DISTINCT_DEFAULT = false;
 
     protected List customDbAttributes = new ArrayList();
     protected List orderings = new ArrayList();
@@ -91,15 +99,9 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     protected String parentObjEntityName;
     protected int pageSize;
 
-
     /** Creates empty SelectQuery. */
     public SelectQuery() {
         super();
-    }
-
-    private void init(Object root, Expression qualifier) {
-        this.setRoot(root);
-        this.setQualifier(qualifier);
     }
 
     /**
@@ -145,6 +147,166 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
     /** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
     public SelectQuery(String objEntityName, Expression qualifier) {
         init(objEntityName, qualifier);
+    }
+
+    private void init(Object root, Expression qualifier) {
+        this.setRoot(root);
+        this.setQualifier(qualifier);
+    }
+
+    /**
+     * Initializes query parameters using a set of properties.
+     * 
+     * @since 1.1
+     */
+    public void initWithProperties(Map properties) {
+
+        // must init defaults even if properties are empty
+        if (properties == null) {
+            properties = Collections.EMPTY_MAP;
+        }
+
+        Object distinct = properties.get(DISTINCT_PROPERTY);
+        Object fetchLimit = properties.get(FETCH_LIMIT_PROPERTY);
+        Object pageSize = properties.get(PAGE_SIZE_PROPERTY);
+        Object refreshingObjects = properties.get(REFRESHING_OBJECTS_PROPERTY);
+        Object fetchingDataRows = properties.get(FETCHING_DATA_ROWS_PROPERTY);
+
+        // init ivars from properties
+        this.distinct =
+            (distinct != null)
+                ? "true".equalsIgnoreCase(distinct.toString())
+                : DISTINCT_DEFAULT;
+
+        this.fetchLimit =
+            (fetchLimit != null)
+                ? Integer.parseInt(fetchLimit.toString())
+                : FETCH_LIMIT_DEFAULT;
+
+        this.pageSize =
+            (pageSize != null)
+                ? Integer.parseInt(pageSize.toString())
+                : PAGE_SIZE_DEFAULT;
+
+        this.refreshingObjects =
+            (refreshingObjects != null)
+                ? "true".equalsIgnoreCase(refreshingObjects.toString())
+                : REFRESHING_OBJECTS_DEFAULT;
+
+        this.fetchingDataRows =
+            (fetchingDataRows != null)
+                ? "true".equalsIgnoreCase(fetchingDataRows.toString())
+                : FETCHING_DATA_ROWS_DEFAULT;
+    }
+
+    /**
+     * Prints itself as XML to the provided PrintWriter.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(PrintWriter pw, String linePadding) {
+        pw.print(linePadding);
+        pw.print("<query name=\"");
+        pw.print(getName());
+        pw.print("\" factory=\"org.objectstyle.cayenne.map.SelectQueryBuilder\"");
+
+        String rootString = null;
+        String rootType = null;
+
+        if (root instanceof String) {
+            rootType = QueryBuilder.OBJ_ENTITY_ROOT;
+            rootString = root.toString();
+        }
+        else if (root instanceof ObjEntity) {
+            rootType = QueryBuilder.OBJ_ENTITY_ROOT;
+            rootString = ((ObjEntity) root).getName();
+        }
+        else if (root instanceof DbEntity) {
+            rootType = QueryBuilder.DB_ENTITY_ROOT;
+            rootString = ((DbEntity) root).getName();
+        }
+        else if (root instanceof Procedure) {
+            rootType = QueryBuilder.PROCEDURE_ROOT;
+            rootString = ((Procedure) root).getName();
+        }
+        else if (root instanceof Class) {
+            rootType = QueryBuilder.JAVA_CLASS_ROOT;
+            rootString = ((Class) root).getName();
+        }
+
+        if (rootType != null) {
+            pw.print("\" root=\"");
+            pw.print(rootType);
+            pw.print("\" root-name=\"");
+            pw.print(rootString);
+            pw.print("\"");
+        }
+
+        pw.println('>');
+
+        // print properties
+        if (distinct != DISTINCT_DEFAULT) {
+            pw.print(linePadding);
+            pw.print("\t<property name=\"");
+            pw.print(DISTINCT_PROPERTY);
+            pw.print("\" value=\"");
+            pw.print(distinct);
+            pw.println("\"/>");
+        }
+
+        if (refreshingObjects != REFRESHING_OBJECTS_DEFAULT) {
+            pw.print(linePadding);
+            pw.print("\t<property name=\"");
+            pw.print(REFRESHING_OBJECTS_PROPERTY);
+            pw.print("\" value=\"");
+            pw.print(refreshingObjects);
+            pw.println("\"/>");
+        }
+
+        if (fetchingDataRows != FETCHING_DATA_ROWS_DEFAULT) {
+            pw.print(linePadding);
+            pw.print("\t<property name=\"");
+            pw.print(FETCHING_DATA_ROWS_PROPERTY);
+            pw.print("\" value=\"");
+            pw.print(fetchingDataRows);
+            pw.println("\"/>");
+        }
+
+        if (fetchLimit != FETCH_LIMIT_DEFAULT) {
+            pw.print(linePadding);
+            pw.print("\t<property name=\"");
+            pw.print(FETCH_LIMIT_PROPERTY);
+            pw.print("\" value=\"");
+            pw.print(fetchLimit);
+            pw.println("\"/>");
+        }
+
+        if (pageSize != PAGE_SIZE_DEFAULT) {
+            pw.print(linePadding);
+            pw.print("\t<property name=\"");
+            pw.print(PAGE_SIZE_PROPERTY);
+            pw.print("\" value=\"");
+            pw.print(pageSize);
+            pw.println("\"/>");
+        }
+        
+        String childPadding = linePadding + "\t";
+        // encode qualifier
+        if(qualifier != null) {
+            qualifier.encodeAsXML(pw, childPadding);
+        }
+        
+        // encode ordering
+        if(orderings != null && !orderings.isEmpty()) {
+            Iterator it = orderings.iterator();
+            while(it.hasNext()) {
+                Ordering ordering = (Ordering) it.next();
+                ordering.encodeAsXML(pw, childPadding);
+            }
+        }
+
+        pw.print(linePadding);
+        pw.println("</query>");
     }
 
     /**

@@ -387,6 +387,7 @@ public class EntityResolver {
      * to the Java class specified. Returns such query if found, null otherwise.
      * 
      * @since 1.1 return type is Query instead of SelectQuery
+     * @deprecated Since 1.1
      */
     public Query lookupQuery(Class queryRoot, String queryName) {
         Entity ent = lookupObjEntity(queryRoot);

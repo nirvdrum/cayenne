@@ -55,62 +55,34 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.Level;
 
 /**
- * Generic query interface.
- *
+ * QueryBuilder for SelectQueries.
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public interface Query {
-	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+public class SelectQueryBuilder extends QueryBuilder {
 
-	public static final int SELECT_QUERY = 1;
-	public static final int INSERT_QUERY = 2;
-	public static final int UPDATE_QUERY = 3;
-	public static final int DELETE_QUERY = 4;
-	public static final int UNKNOWN_QUERY = 5;
+    public Query getQuery() {
+        SelectQuery query = new SelectQuery();
+        query.setRoot(root);
+        query.setName(name);
+        query.setQualifier(qualifier);
 
-    /**
-     * Returns a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    public String getName();
-    
-    /**
-     * Sets a symbolic name of the query.
-     * 
-     * @since 1.1
-     */
-    public void setName(String name);
+        if (orderings != null && !orderings.isEmpty()) {
+            query.addOrderings(orderings);
+        }
 
-	/**
-	 * Returns the <code>logLevel</code> property of this query.
-	 * Log level is a hint to QueryEngine that performs this query
-	 * to log execution with a certain priority.
-	 */
-	public Level getLoggingLevel();
+        if (prefetches != null && !prefetches.isEmpty()) {
+            query.addPrefetches(prefetches);
+        }
+        
+        // init properties
+        if (properties != null && !properties.isEmpty()) {
+            query.initWithProperties(properties);
+        }
 
-	public void setLoggingLevel(Level level);
-
-	/**
-	 * Returns one of the values: SELECT_QUERY, INSERT_QUERY,
-	 * UPDATE_QUERY, DELETE_QUERY
-	 */
-    public int getQueryType();
-
-    /**
-	 * Returns the root object of this query.  Might be a String, ObjEntity, DbEntity or Class,
-	 * depending on the query in question
-	 * @return Object
-	 */
-	public Object getRoot();
-
-	/**
-	 * Sets the root of the query.
-     * 
-	 * @param value The new root
-	 */
-	public void setRoot(Object value);
+        return query;
+    }
 }
