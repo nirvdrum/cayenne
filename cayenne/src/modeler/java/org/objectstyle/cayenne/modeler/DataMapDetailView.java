@@ -60,6 +60,7 @@ import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -166,11 +167,10 @@ public class DataMapDetailView
 
             // must fully relink renamed map
             List nodes = new ArrayList();
-            Iterator allNodes = domain.getDataNodesAsList().iterator();
+            Iterator allNodes = domain.getDataNodes().iterator();
             while (allNodes.hasNext()) {
                 DataNode node = (DataNode) allNodes.next();
-                
-                if(node.getDataMapsAsList().contains(map)) {
+                if(node.getDataMaps().contains(map)) {
                 	nodes.add(node);
                 }
             }
@@ -217,7 +217,7 @@ public class DataMapDetailView
         mapLookup.clear();
 
         // add a list of dependencies
-        java.util.List maps = mediator.getCurrentDataDomain().getDataMapsAsList();
+        Collection maps = mediator.getCurrentDataDomain().getDataMaps();
 
         if (maps.size() < 2) {
             return;
@@ -226,8 +226,8 @@ public class DataMapDetailView
         Component[] leftComp = new Component[maps.size() - 1];
         Component[] rightComp = new Component[maps.size() - 1];
 
-        Iterator it = maps.iterator();
         int i = 0;
+		Iterator it = maps.iterator();
         while (it.hasNext()) {
             DataMap nextMap = (DataMap) it.next();
             if (nextMap != map) {

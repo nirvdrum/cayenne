@@ -243,7 +243,7 @@ public class BrowseView
 
         if (null != node) {
             model.nodeChanged(node);
-            List maps = e.getDataNode().getDataMapsAsList();
+            List maps = new ArrayList(e.getDataNode().getDataMaps());
             int mapCount = maps.size();
             // If added map to this node
             if (mapCount > node.getChildCount()) {
@@ -334,7 +334,7 @@ public class BrowseView
         removeNode(new Object[] { domain, map });
 
         // Clean up map from the nodes
-        Iterator nodes = domain.getDataNodesAsList().iterator();
+        Iterator nodes = new ArrayList(domain.getDataNodes()).iterator();
         while (nodes.hasNext()) {
             removeNode(new Object[] { domain, nodes.next(), map });
         }

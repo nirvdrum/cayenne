@@ -60,6 +60,7 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -91,20 +92,29 @@ public class AddDataMapDialog extends JDialog implements ActionListener {
     private JButton add = new JButton("Add");
     private JButton cancel = new JButton("Cancel");
 
-    public AddDataMapDialog(DataNode temp_node, List map_list) {
+    public AddDataMapDialog(DataNode dataNode, List dataMaps) {
         super(Editor.getFrame(), "Add data maps to the data node", true);
 
-        List maps = temp_node.getDataMapsAsList();
-        if (map_list.size() == maps.size()) {
+        Collection nodeMaps = dataNode.getDataMaps();
+        if (nodeMaps.size() == dataMaps.size()) {
             dispose();
             return;
         }
 
-        node = temp_node;
+        this.node = dataNode;
 
-        getContentPane().setLayout(new BorderLayout());
+		// collect DataMaps to show
+		Vector newMaps = new Vector();
+		Iterator iter = dataMaps.iterator();
+		while (iter.hasNext()) {
+		    DataMap map = (DataMap) iter.next();
+		    if (!nodeMaps.contains(map)) {
+		        newMaps.add(new DataMapWrapper(map));
+			}
+		}
 
-        list = new JList(populate(temp_node, map_list));
+		list = new JList(newMaps);
+		getContentPane().setLayout(new BorderLayout());
         getContentPane().add(list, BorderLayout.CENTER);
 
         JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -126,25 +136,6 @@ public class AddDataMapDialog extends JDialog implements ActionListener {
         this.setLocation(point);
         this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         this.setVisible(true);
-    }
-
-    private Vector populate(DataNode temp_node, List map_list) {
-        List maps = temp_node.getDataMapsAsList();
-        Vector new_maps = new Vector();
-        Iterator iter = map_list.iterator();
-        while (iter.hasNext()) {
-            DataMap map = (DataMap) iter.next();
-            boolean found = false;
-            for (int i = 0; maps != null && i < maps.size(); i++) {
-                if (map == maps.get(i)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                new_maps.add(new DataMapWrapper(map));
-        }
-        return new_maps;
     }
 
     public void actionPerformed(ActionEvent e) {
