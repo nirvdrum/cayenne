@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.CreateStoredProcedureAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -160,7 +160,7 @@ public class TopModel {
         CayenneAction createDDEAction = new CreateDerivedDbEntityAction();
         actionMap.put(createDDEAction.getKey(), createDDEAction);
 
-        CayenneAction createSPAction = new CreateStoredProcedureAction();
+        CayenneAction createSPAction = new CreateProcedureAction();
         actionMap.put(createSPAction.getKey(), createSPAction);
         
         CayenneAction createQueryAction = new CreateQueryAction();

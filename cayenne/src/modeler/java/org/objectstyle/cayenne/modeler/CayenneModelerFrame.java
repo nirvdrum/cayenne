@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.modeler.action.CreateNodeAction;
 import org.objectstyle.cayenne.modeler.action.CreateObjEntityAction;
 import org.objectstyle.cayenne.modeler.action.CreateQueryAction;
 import org.objectstyle.cayenne.modeler.action.CreateRelationshipAction;
-import org.objectstyle.cayenne.modeler.action.CreateStoredProcedureAction;
+import org.objectstyle.cayenne.modeler.action.CreateProcedureAction;
 import org.objectstyle.cayenne.modeler.action.DerivedEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.ExitAction;
 import org.objectstyle.cayenne.modeler.action.GenerateClassesAction;
@@ -302,7 +302,7 @@ public class CayenneModelerFrame
         projectMenu.add(
             getAction(CreateDerivedDbEntityAction.getActionName()).buildMenu());
         projectMenu.add(
-            getAction(CreateStoredProcedureAction.getActionName()).buildMenu());
+            getAction(CreateProcedureAction.getActionName()).buildMenu());
         projectMenu.add(
                    getAction(CreateQueryAction.getActionName()).buildMenu());
         projectMenu.addSeparator();
@@ -346,7 +346,7 @@ public class CayenneModelerFrame
         
         toolBar.add(getAction(CreateDbEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateDerivedDbEntityAction.getActionName()).buildButton());
-        toolBar.add(getAction(CreateStoredProcedureAction.getActionName()).buildButton());
+        toolBar.add(getAction(CreateProcedureAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateObjEntityAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateAttributeAction.getActionName()).buildButton());
         toolBar.add(getAction(CreateRelationshipAction.getActionName()).buildButton());
@@ -494,7 +494,7 @@ public class CayenneModelerFrame
         getAction(CreateDbEntityAction.getActionName()).setEnabled(true);
         getAction(CreateDerivedDbEntityAction.getActionName()).setEnabled(true);
         getAction(CreateQueryAction.getActionName()).setEnabled(true);
-        getAction(CreateStoredProcedureAction.getActionName()).setEnabled(true);
+        getAction(CreateProcedureAction.getActionName()).setEnabled(true);
         getAction(GenerateDbAction.getActionName()).setEnabled(true);
 
         // reset

@@ -71,40 +71,41 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * 
  * @author Andrei Adamchik
  */
-public class CreateStoredProcedureAction extends CayenneAction {
+public class CreateProcedureAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Create Stored Procedure";
-	}
+    public static String getActionName() {
+        return "Create Stored Procedure";
+    }
 
-    public CreateStoredProcedureAction() {
+    public CreateProcedureAction() {
         super(getActionName());
     }
 
     public void performAction(ActionEvent e) {
-        createStoredProcedure();
-    }
-
-    protected void createStoredProcedure() {
         EventController mediator = getMediator();
-        Procedure procedure =
-            (Procedure) NamedObjectFactory.createObject(
-                Procedure.class,
-                mediator.getCurrentDataMap());
-        mediator.getCurrentDataMap().addProcedure(procedure);
-        
-		mediator.fireProcedureEvent(new ProcedureEvent(this, procedure, MapEvent.ADD));
-        mediator.fireProcedureDisplayEvent(
-            new ProcedureDisplayEvent(
+        Procedure procedure = createProcedure(mediator.getCurrentDataMap());
+
+        mediator.fireProcedureEvent(new ProcedureEvent(this, procedure, MapEvent.ADD));
+        mediator.fireProcedureDisplayEvent(new ProcedureDisplayEvent(
                 this,
                 procedure,
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain()));
     }
 
+    protected Procedure createProcedure(DataMap map) {
+        Procedure procedure = (Procedure) NamedObjectFactory.createObject(
+                Procedure.class,
+                map);
+        procedure.setSchema(map.getDefaultSchema());
+
+        map.addProcedure(procedure);
+        return procedure;
+    }
+
     /**
-      * Returns <code>true</code> if path contains a DataMap object.
-      */
+     * Returns <code>true</code> if path contains a DataMap object.
+     */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
