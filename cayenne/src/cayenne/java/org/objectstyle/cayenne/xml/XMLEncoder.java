@@ -100,24 +100,43 @@ public class XMLEncoder {
         root = new Element(xmlTag);
         root.setAttribute("type", type);
     }
+    
+    public Element getRoot() {
+        return root;
+    }
 
     public void encodeProperty(String xmlTag, Object property) {
         Element temp = new Element(xmlTag);
-        temp.setAttribute("type", property.getClass().getName());
-        temp.setText(property.toString());
-
+        
+        if (property instanceof XMLSerializable) {
+            XMLSerializable element = (XMLSerializable) property;
+            Element rootCopy = (Element) root.clone();
+            element.encodeAsXML(this);
+            temp.addContent(root);
+            root = rootCopy;
+        }
+        else if (property instanceof Collection) {
+            Collection c = (Collection) property;
+            temp = encodeCollection(xmlTag, c);
+        }
+        else {
+            temp.setAttribute("type", property.getClass().getName());
+            temp.setText(property.toString());
+        }
+        
         root.addContent(temp);
     }
 
-    public void encodeCollection(String xmlTag, Collection c) {
-        Element temp = new Element(xmlTag);
+    // TODO Should this be made protected now that encodeProperty does the right thing w/ regards to collections?
+    public Element encodeCollection(String xmlTag, Collection c) {
+        XMLEncoder encoder = new XMLEncoder();
+        encoder.setRoot(xmlTag, c.getClass().getName());
 
-        for (Iterator it = c.iterator(); it.hasNext();) {
-            XMLSerializable element = (XMLSerializable) it.next();
-            element.encodeAsXML(this);
-            temp.addContent(root);
+        for (Iterator it = c.iterator(); it.hasNext();) {    
+            encoder.encodeProperty("element", it.next());
         }
 
-        root = temp;
+        //root.addContent(encoder.getRoot());
+        return encoder.getRoot();
     }
 }
