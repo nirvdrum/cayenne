@@ -99,6 +99,10 @@ public class AccessStackAdapter {
     public DbAdapter getAdapter() {
         return adapter;
     }
+    
+    public void unchecked(CayenneTestResources resources) {
+        
+    }
 
     /**
      * Drops all table constraints.

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.unit;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 
 /**
  * @author Andrei Adamchik
@@ -69,6 +70,15 @@ public class SQLServerStackAdapter extends SybaseStackAdapter {
 
     public boolean handlesNullVsEmptyLOBs() {
         return true;
+    }
+
+    public void unchecked(CayenneTestResources resources) {
+        // see if MSSQL driver is used and turn off identity columns in this case...
+
+        String driver = resources.getConnectionInfo().getJdbcDriver();
+        if (driver != null && driver.startsWith("com.microsoft.")) {
+            ((JdbcAdapter) getAdapter()).setSupportsGeneratedKeys(false);
+        }
     }
 
 }

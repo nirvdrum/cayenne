@@ -85,8 +85,9 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
  * @author Andrei Adamchik
  */
 public abstract class AbstractAccessStack {
+
     private static Logger logObj = Logger.getLogger(AbstractAccessStack.class);
-    
+
     // hardcoded dependent entities that should be excluded
     // if LOBs are not supported
     private static final String[] EXTRA_EXCLUDED_FOR_NO_LOB = new String[] {
@@ -96,12 +97,12 @@ public abstract class AbstractAccessStack {
     protected CayenneTestResources resources;
 
     public AccessStackAdapter getAdapter(DataNode node) {
-        return resources.getAccessStackAdapter(node.getAdapter());
+        return resources.getAccessStackAdapter(node.getAdapter().getClass());
     }
 
     /**
-     * Helper method that orders DbEntities to satisfy referential
-     * constraints and returns an ordered list.
+     * Helper method that orders DbEntities to satisfy referential constraints and returns
+     * an ordered list.
      */
     protected List dbEntitiesInInsertOrder(DataNode node, DataMap map) {
         List entities = new ArrayList(map.getDbEntities());
@@ -116,8 +117,8 @@ public abstract class AbstractAccessStack {
             List filtered = new ArrayList();
             while (it.hasNext()) {
                 DbEntity ent = (DbEntity) it.next();
-                
-                if(ent instanceof DerivedDbEntity) {
+
+                if (ent instanceof DerivedDbEntity) {
                     continue;
                 }
 
@@ -150,8 +151,8 @@ public abstract class AbstractAccessStack {
                         // check for BIN PK or FK to BIN Pk
                         DbAttribute attr = (DbAttribute) attrs.next();
                         if (attr.getType() == Types.BINARY
-                            || attr.getType() == Types.VARBINARY
-                            || attr.getType() == Types.LONGVARBINARY) {
+                                || attr.getType() == Types.VARBINARY
+                                || attr.getType() == Types.LONGVARBINARY) {
 
                             if (attr.isPrimaryKey() || attr.isForeignKey()) {
                                 skip = true;
@@ -196,20 +197,18 @@ public abstract class AbstractAccessStack {
                 }
 
                 // this may not work on tables with reflexive relationships
-                // at least on Firebird it doesn't... 
+                // at least on Firebird it doesn't...
 
                 if (isFirebird && "ARTGROUP".equalsIgnoreCase(ent.getName())) {
                     int deleted = 0;
-                    String deleteChildren =
-                        "DELETE FROM "
+                    String deleteChildren = "DELETE FROM "
                             + ent.getName()
                             + " WHERE GROUP_ID NOT IN (SELECT DISTINCT PARENT_GROUP_ID FROM "
                             + ent.getName()
                             + ")";
                     do {
                         deleted = stmt.executeUpdate(deleteChildren);
-                    }
-                    while (deleted > 0);
+                    } while (deleted > 0);
                 }
 
                 String deleteSql = "DELETE FROM " + ent.getName();
@@ -234,7 +233,8 @@ public abstract class AbstractAccessStack {
 
             while (tables.next()) {
                 // 'toUpperCase' is needed since most databases
-                // are case insensitive, and some will convert names to lower case (PostgreSQL)
+                // are case insensitive, and some will convert names to lower case
+                // (PostgreSQL)
                 String name = tables.getString("TABLE_NAME");
                 if (name != null)
                     allTables.add(name.toUpperCase());
@@ -260,8 +260,8 @@ public abstract class AbstractAccessStack {
                 }
                 catch (SQLException sqe) {
                     logObj.warn(
-                        "Can't drop table " + ent.getName() + ", ignoring...",
-                        sqe);
+                            "Can't drop table " + ent.getName() + ", ignoring...",
+                            sqe);
                 }
             }
 
@@ -293,9 +293,9 @@ public abstract class AbstractAccessStack {
             while (it.hasNext()) {
                 String query = (String) it.next();
                 QueryLogger.logQuery(
-                    QueryLogger.DEFAULT_LOG_LEVEL,
-                    query,
-                    Collections.EMPTY_LIST);
+                        QueryLogger.DEFAULT_LOG_LEVEL,
+                        query,
+                        Collections.EMPTY_LIST);
                 stmt.execute(query);
             }
             getAdapter(node).createdTables(conn, map);
@@ -305,7 +305,7 @@ public abstract class AbstractAccessStack {
         }
     }
 
-    /** 
+    /**
      * Returns iterator of preprocessed table create queries.
      */
     protected Iterator tableCreateQueries(DataNode node, DataMap map) throws Exception {

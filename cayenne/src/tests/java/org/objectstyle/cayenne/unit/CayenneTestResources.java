@@ -70,7 +70,6 @@ import org.objectstyle.cayenne.conf.ConnectionProperties;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.unit.util.SQLTemplateCustomizer;
 import org.objectstyle.cayenne.util.Util;
 import org.springframework.beans.BeansException;
@@ -105,10 +104,10 @@ public class CayenneTestResources implements BeanFactoryAware {
 
         String testResourcesPath = System.getProperty(CONFIG_KEY);
         File testResources = null;
-        
-        if(testResourcesPath != null) {
+
+        if (testResourcesPath != null) {
             File altResources = new File(testResourcesPath);
-            if(altResources.isFile()) {
+            if (altResources.isFile()) {
                 testResources = altResources;
             }
         }
@@ -119,7 +118,7 @@ public class CayenneTestResources implements BeanFactoryAware {
                     "test-resources");
             testResources = new File(testDir, "spring-test-resources.xml");
         }
-        
+
         // configure shared resources instance with Spring
         logObj.info("== Loading test configuration from " + testResources);
         logObj.info("== To override set property '" + CONFIG_KEY + "'");
@@ -180,6 +179,7 @@ public class CayenneTestResources implements BeanFactoryAware {
         // per stack on demand, to avoid conflicts when
         // dropping and generating PK objects.
         AccessStack stack = getAccessStack(SCHEMA_SETUP_STACK);
+
         stack.dropSchema();
         stack.dropPKSupport();
         stack.createSchema();
@@ -225,15 +225,19 @@ public class CayenneTestResources implements BeanFactoryAware {
     /**
      * Returns DB-specific testing adapter.
      */
-    public AccessStackAdapter getAccessStackAdapter(DbAdapter adapter) {
-        AccessStackAdapter stackAdapter = null;
+    public AccessStackAdapter getAccessStackAdapter(Class adapterClass) {
+        AccessStackAdapter stackAdapter = (AccessStackAdapter) adapterMap
+                .get(adapterClass.getName());
 
-        if (adapter != null) {
-            stackAdapter = (AccessStackAdapter) adapterMap.get(adapter
-                    .getClass()
-                    .getName());
+        if (stackAdapter == null) {
+            throw new RuntimeException("No AccessStackAdapter for DbAdapter class: "
+                    + adapterClass);
         }
-        return stackAdapter != null ? stackAdapter : new AccessStackAdapter(adapter);
+
+        // post init
+        stackAdapter.unchecked(this);
+
+        return stackAdapter;
     }
 
     /**
@@ -262,18 +266,19 @@ public class CayenneTestResources implements BeanFactoryAware {
      * Creates new DataNode.
      */
     public DataNode newDataNode(String name) throws Exception {
-        DbAdapter adapter = (DbAdapter) Class.forName(
-                connectionInfo.getAdapterClassName()).newInstance();
-        DataNode node = adapter.createDataNode(name);
+        AccessStackAdapter adapter = getAccessStackAdapter(Class.forName(connectionInfo
+                .getAdapterClassName()));
+
+        DataNode node = adapter.getAdapter().createDataNode(name);
         node.setDataSource(dataSource);
-        node.setAdapter(adapter);
+        node.setAdapter(adapter.getAdapter());
         return node;
     }
 
     /**
      * Returns connection information.
      */
-    public DataSourceInfo getConnectionInfo() throws Exception {
+    public DataSourceInfo getConnectionInfo() {
         return connectionInfo;
     }
 
