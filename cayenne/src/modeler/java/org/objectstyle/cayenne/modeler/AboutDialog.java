@@ -56,16 +56,33 @@
 
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.util.ModelerStrings;
+
 
 /** 
  * Displays the information about the licnese of Cayenne
@@ -78,15 +95,6 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 	private static final int WIDTH = 523;
 	private static final int HEIGHT = 450;
 	private static String licenseString;
-	private static final String infoString =
-		"<font size='-1' face='Arial,Helvetica'><b>CayenneModeler</b><br>"
-			+ "(c) 2002 The ObjectStyle Group"
-			+ " (<a href='http://objectstyle.org'>http://objectstyle.org</a>)<br>"
-			+ "and individual authors of the software. "
-			+ "All rights reserved.<br><br>"
-			+ "This software is distributed free of charge under the terms "
-			+ "of The ObjectStyle Group license.<br>"
-			+ "Click \"View License\" for more details.</font><br><br>";
 
 	private boolean view_info = true;
 
@@ -172,10 +180,11 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 	/**
 	 * Builds CayenneModeler info string */
 	public String getInfoString() {
-		String version = getParentEditor().getProperty("cayenne.version");
+		String infoString = ModelerStrings.getString("cayenne.modeler.about.info");
+		String version = ModelerStrings.getString("cayenne.version");
 		String versionStr = (version != null) ? "Version: " + version : "";
 
-		String buildDate = getParentEditor().getProperty("cayenne.build.date");
+		String buildDate = ModelerStrings.getString("cayenne.build.date");
 		String buildDateStr =
 			(buildDate != null) ? " (" + buildDate + ")": "";
 		return infoString

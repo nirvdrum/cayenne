@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler;
 /* ====================================================================
  *
  * The ObjectStyle Group Software License, Version 1.0
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.modeler;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;

@@ -56,12 +56,23 @@
 
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+
+import org.objectstyle.cayenne.modeler.util.ModelerStrings;
 
 /**
  * Displays CayenneModeler exceptions and warning messages.
@@ -194,11 +205,11 @@ public class ErrorDebugDialog extends CayenneDialog implements ActionListener {
 			PrintWriter out = new PrintWriter(str);
 
 			// first add extra diagnostics
-			String version = getParentEditor().getProperty("cayenne.version");
+			String version = ModelerStrings.getString("cayenne.version");
 			version = (version != null) ? version : "(unknown)";
 
 			String buildDate =
-				getParentEditor().getProperty("cayenne.build.date");
+				ModelerStrings.getString("cayenne.build.date");
 			buildDate = (buildDate != null) ? buildDate : "(unknown)";
 
 			out.println("CayenneModeler Info");

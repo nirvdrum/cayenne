@@ -65,13 +65,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
-import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.ActionMap;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -177,8 +174,6 @@ public class Editor
         new JMenuItem("Set Package Name for Obj Entities");
     protected JMenuItem aboutMenu = new JMenuItem("About");
 
-    protected Properties props;
-    protected final JFileChooser fileChooser = new JFileChooser();
     protected XmlFilter xmlFilter = new XmlFilter();
     protected TopController controller = new TopController();
 
@@ -255,14 +250,6 @@ public class Editor
         super(ModelerConstants.TITLE);
 
         frame = this;
-
-        try {
-            props = loadProperties();
-        } catch (IOException ioex) {
-            logObj.error("error", ioex);
-            // ignoring
-            props = new Properties();
-        }
 
         ModelerContext.setupContext();
         initEmptyActions();
@@ -531,40 +518,6 @@ public class Editor
             controller.handleControl(
                 new Control(TopModel.STATUS_MESSAGE_KEY, "Project opened..."));
         }
-    }
-
-    /**
-     * Reads properties from file "gui.properties" bundled with Cayenne.
-     */
-    protected Properties loadProperties() throws IOException {
-        Properties props = new Properties();
-        InputStream in =
-            this.getClass().getClassLoader().getResourceAsStream(
-                CayenneAction.RESOURCE_PATH + "gui.properties");
-        if (in != null) {
-            try {
-                props.load(in);
-            } finally {
-                in.close();
-            }
-        }
-
-        return props;
-    }
-
-    /**
-     * Returns a property for <code>propName</code>.
-     */
-    public String getProperty(String propName) {
-        return props.getProperty(propName);
-    }
-
-    /** 
-     * Returns an instance of FileChooser used by all Modeler
-     * components.
-     */
-    public JFileChooser getFileChooser() {
-        return fileChooser;
     }
 
     /** 
