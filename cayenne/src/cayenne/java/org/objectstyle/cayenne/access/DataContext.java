@@ -885,7 +885,6 @@ public class DataContext implements QueryEngine, Serializable {
 
         // this makes sure the ContextCommitObserver isn't GC'ed prematurely
         result = null;
-
     }
 
     /**
