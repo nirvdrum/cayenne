@@ -52,16 +52,22 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
 
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
-
 
 /**
  * A CayenneDataObject is a default implementation of DataObject interface.
@@ -81,21 +87,21 @@ public class CayenneDataObject implements DataObject {
      * Used for debugging. 
      */
     public static String persistenceStateString(int persistenceState) {
-        switch(persistenceState) {
-        case PersistenceState.TRANSIENT:
-            return "transient";
-        case PersistenceState.NEW:
-            return "new";
-        case PersistenceState.MODIFIED:
-            return "modified";
-        case PersistenceState.COMMITTED:
-            return "committed";
-        case PersistenceState.HOLLOW:
-            return "hollow";
-        case PersistenceState.DELETED:
-            return "deleted";
-        default:
-            return "unknown";
+        switch (persistenceState) {
+            case PersistenceState.TRANSIENT :
+                return "transient";
+            case PersistenceState.NEW :
+                return "new";
+            case PersistenceState.MODIFIED :
+                return "modified";
+            case PersistenceState.COMMITTED :
+                return "committed";
+            case PersistenceState.HOLLOW :
+                return "hollow";
+            case PersistenceState.DELETED :
+                return "deleted";
+            default :
+                return "unknown";
         }
     }
 
@@ -103,7 +109,6 @@ public class CayenneDataObject implements DataObject {
     protected transient int persistenceState = PersistenceState.TRANSIENT;
     protected transient DataContext dataContext;
     protected HashMap props = new HashMap();
-
 
     /** Returns a data context this object is registered with, or null
      * if this object has no associated DataContext */
@@ -162,34 +167,32 @@ public class CayenneDataObject implements DataObject {
      * 
      */
     public Object readNestedProperty(String path) {
-		StringTokenizer toks = new StringTokenizer(path, ".");
-		
-		Object obj = null;
-		CayenneDataObject dataObj = this;
-		boolean terminal = false;
-		while(toks.hasMoreTokens()) {
-			if(terminal) {
-				throw new CayenneRuntimeException("Invalid path: " + path);
-			}
-			String pathComp = toks.nextToken();
-			obj = dataObj.readProperty(pathComp);
-			
-			if(obj == null) {
-				return null;
-			}
-			else if(obj instanceof CayenneDataObject) {
-				dataObj = (CayenneDataObject)obj;
-			}
-			else {
-				terminal = true;
-			}
-		}
-		
-		return obj;
-	}	
+        StringTokenizer toks = new StringTokenizer(path, ".");
+
+        Object obj = null;
+        CayenneDataObject dataObj = this;
+        boolean terminal = false;
+        while (toks.hasMoreTokens()) {
+            if (terminal) {
+                throw new CayenneRuntimeException("Invalid path: " + path);
+            }
+            String pathComp = toks.nextToken();
+            obj = dataObj.readProperty(pathComp);
+
+            if (obj == null) {
+                return null;
+            } else if (obj instanceof CayenneDataObject) {
+                dataObj = (CayenneDataObject) obj;
+            } else {
+                terminal = true;
+            }
+        }
+
+        return obj;
+    }
 
     protected Object readProperty(String propName) {
-        if(persistenceState == PersistenceState.HOLLOW) {
+        if (persistenceState == PersistenceState.HOLLOW) {
             dataContext.refetchObject(objectId);
         }
 
@@ -200,9 +203,8 @@ public class CayenneDataObject implements DataObject {
         return props.get(propName);
     }
 
-
     protected void writeProperty(String propName, Object val) {
-        if(persistenceState == PersistenceState.COMMITTED) {
+        if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }
 
@@ -217,81 +219,81 @@ public class CayenneDataObject implements DataObject {
         Object toOneTarget = readProperty(relName);
 
         // known to be NULL
-        if(toOneTarget == nullValue) {
+        if (toOneTarget == nullValue) {
             return null;
         }
 
         // known to be NOT NULL
-        if(toOneTarget != null) {
-            return (DataObject)toOneTarget;
+        if (toOneTarget != null) {
+            return (DataObject) toOneTarget;
         }
 
-
         // need to fetch
-        SelectQuery sel = QueryHelper.selectRelationshipObjects(dataContext, objectId, relName);
+        SelectQuery sel =
+            QueryHelper.selectRelationshipObjects(dataContext, objectId, relName);
         List results = dataContext.performQuery(sel);
 
         // unexpected
-        if(results.size() > 1) {
-            throw new CayenneRuntimeException("error retrieving 'to one' target, found " + results.size());
+        if (results.size() > 1) {
+            throw new CayenneRuntimeException(
+                "error retrieving 'to one' target, found " + results.size());
         }
 
         // null target
-        if(results.size() == 0) {
+        if (results.size() == 0) {
             writePropertyDirectly(relName, nullValue);
             return null;
         }
 
         // found a valid object
 
-        DataObject dobj = (DataObject)results.get(0);
+        DataObject dobj = (DataObject) results.get(0);
         writePropertyDirectly(relName, dobj);
         return dobj;
     }
 
     public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
-        List relList = (List)readProperty(relName);
+        List relList = (List) readProperty(relName);
         relList.remove(val);
 
-        if(val != null && setReverse) {
+        if (val != null && setReverse) {
             unsetReverseRelationship(relName, val);
         }
     }
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
-        List relList = (List)readProperty(relName);
+        List relList = (List) readProperty(relName);
         relList.add(val);
 
-        if(val != null && setReverse)
+        if (val != null && setReverse)
             setReverseRelationship(relName, val);
     }
 
     public void setToOneDependentTarget(String relName, DataObject val) {
-        if(val == null)
+        if (val == null)
             val = nullValue;
 
         setToOneTarget(relName, val, true);
     }
 
     public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
-        DataObject oldTarget = (DataObject)readPropertyDirectly(relName);
-        if(oldTarget == val) {
+        DataObject oldTarget = (DataObject) readPropertyDirectly(relName);
+        if (oldTarget == val) {
             return;
         }
 
-        if(setReverse) {
+        if (setReverse) {
             // unset old reverse relationship
-            if(oldTarget != null)
+            if (oldTarget != null)
                 unsetReverseRelationship(relName, oldTarget);
 
             // set new reverse relationship
-            if(val != null)
+            if (val != null)
                 setReverseRelationship(relName, val);
         }
 
         writeProperty(relName, val);
     }
-
 
     /** 
      * Initializes reverse relationship from object <code>val</code> 
@@ -301,10 +303,13 @@ public class CayenneDataObject implements DataObject {
      * to <code>val</code>. 
      */
     protected void setReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel = (ObjRelationship)dataContext.lookupEntity(objectId.getObjEntityName()).getRelationship(relName);
-        ObjRelationship revRel =  rel.getReverseRelationship();
-        if(revRel != null) {
-            if(revRel.isToMany())
+        ObjRelationship rel =
+            (ObjRelationship) dataContext.lookupEntity(
+                objectId.getObjEntityName()).getRelationship(
+                relName);
+        ObjRelationship revRel = rel.getReverseRelationship();
+        if (revRel != null) {
+            if (revRel.isToMany())
                 val.addToManyTarget(revRel.getName(), this, false);
             else
                 val.setToOneTarget(revRel.getName(), this, false);
@@ -314,18 +319,20 @@ public class CayenneDataObject implements DataObject {
     /** Remove current object from reverse relationship of object <code>val</code> to this object.
       * @param relName name of relationship from this object to <code>val</code>. */
     protected void unsetReverseRelationship(String relName, DataObject val) {
-        ObjRelationship rel = (ObjRelationship)dataContext.lookupEntity(objectId.getObjEntityName()).getRelationship(relName);
+        ObjRelationship rel =
+            (ObjRelationship) dataContext.lookupEntity(
+                objectId.getObjEntityName()).getRelationship(
+                relName);
         ObjRelationship revRel = rel.getReverseRelationship();
-        if(revRel != null) {
-            if(revRel.isToMany())
+        if (revRel != null) {
+            if (revRel.isToMany())
                 val.removeToManyTarget(revRel.getName(), this, false);
-            else if(revRel.isToDependentEntity())
+            else if (revRel.isToDependentEntity())
                 val.setToOneTarget(revRel.getName(), nullValue, false);
             else
                 val.setToOneTarget(revRel.getName(), null, false);
         }
     }
-
 
     public Map getCommittedSnapshot() {
         return dataContext.getCommittedSnapshot(this);
@@ -335,39 +342,36 @@ public class CayenneDataObject implements DataObject {
         return dataContext.takeObjectSnapshot(this);
     }
 
-
-
     /** A variation of  "toString" method, that may be more efficient in some cases.
      *  For example when printing a list of objects into the same String. */
     public StringBuffer toStringBuffer(StringBuffer buf, boolean fullDesc) {
         // log all properties
         buf.append('{');
 
-        if(fullDesc)
+        if (fullDesc)
             appendProperties(buf);
 
-        buf.append("<oid: ")
-        .append(objectId)
-        .append("; state: ")
-        .append(persistenceStateString(persistenceState))
-        .append(">}\n");
+        buf
+            .append("<oid: ")
+            .append(objectId)
+            .append("; state: ")
+            .append(persistenceStateString(persistenceState))
+            .append(">}\n");
         return buf;
     }
 
     protected void appendProperties(StringBuffer buf) {
         buf.append("[");
         Iterator it = props.keySet().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Object key = it.next();
             buf.append('\t').append(key).append(" => ");
             Object val = props.get(key);
 
-            if(val instanceof CayenneDataObject) {
-                ((CayenneDataObject)val).toStringBuffer(buf, false);
-            } else if(val instanceof List) {
-                buf.append('(')
-                .append(val.getClass().getName())
-                .append(')');
+            if (val instanceof CayenneDataObject) {
+                ((CayenneDataObject) val).toStringBuffer(buf, false);
+            } else if (val instanceof List) {
+                buf.append('(').append(val.getClass().getName()).append(')');
             } else
                 buf.append(val);
 
@@ -377,16 +381,54 @@ public class CayenneDataObject implements DataObject {
         buf.append("]");
     }
 
-
     public String toString() {
         return toStringBuffer(new StringBuffer(), true).toString();
     }
-    
-    
-	/**
-	 * Default implementation does nothing.
-	 * 
-	 * @see org.objectstyle.cayenne.DataObject#fetchFinished()
-	 */
-	public void fetchFinished() {}
+
+    /**
+     * Default implementation does nothing.
+     * 
+     * @see org.objectstyle.cayenne.DataObject#fetchFinished()
+     */
+    public void fetchFinished() {}
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(persistenceState);
+
+        switch (persistenceState) {
+            //New, modified or transient - write the whole shebang
+            //The other states (committed, hollow, deleted) all need just ObjectId
+            case PersistenceState.TRANSIENT :
+            case PersistenceState.NEW :
+            case PersistenceState.MODIFIED :
+                out.writeObject(props);
+                break;
+        }
+
+        out.writeObject(objectId);
+    }
+
+    private void readObject(ObjectInputStream in)
+        throws IOException, ClassNotFoundException {
+        this.persistenceState = in.readInt();
+
+        switch (persistenceState) {
+            case PersistenceState.TRANSIENT :
+            case PersistenceState.NEW :
+            case PersistenceState.MODIFIED :
+                props = (HashMap) in.readObject();
+                break;
+            case PersistenceState.COMMITTED :
+            case PersistenceState.HOLLOW :
+            case PersistenceState.DELETED :
+                this.persistenceState = PersistenceState.HOLLOW;
+                //props will be populated when required (readProperty called)
+                props = new HashMap();
+                break;
+        }
+
+        this.objectId = (ObjectId) in.readObject();
+        // dataContext will be set *IFF* the datacontext it came from is also
+        // deserialized.  Setting of datacontext is handled by the datacontext itself
+    }
 }

@@ -110,7 +110,8 @@ public class DataContext implements QueryEngine, Serializable {
     //Will not be directly serialized - see read/writeObject for details
     protected transient QueryEngine parent;
 
-    protected Map registeredMap = Collections.synchronizedMap(new HashMap());
+    //Must be deserialized slightly differently - see read/writeObject
+    protected transient Map registeredMap = Collections.synchronizedMap(new HashMap());
     protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
     protected RelationshipDataSource relDataSource = new RelationshipDataSource();
 
@@ -1183,6 +1184,10 @@ public class DataContext implements QueryEngine, Serializable {
             out.writeObject(this.parent);
             //Hope that whatever this.parent is, that it is Serializable
         }
+
+        //For writing, just write the objects.  They will be serialized possibly
+        // as just objectIds... it's up to the object itself.  Reading will do magic
+        out.writeObject(registeredMap);
     }
 
     private void readObject(ObjectInputStream in)
@@ -1209,6 +1214,20 @@ public class DataContext implements QueryEngine, Serializable {
                     + value);
         }
 
+        //CayenneDataObjects have a transient datacontext
+        // because at deserialize time the datacontext may need to be different
+
+        // than the one at serialize time (for programmer defined reasons).
+        // So, when a dataobject is resurrected because it's datacontext was
+        // serialized, it will then set the objects datacontext to the correctone
+        // If deser'd "otherwise", it will not have a datacontext (good)
+
+        this.registeredMap = (Map) in.readObject();
+        Iterator it = registeredMap.values().iterator();
+        while (it.hasNext()) {
+            DataObject obj = (DataObject) it.next();
+            obj.setDataContext(this);
+        }
     }
 
     /** 
