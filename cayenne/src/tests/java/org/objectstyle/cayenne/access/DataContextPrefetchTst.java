@@ -163,14 +163,23 @@ public class DataContextPrefetchTst extends DataContextTestBase {
     public void testPrefetch3() throws Exception {
         populatePaintings();
 
-        SelectQuery q = new SelectQuery("Artist");
+        Expression e = ExpressionFactory.matchExp("artistName", artistName(2));
+        
+        // TODO: Uncommenting this line will show that to-many prefetching works 
+        // purely by coincedence.
+     //   e = e.orExp(ExpressionFactory.matchExp("artistName", artistName(3)));
+        SelectQuery q = new SelectQuery("Artist", e);
+        q.setLoggingLevel(Level.WARN);
         q.addPrefetch("paintingArray");
-
-        CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+        
+        
+        List artists = ctxt.performQuery(q);
+        assertEquals(1, artists.size());
+        Artist a1 = (Artist) artists.get(0);
         ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
         assertNotNull(toMany);
-
         assertFalse(toMany.needsFetch());
+        assertEquals(1, toMany.size());
     }
 
     /**
