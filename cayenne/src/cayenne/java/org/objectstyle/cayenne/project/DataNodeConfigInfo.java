@@ -53,72 +53,99 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.project;
 
-import java.io.File;
-import java.sql.Connection;
-
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
-
-import junit.framework.TestCase;
 
 /**
- * Superclass of Cayenne test cases. Provides access to shared
- * connection resources.
- * 
+ * Stores information necessary to reconfigure nodes of existing projects.
+ *  
  * @author Andrei Adamchik
  */
-public class CayenneTestCase extends TestCase {
-    private static Logger logObj = Logger.getLogger(CayenneTestCase.class);
-    
-    /**
-     * Constructor for CayenneTestCase.
-     * @param arg0
-     */
-    public CayenneTestCase(String name) {
-        super(name);
-        
-        // init resources if needed
-        CayenneTestResources.init();
-    }
+public class DataNodeConfigInfo {
+	protected String name;
+	protected String domain;
+	protected String adapter;
+	protected String dataSource;
+	protected String driverFile;
+	
+	/**
+	 * Returns the adapter.
+	 * @return String
+	 */
+	public String getAdapter() {
+		return adapter;
+	}
 
-    /**
-     * Returns directory that should be used by all test 
-     * cases that perform file operations.
-     */
-    public File getTestDir() {
-    	return CayenneTestResources.getResources().getTestDir();
-    }
-    
-    public File getTestResourceDir() {
-		return new File(new File(new File(new File("build"), "tests"), "deps"), "test-resources");
-    }
-    
-    public Connection getConnection() {
-        return CayenneTestResources.getResources().getSharedConnection();
-    }
+	/**
+	 * Returns the dataSource.
+	 * @return String
+	 */
+	public String getDataSource() {
+		return dataSource;
+	}
 
-    public DataDomain getDomain() {
-        return CayenneTestResources.getResources().getSharedDomain();
-    }
+	/**
+	 * Returns the domain.
+	 * @return String
+	 */
+	public String getDomain() {
+		return domain;
+	}
 
-    public DataNode getNode() {
-        return CayenneTestResources.getResources().getSharedNode();
-    }
+	/**
+	 * Returns the driverFile.
+	 * @return String
+	 */
+	public String getDriverFile() {
+		return driverFile;
+	}
 
-    public DataSourceInfo getFreshConnInfo() throws Exception {
-        return CayenneTestResources.getResources().getFreshConnInfo();
-    }
+	/**
+	 * Returns the name.
+	 * @return String
+	 */
+	public String getName() {
+		return name;
+	}
 
-    public DataContext createDataContext() {
-        return getDomain().createDataContext();
-    }
-    
-    public CayenneTestDatabaseSetup getDatabaseSetup() {
-    	return CayenneTestResources.getResources().getSharedDatabaseSetup();
-    } 
+	/**
+	 * Sets the adapter.
+	 * @param adapter The adapter to set
+	 */
+	public void setAdapter(String adapter) {
+		this.adapter = adapter;
+	}
+
+	/**
+	 * Sets the dataSource.
+	 * @param dataSource The dataSource to set
+	 */
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	/**
+	 * Sets the domain.
+	 * @param domain The domain to set
+	 */
+	public void setDomain(String domain) {
+		this.domain = domain;
+	}
+
+	/**
+	 * Sets the driverFile.
+	 * @param driverFile The driverFile to set
+	 */
+	public void setDriverFile(String driverFile) {
+		this.driverFile = driverFile;
+	}
+
+	/**
+	 * Sets the name.
+	 * @param name The name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
 }

@@ -53,72 +53,88 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.sql.Connection;
-
-import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
-
-import junit.framework.TestCase;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Superclass of Cayenne test cases. Provides access to shared
- * connection resources.
- * 
+ * Stores project information necessary to reconfigure existing projects. 
+ *  
  * @author Andrei Adamchik
  */
-public class CayenneTestCase extends TestCase {
-    private static Logger logObj = Logger.getLogger(CayenneTestCase.class);
-    
-    /**
-     * Constructor for CayenneTestCase.
-     * @param arg0
-     */
-    public CayenneTestCase(String name) {
-        super(name);
-        
-        // init resources if needed
-        CayenneTestResources.init();
-    }
+public class ProjectConfigInfo {
+	protected File sourceJar;
+	protected File destJar;
+	protected File altProjectFile;
+	protected List nodes = new ArrayList();
 
-    /**
-     * Returns directory that should be used by all test 
-     * cases that perform file operations.
-     */
-    public File getTestDir() {
-    	return CayenneTestResources.getResources().getTestDir();
-    }
-    
-    public File getTestResourceDir() {
-		return new File(new File(new File(new File("build"), "tests"), "deps"), "test-resources");
-    }
-    
-    public Connection getConnection() {
-        return CayenneTestResources.getResources().getSharedConnection();
-    }
+	public void addToNodes(DataNodeConfigInfo nodeInfo) {
+		nodes.add(nodeInfo);
+	}
+	
+	/**
+	 * Returns the altProjectFile.
+	 * @return File
+	 */
+	public File getAltProjectFile() {
+		return altProjectFile;
+	}
 
-    public DataDomain getDomain() {
-        return CayenneTestResources.getResources().getSharedDomain();
-    }
+	/**
+	 * Returns the destJar.
+	 * @return File
+	 */
+	public File getDestJar() {
+		return destJar;
+	}
 
-    public DataNode getNode() {
-        return CayenneTestResources.getResources().getSharedNode();
-    }
+	/**
+	 * Returns the nodes.
+	 * @return List
+	 */
+	public List getNodes() {
+		return nodes;
+	}
 
-    public DataSourceInfo getFreshConnInfo() throws Exception {
-        return CayenneTestResources.getResources().getFreshConnInfo();
-    }
+	/**
+	 * Returns the sourceJar.
+	 * @return File
+	 */
+	public File getSourceJar() {
+		return sourceJar;
+	}
 
-    public DataContext createDataContext() {
-        return getDomain().createDataContext();
-    }
-    
-    public CayenneTestDatabaseSetup getDatabaseSetup() {
-    	return CayenneTestResources.getResources().getSharedDatabaseSetup();
-    } 
+	/**
+	 * Sets the altProjectFile.
+	 * @param altProjectFile The altProjectFile to set
+	 */
+	public void setAltProjectFile(File altProjectFile) {
+		this.altProjectFile = altProjectFile;
+	}
+
+	/**
+	 * Sets the destJar.
+	 * @param destJar The destJar to set
+	 */
+	public void setDestJar(File destJar) {
+		this.destJar = destJar;
+	}
+
+	/**
+	 * Sets the nodes.
+	 * @param nodes The nodes to set
+	 */
+	public void setNodes(List nodes) {
+		this.nodes = nodes;
+	}
+
+	/**
+	 * Sets the sourceJar.
+	 * @param sourceJar The sourceJar to set
+	 */
+	public void setSourceJar(File sourceJar) {
+		this.sourceJar = sourceJar;
+	}
 }

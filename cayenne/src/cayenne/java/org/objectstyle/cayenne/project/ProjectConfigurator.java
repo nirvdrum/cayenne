@@ -53,72 +53,116 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.unittest;
+package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.sql.Connection;
+import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DataSourceInfo;
-
-import junit.framework.TestCase;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * Superclass of Cayenne test cases. Provides access to shared
- * connection resources.
- * 
+ * Performs on the fly reconfiguration of Cayenne projects.
+ *  
  * @author Andrei Adamchik
  */
-public class CayenneTestCase extends TestCase {
-    private static Logger logObj = Logger.getLogger(CayenneTestCase.class);
-    
-    /**
-     * Constructor for CayenneTestCase.
-     * @param arg0
-     */
-    public CayenneTestCase(String name) {
-        super(name);
-        
-        // init resources if needed
-        CayenneTestResources.init();
-    }
+public class ProjectConfigurator {
+	private static Logger logObj = Logger.getLogger(ProjectConfigurator.class);
+	protected ProjectConfigInfo info;
 
-    /**
-     * Returns directory that should be used by all test 
-     * cases that perform file operations.
-     */
-    public File getTestDir() {
-    	return CayenneTestResources.getResources().getTestDir();
-    }
-    
-    public File getTestResourceDir() {
-		return new File(new File(new File(new File("build"), "tests"), "deps"), "test-resources");
-    }
-    
-    public Connection getConnection() {
-        return CayenneTestResources.getResources().getSharedConnection();
-    }
+	public ProjectConfigurator(ProjectConfigInfo info) {
+		this.info = info;
+	}
 
-    public DataDomain getDomain() {
-        return CayenneTestResources.getResources().getSharedDomain();
-    }
+	/**
+	 * Performs reconfiguration of the project.
+	 * 
+	 * @throws ProjectException
+	 */
+	public void execute() throws ProjectException {
+		File tmpDir = null;
 
-    public DataNode getNode() {
-        return CayenneTestResources.getResources().getSharedNode();
-    }
+		try {
+			if (info.getDestJar() == null) {
+				info.setDestJar(info.getSourceJar());
+			}
+			validate();
+			tmpDir = makeTempDirectory();
+			Util.unzip(info.getSourceJar(), tmpDir);
+		} catch (Exception ex) {
+			throw new ProjectException("Error performing reconfiguration.", ex);
+		} finally {
+			if (tmpDir != null) {
+				cleanup(tmpDir);
+			}
+		}
+	}
 
-    public DataSourceInfo getFreshConnInfo() throws Exception {
-        return CayenneTestResources.getResources().getFreshConnInfo();
-    }
+	/**
+	 *  Deletes a temporary directories and files created.
+	 */
+	protected void cleanup(File dir) {
+		if (!Util.delete(dir.getPath(), true)) {
+			logObj.info("Can't delete temporary directory: " + dir);
+		}
+	}
 
-    public DataContext createDataContext() {
-        return getDomain().createDataContext();
-    }
-    
-    public CayenneTestDatabaseSetup getDatabaseSetup() {
-    	return CayenneTestResources.getResources().getSharedDatabaseSetup();
-    } 
+
+	/**
+	 * Creates a temporary directory to unjar the jar file.
+	 * 
+	 * @return File
+	 * @throws IOException
+	 */
+	protected File makeTempDirectory() throws IOException {
+		File destFolder = info.getDestJar().getParentFile();
+		if (destFolder != null && !destFolder.isDirectory()) {
+			if (!destFolder.mkdirs()) {
+				throw new IOException(
+					"Can't create directory: " + destFolder.getCanonicalPath());
+			}
+		}
+
+		String baseName = info.getDestJar().getName();
+
+		// seeting upper limit on a number of tries, though normally we would expect
+		// to succeed from the first attempt... 
+		for (int i = 0; i < 100; i++) {
+			File tmpDir =
+				(destFolder != null)
+					? new File(destFolder, baseName + i)
+					: new File(baseName + i);
+			if (!tmpDir.exists()) {
+				if (!tmpDir.mkdir()) {
+					throw new IOException(
+						"Can't create directory: " + tmpDir.getCanonicalPath());
+				}
+
+				return tmpDir;
+			}
+		}
+
+		throw new IOException("Problems creating temporary directory.");
+	}
+
+	/**
+	 * Validates consistency of the reconfiguration information.
+	 */
+	protected void validate() throws Exception {
+		if (info == null) {
+			throw new IllegalArgumentException("ProjectConfig info is not set.");
+		}
+
+		if (info.getSourceJar() == null) {
+			throw new IllegalArgumentException("Source jar file is not set.");
+		}
+
+		if (!info.getSourceJar().isFile()) {
+			throw new IOException(info.getSourceJar() + " is not a file.");
+		}
+
+		if (!info.getSourceJar().canRead()) {
+			throw new IOException("Can't read file: " + info.getSourceJar());
+		}
+	}
 }
