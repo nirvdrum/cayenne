@@ -79,8 +79,8 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.TableInfo;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.NameConverter;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** Utility class that does reverse engineering of the database. 
   * It can create DataMaps using database meta data obtained via JDBC driver.

@@ -431,6 +431,10 @@ public class BrowseView
                     mediator.getCurrentDataDomain(),
                     mediator.getCurrentDataMap()});
 
+        if(mapNode == null) {
+        	return;
+        }
+        
         currentNode = new DefaultMutableTreeNode(entity, false);
         fixEntityPosition(mapNode, currentNode);
         showNode(currentNode);

@@ -64,7 +64,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
 import org.xml.sax.InputSource;
 
 /**

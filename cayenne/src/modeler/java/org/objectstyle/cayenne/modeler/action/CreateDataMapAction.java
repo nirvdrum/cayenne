@@ -61,7 +61,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  * Action that creates new DataMap in the project.

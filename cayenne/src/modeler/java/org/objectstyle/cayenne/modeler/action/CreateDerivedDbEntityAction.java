@@ -60,7 +60,7 @@ import javax.swing.Action;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  * @author Andrei Adamchik

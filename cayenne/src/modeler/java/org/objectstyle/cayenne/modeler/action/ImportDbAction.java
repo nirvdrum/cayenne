@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.modeler.event.DataMapEvent;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.event.ModelerEvent;
 import org.objectstyle.cayenne.modeler.util.YesNoToAllDialog;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /** 
  * Action that imports database structure into a DataMap.
@@ -228,8 +229,6 @@ public class ImportDbAction extends CayenneAction {
     public void processMapUpdate(DataMap map) {
         EventController mediator = getMediator();
 
-        // If this is adding to existing data map, remove it
-        // and re-add to the BroseView
         if (mediator.getCurrentDataMap() != null) {
             mediator.fireDataMapEvent(
                 new DataMapEvent(Editor.getFrame(), map, ModelerEvent.CHANGE));
@@ -252,7 +251,12 @@ public class ImportDbAction extends CayenneAction {
                 loader.loadDataMapFromDB(schemaName, null, map);
                 return map;
             } else {
-                return loader.createDataMapFromDB(schemaName);
+                map = loader.createDataMapFromDB(schemaName);
+                
+                // fix map name
+                map.setName(NamedObjectFactory.createName(DataMap.class, mediator.getCurrentDataDomain()));
+                
+                return map;
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -272,9 +276,11 @@ public class ImportDbAction extends CayenneAction {
     class LoaderDelegate implements DbLoaderDelegate {
         protected EventController mediator;
         protected int duplicate = YesNoToAllDialog.UNDEFINED;
+        protected boolean existingMap;
 
         public LoaderDelegate(EventController mediator) {
             this.mediator = mediator;
+            this.existingMap = mediator.getCurrentDataMap() != null;
         }
 
         /**
@@ -317,29 +323,37 @@ public class ImportDbAction extends CayenneAction {
          * @see org.objectstyle.cayenne.access.DbLoaderDelegate#dbEntityAdded(DbEntity)
          */
         public void dbEntityAdded(DbEntity ent) {
-            mediator.fireDbEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+            if (existingMap) {
+                mediator.fireDbEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+            }
         }
 
         /**
          * @see org.objectstyle.cayenne.access.DbLoaderDelegate#objEntityAdded(ObjEntity)
          */
         public void objEntityAdded(ObjEntity ent) {
-            mediator.fireObjEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+            if (existingMap) {
+                mediator.fireObjEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+            }
         }
         /**
          * @see org.objectstyle.cayenne.access.DbLoaderDelegate#dbEntityRemoved(DbEntity)
          */
         public void dbEntityRemoved(DbEntity ent) {
-            mediator.fireDbEntityEvent(
-                new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+            if (existingMap) {
+                mediator.fireDbEntityEvent(
+                    new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+            }
         }
 
         /**
          * @see org.objectstyle.cayenne.access.DbLoaderDelegate#objEntityRemoved(ObjEntity)
          */
         public void objEntityRemoved(ObjEntity ent) {
-            mediator.fireObjEntityEvent(
-                new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+            if (existingMap) {
+                mediator.fireObjEntityEvent(
+                    new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
+            }
         }
     }
 }

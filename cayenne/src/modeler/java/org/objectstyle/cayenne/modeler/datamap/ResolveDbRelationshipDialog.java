@@ -89,7 +89,7 @@ import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /** 
  * Editor for DbRelationship and its DbAttributePair's.

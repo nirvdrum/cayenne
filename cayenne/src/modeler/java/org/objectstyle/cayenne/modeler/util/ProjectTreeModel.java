@@ -101,6 +101,13 @@ public class ProjectTreeModel extends DefaultTreeModel {
     public ProjectTreeModel(Project project) {
         super(wrapProject(project));
     }
+    
+    /**
+     * Refreshes object subtree.
+     */
+    public void refreshSubtree(Object[] path) {
+    	
+    }
 
     /**
      * Returns root node cast into DefaultMutableTreeNode.

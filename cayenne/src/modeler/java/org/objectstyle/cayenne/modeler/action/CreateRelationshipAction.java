@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  * @author Andrei Adamchik

@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainEvent;
 import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
  * @author Andrei Adamchik

@@ -89,7 +89,7 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTextField;
 import org.objectstyle.cayenne.modeler.util.EntityWrapper;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
