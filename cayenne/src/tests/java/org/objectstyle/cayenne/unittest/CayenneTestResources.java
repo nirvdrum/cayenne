@@ -84,7 +84,7 @@ public class CayenneTestResources {
 
     public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
     public static final String TEST_DIR_KEY = "cayenne.test.dir";
-    public static final String TEST_MAP_PATH = "test-resources/testmap.xml";
+    public static final String TEST_MAP_PATH = "test-resources/testmap.map.xml";
 
     private static boolean initDone;
     protected static CayenneTestResources resources;
