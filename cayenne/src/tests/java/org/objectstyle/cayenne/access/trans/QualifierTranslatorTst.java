@@ -55,11 +55,16 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.exp.TstBinaryExpSuite;
+import org.objectstyle.cayenne.exp.TstExpressionCase;
+import org.objectstyle.cayenne.exp.TstExpressionSuite;
+import org.objectstyle.cayenne.exp.TstTernaryExpSuite;
+import org.objectstyle.cayenne.exp.TstUnaryExpSuite;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.QualifiedQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class QualifierTranslatorTst extends CayenneTestCase {
 	private static Logger logObj = Logger.getLogger(QualifierTranslatorTst.class);

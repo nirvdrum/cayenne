@@ -55,11 +55,17 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.util.CayenneMap;
 
 /** 
  * An Entity is an abstract descriptor for an entity mapping concept.

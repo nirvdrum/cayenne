@@ -55,12 +55,13 @@ package org.objectstyle.cayenne.project;
  *
  */
 
-import java.io.*;
-import java.sql.*;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
 /**
  * ProjectDataSource is a DataSource implementation used by 

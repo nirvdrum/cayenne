@@ -55,8 +55,13 @@ package org.objectstyle.cayenne;
  *
  */
 
-import org.apache.log4j.*;
-import org.objectstyle.art.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.Exhibit;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
+import org.objectstyle.art.PaintingInfo;
 
 public class CDOOneDep2OneTst extends CayenneDOTestBase {
     private static Logger logObj = Logger.getLogger(CDOOneDep2OneTst.class);

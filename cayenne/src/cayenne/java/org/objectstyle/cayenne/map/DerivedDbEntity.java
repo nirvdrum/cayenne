@@ -55,9 +55,11 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * DbEntity subclass that is based on another DbEntity

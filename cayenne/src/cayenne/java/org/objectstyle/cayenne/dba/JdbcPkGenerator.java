@@ -56,15 +56,29 @@
 
 package org.objectstyle.cayenne.dba;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.access.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
+import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /** 
  * Default primary key generator implementation. Uses a lookup table named

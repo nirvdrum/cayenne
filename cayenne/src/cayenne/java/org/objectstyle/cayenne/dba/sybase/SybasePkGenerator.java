@@ -56,14 +56,17 @@
 
 package org.objectstyle.cayenne.dba.sybase;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.JdbcPkGenerator;
+import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
  * Primary key generator implementation for Sybase. Uses a lookup table named

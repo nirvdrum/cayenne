@@ -55,8 +55,9 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 
 /**
  * @author Andrei Adamchik

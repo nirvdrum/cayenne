@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.modeler;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,10 +54,15 @@ package org.objectstyle.cayenne.modeler;
  *
  */ 
 
+package org.objectstyle.cayenne.modeler;
 
 import java.awt.Component;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.Spring;
+import javax.swing.SpringLayout;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 

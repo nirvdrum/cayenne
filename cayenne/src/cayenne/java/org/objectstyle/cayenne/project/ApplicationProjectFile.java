@@ -55,9 +55,10 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
+import java.io.PrintWriter;
 
-import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
  * ApplicationProjectFile is a ProjectFile abstraction of the 

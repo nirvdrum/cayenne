@@ -55,10 +55,17 @@ package org.objectstyle.cayenne.wocompat;
  *
  */
 
-import java.io.*;
+import java.io.PrintWriter;
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class EOModelProcessorTst extends CayenneTestCase {
     private static final PrintWriter out = new NullPrintWriter();

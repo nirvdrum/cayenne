@@ -1,9 +1,9 @@
 package cayenne.tutorial.tapestry;
 
-import java.io.*;
+import java.io.Serializable;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.*;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * The artist application session object.  Each user

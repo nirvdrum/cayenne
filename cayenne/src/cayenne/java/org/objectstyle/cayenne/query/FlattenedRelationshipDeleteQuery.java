@@ -54,11 +54,20 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /**
  * @author cmiskell

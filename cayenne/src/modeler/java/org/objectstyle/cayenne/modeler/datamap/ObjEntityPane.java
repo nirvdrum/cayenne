@@ -66,7 +66,15 @@ import java.awt.event.ItemListener;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.InputVerifier;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;

@@ -55,8 +55,8 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class CayenneDataObjectTst extends CayenneTestCase {
     protected DataContext ctxt;

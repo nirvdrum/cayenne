@@ -61,7 +61,11 @@ import java.util.Iterator;
 import javax.swing.table.AbstractTableModel;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMapException;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
 
 

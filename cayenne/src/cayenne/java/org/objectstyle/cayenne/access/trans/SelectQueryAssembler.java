@@ -56,9 +56,9 @@
  
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.*;
+import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbAttribute;
 
 
 /** 

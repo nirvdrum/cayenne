@@ -55,12 +55,15 @@
  */
 package org.objectstyle.cayenne.access.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.QueryHelper;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.ToManyList;
+import org.objectstyle.cayenne.access.ToManyListDataSource;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Default implementation of ToManyListDataSource used to populate 

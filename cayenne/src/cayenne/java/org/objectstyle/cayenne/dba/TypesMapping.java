@@ -55,8 +55,16 @@
  */
 package org.objectstyle.cayenne.dba;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /** 
  * A utility class that handles mappings of JDBC data types to 

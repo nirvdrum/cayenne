@@ -56,17 +56,23 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.trans.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Query;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.

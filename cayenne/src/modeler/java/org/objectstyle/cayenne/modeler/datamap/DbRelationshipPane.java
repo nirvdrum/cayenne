@@ -61,7 +61,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -75,7 +79,13 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.modeler.CayenneActionPanel;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DbEntityListener;
+import org.objectstyle.cayenne.modeler.event.DbRelationshipListener;
+import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 

@@ -55,7 +55,7 @@ package org.objectstyle.art;
  *
  */ 
 
-import java.math.*;
+import java.math.BigDecimal;
 
 public class Painting extends ArtDataObject {
     

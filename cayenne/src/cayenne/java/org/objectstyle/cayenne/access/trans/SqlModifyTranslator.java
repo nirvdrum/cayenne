@@ -56,9 +56,10 @@ package org.objectstyle.cayenne.access.trans;
  */ 
 
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 
 /** Class works as a translator of raw SELECT queries to JDBC statements. */

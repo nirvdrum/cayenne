@@ -55,9 +55,9 @@
  */
 package org.objectstyle.art;
 
-import java.math.*;
+import java.math.BigDecimal;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneDataObject;
 
 /**
  * @author Andrei Adamchik

@@ -55,11 +55,12 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * Describes a database SELECT statement in object terms.

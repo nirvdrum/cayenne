@@ -55,8 +55,9 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.unittest.*;
-import org.xml.sax.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.xml.sax.InputSource;
 
 
 public class MapLoaderLoadTst extends CayenneTestCase {

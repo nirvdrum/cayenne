@@ -55,13 +55,26 @@
  */
 package org.objectstyle.cayenne.unittest;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DbGenerator;
+import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
  * @author Andrei Adamchik

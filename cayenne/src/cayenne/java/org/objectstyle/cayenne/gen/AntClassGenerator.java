@@ -57,9 +57,9 @@
 
 package org.objectstyle.cayenne.gen;
 
-import java.io.*;
+import java.io.File;
 
-import org.apache.tools.ant.*;
+import org.apache.tools.ant.Task;
 
 /** 
   * Ant-specific extension of DefaultClassGenerator that provides logging

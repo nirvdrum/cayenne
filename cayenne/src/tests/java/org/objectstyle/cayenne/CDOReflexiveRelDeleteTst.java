@@ -1,7 +1,6 @@
 package org.objectstyle.cayenne;
 
 import org.objectstyle.art.ArtGroup;
-import org.objectstyle.cayenne.access.DataContext;
 
 public class CDOReflexiveRelDeleteTst extends CayenneDOTestBase {
 	private ArtGroup parentGroup;

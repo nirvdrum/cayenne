@@ -1,10 +1,13 @@
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver sharedResolver;

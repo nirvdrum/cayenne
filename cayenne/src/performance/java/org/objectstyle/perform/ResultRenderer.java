@@ -56,7 +56,8 @@
 
 package org.objectstyle.perform;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Andrei Adamchik

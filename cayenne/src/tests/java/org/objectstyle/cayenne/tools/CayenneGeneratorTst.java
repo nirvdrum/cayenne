@@ -55,15 +55,21 @@
  */
 package org.objectstyle.cayenne.tools;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 
-import org.apache.log4j.*;
-import org.apache.oro.text.perl.*;
-import org.apache.tools.ant.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.unittest.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.log4j.Logger;
+import org.apache.oro.text.perl.Perl5Util;
+import org.apache.tools.ant.Location;
+import org.apache.tools.ant.Project;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestResources;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
 
 public class CayenneGeneratorTst extends CayenneTestCase {
 	private static Logger logObj = Logger.getLogger(CayenneGeneratorTst.class);

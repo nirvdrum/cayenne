@@ -56,8 +56,8 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 public class DeleteQuery extends QualifiedQuery {
     /** Creates empty DeleteQuery. */

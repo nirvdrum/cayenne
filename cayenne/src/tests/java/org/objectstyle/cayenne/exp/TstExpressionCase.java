@@ -55,9 +55,9 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.TranslationTestCase;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 
 public class TstExpressionCase extends TranslationTestCase {    

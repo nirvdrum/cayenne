@@ -55,9 +55,10 @@ package org.objectstyle.cayenne;
  *
  */
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.unittest.CayenneTestResources;
 
 public class TestCaseDataFactory {
 

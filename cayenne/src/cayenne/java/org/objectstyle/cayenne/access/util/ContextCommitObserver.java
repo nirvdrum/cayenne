@@ -55,12 +55,22 @@
  */
 package org.objectstyle.cayenne.access.util;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.ObjectStore;
+import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * ContextCommitObserver is used as an observer for DataContext 

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.*;
+import java.util.Map;
 
 /** 
  * A TempObjectId is used as a temporary

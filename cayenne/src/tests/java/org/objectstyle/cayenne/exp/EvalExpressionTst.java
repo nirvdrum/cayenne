@@ -55,8 +55,8 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

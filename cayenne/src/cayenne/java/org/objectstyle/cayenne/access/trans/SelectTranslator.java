@@ -55,14 +55,25 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** 
  * Class that serves as a translator of SELECT queries to JDBC statements.

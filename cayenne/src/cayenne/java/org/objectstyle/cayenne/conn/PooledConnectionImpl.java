@@ -56,12 +56,17 @@
 
 package org.objectstyle.cayenne.conn;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import javax.sql.*;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.PooledConnection;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 
 /**
  * PooledConnectionImpl is an implementation of a pooling wrapper 

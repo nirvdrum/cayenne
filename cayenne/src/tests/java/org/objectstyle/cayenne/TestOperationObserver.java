@@ -55,13 +55,15 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 /** Helper class to process test queries results. */
 public class TestOperationObserver extends DefaultOperationObserver {

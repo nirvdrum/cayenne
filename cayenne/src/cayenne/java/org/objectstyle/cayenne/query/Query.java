@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Level;
 
 /**
  * Generic query interface.

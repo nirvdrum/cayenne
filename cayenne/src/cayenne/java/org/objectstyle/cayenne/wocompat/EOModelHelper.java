@@ -55,13 +55,16 @@
  */
 package org.objectstyle.cayenne.wocompat;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
-import org.objectstyle.cayenne.wocompat.parser.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
  *  Helper class used by EOModelProcessor. During creation, it loads

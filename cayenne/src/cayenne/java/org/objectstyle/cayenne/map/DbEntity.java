@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /** 
  * A DbEntity is a mapping descriptor that defines a structure of a database table. 

@@ -56,10 +56,10 @@
 
 package org.objectstyle.cayenne.dba;
 
-import java.util.*;
+import java.util.List;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
  * Defines methods to support automatic primary key generation. 

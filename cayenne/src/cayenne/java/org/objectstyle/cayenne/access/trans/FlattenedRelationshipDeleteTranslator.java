@@ -54,9 +54,12 @@ package org.objectstyle.cayenne.access.trans;
  * <http://objectstyle.org/>.
  *
  */
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
 
 /**
  * @author cmiskell

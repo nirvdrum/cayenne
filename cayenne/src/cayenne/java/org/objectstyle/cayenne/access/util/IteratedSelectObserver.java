@@ -56,12 +56,16 @@
 
 package org.objectstyle.cayenne.access.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.List;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.ResultIterator;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * OperationObserver that is used to track the execution

@@ -55,9 +55,11 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 
 /**
  * RequestQueue implements a FIFO queue for threads waiting for a 

@@ -55,10 +55,15 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /** 
   * Utility class to find resources. (Resources are usually files).

@@ -55,8 +55,8 @@ package org.objectstyle.art;
  *
  */ 
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneDataObject;
 
 
 public class PaintingInfo extends CayenneDataObject {

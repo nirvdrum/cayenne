@@ -55,10 +55,17 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
  * Validator of a single node in a project object tree. 

@@ -55,13 +55,15 @@ package org.objectstyle.cayenne.access.types;
  *
  */
 
-import java.lang.reflect.*;
-import java.sql.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.dba.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.dba.TypesMapping;
 
 
 /** Handles Java types mapped to JDBC types in JDBC sepcification. */

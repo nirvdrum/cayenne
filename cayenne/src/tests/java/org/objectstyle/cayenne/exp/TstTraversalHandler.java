@@ -55,9 +55,10 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 
 /** Class that collects statistics of expression traversal. It is both traversal 

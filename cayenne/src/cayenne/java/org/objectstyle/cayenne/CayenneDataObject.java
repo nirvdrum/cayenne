@@ -55,13 +55,19 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * A CayenneDataObject is a default implementation of DataObject interface.

@@ -56,14 +56,19 @@
 
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.JdbcPkGenerator;
+import org.objectstyle.cayenne.map.DbEntity;
 
 /** 
  * Sequence-based primary key generator implementation for Oracle. 

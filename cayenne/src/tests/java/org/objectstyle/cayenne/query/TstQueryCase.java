@@ -55,7 +55,7 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.TranslationTestCase;
 
 
 public class TstQueryCase extends TranslationTestCase {    

@@ -55,7 +55,7 @@
  */ 
 package org.objectstyle.cayenne.conn;
 
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class PooledConnectionImplTst extends CayenneTestCase {
     

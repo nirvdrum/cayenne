@@ -63,7 +63,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
+import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 
 /** 
   * @author Michael Misha Shengaout

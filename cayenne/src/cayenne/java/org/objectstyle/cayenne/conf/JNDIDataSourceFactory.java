@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,11 +54,15 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import javax.naming.*;
-import javax.sql.*;
+package org.objectstyle.cayenne.conf;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.QueryLogger;
 
 
 /** Looks up DataSource objects via JNDI.

@@ -55,11 +55,12 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.commons.beanutils.*;
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Class that performs in-memory Cayenne expressions evaluation.

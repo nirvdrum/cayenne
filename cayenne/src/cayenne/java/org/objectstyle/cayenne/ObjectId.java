@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * An ObjectId is a class that uniquely identifies a 

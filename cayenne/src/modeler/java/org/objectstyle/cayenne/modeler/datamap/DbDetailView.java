@@ -63,7 +63,12 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DbRelationshipDisplayListener;
+import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 
 public class DbDetailView extends JPanel 
 implements ChangeListener, DbEntityDisplayListener

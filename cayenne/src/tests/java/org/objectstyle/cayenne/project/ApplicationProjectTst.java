@@ -55,13 +55,16 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.List;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

@@ -55,8 +55,9 @@
  */
 package org.objectstyle.cayenne.exp;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Defines basic API of a generic data expression. */
 public abstract class Expression implements Serializable {

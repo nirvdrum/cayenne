@@ -55,12 +55,24 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 
 /** 
  * Factory class that generates various Cayenne objects with 

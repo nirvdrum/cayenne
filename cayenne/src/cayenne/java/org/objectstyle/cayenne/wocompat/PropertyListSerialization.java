@@ -55,11 +55,19 @@
  */
 package org.objectstyle.cayenne.wocompat;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.wocompat.parser.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
  * A <b>PropertyListSerialization</b> is a utility class 

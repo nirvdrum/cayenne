@@ -55,9 +55,10 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
+import java.io.PrintWriter;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoader;
 
 /**
  * DataMapFile is a ProjectFile abstraction of the 

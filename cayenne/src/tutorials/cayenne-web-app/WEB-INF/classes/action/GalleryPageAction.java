@@ -1,13 +1,17 @@
 package action;
 
-import java.util.*;
+import java.util.List;
 
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.*;
-import org.apache.struts.action.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Level;
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public final class GalleryPageAction extends Action {
 

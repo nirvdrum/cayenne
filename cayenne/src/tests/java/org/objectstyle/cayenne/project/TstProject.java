@@ -55,8 +55,9 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Concrete subclass of Project used for testing purposes.

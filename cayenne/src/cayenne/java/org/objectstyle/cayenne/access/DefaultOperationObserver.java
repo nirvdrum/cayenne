@@ -56,11 +56,16 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.io.*;
-import java.util.*;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
  * Simple implementation of OperationObserver interface. 

@@ -1,10 +1,12 @@
 package cayenne.tutorial.tapestry;
 
-import javax.servlet.*;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 
-import net.sf.tapestry.*;
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.conf.*;
+import net.sf.tapestry.ApplicationServlet;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
+import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * The main servlet class for the applicatoin. Links the 

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,10 +54,16 @@ package org.objectstyle.cayenne.conf;
  *
  */
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+package org.objectstyle.cayenne.conf;
 
-import org.objectstyle.cayenne.access.*;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+import org.objectstyle.cayenne.access.DataContext;
 
 /**
   * ServletConfiguration is a Configuration that uses ServletContext to locate resources. 

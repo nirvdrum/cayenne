@@ -55,12 +55,14 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.project.validator.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.project.validator.Validator;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik

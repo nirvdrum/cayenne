@@ -55,10 +55,10 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.Comparator;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
  * Comparator that can compare Java beans based on a 

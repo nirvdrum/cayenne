@@ -55,8 +55,12 @@
  */
 package org.objectstyle.cayenne.dba;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.Iterator;
+import java.util.List;
 
 public class TypesMappingTst extends TypesMappingBase {
 

@@ -55,19 +55,24 @@
  */
 package org.objectstyle.cayenne.unittest;
 
-import java.io.*;
-import java.sql.*;
+import java.io.File;
+import java.sql.Connection;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.ConnectionProperties;
+import org.objectstyle.cayenne.conn.PoolDataSource;
+import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Initializes connections for Cayenne unit tests.

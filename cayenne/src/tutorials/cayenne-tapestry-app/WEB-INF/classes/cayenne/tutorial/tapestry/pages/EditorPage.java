@@ -1,6 +1,6 @@
 package cayenne.tutorial.tapestry.pages;
 
-import net.sf.tapestry.html.*;
+import net.sf.tapestry.html.BasePage;
 
 /**
  * @author Eric Schneider

@@ -55,11 +55,11 @@
  */ 
 package org.objectstyle.cayenne.gen;
 
-import java.io.*;
+import java.io.StringWriter;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ClassGeneratorTst extends CayenneTestCase {
     private static Logger logObj = Logger.getLogger(ClassGeneratorTst.class);

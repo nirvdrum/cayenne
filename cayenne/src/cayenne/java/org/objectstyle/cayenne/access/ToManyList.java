@@ -56,10 +56,13 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.io.*;
-import java.util.*;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.ObjectId;
 
 /**
  * Special List implementation to hold "to many" relationship data.

@@ -55,10 +55,15 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.SortedMap;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.CayenneMap;
 
 /**
  * DataMap is a central class in Cayenne Object Relational mapping design.

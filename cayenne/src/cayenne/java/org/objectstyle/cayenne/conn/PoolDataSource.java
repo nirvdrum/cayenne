@@ -56,12 +56,14 @@
 
 package org.objectstyle.cayenne.conn;
 
-import java.io.*;
-import java.sql.*;
+import java.io.PrintWriter;
+import java.sql.SQLException;
 
-import javax.sql.*;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 
 /**
  * <p>PoolDataSource allows to generate pooled connections.</p>

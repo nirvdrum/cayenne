@@ -1,13 +1,18 @@
 package action;
 
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.*;
-import org.apache.struts.action.*;
-import org.objectstyle.cayenne.access.*;
-import webtest.*;
+import org.apache.log4j.Level;
+import org.apache.struts.action.Action;
+import org.apache.struts.action.ActionErrors;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
+import org.objectstyle.cayenne.access.DataContext;
+import webtest.Artist;
 
-import formbean.*;
+import formbean.ArtistForm;
 
 public final class SaveArtistAction extends Action {
 

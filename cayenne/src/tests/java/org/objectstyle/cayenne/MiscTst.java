@@ -55,8 +55,8 @@
  */
 package org.objectstyle.cayenne;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * Tests issues not directly related to Cayenne.

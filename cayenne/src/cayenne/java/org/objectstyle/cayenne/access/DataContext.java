@@ -56,17 +56,49 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.util.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.QueryHelper;
+import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.util.ContextCommitObserver;
+import org.objectstyle.cayenne.access.util.ContextSelectObserver;
+import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
+import org.objectstyle.cayenne.access.util.RelationshipDataSource;
+import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.dba.PkGenerator;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.query.FlattenedRelationshipDeleteQuery;
+import org.objectstyle.cayenne.query.FlattenedRelationshipInsertQuery;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.UpdateQuery;
 
 /** User-level Cayenne access class. Provides isolated object view of 
   * the datasource to the application code. Normal use pattern is to 

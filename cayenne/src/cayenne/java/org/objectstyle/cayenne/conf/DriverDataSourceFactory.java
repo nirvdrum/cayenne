@@ -55,17 +55,25 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.*;
+import java.io.InputStream;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.util.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.ConfigException;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.util.AbstractHandler;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 /** 
  * Creates DataSource objects from XML configuration files that

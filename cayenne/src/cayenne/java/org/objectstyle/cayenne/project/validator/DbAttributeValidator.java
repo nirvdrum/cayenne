@@ -55,10 +55,11 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.*;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * @author Andrei Adamchik

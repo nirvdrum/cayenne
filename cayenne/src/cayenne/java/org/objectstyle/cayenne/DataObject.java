@@ -55,9 +55,9 @@
  */ 
 package org.objectstyle.cayenne;
 
-import java.util.*;
+import java.util.Map;
 
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataContext;
 
 /** 
  * Defines basic methods for a persistent object in Cayenne.

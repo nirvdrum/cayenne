@@ -56,10 +56,12 @@
 
 package org.objectstyle.cayenne.conn;
 
-import java.io.*;
-import java.sql.*;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
 /**
  * DriverDataSource is a simple DataSource implementation

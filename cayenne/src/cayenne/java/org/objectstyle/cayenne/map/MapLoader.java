@@ -55,15 +55,30 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.util.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.PropertyComparator;
+import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.util.Util;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 /** 
  * Default MapLoader. Its responsibilities include reading DataMaps 

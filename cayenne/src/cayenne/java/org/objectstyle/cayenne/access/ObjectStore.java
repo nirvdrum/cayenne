@@ -55,10 +55,19 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.

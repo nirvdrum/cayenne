@@ -56,19 +56,32 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.math.*;
-import java.sql.*;
-import java.util.*;
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.util.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.ArtistAssets;
+import org.objectstyle.art.Gallery;
+import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.TestOperationObserver;
+import org.objectstyle.cayenne.access.util.SelectObserver;
+import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 public class DataContextTst extends CayenneTestCase {
 	private static Logger logObj = Logger.getLogger(DataContextTst.class);

@@ -56,7 +56,7 @@
 
 package org.objectstyle.cayenne.exp;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /** 
  * RuntimeException subclass thrown in cases of errors during 

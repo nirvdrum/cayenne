@@ -55,10 +55,12 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.perform.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.perform.CayennePerformanceTest;
+import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik

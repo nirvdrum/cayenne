@@ -55,10 +55,13 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.conf.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.DataSourceFactory;
+import org.objectstyle.cayenne.conf.DefaultConfiguration;
 
 /**
  * Subclass of Configuration used in the project model.

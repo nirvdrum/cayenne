@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Level;
 
 
 /** Defines API to obtain a javax.sql.DataSource objects 

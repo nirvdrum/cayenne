@@ -62,18 +62,32 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
+import org.objectstyle.cayenne.modeler.event.ObjRelationshipListener;
+import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 

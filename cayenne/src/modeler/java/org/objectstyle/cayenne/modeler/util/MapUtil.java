@@ -58,7 +58,17 @@ package org.objectstyle.cayenne.modeler.util;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.map.Relationship;
 
 /** 
  * Provides utility methods to access DataMap, Entities, etc.

@@ -55,9 +55,9 @@
  */ 
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
+import java.util.ArrayList;
 
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class ToManyListTst extends CayenneTestCase {

@@ -55,11 +55,12 @@ package org.objectstyle.cayenne;
  *
  */
 
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.exp.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class QueryHelperTst extends CayenneTestCase {
     public QueryHelperTst(String name) {

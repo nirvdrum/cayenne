@@ -55,9 +55,12 @@
  */ 
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /** Metadata for the navigational association between the data objects.
  *  For example, if class "Employee" you may need to get to the department

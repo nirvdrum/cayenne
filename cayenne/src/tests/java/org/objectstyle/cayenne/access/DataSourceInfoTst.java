@@ -55,8 +55,8 @@
  */ 
 package org.objectstyle.cayenne.access;
 
-import org.objectstyle.cayenne.unittest.*;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.util.Util;
 
 
 public class DataSourceInfoTst extends CayenneTestCase {

@@ -55,12 +55,15 @@
  */
 package org.objectstyle.cayenne.access.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
  * ContextSelectObserver is a SelectObserver that would 

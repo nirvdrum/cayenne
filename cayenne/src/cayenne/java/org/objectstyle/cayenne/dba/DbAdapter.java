@@ -56,11 +56,15 @@
 
 package org.objectstyle.cayenne.dba;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.access.trans.*;
-import org.objectstyle.cayenne.access.types.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.query.Query;
 
 /** 
  * Defines API needed to handle differences between various 

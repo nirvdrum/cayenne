@@ -55,9 +55,12 @@
  */ 
 package org.objectstyle.cayenne.exp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class ExpressionFactoryExtrasTst extends CayenneTestCase {

@@ -55,11 +55,17 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.conf.*;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
 
 /**
  * ProjectTraversal allows to traverse Cayenne project tree in a

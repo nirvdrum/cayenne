@@ -56,9 +56,10 @@
 
 package org.objectstyle.cayenne.perform.test;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
-import org.objectstyle.cayenne.perform.*;
+import org.objectstyle.cayenne.perform.CayennePerformanceTest;
 
 /**
  * @author Andrei Adamchik

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.unittest;
 
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataDomain;
 
 /**
  * Helper class for the test cases that use a DataMap with all relationships

@@ -56,14 +56,23 @@
 
 package org.objectstyle.cayenne.conn;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
 
-import javax.sql.*;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.util.*;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.util.RequestDequeue;
+import org.objectstyle.cayenne.util.RequestQueue;
 
 /**
  * PoolManager is a pooling DataSource impementation. 

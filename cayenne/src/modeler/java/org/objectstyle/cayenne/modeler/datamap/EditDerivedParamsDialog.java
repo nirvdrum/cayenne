@@ -62,10 +62,18 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import javax.swing.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;

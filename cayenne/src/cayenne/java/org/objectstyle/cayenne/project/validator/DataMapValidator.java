@@ -55,12 +55,13 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import java.util.*;
+import java.util.Iterator;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.*;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * @author Andrei Adamchik

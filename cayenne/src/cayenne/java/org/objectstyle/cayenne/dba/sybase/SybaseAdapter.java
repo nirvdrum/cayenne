@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.dba.sybase;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.access.types.*;
-import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.access.types.CharType;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.dba.PkGenerator;
 
 /** 
  * DbAdapter implementation for 

@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.perform.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.perform.CayennePerformanceTest;
 
 /**
  * @author Andrei Adamchik

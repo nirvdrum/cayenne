@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
-import org.apache.log4j.*;
+import java.util.List;
+
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /** 
  * A QueryLogger is intended to log special events during query executions.

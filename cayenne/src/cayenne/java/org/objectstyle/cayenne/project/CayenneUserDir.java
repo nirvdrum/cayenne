@@ -55,9 +55,9 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.io.*;
+import java.io.File;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 
 /**
  * CayenneUserDir represents a directory where all Cayenne-related information 

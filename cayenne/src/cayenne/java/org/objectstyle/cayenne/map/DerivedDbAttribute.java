@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.map;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A DerivedDbAttribute is a DbAttribute that resolves to an SQL expression based on 

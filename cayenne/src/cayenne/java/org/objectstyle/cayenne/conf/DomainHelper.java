@@ -55,19 +55,37 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.*;
-import java.util.*;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import javax.sql.*;
+import javax.sql.DataSource;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.project.*;
-import org.objectstyle.cayenne.util.*;
-import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DataMapException;
+import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.util.AbstractHandler;
+import org.objectstyle.cayenne.util.Util;
+import org.xml.sax.Attributes;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.Locator;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Assists Configuration object in loading DataDomain configuration files.

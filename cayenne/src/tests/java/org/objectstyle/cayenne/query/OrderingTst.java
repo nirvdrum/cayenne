@@ -55,7 +55,7 @@
  */ 
 package org.objectstyle.cayenne.query;
 
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 
 public class OrderingTst extends CayenneTestCase {

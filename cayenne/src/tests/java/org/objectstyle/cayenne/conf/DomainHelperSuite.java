@@ -55,9 +55,11 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-import org.apache.log4j.*;
+import org.apache.log4j.Logger;
 
 
 /** Runs multiple domain config cases. */

@@ -55,7 +55,8 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * FlatProjectView converts a project tree into a list of nodes,

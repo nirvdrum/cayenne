@@ -1,5 +1,3 @@
-package org.objectstyle.cayenne.modeler;
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +53,7 @@ package org.objectstyle.cayenne.modeler;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.modeler;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
@@ -67,7 +66,15 @@ import javax.swing.JSplitPane;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.DbDetailView;
 import org.objectstyle.cayenne.modeler.datamap.ObjDetailView;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
+import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
+import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 
 /** 
  * Panel for the Editor window.

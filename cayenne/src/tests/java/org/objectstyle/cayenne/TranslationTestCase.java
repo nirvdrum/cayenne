@@ -55,9 +55,9 @@ package org.objectstyle.cayenne;
  *
  */
 
-import org.apache.oro.text.perl.*;
+import org.apache.oro.text.perl.Perl5Util;
 
-import junit.framework.*;
+import junit.framework.Assert;
 
 public class TranslationTestCase {
 	public static final Perl5Util regexUtil = new Perl5Util();

@@ -55,9 +55,13 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.ObjectId;
 
 /** 
  * ObjEntity is a mapping descriptor for a DataObject Java class. 

@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.access.DataDomain;
 
 /**
  * @author Andrei Adamchik

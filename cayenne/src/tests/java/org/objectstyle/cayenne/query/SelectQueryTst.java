@@ -55,11 +55,14 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.art.*;
-import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 
 public class SelectQueryTst extends SelectQueryBase {
     private static final int _artistCount = 20;

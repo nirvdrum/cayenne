@@ -55,7 +55,7 @@
  */
 package org.objectstyle.art;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneDataObject;
 
 public class ArtistPaintingCounts extends CayenneDataObject {
 	public void setPaintingsCount(Integer paintingsCount) {

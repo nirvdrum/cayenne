@@ -55,10 +55,13 @@
  */
 package org.objectstyle.cayenne.dba;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Types;
 
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.unittest.*;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class JdbcAdapterTst extends CayenneTestCase {
 	protected JdbcAdapter adapter;

@@ -57,7 +57,11 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;

@@ -56,8 +56,9 @@
 
 package org.objectstyle.cayenne.query;
 
-import org.apache.log4j.*;
-import org.objectstyle.cayenne.map.*;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /** 
  * Superclass of all query classes. 

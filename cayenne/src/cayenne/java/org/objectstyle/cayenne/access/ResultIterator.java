@@ -55,9 +55,9 @@
  */ 
 package org.objectstyle.cayenne.access;
 
-import java.util.*;
+import java.util.Map;
 
-import org.objectstyle.cayenne.*;
+import org.objectstyle.cayenne.CayenneException;
 
 
 

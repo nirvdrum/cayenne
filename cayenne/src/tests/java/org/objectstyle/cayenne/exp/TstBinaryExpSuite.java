@@ -55,7 +55,8 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class TstBinaryExpSuite extends TstExpressionSuite {
