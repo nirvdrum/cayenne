@@ -94,21 +94,6 @@ public class ValidatorTst extends CayenneTestCase {
 /*	
 
 	
-	public void testValidateObjAttributes() throws Exception {
-		// should succeed
-		DataDomain d1 = new DataDomain("abc");
-		ObjAttribute oa1 = buildValidObjAttribute("a1");
-		
-		validator.reset();
-		validator.validateObjAttributes(d1, map, (ObjEntity)oa1.getEntity());
-		assertValidator(ValidationResult.VALID);
-		
-		oa1.setDbAttribute(null);
-		validator.reset();
-		validator.validateObjAttributes(d1, map, (ObjEntity)oa1.getEntity());
-		assertValidator(ValidationResult.WARNING);
-	}
-	
 	public void testValidateDbAttributes() throws Exception {
 		// should succeed
 		DataDomain d1 = new DataDomain("abc");
@@ -206,55 +191,7 @@ public class ValidatorTst extends CayenneTestCase {
 		assertValidator(ValidationResult.WARNING);		
 	}
 
-	protected DbRelationship buildValidDbRelationship(String name) {
-		DbEntity src = new DbEntity("e1" + counter++);
-		DbEntity target = new DbEntity("e2" + counter++);
-		map.addDbEntity(src);
-		map.addDbEntity(target);
-		DbRelationship dr1 = new DbRelationship(src, target, null);
-		dr1.setName(name);
-		src.addRelationship(dr1);
-		return dr1;
-	}
 
-	protected ObjRelationship buildValidObjRelationship(String name) {
-		DbRelationship dr1 = buildValidDbRelationship("d" + name);
-		
-		ObjEntity src = new ObjEntity("ey" + counter++);
-		map.addObjEntity(src);
-		src.setDbEntity((DbEntity) dr1.getSourceEntity());
-		
-		ObjEntity target = new ObjEntity("oey" + counter++);
-		map.addObjEntity(target);
-		target.setDbEntity((DbEntity) dr1.getTargetEntity());
-
-		ObjRelationship r1 = new ObjRelationship(src, target, dr1.isToMany());
-		r1.setName(name);
-		src.addRelationship(r1);
-		
-		r1.addDbRelationship(dr1);
-		return r1;
-	}
-	
-	protected ObjAttribute buildValidObjAttribute(String name) {
-		DbAttribute a1 = new DbAttribute();
-		a1.setName("d" + name);
-		a1.setType(Types.CHAR);
-		a1.setMaxLength(2);
-		DbEntity e1 = new DbEntity("ex" + counter++);
-		map.addDbEntity(e1);
-		e1.addAttribute(a1);
-		
-		ObjEntity oe1 = new ObjEntity("oex" + counter++);
-		map.addObjEntity(oe1);
-		oe1.setDbEntity(e1);
-		
-		ObjAttribute oa1 = new ObjAttribute(name, "java.lang.Integer", oe1);
-		oe1.addAttribute(oa1);
-		oa1.setDbAttribute(a1);
-	
-		return oa1;
-	}
 
 */
 }

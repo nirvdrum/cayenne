@@ -55,20 +55,41 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * @author Andrei Adamchik
  */
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Validator Package Tests");
-	    suite.addTestSuite(ValidatorTst.class);
-	    suite.addTestSuite(DomainValidatorTst.class);
-	    suite.addTestSuite(DataNodeValidatorTst.class);
-	    suite.addTestSuite(ObjEntityValidatorTst.class);
-	    suite.addTestSuite(ObjAttributeValidatorTst.class);
-		return suite;
-	}
-}
+public class ObjAttributeValidatorTst extends ValidatorTestBase {
 
+    /**
+     * Constructor for ObAttributeValidatorTst.
+     * @param arg0
+     */
+    public ObjAttributeValidatorTst(String arg0) {
+        super(arg0);
+    }
+
+    public void testValidateObjAttributes() throws Exception {
+        DataDomain d1 = new DataDomain("d1");
+
+        DataMap m1 = new DataMap("m1");
+        d1.addMap(m1);
+        ObjAttribute oa1 = buildValidObjAttribute(m1, "a1");
+        validator.reset();
+        new ObjAttributeValidator().validateObject(
+            new Object[] { conf, d1, m1, oa1.getEntity(), oa1 },
+            validator);
+        assertValidator(ValidationResult.VALID);
+
+        oa1.setDbAttribute(null);
+        validator.reset();
+        new ObjAttributeValidator().validateObject(
+            new Object[] { conf, d1, m1, oa1.getEntity(), oa1 },
+            validator);
+        assertValidator(ValidationResult.WARNING);
+    }
+}
