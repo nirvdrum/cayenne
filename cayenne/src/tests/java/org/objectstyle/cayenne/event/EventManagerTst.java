@@ -69,10 +69,15 @@ public class EventManagerTst
 	implements EventListener
 {
 	private static final Logger log = Logger.getLogger(EventManagerTst.class);
+
+	// used for counting received events on the class
 	public static int _numberOfReceivedEventsForClass;
-	
-	private EventManager _eventManager;
+
+	// used for counting received events per listener instance
 	public int _numberOfReceivedEvents;
+
+	// the event manager used for testing
+	private EventManager _eventManager;
 
 	public EventManagerTst(String arg0) {
 		super(arg0);
@@ -177,7 +182,7 @@ public class EventManagerTst
 	public void testWrongRegisteredEventClass() throws Exception {
 		EventSubject subject = EventSubject.getSubject(this.getClass(), "XXX");
 
-		// we register a method that takes a CayenbneEvent or subclass thereof.. 
+		// we register a method that takes a CayenneEvent or subclass thereof.. 
 		_eventManager.addListener(this, "seeNotification", CayenneEvent.class, subject);
 
 		// ..but post a subclass of EventObject that is not compatible with CayenneEvent
