@@ -98,8 +98,8 @@ public class DeploymentConfigurator extends Task {
         try {
             processProject();
         } catch (Exception ex) {
-            super.log("Error generating classes.");
-            throw new BuildException("Error generating classes.", ex);
+            super.log("Error during deployment configuration.");
+            throw new BuildException("Error during deployment configuration.", ex);
         }
     }
 
