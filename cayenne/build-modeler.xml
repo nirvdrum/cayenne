@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ========================================== -->
-<!-- CayenneModeler(Swing) subproject buildfile.-->
+<!-- CayenneModeler subproject buildfile.-->
 <!-- ========================================== -->
 <project default="compile">
 	<property name="modeler.dist.src" value="${dist}/src/modeler"/>
@@ -11,7 +11,6 @@
 	<property name="modeler.src" value="src/modeler/java"/>
 	<property name="modeler.resources" value="src/modeler/resources"/>
 	<property name="modeler.bin" value="src/modeler/bin"/>
-	
     
 	<!-- ========================================== -->
     <!-- Build targets.                             -->
@@ -47,6 +46,8 @@
                 <include name="${ognl.jar}"/>
                 <include name="${jgoodies.forms.jar}"/>
                 <include name="${jgoodies.looks.jar}"/>
+				 <include name="${commons.pool.jar}"/>
+				 <include name="${commons.dbcp.jar}"/>
             </fileset>
         </copy>
 	</target>
@@ -79,7 +80,7 @@
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.modeler.Main"/>
                <attribute name="Class-Path" 
-               		value="../cayenne.jar ${ognl.jar} ${hsqldb.jar} ${jgoodies.forms.jar} ${scope.jar} ${jgoodies.looks.jar}"/>
+               		value="../cayenne.jar ${ognl.jar} ${hsqldb.jar} ${jgoodies.forms.jar} ${scope.jar} ${jgoodies.looks.jar} ${commons.pool.jar} ${commons.dbcp.jar}"/>
             </manifest>
         </jar>
     </target>  

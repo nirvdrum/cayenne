@@ -37,6 +37,8 @@
 	<classpathentry kind="lib" path="otherlib/mockrunner-0.2.9.jar"/>
 	<classpathentry kind="lib" path="otherlib/spring-1.0.jar"/>
 	<classpathentry kind="lib" path="otherlib/hsqldb-1.7.2.jar"/>
+	<classpathentry kind="lib" path="otherlib/commons-pool-1.2.jar"/>
+	<classpathentry kind="lib" path="otherlib/commons-dbcp-1.2.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -75,19 +75,18 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-/** 
- * Creates DataSource objects from XML configuration files that
- * describe a JDBC driver. Wraps JDBC driver in a generic DataSource 
- * implementation.
- *
+/**
+ * Creates DataSource objects from XML configuration files that describe a JDBC driver.
+ * Wraps JDBC driver in a generic DataSource implementation.
+ * 
  * @author Andrei Adamchik
  */
 // TODO: factory shouldn't contain any state specific to location ("driverInfo" ivar
 // should go, and probably "parser" too)... Otherwise the API doesn't make sense -
 // sequential invocations of getDataSource() will have side effects....
 public class DriverDataSourceFactory implements DataSourceFactory {
-    private static Logger logObj =
-        Logger.getLogger(DriverDataSourceFactory.class);
+
+    private static Logger logObj = Logger.getLogger(DriverDataSourceFactory.class);
 
     protected XMLReader parser;
     protected DataSourceInfo driverInfo;
@@ -102,35 +101,29 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     /**
-     * @see DataSourceFactory#initializeWithParentConfiguration(Configuration)
+     * Stores configuration object internally to use it later for resource loading.
      */
-    public void initializeWithParentConfiguration(Configuration conf) {
-        this.parentConfiguration = conf;
+    public void initializeWithParentConfiguration(Configuration parentConfiguration) {
+        this.parentConfiguration = parentConfiguration;
     }
 
-    /**
-     * @see DataSourceFactory#getDataSource(String)
-     */
     public DataSource getDataSource(String location) throws Exception {
         return this.getDataSource(location, Level.DEBUG);
     }
 
-    /**
-     * @see DataSourceFactory#getDataSource(String, Level)
-     */
-    public DataSource getDataSource(String location, Level logLevel)
-        throws Exception {
+    public DataSource getDataSource(String location, Level logLevel) throws Exception {
         this.logLevel = logLevel;
         this.load(location);
-        
+
         ConnectionEventLogger logger = new ConnectionEventLogger(Level.INFO);
-        
+
         try {
             return new PoolManager(driverInfo.getJdbcDriver(), driverInfo
                     .getDataSourceUrl(), driverInfo.getMinConnections(), driverInfo
                     .getMaxConnections(), driverInfo.getUserName(), driverInfo
                     .getPassword(), logger);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             QueryLogger.logConnectFailure(logLevel, ex);
             throw ex;
         }
@@ -145,29 +138,25 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     protected InputStream getInputStream(String location) {
         if (this.parentConfiguration == null) {
-            throw new ConfigurationException("No parent Configuration set - cannot continue.");
+            throw new ConfigurationException(
+                    "No parent Configuration set - cannot continue.");
         }
 
-        return this.parentConfiguration.getResourceLocator()
-        			.findResourceStream(location);
+        return this.parentConfiguration.getResourceLocator().findResourceStream(location);
     }
 
     /**
-     * Loads driver information from the file at <code>location</code>.
-     * Called internally from "getDataSource"
+     * Loads driver information from the file at <code>location</code>. Called
+     * internally from "getDataSource"
      */
     protected void load(String location) throws Exception {
-        logObj.log(
-            logLevel,
-            "loading driver information from '" + location + "'.");
+        logObj.log(logLevel, "loading driver information from '" + location + "'.");
 
         InputStream in = this.getInputStream(location);
         if (in == null) {
-            logObj.log(
-                logLevel,
-                "Error: location '" + location + "' not found.");
+            logObj.log(logLevel, "Error: location '" + location + "' not found.");
             throw new ConfigurationException(
-                "Can't find DataSource configuration file at " + location);
+                    "Can't find DataSource configuration file at " + location);
         }
 
         RootHandler handler = new RootHandler();
@@ -180,29 +169,26 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     /** Handler for the root element. Its only child must be the "driver" element. */
     private class RootHandler extends DefaultHandler {
+
         /**
-         * Handles the start of a "driver" element. A driver handler is created
-         * and initialized with the element name and attributes.
+         * Handles the start of a "driver" element. A driver handler is created and
+         * initialized with the element name and attributes.
          * 
-         * @exception SAXException if the tag given is not 
-         *                              <code>"driver"</code>
+         * @exception SAXException if the tag given is not <code>"driver"</code>
          */
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes atts)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes atts) throws SAXException {
             if (localName.equals("driver")) {
                 new DriverHandler(parser, this).init(localName, atts);
-            } else {
-                logObj.log(
-                    logLevel,
-                    "<driver> must be the root element. <"
+            }
+            else {
+                logObj.log(logLevel, "<driver> must be the root element. <"
                         + localName
                         + "> is unexpected.");
-                throw new SAXException(
-                    "Config file is not of expected XML type. '"
+                throw new SAXException("Config file is not of expected XML type. '"
                         + localName
                         + "' unexpected.");
             }
@@ -211,6 +197,7 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     /** Handler for the "driver" element. */
     private class DriverHandler extends AbstractHandler {
+
         public DriverHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
@@ -223,36 +210,28 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         }
 
         /**
-          * Handles the start of a driver child element. An appropriate handler 
-          * is created and initialized with the element name and attributes.
-          * 
-          * @exception SAXException if the tag given is not recognized.
-          */
+         * Handles the start of a driver child element. An appropriate handler is created
+         * and initialized with the element name and attributes.
+         * 
+         * @exception SAXException if the tag given is not recognized.
+         */
         public void startElement(
-            String namespaceURI,
-            String localName,
-            String qName,
-            Attributes atts)
-            throws SAXException {
+                String namespaceURI,
+                String localName,
+                String qName,
+                Attributes atts) throws SAXException {
             if (localName.equals("login")) {
-                new LoginHandler(this.parser, this).init(
-                    localName,
-                    atts,
-                    driverInfo);
-            } else if (localName.equals("url")) {
-                new UrlHandler(this.parser, this).init(
-                    localName,
-                    atts,
-                    driverInfo);
-            } else if (localName.equals("connectionPool")) {
-                new ConnectionHandler(this.parser, this).init(
-                    localName,
-                    atts,
-                    driverInfo);
-            } else {
-                logObj.log(
-                    logLevel,
-                    "<login, url, connectionPool> are valid. <"
+                new LoginHandler(this.parser, this).init(localName, atts, driverInfo);
+            }
+            else if (localName.equals("url")) {
+                new UrlHandler(this.parser, this).init(localName, atts, driverInfo);
+            }
+            else if (localName.equals("connectionPool")) {
+                new ConnectionHandler(this.parser, this)
+                        .init(localName, atts, driverInfo);
+            }
+            else {
+                logObj.log(logLevel, "<login, url, connectionPool> are valid. <"
                         + localName
                         + "> is unexpected.");
                 throw new SAXException("Config file is not of expected XML type");
@@ -262,22 +241,19 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     private class UrlHandler extends AbstractHandler {
+
         /**
          * Constructor which just delegates to the superconstructor.
          * 
-         * @param parentHandler The handler which should be restored to the 
-         *                      parser at the end of the element. 
-         *                      Must not be <code>null</code>.
+         * @param parentHandler The handler which should be restored to the parser at the
+         *            end of the element. Must not be <code>null</code>.
          */
         public UrlHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(
-            String name,
-            Attributes atts,
-            DataSourceInfo driverInfo)
-            throws SAXException {
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo)
+                throws SAXException {
             driverInfo.setDataSourceUrl(atts.getValue("value"));
             if (driverInfo.getDataSourceUrl() == null) {
                 logObj.log(logLevel, "error: <url> has no 'value'.");
@@ -287,22 +263,19 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     private class LoginHandler extends AbstractHandler {
+
         /**
          * Constructor which just delegates to the superconstructor.
          * 
-         * @param parentHandler The handler which should be restored to the 
-         *                      parser at the end of the element. 
-         *                      Must not be <code>null</code>.
+         * @param parentHandler The handler which should be restored to the parser at the
+         *            end of the element. Must not be <code>null</code>.
          */
         public LoginHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(
-            String name,
-            Attributes atts,
-            DataSourceInfo driverInfo)
-            throws SAXException {
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo)
+                throws SAXException {
             logObj.log(logLevel, "loading user name and password.");
             driverInfo.setUserName(atts.getValue("userName"));
             driverInfo.setPassword(atts.getValue("password"));
@@ -310,24 +283,19 @@ public class DriverDataSourceFactory implements DataSourceFactory {
     }
 
     private class ConnectionHandler extends AbstractHandler {
+
         /**
          * Constructor which just delegates to the superconstructor.
          * 
-         * @param parentHandler The handler which should be restored to the 
-         *                      parser at the end of the element. 
-         *                      Must not be <code>null</code>.
+         * @param parentHandler The handler which should be restored to the parser at the
+         *            end of the element. Must not be <code>null</code>.
          */
-        public ConnectionHandler(
-            XMLReader parser,
-            ContentHandler parentHandler) {
+        public ConnectionHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
 
-        public void init(
-            String name,
-            Attributes atts,
-            DataSourceInfo driverInfo)
-            throws SAXException {
+        public void init(String name, Attributes atts, DataSourceInfo driverInfo)
+                throws SAXException {
             try {
                 String min = atts.getValue("min");
                 if (min != null)
@@ -336,11 +304,10 @@ public class DriverDataSourceFactory implements DataSourceFactory {
                 String max = atts.getValue("max");
                 if (max != null)
                     driverInfo.setMaxConnections(Integer.parseInt(max));
-            } catch (NumberFormatException nfex) {
+            }
+            catch (NumberFormatException nfex) {
                 logObj.log(logLevel, "Error loading numeric attribute", nfex);
-                throw new SAXException(
-                    "Error reading numeric attribute.",
-                    nfex);
+                throw new SAXException("Error reading numeric attribute.", nfex);
             }
         }
     }

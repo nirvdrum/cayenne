@@ -61,8 +61,7 @@ import org.apache.log4j.Level;
 
 
 /**
- * Defines API to obtain a javax.sql.DataSource objects 
- * from configuration data.
+ * A pluggable factory for javax.sql.DataSource instances used by Cayenne runtime.
  */
 public interface DataSourceFactory {
     
