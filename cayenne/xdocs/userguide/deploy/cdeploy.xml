@@ -14,7 +14,7 @@
             database connections from what was used in development.</li>
             <li><i>Deployment of Cayenne libraries:</i> Third party Cayenne libraries may contain DataMaps
             and business classes, but they normally do not have <code>cayenne.xml</code> 
-            file, since ultipmate deployment configuration is unknown when the library is created.</li>
+            file, since ultimate deployment configuration is unknown when the library is created.</li>
             </ul>
             
             <p>Cayenne provides an Ant task described below that takes care of such things.
