@@ -59,7 +59,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.access.ToManyListDataSource;
@@ -88,7 +87,7 @@ public class RelationshipDataSource implements ToManyListDataSource, Serializabl
             list.setObjectList(new ArrayList());
         else {
              SelectQuery sel =
-                QueryHelper.selectRelationshipObjects(
+                QueryUtils.selectRelationshipObjects(
                     context,
                     context.registeredObject(list.getSrcObjectId()),
                     list.getRelName());

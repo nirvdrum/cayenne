@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
-import org.objectstyle.cayenne.access.util.BatchUtils;
+import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
 import org.objectstyle.cayenne.access.util.DependencySorter;
@@ -367,7 +367,7 @@ class ContextCommit {
             
             for (Iterator j = objects.iterator(); j.hasNext();) {
                 DataObject o = (DataObject) j.next();
-                Map snapshot = BatchUtils.buildSnapshotForUpdate(o);
+                Map snapshot = BatchQueryUtils.buildSnapshotForUpdate(o);
                 
                 if (snapshot.isEmpty()) {
                     o.setPersistenceState(PersistenceState.COMMITTED);
@@ -377,7 +377,7 @@ class ContextCommit {
                 TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
                 
                 Integer hashCode =
-                    new Integer(BatchUtils.hashCode(updatedAttributeNames));
+                    new Integer(BatchQueryUtils.hashCode(updatedAttributeNames));
                     
                 UpdateBatchQuery batch =
                     (UpdateBatchQuery) batches.get(hashCode);
@@ -579,7 +579,7 @@ class ContextCommit {
                 continue;
             Map dstId = destination.getObjectId().getIdSnapshot();
             Map flattenedSnapshot =
-                BatchUtils.buildFlattenedSnapshot(
+                BatchQueryUtils.buildFlattenedSnapshot(
                     sourceId,
                     dstId,
                     firstDbRel,
@@ -631,7 +631,7 @@ class ContextCommit {
             if (dstId == null)
                 continue;
             Map flattenedSnapshot =
-                BatchUtils.buildFlattenedSnapshot(
+                BatchQueryUtils.buildFlattenedSnapshot(
                     sourceId,
                     dstId,
                     firstDbRel,

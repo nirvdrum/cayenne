@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne;
+package org.objectstyle.cayenne.access.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -63,10 +63,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
-public class QueryHelperTst extends CayenneTestCase {
-    private static Logger logObj = Logger.getLogger(QueryHelperTst.class);
+public class QueryUtilsTst extends CayenneTestCase {
+    private static Logger logObj = Logger.getLogger(QueryUtilsTst.class);
     
-    public QueryHelperTst(String name) {
+    public QueryUtilsTst(String name) {
         super(name);
     }
 
@@ -78,7 +78,7 @@ public class QueryHelperTst extends CayenneTestCase {
                 "artistName",
                 "abc"));
         SelectQuery reverseQ =
-            QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
+            QueryUtils.selectPrefetchPath(getDomain(), q, "paintingArray");
         Object queryRoot = reverseQ.getRoot();
         if (queryRoot instanceof String) {
             assertEquals("Painting", queryRoot);
@@ -109,7 +109,7 @@ public class QueryHelperTst extends CayenneTestCase {
         q.setQualifier(qual);
 
         SelectQuery reverseQ =
-            QueryHelper.selectPrefetchPath(getDomain(), q, "paintingArray");
+            QueryUtils.selectPrefetchPath(getDomain(), q, "paintingArray");
         logObj.debug("reverse qualifier: " + reverseQ.getQualifier());
         Object queryRoot = reverseQ.getRoot();
         if (queryRoot instanceof String) {

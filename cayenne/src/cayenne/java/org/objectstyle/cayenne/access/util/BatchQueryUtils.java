@@ -75,9 +75,9 @@ import org.objectstyle.cayenne.map.DbRelationship;
  * @author Andriy Shapochka
  */
 
-public class BatchUtils {
+public class BatchQueryUtils {
 
-    private BatchUtils() {
+    private BatchQueryUtils() {
     }
 
     public static Map buildSnapshotForUpdate(DataObject o) {

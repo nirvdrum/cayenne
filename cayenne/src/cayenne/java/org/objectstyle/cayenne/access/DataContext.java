@@ -76,11 +76,11 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
 import org.objectstyle.cayenne.access.util.IteratedSelectObserver;
+import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.RelationshipDataSource;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -618,7 +618,7 @@ public class DataContext implements QueryEngine, Serializable {
      * any records, or if there is more than one object is fetched.
      */
     public DataObject refetchObject(ObjectId oid) {
-        SelectQuery sel = QueryHelper.selectObjectForId(oid);
+        SelectQuery sel = QueryUtils.selectObjectForId(oid);
         List results = this.performQuery(sel);
         if (results.size() != 1) {
             String msg =
@@ -798,7 +798,7 @@ public class DataContext implements QueryEngine, Serializable {
                         Iterator prIt = prefetchRels.iterator();
                         while (prIt.hasNext()) {
                             prefetch.add(
-                                QueryHelper.selectPrefetchPath(
+                                QueryUtils.selectPrefetchPath(
                                     this,
                                     sel,
                                     (String) prIt.next()));

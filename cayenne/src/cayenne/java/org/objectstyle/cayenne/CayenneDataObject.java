@@ -67,6 +67,7 @@ import java.util.StringTokenizer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
+import org.objectstyle.cayenne.access.util.*;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -213,7 +214,7 @@ public class CayenneDataObject implements DataObject {
 
         // need to fetch
         SelectQuery sel =
-            QueryHelper.selectRelationshipObjects(dataContext, this, relName);
+            QueryUtils.selectRelationshipObjects(dataContext, this, relName);
         List results = dataContext.performQuery(sel);
 
         // unexpected
