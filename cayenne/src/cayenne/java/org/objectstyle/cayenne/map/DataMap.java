@@ -108,11 +108,13 @@ public class DataMap {
 
     /** Creates an empty DataMap */
     public DataMap() {
+    	this("unnamed");
     }
 
     /** Creates an empty DataMap and assigns it a <code>name</code>. */
     public DataMap(String mapName) {
-        this.name = mapName;
+    	super();
+        this.setName(mapName);
     }
 
     /**
@@ -123,25 +125,22 @@ public class DataMap {
      */
     public void addDependency(DataMap map) throws IllegalArgumentException {
         if (map.isDependentOn(this)) {
-            StringBuffer buf =
-                new StringBuffer("Attempt to create circular dependency. ");
-            String name1 =
-                (this.getName() != null) ? this.getName() : "unnamed";
-            String name2 = (map.getName() != null) ? map.getName() : "unnamed";
-
-            buf
-                .append('\'')
-                .append(name2)
-                .append("' already depends on '")
-                .append(name1)
-                .append("'.");
+            StringBuffer buf = new StringBuffer(128);
+			buf.append("Attempt to create circular dependency. ")
+				.append('\'')
+				.append(map.getName())
+				.append("' already depends on '")
+				.append(this.getName())
+				.append("'.");
             throw new IllegalArgumentException(buf.toString());
         }
         dependencies.add(map);
+        logObj.debug("added dependency: '"+ map.getName() + "'");
     }
 
     public void removeDependency(DataMap map) {
         dependencies.remove(map);
+		logObj.debug("removed dependency: '"+ map.getName() + "'");
     }
 
     public List getDependencies() {
@@ -157,13 +156,13 @@ public class DataMap {
      * will return <code>true</code>.
      */
     public boolean isDependentOn(DataMap map) {
-        if (dependencies.contains(map)) {
-            return true;
-        }
-
         if (dependencies.size() == 0) {
             return false;
         }
+
+		if (dependencies.contains(map)) {
+			return true;
+		}
 
         Iterator it = dependencies.iterator();
         while (it.hasNext()) {
@@ -187,7 +186,7 @@ public class DataMap {
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name = (name != null ? name : "unnamed");
     }
 
     /** 
