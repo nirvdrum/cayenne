@@ -122,6 +122,10 @@ public class EOModelHelper {
      *  to String representation of Objective C type. 
      */
     public String javaTypeForEOModelerType(String type) {
+        if(type == null) {
+        	return null;
+        }
+        
         if (type.equals("NSString"))
             return "java.lang.String";
         if (type.equals("NSNumber"))

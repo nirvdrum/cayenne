@@ -82,12 +82,17 @@ public class EOModelProcessorTst extends CayenneTestCase {
 
     public void testLoadModel() throws Exception {
         DataMap map = processor.loadEOModel("test-resources/art.eomodeld");
-        assertLoaded(map);
+        assertLoaded("art", map);
+    }
+    
+    public void testLoadBrokenModel() throws Exception {
+        DataMap map = processor.loadEOModel("test-resources/art-with-errors.eomodeld");
+        assertLoaded("art-with-errors", map);
     }
 
-    protected void assertLoaded(DataMap map) throws Exception {
+    protected void assertLoaded(String mapName, DataMap map) throws Exception {
         assertNotNull(map);
-        assertEquals("art", map.getName());
+        assertEquals(mapName, map.getName());
 
         // check obj entities
         ObjEntity artistE = map.getObjEntity("Artist");
