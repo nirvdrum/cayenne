@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<data-map>
+<?xml version="1.0" encoding="utf-8"?>
+<data-map project-version="1.0">
 	<db-entity name="ARTIST">
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true" length="11"/>
 		<db-attribute name="ARTIST_NAME" type="CHAR" isMandatory="true" length="254"/>
@@ -17,15 +17,15 @@
 		<db-attribute name="PAINTING_TITLE" type="VARCHAR" isMandatory="true" length="255"/>
 	</db-entity>
 	<obj-entity name="Artist" className="test.Artist" dbEntityName="ARTIST">
-		<obj-attribute name="artistName" type="java.lang.String" db-attribute-name="ARTIST_NAME"/>
-		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-name="DATE_OF_BIRTH"/>
+		<obj-attribute name="artistName" type="java.lang.String" db-attribute-path="ARTIST_NAME"/>
+		<obj-attribute name="dateOfBirth" type="java.sql.Date" db-attribute-path="DATE_OF_BIRTH"/>
 	</obj-entity>
 	<obj-entity name="Gallery" className="test.Gallery" dbEntityName="GALLERY">
-		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-name="GALLERY_NAME"/>
+		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="GALLERY_NAME"/>
 	</obj-entity>
 	<obj-entity name="Painting" className="test.Painting" dbEntityName="PAINTING">
-		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
-		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
+		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-path="ESTIMATED_PRICE"/>
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
 	</obj-entity>
 	<db-relationship name="paintingArray" source="ARTIST" target="PAINTING" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
