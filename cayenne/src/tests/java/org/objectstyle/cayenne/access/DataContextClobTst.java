@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -53,48 +53,38 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
 
-package org.objectstyle.cayenne.access.types;
+import org.objectstyle.art.ClobTest;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Types;
-
-import org.apache.log4j.Logger;
-
-/** 
- * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
+/**
+ * @author Andrei Adamchik
  */
-public class CharType extends AbstractType {
-    private static Logger logObj = Logger.getLogger(CharType.class);
+public class DataContextClobTst extends CayenneTestCase {
 
-    public String getClassName() {
-        return String.class.getName();
+    protected DataContext ctxt;
+    
+    public DataContextClobTst(String name) {
+        super(name);
     }
 
-    /** Return trimmed string. */
-    public Object materializeObject(ResultSet rs, int index, int type)
-        throws Exception {
-        String val = rs.getString(index);
-
-        // trim CHAR type
-        return (val != null) ? ((type == Types.CHAR) ? val.trim() : val) : null;
+    protected void setUp() throws Exception {
+        getDatabaseSetup().cleanTableData();
+        ctxt = getDomain().createDataContext();
     }
 
-    public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
-        	
-        // if this is a CLOB colums, treat it as VARCHAR
-        // this would allow to build INSERT statements with many drivers
-        if(type == Types.CLOB) {
-            type = Types.VARCHAR;
+    protected boolean skipTests() {
+        return !super.getDatabaseSetupDelegate().supportsLobs();
+    }
+
+    public void testNewClob() throws Exception {
+        if (skipTests()) {
+            return;
         }
-        
-        super.setJdbcObject(st, val, pos, type, precision);
+
+        ClobTest clobObj = (ClobTest)ctxt.createAndRegisterNewObject("ClobTest");
+        clobObj.setClobCol("rather small clob...");
+        ctxt.commitChanges();
     }
 }
