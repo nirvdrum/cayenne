@@ -110,34 +110,36 @@ public abstract class Relationship extends MapObject {
 		this.targetEntityName = targetEntityName;
 	}
 
-	public String toString() {
-		StringBuffer sb = new StringBuffer(this.getClass().getName());
-		sb.append(" - relationship name '").append(this.getName());
-		if (toMany) {
-			sb.append("' (to-many)\n");
-		}
-		else {
-			sb.append("' (to-one)\n");
-		}
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
+        sb.append(this.getClass().getName());
+        sb.append(" - relationship '").append(this.getName());
+        if (toMany) {
+            sb.append("', to-many,");
+        }
+        else {
+            sb.append("', to-one,");
+        }
 
-		sb.append("Source entity: ");
-		Entity src = this.getSourceEntity();
-		if (src == null) {
-			sb.append("<null>");
-		} else {
-			sb.append(src.getName());
-		}
+        Entity src = this.getSourceEntity();
+        if (src == null) {
+            sb.append("<null>");
+        }
+        else {
+            sb.append(src.getName());
+        }
 
-		sb.append(" Target entity: ");
-		Entity target = this.getTargetEntity();
-		if (target == null)
-			sb.append("<null>");
-		else
-			sb.append(target.getName());
+        sb.append(" -> ");
+        Entity target = this.getTargetEntity();
+        if (target == null)
+            sb.append("<null>");
+        else
+            sb.append(target.getName());
 
-		sb.append("\n------------------\n");
-		return sb.toString();
-	}
+        sb.append("]");
+        return sb.toString();
+    }
 	
 	/** Is relationship from source to target to-one or to-many.
 	  * If one-to-many, getxxx() method of the data object class would 

@@ -55,6 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.query;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
 import org.scopemvc.view.swing.SPanel;
 
 /**
@@ -65,7 +70,33 @@ import org.scopemvc.view.swing.SPanel;
  */
 public class SelectQueryOrderingPanel extends SPanel {
 
-    public SelectQueryOrderingPanel() {
+    protected MultiColumnBrowser browser;
 
+    public SelectQueryOrderingPanel() {
+        initView();
+    }
+
+    private void initView() {
+        // create widgets
+        browser = new MultiColumnBrowser();
+        browser.setPreferredSize(new Dimension(203, 100));
+
+        // assemble
+        setLayout(new BorderLayout());
+        add(browser, BorderLayout.NORTH);
+    }
+
+    public void setBoundModel(Object model) {
+        super.setBoundModel(model);
+
+        // init root icon
+        if (model instanceof QueryModel) {
+            Object root = ((QueryModel) model).getRoot();
+            if (root instanceof Entity) {
+                EntityRelationshipTreeModel treeModel =
+                    new EntityRelationshipTreeModel((Entity) root);
+                browser.setModel(treeModel);
+            }
+        }
     }
 }

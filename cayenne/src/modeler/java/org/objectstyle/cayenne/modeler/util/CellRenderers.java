@@ -70,12 +70,14 @@ import javax.swing.tree.TreeCellRenderer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.query.Query;
 
@@ -94,6 +96,8 @@ public final class CellRenderers {
     protected static ImageIcon mapIcon;
     protected static ImageIcon dbEntityIcon;
     protected static ImageIcon objEntityIcon;
+    protected static ImageIcon relationshipIcon;
+    protected static ImageIcon attributeIcon;
     protected static ImageIcon derivedDbEntityIcon;
     protected static ImageIcon procedureIcon;
     protected static ImageIcon queryIcon;
@@ -107,6 +111,8 @@ public final class CellRenderers {
         derivedDbEntityIcon = buildIcon("icon-derived-dbentity.gif");
         procedureIcon = buildIcon("icon-stored-procedure.gif");
         queryIcon = buildIcon("icon-query.gif");
+        relationshipIcon = buildIcon("icon-relationship.gif");
+        attributeIcon = buildIcon("icon-attribute.gif");
     }
 
     static ImageIcon buildIcon(String path) {
@@ -146,6 +152,12 @@ public final class CellRenderers {
         }
         else if (object instanceof Query) {
             return queryIcon;
+        }
+        else if (object instanceof Relationship) {
+            return relationshipIcon;
+        }
+        else if (object instanceof Attribute) {
+            return attributeIcon;
         }
 
         return null;
