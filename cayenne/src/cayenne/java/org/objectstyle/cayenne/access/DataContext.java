@@ -510,7 +510,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         // prepare inserts (create id's, build queries) 
         if (insObjects.size() > 0) {
-            // create permanent id's
+            // create permanent id's. 
             createPermIds(insObjects);
 
             // create insert queries
@@ -874,7 +874,14 @@ public class DataContext implements QueryEngine, Serializable {
      *   @return Newly created ObjectId.
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
-        TempObjectId tempId = (TempObjectId) anObject.getObjectId();
+    	ObjectId id=anObject.getObjectId();
+    	if(!(id instanceof TempObjectId)) {
+    		return id; //If the id is not a temp, then it must be permanent.  Return it and do nothing else
+    	}
+        TempObjectId tempId = (TempObjectId) id;
+        if(tempId.getPermId()!=null) {
+        	return tempId.getPermId();
+        }
         ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(tempId.getObjClass());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = parent.dataNodeForObjEntity(objEntity);

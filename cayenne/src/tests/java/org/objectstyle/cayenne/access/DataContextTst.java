@@ -116,6 +116,20 @@ public class DataContextTst extends CayenneTestCase {
 		ObjectId id = ctxt.createPermId(artist);
 		assertNotNull(id);
 	}
+	
+	public void testCreatePermId2() throws Exception {
+		Artist artist = new Artist();
+		ctxt.registerNewObject(artist, "Artist");
+		ObjectId id1 = ctxt.createPermId(artist);
+		ObjectId id2 = ctxt.createPermId(artist); //Must not fail on second call
+		System.out.println(id1);
+		System.out.println(id2);
+		System.out.println(id1.hashCode()+"?="+ id2.hashCode());
+
+		assertNotNull(id1);
+		assertNotNull(id2);
+		assertEquals(id1, id2); //Must be the same,
+	}
 
 	public void testMerge() throws Exception {
 		String n1 = "changed";
