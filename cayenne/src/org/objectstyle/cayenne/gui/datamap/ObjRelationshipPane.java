@@ -224,8 +224,8 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		Iterator iter = obj_entities.iterator();
 		while(iter.hasNext()){
 			ObjEntity entity  = (ObjEntity)iter.next();
-			EntityWrapper wrap = new EntityWrapper(entity);
-			elements.add(wrap);
+			String name = entity.getName();
+			elements.add(name);
 		}// End while()
 
 		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);

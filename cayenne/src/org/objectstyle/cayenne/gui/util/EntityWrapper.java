@@ -92,5 +92,5 @@ public class EntityWrapper{
 			return false;
 		return this.toString().equals(obj.toString());
 	}
-}// End class EntityWrapper
 	
+}// End class EntityWrapper

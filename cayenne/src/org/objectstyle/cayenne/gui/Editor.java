@@ -91,6 +91,8 @@ implements ActionListener
 	static Logger logObj = Logger.getLogger(Editor.class.getName());
 	
 	private static final String TITLE = "Cayenne modeler";
+	/** To indicate in title that the proj is dirty. */
+	private static final String DIRTY_STRING = "* - ";
 	
     EditorView view;
     Mediator mediator;
@@ -320,11 +322,11 @@ implements ActionListener
 	public void setDirty(boolean dirty_flag) {
 		String title = getTitle();
 		if (dirty_flag) {
-			if (!title.endsWith("*"))
-				setTitle(title + "*");
+			if (!title.startsWith(DIRTY_STRING))
+				setTitle(DIRTY_STRING + title);
 		} else {
-			if (title.endsWith("*"))
-				setTitle(title.substring(0, title.length()-1));
+			if (title.startsWith(DIRTY_STRING))
+				setTitle(title.substring(DIRTY_STRING.length(), title.length()));
 		}
 	}
 
@@ -559,10 +561,6 @@ implements ActionListener
 	}
 
     private void createProject() {
-    	if (mediator != null) {
-    		if (false == closeProject())
-    			return;
-    	}
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
@@ -582,6 +580,11 @@ implements ActionListener
             file = fileChooser.getSelectedFile();
             if (!file.exists())
             	file.createNewFile();
+			// Save and close (if needed) currently open project.
+    		if (mediator != null) {
+    			if (false == closeProject())
+    				return;
+    		}
             // Save dir path to the preferences
             pref.setProperty(Preferences.LAST_DIR, file.getParent());
             // Create project file (cayenne.xml)
@@ -613,10 +616,6 @@ implements ActionListener
     }
 
 	private void openProject(String file_path) {
-    	if (mediator != null) {
-    		if (false == closeProject())
-    			return;
-    	}
 		if (null == file_path || file_path.trim().length() == 0)
 			return;
 		File file = new File(file_path);
@@ -630,6 +629,11 @@ implements ActionListener
 
 	/** Open specified project file. File must already exist. */
 	private void openProject(File file) {
+		// Save and close (if needed) currently open project.
+    	if (mediator != null) {
+    		if (false == closeProject())
+    			return;
+    	}
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {
@@ -651,10 +655,6 @@ implements ActionListener
     }
     /** Open cayenne.xml file using file chooser. */
     private void openProject() {
-    	if (mediator != null) {
-    		if (false == closeProject())
-    			return;
-    	}
     	Preferences pref = Preferences.getPreferences();
        	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
         try {

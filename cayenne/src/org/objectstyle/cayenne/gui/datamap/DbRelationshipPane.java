@@ -183,8 +183,8 @@ implements ActionListener, DbEntityDisplayListener, DbEntityListener
 		Iterator iter = db_entities.iterator();
 		while(iter.hasNext()){
 			DbEntity entity  = (DbEntity)iter.next();
-			EntityWrapper wrap = new EntityWrapper(entity);
-			elements.add(wrap);
+			String name = entity.getName();
+			elements.add(name);
 		}// End while()
 
 		DefaultComboBoxModel model = new DefaultComboBoxModel(elements);
