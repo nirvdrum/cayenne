@@ -101,7 +101,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
 		// are loaded from.
 		locator.setClassLoader(Configuration.getResourceLoader());
 
-		URL url1 = locator.findResource("test-resources/testmap.xml");
+		URL url1 = locator.findResource("test-resources/testmap.map.xml");
 		Util.copy(url1, map);
 		URL url2 = locator.findResource("test-resources/testtemplate.vm");
 		Util.copy(url2, template);

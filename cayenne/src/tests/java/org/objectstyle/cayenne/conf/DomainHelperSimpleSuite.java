@@ -102,7 +102,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         buf.append("<?xml version='1.0' encoding='utf-8'?>")
         .append("\n<domains>")
         .append("\n   <domain name='domain1'>")
-        .append("\n   <map name='m1' location='test-resources/testmap.xml'/>")
+        .append("\n   <map name='m1' location='test-resources/testmap.map.xml'/>")
         .append("\n   </domain>")
         .append("\n </domains>");
 
@@ -118,7 +118,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         buf.append("<?xml version='1.0' encoding='utf-8'?>")
         .append("\n<domains>")
         .append("\n   <domain name='domain1'>")
-        .append("\n        <map name='m1' location='test-resources/testmap.xml'/>")
+        .append("\n        <map name='m1' location='test-resources/testmap.map.xml'/>")
         .append("\n        <node name='db1' datasource='node.xml'")
         .append("\n              factory='org.objectstyle.cayenne.conf.DriverDataSourceFactory'")
         .append("\n              adapter='org.objectstyle.cayenne.dba.mysql.MySQLAdapter'>")
@@ -139,7 +139,7 @@ public class DomainHelperSimpleSuite extends DomainHelperSuite {
         buf.append("<?xml version='1.0' encoding='utf-8'?>")
         .append("\n<domains>")
         .append("\n   <domain name='domain1'>")
-        .append("\n        <map name='m1' location='test-resources/testmap.xml'/>")
+        .append("\n        <map name='m1' location='test-resources/testmap.map.xml'/>")
         .append("\n        <node name='db1' datasource='node.xml'")
         .append("\n              factory='org.objectstyle.cayenne.conf.DriverDataSourceFactory'")
         .append("\n              adapter='org.objectstyle.cayenne.dba.mysql.MySQLAdapter'>")
