@@ -218,16 +218,6 @@ public interface DataObject extends java.io.Serializable {
     public void resolveFault();
 
     /**
-     * Performs property validation of the object, appending any validation failures
-     * to the provided validationResult object. This method is invoked by DataContext
-     * before committing an object to the database. <code>validateForSave(..)</code> 
-     * is called on DELETED, MODIFIED and NEW objects.
-     * 
-     * @since 1.1
-     */
-    public void validateForSave(ValidationResult validationResult);
-
-    /**
      * Performs property validation of the NEW object, appending any validation failures
      * to the provided validationResult object. This method is invoked by DataContext
      * before committing a NEW object to the database.

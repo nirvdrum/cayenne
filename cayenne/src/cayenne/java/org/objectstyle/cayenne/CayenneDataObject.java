@@ -562,15 +562,16 @@ public class CayenneDataObject implements DataObject {
         this.snapshotVersion = snapshotVersion;
     }
     
-    
     /**
-     * Performs default property validation based on DataMap. This includes checking for
+     * Performs property validation of the object, appending any validation failures
+     * to the provided validationResult object. This method is invoked from "validateFor.."
+     * before committing a NEW or MODIFIED object to the database. Validation includes checking for
      * null values and value sizes. CayenneDataObject subclasses may override this method,
      * calling super.
      * 
      * @since 1.1
      */
-    public void validateForSave(ValidationResult validationResult) {
+    protected void validateForSave(ValidationResult validationResult) {
 
         ObjEntity objEntity = getDataContext().getEntityResolver().lookupObjEntity(this);
         ExtendedTypeMap types =
