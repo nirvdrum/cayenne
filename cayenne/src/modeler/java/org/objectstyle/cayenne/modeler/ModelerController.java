@@ -63,6 +63,7 @@ import org.scopemvc.controller.basic.BasicController;
 public class ModelerController extends BasicController {
 	public static final String PROJECT_CLOSED_ID = "projectClosed";
 	public static final String PROJECT_OPENED_ID = "projectOpened";
+	public static final String PROJECT_REVERTED_ID = "projectReverted";
 	public static final String DATA_DOMAIN_SELECTED_ID = "dataSomainSelected";
 
     /**

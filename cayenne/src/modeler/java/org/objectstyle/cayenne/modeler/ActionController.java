@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.modeler.action.ImportDbAction;
 import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
+import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
@@ -120,6 +121,7 @@ public class ActionController extends ModelerController {
 		getAction(ProjectAction.getActionName()).setEnabled(false);
         getAction(SaveAction.getActionName()).setEnabled(false);
         getAction(SaveAsAction.getActionName()).setEnabled(false);
+        getAction(RevertAction.getActionName()).setEnabled(false);
         getAction(CreateDomainAction.getActionName()).setEnabled(false);
 
         updateRemoveAction(null);
@@ -173,7 +175,8 @@ public class ActionController extends ModelerController {
         for (int i = 0; i < len; i++) {
 
             // "save" button has its own rules
-            if (keys[i].equals(SaveAction.getActionName())) {
+            if (keys[i].equals(SaveAction.getActionName())
+                    || keys[i].equals(RevertAction.getActionName())) {
                 continue;
             }
 

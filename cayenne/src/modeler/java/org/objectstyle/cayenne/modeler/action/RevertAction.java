@@ -53,97 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler;
+package org.objectstyle.cayenne.modeler.action;
 
+import java.awt.event.ActionEvent;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.ModelerController;
+import org.objectstyle.cayenne.modeler.TopController;
+import org.objectstyle.cayenne.modeler.dialog.ProjectTypeSelectControl;
+import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.Project;
 import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
 
 /**
  * @author Andrei Adamchik
  */
-public class StatusBarController extends ModelerController {
+public class RevertAction extends CayenneAction {
 
-    public StatusBarController(ModelerController parent) {
-        super(parent);
+    public static String getActionName() {
+        return "Revert";
     }
 
-    /**
-     * Updates status bar depending on the type of control.
-     */
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(PROJECT_CLOSED_ID)) {
-            doUpdate("Project Closed...");
-        }
-        else if (control.matchesID(PROJECT_OPENED_ID)) {
-            projectOpened((Project) control.getParameter());
-        }
-        else if (control.matchesID(PROJECT_REVERTED_ID)) {
-            doUpdate("Reverted To Saved...");
-        }
+    public RevertAction() {
+        super(getActionName());
     }
 
-    /**
-     * Processes project opening event.
-     */
-    protected void projectOpened(Project project) {
-        if (project.isLocationUndefined()) {
-            doUpdate("New project created...");
-        }
-        else {
-            doUpdate("Project opened...");
-        }
-    }
-
-    /**
-     * Performs status bar update with a message. Message will dissappear in 6 seconds.
-     */
-    protected void doUpdate(String message) {
-        TopModel model = (TopModel) getModel();
-        if (model == null) {
+    public void performAction(ActionEvent e) {
+        TopController controller = CayenneModelerFrame.getFrame().getController();
+        Project project = controller.getTopModel().getCurrentProject();
+        if (project == null) {
             return;
         }
 
-        synchronized (model) {
-            model.setStatusMessage(message);
-            ((StatusBarView) getView()).refresh();
+        boolean isNew = project.isLocationUndefined();
+
+        // close ... don't use OpenProjectAction close method as it will ask for save, we
+        // don't want that here
+        controller.handleControl(new Control(ModelerController.PROJECT_CLOSED_ID));
+
+        // reopen existing
+        if (!isNew && project.getMainFile().isFile()) {
+            OpenProjectAction openAction = (OpenProjectAction) controller
+                    .getTopModel()
+                    .getAction(OpenProjectAction.getActionName());
+            openAction.openProject(project.getMainFile());
+        }
+        // create new
+        else if (!(project instanceof ApplicationProject)) {
+            throw new CayenneRuntimeException("Only ApplicationProjects are supported.");
+        }
+        else {
+            new ProjectTypeSelectControl().handleControl(new Control(
+                    ProjectTypeSelectControl.CREATE_APP_PROJECT_CONTROL));
         }
 
-        // start message cleanup thread that would remove the message after X seconds
-        if (message != null && message.trim().length() > 0) {
-            Thread cleanup = new ExpireThread(message, 6);
-            cleanup.start();
-        }
-    }
-
-    class ExpireThread extends Thread {
-
-        protected int seconds;
-        protected String message;
-
-        public ExpireThread(String message, int seconds) {
-            this.seconds = seconds;
-            this.message = message;
-        }
-
-        public void run() {
-            try {
-                sleep(seconds * 1000);
-            }
-            catch (InterruptedException e) {
-                // ignore exception
-            }
-
-            TopModel model = (TopModel) getModel();
-            if (model == null) {
-                return;
-            }
-
-            synchronized (model) {
-                if (message.equals(model.getStatusMessage())) {
-                    doUpdate(null);
-                }
-            }
-        }
+        controller.getStatusController().handleControl(
+                new Control(ModelerController.PROJECT_REVERTED_ID));
     }
 }

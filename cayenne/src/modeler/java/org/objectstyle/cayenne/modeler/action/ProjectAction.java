@@ -57,10 +57,10 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.ModelerController;
+import org.objectstyle.cayenne.modeler.TopController;
 import org.objectstyle.cayenne.modeler.dialog.UnsavedChangesDialog;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.scopemvc.core.Control;
@@ -69,11 +69,10 @@ import org.scopemvc.core.Control;
  * @author Andrei Adamchik
  */
 public class ProjectAction extends CayenneAction {
-	private static Logger logObj = Logger.getLogger(ProjectAction.class);
-	
-	public static String getActionName() {
-		return "Close Project";
-	}
+
+    public static String getActionName() {
+        return "Close Project";
+    }
 
     public ProjectAction() {
         super(getActionName());
@@ -81,6 +80,7 @@ public class ProjectAction extends CayenneAction {
 
     /**
      * Constructor for ProjectAction.
+     * 
      * @param name
      */
     public ProjectAction(String name) {
@@ -100,34 +100,45 @@ public class ProjectAction extends CayenneAction {
             return false;
         }
 
-        CayenneModelerFrame.getFrame().getController().handleControl(
-            new Control(ModelerController.PROJECT_CLOSED_ID));
-        
-        logObj.info("Closed project.");
+        Control control = new Control(ModelerController.PROJECT_CLOSED_ID);
+
+        TopController controller = CayenneModelerFrame.getFrame().getController();
+        controller.handleControl(control);
+
+        control.markUnmatched();
+        controller.getStatusController().handleControl(control);
+
         return true;
     }
 
-    /** 
-     * Returns false if cancel closing the window, true otherwise. 
+    /**
+     * Returns false if cancel closing the window, true otherwise.
      */
     public boolean checkSaveOnClose() {
         EventController mediator = getMediator();
         if (mediator != null && mediator.isDirty()) {
-            UnsavedChangesDialog dialog = new UnsavedChangesDialog(CayenneModelerFrame.getFrame());
+            UnsavedChangesDialog dialog = new UnsavedChangesDialog(CayenneModelerFrame
+                    .getFrame());
             dialog.show();
 
             if (dialog.shouldCancel()) {
-            	// discard changes and DO NOT close
+                // discard changes and DO NOT close
                 return false;
-            } else if (dialog.shouldSave()) {
+            }
+            else if (dialog.shouldSave()) {
                 // save changes and close
-                ActionEvent e =
-                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SaveAll");
-                CayenneModelerFrame.getFrame().getAction(SaveAction.getActionName()).actionPerformed(e);
-				if(mediator.isDirty()) {
-					// save was canceled... do not close
-					return false;
-				}
+                ActionEvent e = new ActionEvent(
+                        this,
+                        ActionEvent.ACTION_PERFORMED,
+                        "SaveAll");
+                CayenneModelerFrame
+                        .getFrame()
+                        .getAction(SaveAction.getActionName())
+                        .actionPerformed(e);
+                if (mediator.isDirty()) {
+                    // save was canceled... do not close
+                    return false;
+                }
             }
         }
 

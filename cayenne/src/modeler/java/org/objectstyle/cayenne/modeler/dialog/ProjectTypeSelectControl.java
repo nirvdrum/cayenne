@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.dialog;
 
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ModelerController;
+import org.objectstyle.cayenne.modeler.TopController;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.DataMapProject;
 import org.objectstyle.cayenne.project.Project;
@@ -68,12 +69,10 @@ import org.scopemvc.core.ControlException;
  * @author Andrei Adamchik
  */
 public class ProjectTypeSelectControl extends BasicController {
-    public static final String CREATE_APP_PROJECT_CONTROL =
-        "cayenne.modeler.project.app.button";
-    public static final String CREATE_MAP_PROJECT_CONTROL =
-        "cayenne.modeler.project.map.button";
-    public static final String CANCEL_PROJECT_CREATE_CONTROL =
-        "cayenne.modeler.project.cancel.button";
+
+    public static final String CREATE_APP_PROJECT_CONTROL = "cayenne.modeler.project.app.button";
+    public static final String CREATE_MAP_PROJECT_CONTROL = "cayenne.modeler.project.map.button";
+    public static final String CANCEL_PROJECT_CREATE_CONTROL = "cayenne.modeler.project.cancel.button";
 
     /**
      * Constructor for ProjectTypeSelectControl.
@@ -109,19 +108,33 @@ public class ProjectTypeSelectControl extends BasicController {
         Project project = new ApplicationProject(null);
 
         // send "Project Open" control to the main controller
-        CayenneModelerFrame.getFrame().getController().handleControl(
-            new Control(ModelerController.PROJECT_OPENED_ID, project));
+        Control control = new Control(ModelerController.PROJECT_OPENED_ID, project);
 
-        shutdown();
+        TopController controller = CayenneModelerFrame.getFrame().getController();
+        controller.handleControl(control);
+
+        control.markUnmatched();
+        controller.getStatusController().handleControl(control);
+
+        if (getView() != null) {
+            shutdown();
+        }
     }
 
     protected void doCreateMapProject() {
         Project project = new DataMapProject(null);
 
         // send "Project Open" control to the main controller
-        CayenneModelerFrame.getFrame().getController().handleControl(
-            new Control(ModelerController.PROJECT_OPENED_ID, project));
+        Control control = new Control(ModelerController.PROJECT_OPENED_ID, project);
 
-        shutdown();
+        TopController controller = CayenneModelerFrame.getFrame().getController();
+        controller.handleControl(control);
+
+        control.markUnmatched();
+        controller.getStatusController().handleControl(control);
+
+        if (getView() != null) {
+            shutdown();
+        }
     }
 }

@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
+import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
@@ -131,6 +132,9 @@ public class TopModel {
 
         CayenneAction saveAsAction = new SaveAsAction();
         actionMap.put(saveAsAction.getKey(), saveAsAction);
+        
+        CayenneAction revertAction = new RevertAction();
+        actionMap.put(revertAction.getKey(), revertAction);
 
         CayenneAction validateAction = new ValidateAction();
         actionMap.put(validateAction.getKey(), validateAction);

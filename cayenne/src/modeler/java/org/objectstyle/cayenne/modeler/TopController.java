@@ -67,10 +67,11 @@ import org.scopemvc.core.ControlException;
 
 /**
  * TopController is the main controller object of the CayenneModeler.
- *  
+ * 
  * @author Andrei Adamchik
  */
 public class TopController extends ModelerController {
+
     protected StatusBarController statusController;
     protected EventController eventController;
     protected ActionController actionController;
@@ -98,13 +99,13 @@ public class TopController extends ModelerController {
         RecentFileMenu recentFileMenu = mainFrame.getRecentFileMenu();
         recentFileMenu.rebuildFromPreferences();
         recentFileMenu.setEnabled(recentFileMenu.getMenuComponentCount() > 0);
-        
+
         if (mainFrame.getView() != null) {
             mainFrame.getContentPane().remove(mainFrame.getView());
             mainFrame.setView(null);
         }
-        
-        // repaint is needed, since sometimes there is a 
+
+        // repaint is needed, since sometimes there is a
         // trace from menu left on the screen
         mainFrame.repaint();
         mainFrame.updateTitle();
@@ -118,17 +119,14 @@ public class TopController extends ModelerController {
 
         control.markUnmatched();
         actionController.handleControl(control);
-
-        control.markUnmatched();
-        statusController.handleControl(control);
     }
 
     /**
-     * Handles project opening control. Updates main frame, then delegates
-     * control to child controllers.
+     * Handles project opening control. Updates main frame, then delegates control to
+     * child controllers.
      */
     protected void projectOpened(Control control) {
-        // sanity check 
+        // sanity check
         if (!(control.getParameter() instanceof Project)) {
             return;
         }
@@ -140,9 +138,7 @@ public class TopController extends ModelerController {
 
         // update main view
         mainFrame.setView(new EditorView(eventController));
-        mainFrame.getContentPane().add(
-            mainFrame.getView(),
-            BorderLayout.CENTER);
+        mainFrame.getContentPane().add(mainFrame.getView(), BorderLayout.CENTER);
         mainFrame.validate();
         mainFrame.updateTitle();
 
@@ -153,9 +149,6 @@ public class TopController extends ModelerController {
         control.markUnmatched();
         actionController.handleControl(control);
 
-        control.markUnmatched();
-        statusController.handleControl(control);
-
         // --- check for load errors
         if (project.getLoadStatus().hasFailures()) {
             // mark project as unsaved
@@ -163,10 +156,9 @@ public class TopController extends ModelerController {
             eventController.setDirty(true);
 
             // show warning dialog
-            ValidatorDialog.showDialog(
-                mainFrame,
-                eventController,
-                new Validator(project, project.getLoadStatus()));
+            ValidatorDialog.showDialog(mainFrame, eventController, new Validator(
+                    project,
+                    project.getLoadStatus()));
         }
     }
 
@@ -177,9 +169,11 @@ public class TopController extends ModelerController {
     protected void doHandleControl(Control control) throws ControlException {
         if (control.matchesID(PROJECT_OPENED_ID)) {
             projectOpened(control);
-        } else if (control.matchesID(PROJECT_CLOSED_ID)) {
+        }
+        else if (control.matchesID(PROJECT_CLOSED_ID)) {
             projectClosed(control);
-        } else if (control.matchesID(DATA_DOMAIN_SELECTED_ID)) {
+        }
+        else if (control.matchesID(DATA_DOMAIN_SELECTED_ID)) {
             control.markUnmatched();
             actionController.handleControl(control);
         }
@@ -194,5 +188,9 @@ public class TopController extends ModelerController {
      */
     public ActionController getActionController() {
         return actionController;
+    }
+
+    public StatusBarController getStatusController() {
+        return statusController;
     }
 }

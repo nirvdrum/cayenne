@@ -97,6 +97,7 @@ import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
+import org.objectstyle.cayenne.modeler.action.RevertAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAsAction;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
@@ -283,6 +284,7 @@ public class CayenneModelerFrame
         fileMenu.addSeparator();
         fileMenu.add(getAction(SaveAction.getActionName()).buildMenu());
         fileMenu.add(getAction(SaveAsAction.getActionName()).buildMenu());
+        fileMenu.add(getAction(RevertAction.getActionName()).buildMenu());
         fileMenu.addSeparator();
 
         recentFileMenu.rebuildFromPreferences();
@@ -386,11 +388,13 @@ public class CayenneModelerFrame
         String title = getTitle();
         if (flag) {
             getAction(SaveAction.getActionName()).setEnabled(true);
+            getAction(RevertAction.getActionName()).setEnabled(true);
             if (title == null || !title.startsWith(DIRTY_STRING)) {
                 setTitle(DIRTY_STRING + title);
             }
         } else {
             getAction(SaveAction.getActionName()).setEnabled(false);
+            getAction(RevertAction.getActionName()).setEnabled(false);
             if (title != null && title.startsWith(DIRTY_STRING)) {
                 setTitle(title.substring(DIRTY_STRING.length(), title.length()));
             }

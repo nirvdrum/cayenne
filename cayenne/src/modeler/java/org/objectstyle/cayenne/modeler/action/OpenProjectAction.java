@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
+import org.objectstyle.cayenne.modeler.TopController;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.dialog.ProjectOpener;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
@@ -163,8 +164,15 @@ public class OpenProjectAction extends ProjectAction {
                 closeProject();
             }
             else {
-                CayenneModelerFrame.getFrame().getController().handleControl(
-                        new Control(ModelerController.PROJECT_OPENED_ID, project));
+                Control control = new Control(
+                        ModelerController.PROJECT_OPENED_ID,
+                        project);
+
+                TopController controller = CayenneModelerFrame.getFrame().getController();
+                controller.handleControl(control);
+
+                control.markUnmatched();
+                controller.getStatusController().handleControl(control);
             }
         }
         catch (Exception ex) {
