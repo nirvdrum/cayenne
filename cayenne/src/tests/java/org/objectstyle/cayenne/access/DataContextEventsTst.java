@@ -103,9 +103,11 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     }
 
     public void testDataContextRolledBackTransaction() throws Exception {
-    	// This doesn't work on MySQL, since transaction support
-    	// is either non-existent or dubious...
-    	if(((DataNode)getDomain().getDataNodes().iterator().next()).getAdapter().getClass() == MySQLAdapter.class) {
+    	// This test will not work on MySQL, since transaction support
+    	// is either non-existent or dubious (depending on your view).
+    	// See: http://www.mysql.com/doc/en/Design_Limitations.html
+    	if(((DataNode)getDomain().getDataNodes().iterator().next())
+    			.getAdapter().getClass() == MySQLAdapter.class) {
     		return;
     	}
     	
@@ -113,7 +115,7 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
         assertFalse(artist.receivedWillCommit());
         assertFalse(artist.receivedDidCommit());
 
-        // modify artist
+        // modify artist so that it cannot be saved correctly anymore
         artist.setArtistName(null); // name is mandatory
 
         try {
