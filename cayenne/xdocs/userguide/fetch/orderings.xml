@@ -36,10 +36,10 @@ Ordering ordering = new Ordering("artistName", true);
 ordering.orderList(list);
 </source>    
 
-		<p>If there is a need to sort on more than a single object property, 
+		<p>If there is a need to sort on more than one object property, 
 		multiple Orderings can be passed as a List to a static method 
-		<code>orderList(List, List)</code>. A significance of Orderings on
-		the ordering list decreases with index increase. The resulting list of objects
+		<code>orderList(List, List)</code>. A significance of Orderings in
+		the ordering list decreases with index increase. The list of objects
 		ends up being sorted using the first Ordering, then the second, and so on.
 		</p>
 
