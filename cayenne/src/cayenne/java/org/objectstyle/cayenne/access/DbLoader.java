@@ -650,6 +650,7 @@ public class DbLoader {
         String[] tableTypes)
         throws SQLException {
         DataMap dataMap = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
+        dataMap.setDefaultSchema(schemaName);
         return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
     }
 

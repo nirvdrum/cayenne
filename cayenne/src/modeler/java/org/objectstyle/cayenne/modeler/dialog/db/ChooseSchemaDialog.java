@@ -56,11 +56,10 @@
 package org.objectstyle.cayenne.modeler.dialog.db;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -70,103 +69,112 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.access.DbLoader;
-import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
-/** 
- * Dialog that allows to select schema of the database. 
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
+import com.jgoodies.forms.builder.DefaultFormBuilder;
+import com.jgoodies.forms.layout.FormLayout;
+
+/**
+ * Dialog for selecting database reverse-engineering parameters.
  */
-public class ChooseSchemaDialog extends CayenneDialog implements ActionListener {
-    public static final int SELECT = 0;
-    public static final int CANCEL = 1;
+public class ChooseSchemaDialog extends CayenneDialog {
 
-    protected List schemaList;
+    public static final int CANCEL = 0;
+    public static final int SELECT = 1;
 
+    protected JLabel schemaLabel;
     protected JComboBox schemaSelect;
     protected JTextField tabeNamePatternField;
-    protected JButton select = new JButton("Continue");
-    protected JButton cancel = new JButton("Cancel");
-    protected int choice = CANCEL;
+    protected JButton select;
+    protected JButton cancel;
+    protected int choice;
 
-    /** 
+    /**
      * Creates and initializes new ChooseSchemaDialog.
      */
-    public ChooseSchemaDialog(List schemaList, DataSourceInfo dsi) {
-        super(CayenneModelerFrame.getFrame(), "Schema Selector", true);
-        setResizable(false);
+    public ChooseSchemaDialog(Collection schemas, String dbUserName) {
+        super(CayenneModelerFrame.getFrame(), "DB Reengineering Options", true);
 
-        this.schemaList = schemaList;
-
-        init(dsi.getUserName());
-
-        select.addActionListener(this);
-        cancel.addActionListener(this);
+        init();
+        initController();
+        initFromModel(schemas, dbUserName);
 
         this.pack();
-
-        // display dialog in the center
         this.centerWindow();
     }
 
     /** Sets up the graphical components. */
-    protected void init(String userName) {
-        getContentPane().setLayout(new BorderLayout());
+    protected void init() {
 
+        // create widgets...
+        select = new JButton("Continue");
+        cancel = new JButton("Cancel");
+        schemaSelect = CayenneWidgetFactory.createComboBox();
         tabeNamePatternField = CayenneWidgetFactory.createTextField();
-        tabeNamePatternField.setText(DbLoader.WILDCARD);
 
-        Component[] left = null;
-        Component[] right = null;
-        JPanel buttons = PanelFactory.createButtonPanel(new JButton[] { select, cancel });
+        // assemble
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, fill:max(150dlu;pref)",
+                "");
+        DefaultFormBuilder builder = new DefaultFormBuilder(layout);
+        builder.setDefaultDialogBorder();
 
-        // optionally create schema selector
-        if (schemaList != null && schemaList.size() > 0) {
-            schemaSelect = CayenneWidgetFactory.createComboBox();
-            schemaSelect.setModel(new DefaultComboBoxModel(schemaList.toArray()));
+        builder.append("Table Name Pattern:", tabeNamePatternField);
+        schemaLabel = builder.append("Schemas:", schemaSelect);
+
+        JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {
+                select, cancel
+        });
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(builder.getPanel(), BorderLayout.CENTER);
+        getContentPane().add(buttons, BorderLayout.SOUTH);
+
+        setResizable(false);
+    }
+
+    protected void initController() {
+        select.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                processSelect();
+            }
+        });
+
+        cancel.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                processCancel();
+            }
+        });
+    }
+
+    protected void initFromModel(Collection schemas, String dbUserName) {
+        this.choice = CANCEL;
+        this.tabeNamePatternField.setText(DbLoader.WILDCARD);
+
+        boolean showSchemaSelector = schemas != null && !schemas.isEmpty();
+        schemaSelect.setVisible(showSchemaSelector);
+        schemaLabel.setVisible(showSchemaSelector);
+
+        if (showSchemaSelector) {
+
+            schemaSelect.setModel(new DefaultComboBoxModel(schemas.toArray()));
 
             // select schema belonging to the user
-            if (userName != null) {
-                Iterator schemas = schemaList.iterator();
-                while (schemas.hasNext()) {
-                    String schema = (String) schemas.next();
-                    if (userName.equalsIgnoreCase(schema)) {
+            if (dbUserName != null) {
+                Iterator it = schemas.iterator();
+                while (it.hasNext()) {
+                    String schema = (String) it.next();
+                    if (dbUserName.equalsIgnoreCase(schema)) {
                         schemaSelect.setSelectedItem(schema);
                         break;
                     }
                 }
             }
-
-            left =
-                new Component[] {
-					CayenneWidgetFactory.createLabel("Table Name Pattern: "),
-					CayenneWidgetFactory.createLabel("Schemas: "),
-                    new JLabel()};
-
-            right = new Component[] { tabeNamePatternField, schemaSelect, buttons };
-        }
-        else {
-            left = new Component[] { CayenneWidgetFactory.createLabel("Table Name Pattern: "), new JLabel()};
-
-            right = new Component[] { tabeNamePatternField, buttons };
-        }
-
-        JPanel panel = PanelFactory.createForm(left, right);
-        getContentPane().add(panel, BorderLayout.CENTER);
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        Object src = e.getSource();
-        if (src == select) {
-            processSelect();
-        }
-        else if (src == cancel) {
-            processCancel();
         }
     }
 
@@ -184,32 +192,19 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
         hide();
     }
 
+    /**
+     * Returns selected schema.
+     */
     public String getSchemaName() {
-        if (getChoice() != SELECT || schemaSelect == null) {
-            return null;
-        }
-
         String schema = (String) schemaSelect.getSelectedItem();
-        if ("".equals(schema)) {
-            schema = null;
-        }
-
-        return schema;
+        return "".equals(schema) ? null : schema;
     }
 
     /**
      * Returns the tableNamePattern.
      */
     public String getTableNamePattern() {
-        if (getChoice() != SELECT) {
-            return null;
-        }
-
-        String pattern = tabeNamePatternField.getText();
-        if ("".equals(pattern)) {
-            pattern = null;
-        }
-
-        return pattern;
+        return "".equals(tabeNamePatternField.getText()) ? null : tabeNamePatternField
+                .getText();
     }
 }

@@ -104,7 +104,7 @@ public class ImportDbAction extends CayenneAction {
     // TODO: this is a temp hack... need to delegate to DbAdapter, or configurable in
     // preferences...
     private static final Collection excludedTables = Arrays.asList(new Object[] {
-        "AUTO_PK_SUPPORT", "auto_pk_support"
+            "AUTO_PK_SUPPORT", "auto_pk_support"
     });
 
     public static String getActionName() {
@@ -118,7 +118,7 @@ public class ImportDbAction extends CayenneAction {
     public void importDb() {
         EventController mediator = getMediator();
         DataNode currentNode = mediator.getCurrentDataNode();
-        
+
         // try a node that belongs to the current DataMap ...
         if (currentNode == null) {
             DataMap map = mediator.getCurrentDataMap();
@@ -126,7 +126,7 @@ public class ImportDbAction extends CayenneAction {
                 currentNode = mediator.getCurrentDataDomain().lookupDataNode(map);
             }
         }
-        
+
         DataSourceInfo dsi = null;
         if (currentNode != null) {
             dsi = ((ProjectDataSource) currentNode.getDataSource())
@@ -175,22 +175,20 @@ public class ImportDbAction extends CayenneAction {
                 return;
             }
 
-            ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas, dsi);
+            ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas, dsi.getUserName());
             dialog.show();
-            String schemaName = dialog.getSchemaName();
-            String tableNamePattern = dialog.getTableNamePattern();
-            dialog.dispose();
-
             if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
                 return;
             }
 
-            DataMap map = loadMap(loader, schemaName, tableNamePattern);
-            if (map == null) {
-                return;
-            }
+            String schemaName = dialog.getSchemaName();
+            String tableNamePattern = dialog.getTableNamePattern();
+            dialog.dispose();
 
-            processMapUpdate(map);
+            DataMap map = loadMap(loader, schemaName, tableNamePattern);
+            if (map != null) {
+                processMapUpdate(map);
+            }
         }
         finally {
             try {
@@ -409,13 +407,15 @@ public class ImportDbAction extends CayenneAction {
                 entity.getDataMap().removeDbEntity(entity.getName());
             }
             else if (existingMap) {
-                mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
+                mediator
+                        .fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
             }
         }
 
         public void objEntityAdded(ObjEntity entity) {
             if (existingMap) {
-                mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
+                mediator
+                        .fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
             }
         }
 
