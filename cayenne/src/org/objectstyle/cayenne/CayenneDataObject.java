@@ -139,16 +139,24 @@ public class CayenneDataObject implements DataObject {
      * 
      * <p>Examples:</p>
      * <ul>
-     *    <li>Read this object property: 
-     *    <code>String name = (String)artist.readNestedProperty("name");</code></li>
-     *    <li>Read an object related to this object: 
-     *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code></li>     
-     *    <li>Read a property of an object related to this object: 
-     *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code></li>
-     *    <li>Read to-many relationship list: 
-     *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code></li>
-     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>: 
-     *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code></li>
+     *    <li>Read this object property:<br>
+     *    <code>String name = (String)artist.readNestedProperty("name");</code><br><br></li>
+     * 
+     *    <li>Read an object related to this object:<br> 
+     *    <code>Gallery g = (Gallery)paintingInfo.readNestedProperty("toPainting.toGallery");</code>
+     *    <br><br></li>
+     * 
+     *    <li>Read a property of an object related to this object: <br>
+     *    <code>String name = (String)painting.readNestedProperty("toArtist.artistName");</code>
+     *    <br><br></li>
+     * 
+     *    <li>Read to-many relationship list:<br> 
+     *    <code>List exhibits = (List)painting.readNestedProperty("toGallery.exhibitArray");</code>
+     *    <br><br></li>
+     * 
+     *    <li>Read to-many relationship in the middle of the path <b>(throws exception)</b>:<br> 
+     *    <code>String name = (String)artist.readNestedProperty("paintingArray.paintingName");</code>
+     *   <br><br></li>
      * </ul>
      * 
      */
