@@ -217,6 +217,15 @@ public class Ordering implements Comparator {
             (Comparable) ((CayenneDataObject) o1).readNestedProperty(operand0);
         Comparable value2 =
             (Comparable) ((CayenneDataObject) o2).readNestedProperty(operand0);
+        
+        if(value1==null) {
+        	if(value2==null) {
+        		return 0;
+        	}
+        	return -1; //value 1 is null, value2 isn't... value1 should come first
+        } else if (value2==null) {
+        	return 1; //value 2 is null, value 1 isn't... value1 should come second
+        }
         if (this.caseInsensitive) {
             //Assumes that value1 and value2 are both the same class - will be the case if
             // both objects being ordered are the same class - they'd better be, otherwise ordering
