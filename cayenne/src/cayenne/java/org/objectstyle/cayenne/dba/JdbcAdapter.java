@@ -305,12 +305,16 @@ public class JdbcAdapter implements DbAdapter {
         // later we may support view creation
         // for derived DbEntities
         if (ent instanceof DerivedDbEntity) {
-            throw new CayenneRuntimeException(
-                "Can't create table for derived DbEntity '" + ent.getName() + "'.");
+            throw new CayenneRuntimeException("Can't create table for derived DbEntity '"
+                    + ent.getName()
+                    + "'.");
         }
 
-        StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
+        StringBuffer sqlBuffer = new StringBuffer();
+        sqlBuffer
+                .append("CREATE TABLE ")
+                .append(ent.getFullyQualifiedName())
+                .append(" (");
 
         // columns
         Iterator it = ent.getAttributes().iterator();
@@ -320,62 +324,22 @@ public class JdbcAdapter implements DbAdapter {
                 first = false;
             }
             else {
-                buf.append(", ");
+                sqlBuffer.append(", ");
             }
 
-            DbAttribute at = (DbAttribute) it.next();
+            DbAttribute column = (DbAttribute) it.next();
 
             // attribute may not be fully valid, do a simple check
-            if (at.getType() == TypesMapping.NOT_DEFINED) {
-                throw new CayenneRuntimeException(
-                    "Undefined type for attribute '"
+            if (column.getType() == TypesMapping.NOT_DEFINED) {
+                throw new CayenneRuntimeException("Undefined type for attribute '"
                         + ent.getFullyQualifiedName()
                         + "."
-                        + at.getName()
+                        + column.getName()
                         + "'.");
             }
 
-            String[] types = externalTypesForJdbcType(at.getType());
-            if (types == null || types.length == 0) {
-                throw new CayenneRuntimeException(
-                    "Undefined type for attribute '"
-                        + ent.getFullyQualifiedName()
-                        + "."
-                        + at.getName()
-                        + "': "
-                        + at.getType());
-            }
+            createTableAppendColumn(sqlBuffer, column);
 
-            String type = types[0];
-            buf.append(at.getName()).append(' ').append(type);
-
-            // append size and precision (if applicable)
-            if (TypesMapping.supportsLength(at.getType())) {
-                int len = at.getMaxLength();
-                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
-
-                // sanity check
-                if (prec > len) {
-                    prec = -1;
-                }
-
-                if (len > 0) {
-                    buf.append('(').append(len);
-
-                    if (prec >= 0) {
-                        buf.append(", ").append(prec);
-                    }
-
-                    buf.append(')');
-                }
-            }
-
-            if (at.isMandatory()) {
-                buf.append(" NOT NULL");
-            }
-            else {
-                buf.append(" NULL");
-            }
         }
 
         // primary key clause
@@ -384,23 +348,70 @@ public class JdbcAdapter implements DbAdapter {
             if (first)
                 first = false;
             else
-                buf.append(", ");
+                sqlBuffer.append(", ");
 
-            buf.append("PRIMARY KEY (");
+            sqlBuffer.append("PRIMARY KEY (");
             boolean firstPk = true;
             while (pkit.hasNext()) {
                 if (firstPk)
                     firstPk = false;
                 else
-                    buf.append(", ");
+                    sqlBuffer.append(", ");
 
                 DbAttribute at = (DbAttribute) pkit.next();
-                buf.append(at.getName());
+                sqlBuffer.append(at.getName());
             }
-            buf.append(')');
+            sqlBuffer.append(')');
         }
-        buf.append(')');
-        return buf.toString();
+        sqlBuffer.append(')');
+        
+        return sqlBuffer.toString();
+    }
+    
+    /**
+     * Appends SQL for column creation to CREATE TABLE buffer.
+     * @since 1.2
+     */
+    protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
+        String[] types = externalTypesForJdbcType(column.getType());
+        if (types == null || types.length == 0) {
+            String entityName = column.getEntity() != null ? ((DbEntity) column
+                    .getEntity()).getFullyQualifiedName() : "<null>";
+            throw new CayenneRuntimeException("Undefined type for attribute '"
+                    + entityName
+                    + "."
+                    + column.getName()
+                    + "': "
+                    + column.getType());
+        }
+
+        String type = types[0];
+        sqlBuffer.append(column.getName()).append(' ').append(type);
+
+        // append size and precision (if applicable)
+        if (TypesMapping.supportsLength(column.getType())) {
+            int len = column.getMaxLength();
+            int prec = TypesMapping.isDecimal(column.getType())
+                    ? column.getPrecision()
+                    : -1;
+
+            // sanity check
+            if (prec > len) {
+                prec = -1;
+            }
+
+            if (len > 0) {
+                sqlBuffer.append('(').append(len);
+
+                if (prec >= 0) {
+                    sqlBuffer.append(", ").append(prec);
+                }
+
+                sqlBuffer.append(')');
+            }
+        }
+
+        sqlBuffer.append(column.isMandatory() ? " NOT NULL" : " NULL");
     }
 
     /**

@@ -60,6 +60,7 @@ import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
 
 /**
  * Cayenne DbAdapter implementation for <a
@@ -74,13 +75,12 @@ import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
  * <pre>
  * 
  *  
- *      sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
- *      sqlserver.jdbc.username = test
- *      sqlserver.jdbc.password = secret
- *      sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
- *      sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
  *   
- *  
+ *       sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
+ *       sqlserver.jdbc.username = test
+ *       sqlserver.jdbc.password = secret
+ *       sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
+ *       sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
  * </pre>
  * 
  * <p>
@@ -99,11 +99,13 @@ import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
  * <pre>
  * 
  *  
- *      sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
- *      sqlserver.jdbc.username = test
- *      sqlserver.jdbc.password = secret
- *      sqlserver.jdbc.url = jdbc:jtds:sqlserver://192.168.0.65/cayenne
- *      sqlserver.jdbc.driver = net.sourceforge.jtds.jdbc.Driver
+ *   
+ *       sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
+ *       sqlserver.jdbc.username = test
+ *       sqlserver.jdbc.password = secret
+ *       sqlserver.jdbc.url = jdbc:jtds:sqlserver://192.168.0.65/cayenne
+ *       sqlserver.jdbc.driver = net.sourceforge.jtds.jdbc.Driver
+ *    
  *   
  *  
  * </pre>
@@ -115,7 +117,6 @@ public class SQLServerAdapter extends SybaseAdapter {
 
     public static final String TRIM_FUNCTION = "RTRIM";
 
-
     /**
      * Returns a trimming translator.
      */
@@ -124,7 +125,7 @@ public class SQLServerAdapter extends SybaseAdapter {
                 queryAssembler,
                 SQLServerAdapter.TRIM_FUNCTION);
     }
-    
+
     /**
      * Returns an instance of SQLServerDataNode.
      * 
@@ -134,5 +135,19 @@ public class SQLServerAdapter extends SybaseAdapter {
         DataNode node = new SQLServerDataNode(name);
         node.setAdapter(this);
         return node;
+    }
+
+    /**
+     * Overrides super implementation to correctly set up identity columns.
+     * 
+     * @since 1.2
+     */
+    protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
+        super.createTableAppendColumn(sqlBuffer, column);
+        
+        if(column.isGenerated()) {
+            // current limitation - we don't allow to set identity parameters...
+            sqlBuffer.append(" IDENTITY (1, 1)");
+        }
     }
 }

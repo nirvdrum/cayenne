@@ -163,4 +163,12 @@ public class MySQLAdapter extends JdbcAdapter {
     protected PkGenerator createPkGenerator() {
         return new MySQLPkGenerator();
     }
+    
+    protected void createTableAppendColumn(StringBuffer sqlBuffer, DbAttribute column) {
+        super.createTableAppendColumn(sqlBuffer, column);
+        
+        if(column.isGenerated()) {
+            sqlBuffer.append(" AUTO_INCREMENT");
+        }
+    }
 }
