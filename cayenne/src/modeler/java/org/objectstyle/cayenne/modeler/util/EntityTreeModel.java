@@ -140,6 +140,11 @@ public class EntityTreeModel implements TreeModel {
 
     private Object[] sortedChildren(Object node) {
         Entity entity = entityForNonLeafNode(node);
+        
+        // may happen in incomplete relationships
+        if(entity == null) {
+            return new Object[0];
+        }
 
         synchronized (sortedChildren) {
             String key = entity.getName();
