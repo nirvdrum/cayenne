@@ -67,6 +67,7 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.InsertBatchQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * SQLServer-specific DataNode implementation that handles certian issues like identity
@@ -83,6 +84,20 @@ public class SQLServerDataNode extends DataNode {
 
     public SQLServerDataNode(String name) {
         super(name);
+    }
+
+    /**
+     * Executes stored procedure with SQLServer specific action.
+     */
+    protected void runStoredProcedure(
+            Connection con,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
+
+        new SQLServerProcedureAction(getAdapter(), getEntityResolver()).performAction(
+                con,
+                query,
+                observer);
     }
 
     /**
