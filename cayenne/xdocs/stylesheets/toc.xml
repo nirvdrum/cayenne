@@ -138,9 +138,10 @@
     	
     	<item name="6. Modeling Object Layer"  href="/modelerguide/modeling-object-layer/index.html">
     		<item name="6.1 Modeling ObjEntities" href="/modelerguide/modeling-object-layer/objentities.html"/>
-    		<item name="6.2 Many-to-Many Relationships" href="/modelerguide/modeling-object-layer/many-to-many.html"/>
-    		<item name="6.3 Flattened Relationships" href="/modelerguide/modeling-object-layer/flattenedrel.html"/>
-    		<item name="6.4 Delete Rules" href="/modelerguide/modeling-object-layer/delete-rules.html"/>
+    		<item name="6.2 Modeling Inheritance" href="/modelerguide/modeling-object-layer/inheritance.html"/>
+    		<item name="6.3 Many-to-Many Relationships" href="/modelerguide/modeling-object-layer/many-to-many.html"/>
+    		<item name="6.4 Flattened Relationships" href="/modelerguide/modeling-object-layer/flattenedrel.html"/>
+    		<item name="6.5 Delete Rules" href="/modelerguide/modeling-object-layer/delete-rules.html"/>
     	</item>
     	
     	<item name="7. Modeling Queries"  href="/modelerguide/modeling-queries/index.html"/>

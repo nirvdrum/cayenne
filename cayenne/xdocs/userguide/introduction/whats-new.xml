@@ -88,7 +88,14 @@
             <p></p>
             </subsection>
             
-            <subsection name="1.1.11 Explicit Transaction API and Container Managed Transactions">
+			<subsection name="1.1.11 Entity Restricting Qualifier ">
+            <p>ObjEntities now can hold a qualifier expression that is automatically appended to any 
+            query qualifiers, thus creating a global data filter for a given entity. This feature is used for
+            inheritance mapping, however it has nothing to do with inheritance as such and can be used
+            all by itself.</p>
+            </subsection>
+            
+            <subsection name="1.1.12 Explicit Transaction API and Container Managed Transactions">
             <p>Cayenne now supports container-managed transactions. As a result it can be used inside EJBs
             out of the box. It also allows a high degree of transactions customization. The following user guide 
             chapter explains Transactions design and behavior in details:</p>
@@ -98,7 +105,7 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.12 Various Performance Enhancements">
+            <subsection name="1.1.13 Various Performance Enhancements">
             <ul>
             	<li>Lazy Relationship Creation - when new objects are fetched, their relationships
             	are not initialized immediately; a Fault singleton is used isntead as a placeholder.
@@ -118,7 +125,7 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.13 DbAdapters for More Databases">
+            <subsection name="1.1.14 DbAdapters for More Databases">
             <p>Cayenne features new database adapters:</p>
             <ul>
             	<li>OpenBase Adapter</li>
@@ -126,17 +133,17 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.14 Support for To-One Relationships Not Pointing to a PK.">
+            <subsection name="1.1.15 Support for To-One Relationships Not Pointing to a PK.">
             <p>Added support for one-to-one relationships between PK and non-PK columns
             of related tables. In the past this could only be modeled as one-to-many. CayenneModeler
             will create UNIQUE constraint for a non-PK columns during schema generation.</p>
             </subsection>
             
-            <subsection name="1.1.15 New Default CayenneModeler Look and Feel">
+            <subsection name="1.1.16 New Default CayenneModeler Look and Feel">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.16 Support for Queries in CayenneModeler and DataMap DTD.">
+            <subsection name="1.1.17 Support for Queries in CayenneModeler and DataMap DTD.">
             <p>Queries are made first-class mapping objects. They can be modeled in CayenneModeler 
             and stored in DataMaps. Application code can then reuse such queries.
             </p>
@@ -147,25 +154,25 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.17 Non-refreshing Select Queries">
+            <subsection name="1.1.18 Non-refreshing Select Queries">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.18 CayenneModeler Support for Custom Class Templates.">
+            <subsection name="1.1.19 CayenneModeler Support for Custom Class Templates.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.19 CayenneModeler Support for UI Customizable Classpath for Jars.">
+            <subsection name="1.1.20 CayenneModeler Support for UI Customizable Classpath for Jars.">
             <p></p>
             </subsection>
             
-            <subsection name="1.1.20 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
+            <subsection name="1.1.21 CayenneModeler ObjRelationship Mapping Dialog Redesign.">
             <p>A dialog used to select mapping of ObjRelationship to one DbRelationship (simple relationship)
             or to a series of DbRelationships (flattened relationship) had arbitrary limitations on what path 
             can be selected. This dialog has been completely redesigned to remove this limitation.</p>
             </subsection>
             
-            <subsection name="1.1.21 CayenneModeler Productivity Enhancements.">
+            <subsection name="1.1.22 CayenneModeler Productivity Enhancements.">
             <p>CayenneModeler now uses defaults where appropriate when working with mappings. This is
             to reduce manual operations. Some examples are:
             </p>

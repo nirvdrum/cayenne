@@ -4,7 +4,7 @@
 <body>
     <section name="6. Modeling Object Layer">
    
-	<subsection name="6.3 Flattened Relationships">
+	<subsection name="6.4 Flattened Relationships">
 	<p>ObjRelationships that map to more than a single DbRelationship are called
 	"flattened".</p>
 	

@@ -6,9 +6,10 @@
     	<subsection name="8.6 Handling Inheritance">
     	<p>"Inheritance" is an Object Oriented concept absent in traditional RDBMS. Cayenne however allows to
     	map a hierarchical class tree to a single base table (so called "single table inheritance"). Such mapping
-    	is described in detail in the Modeler Guide. The idea of single table inheritance
-    	is that a "class" of a database row is determined from the values in one or more columns of the base table.
-    	These columns are called "class designator columns".
+    	is <a href="../../modelerguide/modeling-object-layer/inheritance.html">described in detail</a> in the 
+    	Modeler Guide. The idea of single table inheritance is that a "class" of a database row is determined 
+    	from the values in one or more columns of the base table. These columns are called "class designator 
+    	columns".
     	</p>
     	
 		<panel name="Initial Values of the Classs Designator Columns">Assigning correct values to the 

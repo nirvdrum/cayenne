@@ -3,7 +3,7 @@
 <toc name="toc-modeler-guide" chapter="6. Modeling Object Layer"/>  
 <body>
     <section name="6. Modeling Object Layer">
-    	<subsection name="6.4 Delete Rules">
+    	<subsection name="6.5 Delete Rules">
 		<p>One of the columns in the Modeler ObjRelationships panel is "Delete Rule". It tells Cayenne what to do with related objects
 		when a <strong>source object</strong> of the relationship is deleted. Cayenne will use this delete rule to perform cleanup
 		of other objects after a given object was deleted from the graph.
