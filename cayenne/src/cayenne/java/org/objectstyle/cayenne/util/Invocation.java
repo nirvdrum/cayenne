@@ -153,7 +153,7 @@ public class Invocation extends Object {
 	 * @see #fire(Object[])
 	 */
 	public boolean fire() {
-		return this.fire((Object[])null);
+		return this.fire(null);
 	}
 
 	/**

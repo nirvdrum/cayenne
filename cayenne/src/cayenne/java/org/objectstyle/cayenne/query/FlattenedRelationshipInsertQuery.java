@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -84,7 +83,7 @@ public class FlattenedRelationshipInsertQuery extends AbstractQuery {
 		this.relationshipName=relName;
 		ObjRelationship relationship = this.getRelationship();
 		DbRelationship firstRel = (DbRelationship) relationship.getDbRelationships().get(0);
-		this.setRoot((DbEntity)firstRel.getTargetEntity());
+		this.setRoot(firstRel.getTargetEntity());
 
 	}
 	

@@ -257,7 +257,7 @@ public abstract class Entity extends MapObject {
 
     public Iterator resolvePathComponents(String path)
         throws ExpressionException {
-        return new PathIterator(this, (String) path);
+        return new PathIterator(this, path);
     }
 
     // Used to return an iterator to callers of 'resolvePathComponents'
