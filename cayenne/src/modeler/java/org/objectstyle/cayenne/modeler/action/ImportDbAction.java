@@ -297,7 +297,7 @@ public class ImportDbAction extends CayenneAction {
         try {
             DataMap map = mediator.getCurrentDataMap();
             if (map != null) {
-                loader.loadDataMapFromDB(schemaName, tableNamePattern, null, map);
+                loader.loadDataMapFromDB(schemaName, tableNamePattern, map);
                 return map;
             }
             else {

@@ -145,10 +145,10 @@ public class ObjAttributePane
     }
 
     public void processExistingSelection() {
-        ObjAttribute rel = null;
+        ObjAttribute attribute = null;
         if (table.getSelectedRow() >= 0) {
             ObjAttributeTableModel model = (ObjAttributeTableModel) table.getModel();
-            rel = model.getAttribute(table.getSelectedRow());
+            attribute = model.getAttribute(table.getSelectedRow());
 
             // scroll table
             UIUtil.scrollToSelectedRow(table);
@@ -156,7 +156,7 @@ public class ObjAttributePane
         AttributeDisplayEvent ev =
             new AttributeDisplayEvent(
                 this,
-                rel,
+                attribute,
                 mediator.getCurrentObjEntity(),
                 mediator.getCurrentDataMap(),
                 mediator.getCurrentDataDomain());
