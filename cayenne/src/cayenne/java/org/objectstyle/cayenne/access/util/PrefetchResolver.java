@@ -90,6 +90,7 @@ class PrefetchResolver {
     private static final Logger logObj = Logger.getLogger(PrefetchResolver.class);
 
     List dataRows;
+    ObjEntity entity;
     ObjRelationship incoming;
     Map children;
 
@@ -105,6 +106,7 @@ class PrefetchResolver {
      * Initializes a prefetch tree for the map of query results.
      */
     void buildTree(ObjEntity entity, Query rootQuery, Map resultsByQuery) {
+        this.entity = entity;
 
         // add children
         Iterator it = resultsByQuery.entrySet().iterator();
@@ -134,7 +136,7 @@ class PrefetchResolver {
                 PrefetchSelectQuery prefetchQuery = (PrefetchSelectQuery) query;
 
                 if (prefetchQuery.getParentQuery() == rootQuery) {
-                    addChildWithPath(entity, prefetchQuery.getPrefetchPath(), dataRows);
+                    addChildWithPath(prefetchQuery.getPrefetchPath(), dataRows);
                 }
             }
         }
@@ -143,11 +145,8 @@ class PrefetchResolver {
     /**
      * Adds a (possibly indirect) child to this node.
      */
-    PrefetchResolver addChildWithPath(
-            ObjEntity rootEntity,
-            String prefetchPath,
-            List dataRows) {
-        Iterator it = rootEntity.resolvePathComponents(prefetchPath);
+    PrefetchResolver addChildWithPath(String prefetchPath, List dataRows) {
+        Iterator it = entity.resolvePathComponents(prefetchPath);
 
         if (!it.hasNext()) {
             return null;
@@ -191,33 +190,16 @@ class PrefetchResolver {
      */
     List resolveObjectTree(
             DataContext dataContext,
-            ObjEntity entity,
             boolean refresh,
             boolean resolveHierarchy) {
 
-        // resolve objects
-        List objects = dataContext.objectsFromDataRows(
-                entity,
-                dataRows,
+        // resolve the tree recursively...
+        List objects = resolveObjectTree(dataContext,
                 refresh,
-                resolveHierarchy);
-
-        // resolve children
-        if (children != null) {
-            Iterator it = children.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry) it.next();
-                PrefetchResolver node = (PrefetchResolver) entry.getValue();
-                node.resolveObjectTree(
-                        dataContext,
-                        refresh,
-                        resolveHierarchy,
-                        objects,
-                        false);
-            }
-        }
-
-        return objects;
+                resolveHierarchy,
+                null,
+                false);
+        return (objects != null) ? objects : new ArrayList(1);
     }
 
     /**
@@ -225,7 +207,7 @@ class PrefetchResolver {
      * node. Allows to skip the resolution of this node and only do children. This is
      * useful in chaining various prefetch resolving strategies.
      */
-    void resolveObjectTree(
+    List resolveObjectTree(
             DataContext dataContext,
             boolean refresh,
             boolean resolveHierarchy,
@@ -236,9 +218,14 @@ class PrefetchResolver {
 
         // skip most operations on a "phantom" node that had no prefetch query
         if (!skipSelf && dataRows != null) {
+            ObjEntity entity = (incoming != null) ? (ObjEntity) incoming
+                    .getTargetEntity() : this.entity;
+
             // resolve objects;
-            objects = dataContext.objectsFromDataRows((ObjEntity) incoming
-                    .getTargetEntity(), dataRows, refresh, resolveHierarchy);
+            objects = dataContext.objectsFromDataRows(entity,
+                    dataRows,
+                    refresh,
+                    resolveHierarchy);
 
             // connect to parent - to-many only, as to-one are connected by Cayenne
             // automatically.
@@ -264,14 +251,15 @@ class PrefetchResolver {
             while (it.hasNext()) {
                 Map.Entry entry = (Map.Entry) it.next();
                 PrefetchResolver node = (PrefetchResolver) entry.getValue();
-                node.resolveObjectTree(
-                        dataContext,
+                node.resolveObjectTree(dataContext,
                         refresh,
                         resolveHierarchy,
                         objects,
                         false);
             }
         }
+
+        return objects;
     }
 
     void connectToNodeParents(List parentObjects, Map partitioned) {
