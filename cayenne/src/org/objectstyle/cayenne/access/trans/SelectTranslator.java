@@ -150,12 +150,25 @@ public class SelectTranslator extends SelectQueryAssembler {
 		// build column list
 		buildColumnList();
 
-		// build WHERE
-		String qualifierStr =
-			adapter
-				.getQualifierFactory()
-				.createTranslator(this)
-				.doTranslation();
+		
+		QualifierTranslator tr =
+			adapter.getQualifierFactory().createTranslator(this);
+
+        // build parent qualifier
+        // Parent qualifier translation must PRECEED main qualifier
+        // since it will be appended first and its parameters must
+        // go first as well
+		String parentQualifierStr = null;
+		if (getSelectQuery().isQualifiedOnParent()) {
+			tr.setTranslateParentQual(true);
+			parentQualifierStr = tr.doTranslation();
+		}
+		
+		// build main qualifier
+		tr.setTranslateParentQual(false);
+		String qualifierStr = tr.doTranslation();
+
+
 
 		// build GROUP BY
 		buildGroupByList();
@@ -190,6 +203,32 @@ public class SelectTranslator extends SelectQueryAssembler {
 			appendTable(queryBuf, i);
 		}
 
+		// append db relationship joins if any
+		boolean hasWhere = false;
+		int dbRelCount = dbRelList.size();
+		if (dbRelCount > 0) {
+			hasWhere = true;
+			queryBuf.append(" WHERE ");
+
+			appendDbRelJoins(queryBuf, 0);
+			for (int i = 1; i < dbRelCount; i++) {
+				queryBuf.append(" AND ");
+				appendDbRelJoins(queryBuf, i);
+			}
+		}
+
+		// append parent qualifier if any
+		if (parentQualifierStr != null) {
+			if (hasWhere) {
+				queryBuf.append(" AND ");
+			} else {
+				hasWhere = true;
+				queryBuf.append(" WHERE ");
+			}
+
+			queryBuf.append(parentQualifierStr);
+		}
+
 		// append group by
 		boolean hasGroupBy = false;
 		if (groupByList != null) {
@@ -205,33 +244,19 @@ public class SelectTranslator extends SelectQueryAssembler {
 			}
 		}
 
-		// append db relationship joins if any
-		int dbRelCount = dbRelList.size();
-		if (dbRelCount > 0) {
+		// append qualifier
+		if (qualifierStr != null) {
 			if (hasGroupBy) {
 				queryBuf.append(" HAVING ");
 			} else {
-				queryBuf.append(" WHERE ");
-			}
-
-			appendDbRelJoins(queryBuf, 0);
-			for (int i = 1; i < dbRelCount; i++) {
-				queryBuf.append(" AND ");
-				appendDbRelJoins(queryBuf, i);
-			}
-		}
-
-		// append prebuilt qualifier
-		if (qualifierStr != null) {
-			if (dbRelCount > 0) {
-				queryBuf.append(" AND ");
-			} else {
-				if (hasGroupBy) {
-					queryBuf.append(" HAVING ");
+				if (hasWhere) {
+					queryBuf.append(" AND ");
 				} else {
+					hasWhere = true;
 					queryBuf.append(" WHERE ");
 				}
 			}
+
 			queryBuf.append(qualifierStr);
 		}
 

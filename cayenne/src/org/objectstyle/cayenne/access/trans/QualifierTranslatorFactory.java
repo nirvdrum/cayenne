@@ -68,7 +68,9 @@ public class QualifierTranslatorFactory {
         "org.objectstyle.cayenne.access.trans.QualifierTranslator";
     protected String translatorClass = DEFAULT_TRANSLATOR;
 
-    /** Factory method. */
+    /** 
+     * Factory method that creates a translator for the main query qualifier. 
+     */
     public QualifierTranslator createTranslator(QueryAssembler qa) {
         try {
             QualifierTranslator trans =

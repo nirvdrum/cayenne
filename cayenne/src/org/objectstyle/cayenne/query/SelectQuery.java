@@ -274,4 +274,14 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
 	public void setParentObjEntityName(String parentObjEntityName) {
 		this.parentObjEntityName = parentObjEntityName;
 	}
+	
+	
+	/**
+	 * Returns <code>true</code> if this query has an extra
+	 * qualifier that uses a parent entity of the query
+	 * root entity for additional result filtering.
+	 */
+	public boolean isQualifiedOnParent() {
+		return getParentObjEntityName() != null && parentQualifier != null;
+	}
 }

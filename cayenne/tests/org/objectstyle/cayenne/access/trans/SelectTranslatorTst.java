@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.Iterator;
 import java.util.List;
@@ -167,10 +168,10 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			assertNotNull(sql);
 			assertTrue(sql.startsWith("SELECT "));
 			assertTrue(sql.indexOf(" FROM ") > 0);
-			
+
 			// no WHERE clause
 			assertTrue(sql.indexOf(" WHERE ") < 0);
-			
+
 			assertTrue(sql.indexOf(" GROUP BY ") > 0);
 			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
 			assertTrue(sql.indexOf("ARTIST_ID =") > sql.indexOf(" GROUP BY "));
@@ -178,7 +179,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			con.close();
 		}
 	}
-	
+
 	/**
 	 * Tests query creation with relationship from derived entity.
 	 */
@@ -188,7 +189,10 @@ public class SelectTranslatorTst extends CayenneTestCase {
 		try {
 			// query with qualifier and ordering
 			q.setObjEntityName("ArtistAssets");
-			q.setQualifier(ExpressionFactory.matchExp("toArtist.artistName", "abc"));
+			q.setParentObjEntityName("Painting");
+			q.setParentQualifier(
+				ExpressionFactory.matchExp("toArtist.artistName", "abc"));
+			q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
 
 			String sql = buildTranslator(con).createSqlString();
 
@@ -196,17 +200,29 @@ public class SelectTranslatorTst extends CayenneTestCase {
 			assertNotNull(sql);
 			assertTrue(sql.startsWith("SELECT "));
 			assertTrue(sql.indexOf(" FROM ") > 0);
-			
+
 			// no WHERE clause
-			assertTrue("WHERE clause is expected", sql.indexOf(" WHERE ") > 0);
-			
-			assertTrue("GROUP BY clause is expected", sql.indexOf(" GROUP BY ") > 0);
-			assertTrue("HAVING clause is expected", sql.indexOf(" HAVING ") > 0);
+			assertTrue("WHERE clause is expected: " + sql, sql.indexOf(" WHERE ") > 0);
+
+			assertTrue(
+				"GROUP BY clause is expected:" + sql,
+				sql.indexOf(" GROUP BY ") > 0);
+			assertTrue(
+				"HAVING clause is expected",
+				sql.indexOf(" HAVING ") > 0);
 			assertTrue(sql.indexOf("ARTIST_ID =") > 0);
-			assertTrue("Relationship join must be in WHERE", sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
-			assertTrue("Relationship join must be in WHERE", sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
-			assertTrue("Qualifier for related entity must be in WHERE", sql.indexOf("ARTIST_NAME =") > sql.indexOf(" WHERE "));
-			assertTrue("Qualifier for related entity must be in WHERE", sql.indexOf("ARTIST_NAME =") < sql.indexOf(" GROUP BY "));
+			assertTrue(
+				"Relationship join must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_ID =") > sql.indexOf(" WHERE "));
+			assertTrue(
+				"Relationship join must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_ID =") < sql.indexOf(" GROUP BY "));
+			assertTrue(
+				"Qualifier for related entity must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_NAME") > sql.indexOf(" WHERE "));
+			assertTrue(
+				"Qualifier for related entity must be in WHERE: " + sql,
+				sql.indexOf("ARTIST_NAME") < sql.indexOf(" GROUP BY "));
 		} finally {
 			con.close();
 		}

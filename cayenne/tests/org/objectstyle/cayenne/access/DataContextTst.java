@@ -287,8 +287,9 @@ public class DataContextTst extends CayenneTestCase {
 		populatePaintings();
 		
 		SelectQuery q = new SelectQuery("ArtistAssets");
-		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
+		q.setParentObjEntityName("Painting");
+		q.andQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
+		q.andParentQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
 		q.setLogLevel(Level.SEVERE);
 
 		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);

@@ -59,10 +59,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionTraversal;
+import org.objectstyle.cayenne.exp.TraversalHandler;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.QualifiedQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** Translates query qualifier to SQL. Used as a helper
  *  class by query translators. */
@@ -73,6 +76,8 @@ public class QualifierTranslator
 
     private ExpressionTraversal treeWalker = new ExpressionTraversal();
     private StringBuffer qualBuf = new StringBuffer();
+    
+    protected boolean translateParentQual;
 
     public QualifierTranslator() {
         this(null);
@@ -87,15 +92,28 @@ public class QualifierTranslator
      *  Qualifier is obtained from <code>queryAssembler</code> object. 
      */
     public String doTranslation() {
-        Query q = queryAssembler.getQuery();
-        Expression rootNode = ((QualifiedQuery) q).getQualifier();
-        if (rootNode == null)
+    	qualBuf.setLength(0);
+    	
+        Expression rootNode = extractQualifier();
+        if (rootNode == null) {
             return null;
+        }
 
         // build SQL where clause string based on expression
         // (using '?' for object values)
         treeWalker.traverseExpression(rootNode);
         return qualBuf.length() > 0 ? qualBuf.toString() : null;
+    }
+    
+    protected Expression extractQualifier() {
+    	Query q = queryAssembler.getQuery();
+    	
+    	if(isTranslateParentQual()) {
+    		return ((SelectQuery) q).getParentQualifier();
+    	}
+    	else {
+    		return ((QualifiedQuery) q).getQualifier();
+    	}
     }
 
     /** Opportunity to insert an operation */
@@ -269,4 +287,27 @@ public class QualifierTranslator
             appendLiteral(qualBuf, it.next(), paramDesc);
         }
     }
+    
+	/**
+	 * Returns <code>true</code> if this translator will translate
+	 * parent qualifier on call to <code>doTranslation</code>.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isTranslateParentQual() {
+		return translateParentQual;
+	}
+
+
+	/**
+	 * Configures translator to translate
+	 * parent or main qualifier on call to <code>doTranslation</code>.
+	 * 
+	 * @param translateParentQual The translateParentQual to set
+	 */
+	public void setTranslateParentQual(boolean translateParentQual) {
+		this.translateParentQual = translateParentQual;
+	}
+
+
 }
