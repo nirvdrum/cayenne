@@ -48,8 +48,12 @@
 		</p>
 		
 		<p><strong>Configure Connection Information (Driver factory only).</strong> 
-		Type connection user name, password, JDBC driver class, and database URL in the fields provided. 
+		Type connection user name, password, JDBC driver class, and database URL in the fields provided:
 		</p>
+		
+		<img src="/images/modelerguide/driver-data-node-config.jpg" width="520" height="336" border="0" align="middle"
+		alt="Create DataNode"/>
+		
 		
     </subsection>
     </section>
