@@ -1285,9 +1285,7 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Delegates queries execution to parent QueryEngine. If there are select
-     * queries that require prefetching relationships, will create additional
-     * queries to perform necessary prefetching.
+     * Delegates queries execution to parent QueryEngine.
      * 
      * @since 1.1
      */
@@ -1295,13 +1293,13 @@ public class DataContext implements QueryEngine, Serializable {
         Collection queries,
         OperationObserver resultConsumer,
         Transaction transaction) {
+        
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
 
         DataContextDelegate localDelegate = nonNullDelegate();
         List finalQueries = new ArrayList(queries.size());
-        boolean hasPrefetches = false;
 
         Iterator it = queries.iterator();
         while (it.hasNext()) {
@@ -1317,44 +1315,10 @@ public class DataContext implements QueryEngine, Serializable {
                 // suppressed by the delegate
                 if (filteredSelect != null) {
                     finalQueries.add(filteredSelect);
-
-                    // check if prefetching is required
-                    if (!hasPrefetches && (filteredSelect instanceof SelectQuery)) {
-                        hasPrefetches =
-                            !((SelectQuery) filteredSelect).getPrefetches().isEmpty();
-                    }
                 }
             }
             else {
                 finalQueries.add(query);
-            }
-        }
-
-        if (!resultConsumer.isIteratedResult() && hasPrefetches) {
-            // do a second pass to add prefetches (prefetches must go after all main queries)
-            it = queries.iterator();
-            while (it.hasNext()) {
-                SelectQuery select = (SelectQuery) it.next();
-                Collection prefetchRels = select.getPrefetches();
-                if (prefetchRels.size() > 0) {
-                    Iterator prefetchIt = prefetchRels.iterator();
-                    while (prefetchIt.hasNext()) {
-                        PrefetchSelectQuery prefetchQuery =
-                            new PrefetchSelectQuery(
-                                getEntityResolver(),
-                                select,
-                                (String) prefetchIt.next());
-
-                        // filter via a delegate
-                        GenericSelectQuery filteredPrefetch =
-                            localDelegate.willPerformSelect(this, prefetchQuery);
-
-                        // if not suppressed by delegate
-                        if (filteredPrefetch != null) {
-                            finalQueries.add(filteredPrefetch);
-                        }
-                    }
-                }
             }
         }
 
@@ -1418,8 +1382,10 @@ public class DataContext implements QueryEngine, Serializable {
     
 
     /**
-     * Performs a single selecting query. Various query setting control the behavior
-     * of this method and the results returned:
+     * Performs a single selecting query. If if query is a SelectQuery
+     * that require prefetching relationships, will create additional
+     * queries to perform necessary prefetching. Various query setting 
+     * control the behavior of this method and the results returned:
      * 
      * <ul>
      * <li>Query caching policy defines whether
@@ -1435,14 +1401,55 @@ public class DataContext implements QueryEngine, Serializable {
      *         {@link GenericSelectQuery#isFetchingDataRows()}.
      */
     public List performQuery(GenericSelectQuery query) {
+        return performQuery(query, query.isRefreshingObjects());
+    }
+
+    
+    /**
+     * Returns a list of objects or DataRows for a named query stored in one of the
+     * DataMaps. Internally Cayenne uses a caching policy defined in the named query. If
+     * refresh flag is true, a refresh is forced no matter what the caching policy is.
+     * 
+     * @param queryName a name of a GenericSelectQuery defined in one of the DataMaps. If
+     *            no such query is defined, this method will throw a
+     *            CayenneRuntimeException.
+     * @since 1.1
+     */
+    public List performQuery(String queryName, boolean refresh) {
+
+        // find query...
+        Query query = getEntityResolver().getQuery(queryName);
+        if (query == null) {
+            throw new CayenneRuntimeException("There is no saved query for name '"
+                    + queryName
+                    + "'.");
+        }
+
+        if (!(query instanceof GenericSelectQuery)) {
+            throw new CayenneRuntimeException("Query for name '"
+                    + queryName
+                    + "' is not a GenericSelectQuery: "
+                    + query);
+        }
+
+        GenericSelectQuery selectQuery = (GenericSelectQuery) query;
+
+        if (refresh) {
+            // TODO: decorate the query with refresh flag
+        }
+
+        return performQuery(selectQuery);
+    }
+    
+    
+    List performQuery(GenericSelectQuery query, boolean refreshCache) {
 
         // check if result pagination is requested
         // let a list handle fetch in this case
         if (query.getPageSize() > 0) {
             return new IncrementalFaultList(this, query);
         }
-        
-        boolean refresh = query.isRefreshingObjects();
+
         boolean localCache = GenericSelectQuery.LOCAL_CACHE
                 .equals(query.getCachePolicy());
         boolean sharedCache = GenericSelectQuery.SHARED_CACHE.equals(query
@@ -1459,7 +1466,7 @@ public class DataContext implements QueryEngine, Serializable {
         
 
         // get results from cache...
-        if (!refresh && useCache) {
+        if (!refreshCache && useCache) {
             List results = null;
 
             if (localCache) {
@@ -1495,7 +1502,7 @@ public class DataContext implements QueryEngine, Serializable {
         
         // must fetch...
         SelectObserver observer = new SelectObserver(query.getLoggingLevel());
-        performQueries(Collections.singletonList(query), observer);
+        performQueries(queryWithPrefetches(query, observer), observer);
         
         List results = (query.isFetchingDataRows())
                 ? observer.getResults(query)
@@ -1516,42 +1523,40 @@ public class DataContext implements QueryEngine, Serializable {
 
         return results;
     }
-
     
     /**
-     * Returns a list of objects or DataRows for a named query stored in one of the DataMaps.
-     * Internally Cayenne uses a caching policy defined in the named query. If refresh
-     * flag is true, a refresh is forced no matter what the caching policy is.
-     * 
-     * @param queryName a name of a GenericSelectQuery defined in one of the DataMaps. If no such
-     * query is defined, this method will throw a CayenneRuntimeException.
-     * 
-     * @since 1.1
+     * Expands a SelectQuery into a collection of queries, including prefetch queries if
+     * needed.
      */
-    public List performQuery(String queryName, boolean refresh) {
+    Collection queryWithPrefetches(GenericSelectQuery query, OperationObserver observer) {
 
-        // find query...
-        Query query = getEntityResolver().getQuery(queryName);
-        if (query == null) {
-            throw new CayenneRuntimeException("There is no saved query for name '"
-                    + queryName
-                    + "'.");
+        // check conditions for prefetch...
+        if (observer.isIteratedResult()
+                || query.isFetchingDataRows()
+                || !(query instanceof SelectQuery)) {
+            return Collections.singletonList(query);
         }
 
-        if (!(query instanceof GenericSelectQuery)) {
-            throw new CayenneRuntimeException("Query for name '"
-                    + queryName
-                    + "' is not a GenericSelectQuery: "
-                    + query);
+        SelectQuery selectQuery = (SelectQuery) query;
+
+        Collection prefetchKeys = selectQuery.getPrefetches();
+        if (prefetchKeys.isEmpty()) {
+            return Collections.singletonList(query);
         }
 
-        GenericSelectQuery selectQuery = (GenericSelectQuery) query;
+        List queries = new ArrayList(prefetchKeys.size() + 1);
+        queries.add(query);
 
-        if (refresh) {
-            // TODO: decorate the query with refresh flag
+        Iterator prefetchIt = prefetchKeys.iterator();
+        while (prefetchIt.hasNext()) {
+            PrefetchSelectQuery prefetchQuery = new PrefetchSelectQuery(
+                    getEntityResolver(),
+                    selectQuery,
+                    (String) prefetchIt.next());
+            queries.add(prefetchQuery);
         }
 
-        return performQuery(selectQuery);
+        return queries;
     }
 
     /**

@@ -93,7 +93,7 @@ public class PrefetchSelectQuery extends SelectQuery {
         SelectQuery parentQuery,
         String prefetch) {
 
-        setRootQuery(parentQuery);
+        setParentQuery(parentQuery);
         setPrefetchPath(prefetch);
 
         ObjEntity entity = resolver.lookupObjEntity(parentQuery);
@@ -210,7 +210,7 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
-     * @deprecated Since 1.1 use setparentQuery(..)
+     * @deprecated Since 1.1 use setParentQuery(..)
      */
     public void setRootQuery(SelectQuery parentQuery) {
         this.parentQuery = parentQuery;
