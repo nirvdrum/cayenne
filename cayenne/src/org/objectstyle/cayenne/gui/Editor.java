@@ -217,37 +217,37 @@ implements ActionListener
     	String path = "org/objectstyle/gui/";
     	
     	ClassLoader cl = BrowseView.BrowseViewRenderer.class.getClassLoader();
-    	URL url = cl.getResource(path + "images/domain24.jpg");
+    	URL url = cl.getResource(path + "images/domain24_grey.gif");
         ImageIcon domainIcon = new ImageIcon(url);
         createDomainBtn = new JButton(domainIcon);
         createDomainBtn.setToolTipText("Create new domain");
         toolBar.add(createDomainBtn);
         
-    	url = cl.getResource(path + "images/node24.jpg");
+    	url = cl.getResource(path + "images/node24_grey.gif");
     	ImageIcon nodeIcon = new ImageIcon(url);
     	createDataSourceBtn = new JButton(nodeIcon);
     	createDataSourceBtn.setToolTipText("Create new data node");
         toolBar.add(createDataSourceBtn);
     	
-    	url = cl.getResource(path + "images/map24.jpg");
+    	url = cl.getResource(path + "images/map24_grey.gif");
     	ImageIcon mapIcon = new ImageIcon(url);
     	createDataMapBtn = new JButton(mapIcon);
     	createDataMapBtn.setToolTipText("Create new data map");
         toolBar.add(createDataMapBtn);
     	
-    	url = cl.getResource(path + "images/dbentity24.jpg");
+    	url = cl.getResource(path + "images/dbentity24_grey.gif");
     	ImageIcon dbEntityIcon = new ImageIcon(url);
     	createDbEntityBtn = new JButton(dbEntityIcon);
     	createDbEntityBtn.setToolTipText("Create new db entity");
         toolBar.add(createDbEntityBtn);
     	
-    	url = cl.getResource(path + "images/objentity24.jpg");
+    	url = cl.getResource(path + "images/objentity24_grey.gif");
     	ImageIcon objEntityIcon = new ImageIcon(url);
     	createObjEntityBtn = new JButton(objEntityIcon);
     	createObjEntityBtn.setToolTipText("Create new obj entity");
         toolBar.add(createObjEntityBtn);
     	
-    	url = cl.getResource(path + "images/remove24.jpg");
+    	url = cl.getResource(path + "images/remove24_grey.gif");
     	ImageIcon removeIcon = new ImageIcon(url);
     	removeBtn = new JButton(removeIcon);
     	removeBtn.setToolTipText("Remove current");
