@@ -81,7 +81,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 		DbEntity entity,
 		Mediator mediator,
 		Object eventSource) {
-			
+
 		super(mediator, eventSource, entity.getRelationshipList());
 		this.entity = entity;
 	}
@@ -92,7 +92,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 	public Class getElementsClass() {
 		return DbRelationship.class;
 	}
-	
+
 	public int getColumnCount() {
 		return 4;
 	}
@@ -109,7 +109,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 				return "To Many";
 			default :
 				return null;
-		} 
+		}
 	}
 
 	public Class getColumnClass(int col) {
@@ -133,7 +133,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 		if (rel == null) {
 			return null;
 		}
-		
+
 		switch (col) {
 			case NAME :
 				return rel.getName();
@@ -150,7 +150,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 	}
 
 	public void setUpdatedValueAt(Object aValue, int row, int column) {
-		
+
 		DbRelationship rel = getRelationship(row);
 		// If name column
 		if (column == NAME) {
@@ -201,6 +201,12 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 	}
 
 	public boolean isCellEditable(int row, int col) {
+		DbRelationship rel = getRelationship(row);
+		if (rel == null) {
+			return false;
+		} else if (col == TO_DEPENDENT_KEY) {
+			return MapUtil.isValidForDepPk(rel);
+		}
 		return true;
 	}
 }

@@ -55,72 +55,54 @@
  */
 package org.objectstyle.cayenne.gui.util;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
+import java.util.EventObject;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import javax.swing.text.Document;
 
 /**
- * Customized text field used in Cayenne.
- * 
  * @author Andrei Adamchik
  */
-public class CayenneTextField extends JTextField {
+public class CayenneCellEditor extends DefaultCellEditor {
 
 	/**
-	 * Constructor for CayenneTextField.
+	 * Constructor for CayennCellEditor.
+	 * @param textField
 	 */
-	public CayenneTextField() {
-		super();
-		configFocusBehavior();
-	}
-
-	/**
-	 * Constructor for CayenneTextField.
-	 * @param text
-	 */
-	public CayenneTextField(String text) {
-		super(text);
-		configFocusBehavior();
+	public CayenneCellEditor(JTextField textField) {
+		super(textField);
 	}
 
 	/**
-	 * Constructor for CayenneTextField.
-	 * @param columns
+	 * Constructor for CayennCellEditor.
+	 * @param checkBox
 	 */
-	public CayenneTextField(int columns) {
-		super(columns);
-		configFocusBehavior();
+	public CayenneCellEditor(JCheckBox checkBox) {
+		super(checkBox);
 	}
 
 	/**
-	 * Constructor for CayenneTextField.
-	 * @param text
-	 * @param columns
+	 * Constructor for CayennCellEditor.
+	 * @param comboBox
 	 */
-	public CayenneTextField(String text, int columns) {
-		super(text, columns);
-		configFocusBehavior();
+	public CayenneCellEditor(JComboBox comboBox) {
+		super(comboBox);
 	}
 
 	/**
-	 * Constructor for CayenneTextField.
-	 * @param doc
-	 * @param text
-	 * @param columns
+	 * @see javax.swing.CellEditor#isCellEditable(EventObject)
 	 */
-	public CayenneTextField(Document doc, String text, int columns) {
-		super(doc, text, columns);
-		configFocusBehavior();
+	public boolean isCellEditable(EventObject anEvent) {
+		boolean isEditable = super.isCellEditable(anEvent);
+		
+		if(!isEditable && getComponent() != null) {
+			// disable component
+			getComponent().setEnabled(false);
+		}
+		
+		return isEditable;
 	}
 
-	protected void configFocusBehavior() {
-		this.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// transfer focus
-				CayenneTextField.this.transferFocus();
-			}
-		});
-	}
 }
+

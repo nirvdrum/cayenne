@@ -309,8 +309,9 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
 	public boolean isCellEditable(int row, int col) {
 		DbAttribute attrib = getAttribute(row);
-		if (null == attrib)
+		if (null == attrib) {
 			return false;
+		}
 		else if (col == mandatoryColumnInd()) {
 			if (attrib.isPrimaryKey()) {
 				return false;

@@ -57,18 +57,26 @@ package org.objectstyle.cayenne.gui.datamap;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.util.*;
-import org.apache.log4j.Logger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Vector;
 
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.gui.CayenneActionPanel;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.util.CayenneCellEditor;
 import org.objectstyle.cayenne.gui.util.CayenneTable;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 
 /** 
  * Displays DbRelationship's for the current DbEntity. 
@@ -104,10 +112,15 @@ public class DbRelationshipPane
 		resolve.addActionListener(this);
 	}
 
-	private void init() {
+	protected void init() {
 		setLayout(new BorderLayout());
 		// Create table
 		table = new CayenneTable();
+		
+		// add special editor
+		//CayenneCellEditor editor = new CayenneCellEditor(new JCheckBox());
+		//table.setDefaultEditor(Boolean.class, editor);
+		
 		resolve = new JButton("Database Mapping");
 		JPanel panel =
 			PanelFactory.createTablePanel(table, new JButton[] { resolve });

@@ -289,12 +289,6 @@ public class ResolveDbRelationshipDialog
 		}
 
 		DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
-		if (model.getRowCount() == 0) {
-			JOptionPane.showMessageDialog(Editor.getFrame(), "Enter join attributes ");
-			table.requestFocus(true);
-			return;
-		}
-
 		try {
 			model.commit();
 		} catch (DataMapException e) {

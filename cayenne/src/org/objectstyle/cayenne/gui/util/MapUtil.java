@@ -116,8 +116,6 @@ public class MapUtil {
 		entity.addRelationship(rel);
 	}
 
-	public void setParentEntity(DerivedDbEntity derived, DbEntity parent) {}
-
 	/**
 	 * Cleans any mappings of ObjEntities, ObjAttributes, 
 	 * ObjRelationship to the corresponding Db* objects that not longer
@@ -196,11 +194,18 @@ public class MapUtil {
 	}
 
 	/**
-	 * Returns true if this relationship's "toDepPK" flag can be potentially
-	 * set to true.
+	 * Returns true if this relationship's "toDepPK" flag can be 
+	 * potentially set to <code>true</code>, i.e. if the destination and
+	 * source attributes are primary keys of their corresponding 
+	 * entities.
 	 */
 	public static boolean isValidForDepPk(DbRelationship rel) {
 		Iterator it = rel.getJoins().iterator();
+		// handle case with no joins
+		if(!it.hasNext()) {
+			return false;
+		}
+		
 		while (it.hasNext()) {
 			DbAttributePair join = (DbAttributePair) it.next();
 			if (!join.getTarget().isPrimaryKey() || !join.getSource().isPrimaryKey()) {

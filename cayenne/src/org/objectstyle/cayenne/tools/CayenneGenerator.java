@@ -57,14 +57,11 @@ package org.objectstyle.cayenne.tools;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.conf.DisconnectedConfiguration;
 import org.objectstyle.cayenne.gen.AntClassGenerator;
 import org.objectstyle.cayenne.gen.ClassGenerator;
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
@@ -83,7 +80,6 @@ public class CayenneGenerator extends Task {
 	protected File map;
 	protected File[] mapDeps;
 	protected DefaultClassGenerator generator;
-	protected DisconnectedConfiguration config;
 
 	public CayenneGenerator() {
 		bootstrapVelocity();
