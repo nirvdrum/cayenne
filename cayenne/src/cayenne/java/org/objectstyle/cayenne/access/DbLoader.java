@@ -103,7 +103,10 @@ public class DbLoader {
     }
 
     /** Creates a unique name for loaded relationship on the given entity. */
-    private static String uniqueRelName(Entity entity, String dstName, boolean toMany) {
+    private static String uniqueRelName(
+        Entity entity,
+        String dstName,
+        boolean toMany) {
         int currentSuffix = 1;
         String baseRelName = defaultRelName(dstName, toMany);
         String relName = baseRelName;
@@ -121,7 +124,10 @@ public class DbLoader {
     protected DbLoaderDelegate delegate;
 
     /** Creates new DbLoader. */
-    public DbLoader(Connection con, DbAdapter adapter, DbLoaderDelegate delegate) {
+    public DbLoader(
+        Connection con,
+        DbAdapter adapter,
+        DbLoaderDelegate delegate) {
         this.adapter = adapter;
         this.con = con;
         this.delegate = delegate;
@@ -155,8 +161,7 @@ public class DbLoader {
                 String catalog_name = rs.getString(1);
                 catalogs.add(catalog_name);
             }
-        }
-        finally {
+        } finally {
             rs.close();
         }
         return catalogs;
@@ -176,8 +181,7 @@ public class DbLoader {
                 String schema_name = rs.getString(1);
                 schemas.add(schema_name);
             }
-        }
-        finally {
+        } finally {
             rs.close();
         }
         return schemas;
@@ -197,8 +201,7 @@ public class DbLoader {
             while (rs.next()) {
                 types.add(rs.getString("TABLE_TYPE").trim());
             }
-        }
-        finally {
+        } finally {
             rs.close();
         }
         return types;
@@ -225,15 +228,13 @@ public class DbLoader {
         List tables = new ArrayList();
         if (null == schemaPattern || schemaPattern.equals("")) {
             schemaPattern = WILDCARD;
-        }
-        else if (schemaPattern.indexOf('*') >= 0) {
+        } else if (schemaPattern.indexOf('*') >= 0) {
             schemaPattern.replace('*', '%');
         }
 
         if (null == tableNamePattern || tableNamePattern.equals("")) {
             tableNamePattern = WILDCARD;
-        }
-        else if (tableNamePattern.indexOf('*') >= 0) {
+        } else if (tableNamePattern.indexOf('*') >= 0) {
             tableNamePattern.replace('*', '%');
         }
 
@@ -254,7 +255,11 @@ public class DbLoader {
         }
 
         ResultSet rs =
-            getMetaData().getTables(catalog, schemaPattern, tableNamePattern, types);
+            getMetaData().getTables(
+                catalog,
+                schemaPattern,
+                tableNamePattern,
+                types);
 
         try {
             while (rs.next()) {
@@ -264,8 +269,7 @@ public class DbLoader {
                 Table info = new Table(cat, schema, name);
                 tables.add(info);
             }
-        }
-        finally {
+        } finally {
             rs.close();
         }
         return tables;
@@ -281,7 +285,8 @@ public class DbLoader {
      * 
      * @return true if need to continue, false if must stop loading. 
      */
-    public boolean loadDbEntities(DataMap map, List tables) throws SQLException {
+    public boolean loadDbEntities(DataMap map, List tables)
+        throws SQLException {
         dbEntityList = new ArrayList();
         Iterator iter = tables.iterator();
         while (iter.hasNext()) {
@@ -301,13 +306,11 @@ public class DbLoader {
                         logObj.debug("Overwrite: " + oldEnt.getName());
                         map.deleteDbEntity(oldEnt.getName());
                         delegate.dbEntityRemoved(oldEnt);
-                    }
-                    else {
+                    } else {
                         logObj.debug("Keep old: " + oldEnt.getName());
                         continue;
                     }
-                }
-                catch (CayenneException ex) {
+                } catch (CayenneException ex) {
                     logObj.debug("Load canceled.");
 
                     // cancel immediately
@@ -321,8 +324,7 @@ public class DbLoader {
 
             if (delegate != null) {
                 delegate.setSchema(dbEntity, table.getSchema());
-            }
-            else {
+            } else {
                 dbEntity.setSchema(table.getSchema());
             }
             dbEntity.setCatalog(table.getCatalog());
@@ -365,8 +367,7 @@ public class DbLoader {
                     attr.setEntity(dbEntity);
                     dbEntity.addAttribute(attr);
                 }
-            }
-            finally {
+            } finally {
                 rs.close();
             }
 
@@ -383,25 +384,27 @@ public class DbLoader {
         while (i.hasNext()) {
             DbEntity dbEntity = (DbEntity) i.next();
             String tableName = dbEntity.getName();
-            ResultSet rs = metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
+            ResultSet rs =
+                metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
 
             try {
                 while (rs.next()) {
                     String keyName = rs.getString(4);
-                    DbAttribute attribute = (DbAttribute) dbEntity.getAttribute(keyName);
+                    DbAttribute attribute =
+                        (DbAttribute) dbEntity.getAttribute(keyName);
 
                     if (attribute != null) {
                         attribute.setPrimaryKey(true);
-                    }
-                    else {
+                    } else {
                         // why an attribute might be null is not quiet clear
                         // but there is a bug report 731406 indicating that it is possible
                         // so just print the warning, and ignore
-                        logObj.warn("Can't locate attribute for primary key: " + keyName);
+                        logObj.warn(
+                            "Can't locate attribute for primary key: "
+                                + keyName);
                     }
                 }
-            }
-            finally {
+            } finally {
                 rs.close();
             }
         }
@@ -427,9 +430,9 @@ public class DbLoader {
 
             // check if there are existing entities
             Collection existing = map.getMappedEntities(dbEntity);
-            if(existing.size() > 0) {
-            	loadedEntities.addAll(existing);
-            	continue;
+            if (existing.size() > 0) {
+                loadedEntities.addAll(existing);
+                continue;
             }
 
             String objEntityName =
@@ -437,7 +440,9 @@ public class DbLoader {
             // this loop will terminate even if no valid name is found
             // to prevent loader from looping forever (though such case is very unlikely)
             String baseName = objEntityName;
-            for (int i = 1; i < 1000 && map.getObjEntity(objEntityName) != null; i++) {
+            for (int i = 1;
+                i < 1000 && map.getObjEntity(objEntityName) != null;
+                i++) {
                 objEntityName = baseName + i;
             }
 
@@ -461,76 +466,126 @@ public class DbLoader {
     public void loadDbRelationships(DataMap map) throws SQLException {
         Iterator it = dbEntityList.iterator();
         while (it.hasNext()) {
-            DbEntity pkEnt = (DbEntity) it.next();
-            String pkEntName = pkEnt.getName();
+            DbEntity pkEntity = (DbEntity) it.next();
+            String pkEntName = pkEntity.getName();
 
             // Get all the foreign keys referencing this table
             ResultSet rs =
                 getMetaData().getExportedKeys(
-                    pkEnt.getCatalog(),
-                    pkEnt.getSchema(),
-                    pkEnt.getName());
+                    pkEntity.getCatalog(),
+                    pkEntity.getSchema(),
+                    pkEntity.getName());
             try {
                 if (!rs.next())
                     continue;
 
                 // these will be initailzed every time a new target entity
                 // is found in the result set (which should be ordered by table name among other things)
-                DbRelationship fwdRel = null;
-                DbRelationship backRel = null;
-                DbEntity fkEnt = null;
+                DbRelationship forwardRelationship = null;
+                DbRelationship reverseRelationship = null;
+                DbEntity fkEntity = null;
 
                 do {
                     short keySeq = rs.getShort("KEY_SEQ");
                     if (keySeq == 1) {
-                        // reinit variables for the new traget entity
-                        String fkEntName = rs.getString("FKTABLE_NAME");
 
-                        fkEnt = map.getDbEntity(fkEntName);
+                        if (forwardRelationship != null) {
+                            postprocessMasterDbRelationship(forwardRelationship);
+                            forwardRelationship = null;
+                        }
 
-                        if (fkEnt == null) {
+                        // start new entity
+                        String fkEntityName = rs.getString("FKTABLE_NAME");
+
+                        fkEntity = map.getDbEntity(fkEntityName);
+
+                        if (fkEntity == null) {
                             logObj.debug(
                                 "FK warning: no entity found for name '"
-                                    + fkEntName
+                                    + fkEntityName
                                     + "'");
-                        }
-                        else {
-                            fwdRel =
-                                new DbRelationship(uniqueRelName(pkEnt, fkEntName, true));
-                            fwdRel.setToMany(true);
-                            fwdRel.setSourceEntity(pkEnt);
-                            fwdRel.setTargetEntity(fkEnt);
-                            pkEnt.addRelationship(fwdRel);
+                        } else {
 
-                            backRel =
+                            // init relationship
+                            forwardRelationship =
                                 new DbRelationship(
-                                    uniqueRelName(fkEnt, pkEntName, false));
-                            backRel.setToMany(false);
-                            backRel.setSourceEntity(fkEnt);
-                            backRel.setTargetEntity(pkEnt);
-                            fkEnt.addRelationship(backRel);
+                                    uniqueRelName(
+                                        pkEntity,
+                                        fkEntityName,
+                                        true));
+
+                            forwardRelationship.setSourceEntity(pkEntity);
+                            forwardRelationship.setTargetEntity(fkEntity);
+                            pkEntity.addRelationship(forwardRelationship);
+
+                            reverseRelationship =
+                                new DbRelationship(
+                                    uniqueRelName(fkEntity, pkEntName, false));
+                            reverseRelationship.setToMany(false);
+                            reverseRelationship.setSourceEntity(fkEntity);
+                            reverseRelationship.setTargetEntity(pkEntity);
+                            fkEntity.addRelationship(reverseRelationship);
                         }
                     }
 
-                    if (fkEnt != null) {
+                    if (fkEntity != null) {
                         // Create and append joins
                         DbAttribute pkAtt =
-                            (DbAttribute) pkEnt.getAttribute(
+                            (DbAttribute) pkEntity.getAttribute(
                                 rs.getString("PKCOLUMN_NAME"));
                         DbAttribute fkAtt =
-                            (DbAttribute) fkEnt.getAttribute(
+                            (DbAttribute) fkEntity.getAttribute(
                                 rs.getString("FKCOLUMN_NAME"));
 
-                        fwdRel.addJoin(new DbAttributePair(pkAtt, fkAtt));
-                        backRel.addJoin(new DbAttributePair(fkAtt, pkAtt));
+                        forwardRelationship.addJoin(
+                            new DbAttributePair(pkAtt, fkAtt));
+                        reverseRelationship.addJoin(
+                            new DbAttributePair(fkAtt, pkAtt));
                     }
+                } while (rs.next());
+
+                if (forwardRelationship != null) {
+                    postprocessMasterDbRelationship(forwardRelationship);
+                    forwardRelationship = null;
                 }
-                while (rs.next());
-            }
-            finally {
+
+            } finally {
                 rs.close();
             }
         }
+    }
+
+    /**
+     * Detects correct relationship multiplicity and "to dep pk" flag. Only called
+     * on relationships from PK to FK, not the reverse ones.
+     */
+    protected void postprocessMasterDbRelationship(DbRelationship relationship) {
+        boolean toPK = true;
+        List joins = relationship.getJoins();
+
+        Iterator joinsIt = joins.iterator();
+        while (joinsIt.hasNext()) {
+            DbAttributePair join = (DbAttributePair) joinsIt.next();
+            if (!join.getTarget().isPrimaryKey()) {
+                toPK = false;
+                break;
+            }
+
+        }
+        
+        boolean toDependentPK = false;
+        boolean toMany = true;
+        
+        if(toPK) {
+            toDependentPK = true;
+            if(((DbEntity) relationship.getTargetEntity()).getPrimaryKey().size() == joins.size()) {
+                toMany = false;
+            }
+        }
+        
+
+        relationship.setToDependentPK(toDependentPK);
+        relationship.setToMany(toMany);
     }
 
     /** 
@@ -562,7 +617,10 @@ public class DbLoader {
                         .next();
 
                 String name =
-                    uniqueRelName(objEnt, targetEntity.getName(), dbRel.isToMany());
+                    uniqueRelName(
+                        objEnt,
+                        targetEntity.getName(),
+                        dbRel.isToMany());
                 ObjRelationship objRel = new ObjRelationship(name);
                 objRel.addDbRelationship(dbRel);
                 objRel.setSourceEntity(objEnt);
@@ -613,7 +671,9 @@ public class DbLoader {
         String[] tableTypes)
         throws SQLException {
         DataMap dataMap =
-            (DataMap) NamedObjectFactory.createObject(DataMap.class, new DataDomain());
+            (DataMap) NamedObjectFactory.createObject(
+                DataMap.class,
+                new DataDomain());
         return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
     }
 

@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
@@ -107,21 +108,44 @@ public class DbLoaderTst extends CayenneTestCase {
             if (supportsFK) {
                 // *** TESTING THIS ***
                 loader.loadDbRelationships(map);
+
                 Collection rels = getDbEntity(map, "ARTIST").getRelationships();
                 assertNotNull(rels);
                 assertTrue(rels.size() > 0);
-            }
 
+                // test one-to-one
+                rels = getDbEntity(map, "PAINTING").getRelationships();
+                assertNotNull(rels);
+
+                // find relationship to PAINTING_INFO
+                DbRelationship oneToOne = null;
+                Iterator it = rels.iterator();
+                while (it.hasNext()) {
+                    DbRelationship rel = (DbRelationship) it.next();
+                    if ("PAINTING_INFO"
+                        .equalsIgnoreCase(rel.getTargetEntityName())) {
+                        oneToOne = rel;
+                        break;
+                    }
+                }
+
+                assertNotNull("No relationship to PAINTING_INFO", oneToOne);
+                assertFalse(
+                    "Relationship to PAINTING_INFO must be to-one",
+                    oneToOne.isToMany());
+                assertTrue(
+                    "Relationship to PAINTING_INFO must be to-one",
+                    oneToOne.isToDependentPK());
+
+            } 
+            
             // *** TESTING THIS ***
             loader.loadObjEntities(map);
-
             ObjEntity ae = map.getObjEntity("Artist");
             assertNotNull(ae);
             assertEquals("Artist", ae.getName());
-
             // assert primary key is not an attribute
             assertNull(ae.getAttribute("artistId"));
-
             if (supportsLobs) {
                 assertLobObjEntities(map);
             }
@@ -130,11 +154,8 @@ public class DbLoaderTst extends CayenneTestCase {
                 Collection rels = ae.getRelationships();
                 assertNotNull(rels);
                 assertTrue(rels.size() > 0);
-            }
-
-            // now when the map is loaded, test 
+            } // now when the map is loaded, test 
             // various things
-
             // selectively check how different types were processed
             checkTypes(map);
         } finally {
@@ -146,7 +167,6 @@ public class DbLoaderTst extends CayenneTestCase {
         DbEntity dae = getDbEntity(map, "ARTIST");
         assertNotNull(dae);
         assertEquals("ARTIST", dae.getName().toUpperCase());
-
         DbAttribute a = getDbAttribute(dae, "ARTIST_ID");
         assertNotNull(a);
         assertTrue(a.isPrimaryKey());
@@ -155,17 +175,14 @@ public class DbLoaderTst extends CayenneTestCase {
     private void assertLobDbEntities(DataMap map) {
         DbEntity blobEnt = getDbEntity(map, "BLOB_TEST");
         assertNotNull(blobEnt);
-
         DbAttribute blobAttr = getDbAttribute(blobEnt, "BLOB_COL");
         assertNotNull(blobAttr);
         assertTrue(
             msgForTypeMismatch(Types.BLOB, blobAttr),
             Types.BLOB == blobAttr.getType()
                 || Types.LONGVARBINARY == blobAttr.getType());
-
         DbEntity clobEnt = getDbEntity(map, "CLOB_TEST");
         assertNotNull(clobEnt);
-
         DbAttribute clobAttr = getDbAttribute(clobEnt, "CLOB_COL");
         assertNotNull(clobAttr);
         assertTrue(
@@ -177,15 +194,12 @@ public class DbLoaderTst extends CayenneTestCase {
     private void assertLobObjEntities(DataMap map) {
         ObjEntity blobEnt = map.getObjEntity("BlobTest");
         assertNotNull(blobEnt);
-
         // BLOBs should be mapped as byte[]
         ObjAttribute blobAttr = (ObjAttribute) blobEnt.getAttribute("blobCol");
         assertNotNull("BlobTest.blobCol failed to load", blobAttr);
         assertEquals("byte[]", blobAttr.getType());
-
         ObjEntity clobEnt = map.getObjEntity("ClobTest");
         assertNotNull(clobEnt);
-
         // CLOBs should be mapped as Strings by default
         ObjAttribute clobAttr = (ObjAttribute) clobEnt.getAttribute("clobCol");
         assertNotNull(clobAttr);
@@ -194,7 +208,6 @@ public class DbLoaderTst extends CayenneTestCase {
 
     private DbEntity getDbEntity(DataMap map, String name) {
         DbEntity de = map.getDbEntity(name);
-
         // sometimes table names get converted to lowercase
         if (de == null) {
             de = map.getDbEntity(name.toLowerCase());
@@ -205,7 +218,6 @@ public class DbLoaderTst extends CayenneTestCase {
 
     private DbAttribute getDbAttribute(DbEntity ent, String name) {
         DbAttribute da = (DbAttribute) ent.getAttribute(name);
-
         // sometimes table names get converted to lowercase
         if (da == null) {
             da = (DbAttribute) ent.getAttribute(name.toLowerCase());
@@ -215,19 +227,15 @@ public class DbLoaderTst extends CayenneTestCase {
     }
 
     private DataMap originalMap() {
-        return (DataMap)getNode().getDataMaps().iterator().next();
-    }
-
-    /** Selectively check how different types were processed. */
+        return (DataMap) getNode().getDataMaps().iterator().next();
+    } /** Selectively check how different types were processed. */
     public void checkTypes(DataMap map) {
         DbEntity dbe = getDbEntity(map, "PAINTING");
         DbEntity floatTest = getDbEntity(map, "FLOAT_TEST");
-
         DbAttribute integerAttr = getDbAttribute(dbe, "PAINTING_ID");
         DbAttribute decimalAttr = getDbAttribute(dbe, "ESTIMATED_PRICE");
         DbAttribute varcharAttr = getDbAttribute(dbe, "PAINTING_TITLE");
         DbAttribute floatAttr = getDbAttribute(floatTest, "FLOAT_COL");
-
         // check decimal
         // postgresql does not have a decimal type, instead columns that
         // are declared as DECIMAL will be converted to NUMERIC instead
@@ -244,23 +252,18 @@ public class DbLoaderTst extends CayenneTestCase {
                 msgForTypeMismatch(Types.DECIMAL, decimalAttr),
                 Types.DECIMAL,
                 decimalAttr.getType());
-
             assertEquals(2, decimalAttr.getPrecision());
-        }
-
-        // check varchar
+        } // check varchar
         assertEquals(
             msgForTypeMismatch(Types.VARCHAR, varcharAttr),
             Types.VARCHAR,
             varcharAttr.getType());
         assertEquals(255, varcharAttr.getMaxLength());
-
         // check integer
         assertEquals(
             msgForTypeMismatch(Types.INTEGER, integerAttr),
             Types.INTEGER,
             integerAttr.getType());
-
         // check float
         assertTrue(
             msgForTypeMismatch(Types.FLOAT, floatAttr),
@@ -273,7 +276,6 @@ public class DbLoaderTst extends CayenneTestCase {
         while (entIt.hasNext()) {
             DbEntity origEnt = (DbEntity) entIt.next();
             DbEntity newEnt = map.getDbEntity(origEnt.getName());
-
             Iterator it = origEnt.getAttributes().iterator();
             while (it.hasNext()) {
                 DbAttribute origAttr = (DbAttribute) it.next();
