@@ -197,19 +197,28 @@
 
 
     <!-- ========================================== -->
-    <!-- Build optional JAR files.                   -->
+    <!-- Build optional JAR files.                  -->
     <!-- ========================================== -->
     <target name="jar-other" depends="prepare,compile_subprojects">
         <jar jarfile="${dist}/lib/cayenne_tests.jar" manifest="tests/MANIFEST.MF">
             <fileset dir="tests/${build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>
+    </target>
+    
+    
+    <!-- ========================================== -->
+    <!-- Creates performance testing JAR.           -->
+    <!-- ========================================== -->
+    <target name="build-perf" depends="prepare,jar,jar-other">
+        <ant dir="performance" target="compile"/>
         
         <jar jarfile="${dist}/lib/cayenne_perf.jar" manifest="performance/MANIFEST.MF">
             <fileset dir="performance/${build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>
     </target>
+    
 
 
     <!-- ========================================== -->
@@ -301,7 +310,6 @@
     <target name="compile_subprojects">
         <ant dir="src" target="compile"/>
         <ant dir="tests" target="compile"/>
-        <ant dir="performance" target="compile"/>
     </target>
 </project>
 
