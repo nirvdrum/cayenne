@@ -70,11 +70,13 @@ import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.PackageUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SchemaUpdateController;
@@ -86,6 +88,7 @@ import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
+import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
 
@@ -365,23 +368,42 @@ public class DataMapView extends JPanel {
             throw new ValidationException("Enter name for DataMap");
         }
 
-        DataDomain domain = eventController.getCurrentDataDomain();
         DataMap map = eventController.getCurrentDataMap();
-        DataMap matchingMap = domain.getMap(text);
 
-        if (matchingMap == null) {
-            // completely new name, set new name for domain
-            DataMapEvent e = new DataMapEvent(this, map, map.getName());
-            ProjectUtil.setDataMapName(domain, map, text);
-            eventController.fireDataMapEvent(e);
+        // search for matching map name across domains, as currently they have to be
+        // unique globally
+        Configuration config = ((ApplicationProject) CayenneModelerFrame.getProject())
+                .getConfiguration();
+
+        DataMap matchingMap = null;
+
+        Iterator it = config.getDomains().iterator();
+        while (it.hasNext()) {
+            DataDomain domain = (DataDomain) it.next();
+            DataMap nextMap = domain.getMap(text);
+
+            if (nextMap == map) {
+                continue;
+            }
+
+            if (nextMap != null) {
+                matchingMap = nextMap;
+                break;
+            }
         }
-        else if (matchingMap != map) {
+
+        if (matchingMap != null) {
 
             // there is an entity with the same name
             throw new ValidationException("There is another DataMap named '"
                     + text
                     + "'. Use a different name.");
         }
+
+        // completely new name, set new name for domain
+        DataMapEvent e = new DataMapEvent(this, map, map.getName());
+        ProjectUtil.setDataMapName(eventController.getCurrentDataDomain(), map, text);
+        eventController.fireDataMapEvent(e);
     }
 
     void setDataNode() {

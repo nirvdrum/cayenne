@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.editor;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -70,6 +71,7 @@ import javax.swing.event.DocumentListener;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
@@ -86,6 +88,7 @@ import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
+import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.validation.ValidationException;
@@ -117,7 +120,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
 
     protected JPanel driverPanel;
 
-    /** Cludge to prevent marking domain as dirty during initial load. */
+    // Cludge to prevent marking domain as dirty during initial load.
     private boolean ignoreChange;
 
     public DataNodeView(EventController mediator) {
@@ -383,27 +386,44 @@ public class DataNodeView extends JPanel implements DocumentListener {
         }
 
         DataNode node = mediator.getCurrentDataNode();
-        DataDomain domain = mediator.getCurrentDataDomain();
 
         if (node == null || newName.equals(node.getName())) {
             return;
         }
 
-        DataNode matchingNode = domain.getNode(newName);
+        // search for matching node name across domains, as currently they have to be
+        // unique globally
+        Configuration config = ((ApplicationProject) CayenneModelerFrame.getProject())
+                .getConfiguration();
 
-        if (matchingNode == null) {
-            // completely new name, set new name
-            DataNodeEvent e = new DataNodeEvent(this, node, node.getName());
-            ProjectUtil.setDataNodeName(domain, node, newName);
-            mediator.fireDataNodeEvent(e);
+        DataNode matchingNode = null;
+
+        Iterator it = config.getDomains().iterator();
+        while (it.hasNext()) {
+            DataDomain domain = (DataDomain) it.next();
+            DataNode nextNode = domain.getNode(newName);
+
+            if (nextNode == node) {
+                continue;
+            }
+
+            if (nextNode != null) {
+                matchingNode = nextNode;
+                break;
+            }
         }
-        else if (matchingNode != node) {
 
+        if (matchingNode != null) {
             // there is an entity with the same name
             throw new ValidationException("There is another DataNode named '"
                     + newName
                     + "'. Use a different name.");
         }
+
+        // completely new name, set new name
+        DataNodeEvent e = new DataNodeEvent(this, node, node.getName());
+        ProjectUtil.setDataNodeName(mediator.getCurrentDataDomain(), node, newName);
+        mediator.fireDataNodeEvent(e);
     }
 
     private void setFactoryName(String factoryName) {

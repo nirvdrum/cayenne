@@ -87,8 +87,13 @@ public class CreateDataMapAction extends CayenneAction {
     protected void createDataMap() {
         EventController mediator = getMediator();
         DataDomain currentDomain = mediator.getCurrentDataDomain();
+        
+        // use domain name as DataMap base, as map names must be unique across the project...
         DataMap map =
-            (DataMap) NamedObjectFactory.createObject(DataMap.class, currentDomain);
+            (DataMap) NamedObjectFactory.createObject(
+                DataMap.class,
+                currentDomain,
+                currentDomain.getName() + "Map");
         mediator.addDataMap(this, map);
     }
 

@@ -82,7 +82,7 @@ public class ValidateAction extends CayenneAction {
 	}
 
 	/**
-	 * Validates project for possible conflits and incomplete mappings.
+	 * Validates project for possible conflicts and incomplete mappings.
 	 */
 	public void performAction(ActionEvent e) {
 		EventController mediator = getMediator();

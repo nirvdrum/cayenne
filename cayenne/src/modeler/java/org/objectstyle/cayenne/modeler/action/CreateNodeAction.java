@@ -73,12 +73,13 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class CreateNodeAction extends CayenneAction {
 
-	public static String getActionName() {
-		return "Create DataNode";
-	}
+    public static String getActionName() {
+        return "Create DataNode";
+    }
 
     /**
      * Constructor for CreateNodeAction.
+     * 
      * @param name
      */
     public CreateNodeAction() {
@@ -96,25 +97,28 @@ public class CreateNodeAction extends CayenneAction {
         createDataNode();
     }
 
-    /** 
+    /**
      * Creates a new data node. Data node may consist of two pieces of information:
      * <ul>
-     *   <li>Name/location</li>
-     *   <li>Database url/uid/password (for direct connection to DB).</li>
+     * <li>Name/location</li>
+     * <li>Database url/uid/password (for direct connection to DB).</li>
      * </ul>
-     * 
-     * First piece of info is stored directly into the cayenne.xml.
-     * Second piece of data should be stored in the separate file
-     * if the factory requires it. 
+     * First piece of info is stored directly into the cayenne.xml. Second piece of data
+     * should be stored in the separate file if the factory requires it.
      */
     protected void createDataNode() {
         EventController mediator = getMediator();
         DataDomain domain = mediator.getCurrentDataDomain();
-        DataNode node =
-            (DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
+
+        // use domain name as DataNode base, as node names must be unique across the
+        // project...
+        DataNode node = (DataNode) NamedObjectFactory.createObject(
+                DataNode.class,
+                domain,
+                domain.getName() + "Node");
         ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
         node.setDataSource(src);
-        
+
         // by default create JDBC Node
         node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
 
@@ -124,8 +128,8 @@ public class CreateNodeAction extends CayenneAction {
     }
 
     /**
-    * Returns <code>true</code> if path contains a DataDomain object.
-    */
+     * Returns <code>true</code> if path contains a DataDomain object.
+     */
     public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
