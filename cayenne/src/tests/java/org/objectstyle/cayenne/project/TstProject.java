@@ -73,5 +73,14 @@ public class TstProject extends Project {
         super(projectFile);
         
     }
+    
+    /**
+     * @see org.objectstyle.cayenne.project.Project#getMainProjectFile()
+     */
+    public File getMainProjectFile() {
+        return null;
+    }
+
+
 }
 

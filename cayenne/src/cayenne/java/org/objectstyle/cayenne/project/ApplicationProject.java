@@ -56,14 +56,18 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
-
 
 /**
  * @author Andrei Adamchik
  */
 public class ApplicationProject extends Project {
+    protected ProjectConfiguration config;
 
     /**
      * Constructor for ApplicationProject.
@@ -72,6 +76,46 @@ public class ApplicationProject extends Project {
      */
     public ApplicationProject(File projectFile) {
         super(projectFile);
+
+        try {
+            config = new ProjectConfiguration(projectFile.getCanonicalFile());
+        } catch (IOException e) {
+            throw new ProjectException("Error creating ApplicationProject.", e);
+        }
+
+        // take a snapshot of files used by the project
+        files = Collections.synchronizedList(buildFileList());
+
+        checkForUpgrades();
+    }
+
+    /**
+     * Method getMainProjectFile.
+     * @return File
+     */
+    public File getMainProjectFile() {
+        return config.getProjectFile();
+    }
+
+    /**
+    * Returns Cayenne configuration object associated with this project. 
+    */
+    public Configuration getConfig() {
+        return (Configuration) config;
+    }
+
+    /**
+    * Sets Cayenne configuration object associated with this project. 
+    */
+    public void setConfig(ProjectConfiguration config) {
+        this.config = config;
+    }
+
+    public DataDomain[] getDomains() {
+        List domains = getConfig().getDomainList();
+        if (domains == null) {
+            return new DataDomain[0];
+        }
+        return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
     }
 }
-

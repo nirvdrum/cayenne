@@ -145,7 +145,7 @@ public class ProjectTraversal {
 
     protected List buildNodesList() {
         ArrayList list = new ArrayList();
-        Configuration config = project.getConfig();
+        Configuration config = ((ApplicationProject)project).getConfig();
         Object[] path = buildPath(config, null);
         list.add(path);
         addDomains(list, config.getDomainList(), path);

@@ -53,52 +53,73 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.project;
 
-import java.awt.event.ActionEvent;
+import java.io.File;
+import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.DomainEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
-import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class CreateDomainAction extends CayenneAction {
-    public static final String ACTION_NAME = "Create DataDomain";
+public class ApplicationProjectTst extends CayenneTestCase {
+    protected ApplicationProject p;
+    protected File f;
 
     /**
-     * Constructor for CreateDomainAction.
+     * Constructor for ApplicationProjectTst.
      * @param name
      */
-    public CreateDomainAction() {
-        super(ACTION_NAME);
+    public ApplicationProjectTst(String name) {
+        super(name);
     }
 
-    public String getIconName() {
-        return "icon-dom.gif";
+    protected void setUp() throws Exception {
+        super.setUp();
+        f = new File("xyz");
+        p = new ApplicationProject(f);
     }
 
-    /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-     */
-    public void performAction(ActionEvent e) {
-        createDomain();
+    public void testConfig() throws Exception {
+        assertNotNull(p.getConfig());
     }
 
-    protected void createDomain() {
-        ApplicationProject project = (ApplicationProject) Editor.getProject();
-        Mediator mediator = getMediator();
-        DataDomain domain =
-            (DataDomain) NamedObjectFactory.createObject(
-                DataDomain.class,
-                project.getConfig());
-        project.getConfig().addDomain(domain);
-        mediator.fireDomainEvent(new DomainEvent(this, domain, DomainEvent.ADD));
-        mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
+    public void testConstructor() throws Exception {
+        assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
+    }
+
+    public void testBuildFileList() throws Exception {
+        // build a test project tree
+        DataDomain d1 = new DataDomain("d1");
+        DataMap m1 = new DataMap("m1");
+        DataNode n1 = new DataNode("n1");
+        n1.setDataSourceFactory(DriverDataSourceFactory.class.getName());
+
+        d1.addMap(m1);
+        d1.addNode(n1);
+
+        ObjEntity oe1 = new ObjEntity("oe1");
+        m1.addObjEntity(oe1);
+
+        n1.addDataMap(m1);
+
+        // initialize project 
+        p.getConfig().addDomain(d1);
+
+        // make assertions
+        List files = p.buildFileList();
+
+        // logObj.warn("Files: " + files);
+
+        assertNotNull(files);
+
+        // list must have 3 files total
+        assertEquals(3, files.size());
     }
 }

@@ -81,6 +81,7 @@ import org.objectstyle.cayenne.modeler.util.DataDomainWrapper;
 import org.objectstyle.cayenne.modeler.util.DataMapWrapper;
 import org.objectstyle.cayenne.modeler.util.DataNodeWrapper;
 import org.objectstyle.cayenne.modeler.util.EntityWrapper;
+import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.map.*;
 
 /** 
@@ -167,7 +168,7 @@ public class BrowseView
 		// create tree model with root objects
 		model = new DefaultTreeModel(rootNode);
 		// Populate obj tree
-		DataDomain[] temp_domains = Editor.getProject().getDomains();
+		DataDomain[] temp_domains = ((ApplicationProject)Editor.getProject()).getDomains();
 		for (int i = 0; i < temp_domains.length; i++) {
 			DefaultMutableTreeNode domain_ele;
 			domain_ele = loadDomain(temp_domains[i]);

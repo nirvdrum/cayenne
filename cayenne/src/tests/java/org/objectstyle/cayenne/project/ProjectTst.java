@@ -94,39 +94,6 @@ public class ProjectTst extends CayenneTestCase {
         f = new File("xyz");
         p = new TstProject(f);
     }
-    
-    public void testBuildFileList() throws Exception {
-    	// build a test project tree
-    	DataDomain d1 = new DataDomain("d1");
-    	DataMap m1 = new DataMap("m1");
-    	DataNode n1 = new DataNode("n1");
-    	n1.setDataSourceFactory(DriverDataSourceFactory.class.getName());
-    	
-    	d1.addMap(m1);
-    	d1.addNode(n1);
-    	
-    	ObjEntity oe1 = new ObjEntity("oe1");
-    	m1.addObjEntity(oe1);
-    	
-    	n1.addDataMap(m1);
-    	
-    	// initialize project 
-    	p.getConfig().addDomain(d1);
-    	
-    	// make assertions
-    	List files = p.buildFileList();
-    	
-    	// logObj.warn("Files: " + files);
-    	
-    	assertNotNull(files);
-    	
-    	// list must have 3 files total
-    	assertEquals(3, files.size());    	
-    }
-
-    public void testConstructor() throws Exception {
-        assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
-    }
 
     public void testValidator() throws Exception {
         Validator v1 = p.getValidator();

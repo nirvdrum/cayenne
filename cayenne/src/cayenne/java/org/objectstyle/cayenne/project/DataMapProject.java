@@ -72,5 +72,12 @@ public class DataMapProject extends Project {
     public DataMapProject(File projectFile) {
         super(projectFile);
     }
+    
+    /**
+     * @see org.objectstyle.cayenne.project.Project#getMainProjectFile()
+     */
+    public File getMainProjectFile() {
+        return null;
+    }
 }
 

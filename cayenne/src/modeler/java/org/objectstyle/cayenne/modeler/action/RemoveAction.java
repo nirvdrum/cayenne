@@ -58,16 +58,30 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import org.apache.log4j.Logger;
 
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
+import org.objectstyle.cayenne.modeler.event.AttributeEvent;
+import org.objectstyle.cayenne.modeler.event.DataMapEvent;
+import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
+import org.objectstyle.cayenne.modeler.event.DomainEvent;
+import org.objectstyle.cayenne.modeler.event.EntityEvent;
+import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.project.ApplicationProject;
 
 /** 
  * Removes currently selected object from the project. This can be 
@@ -127,9 +141,10 @@ public class RemoveAction extends CayenneAction {
 	}
 	
 	protected void removeDomain() {
+		ApplicationProject project = (ApplicationProject) Editor.getProject();
 		Mediator mediator = getMediator();
 		DataDomain domain = mediator.getCurrentDataDomain();
-		Editor.getProject().getConfig().removeDomain(domain.getName());
+		project.getConfig().removeDomain(domain.getName());
 		mediator.fireDomainEvent(new DomainEvent(Editor.getFrame(), domain, DomainEvent.REMOVE));
 	}
 	

@@ -63,7 +63,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.project.validator.Validator;
 
@@ -83,7 +82,6 @@ public abstract class Project {
  
     public static final String CURRENT_PROJECT_VERSION = "1.0";
 
-    protected Object rootObject;
     protected File projectDir;
     protected List files;
     protected List upgradeMessages;
@@ -123,15 +121,9 @@ public abstract class Project {
 
         try {
             projectDir = parent.getCanonicalFile();
-            rootObject = new ProjectConfiguration(projectFile.getCanonicalFile());
         } catch (IOException e) {
             throw new ProjectException("Error creating project.", e);
         }
-
-        // take a snapshot of files used by the project
-        files = Collections.synchronizedList(buildFileList());
-
-        checkForUpgrades();
     }
 
     protected void checkForUpgrades() {
@@ -279,20 +271,6 @@ public abstract class Project {
         }
     }
 
-    /**
-     * Returns Cayenne configuration object associated with this project. 
-     */
-    public Configuration getConfig() {
-        return (Configuration)rootObject;
-    }
-
-    /**
-     * Sets Cayenne configuration object associated with this project. 
-     */
-    public void setConfig(Configuration config) {
-        this.rootObject = config;
-    }
-
     /** 
      * Returns project directory. This is a directory where
      * project file is located.
@@ -300,22 +278,11 @@ public abstract class Project {
     public File getProjectDir() {
         return projectDir;
     }
-    
-    public DataDomain[] getDomains() {
-        List domains = getConfig().getDomainList();
-        if (domains == null) {
-            return new DataDomain[0];
-        }
-        return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
-    }
 
     /**
-     * Method getMainProjectFile.
-     * @return File
+     * Returns a main file associated with this project.
      */
-    public File getMainProjectFile() {
-        return ((ProjectConfiguration) rootObject).getProjectFile();
-    }
+    public abstract File getMainProjectFile();
 
     /** 
      * Saves project. All currently existing files are updated,

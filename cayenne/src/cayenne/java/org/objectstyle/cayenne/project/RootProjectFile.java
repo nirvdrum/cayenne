@@ -110,7 +110,7 @@ public class RootProjectFile extends ProjectFile {
     }
 
     public void save(PrintWriter out) throws Exception {
-        DomainHelper.storeDomains(out, getProject().getDomains());
+        DomainHelper.storeDomains(out, ((ApplicationProject)getProject()).getDomains());
     }
 
     public ProjectFile createProjectFile(Project project, Object obj) {
