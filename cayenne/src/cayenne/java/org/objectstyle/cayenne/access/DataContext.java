@@ -385,7 +385,7 @@ public class DataContext implements QueryEngine, Serializable {
         List results = new ArrayList(dataRows.size());
         Iterator it = dataRows.iterator();
         while (it.hasNext()) {
-            Map dataRow = (Map) it.next();
+			DataRow dataRow = (DataRow) it.next();
             ObjectId anId = DataRowUtils.objectIdFromSnapshot(entity, dataRow);
 
             // synchronized on objectstore, since read/write
@@ -421,7 +421,8 @@ public class DataContext implements QueryEngine, Serializable {
                     DataRowUtils.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
             }
-
+            
+			object.setSnapshotVersion(dataRow.getVersion());
             object.fetchFinished();
             results.add(object);
         }
@@ -440,6 +441,8 @@ public class DataContext implements QueryEngine, Serializable {
      * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
      * objectsFromDataRows(ObjEntity, List, boolean)}
      * with <code>false</code> "refersh" parameter.</p>
+     * 
+     * @since 1.1
      */
     public List objectsFromDataRows(Class objectClass, List dataRows, boolean refresh) {
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(objectClass);
@@ -454,20 +457,24 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataObject objectFromDataRow(
         Class objectClass,
-        Map dataRow,
+        DataRow dataRow,
         boolean refresh) {
         List list =
             objectsFromDataRows(objectClass, Collections.singletonList(dataRow), refresh);
         return (DataObject) list.get(0);
     }
 
-    /**
-      * @deprecated Since 1.1 use {@link 
-      * #objectsFromDataRows(Class,java.util.List,boolean)
-      * objectFromDataRow(Class, List, boolean)}, using <code>false</code>
-      * boolean parameter.</p>
-     */
+	/**
+	  * @deprecated Since 1.1 use {@link 
+	  * #objectFromDataRow(Class,org.objectstyle.cayenne.access.DataRow,boolean)
+	  * objectFromDataRow(Class, DataRow, boolean)}.
+	  */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
+		// backwards compatibility... wrap this in a DataRow
+		if(!(dataRow instanceof DataRow)) {
+			dataRow = new DataRow(dataRow);
+		}
+		
         ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
         List list = objectsFromDataRows(ent, Collections.singletonList(dataRow), false);
         return (DataObject) list.get(0);
@@ -475,14 +482,19 @@ public class DataContext implements QueryEngine, Serializable {
 
     /**
       * @deprecated Since 1.1 use {@link 
-      * #objectsFromDataRows(org.objectststyle.cayenne.map.ObjEntity,java.util.List,boolean)
-      * objectFromDataRow(ObjEntity, Map, boolean)}.</p>
+      * #objectFromDataRow(Class,org.objectstyle.cayenne.access.DataRow,boolean)
+      * objectFromDataRow(Class, DataRow, boolean)}.
       */
     public DataObject objectFromDataRow(
         ObjEntity objEntity,
         Map dataRow,
         boolean refresh) {
 
+        // backwards compatibility... wrap this in a DataRow
+        if(!(dataRow instanceof DataRow)) {
+			dataRow = new DataRow(dataRow);
+        }
+        
         List list =
             objectsFromDataRows(objEntity, Collections.singletonList(dataRow), refresh);
         return (DataObject) list.get(0);

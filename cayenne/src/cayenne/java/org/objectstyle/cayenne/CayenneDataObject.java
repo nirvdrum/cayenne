@@ -82,8 +82,8 @@ import org.objectstyle.cayenne.util.PropertyComparator;
  */
 public class CayenneDataObject implements DataObject {
     private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
-
-	protected long snapshotVersion = Long.MIN_VALUE;
+    
+	protected long snapshotVersion = DEFAULT_VERSION;
 	
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
@@ -542,11 +542,16 @@ public class CayenneDataObject implements DataObject {
     /**
      * Returns a version of a DataRow snapshot that was used to 
      * create this object.
+     * 
+     * @since 1.1
      */
     public long getSnapshotVersion() {
         return snapshotVersion;
     }
 
+    /**
+     * @since 1.1
+     */
     public void setSnapshotVersion(long snapshotVersion) {
         this.snapshotVersion = snapshotVersion;
     }

@@ -318,16 +318,17 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
             // modified
             else if (state == PersistenceState.MODIFIED) {
-                object.setPersistenceState(PersistenceState.COMMITTED);
-
                 if (modifiedSnapshots == null) {
                     modifiedSnapshots = new HashMap();
                 }
 
-                modifiedSnapshots.put(
-                    id,
-                    object.getDataContext().takeObjectSnapshot(object));
+                DataRow dataRow =
+                    (DataRow) object.getDataContext().takeObjectSnapshot(object);
 
+                modifiedSnapshots.put(id, dataRow);
+
+                object.setPersistenceState(PersistenceState.COMMITTED);
+                object.setSnapshotVersion(dataRow.getVersion());
             }
         }
 
@@ -358,12 +359,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     modifiedSnapshots = new HashMap();
                 }
 
-                modifiedSnapshots.put(
-                    id.getReplacementId(),
-                    object.getDataContext().takeObjectSnapshot(object));
+                DataRow dataRow =
+                    (DataRow) object.getDataContext().takeObjectSnapshot(object);
+                modifiedSnapshots.put(id.getReplacementId(), dataRow);
 
                 // fix object state
                 object.setObjectId(id.getReplacementId());
+                object.setSnapshotVersion(dataRow.getVersion());
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 addObject(object);
                 removeObject(id);
@@ -373,7 +375,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // clear retained snapshots
         this.retainedSnapshotMap.clear();
 
-        // post change event
+        // notify parent cache
         if (deletedIds != null || modifiedSnapshots != null) {
             getDataRowCache().processSnapshotChanges(
                 this,

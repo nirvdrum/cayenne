@@ -57,8 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataObject;
@@ -80,7 +78,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
     }
 
     public void testUnregisterObject() throws Exception {
-        Map row = new HashMap();
+		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());
@@ -101,7 +99,7 @@ public class DataContextObjectTrackingTst extends CayenneTestCase {
     }
 
     public void testInvalidateObject() throws Exception {
-        Map row = new HashMap();
+		DataRow row = new DataRow(10);
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         row.put("DATE_OF_BIRTH", new Date());

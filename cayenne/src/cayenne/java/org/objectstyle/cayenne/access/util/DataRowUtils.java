@@ -458,7 +458,7 @@ public class DataRowUtils {
     /**
      * Takes a snapshot of current object state.
      */
-    public static Map takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
+    public static DataRow takeObjectSnapshot(ObjEntity ent, DataObject anObject) {
 
         // for a HOLLOW object return snapshot from cache
         if (anObject.getPersistenceState() == PersistenceState.HOLLOW

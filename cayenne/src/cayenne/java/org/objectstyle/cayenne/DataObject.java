@@ -65,7 +65,8 @@ import org.objectstyle.cayenne.access.DataContext;
  * @author Andrei Adamchik
  */
 public interface DataObject extends java.io.Serializable {
-    
+	public static final long DEFAULT_VERSION = Long.MIN_VALUE;
+	
    /** 
     * Returns a data context this object is registered with, or null
     * if this object has no associated DataContext.
@@ -135,4 +136,17 @@ public interface DataObject extends java.io.Serializable {
      * was read from the database.
      */
     public void fetchFinished();
+    
+	/**
+	 * Returns a version of a DataRow snapshot that was used to 
+	 * create this object.
+	 * 
+	 * @since 1.1
+	 */
+	public long getSnapshotVersion();
+
+	/**
+	 * @since 1.1
+	 */
+	public void setSnapshotVersion(long snapshotVersion);
 }

@@ -1,57 +1,46 @@
-/* ====================================================================
- *
- * The ObjectStyle Group Software License, Version 1.0
- *
- * Copyright (c) 2002-2003 The ObjectStyle Group
- * and individual authors of the software.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- *
- * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:
- *       "This product includes software developed by the
- *        ObjectStyle Group (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- *
- * 4. The names "ObjectStyle Group" and "Cayenne"
- *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written
- *    permission, please contact andrus@objectstyle.org.
- *
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    nor may "ObjectStyle" appear in their names without prior written
- *    permission of the ObjectStyle Group.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
+/*
  * ====================================================================
- *
- * This software consists of voluntary contributions made by many
- * individuals on behalf of the ObjectStyle Group.  For more
- * information on the ObjectStyle Group, please see
- * <http://objectstyle.org/>.
- *
+ * 
+ * The ObjectStyle Group Software License, Version 1.0
+ * 
+ * Copyright (c) 2002-2003 The ObjectStyle Group and individual authors of the
+ * software. All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *  2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *  3. The end-user documentation included with the redistribution, if any,
+ * must include the following acknowlegement: "This product includes software
+ * developed by the ObjectStyle Group (http://objectstyle.org/)." Alternately,
+ * this acknowlegement may appear in the software itself, if and wherever such
+ * third-party acknowlegements normally appear.
+ *  4. The names "ObjectStyle Group" and "Cayenne" must not be used to endorse
+ * or promote products derived from this software without prior written
+ * permission. For written permission, please contact andrus@objectstyle.org.
+ *  5. Products derived from this software may not be called "ObjectStyle" nor
+ * may "ObjectStyle" appear in their names without prior written permission of
+ * the ObjectStyle Group.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * OBJECTSTYLE GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ====================================================================
+ * 
+ * This software consists of voluntary contributions made by many individuals
+ * on behalf of the ObjectStyle Group. For more information on the ObjectStyle
+ * Group, please see <http://objectstyle.org/> .
+ *  
  */
 
 package org.objectstyle.cayenne.access;
@@ -106,7 +95,7 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     public void testTakeObjectsSnapshot2() throws Exception {
-        // test  null values
+        // test null values
         Artist artist = fetchArtist("artist1", false);
         artist.setArtistName(null);
         artist.setDateOfBirth(null);
@@ -138,11 +127,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Tests how CHAR field is handled during fetch.
-     * Some databases (Oracle...) would pad a CHAR column
-     * with extra spaces, returned to the client. Cayenne
-     * should trim it.
-     */
+	 * Tests how CHAR field is handled during fetch. Some databases (Oracle...)
+	 * would pad a CHAR column with extra spaces, returned to the client.
+	 * Cayenne should trim it.
+	 */
     public void testCharFetch() throws Exception {
         SelectQuery q = new SelectQuery("Artist");
         List artists = context.performQuery(q);
@@ -151,11 +139,10 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Tests how CHAR field is handled during fetch in the WHERE clause.
-     * Some databases (Oracle...) would pad a CHAR column
-     * with extra spaces, returned to the client. Cayenne
-     * should trim it.
-     */
+	 * Tests how CHAR field is handled during fetch in the WHERE clause. Some
+	 * databases (Oracle...) would pad a CHAR column with extra spaces,
+	 * returned to the client. Cayenne should trim it.
+	 */
     public void testCharInQualifier() throws Exception {
         Expression e =
             ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
@@ -165,9 +152,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Test fetching query with multiple relationship
-     * paths between the same 2 entities used in qualifier.
-     */
+	 * Test fetching query with multiple relationship paths between the same 2
+	 * entities used in qualifier.
+	 */
     public void testMultiObjRelFetch() throws Exception {
         populatePaintings();
 
@@ -180,9 +167,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Test fetching query with multiple relationship
-     * paths between the same 2 entities used in qualifier.
-     */
+	 * Test fetching query with multiple relationship paths between the same 2
+	 * entities used in qualifier.
+	 */
     public void testMultiDbRelFetch() throws Exception {
         populatePaintings();
 
@@ -197,8 +184,8 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Test fetching a derived entity.
-     */
+	 * Test fetching a derived entity.
+	 */
     public void testDerivedEntityFetch1() throws Exception {
         // Skip HSQLDB, since it currently does not support HAVING;
         // this is supposed to appear in the next release.
@@ -221,8 +208,9 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Test fetching a derived entity with complex qualifier including relationships.
-     */
+	 * Test fetching a derived entity with complex qualifier including
+	 * relationships.
+	 */
     public void testDerivedEntityFetch2() throws Exception {
         // Skip HSQLDB, since it currently does not support HAVING;
         // this is supposed to appear in the next release.
@@ -281,19 +269,19 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testCaseInsensitiveOrdering() throws Exception {
         // case insensitive ordering appends extra columns
-        // to the query when query is using DISTINCT... 
+        // to the query when query is using DISTINCT...
         // verify that the result is not messaged up
 
         SelectQuery query = new SelectQuery(Artist.class);
         Ordering ordering = new Ordering("artistName", false);
         ordering.setCaseInsensitive(true);
-		query.addOrdering(ordering);
-		query.setDistinct(true);
-		
+        query.addOrdering(ordering);
+        query.setDistinct(true);
+
         List objects = context.performQuery(query);
         assertEquals(artistCount, objects.size());
-        
-        Map snapshot = ((Artist)objects.get(0)).getCommittedSnapshot();
+
+        Map snapshot = ((Artist) objects.get(0)).getCommittedSnapshot();
         assertEquals(3, snapshot.size());
     }
 
@@ -453,7 +441,7 @@ public class DataContextTst extends DataContextTestBase {
 
         try {
             while (it.hasNextRow()) {
-                Map row = it.nextDataRow();
+                DataRow row = (DataRow) it.nextDataRow();
 
                 // try instantiating an object and fetching its relationships
                 Artist obj = (Artist) context.objectFromDataRow(Artist.class, row, false);
@@ -481,23 +469,26 @@ public class DataContextTst extends DataContextTestBase {
     }
 
     /**
-     * Tests that hasChanges performs correctly when an object is "modified" 
-     * and the property is simply set to the same value (an unreal modification) 
-     */
+	 * Tests that hasChanges performs correctly when an object is "modified"
+	 * and the property is simply set to the same value (an unreal
+	 * modification)
+	 */
     public void testHasChangesUnrealModify() {
         String artistName = "ArtistName";
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName(artistName);
         context.commitChanges();
 
-        artist.setArtistName(artistName); //Set again to *exactly* the same value
+        artist.setArtistName(artistName); //Set again to *exactly* the same
+										  // value
         assertFalse(context.hasChanges());
     }
 
     /**
-     * Tests that hasChanges performs correctly when an object is "modified" 
-     * and the property is simply set to the same value (an unreal modification) 
-     */
+	 * Tests that hasChanges performs correctly when an object is "modified"
+	 * and the property is simply set to the same value (an unreal
+	 * modification)
+	 */
     public void testHasChangesRealModify() {
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("ArtistName");
