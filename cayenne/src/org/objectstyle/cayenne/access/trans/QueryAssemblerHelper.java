@@ -331,28 +331,7 @@ public abstract class QueryAssemblerHelper {
 
 		DbAttributePair join = (DbAttributePair) joins.get(0);
 
-		DbAttribute att = null;
-
-		if (rel.isToMany()) {
-			DbEntity ent = (DbEntity) join.getTarget().getEntity();
-			List pk = ent.getPrimaryKey();
-			if (pk.size() != 1) {
-				StringBuffer msg = new StringBuffer();
-				msg
-					.append("OBJ_PATH expressions can only support ")
-					.append("targets with a single column PK. ")
-					.append("This entity has ")
-					.append(pk.size())
-					.append(" columns in primary key.");
-
-				throw new CayenneRuntimeException(msg.toString());
-			}
-
-			att = (DbAttribute) pk.get(0);
-		} else {
-			att = join.getSource();
-		}
-
+		DbAttribute att = join.getSource();
 		processColumn(buf, att);
 	}
 	

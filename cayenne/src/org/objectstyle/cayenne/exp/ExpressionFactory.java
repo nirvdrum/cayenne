@@ -299,6 +299,7 @@ public class ExpressionFactory {
         return joinExp(Expression.AND, pairs);
     }
     
+    
     /**
      * An shortcut for <code>binaryPathExp(Expression.EQUAL_TO, pathSpec, value)</code>.
      */
@@ -313,19 +314,25 @@ public class ExpressionFactory {
     	return binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value);
     }
 
-    /** Joins all <code>expressions</code> in a single expression. 
-     * <code>type</code> is used as an expression type for expressions joining each one of 
-     * the items on the list. <code>type</code> must be binary expression type 
-     *  For example, if type is Expression.AND, resulting expression would match all expressions
-     *  in the list. If type is Expression.OR, resulting expression would match any of the expressions. */
+    /** 
+     * Joins all <code>expressions</code> in a single expression. 
+     * <code>type</code> is used as an expression type for expressions joining 
+     * each one of the items on the list. <code>type</code> must be binary 
+     * expression type.
+     * 
+     * <p>For example, if type is Expression.AND, resulting expression would match 
+     * all expressions in the list. If type is Expression.OR, resulting expression 
+     * would match any of the expressions. </p>
+     */
     public static Expression joinExp(int type, List expressions) {
         int len = expressions.size();
         if (len == 0)
             return null;
 
         Expression currentExp = (Expression) expressions.get(0);
-        if (len == 1)
+        if (len == 1) {
             return currentExp;
+        }
 
         for (int i = 1; i < len; i++) {
             Expression exp = expressionOfType(type);

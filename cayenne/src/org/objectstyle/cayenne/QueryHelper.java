@@ -205,6 +205,10 @@ public final class QueryHelper {
 		return newQ;
 	}
 
+    /**
+     * Translates qualifier applicable for one ObjEntity into a
+     * qualifier for a related ObjEntity.
+     */
 	public static Expression transformQualifier(
 		ObjEntity ent,
 		Expression qual,
