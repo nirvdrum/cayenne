@@ -66,6 +66,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
 import org.xml.sax.InputSource;
 
 /**
@@ -115,15 +116,19 @@ public class DataMapProject extends Project {
     * Initializes internal <code>map</code> object and then calls super.
     */
     protected void postInit(File projectFile) {
-        try {
-            InputStream in = new FileInputStream(projectFile.getCanonicalFile());
-            map = new MapLoader().loadDataMap(new InputSource(in));
-        } catch (IOException e) {
-            throw new ProjectException("Error creating ApplicationProject.", e);
-        } catch (DataMapException dme) {
-            throw new ProjectException("Error creating ApplicationProject.", dme);
+        if (projectFile != null) {
+            try {
+                InputStream in = new FileInputStream(projectFile.getCanonicalFile());
+                map = new MapLoader().loadDataMap(new InputSource(in));
+            } catch (IOException e) {
+                throw new ProjectException("Error creating ApplicationProject.", e);
+            } catch (DataMapException dme) {
+                throw new ProjectException("Error creating ApplicationProject.", dme);
+            }
+        } else {
+            map = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
         }
-        
+
         super.postInit(projectFile);
     }
 

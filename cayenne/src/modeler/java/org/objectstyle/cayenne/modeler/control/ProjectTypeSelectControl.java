@@ -99,15 +99,26 @@ public class ProjectTypeSelectControl extends BasicController {
             shutdown();
         } else if (control.matchesID(CREATE_APP_PROJECT_CONTROL)) {
             doCreateAppProject();
+        } else if (control.matchesID(CREATE_MAP_PROJECT_CONTROL)) {
+            doCreateMapProject();
         }
     }
 
     protected void doCreateAppProject() {
         // delegate to Editor action.
-        // in the future Scope controllers should handle this
+        // in the future, Scope controllers should handle this
 
         ((NewProjectAction) Editor.getFrame().getAction(NewProjectAction.ACTION_NAME))
             .newAppProject();
+        shutdown();
+    }
+
+    protected void doCreateMapProject() {
+        // delegate to Editor action.
+        // in the future, Scope controllers should handle this
+
+        ((NewProjectAction) Editor.getFrame().getAction(NewProjectAction.ACTION_NAME))
+            .newMapProject();
         shutdown();
     }
 }

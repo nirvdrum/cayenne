@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.ProjectTypeSelectControl;
 import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.DataMapProject;
 import org.objectstyle.cayenne.project.Project;
 
 /**
@@ -92,18 +93,21 @@ public class NewProjectAction extends ProjectAction {
         if (getMediator() != null && !closeProject()) {
             return;
         }
-        
+
         new ProjectTypeSelectControl().startup();
     }
 
     public void newAppProject() {
-        try {
-            Project project = new ApplicationProject(null);
-            Editor.getFrame().getController().getTopModel().setCurrentProject(project);
-            setMediator(new Mediator());
-            Editor.getFrame().projectOpened(project);
-        } catch (Exception e) {
-            logObj.warn("Error loading project file.", e);
-        }
+        Project project = new ApplicationProject(null);
+        Editor.getFrame().getController().getTopModel().setCurrentProject(project);
+        setMediator(new Mediator());
+        Editor.getFrame().projectOpened(project);
+    }
+
+    public void newMapProject() {
+        Project project = new DataMapProject(null);
+        Editor.getFrame().getController().getTopModel().setCurrentProject(project);
+        setMediator(new Mediator());
+        Editor.getFrame().projectOpened(project);
     }
 }

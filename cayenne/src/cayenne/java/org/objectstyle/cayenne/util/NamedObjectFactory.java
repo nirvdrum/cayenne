@@ -193,6 +193,12 @@ public abstract class NamedObjectFactory {
 		}
 
 		protected boolean isNameInUse(String name, Object namingContext) {
+			// null context is a situation when DataMap is a
+			// top level object of the project
+			if(namingContext == null) {
+				return false;
+			}
+			
 			DataDomain domain = (DataDomain) namingContext;
 			return domain.getMap(name) != null;
 		}

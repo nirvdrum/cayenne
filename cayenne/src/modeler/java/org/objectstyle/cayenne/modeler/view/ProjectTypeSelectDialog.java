@@ -92,13 +92,10 @@ public class ProjectTypeSelectDialog extends SPanel {
         setTitle(ModelerUtil.buildTitle("New Project"));
 
         setLayout(new BorderLayout());
-        add(Box.createHorizontalStrut(450), BorderLayout.NORTH);
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(2, 1));
         mainPanel.add(buildProjectPanel("cayenne.modeler.project.app", false));
-
-        // disable map projects for now
         mainPanel.add(buildProjectPanel("cayenne.modeler.project.map", true));
 
         add(mainPanel, BorderLayout.CENTER);
