@@ -140,6 +140,13 @@ public class Project {
     }
 
     /**
+     * Creates an instance of Validator for validating this project.
+     */
+    public Validator getValidator() {
+        return new Validator(this);
+    }
+    
+    /**
      * Looks up and returns a file wrapper for a project
      * object. Returns null if no file exists.
      */
@@ -269,16 +276,17 @@ public class Project {
     /** Saves project. */
     public void save() throws ProjectException {
         // 1. Traverse project tree and update/create file wrappers
+        List deletedFiles = new ArrayList();
+        List modifiedFiles = new ArrayList();
+        List newFiles = new ArrayList();
+        
+         
 
         // 2. Try saving individual file wrappers
 
         // 3. Commit changes
-    }
-
-    /**
-     * Creates an instance of Validator for validating this project.
-     */
-    public Validator getValidator() {
-        return new Validator(this);
+        
+        // 4. Refresh file list
+        files = buildFileList();
     }
 }

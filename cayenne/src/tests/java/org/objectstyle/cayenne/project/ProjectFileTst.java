@@ -81,16 +81,12 @@ public class ProjectFileTst extends CayenneTestCase {
         pf = new TestProjectFile("name", "ext");
     }
 
-    public void testObjectModified() throws Exception {
-        assertTrue(!pf.isObjectModified());
-        pf.setObjectModified(true);
-        assertTrue(pf.isObjectModified());
-    }
+    public void testStatus() throws Exception {
+        pf.setStatus(ProjectFile.FILE_MODIFIED);
+        assertEquals(ProjectFile.FILE_MODIFIED, pf.getStatus());
 
-    public void testObjectDeleted() throws Exception {
-        assertTrue(!pf.isObjectDeleted());
-        pf.setObjectDeleted(true);
-        assertTrue(pf.isObjectDeleted());
+        pf.setStatus(ProjectFile.FILE_DELETED);
+        assertEquals(ProjectFile.FILE_DELETED, pf.getStatus());
     }
 
     public void testGetFileName() throws Exception {
@@ -134,7 +130,6 @@ public class ProjectFileTst extends CayenneTestCase {
         public ProjectFile createProjectFile(Object obj) {
             return null;
         }
-
 
         /**
          * @see org.objectstyle.cayenne.project.ProjectFile#isObjectSupported(Object)
