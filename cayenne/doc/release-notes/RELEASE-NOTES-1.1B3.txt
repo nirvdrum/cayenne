@@ -1,0 +1,18 @@
+Cayenne Release Notes 1.1 B3
+Date: 
+============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+To browse individual bug reports, see 
+http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
+
+Changes, Features And Improvements:
+
+- Added "File -> Revert" menu to the modeler.
+  
+
+
+Bugs Fixed:
+
