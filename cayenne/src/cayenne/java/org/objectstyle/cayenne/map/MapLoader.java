@@ -265,7 +265,7 @@ public class MapLoader extends DefaultHandler {
     }
 
     public void warning(SAXParseException e) throws SAXException {
-        System.out.println(
+        logObj.warn(
             "**Parsing warning**\n"
                 + "Line:"
                 + e.getLineNumber()
@@ -275,7 +275,7 @@ public class MapLoader extends DefaultHandler {
     }
 
     public void error(SAXParseException e) throws SAXException {
-        System.out.println(
+        logObj.error(
             "**Parsing error**\n"
                 + "Line:"
                 + e.getLineNumber()
@@ -285,7 +285,7 @@ public class MapLoader extends DefaultHandler {
     }
 
     public void fatalError(SAXParseException e) throws SAXException {
-        System.out.println(
+        logObj.fatal(
             "**Parsing fatal error**\n"
                 + "Line:"
                 + e.getLineNumber()
@@ -779,7 +779,7 @@ public class MapLoader extends DefaultHandler {
 
         DbEntity source = dataMap.getDbEntity(temp);
         if (null == source) {
-            System.out.println(
+            logObj.debug(
                 "MapLoaderImpl::processStartDbRelationship(),"
                     + " Unable to find source "
                     + temp);

@@ -301,16 +301,16 @@ public class OperationSorter {
 			Iterator entityIterator = allObjEntities.iterator();
 			while (entityIterator.hasNext()) {
 				ObjEntity thisEntity = (ObjEntity) entityIterator.next();
-				//System.out.println("Processing entity :"+thisEntity.getName());
+				logObj.debug("Processing entity :" + thisEntity.getName());
 				Iterator relIterator = thisEntity.getRelationshipList().iterator();
 				Set handledRelationships = new HashSet();
 
 				while (relIterator.hasNext()) {
 					ObjRelationship thisRel = (ObjRelationship) relIterator.next();
 					//Target is the source... we've found a reflexive relationship
-					//System.out.println("Checking relationship :"+thisRel.getName());
+					logObj.debug("Checking relationship :" + thisRel.getName());
 					if (thisRel.getTargetEntity().equals(thisEntity) && !handledRelationships.contains(thisRel)) {
-						//System.out.println("Is reflexive, and not already handled");
+						logObj.debug("Relationship is reflexive, and not already handled");
 						List relList = (List) reflexiveEntities.get(thisEntity);
 						if (relList == null) {
 							relList = new ArrayList();

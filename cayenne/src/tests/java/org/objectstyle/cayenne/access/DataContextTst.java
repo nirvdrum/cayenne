@@ -109,9 +109,10 @@ public class DataContextTst extends CayenneTestCase {
 		ctxt.registerNewObject(artist, "Artist");
 		ObjectId id1 = ctxt.createPermId(artist);
 		ObjectId id2 = ctxt.createPermId(artist); //Must not fail on second call
-		System.out.println(id1);
-		System.out.println(id2);
-		System.out.println(id1.hashCode()+"?="+ id2.hashCode());
+
+		logObj.debug(id1);
+		logObj.debug(id2);
+		logObj.debug(id1.hashCode() + "?="+ id2.hashCode());
 
 		assertNotNull(id1);
 		assertNotNull(id2);

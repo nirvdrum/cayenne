@@ -128,7 +128,6 @@ implements ActionListener {
 		while (iter.hasNext()) {
 			DbRelationship db_rel = (DbRelationship)iter.next();
 			if (db_rel.getTargetEntity() == end) {
-				//System.out.println("WOO HOO... found it");
 				List aList=new ArrayList();
 				aList.add(db_rel);
 				result.add(aList);

@@ -191,7 +191,7 @@ public class ImportDbAction extends CayenneAction {
             logObj.info(e.getMessage());
             SQLException ex = e.getNextException();
             if (ex != null) {
-                System.out.println(ex.getMessage());
+                logObj.error(ex.getMessage());
             }
             e.printStackTrace();
             JOptionPane.showMessageDialog(

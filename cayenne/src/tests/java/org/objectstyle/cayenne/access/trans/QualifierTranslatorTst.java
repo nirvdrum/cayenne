@@ -128,7 +128,7 @@ public class QualifierTranslatorTst extends CayenneTestCase {
 						new QualifierTranslator(qa).doTranslation(),
 						false);
 				} catch (Exception ex) {
-					System.out.println("Failed case: [" + i + "]: " + cases[i]);
+					logObj.error("Failed case: [" + i + "]: " + cases[i]);
 					throw ex;
 				}
 			}
