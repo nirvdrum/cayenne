@@ -63,37 +63,36 @@ import java.sql.SQLException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
 
-public class PostgresPkGenerator extends JdbcPkGenerator
-{
-	public PostgresPkGenerator() {
-		super();
-	}
+public class PostgresPkGenerator extends JdbcPkGenerator {
+    public PostgresPkGenerator() {
+        super();
+    }
 
-	/**
-	 * Checks if AUTO_PK_TABLE already exists in the database.
-	 */
-	protected boolean autoPkTableExists(DataNode node) throws SQLException {
-		if (super.autoPkTableExists(node) == false) {
-			Connection con = node.getDataSource().getConnection();
-			boolean exists = false;
+    /**
+     * Checks if AUTO_PK_TABLE already exists in the database.
+     */
+    protected boolean autoPkTableExists(DataNode node) throws SQLException {
+        if (super.autoPkTableExists(node) == false) {
+            Connection con = node.getDataSource().getConnection();
+            boolean exists = false;
 
-			try {
-				DatabaseMetaData md = con.getMetaData();
-				ResultSet tables = md.getTables(null, null, "auto_pk_support", null);
+            try {
+                DatabaseMetaData md = con.getMetaData();
+                ResultSet tables = md.getTables(null, null, "auto_pk_support", null);
 
-				try {
-					exists = tables.next();
-				}
-				finally {
-					tables.close();
-				}
-			}
-			finally {
-				// return connection to the pool
-				con.close();
-			}
-			return exists;
-		}
-		return true;
-	}
+                try {
+                    exists = tables.next();
+                }
+                finally {
+                    tables.close();
+                }
+            }
+            finally {
+                // return connection to the pool
+                con.close();
+            }
+            return exists;
+        }
+        return true;
+    }
 }

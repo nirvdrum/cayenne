@@ -142,7 +142,11 @@ public class SelectQueryTst extends SelectQueryBase {
         assertEquals(_artistCount - 1, objects.size());
     }
 
-    public void testSelectLikeCasesensitive() throws Exception {
+    public void testSelectLikeCaseSensitive() throws Exception {
+        if(!getDatabaseSetupDelegate().supportsCaseSensitiveLike()) {
+            return;
+        }
+        
         query.setRoot(Artist.class);
         Expression qual = ExpressionFactory.likeExp("artistName", "aRtIsT%");
         query.setQualifier(qual);

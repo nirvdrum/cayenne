@@ -69,4 +69,8 @@ public class MySQLDelegate extends DatabaseSetupDelegate {
     public boolean supportsLobs() {
         return true;
     }
+    
+    public boolean supportsCaseSensitiveLike() {
+        return false;
+    }
 }
