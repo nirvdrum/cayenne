@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
@@ -79,7 +79,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 
 	public DbRelationshipTableModel(
 		DbEntity entity,
-		Mediator mediator,
+		EventController mediator,
 		Object eventSource) {
 
 		super(mediator, eventSource, entity.getRelationshipList());

@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.modeler.datamap;
 import org.apache.log4j.Logger;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
@@ -88,7 +88,7 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 
 	public ObjAttributeTableModel(
 		ObjEntity entity,
-		Mediator mediator,
+		EventController mediator,
 		Object eventSource) {
 
 		super(mediator, eventSource, entity.getAttributeList());

@@ -68,7 +68,7 @@ import javax.swing.KeyStroke;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneToolbarButton;
 
 /**
@@ -155,7 +155,7 @@ public abstract class CayenneAction extends AbstractAction {
 	/** 
 	 * Returns shared CayenneModeler mediator.
 	 */
-	public Mediator getMediator() {
+	public EventController getMediator() {
 		return Editor.getFrame().getMediator();
 	}
 

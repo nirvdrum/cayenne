@@ -60,9 +60,9 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
@@ -103,7 +103,7 @@ public class CreateNodeAction extends CayenneAction {
 	 * if the factory requires it. 
 	 */
 	protected void createDataNode() {
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 		DataDomain domain = mediator.getCurrentDataDomain();
 		DataNode node =
 			(DataNode) NamedObjectFactory.createObject(DataNode.class, domain);

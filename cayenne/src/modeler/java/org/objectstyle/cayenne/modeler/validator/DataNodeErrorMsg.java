@@ -60,8 +60,8 @@ import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
@@ -91,7 +91,7 @@ public class DataNodeErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-	public void displayField(Mediator mediator, JFrame frame) {
+	public void displayField(EventController mediator, JFrame frame) {
 		DataNodeDisplayEvent event;
 		event = new DataNodeDisplayEvent(frame, domain, node);
 		mediator.fireDataNodeDisplayEvent(event);

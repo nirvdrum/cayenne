@@ -83,7 +83,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 import org.objectstyle.cayenne.project.validator.Validator;
 
@@ -103,12 +103,12 @@ public class ValidatorDialog
     public static final Color WARNING_COLOR = new Color(245, 194, 194);
     public static final Color ERROR_COLOR = new Color(237, 121, 121);
 
-    protected Mediator mediator;
+    protected EventController mediator;
     protected Validator validator;
     protected JTable messages;
     protected JButton closeBtn;
 
-    public static void showDialog(Editor editor, Mediator mediator, Validator val) {
+    public static void showDialog(Editor editor, EventController mediator, Validator val) {
 
         ValidatorDialog open = instance;
 
@@ -119,7 +119,7 @@ public class ValidatorDialog
         instance = new ValidatorDialog(editor, mediator, val);
     }
 
-    protected ValidatorDialog(Editor editor, Mediator mediator, Validator validator) {
+    protected ValidatorDialog(Editor editor, EventController mediator, Validator validator) {
         super(editor, "Validation Errors", false);
         this.mediator = mediator;
         this.validator = validator;

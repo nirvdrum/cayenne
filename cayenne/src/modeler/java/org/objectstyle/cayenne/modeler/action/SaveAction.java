@@ -65,7 +65,7 @@ import javax.swing.KeyStroke;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
 import org.objectstyle.cayenne.modeler.view.ProjectOpener;
@@ -126,7 +126,7 @@ public class SaveAction extends CayenneAction {
     }
 
     public synchronized void performAction(int warningLevel) {
-        Mediator mediator = getMediator();
+        EventController mediator = getMediator();
         Validator val = Editor.getFrame().getProject().getValidator();
         int validationCode = val.validate();
 

@@ -79,10 +79,10 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.util.PreferenceField;
 import org.objectstyle.cayenne.project.ProjectDataSource;
 
@@ -97,7 +97,7 @@ public class DataNodeDetailView
     implements DocumentListener, ActionListener, DataNodeDisplayListener {
     static Logger logObj = Logger.getLogger(DataNodeDetailView.class.getName());
 
-    protected Mediator mediator;
+    protected EventController mediator;
     protected DataNode node;
 
     protected JLabel nameLabel;
@@ -137,7 +137,7 @@ public class DataNodeDetailView
     /** Cludge to prevent marking domain as dirty during initial load. */
     private boolean ignoreChange;
 
-    public DataNodeDetailView(Mediator temp_mediator) {
+    public DataNodeDetailView(EventController temp_mediator) {
         super();
         mediator = temp_mediator;
         mediator.addDataNodeDisplayListener(this);

@@ -72,12 +72,12 @@ import org.objectstyle.cayenne.access.DbLoaderDelegate;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.ChooseSchemaDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ModelerEvent;
 import org.objectstyle.cayenne.modeler.util.YesNoToAllDialog;
 import org.objectstyle.cayenne.map.DataMap;
@@ -99,7 +99,7 @@ public class ImportDbAction extends CayenneAction {
     }
 
     public void importDb() {
-        Mediator mediator = getMediator();
+        EventController mediator = getMediator();
         DataSourceInfo dsi = new DataSourceInfo();
         Connection conn = null;
         DbAdapter adapter = null;
@@ -228,7 +228,7 @@ public class ImportDbAction extends CayenneAction {
     }
 
     public void processMapUpdate(DataMap map) {
-        Mediator mediator = getMediator();
+        EventController mediator = getMediator();
 
         // If this is adding to existing data map, remove it
         // and re-add to the BroseView
@@ -247,7 +247,7 @@ public class ImportDbAction extends CayenneAction {
     }
 
     public DataMap loadMap(DbLoader loader, String schemaName) {
-        Mediator mediator = getMediator();
+        EventController mediator = getMediator();
         try {
             DataMap map = mediator.getCurrentDataMap();
             if (map != null) {
@@ -272,10 +272,10 @@ public class ImportDbAction extends CayenneAction {
     }
 
     class LoaderDelegate implements DbLoaderDelegate {
-        protected Mediator mediator;
+        protected EventController mediator;
         protected int duplicate = YesNoToAllDialog.UNDEFINED;
 
-        public LoaderDelegate(Mediator mediator) {
+        public LoaderDelegate(EventController mediator) {
             this.mediator = mediator;
         }
 

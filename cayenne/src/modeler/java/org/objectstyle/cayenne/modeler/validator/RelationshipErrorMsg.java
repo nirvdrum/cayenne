@@ -59,7 +59,7 @@ package org.objectstyle.cayenne.modeler.validator;
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
@@ -101,7 +101,7 @@ public class RelationshipErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-    public void displayField(Mediator mediator, JFrame frame) {
+    public void displayField(EventController mediator, JFrame frame) {
         RelationshipDisplayEvent event;
         event = new RelationshipDisplayEvent(frame, rel, entity, map, domain);
         if (entity instanceof ObjEntity) {

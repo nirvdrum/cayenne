@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.project.ProjectException;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
@@ -114,7 +114,7 @@ public abstract class ValidationDisplayHandler {
     /** 
      * Fires event to display the screen where error should be corrected. 
      */
-    public abstract void displayField(Mediator mediator, JFrame frame);
+    public abstract void displayField(EventController mediator, JFrame frame);
 
     /** Returns the text of the error message. */
     public String getMessage() {

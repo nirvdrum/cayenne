@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataMapEvent;
@@ -98,7 +99,6 @@ import org.objectstyle.cayenne.modeler.event.DomainEvent;
 import org.objectstyle.cayenne.modeler.event.DomainListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
@@ -131,14 +131,14 @@ public class BrowseView
     private static final int OBJ_ENTITY_NODE = 4;
     private static final int DB_ENTITY_NODE = 5;
 
-    protected Mediator mediator;
+    protected EventController mediator;
     protected ProjectTree browseTree;
     protected DefaultMutableTreeNode rootNode;
     protected DefaultMutableTreeNode currentNode;
 
     protected DefaultTreeModel model;
 
-    public BrowseView(Mediator mediator) {
+    public BrowseView(EventController mediator) {
         super();
         this.mediator = mediator;
 

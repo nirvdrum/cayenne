@@ -66,6 +66,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
@@ -88,10 +89,10 @@ public class ObjAttributePane
 		ListSelectionListener {
 	static Logger logObj = Logger.getLogger(ObjAttributePane.class.getName());
 
-	Mediator mediator;
+	EventController mediator;
 	CayenneTable table;
 
-	public ObjAttributePane(Mediator mediator) {
+	public ObjAttributePane(EventController mediator) {
 		super();
 		this.mediator = mediator;
 		mediator.addObjEntityDisplayListener(this);

@@ -64,6 +64,7 @@ import java.awt.FlowLayout;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.datamap.DbDetailView;
 import org.objectstyle.cayenne.modeler.datamap.ObjDetailView;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -74,7 +75,6 @@ import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 
 /** 
@@ -90,7 +90,7 @@ public class EditorView
         DomainDisplayListener,
         DataMapDisplayListener,
         DataNodeDisplayListener {
-    Mediator mediator;
+    EventController mediator;
 
     private static final int INIT_DIVIDER_LOCATION = 170;
 
@@ -112,7 +112,7 @@ public class EditorView
     DbDetailView dbDetailView;
     CardLayout detailLayout;
 
-    public EditorView(Mediator temp_mediator) {
+    public EditorView(EventController temp_mediator) {
         super(new BorderLayout());
         mediator = temp_mediator;
 

@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 
 /**
  * @author Andrei Adamchik
@@ -87,7 +87,7 @@ public class ModelerUtil {
      * Returns array of db attribute names for DbEntity mapped to 
      * current ObjEntity. 
      */
-    public static String[] getDbAttributeNames(Mediator mediator, DbEntity entity) {
+    public static String[] getDbAttributeNames(EventController mediator, DbEntity entity) {
         java.util.List list = entity.getAttributeList();
         int list_size = list.size() + 1;
         String[] arr = new String[list_size];

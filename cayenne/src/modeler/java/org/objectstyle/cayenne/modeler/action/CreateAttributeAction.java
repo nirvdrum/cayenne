@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -95,7 +96,7 @@ public class CreateAttributeAction extends CayenneAction {
 	}
 
 	public void createObjAttribute(ObjEntity objEnt) {
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 
 		ObjAttribute attr =
 			(ObjAttribute) NamedObjectFactory.createObject(
@@ -131,7 +132,7 @@ public class CreateAttributeAction extends CayenneAction {
 			(DbAttribute) NamedObjectFactory.createObject(attrClass, dbEnt);
 		dbEnt.addAttribute(attr);
 		
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 		mediator.fireDbAttributeEvent(
 			new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
 		mediator.fireDbAttributeDisplayEvent(

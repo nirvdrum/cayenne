@@ -60,8 +60,8 @@ import org.apache.log4j.Logger;
 import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -89,7 +89,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
 	public DbAttributeTableModel(
 		DbEntity entity,
-		Mediator mediator,
+		EventController mediator,
 		Object eventSource) {
 
 		this(entity, mediator, eventSource, entity.getAttributeList());
@@ -98,7 +98,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
 	
    public DbAttributeTableModel(
 		DbEntity entity,
-		Mediator mediator,
+		EventController mediator,
 		Object eventSource,
 		java.util.List objectList) {
 

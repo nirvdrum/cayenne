@@ -59,6 +59,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.*;
 
@@ -69,14 +70,14 @@ public class ObjDetailView extends JPanel
 implements ChangeListener, ObjEntityDisplayListener
 , ObjRelationshipDisplayListener, ObjAttributeDisplayListener
 {
-	Mediator mediator;
+	EventController mediator;
 	
 	JTabbedPane tab;
 	ObjEntityPane entity;
 	ObjAttributePane attributes;
 	ObjRelationshipPane rel;
 	
-	public ObjDetailView(Mediator temp_mediator) {
+	public ObjDetailView(EventController temp_mediator) {
 		super();
 		mediator = temp_mediator;
 		mediator.addObjEntityDisplayListener(this);

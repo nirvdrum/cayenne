@@ -59,8 +59,8 @@ package org.objectstyle.cayenne.modeler.validator;
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
@@ -100,7 +100,7 @@ public class EntityErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-    public void displayField(Mediator mediator, JFrame frame) {
+    public void displayField(EventController mediator, JFrame frame) {
         EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
         event.setTabReset(true);
 

@@ -102,6 +102,7 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.TopController;
 import org.objectstyle.cayenne.modeler.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -116,7 +117,6 @@ import org.objectstyle.cayenne.modeler.event.DbRelationshipDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ObjRelationshipDisplayListener;
@@ -164,7 +164,7 @@ public class Editor
     protected static Editor frame;
 
     protected EditorView view;
-    protected Mediator mediator;
+    protected EventController mediator;
     protected ActionMap actionMap;
     protected RecentFileMenu recentFileMenu = new RecentFileMenu("Recent Files");
 
@@ -748,11 +748,11 @@ public class Editor
     /**
      * Returns current CayenneModeler mediator.
      */
-    public Mediator getMediator() {
+    public EventController getMediator() {
         return mediator;
     }
 
-    public void setMediator(Mediator mediator) {
+    public void setMediator(EventController mediator) {
         this.mediator = mediator;
     }
 

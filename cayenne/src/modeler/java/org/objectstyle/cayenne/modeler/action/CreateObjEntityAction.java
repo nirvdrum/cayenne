@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -86,7 +87,7 @@ public class CreateObjEntityAction extends CayenneAction {
 	}
 
 	private void createObjEntity() {
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 		ObjEntity entity =
 			(ObjEntity) NamedObjectFactory.createObject(
 				ObjEntity.class,

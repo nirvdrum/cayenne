@@ -74,10 +74,10 @@ import javax.swing.event.DocumentListener;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DataMapEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 
 /** 
@@ -92,7 +92,7 @@ public class DataMapDetailView
 
     static Logger logObj = Logger.getLogger(DataMapDetailView.class.getName());
 
-    protected Mediator mediator;
+    protected EventController mediator;
 
     protected JLabel nameLabel;
     protected JTextField name;
@@ -107,7 +107,7 @@ public class DataMapDetailView
     /** Cludge to prevent marking map as dirty during initial load. */
     private boolean ignoreChange;
 
-    public DataMapDetailView(Mediator mediator) {
+    public DataMapDetailView(EventController mediator) {
         super();
         this.mediator = mediator;
         mediator.addDataMapDisplayListener(this);

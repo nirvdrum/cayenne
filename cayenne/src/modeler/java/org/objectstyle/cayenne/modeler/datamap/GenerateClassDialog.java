@@ -69,7 +69,7 @@ import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.modeler.*;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 
@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class GenerateClassDialog
 	extends CayenneDialog
 	implements ActionListener {
-	Mediator mediator;
+	EventController mediator;
 
 	File outputFolder = null;
 
@@ -99,7 +99,7 @@ public class GenerateClassDialog
 
 	private JFileChooser fileChooser = new JFileChooser();
 
-	public GenerateClassDialog(Editor win, Mediator temp_mediator) {
+	public GenerateClassDialog(Editor win, EventController temp_mediator) {
 		super(win, "Generate Java Classes", true);
 		mediator = temp_mediator;
 

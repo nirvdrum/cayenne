@@ -61,6 +61,7 @@ import javax.swing.table.*;
 
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.*;
 
@@ -71,7 +72,7 @@ import org.objectstyle.cayenne.modeler.util.*;
 */
 public class DbAttributePairTableModel extends AbstractTableModel
 {
-	Mediator mediator;
+	EventController mediator;
 	Object src;
 	
 	private DbRelationship rel;
@@ -89,7 +90,7 @@ public class DbAttributePairTableModel extends AbstractTableModel
 	static final int TARGET_TYPE = 3;
 	
 	public DbAttributePairTableModel(DbRelationship temp_rel
-	, Mediator temp_mediator, Object temp_src)
+	, EventController temp_mediator, Object temp_src)
 	{
 		mediator = temp_mediator;
 		src = temp_src;
@@ -106,7 +107,7 @@ public class DbAttributePairTableModel extends AbstractTableModel
 	}
 
 	public DbAttributePairTableModel(DbRelationship temp_rel
-	,Mediator temp_mediator, Object temp_src, boolean temp_editable)
+	,EventController temp_mediator, Object temp_src, boolean temp_editable)
 	{
 		this(temp_rel, temp_mediator, temp_src);
 		editable = temp_editable;

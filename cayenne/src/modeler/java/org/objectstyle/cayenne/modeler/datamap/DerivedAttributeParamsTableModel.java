@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
 
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.map.*;
 
 /**
@@ -74,7 +74,7 @@ public class DerivedAttributeParamsTableModel extends DbAttributeTableModel {
 	 */
 	public DerivedAttributeParamsTableModel(
 		DerivedDbAttribute derived,
-		Mediator mediator,
+		EventController mediator,
 		Object eventSource) {
 
 		super(

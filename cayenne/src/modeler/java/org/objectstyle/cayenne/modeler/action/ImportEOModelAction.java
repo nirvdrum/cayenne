@@ -69,6 +69,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.EOModelFileFilter;
 import org.objectstyle.cayenne.modeler.util.EOModelSelectFilter;
@@ -133,7 +134,7 @@ public class ImportEOModelAction extends CayenneAction {
 	 */
 	protected void addDataMap(DataMap map) {
 		DataMap currentMap = getMediator().getCurrentDataMap();
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 
 		if (currentMap != null) {
 			// merge with existing map

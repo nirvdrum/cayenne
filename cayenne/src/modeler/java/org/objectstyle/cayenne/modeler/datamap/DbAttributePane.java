@@ -71,6 +71,7 @@ import javax.swing.table.TableColumn;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -95,11 +96,11 @@ public class DbAttributePane
 
 	static Logger logObj = Logger.getLogger(DbAttributePane.class.getName());
 
-	protected Mediator mediator;
+	protected EventController mediator;
 	protected CayenneTable table;
 	protected JButton editParams;
 
-	public DbAttributePane(Mediator temp_mediator) {
+	public DbAttributePane(EventController temp_mediator) {
 		super();
 		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);

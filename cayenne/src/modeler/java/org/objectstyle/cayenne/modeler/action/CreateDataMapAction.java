@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
@@ -84,7 +84,7 @@ public class CreateDataMapAction extends CayenneAction {
 
     /** Calls addDataMap() or creates new data map if no data node selected.*/
     protected void createDataMap() {
-        Mediator mediator = getMediator();
+        EventController mediator = getMediator();
         DataDomain currentDomain = mediator.getCurrentDataDomain();
         DataMap map =
             (DataMap) NamedObjectFactory.createObject(DataMap.class, currentDomain);

@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.modeler.validator;
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
@@ -105,7 +106,7 @@ public class AttributeErrorMsg extends ValidationDisplayHandler {
 
     }
 
-    public void displayField(Mediator mediator, JFrame frame) {
+    public void displayField(EventController mediator, JFrame frame) {
         AttributeDisplayEvent event;
         event = new AttributeDisplayEvent(frame, attribute, entity, map, domain);
         if (entity instanceof org.objectstyle.cayenne.map.ObjEntity)

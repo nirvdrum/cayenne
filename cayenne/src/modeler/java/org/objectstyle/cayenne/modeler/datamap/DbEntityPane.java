@@ -68,10 +68,10 @@ import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.util.CayenneTextField;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.map.DataMap;
@@ -88,7 +88,7 @@ public class DbEntityPane
 	extends JPanel
 	implements DbEntityDisplayListener, ExistingSelectionProcessor, ActionListener {
 
-	protected Mediator mediator;
+	protected EventController mediator;
 
 	protected JTextField name;
 	protected JTextField catalog;
@@ -104,7 +104,7 @@ public class DbEntityPane
 	 */
 	private boolean ignoreChange;
 
-	public DbEntityPane(Mediator mediator) {
+	public DbEntityPane(EventController mediator) {
 		super();
 		this.mediator = mediator;
 		mediator.addDbEntityDisplayListener(this);

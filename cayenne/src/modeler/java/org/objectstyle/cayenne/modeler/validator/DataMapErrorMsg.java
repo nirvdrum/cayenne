@@ -59,8 +59,8 @@ package org.objectstyle.cayenne.modeler.validator;
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
@@ -92,7 +92,7 @@ public class DataMapErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-    public void displayField(Mediator mediator, JFrame frame) {
+    public void displayField(EventController mediator, JFrame frame) {
         DataMapDisplayEvent event;
         event = new DataMapDisplayEvent(frame, map, domain);
         mediator.fireDataMapDisplayEvent(event);

@@ -71,6 +71,7 @@ import javax.swing.table.TableColumn;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneActionPanel;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.CayenneCellEditor;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
@@ -95,12 +96,12 @@ public class DbRelationshipPane
 		TableModelListener {
 	static Logger logObj = Logger.getLogger(DbRelationshipPane.class.getName());
 
-	Mediator mediator;
+	EventController mediator;
 
 	CayenneTable table;
 	JButton resolve;
 
-	public DbRelationshipPane(Mediator temp_mediator) {
+	public DbRelationshipPane(EventController temp_mediator) {
 		super();
 		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);

@@ -60,8 +60,8 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.modeler.AddDataMapDialog;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 
 
 /** 
@@ -84,7 +84,7 @@ public class AddDataMapAction extends CayenneAction {
 	 * Adds a DataMap to the current data node. 
 	 */	
 	protected void addDataMap() {
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 		DataNode node = mediator.getCurrentDataNode();
 		List map_list = mediator.getCurrentDataDomain().getMapList();
 		new AddDataMapDialog(node, map_list);

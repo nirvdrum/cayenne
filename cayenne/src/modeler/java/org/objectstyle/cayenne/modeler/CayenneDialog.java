@@ -62,7 +62,7 @@ import javax.swing.JDialog;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.BrowserControl;
 
 /**
@@ -106,7 +106,7 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
 	/**
 	 * Returns current CayenneModeler mediator.
 	 */
-	public Mediator getMediator() {
+	public EventController getMediator() {
 		return getParentEditor().getMediator();
 	}
 }

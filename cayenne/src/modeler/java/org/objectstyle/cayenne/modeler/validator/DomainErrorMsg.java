@@ -59,8 +59,8 @@ package org.objectstyle.cayenne.modeler.validator;
 import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.project.validator.ValidationResult;
 
 /**
@@ -86,7 +86,7 @@ public class DomainErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-	public void displayField(Mediator mediator, JFrame frame) {
+	public void displayField(EventController mediator, JFrame frame) {
 		DomainDisplayEvent event;
 		event = new DomainDisplayEvent(frame, domain);
 		mediator.fireDomainDisplayEvent(event);

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
@@ -94,7 +95,7 @@ public class CreateRelationshipAction extends CayenneAction {
 	}
 
 	public void createObjRelationship(ObjEntity objEnt) {
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 
 		ObjRelationship rel =
 			(ObjRelationship) NamedObjectFactory.createObject(
@@ -115,7 +116,7 @@ public class CreateRelationshipAction extends CayenneAction {
 	}
 
 	public void createDbRelationship(DbEntity dbEnt) {
-		Mediator mediator = getMediator();
+		EventController mediator = getMediator();
 
 		DbRelationship rel =
 			(DbRelationship) NamedObjectFactory.createObject(

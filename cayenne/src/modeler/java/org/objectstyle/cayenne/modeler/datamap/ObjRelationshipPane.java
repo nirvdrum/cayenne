@@ -66,6 +66,7 @@ import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.map.*;
@@ -86,12 +87,12 @@ public class ObjRelationshipPane
 		ExistingSelectionProcessor,
 		ListSelectionListener,
 		TableModelListener {
-	Mediator mediator;
+	EventController mediator;
 
 	CayenneTable table;
 	JButton resolve;
 
-	public ObjRelationshipPane(Mediator temp_mediator) {
+	public ObjRelationshipPane(EventController temp_mediator) {
 		super();
 		mediator = temp_mediator;
 		mediator.addObjEntityDisplayListener(this);

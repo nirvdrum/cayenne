@@ -82,9 +82,9 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.PanelFactory;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTextField;
 import org.objectstyle.cayenne.modeler.util.EntityWrapper;
@@ -104,7 +104,7 @@ public class ObjEntityPane
 
     static Logger logObj = Logger.getLogger(ObjEntityPane.class.getName());
 
-    protected Mediator mediator;
+    protected EventController mediator;
     protected JTextField name;
     protected JTextField className;
     protected JTextField superClassName;
@@ -116,7 +116,7 @@ public class ObjEntityPane
     /** Cludge to prevent marking data map as dirty during initial load. */
     private boolean ignoreChange = false;
 
-    public ObjEntityPane(Mediator mediator) {
+    public ObjEntityPane(EventController mediator) {
         this.mediator = mediator;
         mediator.addObjEntityDisplayListener(this);
 

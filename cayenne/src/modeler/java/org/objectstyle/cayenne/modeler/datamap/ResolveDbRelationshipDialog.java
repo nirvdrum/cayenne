@@ -65,7 +65,7 @@ import javax.swing.*;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.modeler.*;
-import org.objectstyle.cayenne.modeler.event.Mediator;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;

@@ -64,6 +64,7 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 import org.objectstyle.cayenne.modeler.util.*;
 
@@ -75,7 +76,7 @@ import org.objectstyle.cayenne.modeler.util.*;
 public class DomainDetailView extends JPanel 
 implements DocumentListener, DomainDisplayListener
 {
-	Mediator mediator;
+	EventController mediator;
 	
 	JLabel		nameLabel;
 	JTextField	name;
@@ -83,7 +84,7 @@ implements DocumentListener, DomainDisplayListener
 	/** Cludge to prevent marking domain as dirty during initial load. */
 	private boolean ignoreChange = false;
 	
-	public DomainDetailView(Mediator temp_mediator) {
+	public DomainDetailView(EventController temp_mediator) {
 		super();		
 		mediator = temp_mediator;
 		mediator.addDomainDisplayListener(this);

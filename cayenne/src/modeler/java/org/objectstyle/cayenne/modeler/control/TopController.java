@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.control;
 
 import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.Project;
@@ -71,7 +70,7 @@ import org.scopemvc.core.ControlException;
  */
 public class TopController extends BasicController {
     protected StatusBarController statusController;
-    protected Mediator eventController;
+    protected EventController eventController;
 
     // should refactor to SPanel
     protected Editor view;
@@ -84,7 +83,7 @@ public class TopController extends BasicController {
         
         TopModel model = new TopModel();
         statusController = new StatusBarController(model);
-        eventController = new Mediator(model);
+        eventController = new EventController(model);
         setModel(model);
         
         view.setMediator(eventController);

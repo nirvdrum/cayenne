@@ -62,20 +62,21 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.objectstyle.cayenne.modeler.control.*;
 import org.objectstyle.cayenne.modeler.event.*;
 
 public class DbDetailView extends JPanel 
 implements ChangeListener, DbEntityDisplayListener
 , DbRelationshipDisplayListener, DbAttributeDisplayListener
 {
-	Mediator mediator;
+	EventController mediator;
 	
 	JTabbedPane tab;
 	DbEntityPane entity;
 	DbAttributePane attributes;
 	DbRelationshipPane rel;
 	
-	public DbDetailView(Mediator temp_mediator) {
+	public DbDetailView(EventController temp_mediator) {
 		super();
 		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);
