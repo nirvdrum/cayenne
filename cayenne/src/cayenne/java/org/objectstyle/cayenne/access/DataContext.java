@@ -261,7 +261,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Normally parent is an instance of DataDomain. DataContext will use parent
      * to execute database queries, updates, and access mapping information.
      * 
-     * @deprecated since 1.1 use {@link #DataContext(QueryEngine, DataRowStore)}
+     * @deprecated since 1.1 use {@link #DataContext(QueryEngine, ObjectStore)}
      */
     public DataContext(QueryEngine parent) {
         setParent(parent);

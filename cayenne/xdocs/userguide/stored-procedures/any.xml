@@ -6,10 +6,16 @@
     <subsection name="9.2 Executing a Stored Procedure">
 		<p>Previous chapter showed how to select a single set of data rows
 		using a ProcedureQuery. In a more general case stored procedures can return multiple 
-		sets of data, execute update/delete/insert queries, etc. To collect the results of
+		sets of data, either as ResultSets or via OUT parameters, 
+		execute update/delete/insert queries, etc. To collect the results of
 		execution of such stored procedure, a special class, <a href=
 		"../../api/cayenne/org/objectstyle/cayenne/access/QueryResult.html">QueryResult</a>, 
-		is used. Its superclass implements OperationObserver, so it can be used as a second parameter to
+		is used. </p>
+		
+		<subsection name="9.2.1 Using QueryResult to Process Complex Results">
+		
+		<p>
+		QueryResult  implements OperationObserver, so it can be used as a second parameter to
 		<code>DataContext.performQuery()</code> method. After the query execution is done, QueryResult 
 		instance will contain all the output of the query:
 		</p>
@@ -52,6 +58,38 @@ while(it.hasNext()) {
   ....
 }
 </source>
+	</subsection>
+	
+		<subsection name="9.2.2 Using QueryResult to Read OUT Parameters">
+		<p>Stored Procedure can return data back to the application as ResultSets or via OUT 
+		parameters. To simplify the processing of the query output, QueryResult treats OUT parameters 
+		as if it was a separate ResultSet. If a stored procedure declares any OUT or INOUT parameters,
+		QueryResult will contain their returned values in the very first result list: 
+		</p>
+<source>
+DataContext ctxt;
+
+// "my_procedure" is a name of a stored procedure,
+// that must exist in the DataMap
+ProcedureQuery query = new ProcedureQuery("my_procedure");
+
+// Set "IN" parameter values
+query.addParam("paramter1", "abc");
+query.addParam("parameter2", new Integer(3000));
+
+QueryResult resultsCollection = new QueryResult();
+
+// run query
+ctxt.performQuery(query, resultsCollection);
+
+// read OUT parameters
+List outList = resultsCollection.getFirstRows(query);
+
+if(outList.size() >  0) {
+    Map outParameterValues = (Map) outList.get(0);
+}
+</source>
+		</subsection>
 	</subsection>
     </section>
 </body>

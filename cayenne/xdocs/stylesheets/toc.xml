@@ -54,6 +54,7 @@
     		<item name="7.6 SQLTemplate Query"  href="/userguide/fetch/sqltemplate.html"/>
     		<item name="7.7 Scripting SQLTemplate"  href="/userguide/fetch/sqltemplate-scripting.html"/>
     		<item name="7.8 Queries Stored in DataMap"  href="/userguide/fetch/datamap-queries.html"/>
+    		<item name="7.9 Caching Query Results"  href="/userguide/fetch/result-caching.html"/>
     	</item>
     	
     	<item name="8. Working with DataObjects"  href="/userguide/dataobjects/index.html">
@@ -84,6 +85,7 @@
     		<item name="11.2 Data Rows"  href="/userguide/perform/data-rows.html"/>
     		<item name="11.3 Iterating Through Data Rows"  href="/userguide/perform/result-iterator.html"/>
     		<item name="11.4 Paginated Queries"  href="/userguide/perform/paged-queries.html"/>
+    		<item name="11.5 Caching Lookup Tables"  href="/userguide/perform/caching-lookup.html"/>
     	</item>
     	
     	<item name="12. Deployment"  href="/userguide/deploy/index.html">
