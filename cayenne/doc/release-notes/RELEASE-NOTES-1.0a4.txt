@@ -9,6 +9,8 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
+0. New project CVS structure - more consistent and clean subprojects separation
+
 1. Removed all methods that were deprecated prior to Aplpha 3.
 
 2. Synchronized internal DataContext cache access.
@@ -18,12 +20,14 @@ Changes in this release:
 4. Made DataContext and DataObjects serializable - a must for web 
 applications.
 
-5. Added "paged" queries support
+5. Added "paginated" queries support
 
-6. Cleaned up tutorials, fixed tutorial bugs and inconsistencies.
+6. Cleaned up tutorials, fixed tutorial bugs and inconsistencies, added tutorials to the  compilation process to make sure they work with the latest code
 
 7. Refactored DataContext, created helper classes, removed unused 
 methods
 
 8. Refactored util.Preferences into gui.ModelerPreferences and
 project.CayenneUserDir
+
+9. Added Tapsestry tutorial

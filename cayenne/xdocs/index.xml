@@ -5,46 +5,18 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><u><strong><i>September 14:</i></strong> <strong>Cayenne 1.0a3-1 Released.</strong></u></p>
+        <p><u><strong><i>October 21:</i></strong> <strong>Cayenne 1.0a4 Released.</strong></u></p>
         
-        <p>This is a point release that fixes some GUI bugs. Download the release 
-        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from here</a>.
-        </p>
-        
-        <p><u><strong><i>September 10:</i> Note To Cayenne Users - deprecated API removed.</strong></u></p>
-        
-        <p>
-        API that is marked 
-        	as "deprecated" in Alpha 3 release is already removed from the development code. 
-        	It is no longer included in the nightly builds and will not be included with 
-        	future releases. If your code uses or overrides such API, please make sure it is replaced
-        	with non-deprected method calls. 
-        </p>
-        
-        
-        <p><u><strong><i>September 7:</i></strong> <strong>Cayenne 
-        Alpha 3 Is Out.</strong></u></p>
-        
-        <p>This is a maintenance release. It contains a few serious bug fixes, 
-        so everybody is encouraged to upgrade. In this release:
-        <ul>
-        	<li>JDK1.3 port: Cayenne runtime libraries are now fully JDK1.3 compatible,
-        	GUI tools still require 1.4.</li>
-        	<li>Fixed a few serious problems in CayenneModeler that could potentially
-        	corrupt model files.</li>
-        	<li>"Derived" entities support. Derived DbEntities allow 
-        	expressions in columns, including aggregate functions. They
-        	also contain built in GROUP BY support.</li>
-        	<li>Bugs fixes, a few convenience features and performance 
-        	improvements.</li>
-        	<li>Links:
-        	       <ul>
-        				<li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132">Download 
-        				Alpha 3.</a></li>
-        				<li><a href="RELEASE-NOTES-1.0a3.txt">View Release Notes.</a></li>
-        			</ul>
-        	</li>
+        <p>The main highlights of this release are: <ul>
+        <li>bug fixes, code cleanup and refactoring</li>
+        <li>paginated queries</li>
+        <li>serialization support of DataObjects</li>
+        <li>new <a href="http://tapestry.sourceforge.net">Tapestry</a> tutorial</li>
+        <li>all API deprecated in Alpha3 and earlier was removed</li>
         </ul>
+         Download the release 
+        <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">from 
+        here</a>. 
         </p>
         
         <p><u><strong><i>July 29:</i></strong> <strong>Cayenne 
