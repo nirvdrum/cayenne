@@ -61,7 +61,6 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -87,7 +86,7 @@ public class DataMapProjectTst extends CayenneTestCase {
         PrintWriter out = new PrintWriter(new FileOutputStream(f));
 
         try {
-            new MapLoader().storeDataMap(out, m);
+            m.encodeAsXML(out);
         } finally {
             out.close();
         }

@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.project;
 import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.MapLoader;
 
 /**
  * DataMapFile is a ProjectFile abstraction of the 
@@ -96,8 +95,7 @@ public class DataMapFile extends ProjectFile {
     }
 
     public void save(PrintWriter out) throws Exception {
-        MapLoader saver = new MapLoader();
-        saver.storeDataMap(out, map);
+        map.encodeAsXML(out);
     }
 
     /**

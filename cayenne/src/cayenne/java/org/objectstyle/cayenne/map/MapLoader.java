@@ -172,6 +172,8 @@ public class MapLoader extends DefaultHandler {
 
     /** 
      * Prints DataMap encoded as XML to a provided PrintWriter.
+     * 
+     * @deprecated Since 1.1 use DataMap.encodeAsXML().
      */
     public synchronized void storeDataMap(PrintWriter out, DataMap map)
         throws DataMapException {

@@ -61,7 +61,6 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -163,8 +162,7 @@ public class EOModelProcessorTst extends CayenneTestCase {
         assertEquals(2, frel.getDbRelationships().size());
 
         // storing data map may uncover some inconsistencies
-        MapLoader loader = new MapLoader();
-        loader.storeDataMap(out, map);
+        map.encodeAsXML(out);
     }
 
     static class NullPrintWriter extends PrintWriter {

@@ -96,7 +96,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DeleteRule;
-import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -324,8 +323,7 @@ public class RandomDomainBuilder {
       try {
         FileWriter dataMapXml = new FileWriter(new File(dir, dataMap.getName() + ".xml"));
         PrintWriter out = new PrintWriter(dataMapXml);
-        MapLoader mapSaver = new MapLoader();
-        mapSaver.storeDataMap(out, dataMap);
+        dataMap.encodeAsXML(out);
         out.close();
         dataMapXml.close();
       }
