@@ -396,6 +396,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @param deleteObject data object that we want to delete.
      */
     public void deleteObject(DataObject deleteObject) {
+    	//TODO - figure out what to do when an object is still in PersistenceState.NEW (unregister maybe?)
         deleteObject.setPersistenceState(PersistenceState.DELETED);
     }
 
