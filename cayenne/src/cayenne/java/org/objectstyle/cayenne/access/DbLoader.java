@@ -522,12 +522,21 @@ public class DbLoader {
 
                     if (fkEntity != null) {
                         // Create and append joins
-                        DbAttribute pkAtt =
-                            (DbAttribute) pkEntity.getAttribute(
-                                rs.getString("PKCOLUMN_NAME"));
-                        DbAttribute fkAtt =
-                            (DbAttribute) fkEntity.getAttribute(
-                                rs.getString("FKCOLUMN_NAME"));
+                        String pkName = rs.getString("PKCOLUMN_NAME");
+                        String fkName = rs.getString("FKCOLUMN_NAME");
+                        
+                        DbAttribute pkAtt = (DbAttribute) pkEntity.getAttribute(pkName);
+                        if(pkAtt == null) {
+                            logObj.info("no attribute for declared primary key: " + pkName);
+                            continue;
+                        }
+                        
+                        DbAttribute fkAtt = (DbAttribute) fkEntity.getAttribute(fkName);
+                        if (fkAtt == null) {
+                            logObj.info(
+                                "no attribute for declared foreign key: " + fkName);
+                            continue;
+                        }
 
                         forwardRelationship.addJoin(new DbAttributePair(pkAtt, fkAtt));
                         reverseRelationship.addJoin(new DbAttributePair(fkAtt, pkAtt));
