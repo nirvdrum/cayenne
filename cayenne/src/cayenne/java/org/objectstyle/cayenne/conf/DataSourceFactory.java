@@ -60,22 +60,29 @@ import javax.sql.DataSource;
 import org.apache.log4j.Level;
 
 
-/** Defines API to obtain a javax.sql.DataSource objects 
+/**
+ * Defines API to obtain a javax.sql.DataSource objects 
  * from configuration data.
  */
 public interface DataSourceFactory {
     
-    /** Initializes factory with the parent configuration object. */
+    /**
+     * Initializes factory with the parent configuration object.
+     */
     public void initWithParentConfiguration(Configuration conf);
     
-    /** Returns DataSource object corresponding to <code>location</code>.
-      * Concrete implementations may treat location differently - as a
-      * file path, JNDI location, etc. */
+    /** 
+     * Returns DataSource object corresponding to <code>location</code>.
+     * Concrete implementations may treat location differently - as a
+     * file path, JNDI location, etc.
+     */
     public DataSource getDataSource(String location) throws Exception;
     
-    /** Returns DataSource object corresponding to <code>location</code>.
-      * Uses <code>logLevel</code> level of verbosity during data source loading.
-      * Concrete implementations may treat location differently - as a
-      * file path, JNDI location, etc. */
+    /**
+     * Returns DataSource object corresponding to <code>location</code>.
+     * Uses <code>logLevel</code> level of verbosity during data source loading.
+     * Concrete implementations may treat location differently - as a
+     * file path, JNDI location, etc.
+     */
     public DataSource getDataSource(String location, Level logLevel) throws Exception;
 }

@@ -66,7 +66,6 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.AbstractHandler;
-import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -85,39 +84,37 @@ import org.xml.sax.helpers.DefaultHandler;
 public class DriverDataSourceFactory implements DataSourceFactory {
     private static Logger logObj = Logger.getLogger(DriverDataSourceFactory.class);
 
-    private static boolean applyWebAppPatch;
-
-    static {
-        // determine what kind of servlet environment is accessible
-        try {
-            Class.forName("javax.servlet.ServletContext");
-            applyWebAppPatch = true;
-        } catch (Exception ex) {
-            applyWebAppPatch = false;
-        }
-
-    }
-
     protected XMLReader parser;
     protected DataSourceInfo driverInfo;
     protected Level logLevel = Level.DEBUG;
-    protected Configuration parentConfig;
+    protected Configuration parentConfiguration;
 
+	/**
+	 * Default constructor
+	 * @throws Exception
+	 */
     public DriverDataSourceFactory() throws Exception {
-        parser = Util.createXmlReader();
+    	super();
+        this.parser = Util.createXmlReader();
     }
 
+	/**
+	 * @see DataSourceFactory#initWithParentConfiguration(Configuration)
+	 */
     public void initWithParentConfiguration(Configuration conf) {
-        this.parentConfig = conf;
+        this.parentConfiguration = conf;
     }
 
-    /** Returns DataSource object corresponding to <code>location</code>.
-      * Location is expected to be a path of a file relative to the current
-      * directory or a user home directory. */
+    /**
+     * @see DataSourceFactory#getDataSource(String)
+     */
     public DataSource getDataSource(String location) throws Exception {
-        return getDataSource(location, Level.DEBUG);
+        return this.getDataSource(location, Level.DEBUG);
     }
 
+	/**
+	 * @see DataSourceFactory#getDataSource(String, Level)
+	 */
     public DataSource getDataSource(String location, Level logLevel) throws Exception {
         this.logLevel = logLevel;
         this.load(location);
@@ -140,22 +137,24 @@ public class DriverDataSourceFactory implements DataSourceFactory {
         }
     }
 
-    /** Returns DataSourceInfo property. */
+    /**
+     * Returns DataSourceInfo property.
+     */
     protected DataSourceInfo getDriverInfo() {
-        return driverInfo;
+        return this.driverInfo;
     }
 
     protected InputStream getInputStream(String location) {
-    	if (parentConfig == null) {
-    		throw new ConfigurationException("No parentConfig set - cannot continue.");
+    	if (parentConfiguration == null) {
+    		throw new ConfigurationException("No parent Configuration set - cannot continue.");
     	}
 
 		// check for web application
-        InputStream is = getWebAppInputStream(location);
+        InputStream is = this.getWebAppInputStream(location);
 
         // if not a web app, return to normal behavior
         if (is == null) {
-        	is = parentConfig.getResourceLocator().findResourceStream(location);
+        	is = this.parentConfiguration.getResourceLocator().findResourceStream(location);
         }
 
         return is;
@@ -163,35 +162,34 @@ public class DriverDataSourceFactory implements DataSourceFactory {
 
     protected InputStream getWebAppInputStream(String location) {
         // webapp patch - first lookup in WEB-INF
-        if (parentConfig != null) {
-            if (applyWebAppPatch
-                && (parentConfig instanceof BasicServletConfiguration)) {
-                BasicServletConfiguration servlConf =
-                    (BasicServletConfiguration) parentConfig;
-                return servlConf.getMapConfiguration(location);
-            }
+        if (this.parentConfiguration != null) {
+			// determine what kind of servlet environment is accessible
+			try {
+				Class.forName("javax.servlet.ServletContext");
+				if (this.parentConfiguration instanceof BasicServletConfiguration) {
+					BasicServletConfiguration servlConf = (BasicServletConfiguration)this.parentConfiguration;
+					return servlConf.getMapConfiguration(location);
+				}
+			} catch (Exception ex) {
+				// no web app
+			}
+
         }
 
         return null;
     }
 
-    /** Loads driver information from the file at <code>location</code>.
-      * Called internally from "getDataSource" */
+    /**
+     * Loads driver information from the file at <code>location</code>.
+     * Called internally from "getDataSource"
+     */
     protected void load(String location) throws Exception {
         logObj.log(logLevel, "loading driver information from '" + location + "'.");
 
         InputStream in = this.getInputStream(location);
         if (in == null) {
-            logObj.log(logLevel, "location not found in file system, trying classpath.");
-            in = ResourceLocator.findResourceInClasspath(location);
-        } else {
-            logObj.log(logLevel, "location found in file system.");
-        }
-
-        if (in == null) {
-            logObj.log(logLevel, "error: location '" + location + "' not found.");
-            throw new ConfigurationException(
-                "Can't find DataSource configuration file at " + location);
+            logObj.log(logLevel, "Error: location '" + location + "' not found.");
+            throw new ConfigurationException("Can't find DataSource configuration file at " + location);
         }
 
         RootHandler handler = new RootHandler();
