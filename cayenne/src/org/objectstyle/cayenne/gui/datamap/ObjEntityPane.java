@@ -52,12 +52,11 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
+
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
@@ -68,12 +67,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
-import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.PanelFactory;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.EntityWrapper;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
+import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** 
  * Detail view of the ObjEntity properties. 
@@ -81,30 +79,32 @@ import org.objectstyle.cayenne.util.*;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class ObjEntityPane extends JPanel
-implements DocumentListener, ActionListener
-, ObjEntityDisplayListener, ExistingSelectionProcessor
-{
+public class ObjEntityPane
+	extends JPanel
+	implements
+		DocumentListener,
+		ActionListener,
+		ObjEntityDisplayListener,
+		ExistingSelectionProcessor {
 	Mediator mediator;
-	
-	JTextField	name;
-	String		oldName;
-	JTextField	className;
-	JPanel		dbPane;
-	JComboBox	dbName;
-	
+
+	JTextField name;
+	String oldName;
+	JTextField className;
+	JPanel dbPane;
+	JComboBox dbName;
+
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
-	
-	
+
 	public ObjEntityPane(Mediator temp_mediator) {
-		super();		
-		mediator = temp_mediator;		
+		super();
+		mediator = temp_mediator;
 		mediator.addObjEntityDisplayListener(this);
-		
+
 		// Create and layout components
 		init();
-		
+
 		// Add listeners
 		name.getDocument().addDocumentListener(this);
 		className.getDocument().addDocumentListener(this);
@@ -112,44 +112,37 @@ implements DocumentListener, ActionListener
 	}
 
 	private void init() {
-		SpringLayout layout = new SpringLayout();
-		this.setLayout(layout);
+		setLayout(new BorderLayout());
 
 		JLabel nameLbl = new JLabel("Entity name: ");
 		name = new JTextField(25);
-		
-		JLabel classNameLbl	= new JLabel("Class name: ");
+
+		JLabel classNameLbl = new JLabel("Class name: ");
 		className = new JTextField(25);
-		
+
 		JLabel dbNameLbl = new JLabel("Table name:");
-		dbName 	= new JComboBox();
+		dbName = new JComboBox();
 		dbName.setBackground(Color.WHITE);
-		
-		
-		Component[] leftCol = new Component[] {
-			nameLbl, classNameLbl, dbNameLbl
-		};
-		
-		Component[] rightCol = new Component[] {
-			name, className, dbName
-		};
-		
-		JPanel formPanel = PanelFactory.createForm(leftCol, rightCol, 5,5,5,5);
-		Spring pad = Spring.constant(5);
-		add(formPanel);
-		SpringLayout.Constraints cons = layout.getConstraints(formPanel);
-		cons.setY(pad);
-		cons.setX(pad);
+
+		Component[] leftCol =
+			new Component[] { nameLbl, classNameLbl, dbNameLbl };
+
+		Component[] rightCol = new Component[] { name, className, dbName };
+
+		add(
+			PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
+			BorderLayout.NORTH);
 	}
 
-	public void processExistingSelection()
-	{
-		EntityDisplayEvent e;
-		e = new EntityDisplayEvent(this, mediator.getCurrentObjEntity()
-			, mediator.getCurrentDataMap(), mediator.getCurrentDataDomain());
+	public void processExistingSelection() {
+		EntityDisplayEvent e =
+			new EntityDisplayEvent(
+				this,
+				mediator.getCurrentObjEntity(),
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireObjEntityDisplayEvent(e);
 	}
-	
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
@@ -159,8 +152,8 @@ implements DocumentListener, ActionListener
 			ObjEntity entity = mediator.getCurrentObjEntity();
 			DbEntity db_entity;
 			EntityWrapper wrap;
-			wrap = (EntityWrapper)dbName.getSelectedItem();
-			db_entity = (DbEntity)wrap.getEntity();
+			wrap = (EntityWrapper) dbName.getSelectedItem();
+			db_entity = (DbEntity) wrap.getEntity();
 			entity.setDbEntity(db_entity);
 			mediator.fireObjEntityEvent(new EntityEvent(this, entity));
 		}
@@ -168,25 +161,36 @@ implements DocumentListener, ActionListener
 
 	private void createDbEntity() {
 		// Create DbEntity and add it to DataMap
-		DbEntity entity = (DbEntity)NamedObjectFactory.createObject(DbEntity.class, mediator.getCurrentDataMap());
+		DbEntity entity =
+			(DbEntity) NamedObjectFactory.createObject(
+				DbEntity.class,
+				mediator.getCurrentDataMap());
 		mediator.getCurrentObjEntity().setDbEntity(entity);
 		mediator.getCurrentDataMap().addDbEntity(entity);
-		EntityEvent event = new EntityEvent(this, mediator.getCurrentObjEntity());
+		EntityEvent event =
+			new EntityEvent(this, mediator.getCurrentObjEntity());
 		mediator.fireObjEntityEvent(event);
 
 		EntityWrapper wrapper = new EntityWrapper(entity);
 		// Add DbEntity to drop-down in alphabetical order
-		DefaultComboBoxModel model = (DefaultComboBoxModel)dbName.getModel();
+		DefaultComboBoxModel model = (DefaultComboBoxModel) dbName.getModel();
 		EntityWrapper wrap = new EntityWrapper(entity);
 		model.insertElementAt(wrap, model.getSize());
 		model.setSelectedItem(wrap);
-		mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-		
+		mediator.fireDbEntityEvent(
+			new EntityEvent(this, entity, EntityEvent.ADD));
+
 	}
 
-	public void insertUpdate(DocumentEvent e)  { textFieldChanged(e); }
-	public void changedUpdate(DocumentEvent e) { textFieldChanged(e); }
-	public void removeUpdate(DocumentEvent e)  { textFieldChanged(e); }
+	public void insertUpdate(DocumentEvent e) {
+		textFieldChanged(e);
+	}
+	public void changedUpdate(DocumentEvent e) {
+		textFieldChanged(e);
+	}
+	public void removeUpdate(DocumentEvent e) {
+		textFieldChanged(e);
+	}
 
 	private void textFieldChanged(DocumentEvent e) {
 		if (ignoreChange)
@@ -196,32 +200,35 @@ implements DocumentListener, ActionListener
 		ObjEntity current_entity = mediator.getCurrentObjEntity();
 		if (doc == name.getDocument()) {
 			// Change the name of the current obj entity
-			GuiFacade.setObjEntityName(map, (ObjEntity)current_entity, name.getText());
+			GuiFacade.setObjEntityName(
+				map,
+				(ObjEntity) current_entity,
+				name.getText());
 			// Make sure this name is propagated to wherever it needs to go
 			EntityEvent event = new EntityEvent(this, current_entity, oldName);
 			oldName = name.getText();
 			mediator.fireObjEntityEvent(event);
-		}
-		else if (doc == className.getDocument()) {
+		} else if (doc == className.getDocument()) {
 			String classText = className.getText();
-			if(classText != null && classText.trim().length() == 0) {
+			if (classText != null && classText.trim().length() == 0) {
 				classText = null;
 			}
-			
+
 			current_entity.setClassName(classText);
 			EntityEvent event = new EntityEvent(this, current_entity);
 			mediator.fireObjEntityEvent(event);
 		}
 	}
-	
+
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
-		ObjEntity entity = (ObjEntity)e.getEntity();
-		if (null == entity  || e.isEntityChanged() == false) 
+		ObjEntity entity = (ObjEntity) e.getEntity();
+		if (null == entity || e.isEntityChanged() == false)
 			return;
 		ignoreChange = true;
 		name.setText(entity.getName());
 		oldName = entity.getName();
-		className.setText(entity.getClassName() != null ? entity.getClassName() : "");
+		className.setText(
+			entity.getClassName() != null ? entity.getClassName() : "");
 
 		// Display DbEntity name in select box
 		DefaultComboBoxModel combo_model;
@@ -229,7 +236,7 @@ implements DocumentListener, ActionListener
 		dbName.setModel(combo_model);
 		ignoreChange = false;
 	}
-	
+
 	/** 
 	 * Creates DefaultComboBoxModel from the list of DbEntities.
 	 * Model contains <code>DbEntityWrapper's</code>.
@@ -240,7 +247,7 @@ implements DocumentListener, ActionListener
 	private DefaultComboBoxModel createComboBoxModel(DbEntity select) {
 		EntityWrapper selected_entry = null;
 
-		Vector combo_entries = new Vector();		
+		Vector combo_entries = new Vector();
 		DataMap map = mediator.getCurrentDataMap();
 		java.util.List entities = map.getDbEntitiesAsList();
 		Iterator iter = entities.iterator();
@@ -248,8 +255,8 @@ implements DocumentListener, ActionListener
 		EntityWrapper wrap = new EntityWrapper(null);
 		selected_entry = wrap;
 		combo_entries.add(wrap);
-		while(iter.hasNext()){
-			DbEntity entity  = (DbEntity)iter.next();
+		while (iter.hasNext()) {
+			DbEntity entity = (DbEntity) iter.next();
 			wrap = new EntityWrapper(entity);
 			if (select == entity) {
 				selected_entry = wrap;

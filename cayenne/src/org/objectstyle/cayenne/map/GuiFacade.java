@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,18 +52,21 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map;
 
 import java.util.Iterator;
 
-/** Provides utility methods to access DataMap, Entities, etc.
- *  For example, setName() in Attribute requires changing
- *  the keys in attribute Maps in Entities. */
+/** 
+ * Provides utility methods to access DataMap, Entities, etc.
+ * For example, setName() in Attribute requires changing
+ * the keys in attribute Maps in Entities. */
 public class GuiFacade {
 
-	public static void setObjEntityName(DataMap map, ObjEntity entity
-									  , String new_name)
-	{
+	public static void setObjEntityName(
+		DataMap map,
+		ObjEntity entity,
+		String new_name) {
 		String old_name = entity.getName();
 		// If name hasnt change, just return
 		if (old_name != null && old_name.equals(new_name)) {
@@ -74,10 +76,11 @@ public class GuiFacade {
 		map.removeObjEntity(old_name);
 		map.addObjEntity(entity);
 	}
-	
-	public static void setDbEntityName(DataMap map, DbEntity entity
-									  , String new_name)
-	{
+
+	public static void setDbEntityName(
+		DataMap map,
+		DbEntity entity,
+		String new_name) {
 		String old_name = entity.getName();
 		// If name hasnt change, just return
 		if (old_name != null && old_name.equals(new_name)) {
@@ -87,24 +90,13 @@ public class GuiFacade {
 		map.removeDbEntity(old_name);
 		map.addDbEntity(entity);
 	}
-	
-	/** Changes the name of the attribute in all places in DataMap. */
-	public static void setObjAttributeName(DataMap map, ObjAttribute attrib
-								  , String new_name)
-	{
-		ObjEntity entity = (ObjEntity)attrib.getEntity();
-		String old_name = attrib.getName();
-		entity.attributes.remove(old_name);
-		attrib.setName(new_name);
-		entity.attributes.put(new_name, attrib);
-	}
-
 
 	/** Changes the name of the attribute in all places in DataMap. */
-	public static void setDbAttributeName(DataMap map, DbAttribute attrib
-								  , String new_name)
-	{
-		DbEntity entity = (DbEntity)attrib.getEntity();
+	public static void setObjAttributeName(
+		DataMap map,
+		ObjAttribute attrib,
+		String new_name) {
+		ObjEntity entity = (ObjEntity) attrib.getEntity();
 		String old_name = attrib.getName();
 		entity.attributes.remove(old_name);
 		attrib.setName(new_name);
@@ -112,15 +104,31 @@ public class GuiFacade {
 	}
 
 	/** Changes the name of the attribute in all places in DataMap. */
-	public static void setObjRelationshipName(ObjEntity entity
-										, ObjRelationship rel, String new_name)
-	{
+	public static void setDbAttributeName(
+		DataMap map,
+		DbAttribute attrib,
+		String new_name) {
+		DbEntity entity = (DbEntity) attrib.getEntity();
+		String old_name = attrib.getName();
+		entity.attributes.remove(old_name);
+		attrib.setName(new_name);
+		entity.attributes.put(new_name, attrib);
+	}
+
+	/** Changes the name of the attribute in all places in DataMap. */
+	public static void setObjRelationshipName(
+		ObjEntity entity,
+		ObjRelationship rel,
+		String new_name) {
 		ObjRelationship temp_rel;
-		temp_rel = (ObjRelationship)entity.relationships.get(rel.getName());
+		temp_rel = (ObjRelationship) entity.relationships.get(rel.getName());
 		// If rel is not in the entity - we have a problem
 		if (null == temp_rel || temp_rel != rel) {
-			System.out.println("Cannot find obj relationship " + rel.getName()
-							+ " in obj entity " + entity.getName());
+			System.out.println(
+				"Cannot find obj relationship "
+					+ rel.getName()
+					+ " in obj entity "
+					+ entity.getName());
 			Thread.currentThread().dumpStack();
 			return;
 		}
@@ -128,15 +136,19 @@ public class GuiFacade {
 		rel.setName(new_name);
 		entity.relationships.put(rel.getName(), rel);
 	}
-	
-	public static void setDbRelationshipName(DbEntity entity
-						, DbRelationship rel, String new_name)
-	{
+
+	public static void setDbRelationshipName(
+		DbEntity entity,
+		DbRelationship rel,
+		String new_name) {
 		DbRelationship temp_rel;
-		temp_rel = (DbRelationship)entity.relationships.get(rel.getName());
+		temp_rel = (DbRelationship) entity.relationships.get(rel.getName());
 		if (null == temp_rel || temp_rel != rel) {
-			System.out.println("Cannot find db relationship " + rel.getName()
-							+ " in db entity " + entity.getName());
+			System.out.println(
+				"Cannot find db relationship "
+					+ rel.getName()
+					+ " in db entity "
+					+ entity.getName());
 			Thread.currentThread().dumpStack();
 			return;
 		}
@@ -145,28 +157,28 @@ public class GuiFacade {
 		entity.relationships.put(rel.getName(), rel);
 	}
 
-	
-     /** Clears all the mapping between this obj entity and its current db entity.
-      *  Clears mapping between entities, attributes and relationships. */
-     public static void clearDbMapping(ObjEntity entity) {
-     	DbEntity db_entity = entity.getDbEntity();
-     	if (db_entity == null)
-     		return;
+	/** Clears all the mapping between this obj entity and its current db entity.
+	 *  Clears mapping between entities, attributes and relationships. */
+	public static void clearDbMapping(ObjEntity entity) {
+		DbEntity db_entity = entity.getDbEntity();
+		if (db_entity == null) {
+			return;
+		}
 
-        Iterator it = entity.getAttributeMap().values().iterator();
-        while (it.hasNext()) {
-             ObjAttribute objAttr = (ObjAttribute)it.next();
-             DbAttribute dbAttr = objAttr.getDbAttribute();
-             if (null != dbAttr) {
-             	objAttr.setDbAttribute(null);
-             }
-        }// End while()
-        
-        Iterator rel_it = entity.getRelationshipList().iterator();
-        while(rel_it.hasNext()) {
-        	ObjRelationship obj_rel = (ObjRelationship)rel_it.next();
-        	obj_rel.clearDbRelationships();
-        }
-        entity.setDbEntity(null);
-     }
+		Iterator it = entity.getAttributeMap().values().iterator();
+		while (it.hasNext()) {
+			ObjAttribute objAttr = (ObjAttribute) it.next();
+			DbAttribute dbAttr = objAttr.getDbAttribute();
+			if (null != dbAttr) {
+				objAttr.setDbAttribute(null);
+			}
+		}
+
+		Iterator rel_it = entity.getRelationshipList().iterator();
+		while (rel_it.hasNext()) {
+			ObjRelationship obj_rel = (ObjRelationship) rel_it.next();
+			obj_rel.clearDbRelationships();
+		}
+		entity.setDbEntity(null);
+	}
 }

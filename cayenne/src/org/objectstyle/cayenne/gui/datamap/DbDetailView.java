@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,16 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import org.objectstyle.cayenne.map.*;
+import java.awt.BorderLayout;
+
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
 
 public class DbDetailView extends JPanel 
 implements ChangeListener, DbEntityDisplayListener

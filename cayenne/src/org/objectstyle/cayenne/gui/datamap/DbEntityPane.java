@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.gui.datamap;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -82,22 +83,23 @@ public class DbEntityPane
 		DbEntityDisplayListener,
 		ExistingSelectionProcessor,
 		ActionListener {
-	Mediator mediator;
+			
+	protected Mediator mediator;
 
-	JTextField name;
-	String oldName;
-	JTextField catalog;
-	JTextField schema;
-	JComboBox parentEntities;
-	JLabel parentLabel;
-	JLabel schemaLabel;
-	JLabel catalogLabel;
+	protected JTextField name;
+	protected String oldName;
+	protected JTextField catalog;
+	protected JTextField schema;
+	protected JComboBox parentEntities;
+	protected JLabel parentLabel;
+	protected JLabel schemaLabel;
+	protected JLabel catalogLabel;
 
 	/** 
 	 * Cludge to prevent marking data map as dirty 
 	 * during initial load. 
 	 */
-	private boolean ignoreChange = false;
+	private boolean ignoreChange;
 
 	public DbEntityPane(Mediator mediator) {
 		super();
@@ -115,8 +117,7 @@ public class DbEntityPane
 	}
 
 	private void init() {
-		SpringLayout layout = new SpringLayout();
-		this.setLayout(layout);
+		setLayout(new BorderLayout());
 
 		JLabel nameLabel = new JLabel("Entity name: ");
 		name = new JTextField(25);
@@ -143,13 +144,7 @@ public class DbEntityPane
 		Component[] rightCol =
 			new Component[] { name, catalog, schema, parentEntities };
 
-		JPanel temp = PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5);
-		Spring pad = Spring.constant(5);
-		add(temp);
-		SpringLayout.Constraints cons = layout.getConstraints(temp);
-		cons.setY(pad);
-		cons.setX(pad);
-
+		add(PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5), BorderLayout.NORTH);
 	}
 
 	public void insertUpdate(DocumentEvent e) {
