@@ -56,7 +56,6 @@
 
 package org.objectstyle.cayenne.dba;
 
-import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
@@ -209,8 +208,4 @@ public interface DbAdapter {
      * <code>DatabaseMetaData.getTableTypes</code>) for a view table.
      */
     public String tableTypeForView();
-
-    public BatchInterpreter getInsertBatchInterpreter();
-    public BatchInterpreter getDeleteBatchInterpreter();
-    public BatchInterpreter getUpdateBatchInterpreter();
 }

@@ -67,13 +67,20 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
+import org.objectstyle.cayenne.access.types.ExtendedType;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.util.DefaultSorter;
 import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.access.util.NullSorter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -256,28 +263,12 @@ public class DataNode implements QueryEngine {
 
                 // catch exceptions for each individual query
                 try {
-                    BatchInterpreter interpreter = null;
-                    switch (nextQuery.getQueryType()) {
-                        case Query.INSERT_BATCH_QUERY :
-                            interpreter =
-                                getAdapter().getInsertBatchInterpreter();
-                            break;
-                        case Query.UPDATE_BATCH_QUERY :
-                            interpreter =
-                                getAdapter().getUpdateBatchInterpreter();
-                            break;
-                        case Query.DELETE_BATCH_QUERY :
-                            interpreter =
-                                getAdapter().getDeleteBatchInterpreter();
-                            break;
-                    }
-                    if (interpreter != null) {
-                        interpreter.execute((BatchQuery) nextQuery, con);
-                        continue;
-                    }
 
+                    if (nextQuery instanceof BatchQuery) {
+                        runBatchUpdate(con, (BatchQuery) nextQuery, opObserver);
+                    }
                     // figure out query type and call appropriate worker method
-                    if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                    else if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
 
                         // if ResultIterator is returned to the user,
                         // DataNode is not responsible for closing the connections
@@ -458,9 +449,84 @@ public class DataNode implements QueryEngine {
 
     protected void runBatchUpdate(
         Connection con,
-        Query query,
+        BatchQuery query,
         OperationObserver delegate)
         throws SQLException, Exception {
+
+        // create BatchInterpreter
+        // TODO: move all query translation logic to adapter.getQueryTranslator()
+        BatchQueryBuilder queryBuilder;
+        switch (query.getQueryType()) {
+            case Query.INSERT_BATCH_QUERY :
+                queryBuilder = new InsertBatchQueryBuilder(getAdapter());
+                break;
+            case Query.UPDATE_BATCH_QUERY :
+                queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
+                break;
+            case Query.DELETE_BATCH_QUERY :
+                queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
+                ;
+                break;
+            default :
+                throw new CayenneException(
+                    "Unsupported batch type: " + query.getQueryType());
+        }
+
+        // translate batch
+        List dbAttributes = query.getDbAttributes();
+        int attributeCount = dbAttributes.size();
+        int[] attributeTypes = new int[attributeCount];
+        int[] attributeScales = new int[attributeCount];
+        for (int i = 0; i < attributeCount; i++) {
+            DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
+            attributeTypes[i] = attribute.getType();
+            attributeScales[i] = attribute.getPrecision();
+        }
+        String queryStr = queryBuilder.query(query);
+        ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
+
+        // log batch execution
+        QueryLogger.logQuery(
+            query.getLoggingLevel(),
+            queryStr,
+            Collections.EMPTY_LIST);
+
+        PreparedStatement st = con.prepareStatement(queryStr);
+        try {
+
+            query.reset();
+            while (query.next()) {
+                // log next batch parameters
+                QueryLogger.logBatchQueryParameters(
+                    query.getLoggingLevel(),
+                    query);
+
+                for (int i = 0; i < attributeCount; i++) {
+                    Object value = query.getObject(i);
+                    int type = attributeTypes[i];
+                    if (value == null)
+                        st.setNull(i + 1, type);
+                    else {
+                        ExtendedType typeProcessor =
+                            typeConverter.getRegisteredType(value.getClass());
+                        typeProcessor.setJdbcObject(
+                            st,
+                            value,
+                            i + 1,
+                            type,
+                            attributeScales[i]);
+                    }
+                }
+                int updated = st.executeUpdate();
+                delegate.nextCount(query, updated);
+                QueryLogger.logUpdateCount(query.getLoggingLevel(), updated);
+            }
+        } finally {
+            try {
+                st.close();
+            } catch (Exception e) {
+            }
+        }
     }
 
     protected void runStoredProcedureUpdate(

@@ -167,6 +167,14 @@ public class DefaultOperationObserver implements OperationObserver {
         logObj.debug("update count: " + resultCount);
     }
 
+    public void nextBatchCount(Query query, int[] resultCount) {
+        if (logObj.isDebugEnabled()) {
+            for (int i = 0; i < resultCount.length; i++) {
+                logObj.debug("batch count: " + resultCount[i]);
+            }
+        }
+    }
+
     public void nextDataRows(Query query, List dataRows) {
         int count = (dataRows == null) ? -1 : dataRows.size();
         logObj.debug("result count: " + count);

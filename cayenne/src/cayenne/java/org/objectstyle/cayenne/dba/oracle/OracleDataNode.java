@@ -53,8 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-
-package org.objectstyle.cayenne.access;
+package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -63,42 +62,71 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- * BatchInterpreter performs BatchQueries in a JDBC specific fashion
- * Its descendants may even employ some RDBMS specific features for the sake of
- * batch efficiency. It is mostly used by DataNodes.
- *
- * @author Andriy Shapochka
+ * DataNode subclass customized for Oracle database engine.
+ * 
+ * @author Andrei Adamchik
  */
+public class OracleDataNode extends DataNode {
 
-public class BatchInterpreter {
-
-    protected DbAdapter adapter;
-    protected BatchQueryBuilder queryBuilder;
-
-    public void setAdapter(DbAdapter adapter) {
-        this.adapter = adapter;
-    }
-    public DbAdapter getAdapter() {
-        return adapter;
-    }
-    public BatchQueryBuilder getQueryBuilder() {
-        return queryBuilder;
-    }
-    public void setQueryBuilder(BatchQueryBuilder queryBuilder) {
-        this.queryBuilder = queryBuilder;
+    /**
+     * 
+     */
+    public OracleDataNode() {
+        super();
     }
 
-    public int[] execute(BatchQuery batch, Connection connection)
-        throws SQLException, CayenneException {
-        List dbAttributes = batch.getDbAttributes();
+    /**
+     * @param name
+     */
+    public OracleDataNode(String name) {
+        super(name);
+    }
+
+    /**
+     *
+     */
+    protected void runBatchUpdate(
+        Connection con,
+        BatchQuery query,
+        OperationObserver delegate)
+        throws SQLException, Exception {
+
+        // TODO: refactoring super implementation  shoild make this method smaller
+        // the only difference with super is using "addBatch" instead of "executeUpdate"
+
+        BatchQueryBuilder queryBuilder;
+        switch (query.getQueryType()) {
+            case Query.INSERT_BATCH_QUERY :
+                queryBuilder = new InsertBatchQueryBuilder(getAdapter());
+                break;
+            case Query.UPDATE_BATCH_QUERY :
+                queryBuilder = new UpdateBatchQueryBuilder(getAdapter());
+                break;
+            case Query.DELETE_BATCH_QUERY :
+                queryBuilder = new DeleteBatchQueryBuilder(getAdapter());
+                ;
+                break;
+            default :
+                throw new CayenneException(
+                    "Unsupported batch type: " + query.getQueryType());
+        }
+
+        // translate batch
+        List dbAttributes = query.getDbAttributes();
         int attributeCount = dbAttributes.size();
         int[] attributeTypes = new int[attributeCount];
         int[] attributeScales = new int[attributeCount];
@@ -107,29 +135,27 @@ public class BatchInterpreter {
             attributeTypes[i] = attribute.getType();
             attributeScales[i] = attribute.getPrecision();
         }
-        String query = queryBuilder.query(batch);
-        PreparedStatement st = null;
+        String queryStr = queryBuilder.query(query);
         ExtendedTypeMap typeConverter = adapter.getExtendedTypes();
 
         // log batch execution
         QueryLogger.logQuery(
-            batch.getLoggingLevel(),
-            query,
+            query.getLoggingLevel(),
+            queryStr,
             Collections.EMPTY_LIST);
 
+        PreparedStatement st = con.prepareStatement(queryStr);
         try {
-            st = connection.prepareStatement(query);
-            batch.reset();
-            int[] results = new int[batch.size()];
-            int index = 0;
-            while (batch.next()) {
+
+            query.reset();
+            while (query.next()) {
                 // log next batch parameters
                 QueryLogger.logBatchQueryParameters(
-                    batch.getLoggingLevel(),
-                    batch);
+                    query.getLoggingLevel(),
+                    query);
 
                 for (int i = 0; i < attributeCount; i++) {
-                    Object value = batch.getObject(i);
+                    Object value = query.getObject(i);
                     int type = attributeTypes[i];
                     if (value == null)
                         st.setNull(i + 1, type);
@@ -144,26 +170,22 @@ public class BatchInterpreter {
                             attributeScales[i]);
                     }
                 }
-                results[index] = st.executeUpdate();
-                QueryLogger.logUpdateCount(
-                    batch.getLoggingLevel(),
-                    results[index]);
 
-                index++;
+                // this line differs from super
+                st.addBatch();
             }
-            return results;
-        } catch (SQLException e) {
-            throw e;
-        } catch (CayenneException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new CayenneException(e);
+
+            // this differs from super
+            int[] results = st.executeBatch();
+            delegate.nextBatchCount(query, results);
+            
+            // TODO: Create QUeryLogger method to log batch counts
         } finally {
             try {
-                if (st != null)
-                    st.close();
+                st.close();
             } catch (Exception e) {
             }
         }
     }
+
 }

@@ -47,3 +47,7 @@ to remove unneeded indirection. QualifierTranslatorFactory class itself is depre
 with correct implementation: org.objectstyle.cayenne.access.util.DefaultSorter, based
 on Ashwood library. 
 
+13. DbAdapter is now serves as a factory of DataNodes. This allows adapters to create
+their own DataNode implementations.
+
+

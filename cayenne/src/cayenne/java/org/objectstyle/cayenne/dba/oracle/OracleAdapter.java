@@ -58,13 +58,10 @@ package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.Types;
 
-import org.objectstyle.cayenne.access.BatchInterpreter;
-import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
-import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
-import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -177,35 +174,6 @@ public class OracleAdapter extends JdbcAdapter {
         }
     }
 
-    public BatchInterpreter getInsertBatchInterpreter() {
-        if (insertBatchInterpreter == null) {
-            insertBatchInterpreter = new OracleBatchInterpreter();
-            insertBatchInterpreter.setAdapter(this);
-            insertBatchInterpreter.setQueryBuilder(
-                new InsertBatchQueryBuilder(this));
-        }
-        return insertBatchInterpreter;
-    }
-
-    public BatchInterpreter getDeleteBatchInterpreter() {
-        if (deleteBatchInterpreter == null) {
-            deleteBatchInterpreter = new OracleBatchInterpreter();
-            deleteBatchInterpreter.setAdapter(this);
-            deleteBatchInterpreter.setQueryBuilder(
-                new DeleteBatchQueryBuilder(this));
-        }
-        return deleteBatchInterpreter;
-    }
-
-    public BatchInterpreter getUpdateBatchInterpreter() {
-        if (updateBatchInterpreter == null) {
-            updateBatchInterpreter = new OracleBatchInterpreter();
-            updateBatchInterpreter.setAdapter(this);
-            updateBatchInterpreter.setQueryBuilder(
-                new UpdateBatchQueryBuilder(this));
-        }
-        return updateBatchInterpreter;
-    }
 
     /**
      * Returns a trimming translator.
@@ -213,4 +181,14 @@ public class OracleAdapter extends JdbcAdapter {
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new TrimmingQualifierTranslator(queryAssembler, "RTRIM");
     }
+
+    /**
+     * Creates an instance of OracleDataNode.
+     */
+    public DataNode createDataNode(String name) {
+        DataNode node = new OracleDataNode(name);
+        node.setAdapter(this);
+        return node;
+    }
+
 }

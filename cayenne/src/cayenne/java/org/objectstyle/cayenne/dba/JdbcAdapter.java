@@ -59,15 +59,12 @@ package org.objectstyle.cayenne.dba;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
 import org.objectstyle.cayenne.access.trans.FlattenedRelationshipDeleteTranslator;
 import org.objectstyle.cayenne.access.trans.FlattenedRelationshipInsertTranslator;
-import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
@@ -76,7 +73,6 @@ import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.SqlModifyTranslator;
 import org.objectstyle.cayenne.access.trans.SqlSelectTranslator;
-import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
@@ -109,9 +105,6 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
-    protected BatchInterpreter insertBatchInterpreter;
-    protected BatchInterpreter deleteBatchInterpreter;
-    protected BatchInterpreter updateBatchInterpreter;
 
     /**
      * Returns an array of all available DbAdapter subclass names.
@@ -432,35 +425,6 @@ public class JdbcAdapter implements DbAdapter {
         return "VIEW";
     }
 
-    public BatchInterpreter getInsertBatchInterpreter() {
-        if (insertBatchInterpreter == null) {
-            insertBatchInterpreter = new BatchInterpreter();
-            insertBatchInterpreter.setAdapter(this);
-            insertBatchInterpreter.setQueryBuilder(
-                new InsertBatchQueryBuilder(this));
-        }
-        return insertBatchInterpreter;
-    }
-
-    public BatchInterpreter getDeleteBatchInterpreter() {
-        if (deleteBatchInterpreter == null) {
-            deleteBatchInterpreter = new BatchInterpreter();
-            deleteBatchInterpreter.setAdapter(this);
-            deleteBatchInterpreter.setQueryBuilder(
-                new DeleteBatchQueryBuilder(this));
-        }
-        return deleteBatchInterpreter;
-    }
-
-    public BatchInterpreter getUpdateBatchInterpreter() {
-        if (updateBatchInterpreter == null) {
-            updateBatchInterpreter = new BatchInterpreter();
-            updateBatchInterpreter.setAdapter(this);
-            updateBatchInterpreter.setQueryBuilder(
-                new UpdateBatchQueryBuilder(this));
-        }
-        return updateBatchInterpreter;
-    }
 
     /**
       * @deprecated Since 1.0Beta1 'getExtendedTypes' is used since this method

@@ -86,6 +86,11 @@ public interface OperationObserver extends OperationHints {
 	 */
     public void nextCount(Query query, int resultCount);
     
+	/** 
+	 * Invoked after the batch update is executed
+	 */
+	public void nextBatchCount(Query query, int[] resultCount);
+    
     
     /** Invoked after the next query results are read. */
     public void nextDataRows(Query query, List dataRows);
