@@ -57,36 +57,36 @@
 package org.objectstyle.cayenne;
 
 /** 
- * A ConfigException is a runtime exception
+ * A ConfigurationException is a runtime exception
  * thrown on failures in Cayenne configuration.
  * 
  * @author Andrei Adamchik 
  */
-public class ConfigException extends CayenneRuntimeException {
+public class ConfigurationException extends CayenneRuntimeException {
     
     /**
-     * Creates new <code>ConfigException</code> without detail message.
+     * Creates new <code>ConfigurationException</code> without detail message.
      */
-    public ConfigException() { }
+    public ConfigurationException() { }
     
     
     /**
-     * Constructs an <code>ConfigException</code> with the specified detail message.
+     * Constructs an <code>ConfigurationException</code> with the specified detail message.
      * @param msg the detail message.
      */
-    public ConfigException(String msg) {
+    public ConfigurationException(String msg) {
         super(msg);
     }
 
     /**
-     * Constructs an <code>ConfigException</code> that wraps <code>exception</code>
+     * Constructs an <code>ConfigurationException</code> that wraps <code>exception</code>
      * thrown elsewhere.
      */
-    public ConfigException(Throwable th) {
+    public ConfigurationException(Throwable th) {
         super(th);
     }
     
-    public ConfigException(String msg, Throwable th) {
+    public ConfigurationException(String msg, Throwable th) {
         super(msg, th);
     }
 }
