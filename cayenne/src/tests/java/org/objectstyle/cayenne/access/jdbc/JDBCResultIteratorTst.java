@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -55,70 +55,77 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.util.List;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.Map;
+
+import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.map.Procedure;
-import org.objectstyle.cayenne.map.ProcedureParameter;
+
+import com.mockrunner.mock.jdbc.MockConnection;
+import com.mockrunner.mock.jdbc.MockResultSet;
+import com.mockrunner.mock.jdbc.MockStatement;
 
 /**
- * A descriptor of a stored procedure parameters, including IN, OUT and INOUT.
- * 
- * @since 1.2
  * @author Andrei Adamchik
  */
-public class ProcedureRowDescriptor extends RowDescriptor {
+public class JDBCResultIteratorTst extends TestCase {
 
-    protected int[] outIndices;
+    public void testClosingConnection() throws Exception {
+        JDBCResultIterator it = makeIterator();
 
-    /**
-     * Creates a row descriptor for stored procedure.
-     */
-    public ProcedureRowDescriptor(Procedure procedure, ExtendedTypeMap types,
-            String[] javaTypeOverrides) {
+        it.setClosingConnection(true);
+        assertTrue(it.isClosingConnection());
 
-        List parameters = procedure.getCallParameters();
-        int outWidth = 0;
-
-        // create columns
-        this.columns = new ColumnDescriptor[parameters.size()];
-
-        for (int i = 0; i < columns.length; i++) {
-            ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
-            columns[i] = new ColumnDescriptor(parameter);
-
-            if (parameter.isOutParam()) {
-                outWidth++;
-            }
-        }
-
-        // index out parameters...
-        if (outWidth == 0) {
-            this.outIndices = new int[0];
-        }
-        else {
-            this.outIndices = new int[outWidth];
-            for (int i = 0, j = 0; i < columns.length; i++) {
-                ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
-                if (parameter.isOutParam()) {
-                    outIndices[j++] = i;
-                }
-            }
-        }
-
-        // override default types
-        if (javaTypeOverrides != null) {
-            overrideJavaTypes(javaTypeOverrides);
-        }
-
-        // index Java classes.
-        indexTypes(types);
+        it.setClosingConnection(false);
+        assertFalse(it.isClosingConnection());
     }
 
-    /**
-     * Returns indices of columns representing procedure OUT parameters.
-     */
-    public int[] getOutIndices() {
-        return outIndices;
+    public void testNextDataRow() throws Exception {
+        JDBCResultIterator it = makeIterator();
+
+        Map row = it.nextDataRow();
+
+        assertNotNull(row);
+        assertEquals(1, row.size());
+        assertEquals("1", row.get("a"));
     }
+
+    public void testClose() throws Exception {
+        MockConnection c = new MockConnection();
+        MockStatement s = new MockStatement(c);
+        MockResultSet rs = new MockResultSet("rs");
+        rs.addColumn("a", new Object[] {
+                "1", "2", "3"
+        });
+        RowDescriptor descriptor = new RowDescriptor(rs, new ExtendedTypeMap());
+
+        JDBCResultIterator it = new JDBCResultIterator(c, s, rs, descriptor, 0);
+
+        assertFalse(rs.isClosed());
+        assertFalse(s.isClosed());
+        assertFalse(c.isClosed());
+
+        it.setClosingConnection(false);
+        it.close();
+
+        assertTrue(rs.isClosed());
+        assertTrue(s.isClosed());
+        assertFalse(c.isClosed());
+    }
+
+    JDBCResultIterator makeIterator() throws Exception {
+
+        Connection c = new MockConnection();
+        Statement s = new MockStatement(c);
+        MockResultSet rs = new MockResultSet("rs");
+        rs.addColumn("a", new Object[] {
+                "1", "2", "3"
+        });
+
+        RowDescriptor descriptor = new RowDescriptor(rs, new ExtendedTypeMap());
+        return new JDBCResultIterator(c, s, rs, descriptor, 0);
+    }
+
 }

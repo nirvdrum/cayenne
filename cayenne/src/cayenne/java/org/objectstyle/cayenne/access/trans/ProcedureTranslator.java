@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -66,7 +65,6 @@ import java.util.Map;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -76,14 +74,13 @@ import org.objectstyle.cayenne.query.ProcedureQuery;
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureTranslator
-    extends QueryTranslator
-    implements SelectQueryTranslator {
+public class ProcedureTranslator extends QueryTranslator {
 
     /**
      * Helper class to make OUT and VOID parameters logger-friendly.
      */
     static class NotInParam {
+
         protected String type;
 
         public NotInParam(String type) {
@@ -174,17 +171,16 @@ public class ProcedureTranslator
         return (ProcedureQuery) query;
     }
 
-    public ResultDescriptor getResultDescriptor(ResultSet rs) {
-        return ResultDescriptor.createDescriptor(rs, getAdapter().getExtendedTypes());
-    }
-
     /**
-     * Returns a result descriptor for the stored procedure OUT parameters. 
+     * Returns a result descriptor for the stored procedure OUT parameters.
+     * 
+     * @deprecated Since 1.2 is unused. Instead OUTParametersReader is created inside a
+     *             SQLAction.
      */
-    public ResultDescriptor getProcedureResultDescriptor() {
-        return ResultDescriptor.createDescriptor(
-            getProcedure(),
-            getAdapter().getExtendedTypes());
+    public org.objectstyle.cayenne.access.util.ResultDescriptor getProcedureResultDescriptor() {
+        return org.objectstyle.cayenne.access.util.ResultDescriptor.createDescriptor(
+                getProcedure(),
+                getAdapter().getExtendedTypes());
     }
 
     /**
@@ -198,7 +194,7 @@ public class ProcedureTranslator
             for (int i = 0; i < len; i++) {
                 ProcedureParameter param = (ProcedureParameter) params.get(i);
 
-                // !Stored procedure parameter can be both in and out 
+                // !Stored procedure parameter can be both in and out
                 // at the same time
                 if (param.isOutParam()) {
                     setOutParam(stmt, param, i + 1);
@@ -235,11 +231,10 @@ public class ProcedureTranslator
      * Sets a single IN parameter of the CallableStatement.
      */
     protected void setInParam(
-        CallableStatement stmt,
-        ProcedureParameter param,
-        Object val,
-        int pos)
-        throws Exception {
+            CallableStatement stmt,
+            ProcedureParameter param,
+            Object val,
+            int pos) throws Exception {
 
         int type = param.getType();
         adapter.bindParameter(stmt, val, pos, type, param.getPrecision());
@@ -249,7 +244,7 @@ public class ProcedureTranslator
      * Sets a single OUT parameter of the CallableStatement.
      */
     protected void setOutParam(CallableStatement stmt, ProcedureParameter param, int pos)
-        throws Exception {
+            throws Exception {
 
         int precision = param.getPrecision();
         if (precision >= 0) {

@@ -66,15 +66,14 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.OptimisticLockException;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -301,12 +300,13 @@ public class BatchAction extends BaseSQLAction {
             OperationObserver observer) throws SQLException, CayenneException {
 
         ResultSet keysRS = statement.getGeneratedKeys();
-        DefaultResultIterator iterator = new DefaultResultIterator(
+        RowDescriptor descriptor = new RowDescriptor(keysRS, getAdapter()
+                .getExtendedTypes());
+        ResultIterator iterator = new JDBCResultIterator(
                 null,
                 null,
                 keysRS,
-                ResultDescriptor
-                        .createDescriptor(keysRS, getAdapter().getExtendedTypes()),
+                descriptor,
                 0);
 
         observer.nextGeneratedDataRows(query, iterator);

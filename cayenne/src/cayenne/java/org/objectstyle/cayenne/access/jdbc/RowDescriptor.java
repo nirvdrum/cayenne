@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access.jdbc;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -95,8 +96,7 @@ public class RowDescriptor {
      * that if javaTypeOverrides array is null, default JDBC to Java types mapping is
      * used.
      */
-    public RowDescriptor(ResultSet resultSet, ExtendedTypeMap types,
-            String[] javaTypeOverrides) {
+    public RowDescriptor(ResultSet resultSet, ExtendedTypeMap types, Map javaTypeOverrides) {
 
         initFromResultSet(resultSet);
 
@@ -124,6 +124,9 @@ public class RowDescriptor {
         }
     }
 
+    /**
+     * Builds columns list from ResultSet metadata.
+     */
     protected void initFromResultSet(ResultSet resultSet) {
         try {
             ResultSetMetaData md = resultSet.getMetaData();
@@ -143,17 +146,18 @@ public class RowDescriptor {
         }
     }
 
-    protected void overrideJavaTypes(String[] overrides) {
-        if (overrides.length != columns.length) {
-            throw new CayenneRuntimeException(
-                    "Size of Java types overrides doesn't match the number of columns in the row. Expected "
-                            + columns.length
-                            + ", got "
-                            + overrides.length);
-        }
+    /**
+     * Overrides Java types of result columns. Keys in the map must correspond to the
+     * names of the columns.
+     */
+    protected void overrideJavaTypes(Map overrides) {
 
         for (int i = 0; i < columns.length; i++) {
-            columns[i].setJavaClass(overrides[i]);
+            String type = (String) overrides.get(columns[i].getName());
+
+            if (type != null) {
+                columns[i].setJavaClass(type);
+            }
         }
     }
 

@@ -57,18 +57,19 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
-
-
 /**
  * Interface that defines common API for SELECT translators.
- *
+ * 
  * @author Andrei Adamchik
+ * @deprecated Unused since 1.2. This interface is useless for queries with more than one
+ *             ResultSet, also a reponsibility of creating ResultDescriptors
+ *             (RowDescriptors in 1.2) was moved to actions.
  */
 public interface SelectQueryTranslator {
 
     /**
      * Returns a descriptor that contains information needed for the ResultSet processing.
      */
-    public ResultDescriptor getResultDescriptor(ResultSet rs);
+    public org.objectstyle.cayenne.access.util.ResultDescriptor getResultDescriptor(
+            ResultSet rs);
 }

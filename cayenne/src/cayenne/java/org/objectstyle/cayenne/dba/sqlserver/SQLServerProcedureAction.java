@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
+import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
@@ -104,49 +105,66 @@ class SQLServerProcedureAction extends ProcedureAction {
         CallableStatement statement = (CallableStatement) transl.createStatement(query
                 .getLoggingLevel());
 
-        // stored procedure may contain a mixture of update counts and result sets,
-        // and out parameters. Read out parameters first, then
-        // iterate until we exhaust all results
-        boolean hasResultSet = statement.execute();
+        try {
+            // stored procedure may contain a mixture of update counts and result sets,
+            // and out parameters. Read out parameters first, then
+            // iterate until we exhaust all results
+            boolean hasResultSet = statement.execute();
 
-        // local observer to cache results and provide them to the external observer in
-        // the order consistent
-        // with other adapters.
+            // local observer to cache results and provide them to the external observer
+            // in
+            // the order consistent
+            // with other adapters.
 
-        Observer localObserver = new Observer(observer);
+            Observer localObserver = new Observer(observer);
 
-        // read query, using local observer
-        while (true) {
-            if (hasResultSet) {
-                ResultSet rs = statement.getResultSet();
-
-                readResultSet(
-                        rs,
-                        transl.getResultDescriptor(rs),
-                        (GenericSelectQuery) query,
-                        localObserver);
-            }
-            else {
-                int updateCount = statement.getUpdateCount();
-                if (updateCount == -1) {
-                    break;
+            // read query, using local observer
+            while (true) {
+                if (hasResultSet) {
+                    ResultSet rs = statement.getResultSet();
+                    try {
+                        RowDescriptor descriptor = new RowDescriptor(rs, getAdapter()
+                                .getExtendedTypes());
+                        readResultSet(
+                                rs,
+                                descriptor,
+                                (GenericSelectQuery) query,
+                                localObserver);
+                    }
+                    finally {
+                        try {
+                            rs.close();
+                        }
+                        catch (SQLException ex) {
+                        }
+                    }
                 }
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
-                localObserver.nextCount(query, updateCount);
+                else {
+                    int updateCount = statement.getUpdateCount();
+                    if (updateCount == -1) {
+                        break;
+                    }
+                    QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
+                    localObserver.nextCount(query, updateCount);
+                }
+
+                hasResultSet = statement.getMoreResults();
             }
 
-            hasResultSet = statement.getMoreResults();
+            // read out parameters to the main observer ... AFTER the main result set
+            readProcedureOutParameters(statement, transl.getProcedure(), query, observer);
+
+            // add results back to main observer
+            localObserver.flushResults(query);
         }
+        finally {
+            try {
+                statement.close();
+            }
+            catch (SQLException ex) {
 
-        // read out parameters to the main observer ... AFTER the main result set
-        readStoredProcedureOutParameters(
-                statement,
-                transl.getProcedureResultDescriptor(),
-                query,
-                observer);
-
-        // add results back to main observer
-        localObserver.flushResults(query);
+            }
+        }
     }
 
     class Observer implements OperationObserver {

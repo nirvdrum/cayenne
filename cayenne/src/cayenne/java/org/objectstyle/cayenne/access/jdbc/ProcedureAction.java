@@ -60,15 +60,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
@@ -82,8 +85,10 @@ public class ProcedureAction extends BaseSQLAction {
         super(adapter, entityResolver);
     }
 
-    public void performAction(Connection connection, Query query, OperationObserver observer)
-            throws SQLException, Exception {
+    public void performAction(
+            Connection connection,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
 
         ProcedureTranslator transl = (ProcedureTranslator) getAdapter()
                 .getQueryTranslator(query);
@@ -100,8 +105,7 @@ public class ProcedureAction extends BaseSQLAction {
             statement.execute();
 
             // read out parameters
-            readStoredProcedureOutParameters(statement, transl
-                    .getProcedureResultDescriptor(), query, observer);
+            readProcedureOutParameters(statement, transl.getProcedure(), query, observer);
 
             // read the rest of the query
             while (true) {
@@ -109,9 +113,11 @@ public class ProcedureAction extends BaseSQLAction {
                     ResultSet rs = statement.getResultSet();
 
                     try {
+                        RowDescriptor descriptor = new RowDescriptor(rs, getAdapter()
+                                .getExtendedTypes());
                         readResultSet(
                                 rs,
-                                transl.getResultDescriptor(rs),
+                                descriptor,
                                 (GenericSelectQuery) query,
                                 observer);
                     }
@@ -146,21 +152,43 @@ public class ProcedureAction extends BaseSQLAction {
     /**
      * Helper method that reads OUT parameters of a CallableStatement.
      */
-    protected void readStoredProcedureOutParameters(
+    protected void readProcedureOutParameters(
             CallableStatement statement,
-            ResultDescriptor descriptor,
+            Procedure procedure,
             Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
-        Map row = DefaultResultIterator.readProcedureOutParameters(statement, descriptor);
 
-        if (!row.isEmpty()) {
+        // build result row...
+        Map result = null;
+        List parameters = procedure.getCallParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
+
+            if (!parameter.isOutParam()) {
+                continue;
+            }
+
+            if (result == null) {
+                result = new HashMap();
+            }
+
+            ColumnDescriptor descriptor = new ColumnDescriptor(parameter);
+            ExtendedType type = getAdapter().getExtendedTypes().getRegisteredType(
+                    descriptor.getJavaClass());
+            Object val = type.materializeObject(statement, i + 1, descriptor
+                    .getJdbcType());
+
+            result.put(descriptor.getLabel(), val);
+        }
+
+        if (result != null && !result.isEmpty()) {
             // treat out parameters as a separate data row set
             QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
                     .currentTimeMillis()
                     - t1);
-            delegate.nextDataRows(query, Collections.singletonList(row));
+            delegate.nextDataRows(query, Collections.singletonList(result));
         }
     }
 }

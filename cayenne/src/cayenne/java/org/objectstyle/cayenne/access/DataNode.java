@@ -73,13 +73,13 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.BatchAction;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
+import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.access.jdbc.SQLAction;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateAction;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectAction;
 import org.objectstyle.cayenne.access.jdbc.SelectAction;
 import org.objectstyle.cayenne.access.jdbc.UpdateAction;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -87,6 +87,7 @@ import org.objectstyle.cayenne.map.AshwoodEntitySorter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.EntitySorter;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -427,14 +428,15 @@ public class DataNode implements QueryEngine {
      */
     protected void readStoredProcedureOutParameters(
             CallableStatement statement,
-            ResultDescriptor descriptor,
+            org.objectstyle.cayenne.access.util.ResultDescriptor descriptor,
             Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder
-        new TempProcedureAction().readStoredProcedureOutParameters(
+        Procedure procedure = (Procedure) query.getRoot();
+        new TempProcedureAction().readProcedureOutParameters(
                 statement,
-                descriptor,
+                procedure,
                 query,
                 delegate);
     }
@@ -446,12 +448,15 @@ public class DataNode implements QueryEngine {
      */
     protected void readResultSet(
             ResultSet resultSet,
-            ResultDescriptor descriptor,
+            org.objectstyle.cayenne.access.util.ResultDescriptor descriptor,
             GenericSelectQuery query,
             OperationObserver delegate) throws SQLException, Exception {
 
         // method is deprecated, so keep this ugly piece here as a placeholder
-        new TempProcedureAction().readResultSet(resultSet, descriptor, query, delegate);
+        RowDescriptor rowDescriptor = new RowDescriptor(resultSet, getAdapter()
+                .getExtendedTypes());
+        new TempProcedureAction()
+                .readResultSet(resultSet, rowDescriptor, query, delegate);
     }
 
     /**
@@ -507,23 +512,18 @@ public class DataNode implements QueryEngine {
         }
 
         // changing access to public
-        public void readStoredProcedureOutParameters(
+        public void readProcedureOutParameters(
                 CallableStatement statement,
-                ResultDescriptor descriptor,
+                Procedure procedure,
                 Query query,
                 OperationObserver delegate) throws SQLException, Exception {
-            super
-                    .readStoredProcedureOutParameters(
-                            statement,
-                            descriptor,
-                            query,
-                            delegate);
+            super.readProcedureOutParameters(statement, procedure, query, delegate);
         }
 
         // changing access to public
         public void readResultSet(
                 ResultSet resultSet,
-                ResultDescriptor descriptor,
+                RowDescriptor descriptor,
                 GenericSelectQuery query,
                 OperationObserver delegate) throws SQLException, Exception {
             super.readResultSet(resultSet, descriptor, query, delegate);

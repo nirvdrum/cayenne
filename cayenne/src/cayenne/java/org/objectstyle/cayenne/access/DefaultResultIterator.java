@@ -73,7 +73,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.util.Util;
 
@@ -85,6 +84,7 @@ import org.objectstyle.cayenne.util.Util;
  * target="_top">Cayenne User Guide.</a></i></p>
  *
  * @author Andrei Adamchik
+ * @deprecated Since 1.2 replaced by JDBCResultIterator.
  */
 public class DefaultResultIterator implements ResultIterator {
     private static Logger logObj = Logger.getLogger(DefaultResultIterator.class);
@@ -95,7 +95,7 @@ public class DefaultResultIterator implements ResultIterator {
     protected ResultSet resultSet;
 
     // Result descriptor
-    protected ResultDescriptor descriptor;
+    protected org.objectstyle.cayenne.access.util.ResultDescriptor descriptor;
 
     protected int mapCapacity;
 
@@ -112,7 +112,7 @@ public class DefaultResultIterator implements ResultIterator {
      */
     public static Map readProcedureOutParameters(
         CallableStatement statement,
-        ResultDescriptor resultDescriptor)
+        org.objectstyle.cayenne.access.util.ResultDescriptor resultDescriptor)
         throws SQLException, Exception {
 
         int resultWidth = resultDescriptor.getResultWidth();
@@ -146,7 +146,7 @@ public class DefaultResultIterator implements ResultIterator {
         Connection connection,
         Statement statement,
         ResultSet resultSet,
-        ResultDescriptor descriptor,
+        org.objectstyle.cayenne.access.util.ResultDescriptor descriptor,
         int fetchLimit)
         throws SQLException, CayenneException {
 

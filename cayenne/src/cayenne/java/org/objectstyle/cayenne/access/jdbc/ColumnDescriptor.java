@@ -59,10 +59,15 @@ package org.objectstyle.cayenne.access.jdbc;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ProcedureParameter;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * A descriptor of a ResultSet column.
@@ -72,10 +77,23 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
  */
 public class ColumnDescriptor {
 
+    protected String tableName;
+    protected String procedureName;
+
+    // identifies column in result set
+    protected String name;
+    protected String namePrefix;
+
+    // identifies column in a DataRow
+    protected String label;
+
+    /**
+     * @deprecated since 1.2
+     */
+    protected boolean primaryKey;
+
     protected int jdbcType;
     protected String javaClass;
-    protected String name;
-    protected boolean primaryKey;
 
     /**
      * Creates a ColumnDescriptor
@@ -84,12 +102,29 @@ public class ColumnDescriptor {
     }
 
     /**
+     * Creates a ColumnDescriptor from Cayenne DbAttribute.
+     * 
+     * @since 1.2
+     */
+    public ColumnDescriptor(DbAttribute attribute) {
+        this.name = attribute.getName();
+        this.label = name;
+        this.jdbcType = attribute.getType();
+        this.primaryKey = attribute.isPrimaryKey();
+        this.javaClass = getDefaultJavaClass(attribute.getMaxLength(), attribute
+                .getPrecision());
+
+        if (attribute.getEntity() != null) {
+            this.tableName = attribute.getEntity().getName();
+        }
+    }
+
+    /**
      * Creates a ColumnDescriptor from Cayenne ObjAttribute and DbAttribute.
      */
     public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
-        this.name = dbAttribute.getName();
-        this.jdbcType = dbAttribute.getType();
-        this.primaryKey = dbAttribute.isPrimaryKey();
+        this(dbAttribute);
+        this.label = objAttribute.getDbAttributePath();
         this.javaClass = objAttribute.getType();
     }
 
@@ -100,9 +135,14 @@ public class ColumnDescriptor {
      */
     public ColumnDescriptor(ProcedureParameter parameter) {
         this.name = parameter.getName();
+        this.label = name;
         this.jdbcType = parameter.getType();
         this.javaClass = getDefaultJavaClass(parameter.getMaxLength(), parameter
                 .getPrecision());
+
+        if (parameter.getProcedure() != null) {
+            this.procedureName = parameter.getProcedure().getName();
+        }
     }
 
     /**
@@ -121,10 +161,55 @@ public class ColumnDescriptor {
         }
 
         this.name = name;
+        this.label = name;
         this.jdbcType = metaData.getColumnType(position);
-        this.javaClass = getDefaultJavaClass(
-                metaData.getColumnDisplaySize(position),
+        this.javaClass = getDefaultJavaClass(metaData.getColumnDisplaySize(position),
                 metaData.getScale(position));
+    }
+
+    /**
+     * Returns true if another object is a ColumnDescriptor with the same name, name
+     * prefix, table and procedure names. Other fields are ignored in the equality test.
+     * 
+     * @since 1.2
+     */
+    public boolean equals(Object o) {
+        if (!(o instanceof ColumnDescriptor)) {
+            return false;
+        }
+
+        ColumnDescriptor rhs = (ColumnDescriptor) o;
+        return new EqualsBuilder().append(name, rhs.name).append(namePrefix,
+                rhs.namePrefix).append(procedureName, rhs.procedureName).append(label,
+                rhs.label).append(tableName, rhs.tableName).isEquals();
+    }
+
+    /**
+     * @since 1.2
+     */
+    public int hashCode() {
+        return new HashCodeBuilder(23, 43)
+                .append(name)
+                .append(namePrefix)
+                .append(procedureName)
+                .append(tableName)
+                .append(label)
+                .toHashCode();
+    }
+
+    /**
+     * @since 1.2
+     */
+    public String toString() {
+        ToStringBuilder builder = new ToStringBuilder(this);
+        builder.append("namePrefix", getNamePrefix());
+        builder.append("name", getName());
+        builder.append("label", getLabel());
+        builder.append("tableName", getTableName());
+        builder.append("procedureName", getProcedureName());
+        builder.append("javaClass", getJavaClass());
+        builder.append("jdbcType", getJdbcType());
+        return builder.toString();
     }
 
     /**
@@ -136,10 +221,34 @@ public class ColumnDescriptor {
         return TypesMapping.getJavaBySqlType(getJdbcType(), size, scale);
     }
 
+    /**
+     * Builds column name combining the prefix and name. If no name exists, throws a
+     * CayenneRuntimeException.
+     * 
+     * @since 1.2
+     */
+    public String getQualifiedColumnName() {
+        if (Util.isEmptyString(name)) {
+            throw new CayenneRuntimeException(
+                    "Can't build column name - 'name'must be set.");
+        }
+
+        StringBuffer buffer = new StringBuffer();
+        if (!Util.isEmptyString(namePrefix)) {
+            buffer.append(namePrefix).append('.');
+        }
+
+        buffer.append(name);
+        return buffer.toString();
+    }
+
     public int getJdbcType() {
         return jdbcType;
     }
 
+    /**
+     * Retunrs column name. Name is an unqualified column name in a query.
+     */
     public String getName() {
         return name;
     }
@@ -152,6 +261,9 @@ public class ColumnDescriptor {
         name = string;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public boolean isPrimaryKey() {
         return primaryKey;
     }
@@ -160,11 +272,78 @@ public class ColumnDescriptor {
         return javaClass;
     }
 
+    /**
+     * @deprecated since 1.2
+     */
     public void setPrimaryKey(boolean b) {
         primaryKey = b;
     }
 
     public void setJavaClass(String string) {
         javaClass = string;
+    }
+
+    /**
+     * Returns the name of the parent table.
+     * 
+     * @since 1.2
+     */
+    public String getTableName() {
+        return tableName;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
+    /**
+     * Returns the name of the parent stored procedure.
+     * 
+     * @since 1.2
+     */
+    public String getProcedureName() {
+        return procedureName;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setProcedureName(String procedureName) {
+        this.procedureName = procedureName;
+    }
+
+    /**
+     * Returns prefix used to name the column in a query. Such as "t0" or "tablex", etc.
+     * 
+     * @since 1.2
+     */
+    public String getNamePrefix() {
+        return namePrefix;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setNamePrefix(String namePrefix) {
+        this.namePrefix = namePrefix;
+    }
+
+    /**
+     * Returns "label" used in a DataRow for column value.
+     * 
+     * @since 1.2
+     */
+    public String getLabel() {
+        return (label != null) ? label : getName();
+    }
+
+    /**
+     * @since 1.2
+     */
+    public void setLabel(String columnName) {
+        this.label = columnName;
     }
 }

@@ -1,56 +1,34 @@
-/* ====================================================================
- * 
- * The ObjectStyle Group Software License, version 1.1
- * ObjectStyle Group - http://objectstyle.org/
- * 
- * Copyright (c) 2002-2004, Andrei (Andrus) Adamchik and individual authors
- * of the software. All rights reserved.
- * 
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 
- * 3. The end-user documentation included with the redistribution, if any,
- *    must include the following acknowlegement:
- *    "This product includes software developed by independent contributors
- *    and hosted on ObjectStyle Group web site (http://objectstyle.org/)."
- *    Alternately, this acknowlegement may appear in the software itself,
- *    if and wherever such third-party acknowlegements normally appear.
- * 
- * 4. The names "ObjectStyle Group" and "Cayenne" must not be used to endorse
- *    or promote products derived from this software without prior written
- *    permission. For written permission, email
- *    "andrus at objectstyle dot org".
- * 
- * 5. Products derived from this software may not be called "ObjectStyle"
- *    or "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their
- *    names without prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
- * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
- * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
- * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- * ====================================================================
- * 
- * This software consists of voluntary contributions made by many
- * individuals and hosted on ObjectStyle Group web site.  For more
- * information on the ObjectStyle Group, please see
+/*
+ * ==================================================================== The ObjectStyle
+ * Group Software License, version 1.1 ObjectStyle Group - http://objectstyle.org/
+ * Copyright (c) 2002-2004, Andrei (Andrus) Adamchik and individual authors of the
+ * software. All rights reserved. Redistribution and use in source and binary forms, with
+ * or without modification, are permitted provided that the following conditions are met:
+ * 1. Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer. 2. Redistributions in binary form must
+ * reproduce the above copyright notice, this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the distribution.
+ * 3. The end-user documentation included with the redistribution, if any, must include
+ * the following acknowlegement: "This product includes software developed by independent
+ * contributors and hosted on ObjectStyle Group web site (http://objectstyle.org/)."
+ * Alternately, this acknowlegement may appear in the software itself, if and wherever
+ * such third-party acknowlegements normally appear. 4. The names "ObjectStyle Group" and
+ * "Cayenne" must not be used to endorse or promote products derived from this software
+ * without prior written permission. For written permission, email "andrus at objectstyle
+ * dot org". 5. Products derived from this software may not be called "ObjectStyle" or
+ * "Cayenne", nor may "ObjectStyle" or "Cayenne" appear in their names without prior
+ * written permission. THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE OBJECTSTYLE
+ * GROUP OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ==================================================================== This software
+ * consists of voluntary contributions made by many individuals and hosted on ObjectStyle
+ * Group web site. For more information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
 package org.objectstyle.cayenne.access.trans;
@@ -58,7 +36,6 @@ package org.objectstyle.cayenne.access.trans;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -66,15 +43,17 @@ import java.util.List;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
-import org.objectstyle.art.ArtistPaintingCounts;
 import org.objectstyle.art.CompoundPainting;
 import org.objectstyle.art.Painting;
-import org.objectstyle.art.SubPainting;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -85,9 +64,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
      */
     public void testCreateSqlString1() throws Exception {
         // query with qualifier and ordering
-        SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory.likeExp(
-                "artistName",
-                "a%"));
+        SelectQuery q = new SelectQuery(Artist.class, ExpressionFactory
+                .likeExp("artistName", "a%"));
         q.addOrdering("dateOfBirth", Ordering.ASC);
 
         Template test = new Template() {
@@ -139,9 +117,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
         Artist a1 = (Artist) createDataContext().registeredObject(id);
 
         // query with qualifier and ordering
-        SelectQuery q = new SelectQuery(ArtistAssets.class, ExpressionFactory.matchExp(
-                "toArtist",
-                a1));
+        SelectQuery q = new SelectQuery(ArtistAssets.class, ExpressionFactory
+                .matchExp("toArtist", a1));
 
         Template test = new Template() {
 
@@ -173,8 +150,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
         SelectQuery q = new SelectQuery(ArtistAssets.class);
         q.setParentObjEntityName("Painting");
         q.setParentQualifier(ExpressionFactory.matchExp("toArtist.artistName", "abc"));
-        q.andParentQualifier(ExpressionFactory.greaterOrEqualExp(
-                "estimatedPrice",
+        q.andParentQualifier(ExpressionFactory.greaterOrEqualExp("estimatedPrice",
                 new BigDecimal(1)));
         q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(3)));
 
@@ -222,9 +198,8 @@ public class SelectTranslatorTst extends CayenneTestCase {
         // query with qualifier and ordering
         SelectQuery q = new SelectQuery(ArtistExhibit.class);
         q.setQualifier(ExpressionFactory.likeExp("toArtist.artistName", "a%"));
-        q.andQualifier(ExpressionFactory.likeExp(
-                "toExhibit.toGallery.paintingArray.toArtist.artistName",
-                "a%"));
+        q.andQualifier(ExpressionFactory
+                .likeExp("toExhibit.toGallery.paintingArray.toArtist.artistName", "a%"));
 
         Template test = new Template() {
 
@@ -265,8 +240,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
         // query with qualifier and ordering
         SelectQuery q = new SelectQuery(ArtistExhibit.class);
         q.setQualifier(ExpressionFactory.likeExp("toArtist.artistName", "a%"));
-        q.andQualifier(ExpressionFactory.likeExp(
-                "toArtist.paintingArray.paintingTitle",
+        q.andQualifier(ExpressionFactory.likeExp("toArtist.paintingArray.paintingTitle",
                 "p%"));
 
         Template test = new Template() {
@@ -503,7 +477,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
                 assertTrue(sql, i3 < 0 || i3 > i2);
 
                 assertTrue(sql, sql.indexOf("PAINTING_ID") > 0);
-                
+
                 // assert we have one join
                 assertEquals(1, transl.dbRelList.size());
             }
@@ -534,95 +508,73 @@ public class SelectTranslatorTst extends CayenneTestCase {
         test.test(q);
     }
 
-    public void testBuildColumnList1() throws Exception {
-        // configure query with entity that maps one-to-one to DbEntity
-        SelectQuery q = new SelectQuery(Artist.class);
+    /**
+     * Tests columns generated for a simple object query.
+     */
+    public void testBuildResultColumns1() throws Exception {
+        SelectQuery q = new SelectQuery(Painting.class);
+        SelectTranslator tr = makeTranslator(q);
 
-        Template test = new Template() {
+        List columns = tr.buildResultColumns();
 
-            void test(SelectTranslator transl) throws Exception {
-
-                transl.createSqlString();
-
-                List columns = transl.getColumns();
-                Collection dbAttrs = getDbEntity("ARTIST").getAttributes();
-
-                assertEquals(dbAttrs.size(), columns.size());
-                Iterator it = dbAttrs.iterator();
-                while (it.hasNext()) {
-                    assertTrue(columns.contains(it.next()));
-                }
-            }
-        };
-
-        test.test(q);
+        // all DbAttributes must be included
+        DbEntity entity = getDbEntity("PAINTING");
+        Iterator it = entity.getAttributes().iterator();
+        while (it.hasNext()) {
+            DbAttribute a = (DbAttribute) it.next();
+            ColumnDescriptor c = new ColumnDescriptor(a);
+            c.setNamePrefix("t0");
+            assertTrue("No descriptor for " + a + ", columns: " + columns, columns
+                    .contains(c));
+        }
     }
 
-    public void testBuildColumnList2() throws Exception {
-        SelectQuery q = new SelectQuery();
-        // configure query with custom attributes
-        q.setRoot(Artist.class);
-        q.addCustomDbAttribute("ARTIST_ID");
+    /**
+     * Tests columns generated for an object query with joint prefetch.
+     */
+    public void testBuildResultColumns2() throws Exception {
+        SelectQuery q = new SelectQuery(Painting.class);
+        q.addJointPrefetch("toArtist");
+        SelectTranslator tr = makeTranslator(q);
 
-        Template test = new Template() {
+        List columns = tr.buildResultColumns();
 
-            void test(SelectTranslator transl) throws Exception {
-
-                transl.createSqlString();
-
-                List columns = transl.getColumns();
-                Object[] dbAttrs = new Object[] {
-                    getDbEntity("ARTIST").getAttribute("ARTIST_ID")
-                };
-
-                assertEquals(dbAttrs.length, columns.size());
-                for (int i = 0; i < dbAttrs.length; i++) {
-                    assertTrue(columns.contains(dbAttrs[i]));
-                }
+        // assert root entity columns
+        DbEntity entity = getDbEntity("PAINTING");
+        Iterator it = entity.getAttributes().iterator();
+        while (it.hasNext()) {
+            DbAttribute a = (DbAttribute) it.next();
+            ColumnDescriptor c = new ColumnDescriptor(a);
+            c.setNamePrefix("t0");
+            assertTrue("No descriptor for " + a + ", columns: " + columns, columns
+                    .contains(c));
+        }
+        
+        // assert joined columns
+        DbEntity joined = getDbEntity("ARTIST");
+        Iterator itj = joined.getAttributes().iterator();
+        while (itj.hasNext()) {
+            DbAttribute a = (DbAttribute) itj.next();
+            
+            // skip ARTIST PK, it is joined from painting
+            if(Artist.ARTIST_ID_PK_COLUMN.equals(a.getName())) {
+                continue;
             }
-        };
-
-        test.test(q);
+            
+            ColumnDescriptor c = new ColumnDescriptor(a);
+            c.setNamePrefix("t1");
+            c.setLabel("toArtist." + a.getName());
+            assertTrue("No descriptor for " + a + ", columns: " + columns, columns
+                    .contains(c));
+        }
     }
 
-    public void testBuildColumnList3() throws Exception {
-        // configure query with entity that maps to a subset of DbEntity
-        SelectQuery q = new SelectQuery(SubPainting.class);
-
-        Template test = new Template() {
-
-            void test(SelectTranslator transl) throws Exception {
-
-                transl.createSqlString();
-                List columns = transl.getColumns();
-
-                // assert that the number of attributes in the query is right
-                // 1 (obj attr) + 1 (pk) = 2
-                assertEquals(2, columns.size());
-            }
-        };
-
-        test.test(q);
-    }
-
-    public void testBuildColumnList4() throws Exception {
-        // configure query with derived entity that maps to a subset of DbEntity
-        SelectQuery q = new SelectQuery(ArtistPaintingCounts.class);
-
-        Template test = new Template() {
-
-            void test(SelectTranslator transl) throws Exception {
-
-                transl.createSqlString();
-                List columns = transl.getColumns();
-
-                // assert that the number of attributes in the query is right
-                // 1 (obj attr) + 1 (pk) = 2
-                assertEquals(2, columns.size());
-            }
-        };
-
-        test.test(q);
+    SelectTranslator makeTranslator(Query q) throws Exception {
+        SelectTranslator transl = (SelectTranslator) getNode()
+                .getAdapter()
+                .getQueryTranslator(q);
+        transl.setEntityResolver(getNode().getEntityResolver());
+        return transl;
     }
 
     /**
@@ -632,10 +584,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
     abstract class Template {
 
         void test(SelectQuery q) throws Exception {
-            SelectTranslator transl = (SelectTranslator) getNode()
-                    .getAdapter()
-                    .getQueryTranslator(q);
-            transl.setEntityResolver(getNode().getEntityResolver());
+            SelectTranslator transl = makeTranslator(q);
 
             Connection c = getConnection();
             try {

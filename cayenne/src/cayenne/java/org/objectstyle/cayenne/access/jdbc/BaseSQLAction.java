@@ -60,10 +60,8 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -98,12 +96,12 @@ public abstract class BaseSQLAction implements SQLAction {
      */
     protected void readResultSet(
             ResultSet resultSet,
-            ResultDescriptor descriptor,
+            RowDescriptor descriptor,
             GenericSelectQuery query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
-        DefaultResultIterator resultReader = new DefaultResultIterator(
+        JDBCResultIterator resultReader = new JDBCResultIterator(
                 null,
                 null,
                 resultSet,

@@ -76,11 +76,14 @@ import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 
 /**
- * Contains information about the ResultSet used to process fetched rows. 
- * ResultDescriptor is initialized by calling various "add*" methods, after that
- * it must be indexed by calling "index".
+ * Contains information about the ResultSet used to process fetched rows. ResultDescriptor
+ * is initialized by calling various "add*" methods, after that it must be indexed by
+ * calling "index".
  * 
  * @author Andrei Adamchik
+ * @deprecated Since 1.2 replaced with RowDescriptor that provides clean and
+ *             straightforward creation options instead of ResultDescriptor's obscure ways
+ *             to index Cayenne attributes data.
  */
 public class ResultDescriptor {
 
@@ -102,8 +105,8 @@ public class ResultDescriptor {
      * Creates and returns a ResultDescritor based on ResultSet metadata.
      */
     public static ResultDescriptor createDescriptor(
-        ResultSet resultSet,
-        ExtendedTypeMap typeConverters) {
+            ResultSet resultSet,
+            ExtendedTypeMap typeConverters) {
         ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
         try {
             ResultSetMetaData md = resultSet.getMetaData();
@@ -133,8 +136,10 @@ public class ResultDescriptor {
                 desc.setType(md.getColumnType(i + 1));
 
                 descriptor.addDbAttribute(desc);
-                descriptor.addJavaType(
-                    TypesMapping.getJavaBySqlType(sqlType, length, precision));
+                descriptor.addJavaType(TypesMapping.getJavaBySqlType(
+                        sqlType,
+                        length,
+                        precision));
             }
         }
         catch (SQLException sqex) {
@@ -151,8 +156,8 @@ public class ResultDescriptor {
      * @since 1.1
      */
     public static ResultDescriptor createDescriptor(
-        ColumnDescriptor[] columns,
-        ExtendedTypeMap typeConverters) {
+            ColumnDescriptor[] columns,
+            ExtendedTypeMap typeConverters) {
 
         ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
 
@@ -165,8 +170,8 @@ public class ResultDescriptor {
         for (int i = 0; i < len; i++) {
             descriptor.names[i] = columns[i].getName();
             descriptor.jdbcTypes[i] = columns[i].getJdbcType();
-            descriptor.converters[i] =
-                typeConverters.getRegisteredType(columns[i].getJavaClass());
+            descriptor.converters[i] = typeConverters.getRegisteredType(columns[i]
+                    .getJavaClass());
             if (columns[i].isPrimaryKey()) {
                 idWidth++;
             }
@@ -176,16 +181,16 @@ public class ResultDescriptor {
     }
 
     /**
-     * Creates and returns a ResultDescriptor for the stored procedure parameters. 
+     * Creates and returns a ResultDescriptor for the stored procedure parameters.
      */
     public static ResultDescriptor createDescriptor(
-        Procedure procedure,
-        ExtendedTypeMap typeConverters) {
+            Procedure procedure,
+            ExtendedTypeMap typeConverters) {
         ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
         Iterator it = procedure.getCallParameters().iterator();
         while (it.hasNext()) {
-            descriptor.addDbAttribute(
-                new ProcedureParameterWrapper((ProcedureParameter) it.next()));
+            descriptor.addDbAttribute(new ProcedureParameterWrapper(
+                    (ProcedureParameter) it.next()));
         }
 
         descriptor.index();
@@ -242,8 +247,8 @@ public class ResultDescriptor {
                     int[] tmp = new int[resultWidth];
                     int j = 0;
                     for (int i = 0; i < resultWidth; i++) {
-                        DbAttribute attribute =
-                            (DbAttribute) entity.getAttribute(names[i]);
+                        DbAttribute attribute = (DbAttribute) entity
+                                .getAttribute(names[i]);
                         if (attribute != null && attribute.isPrimaryKey()) {
                             tmp[j++] = i;
                         }
@@ -263,7 +268,8 @@ public class ResultDescriptor {
 
         // assert validity
         if (javaTypes.size() > 0 && javaTypes.size() != dbAttributes.size()) {
-            throw new IllegalArgumentException("DbAttributes and Java type arrays must have the same size.");
+            throw new IllegalArgumentException(
+                    "DbAttributes and Java type arrays must have the same size.");
         }
 
         // init various things
@@ -418,6 +424,7 @@ public class ResultDescriptor {
     // look like a DbAttribute. A better implementation would
     // probably be a common interface for both.
     static class ProcedureParameterWrapper extends DbAttribute {
+
         ProcedureParameter parameter;
 
         ProcedureParameterWrapper(ProcedureParameter parameter) {

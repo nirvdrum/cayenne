@@ -55,20 +55,20 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
-import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -88,7 +88,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * 
  * @author Andrei Adamchik
  */
-public class SelectTranslator extends QueryAssembler implements SelectQueryTranslator {
+public class SelectTranslator extends QueryAssembler {
 
     protected static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
             Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR
@@ -110,7 +110,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     final List aliasList = new ArrayList();
     final List dbRelList = new ArrayList();
 
-    List columnList;
+    List resultColumns;
     List groupByList;
 
     int aliasCounter;
@@ -126,9 +126,13 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
 
     /**
      * Returns a list of DbAttributes representing columns in this query.
+     * 
+     * @deprecated since 1.2 - contents of this list are now ColumnDescriptors, not
+     *             DbAttributes. Anyway, use getResultColumns() instead to reduce
+     *             confusion.
      */
     protected List getColumns() {
-        return columnList;
+        return resultColumns;
     }
 
     /**
@@ -139,8 +143,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         forcingDistinct = false;
 
         // build column list
-        newAliasForTable(getRootDbEntity());
-        this.columnList = buildColumnList();
+        this.resultColumns = buildResultColumns();
 
         QualifierTranslator tr = adapter.getQualifierTranslator(this);
 
@@ -169,16 +172,15 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         StringBuffer queryBuf = new StringBuffer();
         queryBuf.append("SELECT ");
 
+        // check if DISTINCT is appropriate
+        // side effect: "suppressingDistinct" flag may end up being flipped here
         if (forcingDistinct || getSelectQuery().isDistinct()) {
 
-            // check if DISTINCT is appropriate
-            // side effect: "suppressingDistinct" flag may end up being flipped here
             suppressingDistinct = false;
-            Iterator it = getColumns().iterator();
+            Iterator it = resultColumns.iterator();
             while (it.hasNext()) {
-                DbAttribute attribute = (DbAttribute) it.next();
-                if (attribute != null && isUnsupportedForDistinct(attribute.getType())) {
-
+                ColumnDescriptor column = (ColumnDescriptor) it.next();
+                if (isUnsupportedForDistinct(column.getJdbcType())) {
                     suppressingDistinct = true;
                     break;
                 }
@@ -189,10 +191,13 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
         }
 
+        // convert ColumnDescriptors to column names
         List selectColumnExpList = new ArrayList();
 
-        for (int i = 0; i < columnList.size(); i++) {
-            selectColumnExpList.add(getColumn(i));
+        Iterator it = resultColumns.iterator();
+        while (it.hasNext()) {
+            ColumnDescriptor column = (ColumnDescriptor) it.next();
+            selectColumnExpList.add(column.getQualifiedColumnName());
         }
 
         // append any column expressions used in the order by if this query
@@ -200,6 +205,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         if (forcingDistinct || getSelectQuery().isDistinct()) {
             List orderByColumnList = orderingTranslator.getOrderByColumnList();
             for (int i = 0; i < orderByColumnList.size(); i++) {
+                // Convert to ColumnDescriptors??
                 Object orderByColumnExp = orderByColumnList.get(i);
                 if (!selectColumnExpList.contains(orderByColumnExp)) {
                     selectColumnExpList.add(orderByColumnExp);
@@ -299,6 +305,19 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     }
 
     /**
+     * Returns a list of ColumnDescriptors for the query columns.
+     * 
+     * @since 1.2
+     */
+    public ColumnDescriptor[] getResultColumns() {
+        if (resultColumns == null || resultColumns.isEmpty()) {
+            return new ColumnDescriptor[0];
+        }
+
+        return (ColumnDescriptor[]) resultColumns.toArray(new ColumnDescriptor[resultColumns.size()]);
+    }
+
+    /**
      * Returns true if SelectTranslator determined that a query requiring DISTINCT can't
      * be run with DISTINCT keyword for internal reasons. If this method returns true,
      * DataNode may need to do in-memory distinct filtering.
@@ -322,16 +341,31 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 .getGroupByAttributes() : Collections.EMPTY_LIST;
     }
 
-    /**
-     * Creates a list of DbAttributes used in query.
-     */
-    private List buildColumnList() {
+    List buildResultColumns() {
+
+        // create alias for root table
+        newAliasForTable(getRootDbEntity());
+
+        List columns = new ArrayList();
         SelectQuery query = getSelectQuery();
+
+        // for query with custom attributes use a different strategy
         if (query.isFetchingCustomAttributes()) {
-            return buildColumnListFromCustomAttributes(query.getCustomDbAttributes());
+            appendCustomColumns(columns, query);
+        }
+        else {
+            appendQueryColumns(columns, query);
         }
 
-        List columnList = new ArrayList();
+        return columns;
+    }
+
+    /**
+     * Appends columns needed for object SelectQuery to the provided columns list.
+     */
+    List appendQueryColumns(List columns, SelectQuery query) {
+
+        Set attributes = new HashSet();
 
         // fetched attributes include attributes that are either:
         // 
@@ -370,9 +404,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                                 "ObjAttribute has no DbAttribute: " + oa.getName());
                     }
 
-                    if (!columnList.contains(dbAttr)) {
-                        columnList.add(dbAttr);
-                    }
+                    appendColumn(columns, oa, dbAttr, attributes, null);
                 }
             }
         }
@@ -390,9 +422,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             for (int i = 0; i < len; i++) {
                 DbJoin join = (DbJoin) joins.get(i);
                 DbAttribute src = join.getSource();
-                if (!columnList.contains(src)) {
-                    columnList.add(src);
-                }
+                appendColumn(columns, null, src, attributes, null);
             }
         }
 
@@ -402,12 +432,10 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         Iterator pk = table.getPrimaryKey().iterator();
         while (pk.hasNext()) {
             DbAttribute dba = (DbAttribute) pk.next();
-            if (!columnList.contains(dba)) {
-                columnList.add(dba);
-            }
+            appendColumn(columns, null, dba, attributes, null);
         }
 
-        // certain prefetch selects require special handling
+        // add FKs for Prefetch selects for to-many ObjRelationships with no reverse
         if (query instanceof PrefetchSelectQuery) {
             PrefetchSelectQuery pq = (PrefetchSelectQuery) query;
             ObjRelationship r = pq.getLastPrefetchHint();
@@ -421,9 +449,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 for (int j = 0; j < joins.size(); j++) {
                     DbJoin join = (DbJoin) joins.get(j);
                     DbAttribute target = join.getTarget();
-                    if (!columnList.contains(target)) {
-                        columnList.add(target);
-                    }
+                    appendColumn(columns, null, target, attributes, null);
                 }
             }
         }
@@ -464,7 +490,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                     Iterator joins = r.getJoins().iterator();
                     while (joins.hasNext()) {
                         DbJoin join = (DbJoin) joins.next();
-                        if (columnList.contains(join.getSource())) {
+                        if (attributes.contains(join.getSource())) {
                             skipColumns.add(join.getTarget());
                         }
                     }
@@ -477,38 +503,60 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 while (targetAttributes.hasNext()) {
                     DbAttribute attribute = (DbAttribute) targetAttributes.next();
                     if (!skipColumns.contains(attribute)) {
-                        columnList.add(attribute);
+                        // TODO: need to set correct Java type for the target entity
+                        // instead of relying on default...
+                        appendColumn(columns, null, attribute, attributes, prefetch);
                     }
                 }
             }
         }
 
-        return columnList;
+        return columns;
     }
 
-    private List buildColumnListFromCustomAttributes(List customAttributes) {
+    /**
+     * Appends custom columns from SelectQuery to the provided list.
+     */
+    List appendCustomColumns(List columns, SelectQuery query) {
+
+        List customAttributes = query.getCustomDbAttributes();
         DbEntity table = getRootDbEntity();
         int len = customAttributes.size();
 
-        List columnList = new ArrayList(len);
-
         for (int i = 0; i < len; i++) {
-            Attribute attribute = table.getAttribute((String) customAttributes.get(i));
+            DbAttribute attribute = (DbAttribute) table
+                    .getAttribute((String) customAttributes.get(i));
             if (attribute == null) {
                 throw new CayenneRuntimeException("Attribute does not exist: "
                         + customAttributes.get(i));
             }
 
-            columnList.add(attribute);
+            columns.add(new ColumnDescriptor(attribute));
         }
 
-        return columnList;
+        return columns;
     }
 
-    private String getColumn(int index) {
-        DbAttribute column = (DbAttribute) columnList.get(index);
-        String alias = aliasForTable((DbEntity) column.getEntity());
-        return column.getAliasedName(alias);
+    private void appendColumn(
+            List columns,
+            ObjAttribute objAttribute,
+            DbAttribute attribute,
+            Set skipSet,
+            String labelPrefix) {
+
+        if (skipSet.add(attribute)) {
+            ColumnDescriptor column = (objAttribute != null) ? new ColumnDescriptor(
+                    objAttribute,
+                    attribute) : new ColumnDescriptor(attribute);
+
+            // used for joint prefetches
+            if (labelPrefix != null) {
+                column.setLabel(labelPrefix + '.' + attribute.getName());
+            }
+
+            column.setNamePrefix(aliasForTable((DbEntity) attribute.getEntity()));
+            columns.add(column);
+        }
     }
 
     private void appendGroupBy(StringBuffer queryBuf, int index) {
@@ -544,8 +592,14 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 andFlag = true;
             }
 
-            queryBuf.append(srcAlias).append('.').append(join.getSourceName()).append(
-                    " = ").append(targetAlias).append('.').append(join.getTargetName());
+            queryBuf
+                    .append(srcAlias)
+                    .append('.')
+                    .append(join.getSourceName())
+                    .append(" = ")
+                    .append(targetAlias)
+                    .append('.')
+                    .append(join.getTargetName());
         }
     }
 
@@ -603,9 +657,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         }
         else {
             StringBuffer msg = new StringBuffer();
-            msg.append("Alias not found, DbEntity: '").append(
-                    ent != null ? ent.getName() : "<null entity>").append(
-                    "'\nExisting aliases:");
+            msg.append("Alias not found, DbEntity: '").append(ent != null
+                    ? ent.getName()
+                    : "<null entity>").append("'\nExisting aliases:");
 
             int len = aliasList.size();
             for (int i = 0; i < len; i++) {
@@ -618,30 +672,10 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         }
     }
 
+    /**
+     * Always returns true.
+     */
     public boolean supportsTableAliases() {
         return true;
     }
-
-    public ResultDescriptor getResultDescriptor(ResultSet rs) {
-        if (columnList.isEmpty()) {
-            throw new CayenneRuntimeException(
-                    "No columns in SELECT, call 'createStatement' first");
-        }
-
-        ResultDescriptor descriptor;
-
-        if (getSelectQuery().isFetchingCustomAttributes()) {
-            descriptor = new ResultDescriptor(getAdapter().getExtendedTypes());
-        }
-        else {
-            descriptor = new ResultDescriptor(
-                    getAdapter().getExtendedTypes(),
-                    getRootEntity());
-        }
-
-        descriptor.addColumns(columnList);
-        descriptor.index();
-        return descriptor;
-    }
-
 }

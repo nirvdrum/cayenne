@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.oracle;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -67,10 +66,8 @@ import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
  * DataNode subclass customized for Oracle database engine.
@@ -132,20 +129,6 @@ public class OracleDataNode extends DataNode {
                 con,
                 query,
                 observer);
-    }
-
-    /**
-     * Implements Oracle-specific handling of StoredProcedure OUT parameters reading.
-     * 
-     * @deprecated Since 1.2 this logic is moved to SQLExecutionPlans.
-     */
-    protected void readStoredProcedureOutParameters(
-            CallableStatement statement,
-            ResultDescriptor descriptor,
-            Query query,
-            OperationObserver delegate) throws SQLException, Exception {
-        new OracleProcedureAction(getAdapter(), getEntityResolver())
-                .readStoredProcedureOutParameters(statement, descriptor, query, delegate);
     }
 
     /**

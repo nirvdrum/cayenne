@@ -62,12 +62,10 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.ResultIterator;
-import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.util.DistinctResultIterator;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -87,8 +85,10 @@ public class SelectAction extends BaseSQLAction {
         super(adapter, entityResolver);
     }
 
-    public void performAction(Connection connection, Query query, OperationObserver observer)
-            throws SQLException, Exception {
+    public void performAction(
+            Connection connection,
+            Query query,
+            OperationObserver observer) throws SQLException, Exception {
 
         // sanity check
         if (!(query instanceof GenericSelectQuery)) {
@@ -107,23 +107,22 @@ public class SelectAction extends BaseSQLAction {
         PreparedStatement prepStmt = translator.createStatement(query.getLoggingLevel());
         ResultSet rs = prepStmt.executeQuery();
 
-        SelectQueryTranslator assembler = (SelectQueryTranslator) translator;
-        DefaultResultIterator workerIterator = new DefaultResultIterator(
+        SelectTranslator selectTranslator = (SelectTranslator) translator;
+        RowDescriptor descriptor = new RowDescriptor(selectTranslator
+                .getResultColumns(), getAdapter().getExtendedTypes());
+        JDBCResultIterator workerIterator = new JDBCResultIterator(
                 connection,
                 prepStmt,
                 rs,
-                assembler.getResultDescriptor(rs),
+                descriptor,
                 selectQuery.getFetchLimit());
 
         ResultIterator it = workerIterator;
 
         // wrap result iterator if distinct has to be suppressed
-        if (assembler instanceof SelectTranslator) {
-            SelectTranslator customTranslator = (SelectTranslator) assembler;
-            if (customTranslator.isSuppressingDistinct()) {
-                it = new DistinctResultIterator(workerIterator, customTranslator
-                        .getRootDbEntity());
-            }
+        if (selectTranslator.isSuppressingDistinct()) {
+            it = new DistinctResultIterator(workerIterator, selectTranslator
+                    .getRootDbEntity());
         }
 
         // TODO: Should do something about closing ResultSet and PreparedStatement in this

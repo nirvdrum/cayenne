@@ -62,7 +62,9 @@ import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.art.CompoundPainting;
+import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
@@ -71,6 +73,9 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DataContextCompoundOETst extends CayenneTestCase {
+
+    private static final Logger logObj = Logger.getLogger(DataContextCompoundOETst.class);
+
     final int artistCount = 4;
     final int galleryCount = 2;
     final int paintCount = 8;
@@ -79,20 +84,16 @@ public class DataContextCompoundOETst extends CayenneTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         deleteTestData();
         ctxt = createDataContext();
     }
 
     private void populateTables() throws Exception {
-        String insertArtist =
-                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
-        String insertGal =
-                "INSERT INTO GALLERY (GALLERY_ID, GALLERY_NAME) VALUES (?,?)";
-        String insertPaint =
-                "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID) VALUES (?, ?, ?, ?, ?)";
-        String insertPaintInfo =
-                "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?, ?)";
+        String insertArtist = "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
+        String insertGal = "INSERT INTO GALLERY (GALLERY_ID, GALLERY_NAME) VALUES (?,?)";
+        String insertPaint = "INSERT INTO PAINTING (PAINTING_ID, PAINTING_TITLE, ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID) VALUES (?, ?, ?, ?, ?)";
+        String insertPaintInfo = "INSERT INTO PAINTING_INFO (PAINTING_ID, TEXT_REVIEW) VALUES (?, ?)";
 
         Connection conn = getConnection();
 
@@ -104,9 +105,7 @@ public class DataContextCompoundOETst extends CayenneTestCase {
             for (int i = 1; i <= artistCount; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, "artist" + i);
-                stmt.setDate(
-                    3,
-                    new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
             }
             stmt.close();
@@ -124,15 +123,17 @@ public class DataContextCompoundOETst extends CayenneTestCase {
                 stmt.setInt(1, i);
                 stmt.setString(2, "painting" + i);
                 stmt.setInt(3, (i - 1) % artistCount + 1);
-				stmt.setBigDecimal(4, new BigDecimal(1000));
-                if (i == 3) stmt.setNull(5, Types.INTEGER);
-                else stmt.setInt(5, (i - 1) % galleryCount + 1);
+                stmt.setBigDecimal(4, new BigDecimal(1000));
+                if (i == 3)
+                    stmt.setNull(5, Types.INTEGER);
+                else
+                    stmt.setInt(5, (i - 1) % galleryCount + 1);
                 stmt.executeUpdate();
             }
             stmt.close();
 
             stmt = conn.prepareStatement(insertPaintInfo);
-            for (int i = 1; i <= paintCount/2; i++) {
+            for (int i = 1; i <= paintCount / 2; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, "painting review" + i);
                 stmt.executeUpdate();
@@ -140,10 +141,26 @@ public class DataContextCompoundOETst extends CayenneTestCase {
             stmt.close();
 
             conn.commit();
-        } finally {
+        }
+        finally {
             conn.close();
         }
-	}
+    }
+
+    public void testSelectCompoundDataRow() throws Exception {
+        populateTables();
+        SelectQuery query = new SelectQuery(CompoundPainting.class);
+        query.setFetchingDataRows(true);
+        List objects = ctxt.performQuery(query);
+
+        assertNotNull(objects);
+        assertEquals(3, objects.size());
+
+        for (Iterator i = objects.iterator(); i.hasNext();) {
+            DataRow painting = (DataRow) i.next();
+            logObj.warn("row: " + painting);
+        }
+    }
 
     public void testSelectCompound1() throws Exception {
         populateTables();
@@ -152,59 +169,58 @@ public class DataContextCompoundOETst extends CayenneTestCase {
 
         assertNotNull(objects);
         assertEquals(3, objects.size());
-        assertTrue(
-            "CompoundPainting expected, got " + objects.get(0).getClass(),
-            objects.get(0) instanceof CompoundPainting);
+        assertTrue("CompoundPainting expected, got " + objects.get(0).getClass(), objects
+                .get(0) instanceof CompoundPainting);
 
         for (Iterator i = objects.iterator(); i.hasNext();) {
-            CompoundPainting painting = (CompoundPainting)i.next();
-            Number id = (Number)painting.getObjectId().getValueForAttribute("PAINTING_ID");
-            assertEquals("CompoundPainting.getPaintingTitle(): " + painting.getPaintingTitle(),
-                         "painting"+id,
-                         painting.getPaintingTitle());
+            CompoundPainting painting = (CompoundPainting) i.next();
+            Number id = (Number) painting
+                    .getObjectId()
+                    .getValueForAttribute("PAINTING_ID");
+            assertEquals("CompoundPainting.getPaintingTitle(): "
+                    + painting.getPaintingTitle(), "painting" + id, painting
+                    .getPaintingTitle());
             assertEquals("CompoundPainting.getTextReview(): " + painting.getTextReview(),
-                         "painting review"+id,
-                         painting.getTextReview());
+                    "painting review" + id,
+                    painting.getTextReview());
             assertEquals("CompoundPainting.getArtistName(): " + painting.getArtistName(),
-                         painting.getToArtist().getArtistName(),
-                         painting.getArtistName());
+                    painting.getToArtist().getArtistName(),
+                    painting.getArtistName());
             assertEquals("CompoundPainting.getArtistName(): " + painting.getGalleryName(),
-                         painting.getToGallery().getGalleryName(),
-                         painting.getGalleryName());
+                    painting.getToGallery().getGalleryName(),
+                    painting.getGalleryName());
         }
-	}
+    }
 
     public void testSelectCompound2() throws Exception {
         populateTables();
-        SelectQuery query = new SelectQuery(
-                CompoundPainting.class,
-                ExpressionFactory.matchExp("artistName", "artist2"));
+        SelectQuery query = new SelectQuery(CompoundPainting.class, ExpressionFactory
+                .matchExp("artistName", "artist2"));
         List objects = ctxt.performQuery(query);
 
         assertNotNull(objects);
         assertEquals(1, objects.size());
-        assertTrue(
-            "CompoundPainting expected, got " + objects.get(0).getClass(),
-            objects.get(0) instanceof CompoundPainting);
+        assertTrue("CompoundPainting expected, got " + objects.get(0).getClass(), objects
+                .get(0) instanceof CompoundPainting);
 
         for (Iterator i = objects.iterator(); i.hasNext();) {
-            CompoundPainting painting = (CompoundPainting)i.next();
-            Number id = (Number)painting.getObjectId().getValueForAttribute("PAINTING_ID");
-            assertEquals("CompoundPainting.getObjectId(): " + id,
-                         id.intValue(),
-                         2);
-            assertEquals("CompoundPainting.getPaintingTitle(): " + painting.getPaintingTitle(),
-                         "painting"+id,
-                         painting.getPaintingTitle());
+            CompoundPainting painting = (CompoundPainting) i.next();
+            Number id = (Number) painting
+                    .getObjectId()
+                    .getValueForAttribute("PAINTING_ID");
+            assertEquals("CompoundPainting.getObjectId(): " + id, id.intValue(), 2);
+            assertEquals("CompoundPainting.getPaintingTitle(): "
+                    + painting.getPaintingTitle(), "painting" + id, painting
+                    .getPaintingTitle());
             assertEquals("CompoundPainting.getTextReview(): " + painting.getTextReview(),
-                         "painting review"+id,
-                         painting.getTextReview());
+                    "painting review" + id,
+                    painting.getTextReview());
             assertEquals("CompoundPainting.getArtistName(): " + painting.getArtistName(),
-                         "artist2",
-                         painting.getArtistName());
+                    "artist2",
+                    painting.getArtistName());
             assertEquals("CompoundPainting.getArtistName(): " + painting.getGalleryName(),
-                         painting.getToGallery().getGalleryName(),
-                         painting.getGalleryName());
+                    painting.getToGallery().getGalleryName(),
+                    painting.getGalleryName());
         }
-	}
+    }
 }

@@ -67,10 +67,9 @@ import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -127,27 +126,26 @@ public class SQLTemplateSelectAction extends SQLTemplateAction {
             long t1 = System.currentTimeMillis();
 
             // TODO: we may cache prep statements for this loop, using merged string as a
-            // key
-            // since it is very likely that it will be the same for multiple parameter
+            // key since it is very likely that it will be the same for multiple parameter
             // sets...
             PreparedStatement statement = connection.prepareStatement(compiled.getSql());
-
             bind(statement, compiled.getBindings());
+
+            // obtain and read ResultSet
             ResultSet rs = statement.executeQuery();
+            ExtendedTypeMap types = adapter.getExtendedTypes();
 
-            ResultDescriptor descriptor = (compiled.getResultColumns().length > 0)
-                    ? ResultDescriptor.createDescriptor(
-                            compiled.getResultColumns(),
-                            adapter.getExtendedTypes())
-                    : ResultDescriptor.createDescriptor(rs, adapter.getExtendedTypes());
+            RowDescriptor descriptor = (compiled.getResultColumns().length > 0)
+                    ? new RowDescriptor(compiled.getResultColumns(), types)
+                    : new RowDescriptor(rs, types);
 
-            DefaultResultIterator result = new DefaultResultIterator(
+            JDBCResultIterator result = new JDBCResultIterator(
                     connection,
                     statement,
                     rs,
                     descriptor,
                     sqlTemplate.getFetchLimit());
-
+            
             if (!observer.isIteratedResult()) {
                 // note that we don't need to close ResultIterator
                 // since "dataRows" will do it internally

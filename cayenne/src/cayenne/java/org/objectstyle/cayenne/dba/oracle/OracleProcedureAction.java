@@ -60,19 +60,25 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.jdbc.ProcedureAction;
+import org.objectstyle.cayenne.access.jdbc.RowDescriptor;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.EntityResolver;
+import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
+ * Oracle-specific ProcedureAction that supports ResultSet OUT parameters.
+ * 
  * @since 1.2
  * @author Andrei Adamchik
  */
@@ -82,62 +88,66 @@ class OracleProcedureAction extends ProcedureAction {
         super(adapter, entityResolver);
     }
 
-    protected void readStoredProcedureOutParameters(
+    /**
+     * Helper method that reads OUT parameters of a CallableStatement.
+     */
+    protected void readProcedureOutParameters(
             CallableStatement statement,
-            ResultDescriptor descriptor,
+            Procedure procedure,
             Query query,
             OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
 
-        int resultSetType = OracleAdapter.getOracleCursorType();
-        int resultWidth = descriptor.getResultWidth();
-        if (resultWidth > 0) {
-            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
-            ExtendedType[] converters = descriptor.getConverters();
-            int[] jdbcTypes = descriptor.getJdbcTypes();
-            String[] names = descriptor.getNames();
-            int[] outParamIndexes = descriptor.getOutParamIndexes();
+        // build result row...
+        Map result = null;
+        List parameters = procedure.getCallParameters();
+        for (int i = 0; i < parameters.size(); i++) {
+            ProcedureParameter parameter = (ProcedureParameter) parameters.get(i);
 
-            // process result row columns,
-            for (int i = 0; i < outParamIndexes.length; i++) {
-                int index = outParamIndexes[i];
+            if (!parameter.isOutParam()) {
+                continue;
+            }
 
-                if (jdbcTypes[index] == resultSetType) {
-                    // note: jdbc column indexes start from 1, not 0
-                    ResultSet rs = (ResultSet) statement.getObject(index + 1);
+            // ==== start Oracle-specific part
+            if (parameter.getType() == OracleAdapter.getOracleCursorType()) {
+                ResultSet rs = (ResultSet) statement.getObject(i + 1);
 
+                try {
+                    RowDescriptor rsDescriptor = new RowDescriptor(rs, getAdapter()
+                            .getExtendedTypes());
+                    readResultSet(rs, rsDescriptor, (GenericSelectQuery) query, delegate);
+                }
+                finally {
                     try {
-                        ResultDescriptor nextDesc = ResultDescriptor.createDescriptor(
-                                rs,
-                                getAdapter().getExtendedTypes());
-
-                        readResultSet(rs, nextDesc, (GenericSelectQuery) query, delegate);
+                        rs.close();
                     }
-                    finally {
-                        try {
-                            rs.close();
-                        }
-                        catch (SQLException ex) {
-                        }
+                    catch (SQLException ex) {
                     }
                 }
-                else {
-                    // note: jdbc column indexes start from 1, not 0
-                    Object val = converters[index].materializeObject(
-                            statement,
-                            index + 1,
-                            jdbcTypes[index]);
-                    dataRow.put(names[index], val);
+            }
+            // ==== end Oracle-specific part
+            else {
+                if (result == null) {
+                    result = new HashMap();
                 }
-            }
 
-            if (!dataRow.isEmpty()) {
-                QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
-                        .currentTimeMillis()
-                        - t1);
-                delegate.nextDataRows(query, Collections.singletonList(dataRow));
+                ColumnDescriptor descriptor = new ColumnDescriptor(parameter);
+                ExtendedType type = getAdapter().getExtendedTypes().getRegisteredType(
+                        descriptor.getJavaClass());
+                Object val = type.materializeObject(statement, i + 1, descriptor
+                        .getJdbcType());
+
+                result.put(descriptor.getLabel(), val);
             }
+        }
+
+        if (result != null && !result.isEmpty()) {
+            // treat out parameters as a separate data row set
+            QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
+                    .currentTimeMillis()
+                    - t1);
+            delegate.nextDataRows(query, Collections.singletonList(result));
         }
     }
 }

@@ -143,8 +143,7 @@ public class ResultDirective extends Directive {
 
         Object column = getChild(context, node, 0);
         if (column == null) {
-            throw new ParseErrorException(
-                "Column name expected at line "
+            throw new ParseErrorException("Column name expected at line "
                     + node.getLine()
                     + ", column "
                     + node.getColumn());
@@ -153,8 +152,11 @@ public class ResultDirective extends Directive {
         Object alias = getChild(context, node, 2);
 
         ColumnDescriptor columnDescriptor = new ColumnDescriptor();
-        columnDescriptor.setName(
-            (alias != null) ? alias.toString() : column.toString());
+        columnDescriptor.setName(column.toString());
+
+        if (alias != null) {
+            columnDescriptor.setLabel(alias.toString());
+        }
 
         Object type = getChild(context, node, 1);
         if (type != null) {
