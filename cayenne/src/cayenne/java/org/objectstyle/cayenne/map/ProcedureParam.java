@@ -72,8 +72,7 @@ public class ProcedureParam extends DbAttribute {
     public static final int VOID_PARAM = 4;
 
     protected int direction = VOID_PARAM;
-    protected boolean returned;
-
+ 
     /**
      * Constructor for ProcedureParam.
      */
@@ -92,6 +91,20 @@ public class ProcedureParam extends DbAttribute {
         super(name);
         setType(type);
         setDirection(direction);
+    }
+    
+    /**
+     * @return <code>true</code> if this is OUT or INOUT parameter.
+     */
+    public boolean isOutParam() {
+    	return direction == OUT_PARAM || direction == IN_OUT_PARAM;
+    }
+    
+    /**
+     * @return <code>true</code> if this is IN or INOUT parameter.
+     */
+    public boolean isInParam() {
+        return direction == IN_PARAM || direction == IN_OUT_PARAM;
     }
 
     /**
@@ -114,8 +127,10 @@ public class ProcedureParam extends DbAttribute {
     }
 
     /**
-     * Sets the direction.
-     * @param direction The direction to set
+     * Sets the direction of this parameter. Acceptable values of direction are
+     * defined as int constants in ProcedureParam class. If an attempt is
+     * made to set an invalid attribute's direction, an IllegalArgumentException
+     * is thrown by this method.
      */
     public void setDirection(int direction) {
         if (direction != IN_PARAM
@@ -127,21 +142,5 @@ public class ProcedureParam extends DbAttribute {
         }
 
         this.direction = direction;
-    }
-    
-    /**
-     * Returns the returned.
-     * @return boolean
-     */
-    public boolean isReturned() {
-        return returned;
-    }
-
-    /**
-     * Sets the returned.
-     * @param returned The returned to set
-     */
-    public void setReturned(boolean returned) {
-        this.returned = returned;
     }
 }

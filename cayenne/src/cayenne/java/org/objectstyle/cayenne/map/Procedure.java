@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -65,6 +64,8 @@ import java.util.List;
  * @author Andrei Adamchik
  */
 public class Procedure extends DbEntity {
+    protected boolean returningValue;
+    protected List callParams = new ArrayList();
 
     /**
      * Default constructor for StoredProcedure.
@@ -76,62 +77,84 @@ public class Procedure extends DbEntity {
     public Procedure(String name) {
         super(name);
     }
-    /**
-      * Returns a list of all parameters that are not part of the ResultSet, and
-      * are one of IN, OUT, INOUT, VOID parameters.
-      *
-      * @return List
-      */
-     public List getCallParamsList() {
-         List list = new ArrayList();
-
-         Iterator it = attributes.keySet().iterator();
-         while (it.hasNext()) {
-             Attribute attr = (Attribute) attributes.get(it.next());
-             if (attr instanceof ProcedureParam) {
-                 list.add(attr);
-             }
-         }
-
-         return list;
-     }
 
     /**
-     * Returns a list of all attributes that describe the result retirned by
-     * this procedure.
-     *
-     * @return List
+     * Adds new call parameter to the stored procedure. Also sets
+     * <code>param</code>'s parent to be this procedure.
      */
-    public List getResultAttributesList() {
-        List list = new ArrayList();
-
-        Iterator it = attributes.keySet().iterator();
-        while (it.hasNext()) {
-            Attribute attr = (Attribute) attributes.get(it.next());
-            if (!(attr instanceof ProcedureParam)) {
-                list.add(attr);
-            }
+    public void addCallParam(ProcedureParam param) {
+        if (param.getName() == null) {
+            throw new IllegalArgumentException("Attempt to add tunnamed parameter.");
         }
 
-        return list;
+        if (callParams.contains(param)) {
+            throw new IllegalArgumentException(
+                "Attempt to add the same parameter more than once:" + param);
+        }
+
+        param.setEntity(this);
+        callParams.add(param);
     }
 
-
-    /**
-     * Returns parameter describing the return value of the StoredProcedure. 
-     */
-    public ProcedureParam getResultParam() {
-
-        Iterator it = this.getAttributeList().iterator();
-        while (it.hasNext()) {
-            Attribute attr = (Attribute) it.next();
-            if (attr instanceof ProcedureParam) {
-                ProcedureParam param = (ProcedureParam) attr;
-                if (param.isReturned()) {
-                    return param;
-                }
+    /** Removes a named call parameter. */
+    public void removeCallParam(String name) {
+        for (int i = 0; i < callParams.size(); i++) {
+            ProcedureParam nextParam = (ProcedureParam) callParams.get(i);
+            if (name.equals(nextParam.getName())) {
+                callParams.remove(i);
+                break;
             }
         }
-        return null;
+    }
+
+    public void clearCallParams() {
+        callParams.clear();
+    }
+
+    /**
+     * Returns a list of calll parameters.
+     * 
+     * @return List
+     */
+    public List getCallParamsList() {
+        return callParams;
+    }
+
+    /**
+     * Returns parameter describing the return value of the StoredProcedure, or
+     * null if procedure does not support return values.
+     */
+    public ProcedureParam getResultParam() {
+        // if procedure returns parameters, this must be the first parameter
+        // otherwise, return null
+        return (returningValue && callParams.size() > 0)
+            ? (ProcedureParam) callParams.get(0)
+            : null;
+    }
+
+    /**
+     * Returns the returningValue.
+     * @return boolean
+     */
+    public boolean isReturningValue() {
+        return returningValue;
+    }
+
+    /**
+     * Sets the returningValue.
+     * @param returningValue The returningValue to set
+     */
+    public void setReturningValue(boolean returningValue) {
+        this.returningValue = returningValue;
+    }
+
+    /**
+     * Does extra validation of the added attribute.
+     */
+    public void addAttribute(Attribute attr) {
+        if (attr instanceof ProcedureParam) {
+            throw new IllegalArgumentException("Attempt to set ProcedureParam as attribute. Use 'addCallParam' instead.");
+        }
+        super.addAttribute(attr);
     }
 }

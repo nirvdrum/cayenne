@@ -100,7 +100,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         // create and run stored procedure
         Procedure proc = new Procedure(UPDATE_STORED_PROCEDURE);
         ProcedureParam param = new ProcedureParam("paintingPrice", Types.INTEGER, ProcedureParam.IN_PARAM);
-        proc.addAttribute(param);
+        proc.addCallParam(param);
 
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("paintingPrice", new Integer(3000));
@@ -133,8 +133,8 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
         ProcedureParam param1 = new ProcedureParam("aName", Types.VARCHAR, ProcedureParam.IN_PARAM);
         ProcedureParam param2 = new ProcedureParam("paintingPrice", Types.INTEGER, ProcedureParam.IN_PARAM);
-        proc.addAttribute(param1);
-        proc.addAttribute(param2);
+        proc.addCallParam(param1);
+        proc.addCallParam(param2);
 
         ProcedureSelectQuery q = new ProcedureSelectQuery(Artist.class, proc);
         q.addParam("aName", "An Artist");

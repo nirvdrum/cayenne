@@ -76,10 +76,17 @@ import org.objectstyle.cayenne.query.ProcedureQuery;
  * @author Andrei Adamchik
  */
 public class ProcedureTranslator extends QueryTranslator {
+    private static NotInParam OUT_PARAM = new NotInParam("[OUT]");
+    private static NotInParam VOID_PARAM = new NotInParam("[VOID]");
+
     protected List values;
+    protected List callParams;
 
     public PreparedStatement createStatement(Level logLevel) throws Exception {
         long t1 = System.currentTimeMillis();
+
+        this.callParams = getProcedure().getCallParamsList();
+        this.values = new ArrayList(callParams.size());
 
         initValues();
         String sqlStr = createSqlString();
@@ -99,16 +106,26 @@ public class ProcedureTranslator extends QueryTranslator {
      */
     protected String createSqlString() {
         Procedure proc = getProcedure();
-        List params = proc.getCallParamsList();
 
         StringBuffer buf = new StringBuffer();
-        buf.append("{call ").append(proc.getName());
 
-        if (params.size() > 0) {
+        int totalParams = callParams.size();
+
+        // check if procedure returns values
+        if (proc.isReturningValue()) {
+            totalParams--;
+            buf.append("{? = call ");
+        } else {
+            buf.append("{call ");
+        }
+
+        buf.append(proc.getName());
+
+        if (totalParams > 0) {
             // unroll the loop
             buf.append("(?");
 
-            for (int i = 1; i < params.size(); i++) {
+            for (int i = 1; i < totalParams; i++) {
                 buf.append(", ?");
             }
 
@@ -120,52 +137,93 @@ public class ProcedureTranslator extends QueryTranslator {
     }
 
     protected void initValues() {
-        List params = getProcedure().getCallParamsList();
         Map queryValues = getProcedureQuery().getParams();
 
         // match values with parameters in the correct order.
         // make an assumption that a missing value is NULL
         // Any reason why this is bad?
 
-        values = new ArrayList(params.size());
-        Iterator it = params.iterator();
+        Iterator it = callParams.iterator();
         while (it.hasNext()) {
-            ProcedureParam param = (ProcedureParam)it.next();
-            values.add(queryValues.get(param.getName()));
+            ProcedureParam param = (ProcedureParam) it.next();
+
+            if (param.getDirection() == ProcedureParam.OUT_PARAM) {
+                values.add(OUT_PARAM);
+            } else if (param.getDirection() == ProcedureParam.VOID_PARAM) {
+                values.add(VOID_PARAM);
+            } else {
+                values.add(queryValues.get(param.getName()));
+            }
         }
     }
 
+    /**
+     * Set IN and OUT parameters.
+     */
     protected void initStatement(CallableStatement stmt) throws Exception {
         if (values != null && values.size() > 0) {
             List params = getProcedure().getCallParamsList();
-            
+
             int len = values.size();
             for (int i = 0; i < len; i++) {
-                Object val = values.get(i);
+                ProcedureParam param = (ProcedureParam) params.get(i);
 
-                ProcedureParam attr = (ProcedureParam) params.get(i);
+                // !Stored procedure parameter can be both in and out 
+                // at the same time
+                if (param.isInParam()) {
+                    setInParam(stmt, param, values.get(i), i + 1);
+                }
 
-                // null DbAttributes are a result of inferior qualifier processing
-                // (qualifier can't map parameters to DbAttributes and therefore
-                // only supports standard java types now)
-                // hence, a special moronic case here:
-                if (attr == null) {
-                    stmt.setObject(i + 1, val);
-                } else {
-                    int type = attr.getType();
-
-                    if (val == null)
-                        stmt.setNull(i + 1, type);
-                    else {
-                        ExtendedType map =
-                            adapter.getTypeConverter().getRegisteredType(
-                                val.getClass().getName());
-                        Object jdbcVal =
-                            (map == null) ? val : map.toJdbcObject(val, type);
-                        stmt.setObject(i + 1, jdbcVal, type);
-                    }
+                if (param.isOutParam()) {
+                    setOutParam(stmt, param, i + 1);
                 }
             }
+        }
+    }
+
+    /**
+     * Sets a single IN parameter of the CallableStatement.
+     */
+    protected void setInParam(
+        CallableStatement stmt,
+        ProcedureParam param,
+        Object val,
+        int pos)
+        throws Exception {
+
+        int type = param.getType();
+        if (val == null) {
+            stmt.setNull(pos, type);
+        } else {
+            ExtendedType map =
+                adapter.getTypeConverter().getRegisteredType(
+                    val.getClass().getName());
+            Object jdbcVal = (map == null) ? val : map.toJdbcObject(val, type);
+
+            int precision = param.getPrecision();
+            if (precision >= 0) {
+                stmt.setObject(pos, jdbcVal, type, precision);
+            } else {
+                stmt.setObject(pos, jdbcVal, type);
+            }
+        }
+
+    }
+
+    /**
+     * Sets a single OUT parameter of the CallableStatement.
+     */
+    protected void setOutParam(
+        CallableStatement stmt,
+        ProcedureParam param,
+        int pos)
+        throws Exception {
+
+        int precision = param.getPrecision();
+        if (precision >= 0) {
+            stmt.registerOutParameter(pos, param.getType(), precision);
+        } else {
+            stmt.registerOutParameter(pos, param.getType());
         }
     }
 
@@ -175,5 +233,20 @@ public class ProcedureTranslator extends QueryTranslator {
 
     public Procedure getProcedure() {
         return getProcedureQuery().getProcedure();
+    }
+
+    /**
+     * Helper class to make OUT and VOID parameters logger-friendly.
+     */
+    static class NotInParam {
+        protected String type;
+
+        public NotInParam(String type) {
+            this.type = type;
+        }
+
+        public String toString() {
+            return type;
+        }
     }
 }

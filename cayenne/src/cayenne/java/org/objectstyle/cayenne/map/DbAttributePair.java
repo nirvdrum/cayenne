@@ -57,9 +57,9 @@
 package org.objectstyle.cayenne.map;
 
 /** 
- * A DbAttributePair represents a join
- * between two database tables. A set of DbAtributePair's
- * defines full semantics of a DbRelationship.
+ * A DbAttributePair represents a join between two database tables. A PK/FK
+ * relationship consists of one or more joins. Correspinding Cayenne descriptor
+ * object, DbRelationship, contains one or more DbAtributePairs.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik

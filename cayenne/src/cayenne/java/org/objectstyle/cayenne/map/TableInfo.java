@@ -52,14 +52,14 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.map;
 
 /**
  * Stores information about a table retrieved from database meta data.
  * @author Michael Misha Shengaout
  * 
- * @deprecated Since 1.0-Beta1 This class is not used, it is replaced by
+ * @deprecated Since 1.0-Beta1 this class is not used, it is replaced by
  * Ashwood's Table.
  */
 public class TableInfo {
@@ -68,8 +68,11 @@ public class TableInfo {
     private String catalog;
     private String type;
 
-    public TableInfo(String newName, String newType
-                   , String newSchema, String newCatalog) {
+    public TableInfo(
+        String newName,
+        String newType,
+        String newSchema,
+        String newCatalog) {
         setName(newName);
         setType(newType);
         setCatalog(newCatalog);
@@ -112,7 +115,7 @@ public class TableInfo {
         type = temp;
     }
 
-  public String getNameToDisplay() {
-    return name != null ? name : "<noname>";
-  }
+    public String getNameToDisplay() {
+        return name != null ? name : "<noname>";
+    }
 }
