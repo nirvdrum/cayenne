@@ -135,6 +135,23 @@ public class ObjectIdTst extends CayenneTestCase {
 		ObjectId oid = new ObjectId(class1, hm2);
 		assertFalse(ref.equals(oid));
 	}
+	
+
+	public void testEqualsBinaryKey() throws Exception {
+		Class class1 = Artist.class;
+
+		Map hm1 = new HashMap();
+		hm1.put("key1",  new byte[] {3, 4, 10, -1});
+
+		Map hm2 = new HashMap();
+		hm2.put("key1", new byte[] {3, 4, 10, -1});
+
+		ObjectId ref = new ObjectId(class1, hm1);
+		ObjectId oid = new ObjectId(class1, hm2);
+		assertEquals(ref.hashCode(), oid.hashCode());
+		assertTrue(ref.equals(oid));
+	}
+
 
 	public void testEqualsNull() {
 		ObjectId o = new ObjectId(Artist.class, "ARTIST_ID", 42);

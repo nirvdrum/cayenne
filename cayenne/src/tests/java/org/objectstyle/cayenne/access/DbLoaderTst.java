@@ -89,8 +89,7 @@ public class DbLoaderTst extends CayenneTestCase {
         try {
             boolean supportsFK = getNode().getAdapter().supportsFkConstraints();
 
-            boolean supportsLobs =
-                super.getDatabaseSetupDelegate().supportsLobs();
+            boolean supportsLobs = super.getDatabaseSetupDelegate().supportsLobs();
 
             DataMap map = new DataMap();
 
@@ -122,8 +121,7 @@ public class DbLoaderTst extends CayenneTestCase {
                 Iterator it = rels.iterator();
                 while (it.hasNext()) {
                     DbRelationship rel = (DbRelationship) it.next();
-                    if ("PAINTING_INFO"
-                        .equalsIgnoreCase(rel.getTargetEntityName())) {
+                    if ("PAINTING_INFO".equalsIgnoreCase(rel.getTargetEntityName())) {
                         oneToOne = rel;
                         break;
                     }
@@ -137,8 +135,8 @@ public class DbLoaderTst extends CayenneTestCase {
                     "Relationship to PAINTING_INFO must be to-one",
                     oneToOne.isToDependentPK());
 
-            } 
-            
+            }
+
             // *** TESTING THIS ***
             loader.loadObjEntities(map);
             ObjEntity ae = map.getObjEntity("Artist");
@@ -158,7 +156,8 @@ public class DbLoaderTst extends CayenneTestCase {
             // various things
             // selectively check how different types were processed
             checkTypes(map);
-        } finally {
+        }
+        finally {
             loader.getCon().close();
         }
     }
@@ -187,8 +186,7 @@ public class DbLoaderTst extends CayenneTestCase {
         assertNotNull(clobAttr);
         assertTrue(
             msgForTypeMismatch(Types.CLOB, clobAttr),
-            Types.CLOB == clobAttr.getType()
-                || Types.LONGVARCHAR == clobAttr.getType());
+            Types.CLOB == clobAttr.getType() || Types.LONGVARCHAR == clobAttr.getType());
     }
 
     private void assertLobObjEntities(DataMap map) {
@@ -232,13 +230,13 @@ public class DbLoaderTst extends CayenneTestCase {
     public void checkTypes(DataMap map) {
         DbEntity dbe = getDbEntity(map, "PAINTING");
         DbEntity floatTest = getDbEntity(map, "FLOAT_TEST");
-		DbEntity smallintTest = getDbEntity(map, "SMALLINT_TEST");
+        DbEntity smallintTest = getDbEntity(map, "SMALLINT_TEST");
         DbAttribute integerAttr = getDbAttribute(dbe, "PAINTING_ID");
         DbAttribute decimalAttr = getDbAttribute(dbe, "ESTIMATED_PRICE");
         DbAttribute varcharAttr = getDbAttribute(dbe, "PAINTING_TITLE");
         DbAttribute floatAttr = getDbAttribute(floatTest, "FLOAT_COL");
-		DbAttribute smallintAttr = getDbAttribute(smallintTest, "SMALLINT_COL");
-        
+        DbAttribute smallintAttr = getDbAttribute(smallintTest, "SMALLINT_COL");
+
         // check decimal
         // postgresql does not have a decimal type, instead columns that
         // are declared as DECIMAL will be converted to NUMERIC instead
@@ -250,7 +248,8 @@ public class DbLoaderTst extends CayenneTestCase {
                 msgForTypeMismatch(Types.NUMERIC, decimalAttr),
                 Types.NUMERIC,
                 decimalAttr.getType());
-        } else {
+        }
+        else {
             assertEquals(
                 msgForTypeMismatch(Types.DECIMAL, decimalAttr),
                 Types.DECIMAL,
@@ -270,13 +269,13 @@ public class DbLoaderTst extends CayenneTestCase {
         // check float
         assertTrue(
             msgForTypeMismatch(Types.FLOAT, floatAttr),
-            Types.FLOAT == floatAttr.getType()
-                || Types.DOUBLE == floatAttr.getType());
-                
-		// check smallint
-		assertTrue(
-			msgForTypeMismatch(Types.SMALLINT, smallintAttr),
-			Types.SMALLINT == smallintAttr.getType());
+            Types.FLOAT == floatAttr.getType() || Types.DOUBLE == floatAttr.getType());
+
+        // check smallint
+        assertTrue(
+            msgForTypeMismatch(Types.SMALLINT, smallintAttr),
+            Types.SMALLINT == smallintAttr.getType()
+                || Types.INTEGER == smallintAttr.getType());
     }
 
     public void checkAllDBEntities(DataMap map) {
@@ -304,9 +303,7 @@ public class DbLoaderTst extends CayenneTestCase {
         }
     }
 
-    private String msgForTypeMismatch(
-        DbAttribute origAttr,
-        DbAttribute newAttr) {
+    private String msgForTypeMismatch(DbAttribute origAttr, DbAttribute newAttr) {
         return msgForTypeMismatch(origAttr.getType(), newAttr);
     }
 

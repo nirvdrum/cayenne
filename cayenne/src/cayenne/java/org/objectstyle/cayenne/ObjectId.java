@@ -60,7 +60,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.objectstyle.cayenne.util.Util;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /** 
  * An ObjectId is a globally unique identifier of DataObjects.
@@ -76,129 +77,188 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class ObjectId implements Serializable {
-	// Keys: DbAttribute names
-	// Values: database values of the corresponding attribute
-	protected Map objectIdKeys;
-	protected Class objectClass;
-	protected ObjectId replacementId;
-	
-	/**
-	 * Convenience constructor for entities that have a 
-	 * single Integer as their id.
-	 */
-	public ObjectId(Class objClass, String keyName, int id) {
-		this(objClass, keyName, new Integer(id));
-	}
+    // Keys: DbAttribute names
+    // Values: database values of the corresponding attribute
+    protected Map objectIdKeys;
+    protected Class objectClass;
+    protected ObjectId replacementId;
 
-	/**
-	 * Convenience constructor for entities that have a 
-	 * single column as their id.
-	 */
-	public ObjectId(Class objClass,  String keyName, Object id) {
-		this.objectClass = objClass;
-		this.setIdKeys(Collections.singletonMap(keyName, id));
-	}
+    // cache hasCode, since ObjectId is immutable
+    private int hashCode = Integer.MIN_VALUE;
 
-	/**
-	 * Creates a new ObjectId.
-	 */
-	public ObjectId(Class objClass, Map idKeys) {
-		this.objectClass = objClass;
-		if (idKeys != null) {
-			this.setIdKeys(Collections.unmodifiableMap(idKeys));
-		}
-	}
+    /**
+     * Convenience constructor for entities that have a 
+     * single Integer as their id.
+     */
+    public ObjectId(Class objClass, String keyName, int id) {
+        this(objClass, keyName, new Integer(id));
+    }
 
-	protected void setIdKeys(Map idKeys) {
-		this.objectIdKeys = idKeys;
-	}
+    /**
+     * Convenience constructor for entities that have a 
+     * single column as their id.
+     */
+    public ObjectId(Class objClass, String keyName, Object id) {
+        this.objectClass = objClass;
+        this.setIdKeys(Collections.singletonMap(keyName, id));
+    }
 
-	public boolean equals(Object object) {
-		if (!(object instanceof ObjectId)) {
-			return false;
-		}
+    /**
+     * Creates a new ObjectId.
+     */
+    public ObjectId(Class objClass, Map idKeys) {
+        this.objectClass = objClass;
+        if (idKeys != null) {
+            this.setIdKeys(Collections.unmodifiableMap(idKeys));
+        }
+    }
 
-		if (this == object) {
-			return true;
-		}
+    protected void setIdKeys(Map idKeys) {
+        this.objectIdKeys = idKeys;
+    }
 
-		ObjectId id = (ObjectId) object;
-		// use the class name because two Objectid's should be equal
-		// even if their objClass'es were loaded by different class loaders.
-		return objectClass.getName().equals(id.objectClass.getName()) &&
-				Util.nullSafeEquals(id.objectIdKeys, this.objectIdKeys);
-	}
+    public boolean equals(Object object) {
+        if (!(object instanceof ObjectId)) {
+            return false;
+        }
 
-	/**
-	 * Returns a map of id components. 
-	 * Keys in the map are DbAttribute names, values are database values
-	 * of corresponding columns.
-	 */
-	public Map getIdSnapshot() {
-		return objectIdKeys;
-	}
+        if (this == object) {
+            return true;
+        }
+
+        ObjectId id = (ObjectId) object;
+
+        // use the class name because two Objectid's should be equal
+        // even if their objClass'es were loaded by different class loaders.
+        if (!objectClass.getName().equals(id.objectClass.getName())) {
+            return false;
+        }
+
+        if (id.objectIdKeys == null && objectIdKeys == null) {
+            return true;
+        }
+
+        if (id.objectIdKeys == null || objectIdKeys == null) {
+            return false;
+        }
+
+        if (id.objectIdKeys.size() != objectIdKeys.size()) {
+            return false;
+        }
+
+        EqualsBuilder builder = new EqualsBuilder();
+        Iterator entries = objectIdKeys.entrySet().iterator();
+        while (entries.hasNext()) {
+            Map.Entry entry = (Map.Entry) entries.next();
+
+            Object key = entry.getKey();
+            Object value = entry.getValue();
+            if (value == null) {
+                if (id.objectIdKeys.get(key) != null
+                    || !id.objectIdKeys.containsKey(key)) {
+                    return false;
+                }
+            }
+            else {
+            	// takes care of comparing primitive arrays, such as byte[]
+				builder.append(value, id.objectIdKeys.get(key));
+                if (!builder.isEquals()) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+
+    /**
+     * Returns a map of id components. 
+     * Keys in the map are DbAttribute names, values are database values
+     * of corresponding columns.
+     */
+    public Map getIdSnapshot() {
+        return objectIdKeys;
+    }
 
     /**
      * Returns a value of id attribute identified by the 
      * name of DbAttribute.
      */
-	public Object getValueForAttribute(String attrName) {
-		return objectIdKeys.get(attrName);
-	}
+    public Object getValueForAttribute(String attrName) {
+        return objectIdKeys.get(attrName);
+    }
 
     /**
      * Always returns <code>false</code>.
      */
-	public boolean isTemporary() {
-		return false;
-	}
+    public boolean isTemporary() {
+        return false;
+    }
 
-	public String toString() {
-		StringBuffer buf = new StringBuffer(objectClass.getName());
-		if (isTemporary())
-			buf.append(" (temp)");
-		buf.append(": ");
-		if (objectIdKeys != null) {
-			Iterator it = objectIdKeys.keySet().iterator();
-			while (it.hasNext()) {
-				String nextKey = (String) it.next();
-				Object value = objectIdKeys.get(nextKey);
-				buf.append(" <").append(nextKey).append(": ").append(
-					value).append(
-					'>');
-			}
-		}
-		return buf.toString();
-	}
-	
+    public String toString() {
+        StringBuffer buf = new StringBuffer(objectClass.getName());
+        if (isTemporary())
+            buf.append(" (temp)");
+        buf.append(": ");
+        if (objectIdKeys != null) {
+            Iterator it = objectIdKeys.keySet().iterator();
+            while (it.hasNext()) {
+                String nextKey = (String) it.next();
+                Object value = objectIdKeys.get(nextKey);
+                buf.append(" <").append(nextKey).append(": ").append(value).append('>');
+            }
+        }
+        return buf.toString();
+    }
+
     /**
      * @see java.lang.Object#hashCode()
      */
     public int hashCode() {
-    	int mapHash = (objectIdKeys != null) ? objectIdKeys.hashCode() : 0;
-		// use the class name because two Objectid's should be equal
-		// even if their objClass'es were loaded by different class loaders.
-        return objectClass.getName().hashCode() + mapHash;
+        if (this.hashCode == Integer.MIN_VALUE) {
+            // build and cache hashCode
+
+            HashCodeBuilder builder = new HashCodeBuilder(3, 5);
+
+            // use the class name because two Objectid's should be equal
+            // even if their objClass'es were loaded by different class loaders.
+            builder.append(objectClass.getName().hashCode());
+
+            if (objectIdKeys != null) {
+                Iterator entries = objectIdKeys.entrySet().iterator();
+                while (entries.hasNext()) {
+                    Map.Entry entry = (Map.Entry) entries.next();
+
+                    // HashCodeBuilder will take care of processing object if it 
+                    // happens to be a primitive array such as byte[]
+                    builder.append(entry.getKey()).append(entry.getValue());
+                }
+            }
+
+            this.hashCode = builder.toHashCode();
+        }
+
+        return this.hashCode;
     }
-    
-	/**
-	 * Returns the class of object that this ObjectId is acting for
-	 * @return Class
-	 */
-	public Class getObjClass() {
-		return objectClass;
-	}
 
-	/**
-	 * Returns a replacement ObjectId associated with this id. Replacement ObjectId is either a
-	 * permananent ObjectId for an uncommitted object or a new id for object whose id
-	 * depends on its relationships.
-	 */
-	public ObjectId getReplacementId() {
-		return replacementId;
-	}
+    /**
+     * Returns the class of object that this ObjectId is acting for
+     * @return Class
+     */
+    public Class getObjClass() {
+        return objectClass;
+    }
 
-	public void setReplacementId(ObjectId replacementId) {
-		this.replacementId = replacementId;
-	}
+    /**
+     * Returns a replacement ObjectId associated with this id. Replacement ObjectId is either a
+     * permananent ObjectId for an uncommitted object or a new id for object whose id
+     * depends on its relationships.
+     */
+    public ObjectId getReplacementId() {
+        return replacementId;
+    }
+
+    public void setReplacementId(ObjectId replacementId) {
+        this.replacementId = replacementId;
+    }
 }
