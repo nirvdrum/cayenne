@@ -4,7 +4,8 @@
 <body>
     <section name="1. Introduction">     
         <subsection name="1.1 What's New in 1.1">
-        	<p>Below are significant new features and changes introduced in 1.1 release:</p>
+        	<p>This page lists all new features and changes relevant to Cayenne users, that were introduced 
+        	in 1.1 release:</p>
         	
         	<subsection name="1.1.1 Additions to cayenne.xml Format.">
             <p>Be careful - saving Cayenne projects with Modeler 1.1 will render them uneditable
