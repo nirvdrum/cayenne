@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.conf;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,53 +53,25 @@ package org.objectstyle.cayenne.conf;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.project;
 
-import java.io.InputStream;
-import org.apache.log4j.Level;
-
-import org.objectstyle.cayenne.util.ResourceLocator;
+import java.io.File;
 
 /**
-  * Subclass of Configuration that locates resources using internal reference
-  * to a ClassLoader. It is intended for use in Session Beans and should be 
-  * initialized using bean ClassLoader via 
-  * <code>initSharedConfig(ClassLoader)</code> method.
-  * 
-  * @author Andrei Adamchik
-  */
-public class EJBConfiguration extends Configuration {
-
-    protected ResourceLocator locator;
-
-    /** 
-     * Creates and sets default configuration object
-     * using <code>beanLoader</code> ClassLoader to lookup configuration
-     * files.
-     */
-    public static void initSharedConfig(ClassLoader beanLoader) {
-        EJBConfiguration config = new EJBConfiguration(beanLoader);
-        config.setLoggingLevel(Level.ERROR);
-        Configuration.initSharedConfig(config);
-    }
-
+ * Cayenne project that consists of a single DataMap.
+ * 
+ * @author Andrei Adamchik
+ */
+public class MapProject extends Project {
 
     /**
-     * Creates Configuration object that will lookup for resources 
-     * using <code>beanLoader</code> ClassLoader.
+     * Constructor for MapProject.
+     * @param name
+     * @param projectFile
      */
-    public EJBConfiguration(ClassLoader beanLoader) {
-        locator = new ResourceLocator();
-        locator.setClassLoader(beanLoader);
-        locator.setSkipCurDir(true);
-        locator.setSkipClasspath(false);
-        locator.setSkipHomeDir(true);
+    public MapProject(String name, File projectFile) {
+        super(name, projectFile);
     }
 
-    public InputStream getDomainConfig() {
-        return locator.findResourceStream(DOMAIN_FILE);
-    }
-
-    public InputStream getMapConfig(String location) {
-        return locator.findResourceStream(location);
-    }
 }
+
