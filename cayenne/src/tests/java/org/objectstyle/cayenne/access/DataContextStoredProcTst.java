@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.sql.Types;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
@@ -123,7 +124,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         }
 
         // create an artist with painting in the database
-    /*    createArtist(1000.0);
+        createArtist(1000.0);
 
         // create and run stored procedure
         Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
@@ -137,7 +138,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         proc.addCallParam(param1);
         proc.addCallParam(param2);
 
-        ProcedureSelectQuery q = new ProcedureSelectQuery(Artist.class, proc);
+        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
         q.setLoggingLevel(Level.WARN);
@@ -146,9 +147,13 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         // check the results
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
-        Artist a = (Artist) artists.get(0);
+        Map artistRow = (Map) artists.get(0);
+        Artist a = (Artist)ctxt.objectFromDataRow("Artist", artistRow);
         Painting p = (Painting) a.getPaintingArray().get(0);
-        assertEquals(2000, p.getEstimatedPrice().intValue()); */
+        
+        // invalidate painting, it may have been updated in the proc
+        ctxt.invalidateObject(p);
+        assertEquals(2000, p.getEstimatedPrice().intValue());
     }
 
     protected void createArtist(double paintingPrice) {

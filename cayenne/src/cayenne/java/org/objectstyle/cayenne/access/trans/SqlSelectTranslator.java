@@ -74,18 +74,41 @@ import org.objectstyle.cayenne.query.SqlSelectQuery;
  *
  * @author Andrei Adamchik
  */
-public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTranslator {
+public class SqlSelectTranslator
+    extends QueryAssembler
+    implements SelectQueryTranslator {
+        
     private static Logger logObj = Logger.getLogger(SqlSelectTranslator.class);
 
-    public String createSqlString() throws Exception {
-        return getRawQuery().getSqlString();
+    /**
+     * Initializes the types of columns in ResultDescriptor from the ResultSet metadata.
+     */
+    public static void appendResultTypesFromMetadata(
+        ResultSet rs,
+        ResultDescriptor desc) {
+        try {
+            ResultSetMetaData md = rs.getMetaData();
+            int len = md.getColumnCount();
+            if (len == 0) {
+                throw new CayenneRuntimeException("No columns in ResultSet.");
+            }
+
+            for (int i = 0; i < len; i++) {
+                int sqlType = md.getColumnType(i + 1);
+                desc.addJavaType(TypesMapping.getJavaBySqlType(sqlType));
+            }
+        } catch (SQLException sqex) {
+            logObj.error("Error", sqex);
+            throw new CayenneRuntimeException("Error reading metadata.", sqex);
+        }
     }
 
-    private final SqlSelectQuery getRawQuery() {
-        return (SqlSelectQuery) query;
-    }
-
-    protected void appendSnapshotLabelsFromMetadata(ResultSet rs, ResultDescriptor descriptor) {
+    /**
+     * Initializes the names of columns in ResultDescriptor from the ResultSet metadata.
+     */
+    public static void appendSnapshotLabelsFromMetadata(
+        ResultSet rs,
+        ResultDescriptor descriptor) {
         try {
             ResultSetMetaData md = rs.getMetaData();
             int len = md.getColumnCount();
@@ -108,29 +131,9 @@ public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTr
                 DbAttribute desc = new DbAttribute();
                 desc.setName(name);
                 desc.setType(md.getColumnType(i + 1));
-				descriptor.addDbAttribute(desc);
+                descriptor.addDbAttribute(desc);
             }
         } catch (SQLException sqex) {
-            throw new CayenneRuntimeException("Error reading metadata.", sqex);
-        }
-    }
-
-    protected void appendResultTypesFromMetadata(
-        ResultSet rs,
-        ResultDescriptor desc) {
-        try {
-            ResultSetMetaData md = rs.getMetaData();
-            int len = md.getColumnCount();
-            if (len == 0) {
-                throw new CayenneRuntimeException("No columns in ResultSet.");
-            }
-
-            for (int i = 0; i < len; i++) {
-                int sqlType = md.getColumnType(i + 1);
-                desc.addJavaType(TypesMapping.getJavaBySqlType(sqlType));
-            }
-        } catch (SQLException sqex) {
-            logObj.error("Error", sqex);
             throw new CayenneRuntimeException("Error reading metadata.", sqex);
         }
     }
@@ -139,12 +142,16 @@ public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTr
         throw new RuntimeException("aliases not supported");
     }
 
+    public String createSqlString() throws Exception {
+        return getRawQuery().getSqlString();
+    }
+
     public void dbRelationshipAdded(DbRelationship dbRel) {
         throw new RuntimeException("db relationships not supported");
     }
 
-    public boolean supportsTableAliases() {
-        return false;
+    private SqlSelectQuery getRawQuery() {
+        return (SqlSelectQuery) query;
     }
 
     public ResultDescriptor getResultDescriptor(ResultSet rs) {
@@ -153,7 +160,7 @@ public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTr
 
         DbAttribute[] attrs = getRawQuery().getResultDescriptors();
         if (attrs == null || attrs.length == 0) {
-            appendSnapshotLabelsFromMetadata(rs, descriptor);
+            SqlSelectTranslator.appendSnapshotLabelsFromMetadata(rs, descriptor);
         } else {
             for (int i = 0; i < attrs.length; i++) {
                 descriptor.addDbAttribute(attrs[i]);
@@ -162,7 +169,7 @@ public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTr
 
         ObjAttribute[] objAttrs = getRawQuery().getObjDescriptors();
         if (objAttrs == null || objAttrs.length == 0) {
-            appendResultTypesFromMetadata(rs, descriptor);
+            SqlSelectTranslator.appendResultTypesFromMetadata(rs, descriptor);
         } else {
             for (int i = 0; i < objAttrs.length; i++) {
                 descriptor.addJavaType(objAttrs[i].getType());
@@ -171,5 +178,9 @@ public class SqlSelectTranslator extends QueryAssembler implements SelectQueryTr
 
         descriptor.index();
         return descriptor;
+    }
+
+    public boolean supportsTableAliases() {
+        return false;
     }
 }

@@ -165,8 +165,14 @@ public class ProcedureTranslator
     }
 
     public ResultDescriptor getResultDescriptor(ResultSet rs) {
-        // TODO Auto-generated method stub
-        return null;
+        ResultDescriptor descriptor =
+            new ResultDescriptor(getAdapter().getExtendedTypes(), null);
+
+        SqlSelectTranslator.appendSnapshotLabelsFromMetadata(rs, descriptor);
+        SqlSelectTranslator.appendResultTypesFromMetadata(rs, descriptor);
+
+        descriptor.index();
+        return descriptor;
     }
 
     /**

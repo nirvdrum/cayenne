@@ -178,7 +178,6 @@ public class ResultDescriptor {
     }
 
     protected void initConvertersFromJavaTypes() {
-    	logObj.debug("Creating converters using custom java types.");
         int resultWidth = dbAttributes.size();
         this.converters = new ExtendedType[resultWidth];
 

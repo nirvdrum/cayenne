@@ -60,6 +60,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +68,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
@@ -97,6 +99,7 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class DataNode implements QueryEngine {
+    private static Logger logObj = Logger.getLogger(DataNode.class);
 
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
 
@@ -548,8 +551,7 @@ public class DataNode implements QueryEngine {
         // iterate until we exhaust all results
         boolean hasResultSet = prepStmt.execute();
         while (true) {
-
-            if (hasResultSet) {
+            if (hasResultSet) { 
                 ResultSet rs = prepStmt.getResultSet();
 
                 // sanity check 
@@ -564,14 +566,22 @@ public class DataNode implements QueryEngine {
                         ((GenericSelectQuery) query).getFetchLimit());
 
                 if (readAll) {
-                    // note that we don't need to close ResultIterator
-                    // since "dataRows" will do it internally
-                    List resultRows = it.dataRows();
+                    // read rows one by one, since reading all rows
+                    // in the iterator will lead to closing a statement - something we don't want
+                    List resultRows = new ArrayList();
+                    try {
+                        while (it.hasNextRow()) {
+                            resultRows.add(it.nextDataRow());
+                        }
+
+                    } finally {
+                        rs.close();
+                    }
+
                     QueryLogger.logSelectCount(
                         query.getLoggingLevel(),
                         resultRows.size(),
                         System.currentTimeMillis() - t1);
-
                     delegate.nextDataRows(query, resultRows);
                 } else {
                     try {
@@ -587,9 +597,11 @@ public class DataNode implements QueryEngine {
                 if (updateCount == -1) {
                     break;
                 }
-
+                QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
                 delegate.nextCount(query, updateCount);
             }
+
+            hasResultSet = prepStmt.getMoreResults();
         }
     }
 
