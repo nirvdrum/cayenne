@@ -56,20 +56,28 @@
 package org.objectstyle.cayenne.modeler.view;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.ClassGeneratorController;
+import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
+import org.scopemvc.core.PropertyManager;
+import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
 import org.scopemvc.view.swing.SCheckBox;
 import org.scopemvc.view.swing.SPanel;
 import org.scopemvc.view.swing.STable;
+import org.scopemvc.view.swing.STableModel;
 import org.scopemvc.view.swing.STextField;
 import org.scopemvc.view.swing.SwingView;
 
@@ -89,22 +97,32 @@ public class ClassGeneratorDialog extends SPanel {
         setDisplayMode(SwingView.MODAL_DIALOG);
         setTitle("Generate Java Classes");
         setLayout(new BorderLayout());
-        setSize(500, 400);
 
         // build entity table
-        STable table = new STable();
-        table.setSelector("entities");
-        table.setColumnNames(new String[] {"Entity", "Class", "Generate"});
-        table.setColumnSelectors(new String[] {"entity.name", "entity.className", "selected"});
-        table.getColumnModel().getColumn(0).setMinWidth(100);
-        table.getColumnModel().getColumn(1).setMinWidth(250);
+        STable table = new ClassGeneratorTable();
+        ClassGeneratorModel model = new ClassGeneratorModel(table);
+        model.setSelector("entities");
+        model.setColumnNames(
+            new String[] { "Entity", "Class", "Generate", "Problems" });
+        model.setColumnSelectors(
+            new String[] {
+                "entity.name",
+                "entity.className",
+                "selected",
+                "validationMessage" });
+
+        table.setModel(model);
+
+        // make sure that long columns are not squeezed
+        table.getColumnModel().getColumn(1).setMinWidth(100);
+        table.getColumnModel().getColumn(3).setMinWidth(150);
 
         // build pair checkbox
         Box generate_pair_box = Box.createHorizontalBox();
-        
+
         SCheckBox generatePair = new SCheckBox();
-        generatePair.setSelector("pairs");        
- 
+        generatePair.setSelector("pairs");
+
         generate_pair_box.add(Box.createHorizontalStrut(2));
         generate_pair_box.add(new JLabel("Generate parent/child class pairs"));
         generate_pair_box.add(Box.createHorizontalStrut(7));
@@ -113,14 +131,15 @@ public class ClassGeneratorDialog extends SPanel {
 
         // build folder selector
         Box folder_box = Box.createHorizontalBox();
-       
+
         STextField folder = new STextField();
         folder.setSelector("outputDir");
-        
-        SAction chooseAction = new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL);
+
+        SAction chooseAction =
+            new SAction(ClassGeneratorController.CHOOSE_LOCATION_CONTROL);
         SButton chooseButton = new SButton(chooseAction);
         chooseButton.setEnabled(true);
-        
+
         folder_box.add(Box.createHorizontalStrut(2));
         folder_box.add(new JLabel("Output directory:"));
         folder_box.add(Box.createHorizontalStrut(7));
@@ -130,11 +149,13 @@ public class ClassGeneratorDialog extends SPanel {
         folder_box.add(Box.createHorizontalStrut(2));
 
         // build action buttons
-        SAction generateAction = new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL);
+        SAction generateAction =
+            new SAction(ClassGeneratorController.GENERATE_CLASSES_CONTROL);
         SButton generateButton = new SButton(generateAction);
         generateButton.setEnabled(true);
-        
-        SAction cancelAction = new SAction(ClassGeneratorController.CANCEL_CONTROL);
+
+        SAction cancelAction =
+            new SAction(ClassGeneratorController.CANCEL_CONTROL);
         SButton cancelButton = new SButton(cancelAction);
         cancelButton.setEnabled(true);
 
@@ -145,5 +166,88 @@ public class ClassGeneratorDialog extends SPanel {
                 new JComponent[] { generate_pair_box, folder_box },
                 new JButton[] { generateButton, cancelButton });
         add(panel, BorderLayout.CENTER);
+    }
+
+    class ClassGeneratorModel extends STableModel {
+        protected Selector enabledSelector = Selector.fromString("enabled");
+
+        /**
+         * Constructor for TableModel.
+         * @param table
+         */
+        public ClassGeneratorModel(JTable table) {
+            super(table);
+        }
+
+        public boolean isEnabledRow(int rowIndex) {
+            // check if this is a failed row
+            Object row = getElementAt(rowIndex);
+            PropertyManager manager = getItemsManager();
+            if (manager == null || row == null) {
+                return false;
+            }
+
+            try {
+                Boolean enabled = (Boolean) manager.get(row, enabledSelector);
+                return enabled != null && enabled.booleanValue();
+            } catch (Exception e) {
+                return false;
+            }
+        }
+
+        /**
+         * @see javax.swing.table.TableModel#isCellEditable(int, int)
+         */
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+            // only checkbox is editable
+            if (columnIndex != 2) {
+                return false;
+            }
+
+            return isEnabledRow(rowIndex);
+        }
+    }
+
+    class ClassGeneratorTable extends STable {
+        protected DefaultTableCellRenderer problemRenderer;
+
+        public ClassGeneratorTable() {
+            problemRenderer = new ClassGeneratorProblemRenderer();
+            problemRenderer.setBackground(ValidatorDialog.WARNING_COLOR);
+        }
+
+        public TableCellRenderer getCellRenderer(int row, int column) {
+            ClassGeneratorModel model = (ClassGeneratorModel) getModel();
+
+            return (model.isEnabledRow(row))
+                ? super.getCellRenderer(row, column)
+                : problemRenderer;
+        }
+    }
+
+    class ClassGeneratorProblemRenderer extends DefaultTableCellRenderer {
+
+        public Component getTableCellRendererComponent(
+            JTable table,
+            Object value,
+            boolean isSelected,
+            boolean hasFocus,
+            int row,
+            int column) {
+            
+            if(value instanceof Boolean) {
+            	value = "";
+            }
+            
+            
+            return super.getTableCellRendererComponent(
+                table,
+                value,
+                isSelected,
+                hasFocus,
+                row,
+                column);
+        }
+
     }
 }

@@ -11,7 +11,10 @@ import org.objectstyle.cayenne.gen.DefaultClassGenerator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.model.ClassGeneratorModel;
+import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.view.ClassGeneratorDialog;
+import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.validator.Validator;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -29,15 +32,21 @@ public class ClassGeneratorController extends BasicController {
     public static final String CHOOSE_LOCATION_CONTROL =
         "cayenne.modeler.classgenerator.choose.button";
 
-    public ClassGeneratorController(DataMap map) {
-        setModel(prepareModel(map));
+    public ClassGeneratorController(Project project, DataMap map) {
+        setModel(prepareModel(project, map));
     }
 
-    protected Object prepareModel(DataMap map) {
-        ClassGeneratorModel model = new ClassGeneratorModel(map);
+    protected Object prepareModel(Project project, DataMap map) {
+        // validate entities
+        Validator validator = new Validator(project);
+        validator.validate();
 
+        ClassGeneratorModel model = new ClassGeneratorModel(map, validator.validationResults());
+
+        // by default generate pairs of classes
         model.setPairs(true);
 
+        // figure out default out directory
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         String startDir =
             (String) pref.getProperty(

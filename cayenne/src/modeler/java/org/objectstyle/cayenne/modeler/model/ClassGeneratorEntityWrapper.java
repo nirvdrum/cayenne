@@ -8,10 +8,16 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class ClassGeneratorEntityWrapper {
     protected ObjEntity entity;
     protected boolean selected;
-
+    protected String validationMessage;
+    
     public ClassGeneratorEntityWrapper(ObjEntity entity, boolean selected) {
+    	this(entity, selected, null);
+    }
+    
+    public ClassGeneratorEntityWrapper(ObjEntity entity, boolean selected, String validationMessage) {
         this.entity = entity;
         this.selected = selected;
+        this.validationMessage = validationMessage;
     }
     
     /**
@@ -44,5 +50,29 @@ public class ClassGeneratorEntityWrapper {
      */
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+    
+    /**
+     * Returns the enabled.
+     * @return boolean
+     */
+    public boolean isEnabled() {
+        return validationMessage == null;
+    }
+    
+    /**
+     * Returns the validationMessage.
+     * @return String
+     */
+    public String getValidationMessage() {
+        return validationMessage;
+    }
+
+    /**
+     * Sets the validationMessage.
+     * @param validationMessage The validationMessage to set
+     */
+    public void setValidationMessage(String validationMessage) {
+        this.validationMessage = validationMessage;
     }
 }

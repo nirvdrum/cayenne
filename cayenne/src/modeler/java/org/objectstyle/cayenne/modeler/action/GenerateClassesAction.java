@@ -59,6 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.ClassGeneratorController;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
@@ -82,9 +83,13 @@ public class GenerateClassesAction extends CayenneAction {
     }
 
     protected void generateClasses() {
-        new ClassGeneratorController(getMediator().getCurrentDataMap()).startup();
+        Project project = super.getTopModel().getCurrentProject();
+        new ClassGeneratorController(
+            project,
+            getMediator().getCurrentDataMap())
+            .startup();
     }
-    
+
     /**
     * Returns <code>true</code> if path contains a DataMap object.
     */
