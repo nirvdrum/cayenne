@@ -54,67 +54,51 @@
  *
  */
 
-package org.objectstyle.cayenne.modeler.validator;
+package org.objectstyle.cayenne.unittest;
 
-import javax.swing.JFrame;
-
-import junit.framework.TestCase;
-
+import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.validator.ValidationInfo;
+import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * JUnit tests for ValidationDisplayHandler class.
+ * Superclass of test cases requiring multiple DataContexts with 
+ * the same parent DataDomain.
  * 
  * @author Andrei Adamchik
  */
-public class ValidationDisplayHandlerTst extends TestCase {
+public abstract class MultiContextTestCase extends CayenneTestCase {
+    protected DataContext context;
 
-    public void testValidationInfo() throws Exception {
-        ValidationInfo info = new ValidationInfo(-1, "123", null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
+    protected void setUp() throws Exception {
+        super.setUp();
 
-        assertSame(info, handler.getValidationInfo());
+        // cleanup database data
+        getDatabaseSetup().cleanTableData();
+
+        DataDomain domain = getDomain();
+
+        // remove listeners for snapshot events
+        EventManager.getDefaultManager().removeAllListeners(
+            domain.getSnapshotCache().getSnapshotEventSubject());
+
+        // initialize main DataContext
+        context = domain.createDataContext();
     }
 
-    public void testMessage() throws Exception {
-        String msg = "abc";
-        ValidationInfo info = new ValidationInfo(-1, msg, null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
-
-        assertSame(msg, handler.getMessage());
+    /**
+     * Returns the main DataContext.
+     */
+    protected DataContext getContext() {
+        return context;
     }
 
-    public void testSeverity() throws Exception {
-        ValidationInfo info =
-            new ValidationInfo(ValidationDisplayHandler.ERROR, null, null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
-
-        assertEquals(ValidationDisplayHandler.ERROR, handler.getSeverity());
-    }
-
-    public void testDomain() throws Exception {
-        ValidationInfo info =
-            new ValidationInfo(ValidationDisplayHandler.ERROR, null, null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
-
-        DataDomain dom = new DataDomain("test");
-        assertNull(handler.getDomain());
-        handler.setDomain(dom);
-        assertSame(dom, handler.getDomain());
-    }
-
-    class ConcreteErrorMsg extends ValidationDisplayHandler {
-
-        /**
-         * Constructor for ConcreteErrorMsg.
-         * @param validation
-         */
-        public ConcreteErrorMsg(ValidationInfo validation) {
-            super(validation);
-        }
-
-        public void displayField(EventController mediator, JFrame frame) {}
+    /**
+     * Helper method to create a new DataContext with the ObjectStore
+     * state being the mirror of the given context. This is done by
+     * serializing/deserializing the DataContext.
+     */
+    protected DataContext mirrorDataContext(DataContext context) throws Exception {
+        return (DataContext) Util.cloneViaSerialization(context);
     }
 }

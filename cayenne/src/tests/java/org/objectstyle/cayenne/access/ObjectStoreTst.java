@@ -79,7 +79,7 @@ public class ObjectStoreTst extends CayenneTestCase {
         // create ObjectStore outside of this DataContext
         SnapshotCache cache = new SnapshotCache("test");
         this.objectStore = new ObjectStore(cache);
-        
+
     }
 
     public void testObjectsInvalidated() throws Exception {
@@ -92,7 +92,11 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.addSnapshot(object.getObjectId(), row);
+        objectStore.getSnapshotCache().registerSnapshotChanges(
+            this,
+            Collections.singletonMap(object.getObjectId(), row),
+            Collections.EMPTY_LIST);
+
         assertSame(object, objectStore.getObject(oid));
         assertNotNull(objectStore.getSnapshot(oid));
 
@@ -113,7 +117,10 @@ public class ObjectStoreTst extends CayenneTestCase {
 
         // insert object into the ObjectStore
         objectStore.addObject(object);
-        objectStore.addSnapshot(object.getObjectId(), row);
+        objectStore.getSnapshotCache().registerSnapshotChanges(
+            this,
+            Collections.singletonMap(object.getObjectId(), row),
+            Collections.EMPTY_LIST);
         assertSame(object, objectStore.getObject(oid));
         assertNotNull(objectStore.getSnapshot(oid));
 

@@ -83,7 +83,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
     protected Map objectMap = new HashMap();
     protected transient Map newObjectMap = null;
-    
+
     /**
      * Stores a reference to the SnapshotCache. 
      * 
@@ -93,7 +93,6 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * </p>
      */
     protected transient SnapshotCache snapshotCache;
-
 
     public ObjectStore() {
     }
@@ -143,7 +142,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         // send an event for removed snapshots
-		getSnapshotCache().registerSnapshotChanges(this, Collections.EMPTY_MAP, ids);
+        getSnapshotCache().registerSnapshotChanges(this, Collections.EMPTY_MAP, ids);
     }
 
     /**
@@ -216,7 +215,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         }
 
         if (modified != null) {
-			getSnapshotCache().registerSnapshotChanges(this, modified, Collections.EMPTY_LIST);
+            getSnapshotCache().registerSnapshotChanges(
+                this,
+                modified,
+                Collections.EMPTY_LIST);
         }
     }
 
@@ -301,19 +303,26 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     deletedIds.add(id);
                 }
 
+                // store the new snapshot
+                if (modifiedSnapshots == null) {
+                    modifiedSnapshots = new HashMap();
+                }
+
+                modifiedSnapshots.put(
+                    id.getReplacementId(),
+                    object.getDataContext().takeObjectSnapshot(object));
+
+                // fix object state
                 object.setObjectId(id.getReplacementId());
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 addObject(object);
-                addSnapshot(
-                    id.getReplacementId(),
-                    object.getDataContext().takeObjectSnapshot(object));
                 removeObject(id);
             }
         }
 
         // post change event 
         if (deletedIds != null || modifiedSnapshots != null) {
-			getSnapshotCache().registerSnapshotChanges(
+            getSnapshotCache().registerSnapshotChanges(
                 this,
                 modifiedSnapshots != null ? modifiedSnapshots : Collections.EMPTY_MAP,
                 deletedIds != null ? deletedIds : Collections.EMPTY_LIST);
@@ -336,7 +345,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             objectMap.put(newId, object);
 
             if (snapshot != null) {
-				getSnapshotCache().registerSnapshotChanges(
+                getSnapshotCache().registerSnapshotChanges(
                     this,
                     Collections.singletonMap(newId, snapshot),
                     Collections.singletonList(oldId));
@@ -436,7 +445,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * via ObjectStore are deprecated due to architecture changes.
      */
     public synchronized void removeSnapshot(ObjectId id) {
-		getSnapshotCache().registerSnapshotChanges(
+        getSnapshotCache().registerSnapshotChanges(
             this,
             Collections.EMPTY_MAP,
             Collections.singletonList(id));

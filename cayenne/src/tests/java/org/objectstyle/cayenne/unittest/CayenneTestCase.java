@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
+import org.objectstyle.cayenne.event.EventManager;
 
 /**
  * Superclass of Cayenne test cases. Provides access to shared
@@ -71,7 +72,7 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneTestCase extends TestCase {
+public abstract class CayenneTestCase extends TestCase {
 
     static {
         // init resources if needed
@@ -113,8 +114,12 @@ public class CayenneTestCase extends TestCase {
     }
 
     public DataContext createDataContext() {
-    	// clear cache...
-    	getDomain().getSnapshotCache().clear();
+        // remove listeners for snapshot events
+        EventManager.getDefaultManager().removeAllListeners(
+            getDomain().getSnapshotCache().getSnapshotEventSubject());
+
+        // clear cache...
+        getDomain().getSnapshotCache().clear();
         return getDomain().createDataContext();
     }
 
@@ -123,9 +128,6 @@ public class CayenneTestCase extends TestCase {
     }
 
     public DatabaseSetupDelegate getDatabaseSetupDelegate() {
-        return CayenneTestResources
-            .getResources()
-            .getSharedDatabaseSetup()
-            .getDelegate();
+        return CayenneTestResources.getResources().getSharedDatabaseSetup().getDelegate();
     }
 }

@@ -53,68 +53,34 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access;
 
-package org.objectstyle.cayenne.modeler.validator;
-
-import javax.swing.JFrame;
-
-import junit.framework.TestCase;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.validator.ValidationInfo;
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 
 /**
- * JUnit tests for ValidationDisplayHandler class.
- * 
  * @author Andrei Adamchik
  */
-public class ValidationDisplayHandlerTst extends TestCase {
+public class DataContextSnapshotEventsTst extends MultiContextTestCase {
 
-    public void testValidationInfo() throws Exception {
-        ValidationInfo info = new ValidationInfo(-1, "123", null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
+    public void testUpdatePropagation() throws Exception {
+        // prepare data
+        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
+        artist.setArtistName("version1");
+        context.commitChanges();
 
-        assertSame(info, handler.getValidationInfo());
-    }
+        // prepare a second context
+        DataContext altContext = mirrorDataContext(context);
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+		assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
-    public void testMessage() throws Exception {
-        String msg = "abc";
-        ValidationInfo info = new ValidationInfo(-1, msg, null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
-
-        assertSame(msg, handler.getMessage());
-    }
-
-    public void testSeverity() throws Exception {
-        ValidationInfo info =
-            new ValidationInfo(ValidationDisplayHandler.ERROR, null, null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
-
-        assertEquals(ValidationDisplayHandler.ERROR, handler.getSeverity());
-    }
-
-    public void testDomain() throws Exception {
-        ValidationInfo info =
-            new ValidationInfo(ValidationDisplayHandler.ERROR, null, null);
-        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
-
-        DataDomain dom = new DataDomain("test");
-        assertNull(handler.getDomain());
-        handler.setDomain(dom);
-        assertSame(dom, handler.getDomain());
-    }
-
-    class ConcreteErrorMsg extends ValidationDisplayHandler {
-
-        /**
-         * Constructor for ConcreteErrorMsg.
-         * @param validation
-         */
-        public ConcreteErrorMsg(ValidationInfo validation) {
-            super(validation);
-        }
-
-        public void displayField(EventController mediator, JFrame frame) {}
+        // test update propagation
+		artist.setArtistName("version2");
+		context.commitChanges();
+		
+		// assertEquals(artist.getArtistName(), altArtist.getArtistName());
     }
 }
