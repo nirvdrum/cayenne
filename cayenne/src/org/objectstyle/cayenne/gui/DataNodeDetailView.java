@@ -66,6 +66,7 @@ import javax.swing.border.TitledBorder;
 
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -89,6 +90,9 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	
 	JLabel		factoryLabel;
 	JComboBox	factory;
+
+	JLabel		adapterLabel;
+	JComboBox	adapter;
 	
 	JLabel			userNameLabel;
 	JTextField		userName;
@@ -121,6 +125,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		minConnections.getDocument().addDocumentListener(this);
 		maxConnections.getDocument().addDocumentListener(this);
 		factory.addActionListener(this);
+		adapter.addActionListener(this);
 	}
 
 	private void init(){
@@ -142,18 +147,24 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		fileBtn			= new JButton("...");
 		factoryLabel 	= new JLabel("Data source factory:");
 		factory 		= new JComboBox();
+		factory.setEditable(true);
+		adapterLabel 	= new JLabel("DB query adapter:");
+		adapter 		= new JComboBox();
+		adapter.setEditable(true);
 		
 		JPanel fileChooser = this.formatFileChooser(location, fileBtn);
 
-		Component[] left_comp = new Component[3];
+		Component[] left_comp = new Component[4];
 		left_comp[0] = nameLabel;
 		left_comp[1] = locationLabel;
 		left_comp[2] = factoryLabel;
+		left_comp[3] = adapterLabel;
 
-		Component[] right_comp = new Component[3];
+		Component[] right_comp = new Component[4];
 		right_comp[0] = name;
 		right_comp[1] = fileChooser;
 		right_comp[2] = factory;
+		right_comp[3] = adapter;
 
 		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
 		add(temp, constraints);
@@ -238,9 +249,15 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		} else if (e.getDocument() == url.getDocument()) {
 			info.setDataSourceUrl(url.getText());
 		} else if (e.getDocument() == minConnections.getDocument()) {
-			info.setMinConnections(Integer.parseInt(minConnections.getText()));
+			if (minConnections.getText().trim().length() > 0)
+				info.setMinConnections(Integer.parseInt(minConnections.getText()));
+			else
+				info.setMinConnections(0);
 		} else if (e.getDocument() == maxConnections.getDocument()) {
-			info.setMaxConnections(Integer.parseInt(maxConnections.getText()));
+			if (maxConnections.getText().trim().length() > 0)
+				info.setMaxConnections(Integer.parseInt(maxConnections.getText()));
+			else
+				info.setMaxConnections(0);
 		}
 
 	}
@@ -249,14 +266,26 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		Object src = e.getSource();
 		
 		if (src == factory) {
-			FactoryElement ele = (FactoryElement)factory.getModel().getSelectedItem();
+			String ele = (String)factory.getModel().getSelectedItem();
 			if (null != ele) {
-				if (ele.getClassName().equals(DataSourceFactory.DIRECT_FACTORY))
+				if (ele.equals(DataSourceFactory.DIRECT_FACTORY))
 					fileBtn.setEnabled(true);
 				else 
 					fileBtn.setEnabled(false);
-				mediator.getCurrentDataNode().setDataSourceFactory(ele.getClassName());
+				mediator.getCurrentDataNode().setDataSourceFactory(ele);
 			}
+		} else if (src == adapter) {
+			String ele = (String)adapter.getModel().getSelectedItem();
+			DbAdapter adapt = null; 
+			try {
+				adapt = (DbAdapter)Class.forName(ele).getDeclaredConstructors()[0].newInstance(new Object[0]);
+			} catch (Exception ex) {
+				System.out.println(ex.getMessage());
+				ex.printStackTrace();
+				adapter.setSelectedIndex(-1);
+				return;
+			}
+			mediator.getCurrentDataNode().setAdapter(adapt);
 		}
 	}// End actionPerformed()
 	
@@ -268,22 +297,26 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		name.setText(oldName);
 		location.setText(node.getDataSourceLocation());
 		populateFactory(node.getDataSourceFactory());
+		populateDbAdapter(node.getAdapter().getClass().getName().trim());
 		DataSourceInfo info = src.getDataSourceInfo();
 		populateDataSourceInfo(info);
 		System.out.println("In currentDataNodeChanged() 2.0");
 	}
 	
-	private void populateFactory(String selected_class) {
+	private void populateDbAdapter(String selected_class){
 		DefaultComboBoxModel model;
-		FactoryElement[] arr 
-			= {new FactoryElement("JNDI", DataSourceFactory.JNDI_FACTORY),
-			   new FactoryElement("Direct connection", DataSourceFactory.DIRECT_FACTORY)};
+		String[] arr 
+			= {DbAdapter.JDBC
+			  ,DbAdapter.SYBASE
+			  ,DbAdapter.MYSQL
+			  ,DbAdapter.ORACLE
+			  ,DbAdapter.POSTGRES};
 		model = new DefaultComboBoxModel(arr);
 		if (selected_class != null && selected_class.length() > 0) {
 			boolean found = false;
 			for (int i = 0; i < model.getSize(); i++)  {
-				FactoryElement ele = (FactoryElement)model.getElementAt(i);
-				if (ele.getClassName().equals(selected_class)) {
+				String ele = (String)model.getElementAt(i);
+				if (ele.equals(selected_class)) {
 					model.setSelectedItem(ele);
 					found = true;
 					break;
@@ -291,9 +324,33 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			}// End for()
 			// In case if there is unknown factory
 			if (!found) {
-				FactoryElement ele = new FactoryElement("Unknown", selected_class);
-				model.addElement(ele);
-				model.setSelectedItem(ele);
+				model.addElement(selected_class);
+				model.setSelectedItem(selected_class);
+			}
+		}// End if there is factory to select
+		adapter.setModel(model);
+	}
+	
+	private void populateFactory(String selected_class) {
+		DefaultComboBoxModel model;
+		String[] arr 
+			= {DataSourceFactory.JNDI_FACTORY
+			  ,DataSourceFactory.DIRECT_FACTORY};
+		model = new DefaultComboBoxModel(arr);
+		if (selected_class != null && selected_class.length() > 0) {
+			boolean found = false;
+			for (int i = 0; i < model.getSize(); i++)  {
+				String ele = (String)model.getElementAt(i);
+				if (ele.equals(selected_class)) {
+					model.setSelectedItem(ele);
+					found = true;
+					break;
+				}
+			}// End for()
+			// In case if there is unknown factory
+			if (!found) {
+				model.addElement(selected_class);
+				model.setSelectedItem(selected_class);
 			}
 		}// End if there is factory to select
 		factory.setModel(model);
@@ -308,26 +365,6 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		minConnections.setText(String.valueOf(info.getMinConnections()));
 		maxConnections.setText(String.valueOf(info.getMaxConnections()));
 	}//end populateDataSourceInfo()
-	
-	private class FactoryElement {
-		String label;
-		String className;
-		
-		public FactoryElement(String temp_label, String class_name) {
-			label = temp_label;
-			className = class_name;
-		}
-		
-		public String toString()
-		{ return label; }
-		
-		public String getClassName() 
-		{ return className; }
-		
-		public String getLabel()
-		{ return label; }
-	}// End class FactoryElement
-	
 	
 } // End class DataNodeDetailView
 

@@ -131,6 +131,7 @@ implements ActionListener
             getContentPane().remove(view);
             view = null;
             mediator = null;
+            this.repaint();
             disableMenu();
         } else if (src == saveMapAsMenu) {
             saveMapAs(mediator.getCurrentDataMap());

@@ -247,24 +247,26 @@ public class DomainHelper {
     private static void storeDomains(PrintWriter pw, DataDomain domain) {
         DataNode[] nodes = domain.getDataNodes();
         List maps = domain.getMapList();
-        pw.println("<domain name=\"" + domain.getName() + "\">");
+        pw.println("<domain name=\"" + domain.getName().trim() + "\">");
         Iterator iter = maps.iterator();
         while(iter.hasNext()) {
             StringBuffer buf = new StringBuffer();
             DataMap map = (DataMap)iter.next();
-            buf.append("\t <map name=\"").append(map.getName());
-            buf.append(" \" location=\"").append(map.getLocation());
+            buf.append("\t <map name=\"").append(map.getName().trim());
+            buf.append("\"  location=\"").append(map.getLocation().trim());
             buf.append("\"/> ");
             pw.println(buf.toString());
         }
 
         for (int i = 0; i < nodes.length; i++) {
-            pw.println("\t<node name=\"" + nodes[i].getName() + "\"" );
-            pw.println("\t\t datasource=\""+ nodes[i].getDataSourceLocation() + "\"");
+            pw.println("\t<node name=\"" + nodes[i].getName().trim() + "\"" );
+            pw.println("\t\t datasource=\""+ nodes[i].getDataSourceLocation().trim() + "\"");
+            if (nodes[i].getAdapter() != null)
+            	pw.println("\t\t adapter=\""+ nodes[i].getAdapter().getClass().getName() + "\"");
             pw.println("\t\t factory=\""+ nodes[i].getDataSourceFactory() + "\">");
             DataMap[] map_arr = nodes[i].getDataMaps();
             for (int j = 0; map_arr != null && j < map_arr.length; j++) {
-                pw.println("\t\t\t<map-ref name=\"" + map_arr[j].getName() + "\"/>");
+                pw.println("\t\t\t<map-ref name=\"" + map_arr[j].getName().trim() + "\"/>");
             }
             pw.println("\t </node>");
         }
