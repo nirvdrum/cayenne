@@ -116,7 +116,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // update artist using raw SQL
         SQLTemplate query =
-            getSQLTemplateCustomizer().createSQLTemplate(
+            getSQLTemplateBuilder().createSQLTemplate(
                 Artist.class,
                 "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)",
                 false);
@@ -595,7 +595,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // update artist using raw SQL
         SQLTemplate update =
-            getSQLTemplateCustomizer().createSQLTemplate(
+            getSQLTemplateBuilder().createSQLTemplate(
                 Artist.class,
                 "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)",
                 false);
@@ -643,7 +643,7 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
         // update artist using raw SQL
         SQLTemplate update =
-            getSQLTemplateCustomizer().createSQLTemplate(
+            getSQLTemplateBuilder().createSQLTemplate(
                 Artist.class,
                 "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)",
                 false);
@@ -755,9 +755,10 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
                 artist.getObjectId()));
 
         // now replace the row in the database
-        SQLTemplate update = new SQLTemplate(Artist.class, false);
-        update.setDefaultTemplate(
-            "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)");
+        String template =
+            "UPDATE ARTIST SET ARTIST_NAME = #bind($newName) WHERE ARTIST_NAME = #bind($oldName)";
+        SQLTemplate update = new SQLTemplate(Artist.class, template, false);
+
         Map map = new HashMap(3);
         map.put("newName", backendName);
         map.put("oldName", originalName);

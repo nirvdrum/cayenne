@@ -79,11 +79,10 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
     }
 
     public void testExecuteUpdate() throws Exception {
-
-        SQLTemplate template = new SQLTemplate(Object.class, false);
-        template.setDefaultTemplate(
+        String templateString =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))");
+                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
 
         Map bindings = new HashMap();
         bindings.put("id", new Integer(1));
@@ -125,8 +124,8 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
     public void testExecuteUpdateNoParameters() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        SQLTemplate template = new SQLTemplate(Object.class, false);
-        template.setDefaultTemplate("delete from ARTIST");
+        SQLTemplate template = new SQLTemplate(Object.class, "delete from ARTIST", false);
+
         SQLTemplateExecutionPlan plan =
             new SQLTemplateExecutionPlan(getAccessStackAdapter().getAdapter());
         assertSame(getAccessStackAdapter().getAdapter(), plan.getAdapter());
@@ -147,11 +146,10 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
     }
 
     public void testExecuteUpdateBatch() throws Exception {
-
-        SQLTemplate template = new SQLTemplate(Object.class, false);
-        template.setDefaultTemplate(
+        String templateString =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))");
+                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString, false);
 
         Map bindings1 = new HashMap();
         bindings1.put("id", new Integer(1));

@@ -133,7 +133,7 @@ public class DataPort {
 
         // sort entities for insertion
         List sorted = new ArrayList(entities);
-        destinationNode.getDependencySorter().sortDbEntities(sorted, false);
+        destinationNode.getEntitySorter().sortDbEntities(sorted, false);
 
         if (cleaningDestination) {
             // reverse insertion order for deletion

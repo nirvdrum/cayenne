@@ -70,7 +70,7 @@ public class GenericSelectQueryTst extends BasicTestCase {
     }
 
     public void testSQLTemplate() throws Exception {
-        runTest(new SQLTemplate("Dummy", true));
+        runTest(new SQLTemplate("Dummy", "AAA", true));
     }
 
     /**

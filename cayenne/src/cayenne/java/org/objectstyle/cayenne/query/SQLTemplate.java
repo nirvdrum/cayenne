@@ -116,24 +116,28 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
         setSelecting(selecting);
     }
 
-    public SQLTemplate(ObjEntity root, boolean selecting) {
+    public SQLTemplate(ObjEntity rootEntity, String defaultTemplate, boolean selecting) {
+        setDefaultTemplate(defaultTemplate);
         setSelecting(selecting);
-        setRoot(root);
+        setRoot(rootEntity);
     }
 
-    public SQLTemplate(Class rootClass, boolean selecting) {
+    public SQLTemplate(Class rootClass, String defaultTemplate, boolean selecting) {
+        setDefaultTemplate(defaultTemplate);
         setSelecting(selecting);
         setRoot(rootClass);
     }
 
-    public SQLTemplate(DbEntity root, boolean selecting) {
+    public SQLTemplate(DbEntity rootEntity, String defaultTemplate, boolean selecting) {
+        setDefaultTemplate(defaultTemplate);
         setSelecting(selecting);
-        setRoot(root);
+        setRoot(rootEntity);
     }
 
-    public SQLTemplate(String objEntityName, boolean selecting) {
+    public SQLTemplate(String objEntityName, String defaultTemplate, boolean selecting) {
         setSelecting(selecting);
         setRoot(objEntityName);
+        setDefaultTemplate(defaultTemplate);
     }
 
     /**
@@ -173,6 +177,11 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
 
         query.setLoggingLevel(logLevel);
         query.setRoot(root);
+        query.setDefaultTemplate(getDefaultTemplate());
+
+        if (templates != null) {
+            query.templates = new HashMap(templates);
+        }
 
         selectProperties.copyToProperties(query.selectProperties);
         query.setParameters(parameters);

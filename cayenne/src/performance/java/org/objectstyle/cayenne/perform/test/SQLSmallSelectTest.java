@@ -73,10 +73,10 @@ public class SQLSmallSelectTest extends CayenneSmallSelectTest {
     }
 
     protected GenericSelectQuery buildQuery(int i) {
-        SQLTemplate template = new SQLTemplate(Artist.class, false);
-        template.setDefaultTemplate(
+        String template =
             "SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST "
-                + "WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
-        return template;
+                + "WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'";
+        SQLTemplate query = new SQLTemplate(Artist.class, template, false);
+        return query;
     }
 }

@@ -123,7 +123,7 @@ public abstract class CayenneTestCase extends BasicTestCase {
         return accessStack.getDataDomain();
     }
 
-    protected SQLTemplateCustomizer getSQLTemplateCustomizer() {
+    protected SQLTemplateCustomizer getSQLTemplateBuilder() {
         SQLTemplateCustomizer customizer =
             CayenneTestResources.getResources().getSQLTemplateCustomizer();
 

@@ -96,10 +96,10 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     }
 
     public void testPerfomQueriesSQLTemplate() throws Exception {
-        SQLTemplate query = new SQLTemplate(Object.class, false);
-        query.setDefaultTemplate(
+        String template =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
-                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))");
+                + "VALUES (#bind($id), #bind($name), #bind($dob 'DATE'))";
+        SQLTemplate query = new SQLTemplate(Object.class, template, false);
 
         Map bindings = new HashMap();
         bindings.put("id", new Integer(1));
@@ -128,9 +128,9 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     public void testPerfomQueriesSelectingSQLTemplate1() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        SQLTemplate query = new SQLTemplate(Object.class, true);
-        query.setDefaultTemplate(
-            "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID");
+        String template =
+            "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID";
+        SQLTemplate query = new SQLTemplate(Object.class, template, true);
 
         MockupOperationObserver observer = new MockupOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
@@ -145,9 +145,9 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     public void testPerfomQueriesSelectingSQLTemplate2() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        SQLTemplate query = new SQLTemplate(Object.class, true);
-        query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
-        getSQLTemplateCustomizer().updateSQLTemplate(query);
+        String template = "SELECT * FROM ARTIST ORDER BY ARTIST_ID";
+        SQLTemplate query = new SQLTemplate(Object.class, template, true);
+        getSQLTemplateBuilder().updateSQLTemplate(query);
 
         MockupOperationObserver observer = new MockupOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
@@ -165,9 +165,9 @@ public class DataNodeQueriesTst extends CayenneTestCase {
     public void testPerfomQueriesSelectingSQLTemplateAlias() throws Exception {
         getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
 
-        SQLTemplate query = new SQLTemplate(Object.class, true);
-        query.setDefaultTemplate(
-            "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID");
+        String template =
+            "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID";
+        SQLTemplate query = new SQLTemplate(Object.class, template, true);
 
         MockupOperationObserver observer = new MockupOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);

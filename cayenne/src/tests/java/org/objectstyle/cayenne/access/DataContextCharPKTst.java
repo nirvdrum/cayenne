@@ -81,8 +81,9 @@ public class DataContextCharPKTst extends CayenneTestCase {
         object.setPkCol("PK1");
         ctxt.commitChanges();
 
-        SQLTemplate q = new SQLTemplate(CharPkTest.class, true);
-        q.setDefaultTemplate("SELECT * FROM CHAR_PK_TEST");
+        SQLTemplate q =
+            new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST", true);
+
         q.setFetchingDataRows(true);
 
         List rows = ctxt.performQuery(q);
@@ -112,8 +113,8 @@ public class DataContextCharPKTst extends CayenneTestCase {
         ctxt.deleteObject(object);
         ctxt.commitChanges();
 
-        SQLTemplate q = new SQLTemplate(CharPkTest.class, true);
-        q.setDefaultTemplate("SELECT * FROM CHAR_PK_TEST");
+        SQLTemplate q =
+            new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST", true);
         q.setFetchingDataRows(true);
 
         List rows = ctxt.performQuery(q);
@@ -130,8 +131,8 @@ public class DataContextCharPKTst extends CayenneTestCase {
         object.setOtherCol("UPDATED");
         ctxt.commitChanges();
 
-        SQLTemplate q = new SQLTemplate(CharPkTest.class, true);
-        q.setDefaultTemplate("SELECT * FROM CHAR_PK_TEST");
+        SQLTemplate q =
+            new SQLTemplate(CharPkTest.class, "SELECT * FROM CHAR_PK_TEST", true);
         q.setFetchingDataRows(true);
 
         List rows = ctxt.performQuery(q);

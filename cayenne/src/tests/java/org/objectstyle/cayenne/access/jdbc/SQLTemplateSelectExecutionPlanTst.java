@@ -78,9 +78,10 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
 
     public void testExecuteSelect() throws Exception {
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
-        SQLTemplate template = new SQLTemplate(Object.class, true);
-        template.setDefaultTemplate("SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)");
-        getSQLTemplateCustomizer().updateSQLTemplate(template);
+
+        String templateString = "SELECT * FROM ARTIST WHERE ARTIST_ID = #bind($id)";
+        SQLTemplate template = new SQLTemplate(Object.class, templateString, true);
+        getSQLTemplateBuilder().updateSQLTemplate(template);
 
         Map bindings = new HashMap();
         bindings.put("id", new Integer(33005));

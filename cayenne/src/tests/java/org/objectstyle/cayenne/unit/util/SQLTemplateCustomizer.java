@@ -37,9 +37,7 @@ public class SQLTemplateCustomizer {
         Class root,
         String defaultTemplate,
         boolean selecting) {
-
-        SQLTemplate template = new SQLTemplate(root, selecting);
-        template.setDefaultTemplate(defaultTemplate);
+        SQLTemplate template = new SQLTemplate(root, defaultTemplate, selecting);
         updateSQLTemplate(template);
         return template;
     }

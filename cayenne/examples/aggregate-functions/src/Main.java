@@ -55,18 +55,16 @@
  */
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.examples.aggregate.Artist;
 import org.objectstyle.cayenne.examples.aggregate.Painting;
 import org.objectstyle.cayenne.examples.aggregate.PaintingStats;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 /**
  * This is a demo showing how to use simple aggregate functions in Cayenne.
@@ -80,21 +78,19 @@ public class Main {
     public static void main(String[] args) {
         Main aggregateDemo = new Main();
         aggregateDemo.prepareData();
-        
+
         // run demo
 
         Artist artistB = aggregateDemo.getArtist("Artist B.");
 
         // note that "getPaintingStats()" is not a relationship, but arther a custom method.
         PaintingStats statsB = artistB.getPaintingStats();
-        
+
         System.out.println(
             "Artist B.: most expensive painting price: " + statsB.getMaxPrice());
         System.out.println(
             "Artist B.: least expensive painting price: " + statsB.getMinPrice());
         System.out.println("Artist B.: total paintings: " + statsB.getPaintingsCount());
-
-
 
         Artist artistA = aggregateDemo.getArtist("Artist A.");
 
@@ -113,7 +109,7 @@ public class Main {
             System.out.println(
                 "Artist A.: total paintings in the range: " + statsA.getPaintingsCount());
         }
-        
+
     }
 
     public Main() {
@@ -132,11 +128,10 @@ public class Main {
     public void prepareData() {
 
         // clean up the tables
-        DefaultOperationObserver observer = new DefaultOperationObserver();
-        List queries = new ArrayList(2);
-        queries.add(new SqlModifyQuery(Painting.class, "delete from PAINTING"));
-        queries.add(new SqlModifyQuery(Artist.class, "delete from ARTIST"));
-        context.performQueries(queries, observer);
+        context.performModifyQuery(
+            new SQLTemplate(Painting.class, "delete from PAINTING", false));
+        context.performModifyQuery(
+            new SQLTemplate(Artist.class, "delete from ARTIST", false));
 
         // create test data - 2 artists, one with 3 paintings, another one - with 2
         Artist artist1 = (Artist) context.createAndRegisterNewObject("Artist");
