@@ -294,7 +294,6 @@ public class EOModelProcessor {
             }
 
             if ((firstRel != null) && (lastRel != null)) {
-                boolean toMany = firstRel.isToMany();
                 flatRel.setSourceEntity(e);
 
                 List potentialTargets =
