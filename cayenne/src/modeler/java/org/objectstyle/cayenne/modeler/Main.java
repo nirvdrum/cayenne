@@ -91,19 +91,26 @@ public class Main {
         // get preferences
         ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
-        // set L&F
+        // get L&F
         String laf = prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
-        if (laf == null) {
-            // JGoddies plastic L&F is default
-            laf = PlasticXPLookAndFeel.class.getName();
-        }
         
         try {
+        	// set L&F
             UIManager.setLookAndFeel(laf);
         } catch (Exception e) {
-            logObj.warn("Could not set selected LookAndFeel - using default.", e);
+            logObj.warn("Could not set selected LookAndFeel '" + laf + "'" + "- using default.");
         } finally {
-            // remember L&F in prefs
+			// JGoodies plastic L&F is default
+			laf = PlasticXPLookAndFeel.class.getName();
+			
+			// re-try with default
+			try {
+				UIManager.setLookAndFeel(laf);
+			} catch (Exception e) {
+				// give up
+			}
+
+			// remember L&F
             prefs.setProperty(
                 ModelerPreferences.EDITOR_LAFNAME,
                 UIManager.getLookAndFeel().getClass().getName());
