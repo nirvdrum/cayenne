@@ -55,54 +55,25 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.perform.CayennePerformanceTest;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class CayenneSmallSelectTest extends CayennePerformanceTest {
-	protected DataContext ctxt;
+public class SQLSmallSelectTest extends CayenneSmallSelectTest {
 
 	/**
-	 * Constructor for CayenneSmallSelectTest.
+	 * Constructor for SQLSmallSelectTest.
+	 * @param name
 	 */
-	public CayenneSmallSelectTest(String name) {
+	public SQLSmallSelectTest(String name) {
 		super(name);
 	}
 
-	public void prepare() throws Exception {
-		super.deleteArtists();
-		super.insertArtists();
-		ctxt = super.getDomain().createDataContext();
-	}
-
-	/**
-	 * @see org.objectstyle.perform.PerformanceTest#runTest()
-	 */
-	public void runTest() throws Exception {
-		for (int i = 0; i < SmallSelectTest.QUERIES_COUNT; i++) {
-			ctxt.performQuery(buildQuery(i));
-		}
-	}
-
 	protected GenericSelectQuery buildQuery(int i) {
-		Expression e1 =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				"artist_1000");
-		Expression e2 =
-			ExpressionFactory.binaryPathExp(
-				Expression.LIKE,
-				"artistName",
-				"%rtist_1000");
-		return new SelectQuery(
+		return new SqlSelectQuery(
 			"Artist",
-			ExpressionFactory.binaryExp(Expression.OR, e1, e2));
+			"SELECT ARTIST_ID, ARTIST_NAME FROM ARTIST WHERE ARTIST_NAME = 'artist_1000' OR ARTIST_NAME LIKE '%rtist_1000'");
 	}
 }

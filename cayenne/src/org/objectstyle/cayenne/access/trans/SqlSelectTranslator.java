@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.trans;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,17 +53,20 @@ package org.objectstyle.cayenne.access.trans;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.access.trans;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /** Class works as a translator of raw SELECT queries to JDBC statements.

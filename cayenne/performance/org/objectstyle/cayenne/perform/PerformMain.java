@@ -134,6 +134,13 @@ public class PerformMain implements TestConstants {
 			"Select one record over and over again, Cayenne vs. JDBC Statement (being reopened in every query)",
 			"org.objectstyle.cayenne.perform.test.CayenneSmallSelectTest",
 			"org.objectstyle.cayenne.perform.test.ReopenedSmallSelectTest");
+			
+		suite.addTestPair(
+			"Select Small Lists",
+			"Select one record over and over again, Cayenne SelectQuery vs. Cayenne SQLSelectQuery",
+			"org.objectstyle.cayenne.perform.test.DataRowsSmallSelectTest",
+			"org.objectstyle.cayenne.perform.test.SQLSmallSelectTest");
+			
 
 		return suite;
 	}
@@ -155,8 +162,7 @@ public class PerformMain implements TestConstants {
 					dsi.getPassword());
 
 			// map
-			String[] maps = new String[] { TEST_MAP_PATH };
-			DataMap map = new MapLoader().loadDataMaps(maps)[0];
+			DataMap map = new MapLoader().loadDataMap(TEST_MAP_PATH);
 
 			// node
 			DataNode node = new DataNode("node");

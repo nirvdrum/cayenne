@@ -55,54 +55,25 @@
  */
 package org.objectstyle.cayenne.perform.test;
 
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.perform.CayennePerformanceTest;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * @author Andrei Adamchik
  */
-public class CayenneSmallSelectTest extends CayennePerformanceTest {
-	protected DataContext ctxt;
+public class DataRowsSmallSelectTest extends CayenneSmallSelectTest {
 
 	/**
-	 * Constructor for CayenneSmallSelectTest.
+	 * Constructor for DataRowsSmallSelectTest.
+	 * @param name
 	 */
-	public CayenneSmallSelectTest(String name) {
+	public DataRowsSmallSelectTest(String name) {
 		super(name);
 	}
 
-	public void prepare() throws Exception {
-		super.deleteArtists();
-		super.insertArtists();
-		ctxt = super.getDomain().createDataContext();
-	}
-
-	/**
-	 * @see org.objectstyle.perform.PerformanceTest#runTest()
-	 */
-	public void runTest() throws Exception {
-		for (int i = 0; i < SmallSelectTest.QUERIES_COUNT; i++) {
-			ctxt.performQuery(buildQuery(i));
-		}
-	}
-
 	protected GenericSelectQuery buildQuery(int i) {
-		Expression e1 =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				"artist_1000");
-		Expression e2 =
-			ExpressionFactory.binaryPathExp(
-				Expression.LIKE,
-				"artistName",
-				"%rtist_1000");
-		return new SelectQuery(
-			"Artist",
-			ExpressionFactory.binaryExp(Expression.OR, e1, e2));
+		SelectQuery q = (SelectQuery)super.buildQuery(i);
+		q.setFetchingDataRows(true);
+		return q;
 	}
 }
