@@ -57,11 +57,8 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.ZipUtil;
@@ -145,6 +142,10 @@ public class ProjectConfigurator {
                     "Can't copy project file: " + info.getAltProjectFile());
             }
         }
+        
+        // load project
+        ApplicationProject project = new ApplicationProject(projectFile);
+       
     }
 
     /**

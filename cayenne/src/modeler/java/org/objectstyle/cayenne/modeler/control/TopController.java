@@ -158,8 +158,7 @@ public class TopController extends ModelerController {
         statusController.handleControl(control);
 
         // --- check for load errors
-        if (project.projectLoadStatus() != null
-            && project.projectLoadStatus().hasFailures()) {
+        if (project.getLoadStatus().hasFailures()) {
             // mark project as unsaved
             project.setModified(true);
             eventController.setDirty(true);
@@ -168,7 +167,7 @@ public class TopController extends ModelerController {
             ValidatorDialog.showDialog(
                 mainFrame,
                 eventController,
-                new Validator(project, project.projectLoadStatus()));
+                new Validator(project, project.getLoadStatus()));
         }
     }
 

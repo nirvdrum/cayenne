@@ -149,9 +149,10 @@ public class DataMapProject extends Project {
     }
     
     /**
-     * Always returns null. Map projects do not support status tracking yet.
+     * Always returns empty status. Map projects do not support status tracking
+     * yet.
      */
-    public ConfigStatus projectLoadStatus() {
-        return null;
+    public ConfigStatus getLoadStatus() {
+        return new ConfigStatus();
     }
 }

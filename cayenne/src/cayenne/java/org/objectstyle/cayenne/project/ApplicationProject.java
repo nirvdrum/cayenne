@@ -172,7 +172,7 @@ public class ApplicationProject extends Project {
     }
     
 
-    public ConfigStatus projectLoadStatus() {
-        return (config != null) ? config.getLoadStatus() : null;
+    public ConfigStatus getLoadStatus() {
+        return (config != null) ? config.getLoadStatus() : new ConfigStatus();
     }
 }

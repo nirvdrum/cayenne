@@ -320,7 +320,7 @@ public abstract class Project {
     /**
      * @return An object describing failures in the loaded project.
      */
-    public abstract ConfigStatus projectLoadStatus();
+    public abstract ConfigStatus getLoadStatus();
     
     public abstract ProjectFile projectFileForObject(Object obj);
     

@@ -107,7 +107,7 @@ public class TstProject extends Project {
     /**
      * @see org.objectstyle.cayenne.project.Project#projectLoadStatus()
      */
-    public ConfigStatus projectLoadStatus() {
+    public ConfigStatus getLoadStatus() {
         return null;
     }
 }
