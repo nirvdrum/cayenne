@@ -70,6 +70,7 @@ import org.apache.commons.collections.MapUtils;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -94,6 +95,7 @@ class FlatPrefetchTreeNode {
     ObjRelationship incoming;
     Collection children;
     boolean phantom;
+    boolean categorizeByParent;
 
     // column mapping
     String[] sources;
@@ -142,6 +144,7 @@ class FlatPrefetchTreeNode {
 
     void setIncoming(ObjRelationship incoming) {
         this.incoming = incoming;
+        this.categorizeByParent = incoming != null && incoming.isToMany();
     }
 
     FlatPrefetchTreeNode getParent() {
@@ -198,9 +201,25 @@ class FlatPrefetchTreeNode {
     void objectResolved(Map id, DataObject object, DataObject parent) {
         resolved.put(id, object);
 
-        if (parent != null) {
+        if (parent != null && categorizeByParent) {
             List peers = (List) partitionedByParent.get(parent);
             peers.add(object);
+        }
+    }
+
+    void connectToParents() {
+        if (!isPhantom() && categorizeByParent) {
+            Iterator it = partitionedByParent.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry entry = (Map.Entry) it.next();
+
+                DataObject root = (DataObject) entry.getKey();
+                List related = (List) entry.getValue();
+
+                ToManyList toManyList = (ToManyList) root
+                        .readProperty(incoming.getName());
+                toManyList.setObjectList(related);
+            }
         }
     }
 

@@ -459,8 +459,6 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 // source entity
 
                 Collection skipColumns = Collections.EMPTY_LIST;
-
-                // if one step relationship..
                 if (r.getSourceEntity() == table) {
                     skipColumns = new ArrayList(2);
                     Iterator joins = r.getJoins().iterator();

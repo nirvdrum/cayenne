@@ -121,6 +121,9 @@ final class FlatPrefetchResolver {
             }
         }
 
+        // assemble fetched objects tree
+        connectToParents(rootNode);
+
         return results;
     }
 
@@ -154,8 +157,7 @@ final class FlatPrefetchResolver {
         Collection children = node.getChildren();
         if (children != null) {
 
-            // if this node is phantom use parentObject passed from the parent node
-            DataObject parentOfChildren = (node.isPhantom()) ? parentObject : object;
+            DataObject parentOfChildren = (!node.isPhantom()) ? object : null;
 
             Iterator it = children.iterator();
             while (it.hasNext()) {
@@ -176,5 +178,24 @@ final class FlatPrefetchResolver {
         List objects = dataContext.objectsFromDataRows(node.getEntity(), Collections
                 .singletonList(row), refresh, resolveHierarchy);
         return (DataObject) objects.get(0);
+    }
+
+    /**
+     * Assembles object tree.
+     */
+    private void connectToParents(FlatPrefetchTreeNode node) {
+
+        node.connectToParents();
+
+        // recursively resolve for children
+        Collection children = node.getChildren();
+        if (children != null) {
+
+            Iterator it = children.iterator();
+            while (it.hasNext()) {
+                FlatPrefetchTreeNode child = (FlatPrefetchTreeNode) it.next();
+                child.connectToParents();
+            }
+        }
     }
 }
