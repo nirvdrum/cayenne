@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access.trans;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionTraversal;
@@ -276,9 +277,20 @@ public class QualifierTranslator
     }
 
     private final void appendList(Expression listExpr, DbAttribute paramDesc) {
-        List list = (List) listExpr.getOperand(0);
+        Iterator it = null;
+        Object list = listExpr.getOperand(0);
+        if(list instanceof List) {
+            it = ((List) list).iterator();
+        }
+        else if(list instanceof Object[]) {
+        	it = IteratorUtils.arrayIterator((Object[])list);
+        }
+        else {
+        	String className = (list != null) ? list.getClass().getName() : "<null>";
+        	throw new IllegalArgumentException("Unsupported type for the list expressions: " + className);
+        }
 
-        Iterator it = list.iterator();
+      
         // process first element outside the loop
         // (unroll loop to avoid condition checking
         if (it.hasNext())

@@ -53,69 +53,105 @@ package org.objectstyle.cayenne.exp;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class TstBinaryExpSuite extends TstExpressionSuite {
-    
+
     private static final TstExpressionCase like1 = buildLike1();
     private static final TstExpressionCase likeic1 = buildLikeIgnoreCase1();
     private static final TstExpressionCase in1 = buildIn1();
-    
-    
+    private static final TstExpressionCase in2 = buildIn2();
+
     /** Cayenne syntax: "toGallery.galleryName in ('g1', 'g2', g3')" */
-    private static TstExpressionCase buildIn1() {   
-        List in =  new ArrayList();
+    private static TstExpressionCase buildIn1() {
+        List in = new ArrayList();
         in.add("g1");
         in.add("g2");
         in.add("g3");
-        
+
         Expression e1 = ExpressionFactory.expressionOfType(Expression.IN);
-        
-        Expression e10 = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+
+        Expression e10 =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         e10.setOperand(0, "toGallery.galleryName");
         e1.setOperand(0, e10);
-        
+
         Expression e11 = ExpressionFactory.expressionOfType(Expression.LIST);
         e11.setOperand(0, in);
         e1.setOperand(1, e11);
-        
-        return new TstExpressionCase("Exhibit",
-        e1, "<ta.>GALLERY_NAME IN (?, ?, ?)",
-        3, 2);
+
+        return new TstExpressionCase(
+            "Exhibit",
+            e1,
+            "<ta.>GALLERY_NAME IN (?, ?, ?)",
+            3,
+            2);
     }
-    
+
+    /** Cayenne syntax: "toGallery.galleryName in ('g1', 'g2', g3')" */
+    private static TstExpressionCase buildIn2() {
+        // test Object[]
+        Object[] in = new Object[] { "g1", "g2", "g3" };
+
+        Expression e1 = ExpressionFactory.expressionOfType(Expression.IN);
+
+        Expression e10 =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        e10.setOperand(0, "toGallery.galleryName");
+        e1.setOperand(0, e10);
+
+        Expression e11 = ExpressionFactory.expressionOfType(Expression.LIST);
+        e11.setOperand(0, in);
+        e1.setOperand(1, e11);
+
+        return new TstExpressionCase(
+            "Exhibit",
+            e1,
+            "<ta.>GALLERY_NAME IN (?, ?, ?)",
+            3,
+            2);
+    }
+
     /** Cayenne syntax: "toGallery.galleryName like 'a%'" */
-    private static TstExpressionCase buildLike1() {           
+    private static TstExpressionCase buildLike1() {
         Expression e1 = ExpressionFactory.expressionOfType(Expression.LIKE);
-        Expression e10 = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        Expression e10 =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         e10.setOperand(0, "toGallery.galleryName");
         e1.setOperand(0, e10);
         e1.setOperand(1, "a%");
-        return new TstExpressionCase("Exhibit",
-        e1, "<ta.>GALLERY_NAME LIKE ?",
-        2, 2);
+        return new TstExpressionCase(
+            "Exhibit",
+            e1,
+            "<ta.>GALLERY_NAME LIKE ?",
+            2,
+            2);
     }
-    
+
     /** Cayenne syntax: "toGallery.galleryName likeIgnoreCase 'a%'" */
-    private static TstExpressionCase buildLikeIgnoreCase1() {           
-        Expression e1 = ExpressionFactory.expressionOfType(Expression.LIKE_IGNORE_CASE);
-        Expression e10 = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+    private static TstExpressionCase buildLikeIgnoreCase1() {
+        Expression e1 =
+            ExpressionFactory.expressionOfType(Expression.LIKE_IGNORE_CASE);
+        Expression e10 =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         e10.setOperand(0, "toGallery.galleryName");
         e1.setOperand(0, e10);
         e1.setOperand(1, "a%");
-        return new TstExpressionCase("Exhibit",
-        e1, "UPPER(<ta.>GALLERY_NAME) LIKE UPPER(?)",
-        2, 2);
+        return new TstExpressionCase(
+            "Exhibit",
+            e1,
+            "UPPER(<ta.>GALLERY_NAME) LIKE UPPER(?)",
+            2,
+            2);
     }
-    
-    
+
     public TstBinaryExpSuite() {
         addCase(like1);
         addCase(likeic1);
         addCase(in1);
+        addCase(in2);
     }
 }

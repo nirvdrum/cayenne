@@ -31,6 +31,9 @@ to process loaded XML. This allows alternative loaders.
 7. Named queries can now be associated with Entities. This is a good way to cache shared 
 query definitions.
 
+8. "IN" expressions can now take both java.util.List and Object[] 
+operands.
+
 
 
 
