@@ -106,6 +106,10 @@ public class ExpressionParser {
     }
     
     public static void main(String[] arg) {
+        // since Main is used for some basic speed measuring,
+        // lets run it twice to "warm up" the parser
+        expressionFromString(arg[0]);
+        
         long start = System.currentTimeMillis();
         Expression exp = expressionFromString(arg[0]);
         long end = System.currentTimeMillis();
@@ -165,7 +169,7 @@ void simpleCondition() : {}
 void equalityCondition() : {} 
 {
 	( 
-	  "=" scalarExpression() #Equal(2)
+	  ("="  | "==") scalarExpression() #Equal(2)
 	| 
 	  ("!=" | "<>")  scalarExpression() { jjtThis.setNegating(true); } #Equal(2)
 	)
@@ -265,12 +269,14 @@ void scalarExpression() : {}
       | 
         <DOUBLE_QUOTED_STRING>  { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
       | 
-        <NAMED_PARAMETER> { jjtThis.setValue(token_source.literalValue); } #NamedParameter(0)
+        namedParameter()
       | 
         <NULL> #Scalar(0) ) 
 }
 
-void scalarCharExpression() : {}
+void scalarCharExpression() : 
+{
+}
 {
 	   // TODO: once we switch expression package to use AST* from parser package,
        // we might need implement special subclasses for numeric and character constant
@@ -281,9 +287,18 @@ void scalarCharExpression() : {}
 	| 
 	  <DOUBLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
 	| 
-	  <NAMED_PARAMETER> { jjtThis.setValue(token_source.literalValue); } #NamedParameter(0)
+	  namedParameter()
 	)
 }
+
+void namedParameter() : 
+{
+	Token t;
+}
+{
+	"$" t = <PROPERTY_PATH> { jjtThis.setValue(t.image); } #NamedParameter(0)
+}
+
 
 void pathExpression() : {
    Token t;
@@ -411,14 +426,6 @@ MORE:
     "'"  { stringBuffer = new StringBuffer(); }: WithinSingleQuoteLiteral
  |
     "\""  { stringBuffer = new StringBuffer(); }: WithinDoubleQuoteLiteral
- |
-    "$" { stringBuffer = new StringBuffer(); }: WithinNamedParameter
-}
-
-<WithinNamedParameter> TOKEN : {
-    <NAMED_PARAMETER: <IDENTIFIER>>
-        { literalValue = stringBuffer.toString(); }
-        : DEFAULT
 }
 
 <WithinSingleQuoteLiteral> MORE:
@@ -452,7 +459,7 @@ MORE:
 <WithinDoubleQuoteLiteral> TOKEN:
 {
     <DOUBLE_QUOTED_STRING: "\"">
-        { literalValue = new String( stringBuffer ); }
+        { literalValue = stringBuffer.toString(); }
         : DEFAULT
 }
 
