@@ -6,6 +6,8 @@ import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.Util;
 
 /**
  * Superclass of AST* expressions that implements Node interface defined
@@ -185,12 +187,11 @@ public abstract class SimpleNode extends Expression implements Node {
     }
 
     public void jjtOpen() {
-        // System.out.println("opened: " + this.getClass().getName());
+
     }
 
     public void jjtClose() {
-        //System.out.println(
-        //   "will close: " + this.getClass().getName() + "; " + jjtGetNumChildren());
+
     }
 
     public void jjtSetParent(Node n) {
@@ -217,7 +218,38 @@ public abstract class SimpleNode extends Expression implements Node {
         return children[i];
     }
 
-    public int jjtGetNumChildren() {
+    public final int jjtGetNumChildren() {
         return (children == null) ? 0 : children.length;
+    }
+
+    /**
+     * Evaluates itself with object, pushing result on the stack.
+     */
+    protected abstract Object evaluateNode(Object o) throws Exception;
+
+    protected Object evaluateChild(int index, Object o) throws Exception {
+        return ((SimpleNode) jjtGetChild(index)).evaluate(o);
+    }
+
+    public Object evaluate(Object o) {
+        // wrap in try/catch to provide unified exception processing
+        try {
+            return evaluateNode(o);
+        }
+        catch (Throwable th) {
+            if (th instanceof ExpressionException) {
+                throw (ExpressionException) th;
+            }
+            else {
+                throw new ExpressionException(
+                    "Error evaluating expression.",
+                    this.toString(),
+                    Util.unwindException(th));
+            }
+        }
+    }
+
+    public boolean evaluateBoolean(Object o) {
+        return ColnversionUtil.toBoolean(evaluate(o));
     }
 }

@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Or" expression.
@@ -87,6 +88,21 @@ public class ASTOr extends AggregateConditionNode {
 
     ASTOr(int id) {
         super(id);
+    }
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len == 0) {
+            return Boolean.FALSE;
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (ColnversionUtil.toBoolean(evaluateChild(i, o))) {
+                return Boolean.TRUE;
+            }
+        }
+
+        return Boolean.FALSE;
     }
 
     /**

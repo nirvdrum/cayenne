@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Less than or equal to" expression.
@@ -77,7 +78,26 @@ public class ASTLessOrEqual extends ConditionNode {
     ASTLessOrEqual(int id) {
         super(id);
     }
-    
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len != 2) {
+            return Boolean.FALSE;
+        }
+
+        Comparable c1 = ColnversionUtil.toComparabe(evaluateChild(0, o));
+        if (c1 == null) {
+            return Boolean.FALSE;
+        }
+
+        Comparable c2 = ColnversionUtil.toComparabe(evaluateChild(1, o));
+        if (c2 == null) {
+            return Boolean.FALSE;
+        }
+
+        return c1.compareTo(c2) <= 0 ? Boolean.TRUE : Boolean.FALSE;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

@@ -81,6 +81,25 @@ public class ASTEqual extends ConditionNode {
         super(id);
     }
 
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len != 2) {
+            return Boolean.FALSE;
+        }
+
+        Object o1 = evaluateChild(0, o);
+        if (o1 == null) {
+            return Boolean.FALSE;
+        }
+
+        Object o2 = evaluateChild(1, o);
+        if (o2 == null) {
+            return Boolean.FALSE;
+        }
+
+        return o1.equals(o2) ? Boolean.TRUE : Boolean.FALSE;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

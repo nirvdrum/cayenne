@@ -72,6 +72,7 @@ import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.parser.ExpressionParser;
 import org.objectstyle.cayenne.exp.parser.ParseException;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -102,17 +103,17 @@ public abstract class Expression implements Serializable, XMLSerializable {
     public static final int DIVIDE = 19;
     public static final int NEGATIVE = 20;
     public static final int POSITIVE = 21;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int ALL = 22;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int SOME = 23;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
@@ -168,32 +169,32 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * Interpreted as a comma-separated list of literals. 
      */
     public static final int LIST = 28;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int SUBQUERY = 29;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int COUNT = 30;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int AVG = 31;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int SUM = 32;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
     public static final int MAX = 33;
-    
+
     /**
      * <i><b>Warning:</b> currently not supported in Cayenne.</i>
      */
@@ -435,7 +436,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * @since 1.1
      */
     public boolean evaluateBoolean(Object o) {
-        return ASTCompiler.compile(this).evaluateBooleanASTChain(o);
+        return ColnversionUtil.toBoolean(evaluate(o));
     }
 
     /**
@@ -447,15 +448,12 @@ public abstract class Expression implements Serializable, XMLSerializable {
         }
 
         int size = objects.size();
-        List filtered = new ArrayList(size);
-
-        // compile expression
-        ASTNode compiled = ASTCompiler.compile(this);
+        LinkedList filtered = new LinkedList();
 
         for (int i = 0; i < size; i++) {
             Object o = objects.get(i);
-            if (compiled.evaluateBooleanASTChain(o)) {
-                filtered.add(o);
+            if (evaluateBoolean(o)) {
+                filtered.addLast(o);
             }
         }
 
@@ -677,12 +675,12 @@ public abstract class Expression implements Serializable, XMLSerializable {
             // apply trasformer... First pick and see if transformer
             // changes an objects, and if so, re-insert it to the 
             // top of the stack
-            
-            if(transformer != null) {
+
+            if (transformer != null) {
                 Object object = stack.getLast();
                 Object transformed = transformer.transform(object);
-                
-                if(object != transformed) {
+
+                if (object != transformed) {
                     stack.removeLast();
                     stack.addLast(transformed);
                 }

@@ -77,6 +77,25 @@ public class ASTNotEqual extends ConditionNode {
         jjtAddChild(new ASTScalar(value), 1);
     }
 
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len != 2) {
+            return Boolean.FALSE;
+        }
+
+        Object o1 = evaluateChild(0, o);
+        if (o1 == null) {
+            return Boolean.FALSE;
+        }
+
+        Object o2 = evaluateChild(1, o);
+        if (o2 == null) {
+            return Boolean.FALSE;
+        }
+
+        return o1.equals(o2) ? Boolean.FALSE : Boolean.TRUE;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */
@@ -85,7 +104,7 @@ public class ASTNotEqual extends ConditionNode {
     }
 
     protected String getExpressionOperator(int index) {
-        return "=";
+        return "!=";
     }
 
     public int getType() {

@@ -57,21 +57,36 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Not like, ignore case" expression.
  * 
  * @author Andrei Adamchik
  */
-public class ASTNotLikeIgnoreCase extends ConditionNode {
+public class ASTNotLikeIgnoreCase extends PatternMatchNode {
     public ASTNotLikeIgnoreCase(ASTPath path, Object value) {
-        super(ExpressionParserTreeConstants.JJTNOTLIKEIGNORECASE);
+        super(ExpressionParserTreeConstants.JJTNOTLIKEIGNORECASE, true);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
     }
 
     ASTNotLikeIgnoreCase(int id) {
-        super(id);
+        super(id, true);
+    }
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len != 2) {
+            return Boolean.FALSE;
+        }
+
+        String s1 = ColnversionUtil.toString(evaluateChild(0, o));
+        if (s1 == null) {
+            return Boolean.FALSE;
+        }
+
+        return match(s1) ? Boolean.FALSE : Boolean.TRUE;
     }
 
     /**

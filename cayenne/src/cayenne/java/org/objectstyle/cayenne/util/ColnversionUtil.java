@@ -53,52 +53,111 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.exp.parser;
 
-import org.objectstyle.cayenne.exp.Expression;
+package org.objectstyle.cayenne.util;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.ExpressionParameter;
 
 /**
- * A named expression parameter.
+ * A collection of static utility methods used mainly for expressions evaluation.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTNamedParameter extends ASTScalar {
-    public ASTNamedParameter(Object value) {
-        super(ExpressionParserTreeConstants.JJTNAMEDPARAMETER);
-        setValue(value);
+public final class ColnversionUtil {
+
+    public static boolean toBoolean(Object object) {
+        if (object instanceof Boolean) {
+            return ((Boolean) object).booleanValue();
+        }
+
+        if (object instanceof Number) {
+            return ((Number) object).intValue() != 0;
+        }
+
+        return object != null;
     }
 
-    ASTNamedParameter(int id) {
-        super(id);
-    }
+    public static BigDecimal toBigDecimal(Object object) {
 
-    protected Object evaluateNode(Object o) throws Exception {
-        throw new ExpressionException(
-            "Uninitialized parameter: " + value + ", call 'expWithParameters' first.");
+        if (object == null) {
+            return null;
+        }
+        else if (object instanceof BigDecimal) {
+            return (BigDecimal) object;
+        }
+        else if (object instanceof BigInteger) {
+            return new BigDecimal((BigInteger) object);
+        }
+        else if (object instanceof Number) {
+            return new BigDecimal(((Number) object).doubleValue());
+        }
+
+        throw new ExpressionException("Can't convert to BigDecimal: " + object);
     }
 
     /**
-     * Creates a copy of this expression node, without copying children.
+     * Attempts to convert an object to Comparable instance.
      */
-    public Expression shallowCopy() {
-        ASTNamedParameter copy = new ASTNamedParameter(id);
-        copy.value = value;
-        return copy;
+    public static Comparable toComparabe(Object object) {
+        if (object == null) {
+            return null;
+        }
+        else if (object instanceof Comparable) {
+            return (Comparable) object;
+        }
+        else if (object instanceof StringBuffer) {
+            return object.toString();
+        }
+        else if (object instanceof char[]) {
+            return new String((char[]) object);
+        }
+        else {
+            throw new ClassCastException(
+                "Invalid Comparable class:" + object.getClass().getName());
+        }
     }
 
-    public void setValue(Object value) {
-        if (value == null) {
-            throw new ExpressionException("Null Parameter value");
+    /**
+     * Attempts to convert an object to Comparable instance.
+     */
+    public static String toString(Object object) {
+        if (object == null) {
+            return null;
         }
-
-        String name = value.toString().trim();
-        if (name.length() == 0) {
-            throw new ExpressionException("Empty Parameter value");
+        else if (object instanceof String) {
+            return (String) object;
         }
+        else if (object instanceof StringBuffer) {
+            return object.toString();
+        }
+        else if (object instanceof char[]) {
+            return new String((char[]) object);
+        }
+        else {
+            throw new ClassCastException(
+                "Invalid class for String conversion:" + object.getClass().getName());
+        }
+    }
 
-        super.setValue(new ExpressionParameter(name));
+    /**
+     * Attempts to convert an object to an uppercase string.
+     */
+    public static Object toUpperCase(Object object) {
+        if ((object instanceof String) || (object instanceof StringBuffer)) {
+            return object.toString().toUpperCase();
+        }
+        else if (object instanceof char[]) {
+            return new String((char[]) object).toUpperCase();
+        }
+        else {
+            return object;
+        }
+    }
+
+    private ColnversionUtil() {
     }
 }

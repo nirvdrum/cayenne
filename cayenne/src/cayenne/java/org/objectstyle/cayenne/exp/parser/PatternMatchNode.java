@@ -55,50 +55,68 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.ExpressionParameter;
+import org.apache.oro.text.perl.Perl5Util;
+import org.objectstyle.cayenne.util.Util;
 
 /**
- * A named expression parameter.
+ * Superclass of pattern matching nodes. Assumes that subclass
+ * is a binary expression with the second operand being a pattern.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class ASTNamedParameter extends ASTScalar {
-    public ASTNamedParameter(Object value) {
-        super(ExpressionParserTreeConstants.JJTNAMEDPARAMETER);
-        setValue(value);
+public abstract class PatternMatchNode extends ConditionNode {
+
+    // used by all regex processing nodes
+    // note that according to the docs it is synchronized
+    static final Perl5Util regexUtil = new Perl5Util();
+
+    protected String pattern;
+    protected boolean patternCompiled;
+    protected boolean ignoringCase;
+
+    PatternMatchNode(int i, boolean ignoringCase) {
+        super(i);
+        this.ignoringCase = ignoringCase;
     }
 
-    ASTNamedParameter(int id) {
-        super(id);
+    protected boolean match(String string) {
+        return (string != null) ? regexUtil.match(getPattern(), string) : false;
     }
 
-    protected Object evaluateNode(Object o) throws Exception {
-        throw new ExpressionException(
-            "Uninitialized parameter: " + value + ", call 'expWithParameters' first.");
-    }
+    protected String getPattern() {
+        // compile pattern on demand
+        if (!patternCompiled) {
+            pattern = null;
+            patternCompiled = true;
 
-    /**
-     * Creates a copy of this expression node, without copying children.
-     */
-    public Expression shallowCopy() {
-        ASTNamedParameter copy = new ASTNamedParameter(id);
-        copy.value = value;
-        return copy;
-    }
+            if (jjtGetNumChildren() < 2) {
+                return null;
+            }
 
-    public void setValue(Object value) {
-        if (value == null) {
-            throw new ExpressionException("Null Parameter value");
+            // precompile pattern
+            ASTScalar patternNode = (ASTScalar) jjtGetChild(1);
+            if (patternNode == null) {
+                return null;
+            }
+
+            String srcPattern = (String) patternNode.getValue();
+            if (srcPattern == null) {
+                return null;
+            }
+
+            pattern = Util.sqlPatternToRegex(srcPattern, ignoringCase);
         }
 
-        String name = value.toString().trim();
-        if (name.length() == 0) {
-            throw new ExpressionException("Empty Parameter value");
+        return pattern;
+    }
+
+    public void jjtAddChild(Node n, int i) {
+        // reset pattern if the node is modified
+        if (i == 1) {
+            patternCompiled = false;
         }
 
-        super.setValue(new ExpressionParameter(name));
+        super.jjtAddChild(n, i);
     }
 }

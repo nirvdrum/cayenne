@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.exp.parser;
 import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Not" expression.
@@ -74,7 +75,18 @@ public class ASTNot extends AggregateConditionNode {
     ASTNot(int id) {
         super(id);
     }
-    
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len == 0) {
+            return Boolean.FALSE;
+        }
+
+        return ColnversionUtil.toBoolean(evaluateChild(0, o))
+            ? Boolean.FALSE
+            : Boolean.TRUE;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */
@@ -90,7 +102,7 @@ public class ASTNot extends AggregateConditionNode {
         pw.print("not ");
         super.encodeAsString(pw);
     }
-    
+
     protected String getExpressionOperator(int index) {
         throw new UnsupportedOperationException(
             "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");

@@ -62,7 +62,7 @@ package org.objectstyle.cayenne.exp.parser;
  * @since 1.1
  */
 public abstract class ASTPath extends SimpleNode {
-    protected Object path;
+    protected String path;
 
     ASTPath(int i) {
         super(i);
@@ -85,14 +85,14 @@ public abstract class ASTPath extends SimpleNode {
             throw new ArrayIndexOutOfBoundsException(index);
         }
 
-        this.path = value;
+        setPath(value);
     }
 
     protected void setPath(Object path) {
-        this.path = path;
+        this.path = (path != null) ? path.toString() : null;
     }
 
-    protected Object getPath() {
+    protected String getPath() {
         return path;
     }
 

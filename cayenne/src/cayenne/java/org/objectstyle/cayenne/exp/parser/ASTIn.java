@@ -77,6 +77,32 @@ public class ASTIn extends ConditionNode {
         jjtAddChild(list, 1);
     }
 
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len != 2) {
+            return Boolean.FALSE;
+        }
+
+        Object o1 = evaluateChild(0, o);
+        if (o1 == null) {
+            return Boolean.FALSE;
+        }
+
+        Object[] objects = (Object[]) evaluateChild(1, o);
+        if (objects == null) {
+            return Boolean.FALSE;
+        }
+
+        int size = objects.length;
+        for (int i = 0; i < size; i++) {
+            if (o1.equals(objects[i])) {
+                return Boolean.TRUE;
+            }
+        }
+
+        return Boolean.FALSE;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

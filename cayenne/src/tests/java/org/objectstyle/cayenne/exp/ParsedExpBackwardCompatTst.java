@@ -157,23 +157,23 @@ public class ParsedExpBackwardCompatTst extends CayenneSimpleTestCase {
         assertEquals(compareTo, parsed1);
     }
 
-// can't test List expressions - ASTList stores values internally as Object[],
-// so this doesn't pass 
- /*   public void testIn() throws Exception {
-        List list =
-            Arrays.asList(new Object[] { new Integer(5), new Integer(2), new Integer(6)});
-        Expression compareTo = simpleExp(Expression.IN, list);
-        Expression parsed1 = Expression.fromString("a in (5, 2, 6)");
-        assertEquals(compareTo, parsed1);
-    }
-
-    public void testNotIn() throws Exception {
-        List list =
-            Arrays.asList(new Object[] { new Integer(5), new Integer(2), new Integer(6)});
-        Expression compareTo = simpleExp(Expression.NOT_IN, list);
-        Expression parsed1 = Expression.fromString("a not in (5, 2, 6)");
-        assertEquals(compareTo, parsed1);
-    } */
+    // can't test List expressions - ASTList stores values internally as Object[],
+    // so this doesn't pass 
+    /*   public void testIn() throws Exception {
+           List list =
+               Arrays.asList(new Object[] { new Integer(5), new Integer(2), new Integer(6)});
+           Expression compareTo = simpleExp(Expression.IN, list);
+           Expression parsed1 = Expression.fromString("a in (5, 2, 6)");
+           assertEquals(compareTo, parsed1);
+       }
+    
+       public void testNotIn() throws Exception {
+           List list =
+               Arrays.asList(new Object[] { new Integer(5), new Integer(2), new Integer(6)});
+           Expression compareTo = simpleExp(Expression.NOT_IN, list);
+           Expression parsed1 = Expression.fromString("a not in (5, 2, 6)");
+           assertEquals(compareTo, parsed1);
+       } */
 
     public void testBetween() throws Exception {
         Expression compareTo =
@@ -214,6 +214,37 @@ public class ParsedExpBackwardCompatTst extends CayenneSimpleTestCase {
         Expression parsed2 = Expression.fromString("a = NULL");
         assertEquals(compareTo, parsed1);
         assertEquals(compareTo, parsed2);
+    }
+
+    public void testAddExpression() throws Exception {
+        Expression compareTo = simpleExp(Expression.ADD, new Integer(3));
+        Expression parsed = Expression.fromString("a + 3");
+        assertEquals(compareTo, parsed);
+    }
+
+    public void testSubtractExpression() throws Exception {
+        Expression compareTo = simpleExp(Expression.SUBTRACT, new Integer(3));
+        Expression parsed = Expression.fromString("a - 3");
+        assertEquals(compareTo, parsed);
+    }
+
+    public void testMultiplyExpression() throws Exception {
+        Expression compareTo = simpleExp(Expression.MULTIPLY, new Integer(3));
+        Expression parsed = Expression.fromString("a * 3");
+        assertEquals(compareTo, parsed);
+    }
+
+    public void testDivideExpression() throws Exception {
+        Expression compareTo = simpleExp(Expression.DIVIDE, new Integer(3));
+        Expression parsed = Expression.fromString("a / 3");
+        assertEquals(compareTo, parsed);
+    }
+
+    public void testNegativeExpression() throws Exception {
+        Expression compareTo = new UnaryExpression(Expression.NEGATIVE);
+        compareTo.setOperand(0, new Integer(3));
+        Expression parsed = Expression.fromString("-3");
+        assertEquals(compareTo, parsed);
     }
 
     /**

@@ -324,30 +324,30 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         Expression in =
             new ASTIn(
                 new ASTObjPath("estimatedPrice"),
-                new ASTList(new Object[] { new BigDecimal(10), new BigDecimal(20)}));
+                new ASTList(new Object[] { new BigDecimal("10"), new BigDecimal("20")}));
 
         Expression notIn =
             new ASTNotIn(
                 new ASTObjPath("estimatedPrice"),
-                new ASTList(new Object[] { new BigDecimal(10), new BigDecimal(20)}));
+                new ASTList(new Object[] { new BigDecimal("10"), new BigDecimal("20")}));
 
         Painting noMatch1 = new Painting();
-        noMatch1.setEstimatedPrice(new BigDecimal(21));
+        noMatch1.setEstimatedPrice(new BigDecimal("21"));
         assertFalse(in.evaluateBoolean(noMatch1));
         assertTrue(notIn.evaluateBoolean(noMatch1));
 
         Painting noMatch2 = new Painting();
-        noMatch2.setEstimatedPrice(new BigDecimal(11));
+        noMatch2.setEstimatedPrice(new BigDecimal("11"));
         assertFalse("Failed: " + in, in.evaluateBoolean(noMatch2));
         assertTrue("Failed: " + notIn, notIn.evaluateBoolean(noMatch2));
 
         Painting match1 = new Painting();
-        match1.setEstimatedPrice(new BigDecimal(20));
+        match1.setEstimatedPrice(new BigDecimal("20"));
         assertTrue(in.evaluateBoolean(match1));
         assertFalse(notIn.evaluateBoolean(match1));
 
         Painting match2 = new Painting();
-        match2.setEstimatedPrice(new BigDecimal(10));
+        match2.setEstimatedPrice(new BigDecimal("10"));
         assertTrue("Failed: " + in, in.evaluateBoolean(match2));
         assertFalse("Failed: " + notIn, notIn.evaluateBoolean(match2));
     }
@@ -424,5 +424,38 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         match2.setArtistName("ABcD");
         assertTrue("Failed: " + like, like.evaluateBoolean(match2));
         assertFalse("Failed: " + notLike, notLike.evaluateBoolean(match2));
+    }
+
+    public void testEvaluateADD() throws Exception {
+        Expression add = new ASTAdd(new Object[] { new Integer(1), new Double(5.5)});
+        assertEquals(6.5, ((Number) add.evaluate(null)).doubleValue(), 0.0001);
+    }
+
+    public void testEvaluateSubtract() throws Exception {
+        Expression subtract =
+            new ASTSubtract(
+                new Object[] { new Integer(1), new Double(0.1), new Double(0.2)});
+        assertEquals(0.7, ((Number) subtract.evaluate(null)).doubleValue(), 0.0001);
+    }
+
+    public void testEvaluateMultiply() throws Exception {
+        Expression multiply =
+            new ASTMultiply(new Object[] { new Integer(2), new Double(3.5)});
+        assertEquals(7, ((Number) multiply.evaluate(null)).doubleValue(), 0.0001);
+    }
+
+    public void testEvaluateDivide() throws Exception {
+        Expression divide =
+            new ASTDivide(new Object[] { new BigDecimal("7.0"), new BigDecimal("2.0")});
+        assertEquals(3.5, ((Number) divide.evaluate(null)).doubleValue(), 0.0001);
+    }
+
+    public void testEvaluateNegate() throws Exception {
+        assertEquals(
+            -3,
+            ((Number) new ASTNegate(new Integer(3)).evaluate(null)).intValue());
+        assertEquals(
+            5,
+            ((Number) new ASTNegate(new Integer(-5)).evaluate(null)).intValue());
     }
 }

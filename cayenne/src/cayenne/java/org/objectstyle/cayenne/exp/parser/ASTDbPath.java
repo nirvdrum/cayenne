@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.exp.parser;
 import java.io.PrintWriter;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.Entity;
 
 /**
  * Path expression traversing DB relationships and attributes.
@@ -74,7 +75,12 @@ public class ASTDbPath extends ASTPath {
     ASTDbPath(int id) {
         super(id);
     }
-    
+
+    protected Object evaluateNode(Object o) throws Exception {
+        // TODO: implement resolving DB_PATH for DataObjects.
+        return (o instanceof Entity) ? ((Entity) o).resolvePathComponents(this) : null;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */

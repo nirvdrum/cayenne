@@ -57,21 +57,36 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Not Like" expression.
  * 
  * @author Andrei Adamchik
  */
-public class ASTNotLike extends ConditionNode {
+public class ASTNotLike extends PatternMatchNode {
     public ASTNotLike(ASTPath path, Object value) {
-        super(ExpressionParserTreeConstants.JJTNOTLIKE);
+        super(ExpressionParserTreeConstants.JJTNOTLIKE, false);
         jjtAddChild(path, 0);
         jjtAddChild(new ASTScalar(value), 1);
     }
 
     ASTNotLike(int id) {
-        super(id);
+        super(id, false);
+    }
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len != 2) {
+            return Boolean.FALSE;
+        }
+
+        String s1 = ColnversionUtil.toString(evaluateChild(0, o));
+        if (s1 == null) {
+            return Boolean.FALSE;
+        }
+
+        return match(s1) ? Boolean.FALSE : Boolean.TRUE;
     }
 
     /**

@@ -55,10 +55,12 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Add" Expression.
@@ -85,6 +87,26 @@ public class ASTAdd extends SimpleNode {
         for (int i = 0; i < len; i++) {
             jjtAddChild(wrapChild(it.next()), i);
         }
+    }
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len == 0) {
+            return null;
+        }
+
+        BigDecimal result = null;
+        for (int i = 0; i < len; i++) {
+            BigDecimal value = ColnversionUtil.toBigDecimal(evaluateChild(i, o));
+
+            if (value == null) {
+                return null;
+            }
+
+            result = (i == 0) ? value : result.add(value);
+        }
+
+        return result;
     }
 
     /**

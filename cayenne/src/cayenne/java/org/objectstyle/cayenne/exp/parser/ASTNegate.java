@@ -57,8 +57,10 @@
 package org.objectstyle.cayenne.exp.parser;
 
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 
 /**
  * "Negate" expression.
@@ -81,6 +83,16 @@ public class ASTNegate extends SimpleNode {
      */
     public Expression shallowCopy() {
         return new ASTNegate(id);
+    }
+
+    protected Object evaluateNode(Object o) throws Exception {
+        int len = jjtGetNumChildren();
+        if (len == 0) {
+            return null;
+        }
+
+        BigDecimal result = ColnversionUtil.toBigDecimal(evaluateChild(0, o));
+        return result != null ? result.negate() : null;
     }
 
     public void encodeAsString(PrintWriter pw) {

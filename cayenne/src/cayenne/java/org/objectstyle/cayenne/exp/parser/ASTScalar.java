@@ -80,6 +80,10 @@ public class ASTScalar extends SimpleNode {
         super(id);
     }
 
+    protected Object evaluateNode(Object o) throws Exception {
+        return value;
+    }
+
     /**
      * Creates a copy of this expression node, without copying children.
      */
@@ -93,14 +97,14 @@ public class ASTScalar extends SimpleNode {
         SimpleNode.encodeScalarAsString(pw, value);
     }
 
-    protected void setValue(Object value) {
+    public void setValue(Object value) {
         this.value = value;
     }
 
-    protected Object getValue() {
+    public Object getValue() {
         return value;
     }
-    
+
     protected String getExpressionOperator(int index) {
         throw new UnsupportedOperationException(
             "No operator for '" + ExpressionParserTreeConstants.jjtNodeName[id] + "'");

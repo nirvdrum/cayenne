@@ -98,7 +98,7 @@ import org.xml.sax.XMLReader;
  */
 public class Util {
     private static Logger logObj = Logger.getLogger(Util.class);
-    
+
     private static final Perl5Util regexUtil = new Perl5Util();
 
     /**
@@ -291,6 +291,28 @@ public class Util {
     }
 
     /**
+     * Compare two objects just like "Comparable.compareTo" would. 
+     * Unlike Comparable.compareTo, this method allows any of the 2
+     * objects to be null.
+     * 
+     * @since 1.1
+     */
+    public static int nullSafeCompare(boolean nullsFirst, Comparable o1, Object o2) {
+        if (o1 == null && o2 == null) {
+            return 0;
+        }
+        else if (o1 != null) {
+            return nullsFirst ? 1 : -1;
+        }
+        else if (o2 == null) {
+            return nullsFirst ? -1 : 1;
+        }
+        else {
+            return o1.compareTo(o2);
+        }
+    }
+
+    /**
      * Returns true, if the String is null or an empty string.
      */
     public static boolean isEmptyString(String str) {
@@ -459,17 +481,17 @@ public class Util {
         Collections.sort(list, comparator);
         return list.iterator();
     }
-    
+
     /**
      * Utility method to build a hashCode of Collection.
      */
-	public static int hashCode(Collection c) {
-		HashCodeBuilder builder = new HashCodeBuilder();
-		for (Iterator i = c.iterator(); i.hasNext();)
-			builder.append(i.next());
-		return builder.toHashCode();
-	}
-    
+    public static int hashCode(Collection c) {
+        HashCodeBuilder builder = new HashCodeBuilder();
+        for (Iterator i = c.iterator(); i.hasNext();)
+            builder.append(i.next());
+        return builder.toHashCode();
+    }
+
     /**
      * Converts a SQL-style pattern to a valid Perl regular expression. E.g.
      * 
@@ -515,10 +537,10 @@ public class Util {
 
             buffer.append(nextChar);
         }
-        
+
         buffer.append("$/");
-        
-        if(ignoreCase) {
+
+        if (ignoreCase) {
             buffer.append('i');
         }
 
@@ -529,9 +551,10 @@ public class Util {
             regexUtil.match(finalPattern, "abc_123");
         }
         catch (Exception e) {
-            throw new IllegalArgumentException("Error converting pattern: " + e.getLocalizedMessage());
+            throw new IllegalArgumentException(
+                "Error converting pattern: " + e.getLocalizedMessage());
         }
-        
+
         return finalPattern;
     }
 

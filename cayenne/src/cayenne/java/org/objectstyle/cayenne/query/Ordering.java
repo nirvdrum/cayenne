@@ -63,9 +63,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
+import org.objectstyle.cayenne.util.ColnversionUtil;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /** 
@@ -97,7 +97,6 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      * @param theList a List of objects to be sorted
      */
     public static void orderList(List objects, List orderings) {
-        checkObjectsClass(objects);
         Collections.sort(objects, new DataObjectPropertyComparator(orderings));
     }
 
@@ -193,21 +192,6 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
         this.sortSpec = sortSpec;
     }
 
-    private static void checkObjectsClass(List objects) {
-        int i;
-        for (i = 0; i < objects.size(); i++) {
-            if (!(objects.get(i) instanceof CayenneDataObject)) {
-                throw new IllegalArgumentException(
-                    "Object ("
-                        + objects.get(i)
-                        + ") at index "
-                        + i
-                        + " of list sent to Ordering is not a CayenneDataObject");
-            }
-        }
-
-    }
-
     /**
      * Orders the given list of objects according to the ordering that this object specifies
      * Requires that the objects in object are all subclasses of CayenneDataObject.
@@ -216,7 +200,6 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      * @param theList a List of objects to be sorted
      */
     public void orderList(List objects) {
-        Ordering.checkObjectsClass(objects);
         Collections.sort(objects, this);
     }
 
@@ -238,46 +221,14 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
 
         if (this.caseInsensitive) {
             // TODO: to upper case should probably be defined as a separate expression type
-            value1 = toUpperCase(value1);
-            value2 = toUpperCase(value2);
+            value1 = ColnversionUtil.toUpperCase(value1);
+            value2 = ColnversionUtil.toUpperCase(value2);
         }
 
-        int compareResult = toComparabe(value1).compareTo(toComparabe(value2));
+        int compareResult =
+            ColnversionUtil.toComparabe(value1).compareTo(
+                ColnversionUtil.toComparabe(value2));
         return (ascending) ? compareResult : -compareResult;
-    }
-
-    // attempt to convert objects to Comparable
-    private final Comparable toComparabe(Object object) {
-        if (object == null) {
-            return null;
-        }
-        else if (object instanceof Comparable) {
-            return (Comparable) object;
-        }
-        else if (object instanceof StringBuffer) {
-            return object.toString();
-        }
-        else if (object instanceof char[]) {
-            return new String((char[]) object);
-        }
-        else {
-            throw new ClassCastException(
-                "Invalid Comparable class:" + object.getClass().getName());
-        }
-    }
-
-    // attempt toUpperCase conversion
-    // TODO: define this as an expression class
-    private final Object toUpperCase(Object object) {
-        if ((object instanceof String) || (object instanceof StringBuffer)) {
-            return object.toString().toUpperCase();
-        }
-        else if (object instanceof char[]) {
-            return new String((char[]) object).toUpperCase();
-        }
-        else {
-            return object;
-        }
     }
 
     /**

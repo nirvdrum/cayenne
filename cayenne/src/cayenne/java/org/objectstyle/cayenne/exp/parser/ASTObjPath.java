@@ -58,7 +58,10 @@ package org.objectstyle.cayenne.exp.parser;
 
 import java.io.PrintWriter;
 
+import org.apache.commons.beanutils.PropertyUtils;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.Entity;
 
 public class ASTObjPath extends ASTPath {
 
@@ -72,6 +75,14 @@ public class ASTObjPath extends ASTPath {
      */
     ASTObjPath(int id) {
         super(id);
+    }
+
+    protected Object evaluateNode(Object o) throws Exception {
+        return (o instanceof DataObject)
+            ? ((DataObject) o).readNestedProperty(path)
+            : (o instanceof Entity)
+            ? ((Entity) o).resolvePathComponents(this)
+            : PropertyUtils.getProperty(o, path);
     }
 
     /**

@@ -107,6 +107,10 @@ public class ASTList extends SimpleNode {
         return new ASTList(id);
     }
 
+    protected Object evaluateNode(Object o) throws Exception {
+        return values;
+    }
+
     public int getType() {
         return Expression.LIST;
     }
