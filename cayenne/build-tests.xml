@@ -12,6 +12,7 @@
 	<property name="test.output" value="${test.build}/out/${cayenne.test.connection}"/>
 	<property name="test.report" value="${test.build}/report/${cayenne.test.connection}"/>
 	<property name="test.filter" value="**/*Tst.class"/>
+	<property environment="test.env"/>
 	
     <path id="classpath">
     	<fileset dir="${otherlib.dir}">
@@ -25,6 +26,7 @@
 		</fileset>
 		<pathelement path="build/tests/classes"/>
 		<pathelement path="build/tests/deps"/>
+		<pathelement path="${test.env.CLASSPATH}"/>
     </path>
     
 
