@@ -6,17 +6,10 @@
         <!-- News section -->
         <section name="Cayenne News">
         
-        <p><u><i>[December 22, 2003]</i></u> <strong>Cayenne 1.0.5 Released</strong></p>
-         <p>Cayenne 1.0.5 is released. It contains new Modeler Guide chapter on delete rules, improved DB2 Adapter,
-         and various bug fixes. <a href="RELEASE-NOTES-1.0.5.txt">Release notes</a> contain all the details.
+        <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
+         <p>Cayenne 1.0.5 is released. It contains extended implementation of in-memory Expressions
+         evaluation and numerous bug fixes. For details see <a href="RELEASE-NOTES-1.0.6.txt">Release notes</a>. 
          Release can be downloaded from <a href="download.html">here</a>.
-         </p>
-         
-         <p><u><i>[December 14, 2003]</i></u> <strong>Cayenne 1.0.4 Released</strong></p>
-         <p>Cayenne 1.0.4 is released. It features greatly improved PostgreSQL adapter, support for large objects on
-         MySQL, compound PK bug fix and other bug  fixes. Full list of changes is available in the 
-         <a href="RELEASE-NOTES-1.0.4.txt">release notes</a>. 1.0.4
-         can be downloaded from <a href="download.html">here</a>.
          </p>
          
          <p><u><i>[November 1, 2003]</i></u> <strong>Cayenne in "The Best Freeware And Shareware" of DB Magazine, Japan</strong></p>

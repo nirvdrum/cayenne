@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="10. Using Expressions"/>  
 <body>
     <section name="10. Using Expressions">        
-		<subsection name="10.4 NULL handling.">
+		<subsection name="10.4 NULL Handling">
 		<p>Handling of Java nulls as operands is no different from normal values. 
 		Instead of using special conditional operators, like SQL does, EQUAL_TO and NOT_EQUAL_TO 
         expressions can be used directly with null values. It is up to Cayenne to 
