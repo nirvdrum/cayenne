@@ -287,6 +287,7 @@ public class DataModificationRobot {
       }
   }
 
+/*
   private void removeFromReflexiveToOne(Object master, List objects, String objRelName) {
       for (Iterator i = objects.iterator(); i.hasNext(); ) {
           DataObject object = (DataObject)i.next();
@@ -295,4 +296,6 @@ public class DataModificationRobot {
           }
       }
   }
+*/
+
 }
