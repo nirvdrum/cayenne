@@ -72,10 +72,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 public class DefaultClassGenerator extends MapClassGenerator {
     protected File destDir;
     protected boolean overwrite;
-    protected boolean usepkgpath = true;
-    protected boolean makepairs = true;
+    protected boolean usePkgPath = true;
+    protected boolean makePairs = true;
     protected File template;
-    protected File supertemplate;
+    protected File superTemplate;
     protected long timestamp = System.currentTimeMillis();
 
     public DefaultClassGenerator() {}
@@ -88,7 +88,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
     public DefaultClassGenerator(DataMap map) {
         this(map.getObjEntitiesAsList());
     }
-    
+
     /** 
      * Creates class generator and initializes it with the list of ObjEntities
      * that will be used in class generation.
@@ -101,7 +101,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
     public void execute() throws Exception {
         validateAttributes();
 
-        if (makepairs) {
+        if (makePairs) {
             String t = getTemplateForPairs();
             String st = getSupertemplateForPairs();
             generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
@@ -115,7 +115,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
      * Validates the state of this class generator. Throws exception if 
      * it is in inconsistent state. Called internally from "execute".
      */
-    protected void validateAttributes() throws Exception {
+    public void validateAttributes() throws Exception {
         if (destDir == null) {
             throw new Exception("'destDir' attribute is missing.");
         }
@@ -132,8 +132,8 @@ public class DefaultClassGenerator extends MapClassGenerator {
             throw new Exception("Can't read template from " + template);
         }
 
-        if (makepairs && supertemplate != null && !supertemplate.canRead()) {
-            throw new Exception("Can't read super template from " + supertemplate);
+        if (makePairs && superTemplate != null && !superTemplate.canRead()) {
+            throw new Exception("Can't read super template from " + superTemplate);
         }
     }
 
@@ -154,8 +154,8 @@ public class DefaultClassGenerator extends MapClassGenerator {
     /**
      * Sets <code>makepairs</code> property.
      */
-    public void setMakepairs(boolean makepairs) {
-        this.makepairs = makepairs;
+    public void setMakePairs(boolean makePairs) {
+        this.makePairs = makePairs;
     }
 
     /**
@@ -166,17 +166,17 @@ public class DefaultClassGenerator extends MapClassGenerator {
     }
 
     /**
-     * Sets <code>supertemplate</code> property.
+     * Sets <code>superTemplate</code> property.
      */
-    public void setSupertemplate(File supertemplate) {
-        this.supertemplate = supertemplate;
+    public void setSuperTemplate(File superTemplate) {
+        this.superTemplate = superTemplate;
     }
 
     /**
      * Sets <code>usepkgpath</code> property.
      */
-    public void setUsepkgpath(boolean usepkgpath) {
-        this.usepkgpath = usepkgpath;
+    public void setUsePkgPath(boolean usePkgPath) {
+        this.usePkgPath = usePkgPath;
     }
 
     public void closeWriter(Writer out) throws Exception {
@@ -185,15 +185,14 @@ public class DefaultClassGenerator extends MapClassGenerator {
 
     public Writer openWriter(ObjEntity entity, String pkgName, String className)
         throws Exception {
-        return (className.startsWith(SUPERCLASS_PREFIX))
-            ? writerForSuperclass(entity, pkgName, className)
-            : writerForClass(entity, pkgName, className);
+        File outFile =
+            (className.startsWith(SUPERCLASS_PREFIX))
+                ? fileForSuperclass(pkgName, className)
+                : fileForClass(pkgName, className);
+        return (outFile != null) ? new FileWriter(outFile) : null;
     }
 
-    private Writer writerForSuperclass(
-        ObjEntity entity,
-        String pkgName,
-        String className)
+    protected File fileForSuperclass(String pkgName, String className)
         throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
@@ -203,20 +202,17 @@ public class DefaultClassGenerator extends MapClassGenerator {
             return null;
         }
 
-        return new FileWriter(dest);
+        return dest;
     }
 
-    private Writer writerForClass(
-        ObjEntity entity,
-        String pkgName,
-        String className)
+    protected File fileForClass(String pkgName, String className)
         throws Exception {
 
         File dest = new File(mkpath(destDir, pkgName), className + ".java");
         if (dest.exists()) {
 
             // no overwrite of subclasses
-            if (makepairs) {
+            if (makePairs) {
                 return null;
             }
 
@@ -231,7 +227,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
             }
         }
 
-        return new FileWriter(dest);
+        return dest;
     }
 
     /** 
@@ -249,7 +245,7 @@ public class DefaultClassGenerator extends MapClassGenerator {
      */
     protected File mkpath(File dest, String pkgName) throws Exception {
 
-        if (!usepkgpath || pkgName == null) {
+        if (!usePkgPath || pkgName == null) {
             return dest;
         }
 
@@ -287,8 +283,8 @@ public class DefaultClassGenerator extends MapClassGenerator {
      *  when generating class pairs. 
      */
     protected String getSupertemplateForPairs() throws IOException {
-        return (supertemplate != null)
-            ? supertemplate.getCanonicalPath()
+        return (superTemplate != null)
+            ? superTemplate.getCanonicalPath()
             : MapClassGenerator.SUPERCLASS_TEMPLATE;
     }
 

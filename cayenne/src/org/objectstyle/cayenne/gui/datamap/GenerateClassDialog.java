@@ -224,7 +224,7 @@ implements ActionListener
 		List selected = ((GenerateClassTableModel)table.getModel()).getSelected();
 		DefaultClassGenerator generator = new DefaultClassGenerator(selected);
 		generator.setDestDir(outputFolder);
-		generator.setMakepairs(generatePair.isSelected());		
+		generator.setMakePairs(generatePair.isSelected());		
 		
 		try {
 			generator.execute();

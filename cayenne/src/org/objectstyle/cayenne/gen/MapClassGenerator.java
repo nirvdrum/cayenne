@@ -245,4 +245,14 @@ public abstract class MapClassGenerator {
     public void setSuperPkg(String superPkg) {
         this.superPkg = superPkg;
     }
+    
+
+    public List getObjEntities() {
+        return objEntities;
+    }
+
+    public void setObjEntities(List objEntities) {
+        this.objEntities = objEntities;
+    }
+
 }

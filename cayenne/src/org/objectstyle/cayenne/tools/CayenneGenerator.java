@@ -62,98 +62,47 @@ import org.xml.sax.InputSource;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
-import org.objectstyle.cayenne.gen.ClassGenerator;
-import org.objectstyle.cayenne.gen.MapClassGenerator;
+import org.objectstyle.cayenne.gen.*;
 import org.objectstyle.cayenne.map.*;
 
-/** Ant task to perform class generation from data map.
+/** 
+ * Ant task to perform class generation from data map. 
+ * This class is an Ant adapter to DefaultClassGenerator class.
  *
  *  @author Andrei Adamchik
  */
 public class CayenneGenerator extends Task {
-    protected File map;
-    protected File destDir;
-    protected boolean overwrite;
-    protected boolean usepkgpath = true;
-    protected boolean makepairs = true;
-    protected File template;
-    protected File supertemplate;
-    protected String superpkg;
 
-    /** Classes are generated only for files that are older 
-     * than the map. <code>mapTimestamp</code> is used to track that. 
-     */
-    protected long mapTimestamp;
-    
+    protected File map;
+    protected DefaultClassGenerator generator;
+
     public CayenneGenerator() {
         bootstrapVelocity();
+        generator = new AntClassGenerator();
     }
 
     /** Initialize Velocity with class loader of the right class. */
     protected void bootstrapVelocity() {
         ClassGenerator.bootstrapVelocity(this.getClass());
     }
-    
-    /** The method executing the task. It will be called
-     *  by ant framework. */
+
+    /** 
+     * Executes the task. It will be called by ant framework. 
+     */
     public void execute() throws BuildException {
         validateAttributes();
 
         try {
-            mapTimestamp = map.lastModified();
             DataMap dataMap = loadDataMap();
-            AntClassGenerator gen = new AntClassGenerator(dataMap);
-
-            if (makepairs) {
-                String t = getTemplateForPairs();
-                String st = getSupertemplateForPairs();
-
-                // overwrite superclass package
-                if (superpkg != null) {
-                    gen.setSuperPkg(superpkg);
-                }
-
-                gen.generateClassPairs(t, st, MapClassGenerator.SUPERCLASS_PREFIX);
-            }
-            else {
-                String t = getTemplateForSingles();
-                gen.generateSingleClasses(t);
-            }
+            generator.setTimestamp(map.lastModified());
+            generator.setObjEntities(dataMap.getObjEntitiesAsList());
+            generator.validateAttributes();
+            generator.execute();
         }
         catch (Exception ex) {
             super.log("Error generating classes.");
             throw new BuildException("Error generating classes.", ex);
         }
-    }
-
-    /** 
-     *  Returns template file path for Java class 
-     *  when generating single classes. 
-     */
-    protected String getTemplateForSingles() throws IOException {
-        return (template != null)
-            ? template.getCanonicalPath()
-            : MapClassGenerator.SINGLE_CLASS_TEMPLATE;
-    }
-
-    /** 
-     *  Returns template file path for Java subclass 
-     *  when generating class pairs. 
-     */
-    protected String getTemplateForPairs() throws IOException {
-        return (template != null)
-            ? template.getCanonicalPath()
-            : MapClassGenerator.SUBCLASS_TEMPLATE;
-    }
-
-    /** 
-     *  Returns template file path for Java superclass 
-     *  when generating class pairs. 
-     */
-    protected String getSupertemplateForPairs() throws IOException {
-        return (supertemplate != null)
-            ? supertemplate.getCanonicalPath()
-            : MapClassGenerator.SUPERCLASS_TEMPLATE;
     }
 
     /** Loads and returns DataMap based on <code>map</code> attribute. */
@@ -162,37 +111,17 @@ public class CayenneGenerator extends Task {
         return new MapLoaderImpl().loadDataMap(in);
     }
 
-
-    /** Validates atttribute combinatins. Throws BuildException if
-     *  attributes are invalid. 
+    /** 
+     * Validates atttributes that are not related to internal DefaultClassGenerator. 
+     * Throws BuildException if attributes are invalid. 
      */
     protected void validateAttributes() throws BuildException {
         if (map == null) {
             throw new BuildException("'map' attribute is missing.");
         }
 
-        if (destDir == null) {
-            throw new BuildException("'destDir' attribute is missing.");
-        }
-
         if (!map.canRead()) {
             throw new BuildException("Can't read the map from " + map);
-        }
-
-        if (!destDir.isDirectory()) {
-            throw new BuildException("'destDir' is not a directory.");
-        }
-
-        if (!destDir.canWrite()) {
-            throw new BuildException("Do not have write permissions for " + destDir);
-        }
-
-        if (template != null && !template.canRead()) {
-            throw new BuildException("Can't read template from " + template);
-        }
-
-        if (makepairs && supertemplate != null && !supertemplate.canRead()) {
-            throw new BuildException("Can't read super template from " + supertemplate);
         }
     }
 
@@ -208,140 +137,74 @@ public class CayenneGenerator extends Task {
      * Sets the destDir.
      */
     public void setDestDir(File destDir) {
-        this.destDir = destDir;
+        generator.setDestDir(destDir);
     }
 
     /**
      * Sets <code>overwrite</code> property.
      */
     public void setOverwrite(boolean overwrite) {
-        this.overwrite = overwrite;
+        generator.setOverwrite(overwrite);
     }
 
     /**
      * Sets <code>makepairs</code> property.
      */
     public void setMakepairs(boolean makepairs) {
-        this.makepairs = makepairs;
+        generator.setMakePairs(makepairs);
     }
 
     /**
      * Sets <code>template</code> property.
      */
     public void setTemplate(File template) {
-        this.template = template;
+        generator.setTemplate(template);
     }
 
     /**
      * Sets <code>supertemplate</code> property.
      */
     public void setSupertemplate(File supertemplate) {
-        this.supertemplate = supertemplate;
+        generator.setSuperTemplate(supertemplate);
     }
 
     /**
      * Sets <code>usepkgpath</code> property.
      */
     public void setUsepkgpath(boolean usepkgpath) {
-        this.usepkgpath = usepkgpath;
+        generator.setUsePkgPath(usepkgpath);
     }
 
     /**
      * Sets <code>superpkg</code> property.
      */
     public void setSuperpkg(String superpkg) {
-        this.superpkg = superpkg;
+        generator.setSuperPkg(superpkg);
     }
 
-
-    /** Concrete subclass of MapClassGenerator that performs the actual
-      * class generation. */
-    class AntClassGenerator extends MapClassGenerator {
-
-        public AntClassGenerator(DataMap map) {
-            super(map);
-        }
-
-        public void closeWriter(Writer out) throws Exception {
-            out.close();
-        }
-
-        public Writer openWriter(ObjEntity entity, String pkgName, String className)
-            throws Exception {
-            return (className.startsWith(SUPERCLASS_PREFIX))
-                ? writerForSuperclass(entity, pkgName, className)
-                : writerForClass(entity, pkgName, className);
-        }
-
-
-        private Writer writerForSuperclass(
-            ObjEntity entity,
-            String pkgName,
-            String className)
+    /** 
+     * Ant-specific extension of DefaultClassGenerator that provides logging
+     * functions. 
+     */
+    final class AntClassGenerator extends DefaultClassGenerator {
+        protected File fileForSuperclass(String pkgName, String className)
             throws Exception {
 
-            File dest = new File(mkpath(destDir.getPath(), pkgName), className + ".java");
-
-            // ignore newer files
-            if (dest.exists()
-                && dest.lastModified() > CayenneGenerator.this.mapTimestamp) {
-                return null;
+            File outFile = super.fileForSuperclass(pkgName, className);
+            if (outFile != null) {
+                log("Generating superclass file: " + outFile.getCanonicalPath());
             }
-
-            log("Generating class file: " + dest.getCanonicalPath());
-            return new FileWriter(dest);
+            return outFile;
         }
-        
 
-        private Writer writerForClass(
-            ObjEntity entity,
-            String pkgName,
-            String className)
+        protected File fileForClass(String pkgName, String className)
             throws Exception {
-
-            File dest = new File(mkpath(destDir.getPath(), pkgName), className + ".java");
-            if (dest.exists()) {
-
-                // no overwrite of subclasses
-                if (makepairs) {
-                    return null;
-                }
-
-                // skip if said so
-                if (!overwrite) {
-                    return null;
-                }
-
-                // ignore newer files
-                if (dest.lastModified() > CayenneGenerator.this.mapTimestamp) {
-                    return null;
-                }
+                
+            File outFile = super.fileForClass(pkgName, className);
+            if (outFile != null) {
+                log("Generating class file: " + outFile.getCanonicalPath());
             }
-
-            log("Generating class file :" + dest.getCanonicalPath());
-            return new FileWriter(dest);
-        }
-
-
-        /** 
-         *  Returns a File object corresponding to a directory where files
-         *  that belong to <code>pkgName</code> package should reside. 
-         *  Creates any missing diectories below <code>destDir</code>.
-         */
-        private File mkpath(String basePath, String pkgName) throws Exception {
-            File dest = getProject().resolveFile(basePath);
-
-            if (!usepkgpath || pkgName == null) {
-                return dest;
-            }
-
-            String path = pkgName.replace('.', File.separatorChar);
-            File fullPath = new File(dest, path);
-            if (!fullPath.isDirectory() && !fullPath.mkdirs()) {
-                throw new Exception("Error making path: " + fullPath);
-            }
-
-            return fullPath;
+            return outFile;
         }
     }
 }
