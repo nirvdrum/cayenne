@@ -74,13 +74,18 @@ public class DbRelationshipValidator extends TreeNodeValidator {
     public void validateObject(ProjectPath path, Validator validator) {
         DbRelationship rel = (DbRelationship) path.getObject();
         if (rel.getTargetEntity() == null) {
-        	validator.registerError("DbRelationship has no target entity.", path);
-        } else if (rel.getJoins().size() == 0) {
-        	validator.registerWarning("DbRelationship has no joins.", path);
+            validator.registerError("DbRelationship has no target entity.", path);
+        }
+        else if (rel.getJoins().size() == 0) {
+            validator.registerWarning("DbRelationship has no joins.", path);
         }
 
         if (Util.isEmptyString(rel.getName())) {
-        	validator.registerError("Unnamed DbRelationship.", path);
+            validator.registerError("Unnamed DbRelationship.", path);
+        }
+        // check if there are attributes having the same name
+        else if (rel.getSourceEntity().getAttribute(rel.getName()) != null) {
+            validator.registerWarning("DbRelationship has the same name as one of DbAttributes", path);
         }
     }
 }
