@@ -914,24 +914,22 @@ public class EventController extends ModelerController {
         }
     }
 
-    public void addDataMap(Object src, DataMap wrap) {
-        addDataMap(src, wrap, true);
+    public void addDataMap(Object src, DataMap map) {
+        addDataMap(src, map, true);
     }
 
     public void addDataMap(Object src, DataMap map, boolean makeCurrent) {
 
         // new map was added.. link it to domain (and node if possible)
         currentDomain.addMap(map);
-        fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.ADD));
 
-        if (currentNode != null) {
+        if (currentNode != null && !currentNode.getDataMaps().contains(map)) {
             currentNode.addDataMap(map);
             fireDataNodeEvent(new DataNodeEvent(this, currentNode));
-
-            // TODO: maybe reindexing is an overkill in the modeler?
             currentDomain.reindexNodes();
         }
 
+        fireDataMapEvent(new DataMapEvent(src, map, DataMapEvent.ADD));
         if (makeCurrent) {
             fireDataMapDisplayEvent(
                 new DataMapDisplayEvent(src, map, currentDomain, currentNode));

@@ -268,7 +268,8 @@ public class DbLoader {
      * @return true if need to continue, false if must stop loading. 
      */
     public boolean loadDbEntities(DataMap map, List tables) throws SQLException {
-        dbEntityList = new ArrayList();
+        this.dbEntityList = new ArrayList();
+        
         Iterator iter = tables.iterator();
         while (iter.hasNext()) {
             Table table = (Table) iter.next();
@@ -302,7 +303,6 @@ public class DbLoader {
             }
 
             DbEntity dbEntity = new DbEntity();
-            dbEntityList.add(dbEntity);
             dbEntity.setName(table.getName());
 
             if (delegate != null) {
@@ -313,7 +313,7 @@ public class DbLoader {
             }
             dbEntity.setCatalog(table.getCatalog());
 
-            // --  Create DbAttributes from column information  --
+            // Create DbAttributes from column information  --
             ResultSet rs =
                 getMetaData().getColumns(
                     table.getCatalog(),
@@ -361,6 +361,12 @@ public class DbLoader {
             // notify delegate
             if (delegate != null) {
                 delegate.dbEntityAdded(dbEntity);
+            }
+            
+            // delegate might have thrown this entity out... so check if it is still around
+            // before continuing processing
+            if(map.getDbEntity(table.getName()) == dbEntity) {
+                this.dbEntityList.add(dbEntity);
             }
         }
 

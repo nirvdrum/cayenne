@@ -589,25 +589,6 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
 
         Entity entity = e.getEntity();
 
-        // Add a node and make it selected.
-        if (mediator.getCurrentDataNode() != null) {
-            DefaultMutableTreeNode mapNode = getProjectModel().getNodeForObjectPath(
-                    new Object[] {
-                            mediator.getCurrentDataDomain(),
-                            mediator.getCurrentDataNode(), mediator.getCurrentDataMap()
-                    });
-
-            if (mapNode != null) {
-                DefaultMutableTreeNode newEntityNode = new DefaultMutableTreeNode(
-                        entity,
-                        false);
-                getProjectModel().insertNodeInto(
-                        newEntityNode,
-                        mapNode,
-                        mapNode.getChildCount());
-            }
-        }
-
         DefaultMutableTreeNode mapNode = getProjectModel().getNodeForObjectPath(
                 new Object[] {
                         mediator.getCurrentDataDomain(), mediator.getCurrentDataMap()
@@ -635,12 +616,6 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
         removeNode(new Object[] {
                 mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
                 e.getEntity()
-        });
-
-        // remove from DataMap *reference* tree
-        removeNode(new Object[] {
-                mediator.getCurrentDataDomain(), mediator.getCurrentDataNode(),
-                mediator.getCurrentDataMap(), e.getEntity()
         });
     }
 

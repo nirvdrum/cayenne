@@ -59,6 +59,8 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -97,7 +99,13 @@ import org.objectstyle.cayenne.project.ProjectPath;
  */
 public class ImportDbAction extends CayenneAction {
 
-    private static Logger logObj = Logger.getLogger(ImportDbAction.class);
+    private static final Logger logObj = Logger.getLogger(ImportDbAction.class);
+
+    // TODO: this is a temp hack... need to delegate to DbAdapter, or configurable in
+    // preferences...
+    private static final Collection excludedTables = Arrays.asList(new Object[] {
+        "AUTO_PK_SUPPORT", "auto_pk_support"
+    });
 
     public static String getActionName() {
         return "Reengineer Database Schema";
@@ -385,36 +393,41 @@ public class ImportDbAction extends CayenneAction {
             }
         }
 
-        public void dbEntityAdded(DbEntity ent) {
-            if (existingMap) {
-                mediator.fireDbEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+        public void dbEntityAdded(DbEntity entity) {
+            // TODO: hack to prevent PK tables from being visible... this should really be
+            // delegated to DbAdapter to decide...
+            if (excludedTables.contains(entity.getName()) && entity.getDataMap() != null) {
+                entity.getDataMap().removeDbEntity(entity.getName());
+            }
+            else if (existingMap) {
+                mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
             }
         }
 
-        public void objEntityAdded(ObjEntity ent) {
+        public void objEntityAdded(ObjEntity entity) {
             if (existingMap) {
-                mediator.fireObjEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+                mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
             }
         }
 
-        public void dbEntityRemoved(DbEntity ent) {
+        public void dbEntityRemoved(DbEntity entity) {
             if (existingMap) {
                 mediator.fireDbEntityEvent(new EntityEvent(
                         CayenneModelerFrame.getFrame(),
-                        ent,
+                        entity,
                         EntityEvent.REMOVE));
             }
         }
 
-        public void objEntityRemoved(ObjEntity ent) {
+        public void objEntityRemoved(ObjEntity entity) {
             if (existingMap) {
                 mediator.fireObjEntityEvent(new EntityEvent(CayenneModelerFrame
-                        .getFrame(), ent, EntityEvent.REMOVE));
+                        .getFrame(), entity, EntityEvent.REMOVE));
             }
         }
 
-        public void setSchema(DbEntity ent, String schema) {
-            ent.setSchema(useSchema(schema) ? schema : null);
+        public void setSchema(DbEntity entity, String schema) {
+            entity.setSchema(useSchema(schema) ? schema : null);
         }
 
         /**

@@ -60,16 +60,21 @@ import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.event.DataMapEvent;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
@@ -85,11 +90,12 @@ import org.objectstyle.cayenne.wocompat.EOModelProcessor;
  * @author Andrei Adamchik
  */
 public class ImportEOModelAction extends CayenneAction {
+
     private static Logger logObj = Logger.getLogger(ImportEOModelAction.class);
 
-	public static String getActionName() {
-		return "Import EOModel";
-	}
+    public static String getActionName() {
+        return "Import EOModel";
+    }
 
     protected JFileChooser eoModelChooser;
 
@@ -104,7 +110,7 @@ public class ImportEOModelAction extends CayenneAction {
         importEOModel();
     }
 
-    /** 
+    /**
      * Lets user select an EOModel, then imports it as a DataMap.
      */
     protected void importEOModel() {
@@ -119,14 +125,15 @@ public class ImportEOModelAction extends CayenneAction {
             }
 
             ModelerPreferences.getPreferences().setProperty(
-                ModelerPreferences.LAST_EOM_DIR,
-                file.getParent());
+                    ModelerPreferences.LAST_EOM_DIR,
+                    file.getParent());
 
             try {
                 String path = file.getCanonicalPath();
                 DataMap map = new EOModelProcessor().loadEOModel(path);
                 addDataMap(map);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 logObj.log(Level.INFO, "EOModel Loading Exception", ex);
                 ErrorDebugDialog.guiException(ex);
             }
@@ -135,9 +142,9 @@ public class ImportEOModelAction extends CayenneAction {
     }
 
     /**
-    * Returns <code>true</code> if path contains a DataDomain object.
-    */
-     public boolean enableForPath(ProjectPath path) {
+     * Returns <code>true</code> if path contains a DataDomain object.
+     */
+    public boolean enableForPath(ProjectPath path) {
         if (path == null) {
             return false;
         }
@@ -145,7 +152,7 @@ public class ImportEOModelAction extends CayenneAction {
         return path.firstInstanceOf(DataDomain.class) != null;
     }
 
-    /** 
+    /**
      * Adds DataMap into the project.
      */
     protected void addDataMap(DataMap map) {
@@ -153,31 +160,69 @@ public class ImportEOModelAction extends CayenneAction {
         EventController mediator = getMediator();
 
         if (currentMap != null) {
-            // merge with existing map
-            // loader.loadDataMapFromDB(schema_name, null, map);
+            // merge with existing map... have to memorize map state before and after
+            // to do the right events
+
+            Collection originalOE = new ArrayList(currentMap.getObjEntities());
+            Collection originalDE = new ArrayList(currentMap.getDbEntities());
+
             currentMap.mergeWithDataMap(map);
             map = currentMap;
-        }
 
-        // If this is adding to existing data map, remove it
-        // and re-add to the BroseView
-        if (currentMap != null) {
-            mediator.fireDataMapEvent(
-                new DataMapEvent(CayenneModelerFrame.getFrame(), map, DataMapEvent.REMOVE));
-            mediator.fireDataMapEvent(
-                new DataMapEvent(CayenneModelerFrame.getFrame(), map, DataMapEvent.ADD));
-            mediator.fireDataMapDisplayEvent(
-                new DataMapDisplayEvent(
-            CayenneModelerFrame.getFrame(),
-                    map,
-                    mediator.getCurrentDataDomain(),
-                    mediator.getCurrentDataNode()));
-        } else {
+            // ostprocess changes
+            Collection newOE = new ArrayList(currentMap.getObjEntities());
+            Collection newDE = new ArrayList(currentMap.getDbEntities());
+
+            EntityEvent entityEvent = new EntityEvent(
+                    CayenneModelerFrame.getFrame(),
+                    null);
+
+            Collection addedOE = CollectionUtils.subtract(newOE, originalOE);
+            Iterator it = addedOE.iterator();
+            while (it.hasNext()) {
+                Entity e = (Entity) it.next();
+                entityEvent.setEntity(e);
+                entityEvent.setId(EntityEvent.ADD);
+                mediator.fireObjEntityEvent(entityEvent);
+            }
+
+            Collection removedOE = CollectionUtils.subtract(originalOE, newOE);
+            it = removedOE.iterator();
+            while (it.hasNext()) {
+                Entity e = (Entity) it.next();
+                entityEvent.setEntity(e);
+                entityEvent.setId(EntityEvent.REMOVE);
+                mediator.fireObjEntityEvent(entityEvent);
+            }
+
+            Collection addedDE = CollectionUtils.subtract(newDE, originalDE);
+            it = addedDE.iterator();
+            while (it.hasNext()) {
+                Entity e = (Entity) it.next();
+                entityEvent.setEntity(e);
+                entityEvent.setId(EntityEvent.ADD);
+                mediator.fireDbEntityEvent(entityEvent);
+            }
+
+            Collection removedDE = CollectionUtils.subtract(originalDE, newDE);
+            it = removedDE.iterator();
+            while (it.hasNext()) {
+                Entity e = (Entity) it.next();
+                entityEvent.setEntity(e);
+                entityEvent.setId(EntityEvent.REMOVE);
+                mediator.fireDbEntityEvent(entityEvent);
+            }
+
+            mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(CayenneModelerFrame
+                    .getFrame(), map, mediator.getCurrentDataDomain(), mediator
+                    .getCurrentDataNode()));
+        }
+        else {
             mediator.addDataMap(CayenneModelerFrame.getFrame(), map);
         }
     }
 
-    /** 
+    /**
      * Returns EOModel chooser.
      */
     public JFileChooser getEOModelChooser() {
@@ -186,13 +231,11 @@ public class ImportEOModelAction extends CayenneAction {
             eoModelChooser = new EOModelChooser("Select EOModel");
         }
 
-        String startDir =
-            ModelerPreferences.getPreferences().getString(
+        String startDir = ModelerPreferences.getPreferences().getString(
                 ModelerPreferences.LAST_EOM_DIR);
 
         if (startDir == null) {
-            startDir =
-                ModelerPreferences.getPreferences().getString(
+            startDir = ModelerPreferences.getPreferences().getString(
                     ModelerPreferences.LAST_DIR);
         }
 
@@ -206,10 +249,11 @@ public class ImportEOModelAction extends CayenneAction {
         return eoModelChooser;
     }
 
-    /** 
+    /**
      * Custom file chooser that will pop up again if a bad directory is selected.
      */
     class EOModelChooser extends JFileChooser {
+
         protected FileFilter selectFilter;
         protected JDialog cachedDialog;
 
@@ -233,7 +277,8 @@ public class ImportEOModelAction extends CayenneAction {
             if (selectFilter.accept(file)) {
                 cachedDialog = null;
                 return JFileChooser.APPROVE_OPTION;
-            } else {
+            }
+            else {
                 if (file.isDirectory()) {
                     this.setCurrentDirectory(file);
                 }
