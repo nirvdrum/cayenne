@@ -10,10 +10,19 @@
 </navigator> 
 <body>
     <section name="3. Quick Start">
-    	<subsection name="3.2 &quot;Command-line Application&quot; Tutorial">
+    	<subsection name="3.2 &quot;Command-line Application&quot; Tutorial">    	
     	<p>This section shows how to write a simple command-line application
     	using Cayenne. For a more detailed discussion read <a href="../appguide/index.html">"Writing 
-    	Cayenne Applications"</a> section. The tutorial follows these steps:
+    	Cayenne Applications"</a> section.</p>
+    	
+    	<ul>
+    		<li><strong><a href=
+    		"http://objectstyle.org/cayenne/doc/tutorial/cayenne-tutorial-0.tar.gz">Download
+    		full tutorial source.</a></strong></li>
+    	</ul>
+    		
+    	
+    	<p>Tutorial steps:</p>
     	
     	<ul>
     		<li><a href="#1">Tutorial Setup.</a></li>
@@ -23,7 +32,6 @@
     		<li><a href="#5">Write Application Code.</a></li>
     		<li><a href="#6">Compile and Run the Application.</a></li>
     	</ul>
-    	</p>
     	
        	<subsection name="3.2.1 Tutorial Setup" anchor="1">
        		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 

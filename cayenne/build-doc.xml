@@ -36,6 +36,14 @@
 				<filter token="SFLOGO" value="${sf.logo}"/>
 			 </filterset>
          </copy>
+         
+         <!-- copy tutorial distros -->
+         <antcall target="tutorial-dist">
+        	<param name="tutorial.name" value="0"/>
+         </antcall>
+         <antcall target="tutorial-dist">
+        	<param name="tutorial.name" value="1"/>
+         </antcall>
     </target>
     
     
@@ -47,6 +55,7 @@
         <mkdir dir="${dist}/doc"/>
         <mkdir dir="${dist}/doc/api"/>
         <mkdir dir="${dist}/doc/dtd"/>
+        <mkdir dir="${dist}/doc/tutorial"/>
     </target>    
 
 
@@ -56,11 +65,12 @@
     <target name="clean">
         <delete dir="${dist}/doc"/>
     </target>
+    
 
     <!-- ========================================== -->
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare,doc-img">
+    <target name="doc" depends="prepare,doc-img,tutorials">
         <!-- copy all licenses including ours -->
         <copy todir="${dist}/doc">
             <fileset dir="doc">
@@ -92,13 +102,49 @@
                 <include name="**/*.dtd"/>
             </fileset>
         </copy>
-        
-        <!-- copy tutorial code -->
+    </target>
+    
+    
+    <!-- ========================================== -->
+    <!-- Distributes Cayenne tutorials.             -->
+    <!-- ========================================== -->
+    <target name="tutorials" depends="prepare">
+        <antcall target="tutorial-src">
+        	<param name="tutorial.name" value="0"/>
+        </antcall>
+        <antcall target="tutorial-src">
+        	<param name="tutorial.name" value="1"/>
+        </antcall>
+    </target>
+    
+    
+    <!-- ========================================== -->
+    <!-- Distributes a single Cayenne tutorial.     -->
+    <!-- ========================================== -->
+    <target name="tutorial-src" if="tutorial.name">
+        <!-- copy unpacked tutorial files -->
         <copy todir="${dist}/doc/tutorial" filtering="no">
-            <fileset dir="doc/tutorial"/>
+            <fileset dir="doc/tutorial">
+            	<include name="${tutorial.name}/**"/>
+            </fileset>
         </copy>
     </target>
     
+    <target name="tutorial-dist" if="tutorial.name">
+        <!-- package tutorial files for single click download -->
+        <tar tarfile="${dist}/doc/tutorial/cayenne-tutorial-${tutorial.name}.tar">
+            <tarfileset dir="${dist}/doc/tutorial/${tutorial.name}"/>
+        </tar>
+        <gzip src="${dist}/doc/tutorial/cayenne-tutorial-${tutorial.name}.tar" 
+              zipfile="${dist}/doc/tutorial/cayenne-tutorial-${tutorial.name}.tar.gz"/>  
+        <delete file="${dist}/doc/tutorial/cayenne-tutorial-${tutorial.name}.tar"/>
+    </target>
+    
+    
+    <!-- ========================================== -->
+    <!-- Copies documentation images in the target  -->
+    <!-- directory.                                 -->
+    <!-- ========================================== -->
     <target name="doc-img">
         <!-- copy images -->
         <copy todir="${dist}/doc/images" filtering="no">
