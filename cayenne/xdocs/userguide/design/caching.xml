@@ -65,7 +65,7 @@
             <p>Caching properties are configured using CayenneModeler for each application DataDomain.
             Application code is normally independent from a chosen level, i.e. it does not have to be changed when
             caching is reconfigured. Details on caching configuration are provided in the <a href=
-            "../../modelerguide/configure-deployment/index.html">Modeler Guide</a>.</p>
+            "../../modelerguide/configure-deployment/configure-cache.html">Modeler Guide</a>.</p>
         	 </subsection>
             
             <subsection name="4.9.2 Synchronizing ObjectStores using SnapshotEvents.">

@@ -84,11 +84,12 @@ public class Painting extends _Painting {
 		</subsection>
 		
 		<subsection name="8.5.2 Turning Validation On/Off">
-		<p>Whether DataContext performs validation depends on the value of its property
+		<p>Whether DataContext performs validation at all depends on the value of its property
 		"validatingObjectsOnCommit". Calling "isValidatingObjectsOnCommit()" returns currently 
 		configured value. Default value (usually "true") is propagated from the parent DataDomain
 		when DataContext is created. This default value can be configured using CayenneModeler as 
-		described in Deployment Configuration chapter of the Modeler Guide. 
+		described in <a href="../../modelerguide/configure-deployment/configure-validation.html">Deployment 
+		Configuration</a> chapter of the Modeler Guide. 
 		</p>
 		</subsection>
 		

@@ -162,7 +162,10 @@
     		<item name="6.4 Delete Rules" href="/modelerguide/modeling-object-layer/delete-rules.html"/>
     	</item>
     	
-    	<item name="7. Configure Deployment Settings"  href="/modelerguide/configure-deployment/index.html"/>
+    	<item name="7. Configuring Deployment Settings"  href="/modelerguide/configure-deployment/index.html">
+    		<item name="7.1 Configuring Object Validation" href="/modelerguide/configure-deployment/configure-validation.html"/>
+    		<item name="7.2 Configuring Caching Behavior" href="/modelerguide/configure-deployment/configure-cache.html"/>    	
+    	</item>
     	
     	<item name="8. Modeling Tips"  href="/modelerguide/modeling-tips.html"/>
     </toc-modeler-guide>
