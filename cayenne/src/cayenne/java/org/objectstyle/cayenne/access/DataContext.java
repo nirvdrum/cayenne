@@ -113,12 +113,9 @@ public class DataContext implements QueryEngine, Serializable {
 
     //Will not be directly serialized - see read/writeObject for details
     protected transient QueryEngine parent;
-    protected transient ObjectStore objectStore = new ObjectStore();
+    protected transient ObjectStore objectStore;
 
-    //Must be deserialized slightly differently - see read/writeObject
-    // protected transient Map registeredMap = Collections.synchronizedMap(new HashMap());
-    // protected Map committedSnapshots = Collections.synchronizedMap(new HashMap());
-    protected RelationshipDataSource relDataSource = new RelationshipDataSource(this);
+    protected SnapshotManager snapshotManager;
 
     public DataContext() {
         this(null);
@@ -133,6 +130,9 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public DataContext(QueryEngine parent) {
         this.parent = parent;
+        this.objectStore = new ObjectStore();
+        this.snapshotManager =
+            new SnapshotManager(this, new RelationshipDataSource(this));
     }
 
     /** Returns parent QueryEngine object. */
@@ -146,12 +146,12 @@ public class DataContext implements QueryEngine, Serializable {
     public void setParent(QueryEngine parent) {
         this.parent = parent;
     }
-    
+
     /**
      * Returns ObjectStore associated with this DataContext.
      */
     public ObjectStore getObjectStore() {
-    	return objectStore;
+        return objectStore;
     }
 
     /** 
@@ -211,23 +211,6 @@ public class DataContext implements QueryEngine, Serializable {
     /** 
      * Returns an object for a given ObjectId. 
      * If object is not registered with this context, 
-     * it is being fetched. If no such object exists,
-     * a <code>CayenneRuntimeException</code> is thrown. 
-     * 
-     * @deprecated Use refecthObject instead.
-     */
-    public DataObject registeredExistingObject(ObjectId oid) {
-        DataObject obj = objectStore.getObject(oid);
-        if (obj == null) {
-            obj = refetchObject(oid);
-        }
-
-        return obj;
-    }
-
-    /** 
-     * Returns an object for a given ObjectId. 
-     * If object is not registered with this context, 
      * a "hollow" object fault is created, registered and returned to the caller. 
      */
     public DataObject registeredObject(ObjectId oid) {
@@ -255,6 +238,10 @@ public class DataContext implements QueryEngine, Serializable {
         }
     }
 
+    /**
+     * A factory method of DataObjects. Would use Configuration ClassLoader to
+     * instantaite the new instance of DataObject of a particular class.
+     */
     private final DataObject newDataObject(String className) throws Exception {
         return (DataObject) Configuration
             .getResourceLoader()
@@ -271,77 +258,18 @@ public class DataContext implements QueryEngine, Serializable {
         DataObject anObject,
         Map snapshot) {
 
-        Map attrMap = ent.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-            anObject.writePropertyDirectly(
-                attrName,
-                snapshot.get(attr.getDbAttribute().getName()));
-        }
-
-        Iterator rit = ent.getRelationshipList().iterator();
-        while (rit.hasNext()) {
-            ObjRelationship rel = (ObjRelationship) rit.next();
-            if (rel.isToMany()) {
-                // "to many" relationships have no information to collect from snapshot
-                // rather we need to check if a relationship list exists, if not -
-                // create an empty one.
-
-                ToManyList relList =
-                    new ToManyList(relDataSource, anObject.getObjectId(), rel.getName());
-                anObject.writePropertyDirectly(rel.getName(), relList);
-                continue;
-            }
-
-            DbRelationship dbRel = (DbRelationship) rel.getDbRelationshipList().get(0);
-
-            // dependent to one relationship is optional and can be null.
-            if (dbRel.isToDependentPK()) {
-                continue;
-            }
-
-            Map destMap = dbRel.targetPkSnapshotWithSrcSnapshot(snapshot);
-            if (destMap == null) {
-                continue;
-            }
-
-            ObjectId destId = new ObjectId(rel.getTargetEntity().getName(), destMap);
-            anObject.writePropertyDirectly(rel.getName(), registeredObject(destId));
-        }
-        anObject.setPersistenceState(PersistenceState.COMMITTED);
+        snapshotManager.refreshObjectWithSnapshot(ent, anObject, snapshot);
     }
 
+    /**
+     * Delegates the merge to the SnapshotManager.
+     */ 
     protected void mergeObjectWithSnapshot(
         ObjEntity ent,
         DataObject anObject,
         Map snapshot) {
-        if (anObject.getPersistenceState() == PersistenceState.HOLLOW) {
-            refreshObjectWithSnapshot(ent, anObject, snapshot);
-            return;
-        }
 
-        Map oldSnap = getCommittedSnapshot(anObject);
-
-        Map attrMap = ent.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-            String dbAttrName = attr.getDbAttribute().getName();
-
-            Object curVal = anObject.readPropertyDirectly(attrName);
-            Object oldVal = oldSnap.get(dbAttrName);
-            Object newVal = snapshot.get(dbAttrName);
-
-            // if value not modified, update it from snapshot, 
-            // otherwise leave it alone
-            if (Util.nullSafeEquals(curVal, oldVal)
-                && !Util.nullSafeEquals(newVal, curVal)) {
-                anObject.writePropertyDirectly(attrName, newVal);
-            }
-        }
+        snapshotManager.mergeObjectWithSnapshot(ent, anObject, snapshot);
     }
 
     /** Takes a snapshot of current object state. */
@@ -474,11 +402,14 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /** 
-     * Return a snapshot of all object persistent field values as of last
+     * Returns a snapshot of all object persistent field values as of last
      * commit or fetch operation.
      *
      * @return a map of object values with DbAttribute names as keys 
-     * corresponding to the latest value read from or committed to the database. */
+     * corresponding to the latest value read from or committed to the database. 
+     * 
+     * @deprecated use getObjectStore().getCommittedSnapshot(ObjectId) instead.
+     */
     public Map getCommittedSnapshot(DataObject dataObject) {
         return objectStore.getSnapshot(dataObject.getObjectId());
     }
@@ -500,31 +431,21 @@ public class DataContext implements QueryEngine, Serializable {
         return dobj;
     }
 
-    /** Registers new object (that is not persistent yet) with itself.
+    /** Registers new object (that is not yet persistent) with itself.
      *
      * @param dataObject new object that we want to make persistent.
      * @param objEntityName a name of the ObjEntity in the map used to get 
      *  persistence information for this object.
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
-        // set "to many" relationship arrays
-
         TempObjectId tempId = new TempObjectId(objEntityName);
         dataObject.setObjectId(tempId);
 
         ObjEntity ent = lookupEntity(objEntityName);
-        Iterator it = ent.getRelationshipList().iterator();
-        while (it.hasNext()) {
-            ObjRelationship rel = (ObjRelationship) it.next();
-            if (rel.isToMany()) {
-                ToManyList relList = new ToManyList(relDataSource, tempId, rel.getName());
-                dataObject.writePropertyDirectly(rel.getName(), relList);
-            }
-        }
-
-        dataObject.setPersistenceState(PersistenceState.NEW);
+        snapshotManager.prepareForInsert(ent, dataObject);
         objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
+        dataObject.setPersistenceState(PersistenceState.NEW);
     }
 
     /**
@@ -690,7 +611,12 @@ public class DataContext implements QueryEngine, Serializable {
 
         if (queryList.size() > 0) {
             ContextCommitObserver result =
-                new ContextCommitObserver(logLevel, this, insObjects, updObjects, delObjects);
+                new ContextCommitObserver(
+                    logLevel,
+                    this,
+                    insObjects,
+                    updObjects,
+                    delObjects);
             parent.performQueries(queryList, result);
             if (!result.isTransactionCommitted())
                 throw new CayenneRuntimeException("Error committing transaction.");

@@ -176,7 +176,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
 
 		assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
 		assertEquals(PersistenceState.COMMITTED, obj.getPersistenceState());
-		assertNotNull(ctxt.getCommittedSnapshot(obj));
+		assertNotNull(ctxt.getObjectStore().getSnapshot(obj.getObjectId()));
 	}
 
 	public void testCommitChangesError() throws Exception {

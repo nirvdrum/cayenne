@@ -335,7 +335,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     public Map getCommittedSnapshot() {
-        return dataContext.getCommittedSnapshot(this);
+        return dataContext.getObjectStore().getSnapshot(getObjectId());
     }
 
     public Map getCurrentSnapshot() {
