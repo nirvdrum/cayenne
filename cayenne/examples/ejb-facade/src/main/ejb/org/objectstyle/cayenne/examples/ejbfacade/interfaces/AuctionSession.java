@@ -19,7 +19,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 /**
  * Remote interface for AuctionSession.
  * @author XDOCLET 1.1.2
- * @xdoclet-generated at Feb 5, 2004 2:08:24 AM
+ * @xdoclet-generated at Feb 5, 2004 5:42:46 PM
  */
 public interface AuctionSession
    extends javax.ejb.EJBObject

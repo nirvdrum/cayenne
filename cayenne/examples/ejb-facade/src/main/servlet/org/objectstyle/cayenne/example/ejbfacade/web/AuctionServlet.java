@@ -41,44 +41,104 @@
  * Group, please see <http://objectstyle.org/> .
  *  
  */
-package org.objectstyle.cayenne.examples.ejbfacade;
+package org.objectstyle.cayenne.example.ejbfacade.web;
 
-import java.util.Collection;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.naming.InitialContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.objectstyle.cayenne.examples.ejbfacade.interfaces.AuctionSession;
 import org.objectstyle.cayenne.examples.ejbfacade.interfaces.AuctionSessionHome;
 
 /**
- * A command-line client for EJB facade example.
+ * Servlet that processes requests to create art auctions, passing them to EJB.
+ * Note that this Servlet simply demonstrates communication with the EJB business
+ * logic, and definitely does not demonstrate the best web app practices.
  * 
  * @author Andrei Adamchik
  */
-public class Main {
+public class AuctionServlet extends HttpServlet {
+    private static DateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
 
-    public static void main(String[] args) {
+    protected void doGet(HttpServletRequest arg0, HttpServletResponse arg1)
+        throws ServletException, IOException {
+        super.doPost(arg0, arg1);
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+        // read parameters and pass them to EJB
+
+        // extract name
+        String name = request.getParameter("name");
+
+        // extract start date
+        String startDateString = request.getParameter("startDate");
+        Date startDate = null;
+        if (startDateString != null) {
+            try {
+                startDate = formatter.parse(startDateString);
+            }
+            catch (ParseException ex) {
+
+            }
+        }
+
+        // extract start date
+        String endDateString = request.getParameter("endDate");
+        Date endDate = null;
+        if (endDateString != null) {
+            try {
+                endDate = formatter.parse(endDateString);
+            }
+            catch (ParseException ex) {
+
+            }
+        }
+
+        // use default dates if none entered
+        if (startDate == null) {
+            startDate = new Date();
+        }
+
+        if (endDate == null) {
+            endDate = startDate;
+        }
+
+        log("name: " + name + "; startDate: " + startDate + "; endDate: " + endDate);
+
         try {
             InitialContext context = new InitialContext();
-
             AuctionSessionHome auctionHome =
                 (AuctionSessionHome) context.lookup(
                     "ejb/cayenne/examples/AuctionSession");
             AuctionSession auction = auctionHome.create();
 
-            auction.createAuction(
-                "Auction-" + System.currentTimeMillis(),
-                new Date(),
-                new Date());
-
-            Collection auctions = auction.getActiveAuctions();
-            System.out.println("All auctions: " + auctions);
-
+            auction.createAuction(name, startDate, endDate);
             auction.remove();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            throw new ServletException("Error creating an auction", e);
         }
+
+        forward("/index.jsp", request, response);
+    }
+
+    protected void forward(
+        String url,
+        HttpServletRequest request,
+        HttpServletResponse response)
+        throws ServletException, IOException {
+
+        request.getRequestDispatcher(url).forward(request, response);
     }
 }

@@ -92,11 +92,14 @@
    <property name="src.ejb.dir" value="${src.main.dir}/ejb"/>
    <property name="src.common.dir" value="${src.main.dir}/common"/>
    <property name="src.resources.dir" value="${src.dir}/resources"/>
+   <property name="src.servlet.dir" value="${src.main.dir}/servlet"/>
+   <property name="src.web.dir" value="${src.dir}/web"/>
    <property name="src.etc.dir" value="${src.dir}/etc"/>
    <property name="lib.dir" value="${basedir}/lib"/>
    <property name="build.dir" value="${basedir}/build"/>
    <property name="build.tmp.dir" value="${build.dir}/tmp"/>
    <property name="build.deploy.dir" value="${build.dir}/deploy"/>
+   <property name="build.war.dir" value="${build.dir}/war"/>
    <property name="build.generate.dir" value="${src.ejb.dir}"/>
    <property name="build.classes.dir" value="${build.dir}/classes"/>
    <property name="build.client.dir" value="${build.dir}/client"/>
@@ -106,6 +109,7 @@
    <!-- Resulting jar files -->
    <property name="target.common.jar" value="${build.client.dir}/cayenne-ejbfacade-common.jar"/>
    <property name="target.ejb.jar" value="${build.deploy.dir}/cayenne-ejbfacade-ejb.jar"/>
+   <property name="target.web.war" value="${build.deploy.dir}/cayenne-ejbfacade.war"/>
    <property name="target.client.jar" value="${build.client.dir}/cayenne-ejbfacade-client.jar"/>
    
    <path id="xdoclet.path">
@@ -230,16 +234,61 @@
       <jar jarfile="${target.client.jar}">
          <fileset
             dir="${build.classes.dir}"
-            excludes="org/objectstyle/cayenne/examples/ejbfacade/model/**,org/objectstyle/cayenne/examples/ejbfacade/ejb/**"/>
+            excludes="org/objectstyle/cayenne/examples/ejbfacade/model/**,org/objectstyle/cayenne/examples/ejbfacade/ejb/**,,org/objectstyle/cayenne/examples/ejbfacade/web/**"/>
       </jar>
       
       <!-- Install Client-side cayenne jar -->
       <copy file="${cayenne.home}/lib/cayenne.jar" todir="${build.client.dir}"/>
    </target>
+   
+   <!-- =================================================================== -->
+   <!-- Compiles the WEB source code                                        -->
+   <!-- =================================================================== -->
+   
+   <target name="compile-web" depends="compile" if="servlet-lib.path">
+      <mkdir dir="${build.war.dir}"/>
+      <path id="web.path">
+         <path refid="base.path"/>
+         <pathelement location="${servlet-lib.path}"/>
+      </path>
+      <javac
+         destdir="${build.war.dir}"
+         debug="on"
+         deprecation="off"
+         optimize="on"
+         classpathref="web.path"
+      >
+         <src path="${src.servlet.dir}"/>
+      </javac>
+   </target>
+   
+   <!-- =================================================================== -->
+   <!-- Creates the war archives                                            -->
+   <!-- =================================================================== -->
+   
+   <target name="war" depends="compile-web" if="servlet-lib.path">
+      <mkdir dir="${build.deploy.dir}"/>
+      <copy todir="${build.war.dir}/WEB-INF">
+         <fileset dir="${src.etc.dir}/WEB-INF" includes="jboss-web.xml"/>
+      </copy>
+      <war
+         warfile="${target.web.war}"
+         webxml="${src.etc.dir}/WEB-INF/web-client.xml"
+      >
+         <fileset dir="${src.web.dir}"/>
+         <fileset dir="${build.war.dir}"/>
+          <classes
+            dir="${build.classes.dir}"
+            includes="org/objectstyle/cayenne/examples/ejbfacade/web/**,org/objectstyle/cayenne/examples/ejbfacade/interfaces/**"/>
+      
+      </war>
+   </target>
+   
  
    <!-- =================================================================== -->
    <!-- Fix Cayenne deployment settings to use JNDI DataSource                       -->
    <!-- =================================================================== -->  
+   
    <target name="cdeploy" depends="jar">
        <taskdef name="cdeploy" classname="org.objectstyle.cayenne.tools.DeploymentConfigurator">
              <classpath refid="cayenne.path"/>
@@ -253,11 +302,12 @@
    <!-- Creates the server binary                                           -->
    <!-- =================================================================== -->
    
-   <target name="deploy-server" depends="jar,cdeploy">
+   <target name="deploy-server" depends="jar,cdeploy,war">
       <copy todir="${jboss.deploy}">
          <fileset file="${cayenne.home}/lib/cayenne.jar"/>
          <fileset file="${target.common.jar}"/>
          <fileset file="${target.ejb.jar}"/>
+         <fileset file="${target.web.war}"/>
       </copy>
    </target>
    

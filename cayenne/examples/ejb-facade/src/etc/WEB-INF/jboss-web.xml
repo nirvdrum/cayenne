@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jboss-web
+    PUBLIC "-//JBoss//DTD Web Application 2.3//EN"
+    "http://www.jboss.org/j2ee/dtds/jboss-web_3_0.dtd">
+
+<jboss-web>
+   
+   <ejb-ref>
+      <ejb-ref-name>ejb/cayenne/examples/AuctionSession</ejb-ref-name>
+      <jndi-name>ejb/cayenne/examples/AuctionSession</jndi-name>
+   </ejb-ref>
+   
+</jboss-web>

@@ -19,7 +19,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 /**
  * Home interface for AuctionSession. Lookup using {1}
  * @author XDOCLET 1.1.2
- * @xdoclet-generated at Feb 5, 2004 2:08:24 AM
+ * @xdoclet-generated at Feb 5, 2004 5:42:46 PM
  */
 public interface AuctionSessionHome
    extends javax.ejb.EJBHome
