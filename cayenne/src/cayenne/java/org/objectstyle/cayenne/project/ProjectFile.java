@@ -57,36 +57,126 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
+import org.objectstyle.cayenne.util.Util;
+
 /**
  * Represents a file in a Cayenne project.
+ * File is characterized by a symbolic OS-neutral 
+ * name, that can be resolved to a file in the file system
+ * by calling <code>Project.resolveFile()</code>.
  * 
  * @author Andrei Adamchik
  */
-public class ProjectFile {
+public abstract class ProjectFile {
     protected String name;
     protected String extension;
-    protected String newName;
+    protected boolean objectModified;
 
+    /**
+     * Utility method to extract extension out of file name.
+     */
+    public static String extractExtension(String fullName) {
+     	int dotInd = fullName.lastIndexOf('.');
+    	
+    	// if dot is in the first position,
+    	// we are dealing with a hidden file rather than an extension
+        return (dotInd > 0 && dotInd < fullName.length()) ? fullName.substring(dotInd + 1) : null;
+    }
+
+
+    /**
+     * Utility method to remove extension out of a file name.
+     */
+    public static String stripExtension(String fullName) {
+    	int dotInd = fullName.lastIndexOf('.');
+    	
+    	// if dot is in the first position,
+    	// we are dealing with a hidden file rather than an extension
+        return (dotInd > 0) ? fullName.substring(0, dotInd) : fullName;
+    }
+
+    
     /**
      * Constructor for ProjectFile.
      */
     public ProjectFile(String name, String extension) {
-        super();
+        this.name = name;
+        this.extension = extension;
+    }
+    
+    /**
+     * Returns the objectModified.
+     * @return boolean
+     */
+    public boolean isObjectModified() {
+        return objectModified;
     }
 
-    public File getFile(Project project) {
-        return project.resolveFile(getFileName());
-    }
 
-    public File getNewFile(Project project) {
-        return project.resolveFile(getNewFileName());
+    /**
+     * Sets the objectModified.
+     * @param objectModified The objectModified to set
+     */
+    public void setObjectModified(boolean objectModified) {
+        this.objectModified = objectModified;
     }
+    
 
     public String getFileName() {
         return (extension != null) ? name + '.' + extension : name;
     }
-
-    public String getNewFileName() {
-        return (extension != null) ? newName + '.' + extension : newName;
+    
+    
+    /**
+     * Returns a project object associated with this file.
+     */
+    public abstract Object getObject();
+    
+    /**
+     * Returns a name of associated object, that is also 
+     * used as a file name.
+     */
+    public abstract String getObjectName();
+    
+    /**
+     * Saves an underlying object to the file. 
+     * The procedure is dependent on the type of
+     * object and is implemented by concrete subclasses.
+     */
+    public abstract void saveToFile(File f) throws Exception;
+    
+    /**
+     * Saves ProjectFile's underlying object to a temporary 
+     * file, returning this file to the caller. If any problems are 
+     * encountered during saving, a ProjectException is thrown.
+     */
+    public File saveTemp() throws ProjectException {
+    	return null;
     }
+    
+    /**
+     * Finishes saving the underlying object.
+     */
+    public void saveCommit(File tempFile) {
+    	
+    }
+    
+    /**
+     * Cleans up after unsuccessful or canceled save attempt.
+     */
+    public void saveUndo(File tempFile) {
+    	
+    }
+    
+    /**
+     * Returns true if renaming a file is required 
+     * as a part of save operation.
+     */
+    public boolean isRenamed() {
+    	return Util.nullSafeEquals(getObjectName(), name);
+    }
+    
+    public boolean needsSave() {
+    	return isObjectModified() || isRenamed();
+    }    
 }

@@ -64,10 +64,8 @@ import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /** 
- * Used for validating dirty elements in the Mediator.
- * If errors are found, displays them in the dialog window.
+ * Used for validating Cayenne projects.
  * 
- * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
 public class Validator {

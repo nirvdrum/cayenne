@@ -57,6 +57,9 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -79,9 +82,8 @@ public class Project {
 
     protected String name;
     protected Configuration config;
-
     protected File projectDir;
-    protected String mainProjectFile;
+    protected List files = Collections.synchronizedList(new ArrayList());
 
     /**
      * Constructor for Project. <code>projectFile</code> must denote 
@@ -103,11 +105,39 @@ public class Project {
 
         try {
             this.projectDir = parent.getCanonicalFile();
+            this.config = new ProjectConfiguration(projectFile.getCanonicalFile());
         } catch (IOException e) {
             throw new ProjectException("Error creating project.", e);
         }
+    }
 
-        this.mainProjectFile = projectFile.getName();
+    public boolean removeFileForObject(Object obj) {
+        ProjectFile f = findFile(obj);
+        if (f == null) {
+            return false;
+        }
+
+        files.remove(f);
+        return true;
+    }
+
+    public ProjectFile findFile(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+
+        // to avoid full scan, a map may be a better 
+        // choice of collection here, 
+        // though normally projects have very few files...
+        Iterator it = files.iterator();
+        while (it.hasNext()) {
+            ProjectFile file = (ProjectFile) it.next();
+            if (file.getObject() == obj) {
+                return file;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -125,6 +155,10 @@ public class Project {
             logObj.info("Can't convert to canonical form.", e);
             return null;
         }
+    }
+
+    public File resolveFile(ProjectFile file) {
+        return resolveFile(file.getFileName());
     }
 
     /**
@@ -166,28 +200,11 @@ public class Project {
     }
 
     /**
-     * Returns Cayenne configuartion object assocaiated with this
-     * project. If it is not initialized yet, it will be created 
-     * on demand.
+     * Returns Cayenne configuration object assocaiated with this
+     * project. 
      */
     public Configuration getConfig() {
-        if (mainProjectFile == null) {
-            return null;
-        }
-
-        if (config == null) {
-            config = new ProjectConfiguration(getMainProjectFile());
-        }
         return config;
-    }
-
-    /**
-     * Returns the projectFile.
-     * 
-     * @return File
-     */
-    public File getMainProjectFile() {
-        return resolveFile(mainProjectFile);
     }
 
     /** 
@@ -199,8 +216,7 @@ public class Project {
     }
 
     /**
-     * Returns the name.
-     * @return String
+     * Returns project name.
      */
     public String getName() {
         return name;
@@ -212,5 +228,13 @@ public class Project {
             return new DataDomain[0];
         }
         return (DataDomain[]) domains.toArray(new DataDomain[domains.size()]);
+    }
+
+    /**
+     * Method getMainProjectFile.
+     * @return File
+     */
+    public File getMainProjectFile() {
+        return ((ProjectConfiguration) config).getProjectFile();
     }
 }
