@@ -14,14 +14,18 @@
            
            <subsection name="13.2 Web Applications" anchor="web">
                <p>When deploying an application in a web container, it is still possible 
-               to use the procedure described for the standalone applications above.
-               But Cayenne provides a better way to do that. Suggested way is to use <a href=
+               to use the procedure described for the standalone applications. Just make sure that
+               all Cayenne project XML files are in the location accessible to the ClassLoader 
+               (e.g. /WEB-INF/classes").
+               </p>
+               
+               <p>In addition Cayenne provides an ability to store and locate XML files 
+               in "/WEB-INF/" directory. This is done via <a href=
                "../../api/cayenne/org/objectstyle/cayenne/conf/BasicServletConfiguration.html"
                >BasicServletConfiguration</a> subclass of Configuration. It does <code>cayenne.xml</code>
                and datamap files lookup relative to the WEB-INF directory of a deployed application.
                Since WEB-INF is a standard place to put configuration files, this approach makes
-               configuration cleaner and more maintainable.
-               <i>Note that it will NOT search the CLASSPATH for configuration files.</i>              
+               configuration cleaner and more maintainable. 
                </p>
                
                <p>
@@ -30,10 +34,12 @@
                There are a few different ways to achieve that:
                </p>
                
-               <p><strong>Initialization Servlet.</strong> This is the most common approach
+               <subsection name="13.2.1 Initialization Servlet"> 
+               <p>This is the most common approach
                - use <code>init</code> method of the very first servlet loaded
-               in the application. Some people would even create a specialized initialization servlet for 
-               this purpose. Here is the steps involved.</p>
+               in the application. Sometimes a special initialization servlet is created
+               solely for the purpose of application initialization. 
+               Here is the steps to setup Cayenne.</p>
 
 <p>Startup servlet initialization code:</p>
 <source>
@@ -48,9 +54,9 @@ public class MyServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
   
-        BasicServletConfiguration.setSharedConfiguration(config.getServletContext());
+        BasicServletConfiguration.initializeConfiguration(config.getServletContext());
         
-        // do other initialization...
+        // perfom any other application initialization...
     }
 ...
 </source>
@@ -66,12 +72,15 @@ public class MyServlet extends HttpServlet {
 
 ...
 </source>
-               <p><strong>Using Context and Session Listeners</strong>.  Servlet Specification 2.3
+			</subsection>
+			<subsection name="13.2.2 Using Context and Session Listeners">   
+               <p>Servlet Specification 2.3
                introduces a set of container events that can be sent to the interested
-               listeners. Cayenne contains a subclass of BasicServletConfiguration called
+               listeners. Cayenne implements such listener that would automatically configure 
+               BasicServletConfiguration: 
                <a href=
-               "../../api/cayenne/org/objectstyle/cayenne/conf/ServletConfiguration.html"
-               >ServletConfiguration</a> that implements container listener interfaces
+               "../../api/cayenne/org/objectstyle/cayenne/conf/WebApplicationListener.html"
+               >WebApplicationListener</a> that implements container listener interfaces
                and can be registered as a listener to initialize Cayenne on context 
                startup and to assign a new DataContext object to every new session
                created.</p>
@@ -85,16 +94,23 @@ public class MyServlet extends HttpServlet {
 <source>...
 
 &amp;lt;listener&amp;gt;
-   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.ServletConfiguration&amp;lt;/listener-class&amp;gt;
+   &amp;lt;listener-class&amp;gt;org.objectstyle.cayenne.conf.WebApplicationListener&amp;lt;/listener-class&amp;gt;
 &amp;lt;/listener&amp;gt; 
 
 ...
 </source>
-
-<p>Obtaining session DataContext:</p>      
-              
+		</subsection>
+		
+		<subsection name="13.2.3 Obtaining Session DataContext">      
+        <p>Recommended way to use Cayenne in web applications is to have
+        one DataContext per HttpSession. 
+        No matter how the web application was configured (using default configuration
+        and CLASSPATH, initialization servlet, or WebApplicationListener), DataContext
+        can be obtained from the session in a consistent way by calling BasicServletConfiguration 
+        static method:        
+        </p> 
 <source>
-import org.objectstyle.cayenne.conf.ServletConfiguration;
+import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import javax.servlet.http.HttpServletRequest;
 ...
 
@@ -102,8 +118,9 @@ import javax.servlet.http.HttpServletRequest;
 HttpServletRequest r;
 
 // get session DataContext to perform database queries
-DataContext ctxt = ServletConfiguration.getDefaultContext(r.getSession());
+DataContext ctxt = BasicServletConfiguration.getDefaultContext(r.getSession());
 </source>
+	</subsection>
 </subsection>    
     </section>
 </body>
