@@ -76,33 +76,38 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
+import org.objectstyle.cayenne.query.Query;
 
 /**
- *  Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
+ * Class that converts EOModels to org.objectstyle.cayenne.map.DataMap objects.
  */
 public class EOModelProcessor {
+
     private static Logger logObj = Logger.getLogger(EOModelProcessor.class);
 
-    /** Performs EOModel loading.  
+    /**
+     * Performs EOModel loading.
      * 
-     *  @param path A path to ".eomodeld" directory. 
-     *  If path doesn't end with ".eomodeld", ".eomodeld"
-     *  suffix is automatically assumed.
+     * @param path
+     *            A path to ".eomodeld" directory. If path doesn't end with ".eomodeld",
+     *            ".eomodeld" suffix is automatically assumed.
      */
     public DataMap loadEOModel(String path) throws Exception {
         return loadEOModel(path, false);
     }
 
-    /** Performs EOModel loading.
-     *
-     * @param path A path to ".eomodeld" directory. If path doesn't end with ".eomodeld", 
-     * ".eomodeld" suffix is automatically assumed.
-     * @param generateClientClass if true then loading of EOModel
-     * is java client classes aware and the following processing will work with
-     * Java client class settings of the EOModel.
+    /**
+     * Performs EOModel loading.
+     * 
+     * @param path
+     *            A path to ".eomodeld" directory. If path doesn't end with ".eomodeld",
+     *            ".eomodeld" suffix is automatically assumed.
+     * @param generateClientClass
+     *            if true then loading of EOModel is java client classes aware and the
+     *            following processing will work with Java client class settings of the
+     *            EOModel.
      */
-    public DataMap loadEOModel(String path, boolean generateClientClass)
-        throws Exception {
+    public DataMap loadEOModel(String path, boolean generateClientClass) throws Exception {
         EOModelHelper helper = makeHelper(path, generateClientClass);
 
         // create empty map
@@ -132,7 +137,7 @@ public class EOModelProcessor {
             makeFlatRelationships(helper, dataMap.getObjEntity(name));
         }
 
-        // now create missing reverse DB (but not OBJ) relationships 
+        // now create missing reverse DB (but not OBJ) relationships
         // since Cayenne requires them
         it = helper.modelNames();
         while (it.hasNext()) {
@@ -144,10 +149,23 @@ public class EOModelProcessor {
             }
         }
 
+        // build SelectQueries out of EOFetchSpecifications...
+        it = helper.modelNames();
+        while (it.hasNext()) {
+            String entityName = (String) it.next();
+            Iterator queries = helper.queryNames(entityName);
+            while (queries.hasNext()) {
+                String queryName = (String) queries.next();
+
+                EOObjEntity entity = (EOObjEntity) dataMap.getObjEntity(entityName);
+                makeQuery(helper, entity, queryName);
+            }
+        }
+
         return dataMap;
     }
 
-    /** 
+    /**
      * @deprecated since 1.0.4 use {@link #makeHelper(String, boolean)}.
      */
     protected EOModelHelper makeHelper(String path) throws Exception {
@@ -155,11 +173,11 @@ public class EOModelProcessor {
     }
 
     /**
-     * Creates an returns new EOModelHelper to process EOModel.
-     * Exists mostly for the benefit of subclasses. 
+     * Creates an returns new EOModelHelper to process EOModel. Exists mostly for the
+     * benefit of subclasses.
      */
     protected EOModelHelper makeHelper(String path, boolean genereateClientClass)
-        throws Exception {
+            throws Exception {
         return new EOModelHelper(path);
     }
 
@@ -170,13 +188,33 @@ public class EOModelProcessor {
         return makeEntity(helper, name, false);
     }
 
-    /** 
-     *  Creates and returns a new ObjEntity linked to a corresponding DbEntity.
+    /**
+     * Creates a Cayenne query out of EOFetchSpecification data.
+     * 
+     * @since 1.1
+     */
+    protected Query makeQuery(EOModelHelper helper, EOObjEntity entity, String queryName) {
+
+        DataMap dataMap = helper.getDataMap();
+        Map queryPlist = helper.queryPListMap(entity.getName(), queryName);
+        if (queryPlist == null) {
+            return null;
+        }
+
+        EOQuery query = new EOQuery(entity, queryPlist);
+        query.setName(entity.qualifiedQueryName(queryName));
+        dataMap.addQuery(query);
+
+        return query;
+    }
+
+    /**
+     * Creates and returns a new ObjEntity linked to a corresponding DbEntity.
      */
     protected EOObjEntity makeEntity(
-        EOModelHelper helper,
-        String name,
-        boolean generateClientClass) {
+            EOModelHelper helper,
+            String name,
+            boolean generateClientClass) {
 
         DataMap dataMap = helper.getDataMap();
         Map entityPlist = helper.entityPListMap(name);
@@ -186,14 +224,16 @@ public class EOModelProcessor {
         objEntity.setIsClientEntity(generateClientClass);
         String parent = (String) entityPlist.get("parent");
         objEntity.setClassName(helper.entityClass(name, generateClientClass));
+
         if (parent != null) {
             objEntity.setHasSuperClass(true);
             objEntity.setSuperClassName(helper.entityClass(parent, generateClientClass));
         }
+
         // add flag whether this entity is set as abstract in the model
         objEntity.setIsAbstractEntity("Y".equals(entityPlist.get("isAbstractEntity")));
 
-        // create DbEntity...since EOF allows the same table to be 
+        // create DbEntity...since EOF allows the same table to be
         // associated with multiple EOEntities, check for name duplicates
         String dbEntityName = (String) entityPlist.get("externalName");
 
@@ -225,9 +265,9 @@ public class EOModelProcessor {
         makeAttributes(helper, objEntity);
     }
 
-    /** 
-     *  Create ObjAttributes of the specified entity, as well as 
-     *  DbAttributes of the corresponding DbEntity.
+    /**
+     * Create ObjAttributes of the specified entity, as well as DbAttributes of the
+     * corresponding DbEntity.
      */
     protected void makeAttributes(EOModelHelper helper, EOObjEntity objEntity) {
         Map entityPlistMap = helper.entityPListMap(objEntity.getName());
@@ -236,8 +276,7 @@ public class EOModelProcessor {
         List classProperties;
         if (objEntity.getIsClientEntity()) {
             classProperties = (List) entityPlistMap.get("clientClassProperties");
-        }
-        else {
+        } else {
             classProperties = (List) entityPlistMap.get("classProperties");
         }
 
@@ -284,7 +323,7 @@ public class EOModelProcessor {
 
             if (dbAttrName != null && dbEntity != null) {
 
-                // create DbAttribute...since EOF allows the same column name for 
+                // create DbAttribute...since EOF allows the same column name for
                 // more than one Java attribute, we need to check for name duplicates
                 int i = 0;
                 String dbAttributeBaseName = dbAttrName;
@@ -292,11 +331,8 @@ public class EOModelProcessor {
                     dbAttrName = dbAttributeBaseName + i++;
                 }
 
-                dbAttr =
-                    new EODbAttribute(
-                        dbAttrName,
-                        TypesMapping.getSqlTypeByJava(javaType),
-                        dbEntity);
+                dbAttr = new EODbAttribute(dbAttrName, TypesMapping
+                        .getSqlTypeByJava(javaType), dbEntity);
                 dbAttr.setEoAttributeName(attrName);
                 dbEntity.addAttribute(dbAttr);
 
@@ -319,7 +355,8 @@ public class EOModelProcessor {
 
                 Object allowsNull = attrMap.get("allowsNull");
                 // TODO: Unclear that allowsNull should be inherited from EOPrototypes
-                // if (null == allowsNull)  allowsNull = prototypeAttrMap.get("allowsNull");;
+                // if (null == allowsNull) allowsNull =
+                // prototypeAttrMap.get("allowsNull");;
 
                 dbAttr.setMandatory(!"Y".equals(allowsNull));
             }
@@ -332,7 +369,7 @@ public class EOModelProcessor {
                 String entityReadOnlyString = (String) entityPlistMap.get("isReadOnly");
                 String attributeReadOnlyString = (String) attrMap.get("isReadOnly");
                 if ("Y".equals(entityReadOnlyString)
-                    || "Y".equals(attributeReadOnlyString)) {
+                        || "Y".equals(attributeReadOnlyString)) {
                     attr.setReadOnly(true);
                 }
 
@@ -342,9 +379,9 @@ public class EOModelProcessor {
         }
     }
 
-    /** 
-     *  Create ObjRelationships of the specified entity, as well as 
-     *  DbRelationships of the corresponding DbEntity.
+    /**
+     * Create ObjRelationships of the specified entity, as well as DbRelationships of the
+     * corresponding DbEntity.
      */
     protected void makeRelationships(EOModelHelper helper, ObjEntity objEntity) {
         Map entityPlistMap = helper.entityPListMap(objEntity.getName());
@@ -423,18 +460,19 @@ public class EOModelProcessor {
         }
     }
 
-    /** 
-     * Create reverse DbRelationships that were not created so far, since 
-     * Cayenne requires them.
+    /**
+     * Create reverse DbRelationships that were not created so far, since Cayenne requires
+     * them.
      * 
      * @since 1.0.5
      */
     protected void makeReverseDbRelationships(DbEntity dbEntity) {
         if (dbEntity == null) {
-            throw new NullPointerException("Attempt to create reverse relationships for the null DbEntity.");
+            throw new NullPointerException(
+                    "Attempt to create reverse relationships for the null DbEntity.");
         }
 
-        // iterate over a copy of the collection, since in case of 
+        // iterate over a copy of the collection, since in case of
         // reflexive relationships, we may modify source entity relationship map
         Collection clone = new ArrayList(dbEntity.getRelationships());
         Iterator it = clone.iterator();
@@ -444,18 +482,15 @@ public class EOModelProcessor {
             if (relationship.getReverseRelationship() == null) {
                 DbRelationship reverse = relationship.createReverseRelationship();
 
-                String name =
-                    NamedObjectFactory.createName(
-                        DbRelationship.class,
-                        reverse.getSourceEntity(),
-                        relationship.getName() + "Reverse");
+                String name = NamedObjectFactory.createName(DbRelationship.class, reverse
+                        .getSourceEntity(), relationship.getName() + "Reverse");
                 reverse.setName(name);
                 relationship.getTargetEntity().addRelationship(reverse);
             }
         }
     }
 
-    /** 
+    /**
      * Create Flattened ObjRelationships of the specified entity.
      */
     protected void makeFlatRelationships(EOModelHelper helper, ObjEntity e) {
@@ -495,35 +530,33 @@ public class EOModelProcessor {
             if ((firstRel != null) && (lastRel != null)) {
                 flatRel.setSourceEntity(e);
 
-                Collection potentialTargets =
-                    e.getDataMap().getMappedEntities(
+                Collection potentialTargets = e.getDataMap().getMappedEntities(
                         (DbEntity) lastRel.getTargetEntity());
 
                 // sanity check
                 if (potentialTargets.size() != 1) {
                     throw new CayenneRuntimeException(
-                        "One and only one entity should be mapped"
-                            + " to "
-                            + lastRel.getTargetEntity().getName()
-                            + ". Instead found : "
-                            + potentialTargets.size());
+                            "One and only one entity should be mapped"
+                                    + " to "
+                                    + lastRel.getTargetEntity().getName()
+                                    + ". Instead found : "
+                                    + potentialTargets.size());
                 }
 
                 flatRel.setTargetEntity((ObjEntity) potentialTargets.iterator().next());
                 e.addRelationship(flatRel);
-            }
-            else {
+            } else {
                 throw new CayenneRuntimeException("relationship in the path was null!");
             }
         }
 
     }
 
-    /** 
-     *  Special DbAttribute subclass that stores extra info needed to work
-     *  with EOModels.
+    /**
+     * Special DbAttribute subclass that stores extra info needed to work with EOModels.
      */
     static class EODbAttribute extends DbAttribute {
+
         protected String eoAttributeName;
 
         public static DbAttribute findForEOAttributeName(DbEntity e, String name) {

@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.wocompat;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -65,46 +66,43 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
- *  Helper class used by EOModelProcessor. During creation, it loads
- *  EOModel from the specified location and parses EOModel files storing them
- *  internally as maps. EOModelProcessor will use this information to create 
- *  DataMap instance.
+ * Helper class used by EOModelProcessor. EOModelHelper loads an EOModel from the
+ * specified location and gives its users access to the untyped EOModel information.
  */
 public class EOModelHelper {
+
     private static final ResourceLocator locator = new ResourceLocator();
 
     private Parser plistParser = new Parser();
     protected URL modelUrl;
     protected Map entityIndex;
     protected Map entityClassIndex;
+    protected Map entityQueryIndex;
     protected Map entityClientClassIndex;
     protected DataMap dataMap;
     private Map prototypeValues;
 
     static {
-        // configure locator 
+        // configure locator
         locator.setSkipClasspath(false);
         locator.setSkipCurrentDirectory(false);
         locator.setSkipHomeDirectory(true);
         locator.setSkipAbsolutePath(false);
     }
 
-    /** 
-     *  Creates helper instance and tries to locate 
-     *  EOModel and load index file. 
+    /**
+     * Creates helper instance and tries to locate EOModel and load index file.
      */
     public EOModelHelper(String path) throws Exception {
 
-        // configure URL
-        modelUrl = findModelUrl(path);
-
-        // configure name
-        dataMap = new DataMap(findModelName(path));
+        this.modelUrl = findModelUrl(path);
+        this.dataMap = new DataMap(findModelName(path));
 
         // load index file
         List modelIndex = (List) loadModelIndex().get("entities");
@@ -113,20 +111,24 @@ public class EOModelHelper {
         entityIndex = new HashMap();
         entityClassIndex = new HashMap();
         entityClientClassIndex = new HashMap();
+        entityQueryIndex = new HashMap();
 
         Iterator it = modelIndex.iterator();
         while (it.hasNext()) {
             Map info = (Map) it.next();
             String name = (String) info.get("name");
+
             entityIndex.put(name, loadEntityIndex(name));
+            entityQueryIndex.put(name, loadQueryIndex(name));
             entityClassIndex.put(name, info.get("className"));
             Map entityPlistMap = entityPListMap(name);
+
             // get client class information
             Map internalInfo = (Map) entityPlistMap.get("internalInfo");
 
             if (internalInfo != null) {
-                String clientClassName =
-                    (String) internalInfo.get("_javaClientClassName");
+                String clientClassName = (String) internalInfo
+                        .get("_javaClientClassName");
                 entityClientClassIndex.put(name, clientClassName);
             }
         }
@@ -141,10 +143,8 @@ public class EOModelHelper {
             // get client class information
             Map internalInfo = (Map) entityPlistMap.get("internalInfo");
 
-            List clientClassProperties =
-                (internalInfo != null)
-                    ? (List) internalInfo.get("_clientClassPropertyNames")
-                    : null;
+            List clientClassProperties = (internalInfo != null) ? (List) internalInfo
+                    .get("_clientClassPropertyNames") : null;
 
             // guard against no internal info and no client class properties
             if (clientClassProperties == null) {
@@ -155,20 +155,21 @@ public class EOModelHelper {
             // the client property list. This removes them
             clientClassProperties.retainAll(classProperties);
 
-            // remove all properties from the entity properties that are already defined in
+            // remove all properties from the entity properties that are already defined
+            // in
             // a potential parent class.
             String parentEntity = (String) entityPlistMap.get("parent");
             while (parentEntity != null) {
                 Map parentEntityPListMap = entityPListMap(parentEntity);
-                List parentClassProps =
-                    (List) parentEntityPListMap.get("classProperties");
+                List parentClassProps = (List) parentEntityPListMap
+                        .get("classProperties");
                 classProperties.removeAll(parentClassProps);
                 // get client class information of parent
                 Map parentInternalInfo = (Map) parentEntityPListMap.get("internalInfo");
 
                 if (parentInternalInfo != null) {
-                    List parentClientClassProps =
-                        (List) parentInternalInfo.get("_clientClassPropertyNames");
+                    List parentClientClassProps = (List) parentInternalInfo
+                            .get("_clientClassPropertyNames");
                     clientClassProperties.removeAll(parentClientClassProps);
                 }
 
@@ -182,24 +183,24 @@ public class EOModelHelper {
         }
     }
 
-    /** Performs Objective C data types conversion to Java types.
+    /**
+     * Performs Objective C data types conversion to Java types.
      * 
-     *  @return String representation for Java type corresponding 
-     *  to String representation of Objective C type.
-     * 
-     * @deprecated Since 1.1 use {@link #javaTypeForEOModelerType(String,String)} to take "valueType"
-     * into account.
+     * @return String representation for Java type corresponding to String representation
+     *         of Objective C type.
+     * @deprecated Since 1.1 use {@link #javaTypeForEOModelerType(String,String)}to take
+     *             "valueType" into account.
      */
     public String javaTypeForEOModelerType(String type) {
         return javaTypeForEOModelerType(type, null);
     }
 
-    /** 
+    /**
      * Performs Objective C data types conversion to Java types.
      * 
      * @since 1.1
-     * @return String representation for Java type corresponding 
-     * to String representation of Objective C type. 
+     * @return String representation for Java type corresponding to String representation
+     *         of Objective C type.
      */
     public String javaTypeForEOModelerType(String valueClassName, String valueType) {
         if (valueClassName == null) {
@@ -212,9 +213,8 @@ public class EOModelHelper {
 
         if (valueClassName.equals("NSNumber")) {
             Class numericClass = numericAttributeClass(valueType);
-            return (numericClass != null)
-                ? numericClass.getName()
-                : Number.class.getName();
+            return (numericClass != null) ? numericClass.getName() : Number.class
+                    .getName();
         }
 
         if (valueClassName.equals("NSCalendarDate"))
@@ -222,15 +222,14 @@ public class EOModelHelper {
 
         if (valueClassName.equals("NSDecimalNumber")) {
             Class numericClass = numericAttributeClass(valueType);
-            return (numericClass != null)
-                ? numericClass.getName()
-                : BigDecimal.class.getName();
+            return (numericClass != null) ? numericClass.getName() : BigDecimal.class
+                    .getName();
         }
 
         if (valueClassName.equals("NSData"))
             return "byte[]";
 
-        // don't know what the class is mapped to... 
+        // don't know what the class is mapped to...
         // do some minimum sanity check and use as is
         try {
             return Class.forName(valueClassName).getName();
@@ -245,14 +244,12 @@ public class EOModelHelper {
                 }
                 catch (ClassNotFoundException yetAnotherClassNotFoundException) {
                     try {
-                        return ClassLoader
-                            .getSystemClassLoader()
-                            .loadClass(valueClassName)
-                            .getName();
+                        return ClassLoader.getSystemClassLoader().loadClass(
+                                valueClassName).getName();
                     }
                     catch (ClassNotFoundException e) {
-                        throw new IllegalArgumentException(
-                            "Unknown data type: " + valueClassName);
+                        throw new IllegalArgumentException("Unknown data type: "
+                                + valueClassName);
                     }
                 }
             }
@@ -266,32 +263,23 @@ public class EOModelHelper {
     protected Class numericAttributeClass(String valueType) {
         if (valueType == null) {
             return null;
-        }
-        else if ("b".equals(valueType)) {
+        } else if ("b".equals(valueType)) {
             return Byte.class;
-        }
-        else if ("s".equals(valueType)) {
+        } else if ("s".equals(valueType)) {
             return Short.class;
-        }
-        else if ("i".equals(valueType)) {
+        } else if ("i".equals(valueType)) {
             return Integer.class;
-        }
-        else if ("l".equals(valueType)) {
+        } else if ("l".equals(valueType)) {
             return Long.class;
-        }
-        else if ("f".equals(valueType)) {
+        } else if ("f".equals(valueType)) {
             return Float.class;
-        }
-        else if ("d".equals(valueType)) {
+        } else if ("d".equals(valueType)) {
             return Double.class;
-        }
-        else if ("B".equals(valueType)) {
+        } else if ("B".equals(valueType)) {
             return BigDecimal.class;
-        }
-        else if ("c".equals(valueType)) {
+        } else if ("c".equals(valueType)) {
             return Boolean.class;
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -319,10 +307,9 @@ public class EOModelHelper {
             // no prototypes
             if (eoPrototypesEntityMap == null) {
                 prototypeValues = Collections.EMPTY_MAP;
-            }
-            else {
-                List eoPrototypeAttributes =
-                    (List) eoPrototypesEntityMap.get("attributes");
+            } else {
+                List eoPrototypeAttributes = (List) eoPrototypesEntityMap
+                        .get("attributes");
 
                 prototypeValues = new HashMap();
                 Iterator it = eoPrototypeAttributes.iterator();
@@ -365,6 +352,35 @@ public class EOModelHelper {
     }
 
     /**
+     * Returns the iterator over EOFetchSpecification names for a given entity.
+     * 
+     * @since 1.1
+     */
+    public Iterator queryNames(String entityName) {
+        Map queryPlist = (Map) entityQueryIndex.get(entityName);
+        if (queryPlist == null || queryPlist.isEmpty()) {
+            return IteratorUtils.EMPTY_ITERATOR;
+        }
+
+        return queryPlist.keySet().iterator();
+    }
+
+    /**
+     * Returns a map containing EOFetchSpecification information for entity name and query
+     * name. Returns null if no such query is found.
+     * 
+     * @since 1.1
+     */
+    public Map queryPListMap(String entityName, String queryName) {
+        Map queryPlist = (Map) entityQueryIndex.get(entityName);
+        if (queryPlist == null || queryPlist.isEmpty()) {
+            return null;
+        }
+
+        return (Map) queryPlist.get(queryName);
+    }
+
+    /**
      * @deprecated since 1.0.4 use {@link #entityClass(String, boolean)}.
      */
     public String entityClass(String entityName) {
@@ -374,8 +390,7 @@ public class EOModelHelper {
     public String entityClass(String entityName, boolean getClientClass) {
         if (getClientClass) {
             return (String) entityClientClassIndex.get(entityName);
-        }
-        else {
+        } else {
             return (String) entityClassIndex.get(entityName);
         }
     }
@@ -392,7 +407,9 @@ public class EOModelHelper {
         }
     }
 
-    /** Loads EOEntity information and returns it as a map. */
+    /**
+     * Loads EOEntity information and returns it as a map.
+     */
     protected Map loadEntityIndex(String entityName) throws Exception {
         InputStream entIn = openEntityStream(entityName);
         try {
@@ -401,6 +418,29 @@ public class EOModelHelper {
         }
         finally {
             entIn.close();
+        }
+    }
+
+    /**
+     * Loads EOFetchSpecification information and returns it as a map.
+     */
+    protected Map loadQueryIndex(String entityName) throws Exception {
+        InputStream queryIn = null;
+
+        // catch file open exceptions since not all entities have query files....
+        try {
+            queryIn = openQueryStream(entityName);
+        }
+        catch (IOException ioex) {
+            return Collections.EMPTY_MAP;
+        }
+
+        try {
+            plistParser.ReInit(queryIn);
+            return (Map) plistParser.propertyList();
+        }
+        finally {
+            queryIn.close();
         }
     }
 
@@ -427,8 +467,9 @@ public class EOModelHelper {
         return path;
     }
 
-    /** Returns a URL of the EOModel directory. Throws exception if it 
-     *  can't be found. */
+    /**
+     * Returns a URL of the EOModel directory. Throws exception if it can't be found.
+     */
     protected URL findModelUrl(String path) {
         if (!path.endsWith(".eomodeld")) {
             path += ".eomodeld";
@@ -441,21 +482,34 @@ public class EOModelHelper {
         return base;
     }
 
-    /** 
+    /**
      * Returns InputStream to read an EOModel index file.
      */
     protected InputStream openIndexStream() throws Exception {
         return new URL(modelUrl, "index.eomodeld").openStream();
     }
 
-    /** Returns InputStream to read an EOEntity plist file.
+    /**
+     * Returns InputStream to read an EOEntity plist file.
      * 
-     * @param entityName name of EOEntity to be loaded.
-     * 
+     * @param entityName
+     *            name of EOEntity to be loaded.
      * @return InputStream to read an EOEntity plist file or null if
-     * <code>entityname.plist</code> file can not be located.
+     *         <code>entityname.plist</code> file can not be located.
      */
     protected InputStream openEntityStream(String entityName) throws Exception {
         return new URL(modelUrl, entityName + ".plist").openStream();
+    }
+
+    /**
+     * Returns InputStream to read an EOFetchSpecification plist file.
+     * 
+     * @param entityName
+     *            name of EOEntity to be loaded.
+     * @return InputStream to read an EOEntity plist file or null if
+     *         <code>entityname.plist</code> file can not be located.
+     */
+    protected InputStream openQueryStream(String entityName) throws Exception {
+        return new URL(modelUrl, entityName + ".fspec").openStream();
     }
 }
