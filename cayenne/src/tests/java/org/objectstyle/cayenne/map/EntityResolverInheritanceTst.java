@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne.map;
 
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityInheritanceTree;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.PeopleTestCase;
 
 /**
@@ -73,21 +70,19 @@ public class EntityResolverInheritanceTst extends PeopleTestCase {
     }
 
     private ObjEntity getAbstractPerson() {
-        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity(
-            "AbstractPerson");
+        return getObjEntity("AbstractPerson");
     }
 
     private ObjEntity getClientRep() {
-        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity(
-            "ClientRepresentative");
+        return getObjEntity("ClientRepresentative");
     }
 
     private ObjEntity getEmployee() {
-        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity("Employee");
+        return getObjEntity("Employee");
     }
 
     private ObjEntity getManager() {
-        return getDomain().getMapForObjEntity("AbstractPerson").getObjEntity("Manager");
+        return getObjEntity("Manager");
     }
 
     public void testLookupAbstractPersonTree() throws Exception {
@@ -135,5 +130,4 @@ public class EntityResolverInheritanceTst extends PeopleTestCase {
         assertEquals(2, tree.getChildrenCount());
         assertSame(super1, tree.getEntity());
     }
-
 }

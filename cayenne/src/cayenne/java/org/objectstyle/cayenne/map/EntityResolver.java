@@ -114,16 +114,8 @@ public class EntityResolver extends org.objectstyle.cayenne.access.EntityResolve
         return super.lookupDbEntity(dataObject);
     }
 
-    public synchronized DbEntity lookupDbEntity(ObjEntity entity) {
-        return super.lookupDbEntity(entity);
-    }
-
     public synchronized DbEntity lookupDbEntity(Query q) {
         return super.lookupDbEntity(q);
-    }
-
-    public synchronized DbEntity lookupDbEntity(String entityName) {
-        return super.lookupDbEntity(entityName);
     }
 
     public EntityInheritanceTree lookupInheritanceTree(ObjEntity entity) {

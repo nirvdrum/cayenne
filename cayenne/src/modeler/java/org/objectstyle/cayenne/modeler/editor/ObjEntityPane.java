@@ -328,9 +328,8 @@ public class ObjEntityPane
                 DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
                 if (entity != null) {
                     DataDomain dom = mediator.getCurrentDataDomain();
-                    DataMap map = dom.getMapForDbEntity(entity.getName());
                     mediator.fireDbEntityDisplayEvent(
-                        new EntityDisplayEvent(this, entity, map, dom));
+                        new EntityDisplayEvent(this, entity, entity.getDataMap(), dom));
                 }
             }
         });

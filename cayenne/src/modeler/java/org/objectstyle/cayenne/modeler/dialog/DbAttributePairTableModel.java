@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.dialog;
 
 import java.util.ArrayList;
 
-import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -108,7 +107,7 @@ public class DbAttributePairTableModel extends CayenneTableModel {
     }
 
     /** Mode new attribute pairs from list to the DbRelationship. */
-    public void commit() throws DataMapException {
+    public void commit() {
         relationship.setJoins(getObjectList());
     }
 

@@ -302,9 +302,8 @@ public class DbEntityPane
                 DbEntity parent = ((DerivedDbEntity) current).getParentEntity();
                 if (parent != null) {
                     DataDomain dom = mediator.getCurrentDataDomain();
-                    DataMap map = dom.getMapForDbEntity(parent.getName());
                     mediator.fireDbEntityDisplayEvent(
-                        new EntityDisplayEvent(this, parent, map, dom));
+                        new EntityDisplayEvent(this, parent, parent.getDataMap(), dom));
                 }
             }
         }

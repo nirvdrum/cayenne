@@ -56,7 +56,9 @@
 package org.objectstyle.cayenne.unit;
 
 import java.sql.Connection;
+import java.util.Iterator;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -64,6 +66,9 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.event.EventManager;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unit.util.SQLTemplateCustomizer;
 
 /**
@@ -180,5 +185,39 @@ public abstract class CayenneTestCase extends BasicTestCase {
 
     protected void deleteTestData() throws Exception {
         accessStack.deleteTestData();
+    }
+    
+    protected DbEntity getDbEntity(String dbEntityName) {
+        // retrieve DbEntity the hard way, bypassing the resolver...
+        Iterator it = getDomain().getDataMaps().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            Iterator dbEntities = map.getDbEntities().iterator();
+            while (dbEntities.hasNext()) {
+                DbEntity e = (DbEntity) dbEntities.next();
+                if (dbEntityName.equals(e.getName())) {
+                    return e;
+                }
+            }
+        }
+
+        throw new CayenneRuntimeException("No DbEntity found: " + dbEntityName);
+    }
+    
+    protected ObjEntity getObjEntity(String objEntityName) {
+        // retrieve ObjEntity the hard way, bypassing the resolver...
+        Iterator it = getDomain().getDataMaps().iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            Iterator objEntities = map.getObjEntities().iterator();
+            while (objEntities.hasNext()) {
+                ObjEntity e = (ObjEntity) objEntities.next();
+                if (objEntityName.equals(e.getName())) {
+                    return e;
+                }
+            }
+        }
+
+        throw new CayenneRuntimeException("No ObjEntity found: " + objEntityName);
     }
 }

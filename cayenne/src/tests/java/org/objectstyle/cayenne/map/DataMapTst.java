@@ -194,6 +194,9 @@ public class DataMapTst extends TestCase {
         assertSame(q, queries.get("a"));
     }
 
+    /**
+     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
+     */
     public void testAddDependency1() throws Exception {
         map.setName("m1");
         DataMap map2 = new DataMap("m2");
@@ -202,6 +205,9 @@ public class DataMapTst extends TestCase {
         assertTrue(map.isDependentOn(map2));
     }
 
+    /**
+     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
+     */
     public void testAddDependency2() throws Exception {
         map.setName("m1");
         DataMap map2 = new DataMap("m2");
@@ -211,6 +217,9 @@ public class DataMapTst extends TestCase {
         assertTrue(map.isDependentOn(map3));
     }
 
+    /**
+     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
+     */
     public void testAddDependency3() throws Exception {
         map.setName("m1");
         DataMap map2 = new DataMap("m2");
@@ -225,6 +234,9 @@ public class DataMapTst extends TestCase {
         }
     }
 
+    /**
+     * @deprecated Since 1.1 DataMap dependencies are tracked differently.
+     */
     public void testAddDependency4() throws Exception {
         map.setName("m1");
         DataMap map2 = new DataMap("m2");

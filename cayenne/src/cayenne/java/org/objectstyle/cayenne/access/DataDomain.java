@@ -557,6 +557,7 @@ public class DataDomain implements QueryEngine {
      * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
      */
     public DataNode dataNodeForDbEntityName(String dbEntityName) {
+        // this is not correct anyway - EntityResolver.lookupDbEntity uses ObjEntity name as key!!
         DbEntity dbEntity = getEntityResolver().lookupDbEntity(dbEntityName);
         return (dbEntity != null) ? dataNodeForDbEntity(dbEntity) : null;
     }
@@ -579,6 +580,8 @@ public class DataDomain implements QueryEngine {
     /**
      * Returns a DataMap that contains DbEntity matching the
      * <code>entityName</code> parameter.
+     * 
+     * @deprecated Since 1.1 Use "getEntityResolver().lookupDbEntity(name).getDataMap()"
      */
     public DataMap getMapForDbEntity(String dbEntityName) {
         Iterator it = maps.values().iterator();
@@ -594,6 +597,8 @@ public class DataDomain implements QueryEngine {
     /**
      * Returns a DataMap that contains ObjEntity matching the
      * <code>entityName</code> parameter.
+     * 
+     * @deprecated Since 1.1 Use "getEntityResolver().lookupObjEntity(name).getDataMap()"
      */
     public DataMap getMapForObjEntity(String objEntityName) {
         Iterator it = maps.values().iterator();

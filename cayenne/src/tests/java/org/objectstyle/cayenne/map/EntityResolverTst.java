@@ -62,9 +62,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -77,32 +74,31 @@ public class EntityResolverTst extends CayenneTestCase {
         resolver = new EntityResolver(getDomain().getDataMaps());
     }
 
-    private DbEntity getArtistDbEntity() {
-        return getDomain().getMapForDbEntity("ARTIST").getDbEntity("ARTIST");
-    }
-
-    private ObjEntity getArtistObjEntity() {
-        return getDomain().getMapForObjEntity("Artist").getObjEntity("Artist");
-    }
-
+ 
     private void assertIsArtistDbEntity(DbEntity ae) {
         assertNotNull(ae);
-        assertEquals(ae, this.getArtistDbEntity());
+        assertEquals(ae, getDbEntity("ARTIST"));
     }
 
     private void assertIsArtistObjEntity(ObjEntity ae) {
         assertNotNull(ae);
-        assertEquals(ae, this.getArtistObjEntity());
+        assertEquals(ae, getObjEntity("Artist"));
     }
 
     ////Test DbEntitylookups
 
-    public void testLookupDbEntityByEntityName() throws Exception {
+    /**
+     * @deprecated  Since 1.1
+     */
+    public void testLookupDbEntityByObjEntityName() throws Exception {
         assertIsArtistDbEntity(resolver.lookupDbEntity("Artist"));
     }
 
+    /**
+     * @deprecated  Since 1.1
+     */
     public void testLookupDbEntityByObjEntity() throws Exception {
-        assertIsArtistDbEntity(resolver.lookupDbEntity(getArtistObjEntity()));
+        assertIsArtistDbEntity(resolver.lookupDbEntity(getObjEntity("Artist")));
     }
 
     public void testLookupDbEntityByClass() throws Exception {

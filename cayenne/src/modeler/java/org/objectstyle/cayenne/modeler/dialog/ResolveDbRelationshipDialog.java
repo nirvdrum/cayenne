@@ -76,7 +76,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DataMapException;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
@@ -231,7 +230,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
 
         // init UI components
         setTitle("DbRelationship Info: " + start.getName() + " to " + end.getName());
-        
+
         table.setModel(
             new DbAttributePairTableModel(relationship, getMediator(), this, true));
         TableColumn sourceColumn =
@@ -365,13 +364,7 @@ public class ResolveDbRelationshipDialog extends CayenneDialog {
         }
 
         DbAttributePairTableModel model = (DbAttributePairTableModel) table.getModel();
-        try {
-            model.commit();
-        }
-        catch (DataMapException e) {
-            e.printStackTrace();
-            return;
-        }
+        model.commit();
 
         // If new DbRelationship was created, add it to the source.
         if (isDbRelNew) {

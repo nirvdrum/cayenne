@@ -183,14 +183,12 @@ public class EntityResolver {
         // rebuild index
         Iterator mapIterator = maps.iterator();
         while (mapIterator.hasNext()) {
-            DataMap thisMap = (DataMap) mapIterator.next();
+            DataMap map = (DataMap) mapIterator.next();
 
-            // index entities
-            Iterator objEntities = thisMap.getObjEntities().iterator();
+            // index ObjEntities
+            Iterator objEntities = map.getObjEntities().iterator();
             while (objEntities.hasNext()) {
                 ObjEntity oe = (ObjEntity) objEntities.next();
-                DbEntity de = oe.getDbEntity();
-                dbEntityCache.put(oe, de);
                 Class entityClass;
                 try {
                     entityClass =
@@ -212,10 +210,12 @@ public class EntityResolver {
                             + entityClass.getName());
                 }
 
-                dbEntityCache.put(entityClass, de);
                 objEntityCache.put(entityClass, oe);
-                dbEntityCache.put(oe.getName(), de);
                 objEntityCache.put(oe.getName(), oe);
+
+                if (oe.getDbEntity() != null) {
+                    dbEntityCache.put(entityClass, oe.getDbEntity());
+                }
 
                 // build inheritance tree... include nodes that 
                 // have no children to avoid uneeded cache rebuilding on lookup...
@@ -240,15 +240,22 @@ public class EntityResolver {
                 }
             }
 
+            // index DbEntities
+            Iterator dbEntities = map.getDbEntities().iterator();
+            while (dbEntities.hasNext()) {
+                DbEntity de = (DbEntity) dbEntities.next();
+                dbEntityCache.put(de.getName(), de);
+            }
+
             // index stored procedures
-            Iterator procedures = thisMap.getProcedures().iterator();
+            Iterator procedures = map.getProcedures().iterator();
             while (procedures.hasNext()) {
                 Procedure proc = (Procedure) procedures.next();
                 procedureCache.put(proc.getName(), proc);
             }
 
             // index queries
-            Iterator queries = thisMap.getQueries().iterator();
+            Iterator queries = map.getQueries().iterator();
             while (queries.hasNext()) {
                 Query query = (Query) queries.next();
                 String name = query.getName();
@@ -274,19 +281,26 @@ public class EntityResolver {
     /**
      * Looks in the DataMap's that this object was created with for the DbEntity
      * that services the specified objentity
+     * 
      * @return the required DbEntity, or null if none matches the specifier
+     * @deprecated Since 1.1. Use entity.getDbEntity() instead.
      */
     public synchronized DbEntity lookupDbEntity(ObjEntity entity) {
-        return this._lookupDbEntity(entity);
+        return (entity != null) ? entity.getDbEntity() : null;
     }
 
     /**
      * Looks in the DataMap's that this object was created with for the DbEntity
-     * that services the class with the given name
-     * @return the required DbEntity, or null if none matches the specifier
+     * that services ObjEntity with the given name. Note that this method is deprecated
+     * and shouldn't be used, since it is confusing - the key name is that of ObjEntity,
+     * while lookup is done for ObjEntity.
+     * 
+     * @deprecated Since 1.1 this method is deprecated. Use lookupObjEntity(String).getDbEntity()
+     * to find a DbEntity by ObjEntity name.
      */
-    public synchronized DbEntity lookupDbEntity(String entityName) {
-        return this._lookupDbEntity(entityName);
+    public synchronized DbEntity lookupDbEntity(String objEntityName) {
+        ObjEntity objEntity = this._lookupObjEntity(objEntityName);
+        return (objEntity != null) ? objEntity.getDbEntity() : null;
     }
 
     /**
@@ -336,10 +350,11 @@ public class EntityResolver {
             return this.lookupDbEntity((Class) root);
         }
         else if (root instanceof ObjEntity) {
-            return this.lookupDbEntity((ObjEntity) root);
+            return ((ObjEntity) root).getDbEntity();
         }
         else if (root instanceof String) {
-            return this.lookupDbEntity((String) root);
+            ObjEntity objEntity = this.lookupObjEntity((String) root);
+            return (objEntity != null) ? objEntity.getDbEntity() : null;
         }
         else if (root instanceof DataObject) {
             return this.lookupDbEntity((DataObject) root);
