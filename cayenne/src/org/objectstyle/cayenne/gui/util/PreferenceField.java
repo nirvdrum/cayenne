@@ -55,17 +55,17 @@ package org.objectstyle.cayenne.gui.util;
  *
  */ 
 
-import java.util.Vector;
-import java.util.Collections;
-import java.util.Iterator;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ComboBoxEditor;
+import java.util.*;
+import java.util.logging.Logger;
+
+import javax.swing.*;
 
 import org.objectstyle.util.Preferences;
 
 public class PreferenceField extends JComboBox
 {
+    static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
+
 	private String key;
 	
 	public PreferenceField(String temp_key) {
@@ -88,8 +88,9 @@ public class PreferenceField extends JComboBox
 	/** Return the text of the selected item or "" if nothing is selected.*/
 	public String getText() {
 		ComboBoxEditor editor = getEditor();
-		if (null == editor) 
+		if (null == editor) {
 			return "";
+		}
 		return editor.getItem().toString();
 	}
 

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.gui;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.*;
 import junit.runner.*;
@@ -65,53 +65,56 @@ import java.util.logging.*;
 import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.access.*;
 
-
 public class DbLoginPanelTst extends TestCase {
     static Logger logObj = Logger.getLogger(DbLoginPanelTst.class.getName());
-    
+
     protected JFrame frame;
     protected DbLoginPanel loginPanel;
-    
-    
+
     public DbLoginPanelTst(String name) {
         super(name);
     }
-    
-    
-    protected void setUp() throws java.lang.Exception {                
+
+    protected void setUp() throws java.lang.Exception {
         frame = new JFrame("Hidden Login Frame");
         loginPanel = new DbLoginPanel(frame);
         frame.pack();
         loginPanel.pack();
     }
-    
-    
+
     protected void tearDown() throws java.lang.Exception {
         loginPanel.dispose();
         frame.dispose();
     }
-    
-    
-    public void testWidgetsPresent() { 
-        assertNotNull(loginPanel.unInput); 
-        assertNotNull(loginPanel.pwdInput); 
-        assertNotNull(loginPanel.drInput); 
-        assertNotNull(loginPanel.urlInput); 
-        assertNotNull(loginPanel.adapterInput); 
-    } 
-    
-    
+
+    public void testWidgetsPresent() {
+        assertNotNull(loginPanel.unInput);
+        assertNotNull(loginPanel.pwdInput);
+        assertNotNull(loginPanel.drInput);
+        assertNotNull(loginPanel.urlInput);
+        assertNotNull(loginPanel.adapterInput);
+    }
+
     public void testInitialContents() {
         // according to docs, JTextField should contain a NULL string by default
         // but in fact it contains empty string "".. we need to deal with that
-        assertTrue(loginPanel.unInput.getText() == null || loginPanel.unInput.getText().length() == 0);
-        assertTrue(loginPanel.pwdInput.getPassword() == null || loginPanel.pwdInput.getPassword().length == 0);
-        assertTrue(loginPanel.drInput.getText() == null || loginPanel.drInput.getText().length() == 0);
-        assertTrue(loginPanel.urlInput.getText() == null || loginPanel.urlInput.getText().length() == 0);
-        assertTrue(loginPanel.adapterInput.getText() == null || loginPanel.adapterInput.getText().length() == 0);
+        assertTrue(
+            loginPanel.unInput.getText() == null
+                || loginPanel.unInput.getText().length() == 0);
+        assertTrue(
+            loginPanel.pwdInput.getPassword() == null
+                || loginPanel.pwdInput.getPassword().length == 0);
+        assertTrue(
+            loginPanel.drInput.getText() == null
+                || loginPanel.drInput.getText().length() == 0);
+        assertTrue(
+            loginPanel.urlInput.getText() == null
+                || loginPanel.urlInput.getText().length() == 0);
+        assertTrue(
+            loginPanel.adapterInput.getText() == null
+                || loginPanel.adapterInput.getText().length() == 0);
     }
 
-    
     public void testSetDataSourceInfo() {
         DataSourceInfo info = new DataSourceInfo();
         info.setUserName("1");
@@ -121,17 +124,18 @@ public class DbLoginPanelTst extends TestCase {
         info.setDataSourceUrl("4");
         info.setAdapterClass("5");
         loginPanel.setDataSrcInfo(info);
-        
+
         assertEquals(info.getUserName(), loginPanel.unInput.getText());
         assertEquals(info.getPassword(), new String(loginPanel.pwdInput.getPassword()));
         assertEquals(info.getDataSourceUrl(), loginPanel.urlInput.getText());
         assertEquals(info.getAdapterClass(), loginPanel.adapterInput.getText());
-                
+
         // maybe JTextField bug, but it sets nulls to empty strings
-        assertTrue(loginPanel.drInput.getText() == null || loginPanel.drInput.getText().length() == 0);
+        assertTrue(
+            loginPanel.drInput.getText() == null
+                || loginPanel.drInput.getText().length() == 0);
     }
-    
-    
+
     public void testModifiedDataSourceInfo() {
         DataSourceInfo info = new DataSourceInfo();
         info.setUserName("1");
@@ -140,7 +144,7 @@ public class DbLoginPanelTst extends TestCase {
         info.setDataSourceUrl("4");
         info.setAdapterClass("5");
         loginPanel.setDataSrcInfo(info);
-        
+
         // modify text fields
         loginPanel.unInput.setText("6");
         loginPanel.pwdInput.setText("7");
@@ -148,36 +152,34 @@ public class DbLoginPanelTst extends TestCase {
         loginPanel.adapterInput.setText("9");
         // test empty string, should be converted to NULL in the model object..
         loginPanel.urlInput.setText("");
-        
+
         // generate button click event. 
         loginPanel.ok.doClick();
 
-        // check model values        
-        assertEquals(info.getUserName(), loginPanel.unInput.getText());
-        assertEquals(info.getPassword(), new String(loginPanel.pwdInput.getPassword()));
-        assertEquals(info.getJdbcDriver(), loginPanel.drInput.getText());
-        assertEquals(info.getAdapterClass(), loginPanel.adapterInput.getText());
+        // check model values   
+        assertEquals("6", info.getUserName());
+        assertEquals("7", info.getPassword());
+        assertEquals("8", info.getJdbcDriver());
+        assertEquals("9", info.getAdapterClass());
         assertNull(info.getDataSourceUrl());
     }
-    
-    
+
     /** Test that login info has a valid number of min and max connections. */
     public void testConnectionCount() {
         DataSourceInfo info = new DataSourceInfo();
         loginPanel.setDataSrcInfo(info);
-        
+
         // set to deliberatly invalid values
-        
+
         info.setMinConnections(-1);
         info.setMaxConnections(0);
-        
+
         // generate button click event. 
         loginPanel.ok.doClick();
-        
+
         // check connection pool sizes 
         assertTrue(info.getMinConnections() > 0);
         assertTrue(info.getMinConnections() <= info.getMaxConnections());
     }
-    
 
 }
