@@ -108,7 +108,7 @@ public class DomainHelperCase {
 
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        buf.append("\n===== DomainHelperCase ====")
+        buf.append("\n===== DomainHelperCase ====\n")
         .append(configInfo);
 
         return buf.toString();

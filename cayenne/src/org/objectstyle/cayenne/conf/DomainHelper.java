@@ -180,12 +180,18 @@ public class DomainHelper {
         parser.parse(new InputSource(in));
 
         // return true if no failures
-        return failedMaps.size() == 0
-               && failedDataSources.size() == 0
-               && failedAdapters.size() == 0
-               && failedMapRefs.size() == 0;
+        return !hasFailures();
     }
 
+    /** Returns true if any of the "failed.." collections
+      * is non-empty. */
+    private boolean hasFailures() {
+        return 
+        (failedMaps != null && failedMaps.size() > 0) ||
+        (failedDataSources != null && failedDataSources.size() > 0) ||
+        (failedAdapters != null && failedAdapters.size() > 0) ||
+        (failedMapRefs != null && failedMapRefs.size() > 0);        
+    }
 
     /** Reads domain configuration from the InputStream, returns an array
       * of initialized DataDomains. An attempt will be made to resolve and
@@ -417,7 +423,7 @@ public class DomainHelper {
             if (adapterClass == null)
                 adapterClass = "org.objectstyle.cayenne.dba.JdbcAdapter";
 
-            DataNode node = new DataNode(nodeName);
+            node = new DataNode(nodeName);
             node.setDataSourceFactory(factoryName);
             node.setDataSourceLocation(dataSrcLocation);
             domain.addNode(node);
@@ -471,7 +477,7 @@ public class DomainHelper {
         public void init(String name, Attributes attrs, DataDomain domain, DataNode node) throws SAXException {
             String mapName = attrs.getValue("", "name");
             if (mapName == null)
-                throw new SAXParseException("'<mapref name=' attribute must be present.", locator);
+                throw new SAXParseException("'<map-ref name=' attribute must be present.", locator);
 
             DataMap map = domain.getMap(mapName);
             if (map == null) {
