@@ -228,7 +228,7 @@ public class ObjectId implements Serializable {
 
             if (objectIdKeys != null) {
                 int len = objectIdKeys.size();
-                
+
                 // handle cheap and most common case - single key
                 if (len == 1) {
                     Iterator entries = objectIdKeys.entrySet().iterator();
@@ -240,11 +240,10 @@ public class ObjectId implements Serializable {
                     Object[] keys = objectIdKeys.keySet().toArray();
                     Arrays.sort(keys);
 
-                  
-                    for(int i = 0; i < len; i++) {
+                    for (int i = 0; i < len; i++) {
                         // HashCodeBuilder will take care of processing object if it 
                         // happens to be a primitive array such as byte[]
-                        
+
                         // also we don't have to append the key hashcode, its index will work
                         builder.append(i).append(objectIdKeys.get(keys[i]));
                     }
