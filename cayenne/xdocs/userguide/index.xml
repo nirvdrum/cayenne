@@ -51,7 +51,8 @@
                 <li><a href="appguide/fetch.html#cayenne_fetch">5.5 Fetching Objects</a></li>
                 <li><a href="appguide/save.html#cayenne_save">5.6 Saving Modified Objects</a></li>
                 <li><a href="appguide/exp.html#exp">5.7 Expressions</a></li>
-                <li><a href="appguide/deploy.html#deploy">5.8 Deployment</a></li>
+                <li><a href="appguide/bigqueries.html#big">5.8 Handling Big Result Sets</a></li>
+                <li><a href="appguide/deploy.html#deploy">5.9 Deployment</a></li>
             </ul></li>
             
             <li><a href="modeler/index.html">6. CayenneModeler GUI Tool</a>
