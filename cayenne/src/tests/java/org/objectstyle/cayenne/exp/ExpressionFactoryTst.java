@@ -260,13 +260,13 @@ public class ExpressionFactoryTst extends CayenneTestCase {
     }
 
     public void testLikeExp() throws Exception {
-        Object v = new Object();
+        String v = "abc";
         Expression exp = ExpressionFactory.likeExp("abc", v);
         assertEquals(Expression.LIKE, exp.getType());
     }
     
     public void testLikeIgnoreCaseExp() throws Exception {
-        Object v = new Object();
+        String v = "abc";
         Expression exp = ExpressionFactory.likeIgnoreCaseExp("abc", v);
         assertEquals(Expression.LIKE_IGNORE_CASE, exp.getType());
     }

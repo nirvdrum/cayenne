@@ -513,7 +513,7 @@ public class ExpressionFactory {
      * A convenience shortcut for <code>binaryPathExp(Expression.LIKE, pathSpec,
      * value)</code>.
      */
-    public static Expression likeExp(String pathSpec, Object value) {
+    public static Expression likeExp(String pathSpec, String value) {
         return binaryPathExp(Expression.LIKE, pathSpec, value);
     }
 
@@ -521,7 +521,7 @@ public class ExpressionFactory {
      * A convenience shortcut for <code>binaryPathExp(Expression.
      * LIKE_IGNORE_CASE, pathSpec, value)</code>.
      */
-    public static Expression likeIgnoreCaseExp(String pathSpec, Object value) {
+    public static Expression likeIgnoreCaseExp(String pathSpec, String value) {
         return binaryPathExp(Expression.LIKE_IGNORE_CASE, pathSpec, value);
     }
     
