@@ -21,15 +21,24 @@
             </fileset>
         </chmod>
 	</target>
-  
-  
-    <!-- ========================================== -->
-    <!-- Build JAR file with dependencies.    -->
-    <!-- ========================================== -->
+
+    <!-- ================================== -->
+    <!-- Build JAR file with dependencies.  -->
+    <!-- ================================== -->
     <target name="jar" depends="compile">
     	<jar jarfile="${dist}/lib/cayenne-performance.jar" manifest="src/performance/MANIFEST.MF">
             <fileset dir="${performance.build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>
     </target>
+
+    <!-- ======================= -->
+    <!-- Run performance tests.  -->
+    <!-- ======================= -->
+    <target name="performance" depends="dist-bin">
+   		<echo>
+		Performance tests are not available yet.
+		</echo>
+    </target>
+    
 </project>
