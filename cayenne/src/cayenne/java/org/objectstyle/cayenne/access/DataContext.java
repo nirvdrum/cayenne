@@ -262,7 +262,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @deprecated Since 1.1 all SnapshotManager methods are static
      */
     public SnapshotManager getSnapshotManager() {
-        return new SnapshotManager();
+        return new SnapshotManager(relationshipDataSource);
     }
 
     public ToManyListDataSource getRelationshipDataSource() {
