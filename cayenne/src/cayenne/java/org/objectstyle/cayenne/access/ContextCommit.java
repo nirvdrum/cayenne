@@ -223,6 +223,10 @@ class ContextCommit {
             return;
         }
 
+        boolean supportsGeneratedKeys = commitHelper
+                .getNode()
+                .getAdapter()
+                .supportsGeneratedKeys();
         List dbEntities = new ArrayList(entities.size());
         Map objEntitiesByDbEntity = new HashMap(entities.size());
         groupObjEntitiesBySpannedDbEntities(dbEntities, objEntitiesByDbEntity, entities);
@@ -263,7 +267,8 @@ class ContextCommit {
                     Map snapshot = BatchQueryUtils.buildSnapshotForInsert(
                             entity,
                             o,
-                            masterDependentDbRel);
+                            masterDependentDbRel,
+                            supportsGeneratedKeys);
                     batch.add(snapshot, o.getObjectId());
                 }
 

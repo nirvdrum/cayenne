@@ -241,36 +241,26 @@ public class PrimaryKeyHelper {
                         .toString(), dbRel.getName()));
             }
 
-            if (supportsGeneratedKeys) {
-                // DbRelationship logic currently throws an exception when some key is
-                // missing... so have to implement a similar code here that is more
-                // tolerant to the deferred keys. TODO: refactor this redundant code.
+            // DbRelationship logic currently throws an exception when some key is
+            // missing... so have to implement a similar code here that is more
+            // tolerant to the deferred keys.
+            // TODO: maybe merge this back to DbRel?
 
-                Iterator joins = dbRel.getJoins().iterator();
-                while (joins.hasNext()) {
-                    DbJoin join = (DbJoin) joins.next();
-                    Object value = targetKeyMap.get(join.getTargetName());
-                    if (value == null && !join.getTarget().isGenerated()) {
-                        throw new CayenneRuntimeException(
-                                "Some parts of FK are missing in snapshot, join: " + join);
+            Iterator joins = dbRel.getJoins().iterator();
+            while (joins.hasNext()) {
+                DbJoin join = (DbJoin) joins.next();
+                Object value = targetKeyMap.get(join.getTargetName());
+                if (value == null) {
+                    if (supportsGeneratedKeys && join.getTarget().isGenerated()) {
+                        // ignore
+                        continue;
                     }
 
-                    idMap.put(join.getSourceName(), value);
+                    throw new CayenneRuntimeException(
+                            "Some parts of FK are missing in snapshot, join: " + join);
                 }
-            }
-            else {
-                // make sure we do not override any keys set by user already
-                Iterator fk = dbRel
-                        .srcFkSnapshotWithTargetSnapshot(targetKeyMap)
-                        .entrySet()
-                        .iterator();
 
-                while (fk.hasNext()) {
-                    Map.Entry next = (Map.Entry) fk.next();
-                    if (!idMap.containsKey(next.getKey())) {
-                        idMap.put(next.getKey(), next.getValue());
-                    }
-                }
+                idMap.put(join.getSourceName(), value);
             }
 
             useful = true;

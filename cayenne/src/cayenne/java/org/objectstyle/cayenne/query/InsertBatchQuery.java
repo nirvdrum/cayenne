@@ -59,14 +59,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Factory;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
- * Batched INSERT query. Allows inserting multiple object snapshots (DataRows) for a
- * given DbEntity in a single query. InsertBatchQuery normally is not used directly.
- * Rather DataContext creates one internally when committing DataObjects.
+ * Batched INSERT query. Allows inserting multiple object snapshots (DataRows) for a given
+ * DbEntity in a single query. InsertBatchQuery normally is not used directly. Rather
+ * DataContext creates one internally when committing DataObjects.
  * 
  * @author Andriy Shapochka
  */
@@ -113,7 +114,23 @@ public class InsertBatchQuery extends BatchQuery {
     public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
         Map currentSnapshot = (Map) objectSnapshots.get(batchIndex);
-        return currentSnapshot.get(attribute.getName());
+        Object value = currentSnapshot.get(attribute.getName());
+
+        // if a value is a Factory, resolve it here...
+        if (value instanceof Factory) {
+            value = ((Factory) value).create();
+            currentSnapshot.put(attribute.getName(), value);
+
+            // update replacement id
+            if (attribute.isPrimaryKey()) {
+                ObjectId id = getObjectId();
+                if (id != null) {
+                    id.getReplacementIdMap().put(attribute.getName(), value);
+                }
+            }
+        }
+
+        return value;
     }
 
     /**
@@ -124,7 +141,10 @@ public class InsertBatchQuery extends BatchQuery {
     }
 
     /**
-     * Adds a snapshot to batch. Optionally stores the object id for the snapshot.
+     * Adds a snapshot to batch. Optionally stores the object id for the snapshot. Note
+     * that snapshot can hold either the real values or the instances of
+     * org.apache.commons.collections.Factory that will be resolved to the actual value on
+     * the spot, thus allowing deferred propagated keys resolution.
      * 
      * @since 1.2
      */

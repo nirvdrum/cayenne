@@ -63,8 +63,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Factory;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataRow;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbJoin;
@@ -80,7 +83,7 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * Collection of utility methods to work with BatchQueries.
- *
+ * 
  * @author Andriy Shapochka
  */
 public class BatchQueryUtils {
@@ -89,8 +92,8 @@ public class BatchQueryUtils {
     }
 
     /**
-     * Utility method that returns <code>true</code> if 
-     * the query will update at least one BLOB or CLOB DbAttribute.
+     * Utility method that returns <code>true</code> if the query will update at least
+     * one BLOB or CLOB DbAttribute.
      */
     public static boolean updatesLOBColumns(BatchQuery query) {
         boolean isInsert = query instanceof InsertBatchQuery;
@@ -100,8 +103,7 @@ public class BatchQueryUtils {
             return false;
         }
 
-        List updatedAttributes =
-            (isInsert)
+        List updatedAttributes = (isInsert)
                 ? query.getDbAttributes()
                 : ((UpdateBatchQuery) query).getUpdatedAttributes();
 
@@ -118,8 +120,9 @@ public class BatchQueryUtils {
 
     public static Map buildSnapshotForUpdate(DataObject o) {
         DataContext context = o.getDataContext();
-        Map committedSnapshot =
-            context.getObjectStore().getSnapshot(o.getObjectId(), context);
+        Map committedSnapshot = context.getObjectStore().getSnapshot(
+                o.getObjectId(),
+                context);
         Map currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = null;
 
@@ -159,12 +162,29 @@ public class BatchQueryUtils {
 
     /**
      * Creates a snapshot of inserted columns for a given object.
+     * 
+     * @deprecated since 1.2
      */
     public static Map buildSnapshotForInsert(
-        ObjEntity entity,
-        DataObject o,
-        DbRelationship masterDependentRel) {
-        
+            ObjEntity entity,
+            DataObject o,
+            DbRelationship masterDependentRel) {
+        return buildSnapshotForInsert(entity, o, masterDependentRel, false);
+    }
+
+    /**
+     * Creates a snapshot of inserted columns for a given object. Supports deferring value
+     * resolution by setting adding factories to the snapshot instead of rela values if
+     * the value is not known yet.
+     * 
+     * @since 1.2
+     */
+    public static Map buildSnapshotForInsert(
+            ObjEntity entity,
+            DataObject o,
+            DbRelationship masterDependentRel,
+            boolean supportsGeneratedKeys) {
+
         boolean isMasterDbEntity = (masterDependentRel == null);
         Map map = new HashMap();
 
@@ -204,14 +224,14 @@ public class BatchQueryUtils {
                 continue;
             }
 
-            Map idParts = target.getObjectId().getIdSnapshot();
-            
+            Map targetKeyMap = target.getObjectId().getIdSnapshot();
+
             // this may happen in uncommitted objects
-            if (idParts == null) {
+            if (targetKeyMap == null) {
                 continue;
             }
-            
-            DbRelationship dbRel ;
+
+            DbRelationship dbRel;
             if (isMasterDbEntity) {
                 dbRel = (DbRelationship) rel.getDbRelationships().get(0);
             }
@@ -221,11 +241,28 @@ public class BatchQueryUtils {
                     continue;
                 }
             }
-            
-            Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-            map.putAll(fk);
+
+            // support deferred propagated values...
+            // stick a Factory in the snapshot instead...
+            Iterator joins = dbRel.getJoins().iterator();
+            while (joins.hasNext()) {
+                DbJoin join = (DbJoin) joins.next();
+                Object value = targetKeyMap.get(join.getTargetName());
+                if (value == null) {
+                    if (supportsGeneratedKeys && join.getTarget().isGenerated()) {
+                        // setup a factory
+                        value = new PropagatedValueFactory(target.getObjectId(), join
+                                .getTargetName());
+                    }
+                    else {
+                        throw new CayenneRuntimeException(
+                                "Some parts of FK are missing in snapshot, join: " + join);
+                    }
+                }
+
+                map.put(join.getSourceName(), value);
+            }
         }
-     
 
         // process object id map
         // we should ignore any object id values if a corresponding attribute
@@ -234,8 +271,8 @@ public class BatchQueryUtils {
         Map thisIdParts = o.getObjectId().getIdSnapshot();
         if (thisIdParts != null) {
             if (!isMasterDbEntity) {
-                thisIdParts =
-                    masterDependentRel.targetPkSnapshotWithSrcSnapshot(thisIdParts);
+                thisIdParts = masterDependentRel
+                        .targetPkSnapshotWithSrcSnapshot(thisIdParts);
             }
             // put only thise that do not exist in the map
             Iterator itm = thisIdParts.keySet().iterator();
@@ -249,8 +286,8 @@ public class BatchQueryUtils {
     }
 
     private static String getTargetDbAttributeName(
-        String srcDbAttributeName,
-        DbRelationship masterDependentRel) {
+            String srcDbAttributeName,
+            DbRelationship masterDependentRel) {
         for (Iterator i = masterDependentRel.getJoins().iterator(); i.hasNext();) {
             DbJoin join = (DbJoin) i.next();
             if (srcDbAttributeName.equals(join.getSourceName()))
@@ -263,14 +300,15 @@ public class BatchQueryUtils {
      * Creates a snapshot of updated columns for a given object.
      */
     public static Map buildSnapshotForUpdate(
-        ObjEntity entity,
-        DataObject o,
-        DbRelationship masterDependentRel) {
+            ObjEntity entity,
+            DataObject o,
+            DbRelationship masterDependentRel) {
 
         boolean isRootDbEntity = (masterDependentRel == null);
         DataContext context = o.getDataContext();
-        DataRow committedSnapshot =
-            context.getObjectStore().getSnapshot(o.getObjectId(), context);
+        DataRow committedSnapshot = context.getObjectStore().getSnapshot(
+                o.getObjectId(),
+                context);
         DataRow currentSnapshot = o.getDataContext().currentSnapshot(o);
         Map snapshot = new HashMap(currentSnapshot.size());
 
@@ -286,17 +324,18 @@ public class BatchQueryUtils {
                     snapshot.put(dbAttrPath, newValue);
                 }
                 else if (!isRootDbEntity && compoundDbAttr) {
-                    Iterator pathIterator =
-                        entity.getDbEntity().resolvePathComponents(dbAttrPath);
+                    Iterator pathIterator = entity.getDbEntity().resolvePathComponents(
+                            dbAttrPath);
                     if (pathIterator.hasNext()
-                        && masterDependentRel.equals(pathIterator.next())) {
+                            && masterDependentRel.equals(pathIterator.next())) {
                         DbAttribute dbAttr = (DbAttribute) pathIterator.next();
                         snapshot.put(dbAttr.getName(), newValue);
                     }
                 }
                 else if (!isRootDbEntity && !compoundDbAttr) {
-                    String pkAttrName =
-                        getTargetDbAttributeName(dbAttrPath, masterDependentRel);
+                    String pkAttrName = getTargetDbAttributeName(
+                            dbAttrPath,
+                            masterDependentRel);
                     if (pkAttrName != null)
                         snapshot.put(pkAttrName, newValue);
                 }
@@ -310,14 +349,15 @@ public class BatchQueryUtils {
             String dbAttrPath = (String) entry.getKey();
             boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
             Object newValue = entry.getValue();
-            
-            // ... if not for flattened attributes, we could've used DataRow.createDiff()..
-            
+
+            // ... if not for flattened attributes, we could've used
+            // DataRow.createDiff()..
+
             // if snapshot exists, compare old values and new values,
             // only add attribute to the update clause if the value has changed
             Object oldValue = committedSnapshot.get(dbAttrPath);
             if (!Util.nullSafeEquals(oldValue, newValue)) {
-                
+
                 if (!isRootDbEntity) {
                     if (compoundDbAttr) {
                         Iterator pathIterator = entity
@@ -352,28 +392,60 @@ public class BatchQueryUtils {
             if (entry.getValue() == null || currentSnapshot.containsKey(dbAttrPath)) {
                 continue;
             }
-            
+
             boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
-           
+
             if (isRootDbEntity && !compoundDbAttr) {
                 snapshot.put(dbAttrPath, null);
             }
             else if (!isRootDbEntity && compoundDbAttr) {
-                Iterator pathIterator =
-                    entity.getDbEntity().resolvePathComponents(dbAttrPath);
+                Iterator pathIterator = entity.getDbEntity().resolvePathComponents(
+                        dbAttrPath);
                 if (pathIterator.hasNext()
-                    && masterDependentRel.equals(pathIterator.next())) {
+                        && masterDependentRel.equals(pathIterator.next())) {
                     DbAttribute dbAttr = (DbAttribute) pathIterator.next();
                     snapshot.put(dbAttr.getName(), null);
                 }
             }
             else if (!isRootDbEntity && !compoundDbAttr) {
-                String pkAttrName =
-                    getTargetDbAttributeName(dbAttrPath, masterDependentRel);
+                String pkAttrName = getTargetDbAttributeName(
+                        dbAttrPath,
+                        masterDependentRel);
                 if (pkAttrName != null)
                     snapshot.put(pkAttrName, null);
             }
         }
         return Collections.unmodifiableMap(snapshot);
+    }
+
+    final static class PropagatedValueFactory implements Factory {
+
+        ObjectId masterID;
+        String masterKey;
+
+        PropagatedValueFactory(ObjectId masterID, String masterKey) {
+            this.masterID = masterID;
+            this.masterKey = masterKey;
+        }
+
+        public Object create() {
+            if (!masterID.isReplacementIdAttached()) {
+                throw new CayenneRuntimeException("Deferred propagated key ("
+                        + masterKey
+                        + ") wasn't generated for object with ID "
+                        + masterID);
+            }
+
+            Map replacementId = masterID.getReplacementIdMap();
+            Object value = replacementId.get(masterKey);
+            if (value == null) {
+                throw new CayenneRuntimeException("Deferred propagated key ("
+                        + masterKey
+                        + ") wasn't generated for object with ID "
+                        + masterID);
+            }
+
+            return value;
+        }
     }
 }
