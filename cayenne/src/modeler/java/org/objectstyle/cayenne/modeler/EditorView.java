@@ -116,14 +116,18 @@ public class EditorView
         mediator = temp_mediator;
 
         add(splitPane, BorderLayout.CENTER);
-        treePanel = new BrowseView(temp_mediator);
+		treePanel = new BrowseView(temp_mediator);
         splitPane.setLeftComponent(treePanel);
         splitPane.setRightComponent(detailPanel);
 
         Dimension minimumSize = new Dimension(350, 200);
         detailPanel.setMinimumSize(minimumSize);
-        minimumSize = new Dimension(170, 200);
+        minimumSize = new Dimension(INIT_DIVIDER_LOCATION, 200);
         treePanel.setMinimumSize(minimumSize);
+
+		ModelerPreferences prefs = ModelerPreferences.getPreferences();
+		int preferredSize = prefs.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
+		treePanel.setPreferredSize(new Dimension(preferredSize, this.getHeight()));
 
         detailLayout = new CardLayout();
         detailPanel.setLayout(detailLayout);
