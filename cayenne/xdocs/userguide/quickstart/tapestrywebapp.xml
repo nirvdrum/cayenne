@@ -37,14 +37,11 @@
        		
        		<p>- Install a web container. This tutorial was tested with <a href=
     		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.1.10.
-       		It should work with any other container that is compliant with Servlet 2.3
-       		specification (older containers will also work, but you will not be able
-       		to use some of ServletConfiguration features discussed below). 
-       		All references to Tomcat below should apply in some form to other web containers
-       		as well.</p>
-
-         		<p>- Obtain the latest (2.2) Tapestry distribution and unzip somewhere.  You will need to place some of the jars in an appropriate place</p>  		
-    		<p>- Use tutorial source directory distributed with Cayenne at
+       		It should work with any other container that is compliant with Servlet 2.3 or 2.2
+       		specification. All references to Tomcat below should apply in some form 
+       		to other web containers	as well.</p>
+         	
+         	<p>- Use tutorial source directory distributed with Cayenne at
     		<code>$CAYENNE_HOME/src/tutorials/cayenne-tapestry-app</code> 
     		as a project directory.</p>
     		
@@ -52,14 +49,22 @@
     		the tutorial project directory.</p>
 
     		
-    		<p> - Doublecheck the JDBC driver installation for the target database. If you haven't installed
-    		it already, you may copy the driver jar file to 
+    		<p> - Doublecheck the JDBC driver installation for the target database. If you haven't 
+    		installed it already, you may copy the driver jar file to 
        		<code>WEB-INF/lib</code> subdirectory of the tutorial project. Alternatively if you want it to be 
        		shared by all web applications and you are using Tomcat, you may copy it to
        		<code>$CATALINA_HOME/common/lib</code> instead.
        		</p>
        		
-    		<p>- Copy <code>ognl.jar</code> (probably version 2.1.4-opt) and <code>net.sf.tapestry-2.2.jar</code> from the Tapestry distribution (/lib/ext for ognl, /lib for tapestry-2.2.jar) to EITHER the <code>WEB-INF/lib</code> subdirectory of the tutorial project directory, or some other location that your web container will be able to locate.  E.g. for Tomcat, $CATALINA_HOME/shared/lib is a good place.  If you have Tapestry already installed, you may not need to perform this step</p>
+    		<p>- <i>Optional: if you have Tapestry already installed, you should skip 
+    		this step.</i> Obtain the latest Tapestry distribution and unzip somewhere. 
+    		(This tutorial was tested with Tapestry 2.2). Copy <code>ognl.jar</code> 
+    		and <code>net.sf.tapestry-*.jar</code> 
+    		from the Tapestry distribution (/lib/ext for ognl, /lib for tapestry-*.jar) 
+    		to EITHER the <code>WEB-INF/lib</code> subdirectory of the tutorial project 
+    		directory, or some other location that your web container will be able to 
+    		locate.  E.g. for Tomcat, $CATALINA_HOME/shared/lib is a good place. 
+    		</p>
     	</subsection>
     	
     	<subsection name="3.3.2 Prepare Tutorial Database" anchor="2">
@@ -101,7 +106,11 @@
     	done for another tutorial.</p>
     	</subsection>
    	<subsection name="3.3.5 Compile and Deploy the Application" anchor="6">
-    		<p>To compile the application, the easiest way is to use ant.  Change into the cayenne-tapestry-app directory and invoke ant.  The application will be built</p>
+    		<p>To compile the application, the easiest way is to use ant.  
+    		Change into the cayenne-tapestry-app directory and invoke ant.  
+    		The application will be built. <i>Note that "servlet.jar" (or an appropriate jar file with all
+    		the servlet classes) must be accessible to ant. Feel free to modify the buildfile 
+    		accordingly.</i></p>
 
 			<p>To deploy, simply copy <code>cayenne-tapestry-app</code> directory to Tomcat 
 			<code>webapps</code> directory and restart the Tomcat. URL of the new applications
