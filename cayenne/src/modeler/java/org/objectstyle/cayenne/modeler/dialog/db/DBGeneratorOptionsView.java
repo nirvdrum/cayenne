@@ -119,10 +119,6 @@ public class DBGeneratorOptionsView extends JDialog {
         optionsPane.add(dropPK);
         optionsPane.add(createPK);
 
-        //     JPanel optionsHolder = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        //      optionsHolder.add(optionsPane);
-        //     optionsHolder.setBorder(BorderFactory.createTitledBorder("Options"));
-
         JPanel sqlTextPanel = new JPanel(new BorderLayout());
         sqlTextPanel.add(new JScrollPane(
                 sql,

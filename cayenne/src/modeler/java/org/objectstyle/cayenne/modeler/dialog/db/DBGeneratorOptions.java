@@ -74,11 +74,13 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
+import org.objectstyle.cayenne.modeler.dialog.ValidationResultBrowser;
 import org.objectstyle.cayenne.modeler.pref.DBConnectionInfo;
 import org.objectstyle.cayenne.modeler.pref.DBGeneratorDefaults;
 import org.objectstyle.cayenne.modeler.util.CayenneController;
 import org.objectstyle.cayenne.swing.BindingBuilder;
 import org.objectstyle.cayenne.swing.ObjectBinding;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * @author Andrei Adamchik
@@ -162,7 +164,7 @@ public class DBGeneratorOptions extends CayenneController {
 
         builder.bindToAction(view.getGenerateButton(), "generateSchemaAction()");
         builder.bindToAction(view.getSaveSqlButton(), "storeSQLAction()");
-        builder.bindToAction(view.getCancelButton(), "cancelAction()");
+        builder.bindToAction(view.getCancelButton(), "closeAction()");
 
         // refresh SQL if different tables were selected
         view.getTabs().addChangeListener(new ChangeListener() {
@@ -258,6 +260,7 @@ public class DBGeneratorOptions extends CayenneController {
     public void generateSchemaAction() {
         refreshGeneratorAction();
 
+        // sanity check...
         if (generator.isEmpty(true)) {
             JOptionPane.showMessageDialog(getView(), "Nothing to generate.");
             return;
@@ -267,8 +270,18 @@ public class DBGeneratorOptions extends CayenneController {
             DataSource dataSource = connectionInfo.makeDataSource(getApplication()
                     .getClassLoadingService());
             generator.runGenerator(dataSource);
-            JOptionPane.showMessageDialog(getView(), "Schema Generation Complete.");
-            view.dispose();
+
+            ValidationResult failures = generator.getFailures();
+
+            if (failures == null || !failures.hasFailures()) {
+                JOptionPane.showMessageDialog(getView(), "Schema Generation Complete.");
+            }
+            else {
+                new ValidationResultBrowser(this).startupAction(
+                        "Schema Generation Complete",
+                        "Schema generation finished. The following problem(s) were ignored.",
+                        failures);
+            }
         }
         catch (Throwable th) {
             reportError("Schema Generation Error", th);
@@ -306,7 +319,7 @@ public class DBGeneratorOptions extends CayenneController {
         }
     }
 
-    public void cancelAction() {
+    public void closeAction() {
         view.dispose();
     }
 }

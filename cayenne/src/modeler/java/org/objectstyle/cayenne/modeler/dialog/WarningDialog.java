@@ -66,27 +66,14 @@ import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
  */
 public class WarningDialog extends ErrorDebugDialog {
 
-    /**
-     * Constructor for WarningDialog.
-     * 
-     * @param owner
-     * @param title
-     * @param throwable
-     * @param detailed
-     * @throws HeadlessException
-     */
-    public WarningDialog(
-        CayenneModelerFrame owner,
-        String title,
-        Throwable throwable,
-        boolean detailed)
-        throws HeadlessException {
+    public WarningDialog(CayenneModelerFrame owner, String title, Throwable throwable,
+            boolean detailed) throws HeadlessException {
         super(owner, title, throwable, detailed);
     }
 
     protected String infoHTML() {
         return "<font face='Arial,Helvetica' size='+1' color='blue'>"
-            + getTitle()
-            + "</font>";
+                + getTitle()
+                + "</font>";
     }
 }

@@ -30,6 +30,7 @@ Bugs Fixed:
 CAY-162	Cayenne Modeler doesn't remember custom class templates
 CAY-12 Prefetching on entity used in qualifier
 CAY-196 DataObjectUtils.objectForPK should look in shared cache
+CAY-194 Error in generating SQL query for to-one faults with inheritance
 
 
 New Modeler Jar Files:
