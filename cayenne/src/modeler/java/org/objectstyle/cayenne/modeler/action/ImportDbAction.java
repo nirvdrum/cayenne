@@ -130,8 +130,8 @@ public class ImportDbAction extends CayenneAction {
         }
 
         try {
-            DbLoader loader =
-                new DbLoader(conn, adapter, new LoaderDelegate(mediator));
+            LoaderDelegate delegate = new LoaderDelegate(dsi, mediator);
+            DbLoader loader = new DbLoader(conn, adapter, delegate);
             List schemas = loadSchemas(loader);
             if (schemas == null) {
                 return;
@@ -139,7 +139,8 @@ public class ImportDbAction extends CayenneAction {
 
             String schemaName = null;
             if (schemas.size() != 0) {
-                ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
+                ChooseSchemaDialog dialog =
+                    new ChooseSchemaDialog(schemas, dsi);
                 dialog.show();
                 if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
                     dialog.dispose();
@@ -306,10 +307,12 @@ public class ImportDbAction extends CayenneAction {
         protected EventController mediator;
         protected int duplicate = YesNoToAllDialog.UNDEFINED;
         protected boolean existingMap;
+        protected String userName;
 
-        public LoaderDelegate(EventController mediator) {
+        public LoaderDelegate(DataSourceInfo dsi, EventController mediator) {
             this.mediator = mediator;
             this.existingMap = mediator.getCurrentDataMap() != null;
+            this.userName = dsi.getUserName();
         }
 
         /**
@@ -349,9 +352,7 @@ public class ImportDbAction extends CayenneAction {
                 throw new CayenneException("Should stop DB import.");
             }
         }
-        /**
-         * @see org.objectstyle.cayenne.access.DbLoaderDelegate#dbEntityAdded(DbEntity)
-         */
+
         public void dbEntityAdded(DbEntity ent) {
             if (existingMap) {
                 mediator.fireDbEntityEvent(
@@ -359,18 +360,13 @@ public class ImportDbAction extends CayenneAction {
             }
         }
 
-        /**
-         * @see org.objectstyle.cayenne.access.DbLoaderDelegate#objEntityAdded(ObjEntity)
-         */
         public void objEntityAdded(ObjEntity ent) {
             if (existingMap) {
                 mediator.fireObjEntityEvent(
                     new EntityEvent(this, ent, EntityEvent.ADD));
             }
         }
-        /**
-         * @see org.objectstyle.cayenne.access.DbLoaderDelegate#dbEntityRemoved(DbEntity)
-         */
+
         public void dbEntityRemoved(DbEntity ent) {
             if (existingMap) {
                 mediator.fireDbEntityEvent(
@@ -381,9 +377,6 @@ public class ImportDbAction extends CayenneAction {
             }
         }
 
-        /**
-         * @see org.objectstyle.cayenne.access.DbLoaderDelegate#objEntityRemoved(ObjEntity)
-         */
         public void objEntityRemoved(ObjEntity ent) {
             if (existingMap) {
                 mediator.fireObjEntityEvent(
@@ -392,6 +385,17 @@ public class ImportDbAction extends CayenneAction {
                         ent,
                         EntityEvent.REMOVE));
             }
+        }
+
+        public void setSchema(DbEntity ent, String schema) {
+            ent.setSchema(useSchema(schema) ? schema : null);
+        }
+
+        /**
+         * Schema should not be used if the user is the owner of this schema. 
+         */
+        protected boolean useSchema(String schema) {
+            return userName == null || !userName.equalsIgnoreCase(schema);
         }
     }
 }

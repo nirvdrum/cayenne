@@ -64,8 +64,18 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
-import org.objectstyle.cayenne.access.trans.FlattenedRelationshipDeleteTranslator;
-import org.objectstyle.cayenne.access.trans.FlattenedRelationshipInsertTranslator;
+import org
+    .objectstyle
+    .cayenne
+    .access
+    .trans
+    .FlattenedRelationshipDeleteTranslator;
+import org
+    .objectstyle
+    .cayenne
+    .access
+    .trans
+    .FlattenedRelationshipInsertTranslator;
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
@@ -180,7 +190,7 @@ public class JdbcAdapter implements DbAdapter {
      * to <code>ent</code> DbEntity. 
      */
     public String dropTable(DbEntity ent) {
-        return "DROP TABLE " + ent.getName();
+        return "DROP TABLE " + ent.getFullyQualifiedName();
     }
 
     /** 
@@ -192,11 +202,13 @@ public class JdbcAdapter implements DbAdapter {
         // for derived DbEntities
         if (ent instanceof DerivedDbEntity) {
             throw new CayenneRuntimeException(
-                "Can't create table for derived DbEntity '" + ent.getName() + "'.");
+                "Can't create table for derived DbEntity '"
+                    + ent.getName()
+                    + "'.");
         }
 
         StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE ").append(ent.getName()).append(" (");
+        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
 
         // columns
         Iterator it = ent.getAttributeList().iterator();
@@ -213,17 +225,34 @@ public class JdbcAdapter implements DbAdapter {
             // attribute may not be fully valid, do a simple check
             if (at.getType() == TypesMapping.NOT_DEFINED) {
                 throw new CayenneRuntimeException(
-                    "Undefined type for attribute '" + ent.getName() + "." + at.getName() + "'.");
+                    "Undefined type for attribute '"
+                        + ent.getFullyQualifiedName()
+                        + "."
+                        + at.getName()
+                        + "'.");
             }
 
-            String type = this.externalTypesForJdbcType(at.getType())[0];
+            String[] types = externalTypesForJdbcType(at.getType());
+            if (types == null || types.length == 0) {
+                throw new CayenneRuntimeException(
+                    "Undefined type for attribute '"
+                        + ent.getFullyQualifiedName()
+                        + "."
+                        + at.getName()
+                        + "': "
+                        + at.getType());
+            }
 
+            String type = types[0];
             buf.append(at.getName()).append(' ').append(type);
 
             // append size and precision (if applicable)
             if (TypesMapping.supportsLength(at.getType())) {
                 int len = at.getMaxLength();
-                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
+                int prec =
+                    TypesMapping.isDecimal(at.getType())
+                        ? at.getPrecision()
+                        : -1;
 
                 // sanity check
                 if (prec > len) {
@@ -280,7 +309,8 @@ public class JdbcAdapter implements DbAdapter {
         StringBuffer buf = new StringBuffer();
         StringBuffer refBuf = new StringBuffer();
 
-        buf.append("ALTER TABLE ").append(rel.getSourceEntity().getName()).append(
+        buf.append("ALTER TABLE ").append(
+            ((DbEntity)rel.getSourceEntity()).getFullyQualifiedName()).append(
             " ADD FOREIGN KEY (");
 
         Iterator jit = rel.getJoins().iterator();
@@ -299,7 +329,7 @@ public class JdbcAdapter implements DbAdapter {
 
         buf
             .append(") REFERENCES ")
-            .append(rel.getTargetEntity().getName())
+            .append(((DbEntity)rel.getTargetEntity()).getFullyQualifiedName())
             .append(" (")
             .append(refBuf.toString())
             .append(')');

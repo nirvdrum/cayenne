@@ -61,6 +61,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -68,6 +69,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -93,13 +95,13 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
     /** 
      * Creates and initializes new ChooseSchemaDialog.
      */
-	public ChooseSchemaDialog(List schemaList) {
+	public ChooseSchemaDialog(List schemaList, DataSourceInfo dsi) {
 		super(Editor.getFrame(), "Schema Selector", true);
 		setResizable(false);
 		
 		this.schemaList = schemaList;
 		
-		init();
+		init(dsi.getUserName());
 		
 		select.addActionListener(this);
 		cancel.addActionListener(this);
@@ -111,12 +113,24 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
 	}
 
 	/** Sets up the graphical components. */
-	private void init() {
+	private void init(String userName) {
 		getContentPane().setLayout(new BorderLayout());
 		
         // create schema selector
         schemaSelect = new JComboBox(schemaList.toArray(new Object[schemaList.size()]));
         schemaSelect.setBackground(Color.WHITE);
+        
+        // select schema belonging to the user
+        if(userName != null) {
+        	Iterator schemas = schemaList.iterator();
+        	while(schemas.hasNext()) {
+        		String schema = (String)schemas.next();
+        		if(userName.equalsIgnoreCase(schema)) {
+        		    schemaSelect.setSelectedItem(schema);
+        		    break;
+        		}
+        	}            
+        }
         
         // add buttons
 		JPanel buttons = PanelFactory.createButtonPanel(new JButton[] {select, cancel});

@@ -124,7 +124,10 @@ public class DbLoader {
     protected DbLoaderDelegate delegate;
 
     /** Creates new DbLoader. */
-    public DbLoader(Connection con, DbAdapter adapter, DbLoaderDelegate delegate) {
+    public DbLoader(
+        Connection con,
+        DbAdapter adapter,
+        DbLoaderDelegate delegate) {
         this.adapter = adapter;
         this.con = con;
         this.delegate = delegate;
@@ -224,7 +227,11 @@ public class DbLoader {
         }
 
         ResultSet rs =
-            getMetaData().getTables(catalog, schemaPattern, tableNamePattern, types);
+            getMetaData().getTables(
+                catalog,
+                schemaPattern,
+                tableNamePattern,
+                types);
 
         while (rs.next()) {
             String cat = rs.getString("TABLE_CAT");
@@ -248,7 +255,8 @@ public class DbLoader {
      * 
      * @return true if need to continue, false if must stop loading. 
      */
-    public boolean loadDbEntities(DataMap map, List tables) throws SQLException {
+    public boolean loadDbEntities(DataMap map, List tables)
+        throws SQLException {
         boolean ret_code = true;
         dbEntityList = new ArrayList();
         Iterator iter = tables.iterator();
@@ -284,7 +292,12 @@ public class DbLoader {
             DbEntity dbEntity = new DbEntity();
             dbEntityList.add(dbEntity);
             dbEntity.setName(table.getName());
-            dbEntity.setSchema(table.getSchema());
+
+            if (delegate != null) {
+                delegate.setSchema(dbEntity, table.getSchema());
+            } else {
+                dbEntity.setSchema(table.getSchema());
+            }
             dbEntity.setCatalog(table.getCatalog());
 
             // --  Create DbAttributes from column information  --
@@ -337,10 +350,12 @@ public class DbLoader {
         while (i.hasNext()) {
             DbEntity dbEntity = (DbEntity) i.next();
             String tableName = dbEntity.getName();
-            ResultSet rs = metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
+            ResultSet rs =
+                metaData.getPrimaryKeys(null, dbEntity.getSchema(), tableName);
             while (rs.next()) {
                 String keyName = rs.getString(4);
-                ((DbAttribute) dbEntity.getAttribute(keyName)).setPrimaryKey(true);
+                ((DbAttribute) dbEntity.getAttribute(keyName)).setPrimaryKey(
+                    true);
             }
             rs.close();
         }
@@ -357,7 +372,8 @@ public class DbLoader {
         while (it.hasNext()) {
             DbEntity dbEntity = (DbEntity) it.next();
             ObjEntity objEntity =
-                new ObjEntity(NameConverter.undescoredToJava(dbEntity.getName(), true));
+                new ObjEntity(
+                    NameConverter.undescoredToJava(dbEntity.getName(), true));
             objEntity.setDbEntity(dbEntity);
             objEntity.setClassName(objEntity.getName());
             map.addObjEntity(objEntity);
@@ -368,7 +384,8 @@ public class DbLoader {
                 if (dbAtt.isPrimaryKey())
                     continue;
 
-                String attName = NameConverter.undescoredToJava(dbAtt.getName(), false);
+                String attName =
+                    NameConverter.undescoredToJava(dbAtt.getName(), false);
                 String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
 
                 if (logObj.isDebugEnabled()) {
@@ -393,7 +410,8 @@ public class DbLoader {
                     }
                 }
 
-                ObjAttribute objAtt = new ObjAttribute(attName, type, objEntity);
+                ObjAttribute objAtt =
+                    new ObjAttribute(attName, type, objEntity);
                 objAtt.setDbAttribute(dbAtt);
                 objEntity.addAttribute(objAtt);
             }
@@ -436,17 +454,21 @@ public class DbLoader {
 
                     if (fkEnt == null) {
                         logObj.debug(
-                            "FK warning: no entity found for name '" + fkEntName + "'");
+                            "FK warning: no entity found for name '"
+                                + fkEntName
+                                + "'");
                     } else {
                         fwdRel =
-                            new DbRelationship(uniqueDbRelName(pkEnt, fkEntName, true));
+                            new DbRelationship(
+                                uniqueDbRelName(pkEnt, fkEntName, true));
                         fwdRel.setToMany(true);
                         fwdRel.setSourceEntity(pkEnt);
                         fwdRel.setTargetEntity(fkEnt);
                         pkEnt.addRelationship(fwdRel);
 
                         backRel =
-                            new DbRelationship(uniqueDbRelName(fkEnt, pkEntName, false));
+                            new DbRelationship(
+                                uniqueDbRelName(fkEnt, pkEntName, false));
                         backRel.setToMany(false);
                         backRel.setSourceEntity(fkEnt);
                         backRel.setTargetEntity(pkEnt);
@@ -457,9 +479,11 @@ public class DbLoader {
                 if (fkEnt != null) {
                     // Create and append joins
                     DbAttribute pkAtt =
-                        (DbAttribute) pkEnt.getAttribute(rs.getString("PKCOLUMN_NAME"));
+                        (DbAttribute) pkEnt.getAttribute(
+                            rs.getString("PKCOLUMN_NAME"));
                     DbAttribute fkAtt =
-                        (DbAttribute) fkEnt.getAttribute(rs.getString("FKCOLUMN_NAME"));
+                        (DbAttribute) fkEnt.getAttribute(
+                            rs.getString("FKCOLUMN_NAME"));
 
                     fwdRel.addJoin(new DbAttributePair(pkAtt, fkAtt));
                     backRel.addJoin(new DbAttributePair(fkAtt, pkAtt));
@@ -535,7 +559,9 @@ public class DbLoader {
     public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
         throws SQLException {
         DataMap dataMap =
-            (DataMap) NamedObjectFactory.createObject(DataMap.class, new DataDomain());
+            (DataMap) NamedObjectFactory.createObject(
+                DataMap.class,
+                new DataDomain());
         return loadDataMapFromDB(schemaName, tableTypes, dataMap);
     }
 
@@ -550,7 +576,8 @@ public class DbLoader {
         DataMap dataMap)
         throws SQLException {
 
-        if (!loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes))) {
+        if (!loadDbEntities(dataMap,
+            getTables(null, schemaName, "%", tableTypes))) {
             return dataMap;
         }
 

@@ -82,4 +82,11 @@ public interface DbLoaderDelegate {
     public void objEntityAdded(ObjEntity ent);
     
     public void objEntityRemoved(ObjEntity ent);
+    
+    /**
+     * This method allows delegate to do its own processing of schema of the
+     * loaded entity. For instance if a user is the schema owner, schema may be
+     * ignored.
+     */
+    public void setSchema(DbEntity ent, String schema);
 }
