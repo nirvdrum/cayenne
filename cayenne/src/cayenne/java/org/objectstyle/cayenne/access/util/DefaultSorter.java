@@ -77,6 +77,7 @@ import org.objectstyle.ashwood.graph.StrongConnection;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -138,10 +139,9 @@ public class DefaultSorter implements DependencySorter {
             DataMap map = (DataMap) i.next();
             Iterator entitiesToConvert = map.getDbEntities().iterator();
             while (entitiesToConvert.hasNext()) {
-                DbEntity entity = (DbEntity)entitiesToConvert.next();
-                Table table = new Table(entity.getCatalog(),
-                						entity.getSchema(),
-                						entity.getName());
+                DbEntity entity = (DbEntity) entitiesToConvert.next();
+                Table table =
+                    new Table(entity.getCatalog(), entity.getSchema(), entity.getName());
                 fillInMetadata(table, entity);
                 dbEntityToTableMap.put(entity, table);
                 tables.add(table);
@@ -150,11 +150,8 @@ public class DefaultSorter implements DependencySorter {
         referentialDigraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
         DbUtils.buildReferentialDigraph(referentialDigraph, tables);
         StrongConnection contractor =
-            new StrongConnection(
-                referentialDigraph,
-                CollectionFactory.ARRAYLIST_FACTORY);
-        contractedReferentialDigraph =
-            new MapDigraph(MapDigraph.HASHMAP_FACTORY);
+            new StrongConnection(referentialDigraph, CollectionFactory.ARRAYLIST_FACTORY);
+        contractedReferentialDigraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
         contractor.contract(
             contractedReferentialDigraph,
             CollectionFactory.ARRAYLIST_FACTORY);
@@ -164,8 +161,7 @@ public class DefaultSorter implements DependencySorter {
         int componentIndex = 0;
         while (sorter.hasNext()) {
             Collection component = (Collection) sorter.next();
-            ComponentRecord rec =
-                new ComponentRecord(componentIndex++, component);
+            ComponentRecord rec = new ComponentRecord(componentIndex++, component);
             for (Iterator i = component.iterator(); i.hasNext();) {
                 components.put(i.next(), rec);
             }
@@ -218,8 +214,7 @@ public class DefaultSorter implements DependencySorter {
 
         List sorted = new ArrayList(size);
 
-        Digraph objectDependencyGraph =
-            new MapDigraph(MapDigraph.HASHMAP_FACTORY);
+        Digraph objectDependencyGraph = new MapDigraph(MapDigraph.HASHMAP_FACTORY);
         DataObject[] masters = new DataObject[objRelNames.length];
         for (int i = 0; i < size; i++) {
             DataObject current = (DataObject) objects.get(i);
@@ -237,8 +232,7 @@ public class DefaultSorter implements DependencySorter {
                     masters[k] =
                         findReflexiveMaster(
                             current,
-                            (ObjRelationship) objEntity.getRelationship(
-                                objRelName),
+                            (ObjRelationship) objEntity.getRelationship(objRelName),
                             current.getObjectId().getObjClass());
                 }
 
@@ -248,9 +242,7 @@ public class DefaultSorter implements DependencySorter {
             }
             int mastersFound = 0;
 
-            for (int j = 0;
-                j < size && mastersFound < actualMasterCount;
-                j++) {
+            for (int j = 0; j < size && mastersFound < actualMasterCount; j++) {
 
                 if (i == j) {
                     continue;
@@ -319,8 +311,7 @@ public class DefaultSorter implements DependencySorter {
                         table.addForeignKey(fk);
 
                         if (newReflexive) {
-                            List reflexiveRels =
-                                (List) reflexiveDbEntities.get(entity);
+                            List reflexiveRels = (List) reflexiveDbEntities.get(entity);
                             if (reflexiveRels == null) {
                                 reflexiveRels = new ArrayList(1);
                                 reflexiveDbEntities.put(entity, reflexiveRels);
@@ -339,7 +330,14 @@ public class DefaultSorter implements DependencySorter {
         ObjRelationship toOneRel,
         Class targetClass) {
         DbRelationship finalRel = (DbRelationship) toOneRel.getDbRelationships().get(0);
-        Map snapshot = obj.getCommittedSnapshot();
+
+        Map snapshot = null;
+
+        // IMPORTANT: don't try to get snapshots for new objects, this will result in exception
+        if (obj.getPersistenceState() != PersistenceState.NEW) {
+            snapshot = obj.getCommittedSnapshot();
+        }
+
         if (snapshot == null) {
             snapshot = obj.getCurrentSnapshot();
         }
@@ -365,9 +363,7 @@ public class DefaultSorter implements DependencySorter {
     }
 
     protected Table getTable(DbEntity dbEntity) {
-        return (dbEntity != null)
-            ? (Table) dbEntityToTableMap.get(dbEntity)
-            : null;
+        return (dbEntity != null) ? (Table) dbEntityToTableMap.get(dbEntity) : null;
     }
 
     protected Table getTable(ObjEntity objEntity) {
