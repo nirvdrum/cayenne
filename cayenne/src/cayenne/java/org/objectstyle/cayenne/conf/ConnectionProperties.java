@@ -115,7 +115,7 @@ public class ConnectionProperties {
                     new ExtendedProperties(f.getAbsolutePath()));
             } else {
                 // lets touch this file so that users would get a clue of what it is
-                createSamplPropertiesFile(f);
+                createSamplePropertiesFile(f);
             }
         } catch (IOException e) {
             logObj.warn("Error loading connection properties. Ignoring..", e);
@@ -124,7 +124,7 @@ public class ConnectionProperties {
         return new ConnectionProperties(new ExtendedProperties());
     }
 
-    protected static void createSamplPropertiesFile(File f) throws IOException {
+    protected static void createSamplePropertiesFile(File f) throws IOException {
         BufferedWriter out = new BufferedWriter(new FileWriter(f));
 
         try {
