@@ -201,7 +201,6 @@ class ContextCommit {
 
 				postprocess(nodeHelper);
 			}
-			context.clearFlattenedUpdateQueries();
 			context.fireTransactionCommitted();
 		} finally {
 			if (context.isTransactionEventsEnabled()) {

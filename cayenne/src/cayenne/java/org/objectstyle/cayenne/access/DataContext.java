@@ -701,6 +701,7 @@ public class DataContext implements QueryEngine, Serializable {
         
         try {
             worker.commit(logLevel);
+            this.clearFlattenedUpdateQueries();
         } catch (CayenneException ex) {
             throw new CayenneRuntimeException(ex);
         }
@@ -1153,7 +1154,7 @@ public class DataContext implements QueryEngine, Serializable {
      * Should be called once the queries returned by getFlattenedUpdateQueries
      * have been succesfully executed or reverted and are no longer needed.
      */
-    void clearFlattenedUpdateQueries() {
+    protected void clearFlattenedUpdateQueries() {
         this.flattenedDeletes = new ArrayList();
         this.flattenedInserts = new ArrayList();
     }
@@ -1191,9 +1192,8 @@ public class DataContext implements QueryEngine, Serializable {
 
     void fireWillCommit() {
         // post event: WILL_COMMIT
-        EventManager eventMgr = EventManager.getDefaultManager();
         if (this.postDataContextTransactionEvents) {
-            //result.registerForDataContextEvents();
+			EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.WILL_COMMIT);
         }
@@ -1201,8 +1201,8 @@ public class DataContext implements QueryEngine, Serializable {
 
     void fireTransactionRolledback() {
         // post event: DID_ROLLBACK
-        EventManager eventMgr = EventManager.getDefaultManager();
         if ((this.postDataContextTransactionEvents)) {
+			EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_ROLLBACK);
         }
@@ -1210,8 +1210,8 @@ public class DataContext implements QueryEngine, Serializable {
 
     void fireTransactionCommitted() {
         // post event: DID_COMMIT
-        EventManager eventMgr = EventManager.getDefaultManager();
         if ((this.postDataContextTransactionEvents)) {
+			EventManager eventMgr = EventManager.getDefaultManager();
             DataContextEvent commitChangesEvent = new DataContextEvent(this);
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
         }
