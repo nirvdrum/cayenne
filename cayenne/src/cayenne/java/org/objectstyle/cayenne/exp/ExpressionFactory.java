@@ -213,7 +213,7 @@ public class ExpressionFactory {
      * expressions. Applied only in path expressions.
      */
     protected static Object wrapPathOperand(Object op) {
-        if (op instanceof List) {
+        if ((op instanceof List) || (op instanceof Object[])) {
             return unaryExp(Expression.LIST, op);
         } else {
             return op;
@@ -424,6 +424,13 @@ public class ExpressionFactory {
     }
 
     /**
+     * An shortcut for <code>binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+     */
+    public static Expression matchDbExp(String pathSpec, Object value) {
+        return binaryDbPathExp(Expression.EQUAL_TO, pathSpec, value);
+    }
+
+    /**
      * A convenience shortcut for <code>binaryPathExp(Expression.EQUAL_TO,
      * pathSpec, value)
      * </code>.
@@ -433,11 +440,91 @@ public class ExpressionFactory {
     }
 
     /**
-     * An shortcut for <code>binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+     * A convenience shortcut for <code>binaryPathExp(Expression.NOT_EQUAL_TO,
+     * pathSpec, value)
+     * </code>.
      */
-    public static Expression matchDbExp(String pathSpec, Object value) {
-        return binaryDbPathExp(Expression.EQUAL_TO, pathSpec, value);
+    public static Expression noMatchExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.NOT_EQUAL_TO, pathSpec, value);
     }
+
+    /**
+     * A convenience shortcut for <code>binaryPathExp(Expression.LESS_THAN,
+     * pathSpec, value)
+     * </code>.
+     */
+    public static Expression lessExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.LESS_THAN, pathSpec, value);
+    }
+
+    /**
+     * A convenience shortcut for <code>binaryPathExp(Expression.LESS_THAN_EQUAL_TO,
+     * pathSpec, value)
+     * </code>.
+     */
+    public static Expression lessOrEqualExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.LESS_THAN_EQUAL_TO, pathSpec, value);
+    }
+
+    /**
+     * A convenience shortcut for <code>binaryPathExp(Expression.GREATER_THAN,
+     * pathSpec, value)
+     * </code>.
+     */
+    public static Expression greaterExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.GREATER_THAN, pathSpec, value);
+    }
+
+    /**
+     * A convenience shortcut for <code>binaryPathExp(Expression.GREATER_THAN_EQUAL_TO,
+     * pathSpec, value)
+     * </code>.
+     */
+    public static Expression greaterOrEqualExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.GREATER_THAN_EQUAL_TO, pathSpec, value);
+    }
+
+    /**
+     * A convenience shortcut for building IN expression.
+     */
+    public static Expression inExp(String pathSpec, Object[] values) {
+        return binaryPathExp(Expression.IN, pathSpec, wrapPathOperand(values));
+    }
+
+    /**
+     * A convenience shortcut for building IN expression.
+     */
+    public static Expression inExp(String pathSpec, List values) {
+        return binaryPathExp(Expression.IN, pathSpec, wrapPathOperand(values));
+    }
+
+    /**
+     * A convenience shortcut for building BETWEEN expressions.
+     */
+    public static Expression betweenExp(
+        String pathSpec,
+        Object value1,
+        Object value2) {
+        Expression path = unaryExp(Expression.OBJ_PATH, pathSpec);
+        return ternaryExp(Expression.BETWEEN, path, value1, value2);
+    }
+
+    /**
+     * A convenience shortcut for <code>binaryPathExp(Expression.LIKE, pathSpec,
+     * value)</code>.
+     */
+    public static Expression likeExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.LIKE, pathSpec, value);
+    }
+
+    /**
+     * A convenience shortcut for <code>binaryPathExp(Expression.
+     * LIKE_IGNORE_CASE, pathSpec, value)</code>.
+     */
+    public static Expression likeIgnoreCaseExp(String pathSpec, Object value) {
+        return binaryPathExp(Expression.LIKE_IGNORE_CASE, pathSpec, value);
+    }
+    
 
     /** 
      * Joins all <code>expressions</code> in a single expression. 
