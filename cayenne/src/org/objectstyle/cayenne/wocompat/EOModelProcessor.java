@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.wocompat;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.wocompat;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.wocompat;
 
 import java.io.*;
 import java.net.URL;
@@ -176,7 +176,7 @@ public class EOModelProcessor {
 
             Object allowsNull = attrMap.get("allowsNull");
             dbAttr.setMandatory(!"Y".equals(allowsNull));
-            if (classProps.contains(attrName)) {
+            if (classProps != null && classProps.contains(attrName)) {
                 ObjAttribute attr = new ObjAttribute(attrName, javaType, e);
                 attr.setDbAttribute(dbAttr);
                 e.addAttribute(attr);
