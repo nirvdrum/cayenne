@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.dataport.ant;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Task;
@@ -72,6 +73,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 public class AntDataPortDelegate implements DataPortDelegate
 {
   private static final Perl5Util regexUtil = new Perl5Util();
+  private static final String[] emptyArray = new String[0];
 
   protected Task parentTask;
   protected String[] mapFilters;
@@ -88,6 +90,35 @@ public class AntDataPortDelegate implements DataPortDelegate
     String excludeEntitiesPattern)
   {
     this.parentTask = parentTask;
+
+    mapFilters = tokenizePattern(mapsPattern);
+    entityIncludeFilters = tokenizePattern(includeEntitiesPattern);
+    entityExcludeFilters = tokenizePattern(excludeEntitiesPattern);
+  }
+
+  protected String[] tokenizePattern(String pattern)
+  {
+    if (pattern != null && pattern.length() > 0)
+    {
+      StringTokenizer toks = new StringTokenizer(pattern, ",");
+
+      int len = toks.countTokens();
+      if (len == 0)
+      {
+        return emptyArray;
+      }
+
+      String[] patterns = new String[len];
+      for (int i = 0; i < len; i++)
+      {
+        patterns[i] = toks.nextToken();
+      }
+      return patterns;
+    }
+    else
+    {
+      return emptyArray;
+    }
   }
 
   /**
