@@ -107,8 +107,8 @@ public abstract class Configuration {
       * custom Configuration subclass. */
     public static void initSharedConfig(String configClass) {
         Configuration conf = null;
-        
-        // separate instantiation exceptions from the 
+
+        // separate instantiation exceptions from the
         // possible runtime exceptions thown in initSharedConfig
         try {
             conf = (Configuration)Class.forName(configClass).newInstance();
@@ -116,11 +116,11 @@ public abstract class Configuration {
             logObj.log(Level.SEVERE, "Error initializing shared Configuration", ex);
             throw new RuntimeException("Error initializing shared Configuration");
         }
-        
+
         initSharedConfig(conf);
     }
-    
-    
+
+
     /** Sets shared Configuration object to a new Configuration object.
       * calls <code>init</code> method of <code>conf</code> object. */
     public static void initSharedConfig(Configuration conf) {
@@ -159,14 +159,14 @@ public abstract class Configuration {
                                       + "\" is not found in CLASSPATH. Current CLASSPATH is: "
                                       + System.getProperty("java.class.path"));
 
-        DomainHelper helper = new DomainHelper(this);        
+        DomainHelper helper = new DomainHelper(this);
         if(!helper.loadDomains(in)) {
             throw new ConfigException("Failed to load domain and/or its maps/nodes.");
         }
-        
+
         Iterator it = helper.getDomains().iterator();
         while(it.hasNext()) {
-            addDomain((DataDomain)it.next());            
+            addDomain((DataDomain)it.next());
         }
     }
 
@@ -181,6 +181,23 @@ public abstract class Configuration {
       * or null if no such domain is found. */
     public DataDomain getDomain(String name) {
         return (DataDomain)dataDomains.get(name);
+    }
+
+
+    /** Returns default domain of this configuration. If no domains
+      * are configured, null is returned. If more then 1 domain exists
+      * in this configuration, an exception is thrown. In such cases
+      * <code>getDomain(String name)</code> method must be used. */
+    public DataDomain getDomain() {
+        int size = dataDomains.size();
+        if(size == 0) {
+            return null;
+        } else if(size == 1) {
+            Iterator it = dataDomains.keySet().iterator();
+            return (DataDomain)dataDomains.get(it.next());
+        } else {
+            throw new CayenneRuntimeException("More then 1 domain is configured, use 'getDomain(String name)' instead.");
+        }
     }
 
 
