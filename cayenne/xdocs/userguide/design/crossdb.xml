@@ -7,7 +7,7 @@
 </navigator>
 <body>
     <section name="4. Design">
-        <subsection name="4.5 Cross-Database Issues" anchor="crossdb">
+        <subsection name="4.6 Cross-Database Issues" anchor="crossdb">
         	<p>JDBC specification was created by Sun to provide a uniform
         	way of connecting to relational databases from the Java code.
         	In theory this should allow Java developer to create database-aware

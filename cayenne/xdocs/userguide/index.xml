@@ -32,11 +32,12 @@
             <ul>
                 <li><a href="design/index.html#or_map">4.1 Object Relational Mapping</a></li>
                 <li><a href="design/dataobj.html#do">4.2 Data Objects</a></li>
-                <li><a href="design/access.html#access_classes">4.3 Access Classes</a></li>
-                <li><a href="design/datasrc.html#connect">4.4 Cayenne DataSource</a></li>
-                <li><a href="design/crossdb.html#crossdb">4.5 Cross-Database Issues</a></li>
-                <li><a href="design/autopk.html#pk">4.6 Primary Key Generation</a></li>
-                <li><a href="design/config.html#config">4.7 Configuration</a></li>
+                <li><a href="design/query.html#query">4.3 Queries: Retrieving Objects</a></li>
+                <li><a href="design/access.html#access_classes">4.4 Access Classes</a></li>
+                <li><a href="design/datasrc.html#connect">4.5 Cayenne DataSource</a></li>
+                <li><a href="design/crossdb.html#crossdb">4.6 Cross-Database Issues</a></li>
+                <li><a href="design/autopk.html#pk">4.7 Primary Key Generation</a></li>
+                <li><a href="design/config.html#config">4.8 Configuration</a></li>
             </ul></li>
             
             <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>

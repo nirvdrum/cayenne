@@ -2,13 +2,13 @@
 <title>User Guide - Design</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/design/crossdb.html</prev>
-	<next>/userguide/design/config.html</next>
+	<prev>/userguide/design/dataobj.html</prev>
+	<next>/userguide/design/access.html</next>
 </navigator>
 <body>
     <section name="4. Design">
-        <subsection name="4.7 Primary Key Generation" anchor="pk">
-            <p> To Be Done </p>
+       <subsection name="4.3 Queries: Retrieving Objects" anchor="query">
+            <p>To Be Done</p>
         </subsection>
     </section>
 </body>
