@@ -156,7 +156,7 @@
     <!-- It does not include source  code or        -->
     <!-- documentation.                             -->
     <!-- ========================================== -->
-    <target name="dist" depends="prepare,compile_subprojects,jar,jar-other"
+    <target name="dist" depends="prepare,compile_subprojects,jar,jar-other,jar-nodeps"
         description="Creates Cayenne development, distribution including all code dependencies.">
         <copy file="doc/LICENSE" todir="${dist}"/>
 

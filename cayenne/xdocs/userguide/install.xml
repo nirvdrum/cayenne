@@ -22,7 +22,7 @@
             JDBC driver available but this is untested and not guaranteed. List of
             available JDBC drivers can be found at 
             <a href="http://industry.java.sun.com/products/jdbc/drivers">
-            http://industry.java.sun.com/products/jdbc/drivers</a>
+            http://industry.java.sun.com/products/jdbc/drivers</a>.
             <i>Note that to run Cayenne unit tests you will need "CREATE TABLE" and 
             "DROP TABLE" database privileges since tests supplied with 
             Cayenne will create all the tables on the fly.</i>
@@ -62,17 +62,37 @@
                 
             <source># tar xzf [filename].tar.gz</source>
             
-            <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by your 
-            applications that use Cayenne. This can be done in many different ways depending on
-            what you are planning to use Cayenne for. The simplest way is to copy
-            <code>cayenne.jar</code> to your JRE extensions directory 
-            ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext).</p>
-                 
-            <p>Installation is complete. Further in this section we explain how to run Cayenne unit tests.</p>
-                
+            <p>Installation is complete.</p>
         </subsection>
         
-        <subsection name="2.3 Unit Tests" anchor="tests">        
+        
+        <subsection name="2.3 Cayenne JAR Files" anchor="jar">
+            <p>There are two JAR files in <code>[cayenne_install_dir]/lib</code>
+            directory: <code>cayenne.jar</code> and <code>cayenne-nodeps.jar</code>. 
+            Either one or another should be used (<strong>but not both of them</strong>
+            at the same time).
+            In most cases <code>cayenne.jar</code> is the best choice. It has 
+            Cayenne classes as well as all the needed dependencies. 
+            Dependencies include <a href="http://jakarta.apache.org/velocity/">Velocity 
+            Template Engine</a> classes, and are bundled with Cayenne for simpler installation 
+            and configuration. A leaner <code>cayenne-nodeps.jar</code> file
+            should only be used if Velocity is already installed on the user machine
+            or a user wants to install it herself. 
+            <i>Note that Cayenne was tested with Velocity version 1.3. 
+            There is no guarantee that it will work with other versions.</i>
+            </p>
+            
+            <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by 
+			the 
+            applications that use Cayenne. This can be done in many different ways depending on
+            what you are planning to use Cayenne for. The simplest way is to copy
+            <code>cayenne.jar</code> (or <code>cayenne-nodeps.jar</code> 
+            to your JRE extensions directory 
+            ($JRE_HOME/lib/ext or $JAVA_HOME/jre/lib/ext).</p>
+        </subsection>
+        
+        
+        <subsection name="2.4 Unit Tests" anchor="tests">        
             <p>[Optional] Run tests. To do that, you will need to set the following
             environment variables:</p>
             
