@@ -82,7 +82,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         ObjEntity oe1 = new ObjEntity("oe1");
         DbEntity de1 = new DbEntity("de1");
         oe1.setDbEntityName("de1");
-        oe1.setClassName("java.class.name");
+        oe1.setClassName("some.javaclass.name");
         map.addObjEntity(oe1);
         map.addDbEntity(de1);
 
@@ -142,7 +142,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         //WARNING is ok - null class name will give that, but ERROR is bad
 
         //Give one a class name - still valid
-        oe1.setClassName("java.class.name");
+        oe1.setClassName("some.javaclassclass.name");
         validator.reset();
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
@@ -150,7 +150,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         assertValidator(ValidationInfo.VALID); //Must be valid - this class has a name
 
         //Give the other the same class name - no longer valid
-        oe2.setClassName("java.class.name");
+        oe2.setClassName("some.javaclassclass.name");
         validator.reset();
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
