@@ -69,6 +69,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.EntityResolver;
+import org.objectstyle.cayenne.access.SnapshotManager;
 import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
@@ -90,7 +91,7 @@ public class CayenneDataObject implements DataObject {
     protected ObjectId objectId;
     protected transient int persistenceState = PersistenceState.TRANSIENT;
     protected transient DataContext dataContext;
-    protected Map props = new HashMap();
+    protected Map values = new HashMap();
 
     /** Returns a data context this object is registered with, or null
      * if this object has no associated DataContext */
@@ -114,8 +115,12 @@ public class CayenneDataObject implements DataObject {
         return persistenceState;
     }
 
-    public void setPersistenceState(int newState) {
-        persistenceState = newState;
+    public void setPersistenceState(int persistenceState) {
+        this.persistenceState = persistenceState;
+
+        if (persistenceState == PersistenceState.HOLLOW) {
+            values.clear();
+        }
     }
 
     /**
@@ -164,27 +169,33 @@ public class CayenneDataObject implements DataObject {
             // if a null value is returned, 
             // there is still a chance to find a non-persistent property
             // via reflection
-            if (obj == null && !props.containsKey(pathComp)) {
+            if (obj == null && !values.containsKey(pathComp)) {
                 try {
+                    // TODO: BeanUtils.getSimpleProperty only retruns String!!!!!
                     obj = BeanUtils.getSimpleProperty(dataObj, pathComp);
-                } catch (IllegalAccessException e) {
+                }
+                catch (IllegalAccessException e) {
                     throw new CayenneRuntimeException(
                         "Error reading property '" + pathComp + "'.",
                         e);
-                } catch (InvocationTargetException e) {
+                }
+                catch (InvocationTargetException e) {
                     throw new CayenneRuntimeException(
                         "Error reading property '" + pathComp + "'.",
                         e);
-                } catch (NoSuchMethodException e) {
+                }
+                catch (NoSuchMethodException e) {
                     // ignoring, no such property exists
                 }
             }
 
             if (obj == null) {
                 return null;
-            } else if (obj instanceof CayenneDataObject) {
+            }
+            else if (obj instanceof CayenneDataObject) {
                 dataObj = (CayenneDataObject) obj;
-            } else {
+            }
+            else {
                 terminal = true;
             }
         }
@@ -192,45 +203,58 @@ public class CayenneDataObject implements DataObject {
         return obj;
     }
 
+    protected void resolveFault() {
+        try {
+            // first try refreshing from snapshot
+            Map snapshot = dataContext.getObjectStore().getSnapshot(objectId);
+
+            if (snapshot != null) {
+                ObjEntity entity = dataContext.getEntityResolver().lookupObjEntity(this);
+                SnapshotManager.refreshObjectWithSnapshot(entity, this, snapshot, true);
+            }
+            else {
+                dataContext.refetchObject(objectId);
+            }
+        }
+        catch (Exception ex) {
+            // TODO: add some sort of delegate method here. Quietly
+            // making object TRANSIENT doesn't seem right
+            logObj.info("Error refetching object, making transient.", ex);
+            setPersistenceState(PersistenceState.TRANSIENT);
+        }
+
+        if (persistenceState == PersistenceState.HOLLOW) {
+            persistenceState = PersistenceState.COMMITTED;
+        }
+    }
+
     protected Object readProperty(String propName) {
         if (persistenceState == PersistenceState.HOLLOW) {
-            try {
-                dataContext.refetchObject(objectId);
-            } catch (Exception ex) {
-                // TODO: add some sort of delegate method here. Quietly
-                // making object TRANSIENT doesn't seem right
-                logObj.info("Error refetching object, making transient.", ex);
-                setPersistenceState(PersistenceState.TRANSIENT);
-            }
+            resolveFault();
         }
 
         return readPropertyDirectly(propName);
     }
 
     public Object readPropertyDirectly(String propName) {
-        return props.get(propName);
+        return values.get(propName);
     }
 
     protected void writeProperty(String propName, Object val) {
         if (persistenceState == PersistenceState.HOLLOW) {
-            try {
-                dataContext.refetchObject(objectId);
-                persistenceState = PersistenceState.MODIFIED;
-            } catch (Exception ex) {
-                // TODO: add some sort of delegate method here. Quietly
-                // making object TRANSIENT doesn't seem right
-                logObj.info("Error refetching object, making transient.", ex);
-                setPersistenceState(PersistenceState.TRANSIENT);
-            }
-        } else if (persistenceState == PersistenceState.COMMITTED) {
+            resolveFault();
             persistenceState = PersistenceState.MODIFIED;
         }
+        else if (persistenceState == PersistenceState.COMMITTED) {
+            persistenceState = PersistenceState.MODIFIED;
+        }
+        // else if we are deleted or new no persistence state change needed
 
         writePropertyDirectly(propName, val);
     }
 
     public void writePropertyDirectly(String propName, Object val) {
-        props.put(propName, val);
+        values.put(propName, val);
     }
 
     public DataObject readToOneDependentTarget(String relName) {
@@ -270,24 +294,17 @@ public class CayenneDataObject implements DataObject {
         return dobj;
     }
 
-    public void removeToManyTarget(
-        String relName,
-        DataObject val,
-        boolean setReverse) {
+    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
         ObjRelationship relationship = this.getRelationshipNamed(relName);
         //Only delete the internal object if we should "setReverse" (or rather, if we aren't not setting the reverse).
         //This kind of doubles up the meaning of that flag, so we may need to add another?
         if (relationship.isFlattened() && setReverse) {
             if (relationship.isReadOnly()) {
                 throw new CayenneRuntimeException(
-                    "Cannot modify (remove from) the read-only relationship "
-                        + relName);
+                    "Cannot modify (remove from) the read-only relationship " + relName);
             }
             //Handle removing from a flattened relationship
-            dataContext.registerFlattenedRelationshipDelete(
-                this,
-                relationship,
-                val);
+            dataContext.registerFlattenedRelationshipDelete(this, relationship, val);
         }
 
         //Now do the rest of the normal handling (regardless of whether it was flattened or not)
@@ -302,10 +319,7 @@ public class CayenneDataObject implements DataObject {
         }
     }
 
-    public void addToManyTarget(
-        String relName,
-        DataObject val,
-        boolean setReverse) {
+    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
         if ((val != null) && (dataContext != val.getDataContext())) {
             throw new CayenneRuntimeException(
                 "Cannot add object to relationship "
@@ -324,14 +338,10 @@ public class CayenneDataObject implements DataObject {
         if (relationship.isFlattened() && setReverse) {
             if (relationship.isReadOnly()) {
                 throw new CayenneRuntimeException(
-                    "Cannot modify (add to) the read-only relationship "
-                        + relName);
+                    "Cannot modify (add to) the read-only relationship " + relName);
             }
             //Handle adding to a flattened relationship
-            dataContext.registerFlattenedRelationshipInsert(
-                this,
-                relationship,
-                val);
+            dataContext.registerFlattenedRelationshipInsert(this, relationship, val);
         }
 
         //Now do the rest of the normal handling (regardless of whether it was flattened or not)
@@ -352,10 +362,7 @@ public class CayenneDataObject implements DataObject {
         setToOneTarget(relName, val, true);
     }
 
-    public void setToOneTarget(
-        String relName,
-        DataObject val,
-        boolean setReverse) {
+    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
         //Three reasons that may mean a check is not needed:
         // 1: val==null... dataContext of value is unobtainable, and hence irrelevant
         // 2: val==nullValue... the relationship is a toOneDependent, this is functionally
@@ -474,17 +481,19 @@ public class CayenneDataObject implements DataObject {
 
     protected void appendProperties(StringBuffer buf) {
         buf.append("[");
-        Iterator it = props.keySet().iterator();
+        Iterator it = values.keySet().iterator();
         while (it.hasNext()) {
             Object key = it.next();
             buf.append('\t').append(key).append(" => ");
-            Object val = props.get(key);
+            Object val = values.get(key);
 
             if (val instanceof CayenneDataObject) {
                 ((CayenneDataObject) val).toStringBuffer(buf, false);
-            } else if (val instanceof List) {
+            }
+            else if (val instanceof List) {
                 buf.append('(').append(val.getClass().getName()).append(')');
-            } else
+            }
+            else
                 buf.append(val);
 
             buf.append('\n');
@@ -514,8 +523,8 @@ public class CayenneDataObject implements DataObject {
             case PersistenceState.TRANSIENT :
             case PersistenceState.NEW :
             case PersistenceState.MODIFIED :
-			case PersistenceState.DELETED :
-                out.writeObject(props);
+            case PersistenceState.DELETED :
+                out.writeObject(values);
                 break;
         }
 
@@ -530,19 +539,19 @@ public class CayenneDataObject implements DataObject {
             case PersistenceState.TRANSIENT :
             case PersistenceState.NEW :
             case PersistenceState.MODIFIED :
-			case PersistenceState.DELETED :
-                props = (Map) in.readObject();
+            case PersistenceState.DELETED :
+                values = (Map) in.readObject();
                 break;
             case PersistenceState.COMMITTED :
             case PersistenceState.HOLLOW :
                 this.persistenceState = PersistenceState.HOLLOW;
                 //props will be populated when required (readProperty called)
-                props = new HashMap();
+                values = new HashMap();
                 break;
         }
 
         this.objectId = (ObjectId) in.readObject();
-        
+
         // DataContext will be set *IF* the DataContext it came from is also
         // deserialized.  Setting of DataContext is handled by the DataContext itself
     }

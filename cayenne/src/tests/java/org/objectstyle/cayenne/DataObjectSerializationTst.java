@@ -121,7 +121,7 @@ public class DataObjectSerializationTst extends CayenneTestCase {
 
         // everything must be deserialized, but DataContext link should stay null,
         // and properties shouldn't be populated
-        // deserizalized commitrted object is HOLLOW
+        // deserizalized committed object is HOLLOW
         assertEquals(
             "Unexpected persistence state: "
                 + PersistenceState.persistenceStateName(deserialized.getPersistenceState()),

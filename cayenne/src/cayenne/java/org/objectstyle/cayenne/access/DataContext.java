@@ -299,14 +299,13 @@ public class DataContext implements QueryEngine, Serializable {
      * Newly created object is registered with this DataContext.
      *
      * <p>Internally this method calls
-     * <code>objectFromDataRow(ObjEntity, Map, boolean)</code>
+     *  #objectFromDataRow(org.objectststyle.cayenne.map.ObjEntity,java.util.Map,boolean)
+     * objectFromDataRow(ObjEntity, Map, boolean)}
      * with <code>false</code> "refersh" parameter.</p>
      */
     public DataObject objectFromDataRow(String entityName, Map dataRow) {
         ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
-        return (ent.isReadOnly())
-            ? readOnlyObjectFromDataRow(ent, dataRow, false)
-            : objectFromDataRow(ent, dataRow, false);
+        return objectFromDataRow(ent, dataRow, false);
     }
 
     /**
@@ -348,25 +347,17 @@ public class DataContext implements QueryEngine, Serializable {
     /**
      * Creates and returns a read-only DataObject from a data row (snapshot).
      * Newly created object is registered with this DataContext.
+     * 
+     * @deprecated Since 1.1 This method is not used in Cayenne anymore. Use
+     * #objectFromDataRow(org.objectststyle.cayenne.map.ObjEntity,java.util.Map,boolean)
+     * objectFromDataRow(ObjEntity, Map, boolean)} instead.
      */
     protected DataObject readOnlyObjectFromDataRow(
         ObjEntity objEntity,
         Map dataRow,
         boolean refresh) {
-        	
-        ObjectId anId = SnapshotManager.objectIdFromSnapshot(objEntity, dataRow);
 
-        // this will create a HOLLOW object if it is not registered yet
-        DataObject obj = registeredObject(anId);
-
-        if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
-            SnapshotManager.refreshObjectWithSnapshot(objEntity, obj, dataRow);
-
-            // notify object that it was fetched
-            obj.fetchFinished();
-        }
-
-        return obj;
+        return this.objectFromDataRow(objEntity, dataRow, refresh);
     }
 
     /**
@@ -679,11 +670,7 @@ public class DataContext implements QueryEngine, Serializable {
                         //Do the same as for modified... deleted is only a persistence state, so
                         // rolling the object back will set the state to committed
                     case PersistenceState.MODIFIED :
-                        ObjEntity oe = getEntityResolver().lookupObjEntity(thisObject);
-                        SnapshotManager.refreshObjectWithSnapshot(
-                            oe,
-                            thisObject,
-                            thisObject.getCommittedSnapshot());
+                        thisObject.setPersistenceState(PersistenceState.HOLLOW);
                         break;
                     default :
                         //Transient, committed and hollow need no handling

@@ -81,7 +81,6 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * SnapshotManager handles snapshot (data row) operations on objects.
  * This is a helper class that works in conjunction with DataContext.
- * Used as a singleton.
  *
  * @author Andrei Adamchik
  */
@@ -111,8 +110,10 @@ public class SnapshotManager {
      * CayenneRuntimeException is thrown.
      */
     public static ObjectId objectIdFromSnapshot(ObjEntity entity, Map snapshot) {
-        // PK.size == 1 is a special (and most common) case
-        // add some minimum optimization...
+
+        // ... handle special case - PK.size == 1
+        //     use some not-so-significant optimizations...
+
         List pk = entity.getDbEntity().getPrimaryKey();
         if (pk.size() == 1) {
             DbAttribute attr = (DbAttribute) pk.get(0);
@@ -157,18 +158,19 @@ public class SnapshotManager {
      * in which case the state is set to HOLLOW
      */
     public static void refreshObjectWithSnapshot(
-        ObjEntity ent,
-        DataObject anObject,
-        Map snapshot) {
+        ObjEntity objEntity,
+        DataObject object,
+        Map snapshot,
+        boolean invalidateToManyRelationships) {
 
-        Map attrMap = ent.getAttributeMap();
+        Map attrMap = objEntity.getAttributeMap();
         Iterator it = attrMap.keySet().iterator();
         boolean isPartialSnapshot = false;
         while (it.hasNext()) {
             String attrName = (String) it.next();
             ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
             String dbAttrPath = attr.getDbAttributePath();
-            anObject.writePropertyDirectly(attrName, snapshot.get(dbAttrPath));
+            object.writePropertyDirectly(attrName, snapshot.get(dbAttrPath));
             if (!snapshot.containsKey(dbAttrPath)) {
                 //Note the distinction between
                 // 1) the map returning null because there was no mapping
@@ -180,18 +182,33 @@ public class SnapshotManager {
             }
         }
 
-        DataContext context = anObject.getDataContext();
+        DataContext context = object.getDataContext();
         ToManyListDataSource relDataSource = context.getRelationshipDataSource();
 
-        Iterator rit = ent.getRelationships().iterator();
+        Iterator rit = objEntity.getRelationships().iterator();
         while (rit.hasNext()) {
             ObjRelationship rel = (ObjRelationship) rit.next();
             if (rel.isToMany()) {
+            	
                 // "to many" relationships have no information to collect from snapshot
-                // simply initialize a new empty list...
-                ToManyList relList =
-                    new ToManyList(relDataSource, anObject.getObjectId(), rel.getName());
-                anObject.writePropertyDirectly(rel.getName(), relList);
+                // initialize a new empty list if requested, but otherwise 
+                // ignore snapshot data
+
+                ToManyList toManyList =
+                    (ToManyList) object.readPropertyDirectly(rel.getName());
+                    
+                if (toManyList == null) {
+                    object.writePropertyDirectly(
+                        rel.getName(),
+                        new ToManyList(
+                            relDataSource,
+                            object.getObjectId(),
+                            rel.getName()));
+                }
+                else if(invalidateToManyRelationships) {
+					toManyList.invalidateObjectList();
+                }
+
                 continue;
             }
 
@@ -205,9 +222,9 @@ public class SnapshotManager {
                 // and the source idsnapshot in order for later code 
                 // to be able to perform an appropriate fetch
                 FlattenedObjectId objectid =
-                    new FlattenedObjectId(targetClass, anObject, rel.getName());
+                    new FlattenedObjectId(targetClass, object, rel.getName());
                 Object newObject = context.registeredObject(objectid);
-                anObject.writePropertyDirectly(rel.getName(), newObject);
+                object.writePropertyDirectly(rel.getName(), newObject);
                 continue;
             }
 
@@ -219,16 +236,16 @@ public class SnapshotManager {
             }
 
             ObjectId id = targetObjectId(targetClass, dbRel, snapshot);
-            DataObject object = (id != null) ? context.registeredObject(id) : null;
+            DataObject targetObject = (id != null) ? context.registeredObject(id) : null;
 
-            anObject.writePropertyDirectly(rel.getName(), object);
+            object.writePropertyDirectly(rel.getName(), targetObject);
         }
 
         if (isPartialSnapshot) {
-            anObject.setPersistenceState(PersistenceState.HOLLOW);
+            object.setPersistenceState(PersistenceState.HOLLOW);
         }
         else {
-            anObject.setPersistenceState(PersistenceState.COMMITTED);
+            object.setPersistenceState(PersistenceState.COMMITTED);
         }
 
     }
@@ -244,61 +261,67 @@ public class SnapshotManager {
         DataObject anObject,
         Map snapshot) {
 
-        if (anObject.getPersistenceState() == PersistenceState.HOLLOW) {
-            refreshObjectWithSnapshot(entity, anObject, snapshot);
-            return;
+        if (entity.isReadOnly()
+            || anObject.getPersistenceState() == PersistenceState.HOLLOW) {
+            refreshObjectWithSnapshot(entity, anObject, snapshot, true);
         }
-
-        DataContext context = anObject.getDataContext();
-        Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
-
-        // attributes
-        Map attrMap = entity.getAttributeMap();
-        Iterator it = attrMap.keySet().iterator();
-        while (it.hasNext()) {
-            String attrName = (String) it.next();
-            ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
-
-            //processing compound attributes correctly
-            String dbAttrPath = attr.getDbAttributePath();
-            Object curVal = anObject.readPropertyDirectly(attrName);
-            Object oldVal = oldSnap.get(dbAttrPath);
-            Object newVal = snapshot.get(dbAttrPath);
-
-            // if value not modified, update it from snapshot,
-            // otherwise leave it alone
-            if (Util.nullSafeEquals(curVal, oldVal)
-                && !Util.nullSafeEquals(newVal, curVal)) {
-                anObject.writePropertyDirectly(attrName, newVal);
-            }
+        else if (anObject.getPersistenceState() == PersistenceState.COMMITTED) {
+            // do not invalidate to-many relationships, since they might have just been prefetched...
+            refreshObjectWithSnapshot(entity, anObject, snapshot, false);
         }
+        else {
+            DataContext context = anObject.getDataContext();
+            Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
 
-        // merge to-one relationships
-        Iterator rit = entity.getRelationships().iterator();
-        while (rit.hasNext()) {
-            ObjRelationship rel = (ObjRelationship) rit.next();
-            if (rel.isToMany()) {
-                continue;
+            // attributes
+            Map attrMap = entity.getAttributeMap();
+            Iterator it = attrMap.keySet().iterator();
+            while (it.hasNext()) {
+                String attrName = (String) it.next();
+                ObjAttribute attr = (ObjAttribute) attrMap.get(attrName);
+
+                //processing compound attributes correctly
+                String dbAttrPath = attr.getDbAttributePath();
+                Object curVal = anObject.readPropertyDirectly(attrName);
+                Object oldVal = oldSnap.get(dbAttrPath);
+                Object newVal = snapshot.get(dbAttrPath);
+
+                // if value not modified, update it from snapshot,
+                // otherwise leave it alone
+                if (Util.nullSafeEquals(curVal, oldVal)
+                    && !Util.nullSafeEquals(newVal, curVal)) {
+                    anObject.writePropertyDirectly(attrName, newVal);
+                }
             }
 
-            // TODO: will this work for flattened, how do we save snapshots for them?
+            // merge to-one relationships
+            Iterator rit = entity.getRelationships().iterator();
+            while (rit.hasNext()) {
+                ObjRelationship rel = (ObjRelationship) rit.next();
+                if (rel.isToMany()) {
+                    continue;
+                }
 
-            // if value not modified, update it from snapshot,
-            // otherwise leave it alone
-            if (!isToOneTargetModified(rel, anObject, oldSnap)
-                && isJoinAttributesModified(rel, snapshot, oldSnap)) {
+                // TODO: will this work for flattened, how do we save snapshots for them?
 
-                DbRelationship dbRelationship =
-                    (DbRelationship) rel.getDbRelationships().get(0);
+                // if value not modified, update it from snapshot,
+                // otherwise leave it alone
+                if (!isToOneTargetModified(rel, anObject, oldSnap)
+                    && isJoinAttributesModified(rel, snapshot, oldSnap)) {
 
-                ObjectId id =
-                    targetObjectId(
-                        ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
-                        dbRelationship,
-                        snapshot);
-                DataObject target = (id != null) ? context.registeredObject(id) : null;
+                    DbRelationship dbRelationship =
+                        (DbRelationship) rel.getDbRelationships().get(0);
 
-                anObject.writePropertyDirectly(rel.getName(), target);
+                    ObjectId id =
+                        targetObjectId(
+                            ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
+                            dbRelationship,
+                            snapshot);
+                    DataObject target =
+                        (id != null) ? context.registeredObject(id) : null;
+
+                    anObject.writePropertyDirectly(rel.getName(), target);
+                }
             }
         }
     }
