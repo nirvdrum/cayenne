@@ -57,8 +57,10 @@
 package org.objectstyle.cayenne;
 
 /** 
- * RuntimeException subclass thrown in cases of failed
- * cayenne configuration attempts. 
+ * A ConfigException is a runtime exception
+ * thrown on failures in Cayenne configuration.
+ * 
+ * @author Andrei Adamchik 
  */
 public class ConfigException extends CayenneRuntimeException {
     

@@ -187,10 +187,7 @@ public class DataContextTst extends CayenneTestCase {
 	 */
 	public void testCharInQualifier() throws Exception {
 		Expression e =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				"artist1");
+			ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "artist1");
 		SelectQuery q = new SelectQuery("Artist", e);
 		List artists = ctxt.performQuery(q);
 		assertEquals(1, artists.size());
@@ -202,16 +199,13 @@ public class DataContextTst extends CayenneTestCase {
 	 */
 	public void testPrefetch1() throws Exception {
 		Expression e =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				"a");
+			ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
 		SelectQuery q = new SelectQuery("Artist", e);
 		q.addPrefetch("paintingArray");
 
 		SelectObserver o = new SelectObserver();
 		ctxt.performQuery(q, o);
-		
+
 		assertEquals(2, o.getSelectCount());
 	}
 
@@ -221,10 +215,7 @@ public class DataContextTst extends CayenneTestCase {
 	 */
 	public void testPrefetch2() throws Exception {
 		Expression e =
-			ExpressionFactory.binaryPathExp(
-				Expression.EQUAL_TO,
-				"artistName",
-				"a");
+			ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "a");
 		SelectQuery q = new SelectQuery("Artist", e);
 		q.addPrefetch("paintingArray");
 		q.addPrefetch("paintingArray.toGallery");
@@ -232,99 +223,100 @@ public class DataContextTst extends CayenneTestCase {
 
 		SelectObserver o = new SelectObserver();
 		ctxt.performQuery(q, o);
-		
+
 		assertEquals(4, o.getSelectCount());
 	}
-	
-	
+
 	/** 
 	 * Test that a to-many relationship is initialized.
 	 */
 	public void testPrefetch3() throws Exception {
 		populatePaintings();
-		
+
 		SelectQuery q = new SelectQuery("Artist");
 		q.addPrefetch("paintingArray");
 
-		CayenneDataObject a1 = (CayenneDataObject)ctxt.performQuery(q).get(0);
-        ToManyList toMany = (ToManyList)a1.readPropertyDirectly("paintingArray");
-        // assertTrue(!toMany.needsFetch());
+		CayenneDataObject a1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+		ToManyList toMany = (ToManyList) a1.readPropertyDirectly("paintingArray");
+		// assertTrue(!toMany.needsFetch());
 	}
-	
+
 	/** 
 	 * Test that a to-one relationship is initialized.
 	 */
 	public void testPrefetch4() throws Exception {
 		populatePaintings();
-		
+
 		SelectQuery q = new SelectQuery("Painting");
 		q.addPrefetch("toArtist");
 
-		CayenneDataObject p1 = (CayenneDataObject)ctxt.performQuery(q).get(0);
-        CayenneDataObject a1 = (CayenneDataObject)p1.readPropertyDirectly("toArtist");
-        
-        assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
+		CayenneDataObject p1 = (CayenneDataObject) ctxt.performQuery(q).get(0);
+		CayenneDataObject a1 = (CayenneDataObject) p1.readPropertyDirectly("toArtist");
+
+		assertEquals(PersistenceState.COMMITTED, a1.getPersistenceState());
 	}
-	
-	
+
 	/** 
 	 * Test prefetching with queries using DB_PATH.
 	 */
 	public void testPrefetch5() throws Exception {
 		populatePaintings();
-		
+
 		SelectQuery q = new SelectQuery("Painting");
-		q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+		q.andQualifier(
+			ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
 		q.addPrefetch("toArtist");
-		q.setLoggingLevel(Level.WARN);
-		
+		q.setLoggingLevel(Level.INFO);
+
 		List results = ctxt.performQuery(q);
-        assertEquals(1, results.size());
+		assertEquals(1, results.size());
 	}
-	
+
 	/** 
 	 * Test prefetching with queries using OBJ_PATH.
 	 */
 	public void testPrefetch6() throws Exception {
 		populatePaintings();
-		
+
 		SelectQuery q = new SelectQuery("Painting");
 		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
 		q.addPrefetch("toArtist");
-		q.setLoggingLevel(Level.WARN);
-		
+		q.setLoggingLevel(Level.INFO);
+
 		List results = ctxt.performQuery(q);
-        assertEquals(1, results.size());
+		assertEquals(1, results.size());
 	}
-	
+
 	/** 
 	 * Test fetching query with multiple relationship
 	 * paths between the same 2 entities used in qualifier.
 	 */
 	public void testMultiObjRelFetch() throws Exception {
 		populatePaintings();
-		
+
 		SelectQuery q = new SelectQuery("Painting");
 		q.andQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(2)));
 		q.orQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(4)));
 		List results = ctxt.performQuery(q);
-        
-        assertEquals(2, results.size());
+
+		assertEquals(2, results.size());
 	}
-	
+
 	/** 
 	 * Test fetching query with multiple relationship
 	 * paths between the same 2 entities used in qualifier.
 	 */
 	public void testMultiDbRelFetch() throws Exception {
 		populatePaintings();
-		
+
 		SelectQuery q = new SelectQuery("Painting");
-		q.andQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
-		q.orQualifier(ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
+		q.andQualifier(
+			ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(2)));
+		q.orQualifier(
+			ExpressionFactory.matchDbExp("toArtist.ARTIST_NAME", artistName(4)));
 		List results = ctxt.performQuery(q);
-        
-        assertEquals(2, results.size());
+
+		assertEquals(2, results.size());
 	}
 
 	/** 
@@ -332,47 +324,35 @@ public class DataContextTst extends CayenneTestCase {
 	 */
 	public void testDerivedEntityFetch1() throws Exception {
 		populatePaintings();
-		
-		SelectQuery q = new SelectQuery("ArtistAssets");
-		q.setQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-		q.setLoggingLevel(Level.ERROR);
 
-		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
-        assertEquals(1, a1.getPaintingsCount().intValue());
+		SelectQuery q = new SelectQuery("ArtistAssets");
+		q.setQualifier(
+			ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
+		q.setLoggingLevel(Level.INFO);
+
+		ArtistAssets a1 = (ArtistAssets) ctxt.performQuery(q).get(0);
+		assertEquals(1, a1.getPaintingsCount().intValue());
 	}
-	
+
 	/** 
 	 * Test fetching a derived entity with complex qualifier including relationships.
 	 */
 	public void testDerivedEntityFetch2() throws Exception {
 		populatePaintings();
-		
-		SelectQuery q = new SelectQuery("ArtistAssets");
-		q.setParentObjEntityName("Painting");
-		q.andQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-		q.andParentQualifier(ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
-		q.setLoggingLevel(Level.ERROR);
 
-		ArtistAssets a1 = (ArtistAssets)ctxt.performQuery(q).get(0);
-        assertEquals(1, a1.getPaintingsCount().intValue());
-	}
-	
-    /** 
-	 * Test fetching a derived entity with complex qualifier including relationships
-	 * on the parent entity.
-	 */
-	public void testDerivedEntityFetch3() throws Exception {
-		populatePaintings();
-		
 		SelectQuery q = new SelectQuery("ArtistAssets");
 		q.setParentObjEntityName("Painting");
-		q.andQualifier(ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
-		q.andParentQualifier(ExpressionFactory.matchExp("toPaintingInfo.textReview", "abc"));
-		q.setLoggingLevel(Level.ERROR);
-        assertEquals(0, ctxt.performQuery(q).size());
+		q.andQualifier(
+			ExpressionFactory.matchExp("estimatedPrice", new BigDecimal(1000)));
+		q.andParentQualifier(
+			ExpressionFactory.matchExp("toArtist.artistName", artistName(1)));
+		q.setLoggingLevel(Level.INFO);
+
+		ArtistAssets a1 = (ArtistAssets) ctxt.performQuery(q).get(0);
+		assertEquals(1, a1.getPaintingsCount().intValue());
 	}
-	
-	
+
+
 	public void testPerformQueries() throws Exception {
 		SelectQuery q1 = new SelectQuery();
 		q1.setObjEntityName("Artist");
@@ -393,72 +373,73 @@ public class DataContextTst extends CayenneTestCase {
 		assertNotNull(o2);
 		assertEquals(galleryCount, o2.size());
 	}
-	
+
 	public void testPerformSelectQuery() throws Exception {
 		SelectQuery query = new SelectQuery("Artist");
 		List objects = ctxt.performQuery(query);
-		
+
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());
-		assertTrue("Artist expected, got " + objects.get(0).getClass(), objects.get(0) instanceof Artist);
+		assertTrue(
+			"Artist expected, got " + objects.get(0).getClass(),
+			objects.get(0) instanceof Artist);
 	}
 
 	public void testPerformQuery() throws Exception {
 		SelectQuery query = new SelectQuery("Artist");
 		ctxt.performQuery(query, opObserver);
 		ArrayList objects = opObserver.objectsForQuery(query);
-		
+
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());
 	}
-	
+
 	public void testPerformDataRowQuery() throws Exception {
 		SelectQuery query = new SelectQuery("Artist");
 		query.setFetchingDataRows(true);
 		List objects = ctxt.performQuery(query);
-		
+
 		assertNotNull(objects);
 		assertEquals(artistCount, objects.size());
-		assertTrue("Map expected, got " + objects.get(0).getClass(), objects.get(0) instanceof Map);
+		assertTrue(
+			"Map expected, got " + objects.get(0).getClass(),
+			objects.get(0) instanceof Map);
 	}
-	
+
 	public void testCommitChangesRO1() throws Exception {
-		Artist a1 = (Artist)ctxt.createAndRegisterNewObject("ROArtist");
-		a1.setArtistName("abc");		
-		
+		Artist a1 = (Artist) ctxt.createAndRegisterNewObject("ROArtist");
+		a1.setArtistName("abc");
+
 		try {
 			ctxt.commitChanges();
 			fail("Inserting a 'read-only' object must fail.");
-		}
-		catch(Exception ex) {
+		} catch (Exception ex) {
 			// exception is expected, 
 			// must blow on saving new "read-only" object.
 		}
 	}
-	
+
 	public void testCommitChangesRO2() throws Exception {
 		Artist a1 = fetchROArtist("artist1");
 		a1.setArtistName("abc");
-		
+
 		try {
 			ctxt.commitChanges();
 			fail("Updating a 'read-only' object must fail.");
-		}
-		catch(Exception ex) {
+		} catch (Exception ex) {
 			// exception is expected, 
 			// must blow on saving new "read-only" object.
 		}
 	}
-	
+
 	public void testCommitChangesRO3() throws Exception {
 		Artist a1 = fetchROArtist("artist1");
 		ctxt.deleteObject(a1);
-		
+
 		try {
 			ctxt.commitChanges();
 			fail("Deleting a 'read-only' object must fail.");
-		}
-		catch(Exception ex) {
+		} catch (Exception ex) {
 			// exception is expected, 
 			// must blow on saving new "read-only" object.
 		}
@@ -468,22 +449,16 @@ public class DataContextTst extends CayenneTestCase {
 		SelectQuery q =
 			new SelectQuery(
 				"Artist",
-				ExpressionFactory.binaryPathExp(
-					Expression.EQUAL_TO,
-					"artistName",
-					name));
+				ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", name));
 		List ats = ctxt.performQuery(q);
 		return (ats.size() > 0) ? (Artist) ats.get(0) : null;
 	}
-	
+
 	private Artist fetchROArtist(String name) {
 		SelectQuery q =
 			new SelectQuery(
 				"ROArtist",
-				ExpressionFactory.binaryPathExp(
-					Expression.EQUAL_TO,
-					"artistName",
-					name));
+				ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", name));
 		List ats = ctxt.performQuery(q);
 		return (ats.size() > 0) ? (Artist) ats.get(0) : null;
 	}
@@ -507,9 +482,7 @@ public class DataContextTst extends CayenneTestCase {
 			for (int i = 1; i <= artistCount; i++) {
 				stmt.setInt(1, i);
 				stmt.setString(2, artistName(i));
-				stmt.setDate(
-					3,
-					new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+				stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
 				stmt.executeUpdate();
 			}
 
@@ -585,7 +558,7 @@ public class DataContextTst extends CayenneTestCase {
 
 		// just for this test increase pool size
 		changeMaxConnections(1);
-		
+
 		try {
 			while (it.hasNextRow()) {
 				Map row = it.nextDataRow();
@@ -599,7 +572,7 @@ public class DataContextTst extends CayenneTestCase {
 		} finally {
 			// change allowed connections back
 			changeMaxConnections(-1);
-			
+
 			it.close();
 		}
 	}

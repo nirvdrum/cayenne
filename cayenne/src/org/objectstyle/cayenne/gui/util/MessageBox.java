@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,10 +53,10 @@ package org.objectstyle.cayenne.gui.util;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.util;
 
-import javax.swing.*;
-import java.awt.event.*;
-import java.awt.*;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 
 public class MessageBox{
 

@@ -194,10 +194,10 @@ public class MapUtil {
 	}
 
 	/**
-	 * Returns true if this relationship's "toDepPK" flag can be 
-	 * potentially set to <code>true</code>, i.e. if the destination and
-	 * source attributes are primary keys of their corresponding 
-	 * entities.
+	 * Returns <code>true</code> if this relationship's <code>toDependentPk</code>
+	 * property can be potentially set to <code>true</code>. 
+	 * This means that destination and
+	 * source attributes are primary keys of their corresponding entities.
 	 */
 	public static boolean isValidForDepPk(DbRelationship rel) {
 		Iterator it = rel.getJoins().iterator();

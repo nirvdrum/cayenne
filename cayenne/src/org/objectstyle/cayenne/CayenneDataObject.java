@@ -64,12 +64,10 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 
 /**
- * Default superclass of Cayenne persistent objects. 
- *
- * <p>This implementation of DataObject will use WeakReferences in to-many relationships. This will allow
- * to clean up memory when needed, while still be preserving the ability to access data on the
- * other side of the relationship.. To-one relationships are implemented without using WeakReferneces
- * for access speed (since savings in memory are much smaller then in case of "to-many").</p>
+ * A CayenneDataObject is a default implementation of DataObject interface.
+ * It is normally used as a superclass of Cayenne persistent objects. 
+ * 
+ * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
     static Logger logObj = Logger.getLogger(CayenneDataObject.class.getName());
@@ -78,7 +76,10 @@ public class CayenneDataObject implements DataObject {
     // to indicate that destination relationship was fetched and is null
     private static final CayenneDataObject nullValue = new CayenneDataObject();
 
-    /** Returns string label for persistence state. Useed for debugging. */
+    /** 
+     * Returns String label for persistence state. 
+     * Used for debugging. 
+     */
     public static String persistenceStateString(int persistenceState) {
         switch(persistenceState) {
         case PersistenceState.TRANSIENT:

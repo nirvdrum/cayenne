@@ -59,6 +59,10 @@ import java.util.*;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
+/**
+ * A DbRelationship defines a database relationship between
+ * two tables based on one or more primary key - foreign key pairs.
+ */
 public class DbRelationship extends Relationship {
 	// The columns through which the join is implemented.
 	protected List joins = new ArrayList();
@@ -146,8 +150,12 @@ public class DbRelationship extends Relationship {
 		return getReverseRelationship().isToDependentPK();
 	}
 
-	/** Returns <code>true</code> if relationship from source to target points to dependent primary
-	 *  key (primary key column of destination table that is also a FK to the source column). */
+	/** 
+	 * Returns <code>true</code> if relationship from source to 
+	 * target points to dependent primary key. Dependent PK is
+	 * a primary key column of the destination table that is 
+	 * also a FK to the source column. 
+	 */
 	public boolean isToDependentPK() {
 		return toDependentPK;
 	}

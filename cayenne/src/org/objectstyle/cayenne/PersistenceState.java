@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,8 +53,13 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne;
 
-/** Provides constants that define possible DataObject states. */
+/** 
+ * Defines constants for the possible DataObject states.
+ * 
+ * @author Andrei Adamchik 
+ */
 public interface PersistenceState {
     /** Describes a state of an object not registered with DataContext,
      *  and therefore having no persistence features.

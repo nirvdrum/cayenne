@@ -61,6 +61,7 @@ public class AllTests {
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("WebObjects Compatibility (org.objectstyle.cayenne.wocompat)");
 		suite.addTestSuite(EOModelProcessorTst.class);
+		suite.addTestSuite(PropertyListSerializationTst.class);
 		return suite;
 	}
 }

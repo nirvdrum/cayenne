@@ -56,10 +56,14 @@
 package org.objectstyle.cayenne;
 
 /**
- * Generic exception that may be thrown by cayenne framework. Subclasses of this exception
- * will be used in more specific cases. This exception class
- * is compatible with JDK 1.3 and at the same time implements
- * enhancements introduced in 1.4, namely chained exceptions.
+ * A CayenneException is a generic exception that 
+ * may be thrown by Cayenne framework. All checked exceptions 
+ * in Cayenne would normally inherit from this class. 
+ * The class is compatible with JDK 1.3 and at the same 
+ * time implements enhancements introduced in 1.4, namely 
+ * chained exceptions.
+ * 
+ * @author Andrei Adamchik
  */
 public class CayenneException extends Exception {
     private Throwable cause;

@@ -2,13 +2,33 @@
 <document>
     <title>Overview</title>
 
-    <properties>
-        <author>Andrei Adamchik</author>
-    </properties>
-
     <body>
         <!-- News section -->
         <section name="Cayenne News">
+        <p><strong><font color="#AAAAAA"><i>September 7:</i></font></strong> <strong>Cayenne 
+        Alpha 3 Is Out.</strong> 
+        This is a maintenance release. It contains a few serious bug fixes, 
+        so everybody is encouraged to upgrade. In this release:
+        <ul>
+        	<li>JDK1.3 port: Cayenne runtime libraries are now fully JDK1.3 compatible,
+        	GUI tools still require 1.4.</li>
+        	<li>Fixed a few serious problems in CayenneModeler that could potentially
+        	corrupt model files.</li>
+        	<li>"Derived" entities support. Derived DbEntities allow 
+        	expressions in columns, including aggregate functions. They
+        	also contain built in GROUP BY support.</li>
+        	<li>Bugs fixes, a few convenience features and performance 
+        	improvements.</li>
+        	<li>Links:
+        	       <ul>
+        				<li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132">Download 
+        				Alpha 3.</a></li>
+        				<li><a href="RELEASE-NOTES-1.0a3.txt">View Release Notes.</a></li>
+        			</ul>
+        	</li>
+        </ul>
+        </p>
+        
         <p><strong><font color="#AAAAAA"><i>July 29:</i></font></strong> <strong>Cayenne Comparison Chart.</strong> 
         Having received multiple requests to compare Cayenne features
         with other O/R frameworks we decided to leverage the community collective knowledge
@@ -18,28 +38,6 @@
         the input interactively via WikiWiki collaboration engine. To participate, click on the link
         above, scroll to the bottom of the page and select "Edit Text".
         </p>
-        
-        <p><font color="#AAAAAA"><i>July 16:</i></font> <strong>Cayenne Alpha 2 Is Out.</strong> 
-        This is a second Alpha release. Everybody is encouraged to upgrade. You won't 
-        regret - CayenneModeler GUI is much better now. Source and binary packages
-        can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
-        Release notes are located <a href="RELEASE-NOTES-1.0a2.txt">here</a>.
-        </p>
-        
-        <p><font color="#AAAAAA"><i>June 16:</i></font> <strong>Cayenne Alpha 1 Is Out.</strong> 
-        Download now the first "official" Cayenne release. Source and binary packages
-        can be found <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">here</a>.
-        Release notes are located <a href="RELEASE-NOTES-1.0a1.txt">here</a>.
-        </p>
-              
-        <p><font color="#AAAAAA"><i>March 16:</i></font> <strong>Cayenne at SourceForge and Freshmeat.</strong> 
-        Cayenne is still hosted 
-        at objectstyle.org, but we also registered the project at 
-        <a href="http://sourceforge.net/projects/cayenne/">SourceForge.net</a>. 
-        Bug tracking, CVS and downloads 
-        will be performed from SourceForge. Also Cayenne is registered at
-        <a href="http://freshmeat.net/projects/cayenne/">Freshmeat.net</a> to make 
-        release announcements.</p>
         </section>
         
         <!-- Welcome section -->
@@ -67,7 +65,8 @@
         <section name="History">
         <p>Idea of Cayenne was conceived back in April 2001 by a group of developers in 
         Atlanta, USA. Current version is based on that original idea and is under active 
-        development since December 2001.</p>
+        development since December 2001. Right now Cayenne has a growing international
+        user and developer community.</p>
         </section>
     </body>
 </document>

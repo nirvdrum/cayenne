@@ -12,13 +12,14 @@
         <p>Every volunteer project gets its strength from its participants.
         We invite everybody to participate in Cayenne in any way that is suitable for you.
         
-        If you are willing to help, you can do it in many different ways:
+        If you are willing to help, you can do it in many different ways (in no particular order):
         <ul>
-            <li>By contributing code for one or more tasks listsed below</li> 
-            <li>By contributing documentation</li> 
-            <li>By testing Cayenne and reporting bugs</li>
-            <li>By using Cayenne and reporting bugs</li>
-            <li>By suggesting your own ideas on the mailing list</li>
+            <li>By contributing code for one or more tasks listed below.</li> 
+            <li>By contributing documentation.</li> 
+            <li>By testing Cayenne and reporting bugs.</li>
+            <li>By using Cayenne and reporting bugs.</li>
+            <li>By suggesting your own ideas on the mailing list and contributing
+            code implementing them.</li>
         </ul>        
         </p>
         
@@ -35,7 +36,7 @@
         </p>
         
         <p>For the latest list of tasks that Cayenne team is working on visit our 
-        <a href="http://sourceforge.net/pm/?group_id=48132">task tracker</a>.
+        <a href="http://sourceforge.net/pm/?group_id=48132">task tracker</a>. 
         </p> 
         </section>
     </body>

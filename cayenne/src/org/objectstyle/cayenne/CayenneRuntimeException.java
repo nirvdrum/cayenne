@@ -55,10 +55,15 @@
  */
 package org.objectstyle.cayenne;
 
-/** 
- * Generic Cayenne runtime exception. This exception class
+/**
+ * A CayenneRuntimeException is a generic *runtime*
+ * exception that may be thrown by Cayenne framework. 
+ * All runtime exceptions in Cayenne would normally inherit 
+ * from this class. The class
  * is compatible with JDK 1.3 and at the same time implements
  * enhancements introduced in 1.4, namely chained exceptions.
+ * 
+ * @author Andrei Adamchik
  */
 public class CayenneRuntimeException extends RuntimeException {
 	private Throwable cause;

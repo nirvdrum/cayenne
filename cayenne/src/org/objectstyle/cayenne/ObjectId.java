@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,22 +53,35 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 
-/** Each data object has an id uniquely identifying it. 
-  * This concept is a translation of a primary key idea in the database world,
-  * to the OO world. Such id is needed to be able to implement object uniquing 
-  * and other persistence layer functions. */
+/** 
+ * An ObjectId is a class that uniquely identifies a 
+ * persistent object.
+ * 
+ * <p>Each data object has an id uniquely identifying it. 
+ * ObjectId concept corresponds to a primary key concept 
+ * in the relational world. Such id is needed to 
+ * implement object uniquing and other persistence layer functions. 
+ * </p>
+ * 
+ * @author Andrei Adamchik
+ */
 public class ObjectId {
 	static Logger logObj = Logger.getLogger(ObjectId.class.getName());
 
 	// Keys: DbAttribute objects;
 	// Values database values of the corresponding attribute
-	private Map idKeys;
-	private String objEntityName;
-	private int hash;
+	protected Map idKeys;
+	protected String objEntityName;
+	protected int hash;
 
 	/**
 	 * Convenience constructor for entities that have a 
@@ -138,6 +150,9 @@ public class ObjectId {
 		return objEntityName;
 	}
 
+    /**
+     * Always returns <code>false</code>.
+     */
 	public boolean isTemporary() {
 		return false;
 	}
