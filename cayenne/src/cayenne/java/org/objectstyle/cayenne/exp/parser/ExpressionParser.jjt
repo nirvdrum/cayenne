@@ -143,9 +143,9 @@ void simpleCondition() : {}
 	| 
 	  ">=" scalarExpression() #GreaterOrEqual(2)
 	|
-		"like" scalarCharExpression() #Like(2)
+		"like" scalarExpression() #Like(2)
 	|
-	    "likeIgnoreCase"  scalarCharExpression() #LikeIgnoreCase(2)
+	    "likeIgnoreCase"  scalarExpression() #LikeIgnoreCase(2)
 	|  
 		"in"  
 		(  namedParameter() | "(" scalarCommaList() ")" )
@@ -160,9 +160,9 @@ void simpleNotCondition() : {}
 	("not" | "!" )
 	
 	(
-		"like" scalarCharExpression() #NotLike(2)
+		"like" scalarExpression() #NotLike(2)
 	|
-	    "likeIgnoreCase"  scalarCharExpression() #NotLikeIgnoreCase(2)
+	    "likeIgnoreCase"  scalarExpression() #NotLikeIgnoreCase(2)
 	|  
 		"in"  
 		(  namedParameter() |  "(" scalarCommaList() ")" )
@@ -198,20 +198,15 @@ void scalarExpression() : {}
 
 void scalarConstExpression() : {}
 {
-	  scalarCharExpression()
+	  <SINGLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
+	|
+	  <DOUBLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
+	| 
+	  namedParameter()
 	| 
 	  <INT_LITERAL> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
 	| 
 	   <FLOAT_LITERAL>{ jjtThis.setValue(token_source.literalValue); }  #Scalar(0)
-}
-
-void scalarCharExpression() : {}
-{
-	  <SINGLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
-	| 
-	  <DOUBLE_QUOTED_STRING> { jjtThis.setValue(token_source.literalValue); } #Scalar(0)
-	| 
-	  namedParameter()
 }
 
 void scalarNumericExpression() : {}
