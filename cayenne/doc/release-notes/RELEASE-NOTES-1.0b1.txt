@@ -10,4 +10,6 @@ http://objectstyle.org/cayenne/
 Changes in this release:
 ============================================
 1. Added ResultIterator
+2. Added public method DataContext.objectFromDataRow (rather exposed 
+another private method).
 
