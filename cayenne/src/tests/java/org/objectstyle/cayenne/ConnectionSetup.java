@@ -65,7 +65,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.*;
 import org.objectstyle.cayenne.conn.PoolManager;
-import org.objectstyle.cayenne.gui.InteractiveLogin;
+import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.testui.TestLogin;
 

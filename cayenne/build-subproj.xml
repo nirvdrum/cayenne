@@ -22,9 +22,14 @@
 		</fileset>
     </path>
     
-    <path id="classpath-tests">
+    <path id="classpath-modeler">
 		<path refid="classpath-cayenne"/>
 		<pathelement path="build/cayenne/classes"/>
+    </path>
+    
+    <path id="classpath-tests">
+		<path refid="classpath-modeler"/>
+		<pathelement path="build/modeler/classes"/>
     </path>
     
     <path id="classpath-performance">

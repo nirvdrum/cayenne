@@ -61,8 +61,8 @@ import java.util.Iterator;
 
 import javax.swing.*;
 
-import org.objectstyle.cayenne.gui.DbLoginPanel;
-import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.modeler.DbLoginPanel;
+import org.objectstyle.cayenne.modeler.Editor;
 
 
 /** Login panel that allows to quickly switch databases. */

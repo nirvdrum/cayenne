@@ -6,7 +6,6 @@
 <project name="cayenne-core" default="compile">
 	<property name="core.dist.src" value="${dist}/src/cayenne"/>
 	<property name="core.build" value="build/cayenne"/>
-	<property name="core.build.properties" value="${core.build}/properties"/>
 	<property name="core.build.deps" value="${core.build}/deps"/>
 	<property name="core.src" value="src/cayenne/java"/>
 	<property name="core.bin" value="src/cayenne/bin"/>
@@ -67,10 +66,9 @@
 	<!-- ========================================== -->
     <!-- Build "lean" JAR file without dependencies.-->
     <!-- ========================================== -->
-    <target name="jar-nodeps" depends="compile,prepare-properties">
+    <target name="jar-nodeps" depends="compile">
         <jar jarfile="${dist}/lib/cayenne-nodeps.jar">
  			<fileset dir="${core.build}/classes"/>
-			<fileset dir="${core.build.properties}"/>
 			<fileset dir="${core.src}">
 				<include name="**/*.xml"/>
             	<include name="**/*.gif"/>
@@ -99,10 +97,9 @@
     <!-- ========================================== -->
     <!-- Build "fat" JAR file with dependencies.    -->
     <!-- ========================================== -->
-    <target name="jar" depends="compile,prepare-deps,prepare-properties">
+    <target name="jar" depends="compile,prepare-deps">
         <jar jarfile="${dist}/lib/cayenne.jar">
  			<fileset dir="${core.build}/classes"/>
-			<fileset dir="${core.build.properties}"/>
 			<fileset dir="${core.src}">
 				<include name="**/*.xml"/>
             	<include name="**/*.gif"/>
@@ -127,23 +124,6 @@
             </manifest>
         </jar>
     </target>
-    
-    
-    <!-- ========================================== -->
-    <!-- Performs replacements in property files.   -->
-    <!-- ========================================== -->
-    <target name="prepare-properties">
-    	<tstamp/>
-		<copy todir="${core.build.properties}" overwrite="yes">
-			<fileset dir="${core.src}" >
-				<include name="**/*.properties"/>
-			</fileset>
-			<filterset>
-				<filter token="CAYENNE_BUILD_DATE" value="${TODAY}" />
-				<filter token="CAYENNE_VERSION" value="${project.version}"/>
-			</filterset>
-		</copy>
-	</target>
 	
     
     <!-- ========================================== -->

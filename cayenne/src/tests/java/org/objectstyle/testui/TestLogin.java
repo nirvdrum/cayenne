@@ -67,7 +67,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.TestConstants;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.gui.InteractiveLogin;
+import org.objectstyle.cayenne.modeler.InteractiveLogin;
 
 /** Login handler used for unit tests.
   *

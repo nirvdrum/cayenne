@@ -58,7 +58,7 @@ package org.objectstyle.testui;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.objectstyle.cayenne.gui.Editor;
+import org.objectstyle.cayenne.modeler.Editor;
 
 /**
  * Subclass of CayenneModeler Editor frame with 
