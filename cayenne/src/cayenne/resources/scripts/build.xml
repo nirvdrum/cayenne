@@ -26,10 +26,12 @@
      <target name="clean">
          <delete dir="${build}"/>
          <delete file="${lib}/cayenne-cust.jar"/>
+         <delete file="${lib}/modeler/cayenne-modeler-cust.jar"/>
      </target>
 
      <target name="prepare">
          <mkdir dir="${build}/cayenne"/>
+         <mkdir dir="${build}/modeler"/>
          <mkdir dir="${build}/deps"/>
      </target>     
 
@@ -41,12 +43,28 @@
               <pathelement path="${build}/deps"/>
           </path>
           
+          <path id="classpath-modeler">
+   		<path refid="classpath"/>
+		<pathelement path="${build}/cayenne"/>
+		<fileset dir="${lib}/modeler">
+              	  <include name="scope*.jar"/>
+                </fileset>
+	  </path>
+ 
+          
           <property name="cp" refid="classpath"/>
           <echo> Java home: ${java.home}</echo>
           <echo> CLASSPATH: ${cp}</echo>
           
           <javac srcdir="${src}/cayenne" destdir="${build}/cayenne">
               <classpath refid="classpath"/>
+          </javac>
+          
+          <property name="cp-modeler" refid="classpath-modeler"/>
+          <echo> Java home: ${java.home}</echo>
+          <echo> CLASSPATH: ${cp-modeler}</echo>
+          <javac srcdir="${src}/modeler" destdir="${build}/modeler">
+              <classpath refid="classpath-modeler"/>
           </javac>
      </target>
 
@@ -56,6 +74,10 @@
              	<exclude name="**/MANIFEST.MF"/>
              </fileset>
              <fileset dir="${build}/cayenne"/>
+          </jar>
+          
+          <jar jarfile="${lib}/modeler/cayenne-modeler-cust.jar">
+             <fileset dir="${build}/modeler"/>
           </jar>     
      </target>     
      
