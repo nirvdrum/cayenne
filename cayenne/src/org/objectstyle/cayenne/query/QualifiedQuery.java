@@ -52,23 +52,37 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.exp.Expression;
 
 public abstract class QualifiedQuery extends AbstractQuery {
-    protected Expression qualifier;
-    
-    
-    /** Setter for query qualifier. */
-    public void setQualifier(Expression qualifier) {
-        this.qualifier = qualifier;
-    }
-    
-    
-    /** Getter for query qualifier. */
-    public Expression getQualifier() {
-        return qualifier;
-    }
+	protected Expression qualifier;
+
+	/** Setter for query qualifier. */
+	public void setQualifier(Expression qualifier) {
+		this.qualifier = qualifier;
+	}
+
+	/** Getter for query qualifier. */
+	public Expression getQualifier() {
+		return qualifier;
+	}
+
+	/**
+	 * Adds specificed qualifier to the existing qualifier
+	 * joining it using "AND".
+	 */
+	public void andQualifier(Expression e) {
+        qualifier = (qualifier != null) ? qualifier.andExp(e) : e;
+	}
+
+	/**
+	* Adds specificed qualifier to the existing qualifier
+	* joining it using "OR".
+	*/
+	public void orQualifier(Expression e) {
+       qualifier = (qualifier != null) ? qualifier.orExp(e) : e;
+	}
 }
