@@ -55,8 +55,10 @@
  */
 package org.objectstyle.cayenne.project;
 
-import java.util.ArrayList;
+import java.util.List;
 
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -72,7 +74,7 @@ public class ProjectTraversalTst extends CayenneTestCase {
         super(arg0);
     }
 
-   public void testObjectFromPath1() throws Exception {
+    public void testObjectFromPath1() throws Exception {
         Object[] path = new Object[] { new Object(), new Object()};
         assertSame(path[1], ProjectTraversal.objectFromPath(path));
     }
@@ -119,5 +121,28 @@ public class ProjectTraversalTst extends CayenneTestCase {
     public void testObjectParentFromPath2() throws Exception {
         Object[] path = new Object[] { new Object()};
         assertNull(ProjectTraversal.objectParentFromPath(path));
+    }
+
+    public void testTraverse1() throws Exception {
+        TstProjectTraversalHelper helper = new TstProjectTraversalHelper();
+        DataMap map = new DataMap("m1");
+        new ProjectTraversal(helper).traverse(map);
+        List view = helper.getNodes();
+        assertNotNull(view);
+        assertEquals(1, view.size());
+        assertSame(map, view.get(0));
+    }
+
+    public void testTraverse2() throws Exception {
+        TstProjectTraversalHelper helper = new TstProjectTraversalHelper();
+        DataMap map = new DataMap("m1");
+        ObjEntity ent = new ObjEntity("e1");
+        map.addObjEntity(ent);
+        new ProjectTraversal(helper).traverse(map);
+        List view = helper.getNodes();
+        assertNotNull(view);
+        assertEquals(2, view.size());
+        assertSame(map, view.get(0));
+        assertSame(ent, view.get(1));
     }
 }
