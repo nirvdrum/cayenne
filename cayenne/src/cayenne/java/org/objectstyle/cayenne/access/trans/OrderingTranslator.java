@@ -143,8 +143,6 @@ public class OrderingTranslator extends QueryAssemblerHelper {
      * the order by clause.  E.g., in the case of an case-insensitive 
      * order by, an element of the list would be 
      * <code>UPPER(&lt;column reference&gt;)</code>
-     *  
-     * @return
      */    
     public List getOrderByColumnList() {
         return orderByColumnList;

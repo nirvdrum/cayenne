@@ -39,7 +39,7 @@
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="BIT_TEST">
-		<db-attribute name="BIT_COLUMN" type="BIT"/>
+		<db-attribute name="BIT_COLUMN" type="BIT" isMandatory="true"/>
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
 	<db-entity name="BLOB_TEST">
