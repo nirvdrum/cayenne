@@ -19,3 +19,4 @@ Changes:
 
 Bugs Fixed:
 
+CAY-251 NPE on calling stored proc for SQL Server.

@@ -90,16 +90,14 @@ import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
- * ContextCommit implements DataContext commit logic. DataContext internally delegates
- * commit operations to an instance of ContextCommit. ContextCommit resolves primary key
- * dependencies, referential integrity dependencies (including multi-reflexive entities),
- * generates primary keys, creates batches for massive data modifications, assigns
- * operations to data nodes. It indirectly relies on graph algorithms provided by ASHWOOD
- * library.
+ * DataContext internally delegates commit operations to an instance of ContextCommit that
+ * contains the actual commit logic. ContextCommit resolves primary key dependencies,
+ * referential integrity dependencies (including multi-reflexive entities), generates
+ * primary keys, creates batches for massive data modifications, assigns operations to
+ * data nodes. It indirectly relies on graph algorithms provided by ASHWOOD library.
  * 
- * @author Andriy Shapochka
+ * @author Andriy Shapochka, Andrei Adamchik
  */
-
 class ContextCommit {
 
     private DataContext context;
@@ -156,7 +154,7 @@ class ContextCommit {
                     prepareDeleteQueries(nodeHelper);
                 }
 
-                CommitOperationObserver observer = new CommitOperationObserver(
+                CommitObserver observer = new CommitObserver(
                         logLevel,
                         context,
                         insObjects,
@@ -236,7 +234,12 @@ class ContextCommit {
         while (i.hasNext()) {
             DbEntity dbEntity = (DbEntity) i.next();
             List objEntitiesForDbEntity = (List) objEntitiesByDbEntity.get(dbEntity);
-            InsertBatchQuery batch = new InsertBatchQuery(dbEntity, 27);
+
+            String generatedColumn = commitHelper.firstGeneratedColumn(dbEntity);
+            InsertBatchQuery batch = (generatedColumn != null)
+                    ? new CallbackInsertBatchQuery(dbEntity, generatedColumn, 27)
+                    : new InsertBatchQuery(dbEntity, 27);
+
             batch.setLoggingLevel(logLevel);
 
             for (Iterator j = objEntitiesForDbEntity.iterator(); j.hasNext();) {

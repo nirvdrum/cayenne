@@ -107,6 +107,7 @@ public class JdbcAdapter implements DbAdapter {
     protected boolean supportsBatchUpdates;
     protected boolean supportsFkConstraints;
     protected boolean supportsUniqueConstraints;
+    protected boolean supportsGeneratedKeys;
 
     /**
      * Creates new JdbcAdapter with a set of default parameters.
@@ -552,6 +553,20 @@ public class JdbcAdapter implements DbAdapter {
 
     public void setSupportsBatchUpdates(boolean flag) {
         this.supportsBatchUpdates = flag;
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public boolean supportsGeneratedKeys() {
+        return supportsGeneratedKeys;
+    }
+    
+    /**
+     * @since 1.2
+     */
+    public void setSupportsGeneratedKeys(boolean flag) {
+        this.supportsGeneratedKeys = flag;
     }
 
     /**

@@ -59,6 +59,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.DefaultResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
@@ -123,7 +124,14 @@ public abstract class BaseSQLAction implements SQLAction {
                 delegate.nextDataRows(query, resultReader);
             }
             catch (Exception ex) {
-                resultReader.close();
+
+                try {
+                    resultReader.close();
+                }
+                catch (CayenneException cex) {
+                    // ignore...
+                }
+                
                 throw ex;
             }
         }

@@ -65,6 +65,7 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.query.Query;
@@ -176,15 +177,38 @@ public class DefaultOperationObserver implements OperationObserver {
         // noop
     }
 
-    public void nextDataRows(Query q, ResultIterator it) {
-        logObj.debug("result: (iterator)");
+    /**
+     * Closes ResultIterator without reading its data. If you implement a custom subclass,
+     * only call super if closing the iterator is what you need.
+     */
+    public void nextDataRows(Query query, ResultIterator it) {
+        if (it != null) {
+            try {
+                it.close();
+            }
+            catch (CayenneException ex) {
+                // don't throw here....
+                nextQueryException(query, ex);
+            }
+        }
     }
 
     /**
+     * Closes ResultIterator without reading its data. If you implement a custom subclass,
+     * only call super if closing the iterator is what you need.
+     * 
      * @since 1.2
      */
     public void nextKeyDataRows(Query query, ResultIterator keysIterator) {
-        // noop
+        if (keysIterator != null) {
+            try {
+                keysIterator.close();
+            }
+            catch (CayenneException ex) {
+                // don't throw here....
+                nextQueryException(query, ex);
+            }
+        }
     }
 
     public void nextQueryException(Query query, Exception ex) {

@@ -128,7 +128,7 @@ public class BatchAction extends BaseSQLAction {
         BatchQuery batchQuery = (BatchQuery) query;
         BatchQueryBuilder queryBuilder = createBuilder(batchQuery);
 
-        boolean generatesKeys = shouldProcessGeneratedKeys(batchQuery);
+        boolean generatesKeys = hasGeneratedKeys(batchQuery);
 
         if (batch && !generatesKeys) {
             runAsBatch(connection, batchQuery, queryBuilder, observer);
@@ -276,7 +276,7 @@ public class BatchAction extends BaseSQLAction {
     /**
      * Returns whether BatchQuery generates
      */
-    protected boolean shouldProcessGeneratedKeys(BatchQuery query) {
+    protected boolean hasGeneratedKeys(BatchQuery query) {
         // see if we are configured to syupport generated keys
         if (!generatedKeys) {
             return false;

@@ -169,7 +169,7 @@ public abstract class LOBBatchQueryBuilder extends BatchQueryBuilder {
         // i - attribute position in the query
         // j - PreparedStatement parameter position (starts with "1")
         for (int i = 0, j = 1; i < attributeCount; i++) {
-            Object value = query.getObject(i);
+            Object value = query.getValue(i);
             DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
             int type = attribute.getType();
 

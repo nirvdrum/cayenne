@@ -138,7 +138,7 @@ public abstract class BatchQueryBuilder {
         int attributeCount = dbAttributes.size();
 
         for (int i = 0; i < attributeCount; i++) {
-            Object value = query.getObject(i);
+            Object value = query.getValue(i);
             DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
             adapter.bindParameter(
                 statement,

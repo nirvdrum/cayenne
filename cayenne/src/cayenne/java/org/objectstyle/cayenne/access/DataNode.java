@@ -119,11 +119,6 @@ public class DataNode implements QueryEngine {
     protected String dataSourceFactory;
     protected EntityResolver entityResolver;
     protected EntitySorter entitySorter = NULL_SORTER;
-    
-    /** 
-     * @since 1.2
-     */
-    protected int supportedJDBCSpec;
 
     // ====================================================
     // DataMaps
@@ -149,24 +144,6 @@ public class DataNode implements QueryEngine {
 
     public void setName(String name) {
         this.name = name;
-    }
-    
-    /**
-     * Returns a minimum version of the JDBC spcification supported by internal
-     * DataSource. This property is configured by whoever creates this DataNode, so it may
-     * not be accurate.
-     * 
-     * @since 1.2
-     */
-    public int getSupportedJDBCSpec() {
-        return supportedJDBCSpec;
-    }
-
-    /**
-     * @since 1.2
-     */
-    public void setSupportedJDBCSpec(int supportedJDBCSpec) {
-        this.supportedJDBCSpec = supportedJDBCSpec;
     }
 
     /** Returns a location of DataSource of this node. */
@@ -411,7 +388,7 @@ public class DataNode implements QueryEngine {
         boolean runningAsBatch = !useOptimisticLock && adapter.supportsBatchUpdates();
         BatchAction action = new BatchAction(getAdapter(), getEntityResolver());
         action.setBatch(runningAsBatch);
-        action.setGeneratedKeys(false);
+        action.setGeneratedKeys(getAdapter().supportsGeneratedKeys());
         action.performAction(connection, query, observer);
     }
 

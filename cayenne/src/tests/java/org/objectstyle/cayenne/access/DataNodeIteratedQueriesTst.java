@@ -223,8 +223,6 @@ public class DataNodeIteratedQueriesTst extends JDBCAccessTestCase {
         }
 
         public void nextDataRows(Query q, ResultIterator it) {
-            super.nextDataRows(q, it);
-
             try {
                 while (it.hasNextRow()) {
                     it.nextDataRow();

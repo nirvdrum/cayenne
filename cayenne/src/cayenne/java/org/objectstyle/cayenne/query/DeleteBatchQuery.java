@@ -95,7 +95,7 @@ public class DeleteBatchQuery extends BatchQuery {
         return true;
     }
 
-    public Object getObject(int dbAttributeIndex) {
+    public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute =
             (DbAttribute) dbAttributes.get(dbAttributeIndex);
         return currentId.get(attribute.getName());

@@ -166,7 +166,7 @@ public class UpdateBatchQuery extends BatchQuery {
         return true;
     }
 
-    public Object getObject(int dbAttributeIndex) {
+    public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
         String name = attribute.getName();
 

@@ -79,7 +79,7 @@ public class LOBInsertBatchQueryBuilder extends LOBBatchQueryBuilder {
 
         List values = new ArrayList(len);
         for (int i = 0; i < len; i++) {
-            Object value = query.getObject(i);
+            Object value = query.getValue(i);
             DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
             if (isUpdateableColumn(value, attribute.getType())) {
                 values.add(value);
@@ -110,7 +110,7 @@ public class LOBInsertBatchQueryBuilder extends LOBBatchQueryBuilder {
             appendUpdatedParameter(
                 query,
                 (DbAttribute) dbAttributes.get(i),
-                batch.getObject(i));
+                batch.getValue(i));
         }
         query.append(')');
         return query.toString();

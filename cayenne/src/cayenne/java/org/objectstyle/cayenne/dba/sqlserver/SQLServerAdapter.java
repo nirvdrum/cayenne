@@ -117,6 +117,12 @@ public class SQLServerAdapter extends SybaseAdapter {
 
     public static final String TRIM_FUNCTION = "RTRIM";
 
+    public SQLServerAdapter() {
+        // TODO: i wonder if Sybase supports generated keys... 
+        // in this case we need to move this to the super.
+        this.setSupportsGeneratedKeys(true);
+    }
+    
     /**
      * Returns a trimming translator.
      */

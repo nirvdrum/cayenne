@@ -129,7 +129,7 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
         int len = updatedDbAttributes.size();
         int parameterIndex = 1;
         for (int i = 0; i < len; i++) {
-            Object value = query.getObject(i);
+            Object value = query.getValue(i);
 
             DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
             adapter.bindParameter(
@@ -141,7 +141,7 @@ public class UpdateBatchQueryBuilder extends BatchQueryBuilder {
         }
 
         for (int i = 0; i < qualifierAttributes.size(); i++) {
-            Object value = query.getObject(len + i);
+            Object value = query.getValue(len + i);
             
             // skip null values... they are translated as "IS NULL"
             if (null == value)

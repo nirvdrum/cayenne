@@ -102,7 +102,7 @@ public class InsertBatchQuery extends BatchQuery {
         return true;
     }
 
-    public Object getObject(int dbAttributeIndex) {
+    public Object getValue(int dbAttributeIndex) {
         DbAttribute attribute = (DbAttribute) dbAttributes.get(dbAttributeIndex);
         return currentSnapshot.get(attribute.getName());
     }

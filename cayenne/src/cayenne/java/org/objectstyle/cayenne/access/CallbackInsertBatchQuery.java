@@ -53,89 +53,69 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.query.InsertBatchQuery;
 
 /**
- * BatchQuery and its descendants allow to group similar data for the
- * batch database modifications, including inserts, updates and deletes. 
- * Single BatchQuery corresponds to a parameterized PreparedStatement 
- * and a matrix of values.
- *
- * @author Andriy Shapochka
+ * An InsertBatchQuery subclass that supports mapping current batch iteration back to the
+ * ObjectId of inserted object.
+ * 
+ * @since 1.2
+ * @author Andrei Adamchik
  */
-public abstract class BatchQuery extends AbstractQuery {
+class CallbackInsertBatchQuery extends InsertBatchQuery {
 
-    public BatchQuery(DbEntity dbEntity) {
-        setRoot(dbEntity);
+    List objectIds;
+    int idIndex;
+    String generatedColumn;
+
+    CallbackInsertBatchQuery(DbEntity dbEntity, String generatedColumn, int batchCapacity) {
+        super(dbEntity, batchCapacity);
+
+        this.objectIds = new ArrayList(batchCapacity);
+        this.generatedColumn = generatedColumn;
+        this.idIndex = -1;
     }
 
-    /**
-     * Returns a DbEntity associated with this batch.
-     */
-    public DbEntity getDbEntity() {
-        return (DbEntity) getRoot();
+    String getGeneratedColumn() {
+        return generatedColumn;
     }
 
-    /**
-     * Returns a List of values for the current batch iteration, 
-     * in the order they are bound to the query. Used mainly for 
-     * logging.
-     */
-    public List getValuesForUpdateParameters() {
-        int len = getDbAttributes().size();
-        List values = new ArrayList(len);
-        for (int i = 0; i < len; i++) {
-            values.add(getValue(i));
+    ObjectId getObjectId() {
+        return (ObjectId) objectIds.get(idIndex);
+    }
+
+    void add(Map snapshot, ObjectId id) {
+        super.add(snapshot);
+        objectIds.add(id);
+    }
+
+    public void add(Map dataObjectSnapshot) {
+        throw new UnsupportedOperationException("Call 'add(Map, ObjectId)' instead.");
+    }
+
+    public void reset() {
+        super.reset();
+        idIndex = -1;
+    }
+
+    public boolean next() {
+        boolean next = super.next();
+
+        if (next) {
+            idIndex++;
         }
-        return values;
+        else {
+            idIndex = -1;
+        }
+
+        return next;
     }
-
-    /**
-     * Returns <code>true</code> if this batch query has no parameter rows.
-     */
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    /**
-     * Returns a list of DbAttributes describing batch parameters.
-     */
-    public abstract List getDbAttributes();
-
-    /**
-     * Rewinds batch to the first parameter row.
-     */
-    public abstract void reset();
-
-    /**
-     * Repositions batch to the next object, so that subsequent calls to
-     * getObject(int) would return the values of the next batch object. Returns
-     * <code>true</code> if batch has more objects to iterate over,
-     * <code>false</code> otherwise.
-     */
-    public abstract boolean next();
-    
-    /**
-     * @deprecated Since 1.2 renamed to "getValue()"
-     */
-    public Object getObject(int valueIndex) {
-       return getValue(valueIndex); 
-    }
-
-    /**
-     * Returns a value at a given index for the current batch iteration.
-     * 
-     * @since 1.2 
-     */
-    public abstract Object getValue(int valueIndex);
-
-    /**
-     * Returns the number of parameter rows in a batch.
-     */
-    public abstract int size();
 }

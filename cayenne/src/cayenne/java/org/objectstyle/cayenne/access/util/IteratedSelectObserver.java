@@ -84,7 +84,7 @@ public class IteratedSelectObserver extends DefaultOperationObserver {
 	}
 
 	public void nextDataRows(Query q, ResultIterator it) {
-		super.nextDataRows(q, it);
+	    // don't call super - it closes the iterator
 		resultIterator = it;
 	}
 

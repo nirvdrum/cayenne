@@ -328,17 +328,19 @@ public class DefaultResultIterator implements ResultIterator {
                 e1.printStackTrace(out);
             }
 
-            try {
-                statement.close();
-            }
-            catch (SQLException e2) {
-                out.println("Error closing PreparedStatement");
-                e2.printStackTrace(out);
+            if (statement != null) {
+                try {
+                    statement.close();
+                }
+                catch (SQLException e2) {
+                    out.println("Error closing PreparedStatement");
+                    e2.printStackTrace(out);
+                }
             }
 
             // close connection, if this object was explicitly configured to be
             // responsible for doing it
-            if (this.isClosingConnection()) {
+            if (connection != null && this.isClosingConnection()) {
                 try {
                     connection.close();
                 }

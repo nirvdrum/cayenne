@@ -114,6 +114,14 @@ public interface DbAdapter {
      * @since 1.1
      */
     public boolean supportsUniqueConstraints();
+    
+    /** 
+     * Returns true if a target database supports key autogeneration.
+     * This feature also requires JDBC3-compliant driver.
+     * 
+     * @since 1.2
+     */
+    public boolean supportsGeneratedKeys();
 
     /**
      * Returns <code>true</code> if the target database supports

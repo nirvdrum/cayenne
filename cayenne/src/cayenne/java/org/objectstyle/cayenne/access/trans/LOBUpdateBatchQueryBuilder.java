@@ -86,14 +86,14 @@ public class LOBUpdateBatchQueryBuilder extends LOBBatchQueryBuilder {
         int qualifierLen = qualifierAttributes.size();
         for (int i = 0; i < updatedLen; i++) {
             DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
-            Object value = query.getObject(i);
+            Object value = query.getValue(i);
             if(isUpdateableColumn(value, attribute.getType())) {
             	values.add(value);
             }
         }
 
 		for (int i = 0; i < qualifierLen; i++) {
-			values.add(query.getObject(updatedLen + i));
+			values.add(query.getValue(updatedLen + i));
         }
 
         return values;
@@ -115,7 +115,7 @@ public class LOBUpdateBatchQueryBuilder extends LOBBatchQueryBuilder {
 
             DbAttribute attribute = (DbAttribute) updatedDbAttributes.get(i);
             query.append(attribute.getName()).append(" = ");
-            appendUpdatedParameter(query, attribute, batch.getObject(i));
+            appendUpdatedParameter(query, attribute, batch.getValue(i));
         }
 
         query.append(" WHERE ");

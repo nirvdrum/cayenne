@@ -127,7 +127,7 @@ public class LOBBatchQueryWrapper {
 
             if (allLOBAttributes[i]) {
                 // skip null and empty LOBs
-                Object value = query.getObject(i);
+                Object value = query.getValue(i);
 
                 if (value == null) {
                     continue;
@@ -217,7 +217,7 @@ public class LOBBatchQueryWrapper {
         List values = new ArrayList(len);
         for (int i = 0; i < len; i++) {
             if (this.qualifierAttributes[i]) {
-                values.add(query.getObject(i));
+                values.add(query.getValue(i));
             }
         }
         

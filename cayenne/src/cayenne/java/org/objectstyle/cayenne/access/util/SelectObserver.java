@@ -154,7 +154,6 @@ public class SelectObserver extends DefaultOperationObserver {
      */
     public void nextDataRows(Query query, List dataRows) {
 
-        super.nextDataRows(query, dataRows);
         if (dataRows != null) {
             results.put(query, dataRows);
         }
