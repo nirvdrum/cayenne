@@ -177,7 +177,10 @@ public class DefaultOperationObserver implements OperationObserver {
     }
 
     public void nextQueryException(Query query, Exception ex) {
-        logObj.log(Level.WARN, "query exception", ex);
+        if (logObj.isEnabledFor(Level.WARN)) {
+        	String queryClass = (query != null) ? query.getClass().getName() : "<null>";
+            logObj.log(Level.WARN, "Query exception: " + queryClass, ex);
+        }
         queryExceptions.put(query, ex);
     }
 
