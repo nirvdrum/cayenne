@@ -58,9 +58,13 @@ package org.objectstyle.cayenne.access;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.objectstyle.art.GeneratedColumnCompKey;
+import org.objectstyle.art.GeneratedColumnCompMaster;
 import org.objectstyle.art.GeneratedColumnDep;
 import org.objectstyle.art.GeneratedColumnTest;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.DataObjectUtils;
+import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
@@ -138,7 +142,56 @@ public class IdentityColumnsTst extends CayenneTestCase {
 
     public void testCompoundPKWithGeneratedColumn() throws Exception {
         if (getAccessStackAdapter().getAdapter().supportsGeneratedKeys()) {
-            fail("TODO: build test case for a compound PK with one generated column...");
+            // only works for generated keys, as the entity tested has one Cayenne
+            // auto-pk and one generated key
+
+            String masterName = "m_" + System.currentTimeMillis();
+            String depName1 = "dep1_" + System.currentTimeMillis();
+            String depName2 = "dep2_" + System.currentTimeMillis();
+
+            DataContext context = createDataContext();
+            GeneratedColumnCompMaster master = (GeneratedColumnCompMaster) context
+                    .createAndRegisterNewObject(GeneratedColumnCompMaster.class);
+            master.setName(masterName);
+
+            GeneratedColumnCompKey dep1 = (GeneratedColumnCompKey) context
+                    .createAndRegisterNewObject(GeneratedColumnCompKey.class);
+            dep1.setName(depName1);
+            dep1.setToMaster(master);
+
+            GeneratedColumnCompKey dep2 = (GeneratedColumnCompKey) context
+                    .createAndRegisterNewObject(GeneratedColumnCompKey.class);
+            dep2.setName(depName2);
+            dep2.setToMaster(master);
+
+            context.commitChanges();
+
+            int masterId = DataObjectUtils.intPKForObject(master);
+
+            ObjectId id2 = dep2.getObjectId();
+
+            // check propagated id
+            Number propagatedID2 = (Number) id2
+                    .getValueForAttribute(GeneratedColumnCompKey.PROPAGATED_PK_PK_COLUMN);
+            assertNotNull(propagatedID2);
+            assertEquals(masterId, propagatedID2.intValue());
+
+            // check Cayenne-generated ID
+            Number cayenneGeneratedID2 = (Number) id2
+                    .getValueForAttribute(GeneratedColumnCompKey.AUTO_PK_PK_COLUMN);
+            assertNotNull(cayenneGeneratedID2);
+
+            // check DB-generated ID
+            Number dbGeneratedID2 = (Number) id2
+                    .getValueForAttribute(GeneratedColumnCompKey.GENERATED_COLUMN_PK_COLUMN);
+            assertNotNull(dbGeneratedID2);
+
+            context.invalidateObjects(Arrays.asList(new Object[] {
+                    master, dep1, dep2
+            }));
+
+            DataObject fetchedDep2 = DataObjectUtils.objectForPK(context, id2);
+            assertNotNull(fetchedDep2);
         }
     }
 
@@ -159,18 +212,18 @@ public class IdentityColumnsTst extends CayenneTestCase {
         GeneratedColumnTest master2 = (GeneratedColumnTest) context
                 .createAndRegisterNewObject(GeneratedColumnTest.class);
         master2.setName("bbb");
-        
+
         // TESTING THIS
         dependent.setToMaster(master2);
         context.commitChanges();
-        
+
         int id1 = DataObjectUtils.intPKForObject(master2);
         assertTrue(id1 >= 0);
 
         int id2 = DataObjectUtils.intPKForObject(dependent);
         assertTrue(id2 >= 0);
         assertEquals(id1, id2);
-        
+
         context.invalidateObjects(Arrays.asList(new Object[] {
                 master2, dependent
         }));

@@ -95,6 +95,16 @@
 		<db-attribute name="GALLERY_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GALLERY_NAME" type="VARCHAR" isMandatory="true" length="100"/>
 	</db-entity>
+	<db-entity name="GENERATED_COLUMN_COMP_KEY">
+		<db-attribute name="AUTO_PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="GENERATED_COLUMN" type="INTEGER" isPrimaryKey="true" isMandatory="true" isGenerated="true"/>
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
+		<db-attribute name="PROPAGATED_PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="GENERATED_COLUMN_COMP_MASTER">
+		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="NAME" type="VARCHAR" length="100"/>
+	</db-entity>
 	<db-entity name="GENERATED_COLUMN_DEP">
 		<db-attribute name="GENERATED_COLUMN_FK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="NAME" type="VARCHAR" length="100"/>
@@ -229,6 +239,12 @@
 	<obj-entity name="Gallery" className="org.objectstyle.art.Gallery" dbEntityName="GALLERY">
 		<obj-attribute name="galleryName" type="java.lang.String" db-attribute-path="GALLERY_NAME"/>
 	</obj-entity>
+	<obj-entity name="GeneratedColumnCompKey" className="org.objectstyle.art.GeneratedColumnCompKey" dbEntityName="GENERATED_COLUMN_COMP_KEY">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
+	<obj-entity name="GeneratedColumnCompMaster" className="org.objectstyle.art.GeneratedColumnCompMaster" dbEntityName="GENERATED_COLUMN_COMP_MASTER">
+		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
+	</obj-entity>
 	<obj-entity name="GeneratedColumnDep" className="org.objectstyle.art.GeneratedColumnDep" dbEntityName="GENERATED_COLUMN_DEP">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
@@ -344,6 +360,12 @@
 	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
+	<db-relationship name="toMaster" source="GENERATED_COLUMN_COMP_KEY" target="GENERATED_COLUMN_COMP_MASTER" toMany="false">
+		<db-attribute-pair source="PROPAGATED_PK" target="ID"/>
+	</db-relationship>
+	<db-relationship name="toDetail" source="GENERATED_COLUMN_COMP_MASTER" target="GENERATED_COLUMN_COMP_KEY" toDependentPK="true" toMany="true">
+		<db-attribute-pair source="ID" target="PROPAGATED_PK"/>
+	</db-relationship>
 	<db-relationship name="toMaster" source="GENERATED_COLUMN_DEP" target="GENERATED_COLUMN_TEST" toMany="false">
 		<db-attribute-pair source="GENERATED_COLUMN_FK" target="GENERATED_COLUMN"/>
 	</db-relationship>
@@ -393,6 +415,8 @@
 	<obj-relationship name="toGallery" source="Exhibit" target="Gallery" deleteRule="Nullify" db-relationship-path="toGallery"/>
 	<obj-relationship name="exhibitArray" source="Gallery" target="Exhibit" deleteRule="Cascade" db-relationship-path="exhibitArray"/>
 	<obj-relationship name="paintingArray" source="Gallery" target="Painting" deleteRule="Deny" db-relationship-path="paintingArray"/>
+	<obj-relationship name="toMaster" source="GeneratedColumnCompKey" target="GeneratedColumnCompMaster" db-relationship-path="toMaster"/>
+	<obj-relationship name="toDetail" source="GeneratedColumnCompMaster" target="GeneratedColumnCompKey" db-relationship-path="toDetail"/>
 	<obj-relationship name="toMaster" source="GeneratedColumnDep" target="GeneratedColumnTest" db-relationship-path="toMaster"/>
 	<obj-relationship name="toDep" source="GeneratedColumnTest" target="GeneratedColumnDep" db-relationship-path="toDep"/>
 	<obj-relationship name="toMeaningfulPK" source="MeaningfulPKDep" target="MeaningfulPKTest1" db-relationship-path="toMeaningfulPK"/>

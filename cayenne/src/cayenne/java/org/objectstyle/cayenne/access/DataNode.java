@@ -64,7 +64,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -88,7 +87,6 @@ import org.objectstyle.cayenne.map.AshwoodEntitySorter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.EntitySorter;
-import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -110,7 +108,6 @@ import org.objectstyle.cayenne.query.UpdateBatchQuery;
 public class DataNode implements QueryEngine {
 
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
-    private static final EntitySorter NULL_SORTER = new NullSorter();
 
     protected String name;
     protected DataSource dataSource;
@@ -118,7 +115,7 @@ public class DataNode implements QueryEngine {
     protected String dataSourceLocation;
     protected String dataSourceFactory;
     protected EntityResolver entityResolver;
-    protected EntitySorter entitySorter = NULL_SORTER;
+    protected EntitySorter entitySorter;
 
     // ====================================================
     // DataMaps
@@ -135,6 +132,11 @@ public class DataNode implements QueryEngine {
     /** Creates DataNode and assigns <code>name</code> to it. */
     public DataNode(String name) {
         this.name = name;
+
+        // since 1.2 we always implement entity sorting, regardless of the underlying DB
+        // as the right order is needed for deferred PK propagation (and maybe other
+        // things too?)
+        this.entitySorter = new AshwoodEntitySorter(Collections.EMPTY_LIST);
     }
 
     /** Returns node "name" property. */
@@ -218,16 +220,6 @@ public class DataNode implements QueryEngine {
 
     public void setAdapter(DbAdapter adapter) {
         this.adapter = adapter;
-
-        // update sorter
-
-        // TODO: since sorting may be disabled even for databases
-        // that enforce constraints, in cases when constraints are
-        // defined as deferrable, this may need more fine grained
-        // control from the user, maybe via ContextCommitObserver?
-        this.entitySorter = (adapter != null && adapter.supportsFkConstraints())
-                ? new AshwoodEntitySorter(getDataMaps())
-                : NULL_SORTER;
     }
 
     /**
@@ -496,33 +488,14 @@ public class DataNode implements QueryEngine {
     public synchronized void shutdown() {
         DataSource ds = getDataSource();
         try {
+            // TODO: theoretically someone maybe using our PoolManager as a container
+            // mapped DataSource, so we should use some other logic to determine whether
+            // this is a DataNode-managed DS.
             if (ds instanceof PoolManager) {
                 ((PoolManager) ds).dispose();
             }
         }
         catch (SQLException ex) {
-        }
-    }
-
-    static class NullSorter implements EntitySorter {
-
-        public void sortDbEntities(List dbEntities, boolean deleteOrder) {
-            // do nothing
-        }
-
-        public void sortObjEntities(List objEntities, boolean deleteOrder) {
-            // do nothing
-        }
-
-        public void sortObjectsForEntity(
-                ObjEntity entity,
-                List objects,
-                boolean deleteOrder) {
-            // do nothing
-        }
-
-        public void setDataMaps(Collection dataMaps) {
-
         }
     }
 

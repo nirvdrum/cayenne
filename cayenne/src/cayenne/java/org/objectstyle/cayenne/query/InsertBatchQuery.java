@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.Factory;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -119,15 +120,28 @@ public class InsertBatchQuery extends BatchQuery {
         // if a value is a Factory, resolve it here...
         if (value instanceof Factory) {
             value = ((Factory) value).create();
-            currentSnapshot.put(attribute.getName(), value);
 
             // update replacement id
             if (attribute.isPrimaryKey()) {
+                // sanity check
+                if (value == null) {
+                    String name = attribute.getEntity() != null ? attribute
+                            .getEntity()
+                            .getName() : "<null>";
+                    throw new CayenneRuntimeException("Failed to generate PK: "
+                            + name
+                            + "."
+                            + attribute.getName());
+                }
+
                 ObjectId id = getObjectId();
                 if (id != null) {
                     id.getReplacementIdMap().put(attribute.getName(), value);
                 }
             }
+
+            // update snapshot
+            currentSnapshot.put(attribute.getName(), value);
         }
 
         return value;
