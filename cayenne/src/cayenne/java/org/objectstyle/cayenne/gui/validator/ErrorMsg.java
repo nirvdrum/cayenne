@@ -60,6 +60,7 @@ import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /** 
  * Superclass of CayenneModeler validation messages.
@@ -68,13 +69,19 @@ import org.objectstyle.cayenne.gui.event.Mediator;
  * @author Andrei Adamchik
  */
 public abstract class ErrorMsg {
-	public static final int NO_ERROR = 0;
-	public static final int WARNING = 1;
-	public static final int ERROR = 2;
+	public static final int NO_ERROR = ValidationResult.VALID;
+	public static final int WARNING = ValidationResult.WARNING;
+	public static final int ERROR = ValidationResult.ERROR;
 
 	protected String message;
 	protected int severity;
 	protected DataDomain domain;
+	
+	public ErrorMsg(ValidationResult result) {
+		this.message = result.getMessage();
+		this.severity = result.getSeverity();
+		this.domain = (DataDomain)result.getTreeNodePath()[0];
+	}
 
 	public ErrorMsg(String message, int severity, DataDomain domain) {
 		this.message = message;

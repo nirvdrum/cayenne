@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /**
  * DataMap validation message.
@@ -70,7 +71,28 @@ import org.objectstyle.cayenne.map.DataMap;
  * @author Andrei Adamchik
  */
 public class DataMapErrorMsg extends ErrorMsg {
-	private DataMap map;
+	protected DataMap map;
+
+    /**
+     * Constructor for DataMapErrorMsg.
+     * @param result
+     */
+    public DataMapErrorMsg(ValidationResult result) {
+        super(result);
+        this.map = (DataMap)result.getTreeNodePath()[1];
+    }
+
+
+    /**
+     * Constructor for DataMapErrorMsg.
+     * @param message
+     * @param severity
+     * @param domain
+     */
+    public DataMapErrorMsg(String message, int severity, DataDomain domain) {
+        super(message, severity, domain);
+    }
+
 
 	public DataMapErrorMsg(
 		String message,

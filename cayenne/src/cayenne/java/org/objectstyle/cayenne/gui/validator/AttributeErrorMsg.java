@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /**
  * Attribute validation message.
@@ -72,9 +73,21 @@ import org.objectstyle.cayenne.map.Attribute;
  * @author Andrei Adamchik
  */
 public class AttributeErrorMsg extends ErrorMsg {
-	private DataMap map;
-	private Entity entity;
-	private Attribute attribute;
+	protected DataMap map;
+	protected Entity entity;
+	protected Attribute attribute;
+
+    /**
+     * Constructor for AttributeErrorMsg.
+     * @param result
+     */
+    public AttributeErrorMsg(ValidationResult result) {
+        super(result);
+        this.map = (DataMap)result.getTreeNodePath()[1];
+        this.entity = (Entity)result.getTreeNodePath()[2];
+        this.attribute = (Attribute)result.getTreeNodePath()[3];
+    }
+
 
 	public AttributeErrorMsg(
 		String message,

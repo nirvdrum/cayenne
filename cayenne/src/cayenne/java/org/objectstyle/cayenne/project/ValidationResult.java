@@ -53,29 +53,81 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.util;
+package org.objectstyle.cayenne.project;
 
 /**
- * Generic interface defining a double-linked entry in CayenneMap.
+ * ValidationResult encapsulates information about a single node validation
+ * on the project tree.
  * 
  * @author Andrei Adamchik
  */
-public interface CayenneMapEntry {
-	/**
-	 * Returns the name property of this object.
-	 * 
-	 * @return name of this entry.
-	 */
-	public String getName();
-
-	/**
-	 * Returns the parent map.
-	 */
-	public Object getParent();
+public class ValidationResult {
+	public static final int VALID = 0;
+	public static final int WARNING = 1;
+	public static final int ERROR = 2;
 	
-	/**
-	 * Stores the parent map.
-	 */
-	public void setParent(Object parent);
-}
+	
+    protected Object[] treeNodePath;
+    protected String message;
+    protected int severity;
 
+    /**
+     * Constructor for ProjectValidationError.
+     */
+    public ValidationResult(int severity, String message, Object[] treeNodePath) {
+    	this.severity = severity;
+    	this.message = message;
+    	this.treeNodePath = treeNodePath;
+    }
+
+    public String toString() {
+        return getMessage();
+    }
+    /**
+     * Returns the message.
+     * @return String
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Returns the severity.
+     * @return int
+     */
+    public int getSeverity() {
+        return severity;
+    }
+
+    /**
+     * Returns the treeNodePath.
+     * @return Object[]
+     */
+    public Object[] getTreeNodePath() {
+        return treeNodePath;
+    }
+
+    /**
+     * Sets the message.
+     * @param message The message to set
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    /**
+     * Sets the severity.
+     * @param severity The severity to set
+     */
+    public void setSeverity(int severity) {
+        this.severity = severity;
+    }
+
+    /**
+     * Sets the treeNodePath.
+     * @param treeNodePath The treeNodePath to set
+     */
+    public void setTreeNodePath(Object[] treeNodePath) {
+        this.treeNodePath = treeNodePath;
+    }
+}

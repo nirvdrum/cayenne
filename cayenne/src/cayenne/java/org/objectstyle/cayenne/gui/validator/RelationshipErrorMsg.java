@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /**
  * Relationship validation message.
@@ -70,9 +71,32 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class RelationshipErrorMsg extends ErrorMsg {
-	private DataMap map;
-	private Entity entity;
-	private Relationship rel;
+	protected DataMap map;
+	protected Entity entity;
+	protected Relationship rel;
+
+    /**
+     * Constructor for RelationshipErrorMsg.
+     * @param result
+     */
+    public RelationshipErrorMsg(ValidationResult result) {
+        super(result);
+        this.map = (DataMap)result.getTreeNodePath()[1];
+        this.entity = (Entity)result.getTreeNodePath()[2];
+        this.rel = (Relationship)result.getTreeNodePath()[3];
+    }
+
+
+    /**
+     * Constructor for RelationshipErrorMsg.
+     * @param message
+     * @param severity
+     * @param domain
+     */
+    public RelationshipErrorMsg(String message, int severity, DataDomain domain) {
+        super(message, severity, domain);
+    }
+
 
 	public RelationshipErrorMsg(
 		String message,

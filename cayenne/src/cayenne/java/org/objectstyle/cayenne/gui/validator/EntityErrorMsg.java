@@ -65,6 +65,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /**
  * DataDomain validation message.
@@ -73,29 +74,49 @@ import org.objectstyle.cayenne.map.ObjEntity;
  * @author Andrei Adamchik
  */
 public class EntityErrorMsg extends ErrorMsg {
-	private DataMap map;
-	private Entity entity;
+    protected DataMap map;
+    protected Entity entity;
 
-	public EntityErrorMsg(
-		String message,
-		int severity,
-		DataDomain domain,
-		DataMap map,
-		Entity entity) {
+    /**
+     * Constructor for EntityErrorMsg.
+     * @param result
+     */
+    public EntityErrorMsg(ValidationResult result) {
+        super(result);
+        this.map = (DataMap) result.getTreeNodePath()[1];
+        this.entity = (Entity) result.getTreeNodePath()[2];
+    }
 
-		super(message, severity, domain);
-		this.map = map;
-		this.entity = entity;
-	}
+    /**
+     * Constructor for EntityErrorMsg.
+     * @param message
+     * @param severity
+     * @param domain
+     */
+    public EntityErrorMsg(String message, int severity, DataDomain domain) {
+        super(message, severity, domain);
+    }
 
-	public void displayField(Mediator mediator, JFrame frame) {
-		EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
-		event.setTabReset(true);
-		
-		if (entity instanceof ObjEntity) {
-			mediator.fireObjEntityDisplayEvent(event);
-		} else if (entity instanceof DbEntity) {
-			mediator.fireDbEntityDisplayEvent(event);
-		}
-	}
+    public EntityErrorMsg(
+        String message,
+        int severity,
+        DataDomain domain,
+        DataMap map,
+        Entity entity) {
+
+        super(message, severity, domain);
+        this.map = map;
+        this.entity = entity;
+    }
+
+    public void displayField(Mediator mediator, JFrame frame) {
+        EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
+        event.setTabReset(true);
+
+        if (entity instanceof ObjEntity) {
+            mediator.fireObjEntityDisplayEvent(event);
+        } else if (entity instanceof DbEntity) {
+            mediator.fireDbEntityDisplayEvent(event);
+        }
+    }
 }

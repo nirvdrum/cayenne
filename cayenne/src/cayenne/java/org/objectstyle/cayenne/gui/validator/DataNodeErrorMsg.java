@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /**
  * DataNode validation message.
@@ -70,7 +71,28 @@ import org.objectstyle.cayenne.gui.event.Mediator;
  * @author Andrei Adamchik
  */
 public class DataNodeErrorMsg extends ErrorMsg {
-	private DataNode node;
+	protected DataNode node;
+
+    /**
+     * Constructor for DataNodeErrorMsg.
+     * @param result
+     */
+    public DataNodeErrorMsg(ValidationResult result) {
+        super(result);
+        this.node = (DataNode)result.getTreeNodePath()[1];
+    }
+
+
+    /**
+     * Constructor for DataNodeErrorMsg.
+     * @param message
+     * @param severity
+     * @param domain
+     */
+    public DataNodeErrorMsg(String message, int severity, DataDomain domain) {
+        super(message, severity, domain);
+    }
+
 
 	public DataNodeErrorMsg(
 		String message,

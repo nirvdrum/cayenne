@@ -61,6 +61,7 @@ import javax.swing.JFrame;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.project.ValidationResult;
 
 /**
  * DataDomain validation message.
@@ -69,6 +70,15 @@ import org.objectstyle.cayenne.gui.event.Mediator;
  * @author Andrei Adamchik
  */
 public class DomainErrorMsg extends ErrorMsg {
+
+    /**
+     * Constructor for DomainErrorMsg.
+     * @param result
+     */
+    public DomainErrorMsg(ValidationResult result) {
+        super(result);
+    }
+
 
 	public DomainErrorMsg(String message, int severity, DataDomain domain) {
 		super(message, severity, domain);
