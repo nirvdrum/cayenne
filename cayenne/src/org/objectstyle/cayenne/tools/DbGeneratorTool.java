@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.dba;
+package org.objectstyle.cayenne.tools;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -56,52 +56,52 @@ package org.objectstyle.cayenne.dba;
  */ 
 
 import java.sql.*;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationSorter;
+import java.util.*;
+
+import org.xml.sax.InputSource;
+
+import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
 
-/** Defines API needed to handle differences between
-  * various databases accessed via JDBC. Implementing classed are 
-  * intended to be pluggable database specific adapters.
+/** Utility class for generating database  schema from a DataMap
+  * <p>This class is an frontend to DbGenerator class. It can be used 
+  * from command line as well as from GUI tools.</p>
   *
-  * @author Andrei Adamchik 
+  * @author Andrei Adamchik
   */
-public interface DbAdapter {
-
-    /** Returns true if a target database supports FK constraints. */
-    public boolean supportsFkConstraints();
-
-    /** Returns a SQL string that can be used to create
-      * a foreign key constraint for the relationship. */
-    public String createFkConstraint(DbRelationship rel);
-
-    /** Creates necessary database objects to do primary key generation. */
-    public void createAutoPkSupport(DataNode dataNode) throws Exception;
-
-
-    /** Performs necessary database operations to do primary key generation
-     *  for a particular DbEntity. This  may require a prior call to 
-     *  <code>"createAutoPkSupport"<code> method.
-     *
-     *  @param dataNode node that provides connection layer for PkGenerator.
-     *  @param dbEntity DbEntity that needs an auto PK support
-     */
-    public void createAutoPkSupportForDbEntity(DataNode dataNode, DbEntity dbEntity) throws Exception;
-
-
-    /** Generates unique and non-repeating primary key for specified dbEntity. */
-    public Object generatePkForDbEntity(DataNode dataNode, DbEntity dbEntity) throws Exception;
-
-    /** Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
-      * Valid types are defined in java.sql.Types. */
-    public String[] externalTypesForJdbcType(int type);
+public class DbGeneratorTool {
     
+    /** Runs DbGenerator with a specified map. */
+    public static void main (String args[]) {
+        boolean noGui = "true".equalsIgnoreCase(System.getProperty(DbLoaderTool.NO_GUI_PROPERTY));
+
+        if(args.length != 1) {
+            usage();
+            System.exit(1);
+        }
+            
+        try {
+            DataMap map = new MapLoaderImpl().loadDataMap(new InputSource(args[0]));
+            DataSourceInfo dsi = DbLoaderTool.getConnectionInfo(!noGui);
+            Connection conn = DbLoaderTool.openConnection(dsi);
+            if (null == conn) {
+            	System.out.println("Cancel processing...");
+            	return;
+            }
+            
+            DbAdapter adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
+            new DbGenerator(conn, adapter).createTables(map);
+            conn.close();
+            
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.exit(1);
+        }
+    }
     
-    /** Returns an operation sorter or null if no sorting
-      * is required. Operation sorter is needed for databases
-      * (like Sybase) that do not have deferred constraint checking
-      * and need appropriate operation ordering within transactions. */
-    public OperationSorter getOpSorter(DataNode node);
+    private static void usage() {
+        System.out.println("Usage : dbgen mappath");
+    }
 }

@@ -53,7 +53,7 @@ package org.objectstyle.cayenne.tools;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.sql.*;
 import java.util.*;
@@ -64,15 +64,12 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.access.*;
 
 
-/** Utility class for loading schema information from the specified 
+/** Utility class for loading schema information from the specified
   * database into DataMap.
-  * <p>This class is an interface to DbLoader class. It can be used 
+  * <p>This class is an frontend to DbLoader class. It can be used 
   * from command line as well as from GUI tools.</p> */
 public class DbLoaderTool {
     public static final String NO_GUI_PROPERTY = "cayenne.nogui";
-
-    private Connection con;
-    private DatabaseMetaData metaData;
 
 
     /** Runs DbLoader against specified database. Prints generated data map XML to STDOUT. */
@@ -82,10 +79,10 @@ public class DbLoaderTool {
 
         DataMap map = null;
         try {
-            Connection conn = openConnection(!noGui);
+            Connection conn = openConnection(getConnectionInfo(!noGui));
             if (null == conn) {
-            	System.out.println("Cancel loading...");
-            	return;
+                System.out.println("Cancel loading...");
+                return;
             }
             map = new DbLoader(conn).createDataMapFromDB(null);
             conn.close();
@@ -108,7 +105,20 @@ public class DbLoaderTool {
         out.flush();
     }
 
-    private static Connection openConnection(boolean useGui) throws Exception {
+    /** Interactively collects database login info and opens database connection. */
+    static Connection openConnection(DataSourceInfo dsi) throws Exception {
+        if (null == dsi)
+            return null;
+        // connect
+        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
+        return DriverManager.getConnection(
+                   dsi.getDataSourceUrl(),
+                   dsi.getUserName(),
+                   dsi.getPassword());
+    }
+
+
+    static DataSourceInfo getConnectionInfo(boolean useGui) {
         // gather connection info
         DataSourceInfo dsi = new DataSourceInfo();
         InteractiveLogin loginObj = (useGui)
@@ -122,14 +132,6 @@ public class DbLoaderTool {
 
         loginObj.collectLoginInfo();
 
-		dsi = loginObj.getDataSrcInfo();
-		if (null == dsi)
-			return null;
-        // connect
-        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
-        return DriverManager.getConnection(
-                   dsi.getDataSourceUrl(),
-                   dsi.getUserName(),
-                   dsi.getPassword());
+        return loginObj.getDataSrcInfo();
     }
 }

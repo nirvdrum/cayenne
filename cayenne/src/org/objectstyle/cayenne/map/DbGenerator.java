@@ -56,13 +56,18 @@ package org.objectstyle.cayenne.map;
  */
 
 
+import java.util.logging.Level;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.SQLException;
+
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.QueryLogger;
 
 
 /** Utility class that does forward engineering of the database.
@@ -84,15 +89,50 @@ public class DbGenerator {
     }
 
 
+    /** Returns DbAdapter associated with this DbGenerator. */
     public DbAdapter getAdapter() {
         return adapter;
     }
 
 
+    /** Returns JDBC connection object associated with this DbGenerator. */
     public Connection getCon() {
         return con;
     }
 
+
+    /** Creates database tables using the information from the
+      * <code>map</code>. */
+    public void createTables(DataMap map) throws SQLException {
+        Statement stmt = con.createStatement();
+
+        try {
+            Iterator it = map.getDbEntitiesAsList().iterator();
+            while(it.hasNext()) {
+                String q = createTableQuery((DbEntity)it.next());
+                QueryLogger.logQuery(Level.INFO, q, null);
+                stmt.execute(q);
+            }
+
+            // now see if we need FK constraints
+            if(adapter.supportsFkConstraints()) {
+                Iterator it2 = map.getDbEntitiesAsList().iterator();
+                while(it2.hasNext()) {
+                    List list = createFkConstraintsQueries((DbEntity)it2.next());
+
+                    Iterator cit = list.iterator();
+                    while(cit.hasNext()) {
+                        String cq = (String)cit.next();
+                        QueryLogger.logQuery(Level.INFO, cq, null);
+                        stmt.execute(cq);
+                    }
+                }
+            }
+        }
+        finally {
+            stmt.close();
+        }
+    }
 
     /** Returns a query that can be used to create database table
       * corresponding to <code>ent</code> parameter. */
