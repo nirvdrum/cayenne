@@ -21,6 +21,7 @@
         	"http://objectstyle.org/ashwood/">Ashwood</a>.</li>
         	<li>Support for PostgreSQL and HSQLDB.</li>
         	<li>Batched data modification operations.</li>
+        	<li>More straightforward configuration for webapplications.</li>
         </ul>
         
         <i>Note on deprecated API: There is lots of deprecated API in this release. All deprecated

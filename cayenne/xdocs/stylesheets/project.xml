@@ -10,7 +10,7 @@
     <css href="/images/objectstyle.css"/>
     
     <menu name="About">
-        <item name="Overview"       href="/index.html"/>
+        <item name="Home"       href="/index.html"/>
         <item name="Download"       href="/download.html"/>
         <item name="Contributors"   href="/contributors.html"/>
         <item name="How Can I Help" href="/todo.html"/>
