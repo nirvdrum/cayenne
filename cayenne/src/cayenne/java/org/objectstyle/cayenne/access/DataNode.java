@@ -226,29 +226,9 @@ public class DataNode implements QueryEngine {
      * Wraps queries in an internal transaction, and executes them via connection obtained from 
      * internal DataSource.
      */
-    public void performQueries(List queries, OperationObserver resultConsumer) {
+    public void performQueries(Collection queries, OperationObserver observer) {
         Transaction transaction = Transaction.internalTransaction(null);
-
-        try {
-            transaction.begin();
-            performQueries(queries, resultConsumer, transaction);
-            transaction.commit();
-        }
-        catch (Exception ex) {
-            try {
-                transaction.rollback();
-            }
-            catch (Exception rollbackEx) {
-            }
-            
-            // must rethrow
-            if (ex instanceof CayenneRuntimeException) {
-                throw (CayenneRuntimeException)ex;
-            }
-            else {
-                throw new CayenneRuntimeException(ex);
-            }
-        }
+        transaction.performQueries(this, queries, observer);
     }
     
 
@@ -275,10 +255,11 @@ public class DataNode implements QueryEngine {
         Level logLevel = resultConsumer.getLoggingLevel();
 
         int listSize = queries.size();
-        QueryLogger.logQueryStart(logLevel, listSize);
         if (listSize == 0) {
             return;
         }
+        QueryLogger.logQueryStart(logLevel, listSize);
+
 
         // since 1.1 Transaction object is required
         if (transaction == null) {

@@ -57,7 +57,6 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
@@ -88,8 +87,10 @@ public interface QueryEngine {
      * Executes a list of queries wrapping them in its own transaction. 
      * Results of execution are passed to {@link OperationObserver} object via its 
      * callback methods.
+     * 
+     * @since 1.1 The signiture has changed from List to Collection.
      */
-    public void performQueries(List queries, OperationObserver resultConsumer);
+    public void performQueries(Collection queries, OperationObserver resultConsumer);
 
     /**
      * Executes a single query. Will notify <code>resultConsumer</code>

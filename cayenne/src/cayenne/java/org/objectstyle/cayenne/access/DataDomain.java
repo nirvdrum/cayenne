@@ -133,7 +133,7 @@ public class DataDomain implements QueryEngine {
     protected boolean sharedCacheEnabled;
     protected boolean validatingObjectsOnCommit;
     protected boolean usingExternalTransactions;
-
+    
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
      * creates a DataDomain with name "default".
@@ -788,32 +788,12 @@ public class DataDomain implements QueryEngine {
      * Wraps queries in an internal transaction and sends them to appropriate DataNodes 
      * for execution.
      */
-    public void performQueries(List queries, OperationObserver resultConsumer) {
+    public void performQueries(Collection queries, OperationObserver observer) {
         Transaction transaction =
-            (resultConsumer.isIteratedResult())
+            (observer.isIteratedResult())
                 ? Transaction.noTransaction()
                 : createTransaction();
-
-        try {
-            transaction.begin();
-            performQueries(queries, resultConsumer, transaction);
-            transaction.commit();
-        }
-        catch (Exception ex) {
-            try {
-                transaction.rollback();
-            }
-            catch (Exception rollbackEx) {
-            }
-
-            // must rethrow
-            if (ex instanceof CayenneRuntimeException) {
-                throw (CayenneRuntimeException) ex;
-            }
-            else {
-                throw new CayenneRuntimeException(ex);
-            }
-        }
+        transaction.performQueries(this, queries, observer);
     }
 
     /** 

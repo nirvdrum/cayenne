@@ -1203,32 +1203,13 @@ public class DataContext implements QueryEngine, Serializable {
      * queries that require prefetching relationships, will create additional
      * queries to perform necessary prefetching.
      */
-    public void performQueries(List queries, OperationObserver resultConsumer) {
+    public void performQueries(Collection queries, OperationObserver observer) {
         Transaction transaction =
-            (resultConsumer.isIteratedResult())
+            (observer.isIteratedResult())
                 ? Transaction.noTransaction()
                 : getParentDataDomain().createTransaction();
 
-        try {
-            transaction.begin();
-            performQueries(queries, resultConsumer, transaction);
-            transaction.commit();
-        }
-        catch (Exception ex) {
-            try {
-                transaction.rollback();
-            }
-            catch (Exception rollbackEx) {
-            }
-
-            // must rethrow
-            if (ex instanceof CayenneRuntimeException) {
-                throw (CayenneRuntimeException) ex;
-            }
-            else {
-                throw new CayenneRuntimeException(ex);
-            }
-        }
+        transaction.performQueries(this, queries, observer);
     }
 
     /**
