@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
@@ -112,8 +113,7 @@ public class ProjectConfigurator {
                 throw new IOException(
                     "Error renaming: " + tmpDest + " to " + info.getDestJar());
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new ProjectException("Error performing reconfiguration.", ex);
         } finally {
             if (tmpDir != null) {
@@ -132,7 +132,8 @@ public class ProjectConfigurator {
      * @param projectDir a directory where a working copy of the project is
      * located.
      */
-    protected void reconfigureProject(File projectDir) throws ProjectException {
+    protected void reconfigureProject(File projectDir)
+        throws ProjectException {
         File projectFile = new File(projectDir, Configuration.DOMAIN_FILE);
 
         // process alternative project file
@@ -142,17 +143,33 @@ public class ProjectConfigurator {
                     "Can't copy project file: " + info.getAltProjectFile());
             }
         }
-        
-        // drop 
-        
-        // load project
-        ApplicationProject project = new ApplicationProject(projectFile);
-        if(project.getLoadStatus().hasFailures()) {
-        	throw new ProjectException("Failed loading project: " + projectFile);
+
+        // copy driver files, delete unused
+        Iterator it = info.getNodes().iterator();
+        boolean needFix = it.hasNext();
+        while (it.hasNext()) {
+            DataNodeConfigInfo nodeInfo = (DataNodeConfigInfo) it.next();
+            String name = nodeInfo.getName();
+            File targetDriverFile =
+                new File(projectDir, name + DataNodeFile.LOCATION_SUFFIX);
+            // need to remove old file if exists
+            if (targetDriverFile.exists()) {
+                targetDriverFile.delete();
+            }
+
+            if (nodeInfo.getDriverFile() == null) {           
+                // need to copy file from another location
+                if(!Util.copy(nodeInfo.getDriverFile(), targetDriverFile)) {
+                	throw new ProjectException("Can't copy driver file from " + nodeInfo.getDriverFile());
+                }
+            }
         }
-        
-        
-        
+
+        // load project
+        if (needFix) {
+            // read the project and fix data nodes
+            new PartialProject(projectFile).updateNodes(info.getNodes());
+        }
     }
 
     /**

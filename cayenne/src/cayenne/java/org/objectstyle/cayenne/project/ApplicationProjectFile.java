@@ -60,6 +60,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.ConfigSaver;
+import org.objectstyle.cayenne.conf.ConfigSaverDelegate;
 import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
 
 /**
@@ -70,8 +71,11 @@ import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
  * 
  * @author Andrei Adamchik
  */
-public class ApplicationProjectFile extends ProjectFile {    
-    public ApplicationProjectFile() {}
+public class ApplicationProjectFile extends ProjectFile {
+    protected ConfigSaverDelegate saveDelegate;
+
+    public ApplicationProjectFile() {
+    }
 
     /**
      * Constructor for ApplicationProjectFile.
@@ -107,13 +111,32 @@ public class ApplicationProjectFile extends ProjectFile {
         List children = getProject().getChildren();
         DataDomain[] domains = new DataDomain[children.size()];
         children.toArray(domains);
-        
-        ApplicationProject project = (ApplicationProject)projectObj;
-        RuntimeSaveDelegate delegate = new RuntimeSaveDelegate(project.getConfig());
-        new ConfigSaver(delegate).storeDomains(out);
+
+        ApplicationProject project = (ApplicationProject) projectObj;
+        ConfigSaverDelegate localDelegate =
+            (saveDelegate != null)
+                ? saveDelegate
+                : new RuntimeSaveDelegate(project.getConfig());
+        new ConfigSaver(localDelegate).storeDomains(out);
     }
 
     public boolean canHandle(Object obj) {
         return obj instanceof ApplicationProject;
+    }
+    
+    /**
+     * Returns the saveDelegate.
+     * @return ConfigSaverDelegate
+     */
+    public ConfigSaverDelegate getSaveDelegate() {
+        return saveDelegate;
+    }
+
+    /**
+     * Sets the saveDelegate.
+     * @param saveDelegate The saveDelegate to set
+     */
+    public void setSaveDelegate(ConfigSaverDelegate saveDelegate) {
+        this.saveDelegate = saveDelegate;
     }
 }

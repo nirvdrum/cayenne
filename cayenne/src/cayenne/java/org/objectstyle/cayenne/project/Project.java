@@ -84,7 +84,7 @@ public abstract class Project {
     public static final String CURRENT_PROJECT_VERSION = "1.0";
 
     protected File projectDir;
-    protected List files;
+    protected List files = new ArrayList();
     protected List upgradeMessages;
     protected boolean modified;
 
