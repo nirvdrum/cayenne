@@ -84,14 +84,12 @@
     <target name="release-site" depends="nositedir">
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
 		<ant antfile="build-modeler.xml" target="dist-src"/>
-		<ant antfile="build-tests.xml" target="dist-src"/>
-		<ant antfile="build-regression.xml" target="dist-src"/>
 		<ant antfile="build-tutorials.xml" target="release-site"/>
 		<ant antfile="build-doc.xml" target="release-site"/>
     </target>
         
     <!-- ========================================== -->
-    <!-- Builds all Cayenne Java subproject JARS.   -->
+    <!-- Runs Cayenne Unit Tests   -->
     <!-- ========================================== -->
     <target name="test">
     	<!-- Cayenne must be fully built -->
@@ -101,8 +99,16 @@
 		<!-- Modeler must be fully compiled, with scripts -->
 		<ant antfile="build-modeler.xml" target="dist-bin"/>
 		<ant antfile="build-tests-modeler.xml" target="test"/>
-		
-		<ant antfile="build-regression.xml" target="dist-bin"/>
+    </target>
+    
+    <!-- ========================================== -->
+    <!-- Builds all Cayenne Java subproject JARS.   -->
+    <!-- ========================================== -->
+    <target name="regression-test">
+    	<!-- Cayenne must be fully built -->
+		<ant antfile="build-cayenne.xml" target="dist-bin"/>
+		<ant antfile="build-tests.xml" target="dist-bin"/>
+		<ant antfile="build-regression.xml" target="test"/>
     </target>
 
     <!-- ========================================== -->

@@ -9,27 +9,40 @@
 	<property name="regression.src" value="src/regression/java"/>
 	<property name="regression.bin" value="src/regression/bin"/>
 
-
+    <path id="classpath">
+    	<fileset dir="${otherlib.dir}">
+			<include name="${bcel.jar}"/>
+		</fileset>
+		<fileset dir="${dist}/lib">
+			<include name="cayenne.jar"/>
+		</fileset>
+		<pathelement path="${regression.build}/classes"/>
+		<pathelement path="${regression.src}"/>
+    </path>
+    
     
     <!-- ========================================== -->
     <!-- Build targets.                             -->
     <!-- ========================================== -->
-    <target name="api">
-		<ant antfile="build-subproj.xml" target="api">
-			<property name="subproj" value="regression"/>
-		</ant>
+    <target name="test" depends="compile">
+		<java fork="true" 
+		      failonerror="true"
+		      classname="org.objectstyle.cayenne.regression.AntMain">
+		      
+			<classpath refid="classpath"/>
+			
+			<jvmarg value="-Xms60m"/>
+			<jvmarg value="-Xmx60m"/>
+			
+			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
+			<sysproperty key="cayenne.schema" value="TEST"/>			
+		</java>
 	</target>
 	
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">
 			<property name="subproj" value="regression"/>
 		</ant>
-	</target>
-	
-	<target name="dist-src" depends="dist-bin,api">
-		<copy todir="${regression.dist.src}">
- 			<fileset dir="${regression.src}"/>
-        </copy>
 	</target>
 
 	<target name="dist-bin" depends="jar">
@@ -69,7 +82,7 @@
                <attribute name="Implementation-Version" value="${project.version}"/>
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.regression.Main"/>
-               <attribute name="Class-Path" value="../cayenne.jar bcel.jar"/>
+               <attribute name="Class-Path" value="../cayenne.jar ../cayenne-tests.jar bcel.jar"/>
             </manifest>
         </jar>
     </target>

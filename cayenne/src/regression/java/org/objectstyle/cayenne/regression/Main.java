@@ -1,7 +1,62 @@
+/* ====================================================================
+ *
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
+ * and individual authors of the software.  All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in
+ *    the documentation and/or other materials provided with the
+ *    distribution.
+ *
+ * 3. The end-user documentation included with the redistribution, if
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
+ *        ObjectStyle Group (http://objectstyle.org/)."
+ *    Alternately, this acknowlegement may appear in the software itself,
+ *    if and wherever such third-party acknowlegements normally appear.
+ *
+ * 4. The names "ObjectStyle Group" and "Cayenne"
+ *    must not be used to endorse or promote products derived
+ *    from this software without prior written permission. For written
+ *    permission, please contact andrus@objectstyle.org.
+ *
+ * 5. Products derived from this software may not be called "ObjectStyle"
+ *    nor may "ObjectStyle" appear in their names without prior written
+ *    permission of the ObjectStyle Group.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED.  IN NO EVENT SHALL THE OBJECTSTYLE GROUP OR
+ * ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
+ * USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ * ====================================================================
+ *
+ * This software consists of voluntary contributions made by many
+ * individuals on behalf of the ObjectStyle Group.  For more
+ * information on the ObjectStyle Group, please see
+ * <http://objectstyle.org/>.
+ *
+ */
+
 package org.objectstyle.cayenne.regression;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Random;
@@ -20,153 +75,238 @@ import org.objectstyle.cayenne.conf.DefaultConfiguration;
  */
 
 public class Main {
-  public static void main(String[] args) {
-    //QueryLogger.setLoggingLevel(Level.ALL);
-    System.out.println("max memory, MB: " + Runtime.getRuntime().maxMemory()/(1024*1024));
-    System.out.println("total memory, MB: " + Runtime.getRuntime().totalMemory()/(1024*1024));
-    System.out.println("free memory, MB: " + Runtime.getRuntime().freeMemory()/(1024*1024));
+    protected Preferences prefs;
 
-    Preferences prefs;
-    try {
-      prefs = new Preferences(args);
-    } catch (FileNotFoundException ex) {
-      System.out.println("Fatal Error: " + ex.getMessage());
-      System.out.println("Good-bye.");
-      return;
-    }
-    FileWriter fileOut = null;
-    PrintWriter out = null;
-    PrintWriter console = new PrintWriter(System.out, true);
-    try {
-      if (prefs.getOutFile() != null && !prefs.getOutFile().isDirectory()) {
-        fileOut = new FileWriter(prefs.getOutFile());
-        out = new PrintWriter(fileOut);
-      }
-      printHeader(console);
-      if (out != null) printHeader(out);
-      printPrefs(console, prefs);
-      if (out != null) printPrefs(out, prefs);
-      ClassLoader loader = new DOStubClassLoader();
-      Configuration.bootstrapSharedConfig(loader.loadClass("Table"));
-      Configuration conf = new DefaultConfiguration(prefs.getCayenneProject());
-      conf.init();
-      DataDomain domain = conf.getDomain();
-      RandomDomainBuilder domainBuilder = new RandomDomainBuilder(domain);
-      RandomSchema rndSchema = domainBuilder.getRandomSchema();
-      rndSchema.setSchemaName(prefs.getSchema());
-      rndSchema.setTableCount(prefs.getTableCount());
-      rndSchema.setMaxReferencesPerTable(prefs.getMaxReferencesPerTable());
-      rndSchema.setMaxForeignKeysPerTable(prefs.getMaxForeignKeysPerTable());
-      rndSchema.setLoopCount(prefs.getLoopCount());
-      rndSchema.setMaxLoopsPerTable(prefs.getMaxLoopsPerTable());
-      Random randomizer = new Random(prefs.getSeed());
-      rndSchema.setRandomizer(randomizer);
-      File workDir = prefs.getWorkDirectory();
-      String dirPrefix = prefs.getSchemaDirPrefix() + "-";
-      for (int i = 1; i <= prefs.getSchemaCount(); i++) {
+    public static void main(String[] args) {
+        //QueryLogger.setLoggingLevel(Level.ALL);
+        System.out.println(
+            "max memory, MB: "
+                + Runtime.getRuntime().maxMemory() / (1024 * 1024));
+        System.out.println(
+            "total memory, MB: "
+                + Runtime.getRuntime().totalMemory() / (1024 * 1024));
+        System.out.println(
+            "free memory, MB: "
+                + Runtime.getRuntime().freeMemory() / (1024 * 1024));
+
+        Preferences prefs;
         try {
-          File schemaDir = new File(workDir, dirPrefix + System.currentTimeMillis());
-          schemaDir.mkdirs();
-          printSchemaStart(console, i, schemaDir);
-          if (out != null) printSchemaStart(out, i, schemaDir);
-          domainBuilder.generate(schemaDir);
-          DataContext ctxt = domain.createDataContext();
-          for (int j = 1; j <= prefs.getCommitsPerSchema(); j++) {
-            printCommitStart(console, j);
-            if (out != null) printCommitStart(out, j);
-            long freeMem = Runtime.getRuntime().freeMemory();
-            console.println("free memory before gc, MB: " + freeMem/(1024*1024));
-            do System.gc();
-            while (freeMem > Runtime.getRuntime().freeMemory());
-            freeMem = Runtime.getRuntime().freeMemory();
-            console.println("free memory after gc, MB: " + freeMem/(1024*1024));
-            if (freeMem/(1024*1024) < 5) {
-              console.println("Out of memory!");
-              return;
-            }
-            DataModificationRobot robot = new DataModificationRobot(ctxt, randomizer, prefs.getNewObjectPerTableCount(), prefs.getDeleteObjectPerTableCount());
-            robot.generate();
-            try {
-              long start = System.currentTimeMillis();
-              ctxt.commit(null);
-              //ctxt.commitChanges(Level.ALL);
-              long end = System.currentTimeMillis();
-              printCommitSuccess(console, j, end - start);
-              if (out != null) printCommitSuccess(out, j, end - start);
-            }
-            catch (Exception ex) {
-              printCommitFailure(console, j, ex);
-              if (out != null) printCommitFailure(out, j, ex);
-            }
-          }
-          printSchemaSuccess(console, i);
-          if (out != null) printSchemaSuccess(out, i);
+            prefs = new Preferences(args);
         } catch (Exception ex) {
-          printSchemaFailure(console, i, ex);
-          if (out != null) printSchemaFailure(out, i, ex);
-        } finally {
-          domainBuilder.drop();
+            System.out.println("Fatal Error: " + ex.getMessage());
+            System.exit(1);
+            return;
         }
-      }
-    } catch (Exception ex) {
-      printFailure(console, ex);
-      if (out != null) printFailure(out, ex);
-    } finally {
-      printFooter(console);
-      if (out != null) printFooter(out);
-      console.flush();
-      try {out.close();} catch (Exception ex) {}
-      try {fileOut.close();} catch (Exception ex) {}
+
+        if (new Main(prefs).execute()) {
+            System.exit(1);
+        }
+
+        System.exit(0);
     }
-  }
 
-  static void printHeader(PrintWriter out) {
-    out.println("Test starting!");
-  }
+    public Main(Preferences prefs) {
+        this.prefs = prefs;
+    }
 
-  static void printFooter(PrintWriter out) {
-    out.println("Test finished!");
-    out.println("Good-bye.");
-  }
+    protected DataDomain createDomain() throws Exception {
+        ClassLoader loader = new DOStubClassLoader();
+        Configuration.bootstrapSharedConfig(loader.loadClass("Table"));
+        Configuration conf =
+            new DefaultConfiguration(prefs.getCayenneProject());
+        conf.init();
+        return conf.getDomain();
+    }
 
-  static void printPrefs(PrintWriter out, Preferences prefs) {
-    out.println("Loaded preferences - ");
-    prefs.print(out);
-  }
+    protected RandomDomainBuilder createDomainBuilder(
+        DataDomain domain,
+        Random randomizer) {
 
-  static void printSchemaStart(PrintWriter out, int schemaIndex, File schemaDir) {
-    out.println();
-    out.println("Schema " + schemaIndex + " generating.");
-    out.println("schema recording in " + schemaDir);
-  }
+        RandomDomainBuilder domainBuilder = new RandomDomainBuilder(domain);
+        RandomSchema rndSchema = domainBuilder.getRandomSchema();
+        rndSchema.setSchemaName(prefs.getSchema());
+        rndSchema.setTableCount(prefs.getTableCount());
+        rndSchema.setMaxReferencesPerTable(prefs.getMaxReferencesPerTable());
+        rndSchema.setMaxForeignKeysPerTable(prefs.getMaxForeignKeysPerTable());
+        rndSchema.setLoopCount(prefs.getLoopCount());
+        rndSchema.setMaxLoopsPerTable(prefs.getMaxLoopsPerTable());
+        rndSchema.setRandomizer(randomizer);
+        return domainBuilder;
+    }
 
-  static void printCommitStart(PrintWriter out, int commitIndex) {
-    out.println("  Commit " + commitIndex + " starting.");
-  }
+    public boolean execute() {
+        boolean hasFailures = false;
+        FileWriter fileOut = null;
+        PrintWriter out = null;
+        PrintWriter console = new PrintWriter(System.out, true);
+        try {
+            if (prefs.getOutFile() != null
+                && !prefs.getOutFile().isDirectory()) {
+                fileOut = new FileWriter(prefs.getOutFile());
+                out = new PrintWriter(fileOut);
+            }
+            printHeader(console);
+            if (out != null)
+                printHeader(out);
+            printPrefs(console, prefs);
+            if (out != null)
+                printPrefs(out, prefs);
 
-  static void printCommitSuccess(PrintWriter out, int commitIndex, long ms) {
-    out.println("  Commit " + commitIndex + " succeeded. Time=" + ms + " ms");
-  }
+            DataDomain domain = createDomain();
+            Random randomizer = new Random(prefs.getSeed());
+            RandomDomainBuilder domainBuilder =
+                createDomainBuilder(domain, randomizer);
 
-  static void printCommitFailure(PrintWriter out, int commitIndex, Exception e) {
-    out.println("  Commit " + commitIndex + " failed.");
-    e.printStackTrace(out);
-    out.println();
-  }
+            File workDir = prefs.getWorkDirectory();
+            String dirPrefix = prefs.getSchemaDirPrefix() + "-";
+            for (int i = 1; i <= prefs.getSchemaCount(); i++) {
+                try {
+                    File schemaDir =
+                        new File(
+                            workDir,
+                            dirPrefix + System.currentTimeMillis());
+                    schemaDir.mkdirs();
+                    printSchemaStart(console, i, schemaDir);
+                    if (out != null)
+                        printSchemaStart(out, i, schemaDir);
+                    domainBuilder.generate(schemaDir);
+                    DataContext ctxt = domain.createDataContext();
+                    for (int j = 1; j <= prefs.getCommitsPerSchema(); j++) {
+                        printCommitStart(console, j);
+                        if (out != null)
+                            printCommitStart(out, j);
+                        long freeMem = Runtime.getRuntime().freeMemory();
+                        console.println(
+                            "free memory before gc, MB: "
+                                + freeMem / (1024 * 1024));
+                        do System.gc();
+                        while (freeMem > Runtime.getRuntime().freeMemory());
+                        freeMem = Runtime.getRuntime().freeMemory();
+                        console.println(
+                            "free memory after gc, MB: "
+                                + freeMem / (1024 * 1024));
+                        if (freeMem / (1024 * 1024) < 5) {
+                            console.println("Out of memory!");
+                            return true;
+                        }
+                        DataModificationRobot robot =
+                            new DataModificationRobot(
+                                ctxt,
+                                randomizer,
+                                prefs.getNewObjectPerTableCount(),
+                                prefs.getDeleteObjectPerTableCount());
+                        robot.generate();
+                        try {
+                            long start = System.currentTimeMillis();
+                            ctxt.commit(null);
+                            long end = System.currentTimeMillis();
+                            printCommitSuccess(console, j, end - start);
+                            if (out != null)
+                                printCommitSuccess(out, j, end - start);
+                        } catch (Exception ex) {
+                            hasFailures = true;
+                            printCommitFailure(console, j, ex);
+                            if (out != null)
+                                printCommitFailure(out, j, ex);
+                        }
+                    }
+                    printSchemaSuccess(console, i);
+                    if (out != null)
+                        printSchemaSuccess(out, i);
+                } catch (Exception ex) {
+                    hasFailures = true;
+                    printSchemaFailure(console, i, ex);
+                    if (out != null)
+                        printSchemaFailure(out, i, ex);
+                } finally {
+                    domainBuilder.drop();
+                }
+            }
+        } catch (Exception ex) {
+            hasFailures = true;
+            printFailure(console, ex);
+            if (out != null)
+                printFailure(out, ex);
+        } finally {
+            printFooter(console);
+            if (out != null)
+                printFooter(out);
+            console.flush();
+            try {
+                out.close();
+            } catch (Exception ex) {
+                hasFailures = true;
+            }
+            try {
+                fileOut.close();
+            } catch (Exception ex) {
+                hasFailures = true;
+            }
+        }
 
-  static void printSchemaSuccess(PrintWriter out, int schemaIndex) {
-    out.println("Schema " + schemaIndex + " succeeded.");
-  }
+        return hasFailures;
+    }
 
-  static void printSchemaFailure(PrintWriter out, int schemaIndex, Exception e) {
-    out.println("Schema " + schemaIndex + " failed.");
-    e.printStackTrace(out);
-    out.println();
-  }
+    protected void printHeader(PrintWriter out) {
+        out.println("Test starting!");
+    }
 
-  static void printFailure(PrintWriter out, Exception e) {
-    out.println("Fatal Error: ");
-    e.printStackTrace(out);
-    out.println();
-  }
+    protected void printFooter(PrintWriter out) {
+        out.println("Test finished!");
+        out.println("Good-bye.");
+    }
+
+    protected void printPrefs(PrintWriter out, Preferences prefs) {
+        out.println("Loaded preferences - ");
+        prefs.print(out);
+    }
+
+    protected void printSchemaStart(
+        PrintWriter out,
+        int schemaIndex,
+        File schemaDir) {
+        out.println();
+        out.println("Schema " + schemaIndex + " generating.");
+        out.println("schema recording in " + schemaDir);
+    }
+
+    protected void printCommitStart(PrintWriter out, int commitIndex) {
+        out.println("  Commit " + commitIndex + " starting.");
+    }
+
+    protected void printCommitSuccess(
+        PrintWriter out,
+        int commitIndex,
+        long ms) {
+        out.println(
+            "  Commit " + commitIndex + " succeeded. Time=" + ms + " ms");
+    }
+
+    protected void printCommitFailure(
+        PrintWriter out,
+        int commitIndex,
+        Exception e) {
+        out.println("  Commit " + commitIndex + " failed.");
+        e.printStackTrace(out);
+        out.println();
+    }
+
+    protected void printSchemaSuccess(PrintWriter out, int schemaIndex) {
+        out.println("Schema " + schemaIndex + " succeeded.");
+    }
+
+    protected void printSchemaFailure(
+        PrintWriter out,
+        int schemaIndex,
+        Exception e) {
+        out.println("Schema " + schemaIndex + " failed.");
+        e.printStackTrace(out);
+        out.println();
+    }
+
+    protected void printFailure(PrintWriter out, Exception e) {
+        out.println("Fatal Error: ");
+        e.printStackTrace(out);
+        out.println();
+    }
 }

@@ -53,35 +53,78 @@
  * <http://objectstyle.org/>.
  *
  */
- 
+
 package org.objectstyle.cayenne.regression;
 
-import org.apache.bcel.Constants;
-import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.generic.ClassGen;
+import javax.sql.DataSource;
+
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conn.PoolDataSource;
+import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.dba.DbAdapter;
 
 /**
- * DOStubClassLoader is a simple class loader to generate new types of DataObjects
- * (new classes) at runtime. This behavior is needed to trick Cayenne algorithms
- * based on usage of Classes of DataObject descendants for identifiers.
- *
- * @author Andriy Shapochka
+ * Runs regression test based on a set of properties 
+ * @author Andrei Adamchik
  */
+public class AntMain extends Main {
 
-class DOStubClassLoader extends ClassLoader {
-  private String superClassName = "org.objectstyle.cayenne.CayenneDataObject";
+    /**
+     * Uses System properties to configure regression tests.
+     */
+    public static void main(String[] args) {
+        TestPreferences prefs;
+        try {
+            prefs = new TestPreferences(System.getProperties());
+        } catch (Exception ex) {
+            System.out.println("Fatal Error: " + ex.getMessage());
+            System.exit(1);
+            return;
+        }
 
-  public Class findClass(String name) {
-    byte[] b = loadClassData(name);
-    return defineClass(name, b, 0, b.length);
-  }
+        if (new AntMain(prefs).execute()) {
+            System.exit(1);
+        }
 
-  private byte[] loadClassData(String name) {
-    ClassGen cg = new ClassGen(name, superClassName,
-                             "<generated>", Constants.ACC_PUBLIC | Constants.ACC_SUPER,
-                             null);
-    cg.addEmptyConstructor(Constants.ACC_PUBLIC);
-    JavaClass hw = cg.getJavaClass();
-    return hw.getBytes();
-  }
+        System.exit(0);
+    }
+
+    /**
+     * Constructor for AntMain.
+     */
+    public AntMain(TestPreferences prefs) {
+        super(prefs);
+    }
+
+    protected DataDomain createDomain() throws Exception {
+        DataSourceInfo info = ((TestPreferences) prefs).getConnectionInfo();
+
+        // data source
+        PoolDataSource poolDS =
+            new PoolDataSource(info.getJdbcDriver(), info.getDataSourceUrl());
+        DataSource ds =
+            new PoolManager(
+                poolDS,
+                1,
+                1,
+                info.getUserName(),
+                info.getPassword());
+
+        DataNode node = new DataNode("node");
+        node.setDataSource(ds);
+        Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
+
+        if (info.getAdapterClass() != null) {
+            adapterClass = Class.forName(info.getAdapterClass());
+        }
+
+        node.setAdapter((DbAdapter) adapterClass.newInstance());
+
+        // domain
+        DataDomain domain = new DataDomain("domain");
+        domain.addNode(node);
+        return domain;
+    }
 }

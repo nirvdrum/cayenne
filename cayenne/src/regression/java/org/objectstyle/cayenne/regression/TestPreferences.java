@@ -56,32 +56,42 @@
  
 package org.objectstyle.cayenne.regression;
 
-import org.apache.bcel.Constants;
-import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.generic.ClassGen;
+import java.util.Properties;
+
+import org.apache.commons.collections.ExtendedProperties;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.conf.ConnectionProperties;
+import org.objectstyle.cayenne.unittest.CayenneTestResources;
 
 /**
- * DOStubClassLoader is a simple class loader to generate new types of DataObjects
- * (new classes) at runtime. This behavior is needed to trick Cayenne algorithms
- * based on usage of Classes of DataObject descendants for identifiers.
- *
- * @author Andriy Shapochka
+ * @author Andrei Adamchik
  */
+public class TestPreferences extends Preferences {
+	protected DataSourceInfo connectionInfo;
+	
+    /**
+     * Constructor for TestPreferences.
+     * @param props
+     */
+    public TestPreferences(Properties props) throws Exception {
+        super(props);
+    }
 
-class DOStubClassLoader extends ClassLoader {
-  private String superClassName = "org.objectstyle.cayenne.CayenneDataObject";
-
-  public Class findClass(String name) {
-    byte[] b = loadClassData(name);
-    return defineClass(name, b, 0, b.length);
-  }
-
-  private byte[] loadClassData(String name) {
-    ClassGen cg = new ClassGen(name, superClassName,
-                             "<generated>", Constants.ACC_PUBLIC | Constants.ACC_SUPER,
-                             null);
-    cg.addEmptyConstructor(Constants.ACC_PUBLIC);
-    JavaClass hw = cg.getJavaClass();
-    return hw.getBytes();
-  }
+    protected boolean initProjectFile(ExtendedProperties conf) {
+        String connectionName = conf.getString(CayenneTestResources.CONNECTION_NAME_KEY);
+        if(connectionName == null) {
+        	return false;
+        }
+        
+        connectionInfo =
+            ConnectionProperties.getInstance().getConnectionInfo(connectionName);
+        return connectionInfo != null;
+    }
+    /**
+     * Returns the connectionInfo.
+     * @return DataSourceInfo
+     */
+    public DataSourceInfo getConnectionInfo() {
+        return connectionInfo;
+    }
 }

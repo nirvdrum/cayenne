@@ -72,8 +72,9 @@ import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.postgres.PostgresAdapter;
-import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.Util;
 
