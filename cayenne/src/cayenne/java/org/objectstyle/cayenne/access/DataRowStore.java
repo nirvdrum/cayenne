@@ -211,68 +211,72 @@ public class DataRowStore implements Serializable {
 	 * then sends the event to all listeners. Outgoing event will have a source
 	 * set ot this SnapshotCache.
 	 */
-    public synchronized void processSnapshotChanges(
+    public void processSnapshotChanges(
         Object source,
         Map updatedSnapshots,
         Collection deletedSnapshotIds) {
 
         // update the internal cache, prepare snapshot event
         Map diffs = null;
+        
+        synchronized (snapshots) {
 
-        // DELETED: evict deleted snapshots
-        if (!deletedSnapshotIds.isEmpty()) {
-            Iterator it = deletedSnapshotIds.iterator();
-            while (it.hasNext()) {
-                snapshots.remove(it.next());
+            // DELETED: evict deleted snapshots
+            if (!deletedSnapshotIds.isEmpty()) {
+                Iterator it = deletedSnapshotIds.iterator();
+                while (it.hasNext()) {
+                    snapshots.remove(it.next());
+                }
             }
-        }
 
-        // MODIFIED: replace/add snapshots, generate diffs for event
-        if (!updatedSnapshots.isEmpty()) {
-            Iterator it = updatedSnapshots.keySet().iterator();
-            while (it.hasNext()) {
+            // MODIFIED: replace/add snapshots, generate diffs for event
+            if (!updatedSnapshots.isEmpty()) {
+                Iterator it = updatedSnapshots.keySet().iterator();
+                while (it.hasNext()) {
 
-                ObjectId key = (ObjectId) it.next();
-                DataRow newSnapshot = (DataRow) updatedSnapshots.get(key);
-                DataRow oldSnapshot = (DataRow) snapshots.remove(key);
+                    ObjectId key = (ObjectId) it.next();
+                    DataRow newSnapshot = (DataRow) updatedSnapshots.get(key);
+                    DataRow oldSnapshot = (DataRow) snapshots.remove(key);
 
-                // generate diff for the updated event, if this not a new
-                // snapshot
+                    // generate diff for the updated event, if this not a new
+                    // snapshot
 
-                // The following cases should be handled here:
+                    // The following cases should be handled here:
 
-                // 1. There is no previously cached snapshot for a given id.
-                // 2. There was a previously cached snapshot for a given id,
-                //    but it expired from cache and was removed. Currently
-                //    handled as (1); what are the consequences of that?
-                // 3. There is a previously cached snapshot and it has the
-                //    *same version* as the "replacesVersion" property of the
-                //    new snapshot.
-                // 4. There is a previously cached snapshot and it has a
-                //    *different version* from "replacesVersion" property of
-                //    the new snapshot. It means that we don't know how to merge
-                //    the two (we don't even know which one is newer due to
-                //    multithreading). Just throw out this snapshot....
+                    // 1. There is no previously cached snapshot for a given id.
+                    // 2. There was a previously cached snapshot for a given id,
+                    //    but it expired from cache and was removed. Currently
+                    //    handled as (1); what are the consequences of that?
+                    // 3. There is a previously cached snapshot and it has the
+                    //    *same version* as the "replacesVersion" property of the
+                    //    new snapshot.
+                    // 4. There is a previously cached snapshot and it has a
+                    //    *different version* from "replacesVersion" property of
+                    //    the new snapshot. It means that we don't know how to merge
+                    //    the two (we don't even know which one is newer due to
+                    //    multithreading). Just throw out this snapshot....
 
-                if (oldSnapshot != null) {
-                    // case 4 above... have to throw out the snapshot since
-                    // no good options exist to tell how to merge the two.
-                    if (oldSnapshot.getVersion() != newSnapshot.getReplacesVersion()) {
-                        forgetSnapshot(key);
-                        continue;
-                    }
-
-                    Map diff = buildSnapshotDiff(oldSnapshot, newSnapshot);
-                    if (diff != null) {
-                        if (diffs == null) {
-                            diffs = new HashMap();
+                    if (oldSnapshot != null) {
+                        // case 4 above... have to throw out the snapshot since
+                        // no good options exist to tell how to merge the two.
+                        if (oldSnapshot.getVersion()
+                            != newSnapshot.getReplacesVersion()) {
+                            forgetSnapshot(key);
+                            continue;
                         }
 
-                        diffs.put(key, diff);
-                    }
-                }
+                        Map diff = buildSnapshotDiff(oldSnapshot, newSnapshot);
+                        if (diff != null) {
+                            if (diffs == null) {
+                                diffs = new HashMap();
+                            }
 
-                snapshots.addObject(key, newSnapshot);
+                            diffs.put(key, diff);
+                        }
+                    }
+
+                    snapshots.addObject(key, newSnapshot);
+                }
             }
         }
 

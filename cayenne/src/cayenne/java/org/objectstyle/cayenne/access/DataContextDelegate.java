@@ -85,10 +85,10 @@ public interface DataContextDelegate {
 	public GenericSelectQuery willPerformSelect(DataContext context, GenericSelectQuery query);
 
 	/**
-	 * This method is invoked by DataObject's DataContext during commit, when it is detected
+	 * This method is invoked by DataObject's DataContext during commit, when it detects
 	 * that a snapshot for object was modified in the underlying DataRowStore. It is invoked
 	 * for MODIFIED and DELETED objects about to be committed. Delegate can perform merging
-	 * of the snapshop, or abort commit by throwing an exception.
+	 * of the snapshot, or abort commit by throwing an exception.
 	 * 
 	 * <p>Note that this delegate method may not be invoked even if the database row
 	 * has changed compared to the snapshot an update is built against. The reasons for 
