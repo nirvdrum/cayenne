@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<document>
+    <title>Mailing Lists</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+
+    <body>
+    	<section name="Mailing Lists">
+    	
+        <subsection name="cayenne-devel">
+        	<p><strong>cayenne-devel</strong> is a mailing list intended for Cayenne 
+        	developers. It is low traffic (0 - 5 messages a day). 
+        	You should subscribe if you are a part of Cayenne development team. 
+        	And of course you are welcome to subscribe if you are just interested 
+        	where this project is going and what it is all about. <i>Note that currently
+        	user questions are also answered on this list. We may create 
+        	a separate cayenne-user list in the future.</i>
+        	</p>
+        	
+        	<p>To <strong>subscribe</strong> send empty email to
+        	<u>cayenne-devel-subscribe@objectstyle.org</u>.
+        	</p>
+
+        	<p>To <strong>unsubscribe</strong> send empty email to
+        	<u>cayenne-devel-unsubscribe@objectstyle.org</u>.
+        	</p>
+        	
+        	<p>To <strong>post</strong> a message use the following address:
+        	<u>cayenne-devel@objectstyle.org</u>.
+        	</p>
+        	
+        	<table>
+        	<tr>
+        		<th colspan="13">Message Archive (<a href="http://objectstyle.org/cayenne/mailarchive/">...earlier messages</a>)</th>
+        	</tr>
+            <tr>
+                <th colspan="1">Year</th>
+                <th colspan="1">Jan</th>
+                <th colspan="1">Feb</th>
+                <th colspan="1">Mar</th>
+                <th colspan="1">Apr</th>
+                <th colspan="1">May</th>
+                <th colspan="1">Jun</th>
+                <th colspan="1">Jul</th>
+                <th colspan="1">Aug</th>
+                <th colspan="1">Sep</th>
+                <th colspan="1">Oct</th>
+                <th colspan="1">Nov</th>
+                <th colspan="1">Dec</th>
+            </tr>
+            <tr>
+                <td colspan="1">2002</td>
+                <td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+				<td colspan="1">-</td>
+            </tr>
+            </table>
+        </subsection>
+        </section>
+    </body>
+</document>
