@@ -59,7 +59,7 @@ import org.objectstyle.art.Artist;
 DataContext ctxt;
 
 // create a query returning data rows
-SelectQuery q = new SelectQuery("Artist");
+SelectQuery q = new SelectQuery(Artist.class);
 q.setFetchingDataRows(true);
 
 List artistRows = ctxt.performQuery(q);
@@ -120,7 +120,7 @@ import org.objectstyle.art.Artist;
 DataContext ctxt;
 
 // create a usual query
-SelectQuery q = new SelectQuery("Artist");
+SelectQuery q = new SelectQuery(Artist.class);
 ResultIterator it = null;
 
 // ResultIterator operations all throw checked CayenneException
@@ -184,7 +184,7 @@ import org.objectstyle.art.Artist;
 DataContext ctxt;
 
 // create a query returning data rows
-SelectQuery q = new SelectQuery("Artist");
+SelectQuery q = new SelectQuery(Artist.class);
 q.setPageSize(50);
 
 // the fact that result is paged is transparent

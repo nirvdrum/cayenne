@@ -8,15 +8,18 @@
  
 <body>
     <section name="7. Using SelectQueries">      
-		<p>To give users access to the existing database data, Cayenne
+	<p>To give users access to the existing database data, Cayenne
         provides extensive query API. Queries in Cayenne are Java objects
-        that in most cases create abstraction independent from SQL dialect 
-        used by the target database. SQL queries not covered by Cayenne can 
-        also be performed. This is done using wrappers around SQL statements (<a href=
-            "../../api/cayenne/org/objectstyle/cayenne/query/SqlSelectQuery.html">SqlSelectQuery</a>
-            and <a href=
-            "../../api/cayenne/org/objectstyle/cayenne/query/SqlModifyQuery.html">SqlModfyQuery</a>).
-            </p>
+        that create abstraction independent from the SQL dialect used by the target database.
+        One of the goals of Query API is to provide queries in terms of Java objects and their
+        properties (attributes and relationships) instead of SQL tables and columns.</p>
+        
+        <p>Cayenne also provides a way to execute direct SQL statements, to allow users to
+        run the queries that are not covered by Cayenne or simply can not be expressed in terms 
+        of Java objects. This is done using wrapper Query objects that contain arbitrary
+        SQL strings: <a href=
+        "../../api/cayenne/org/objectstyle/cayenne/query/SqlSelectQuery.html">SqlSelectQuery</a>.
+        </p>
     </section>
 </body>
 

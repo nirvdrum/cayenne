@@ -1,0 +1,20 @@
+<document>
+<title>User Guide - Using SelectQueries</title>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/fetch/other.html</prev>
+	<next>/userguide/modify/index.html</next>
+</navigator>    
+
+<body>
+    <section name="7. Using SelectQueries">        
+        <subsection name="7.5 Executing raw SQL: SqlSelectQuery">
+	<p>
+		
+				
+	</p>
+        </subsection>
+    </section>
+</body>
+</document>
+
