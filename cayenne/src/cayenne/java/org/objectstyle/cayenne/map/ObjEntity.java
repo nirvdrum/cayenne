@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.ObjectId;
  * @author Andrei Adamchik
  */
 public class ObjEntity extends Entity {
+	protected String superClassName;
 	protected String className;
 	protected DbEntity dbEntity;
 	protected boolean readOnly;
@@ -92,6 +93,25 @@ public class ObjEntity extends Entity {
 	public void setClassName(String className) {
 		this.className = className;
 	}
+	/**
+	 * 
+	 * Returns the fully qualified name of the super class of the data object class for this entity
+	 * Used in the modeller and in class generation only, not at "runtime"
+	 * @return String
+	 */
+	public String getSuperClassName() {
+		return superClassName;
+	}
+
+	/**
+	 * Sets the name of the super class of the data object class for this entity
+	 * Used in the modeller and in class generation only, not at "runtime"
+	 * @param superClassName fully qualified class namee
+	 */
+	public void setSuperClassName(String parentClassName) {
+		this.superClassName = parentClassName;
+	}
+
 
 	/** Returns a DbEntity that this ObjEntity is mapped to. */
 	public DbEntity getDbEntity() {
@@ -197,4 +217,5 @@ public class ObjEntity extends Entity {
 	public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 	}
+	
 }

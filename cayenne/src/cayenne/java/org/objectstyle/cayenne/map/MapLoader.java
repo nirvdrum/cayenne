@@ -497,7 +497,7 @@ public class MapLoader extends DefaultHandler {
             if (temp.isReadOnly()) {
                 out.print("\" readOnly=\"true");
             }
-
+            
             out.print('\"');
 
             if (temp.getDbEntity() != null) {
@@ -506,6 +506,12 @@ public class MapLoader extends DefaultHandler {
                 out.print('\"');
             }
 
+			if(temp.getSuperClassName() !=null) {
+				out.print(" superClassName=\"");
+				out.print(temp.getSuperClassName());
+				out.print("\"");
+			}
+			
             out.println('>');
             storeObjAttribute(out, temp);
 
@@ -750,7 +756,7 @@ public class MapLoader extends DefaultHandler {
     private void processStartObjEntity(Attributes atts) {
         objEntity = new ObjEntity(atts.getValue("", "name"));
         objEntity.setClassName(atts.getValue("", "className"));
-
+		
         String readOnly = atts.getValue("", "readOnly");
         objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
 
@@ -759,7 +765,11 @@ public class MapLoader extends DefaultHandler {
             DbEntity db_temp = dataMap.getDbEntity(temp);
             objEntity.setDbEntity(db_temp);
         }
-
+        
+		temp=atts.getValue("", "superClassName");
+		if( null != temp) {
+			objEntity.setSuperClassName(temp);
+		}
         dataMap.addObjEntity(objEntity);
     }
 

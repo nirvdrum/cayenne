@@ -5,7 +5,7 @@ package $classGen.packageName;
 import java.util.List;
 import org.objectstyle.cayenne.*;
 
-public class $classGen.className extends CayenneDataObject {
+public class $classGen.className extends $classGen.superClassName {
 
 ## Create attribute set/get methods
 #foreach( $attr in ${classGen.Entity.AttributeList} )

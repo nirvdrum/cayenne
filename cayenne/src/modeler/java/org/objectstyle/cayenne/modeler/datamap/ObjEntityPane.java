@@ -102,6 +102,7 @@ public class ObjEntityPane
 	protected Mediator mediator;
 	protected JTextField name;
 	protected JTextField className;
+	protected JTextField superClassName;
 	protected JPanel dbPane;
 	protected JComboBox dbName;
 	protected JButton tableLabel;
@@ -121,6 +122,7 @@ public class ObjEntityPane
 		InputVerifier inputCheck = new FieldVerifier();
 		name.setInputVerifier(inputCheck);
 		className.setInputVerifier(inputCheck);
+		superClassName.setInputVerifier(inputCheck);
 
 		dbName.addActionListener(this);
 		tableLabel.addActionListener(this);
@@ -131,6 +133,9 @@ public class ObjEntityPane
 
 		JLabel nameLbl = new JLabel("Entity name: ");
 		name = new CayenneTextField(25);
+
+		JLabel superClassNameLbl = new JLabel("Super class name: ");
+		superClassName = new CayenneTextField(25);
 
 		JLabel classNameLbl = new JLabel("Class name: ");
 		className = new CayenneTextField(25);
@@ -145,10 +150,10 @@ public class ObjEntityPane
 		readOnly.addItemListener(this);
 
 		Component[] leftCol =
-			new Component[] { nameLbl, classNameLbl, tableLabel, checkLabel };
+			new Component[] { nameLbl, superClassNameLbl, classNameLbl, tableLabel, checkLabel};
 
 		Component[] rightCol =
-			new Component[] { name, className, dbName, readOnly };
+			new Component[] { name, superClassName, className, dbName, readOnly };
 
 		add(
 			PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5),
@@ -218,6 +223,8 @@ public class ObjEntityPane
 
 		ignoreChange = true;
 		name.setText(entity.getName());
+		superClassName.setText(
+			entity.getSuperClassName()!=null?entity.getSuperClassName():"");
 		className.setText(
 			entity.getClassName() != null ? entity.getClassName() : "");
 		readOnly.setSelected(entity.isReadOnly());
@@ -281,6 +288,8 @@ public class ObjEntityPane
 		public boolean verify(JComponent input) {
 			if (input == name) {
 				return verifyName();
+			} else if (input == superClassName) {
+				return verifySuperClassName();
 			} else if (input == className) {
 				return verifyClassName();
 			} else {
@@ -330,6 +339,27 @@ public class ObjEntityPane
 				.nullSafeEquals(ent.getClassName(), classText)) {
 
 				ent.setClassName(classText);
+				mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+			}
+
+			return true;
+		}
+		protected boolean verifySuperClassName() {
+			String parentClassText = superClassName.getText();
+			if (parentClassText != null && parentClassText.trim().length() == 0) {
+				parentClassText = null;
+			}
+
+			ObjEntity ent = mediator.getCurrentObjEntity();
+
+			if (!org
+				.objectstyle
+				.cayenne
+				.util
+				.Util
+				.nullSafeEquals(ent.getClassName(), parentClassText)) {
+
+				ent.setSuperClassName(parentClassText);
 				mediator.fireObjEntityEvent(new EntityEvent(this, ent));
 			}
 

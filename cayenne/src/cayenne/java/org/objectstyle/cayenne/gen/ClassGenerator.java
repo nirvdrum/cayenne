@@ -144,7 +144,8 @@ public class ClassGenerator {
 	protected String superPrefix;
 	protected String prop;
 	protected String superPackageName;
-
+	protected String superClassName;
+	
 	/** Loads Velocity template used for class generation. */
 	public ClassGenerator(String template) throws Exception {
 		if (!initDone) {
@@ -264,4 +265,15 @@ public class ClassGenerator {
 	public ObjEntity getEntity() {
 		return entity;
 	}
+	
+	/** Returns the fully qualified super class of the data object class associated with this generator*/
+	public String getSuperClassName() {
+		return superClassName;
+	}
+
+	/** Sets the fully qualified super class of the data object class associated with this generator*/
+	public void setSuperClassName(String value) {
+		this.superClassName = value;
+	}
+
 }

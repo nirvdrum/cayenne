@@ -239,6 +239,11 @@ public abstract class MapClassGenerator {
         // init generator
         gen.setPackageName(pkg);
         gen.setClassName(cname);
+        if(entity.getSuperClassName()!=null) {
+        	gen.setSuperClassName(entity.getSuperClassName());
+        } else {
+        	gen.setSuperClassName("org.objectstyle.cayenne.CayenneDataObject");
+        }
         gen.setSuperPackageName(spkg);
     }
 
