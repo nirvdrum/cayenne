@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * <p>DataPort implements a Cayenne-based algorithm to read data from one data node
  * and write to another. It uses DataPortDelegate interface to decouple porting logic 
  * from such things like filtering entities (include/exclude from port based on some criteria),
- * logging the progress of port operation, qualifying the querie, etc. It is possible to build 
+ * logging the progress of port operation, qualifying the queries, etc. It is possible to build 
  * various configurable interfaces to the this tool. E.g. Cayenne implements CayenneDataPort 
  * Ant task.
  * </p>
