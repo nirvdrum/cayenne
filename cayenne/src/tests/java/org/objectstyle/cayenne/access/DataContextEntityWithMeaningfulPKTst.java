@@ -69,14 +69,9 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
 public class DataContextEntityWithMeaningfulPKTst extends CayenneTestCase {
     protected DataContext ctxt;
 
-    protected void setUp() throws java.lang.Exception {
-        super.setUp();
-
+    protected void setUp() throws Exception {
         getDatabaseSetup().cleanTableData();
-        getDatabaseSetup().createPkSupportForMapEntities(
-            (DataNode) getDomain().getDataNodes().iterator().next());
-
-        ctxt = createDataContext();
+        ctxt = getDomain().createDataContext();
     }
 
     public void testInsertWithMeaningfulPK() throws Exception {

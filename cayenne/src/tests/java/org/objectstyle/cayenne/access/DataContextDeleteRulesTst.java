@@ -68,7 +68,6 @@ import org.objectstyle.art.Painting;
 import org.objectstyle.art.PaintingInfo;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 /**
  * 
@@ -79,15 +78,9 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 
     private DataContext context;
 
-    public void setUp() throws java.lang.Exception {
-        CayenneTestDatabaseSetup setup = getDatabaseSetup();
-        setup.cleanTableData();
-
-        DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(
-            (DataNode) dom.getDataNodes().iterator().next());
-
-        context = dom.createDataContext();
+    protected void setUp() throws Exception {
+        getDatabaseSetup().cleanTableData();
+        context = getDomain().createDataContext();
     }
 
     public void testNullifyToOne() {

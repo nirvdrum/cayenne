@@ -61,7 +61,6 @@ import org.apache.log4j.Level;
 import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.mysql.MySQLAdapter;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 
 /**
@@ -73,14 +72,9 @@ public class DataContextEventsTst extends OneWayMappingTestCase {
     protected Artist artist;
 
     public void setUp() throws Exception {
-        CayenneTestDatabaseSetup setup = getDatabaseSetup();
-        setup.cleanTableData();
-
-        DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(
-            (DataNode) dom.getDataNodes().iterator().next());
-
-        context = dom.createDataContext();
+        getDatabaseSetup().cleanTableData();
+        context = getDomain().createDataContext();
+        
         context.setTransactionEventsEnabled(true);
         artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("artist1");

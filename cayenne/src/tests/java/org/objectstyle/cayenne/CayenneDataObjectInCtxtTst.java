@@ -59,27 +59,18 @@ import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
     protected DataContext context;
 
     protected void setUp() throws Exception {
-        CayenneTestDatabaseSetup setup = getDatabaseSetup();
-        setup.cleanTableData();
-
-        DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(
-            (DataNode) dom.getDataNodes().iterator().next());
-
-        context = dom.createDataContext();
+        getDatabaseSetup().cleanTableData();
+        context = getDomain().createDataContext();
     }
 
     public void testCommitChangesInBatch() throws Exception {

@@ -81,7 +81,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.query.UpdateQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 
 /**
  * @author Andrei Adamchik
@@ -97,13 +96,8 @@ public class DataContextTestBase extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        CayenneTestDatabaseSetup setup = getDatabaseSetup();
-        setup.cleanTableData();
+        getDatabaseSetup().cleanTableData();
         populateTables();
-
-        DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities(
-            (DataNode) dom.getDataNodes().iterator().next());
 
         context = createDataContext();
         opObserver = new TestOperationObserver();
@@ -155,12 +149,12 @@ public class DataContextTestBase extends CayenneTestCase {
         List ats = context.performQuery(q);
         return (ats.size() > 0) ? (ROArtist) ats.get(0) : null;
     }
-    
+
     protected int safeId(int i) {
         // something in the range that we are unlikely to hit
         return 33000 + i;
     }
-    
+
     /** Give each artist a single painting. */
     public void populatePaintings() throws Exception {
         String insertPaint =
@@ -183,11 +177,12 @@ public class DataContextTestBase extends CayenneTestCase {
 
             stmt.close();
             conn.commit();
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }
-    
+
     public void populateGalleries() throws Exception {
         List galleries = new ArrayList(2);
         galleries.add(
@@ -233,7 +228,7 @@ public class DataContextTestBase extends CayenneTestCase {
     public void populateTables() throws Exception {
         populateTables(false);
     }
-    
+
     public void populateTables(boolean padToConstWidth) throws Exception {
         String insertArtist =
             "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) VALUES (?,?,?)";
@@ -270,7 +265,8 @@ public class DataContextTestBase extends CayenneTestCase {
 
             stmt.close();
             conn.commit();
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }

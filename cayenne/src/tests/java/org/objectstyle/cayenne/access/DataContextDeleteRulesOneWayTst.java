@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.art.oneway.Gallery;
 import org.objectstyle.art.oneway.Painting;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 
 /**
@@ -65,39 +64,34 @@ import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
  * @author Craig Miskell
  */
 public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
-	private DataContext context;
+    private DataContext context;
 
-	public void setUp() throws java.lang.Exception {
-		CayenneTestDatabaseSetup setup = getDatabaseSetup();
-		setup.cleanTableData();
+    public void setUp() throws Exception {
+        getDatabaseSetup().cleanTableData();
+        context = getDomain().createDataContext();
+    }
 
-		DataDomain dom = getDomain();
-		setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
+    public void testNullifyToOne() {
+        Painting aPainting = (Painting) context.createAndRegisterNewObject("Painting");
+        aPainting.setPaintingTitle("A Title");
 
-		context = dom.createDataContext();
-	}
+        Gallery aGallery = (Gallery) context.createAndRegisterNewObject("Gallery");
+        aGallery.setGalleryName("Gallery Name");
 
-	public void testNullifyToOne() {
-		Painting aPainting =
-			(Painting) context.createAndRegisterNewObject("Painting");
-		aPainting.setPaintingTitle("A Title");
-		
-		Gallery aGallery=(Gallery) context.createAndRegisterNewObject("Gallery");
-		aGallery.setGalleryName("Gallery Name");
-		
-		aPainting.setToGallery(aGallery);
-		context.commitChanges();
-	
-		try {
-			context.deleteObject(aPainting);
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("Should not have thrown an exception");
-		}
-		//There's no reverse relationship, so there's nothing else to test
-		// except to be sure that the commit works
-		context.commitChanges();
-		
-	}
+        aPainting.setToGallery(aGallery);
+        context.commitChanges();
+
+        try {
+            context.deleteObject(aPainting);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            fail("Should not have thrown an exception");
+        }
+        //There's no reverse relationship, so there's nothing else to test
+        // except to be sure that the commit works
+        context.commitChanges();
+
+    }
 
 }

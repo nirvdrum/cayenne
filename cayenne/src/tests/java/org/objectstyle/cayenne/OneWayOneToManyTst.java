@@ -61,14 +61,11 @@ import java.util.List;
 import org.objectstyle.art.oneway.Artist;
 import org.objectstyle.art.oneway.Painting;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.query.SqlModifyQuery;
-import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 
 /**
@@ -78,12 +75,8 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
     protected DataContext ctxt;
 
     protected void setUp() throws Exception {
-        CayenneTestDatabaseSetup setup = getDatabaseSetup();
-        setup.cleanTableData();
-        DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
-
-        ctxt = createDataContext();
+        getDatabaseSetup().cleanTableData();
+        ctxt = getDomain().createDataContext();
     }
 
     public void testReadList() throws Exception {
