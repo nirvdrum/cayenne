@@ -13,6 +13,7 @@ import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
 
 /** Used for validating dirty elements in the Mediator.
   * If errors are found, displays them in the dialog window.*/
@@ -61,6 +62,9 @@ public class Validator
 		
 		for (int i = 0; i < domains.length; i++) {
 			String name = domains[i].getName().trim();
+			if (name == null) 
+				name = "";
+			else name = name.trim();
 			if (name.length() == 0) {
 				msg = new DomainErrorMsg("Domain has no name"
 										, ErrorMsg.ERROR, domains[i]);
@@ -97,7 +101,10 @@ public class Validator
 		HashMap name_map = new HashMap();
 		
 		for (int i = 0; i < nodes.length; i++) {
-			String name = nodes[i].getName().trim();
+			String name = nodes[i].getName();
+			if (name == null) 
+				name = "";
+			else name = name.trim();
 			if (name.length() == 0) {
 				msg = new DataNodeErrorMsg("Data node has no name", ErrorMsg.ERROR
 											, domain, nodes[i]);
@@ -124,10 +131,16 @@ public class Validator
 		int status = ErrorMsg.NO_ERROR;
 		DataNodeErrorMsg msg;
 		
-		String factory = node.getDataSourceFactory().trim();
+		String factory = node.getDataSourceFactory();
+		if (factory == null)
+			factory = "";
+		else factory = factory.trim();
 		// If directo factory, make sure the location is a valid file name.
 		if (factory.equals(DataSourceFactory.DIRECT_FACTORY)) {
-			String location = node.getDataSourceLocation().trim();
+			String location = node.getDataSourceLocation();
+			if (location == null)
+				location = "";
+			else location = location.trim();
 			if (location.length() == 0) {
 				String temp;
 				temp = "Must specify valid Data Node file name when using data"
@@ -152,7 +165,10 @@ public class Validator
 		Iterator iter = maps.iterator();
 		while (iter.hasNext()) {
 			DataMap map = (DataMap)iter.next();
-			String name = map.getName().trim();
+			String name = map.getName();
+			if (name == null)
+				name = "";
+			else name = name.trim();
 			if (name.length() == 0) {
 				msg = new DataMapErrorMsg("Data map has no name", ErrorMsg.ERROR
 											, domain, map);
@@ -179,16 +195,58 @@ public class Validator
 		DataMapErrorMsg msg;
 		
 		// If directo factory, make sure the location is a valid file name.
-		String location = map.getLocation().trim();
+		String location = map.getLocation();
+		if (location == null)
+			location = "";
+		else location = location.trim();
 		if (location.length() == 0) {
 			msg = new DataMapErrorMsg("Must specify valid Data Map file name"
 									, ErrorMsg.ERROR, domain, map);
 			errMsg.add(msg);
 			status = ErrorMsg.ERROR;
 		}
+		
+		ObjEntity[] entities = map.getObjEntities();
+		int temp_err_level = validateObjEntities(domain, map, entities);
+		if (temp_err_level > status) 
+			status = temp_err_level;
 		return status;
 	}
 
+	private int validateObjEntities(DataDomain domain, DataMap map
+									, ObjEntity[] entities)
+	{
+		int status = ErrorMsg.NO_ERROR;
+
+		for (int i = 0; i < entities.length; i++) {
+			List rel = entities[i].getRelationshipList();
+			int temp_err_level = validateObjRels(domain, map, entities[i]);
+			if (temp_err_level > status) 
+				status = temp_err_level;
+		}
+		return status;
+	}
+	
+	private int validateObjRels(DataDomain domain, DataMap map
+									, ObjEntity entity)
+	{
+		int status = ErrorMsg.NO_ERROR;
+		RelationshipErrorMsg msg;
+		
+		List rels = entity.getRelationshipList();
+		Iterator iter = rels.iterator();
+		while (iter.hasNext()) {
+			ObjRelationship rel = (ObjRelationship)iter.next();
+			if (rel.getTargetEntity() == null) {
+				msg = new RelationshipErrorMsg("Must specify target entity"
+									, ErrorMsg.ERROR, domain, map, rel);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+		}// End while()
+		
+		return status;
+	}
 
 }
 

@@ -263,6 +263,10 @@ public class Mediator
 		addListener("org.objectstyle.cayenne.gui.event.ObjRelationshipListener", listener);
 	}
 
+	public void addObjRelationshipDisplayListener(ObjRelationshipDisplayListener listener) {
+		addListener("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener", listener);
+	}
+
 
 	public void fireDomainDisplayEvent(DomainDisplayEvent e)
 	{
@@ -575,6 +579,17 @@ public class Mediator
 		}// End for()
 	}
 
+	public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e)
+	{
+		this.fireObjEntityDisplayEvent(e);
+		EventListener[] list;
+		list = getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener");
+		for (int i = 0; i < list.length; i++) {
+			ObjRelationshipDisplayListener temp = (ObjRelationshipDisplayListener)list[i];
+			temp.currentObjRelationshipChanged(e);
+		}// End for()
+	}
+	
 
 
 	/** Clean remove of the ObjEntity from map and all views. 

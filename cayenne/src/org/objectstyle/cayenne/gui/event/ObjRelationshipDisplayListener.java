@@ -1,4 +1,4 @@
-package org.objectstyle.cayenne.gui.datamap;
+package org.objectstyle.cayenne.gui.event;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,59 +55,12 @@ package org.objectstyle.cayenne.gui.datamap;
  *
  */ 
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.event.*;
+import java.util.EventListener;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
 
-public class ObjDetailView extends JPanel 
-implements ChangeListener, ObjEntityDisplayListener, ObjRelationshipDisplayListener
+/** Used to display ObjRelationship. */
+public interface ObjRelationshipDisplayListener extends EventListener
 {
-	Mediator mediator;
-	
-	JTabbedPane tab;
-	ObjEntityPane entity;
-	ObjAttributePane attributes;
-	ObjRelationshipPane rel;
-	
-	public ObjDetailView(Mediator temp_mediator) {
-		super();
-		mediator = temp_mediator;
-		mediator.addObjEntityDisplayListener(this);
-		
-		setLayout(new BorderLayout());
-		tab = new JTabbedPane();
-		tab.setTabPlacement(JTabbedPane.TOP);
-		add(tab, BorderLayout.CENTER);
-		entity = new ObjEntityPane(mediator);
-		tab.addTab("Entity", entity);
-		attributes = new ObjAttributePane(mediator);
-		tab.addTab("Attributes", attributes);
-		rel = new ObjRelationshipPane(mediator);
-		tab.addTab("Relationships", rel);
-	}
-	
-	/** Handle focus when tab changes. */
-	public void stateChanged(ChangeEvent e)	
-	{
-		// FIXME!! Handle focus changes
-	}
-	
-	/** If entity is null hides it's contents, otherwise makes it visible. */
-	public void currentObjEntityChanged(EntityDisplayEvent e)
-	{
-		if (e.getEntity() == null)
-			tab.setVisible(false);
-		else
-			tab.setVisible(true);
-	}
-	
-	public void currentObjRelationshipChanged(RelationshipDisplayEvent e) {
-		if (e.getEntity() == null)
-			return;
-		// Display relationship tab
-		tab.setSelectedIndex(2);
-	}
+	/** Current obj entity used as a model has changed.*/
+	public void currentObjRelationshipChanged(RelationshipDisplayEvent e);
 }

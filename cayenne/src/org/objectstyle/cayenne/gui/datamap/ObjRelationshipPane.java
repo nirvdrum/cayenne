@@ -198,7 +198,10 @@ implements ActionListener, ObjEntityDisplayListener, ObjEntityListener
 		col.setMinWidth(150);
 		JComboBox combo = new JComboBox(createComboModel());
 		combo.setEditable(false);
-		col.setCellEditor(new DefaultCellEditor(combo));
+		combo.setSelectedIndex(-1);
+		DefaultCellEditor editor = new DefaultCellEditor(combo);
+		editor.setClickCountToStart(1);
+		col.setCellEditor(editor);
 		col = table.getColumnModel().getColumn(model.REL_CARDINALITY);
 		col.setMinWidth(150);
 	}

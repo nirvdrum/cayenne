@@ -205,7 +205,6 @@ implements ActionListener
 			return;
 		Preferences.getPreferences().storePreferences(Editor.this);
 		Editor.this.setVisible(false);
-		Editor.this.dispose();
 		System.exit(0);
 	}
 
@@ -744,6 +743,7 @@ implements ActionListener
 			mediator.getDirtyDataNodes().clear();
 			
 			mediator.setDirty(false);
+			JOptionPane.showMessageDialog(this, "Data saved successfully");
 		}
 		// If there were errors or warnings at validation, display them
 		if (ret_code == ErrorMsg.ERROR || ret_code == ErrorMsg.WARNING) {

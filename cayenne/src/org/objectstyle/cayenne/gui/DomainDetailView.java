@@ -120,7 +120,6 @@ implements DocumentListener, DomainDisplayListener
 		String new_name = name.getText();
 		DataDomain domain = mediator.getCurrentDataDomain();
 		// If name hasn't changed, do nothing
-		System.out.println("New name = " + new_name + ", domain name = " + domain.getName());
 		if (new_name.equals(domain.getName()))
 			return;
 		domain.setName(new_name);

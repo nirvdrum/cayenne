@@ -56,6 +56,8 @@ package org.objectstyle.cayenne.gui.datamap;
  */ 
 
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.table.*;
 
@@ -67,6 +69,8 @@ import org.objectstyle.cayenne.gui.util.*;
 /** Display obj entity relationships. */
 class ObjRelationshipTableModel extends AbstractTableModel
 {
+    static Logger logObj = Logger.getLogger(ObjRelationshipTableModel.class.getName());
+
 	Mediator mediator;
 	/** The pane to use as source of AttributeEvents. */
 	Object src;
@@ -160,6 +164,8 @@ class ObjRelationshipTableModel extends AbstractTableModel
 		}
 		// If target column
 		else if (column == REL_TARGET) {
+			if (null == aValue)
+				return;
 			String target_name = aValue.toString();
 			if (target_name == null)
 				target_name = "";
