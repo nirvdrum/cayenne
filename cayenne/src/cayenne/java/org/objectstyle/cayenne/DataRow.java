@@ -104,6 +104,9 @@ public class DataRow extends HashMap {
         return replacesVersion;
     }
 
+    /**
+     * Sets the version of DataRow replaced by this one in the store.
+     */
     public void setReplacesVersion(long replacesVersion) {
         this.replacesVersion = replacesVersion;
     }

@@ -255,7 +255,7 @@ public class DataRowStore implements Serializable {
 
                 if (oldSnapshot != null) {
                     // case 4 above... have to throw out the snapshot since
-                    // now good options exist to tell how to merge the two.
+                    // no good options exist to tell how to merge the two.
                     if (oldSnapshot.getVersion() != newSnapshot.getReplacesVersion()) {
                         forgetSnapshot(key);
                         continue;

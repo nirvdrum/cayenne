@@ -61,12 +61,27 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class QueryLoggerTst extends CayenneTestCase {
-	public void testSqlLiteralForObject() throws Exception {
+    public void testSqlLiteralForObject() throws Exception {
         StringBuffer buf = new StringBuffer();
-        
+
         // test unsupported type
         QueryLogger.sqlLiteralForObject(buf, new Object());
-        
+
         assertTrue(buf.length() > 0);
-	}
+    }
+
+    public void testAppendFormattedByte() throws Exception {
+        assertFormatting((byte) 0, "80");
+        assertFormatting((byte) 1, "81");
+        assertFormatting((byte) 10, "8A");
+        assertFormatting(Byte.MAX_VALUE, "FF");
+        assertFormatting((byte) - 1, "7F");
+        assertFormatting(Byte.MIN_VALUE, "00");
+    }
+
+    private void assertFormatting(byte b, String formatted) throws Exception {
+        StringBuffer buffer = new StringBuffer();
+        QueryLogger.appendFormattedByte(buffer, b);
+        assertEquals(formatted, buffer.toString());
+    }
 }

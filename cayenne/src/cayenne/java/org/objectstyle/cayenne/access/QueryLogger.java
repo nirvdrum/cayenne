@@ -182,10 +182,12 @@ public class QueryLogger {
         StringBuffer buf,
         byte byteValue) {
 
-        String hexDecode = "0123456789ABCDEF";
+        // convert to unsigned 
+        int unsignedByte = byteValue + 128;
+        final String hexDecode = "0123456789ABCDEF";
 
-        buf.append(hexDecode.charAt(byteValue >>> 4));
-        buf.append(hexDecode.charAt(byteValue & 0x0F));
+        buf.append(hexDecode.charAt(unsignedByte >>> 4));
+        buf.append(hexDecode.charAt(unsignedByte & 0x0F));
     }
 
     /** 
