@@ -515,13 +515,25 @@ public class MapLoader extends DefaultHandler {
 	private void storeObjRelationships(PrintWriter out) throws DataMapException {
 		Iterator iter = sortedRelationships(objRelationships).iterator();
 		while (iter.hasNext()) {
-			ObjRelationship temp = (ObjRelationship) iter.next();
-			out.print("\t<obj-relationship name=\"" + temp.getName() + '\"');
-			out.print(" source=\"" + temp.getSourceEntity().getName() + '\"');
-			out.print(" target=\"" + temp.getTargetEntity().getName() + '\"');
-			out.print(" toMany=\"" + (temp.isToMany() ? TRUE : FALSE) + '\"');
+			ObjRelationship rel = (ObjRelationship) iter.next();
+			ObjEntity srcEnt = (ObjEntity)rel.getSourceEntity();
+			if(srcEnt == null) {
+				logObj.warn("No source entity, ignoring ObjRelationship " + rel.getName());
+				return;
+			}
+			
+			ObjEntity targetEnt = (ObjEntity)rel.getTargetEntity();
+			if(targetEnt == null) {
+				logObj.warn("No target entity, ignoring ObjRelationship " + rel.getName());
+				return;
+			}
+			
+			out.print("\t<obj-relationship name=\"" + rel.getName() + '\"');
+			out.print(" source=\"" + srcEnt.getName() + '\"');
+			out.print(" target=\"" + targetEnt.getName() + '\"');
+			out.print(" toMany=\"" + (rel.isToMany() ? TRUE : FALSE) + '\"');
 			out.println('>');
-			storeDbRelationshipRef(out, temp);
+			storeDbRelationshipRef(out, rel);
 			out.println("\t</obj-relationship>");
 		}
 	}
