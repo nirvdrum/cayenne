@@ -260,7 +260,7 @@ public class IncrementalFaultList implements List {
                 boolean first = true;
                 while (idsIt.hasNext()) {
                     boolean found = false;
-                    Object id = (Object) idsIt.next();
+                    Object id = idsIt.next();
                     Iterator oIt = objects.iterator();
                     while (oIt.hasNext()) {
                         if (((DataObject) oIt.next())

@@ -105,7 +105,7 @@ public class EditorPage extends BasePage {
 			return false;
 		}
 
-		if ((anObject instanceof String) && ("".equals((String) anObject))) {
+		if ((anObject instanceof String) && ("".equals(anObject))) {
 			return false;
 		}
 

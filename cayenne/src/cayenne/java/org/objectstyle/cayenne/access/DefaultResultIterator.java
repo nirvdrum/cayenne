@@ -156,9 +156,9 @@ public class DefaultResultIterator implements ResultIterator {
         this.fetchLimit = fetchLimit;
 
         this.mapCapacity =
-            (int) Math.ceil(((double) descriptor.getNames().length) / 0.75);
+            (int) Math.ceil((descriptor.getNames().length) / 0.75);
         this.idMapCapacity =
-            (int) Math.ceil(((double) descriptor.getIdIndexes().length) / 0.75);
+            (int) Math.ceil((descriptor.getIdIndexes().length) / 0.75);
 
         checkNextRow();
     }

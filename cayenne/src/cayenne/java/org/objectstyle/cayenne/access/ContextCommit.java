@@ -260,7 +260,7 @@ class ContextCommit {
 					entity.getClassName());
 			for (Iterator j = objects.iterator(); j.hasNext();) {
 				DataObject o = (DataObject) j.next();
-				ObjectId oldId = (ObjectId) o.getObjectId();
+				ObjectId oldId = o.getObjectId();
 				ObjectId newId = (ObjectId) updatedIds.get(oldId);
 				Map snapshot = context.takeObjectSnapshot(o);
 				objectStore.addSnapshot(oldId, snapshot);

@@ -722,7 +722,7 @@ public class DataContext implements QueryEngine, Serializable {
 	 * insert, update and delete queries (generated internally).
 	 */
 	public void commitChanges() throws CayenneRuntimeException {
-		commitChanges((Level) null);
+		commitChanges(null);
 	}
 
 	/**
@@ -776,8 +776,8 @@ public class DataContext implements QueryEngine, Serializable {
 				? new SelectObserver(query.getLoggingLevel())
 				: new ContextSelectObserver(this, query.getLoggingLevel());
 
-		performQuery((Query) query, observer);
-		return observer.getResults((Query) query);
+		performQuery(query, observer);
+		return observer.getResults(query);
 	}
 
 	/**
@@ -790,7 +790,7 @@ public class DataContext implements QueryEngine, Serializable {
 
 		IteratedSelectObserver observer = new IteratedSelectObserver();
 		observer.setLoggingLevel(query.getLoggingLevel());
-		performQuery((Query) query, observer);
+		performQuery(query, observer);
 		return observer.getResultIterator();
 	}
 

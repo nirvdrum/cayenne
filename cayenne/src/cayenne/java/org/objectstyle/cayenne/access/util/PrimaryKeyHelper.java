@@ -321,8 +321,8 @@ public class PrimaryKeyHelper {
 			if (o1.equals(o2)) {
 				return 0;
 			}
-			Integer index1 = (Integer) indexedDbEntities.get((DbEntity) o1);
-			Integer index2 = (Integer) indexedDbEntities.get((DbEntity) o2);
+			Integer index1 = (Integer) indexedDbEntities.get(o1);
+			Integer index2 = (Integer) indexedDbEntities.get(o2);
 			return ComparatorUtils.NATURAL_COMPARATOR.compare(index1, index2);
 		}
 	}
