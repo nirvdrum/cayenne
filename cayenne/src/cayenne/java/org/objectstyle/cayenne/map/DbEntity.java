@@ -372,29 +372,44 @@ public class DbEntity extends Entity implements DbAttributeListener {
         }
 
         String translatePath(String path) {
+            
             // algorithm to determine the translated path:
-
-            // 1. If input completely includes relationship path, use input's remaining tail
-            // 2. If relationship path equals to input, throw an exception - we can't handle this case
-            // 3. If relationship path and input have none or a some leading components in common,
-            //    (a) strip common leading part; 
-            //    (b) reverse the remaining relationship part; 
+            // 1. If relationship path equals to input, travel to source and back.
+            // 2. If input completely includes relationship path, use input's remaining
+            // tail.
+            // 3. If relationship path and input have none or some leading components in
+            // common,
+            //    (a) strip common leading part;
+            //    (b) reverse the remaining relationship part;
             //    (c) append remaining input to the reversed remaining relationship.
 
+            // case (1)
             if (path.equals(relationshipPath)) {
-                throw new CayenneRuntimeException("Can't convert path ending on target entity.");
+
+                LinkedList finalPath = new LinkedList();
+                Iterator it = resolvePathComponents(path);
+
+                while (it.hasNext()) {
+                    // relationship path components must be DbRelationships
+                    DbRelationship nextDBR = (DbRelationship) it.next();
+                    prependReversedPath(finalPath, nextDBR);
+                    appendPath(finalPath, nextDBR);
+                }
+
+                return convertToPath(finalPath);
             }
 
+            // case (2)
             String relationshipPathWithDot = relationshipPath + Entity.PATH_SEPARATOR;
             if (path.startsWith(relationshipPathWithDot)) {
                 return path.substring(relationshipPathWithDot.length());
             }
 
+            // case (3)
             Iterator pathIt = resolvePathComponents(path);
             Iterator relationshipIt = resolvePathComponents(relationshipPath);
 
             // for inserts from the both ends use LinkedList
-
             LinkedList finalPath = new LinkedList();
 
             while (relationshipIt.hasNext() && pathIt.hasNext()) {
@@ -428,14 +443,18 @@ public class DbEntity extends Entity implements DbAttributeListener {
                 appendPath(finalPath, next);
             }
 
+            return convertToPath(finalPath);
+        }
+        
+        private String convertToPath(List path) {
             StringBuffer converted = new StringBuffer();
-            int len = finalPath.size();
+            int len = path.size();
             for (int i = 0; i < len; i++) {
                 if (i > 0) {
                     converted.append(Entity.PATH_SEPARATOR);
                 }
 
-                converted.append(finalPath.get(i));
+                converted.append(path.get(i));
             }
 
             return converted.toString();

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -389,7 +390,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
     /**
      * Test prefetching with qualifier on the root query containing the path to the
-     * prefetch
+     * prefetch.
      */
     public void testPrefetch8() throws Exception {
         createTestData("testPaintings");
@@ -403,14 +404,14 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         Painting painting = (Painting) results.get(0);
 
-        //The parent must be fully fetched, not just HOLLOW (a fault)
+        // The parent must be fully fetched, not just HOLLOW (a fault)
         assertEquals(PersistenceState.COMMITTED, painting
                 .getToArtist()
                 .getPersistenceState());
     }
 
     /**
-     * Test prefetching with qualifier on the root query being the path to the prefetch
+     * Test prefetching with qualifier on the root query being the path to the prefetch.
      */
     public void testPrefetch9() throws Exception {
         createTestData("testPaintings");
@@ -418,26 +419,27 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         SelectQuery artistQuery = new SelectQuery(Artist.class, artistExp);
         Artist artist1 = (Artist) context.performQuery(artistQuery).get(0);
 
-        //Try and find the painting matching the artist
-        Expression exp = ExpressionFactory.matchExp("toArtist", artist1);
+        // find the painting not matching the artist (this is the case where such prefetch
+        // at least makes sense)
+        Expression exp = ExpressionFactory.noMatchExp("toArtist", artist1);
 
         SelectQuery q = new SelectQuery(Painting.class, exp);
         q.addPrefetch("toArtist");
 
-        //The rest of this test causes failures. Do we even need to fix this
-        // given the rather odd nature of what is trying to be done
-        // (prefetching an object which we used to create the root query
-        // qualifier in the first place)?
-        /*
-         * ContextSelectObserver o = new ContextSelectObserver(ctxt, Level.WARN); try {
-         * ctxt.performQuery(q, o); } catch (Exception e) { e.printStackTrace();
-         * fail("Should not have failed with exception " + e.getMessage()); }
-         * assertEquals(2, o.getSelectCount()); List results = o.getResults(q);
-         * assertEquals(1, results.size()); Painting painting = (Painting) results.get(0);
-         * //The parent must be fully fetched, not just HOLLOW (a fault) assertEquals(
-         * PersistenceState.COMMITTED, painting.getToArtist().getPersistenceState());
-         */
+        // test how prefetches are resolved in this case - this was a stumbling block for
+        // a while
+        Collection prefetches = context.queryWithPrefetches(q, new SelectObserver());
+        assertEquals(2, prefetches.size());
 
+        // run the query ... see that it doesn't blow
+        List paintings = context.performQuery(q);
+        assertEquals(24, paintings.size());
+
+        // see that artists are resolved...
+
+        Painting px = (Painting) paintings.get(3);
+        Artist ax = (Artist) px.readProperty(Painting.TO_ARTIST_PROPERTY);
+        assertEquals(PersistenceState.COMMITTED, ax.getPersistenceState());
     }
 
     public void testCAY119() throws Exception {
