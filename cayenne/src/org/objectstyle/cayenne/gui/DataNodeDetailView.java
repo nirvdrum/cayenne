@@ -179,7 +179,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			  ,DbAdapter.SYBASE
 			  ,DbAdapter.MYSQL
 			  ,DbAdapter.ORACLE
-			  ,DbAdapter.POSTGRES};
+			  /* [DISABLE POSTGRES DATA] ,DbAdapter.POSTGRES */ };
 		model = new DefaultComboBoxModel(arr1);
 		adapter.setModel(model);
 		adapter.setSelectedIndex(-1);

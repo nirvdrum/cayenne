@@ -75,9 +75,11 @@ import org.objectstyle.cayenne.access.*;
 public class TestLogin extends InteractiveLogin implements TestConstants {
     static Logger logObj = Logger.getLogger(TestLogin.class.getName());
 
-    private static final String[] dbLabels = new String[] {"Sybase", "Oracle", "MySQL", "PostgreSQL"};
+    private static final String[] dbLabels = new String[] {"Sybase", "Oracle", "MySQL"
+        /* [DISABLE POSTGRES DATA], "PostgreSQL" */ };
     private static final String[] testFiles
-    = new String[] {"testnode_syb.xml", "testnode_ora.xml", "testnode_mysql.xml", "testnode_postgresql.xml"};
+    = new String[] {"testnode_syb.xml", "testnode_ora.xml", "testnode_mysql.xml"
+        /* [DISABLE POSTGRES DATA] , "testnode_postgresql.xml" */};
     private static final String defaultSel = "Default";
 
     public static InteractiveLogin getTestGuiLoginObject() {
