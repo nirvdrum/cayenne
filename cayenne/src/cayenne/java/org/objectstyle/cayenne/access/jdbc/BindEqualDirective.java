@@ -77,7 +77,7 @@ public class BindEqualDirective extends BindDirective {
     protected void render(
         InternalContextAdapter context,
         Writer writer,
-        DataBinding binding)
+        ParameterBinding binding)
         throws IOException {
 
         if (binding.getValue() != null) {

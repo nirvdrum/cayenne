@@ -53,59 +53,46 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
-package org.objectstyle.cayenne.map;
+package org.objectstyle.cayenne.access.jdbc;
 
 /**
- * A descriptor for the tabular data value.
+ * Describes PreparedStatement parameter binding.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class DataColumnDescriptor {
-    protected int externalType;
-    protected String valueClassName;
-    protected String valueLabel;
-    protected boolean primaryKey;
+public class ParameterBinding {
+    protected int jdbcType;
+    protected int precision;
+    protected Object value;
 
-    public DataColumnDescriptor() {
+    public ParameterBinding(Object value, int jdbcType, int precision) {
+        this.value = value;
+        this.jdbcType = jdbcType;
+        this.precision = precision;
     }
 
-    public DataColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
-        this.valueLabel = dbAttribute.getName();
-        this.externalType = dbAttribute.getType();
-        this.primaryKey = dbAttribute.isPrimaryKey();
-        this.valueClassName = objAttribute.getType();
+    public int getJdbcType() {
+        return jdbcType;
     }
 
-    public int getExternalType() {
-        return externalType;
+    public int getPrecision() {
+        return precision;
     }
 
-    public String getValueLabel() {
-        return valueLabel;
+    public Object getValue() {
+        return value;
     }
 
-    public void setExternalType(int i) {
-        externalType = i;
+    public void setJdbcType(int i) {
+        jdbcType = i;
     }
 
-    public void setValueLabel(String string) {
-        valueLabel = string;
-    }
-    public boolean isPrimaryKey() {
-        return primaryKey;
+    public void setPrecision(int i) {
+        precision = i;
     }
 
-    public String getValueClassName() {
-        return valueClassName;
-    }
-
-    public void setPrimaryKey(boolean b) {
-        primaryKey = b;
-    }
-
-    public void setValueClassName(String string) {
-        valueClassName = string;
+    public void setValue(Object object) {
+        value = object;
     }
 }

@@ -73,6 +73,7 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.jdbc.SQLTemplateExecutionPlan;
+import org.objectstyle.cayenne.access.jdbc.SQLTemplateSelectExecutionPlan;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
@@ -321,12 +322,12 @@ public class DataNode implements QueryEngine {
 
                 // figure out query type and call appropriate worker method
                 if (nextQuery instanceof SQLTemplate) {
+                    SQLTemplate sqlTemplate = (SQLTemplate) nextQuery;
                     SQLTemplateExecutionPlan executionPlan =
-                        new SQLTemplateExecutionPlan(getAdapter());
-                    executionPlan.execute(
-                        connection,
-                        (SQLTemplate) nextQuery,
-                        resultConsumer);
+                        (sqlTemplate.isSelecting())
+                            ? new SQLTemplateSelectExecutionPlan(getAdapter())
+                            : new SQLTemplateExecutionPlan(getAdapter());
+                    executionPlan.execute(connection, sqlTemplate, resultConsumer);
                 }
                 else if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
                     runSelect(connection, nextQuery, resultConsumer);

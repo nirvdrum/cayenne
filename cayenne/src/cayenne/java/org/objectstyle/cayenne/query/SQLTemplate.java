@@ -63,7 +63,6 @@ import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.collections.Transformer;
-import org.objectstyle.cayenne.map.DataColumnDescriptor;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
@@ -105,7 +104,6 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
 
     protected SelectExecutionProperties selectProperties =
         new SelectExecutionProperties();
-    protected DataColumnDescriptor[] resultColumns;
     protected String defaultTemplate;
     protected Map templates;
     protected Map[] parameters;
@@ -175,7 +173,6 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
 
         query.setLoggingLevel(logLevel);
         query.setRoot(root);
-        query.setResultColumns(resultColumns);
 
         selectProperties.copyToProperties(query.selectProperties);
         query.setParameters(parameters);
@@ -229,14 +226,6 @@ public class SQLTemplate extends AbstractQuery implements GenericSelectQuery {
      */
     public int getQueryType() {
         return isSelecting() ? SELECT_QUERY : UNKNOWN_QUERY;
-    }
-
-    public DataColumnDescriptor[] getResultColumns() {
-        return resultColumns;
-    }
-
-    public void setResultColumns(DataColumnDescriptor[] descriptors) {
-        resultColumns = descriptors;
     }
 
     /**

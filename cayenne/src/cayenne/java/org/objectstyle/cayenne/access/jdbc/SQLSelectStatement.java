@@ -55,37 +55,35 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.apache.velocity.context.InternalContextAdapter;
-
 /**
- * A custom Velocity directive to create a PreparedStatement parameter text
- * for "= ?". If null value is encountered, generated text will look like "IS NULL".
- * Usage in Velocity template is "WHERE SOME_COLUMN #bindNotEqual($xyz)".
+ * A selecting PreparedStatement descriptor with a String of SQL and 
+ * an array of parameters. SQLStatement is essentially a "complied"
+ * version of any selecting Cayenne query.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class BindNotEqualDirective extends BindDirective {
+public class SQLSelectStatement extends SQLStatement {
+    protected ColumnDescriptor[] resultColumns;
 
-    public String getName() {
-        return "bindNotEqual";
+    public SQLSelectStatement() {
+
     }
 
-    protected void render(
-        InternalContextAdapter context,
-        Writer writer,
-        ParameterBinding binding)
-        throws IOException {
+    public SQLSelectStatement(
+        String sql,
+        ColumnDescriptor[] resultColumns,
+        ParameterBinding[] bindings) {
 
-        if (binding.getValue() != null) {
-            bind(context, binding);
-            writer.write("<> ?");
-        }
-        else {
-            writer.write("IS NOT NULL");
-        }
+        super(sql, bindings);
+        setResultColumns(resultColumns);
+    }
+
+    public ColumnDescriptor[] getResultColumns() {
+        return resultColumns;
+    }
+
+    public void setResultColumns(ColumnDescriptor[] descriptors) {
+        resultColumns = descriptors;
     }
 }

@@ -73,7 +73,6 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.directive.Directive;
 import org.apache.velocity.runtime.parser.node.Node;
-import org.objectstyle.cayenne.map.DataColumnDescriptor;
 
 /**
  * A custom Velocity directive to describe a ResultSet column.
@@ -153,13 +152,13 @@ public class ResultDirective extends Directive {
 
         Object alias = getChild(context, node, 2);
 
-        DataColumnDescriptor columnDescriptor = new DataColumnDescriptor();
-        columnDescriptor.setValueLabel(
+        ColumnDescriptor columnDescriptor = new ColumnDescriptor();
+        columnDescriptor.setName(
             (alias != null) ? alias.toString() : column.toString());
 
         Object type = getChild(context, node, 1);
         if (type != null) {
-            columnDescriptor.setValueClassName(guessType(type.toString()));
+            columnDescriptor.setJavaClass(guessType(type.toString()));
         }
 
         writer.write(column.toString());
@@ -194,7 +193,7 @@ public class ResultDirective extends Directive {
      */
     protected void bindResult(
         InternalContextAdapter context,
-        DataColumnDescriptor columnDescriptor) {
+        ColumnDescriptor columnDescriptor) {
 
         Collection resultColumns =
             (Collection) context.getInternalUserContext().get(

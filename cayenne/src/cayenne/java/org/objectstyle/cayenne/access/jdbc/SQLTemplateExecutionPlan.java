@@ -59,10 +59,8 @@ package org.objectstyle.cayenne.access.jdbc;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.IteratorUtils;
@@ -109,7 +107,6 @@ public class SQLTemplateExecutionPlan {
 
         SQLTemplateProcessor templateProcessor = new SQLTemplateProcessor();
         String template = query.getTemplate(adapter.getClass().getName());
-        List bindings = new ArrayList();
 
         int size = query.parametersSize();
 
@@ -123,19 +120,19 @@ public class SQLTemplateExecutionPlan {
         for (int i = 0; i < counts.length; i++) {
             Map nextParameters = (Map) it.next();
 
-            // reset bindings
-            bindings.clear();
+            SQLStatement compiled =
+                templateProcessor.processTemplate(template, nextParameters);
 
-            String sqlString =
-                templateProcessor.processTemplate(template, nextParameters, bindings);
-
-            QueryLogger.logQuery(query.getLoggingLevel(), sqlString, bindings);
+            QueryLogger.logQuery(
+                query.getLoggingLevel(),
+                compiled.getSql(),
+                Collections.EMPTY_LIST);
 
             // TODO: we may cache prep statements for this loop, using merged string as a key
             // since it is very likely that it will be the same for multiple parameter sets...
-            PreparedStatement statement = connection.prepareStatement(sqlString);
+            PreparedStatement statement = connection.prepareStatement(compiled.getSql());
             try {
-                bind(statement, bindings);
+                bind(statement, compiled.getBindings());
                 counts[i] = statement.executeUpdate();
                 QueryLogger.logUpdateCount(query.getLoggingLevel(), counts[i]);
             }
@@ -150,19 +147,18 @@ public class SQLTemplateExecutionPlan {
     /**
      * Binds parameters to the PreparedStatement.
      */
-    protected void bind(PreparedStatement preparedStatement, List bindings)
+    protected void bind(PreparedStatement preparedStatement, ParameterBinding[] bindings)
         throws SQLException, Exception {
         // bind parameters
-        if (bindings != null && !bindings.isEmpty()) {
-            int len = bindings.size();
+        if (bindings.length > 0) {
+            int len = bindings.length;
             for (int i = 0; i < len; i++) {
-                DataBinding binding = (DataBinding) bindings.get(i);
                 adapter.bindParameter(
                     preparedStatement,
-                    binding.getValue(),
+                    bindings[i].getValue(),
                     i + 1,
-                    binding.getJdbcType(),
-                    binding.getPrecision());
+                    bindings[i].getJdbcType(),
+                    bindings[i].getPrecision());
             }
         }
     }

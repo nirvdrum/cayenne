@@ -143,8 +143,8 @@ public class BindDirective extends Directive {
                     + node.getColumn());
         }
 
-        DataBinding binding =
-            new DataBinding(value, jdbcType, ConversionUtil.toInt(precision, -1));
+        ParameterBinding binding =
+            new ParameterBinding(value, jdbcType, ConversionUtil.toInt(precision, -1));
 
         render(context, writer, binding);
         return true;
@@ -153,7 +153,7 @@ public class BindDirective extends Directive {
     protected void render(
         InternalContextAdapter context,
         Writer writer,
-        DataBinding binding)
+        ParameterBinding binding)
         throws IOException {
 
         bind(context, binding);
@@ -170,7 +170,7 @@ public class BindDirective extends Directive {
     /**
      * Adds value to the list of bindings in the context.
      */
-    protected void bind(InternalContextAdapter context, DataBinding binding) {
+    protected void bind(InternalContextAdapter context, ParameterBinding binding) {
         Collection bindings =
             (Collection) context.getInternalUserContext().get(
                 SQLTemplateProcessor.BINDINGS_LIST_KEY);

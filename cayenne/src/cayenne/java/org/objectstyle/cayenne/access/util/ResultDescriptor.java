@@ -65,10 +65,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.jdbc.ColumnDescriptor;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.DataColumnDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -153,7 +153,7 @@ public class ResultDescriptor {
      * @since 1.1
      */
     public static ResultDescriptor createDescriptor(
-        DataColumnDescriptor[] columns,
+        ColumnDescriptor[] columns,
         ExtendedTypeMap typeConverters) {
 
         ResultDescriptor descriptor = new ResultDescriptor(typeConverters);
@@ -165,10 +165,10 @@ public class ResultDescriptor {
         int idWidth = 0;
 
         for (int i = 0; i < len; i++) {
-            descriptor.names[i] = columns[i].getValueLabel();
-            descriptor.jdbcTypes[i] = columns[i].getExternalType();
+            descriptor.names[i] = columns[i].getName();
+            descriptor.jdbcTypes[i] = columns[i].getJdbcType();
             descriptor.converters[i] =
-                typeConverters.getRegisteredType(columns[i].getValueClassName());
+                typeConverters.getRegisteredType(columns[i].getJavaClass());
             if (columns[i].isPrimaryKey()) {
                 idWidth++;
             }

@@ -53,39 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.io.IOException;
-import java.io.Writer;
-
-import org.apache.velocity.context.InternalContextAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.ObjAttribute;
 
 /**
- * A custom Velocity directive to create a PreparedStatement parameter text
- * for "= ?". If null value is encountered, generated text will look like "IS NULL".
- * Usage in Velocity template is "WHERE SOME_COLUMN #bindNotEqual($xyz)".
+ * A descriptor of a ResultSet column.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class BindNotEqualDirective extends BindDirective {
+public class ColumnDescriptor {
+    protected int jdbcType;
+    protected String javaClass;
+    protected String name;
+    protected boolean primaryKey;
 
-    public String getName() {
-        return "bindNotEqual";
+    public ColumnDescriptor() {
     }
 
-    protected void render(
-        InternalContextAdapter context,
-        Writer writer,
-        ParameterBinding binding)
-        throws IOException {
+    public ColumnDescriptor(ObjAttribute objAttribute, DbAttribute dbAttribute) {
+        this.name = dbAttribute.getName();
+        this.jdbcType = dbAttribute.getType();
+        this.primaryKey = dbAttribute.isPrimaryKey();
+        this.javaClass = objAttribute.getType();
+    }
 
-        if (binding.getValue() != null) {
-            bind(context, binding);
-            writer.write("<> ?");
-        }
-        else {
-            writer.write("IS NOT NULL");
-        }
+    public int getJdbcType() {
+        return jdbcType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setJdbcType(int i) {
+        jdbcType = i;
+    }
+
+    public void setName(String string) {
+        name = string;
+    }
+    public boolean isPrimaryKey() {
+        return primaryKey;
+    }
+
+    public String getJavaClass() {
+        return javaClass;
+    }
+
+    public void setPrimaryKey(boolean b) {
+        primaryKey = b;
+    }
+
+    public void setJavaClass(String string) {
+        javaClass = string;
     }
 }

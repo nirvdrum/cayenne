@@ -60,7 +60,7 @@ import java.util.List;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.access.jdbc.DataBinding;
+import org.objectstyle.cayenne.access.jdbc.ParameterBinding;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
@@ -168,8 +168,8 @@ public class QueryLogger {
             buf.append('\'').append(anObject).append('\'');
 
         }
-        else if (anObject instanceof DataBinding) {
-            sqlLiteralForObject(buf, ((DataBinding) anObject).getValue());
+        else if (anObject instanceof ParameterBinding) {
+            sqlLiteralForObject(buf, ((ParameterBinding) anObject).getValue());
         }
         else {
             // unknown

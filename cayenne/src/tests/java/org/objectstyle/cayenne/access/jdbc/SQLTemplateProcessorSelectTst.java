@@ -55,11 +55,8 @@
  */
 package org.objectstyle.cayenne.access.jdbc;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
-import org.objectstyle.cayenne.map.DataColumnDescriptor;
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
@@ -68,101 +65,81 @@ import org.objectstyle.cayenne.unit.BasicTestCase;
 public class SQLTemplateProcessorSelectTst extends BasicTestCase {
     public void testProcessTemplateUnchanged() throws Exception {
         String sqlTemplate = "SELECT * FROM ME";
-        List bindings = new ArrayList(0);
-        List columns = new ArrayList(0);
-        String sql =
+
+        SQLSelectStatement compiled =
             new SQLTemplateProcessor().processSelectTemplate(
                 sqlTemplate,
-                Collections.EMPTY_MAP,
-                columns,
-                bindings);
+                Collections.EMPTY_MAP);
 
-        assertEquals(sqlTemplate, sql);
-        assertTrue(bindings.isEmpty());
-        assertTrue(columns.isEmpty());
+        assertEquals(sqlTemplate, compiled.getSql());
+        assertEquals(0, compiled.getBindings().length);
+        assertEquals(0, compiled.getResultColumns().length);
     }
 
     public void testProcessSelectTemplate1() throws Exception {
         String sqlTemplate = "SELECT #result('A') FROM ME";
-        List bindings = new ArrayList(1);
-        List columns = new ArrayList(1);
 
-        String sql =
+        SQLSelectStatement compiled =
             new SQLTemplateProcessor().processSelectTemplate(
                 sqlTemplate,
-                Collections.EMPTY_MAP,
-                columns,
-                bindings);
+                Collections.EMPTY_MAP);
 
-        assertEquals("SELECT A FROM ME", sql);
-        assertTrue(bindings.isEmpty());
-
-        assertEquals(1, columns.size());
-        DataColumnDescriptor column = (DataColumnDescriptor) columns.get(0);
-        assertEquals("A", column.getValueLabel());
-        assertNull(column.getValueClassName());
+        assertEquals("SELECT A FROM ME", compiled.getSql());
+        assertEquals(0, compiled.getBindings().length);
+        assertEquals(1, compiled.getResultColumns().length);
+        assertEquals("A", compiled.getResultColumns()[0].getName());
+        assertNull(compiled.getResultColumns()[0].getJavaClass());
     }
 
     public void testProcessSelectTemplate2() throws Exception {
         String sqlTemplate = "SELECT #result('A' 'String') FROM ME";
-        List bindings = new ArrayList(1);
-        List columns = new ArrayList(1);
 
-        String sql =
+        SQLSelectStatement compiled =
             new SQLTemplateProcessor().processSelectTemplate(
                 sqlTemplate,
-                Collections.EMPTY_MAP,
-                columns,
-                bindings);
+                Collections.EMPTY_MAP);
 
-        assertEquals("SELECT A FROM ME", sql);
-        assertTrue(bindings.isEmpty());
+        assertEquals("SELECT A FROM ME", compiled.getSql());
+        assertEquals(0, compiled.getBindings().length);
 
-        assertEquals(1, columns.size());
-        DataColumnDescriptor column = (DataColumnDescriptor) columns.get(0);
-        assertEquals("A", column.getValueLabel());
-        assertEquals("java.lang.String", column.getValueClassName());
+        assertEquals(1, compiled.getResultColumns().length);
+        assertEquals("A", compiled.getResultColumns()[0].getName());
+        assertEquals(
+            "java.lang.String",
+            compiled.getResultColumns()[0].getJavaClass());
     }
 
     public void testProcessSelectTemplate3() throws Exception {
         String sqlTemplate = "SELECT #result('A' 'String' 'B') FROM ME";
-        List bindings = new ArrayList(1);
-        List columns = new ArrayList(1);
 
-        String sql =
+        SQLSelectStatement compiled =
             new SQLTemplateProcessor().processSelectTemplate(
                 sqlTemplate,
-                Collections.EMPTY_MAP,
-                columns,
-                bindings);
+                Collections.EMPTY_MAP);
 
-        assertEquals("SELECT A AS B FROM ME", sql);
-        assertTrue(bindings.isEmpty());
+        assertEquals("SELECT A AS B FROM ME", compiled.getSql());
+        assertEquals(0, compiled.getBindings().length);
 
-        assertEquals(1, columns.size());
-        DataColumnDescriptor column = (DataColumnDescriptor) columns.get(0);
-        assertEquals("B", column.getValueLabel());
-        assertEquals("java.lang.String", column.getValueClassName());
+        assertEquals(1, compiled.getResultColumns().length);
+        ColumnDescriptor column = compiled.getResultColumns()[0];
+        assertEquals("B", column.getName());
+        assertEquals("java.lang.String", column.getJavaClass());
     }
 
     public void testProcessSelectTemplate4() throws Exception {
         String sqlTemplate = "SELECT #result('A'), #result('B'), #result('C') FROM ME";
-        List bindings = new ArrayList(1);
-        List columns = new ArrayList(1);
 
-        String sql =
+        SQLSelectStatement compiled =
             new SQLTemplateProcessor().processSelectTemplate(
                 sqlTemplate,
-                Collections.EMPTY_MAP,
-                columns,
-                bindings);
+                Collections.EMPTY_MAP);
 
-        assertEquals("SELECT A, B, C FROM ME", sql);
-        assertTrue(bindings.isEmpty());
+        assertEquals("SELECT A, B, C FROM ME", compiled.getSql());
+        assertEquals(0, compiled.getBindings().length);
 
-        assertEquals(3, columns.size());
-        assertEquals("A", ((DataColumnDescriptor) columns.get(0)).getValueLabel());
-        assertEquals("B", ((DataColumnDescriptor) columns.get(1)).getValueLabel());
-        assertEquals("C", ((DataColumnDescriptor) columns.get(2)).getValueLabel());
+        assertEquals(3, compiled.getResultColumns().length);
+        assertEquals("A", compiled.getResultColumns()[0].getName());
+        assertEquals("B", compiled.getResultColumns()[1].getName());
+        assertEquals("C", compiled.getResultColumns()[2].getName());
     }
 }

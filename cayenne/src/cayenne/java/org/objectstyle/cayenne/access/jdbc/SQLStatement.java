@@ -56,43 +56,38 @@
 package org.objectstyle.cayenne.access.jdbc;
 
 /**
- * Described PreparedStatement parameter binding.
+ * A PreparedStatement descriptor containing a String of SQL and 
+ * an array of parameters. SQLStatement is essentially a "complied"
+ * version of any non-selecting query.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class DataBinding {
-    protected int jdbcType;
-    protected int precision;
-    protected Object value;
+public class SQLStatement {
+    protected String sql;
+    protected ParameterBinding[] bindings;
 
-    public DataBinding(Object value, int jdbcType, int precision) {
-        this.value = value;
-        this.jdbcType = jdbcType;
-        this.precision = precision;
+    public SQLStatement() {
     }
 
-    public int getJdbcType() {
-        return jdbcType;
+    public SQLStatement(String sql, ParameterBinding[] bindings) {
+        setSql(sql);
+        setBindings(bindings);
     }
 
-    public int getPrecision() {
-        return precision;
+    public ParameterBinding[] getBindings() {
+        return bindings;
     }
 
-    public Object getValue() {
-        return value;
+    public String getSql() {
+        return sql;
     }
 
-    public void setJdbcType(int i) {
-        jdbcType = i;
+    public void setBindings(ParameterBinding[] bindings) {
+        this.bindings = bindings;
     }
 
-    public void setPrecision(int i) {
-        precision = i;
-    }
-
-    public void setValue(Object object) {
-        value = object;
+    public void setSql(String string) {
+        sql = string;
     }
 }

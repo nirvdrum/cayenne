@@ -60,7 +60,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.objectstyle.cayenne.map.DataColumnDescriptor;
 import org.objectstyle.cayenne.unit.BasicTestCase;
 
 /**
@@ -93,30 +92,10 @@ public class SQLTemplateTst extends BasicTestCase {
         assertEquals("123", query.getTemplate("key2"));
     }
 
-    public void testResultColumns() throws Exception {
-        SQLTemplate query = new SQLTemplate(false);
-
-        assertNull(query.getResultColumns());
-
-        DataColumnDescriptor[] columns = new DataColumnDescriptor[3];
-        query.setResultColumns(columns);
-        assertSame(columns, query.getResultColumns());
-
-        query.setResultColumns(null);
-        assertNull(query.getResultColumns());
-    }
-
     public void testQueryType() throws Exception {
         SQLTemplate query = new SQLTemplate(false);
 
         assertEquals(Query.UNKNOWN_QUERY, query.getQueryType());
-
-        query.setResultColumns(new DataColumnDescriptor[0]);
-        assertEquals(Query.UNKNOWN_QUERY, query.getQueryType());
-
-        query.setResultColumns(new DataColumnDescriptor[2]);
-        assertEquals(Query.UNKNOWN_QUERY, query.getQueryType());
-
         query.setSelecting(true);
         assertEquals(Query.SELECT_QUERY, query.getQueryType());
     }

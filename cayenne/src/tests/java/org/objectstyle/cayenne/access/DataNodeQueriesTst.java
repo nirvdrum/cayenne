@@ -124,4 +124,55 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         // to compare dates we need to create the binding correctly
         // assertEquals(bindings.get("dob"), row.get("DATE_OF_BIRTH"));
     }
+
+    public void testPerfomQueriesSelectingSQLTemplate1() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
+        SQLTemplate query = new SQLTemplate(Object.class, true);
+        query.setDefaultTemplate(
+            "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID");
+
+        MockupOperationObserver observer = new MockupOperationObserver();
+        getNode().performQueries(Collections.singletonList(query), observer);
+
+        List data = observer.rowsForQuery(query);
+        assertEquals(DataContextTestBase.artistCount, data.size());
+        Map row = (Map) data.get(2);
+        assertEquals(1, row.size());
+        assertEquals(new Integer(33003), row.get("ARTIST_ID"));
+    }
+
+    public void testPerfomQueriesSelectingSQLTemplate2() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
+        SQLTemplate query = new SQLTemplate(Object.class, true);
+        query.setDefaultTemplate("SELECT * FROM ARTIST ORDER BY ARTIST_ID");
+
+        MockupOperationObserver observer = new MockupOperationObserver();
+        getNode().performQueries(Collections.singletonList(query), observer);
+
+        List data = observer.rowsForQuery(query);
+        assertEquals(DataContextTestBase.artistCount, data.size());
+        Map row = (Map) data.get(2);
+        assertEquals(3, row.size());
+        assertEquals(new Integer(33003), row.get("ARTIST_ID"));
+    }
+
+    public void testPerfomQueriesSelectingSQLTemplateAlias() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+
+        SQLTemplate query = new SQLTemplate(Object.class, true);
+        query.setDefaultTemplate(
+            "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID");
+
+        MockupOperationObserver observer = new MockupOperationObserver();
+        getNode().performQueries(Collections.singletonList(query), observer);
+
+        List data = observer.rowsForQuery(query);
+        assertEquals(DataContextTestBase.artistCount, data.size());
+        Map row = (Map) data.get(2);
+        assertEquals(1, row.size());
+        assertEquals(new Integer(33003), row.get("A"));
+    }
+
 }
