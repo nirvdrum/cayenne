@@ -101,7 +101,7 @@
 		<db-attribute name="NAME" type="VARCHAR" length="100"/>
 		<db-attribute name="PROPAGATED_PK" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
-	<db-entity name="GENERATED_COLUMN_COMP_MASTER">
+	<db-entity name="GENERATED_COLUMN_COMP_M">
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="NAME" type="VARCHAR" length="100"/>
 	</db-entity>
@@ -242,7 +242,7 @@
 	<obj-entity name="GeneratedColumnCompKey" className="org.objectstyle.art.GeneratedColumnCompKey" dbEntityName="GENERATED_COLUMN_COMP_KEY">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
-	<obj-entity name="GeneratedColumnCompMaster" className="org.objectstyle.art.GeneratedColumnCompMaster" dbEntityName="GENERATED_COLUMN_COMP_MASTER">
+	<obj-entity name="GeneratedColumnCompMaster" className="org.objectstyle.art.GeneratedColumnCompMaster" dbEntityName="GENERATED_COLUMN_COMP_M">
 		<obj-attribute name="name" type="java.lang.String" db-attribute-path="NAME"/>
 	</obj-entity>
 	<obj-entity name="GeneratedColumnDep" className="org.objectstyle.art.GeneratedColumnDep" dbEntityName="GENERATED_COLUMN_DEP">
@@ -360,10 +360,10 @@
 	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
 	</db-relationship>
-	<db-relationship name="toMaster" source="GENERATED_COLUMN_COMP_KEY" target="GENERATED_COLUMN_COMP_MASTER" toMany="false">
+	<db-relationship name="toMaster" source="GENERATED_COLUMN_COMP_KEY" target="GENERATED_COLUMN_COMP_M" toMany="false">
 		<db-attribute-pair source="PROPAGATED_PK" target="ID"/>
 	</db-relationship>
-	<db-relationship name="toDetail" source="GENERATED_COLUMN_COMP_MASTER" target="GENERATED_COLUMN_COMP_KEY" toDependentPK="true" toMany="true">
+	<db-relationship name="toDetail" source="GENERATED_COLUMN_COMP_M" target="GENERATED_COLUMN_COMP_KEY" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="ID" target="PROPAGATED_PK"/>
 	</db-relationship>
 	<db-relationship name="toMaster" source="GENERATED_COLUMN_DEP" target="GENERATED_COLUMN_TEST" toMany="false">
