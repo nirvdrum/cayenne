@@ -119,7 +119,14 @@ public class JdbcAdapter implements DbAdapter {
     protected BatchInterpreter deleteBatchInterpreter;
     protected BatchInterpreter updateBatchInterpreter;
 
-	public static String[] availableAdapterClasses() {
+	/**
+	 * Returns an array of all available DbAdapter subclass names.
+	 * This should probably better be in DbAdapter but interfaces cannot
+	 * contain implementations..
+	 * 
+	 * @return String[] array of DbAdapter subclass names
+	 */
+	public static String[] availableAdapterClassNames() {
 		return new String[] {
 					DbAdapter.JDBC,
 					DbAdapter.HSQLDB,

@@ -190,7 +190,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 		adapterInput =
 			new PreferenceField(
 				ModelerPreferences.RDBMS_ADAPTER,
-				Arrays.asList(JdbcAdapter.availableAdapterClasses()));
+				Arrays.asList(JdbcAdapter.availableAdapterClassNames()));
 		disableVKEvents(adapterInput);
 
 		Component[] left =

@@ -189,7 +189,7 @@ public class DataNodeDetailView
         adapterLabel = new JLabel("DB adapter:");
         adapter = new JComboBox();
         adapter.setEditable(true);
-        model = new DefaultComboBoxModel(JdbcAdapter.availableAdapterClasses());
+        model = new DefaultComboBoxModel(JdbcAdapter.availableAdapterClassNames());
         adapter.setModel(model);
         adapter.setSelectedIndex(-1);
 
