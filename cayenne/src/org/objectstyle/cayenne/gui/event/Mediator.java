@@ -56,36 +56,45 @@
 package org.objectstyle.cayenne.gui.event;
 
 import java.util.*;
-import java.awt.Component;
-import javax.swing.*;
-import javax.swing.event.*;
+import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.gui.GuiConfiguration;
+import javax.swing.event.EventListenerList;
+
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.gui.GuiConfiguration;
+import org.objectstyle.cayenne.gui.util.DataMapWrapper;
+import org.objectstyle.cayenne.map.*;
 
 /** 
- * Interface for mediator of all views of DataMapEditor. 
- * DataMapEditor is implemented using Mediator pattern.
- * Views (Pane-s) responsible for the display of the 
- * group of teh properties of the DataMap elements,
- * such as Entities, attributes and relationships,
- * are going to listen to the different types of 
- * events and act as controllers. 
- * Do not make listeners out of models!
+ * Implementation of event dispatching in CayenneModeler using <code>Mediator</code>
+ * design pattern. Views responsible for the display of the 
+ * groups of properties of the project elements, such as Entities, 
+ * attributes and relationships, register themselves as listeners to the 
+ * different types of events and act as controllers.
+ * 
+ * <p>Do not make listeners out of models!
  * Models (table models, combo box models)
  * may create events, but they will assign the
  * view (pane) they belong to as the source of the event.
- * This is done to prevent eternal loops.
+ * This is done to prevent eternal loops.</p>
  * 
  * @author Michael Misha Shengaout 
+ * @author Andrei Adamchik
  */
 public class Mediator {
-	//DataMapEditor parent;
+
+	protected static Logger logObj = Logger.getLogger(Mediator.class.getName());
+
+	// this is used for debugging of listeners
+	// if there number of listeners for any given event exceeds
+	// this value, a warning will be printed in the logs
+	private static final int LISTENER_THRESHOLD = 3;
+
 	protected EventListenerList listenerList;
-	/** The list of the currently open DataMapModel-s */
+
+	/** The list of the currently open DataMapModel's */
 	DataDomain currentDomain = null;
 	DataNode currentNode = null;
 	DataMap currentMap = null;
@@ -254,111 +263,75 @@ public class Mediator {
 	}
 
 	public void addDomainDisplayListener(DomainDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DomainDisplayListener",
-			listener);
+		addListener(DomainDisplayListener.class, listener);
 	}
 
 	public void addDomainListener(DomainListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DomainListener",
-			listener);
+		addListener(DomainListener.class, listener);
 	}
 
 	public void addDataNodeDisplayListener(DataNodeDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DataNodeDisplayListener",
-			listener);
+		addListener(DataNodeDisplayListener.class, listener);
 	}
 
 	public void addDataNodeListener(DataNodeListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DataNodeListener",
-			listener);
+		addListener(DataNodeListener.class, listener);
 	}
 
 	public void addDataMapDisplayListener(DataMapDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DataMapDisplayListener",
-			listener);
+		addListener(DataMapDisplayListener.class, listener);
 	}
 
 	public void addDataMapListener(DataMapListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DataMapListener",
-			listener);
+		addListener(DataMapListener.class, listener);
 	}
 
 	public void addDbEntityListener(DbEntityListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DbEntityListener",
-			listener);
+		addListener(DbEntityListener.class, listener);
 	}
 
 	public void addObjEntityListener(ObjEntityListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.ObjEntityListener",
-			listener);
+		addListener(ObjEntityListener.class, listener);
 	}
 
 	public void addDbEntityDisplayListener(DbEntityDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DbEntityDisplayListener",
-			listener);
+		addListener(DbEntityDisplayListener.class, listener);
 	}
 
 	public void addObjEntityDisplayListener(ObjEntityDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener",
-			listener);
+		addListener(ObjEntityDisplayListener.class, listener);
 	}
 
 	public void addDbAttributeListener(DbAttributeListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DbAttributeListener",
-			listener);
+		addListener(DbAttributeListener.class, listener);
 	}
 
 	public void addDbAttributeDisplayListener(DbAttributeDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener",
-			listener);
+		addListener(DbAttributeDisplayListener.class, listener);
 	}
 
 	public void addObjAttributeListener(ObjAttributeListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.ObjAttributeListener",
-			listener);
+		addListener(ObjAttributeListener.class, listener);
 	}
 
 	public void addObjAttributeDisplayListener(ObjAttributeDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener",
-			listener);
+		addListener(ObjAttributeDisplayListener.class, listener);
 	}
 
 	public void addDbRelationshipListener(DbRelationshipListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DbRelationshipListener",
-			listener);
+		addListener(DbRelationshipListener.class, listener);
 	}
 
 	public void addDbRelationshipDisplayListener(DbRelationshipDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener",
-			listener);
+		addListener(DbRelationshipDisplayListener.class, listener);
 	}
 
 	public void addObjRelationshipListener(ObjRelationshipListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.ObjRelationshipListener",
-			listener);
+		addListener(ObjRelationshipListener.class, listener);
 	}
 
 	public void addObjRelationshipDisplayListener(ObjRelationshipDisplayListener listener) {
-		addListener(
-			"org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener",
-			listener);
+		addListener(ObjRelationshipDisplayListener.class, listener);
 	}
 
 	public void fireDomainDisplayEvent(DomainDisplayEvent e) {
@@ -367,12 +340,11 @@ public class Mediator {
 		clearState();
 		currentDomain = e.getDomain();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DomainDisplayListener");
+		list = getListeners(DomainDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DomainDisplayListener temp = (DomainDisplayListener) list[i];
 			temp.currentDomainChanged(e);
-		} // End for()
+		}
 	}
 
 	/** Informs all listeners of the DomainEvent. 
@@ -389,8 +361,7 @@ public class Mediator {
 			}
 		}
 
-		EventListener[] list =
-			getListeners("org.objectstyle.cayenne.gui.event.DomainListener");
+		EventListener[] list = getListeners(DomainListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DomainListener temp = (DomainListener) list[i];
 			switch (e.getId()) {
@@ -417,8 +388,7 @@ public class Mediator {
 		clearState();
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
-		EventListener[] list =
-			getListeners("org.objectstyle.cayenne.gui.event.DataNodeDisplayListener");
+		EventListener[] list = getListeners(DataNodeDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			((DataNodeDisplayListener) list[i]).currentDataNodeChanged(e);
 		}
@@ -428,8 +398,7 @@ public class Mediator {
 	  * Does not send the event to its originator. */
 	public void fireDataNodeEvent(DataNodeEvent e) {
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DataNodeListener");
+		list = getListeners(DataNodeListener.class);
 
 		// FIXME: "dirty" flag and other procesisng is
 		// done in the loop. Loop should only care about 
@@ -466,8 +435,7 @@ public class Mediator {
 		currentDomain = e.getDomain();
 		currentNode = e.getDataNode();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DataMapDisplayListener");
+		list = getListeners(DataMapDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DataMapDisplayListener temp = (DataMapDisplayListener) list[i];
 			temp.currentDataMapChanged(e);
@@ -477,8 +445,8 @@ public class Mediator {
 	/** Informs all listeners of the DataMapEvent. 
 	  * Does not send the event to its originator. */
 	public void fireDataMapEvent(DataMapEvent e) {
-		EventListener[] list =
-			getListeners("org.objectstyle.cayenne.gui.event.DataMapListener");
+		EventListener[] list = getListeners(DataMapListener.class);
+
 		for (int i = 0; i < list.length; i++) {
 			DataMapListener temp = (DataMapListener) list[i];
 			switch (e.getId()) {
@@ -508,8 +476,7 @@ public class Mediator {
 	public void fireObjEntityEvent(EntityEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.ObjEntityListener");
+		list = getListeners(ObjEntityListener.class);
 		for (int i = 0; i < list.length; i++) {
 			ObjEntityListener temp = (ObjEntityListener) list[i];
 			switch (e.getId()) {
@@ -534,8 +501,7 @@ public class Mediator {
 	public void fireDbEntityEvent(EntityEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DbEntityListener");
+		list = getListeners(DbEntityListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DbEntityListener temp = (DbEntityListener) list[i];
 			switch (e.getId()) {
@@ -551,8 +517,8 @@ public class Mediator {
 				default :
 					throw new IllegalArgumentException(
 						"Invalid EntityEvent type: " + e.getId());
-			} // End switch
-		} // End for()
+			}
+		}
 	}
 
 	public void fireObjEntityDisplayEvent(EntityDisplayEvent e) {
@@ -565,8 +531,7 @@ public class Mediator {
 
 		currentObjEntity = (ObjEntity) e.getEntity();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener");
+		list = getListeners(ObjEntityDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			ObjEntityDisplayListener temp = (ObjEntityDisplayListener) list[i];
 			temp.currentObjEntityChanged(e);
@@ -582,8 +547,7 @@ public class Mediator {
 		currentMap = e.getDataMap();
 		currentDbEntity = (DbEntity) e.getEntity();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DbEntityDisplayListener");
+		list = getListeners(DbEntityDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DbEntityDisplayListener temp = (DbEntityDisplayListener) list[i];
 			temp.currentDbEntityChanged(e);
@@ -594,8 +558,7 @@ public class Mediator {
 	public void fireDbAttributeEvent(AttributeEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DbAttributeListener");
+		list = getListeners(DbAttributeListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DbAttributeListener temp = (DbAttributeListener) list[i];
 			switch (e.getId()) {
@@ -627,8 +590,7 @@ public class Mediator {
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DbAttributeDisplayListener");
+		list = getListeners(DbAttributeDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DbAttributeDisplayListener temp =
 				(DbAttributeDisplayListener) list[i];
@@ -641,8 +603,7 @@ public class Mediator {
 	public void fireObjAttributeEvent(AttributeEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeListener");
+		list = getListeners(ObjAttributeListener.class);
 		for (int i = 0; i < list.length; i++) {
 			ObjAttributeListener temp = (ObjAttributeListener) list[i];
 			switch (e.getId()) {
@@ -673,8 +634,7 @@ public class Mediator {
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.ObjAttributeDisplayListener");
+		list = getListeners(ObjAttributeDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			ObjAttributeDisplayListener temp =
 				(ObjAttributeDisplayListener) list[i];
@@ -686,8 +646,7 @@ public class Mediator {
 	public void fireDbRelationshipEvent(RelationshipEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipListener");
+		list = getListeners(DbRelationshipListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DbRelationshipListener temp = (DbRelationshipListener) list[i];
 			switch (e.getId()) {
@@ -718,8 +677,7 @@ public class Mediator {
 		// as it resets curr Attr and Rel values to null.
 		currentDbRel = (DbRelationship) e.getRelationship();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.DbRelationshipDisplayListener");
+		list = getListeners(DbRelationshipDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			DbRelationshipDisplayListener temp =
 				(DbRelationshipDisplayListener) list[i];
@@ -731,8 +689,7 @@ public class Mediator {
 	public void fireObjRelationshipEvent(RelationshipEvent e) {
 		setDirty(currentMap);
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipListener");
+		list = getListeners(ObjRelationshipListener.class);
 		for (int i = 0; i < list.length; i++) {
 			ObjRelationshipListener temp = (ObjRelationshipListener) list[i];
 			switch (e.getId()) {
@@ -749,7 +706,7 @@ public class Mediator {
 					throw new IllegalArgumentException(
 						"Invalid RelationshipEvent type: " + e.getId());
 			}
-		} 
+		}
 	}
 
 	public void fireObjRelationshipDisplayEvent(RelationshipDisplayEvent e) {
@@ -763,8 +720,7 @@ public class Mediator {
 		this.currentMap = e.getDataMap();
 		this.currentDomain = e.getDomain();
 		EventListener[] list;
-		list =
-			getListeners("org.objectstyle.cayenne.gui.event.ObjRelationshipDisplayListener");
+		list = getListeners(ObjRelationshipDisplayListener.class);
 		for (int i = 0; i < list.length; i++) {
 			ObjRelationshipDisplayListener temp =
 				(ObjRelationshipDisplayListener) list[i];
@@ -799,25 +755,27 @@ public class Mediator {
 			fireDomainDisplayEvent(new DomainDisplayEvent(src, domain));
 	}
 
-	private void addListener(String name, EventListener listener) {
-		Class temp_class;
-		try {
-			temp_class = Class.forName(name);
-		} catch (ClassNotFoundException ex) {
-			throw new RuntimeException(ex);
+	private void addListener(Class aClass, EventListener listener) {
+		listenerList.add(aClass, listener);
+
+		// debugging possible memory leaks
+		/* int size = listenerList.getListenerCount(aClass);
+		if (size > LISTENER_THRESHOLD) {
+			logObj.info(
+				"Number of listeners exceeded the threshold, this is a possible memory leak.");
+			logObj.info(
+				"Class: "
+					+ aClass.getName()
+					+ ", listeners count: "
+					+ size
+					+ ", last added listener: "
+					+ listener.getClass().getName());
 		}
-		listenerList.add(temp_class, listener);
+		*/
 	}
 
-	private EventListener[] getListeners(String class_name) {
-		Class temp_class;
-		try {
-			temp_class = Class.forName(class_name);
-		} catch (ClassNotFoundException ex) {
-			throw new RuntimeException(ex);
-		}
-		EventListener[] list = listenerList.getListeners(temp_class);
-		return list;
+	private EventListener[] getListeners(Class aClass) {
+		return listenerList.getListeners(aClass);
 	}
 
 	public void setDirty(boolean dirty) {
