@@ -85,7 +85,7 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.dialog.objentity.ObjRelationshipInfoController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -112,12 +112,12 @@ public class ObjEntityRelationshipTab extends JPanel implements ObjEntityDisplay
             DeleteRule.deleteRuleName(DeleteRule.DENY),
     };
 
-    EventController mediator;
+    ProjectController mediator;
 
     CayenneTable table;
     JButton resolve;
 
-    public ObjEntityRelationshipTab(EventController mediator) {
+    public ObjEntityRelationshipTab(ProjectController mediator) {
         this.mediator = mediator;
 
         init();

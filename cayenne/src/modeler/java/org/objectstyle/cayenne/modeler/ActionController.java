@@ -81,12 +81,10 @@ import org.objectstyle.cayenne.project.ProjectPath;
 /**
  * @author Andrei Adamchik
  */
-public class ActionController {
-
-    protected Application application;
+public class ActionController extends Controller {
 
     public ActionController(Application application) {
-        this.application = application;
+        super(application);
     }
 
     public void domainSelected(DataDomain domain) {

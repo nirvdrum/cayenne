@@ -65,7 +65,7 @@ import javax.swing.JPanel;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
@@ -86,12 +86,12 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class SQLTemplateMainTab extends JPanel {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected TextFieldAdapter name;
     protected JCheckBox selecting;
     protected SelectPropertiesPanel properties;
 
-    public SQLTemplateMainTab(EventController mediator) {
+    public SQLTemplateMainTab(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

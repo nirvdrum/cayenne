@@ -61,7 +61,7 @@ import javax.swing.JFrame;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
@@ -115,6 +115,6 @@ public class ValidationDisplayHandlerTst extends TestCase {
             super(validation);
         }
 
-        public void displayField(EventController mediator, JFrame frame) {}
+        public void displayField(ProjectController mediator, JFrame frame) {}
     }
 }

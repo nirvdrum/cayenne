@@ -118,19 +118,17 @@ import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Implementation of event dispatching in CayenneModeler using <i>mediator </i> design
- * pattern.
+ * A controller that works with the project tree, tracking selection and dispatching
+ * project events.
  * <p>
  * TODO: Refactor the event model, so that events are generic and contain "path" to a
  * project node in question. After this is done, EventController should no longer maintain
  * the selection model (currentXYZ ivars), rather it should update internal model.
  * </p>
- * 
- * @author Andrei Adamchik
  */
-public class EventController {
+public class ProjectController extends Controller {
 
-    private static Logger logObj = Logger.getLogger(EventController.class);
+    private static Logger logObj = Logger.getLogger(ProjectController.class);
 
     protected EventListenerList listenerList;
 
@@ -150,10 +148,8 @@ public class EventController {
     /** Changes have been made, need to be saved. */
     protected boolean dirty;
 
-    protected CayenneModelerController parent;
-
-    public EventController(CayenneModelerController parent) {
-        this.parent = parent;
+    public ProjectController(CayenneModelerController parent) {
+        super(parent);
         this.listenerList = new EventListenerList();
     }
 
@@ -365,7 +361,7 @@ public class EventController {
             temp.currentDomainChanged(e);
         }
 
-        parent.dataDomainSelectedAction(currentDomain);
+        ((CayenneModelerController) parent).dataDomainSelectedAction(currentDomain);
     }
 
     /**

@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -89,7 +89,7 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 
     public ObjRelationshipTableModel(
         ObjEntity entity,
-        EventController mediator,
+        ProjectController mediator,
         Object eventSource) {
         super(mediator, eventSource, new ArrayList(entity.getRelationships()));
         this.entity = entity;

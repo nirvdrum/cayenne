@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -104,7 +104,7 @@ public class CreateRelationshipAction extends CayenneAction {
     }
 
     public void createObjRelationship(ObjEntity objEnt) {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
 
         ObjRelationship rel =
             (ObjRelationship) NamedObjectFactory.createObject(
@@ -125,7 +125,7 @@ public class CreateRelationshipAction extends CayenneAction {
     }
 
     public void createDbRelationship(DbEntity dbEnt) {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
 
         DbRelationship rel =
             (DbRelationship) NamedObjectFactory.createObject(DbRelationship.class, dbEnt);

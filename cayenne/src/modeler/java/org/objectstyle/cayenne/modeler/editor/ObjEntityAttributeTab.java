@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjAttributeListener;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -93,10 +93,10 @@ import org.objectstyle.cayenne.modeler.util.UIUtil;
 public class ObjEntityAttributeTab extends JPanel implements ObjEntityDisplayListener,
         ObjEntityListener, ObjAttributeListener, ExistingSelectionProcessor {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected CayenneTable table;
 
-    public ObjEntityAttributeTab(EventController mediator) {
+    public ObjEntityAttributeTab(ProjectController mediator) {
         this.mediator = mediator;
 
         init();

@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.event.DomainEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.datadomain.CacheSyncConfigController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
@@ -89,7 +89,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class DataDomainView extends JPanel implements DomainDisplayListener {
 
-    protected EventController eventController;
+    protected ProjectController eventController;
 
     protected TextFieldAdapter name;
     protected TextFieldAdapter cacheSize;
@@ -99,7 +99,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
 
-    public DataDomainView(EventController eventController) {
+    public DataDomainView(ProjectController eventController) {
         this.eventController = eventController;
 
         // Create and layout components

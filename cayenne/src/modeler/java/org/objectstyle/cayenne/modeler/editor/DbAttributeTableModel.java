@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
@@ -92,7 +92,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
     public DbAttributeTableModel(
         DbEntity entity,
-        EventController mediator,
+        ProjectController mediator,
         Object eventSource) {
         this(entity, mediator, eventSource, new ArrayList(entity.getAttributes()));
         this.entity = entity;
@@ -100,7 +100,7 @@ public class DbAttributeTableModel extends CayenneTableModel {
 
     public DbAttributeTableModel(
         DbEntity entity,
-        EventController mediator,
+        ProjectController mediator,
         Object eventSource,
         java.util.List objectList) {
         super(mediator, eventSource, objectList);

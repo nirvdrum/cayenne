@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
@@ -84,7 +84,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
 
     protected DbEntity entity;
 
-    public DbRelationshipTableModel(DbEntity entity, EventController mediator,
+    public DbRelationshipTableModel(DbEntity entity, ProjectController mediator,
             Object eventSource) {
 
         super(mediator, eventSource, new ArrayList(entity.getRelationships()));

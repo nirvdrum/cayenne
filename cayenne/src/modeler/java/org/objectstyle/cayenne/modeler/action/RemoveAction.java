@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -122,7 +122,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     private void remove() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
 
         if (mediator.getCurrentObjAttribute() != null) {
             removeObjAttribute();
@@ -172,7 +172,7 @@ public class RemoveAction extends CayenneAction {
     protected void removeDomain() {
         ApplicationProject project =
             (ApplicationProject) Application.getProject();
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DataDomain domain = mediator.getCurrentDataDomain();
         project.getConfiguration().removeDomain(domain.getName());
         mediator.fireDomainEvent(
@@ -180,7 +180,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDataMap() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DataMap map = mediator.getCurrentDataMap();
         DataDomain domain = mediator.getCurrentDataDomain();
         domain.removeMap(map.getName());
@@ -189,7 +189,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDataNode() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DataNode node = mediator.getCurrentDataNode();
         DataDomain domain = mediator.getCurrentDataDomain();
         domain.removeDataNode(node.getName());
@@ -202,7 +202,7 @@ public class RemoveAction extends CayenneAction {
      * "remove" EntityEvent.
      */
     protected void removeDbEntity() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DbEntity ent = mediator.getCurrentDbEntity();
         DataMap map = mediator.getCurrentDataMap();
         map.removeDbEntity(ent.getName(), true);
@@ -215,7 +215,7 @@ public class RemoveAction extends CayenneAction {
        * "remove" QueryEvent.
        */
     protected void removeQuery() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         Query query = mediator.getCurrentQuery();
         DataMap map = mediator.getCurrentDataMap();
         map.removeQuery(query.getName());
@@ -231,7 +231,7 @@ public class RemoveAction extends CayenneAction {
        * "remove" ProcedureEvent.
        */
     protected void removeProcedure() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         Procedure procedure = mediator.getCurrentProcedure();
         DataMap map = mediator.getCurrentDataMap();
         map.removeProcedure(procedure.getName());
@@ -246,7 +246,7 @@ public class RemoveAction extends CayenneAction {
      * Removes current object entity from its DataMap. 
      */
     protected void removeObjEntity() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         ObjEntity ent = mediator.getCurrentObjEntity();
 
         DataMap map = mediator.getCurrentDataMap();
@@ -256,7 +256,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeProcedureParameter() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         ProcedureParameter parameter = mediator.getCurrentProcedureParameter();
         mediator.getCurrentProcedure().removeCallParameter(parameter.getName());
         ProcedureParameterEvent e =
@@ -268,7 +268,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeObjAttribute() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         ObjEntity entity = mediator.getCurrentObjEntity();
         ObjAttribute attrib = mediator.getCurrentObjAttribute();
 
@@ -283,7 +283,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDbAttribute() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DbEntity entity = mediator.getCurrentDbEntity();
         DbAttribute attrib = mediator.getCurrentDbAttribute();
         entity.removeAttribute(attrib.getName());
@@ -299,7 +299,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeObjRelationship() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         ObjEntity entity = mediator.getCurrentObjEntity();
         ObjRelationship rel = mediator.getCurrentObjRelationship();
         entity.removeRelationship(rel.getName());
@@ -313,7 +313,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDbRelationship() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DbEntity entity = mediator.getCurrentDbEntity();
         DbRelationship rel = mediator.getCurrentDbRelationship();
         entity.removeRelationship(rel.getName());
@@ -329,7 +329,7 @@ public class RemoveAction extends CayenneAction {
     }
 
     protected void removeDataMapFromDataNode() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DataNode node = mediator.getCurrentDataNode();
         DataMap map = mediator.getCurrentDataMap();
         node.removeDataMap(map.getName());

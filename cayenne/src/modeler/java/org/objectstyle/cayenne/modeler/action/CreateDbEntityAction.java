@@ -60,7 +60,7 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -92,7 +92,7 @@ public class CreateDbEntityAction extends CayenneAction {
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DbEntity entity = createEntity(mediator.getCurrentDataMap());
 
         mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));

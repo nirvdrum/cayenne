@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbJoin;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 
 /** Model for editing DbAttributePair-s. Changes in the join attributes
@@ -82,7 +82,7 @@ public class DbJoinTableModel extends CayenneTableModel {
 
     public DbJoinTableModel(
         DbRelationship relationship,
-        EventController mediator,
+        ProjectController mediator,
         Object src) {
 
         super(mediator, src, new ArrayList(relationship.getJoins()));
@@ -93,7 +93,7 @@ public class DbJoinTableModel extends CayenneTableModel {
 
     public DbJoinTableModel(
         DbRelationship relationship,
-        EventController mediator,
+        ProjectController mediator,
         Object src,
         boolean editable) {
 

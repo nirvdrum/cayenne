@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 
@@ -101,7 +101,7 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
 
     public ProcedureParameterTableModel(
         Procedure procedure,
-        EventController mediator,
+        ProjectController mediator,
         Object eventSource) {
 
         super(mediator, eventSource, new ArrayList(procedure.getCallParameters()));

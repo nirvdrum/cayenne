@@ -59,7 +59,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.query.Query;
@@ -80,12 +80,12 @@ public class QueryTypeController extends BasicController {
     public static final String SQL_QUERY_CONTROL = "cayenne.modeler.queryType.sqlQuery.radio";
     public static final String PROCEDURE_QUERY_CONTROL = "cayenne.modeler.queryType.procedureQuery.radio";
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected DataMap dataMap;
     protected DataDomain domain;
     protected Query query;
 
-    public QueryTypeController(EventController mediator) {
+    public QueryTypeController(ProjectController mediator) {
         this.mediator = mediator;
         this.dataMap = mediator.getCurrentDataMap();
         this.domain = mediator.getCurrentDataDomain();

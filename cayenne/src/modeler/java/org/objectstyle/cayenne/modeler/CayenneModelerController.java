@@ -76,27 +76,23 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneModelerController {
+public class CayenneModelerController extends Controller {
 
-    protected EventController eventController;
+    protected ProjectController projectController;
     protected ActionController actionController;
 
     protected CayenneModelerFrame frame;
-    protected Application application;
     protected Project currentProject;
     protected File initialProject;
 
     public CayenneModelerController(Application application, File initialProject) {
-        this.application = application;
+        super(application);
+
         this.initialProject = initialProject;
         this.frame = new CayenneModelerFrame(this);
 
-        eventController = new EventController(this);
+        projectController = new ProjectController(this);
         actionController = new ActionController(application);
-    }
-
-    public Application getApplication() {
-        return application;
     }
 
     public CayenneModelerFrame getFrame() {
@@ -111,8 +107,8 @@ public class CayenneModelerController {
         this.currentProject = currentProject;
     }
 
-    public EventController getEventController() {
-        return eventController;
+    public ProjectController getProjectController() {
+        return projectController;
     }
 
     protected void initBindings() {
@@ -163,7 +159,7 @@ public class CayenneModelerController {
 
         setCurrentProject(null);
 
-        eventController.reset();
+        projectController.reset();
         actionController.projectClosed();
 
         doUpdate("Project Closed...");
@@ -178,7 +174,7 @@ public class CayenneModelerController {
         setCurrentProject(project);
 
         // update main view
-        frame.setView(new EditorView(eventController));
+        frame.setView(new EditorView(projectController));
         frame.getContentPane().add(frame.getView(), BorderLayout.CENTER);
         frame.validate();
         frame.updateTitle();
@@ -191,7 +187,7 @@ public class CayenneModelerController {
         }
 
         // --- propagate control to child controllers
-        eventController.projectOpened(getFrame());
+        projectController.projectOpened(getFrame());
 
         actionController.projectOpened();
 
@@ -199,10 +195,10 @@ public class CayenneModelerController {
         if (project.getLoadStatus().hasFailures()) {
             // mark project as unsaved
             project.setModified(true);
-            eventController.setDirty(true);
+            projectController.setDirty(true);
 
             // show warning dialog
-            ValidatorDialog.showDialog(frame, eventController, new Validator(
+            ValidatorDialog.showDialog(frame, projectController, new Validator(
                     project,
                     project.getLoadStatus()));
         }

@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -102,7 +102,7 @@ import com.jgoodies.forms.layout.FormLayout;
 public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         DbEntityDisplayListener, ActionListener {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
 
     protected TextFieldAdapter name;
     protected JTextField schema;
@@ -118,7 +118,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
     protected JTextField customPKName;
     protected JTextField customPKSize;
 
-    public DbEntityTab(EventController mediator) {
+    public DbEntityTab(ProjectController mediator) {
         super();
         this.mediator = mediator;
 

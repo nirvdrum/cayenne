@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.conn.DriverDataSource;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.InteractiveLogin;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.dialog.db.DbLoaderHelper;
@@ -98,7 +98,7 @@ public class ImportDbAction extends CayenneAction {
     public void performAction(ActionEvent event) {
         // connect to DB and delegate processing to DbLoaderController....
 
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DataNode currentNode = mediator.getCurrentDataNode();
 
         // try a node that belongs to the current DataMap ...

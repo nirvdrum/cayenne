@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.util.LongRunningTask;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
@@ -106,7 +106,7 @@ public class DbLoaderHelper {
     protected boolean stoppingReverseEngineering;
     protected boolean existingMap;
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected String dbUserName;
     protected DbLoader loader;
     protected DataMap dataMap;
@@ -126,7 +126,7 @@ public class DbLoaderHelper {
         return mergeDialog;
     }
 
-    public DbLoaderHelper(EventController mediator, Connection connection,
+    public DbLoaderHelper(ProjectController mediator, Connection connection,
             DbAdapter adapter, String dbUserName) {
         this.dbUserName = dbUserName;
         this.mediator = mediator;

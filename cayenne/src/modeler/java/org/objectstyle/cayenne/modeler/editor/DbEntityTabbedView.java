@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbAttributeDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
@@ -78,13 +78,13 @@ public class DbEntityTabbedView extends JTabbedPane implements ChangeListener,
         DbEntityDisplayListener, DbRelationshipDisplayListener,
         DbAttributeDisplayListener {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
 
     protected DbEntityTab entityPanel;
     protected DbEntityAttributeTab attributesPanel;
     protected DbEntityRelationshipTab relationshipsPanel;
 
-    public DbEntityTabbedView(EventController mediator) {
+    public DbEntityTabbedView(ProjectController mediator) {
         super();
         this.mediator = mediator;
         mediator.addDbEntityDisplayListener(this);

@@ -67,7 +67,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.ProjectTreeView;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -109,13 +109,13 @@ public class EditorView extends JPanel implements ObjEntityDisplayListener,
     private static final String SQL_TEMPLATE_VIEW = "SQLTemplateView";
     private static final String PROCEDURE_QUERY_VIEW = "ProcedureQueryView";
 
-    protected EventController eventController;
+    protected ProjectController eventController;
     protected JSplitPane splitPane;
     protected Container detailPanel;
 
     protected CardLayout detailLayout;
 
-    public EditorView(EventController eventController) {
+    public EditorView(ProjectController eventController) {
         this.eventController = eventController;
         initView();
         initController();

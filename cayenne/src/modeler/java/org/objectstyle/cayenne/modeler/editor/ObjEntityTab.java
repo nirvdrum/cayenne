@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.map.MapObject;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -115,7 +115,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         }
     };
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected TextFieldAdapter name;
     protected JTextField className;
     protected JTextField superClassName;
@@ -126,7 +126,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     protected JCheckBox readOnly;
     protected JCheckBox optimisticLocking;
 
-    public ObjEntityTab(EventController mediator) {
+    public ObjEntityTab(ProjectController mediator) {
         this.mediator = mediator;
         initView();
         initController();

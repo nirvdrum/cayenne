@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
@@ -105,7 +105,7 @@ public class RelationshipErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-    public void displayField(EventController mediator, JFrame frame) {
+    public void displayField(ProjectController mediator, JFrame frame) {
         RelationshipDisplayEvent event =
             new RelationshipDisplayEvent(frame, rel, entity, map, domain);
         if (entity instanceof ObjEntity) {

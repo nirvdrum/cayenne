@@ -59,7 +59,7 @@
 import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
 import org.objectstyle.cayenne.project.Project;
@@ -85,7 +85,7 @@ public class ValidateAction extends CayenneAction {
 	 * Validates project for possible conflicts and incomplete mappings.
 	 */
 	public void performAction(ActionEvent e) {
-		EventController mediator = getMediator();
+		ProjectController mediator = getMediator();
 		Validator val = Application.getProject().getValidator();
 		int validationCode = val.validate();
 

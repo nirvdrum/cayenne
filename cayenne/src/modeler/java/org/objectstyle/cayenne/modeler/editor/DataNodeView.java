@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
@@ -101,7 +101,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class DataNodeView extends JPanel implements DocumentListener {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected DataNode node;
 
     protected TextFieldAdapter name;
@@ -123,7 +123,7 @@ public class DataNodeView extends JPanel implements DocumentListener {
     // Cludge to prevent marking domain as dirty during initial load.
     private boolean ignoreChange;
 
-    public DataNodeView(EventController mediator) {
+    public DataNodeView(ProjectController mediator) {
         this.mediator = mediator;
         initView();
         initController();

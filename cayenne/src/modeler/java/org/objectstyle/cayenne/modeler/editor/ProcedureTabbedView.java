@@ -64,7 +64,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
@@ -79,11 +79,11 @@ public class ProcedureTabbedView
     extends JTabbedPane
     implements ProcedureDisplayListener, ProcedureParameterDisplayListener {
 
-    protected EventController eventController;
+    protected ProjectController eventController;
     protected ProcedureTab procedurePanel;
     protected ProcedureParameterTab procedureParameterPanel;
 
-    public ProcedureTabbedView(EventController eventController) {
+    public ProcedureTabbedView(ProjectController eventController) {
         this.eventController = eventController;
 
         // init view

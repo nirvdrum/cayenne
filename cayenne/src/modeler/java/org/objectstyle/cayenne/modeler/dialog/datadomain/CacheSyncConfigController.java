@@ -62,7 +62,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataRowStore;
 import org.objectstyle.cayenne.map.event.DomainEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -100,9 +100,9 @@ public class CacheSyncConfigController extends BasicController implements
 
     protected Map existingCards;
     protected boolean modified;
-    protected EventController eventController;
+    protected ProjectController eventController;
 
-    public CacheSyncConfigController(EventController eventController) {
+    public CacheSyncConfigController(ProjectController eventController) {
         this.eventController = eventController;
     }
 

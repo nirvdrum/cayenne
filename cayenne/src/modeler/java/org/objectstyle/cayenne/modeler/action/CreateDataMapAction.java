@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -85,7 +85,7 @@ public class CreateDataMapAction extends CayenneAction {
 
     /** Calls addDataMap() or creates new data map if no data node selected.*/
     protected void createDataMap() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         DataDomain currentDomain = mediator.getCurrentDataDomain();
         
         // use domain name as DataMap base, as map names must be unique across the project...

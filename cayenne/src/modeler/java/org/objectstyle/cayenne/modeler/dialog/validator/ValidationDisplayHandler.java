@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 import org.objectstyle.cayenne.query.Query;
@@ -135,7 +135,7 @@ public abstract class ValidationDisplayHandler {
     /** 
      * Fires event to display the screen where error should be corrected. 
      */
-    public abstract void displayField(EventController mediator, JFrame frame);
+    public abstract void displayField(ProjectController mediator, JFrame frame);
 
     /** Returns the text of the error message. */
     public String getMessage() {
@@ -172,7 +172,7 @@ public abstract class ValidationDisplayHandler {
             super(info);
         }
 
-        public void displayField(EventController mediator, JFrame frame) {
+        public void displayField(ProjectController mediator, JFrame frame) {
             // noop
         }
     }

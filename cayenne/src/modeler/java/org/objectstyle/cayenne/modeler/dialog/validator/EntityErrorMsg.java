@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
@@ -100,7 +100,7 @@ public class EntityErrorMsg extends ValidationDisplayHandler {
         }
     }
 
-    public void displayField(EventController mediator, JFrame frame) {
+    public void displayField(ProjectController mediator, JFrame frame) {
         EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
         event.setTabReset(true);
 

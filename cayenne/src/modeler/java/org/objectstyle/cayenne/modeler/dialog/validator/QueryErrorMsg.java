@@ -59,7 +59,7 @@ import javax.swing.JFrame;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.ValidationInfo;
@@ -75,7 +75,7 @@ public class QueryErrorMsg extends ValidationDisplayHandler {
         super(validationInfo);
     }
 
-    public void displayField(EventController mediator, JFrame frame) {
+    public void displayField(ProjectController mediator, JFrame frame) {
         ProjectPath path = super.validationInfo.getPath();
         DataDomain domain = (DataDomain) path.firstInstanceOf(DataDomain.class);
         DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);

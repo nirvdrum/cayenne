@@ -68,7 +68,7 @@ import javax.swing.JComboBox;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
@@ -89,7 +89,7 @@ public abstract class RawQueryPropertiesPanel extends SelectPropertiesPanel {
     protected JCheckBox dataObjects;
     protected JComboBox entities;
 
-    public RawQueryPropertiesPanel(EventController mediator) {
+    public RawQueryPropertiesPanel(ProjectController mediator) {
         super(mediator);
     }
 

@@ -68,7 +68,7 @@ import javax.swing.JPanel;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -91,13 +91,13 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class ProcedureQueryView extends JPanel {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected TextFieldAdapter name;
     protected JComboBox queryRoot;
     protected JCheckBox selecting;
     protected SelectPropertiesPanel properties;
 
-    public ProcedureQueryView(EventController mediator) {
+    public ProcedureQueryView(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

@@ -121,10 +121,10 @@ public class ProjectTreeView extends JTree implements DomainDisplayListener,
 
     private static final Logger logObj = Logger.getLogger(ProjectTreeView.class);
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected TreeSelectionListener treeSelectionListener;
 
-    public ProjectTreeView(EventController mediator) {
+    public ProjectTreeView(ProjectController mediator) {
         super();
         this.mediator = mediator;
 

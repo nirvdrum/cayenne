@@ -83,7 +83,7 @@ import org.objectstyle.cayenne.map.event.DbEntityListener;
 import org.objectstyle.cayenne.map.event.DbRelationshipListener;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.dialog.ResolveDbRelationshipDialog;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
@@ -104,11 +104,11 @@ public class DbEntityRelationshipTab extends JPanel implements ActionListener,
         DbEntityDisplayListener, DbEntityListener, DbRelationshipListener,
         ExistingSelectionProcessor, ListSelectionListener, TableModelListener {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected CayenneTable table;
     protected JButton resolve;
 
-    public DbEntityRelationshipTab(EventController mediator) {
+    public DbEntityRelationshipTab(ProjectController mediator) {
         super();
 
         this.mediator = mediator;

@@ -77,7 +77,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.DbAdapterInfo;
 import org.objectstyle.cayenne.modeler.util.TextAreaAdapter;
 import org.objectstyle.cayenne.query.Query;
@@ -97,13 +97,13 @@ public class SQLTemplateScriptsTab extends JPanel {
 
     private static final String DEFAULT_LABEL = "Default";
 
-    protected EventController mediator;
+    protected ProjectController mediator;
 
     protected JList scripts;
     protected TextAreaAdapter script;
     protected ListSelectionListener scriptRefreshHandler;
 
-    public SQLTemplateScriptsTab(EventController mediator) {
+    public SQLTemplateScriptsTab(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

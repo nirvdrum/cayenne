@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.PackageUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SchemaUpdateController;
 import org.objectstyle.cayenne.modeler.dialog.datamap.SuperclassUpdateController;
@@ -100,7 +100,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class DataMapView extends JPanel {
 
-    protected EventController eventController;
+    protected ProjectController eventController;
 
     protected TextFieldAdapter name;
     protected JLabel location;
@@ -114,7 +114,7 @@ public class DataMapView extends JPanel {
     protected JButton updateDefaultSuperclass;
     protected JButton updateDefaultLockType;
 
-    public DataMapView(EventController eventController) {
+    public DataMapView(ProjectController eventController) {
         this.eventController = eventController;
 
         initView();

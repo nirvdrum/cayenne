@@ -72,7 +72,7 @@ import javax.swing.JPanel;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
@@ -112,9 +112,9 @@ public abstract class SelectPropertiesPanel extends JPanel {
     protected JComboBox cachePolicy;
     protected JCheckBox refreshesResults;
 
-    protected EventController mediator;
+    protected ProjectController mediator;
 
-    public SelectPropertiesPanel(EventController mediator) {
+    public SelectPropertiesPanel(ProjectController mediator) {
         this.mediator = mediator;
         initView();
         initController();

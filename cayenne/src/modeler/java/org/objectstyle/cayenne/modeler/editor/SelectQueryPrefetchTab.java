@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 
 /**
@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
  */
 public class SelectQueryPrefetchTab extends SelectQueryOrderingTab {
 
-    public SelectQueryPrefetchTab(EventController mediator) {
+    public SelectQueryPrefetchTab(ProjectController mediator) {
         super(mediator);
     }
 

@@ -438,12 +438,12 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     }
 
     private void enableDataMapMenu() {
-        if (controller.getEventController().getCurrentDataNode() != null)
+        if (controller.getProjectController().getCurrentDataNode() != null)
             enableDataNodeMenu();
         else {
             // Andrus: Temp hack till moved to controller
             controller.getActionController().domainSelected(
-                    controller.getEventController().getCurrentDataDomain());
+                    controller.getProjectController().getCurrentDataDomain());
         }
 
         getAction(GenerateClassesAction.getActionName()).setEnabled(true);
@@ -470,7 +470,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
         getAction(CreateAttributeAction.getActionName()).setEnabled(true);
         getAction(CreateRelationshipAction.getActionName()).setEnabled(true);
 
-        if (controller.getEventController().getCurrentDbEntity() instanceof DerivedDbEntity) {
+        if (controller.getProjectController().getCurrentDbEntity() instanceof DerivedDbEntity) {
             getAction(DerivedEntitySyncAction.getActionName()).setEnabled(true);
         }
     }
@@ -483,7 +483,7 @@ public class CayenneModelerFrame extends JFrame implements DataNodeDisplayListen
     private void enableDataNodeMenu() {
         // Andrus: Temp hack till moved to controller
         controller.getActionController().domainSelected(
-                controller.getEventController().getCurrentDataDomain());
+                controller.getProjectController().getCurrentDataDomain());
     }
 
     public void updateTitle() {

@@ -82,7 +82,7 @@ import javax.swing.table.TableModel;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.util.CayenneDialog;
@@ -103,14 +103,14 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
     public static final Color WARNING_COLOR = new Color(245, 194, 194);
     public static final Color ERROR_COLOR = new Color(237, 121, 121);
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected Validator validator;
     protected JTable messages;
     protected JButton closeBtn;
 
     public static synchronized void showDialog(
         CayenneModelerFrame editor,
-        EventController mediator,
+        ProjectController mediator,
         Validator val) {
 
         closeValidationDialog();
@@ -119,7 +119,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
     public static synchronized void showDialog(
         CayenneModelerFrame editor,
-        EventController mediator,
+        ProjectController mediator,
         Validator val,
         String message) {
 
@@ -129,7 +129,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
     public static synchronized void showValidationSuccess(
         CayenneModelerFrame editor,
-        EventController mediator,
+        ProjectController mediator,
         Validator val) {
         closeValidationDialog();
         JOptionPane.showMessageDialog(
@@ -146,14 +146,14 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
     protected ValidatorDialog(
         CayenneModelerFrame editor,
-        EventController mediator,
+        ProjectController mediator,
         Validator validator) {
         this(editor, mediator, validator, "Validation Problems");
     }
 
     protected ValidatorDialog(
         CayenneModelerFrame editor,
-        EventController mediator,
+        ProjectController mediator,
         Validator validator,
         String warning) {
         super(editor, warning, false);

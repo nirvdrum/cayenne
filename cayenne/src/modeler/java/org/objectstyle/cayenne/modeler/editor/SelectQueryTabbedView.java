@@ -60,7 +60,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -72,13 +72,13 @@ import org.objectstyle.cayenne.query.SelectQuery;
  */
 public class SelectQueryTabbedView extends JTabbedPane {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected SelectQueryMainTab mainTab;
     protected SelectQueryPrefetchTab prefetchTab;
     protected SelectQueryOrderingTab orderingTab;
     protected int lastSelectionIndex;
 
-    public SelectQueryTabbedView(EventController mediator) {
+    public SelectQueryTabbedView(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

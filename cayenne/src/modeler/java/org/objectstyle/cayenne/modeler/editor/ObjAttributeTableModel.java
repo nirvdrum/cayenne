@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.ProjectUtil;
 import org.objectstyle.cayenne.util.Util;
@@ -94,7 +94,7 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 
     public ObjAttributeTableModel(
         ObjEntity entity,
-        EventController mediator,
+        ProjectController mediator,
         Object eventSource) {
         super(mediator, eventSource, new ArrayList(entity.getAttributes()));
         // take a copy

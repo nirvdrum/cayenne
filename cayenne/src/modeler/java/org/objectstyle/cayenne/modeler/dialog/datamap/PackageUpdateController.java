@@ -60,7 +60,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -74,7 +74,7 @@ public class PackageUpdateController extends DefaultsPreferencesController {
     public static final String ALL_CONTROL = "cayenne.modeler.datamap.defaultprefs.package.radio";
     public static final String UNINIT_CONTROL = "cayenne.modeler.datamap.defaultprefs.packagenull.radio";
 
-    public PackageUpdateController(EventController mediator, DataMap dataMap) {
+    public PackageUpdateController(ProjectController mediator, DataMap dataMap) {
         super(mediator, dataMap);
     }
 

@@ -68,7 +68,7 @@ import javax.swing.JPanel;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
@@ -92,7 +92,7 @@ import com.jgoodies.forms.layout.FormLayout;
  */
 public class SelectQueryMainTab extends JPanel {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
 
     protected TextFieldAdapter name;
     protected JComboBox queryRoot;
@@ -100,7 +100,7 @@ public class SelectQueryMainTab extends JPanel {
     protected JCheckBox distinct;
     protected ObjectQueryPropertiesPanel properties;
 
-    public SelectQueryMainTab(EventController mediator) {
+    public SelectQueryMainTab(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -78,7 +78,7 @@ public class SchemaUpdateController extends DefaultsPreferencesController {
     public static final String ALL_CONTROL = "cayenne.modeler.datamap.defaultprefs.schema.radio";
     public static final String UNINIT_CONTROL = "cayenne.modeler.datamap.defaultprefs.schemanull.radio";
 
-    public SchemaUpdateController(EventController mediator, DataMap dataMap) {
+    public SchemaUpdateController(ProjectController mediator, DataMap dataMap) {
         super(mediator, dataMap);
     }
 

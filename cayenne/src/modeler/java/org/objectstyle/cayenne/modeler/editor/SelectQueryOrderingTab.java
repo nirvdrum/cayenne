@@ -74,7 +74,7 @@ import javax.swing.tree.TreeModel;
 
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.QueryEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
 import org.objectstyle.cayenne.modeler.util.UIUtil;
@@ -101,13 +101,13 @@ public class SelectQueryOrderingTab extends JPanel {
     static final String ASCENDING_HEADER = "Ascending";
     static final String IGNORE_CASE_HEADER = "Ignore Case";
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected SelectQuery selectQuery;
 
     protected MultiColumnBrowser browser;
     protected JTable table;
 
-    public SelectQueryOrderingTab(EventController mediator) {
+    public SelectQueryOrderingTab(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

@@ -61,7 +61,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.query.SQLTemplate;
@@ -71,12 +71,12 @@ import org.objectstyle.cayenne.query.SQLTemplate;
  */
 public class SQLTemplateTabbedView extends JTabbedPane {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected SQLTemplateMainTab mainTab;
     protected SQLTemplateScriptsTab scriptsTab;
     protected int lastSelectionIndex;
 
-    public SQLTemplateTabbedView(EventController mediator) {
+    public SQLTemplateTabbedView(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

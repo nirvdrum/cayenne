@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.dialog.EditDerivedParamsDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -99,11 +99,11 @@ public class DbEntityAttributeTab
         ExistingSelectionProcessor,
         ActionListener {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected CayenneTable table;
     protected JButton editParams;
 
-    public DbEntityAttributeTab(EventController temp_mediator) {
+    public DbEntityAttributeTab(ProjectController temp_mediator) {
         super();
         mediator = temp_mediator;
         mediator.addDbEntityDisplayListener(this);

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.modeler.editor;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 
 /**
  * Table model for derived DbAttributes.
@@ -83,7 +83,7 @@ public class DerivedDbAttributeTableModel extends DbAttributeTableModel {
 	 */
 	public DerivedDbAttributeTableModel(
 			DbEntity entity,
-			EventController mediator,
+			ProjectController mediator,
 			Object eventSource) {
 		super(entity, mediator, eventSource);
 	}

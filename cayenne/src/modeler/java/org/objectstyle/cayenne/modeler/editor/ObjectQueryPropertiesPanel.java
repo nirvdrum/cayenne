@@ -61,7 +61,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -77,7 +77,7 @@ public class ObjectQueryPropertiesPanel extends SelectPropertiesPanel {
 
     protected JCheckBox dataRows;
 
-    public ObjectQueryPropertiesPanel(EventController mediator) {
+    public ObjectQueryPropertiesPanel(ProjectController mediator) {
         super(mediator);
     }
 

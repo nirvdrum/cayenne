@@ -56,7 +56,7 @@
 package org.objectstyle.cayenne.modeler.dialog.datamap;
 
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.scopemvc.controller.basic.BasicController;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -72,9 +72,9 @@ public abstract class DefaultsPreferencesController extends BasicController {
     public static final String UPDATE_CONTROL = "cayenne.modeler.datamap.defaultprefs.update.button";
 
     protected DataMap dataMap;
-    protected EventController mediator;
+    protected ProjectController mediator;
 
-    public DefaultsPreferencesController(EventController mediator, DataMap dataMap) {
+    public DefaultsPreferencesController(ProjectController mediator, DataMap dataMap) {
         setModel(new DefaultsPreferencesModel(true));
         this.dataMap = dataMap;
         this.mediator = mediator;

@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -76,7 +76,7 @@ public class ProcedureParameterErrorMsg extends ValidationDisplayHandler {
         super(validationInfo);
     }
 
-    public void displayField(EventController mediator, JFrame frame) {
+    public void displayField(ProjectController mediator, JFrame frame) {
         ProjectPath path = super.validationInfo.getPath();
         DataDomain domain = (DataDomain) path.firstInstanceOf(DataDomain.class);
         DataMap map = (DataMap) path.firstInstanceOf(DataMap.class);

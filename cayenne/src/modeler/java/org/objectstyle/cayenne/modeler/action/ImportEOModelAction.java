@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -157,7 +157,7 @@ public class ImportEOModelAction extends CayenneAction {
      */
     protected void addDataMap(DataMap map) {
         DataMap currentMap = getMediator().getCurrentDataMap();
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
 
         if (currentMap != null) {
             // merge with existing map... have to memorize map state before and after

@@ -60,7 +60,7 @@ import java.awt.event.ActionEvent;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -93,7 +93,7 @@ public class CreateObjEntityAction extends CayenneAction {
     }
 
     protected void createObjEntity() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
 
         DataMap dataMap = mediator.getCurrentDataMap();
         ObjEntity entity = (ObjEntity) NamedObjectFactory.createObject(

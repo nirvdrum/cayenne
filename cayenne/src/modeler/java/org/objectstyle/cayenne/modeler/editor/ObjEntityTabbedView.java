@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.Attribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjAttributeDisplayListener;
@@ -83,11 +83,11 @@ import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 public class ObjEntityTabbedView extends JTabbedPane implements ObjEntityDisplayListener,
         ObjRelationshipDisplayListener, ObjAttributeDisplayListener {
 
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected ObjEntityRelationshipTab relationshipsPanel;
     protected ObjEntityAttributeTab attributesPanel;
 
-    public ObjEntityTabbedView(EventController mediator) {
+    public ObjEntityTabbedView(ProjectController mediator) {
         this.mediator = mediator;
 
         initView();

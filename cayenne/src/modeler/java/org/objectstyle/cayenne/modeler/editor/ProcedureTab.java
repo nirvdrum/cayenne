@@ -65,7 +65,7 @@ import javax.swing.JPanel;
 
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -86,13 +86,13 @@ import com.jgoodies.forms.layout.FormLayout;
 public class ProcedureTab extends JPanel implements ProcedureDisplayListener,
         ExistingSelectionProcessor {
 
-    protected EventController eventController;
+    protected ProjectController eventController;
     protected TextFieldAdapter name;
     protected TextFieldAdapter schema;
     protected JCheckBox returnsValue;
     protected boolean ignoreChange;
 
-    public ProcedureTab(EventController eventController) {
+    public ProcedureTab(ProjectController eventController) {
         this.eventController = eventController;
 
         initView();

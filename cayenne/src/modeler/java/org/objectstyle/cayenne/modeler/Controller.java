@@ -53,49 +53,32 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-
-package org.objectstyle.cayenne.modeler.dialog.validator;
-
-import javax.swing.JFrame;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.modeler.ProjectController;
-import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationInfo;
+package org.objectstyle.cayenne.modeler;
 
 /**
- * DataMap validation message.
+ * A superclass of CayenneModeler controllers.
  * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class DataMapErrorMsg extends ValidationDisplayHandler {
-    protected DataMap map;
+public abstract class Controller {
 
-    /**
-     * Constructor for DataMapErrorMsg.
-     * @param result
-     */
-    public DataMapErrorMsg(ValidationInfo result) {
-        super(result);
+    protected Controller parent;
+    protected Application application;
 
-        Object[] path = result.getPath().getPath();
-        int len = path.length;
-
-        if (len >= 1) {
-            map = (DataMap) path[len - 1];
-        }
-
-        if (len >= 2) {
-            domain = (DataDomain) path[len - 2];
-        }
+    public Controller(Controller parent) {
+        this.application = (parent != null) ? parent.getApplication() : null;
+        this.parent = parent;
     }
 
-    public void displayField(ProjectController mediator, JFrame frame) {
-        DataMapDisplayEvent event;
-        event = new DataMapDisplayEvent(frame, map, domain);
-        mediator.fireDataMapDisplayEvent(event);
+    public Controller(Application application) {
+        this.application = application;
     }
 
+    public Application getApplication() {
+        return application;
+    }
+
+    public Controller getParent() {
+        return parent;
+    }
 }

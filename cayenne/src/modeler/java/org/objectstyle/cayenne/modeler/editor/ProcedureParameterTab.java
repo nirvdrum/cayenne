@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
@@ -97,13 +97,13 @@ public class ProcedureParameterTab
         ExistingSelectionProcessor,
         ActionListener {
     
-    protected EventController eventController;
+    protected ProjectController eventController;
 
     protected CayenneTable table;
     protected JButton moveUp;
     protected JButton moveDown;
 
-    public ProcedureParameterTab(EventController eventController) {
+    public ProcedureParameterTab(ProjectController eventController) {
         this.eventController = eventController;
 
         init();

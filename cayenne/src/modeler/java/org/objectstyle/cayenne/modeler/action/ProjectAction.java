@@ -59,7 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerController;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.UnsavedChangesDialog;
 import org.objectstyle.cayenne.project.ProjectPath;
 
@@ -110,7 +110,7 @@ public class ProjectAction extends CayenneAction {
      * Returns false if cancel closing the window, true otherwise.
      */
     public boolean checkSaveOnClose() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         if (mediator != null && mediator.isDirty()) {
             UnsavedChangesDialog dialog = new UnsavedChangesDialog(Application.getFrame());
             dialog.show();

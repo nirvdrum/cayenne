@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapObject;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
 
 /**
@@ -134,7 +134,7 @@ public final class ModelerUtil {
      * current ObjEntity. 
      */
     public static Collection getDbAttributeNames(
-        EventController mediator,
+        ProjectController mediator,
         DbEntity entity) {
 
         Set keys = entity.getAttributeMap().keySet();

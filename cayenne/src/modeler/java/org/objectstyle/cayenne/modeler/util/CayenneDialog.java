@@ -72,7 +72,7 @@ import javax.swing.event.HyperlinkListener;
 
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.scopemvc.view.awt.AWTUtilities;
 
 /**
@@ -194,8 +194,8 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
     /**
      * Returns current CayenneModeler mediator.
      */
-    public EventController getMediator() {
-        return Application.getInstance().getFrameController().getEventController();
+    public ProjectController getMediator() {
+        return Application.getInstance().getFrameController().getProjectController();
     }
 
     protected void dialogInit() {

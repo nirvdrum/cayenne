@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.Application;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.dialog.ResolveDbRelationshipDialog;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.scopemvc.controller.basic.BasicController;
@@ -83,9 +83,9 @@ public class ObjRelationshipInfoController extends BasicController {
     public static final String NEW_TOONE_CONTROL = "cayenne.modeler.mapObjRelationship.newtoone.button";
     public static final String NEW_TOMANY_CONTROL = "cayenne.modeler.mapObjRelationship.newtomany.button";
 
-    protected EventController mediator;
+    protected ProjectController mediator;
 
-    public ObjRelationshipInfoController(EventController mediator,
+    public ObjRelationshipInfoController(ProjectController mediator,
             ObjRelationship relationship) {
 
         this.mediator = mediator;

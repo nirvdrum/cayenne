@@ -59,7 +59,7 @@ import java.util.Collections;
 
 import javax.swing.table.AbstractTableModel;
 
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.Util;
 
@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public abstract class CayenneTableModel extends AbstractTableModel {
-    protected EventController mediator;
+    protected ProjectController mediator;
     protected Object eventSource;
     protected java.util.List objectList;
 
@@ -77,7 +77,7 @@ public abstract class CayenneTableModel extends AbstractTableModel {
      * Constructor for CayenneTableModel.
      */
     public CayenneTableModel(
-        EventController mediator,
+        ProjectController mediator,
         Object eventSource,
         java.util.List objectList) {
         super();
@@ -143,7 +143,7 @@ public abstract class CayenneTableModel extends AbstractTableModel {
     /** 
      * Returns EventController object. 
      */
-    public EventController getMediator() {
+    public ProjectController getMediator() {
         return mediator;
     }
 

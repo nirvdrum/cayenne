@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
-import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ProjectController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureParameterDisplayEvent;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
@@ -120,7 +120,7 @@ public class CreateAttributeAction extends CayenneAction {
                 procedure);
         procedure.addCallParameter(parameter);
 
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         mediator.fireProcedureParameterEvent(
             new ProcedureParameterEvent(this, parameter, MapEvent.ADD));
         mediator.fireProcedureParameterDisplayEvent(
@@ -133,7 +133,7 @@ public class CreateAttributeAction extends CayenneAction {
     }
 
     public void createObjAttribute() {
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         ObjEntity objEntity = mediator.getCurrentObjEntity();
 
         ObjAttribute attr =
@@ -169,7 +169,7 @@ public class CreateAttributeAction extends CayenneAction {
             (DbAttribute) NamedObjectFactory.createObject(attrClass, dbEntity);
         dbEntity.addAttribute(attr);
 
-        EventController mediator = getMediator();
+        ProjectController mediator = getMediator();
         mediator.fireDbAttributeEvent(
             new AttributeEvent(this, attr, dbEntity, AttributeEvent.ADD));
         mediator.fireDbAttributeDisplayEvent(
