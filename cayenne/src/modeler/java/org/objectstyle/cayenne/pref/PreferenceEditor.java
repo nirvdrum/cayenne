@@ -56,10 +56,16 @@
 package org.objectstyle.cayenne.pref;
 
 /**
+ * Defines an API of a preferences editor used for editing preferences without affecting
+ * the rest of the application until the editing is finished.
+ * 
  * @author Andrei Adamchik
  */
 public interface PreferenceEditor {
 
+    /**
+     * Returns an underlying PreferenceService which is a parent of this editor.
+     */
     public PreferenceService getService();
 
     /**
