@@ -1,29 +1,30 @@
            Cayenne Release Notes 1.0a5 (Alpha 1)
-                 Date: Dec 21, 2002
+                 Date: Dec 22, 2002
          ============================================
 
 For the latest information go to the project web site at 
 http://objectstyle.org/cayenne/
 
 
-
 Changes in this release:
 ============================================
-1. Created a project package to handle project file operations 
-independently from GUI, switched CayenneModeler to this package.
+1. New org.objectstyle.cayenne.project package to handle project 
+file operations in abstract fashion, 
+independent from GUI.  CayenneModeler is switched to this package.
 This allowed to eliminate explicit "location" selection and fixed
 lots of bugs.
 
-2. Project structure update - now linked files have
-preset extensions, and project file version is saved in "cayenne.xml".
-Old format is still understood by Cayenne runtime. 
+2. Project structure update - now linked files have preset extensions, 
+and project file version is saved in "cayenne.xml". Old format is still 
+understood by Cayenne runtime. 
 
 3. GUI would allow to upgrade from the earlier projects.
 
 4. DataNode.DEFAULT_ADAPTER_CLASS is now an instance of Class, not String
 
 5. Introduced a concept of queries by Class as opposed to symbolic 
-entity names. A few items below are related to this change.
+entity names. This makes Cayenne queries more type-safe.
+A few items below are related to this change.
 
 6. Created a new class EntityResolver to quickly map the queries
 to appropriate entities.
@@ -59,3 +60,6 @@ hardcoded file or directory names.
 15. Relationships between DataObjects in different DataContexts are prevented.
 
 16. Fixed occasional failure in RequestQueueTst (due to the test setup)
+
+17. Documentation improvements: significantly expanded UserGuide, new Developer Guide,
+new CayenneModeler Guide.
