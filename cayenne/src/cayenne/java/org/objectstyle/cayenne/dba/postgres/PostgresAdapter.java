@@ -93,14 +93,6 @@ public class PostgresAdapter extends JdbcAdapter
 	}
 
 	/**
-	 * Adds the DEFERRABLE INITIALLY DEFERRED options to a relationship constraint.
-	 * @see JdbcAdapter#createFkConstraint(DbRelationship)
-	 */
-	public String createFkConstraint(DbRelationship rel) {
-		return super.createFkConstraint(rel) + " DEFERRABLE INITIALLY DEFERRED";
-	}
-
-	/**
 	 * Returns an OperationSorter to handle constraints.
 	 * @see JdbcAdapter#getOpSorter(DataNode)
 	 */
