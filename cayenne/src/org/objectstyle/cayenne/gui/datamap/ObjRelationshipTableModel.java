@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.gui.datamap;
 
 import java.util.*;
@@ -67,46 +67,43 @@ import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
+/** 
+ * Table model to display ObjRelationships. 
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
+class ObjRelationshipTableModel extends CayenneTableModel {
+	static Logger logObj =
+		Logger.getLogger(ObjRelationshipTableModel.class.getName());
 
-/** Display obj entity relationships. */
-class ObjRelationshipTableModel extends AbstractTableModel
-{
-    static Logger logObj = Logger.getLogger(ObjRelationshipTableModel.class.getName());
-
-	Mediator mediator;
-	/** The pane to use as source of AttributeEvents. */
-	Object src;
-
-	private ObjEntity entity;
-	private java.util.List relList;
-	
 	// Columns
 	static final int REL_NAME = 0;
 	static final int REL_TARGET = 1;
-	static final int REL_CARDINALITY = 2;	
+	static final int REL_CARDINALITY = 2;
+
+	protected ObjEntity entity;
+
+	public ObjRelationshipTableModel(
+		ObjEntity entity,
+		Mediator mediator,
+		Object eventSource) {
+			
+		super(mediator, eventSource, entity.getRelationshipList());
+		this.entity = entity;
+	}
 	
-	/** To provide reference to String class. */	
-	private String	string = new String();
-	/** To provide reference to Boolean class. */	
-	private Boolean bool = new Boolean(false);
-	
-	public ObjRelationshipTableModel(ObjEntity temp_entity
-	, Mediator temp_mediator, Object temp_src)
-	{
-		entity = temp_entity;
-		relList = entity.getRelationshipList();
-		mediator = temp_mediator;
-		src = temp_src;
+	/**
+	 * Returns ObjRelationship class.
+	 */
+	public Class getElementsClass() {
+		return ObjRelationship.class;
 	}
 
-	public int getRowCount() {
-		return relList.size();
-	}
-	
-	public int getColumnCount(){
+	public int getColumnCount() {
 		return 3;
 	}
-	
+
 	public String getColumnName(int column) {
 		if (column == REL_NAME)
 			return "Name";
@@ -114,29 +111,27 @@ class ObjRelationshipTableModel extends AbstractTableModel
 			return "Target";
 		else if (column == REL_CARDINALITY)
 			return "To many";
-		else return "";
+		else
+			return "";
 	}
 
 	public Class getColumnClass(int col) {
 		switch (col) {
-			case REL_CARDINALITY:
-				return bool.getClass();
-			default:
-				return string.getClass();
+			case REL_CARDINALITY :
+				return Boolean.class;
+			default :
+				return String.class;
 		}
 	}
-	
 
 	public ObjRelationship getRelationship(int row) {
-		if (row < 0 || row >= relList.size())
-			return null;
-		ObjRelationship rel = (ObjRelationship)relList.get(row);
-		return rel;		
+		return (row >= 0 && row < objectList.size())
+			? (ObjRelationship) objectList.get(row)
+			: null;
 	}
-	
-	public Object getValueAt(int row, int column)
-	{
-		ObjRelationship rel = (ObjRelationship)relList.get(row);
+
+	public Object getValueAt(int row, int column) {
+		ObjRelationship rel = getRelationship(row);
 		// If name column
 		if (column == REL_NAME)
 			return rel.getName();
@@ -145,22 +140,21 @@ class ObjRelationshipTableModel extends AbstractTableModel
 			if (null == rel.getTargetEntity())
 				return null;
 			return rel.getTargetEntity().getName();
-		}
-		else if (column == REL_CARDINALITY)
+		} else if (column == REL_CARDINALITY)
 			return new Boolean(rel.isToMany());
-		else return "";
-	}// End getValueAt()
-	
-    
-    public void setValueAt(Object aValue, int row, int column) {
-		ObjRelationship rel = (ObjRelationship)relList.get(row);
+		else
+			return "";
+	}
+
+	public void setValueAt(Object aValue, int row, int column) {
+		ObjRelationship rel = getRelationship(row);
+		
 		// If name column
 		if (column == REL_NAME) {
-			String text = (String)aValue;
+			String text = (String) aValue;
 			String old_name = rel.getName();
 			GuiFacade.setObjRelationshipName(entity, rel, text);
-			RelationshipEvent e;
-			e = new RelationshipEvent(src, rel, entity, old_name);
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity, old_name);
 			mediator.fireObjRelationshipEvent(e);
 			fireTableCellUpdated(row, column);
 		}
@@ -173,9 +167,8 @@ class ObjRelationshipTableModel extends AbstractTableModel
 				target_name = "";
 			target_name = target_name.trim();
 			// If data hasn't changed, do nothing
-			if (rel.getTargetEntity() != null 
-				&& target_name.equals(rel.getTargetEntity().getName()))
-			{
+			if (rel.getTargetEntity() != null
+				&& target_name.equals(rel.getTargetEntity().getName())) {
 				return;
 			}
 			// Remove db relationship mappings.
@@ -186,31 +179,32 @@ class ObjRelationshipTableModel extends AbstractTableModel
 				target = null;
 			else {
 				DataMap map = mediator.getCurrentDataMap();
-			 	target = map.getObjEntity(target_name);
-			 }
+				target = map.getObjEntity(target_name);
+			}
 			rel.setTargetEntity(target);
 			RelationshipEvent e;
-			e = new RelationshipEvent(src, rel, entity);
+			e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireObjRelationshipEvent(e);
-		}
-		else if (column == REL_CARDINALITY) {
-			Boolean temp = (Boolean)aValue;
+		} else if (column == REL_CARDINALITY) {
+			Boolean temp = (Boolean) aValue;
 			rel.setToMany(temp.booleanValue());
-			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireObjRelationshipEvent(e);
 		}
-        fireTableRowsUpdated(row, row);
-    }// End setValueAt()
+		fireTableRowsUpdated(row, row);
+	} // End setValueAt()
 
-	
 	/** Don't allow adding more than one new attributes. 
 	 * @return true if new row was added, false if not. */
 	public boolean addRow() {
-		ObjRelationship temp = (ObjRelationship)NamedObjectFactory.createObject(ObjRelationship.class, entity);
+		ObjRelationship temp =
+			(ObjRelationship) NamedObjectFactory.createObject(
+				ObjRelationship.class,
+				entity);
 		temp.setSourceEntity(entity);
 		RelationshipEvent e;
-		e = new RelationshipEvent(src, temp, entity, RelationshipEvent.ADD);
-		relList.add(temp);
+		e = new RelationshipEvent(eventSource, temp, entity, RelationshipEvent.ADD);
+		objectList.add(temp);
 		entity.addRelationship(temp);
 		mediator.fireObjRelationshipEvent(e);
 		fireTableDataChanged();
@@ -220,26 +214,24 @@ class ObjRelationshipTableModel extends AbstractTableModel
 	public void removeRow(int row) {
 		if (row < 0)
 			return;
-		Relationship rel = (Relationship)relList.get(row);
+		Relationship rel = getRelationship(row);
 		RelationshipEvent e;
-		e = new RelationshipEvent(src, rel, entity, RelationshipEvent.REMOVE);
+		e = new RelationshipEvent(eventSource, rel, entity, RelationshipEvent.REMOVE);
 		mediator.fireObjRelationshipEvent(e);
-		relList.remove(row);
+		objectList.remove(row);
 		entity.removeRelationship(rel.getName());
 		fireTableRowsDeleted(row, row);
-	}	
+	}
 
 	/** Relationship just needs to be removed from the model. 
 	 *  It is already removed from the DataMap. */
 	void removeRelationship(Relationship rel) {
-		relList.remove(rel);
+		objectList.remove(rel);
 		fireTableDataChanged();
 	}
 
-
 	public boolean isCellEditable(int row, int col) {
 		return true;
-	}// End isCellEditable()
+	} 
 
-}// End ObjRelationshipTableModel
-
+}

@@ -52,29 +52,14 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.*;
-import javax.swing.border.*;
-import javax.swing.tree.*;
-import javax.swing.text.*;
-import javax.swing.table.*;
-import javax.swing.event.*;
-import javax.swing.filechooser.*;
-import javax.swing.filechooser.FileFilter;
-import org.objectstyle.cayenne.gui.util.XmlFilter;
-
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.RelationshipEvent;
+import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
-
+import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** 
  * Table model for DbRelationship table.
@@ -82,113 +67,99 @@ import org.objectstyle.cayenne.gui.util.*;
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-class DbRelationshipTableModel extends AbstractTableModel {
-
-	Mediator mediator;
-	/** The pane to use as source of AttributeEvents. */
-	Object src;
-
-	private DbEntity entity;
-	private java.util.List relList;
-	
+class DbRelationshipTableModel extends CayenneTableModel {
 	// Columns
-	public static final int NAME 		= 0;
-	public static final int TARGET 		= 1;
-	public static final int TO_DEPENDENT_KEY = 2;
-	public static final int CARDINALITY = 3;
-	
-	/** To provide reference to String class. */	
-	private String	string = new String();
-	/** To provide reference to Boolean class. */	
-	private Boolean bool = new Boolean(false);
-	
-	public DbRelationshipTableModel(DbEntity temp_entity
-	, Mediator temp_mediator, Object temp_src) {
-		entity = temp_entity;
-		relList = entity.getRelationshipList();
-		mediator = temp_mediator;
-		src = temp_src;
+	static final int NAME = 0;
+	static final int TARGET = 1;
+	static final int TO_DEPENDENT_KEY = 2;
+	static final int CARDINALITY = 3;
+
+	protected DbEntity entity;
+
+	public DbRelationshipTableModel(
+		DbEntity entity,
+		Mediator mediator,
+		Object eventSource) {
+			
+		super(mediator, eventSource, entity.getRelationshipList());
+		this.entity = entity;
 	}
 
-	public int getRowCount() {
-		return relList.size();
+	/**
+	 * Returns DbRelationship class.
+	 */
+	public Class getElementsClass() {
+		return DbRelationship.class;
 	}
 	
-	public int getColumnCount(){
+	public int getColumnCount() {
 		return 4;
 	}
-	
-	public String getColumnName(int col)
-	{		
-		switch (col)
-		{
-			case NAME:
+
+	public String getColumnName(int col) {
+		switch (col) {
+			case NAME :
 				return "Name";
-			case TARGET:
+			case TARGET :
 				return "Target";
-			case TO_DEPENDENT_KEY:
+			case TO_DEPENDENT_KEY :
 				return "To Dep PK";
-			case CARDINALITY:
+			case CARDINALITY :
 				return "To Many";
-			default:
+			default :
 				return null;
-		}// End switch
+		} 
 	}
 
 	public Class getColumnClass(int col) {
 		switch (col) {
-			case TO_DEPENDENT_KEY:
-			case CARDINALITY:
-				return bool.getClass();
-			default:
-				return string.getClass();
+			case TO_DEPENDENT_KEY :
+			case CARDINALITY :
+				return Boolean.class;
+			default :
+				return String.class;
 		}
 	}
-	
 
-
-	
 	public DbRelationship getRelationship(int row) {
-		if (row < 0 || row >= relList.size())
-			return null;
-		DbRelationship rel = (DbRelationship)relList.get(row);
-		return rel;		
+		return (row >= 0 && row < objectList.size())
+			? (DbRelationship) objectList.get(row)
+			: null;
 	}
-	
+
 	public Object getValueAt(int row, int col) {
-		if (null == relList || relList.size() <= row)
-			return null;
 		DbRelationship rel = getRelationship(row);
-		if (rel == null)
+		if (rel == null) {
 			return null;
+		}
+		
 		switch (col) {
-			case NAME:
+			case NAME :
 				return rel.getName();
-			case TARGET:
-				DbEntity temp = (DbEntity)rel.getTargetEntity();
+			case TARGET :
+				DbEntity temp = (DbEntity) rel.getTargetEntity();
 				if (null != temp)
 					return temp.getName();
 				else
 					return null;
-			case TO_DEPENDENT_KEY:
+			case TO_DEPENDENT_KEY :
 				return new Boolean(rel.isToDependentPK());
-			case CARDINALITY:
+			case CARDINALITY :
 				return new Boolean(rel.isToMany());
-			default:
+			default :
 				return null;
 		}
 	}
-	
-	
-    
-    public void setValueAt(Object aValue, int row, int column) {
-		DbRelationship rel = (DbRelationship)relList.get(row);
+
+	public void setValueAt(Object aValue, int row, int column) {
+		DbRelationship rel = getRelationship(row);
 		// If name column
 		if (column == NAME) {
-			String text = (String)aValue;
+			String text = (String) aValue;
 			String old_name = rel.getName();
 			GuiFacade.setDbRelationshipName(entity, rel, text);
-			RelationshipEvent e = new RelationshipEvent(src, rel, entity, old_name);
+			RelationshipEvent e =
+				new RelationshipEvent(eventSource, rel, entity, old_name);
 			mediator.fireDbRelationshipEvent(e);
 			fireTableCellUpdated(row, column);
 		}
@@ -196,7 +167,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		else if (column == TARGET) {
 			if (null == aValue)
 				return;
-			String target_name = aValue.toString();			
+			String target_name = aValue.toString();
 			if (target_name == null)
 				target_name = "";
 			target_name = target_name.trim();
@@ -205,36 +176,36 @@ class DbRelationshipTableModel extends AbstractTableModel {
 			if ("".equals(target_name))
 				target = null;
 			else
-			 	target = mediator.getCurrentDataMap().getDbEntity(target_name);
+				target = mediator.getCurrentDataMap().getDbEntity(target_name);
 			rel.setTargetEntity(target);
-			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireDbRelationshipEvent(e);
-		}
-		else if (column == TO_DEPENDENT_KEY) {
-			Boolean temp = (Boolean)aValue;
+		} else if (column == TO_DEPENDENT_KEY) {
+			Boolean temp = (Boolean) aValue;
 			rel.setToDependentPK(temp.booleanValue());
-			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireDbRelationshipEvent(e);
-		}
-		else if (column == CARDINALITY) {
-			Boolean temp = (Boolean)aValue;
+		} else if (column == CARDINALITY) {
+			Boolean temp = (Boolean) aValue;
 			rel.setToMany(temp.booleanValue());
-			RelationshipEvent e = new RelationshipEvent(src, rel, entity);
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireDbRelationshipEvent(e);
 		}
-        fireTableRowsUpdated(row, row);
-    }// End setValueAt()
+		fireTableRowsUpdated(row, row);
+	} // End setValueAt()
 
-	
 	/** @return true if new row was added, false if not. */
 	public boolean addRow() {
-		DbRelationship temp = (DbRelationship)NamedObjectFactory.createObject(DbRelationship.class, entity);
-		
+		DbRelationship temp =
+			(DbRelationship) NamedObjectFactory.createObject(
+				DbRelationship.class,
+				entity);
+
 		temp.setSourceEntity(entity);
-		relList.add(temp);
+		objectList.add(temp);
 		entity.addRelationship(temp);
 		RelationshipEvent e;
-		e = new RelationshipEvent(src, temp, entity, RelationshipEvent.ADD);
+		e = new RelationshipEvent(eventSource, temp, entity, RelationshipEvent.ADD);
 		mediator.fireDbRelationshipEvent(e);
 		fireTableDataChanged();
 		return true;
@@ -244,25 +215,24 @@ class DbRelationshipTableModel extends AbstractTableModel {
 		if (row < 0)
 			return;
 		System.out.println("DbRelationshipTableModel::removeRow()");
-		Relationship rel = (Relationship)relList.get(row);
+		Relationship rel = this.getRelationship(row);
 		RelationshipEvent e;
-		e = new RelationshipEvent(src, rel, entity, RelationshipEvent.REMOVE);
+		e = new RelationshipEvent(eventSource, rel, entity, RelationshipEvent.REMOVE);
 		mediator.fireDbRelationshipEvent(e);
-		relList.remove(row);
+		objectList.remove(row);
 		String name = rel.getName();
 		entity.removeRelationship(name);
 		fireTableRowsDeleted(row, row);
-	}	
+	}
 
 	/** Relationship just needs to be removed from the model. 
 	 *  It is already removed from the DataMap. */
 	void removeRelationship(Relationship rel) {
-		relList.remove(rel);
+		objectList.remove(rel);
 		fireTableDataChanged();
 	}
 
-
 	public boolean isCellEditable(int row, int col) {
 		return true;
-	}// End isCellEditable()
-}// End DbRelationshipTableModel
+	}
+}
