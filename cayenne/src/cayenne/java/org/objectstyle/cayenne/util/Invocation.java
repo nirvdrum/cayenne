@@ -61,6 +61,15 @@ import java.lang.reflect.Method;
 
 import org.apache.log4j.Logger;
 
+
+/**
+ * Invocation represents a dynamic method invocation bound to a specific target.
+ * The target is kept with a WeakReference and can therefore be reclaimed by the
+ * Garbage Collector.
+ * 
+ * @author Holger Hoffstätte
+ * @author Dirk Olmes
+ */
 public class Invocation extends Object {
 	private static final Logger log = Logger.getLogger(Invocation.class);
 
@@ -69,13 +78,15 @@ public class Invocation extends Object {
 	private Class[] _parameterTypes;
 
 	/**
-	 * @HH: writeme!
+	 * Prevent use of empty default constructor
 	 */
 	private Invocation() {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Constructor for an Invocation without arguments in the target's method.
+	 * 
+	 * @see #Invocation(Object, String, Class[])
 	 */
 	public Invocation(Object target, String methodName)
 		throws NoSuchMethodException {
@@ -83,7 +94,10 @@ public class Invocation extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Constructor for an Invocation with a single argument in the target's
+	 * method.
+	 * 
+	 * @see #Invocation(Object, String, Class[])
 	 */
 	public Invocation(Object target, String methodName, Class parameterType)
 		throws NoSuchMethodException {
@@ -91,7 +105,17 @@ public class Invocation extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Constructor for an Invocation with arbitrary arguments in the target's
+	 * method.
+	 * 
+	 * @param target
+	 * @param methodName
+	 * @param parameterTypes
+	 * @throws NoSuchMethodException if <code>methodName</code> could not be
+	 * found in the target
+	 * @throws IllegalArgumentException if target or methodName are
+	 * <code>null</code>, or parameterTypes is empty or contains
+	 * <code>null</code> elements
 	 */
 	public Invocation(Object target, String methodName, Class[] parameterTypes)
 		throws NoSuchMethodException {
@@ -124,21 +148,35 @@ public class Invocation extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Invoke the target's method without any arguments.
+	 * 
+	 * @see #fire(Object[])
 	 */
 	public boolean fire() {
 		return this.fire((Object[])null);
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Invoke the target's method with a single argument.
+	 * 
+	 * @param argument an object passed to the target's method
+	 * @see #fire(Object[])
 	 */
 	public boolean fire(Object argument) {
 		return this.fire(new Object[]{argument});
 	}
 
 	/**
-	 * @HH: writeme!
+	 * Invoke the target's method with an arbitrary number of arguments.
+	 * The number of arguments must be consistent with the arguments given at
+	 * construction time of this Invocation.
+	 * 
+	 * @param arguments an array of objects passed to the target's method
+	 * @return <code>true</code> if invocation of the method succeeded,
+	 * otherwise <code>false</code>
+	 * @throws IllegalArgumentException if the passed arguments are inconsistent
+	 * with the arguments passed to this instance's constructor
+	 * @see #fire(Object[])
 	 */
 	public boolean fire(Object[] arguments) {
 		boolean success = false;
@@ -178,7 +216,7 @@ public class Invocation extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * @see Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
 		if ((obj != null) && (obj.getClass().equals(this.getClass()))) {
@@ -208,7 +246,7 @@ public class Invocation extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * @see Object#hashCode()
 	 */
 	public int hashCode() {
 		int hash = 42, hashMultiplier = 59;
@@ -222,21 +260,21 @@ public class Invocation extends Object {
 	}
 
 	/**
-	 * @HH: writeme!
+	 * @return the method to be invoked on the target
 	 */
 	public Method getMethod() {
 		return _method;
 	}
 
 	/**
-	 * @HH: writeme!
+	 * @return the target object of this Invocation 
 	 */
 	public Object getTarget() {
 		return _target.get();
 	}
 
 	/**
-	 * @HH: writeme!
+	 * @return an array of Classes describing the target method's parameters
 	 */
 	public Class[] getParameterTypes() {
 		return _parameterTypes;
