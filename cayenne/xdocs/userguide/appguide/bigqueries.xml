@@ -11,7 +11,7 @@
 </navigator>    
 <body>
     <section name="5. Writing Cayenne Applications">        
-		<subsection name="5.8 Handling Big Result Sets" anchor="big">
+		<subsection name="5.8 Handling Large Result Sets" anchor="big">
             <p>Working with tables that contain huge number of rows
             (from tens of thousands to millions) often causes performance problems with 
             traditional O/R approach. The reasons are obvious and in many cases are
@@ -76,7 +76,7 @@ Artist artist = (Artist)ctxt.objectFromDataRow("Artist", row);
 			</subsection>
             
 			<subsection name="5.8.2 ResultIterator: Incremental Data Processing" anchor="iterator">
-			<p>There are cases when the result sets are so big that even when fetching data rows, 
+			<p>There are cases when the result sets are so large that even when fetching data rows, 
 			application can run out of memory. For instance, a user may be creating a report
 			that requires in-memory processing of hundreds of thousands of database rows. 
 			In such cases normal Cayenne behavior of reading the whole <code>java.sql.ResultSet</code> 
