@@ -101,7 +101,7 @@ sub success_email() {
 	if($opt_m) {
 		my $msg = $_[0];
     
-		open(MAIL, "| mail -s "Cayenne Build Succeeded ($mon/$mday/$year)" $opt_m") 
+		open(MAIL, "| mail -s 'Cayenne Build Succeeded ($mon/$mday/$year)' $opt_m") 
 			or die  "Can't send mail: $!\n";
     
 		print MAIL "\n";
@@ -117,7 +117,7 @@ sub die_with_email() {
 	
 	if($opt_m) {
     
-		open(MAIL, "| mail -s "Subject: Cayenne Build Failed ($mon/$mday/$year)" $opt_m") 
+		open(MAIL, "| mail -s 'Subject: Cayenne Build Failed ($mon/$mday/$year)' $opt_m") 
 		or die  "Can't send mail: $!\n";
     
 		print MAIL "\n";
