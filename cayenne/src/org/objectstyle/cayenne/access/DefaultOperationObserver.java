@@ -83,7 +83,7 @@ public class DefaultOperationObserver implements OperationObserver {
     protected boolean transactionCommitted;
     protected boolean transactionRolledback;
     protected Level queryLogLevel = DEFAULT_LOG_LEVEL;
-    protected boolean useIteratedResult;
+    protected boolean iteratedResult;
     
     
     /** Returns a list of global exceptions that occured during data operation run. */
@@ -139,7 +139,7 @@ public class DefaultOperationObserver implements OperationObserver {
         logObj.fine("result count: " + count);
     }
     
-    public void nextDataRows(ResultIterator it, Query q) {
+    public void nextDataRows(Query q, ResultIterator it) {
         logObj.fine("result: (iterator)");
     }
     
@@ -178,11 +178,11 @@ public class DefaultOperationObserver implements OperationObserver {
         return queryList;
     }
     
-    public boolean useIteratedResult() {
-    	return useIteratedResult;
+    public boolean iteratedResult() {
+    	return iteratedResult;
     }
     
-    public void setUseIteratedResult(boolean flag) {
-    	this.useIteratedResult = flag;
+    public void setIteratedResult(boolean flag) {
+    	this.iteratedResult = flag;
     }
 }

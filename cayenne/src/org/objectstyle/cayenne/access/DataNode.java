@@ -233,20 +233,22 @@ public class DataNode implements QueryEngine {
 					PreparedStatement prepStmt =
 						transl.createStatement(logLevel);
 
-					try {
-						if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-							runSelect(opObserver, prepStmt, transl);
-						} else {
-							runUpdate(opObserver, prepStmt, transl);
-						}
-					} finally {
-						// important - prepared statement must be closed 
-						// no matter what, or it will result in 
-						// "leaks" of the database resources (in Oracle,
-						// for example, this will result in 
-						// "ORA-01000 maximum open cursors exceeded" error)
-						prepStmt.close();
+					// if ResultIterator is returned to the user,
+					// DataNode is not responsible for closing the connections
+					// exception handling, and other housekeeping
+					if (opObserver.iteratedResult()) {
+						// trick "finally" to avoid closing connection here
+						// it will be closed by the ResultIterator
+						con = null;
+						runIteratedSelect(opObserver, prepStmt, transl);
+						return;
 					}
+					if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+						runSelect(opObserver, prepStmt, transl);
+					} else {
+						runUpdate(opObserver, prepStmt, transl);
+					}
+
 				} catch (Exception queryEx) {
 					QueryLogger.logQueryError(logLevel, queryEx);
 
@@ -299,8 +301,9 @@ public class DataNode implements QueryEngine {
 		} finally {
 			try {
 				// return connection to the pool if it was checked out
-				if (con != null)
+				if (con != null) {
 					con.close();
+				}
 			}
 			// finally catch connection closing exceptions...
 			catch (Exception finalEx) {
@@ -321,6 +324,30 @@ public class DataNode implements QueryEngine {
 		ResultSet rs = null;
 		DefaultResultIterator it = null;
 
+		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
+		it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+
+        // note that we don't need to close ResultIterator
+        // since "dataRows" will do it internally
+		List resultRows = it.dataRows();
+		QueryLogger.logSelectCount(observer.queryLogLevel(), resultRows.size());
+
+		observer.nextDataRows(transl.getQuery(), resultRows);
+	}
+
+	/** 
+	 * Executes prebuilt SELECT PreparedStatement and returns 
+	 * result to an observer as a ResultIterator.
+	 */
+	protected void runIteratedSelect(
+		OperationObserver observer,
+		PreparedStatement prepStmt,
+		QueryTranslator transl)
+		throws Exception {
+
+		ResultSet rs = null;
+		DefaultResultIterator it = null;
+
 		try {
 			SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
 			it =
@@ -329,17 +356,14 @@ public class DataNode implements QueryEngine {
 					this.getAdapter(),
 					assembler);
 
-			List resultSnapshots = it.dataRows();
-			QueryLogger.logSelectCount(
-				observer.queryLogLevel(),
-				resultSnapshots.size());
-
-			observer.nextDataRows(transl.getQuery(), resultSnapshots);
-
-		} finally {
+			it.setClosingConnection(true);
+			observer.nextDataRows(transl.getQuery(), it);
+		} catch (Exception ex) {
 			if (it != null) {
 				it.close();
 			}
+
+			throw ex;
 		}
 	}
 
@@ -352,12 +376,16 @@ public class DataNode implements QueryEngine {
 		QueryTranslator transl)
 		throws Exception {
 
-		// 2.b execute update
-		int count = prepStmt.executeUpdate();
-		QueryLogger.logUpdateCount(observer.queryLogLevel(), count);
+		try {
+			// 2.b execute update
+			int count = prepStmt.executeUpdate();
+			QueryLogger.logUpdateCount(observer.queryLogLevel(), count);
 
-		// 3.b send results back to consumer
-		observer.nextCount(transl.getQuery(), count);
+			// 3.b send results back to consumer
+			observer.nextCount(transl.getQuery(), count);
+		} finally {
+			prepStmt.close();
+		}
 	}
 
 	public void performQuery(Query query, OperationObserver opObserver) {

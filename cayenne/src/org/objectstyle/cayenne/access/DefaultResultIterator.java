@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 
@@ -66,7 +67,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 
 /**
- * Default implementation of ResultIterator interface. It works as a 
+ * Default implementation of ResultIterator interface. Serves as a 
  * factory that creates data rows from <code>java.sql.ResultSet</code>.
  * 
  * <p><i>For more information see <a href="../../../../../userguide/index.html"
@@ -77,10 +78,15 @@ import org.objectstyle.cayenne.map.DbAttribute;
 public class DefaultResultIterator implements ResultIterator {
 	protected PreparedStatement prepStmt;
 	protected ResultSet resultSet;
+	protected Connection connection;
+
 	protected Map dataRow;
 	protected DbAttribute[] rowDescriptor;
 	protected ExtendedType[] converters;
 	protected int resultSize;
+
+	protected boolean closingConnection;
+	protected boolean isClosed;
 
 	/** 
 	 * Creates new DefaultResultIterator. Initializes it
@@ -91,8 +97,9 @@ public class DefaultResultIterator implements ResultIterator {
 		DbAdapter adapter,
 		SelectQueryAssembler queryAssembler)
 		throws SQLException, CayenneException {
-			
+
 		this.prepStmt = prepStmt;
+		this.connection = queryAssembler.getCon();
 		this.resultSet = prepStmt.executeQuery();
 		this.rowDescriptor = queryAssembler.getSnapshotDesc(resultSet);
 		String[] rowTypes = queryAssembler.getResultTypes(resultSet);
@@ -147,17 +154,19 @@ public class DefaultResultIterator implements ResultIterator {
 
 	/**
 	 * Returns all unread data rows from ResultSet and closes
-	 * this iterator.
+	 * this iterator. 
 	 */
 	public List dataRows() throws CayenneException {
 		ArrayList list = new ArrayList();
-		while (this.hasNextRow()) {
-			list.add(this.nextDataRow());
+
+		try {
+			while (this.hasNextRow()) {
+				list.add(this.nextDataRow());
+			}
+			return list;
+		} finally {
+			this.close();
 		}
-
-		this.close();
-
-		return list;
 	}
 
 	/** 
@@ -197,20 +206,68 @@ public class DefaultResultIterator implements ResultIterator {
 	 * Otherwise unused database resources will not be released properly.
 	 */
 	public void close() throws CayenneException {
-		dataRow = null;
-		
-		try {
-			resultSet.close();
-		} catch (SQLException sqex) {
-			throw new CayenneException("Exception closing ResultSet.", sqex);
-		}
+		if (!isClosed) {
 
-		try {
-			prepStmt.close();
-		} catch (SQLException sqex) {
-			throw new CayenneException(
-				"Exception closing PreparedStatement.",
-				sqex);
+			dataRow = null;
+
+			StringWriter errors = new StringWriter();
+			PrintWriter out = new PrintWriter(errors);
+
+			try {
+				resultSet.close();
+			} catch (SQLException e1) {
+				out.println("Error closing ResultSet");
+				e1.printStackTrace(out);
+			}
+
+			try {
+				prepStmt.close();
+			} catch (SQLException e2) {
+				out.println("Error closing PreparedStatement");
+				e2.printStackTrace(out);
+			}
+
+			if (this.isClosingConnection()) {
+				try {
+					connection.close();
+				} catch (SQLException e3) {
+					out.println("Error closing Connection");
+					e3.printStackTrace(out);
+				}
+			}
+
+			try {
+				out.close();
+				errors.close();
+			} catch (IOException ioex) {
+				// this is totally unexpected, 
+				// after all we are writing to the StringBuffer
+				// in the memory	
+			}
+			StringBuffer buf = errors.getBuffer();
+
+			if (buf.length() > 0) {
+				throw new CayenneException(
+					"Error closing ResultIterator: " + buf);
+			}
+
+			isClosed = true;
 		}
+	}
+
+	/**
+	 * Returns <code>true</code> if this iterator is responsible 
+	 * for closing its connection, otherwise a user of the iterator 
+	 * must close the connection after closing the iterator.
+	 */
+	public boolean isClosingConnection() {
+		return closingConnection;
+	}
+
+	/**
+	 * Sets the <code>closingConnection</code> property.
+	 */
+	public void setClosingConnection(boolean flag) {
+		this.closingConnection = flag;
 	}
 }

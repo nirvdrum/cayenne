@@ -52,41 +52,73 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.access;
 
-import java.util.logging.Level;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * 
- * Defines an API that allows QueryEngine to obtain information about 
- * query execution. Defines query running strategies, logging, etc. 
- * 
  * @author Andrei Adamchik
  */
-public interface OperationHints {
-	
-    /** Returns a log level level that should be used when logging query execution. */ 
-    public Level queryLogLevel();
-    
-    /** <p>DataNode executing a list of statements will consult OperationHints
-     *  about transactional behavior by calling this method.</p>
-     * 
-     *  <ul>
-     *  	<li>If this method returns true, each statement in a batch will be run as a separate 
-     *  transaction.</li>
-     *  	<li>If this method returns false, the whole batch will be wrapped in a transaction.</li>
-     *  </ul>
-     */
-    public boolean useAutoCommit();
-    
-    
-    /** 
-     * Returns <code>true</code> to indicate that any results of a select operation
-     * should be returned as a ResultIterator. <code>false</code> is returned when the
-     * results are expected as a list.
-     */
-    public boolean iteratedResult();
-}
+public class IteratorTestBase extends TestCase {
+	protected Connection conn;
+	protected PreparedStatement st;
+	protected QueryTranslator transl;
 
+	/**
+	 * Constructor for IteratorTestBase.
+	 * @param arg0
+	 */
+	public IteratorTestBase(String arg0) {
+		super(arg0);
+	}
+
+	public void setUp() throws Exception {
+		conn = null;
+		st = null;
+		transl = null;
+
+		TestMain.getSharedDatabaseSetup().cleanTableData();
+		new DataContextTst("Helper").populateTables();
+	}
+
+
+    /** 
+     * Initializes internal state.
+     */
+	protected void initStatement() throws Exception {
+		conn = TestMain.getSharedConnection();
+
+		SelectQuery q = new SelectQuery("Artist");
+		q.addOrdering("artistName", true);
+
+		transl = TestMain.getSharedNode().getAdapter().getQueryTranslator(q);
+		transl.setEngine(TestMain.getSharedNode());
+		transl.setCon(conn);
+
+		st = transl.createStatement(DefaultOperationObserver.DEFAULT_LOG_LEVEL);
+	}
+
+
+    /**
+     * Closes all open resources (connections, statements, etc.)
+     */
+	protected void cleanup() throws Exception {
+		if (st != null) {
+			st.close();
+		}
+
+		if (conn != null) {
+			conn.close();
+		}
+	}
+}

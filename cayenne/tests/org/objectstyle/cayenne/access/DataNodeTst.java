@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,42 +54,28 @@ package org.objectstyle.cayenne.access;
  *
  */
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.conn.*;
+package org.objectstyle.cayenne.access;
 
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.SelectQuery;
 
-public class DataNodeTst extends TestCase {
+public class DataNodeTst extends IteratorTestBase {
 
-    public DataNodeTst(String name) {
-        super(name);
-    }
+	public DataNodeTst(String name) {
+		super(name);
+	}
 
-    public void testName() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getName());
-        node.setName(tstName);
-        assertEquals(tstName, node.getName());
-    }
+	public void testRunSelect() throws Exception {
+		// fail("Not implemented.");
+	}
 
+	public void testRunUpdate() throws Exception {
+		// fail("Not implemented.");
+	}
 
-    public void testDataSourceLocation() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getDataSourceLocation());
-        node.setDataSourceLocation(tstName);
-        assertEquals(tstName, node.getDataSourceLocation());
-    }
-
-
-    public void testDataSourceFactory() throws Exception {
-        String tstName = "tst_name";
-        DataNode node = new DataNode();
-        assertNull(node.getDataSourceFactory());
-        node.setDataSourceFactory(tstName);
-        assertEquals(tstName, node.getDataSourceFactory());
-    }
+	public void testRunIteratedSelect() throws Exception {
+		// fail("Not implemented.");
+	}
 }

@@ -97,7 +97,7 @@ public interface OperationObserver extends OperationHints {
 	 * results to be returned as a ResultIterator. OperationObserver 
 	 * is responsible for closing the ResultIterator.
 	 */
-    public void nextDataRows(ResultIterator it, Query q);
+    public void nextDataRows(Query q, ResultIterator it);
 	
 	
     /** Invoked when an exception occurs during query execution. */

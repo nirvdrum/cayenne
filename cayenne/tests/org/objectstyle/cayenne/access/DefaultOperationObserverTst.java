@@ -76,9 +76,9 @@ public class DefaultOperationObserverTst extends TestCase {
 	}
 
     public void testIteratedResult() throws Exception {
-    	assertTrue(!observer.useIteratedResult());
+    	assertTrue(!observer.iteratedResult());
     	
-    	observer.setUseIteratedResult(true);
-    	assertTrue(observer.useIteratedResult());
+    	observer.setIteratedResult(true);
+    	assertTrue(observer.iteratedResult());
     }
 }

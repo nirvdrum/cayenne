@@ -55,38 +55,71 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.sql.*;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.SelectQuery;
 
-public class DefaultResultIteratorTst extends TestCase {
-
-	private DefaultResultIterator it;
-	private Connection conn;
-	private PreparedStatement st;
+public class DefaultResultIteratorTst extends IteratorTestBase {
+	protected DefaultResultIterator it;
 
 	public DefaultResultIteratorTst(String name) {
 		super(name);
 	}
 
-	public void setUp() throws java.lang.Exception {
-		conn = null;
-		st = null;
-		it = null;
+	public void setUp() throws Exception {
+		super.setUp();
 
-		TestMain.getSharedDatabaseSetup().cleanTableData();
-		new DataContextTst("noop").populateTables();
+		it = null;
 	}
 
-	public void testCheckNextRow() throws java.lang.Exception {
+	protected void initIterator() throws Exception {
+		super.initStatement();
+		it =
+			new DefaultResultIterator(
+				st,
+				TestMain.getSharedNode().getAdapter(),
+				(SelectQueryAssembler) transl);
+	}
+
+	protected void cleanup() throws Exception {
+		if (it != null) {
+			it.close();
+			st = null;
+		}
+
+		super.cleanup();
+	}
+
+	public void testClose1() throws Exception {
 		try {
-			createIterator();
+			initIterator();
+			assertTrue(!conn.isClosed());
+
+			it.setClosingConnection(false);
+			it.close();
+
+			// caller must close the connection
+			assertTrue(!conn.isClosed());
+		} finally {
+			conn.close();
+		}
+	}
+
+	public void testClose2() throws Exception {
+		initIterator();
+		assertTrue(!conn.isClosed());
+
+		it.setClosingConnection(true);
+		it.close();
+
+		// iterator must close the connection
+		assertTrue(conn.isClosed());
+	}
+
+	public void testCheckNextRow() throws Exception {
+		try {
+			initIterator();
 
 			assertNotNull(it.dataRow);
 			it.checkNextRow();
@@ -99,7 +132,7 @@ public class DefaultResultIteratorTst extends TestCase {
 
 	public void testHasNextRow() throws java.lang.Exception {
 		try {
-			createIterator();
+			initIterator();
 			assertTrue(it.hasNextRow());
 		} finally {
 			cleanup();
@@ -108,7 +141,7 @@ public class DefaultResultIteratorTst extends TestCase {
 
 	public void testNextDataRow() throws java.lang.Exception {
 		try {
-			createIterator();
+			initIterator();
 
 			// must be as many rows as we have artists
 			// inserted in the database
@@ -125,9 +158,21 @@ public class DefaultResultIteratorTst extends TestCase {
 		}
 	}
 
+	public void testIsClosingConnection() throws java.lang.Exception {
+		try {
+			initIterator();
+			assertTrue(!it.isClosingConnection());
+			it.setClosingConnection(true);
+			assertTrue(it.isClosingConnection());
+		} finally {
+			it.setClosingConnection(false);
+			cleanup();
+		}
+	}
+
 	public void testReadDataRow() throws java.lang.Exception {
 		try {
-			createIterator();
+			initIterator();
 
 			// must be as many rows as we have artists
 			// inserted in the database
@@ -145,39 +190,5 @@ public class DefaultResultIteratorTst extends TestCase {
 		} finally {
 			cleanup();
 		}
-	}
-
-	protected void cleanup() throws Exception {
-		if (it != null) {
-			it.close();
-		}
-
-		if (st != null) {
-			st.close();
-		}
-
-		if (conn != null) {
-			conn.close();
-		}
-	}
-
-	protected void createIterator() throws Exception {
-		conn = TestMain.getSharedConnection();
-
-		DbAdapter adapter = TestMain.getSharedNode().getAdapter();
-		SelectQuery q = new SelectQuery("Artist");
-		q.addOrdering("artistName", true);
-
-		SelectQueryAssembler assembler =
-			(SelectQueryAssembler) adapter.getQueryTranslator(q);
-		assembler.setEngine(TestMain.getSharedNode());
-
-		assembler.setCon(conn);
-
-		st =
-			assembler.createStatement(
-				DefaultOperationObserver.DEFAULT_LOG_LEVEL);
-
-		it = new DefaultResultIterator(st, adapter, assembler);
 	}
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,29 +54,59 @@ package org.objectstyle.cayenne.access;
  *
  */
 
+package org.objectstyle.cayenne.access;
+
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataNodeExtrasTst extends TestCase {
 
-    public DataNodeExtrasTst(String name) {
-        super(name);
-    }
+	public DataNodeExtrasTst(String name) {
+		super(name);
+	}
 
-    public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
-        TestMain.getSharedDatabaseSetup().cleanTableData();
-        DataNode node = TestMain.getSharedDomain().getDataNodes()[0];
-        node.createPkSupportForMapEntities();
+	public void testName() throws Exception {
+		String tstName = "tst_name";
+		DataNode node = new DataNode();
+		assertNull(node.getName());
+		node.setName(tstName);
+		assertEquals(tstName, node.getName());
+	}
 
-        DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();
-        assertNotNull(
-            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
+	public void testDataSourceLocation() throws Exception {
+		String tstName = "tst_name";
+		DataNode node = new DataNode();
+		assertNull(node.getDataSourceLocation());
+		node.setDataSourceLocation(tstName);
+		assertEquals(tstName, node.getDataSourceLocation());
+	}
 
-        DbEntity exhibitEnt = node.lookupEntity("Exhibit").getDbEntity();
-        assertNotNull(
-            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
-    }
+	public void testDataSourceFactory() throws Exception {
+		String tstName = "tst_name";
+		DataNode node = new DataNode();
+		assertNull(node.getDataSourceFactory());
+		node.setDataSourceFactory(tstName);
+		assertEquals(tstName, node.getDataSourceFactory());
+	}
+
+	public void testCreatePkSupportForMapEntities()
+		throws java.lang.Exception {
+		TestMain.getSharedDatabaseSetup().cleanTableData();
+		DataNode node = TestMain.getSharedDomain().getDataNodes()[0];
+		node.createPkSupportForMapEntities();
+
+		DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();
+		assertNotNull(
+			node.getAdapter().getPkGenerator().generatePkForDbEntity(
+				node,
+				artistEnt));
+
+		DbEntity exhibitEnt = node.lookupEntity("Exhibit").getDbEntity();
+		assertNotNull(
+			node.getAdapter().getPkGenerator().generatePkForDbEntity(
+				node,
+				exhibitEnt));
+	}
 }
