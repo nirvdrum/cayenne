@@ -361,11 +361,6 @@ public final class QueryHelper {
 		protected String prependDbPath;
 
 		public ExpressionTranslator(ObjEntity e, String relPath) {
-			System.out.println(
-				"Expression translator for e "
-					+ e.getName()
-					+ " and path "
-					+ relPath);
 			this.ent = e;
 			this.relationshipPath = relPath;
 			this.relationshipDbPath = forwardDbPath(e, relPath);
@@ -544,6 +539,7 @@ public final class QueryHelper {
 			String path,
 			String toPrefix,
 			String fromPrefix) {
+			System.err.println("path :"+path+", toPrefix:"+toPrefix);
 			if (path.equals(toPrefix)) {
 				// 1. Path ends with prefetch entity - match PK
 				throw new CayenneRuntimeException(
