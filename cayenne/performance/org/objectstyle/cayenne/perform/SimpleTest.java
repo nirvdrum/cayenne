@@ -56,6 +56,7 @@ package org.objectstyle.cayenne.perform;
  */
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +69,8 @@ import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoaderImpl;
 import org.objectstyle.cayenne.query.SelectQuery;
@@ -81,11 +84,13 @@ public class SimpleTest implements TestConstants {
 
     protected DataDomain domain;
     protected final int objCount = 2000;
+    protected final int batchCount = objCount / 20;
     protected long insertCayenne;
     protected long insertCayenne1;
     protected long selectCayenne1;
     protected long selectCayenne2;
     protected long selectCayenne3;
+    protected long selectCayenne4;
     protected long insertJDBC;
     protected long selectJDBC;
 
@@ -123,7 +128,6 @@ public class SimpleTest implements TestConstants {
     private void testCayenneSmallInserts(DataContext ctxt) throws Exception {
         long t1 = System.currentTimeMillis();
 
-        final int batchCount = objCount / 20;
         for (int j = 0; j < batchCount; j++) {
             int startInd = j * 20;
             for (int i = 0; i < 20; i++) {
@@ -154,9 +158,27 @@ public class SimpleTest implements TestConstants {
         domain.performQuery(q, new SelectOperationObserver());
         long t5 = System.currentTimeMillis();
 
+        // fetch into the new context in small chunks 
+        ArrayList in = new ArrayList();
+        Expression listE = ExpressionFactory.unaryExp(Expression.LIST, in);
+        Expression e = ExpressionFactory.binaryPathExp(Expression.IN, "artistName", listE);
+        q.setQualifier(e);
+
+        for (int j = 0; j < batchCount; j++) {
+            int startInd = j * 20;
+            int endInd = startInd + 20;
+            in.clear();
+            for (int i = startInd; i < endInd; i++) {
+                in.add("name_" + i);
+            }
+            ctxt.performQuery(q);
+        }
+        long t6 = System.currentTimeMillis();
+
         selectCayenne1 = t3 - t2;
         selectCayenne2 = t4 - t3;
         selectCayenne3 = t5 - t4;
+        selectCayenne4 = t6 - t5;
     }
 
     public void testJDBC() throws Exception {
@@ -206,6 +228,11 @@ public class SimpleTest implements TestConstants {
         logObj.log(
             level,
             "Select via Cayenne (objects in cache): " + selectCayenne1 + " ms.");
+        logObj.log(
+            level,
+            "Select via Cayenne (objects in cache, small batches): "
+                + selectCayenne4
+                + " ms.");
         logObj.log(
             level,
             "Select via Cayenne (objects not in cache): " + selectCayenne2 + " ms.");
