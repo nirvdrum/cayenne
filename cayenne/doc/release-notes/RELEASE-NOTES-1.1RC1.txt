@@ -1,0 +1,18 @@
+Cayenne Release Notes 1.1 Release Candidate 1 (RC1)
+Date: 
+============================================
+
+For the latest information go to the project web site at 
+http://objectstyle.org/cayenne/
+
+To browse individual bug reports, see 
+http://objectstyle.org/jira/secure/BrowseProject.jspa?id=10000
+
+Changes, Features And Improvements:
+
+- cayenne-log.properties included in cayenne.jar has more sensible defaults - 
+  WARN for everything except for QueryLogger.
+
+
+Bugs Fixed:
+
