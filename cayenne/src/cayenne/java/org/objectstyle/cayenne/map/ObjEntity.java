@@ -127,7 +127,8 @@ public class ObjEntity extends Entity {
 
         encoder.print('\"');
 
-        if (getDbEntity() != null) {
+        // only encode DbEntity if there is no super entity
+        if (getSuperEntityName() == null && getDbEntity() != null) {
             encoder.print(" dbEntityName=\"");
             encoder.print(getDbEntity().getName());
             encoder.print('\"');
@@ -197,8 +198,8 @@ public class ObjEntity extends Entity {
      * 
      * @since 1.1
      */
-    public void setQualifier(Expression expression) {
-        qualifier = expression;
+    public void setQualifier(Expression qualifier) {
+        this.qualifier = qualifier;
     }
 
     /**
@@ -206,8 +207,8 @@ public class ObjEntity extends Entity {
      * 
      * @since 1.1
      */
-    public void setSuperEntityName(String string) {
-        superEntityName = string;
+    public void setSuperEntityName(String superEntityName) {
+        this.superEntityName = superEntityName;
     }
 
     /** 
@@ -235,9 +236,17 @@ public class ObjEntity extends Entity {
     /**
      * Sets a fully-qualified name of the super class of the DataObject class.
      * This value is used as a hint for class generation.
+     * 
+     * <p><i>An attempt to set superclass on an inherited entity would
+     * result in UnsupportedOperationException, since superclass is always
+     * a class of the parent in the inheritance hierarchy.</i></p>
      */
-    public void setSuperClassName(String parentClassName) {
-        this.superClassName = parentClassName;
+    public void setSuperClassName(String superClassName) {
+        if (superEntityName != null) {
+            throw new UnsupportedOperationException("Setting superclass is not allowed in inherited entities.");
+        }
+
+        this.superClassName = superClassName;
     }
 
     /**
@@ -255,11 +264,15 @@ public class ObjEntity extends Entity {
      * Returns a DbEntity associated with this ObjEntity. 
      */
     public DbEntity getDbEntity() {
-        return dbEntity;
+        return (superEntityName != null) ? getSuperEntity().getDbEntity() : dbEntity;
     }
 
     /** 
-     * Sets the DbEntity used by this ObjEntity. 
+     * Sets the DbEntity used by this ObjEntity.
+     * 
+     * <p><i>An attempt to set DbEntity on an inherited entity would
+     * result in UnsupportedOperationException, since DbEntity should be
+     * derived from the top of the inheritance hierarchy.</i></p>
      */
     public void setDbEntity(DbEntity dbEntity) {
         if (superEntityName != null) {
