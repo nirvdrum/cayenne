@@ -55,13 +55,12 @@ package org.objectstyle.cayenne.conn;
  *
  */
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
+import java.sql.Connection;
 
+import junit.framework.TestCase;
+
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 
 public class PoolManagerTst extends TestCase {
 
@@ -72,12 +71,11 @@ public class PoolManagerTst extends TestCase {
     public void testDataSourceUrl() throws java.lang.Exception {
         String driverName = org.objectstyle.TestMain.getFreshConnInfo().getJdbcDriver();
         String url = org.objectstyle.TestMain.getFreshConnInfo().getDataSourceUrl();
-        
+
         PoolManager pm = new PoolManager(driverName, url, 0, 3, "", "");
         assertEquals(url, pm.getDataSourceUrl());
         assertEquals(driverName, pm.getJdbcDriver());
     }
-
 
     public void testPassword() throws java.lang.Exception {
         PoolManager pm = new PoolManager(null, 0, 3, "", "b");
@@ -97,5 +95,43 @@ public class PoolManagerTst extends TestCase {
     public void testMaxConnections() throws java.lang.Exception {
         PoolManager pm = new PoolManager(null, 0, 3, "", "");
         assertEquals(3, pm.getMaxConnections());
+    }
+
+    public void testPooling() throws java.lang.Exception {
+        DataSourceInfo dsi = TestMain.getFreshConnInfo();
+        PoolManager pm =
+            new PoolManager(
+                dsi.getJdbcDriver(),
+                dsi.getDataSourceUrl(),
+                2,
+                4,
+                dsi.getUserName(),
+                dsi.getPassword());
+
+        try {
+            assertEquals(0, pm.getCurrentlyInUse());
+            assertEquals(2, pm.getCurrentlyUnused());
+
+            Connection c1 = pm.getConnection();
+            assertEquals(1, pm.getCurrentlyInUse());
+            assertEquals(1, pm.getCurrentlyUnused());
+            
+            Connection c2 = pm.getConnection();
+            assertEquals(2, pm.getCurrentlyInUse());
+            assertEquals(0, pm.getCurrentlyUnused());
+            
+            Connection c3 = pm.getConnection();
+            assertEquals(3, pm.getCurrentlyInUse());
+            assertEquals(0, pm.getCurrentlyUnused());
+            
+            c3.close();
+            assertEquals(2, pm.getCurrentlyInUse());
+            assertEquals(1, pm.getCurrentlyUnused());            
+        }
+        finally {
+            // get rid of local pool
+            pm.dispose();
+        }
+
     }
 }
