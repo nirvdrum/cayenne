@@ -203,15 +203,6 @@ public class ObjRelationshipPane
         processExistingSelection();
     }
 
-    private void stopEditing() {
-        // Stop whatever editing may be taking place
-        int col_index = table.getEditingColumn();
-        if (col_index >= 0) {
-            TableColumn col = table.getColumnModel().getColumn(col_index);
-            col.getCellEditor().stopCellEditing();
-        }
-    }
-
     private void resolveRelationship() {
         int row = table.getSelectedRow();
         if (-1 == row)

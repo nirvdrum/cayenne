@@ -76,7 +76,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -89,7 +88,6 @@ import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTextField;
 import org.objectstyle.cayenne.modeler.util.EntityWrapper;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
-import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
@@ -101,8 +99,6 @@ import org.objectstyle.cayenne.util.Util;
 public class ObjEntityPane
     extends JPanel
     implements ActionListener, ObjEntityDisplayListener, ExistingSelectionProcessor, ItemListener {
-
-    private static Logger logObj = Logger.getLogger(ObjEntityPane.class);
 
     protected EventController mediator;
     protected JTextField name;
@@ -197,26 +193,6 @@ public class ObjEntityPane
                     new EntityDisplayEvent(this, entity, map, dom));
             }
         }
-    }
-
-    private void createDbEntity() {
-        // Create DbEntity and add it to DataMap
-        DbEntity entity =
-            (DbEntity) NamedObjectFactory.createObject(
-                DbEntity.class,
-                mediator.getCurrentDataMap());
-        mediator.getCurrentObjEntity().setDbEntity(entity);
-        mediator.getCurrentDataMap().addDbEntity(entity);
-        EntityEvent event = new EntityEvent(this, mediator.getCurrentObjEntity());
-        mediator.fireObjEntityEvent(event);
-
-        // Add DbEntity to dropdown in alphabetical order
-        DefaultComboBoxModel model = (DefaultComboBoxModel) dbName.getModel();
-        EntityWrapper wrap = new EntityWrapper(entity);
-        model.insertElementAt(wrap, model.getSize());
-        model.setSelectedItem(wrap);
-        mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
-
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {

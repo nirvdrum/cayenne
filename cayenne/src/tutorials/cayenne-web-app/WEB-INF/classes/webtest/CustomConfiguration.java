@@ -1,7 +1,6 @@
 package webtest;
 
 import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.ServletConfiguration;
 
 /** 
@@ -10,13 +9,11 @@ import org.objectstyle.cayenne.conf.ServletConfiguration;
  * custom tasks on servlet container startup.
  */
 public class CustomConfiguration extends ServletConfiguration {
-    private static Logger logObj = Logger.getLogger(CustomConfiguration.class);
 
     public CustomConfiguration() {
         super();
-        configureLogging();
+        this.configureLogging();
     }
-
 
     private void configureLogging() {
         // debug configuration

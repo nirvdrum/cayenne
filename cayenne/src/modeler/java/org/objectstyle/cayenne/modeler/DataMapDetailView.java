@@ -73,7 +73,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -91,8 +90,6 @@ import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 public class DataMapDetailView
     extends JPanel
     implements DocumentListener, DataMapDisplayListener, ItemListener {
-
-    private static Logger logObj = Logger.getLogger(DataMapDetailView.class);
 
     protected EventController mediator;
 

@@ -59,7 +59,6 @@ import java.awt.Window;
 
 import javax.swing.JRootPane;
 
-import org.apache.log4j.Logger;
 import org.scopemvc.controller.basic.ViewContext;
 import org.scopemvc.controller.swing.SwingContext;
 import org.scopemvc.core.View;
@@ -69,7 +68,6 @@ import org.scopemvc.view.swing.SwingView;
  * @author Andrei Adamchik
  */
 public class ModelerContext extends SwingContext {
-    private static Logger logObj = Logger.getLogger(ModelerContext.class);
 
     public static void setupContext() {
         ViewContext.clearThreadContext();

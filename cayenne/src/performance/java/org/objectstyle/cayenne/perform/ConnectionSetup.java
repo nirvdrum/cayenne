@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.perform;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,12 +53,12 @@ package org.objectstyle.cayenne.perform;
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.perform;
 
 import java.io.InputStream;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -79,8 +78,6 @@ import org.objectstyle.cayenne.util.ResourceLocator;
   * @author Andrei Adamchik
   */
 public class ConnectionSetup  {
-    private static Logger logObj = Logger.getLogger(ConnectionSetup.class);
-
     private boolean interactive;
  
     public ConnectionSetup(boolean interactive) {

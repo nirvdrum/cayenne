@@ -70,13 +70,10 @@ import javax.swing.JList;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.util.Util;
 
 public class PreferenceField extends JComboBox {
-    private static Logger logObj = Logger.getLogger(PreferenceField.class);
-
     private String key;
 
     /** 

@@ -68,7 +68,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -97,8 +96,6 @@ public class DbAttributePane
         DbAttributeListener,
         ExistingSelectionProcessor,
         ActionListener {
-
-    private static Logger logObj = Logger.getLogger(DbAttributePane.class);
 
     protected EventController mediator;
     protected CayenneTable table;

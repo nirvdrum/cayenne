@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -64,7 +63,6 @@ import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -248,16 +246,6 @@ public class DataNodeDetailView
         constraints.gridwidth = GridBagConstraints.REMAINDER;
         constraints.gridheight = GridBagConstraints.REMAINDER;
         add(driverPanel, constraints);
-    }
-
-    private JPanel formatFileChooser(JTextField fld, JButton btn) {
-        JPanel panel = new JPanel();
-
-        panel.setLayout(new BorderLayout());
-        panel.add(fld, BorderLayout.CENTER);
-        panel.add(btn, BorderLayout.EAST);
-
-        return panel;
     }
 
     public void insertUpdate(DocumentEvent e) {

@@ -59,7 +59,6 @@ import java.util.Iterator;
 
 import javax.sql.DataSource;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DataSourceInfo;
@@ -77,8 +76,6 @@ import org.objectstyle.perform.ResultRenderer;
 
 /** Runs performance tests. */
 public class PerformMain {
-    private static Logger logObj = Logger.getLogger(PerformMain.class);
-
     public static DataDomain sharedDomain;
 
     public static void main(String[] args) {

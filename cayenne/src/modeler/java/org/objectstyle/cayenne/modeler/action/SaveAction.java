@@ -62,7 +62,6 @@ import java.io.File;
 
 import javax.swing.KeyStroke;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -79,8 +78,6 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Misha Shengaout
  */
 public class SaveAction extends CayenneAction {
-    private static Logger logObj = Logger.getLogger(SaveAction.class);
-
     public static final String ACTION_NAME = "Save";
 
     protected ProjectOpener fileChooser = new ProjectOpener();

@@ -74,7 +74,6 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
@@ -124,8 +123,6 @@ public class BrowseView
         ObjEntityDisplayListener,
         DbEntityListener,
         DbEntityDisplayListener {
-    private static Logger logObj = Logger.getLogger(BrowseView.class);
-
     protected EventController mediator;
     protected ProjectTree browseTree;
     protected DefaultMutableTreeNode rootNode;

@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -71,8 +70,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
  * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
-    private static Logger logObj = Logger.getLogger(CreateDataMapAction.class);
-
     public static final String ACTION_NAME = "Create DataMap";
 
     public CreateDataMapAction() {

@@ -64,7 +64,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
@@ -93,8 +92,6 @@ public class ObjAttributePane
         ObjAttributeListener,
         ExistingSelectionProcessor,
         ListSelectionListener {
-    private static Logger logObj = Logger.getLogger(ObjAttributePane.class);
-
     EventController mediator;
     CayenneTable table;
 
@@ -173,15 +170,6 @@ public class ObjAttributePane
         int ind = model.getObjectList().indexOf(e.getAttribute());
         model.removeRow(e.getAttribute());
         table.select(ind);
-    }
-
-    private void stopEditing() {
-        // Stop whatever editing may be taking place
-        int col_index = table.getEditingColumn();
-        if (col_index >= 0) {
-            TableColumn col = table.getColumnModel().getColumn(col_index);
-            col.getCellEditor().stopCellEditing();
-        }
     }
 
     public void currentObjEntityChanged(EntityDisplayEvent e) {

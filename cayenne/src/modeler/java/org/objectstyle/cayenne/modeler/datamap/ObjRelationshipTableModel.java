@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.modeler.datamap;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -73,8 +72,6 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class ObjRelationshipTableModel extends CayenneTableModel {
-	private static Logger logObj = Logger.getLogger(ObjRelationshipTableModel.class);
-
 	// Columns
 	static final int REL_NAME = 0;
 	static final int REL_TARGET = 1;

@@ -67,8 +67,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
 import javax.swing.text.JTextComponent;
 
-import org.apache.log4j.Logger;
-
 /**  
  * Common superclass of tables used in Cayenne. Contains some common configuration
  * settings and utility methods.
@@ -77,8 +75,6 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class CayenneTable extends JTable {
-    private static Logger logObj = Logger.getLogger(CayenneTable.class);
-
     protected void createDefaultEditors() {
         super.createDefaultEditors();
         DefaultCellEditor temp = new DefaultCellEditor(new JTextField());

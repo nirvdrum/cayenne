@@ -55,13 +55,10 @@
  */
 package org.objectstyle.cayenne.modeler;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 
 /** Class that can collect login information via GUI or command line interface.  */
 public class InteractiveLogin {
-    private static Logger logObj = Logger.getLogger(InteractiveLogin.class);
-
     protected DataSourceInfo dataSrcInfo;
 
     /** Creates login handler object for GUI login */

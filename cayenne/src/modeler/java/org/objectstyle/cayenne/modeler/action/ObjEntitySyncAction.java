@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.EntityEvent;
@@ -69,8 +68,6 @@ import org.objectstyle.cayenne.util.EntityMergeSupport;
  * @author Andrei Adamchik
  */
 public class ObjEntitySyncAction extends CayenneAction {
-	private static Logger logObj = Logger.getLogger(ObjEntitySyncAction.class);
-	
 	public static final String ACTION_NAME = "Sync ObjEntity with DbEntity";
 
 	public ObjEntitySyncAction() {

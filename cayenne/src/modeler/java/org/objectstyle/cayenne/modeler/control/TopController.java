@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.control;
 
 import java.awt.BorderLayout;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.EditorView;
 import org.objectstyle.cayenne.modeler.model.TopModel;
@@ -74,8 +73,6 @@ import org.scopemvc.core.ControlException;
  * @author Andrei Adamchik
  */
 public class TopController extends ModelerController {
-    private static Logger logObj = Logger.getLogger(TopController.class);
-
     protected StatusBarController statusController;
     protected EventController eventController;
     protected ActionController actionController;

@@ -58,7 +58,6 @@
 
 import java.awt.event.ActionEvent;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
@@ -67,10 +66,10 @@ import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.validator.Validator;
 
-/***/
+/**
+ * @author Craig Miskell
+ */
 public class ValidateAction extends CayenneAction {
-	private static Logger logObj = Logger.getLogger(SaveAction.class);
-
 	public static final String ACTION_NAME = "Validate";
 
 	public ValidateAction() {
