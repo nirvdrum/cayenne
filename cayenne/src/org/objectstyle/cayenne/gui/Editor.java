@@ -209,8 +209,11 @@ public class Editor
 		CayenneAction addMapToNodeAction = new AddDataMapAction();
 		actionMap.put(addMapToNodeAction.getKey(), addMapToNodeAction);
 
-		CayenneAction entSynchAction = new EntitySynchAction();
-		actionMap.put(entSynchAction.getKey(), entSynchAction);
+		CayenneAction entSyncAction = new ObjEntitySyncAction();
+		actionMap.put(entSyncAction.getKey(), entSyncAction);
+		
+		CayenneAction derivedResetAction = new DerivedEntitySyncAction();
+		actionMap.put(derivedResetAction.getKey(), derivedResetAction);
 
 		CayenneAction importDbAction = new ImportDbAction();
 		actionMap.put(importDbAction.getKey(), importDbAction);
@@ -264,7 +267,8 @@ public class Editor
 			getAction(CreateDerivedDbEntityAction.ACTION_NAME).buildMenu());
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(AddDataMapAction.ACTION_NAME).buildMenu());
-		projectMenu.add(getAction(EntitySynchAction.ACTION_NAME).buildMenu());
+		projectMenu.add(getAction(ObjEntitySyncAction.ACTION_NAME).buildMenu());
+		projectMenu.add(getAction(DerivedEntitySyncAction.ACTION_NAME).buildMenu());
 		projectMenu.addSeparator();
 		projectMenu.add(getAction(RemoveAction.ACTION_NAME).buildMenu());
 
@@ -640,7 +644,7 @@ public class Editor
 
 	private void enableObjEntityMenu() {
 		enableDataMapMenu();
-		getAction(EntitySynchAction.ACTION_NAME).setEnabled(true);
+		getAction(ObjEntitySyncAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
 	}
@@ -649,6 +653,11 @@ public class Editor
 		enableDataMapMenu();
 		getAction(CreateAttributeAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateRelationshipAction.ACTION_NAME).setEnabled(true);
+	}
+	
+	private void enableDerivedDbEntityMenu() {
+		enableDbEntityMenu();
+		getAction(DerivedEntitySyncAction.ACTION_NAME).setEnabled(true);
 	}
 
 	private void enableDataNodeMenu() {
