@@ -55,8 +55,12 @@
  */
 package org.objectstyle.cayenne.access.trans;
 
+import java.io.File;
 import java.sql.ResultSet;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -367,6 +371,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 
 		if (aliasIndex < 0) {
 			// print some valuable diagnostics in case of translation errors
+
 			String name = (ent != null) ? ent.getName() : "<null entity>";
 			String attrName = attr.getName();
 			StringBuffer msg = new StringBuffer();
@@ -375,13 +380,15 @@ public class SelectTranslator extends SelectQueryAssembler {
 				.append(name)
 				.append('.')
 				.append(attrName)
-				.append("\nExisting aliased entities:");
-		    
-		    Iterator it = tableList.iterator();
-		    while(it.hasNext()) {
-		    	DbEntity en = (DbEntity)it.next();
-		    	msg.append(' ').append(en != null ? en.getName() : "<null entity>");
-		    }
+				.append(File.separator)
+				.append("Existing aliased entities:");
+
+			Iterator it = tableList.iterator();
+			while (it.hasNext()) {
+				DbEntity en = (DbEntity) it.next();
+				msg.append(' ').append(
+					en != null ? en.getName() : "<null entity>");
+			}
 
 			throw new CayenneRuntimeException(msg.toString());
 		}
