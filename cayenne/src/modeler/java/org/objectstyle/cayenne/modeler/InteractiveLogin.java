@@ -88,7 +88,6 @@ public class InteractiveLogin {
         Editor frame = getFrame();
         DbLoginPanel loginPanel = new DbLoginPanel(frame);
         loginPanel.setDataSrcInfo(dataSrcInfo);
-        frame.pack();
 
         // call to show will block until user closes the dialog
         loginPanel.show();
