@@ -55,6 +55,7 @@ package org.objectstyle.cayenne.map;
  *
  */
 
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Logger;
@@ -132,13 +133,35 @@ public class DbLoaderTst extends TestCase {
 
         // now when the map is loaded, test 
         // various things
-        
+
         /* This test fails on almost any database, used primarily for debugging. */
         // checkDBEntities(map);
+
+        // selectively check how different types were processed
+        checkTypes(map);
     }
 
     private DataMap originalMap() {
         return TestMain.getSharedNode().getDataMaps()[0];
+    }
+
+    /** Selectively check how different types were processed. */
+    public void checkTypes(DataMap map) {
+        DbEntity dbe = map.getDbEntity("PAINTING");
+		DbAttribute decimalAttr = (DbAttribute)dbe.getAttribute("ESTIMATED_PRICE");
+		DbAttribute varcharAttr = (DbAttribute)dbe.getAttribute("PAINTING_TITLE");	
+			
+        // check decimal
+        assertEquals(
+            msgForTypeMismatch(Types.DECIMAL, decimalAttr),
+            Types.DECIMAL,
+            decimalAttr.getType());
+        
+        // check varchar
+        assertEquals(
+            msgForTypeMismatch(Types.VARCHAR, varcharAttr),
+            Types.VARCHAR,
+            varcharAttr.getType());
     }
 
     public void checkDBEntities(DataMap map) {
@@ -152,24 +175,27 @@ public class DbLoaderTst extends TestCase {
                 DbAttribute origAttr = (DbAttribute) it.next();
                 DbAttribute newAttr = (DbAttribute) newEnt.getAttribute(origAttr.getName());
                 assertNotNull("No matching DbAttribute for '" + origAttr.getName(), newAttr);
-                  assertEquals(
-                      msgForTypeMismatch(origAttr, newAttr),
-                      origAttr.getType(),
-                      newAttr.getType());
+                assertEquals(
+                    msgForTypeMismatch(origAttr, newAttr),
+                    origAttr.getType(),
+                    newAttr.getType());
                 // length and precision doesn't have to be the same
                 // it must be greater or equal
                 assertTrue(origAttr.getMaxLength() <= newAttr.getMaxLength());
-                assertTrue(origAttr.getPrecision() <=  newAttr.getPrecision());
+                assertTrue(origAttr.getPrecision() <= newAttr.getPrecision());
             }
         }
     }
 
     private String msgForTypeMismatch(DbAttribute origAttr, DbAttribute newAttr) {
-        String ot = TypesMapping.getSqlNameByType(origAttr.getType());
+        return msgForTypeMismatch(origAttr.getType(), newAttr);
+    }
+    
+    private String msgForTypeMismatch(int origType, DbAttribute newAttr) {
         String nt = TypesMapping.getSqlNameByType(newAttr.getType());
         return attrMismatch(
-            origAttr.getName(),
-            "expected type: <" + ot + ">, but was <" + nt + ">");
+            newAttr.getName(),
+            "expected type: <" + origType + ">, but was <" + nt + ">");
     }
 
     private String attrMismatch(String attrName, String msg) {
