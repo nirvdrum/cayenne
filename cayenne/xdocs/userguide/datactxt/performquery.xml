@@ -13,6 +13,35 @@
     <section name="6. Using DataContext">
 	<subsection name="6.2 Running Queries">
 	
+	<p>Being an instance of <a href=
+	"../../api/cayenne/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine</a>
+	DataContext can be used to run any types of queries from <code>org.objectstyle.cayenne.query</code>
+	package. In addition to generic QueryEngine methods, it provides more powerful and user-friendly API.
+	Specific query types are discussed in the following chapters. This chapter explains 
+	the basic DataContext query-related API.	
+	</p>	
+	
+	<ul>
+	<li><code>public java.util.List <b>performQuery</b>(GenericSelectQuery query)</code><br/>
+	The most commonly used query method. It is intended to run SelectQuery or SqlSelectQuery queries.
+	<p></p>
+	</li>
+	
+	<li><code>public ResultIterator <b>performIteratedQuery</b>(GenericSelectQuery query) throws CayenneException</code><br/>
+	Unlike other query methods this one performs selects returning an iterator backed by the open ResultSet.
+	Potential benefits and shortcomings of running queries this way are discussed in "Performance Tuning" chapter.
+	This is the only query method that throws chekced exceptions. Also it is important to remember that returned ResultIterator
+	requires explicit cleanup via calling <code>close()</code>.
+	<p></p>
+	</li>
+	
+	<li><code>public void <b>performQueries</b>(java.util.List queries, OperationObserver resultConsumer)</code> and 
+	<br/><code>public void <b>performQuery</b>(Query query, OperationObserver resultConsumer)</code><br/>
+        These two methods are the implementation of QueryEngine interface and are used by the framework 
+	internally. They are rearely used directly in the application code.
+	<p></p>
+	</li>
+	</ul>
 	</subsection>
     </section>
 </body>
