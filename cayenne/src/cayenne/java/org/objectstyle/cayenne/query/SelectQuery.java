@@ -56,13 +56,16 @@
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Collection;
 
 import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
@@ -242,7 +245,21 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * in the results of this query.
      */
     public List getCustomDbAttributes() {
-        return customDbAttributes;
+    	// if query root is DbEntity, and no custom attributes
+    	// are defined, return DbEntity attributes.
+    	if(customDbAttributes.size() == 0 && (getRoot() instanceof DbEntity)) {
+    		Collection attributes = ((DbEntity)getRoot()).getAttributes();
+    		List attributeNames = new ArrayList(attributes.size());
+    		Iterator it = attributes.iterator();
+    		while(it.hasNext()) {
+    			DbAttribute attribute = (DbAttribute)it.next();
+			    attributeNames.add(attribute.getName());
+    		}
+    		return attributeNames;
+    	}
+    	else {
+		  return customDbAttributes;
+    	}
     }
 
     /**
@@ -270,7 +287,7 @@ public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
      * </p>
      */
     public boolean isFetchingCustomAttributes() {
-        return customDbAttributes.size() > 0;
+        return (getRoot() instanceof DbEntity) || customDbAttributes.size() > 0;
     }
 
     /**

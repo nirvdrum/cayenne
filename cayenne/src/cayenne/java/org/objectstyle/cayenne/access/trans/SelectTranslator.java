@@ -241,7 +241,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
      * Creates a list of columns used in the query.
      */
     private void buildColumnList() {
-        newAliasForTable(getRootEntity().getDbEntity());
+        newAliasForTable(getRootDbEntity());
         appendAttributes();
     }
 
@@ -249,7 +249,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
      * Creates a list of columns used in the query's GROUP BY clause.
      */
     private void buildGroupByList() {
-        DbEntity dbEntity = getRootEntity().getDbEntity();
+        DbEntity dbEntity = getRootDbEntity();
         if (dbEntity instanceof DerivedDbEntity) {
             groupByList = ((DerivedDbEntity) dbEntity).getGroupByAttributes();
         }
@@ -259,8 +259,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
      * Returns a list of DbAttributes used in query.
      */
     private void appendAttributes() {
-        ObjEntity oe = getRootEntity();
-        DbEntity dbe = oe.getDbEntity();
+        DbEntity dbe = getRootDbEntity();
         SelectQuery q = getSelectQuery();
 
         // extract custom attributes from the query
@@ -278,7 +277,8 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
         } else {
             // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
-
+			ObjEntity oe = getRootEntity();
+			
             // ObjEntity attrs
             Iterator attrs = oe.getAttributes().iterator();
             while (attrs.hasNext()) {
@@ -488,11 +488,18 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         if (columnList.size() == 0) {
             throw new CayenneRuntimeException("Call 'createStatement' first");
         }
-
-        ResultDescriptor descriptor =
-            new ResultDescriptor(
+        
+		ResultDescriptor descriptor;
+			
+        if(getSelectQuery().isFetchingCustomAttributes()) {
+			descriptor = new ResultDescriptor(getAdapter().getExtendedTypes());
+        }
+        else {
+		    descriptor = new ResultDescriptor(
                 getAdapter().getExtendedTypes(),
                 getRootEntity());
+        }
+        
         descriptor.addColumns(columnList);
         descriptor.index();
         return descriptor;

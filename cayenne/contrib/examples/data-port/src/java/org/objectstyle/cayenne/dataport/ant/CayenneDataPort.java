@@ -64,9 +64,10 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.FileConfiguration;
 import org.objectstyle.cayenne.dataport.DataPort;
 import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.project.ApplicationProject;
 
 /**
  * Ant frontend to DataPort class.
@@ -85,16 +86,18 @@ public class CayenneDataPort extends Task
   {
     validateParameters();
 
-    ApplicationProject project = new ApplicationProject(projectFile);
+    FileConfiguration configuration = new FileConfiguration();
+    configuration.addFilesystemPath(projectFile.getParentFile());
+    Configuration.initializeSharedConfiguration(configuration);
 
     // perform project validation
-    DataNode source = findNode(project, srcNode);
+    DataNode source = findNode(configuration, srcNode);
     if (source == null)
     {
       throw new BuildException("srcNode not found in the project: " + srcNode);
     }
 
-    DataNode destination = findNode(project, destNode);
+    DataNode destination = findNode(configuration, destNode);
     if (destination == null)
     {
       throw new BuildException(
@@ -119,9 +122,9 @@ public class CayenneDataPort extends Task
     }
   }
 
-  protected DataNode findNode(ApplicationProject project, String name)
+  protected DataNode findNode(Configuration configuration, String name)
   {
-    Iterator domains = project.getConfiguration().getDomains().iterator();
+    Iterator domains = configuration.getDomains().iterator();
     while (domains.hasNext())
     {
       DataDomain domain = (DataDomain) domains.next();
