@@ -107,10 +107,10 @@ public class PoolDataSource implements ConnectionPoolDataSource {
 	}
 
 	public PooledConnection getPooledConnection() throws SQLException {
-		return new PooledConnectionImpl(nonPooledDatasource.getConnection());
+		return new PooledConnectionImpl(nonPooledDatasource, null, null);
 	}
 
 	public PooledConnection getPooledConnection(String user, String password) throws SQLException {
-		return new PooledConnectionImpl(nonPooledDatasource.getConnection(user, password));
+		return new PooledConnectionImpl(nonPooledDatasource, user, password);
 	}
 }

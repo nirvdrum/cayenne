@@ -55,26 +55,26 @@
  */ 
 package org.objectstyle.cayenne.conn;
 
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import junit.framework.TestCase;
 
-public class PooledConnectionImplTst extends CayenneTestCase {
+public class PooledConnectionImplTst extends TestCase {
     
-    public void testConnectionErrorNotificationConcurrency() throws java.lang.Exception {
+    public void testConnectionErrorNotificationConcurrency() throws Exception {
         // test a case when error notification is sent to connection
         // that has been removed from the pool, but when pool is still a 
         // listener for its events.
         PoolManager pm = new PoolManager(null, 0, 3, "", "");
-        PooledConnectionImpl con = new PooledConnectionImpl(new TstConnection());
+        PooledConnectionImpl con = new PooledConnectionImpl();
         con.addConnectionEventListener(pm);
         con.connectionErrorNotification(new java.sql.SQLException("Bad SQL Exception.."));
     }
     
-    public void testConnectionClosedNotificationConcurrency() throws java.lang.Exception {
+    public void testConnectionClosedNotificationConcurrency() throws Exception {
         // test a case when closed notification is sent to connection
         // that has been removed from the pool, but when pool is still a 
         // listener for its events.
         PoolManager pm = new PoolManager(null, 0, 3, "", "");
-        PooledConnectionImpl con = new PooledConnectionImpl(new TstConnection());
+        PooledConnectionImpl con = new PooledConnectionImpl();
         con.addConnectionEventListener(pm);
         con.connectionClosedNotification();
     }

@@ -65,6 +65,7 @@ import java.util.List;
 
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
+import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 
 import org.apache.log4j.Logger;
@@ -83,12 +84,51 @@ public class PooledConnectionImpl implements PooledConnection {
     private Connection connectionObj;
     private List connectionEventListeners;
     private boolean hadErrors;
+    private long lastReconnected;
+    private DataSource connectionSource;
+    private String userName;
+    private String password;
+    private int reconnectCount;
 
-    /** Creates new PooledConnection */
-    public PooledConnectionImpl(Connection connectionObj) {
-        this.connectionObj = connectionObj;
+    protected PooledConnectionImpl() {
         this.connectionEventListeners =
             Collections.synchronizedList(new ArrayList(10));
+    }
+
+    /** Creates new PooledConnection */
+    public PooledConnectionImpl(
+        DataSource connectionSource,
+        String userName,
+        String password)
+        throws SQLException {
+
+        this();
+
+        this.connectionSource = connectionSource;
+        this.userName = userName;
+        this.password = password;
+
+    }
+
+    protected void reconnect() throws SQLException {
+        if (connectionObj != null) {
+            try {
+                connectionObj.close();
+            } catch (SQLException ex) {
+                // ignore exception, since connection is expected
+                // to be in a bad state
+            } finally {
+                connectionObj = null;
+            }
+        }
+
+        connectionObj =
+            (userName != null)
+                ? connectionSource.getConnection(userName, password)
+                : connectionSource.getConnection();
+
+        lastReconnected = System.currentTimeMillis();
+        reconnectCount++;
     }
 
     public void addConnectionEventListener(ConnectionEventListener listener) {
@@ -119,6 +159,10 @@ public class PooledConnectionImpl implements PooledConnection {
     }
 
     public Connection getConnection() throws SQLException {
+        if (connectionObj == null) {
+            reconnect();
+        }
+
         // set autocommit to false to return connection
         // always in consistent state
         if (!connectionObj.getAutoCommit()) {
@@ -135,7 +179,6 @@ public class PooledConnectionImpl implements PooledConnection {
         }
 
         connectionObj.clearWarnings();
-
         return new ConnectionWrapper(connectionObj, this);
     }
 
@@ -146,6 +189,35 @@ public class PooledConnectionImpl implements PooledConnection {
         else
             // notify the listeners that connection is no longer used by application...
             this.connectionClosedNotification();
+    }
+
+    /**
+     * Returns time in miliseconds since the original creation or last reconnection
+     * attempt.
+     */
+    public long timeSinceReconnect() {
+        return System.currentTimeMillis() - lastReconnected;
+    }
+
+    /**
+     * Tries to reconnect on connection error. Rethrows the original exception if 
+     * this is not possible.
+     */
+    public Connection reconnectOnError(SQLException exception)
+        throws SQLException {
+
+        // if there was a relatively recent reconnect, just rethrow an error
+        // and retire itself
+        if (reconnectCount > 1
+            && System.currentTimeMillis() - lastReconnected < 90000) {
+            connectionErrorNotification(exception);
+            throw exception;
+        }
+
+        // force reconnect
+        reconnect();
+
+        return getConnection();
     }
 
     /** This method creates and sents an event to listeners when an error occurs in the
