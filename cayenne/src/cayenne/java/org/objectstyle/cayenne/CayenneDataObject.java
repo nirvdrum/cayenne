@@ -79,6 +79,9 @@ import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.validation.BeanValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationFailure;
 import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.xml.XMLEncoder;
+import org.objectstyle.cayenne.xml.XMLSerializable;
+
 
 /**
  * A default implementation of DataObject interface. It is normally used as a superclass
@@ -86,7 +89,7 @@ import org.objectstyle.cayenne.validation.ValidationResult;
  * 
  * @author Andrei Adamchik
  */
-public class CayenneDataObject implements DataObject {
+public class CayenneDataObject implements DataObject, XMLSerializable {
 
     protected long snapshotVersion = DEFAULT_VERSION;
 
@@ -734,5 +737,26 @@ public class CayenneDataObject implements DataObject {
      */
     public void validateForDelete(ValidationResult validationResult) {
         // does nothing
+    }
+    
+
+
+    /**
+     * Encodes object to XML using provided encoder.
+     * 
+     * @since 1.2
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        EntityResolver er = getDataContext().getEntityResolver();
+        ObjEntity object = er.lookupObjEntity(getClass());
+
+        String[] fields = this.getClass().getName().split("\\.");
+        encoder.setRoot(fields[fields.length - 1], this.getClass().getName());
+
+        for (Iterator it = object.getDeclaredAttributes().iterator(); it.hasNext();) {
+            ObjAttribute att = (ObjAttribute) it.next();
+            String name = att.getName();
+            encoder.encodeProperty(name, readNestedProperty(name));
+        }
     }
 }
