@@ -248,14 +248,9 @@ public class QueryUtils {
 	 * fetch an object given an ObjectId.
 	 */
 	public static SelectQuery selectObjectForId(ObjectId oid) {
-		SelectQuery sel = new SelectQuery();
-		sel.setRoot(oid.getObjClass());
-
-		sel.setQualifier(
-			ExpressionFactory.matchAllDbExp(
-				oid.getIdSnapshot(),
-				Expression.EQUAL_TO));
-		return sel;
+		return new SelectQuery(oid.getObjClass(), ExpressionFactory.matchAllDbExp(
+		oid.getIdSnapshot(),
+		Expression.EQUAL_TO));
 	}
 
 	/** 

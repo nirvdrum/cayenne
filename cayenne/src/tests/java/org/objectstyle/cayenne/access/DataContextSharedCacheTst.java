@@ -55,6 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Date;
+import java.util.Map;
+
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 import org.objectstyle.cayenne.util.Util;
@@ -62,18 +65,23 @@ import org.objectstyle.cayenne.util.Util;
 /**
  * @author Andrei Adamchik
  */
-public class DataContextSnapshotEventsTst extends MultiContextTestCase {
+public class DataContextSharedCacheTst extends MultiContextTestCase {
+    protected Artist artist;
+
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        // prepare a single artist record
+        artist = (Artist) context.createAndRegisterNewObject("Artist");
+        artist.setArtistName("version1");
+        context.commitChanges();
+    }
 
     public void testUpdatePropagationViaEvents() throws Exception {
         // turn on the events
         getDomain().getSnapshotCache().setNotifyingObjectStores(true);
 
         try {
-            // prepare data
-            Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
-            artist.setArtistName("version1");
-            context.commitChanges();
-
             // prepare a second context
             DataContext altContext = mirrorDataContext(context);
             Artist altArtist =
@@ -96,11 +104,6 @@ public class DataContextSnapshotEventsTst extends MultiContextTestCase {
 
     public void testUpdatePropagationViaExplicitSync() throws Exception {
 
-        // prepare data
-        Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
-        artist.setArtistName("version1");
-        context.commitChanges();
-
         // prepare a second context
         DataContext altContext = mirrorDataContext(context);
         Artist altArtist =
@@ -118,9 +121,59 @@ public class DataContextSnapshotEventsTst extends MultiContextTestCase {
             Util.nullSafeEquals(artist.getArtistName(), altArtist.getArtistName()));
 
         altContext.getObjectStore().synchronizeWithCache();
-        
+
         // after sync
         // TODO: uncomment this test when the feature is implemented
         // assertEquals(artist.getArtistName(), altArtist.getArtistName());
+    }
+
+    public void testCommitUpdateWithExternallyUpdatedSnapshot1() throws Exception {
+        // prepare a second context
+        DataContext altContext = mirrorDataContext(context);
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
+
+        // update
+        artist.setArtistName("version2");
+        context.commitChanges();
+
+        // test behavior on commit when snapshot has changed underneath
+        // (case when the same property has changed twice);
+        altArtist.setArtistName("version3");
+        altContext.commitChanges();
+        Map snapshot =
+            altContext.getObjectStore().getSnapshotCache().getSnapshot(
+                altArtist.getObjectId());
+        assertEquals("version3", snapshot.get("ARTIST_NAME"));
+    }
+
+    public void testCommitUpdateWithExternallyUpdatedSnapshot2() throws Exception {
+        // prepare a second context
+        DataContext altContext = mirrorDataContext(context);
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
+
+        // update
+        Date dob = new Date();
+        artist.setDateOfBirth(dob);
+        context.commitChanges();
+
+        // test behavior on commit when snapshot has changed underneath
+        // (case when a different property has changed);
+        altArtist.setArtistName("version3");
+        altContext.commitChanges();
+        Map snapshot =
+            altContext.getObjectStore().getSnapshotCache().getSnapshot(
+                altArtist.getObjectId());
+        assertEquals("version3", snapshot.get("ARTIST_NAME"));
+
+        // TODO: uncomment this once snapshot timestamping is implemented
+        // assertEquals(dob, snapshot.get("DATE_OF_BIRTH"));
     }
 }
