@@ -12,10 +12,16 @@
 <body>
  	<section name="3. CayenneModeler Concepts: What the Buttons Mean"> 
  		<subsection name="3.1 Project">
+ 		
+ 		<p></p>
 		<img src="/images/modeler/icon-new.gif" width="16" height="16"/>
 		<img src="/images/modeler/icon-open.gif" width="16" height="16"/>
 		<img src="/images/modeler/icon-save.gif" width="16" height="16"/>
 		
+		<p>Cayenne <strong>Project</strong> is a logical deployment unit, that consists of a main project
+		file (called <code>cayenne.xml</code>) and zero or more DataNode (*.driver.xml)
+		and DataMap (*.map.xml) XML files. Project can be opened and edited in the CayenneModeler.
+		</p>
 		</subsection>
 		
 		<subsection name="3.2 DataDomain">
