@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.map;
 
 import java.util.*;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+
 /**
  * DbEntity subclass that is based on another DbEntity
  * and allows to define complex database expressions 
@@ -151,12 +153,42 @@ public class DerivedDbEntity extends DbEntity {
 	public void clearGroupByAttributes() {
 		groupByAttributes.clear();
 	}
-	
+
 	/**
 	 * @see org.objectstyle.cayenne.map.DbEntity#getFullyQualifiedName()
 	 */
 	public String getFullyQualifiedName() {
-		return getParentEntity().getFullyQualifiedName();
+		return (getParentEntity() != null)
+			? getParentEntity().getFullyQualifiedName()
+			: null;
+	}
+
+	/** 
+	 * Returns schema of the parent entity.
+	 */
+	public String getSchema() {
+		return (getParentEntity() != null)
+			? getParentEntity().getSchema()
+			: null;
+	}
+
+	/** Throws exception. */
+	public void setSchema(String schema) {
+		throw new CayenneRuntimeException("Can't change schema of a derived entity.");
+	}
+
+	/** 
+	 * Returns catalog of the parent entity.
+	 */
+	public String getCatalog() {
+		return (getParentEntity() != null)
+			? getParentEntity().getCatalog()
+			: null;
+	}
+
+	/** Throws exception. */
+	public void setCatalog(String catalog) {
+		throw new CayenneRuntimeException("Can't change catalogue of a derived entity.");
 	}
 
 	/**

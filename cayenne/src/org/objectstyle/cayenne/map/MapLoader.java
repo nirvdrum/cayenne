@@ -311,8 +311,7 @@ public class MapLoader extends DefaultHandler {
 			}
 
 			if (temp instanceof DerivedDbEntity) {
-				DbEntity parent =
-					((DerivedDbEntity) temp).getParentEntity();
+				DbEntity parent = ((DerivedDbEntity) temp).getParentEntity();
 				String name = (parent != null) ? parent.getName() : "";
 				out.print(" parentName=\"");
 				out.print(name);
@@ -391,8 +390,7 @@ public class MapLoader extends DefaultHandler {
 								+ "\"/>");
 					}
 					out.println("\t\t</db-attribute>");
-				}
-				else {
+				} else {
 					out.println("/>");
 				}
 			} else {
@@ -561,8 +559,10 @@ public class MapLoader extends DefaultHandler {
 			dbEntity = new DbEntity(name);
 		}
 
-		dbEntity.setSchema(atts.getValue("", "schema"));
-		dbEntity.setCatalog(atts.getValue("", "catalog"));
+		if (!(dbEntity instanceof DerivedDbEntity)) {
+			dbEntity.setSchema(atts.getValue("", "schema"));
+			dbEntity.setCatalog(atts.getValue("", "catalog"));
+		}
 	}
 
 	private void processStartDbAttributeRef(Attributes atts)

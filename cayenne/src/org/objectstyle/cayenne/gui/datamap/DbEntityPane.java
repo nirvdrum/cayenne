@@ -56,17 +56,18 @@
 
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.*;
-import java.util.*;
-import java.awt.event.*;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.text.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.gui.PanelFactory;
-import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.*;
+import org.objectstyle.cayenne.map.*;
 
 /** 
  * Detail view of the DbEntity properties. 
@@ -89,6 +90,8 @@ public class DbEntityPane
 	JTextField schema;
 	JComboBox parentEntities;
 	JLabel parentLabel;
+	JLabel schemaLabel;
+	JLabel catalogLabel;
 
 	/** 
 	 * Cludge to prevent marking data map as dirty 
@@ -96,12 +99,14 @@ public class DbEntityPane
 	 */
 	private boolean ignoreChange = false;
 
-	public DbEntityPane(Mediator temp_mediator) {
+	public DbEntityPane(Mediator mediator) {
 		super();
-		mediator = temp_mediator;
+		this.mediator = mediator;
 		mediator.addDbEntityDisplayListener(this);
+		
 		// Create and layout components
 		init();
+		
 		// Add listeners
 		name.getDocument().addDocumentListener(this);
 		catalog.getDocument().addDocumentListener(this);
@@ -116,10 +121,10 @@ public class DbEntityPane
 		JLabel nameLabel = new JLabel("Entity name: ");
 		name = new JTextField(25);
 
-		JLabel catalogLabel = new JLabel("Catalog: ");
+		catalogLabel = new JLabel("Catalog: ");
 		catalog = new JTextField(25);
 
-		JLabel schemaLabel = new JLabel("Schema: ");
+		schemaLabel = new JLabel("Schema: ");
 		schema = new JTextField(25);
 
 		parentLabel = new JLabel("Parent entity: ");
@@ -202,13 +207,19 @@ public class DbEntityPane
 		ignoreChange = true;
 		name.setText(entity.getName());
 		oldName = entity.getName();
-		catalog.setText(entity.getCatalog() != null ? entity.getCatalog() : "");
-		schema.setText(entity.getSchema() != null ? entity.getSchema() : "");
+		catalog.setText(entity.getCatalog());
+		schema.setText(entity.getSchema());
 		ignoreChange = false;
 
 		if (entity instanceof DerivedDbEntity) {
+			catalogLabel.setEnabled(false);
+			catalog.setEnabled(false);
+			schemaLabel.setEnabled(false);
+			schema.setEnabled(false);
+			
 			parentLabel.setEnabled(true);
 			parentEntities.setEnabled(true);
+			
 			java.util.List ents =
 				mediator.getCurrentDataMap().getDbEntityNames(true);
 			ents.remove(entity.getName());
@@ -221,6 +232,11 @@ public class DbEntityPane
 
 			parentEntities.setModel(model);
 		} else {
+			catalogLabel.setEnabled(true);
+			catalog.setEnabled(true);
+			schemaLabel.setEnabled(true);
+			schema.setEnabled(true);
+			
 			parentLabel.setEnabled(false);
 			parentEntities.setEnabled(false);
 			parentEntities.setSelectedIndex(-1);
