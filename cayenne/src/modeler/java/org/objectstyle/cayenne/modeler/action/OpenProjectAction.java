@@ -57,10 +57,8 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
@@ -76,9 +74,7 @@ import org.objectstyle.cayenne.project.ProjectException;
 public class OpenProjectAction extends ProjectAction {
     static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
     public static final String ACTION_NAME = "Open Project";
-
     protected ProjectOpener fileChooser = new ProjectOpener();
-
     /**
      * Constructor for OpenProjectAction.
      */
@@ -95,6 +91,11 @@ public class OpenProjectAction extends ProjectAction {
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
     public void performAction(ActionEvent e) {
+        // Save and close (if needed) currently open project.
+        if (getMediator() != null && !closeProject()) {
+            return;
+        }
+
         File f = null;
         if (e.getSource() instanceof RecentFileMenuItem) {
             RecentFileMenuItem menu = (RecentFileMenuItem) e.getSource();
@@ -108,8 +109,6 @@ public class OpenProjectAction extends ProjectAction {
     }
     /** Opens cayenne.xml file using file chooser. */
     protected void openProject() {
-        ModelerPreferences pref = ModelerPreferences.getPreferences();
-        String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
             File file = fileChooser.openProjectFile(Editor.getFrame());
@@ -120,13 +119,8 @@ public class OpenProjectAction extends ProjectAction {
             logObj.warn("Error loading project file.", e);
         }
     }
-
     /** Opens specified project file. File must already exist. */
     protected void openProject(File file) {
-        // Save and close (if needed) currently open project.
-        if (getMediator() != null && !closeProject()) {
-            return;
-        }
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         try {
             // Save dir path to the preferences

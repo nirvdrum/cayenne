@@ -53,56 +53,57 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.view;
 
-import java.awt.event.ActionEvent;
+import java.awt.Component;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import org.objectstyle.cayenne.modeler.Editor;
-import org.objectstyle.cayenne.modeler.event.Mediator;
-import org.objectstyle.cayenne.modeler.view.UnsavedChangesDialog;
+import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 /**
  * @author Andrei Adamchik
  */
-public abstract class ProjectAction extends CayenneAction {
-    /**
-     * Constructor for ProjectAction.
-     * @param name
-     */
-    public ProjectAction(String name) {
-        super(name);
+public class UnsavedChangesDialog {
+    private static final String SAVE_AND_CLOSE = "Save Changes";
+    private static final String CLOSE_WITHOUT_SAVE = "Ignore Changes";
+    private static final String CANCEL = "Cancel";
+    
+    private static final String[] OPTIONS =
+        new String[] { SAVE_AND_CLOSE, CLOSE_WITHOUT_SAVE, CANCEL };
+
+    protected Component parent;
+    protected String result = CANCEL;
+
+    public UnsavedChangesDialog(Component parent) {
+        this.parent = parent;
     }
 
-    /** Returns true if successfully closed project, false otherwise. */
-    public boolean closeProject() {
-        if (!checkSaveOnClose()) {
-            return false;
-        }
+    public void show() {
+        JOptionPane pane =
+            new JOptionPane(
+                "You have unsaved changes. Do you want to save them?",
+                JOptionPane.QUESTION_MESSAGE);
+        pane.setOptions(OPTIONS);
 
-        // later may create an event, right now notify frame
-        // directly
-        Editor.getFrame().projectClosed();
-        return true;
+        JDialog dialog = pane.createDialog(parent, ModelerUtil.buildTitle("Unsaved Changes"));
+        dialog.show();
+
+        Object selectedValue = pane.getValue();
+        result = (selectedValue != null) ? selectedValue.toString() : CANCEL;
     }
 
-    /** Return false if cancel closing the window, true otherwise. */
-    public boolean checkSaveOnClose() {
-        Mediator mediator = getMediator();
-        if (mediator != null && mediator.isDirty()) {
-            UnsavedChangesDialog dialog = new UnsavedChangesDialog(Editor.getFrame());
-            dialog.show();
+    public boolean shouldSave() {
+        return SAVE_AND_CLOSE.equals(result);
+    }
 
-            if (dialog.shouldCancel()) {
-                return false;
-            } else if (dialog.shouldSave()) {
-                ActionEvent e =
-                    new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SaveAll");
-                Editor.getFrame().getAction(SaveAction.ACTION_NAME).actionPerformed(e);
-            }
-        }
+    public boolean shouldNotSave() {
+        return CLOSE_WITHOUT_SAVE.equals(result);
+    }
 
-        return true;
+    public boolean shouldCancel() {
+        return result == null || CANCEL.equals(result);
     }
 }
+
