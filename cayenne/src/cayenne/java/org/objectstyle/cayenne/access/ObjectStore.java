@@ -653,10 +653,40 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         logObj.debug("new SnapshotEvent: " + event);
 
         synchronized (this) {
+
+            // process updated
             DataRowUtils.mergeObjectsWithSnapshotDiffs(this, event.modifiedDiffs());
 
-            // TODO: what should we do with deleted objects?
-            // I suggest to turn them into TRANSIENT and notify a delegate...
+            // process deleted
+            Collection deleted = event.deletedIds();
+            if (deleted != null && !deleted.isEmpty()) {
+                Iterator it = deleted.iterator();
+                while (it.hasNext()) {
+                    ObjectId oid = (ObjectId) it.next();
+                    DataObject object = getObject(oid);
+                    if (object == null) {
+                        continue;
+                    }
+
+                    switch (object.getPersistenceState()) {
+                        case PersistenceState.COMMITTED :
+                        case PersistenceState.HOLLOW :
+                        case PersistenceState.DELETED :
+                            objectMap.remove(oid);
+                            retainedSnapshotMap.remove(oid);
+                            object.setDataContext(null);
+                            
+                            // not sure if cleaning ObjectId is needed
+                            // object.setObjectId(null);
+                            
+                            object.setPersistenceState(PersistenceState.TRANSIENT);
+                            break;
+                        case PersistenceState.MODIFIED :
+                            object.setPersistenceState(PersistenceState.NEW);
+                            // What are the implications that OID is not temporary?
+                    }
+                }
+            }
         }
     }
 }

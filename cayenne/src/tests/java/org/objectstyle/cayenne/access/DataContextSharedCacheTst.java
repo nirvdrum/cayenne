@@ -56,14 +56,20 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.Date;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.DataRow;
-import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 
 /**
+ * Test suite for testing behavior of multiple DataContexts that share the same 
+ * underlying DataDomain.
+ * 
  * @author Andrei Adamchik
  */
 public class DataContextSharedCacheTst extends MultiContextTestCase {
@@ -73,82 +79,267 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
 
     protected void setUp() throws Exception {
         super.setUp();
-        
+
         DataContext context = createDataContextWithSharedCache();
-        
+
         // prepare a single artist record
         artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("version1");
+        artist.setDateOfBirth(new Date());
         context.commitChanges();
     }
 
-    protected DataRowStore getDataRowCache() {
-        return artist.getDataContext().getObjectStore().getDataRowCache();
+    /**
+     * Test case to prove that changes made to an object in one ObjectStore
+     * and committed to the database will be reflected in the peer ObjectStore
+     * using the same DataRowCache.
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotChangePropagation() throws Exception {
+        String originalName = artist.getArtistName();
+        String newName = "version2";
+
+        // two contexts being tested
+        DataContext context = artist.getDataContext();
+        DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object 
+        // in the second context
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(originalName, altArtist.getArtistName());
+        assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
+
+        // Update Artist
+        artist.setArtistName(newName);
+
+        // no changes propagated till commit...
+        assertEquals(originalName, altArtist.getArtistName());
+        context.commitChanges();
+
+        // check underlying cache
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId());
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+
+        // check peer artist
+        assertEquals(newName, altArtist.getArtistName());
     }
 
+    /**
+     * Test case to prove that changes made to an object in one ObjectStore
+     * and committed to the database will be correctly merged in the peer ObjectStore
+     * using the same DataRowCache. E.g. modified objects will be merged so that no
+     * new changes are lost.
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotChangePropagationToModifiedObjects() throws Exception {
+        String originalName = artist.getArtistName();
+        Date originalDate = artist.getDateOfBirth();
+        String newName = "version2";
+        Date newDate = new Date(originalDate.getTime() - 10000);
+        String newAltName = "version3";
 
-    public void testCommitUpdateWithExternallyUpdatedSnapshot1() throws Exception {
+        // two contexts being tested
         DataContext context = artist.getDataContext();
-        // prepare a second context
         DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object 
+        // in the second context
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(originalName, altArtist.getArtistName());
+        assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
+
+        // Update Artist peers independently
+        artist.setArtistName(newName);
+        artist.setDateOfBirth(newDate);
+        altArtist.setArtistName(newAltName);
+
+        context.commitChanges();
+
+        // check underlying cache
+        DataRow freshSnapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId());
+        assertEquals(newName, freshSnapshot.get("ARTIST_NAME"));
+        assertEquals(newDate, freshSnapshot.get("DATE_OF_BIRTH"));
+
+        // check peer artist
+        assertEquals(newAltName, altArtist.getArtistName());
+        assertEquals(newDate, altArtist.getDateOfBirth());
+        assertEquals(PersistenceState.MODIFIED, altArtist.getPersistenceState());
+    }
+
+    /**
+     * Test case to prove that deleting an object in one ObjectStore
+     * and committed to the database will be reflected in the peer ObjectStore
+     * using the same DataRowCache. By default COMMITTED objects will be changed 
+     * to TRANSIENT.
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotDeletePropagationToCommitted() throws Exception {
+
+        // two contexts being tested
+        DataContext context = artist.getDataContext();
+        DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object 
+        // in the second context
         Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
+        assertEquals(PersistenceState.COMMITTED, altArtist.getPersistenceState());
 
-        // update.. first make sure that ALT is not hollow
-        altArtist.getArtistName();
-
-        // update
-        artist.setArtistName("version2");
+        // Update Artist
+        context.deleteObject(artist);
         context.commitChanges();
 
-        // test behavior on commit when snapshot has changed underneath
-        // (case when the same property has changed twice);
-        altArtist.setArtistName("version3");
-        altContext.commitChanges();
+        // check underlying cache
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId()));
 
-        // due to external changes, snapshot should've been evicted
-        assertNull(getDataRowCache().getCachedSnapshot(altArtist.getObjectId()));
-
-        // but we should be able to refetch it immediately
-        DataRow freshSnapshot =
-            getDataRowCache().getSnapshot(altArtist.getObjectId(), getDomain());
-        assertEquals("version3", freshSnapshot.get("ARTIST_NAME"));
+        // check peer artist
+        assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
+        assertNull(altArtist.getDataContext());
     }
 
-    public void testCommitUpdateWithExternallyUpdatedSnapshot2() throws Exception {
+    /**
+     * Test case to prove that deleting an object in one ObjectStore
+     * and committed to the database will be reflected in the peer ObjectStore
+     * using the same DataRowCache. By default HOLLOW objects will be changed 
+     * to TRANSIENT.
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotDeletePropagationToHollow() throws Exception {
+
+        // two contexts being tested
         DataContext context = artist.getDataContext();
+        DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object 
+        // in the second context
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+        assertEquals(PersistenceState.HOLLOW, altArtist.getPersistenceState());
+
+        // Update Artist
+        context.deleteObject(artist);
+        context.commitChanges();
+
+        // check underlying cache
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId()));
+
+        // check peer artist
+        assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
+        assertNull(altArtist.getDataContext());
+    }
+
+    /**
+     * Test case to prove that deleting an object in one ObjectStore
+     * and committed to the database will be reflected in the peer ObjectStore
+     * using the same DataRowCache. By default MODIFIED objects will be changed 
+     * to NEW.
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotDeletePropagationToModified() throws Exception {
+
+        // two contexts being tested
+        DataContext context = artist.getDataContext();
+        DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object 
+        // in the second context
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+        assertFalse(altArtist == artist);
+
+        // modify peer
+        altArtist.setArtistName("version2");
+        assertEquals(PersistenceState.MODIFIED, altArtist.getPersistenceState());
+
+        // Update Artist
+        context.deleteObject(artist);
+        context.commitChanges();
+
+        // check underlying cache
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId()));
+
+        // check peer artist
+        assertEquals(PersistenceState.NEW, altArtist.getPersistenceState());
+
+        // check if now we can save this object again, and with the original ObjectId
+        ObjectId id = altArtist.getObjectId();
+        assertNotNull(id);
+        assertNotNull(id.getValueForAttribute(Artist.ARTIST_ID_PK_COLUMN));
+        assertFalse(id.isTemporary());
+       
+        altContext.commitChanges();
         
-        // prepare a second context
+        // create independent context and fetch artist in it
+        DataContext context3 = getDomain().createDataContext(false);
+        List artists = context3.performQuery(QueryUtils.selectObjectForId(id));
+        assertEquals(1, artists.size());
+        Artist artist3 = (Artist)artists.get(0);
+        assertEquals(id, artist3.getObjectId());
+    }
+
+    /**
+     * Test case to prove that deleting an object in one ObjectStore
+     * and committed to the database will be reflected in the peer ObjectStore
+     * using the same DataRowCache. By default DELETED objects will be changed 
+     * to TRANSIENT.
+     * 
+     * @throws Exception
+     */
+    public void testSnapshotDeletePropagationToDeleted() throws Exception {
+
+        // two contexts being tested
+        DataContext context = artist.getDataContext();
         DataContext altContext = mirrorDataContext(context);
+
+        // make sure we have a fully resolved copy of an artist object 
+        // in the second context
         Artist altArtist =
             (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
         assertNotNull(altArtist);
         assertFalse(altArtist == artist);
-        assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
-        // update.. first make sure that ALT is not hollow
-        altArtist.getArtistName();
+        // delete peer
+        altContext.deleteObject(altArtist);
 
-        // update
-        Date dob = CayenneTestCase.stripTime(new Date());
-        artist.setDateOfBirth(dob);
+        // Update Artist
+        context.deleteObject(artist);
         context.commitChanges();
 
-        // test behavior on commit when snapshot has changed underneath
-        // (case when a different property has changed);
-        altArtist.setArtistName("version3");
-        altContext.commitChanges();
+        // check underlying cache
+        assertNull(
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(
+                altArtist.getObjectId()));
 
-        // due to external changes, snapshot should've been evicted
-        assertNull(getDataRowCache().getCachedSnapshot(altArtist.getObjectId()));
-
-        // but we should be able to refetch it immediately
-        DataRow freshSnapshot =
-            getDataRowCache().getSnapshot(altArtist.getObjectId(), getDomain());
-        assertEquals("version3", freshSnapshot.get("ARTIST_NAME"));
-        assertEquals(dob, freshSnapshot.get("DATE_OF_BIRTH"));
+        // check peer artist
+        assertEquals(PersistenceState.TRANSIENT, altArtist.getPersistenceState());
+        assertNull(altArtist.getDataContext());
+        assertFalse(altContext.hasChanges());
     }
 }

@@ -74,6 +74,11 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * @since 1.0.1
  * @author Andrei Adamchik
  */
+
+// TODO: RelationshipFault should likely be used as a shared flyweight, one per relationship.
+// This would allow to avoid creating faults instances per object. Also it can be extended
+// to normal to-one relationships... then calling "resolveToOne" would create a HOLLOW object,
+// but not before it is requested, speeding things up and improving memory use.
 public class RelationshipFault implements Serializable {
     protected String relationshipName;
     protected DataObject sourceObject;

@@ -74,6 +74,17 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class DataContextTst extends DataContextTestBase {
     private static Logger logObj = Logger.getLogger(DataContextTst.class);
 
+    public void testDeleteHollow() throws Exception {
+        populatePaintings();
+        List paintings = context.performQuery(new SelectQuery(Painting.class));
+        Painting p = (Painting) paintings.get(0);
+        Artist a = p.getToArtist();
+        
+        assertEquals(PersistenceState.HOLLOW, a.getPersistenceState());
+        context.deleteObject(a);
+        assertEquals(PersistenceState.DELETED, a.getPersistenceState());
+    }
+
     public void testLocalObjects() throws Exception {
         List artists = context.performQuery(new SelectQuery(Artist.class));
 
@@ -142,7 +153,7 @@ public class DataContextTst extends DataContextTestBase {
                 fail("Attempt to resolve object via query instead of snapshot");
                 return null;
             }
-            
+
             public boolean shouldMergeChanges(
                 DataObject object,
                 DataRow snapshotInStore) {
