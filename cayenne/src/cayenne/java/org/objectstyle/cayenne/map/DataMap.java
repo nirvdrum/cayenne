@@ -490,11 +490,11 @@ public class DataMap {
         Iterator dbEnts = this.getDbEntities().iterator();
         while (dbEnts.hasNext()) {
         	DbEntity dbEnt = (DbEntity)dbEnts.next();
-			// @HH: write a test for this (concurrent relationship mods)
-            Iterator rels = dbEnt.getRelationships().iterator();
+			// take a copy since we're going to modifiy the entity
+            Iterator rels = new ArrayList(dbEnt.getRelationships()).iterator();
             while (rels.hasNext()) {
                 DbRelationship rel = (DbRelationship)rels.next();
-                if (rel.getTargetEntity() == dbEntityToDelete) {
+                if (dbEntityName.equals(rel.getTargetEntityName())) {
                     dbEnt.removeRelationship(rel.getName());
                 }
             }
