@@ -214,12 +214,10 @@ public class DataNode implements QueryEngine {
         }
     }
 
-    /**
-     * Returns this object if it can handle queries for <code>objEntity</code>,
-     * returns null otherwise.
-     * 
+    /** 
      * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)} since
-     * queries are not necessarily based on an ObjEntity.
+     * queries are not necessarily based on an ObjEntity. Use 
+     * {@link ObjEntity#getDataMap()} to obtain DataMap from ObjEntity.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null)

@@ -138,49 +138,49 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
      */
     public PrefetchSelectQuery() {
         super();
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
      */
     public PrefetchSelectQuery(ObjEntity root) {
         super(root);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
      */
     public PrefetchSelectQuery(ObjEntity root, Expression qualifier) {
         super(root, qualifier);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
      */
     public PrefetchSelectQuery(Class rootClass) {
         super(rootClass);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
      */
     public PrefetchSelectQuery(Class rootClass, Expression qualifier) {
         super(rootClass, qualifier);
     }
 
     /**
-     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+     * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
      */
     public PrefetchSelectQuery(String objEntityName) {
         super(objEntityName);
     }
 
     /**
-    * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(ObjEntity,SelectQuery,String)}
+    * @deprecated Since 1.1 use {@link #PrefetchSelectQuery(EntityResolver,SelectQuery,String)}
     */
     public PrefetchSelectQuery(String objEntityName, Expression qualifier) {
         super(objEntityName, qualifier);
@@ -203,7 +203,7 @@ public class PrefetchSelectQuery extends SelectQuery {
     }
 
     /**
-     * @deprecated Since 1.1 use getParentQuery()
+     * @deprecated Since 1.1 use {@link #getParentQuery()}.
      */
     public SelectQuery getRootQuery() {
         return parentQuery;

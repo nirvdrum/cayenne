@@ -10,7 +10,7 @@
 		<li><a href="userguide/index.html">User Guide</a> - installation instructions and general usage notes.</li>
 		<li><a href="modelerguide/index.html">Modeler Guide</a> - Cayenne Modeler documentation.</li>
 		<li><a href="examples/index.html">Examples</a> - examples documentation</li>
-		<li><a href="api/index.html">Javadoc API</a></li>
+		<li><a href="api/cayenne/index.html">Javadoc API</a></li>
 		</ul>
 		
 		<p>Online Resources:</p>
