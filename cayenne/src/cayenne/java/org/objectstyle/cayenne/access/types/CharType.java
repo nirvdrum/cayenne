@@ -56,8 +56,14 @@
 
 package org.objectstyle.cayenne.access.types;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Types;
 
 import org.apache.log4j.Logger;
@@ -68,6 +74,8 @@ import org.apache.log4j.Logger;
 public class CharType extends AbstractType {
     private static Logger logObj = Logger.getLogger(CharType.class);
 
+    private static final int BUF_SIZE = 8 * 1024;
+
     public String getClassName() {
         return String.class.getName();
     }
@@ -75,10 +83,26 @@ public class CharType extends AbstractType {
     /** Return trimmed string. */
     public Object materializeObject(ResultSet rs, int index, int type)
         throws Exception {
-        String val = rs.getString(index);
 
-        // trim CHAR type
-        return (val != null) ? ((type == Types.CHAR) ? val.trim() : val) : null;
+        String val = null;
+
+        // CLOB handling
+        if (type == Types.CLOB) {
+            Clob clob = rs.getClob(index);
+            if (clob != null) {
+                val = readClob(clob);
+            }
+        } else {
+
+            val = rs.getString(index);
+
+            // trim CHAR type
+            if (val != null && type == Types.CHAR) {
+                val = val.trim();
+            }
+        }
+
+        return val;
     }
 
     public void setJdbcObject(
@@ -88,13 +112,39 @@ public class CharType extends AbstractType {
         int type,
         int precision)
         throws Exception {
-        	
+
         // if this is a CLOB column, treat it as VARCHAR
         // this would allow to build INSERT statements with many drivers
-        if(type == Types.CLOB) {
+        if (type == Types.CLOB) {
             type = Types.VARCHAR;
         }
-        
+
         super.setJdbcObject(st, val, pos, type, precision);
+    }
+
+    protected String readClob(Clob clob) throws IOException, SQLException {
+        // sanity check on size
+        if (clob.length() > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(
+                "CLOB is too big to be read as String in memory: "
+                    + clob.length());
+        }
+
+        int size = (int) clob.length();
+        int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
+
+        Reader in = new BufferedReader(clob.getCharacterStream(), bufSize);
+        char[] buf = new char[bufSize];
+        int read;
+        StringWriter out = new StringWriter(size);
+
+        try {
+            while ((read = in.read(buf, 0, bufSize)) >= 0) {
+                out.write(buf, 0, read);
+            }
+            return out.toString();
+        } finally {
+            in.close();
+        }
     }
 }

@@ -55,7 +55,10 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.List;
+
 import org.objectstyle.art.ClobTest;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
@@ -82,9 +85,18 @@ public class DataContextClobTst extends CayenneTestCase {
         if (skipTests()) {
             return;
         }
-
-        ClobTest clobObj = (ClobTest)ctxt.createAndRegisterNewObject("ClobTest");
-        clobObj.setClobCol("rather small clob...");
+        
+        // insert new clob
+        ClobTest clobObj1 = (ClobTest)ctxt.createAndRegisterNewObject("ClobTest");
+        clobObj1.setClobCol("rather small clob...");
         ctxt.commitChanges();
+        
+        // read the CLOB in the new context
+        DataContext ctxt2 = getDomain().createDataContext();
+        List objects = ctxt2.performQuery(new SelectQuery(ClobTest.class));
+        assertEquals(1, objects.size());
+        
+        ClobTest clobObj2 = (ClobTest)objects.get(0);
+        assertEquals(clobObj1.getClobCol(), clobObj2.getClobCol());        
     }
 }

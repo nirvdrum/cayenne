@@ -251,8 +251,8 @@ public class DefaultResultIterator implements ResultIterator {
             Map dataRow = new HashMap(mapCapacity, 0.75f);
 
             // process result row columns,
-            for (int i = 0; i < resultWidth; i++) {
-                // note: jdbc column indexes start from 1, not 0 as in arrays
+            for (int i = 0; i < resultWidth; i++) {            	
+                // note: jdbc column indexes start from 1, not 0 unlike everywhere else
                 Object val =
                     converters[i].materializeObject(
                         resultSet,
