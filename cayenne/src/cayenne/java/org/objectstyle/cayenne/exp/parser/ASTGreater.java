@@ -75,6 +75,13 @@ public class ASTGreater extends SimpleNode {
     ASTGreater(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        return new ASTGreater(id);
+    }
 
     protected String getExpressionOperator(int index) {
         return ">";

@@ -67,12 +67,21 @@ import org.objectstyle.cayenne.exp.Expression;
  */
 public class ASTDbPath extends ASTPath {
     public ASTDbPath(Object value) {
-        super(ExpressionParserTreeConstants.JJTOBJPATH);
+        super(ExpressionParserTreeConstants.JJTDBPATH);
         setValue(value);
     }
 
     ASTDbPath(int id) {
         super(id);
+    }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTDbPath copy = new ASTDbPath(id);
+        copy.value = value;
+        return copy;
     }
 
     public void encodeAsString(PrintWriter pw) {

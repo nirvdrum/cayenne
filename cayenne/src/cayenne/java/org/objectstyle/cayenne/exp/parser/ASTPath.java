@@ -78,4 +78,12 @@ public abstract class ASTPath extends SimpleNode {
 
         throw new ArrayIndexOutOfBoundsException(index);
     }
+
+    public void setOperand(int index, Object value) {
+        if (index != 0) {
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
+
+        this.value = value;
+    }
 }

@@ -1,7 +1,3 @@
-package org.objectstyle.cayenne.exp;
-
-import java.io.PrintWriter;
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -57,6 +53,9 @@ import java.io.PrintWriter;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.exp;
+
+import java.io.PrintWriter;
 
 /** 
  * Generic ternary expression. 
@@ -76,6 +75,15 @@ public class TernaryExpression extends Expression {
 
     public final int getOperandCount() {
         return 3;
+    }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     * 
+     * @since 1.1
+     */
+    public Expression shallowCopy() {
+        return new TernaryExpression(type);
     }
 
     public Object getOperand(int index) {

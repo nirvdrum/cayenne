@@ -76,6 +76,13 @@ public class ASTLess extends SimpleNode {
     ASTLess(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        return new ASTLess(id);
+    }
 
     protected String getExpressionOperator(int index) {
         return "<";

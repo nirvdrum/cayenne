@@ -57,7 +57,6 @@ package org.objectstyle.cayenne.modeler.util;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.util.Util;
 import org.scopemvc.util.convertor.StringConvertor;
@@ -85,7 +84,7 @@ public class ExpressionConvertor implements StringConvertor {
 
     public Object stringAsValue(String string) throws IllegalArgumentException {
         try {
-            return ExpressionFactory.expFromString(string);
+            return Expression.fromString(string);
         }
         catch (ExpressionException eex) {
             // this is likely a parse exception... show detailed message

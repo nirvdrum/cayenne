@@ -61,12 +61,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Transformer;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -354,6 +356,97 @@ public class ObjEntity extends Entity {
                         + objAttr.getName()
                         + " compound, read only.");
             }
+        }
+    }
+
+    /**
+     * Transforms Expression rooted in this entity to an analogous expression 
+     * rooted in related entity.
+     * 
+     * @since 1.1
+     */
+    public Expression translateToRelatedEntity(
+        Expression expression,
+        String relationshipPath) {
+
+        if (expression == null) {
+            return null;
+        }
+
+        if (relationshipPath == null) {
+            return expression;
+        }
+
+        if (getDbEntity() == null) {
+            throw new CayenneRuntimeException(
+                "Can't transform expression, no DbEntity for '" + getName() + "'.");
+        }
+
+        // converts all OBJ_PATH expressions to DB_PATH expressions
+        // and pass control to the DB entity
+
+        DBPathConverter transformer = new DBPathConverter();
+
+        String dbPath = transformer.toDbPath(resolvePathComponents(relationshipPath));
+        Expression dbClone = expression.transform(transformer);
+
+        return getDbEntity().translateToRelatedEntity(dbClone, dbPath);
+    }
+
+    final class DBPathConverter implements Transformer {
+        // TODO: make it a public method - resolveDBPathComponents or something... 
+        // seems generally useful
+        String toDbPath(Iterator objectPathComponents) {
+            StringBuffer buf = new StringBuffer();
+            while (objectPathComponents.hasNext()) {
+                Object component = objectPathComponents.next();
+
+                Iterator dbSubpath;
+
+                if (component instanceof ObjRelationship) {
+                    dbSubpath =
+                        ((ObjRelationship) component).getDbRelationships().iterator();
+                }
+                else if (component instanceof ObjAttribute) {
+                    dbSubpath = ((ObjAttribute) component).getDbPathIterator();
+                }
+                else {
+                    throw new CayenneRuntimeException(
+                        "Unknown path component: " + component);
+                }
+
+                while (dbSubpath.hasNext()) {
+                    MapObject subComponent = (MapObject) dbSubpath.next();
+                    if (buf.length() > 0) {
+                        buf.append(Entity.PATH_SEPARATOR);
+                    }
+
+                    buf.append(subComponent.getName());
+                }
+            }
+
+            return buf.toString();
+        }
+
+        public Object transform(Object input) {
+
+            if (!(input instanceof Expression)) {
+                return input;
+            }
+
+            Expression expression = (Expression) input;
+
+            if (expression.getType() != Expression.OBJ_PATH) {
+                return input;
+            }
+
+            // convert obj_path to db_path
+
+            String converted = toDbPath(resolvePathComponents(expression));
+            Expression transformed =
+                ExpressionFactory.expressionOfType(Expression.DB_PATH);
+            transformed.setOperand(0, converted);
+            return transformed;
         }
     }
 }

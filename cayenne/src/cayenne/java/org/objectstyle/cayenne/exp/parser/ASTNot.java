@@ -74,6 +74,13 @@ public class ASTNot extends SimpleNode {
     ASTNot(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        return new ASTNot(id);
+    }
 
     public int getType() {
         return Expression.NOT;

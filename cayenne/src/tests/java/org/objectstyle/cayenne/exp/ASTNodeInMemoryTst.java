@@ -109,8 +109,7 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateOBJ_PATH_ObjEntity() throws Exception {
         ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.expFromString("paintingArray.paintingTitle"));
+            ASTCompiler.compile(Expression.fromString("paintingArray.paintingTitle"));
 
         ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
 
@@ -125,8 +124,7 @@ public class ASTNodeInMemoryTst extends CayenneTestCase {
 
     public void testEvaluateDB_PATH_DbEntity() throws Exception {
         ASTNode node =
-            ASTCompiler.compile(
-                ExpressionFactory.expFromString("db:paintingArray.PAINTING_TITLE"));
+            ASTCompiler.compile(Expression.fromString("db:paintingArray.PAINTING_TITLE"));
 
         ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
         DbEntity ade = ae.getDbEntity();

@@ -69,97 +69,94 @@ public class ParsedExpBackwardCompatTst extends CayenneSimpleTestCase {
 
     public void testOr() throws Exception {
         Expression compareTo = simpleExp().orExp(simpleExp());
-        Expression parsed = ExpressionFactory.expFromString("a = 'b' or a = 'b'");
+        Expression parsed = Expression.fromString("a = 'b' or a = 'b'");
         assertEquals(compareTo, parsed);
 
         compareTo = compareTo.orExp(simpleExp());
-        parsed = ExpressionFactory.expFromString("a = 'b' or a = 'b' or a = 'b'");
+        parsed = Expression.fromString("a = 'b' or a = 'b' or a = 'b'");
         assertEquals(compareTo, parsed);
     }
 
     public void testAnd() throws Exception {
         Expression compareTo = simpleExp().andExp(simpleExp());
-        Expression parsed = ExpressionFactory.expFromString("a = 'b' and a = 'b'");
+        Expression parsed = Expression.fromString("a = 'b' and a = 'b'");
         assertEquals(compareTo, parsed);
 
         compareTo = compareTo.andExp(simpleExp());
-        parsed =
-            ExpressionFactory.expFromString("a = 'b' and a = 'b' and a = 'b'");
+        parsed = Expression.fromString("a = 'b' and a = 'b' and a = 'b'");
         assertEquals(compareTo, parsed);
     }
 
     public void testNot() throws Exception {
         Expression compareTo = simpleExp().notExp();
-        Expression parsed1 = ExpressionFactory.expFromString("not a = 'b'");
-        Expression parsed2 = ExpressionFactory.expFromString("! a = 'b'");
+        Expression parsed1 = Expression.fromString("not a = 'b'");
+        Expression parsed2 = Expression.fromString("! a = 'b'");
         assertEquals(compareTo, parsed1);
         assertEquals(compareTo, parsed2);
     }
 
     public void testEqual() throws Exception {
         Expression compareTo = simpleExp(Expression.EQUAL_TO, new Integer("3"));
-        Expression parsed1 = ExpressionFactory.expFromString("a = 3");
-        Expression parsed2 = ExpressionFactory.expFromString("a == 3");
+        Expression parsed1 = Expression.fromString("a = 3");
+        Expression parsed2 = Expression.fromString("a == 3");
         assertEquals(compareTo, parsed1);
         assertEquals(compareTo, parsed2);
     }
 
     public void testNotEqual() throws Exception {
         Expression compareTo = simpleExp(Expression.NOT_EQUAL_TO, new Integer("3"));
-        Expression parsed1 = ExpressionFactory.expFromString("a != 3");
-        Expression parsed2 = ExpressionFactory.expFromString("a <> 3");
+        Expression parsed1 = Expression.fromString("a != 3");
+        Expression parsed2 = Expression.fromString("a <> 3");
         assertEquals(compareTo, parsed1);
         assertEquals(compareTo, parsed2);
     }
 
     public void testLessThan() throws Exception {
         Expression compareTo = simpleExp(Expression.LESS_THAN, new Integer("3"));
-        Expression parsed1 = ExpressionFactory.expFromString("a < 3");
+        Expression parsed1 = Expression.fromString("a < 3");
         assertEquals(compareTo, parsed1);
     }
 
     public void testLessThanEqualTo() throws Exception {
         Expression compareTo = simpleExp(Expression.LESS_THAN_EQUAL_TO, new Integer("3"));
-        Expression parsed1 = ExpressionFactory.expFromString("a <= 3");
+        Expression parsed1 = Expression.fromString("a <= 3");
         assertEquals(compareTo, parsed1);
     }
 
     public void testGreaterThan() throws Exception {
         Expression compareTo = simpleExp(Expression.GREATER_THAN, new Integer("3"));
-        Expression parsed1 = ExpressionFactory.expFromString("a > 3");
+        Expression parsed1 = Expression.fromString("a > 3");
         assertEquals(compareTo, parsed1);
     }
 
     public void testGreaterThanEqualTo() throws Exception {
         Expression compareTo =
             simpleExp(Expression.GREATER_THAN_EQUAL_TO, new Integer("3"));
-        Expression parsed1 = ExpressionFactory.expFromString("a >= 3");
+        Expression parsed1 = Expression.fromString("a >= 3");
         assertEquals(compareTo, parsed1);
     }
 
     public void testLike() throws Exception {
         Expression compareTo = simpleExp(Expression.LIKE, "a%b");
-        Expression parsed1 = ExpressionFactory.expFromString("a like 'a%b'");
+        Expression parsed1 = Expression.fromString("a like 'a%b'");
         assertEquals(compareTo, parsed1);
     }
 
     public void testLikeIgnoreCase() throws Exception {
         Expression compareTo = simpleExp(Expression.LIKE_IGNORE_CASE, "a%b");
-        Expression parsed1 =
-            ExpressionFactory.expFromString("a likeIgnoreCase 'a%b'");
+        Expression parsed1 = Expression.fromString("a likeIgnoreCase 'a%b'");
         assertEquals(compareTo, parsed1);
     }
 
     public void testNotLike() throws Exception {
         Expression compareTo = simpleExp(Expression.NOT_LIKE, "a%b");
-        Expression parsed1 = ExpressionFactory.expFromString("a not like 'a%b'");
+        Expression parsed1 = Expression.fromString("a not like 'a%b'");
         assertEquals(compareTo, parsed1);
     }
 
     public void testNotLikeIgnoreCase() throws Exception {
         Expression compareTo = simpleExp(Expression.NOT_LIKE_IGNORE_CASE, "a%b");
-        Expression parsed1 =
-            ExpressionFactory.expFromString("a not likeIgnoreCase 'a%b'");
+        Expression parsed1 = Expression.fromString("a not likeIgnoreCase 'a%b'");
         assertEquals(compareTo, parsed1);
     }
 
@@ -167,7 +164,7 @@ public class ParsedExpBackwardCompatTst extends CayenneSimpleTestCase {
         List list =
             Arrays.asList(new Object[] { new Integer(5), new Integer(2), new Integer(6)});
         Expression compareTo = simpleExp(Expression.IN, list);
-        Expression parsed1 = ExpressionFactory.expFromString("a in (5, 2, 6)");
+        Expression parsed1 = Expression.fromString("a in (5, 2, 6)");
         assertEquals(compareTo, parsed1);
     }
 
@@ -175,48 +172,47 @@ public class ParsedExpBackwardCompatTst extends CayenneSimpleTestCase {
         List list =
             Arrays.asList(new Object[] { new Integer(5), new Integer(2), new Integer(6)});
         Expression compareTo = simpleExp(Expression.NOT_IN, list);
-        Expression parsed1 = ExpressionFactory.expFromString("a not in (5, 2, 6)");
+        Expression parsed1 = Expression.fromString("a not in (5, 2, 6)");
         assertEquals(compareTo, parsed1);
     }
 
     public void testBetween() throws Exception {
         Expression compareTo =
             simpleExp(Expression.BETWEEN, new Integer(2), new Integer(6));
-        Expression parsed1 = ExpressionFactory.expFromString("a between 2 and 6");
+        Expression parsed1 = Expression.fromString("a between 2 and 6");
         assertEquals(compareTo, parsed1);
     }
 
     public void testNotBetween() throws Exception {
         Expression compareTo =
             simpleExp(Expression.NOT_BETWEEN, new Integer(2), new Integer(6));
-        Expression parsed1 =
-            ExpressionFactory.expFromString("a not between 2 and 6");
+        Expression parsed1 = Expression.fromString("a not between 2 and 6");
         assertEquals(compareTo, parsed1);
     }
 
     public void testParameter() throws Exception {
         Expression compareTo =
             simpleExp(Expression.EQUAL_TO, new ExpressionParameter("param1"));
-        Expression parsed1 = ExpressionFactory.expFromString("a =$param1");
+        Expression parsed1 = Expression.fromString("a =$param1");
         assertEquals(compareTo, parsed1);
     }
 
     public void testDbExpression() throws Exception {
         Expression compareTo = simpleDbExp(Expression.EQUAL_TO, new Integer("5"));
-        Expression parsed1 = ExpressionFactory.expFromString("db:a = 5");
+        Expression parsed1 = Expression.fromString("db:a = 5");
         assertEquals(compareTo, parsed1);
     }
-    
+
     public void testFloatExpression() throws Exception {
         Expression compareTo = simpleExp(Expression.EQUAL_TO, new Double(3.33));
-        Expression parsed1 = ExpressionFactory.expFromString("a = 3.33");
+        Expression parsed1 = Expression.fromString("a = 3.33");
         assertEquals(compareTo, parsed1);
     }
-    
+
     public void testNullExpression() throws Exception {
         Expression compareTo = simpleExp(Expression.EQUAL_TO, null);
-        Expression parsed1 = ExpressionFactory.expFromString("a = null");
-        Expression parsed2 = ExpressionFactory.expFromString("a = NULL");
+        Expression parsed1 = Expression.fromString("a = null");
+        Expression parsed2 = Expression.fromString("a = NULL");
         assertEquals(compareTo, parsed1);
         assertEquals(compareTo, parsed2);
     }

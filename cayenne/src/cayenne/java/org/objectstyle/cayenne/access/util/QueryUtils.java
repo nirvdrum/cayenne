@@ -68,12 +68,8 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.QueryEngine;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.exp.TraversalHelper;
 import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
@@ -229,7 +225,7 @@ public class QueryUtils {
         ObjEntity ent = e.getEntityResolver().lookupObjEntity(sourceObject);
 
         sel.setQualifier(
-            transformQualifier(ent, sourceExpression, oid.getRelationshipName()));
+            ent.translateToRelatedEntity(sourceExpression, oid.getRelationshipName()));
 
         return sel;
     }
@@ -301,7 +297,7 @@ public class QueryUtils {
         if (r != null) {
             ObjRelationship objR = (ObjRelationship) r;
             newQ.setRoot(objR.getTargetEntity());
-            newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
+            newQ.setQualifier(ent.translateToRelatedEntity(q.getQualifier(), prefetchPath));
             if ((relCount == 1) && objR.isToMany() && !objR.isFlattened()) {
                 //A one step toMany relationship needs the special handling
                 newQ.setSingleStepToManyRelationship(objR);
@@ -324,19 +320,19 @@ public class QueryUtils {
      * @return Expression which, when applied to the target entity of relPath, 
      * will give the union of the objects that would be obtained by following 
      * relPath from all of the objects in <code>ent</code> that match <code>qual</code>
+     * 
+     * @deprecated Since 1.1 use Entity.translatedForRelatedEntity(Expression, String)
      */
     public static Expression transformQualifier(
         ObjEntity ent,
         Expression qual,
         String relPath) {
+
         if (qual == null) {
             return null;
         }
 
-        ExpressionTranslator trans = new ExpressionTranslator(ent, relPath);
-        qual.traverse(trans);
-
-        return trans.getPeer(qual);
+        return ent.translateToRelatedEntity(qual, relPath);
     }
 
     /**
@@ -392,237 +388,5 @@ public class QueryUtils {
                 source));
 
         return sel;
-    }
-
-    static final class ExpressionTranslator extends TraversalHelper {
-        protected Map expMap = new HashMap();
-        protected Map expFill = new HashMap();
-        protected ObjEntity ent;
-        protected String relationshipPath;
-        protected String relationshipDbPath;
-        protected String prependObjPath;
-        protected String prependDbPath;
-
-        public ExpressionTranslator(ObjEntity e, String relPath) {
-            this.ent = e;
-            this.relationshipPath = relPath;
-            this.relationshipDbPath = forwardDbPath(e, relPath);
-            this.prependObjPath = reversePath(e, relPath);
-            this.prependDbPath = reverseDbPath(e, relPath);
-        }
-
-        public Expression getPeer(Expression orig) {
-            return (Expression) expMap.get(orig);
-        }
-
-        private int getOperandIndex(Expression orig) {
-            Integer indObj = (Integer) expFill.get(orig);
-            int ind = (indObj != null) ? indObj.intValue() + 1 : 0;
-            expFill.put(orig, new Integer(ind));
-
-            return ind;
-        }
-
-        /**
-         * For a relationship path from source to target, builds a reverse path 
-         * from target to source.
-         */
-        public String reversePath(ObjEntity e, String relPath) {
-            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
-            Iterator it = e.resolvePathComponents(exp);
-            StringBuffer buf = new StringBuffer();
-            boolean hasRels = false;
-
-            while (it.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) it.next();
-                ObjRelationship reverse = rel.getReverseRelationship();
-                if (reverse == null) {
-                    //Couldn't create reverse obj path because of a missing reverse
-                    // relationship
-                    return null;
-                }
-                if (hasRels) {
-                    buf.insert(0, Entity.PATH_SEPARATOR);
-                }
-
-                buf.insert(0, reverse.getName());
-                hasRels = true;
-            }
-
-            return buf.toString();
-        }
-
-        public String forwardDbPath(ObjEntity e, String relPath) {
-            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, relPath);
-            Iterator it = e.resolvePathComponents(exp);
-            StringBuffer buf = new StringBuffer();
-
-            while (it.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) it.next();
-                Iterator dbRels = rel.getDbRelationships().iterator();
-                while (dbRels.hasNext()) {
-                    DbRelationship r = (DbRelationship) dbRels.next();
-                    if (buf.length() > 0) {
-                        buf.append(Entity.PATH_SEPARATOR);
-                    }
-
-                    buf.append(r.getName());
-                }
-            }
-
-            return buf.toString();
-        }
-
-        /**
-         * For a relationship path from source to target, builds a reverse path 
-         * from target to source.
-         */
-        public String reverseDbPath(ObjEntity e, String relPath) {
-            Iterator it = e.resolvePathComponents(relPath);
-            StringBuffer buf = new StringBuffer();
-            boolean hasRels = false;
-
-            while (it.hasNext()) {
-                ObjRelationship rel = (ObjRelationship) it.next();
-
-                Iterator dbRels = rel.getDbRelationships().iterator();
-                while (dbRels.hasNext()) {
-                    DbRelationship dbRel = (DbRelationship) dbRels.next();
-                    DbRelationship reverse = dbRel.getReverseRelationship();
-                    if (null == reverse) {
-                        throw new CayenneRuntimeException(
-                            "Unable to find reverse dbRelationship for dbRelationship "
-                                + dbRel.getName()
-                                + " on Entity "
-                                + dbRel.getSourceEntity().getName()
-                                + ".");
-                    }
-
-                    if (hasRels) {
-                        buf.insert(0, Entity.PATH_SEPARATOR);
-                    }
-
-                    buf.insert(0, reverse.getName());
-                    hasRels = true;
-                }
-            }
-
-            return buf.toString();
-        }
-
-        /** 
-         * Creates expression of the same type and same operands 
-         * as the original expression. Operands of the new expression
-         * are set to null.
-         */
-        public Expression createExpressionOfType(Expression e)
-            throws ExpressionException {
-            try {
-                Expression exp = (Expression) e.getClass().newInstance();
-                exp.setType(e.getType());
-                return exp;
-            }
-            catch (Exception ex) {
-                throw new ExpressionException("Error instantiating expression.", ex);
-            }
-        }
-
-        private void processOperand(Object operand, Expression parentNode) {
-            // attach operand to parent at index
-            if (parentNode != null) {
-                int ind = getOperandIndex(parentNode);
-                Expression parentPeer = getPeer(parentNode);
-                // operands of object expression need translation
-                if (parentPeer.getType() == Expression.OBJ_PATH) {
-                    if (prependObjPath == null) {
-                        //Change to a db path type expression,
-                        // because there is no ObjPath
-                        parentPeer.setType(Expression.DB_PATH);
-
-                        Iterator it = ent.resolvePathComponents(parentNode);
-                        Object lastComponent = null;
-                        while (it.hasNext()) {
-                            lastComponent = it.next();
-                        }
-                        if (lastComponent instanceof ObjAttribute) {
-                            ObjAttribute objAttr = (ObjAttribute) lastComponent;
-                            operand =
-                                processPath(
-                                    objAttr.getDbAttribute().getName(),
-                                    relationshipDbPath,
-                                    prependDbPath);
-                        }
-                        else {
-                            //Not sure what to do... just hope that this
-                            // will work I guess?
-                            operand =
-                                processPath(
-                                    (String) operand,
-                                    relationshipDbPath,
-                                    prependDbPath);
-
-                        }
-
-                    }
-                    else {
-                        //There is a reverse obj path.. use it
-                        operand =
-                            processPath(
-                                (String) operand,
-                                relationshipPath,
-                                prependObjPath);
-                    }
-                }
-                else if (parentPeer.getType() == Expression.DB_PATH) {
-                    operand =
-                        processPath((String) operand, relationshipDbPath, prependDbPath);
-                }
-                parentPeer.setOperand(ind, operand);
-            }
-        }
-
-        private String processPath(String path, String toPrefix, String fromPrefix) {
-            if (path.equals(toPrefix)) {
-                // 1. Path ends with prefetch entity - match PK
-                throw new CayenneRuntimeException(
-                    "Prefetching with path ending on "
-                        + "prefetch entity is not supported yet.");
-            }
-            else if (path.startsWith(toPrefix + Entity.PATH_SEPARATOR)) {
-                // 2. Path starts with prefetch entity - strip it.
-                return path.substring((toPrefix + Entity.PATH_SEPARATOR).length());
-            }
-            else {
-                // 3. Path has nothing to do with prefetch entity - prepend rel from prefetch
-                return fromPrefix + Entity.PATH_SEPARATOR + path;
-            }
-        }
-
-        private void processNode(Expression node, Expression parentNode) {
-            Expression e = createExpressionOfType(node);
-            expMap.put(node, e);
-            processOperand(e, parentNode);
-        }
-
-        public void startUnaryNode(Expression node, Expression parentNode) {
-            processNode(node, parentNode);
-        }
-
-        public void startBinaryNode(Expression node, Expression parentNode) {
-            processNode(node, parentNode);
-        }
-
-        public void startTernaryNode(Expression node, Expression parentNode) {
-            processNode(node, parentNode);
-        }
-
-        public void objectNode(Object leaf, Expression parentNode) {
-            processOperand(leaf, parentNode);
-        }
-
-        public void startListNode(Expression node, Expression parentNode) {
-            processNode(node, parentNode);
-        }
-
     }
 }

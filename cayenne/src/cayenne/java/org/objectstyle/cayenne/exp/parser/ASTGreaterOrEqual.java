@@ -76,6 +76,13 @@ public class ASTGreaterOrEqual extends SimpleNode {
     ASTGreaterOrEqual(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        return new ASTGreaterOrEqual(id);
+    }
 
     protected String getExpressionOperator(int index) {
         return ">=";

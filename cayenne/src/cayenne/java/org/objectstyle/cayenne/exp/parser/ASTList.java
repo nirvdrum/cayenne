@@ -79,6 +79,15 @@ public class ASTList extends SimpleNode {
         super(id);
     }
 
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTList copy = new ASTList(id);
+        copy.value = value;
+        return copy;
+    }
+
     public int getType() {
         return Expression.LIST;
     }
@@ -114,6 +123,19 @@ public class ASTList extends SimpleNode {
         }
 
         throw new ArrayIndexOutOfBoundsException(index);
+    }
+
+    public void setOperand(int index, Object value) {
+        if (index != 0) {
+            throw new ArrayIndexOutOfBoundsException(index);
+        }
+
+        if (value != null && !(value instanceof Collection)) {
+            throw new IllegalArgumentException(
+                "Collection expected, got: " + value.getClass().getName());
+        }
+
+        this.value = value;
     }
 
     public void jjtClose() {

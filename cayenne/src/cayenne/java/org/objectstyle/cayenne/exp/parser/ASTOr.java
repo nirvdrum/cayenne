@@ -80,6 +80,13 @@ public class ASTOr extends SimpleNode {
     ASTOr(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        return new ASTOr(id);
+    }
 
     protected String getExpressionOperator(int index) {
         return "or";

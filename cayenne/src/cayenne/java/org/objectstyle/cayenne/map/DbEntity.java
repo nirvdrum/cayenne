@@ -58,10 +58,15 @@ package org.objectstyle.cayenne.map;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.collections.Transformer;
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.map.event.MapEvent;
@@ -74,6 +79,8 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public class DbEntity extends Entity implements DbAttributeListener {
+    private static Logger logObj = Logger.getLogger(DbEntity.class);
+
     protected String catalog;
     protected String schema;
     protected List primaryKey;
@@ -308,6 +315,146 @@ public class DbEntity extends Entity implements DbAttributeListener {
                         this.primaryKey.add(dba);
                     }
                 }
+        }
+    }
+
+    /**
+     * Transforms Expression rooted in this entity to an analogous expression 
+     * rooted in related entity.
+     * 
+     * @since 1.1
+     */
+    public Expression translateToRelatedEntity(
+        Expression expression,
+        String relationshipPath) {
+
+        if (expression == null) {
+            return null;
+        }
+
+        if (relationshipPath == null) {
+            return expression;
+        }
+
+        return expression.transform(new RelationshipPathConverter(relationshipPath));
+    }
+
+    final class RelationshipPathConverter implements Transformer {
+        String relationshipPath;
+
+        RelationshipPathConverter(String relationshipPath) {
+            this.relationshipPath = relationshipPath;
+        }
+
+        public Object transform(Object input) {
+            if (!(input instanceof Expression)) {
+                return input;
+            }
+
+            Expression expression = (Expression) input;
+
+            if (expression.getType() != Expression.DB_PATH) {
+                return input;
+            }
+
+            String path = (String) expression.getOperand(0);
+            String converted = translatePath(path);
+            logObj.warn("transforming: " + path + " to " + converted);
+            Expression transformed =
+                ExpressionFactory.expressionOfType(Expression.DB_PATH);
+            transformed.setOperand(0, converted);
+            return transformed;
+        }
+
+        String translatePath(String path) {
+            // algorithm to determine the translated path:
+
+            // 1. If input completely includes relationship path, use input's remaining tail
+            // 2. If relationship path equals to input, throw an exception - we can't handle this case
+            // 3. If relationship path and input have none or a some leading components in common,
+            //    (a) strip common leading part; 
+            //    (b) reverse the remaining relationship part; 
+            //    (c) append remaining input to the reversed remaining relationship.
+
+            if (path.equals(relationshipPath)) {
+                throw new CayenneRuntimeException("Can't convert path ending on target entity.");
+            }
+
+            String relationshipPathWithDot = relationshipPath + Entity.PATH_SEPARATOR;
+            if (path.startsWith(relationshipPathWithDot)) {
+                return path.substring(relationshipPathWithDot.length());
+            }
+
+            Iterator pathIt = resolvePathComponents(path);
+            Iterator relationshipIt = resolvePathComponents(relationshipPath);
+
+            // for inserts from the both ends use LinkedList
+
+            LinkedList finalPath = new LinkedList();
+
+            while (relationshipIt.hasNext() && pathIt.hasNext()) {
+                // relationship path components must be DbRelationships
+                DbRelationship nextDBR = (DbRelationship) relationshipIt.next();
+
+                // expression components may be attributes or relationships
+                MapObject next = (MapObject) pathIt.next();
+
+                if (nextDBR != next) {
+                    // found split point
+                    // consume the last iteration components,
+                    // then break out to finish the iterators independenly
+                    prependReversedPath(finalPath, nextDBR);
+                    appendPath(finalPath, next);
+                    break;
+                }
+
+                break;
+            }
+
+            // append remainder of the relationship, reversing it
+            while (relationshipIt.hasNext()) {
+                DbRelationship nextDBR = (DbRelationship) relationshipIt.next();
+                prependReversedPath(finalPath, nextDBR);
+            }
+
+            while (pathIt.hasNext()) {
+                // components may be attributes or relationships
+                MapObject next = (MapObject) pathIt.next();
+                appendPath(finalPath, next);
+            }
+
+            StringBuffer converted = new StringBuffer();
+            int len = finalPath.size();
+            for (int i = 0; i < len; i++) {
+                if (i > 0) {
+                    converted.append(Entity.PATH_SEPARATOR);
+                }
+
+                converted.append(finalPath.get(i));
+            }
+
+            return converted.toString();
+        }
+
+        private void prependReversedPath(
+            LinkedList finalPath,
+            DbRelationship relationship) {
+            DbRelationship revNextDBR = relationship.getReverseRelationship();
+
+            if (revNextDBR == null) {
+                throw new CayenneRuntimeException(
+                    "Unable to find reverse DbRelationship for "
+                        + relationship.getSourceEntity().getName()
+                        + Entity.PATH_SEPARATOR
+                        + relationship.getName()
+                        + ".");
+            }
+
+            finalPath.addFirst(revNextDBR.getName());
+        }
+
+        private void appendPath(LinkedList finalPath, MapObject pathComponent) {
+            finalPath.addLast(pathComponent.getName());
         }
     }
 }

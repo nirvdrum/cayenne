@@ -74,6 +74,15 @@ public class ASTObjPath extends ASTPath {
         super(id);
     }
 
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTObjPath copy = new ASTObjPath(id);
+        copy.value = value;
+        return copy;
+    }
+
     public void encodeAsString(PrintWriter pw) {
         pw.print(value);
     }

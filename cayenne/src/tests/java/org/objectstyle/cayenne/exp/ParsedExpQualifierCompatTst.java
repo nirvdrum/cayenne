@@ -71,175 +71,160 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class ParsedExpQualifierCompatTst extends DataContextTestBase {
 
     private List execute(Class root, Expression qualifier) {
+        return execute(root, qualifier, null);
+    }
+
+    private List execute(Class root, Expression qualifier, String prefecth) {
         SelectQuery query = new SelectQuery(root, qualifier);
+        if (prefecth != null) {
+            query.addPrefetch(prefecth);
+        }
         return context.performQuery(query);
     }
 
     public void testOr() throws Exception {
         Expression parsed =
-            ExpressionFactory.expFromString(
-                "artistName='artist1' or artistName='artist3'");
+            Expression.fromString("artistName='artist1' or artistName='artist3'");
         assertEquals(2, execute(Artist.class, parsed).size());
 
         parsed =
-            ExpressionFactory.expFromString(
+            Expression.fromString(
                 "artistName='artist1' or artistName='artist3' or artistName='artist5'");
         assertEquals(3, execute(Artist.class, parsed).size());
     }
 
     public void testAnd() throws Exception {
         Expression parsed =
-            ExpressionFactory.expFromString(
-                "artistName='artist1' and artistName='artist1'");
+            Expression.fromString("artistName='artist1' and artistName='artist1'");
         assertEquals(1, execute(Artist.class, parsed).size());
 
-        parsed =
-            ExpressionFactory.expFromString(
-                "artistName='artist1' and artistName='artist3'");
+        parsed = Expression.fromString("artistName='artist1' and artistName='artist3'");
         assertEquals(0, execute(Artist.class, parsed).size());
     }
 
     public void testNot() throws Exception {
-        Expression parsed1 =
-            ExpressionFactory.expFromString("not artistName='artist3'");
+        Expression parsed1 = Expression.fromString("not artistName='artist3'");
         assertEquals(artistCount - 1, execute(Artist.class, parsed1).size());
 
-        Expression parsed2 =
-            ExpressionFactory.expFromString("not artistName='artist3'");
+        Expression parsed2 = Expression.fromString("not artistName='artist3'");
         assertEquals(artistCount - 1, execute(Artist.class, parsed2).size());
     }
 
     public void testEqual() throws Exception {
-        Expression parsed1 =
-            ExpressionFactory.expFromString("artistName='artist3'");
+        Expression parsed1 = Expression.fromString("artistName='artist3'");
         assertEquals(1, execute(Artist.class, parsed1).size());
+        
+        // test with prefetch... this type of expressions should work with prefetches
+        assertEquals(1, execute(Artist.class, parsed1, "paintingArray").size());
 
-        Expression parsed2 =
-            ExpressionFactory.expFromString("artistName=='artist3'");
+        Expression parsed2 = Expression.fromString("artistName=='artist3'");
         assertEquals(1, execute(Artist.class, parsed2).size());
     }
 
     public void testNotEqual() throws Exception {
-        Expression parsed1 =
-            ExpressionFactory.expFromString("artistName!='artist3'");
+        Expression parsed1 = Expression.fromString("artistName!='artist3'");
         assertEquals(artistCount - 1, execute(Artist.class, parsed1).size());
 
-        Expression parsed2 =
-            ExpressionFactory.expFromString("artistName<>'artist3'");
+        Expression parsed2 = Expression.fromString("artistName<>'artist3'");
         assertEquals(artistCount - 1, execute(Artist.class, parsed2).size());
     }
 
     public void testLessThan() throws Exception {
         populatePaintings();
-        Expression parsed1 =
-            ExpressionFactory.expFromString("estimatedPrice < 2000.0");
+        Expression parsed1 = Expression.fromString("estimatedPrice < 2000.0");
         assertEquals(1, execute(Painting.class, parsed1).size());
     }
 
     public void testLessThanEqualTo() throws Exception {
         populatePaintings();
-        Expression parsed1 =
-            ExpressionFactory.expFromString("estimatedPrice <= 2000.0");
+        Expression parsed1 = Expression.fromString("estimatedPrice <= 2000.0");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 
     public void testGreaterThan() throws Exception {
         populatePaintings();
-        Expression parsed1 =
-            ExpressionFactory.expFromString("estimatedPrice > 2000");
+        Expression parsed1 = Expression.fromString("estimatedPrice > 2000");
         assertEquals(artistCount - 2, execute(Painting.class, parsed1).size());
     }
 
     public void testGreaterThanEqualTo() throws Exception {
         populatePaintings();
-        Expression parsed1 =
-            ExpressionFactory.expFromString("estimatedPrice >= 2000");
+        Expression parsed1 = Expression.fromString("estimatedPrice >= 2000");
         assertEquals(artistCount - 1, execute(Painting.class, parsed1).size());
     }
 
     public void testLike() throws Exception {
-        Expression parsed1 =
-            ExpressionFactory.expFromString("artistName like 'artist%2'");
+        Expression parsed1 = Expression.fromString("artistName like 'artist%2'");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testLikeIgnoreCase() throws Exception {
         Expression parsed1 =
-            ExpressionFactory.expFromString(
-                "artistName likeIgnoreCase 'artist%2'");
+            Expression.fromString("artistName likeIgnoreCase 'artist%2'");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotLike() throws Exception {
-        Expression parsed1 =
-            ExpressionFactory.expFromString("artistName not like 'artist%2'");
+        Expression parsed1 = Expression.fromString("artistName not like 'artist%2'");
         assertEquals(artistCount - 3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotLikeIgnoreCase() throws Exception {
         Expression parsed1 =
-            ExpressionFactory.expFromString(
-                "artistName not likeIgnoreCase 'artist%2'");
+            Expression.fromString("artistName not likeIgnoreCase 'artist%2'");
         assertEquals(artistCount - 3, execute(Artist.class, parsed1).size());
     }
 
     public void testIn() throws Exception {
         Expression parsed1 =
-            ExpressionFactory.expFromString(
-                "artistName in ('artist1', 'artist3', 'artist19')");
+            Expression.fromString("artistName in ('artist1', 'artist3', 'artist19')");
         assertEquals(3, execute(Artist.class, parsed1).size());
     }
 
     public void testNotIn() throws Exception {
         Expression parsed1 =
-            ExpressionFactory.expFromString(
-                "artistName not in ('artist1', 'artist3', 'artist19')");
+            Expression.fromString("artistName not in ('artist1', 'artist3', 'artist19')");
         assertEquals(artistCount - 3, execute(Artist.class, parsed1).size());
     }
 
     public void testBetween() throws Exception {
         populatePaintings();
         Expression parsed1 =
-            ExpressionFactory.expFromString(
-                "estimatedPrice between 2000.0 and 4000.0");
+            Expression.fromString("estimatedPrice between 2000.0 and 4000.0");
         assertEquals(3, execute(Painting.class, parsed1).size());
     }
 
     public void testNotBetween() throws Exception {
         populatePaintings();
         Expression parsed1 =
-            ExpressionFactory.expFromString(
-                "estimatedPrice not between 2000.0 and 4000.0");
+            Expression.fromString("estimatedPrice not between 2000.0 and 4000.0");
         assertEquals(artistCount - 3, execute(Painting.class, parsed1).size());
     }
 
     public void testParameter() throws Exception {
         Map parameters = new HashMap();
         parameters.put("artistName", "artist5");
-        Expression parsed1 =
-            ExpressionFactory.expFromString("artistName=$artistName");
+        Expression parsed1 = Expression.fromString("artistName=$artistName");
         parsed1 = parsed1.expWithParameters(parameters);
         assertEquals(1, execute(Artist.class, parsed1).size());
     }
 
     public void testDbExpression() throws Exception {
-        Expression parsed1 =
-            ExpressionFactory.expFromString("db:ARTIST_NAME='artist3'");
+        Expression parsed1 = Expression.fromString("db:ARTIST_NAME='artist3'");
         assertEquals(1, execute(Artist.class, parsed1).size());
     }
 
     public void testFloatExpression() throws Exception {
         populatePaintings();
-        Expression parsed1 =
-            ExpressionFactory.expFromString("estimatedPrice < 2000.01");
+        Expression parsed1 = Expression.fromString("estimatedPrice < 2000.01");
         assertEquals(2, execute(Painting.class, parsed1).size());
     }
 
     public void testNullExpression() throws Exception {
-        Expression parsed1 = ExpressionFactory.expFromString("artistName!=null");
+        Expression parsed1 = Expression.fromString("artistName!=null");
         assertEquals(artistCount, execute(Artist.class, parsed1).size());
 
-        Expression parsed2 = ExpressionFactory.expFromString("artistName = null");
+        Expression parsed2 = Expression.fromString("artistName = null");
         assertEquals(0, execute(Artist.class, parsed2).size());
     }
 }

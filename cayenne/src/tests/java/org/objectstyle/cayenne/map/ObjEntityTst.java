@@ -55,54 +55,118 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class ObjEntityTst extends CayenneTestCase {
-	protected ObjEntity ent;
+    protected ObjEntity ent;
 
-	public void setUp() throws Exception {
-		ent = new ObjEntity();
-	}
+    public void setUp() throws Exception {
+        ent = new ObjEntity();
+    }
 
-	public void testClassName() throws Exception {
-		String tstName = "tst_name";
-		ent.setClassName(tstName);
-		assertEquals(tstName, ent.getClassName());
-	}
+    public void testClassName() throws Exception {
+        String tstName = "tst_name";
+        ent.setClassName(tstName);
+        assertEquals(tstName, ent.getClassName());
+    }
 
-	public void testSuperClassName() throws Exception {
-		String tstName = "super_tst_name";
-		ent.setSuperClassName(tstName);
-		assertEquals(tstName, ent.getSuperClassName());
-	}
-	
-	public void testAttributeForDbAttribute() throws Exception {
-		ObjEntity ae =
-			getDomain().getEntityResolver().lookupObjEntity("Artist");
-		DbEntity dae = ae.getDbEntity();
+    public void testSuperClassName() throws Exception {
+        String tstName = "super_tst_name";
+        ent.setSuperClassName(tstName);
+        assertEquals(tstName, ent.getSuperClassName());
+    }
 
-		assertNull(
-			ae.getAttributeForDbAttribute(
-				(DbAttribute) dae.getAttribute("ARTIST_ID")));
-		assertNotNull(
-			ae.getAttributeForDbAttribute(
-				(DbAttribute) dae.getAttribute("ARTIST_NAME")));
-	}
+    public void testAttributeForDbAttribute() throws Exception {
+        ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity("Artist");
+        DbEntity dae = ae.getDbEntity();
 
-	public void testRelationshipForDbRelationship() throws Exception {
-		ObjEntity ae =
-			getDomain().getEntityResolver().lookupObjEntity("Artist");
-		DbEntity dae = ae.getDbEntity();
+        assertNull(
+            ae.getAttributeForDbAttribute((DbAttribute) dae.getAttribute("ARTIST_ID")));
+        assertNotNull(
+            ae.getAttributeForDbAttribute((DbAttribute) dae.getAttribute("ARTIST_NAME")));
+    }
 
-		assertNull(ae.getRelationshipForDbRelationship(new DbRelationship()));
-		assertNotNull(
-			ae.getRelationshipForDbRelationship(
-				(DbRelationship) dae.getRelationship("paintingArray")));
-	}
-	
-	public void testReadOnly() throws Exception {
-		assertFalse(ent.isReadOnly());
-		ent.setReadOnly(true);
-		assertTrue(ent.isReadOnly());
-	}
+    public void testRelationshipForDbRelationship() throws Exception {
+        ObjEntity ae = getDomain().getEntityResolver().lookupObjEntity("Artist");
+        DbEntity dae = ae.getDbEntity();
+
+        assertNull(ae.getRelationshipForDbRelationship(new DbRelationship()));
+        assertNotNull(
+            ae.getRelationshipForDbRelationship(
+                (DbRelationship) dae.getRelationship("paintingArray")));
+    }
+
+    public void testReadOnly() throws Exception {
+        assertFalse(ent.isReadOnly());
+        ent.setReadOnly(true);
+        assertTrue(ent.isReadOnly());
+    }
+
+    public void testTranslateToRelatedEntityIndependentPath() throws Exception {
+        ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("paintingArray");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString("db:toArtist.paintingArray"),
+            translated);
+    }
+
+    public void testTranslateToRelatedEntityTrimmedPath() throws Exception {
+        ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("artistExhibitArray.toExhibit");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString("db:toExhibit"),
+            translated);
+    }
+
+    public void testTranslateToRelatedEntitySplitHalfWay() throws Exception {
+        ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("paintingArray.toPaintingInfo.textReview");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "paintingArray.toGallery");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString("db:paintingArray.toPaintingInfo.TEXT_REVIEW"),
+            translated);
+    }
+
+    public void testTranslateToRelatedEntityMatchingPath() throws Exception {
+        ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("artistExhibitArray.toExhibit");
+
+        try {
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray.toExhibit");
+            fail();
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
+    }
+
+    public void testTranslateToRelatedEntityMultiplePaths() throws Exception {
+        ObjEntity artistE = getDomain().getEntityResolver().lookupObjEntity(Artist.class);
+
+        Expression e1 =
+            Expression.fromString(
+                "paintingArray = $p and artistExhibitArray.toExhibit.closingDate = $d");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString(
+                "db:toArtist.paintingArray = $p and db:toExhibit.CLOSING_DATE = $d"),
+            translated);
+    }
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.access.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, version 1.1
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.access.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.access.util;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Painting;
@@ -92,7 +92,7 @@ public class QueryUtilsTst extends CayenneTestCase {
 
         Expression newPath = (Expression) reverseQ.getQualifier().getOperand(0);
         assertNotNull("Null path operand.", newPath);
-        assertEquals("toArtist.artistName", newPath.getOperand(0));
+        assertEquals("toArtist.ARTIST_NAME", newPath.getOperand(0));
     }
 
     public void testSelectPrefetchPath2() throws Exception {

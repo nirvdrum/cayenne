@@ -76,6 +76,15 @@ public class ListExpression extends Expression {
     public ListExpression(int type) {
         this.type = type;
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     * 
+     * @since 1.1
+     */
+    public Expression shallowCopy() {
+        return new ListExpression(type);
+    }
 
     /**
      * Returns the number of operands currently in the list.

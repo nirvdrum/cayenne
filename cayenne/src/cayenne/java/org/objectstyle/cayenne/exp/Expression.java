@@ -64,9 +64,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.Transformer;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.parser.ExpressionParser;
 import org.objectstyle.cayenne.exp.parser.ParseException;
@@ -177,7 +179,6 @@ public abstract class Expression implements Serializable, XMLSerializable {
 
     protected int type;
 
-
     /**
      * Parses string, converting it to Expression. If string does
      * not represent a semantically correct expression, an ExpressionException
@@ -198,7 +199,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
             throw new ExpressionException(ex.getMessage(), ex);
         }
     }
-    
+
     /**
      * Returns String label for this expression. Used for debugging.
      */
@@ -435,6 +436,37 @@ public abstract class Expression implements Serializable, XMLSerializable {
     }
 
     /**
+     * Clones this expression.
+     * 
+     * @since 1.1
+     */
+    public Expression deepCopy() {
+        return transform(null);
+    }
+
+    /**
+     * Creates a transformed copy of this expression applying 
+     * transformation provided by Transformer to all its nodes.
+     * Null transformer will result in an identical deep copy of
+     * this expression.
+     *
+     * @since 1.1
+     */
+    public Expression transform(Transformer transformer) {
+        ExpressionDeepCopy transformEngine = new ExpressionDeepCopy(transformer);
+        traverse(transformEngine);
+
+        return transformEngine.getTransformed();
+    }
+
+    /**
+     * Creates a copy of this expression node, without copying children.
+     * 
+     * @since 1.1
+     */
+    public abstract Expression shallowCopy();
+
+    /**
      * Traverses a itself and tree of child expressions invoking visitor callback
      * methods as it goes. This is an Expression-specific "Visitor"
      * pattern implementation.
@@ -459,7 +491,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
         Object expressionObj,
         Expression parentExp,
         TraversalHandler visitor) {
-            
+
         // see if "expObj" is a leaf node
         if (!(expressionObj instanceof Expression)) {
             visitor.objectNode(expressionObj, parentExp);
@@ -575,10 +607,98 @@ public abstract class Expression implements Serializable, XMLSerializable {
         return buffer.toString();
     }
 
-    /**
-     * Helper class to process parameterized expressions.
-     */
-    class ParametrizedExpressionBuilder extends TraversalHelper {
+    // ====================================================
+    // Deep copy traversal handler
+    // ====================================================
+    final class ExpressionDeepCopy implements TraversalHandler {
+        Transformer transformer;
+        LinkedList stack;
+
+        ExpressionDeepCopy(Transformer transformer) {
+            this.transformer = transformer;
+            this.stack = new LinkedList();
+        }
+
+        public Expression getTransformed() {
+            return (Expression) stack.getLast();
+        }
+
+        public void objectNode(Object leaf, Expression parentNode) {
+            stack.addLast(leaf);
+        }
+
+        public void finishedChild(
+            Expression node,
+            int childIndex,
+            boolean hasMoreChildren) {
+
+            Object childCopy = stack.removeLast();
+
+            // there is always be a parent clone on the stack, 
+            // so the line below is safe
+
+            Expression parentCopy = (Expression) stack.getLast();
+            parentCopy.setOperand(childIndex, childCopy);
+        }
+
+        void startNode(Expression node, Expression parentNode) {
+            stack.addLast(node.shallowCopy());
+        }
+
+        void endNode() {
+            // now that the clone's children are fully assembled,
+            // apply trasformer... First pick and see if transformer
+            // changes an objects, and if so, re-insert it to the 
+            // top of the stack
+            
+            if(transformer != null) {
+                Object object = stack.getLast();
+                Object transformed = transformer.transform(object);
+                
+                if(object != transformed) {
+                    stack.removeLast();
+                    stack.addLast(transformed);
+                }
+            }
+        }
+
+        public void startUnaryNode(Expression node, Expression parentNode) {
+            startNode(node, parentNode);
+        }
+
+        public void startBinaryNode(Expression node, Expression parentNode) {
+            startNode(node, parentNode);
+        }
+
+        public void startTernaryNode(Expression node, Expression parentNode) {
+            startNode(node, parentNode);
+        }
+
+        public void startListNode(Expression node, Expression parentNode) {
+            startNode(node, parentNode);
+        }
+
+        public void endUnaryNode(Expression node, Expression parentNode) {
+            endNode();
+        }
+
+        public void endBinaryNode(Expression node, Expression parentNode) {
+            endNode();
+        }
+
+        public void endTernaryNode(Expression node, Expression parentNode) {
+            endNode();
+        }
+
+        public void endListNode(Expression node, Expression parentNode) {
+            endNode();
+        }
+    }
+
+    // ====================================================
+    // Helper class to process parameterized expressions.
+    // ====================================================
+    final class ParametrizedExpressionBuilder extends TraversalHelper {
         protected final Expression fakeTopLevelParent = new UnaryExpression();
         protected Expression proto;
 

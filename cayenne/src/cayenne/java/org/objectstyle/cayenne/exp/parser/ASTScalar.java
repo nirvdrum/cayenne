@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.exp.parser;
 
 import java.io.PrintWriter;
 
+import org.objectstyle.cayenne.exp.Expression;
+
 /**
  * A scalar value wrapper expression.
  * 
@@ -75,6 +77,15 @@ public class ASTScalar extends SimpleNode {
      */
     ASTScalar(int id) {
         super(id);
+    }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTScalar copy = new ASTScalar(id);
+        copy.value = value;
+        return copy;
     }
 
     public void encodeAsString(PrintWriter pw) {

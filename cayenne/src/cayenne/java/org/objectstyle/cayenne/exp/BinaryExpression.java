@@ -67,6 +67,7 @@ import java.io.PrintWriter;
 public class BinaryExpression extends Expression {
     protected Object leftOperand;
     protected Object rightOperand;
+    
     public BinaryExpression() {}
     
     public BinaryExpression(int type) {
@@ -77,6 +78,14 @@ public class BinaryExpression extends Expression {
         return 2;
     }
     
+    /**
+     * Creates a copy of this expression node, without copying children.
+     * 
+     * @since 1.1
+     */
+    public Expression shallowCopy() {
+        return new BinaryExpression(type);
+    }
     
     public Object getOperand(int index) {
         if(index == 0)

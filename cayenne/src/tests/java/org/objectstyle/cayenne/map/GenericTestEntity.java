@@ -85,4 +85,10 @@ public class GenericTestEntity extends Entity {
         throws ExpressionException {
         return null;
     }
+
+    public Expression translateToRelatedEntity(
+        Expression expression,
+        String relationshipPath) {
+        return null;
+    }
 }

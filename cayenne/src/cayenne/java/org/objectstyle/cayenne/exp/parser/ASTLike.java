@@ -72,6 +72,16 @@ public class ASTLike extends SimpleNode {
     ASTLike(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTLike copy = new ASTLike(id);
+        copy.negating = negating;
+        copy.ignoringCase = ignoringCase;
+        return copy;
+    }
 
     protected String getExpressionOperator(int index) {
         if (negating) {

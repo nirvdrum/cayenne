@@ -79,6 +79,15 @@ public class ASTIn extends SimpleNode {
         super(id);
     }
 
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTIn copy = new ASTIn(id);
+        copy.negating = negating;
+        return copy;
+    }
+
     protected String getExpressionOperator(int index) {
         return (negating) ? "not in" : "in";
     }

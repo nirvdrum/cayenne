@@ -74,6 +74,15 @@ public class UnaryExpression extends Expression {
     public UnaryExpression(int type) {
         this.type = type;
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     * 
+     * @since 1.1
+     */
+    public Expression shallowCopy() {
+        return new UnaryExpression(type);
+    }
 
     public final int getOperandCount() {
         return 1;

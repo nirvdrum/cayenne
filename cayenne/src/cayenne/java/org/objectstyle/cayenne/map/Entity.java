@@ -262,16 +262,21 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Processes expression <code>objPathExp</code> and returns an Iterator
+     * Translates Expression rooted in this entity to an analogous expression 
+     * rooted in related entity.
+     * 
+     * @since 1.1
+     */
+    public abstract Expression translateToRelatedEntity(
+        Expression expression,
+        String relationshipPath);
+
+    /**
+     * Processes expression <code>pathExp</code> and returns an Iterator
      * of path components that contains a sequence of Attributes and Relationships.
      * Note that if path is invalid and can not be resolved from this entity,
      * this method will still return an Iterator, but an attempt to read the first
      * invalid path component will result in ExpressionException.
-     *
-     * @see org.objectstyle.cayenne.exp.Expression#OBJ_PATH for definition of OBJ_PATH.
-     *
-     * @throws org.objectstyle.cayenne.exp.ExpressionException Exception is thrown if
-     * <code>objPathExp</code> is not of type OBJ_PATH
      */
     public abstract Iterator resolvePathComponents(Expression pathExp)
         throws ExpressionException;
@@ -283,7 +288,7 @@ public abstract class Entity extends MapObject {
     // An iterator resolving mapping components represented by the path string.
     // This entity is assumed to be the root of the path.
     final class PathIterator implements Iterator {
-        
+
         private StringTokenizer toks;
         private Entity currentEnt;
         private String path;

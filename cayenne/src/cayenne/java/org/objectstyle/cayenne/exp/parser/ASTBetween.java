@@ -77,6 +77,15 @@ public class ASTBetween extends SimpleNode {
     ASTBetween(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTBetween copy = new ASTBetween(id);
+        copy.negating = negating;
+        return copy;
+    }
 
     protected String getExpressionOperator(int index) {
         return (index == 2) ? "and" : (negating) ? "not between" : "between";

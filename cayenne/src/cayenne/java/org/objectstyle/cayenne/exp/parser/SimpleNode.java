@@ -167,7 +167,11 @@ public abstract class SimpleNode extends Expression implements Node {
     }
 
     public void setOperand(int index, Object value) {
-        throw new UnsupportedOperationException("'setOperand' not supported.");
+        Node node =
+            (value == null || value instanceof Node)
+                ? (Node) value
+                : new ASTScalar(value);
+        jjtAddChild(node, index);
     }
 
     public void jjtOpen() {
@@ -182,7 +186,7 @@ public abstract class SimpleNode extends Expression implements Node {
     public void jjtSetParent(Node n) {
         parent = n;
     }
-    
+
     public Node jjtGetParent() {
         return parent;
     }

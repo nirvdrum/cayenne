@@ -57,6 +57,9 @@ package org.objectstyle.cayenne.map;
 
 import java.util.List;
 
+import org.objectstyle.art.Artist;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class DbEntityTst extends CayenneTestCase {
@@ -67,15 +70,15 @@ public class DbEntityTst extends CayenneTestCase {
     }
 
     public void testConstructor1() throws Exception {
-    	ent = new DbEntity();
-    	assertNull(ent.getName());
+        ent = new DbEntity();
+        assertNull(ent.getName());
     }
-    
+
     public void testConstructor2() throws Exception {
-    	ent = new DbEntity("abc");
-    	assertEquals("abc", ent.getName());
+        ent = new DbEntity("abc");
+        assertEquals("abc", ent.getName());
     }
-    
+
     public void testCatalog() throws Exception {
         String tstName = "tst_name";
         ent.setCatalog(tstName);
@@ -119,43 +122,43 @@ public class DbEntityTst extends CayenneTestCase {
         assertSame(a2, pk.get(0));
     }
 
-	public void testAddPKAttribute() {
-		DbAttribute a1 = new DbAttribute();
-		a1.setName("a1");
-		a1.setPrimaryKey(false);
+    public void testAddPKAttribute() {
+        DbAttribute a1 = new DbAttribute();
+        a1.setName("a1");
+        a1.setPrimaryKey(false);
 
-		assertTrue(ent.getPrimaryKey().isEmpty());
-		ent.addAttribute(a1);
-		assertTrue(ent.getPrimaryKey().isEmpty());
-	}
+        assertTrue(ent.getPrimaryKey().isEmpty());
+        ent.addAttribute(a1);
+        assertTrue(ent.getPrimaryKey().isEmpty());
+    }
 
-	public void testChangeAttributeToPK() {
-		DbAttribute a1 = new DbAttribute();
-		a1.setName("a1");
-		a1.setPrimaryKey(false);
-		ent.addAttribute(a1);
+    public void testChangeAttributeToPK() {
+        DbAttribute a1 = new DbAttribute();
+        a1.setName("a1");
+        a1.setPrimaryKey(false);
+        ent.addAttribute(a1);
 
-		assertFalse(ent.getPrimaryKey().contains(a1));
-		a1.setPrimaryKey(true);
-		assertTrue(ent.getPrimaryKey().contains(a1));
-	}
+        assertFalse(ent.getPrimaryKey().contains(a1));
+        a1.setPrimaryKey(true);
+        assertTrue(ent.getPrimaryKey().contains(a1));
+    }
 
-	public void testChangePKAttribute() {
-		DbAttribute a1 = new DbAttribute();
-		a1.setName("a1");
-		a1.setPrimaryKey(true);
-		ent.addAttribute(a1);
+    public void testChangePKAttribute() {
+        DbAttribute a1 = new DbAttribute();
+        a1.setName("a1");
+        a1.setPrimaryKey(true);
+        ent.addAttribute(a1);
 
-		assertTrue(ent.getPrimaryKey().contains(a1));
-		a1.setPrimaryKey(false);
-		assertFalse(ent.getPrimaryKey().contains(a1));
-	}
+        assertTrue(ent.getPrimaryKey().contains(a1));
+        a1.setPrimaryKey(false);
+        assertFalse(ent.getPrimaryKey().contains(a1));
+    }
 
     public void testRemovAttribute() throws Exception {
         DataMap map = new DataMap("map");
         ent.setName("ent");
         map.addDbEntity(ent);
-       
+
         DbAttribute a1 = new DbAttribute();
         a1.setName("a1");
         a1.setPrimaryKey(false);
@@ -189,5 +192,55 @@ public class DbEntityTst extends CayenneTestCase {
         assertNull(ent.getAttribute(a1.getName()));
         assertEquals(0, rel1.getJoins().size());
         assertEquals(0, rel.getJoins().size());
+    }
+
+    public void testTranslateToRelatedEntityIndependentPath() throws Exception {
+        DbEntity artistE = getDomain().getEntityResolver().lookupDbEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("db:paintingArray");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString("db:toArtist.paintingArray"),
+            translated);
+    }
+
+    public void testTranslateToRelatedEntityTrimmedPath() throws Exception {
+        DbEntity artistE = getDomain().getEntityResolver().lookupDbEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("db:artistExhibitArray.toExhibit");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString("db:toExhibit"),
+            translated);
+    }
+    
+    public void testTranslateToRelatedEntitySplitHalfWay() throws Exception {
+        DbEntity artistE = getDomain().getEntityResolver().lookupDbEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("db:paintingArray.toPaintingInfo.TEXT_REVIEW");
+        Expression translated =
+            artistE.translateToRelatedEntity(e1, "paintingArray.toGallery");
+        assertEquals(
+            "failure: " + translated,
+            Expression.fromString("db:paintingArray.toPaintingInfo.TEXT_REVIEW"),
+            translated);
+    }
+
+    public void testTranslateToRelatedEntityMatchingPath() throws Exception {
+        DbEntity artistE = getDomain().getEntityResolver().lookupDbEntity(Artist.class);
+
+        Expression e1 = Expression.fromString("db:artistExhibitArray.toExhibit");
+
+        try {
+            artistE.translateToRelatedEntity(e1, "artistExhibitArray.toExhibit");
+            fail();
+        }
+        catch (CayenneRuntimeException e) {
+            // expected
+        }
     }
 }

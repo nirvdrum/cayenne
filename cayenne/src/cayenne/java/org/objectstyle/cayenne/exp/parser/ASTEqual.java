@@ -79,6 +79,15 @@ public class ASTEqual extends SimpleNode {
     ASTEqual(int id) {
         super(id);
     }
+    
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTEqual copy = new ASTEqual(id);
+        copy.negating = negating;
+        return copy;
+    }
 
     protected String getExpressionOperator(int index) {
         return (negating) ? "!=" : "=";

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.exp.parser;
 
+import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionParameter;
 
@@ -72,6 +73,15 @@ public class ASTNamedParameter extends ASTScalar {
 
     ASTNamedParameter(int id) {
         super(id);
+    }
+
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        ASTNamedParameter copy = new ASTNamedParameter(id);
+        copy.value = value;
+        return copy;
     }
 
     protected void setValue(Object value) {

@@ -83,6 +83,14 @@ public class ASTAnd extends SimpleNode {
     ASTAnd(int id) {
         super(id);
     }
+    
+
+    /**
+     * Creates a copy of this expression node, without copying children.
+     */
+    public Expression shallowCopy() {
+        return new ASTAnd(id);
+    }
 
     public int getType() {
         return Expression.AND;
