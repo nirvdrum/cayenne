@@ -63,12 +63,13 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
-import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjEntity;
 
-/** Abstract superclass of Query translators.
- *  Defines callback methods for helper classes 
- *  that are delegated tasks of building query parts.
+/** 
+ * Abstract superclass of Query translators.
  *
  * @author Andrei Adamchik 
  */
@@ -87,10 +88,12 @@ public abstract class QueryAssembler extends QueryTranslator {
     /** Processes a join being added. */
     public abstract void dbRelationshipAdded(DbRelationship dbRel);
 
-    /** Translates query into sql string. This is a workhorse
-    * method of QueryAssembler. It is called internally from
-    * <code>createStatement</code>. Usually there is no need
-    * to invoke it explicitly. */
+    /** 
+     * Translates query into sql string. This is a workhorse
+     * method of QueryAssembler. It is called internally from
+     * <code>createStatement</code>. Usually there is no need
+     * to invoke it explicitly. 
+     */
     public abstract String createSqlString() throws java.lang.Exception;
 
     /** 
@@ -128,8 +131,9 @@ public abstract class QueryAssembler extends QueryTranslator {
 
     /** Translates internal query into PreparedStatement. */
     public PreparedStatement createStatement(Level logLevel) throws Exception {
+    	long t1 = System.currentTimeMillis();
         String sqlStr = createSqlString();
-        QueryLogger.logQuery(logLevel, sqlStr, values);
+        QueryLogger.logQuery(logLevel, sqlStr, values, System.currentTimeMillis() - t1);
         PreparedStatement stmt = con.prepareStatement(sqlStr);
         initStatement(stmt);
         return stmt;

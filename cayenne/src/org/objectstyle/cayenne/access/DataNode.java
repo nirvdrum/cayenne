@@ -332,6 +332,8 @@ public class DataNode implements QueryEngine {
 		QueryTranslator transl)
 		throws Exception {
 
+		long t1 = System.currentTimeMillis();
+
 		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
 		DefaultResultIterator it =
 			(assembler.getFetchLimit() > 0)
@@ -347,7 +349,10 @@ public class DataNode implements QueryEngine {
 		// note that we don't need to close ResultIterator
 		// since "dataRows" will do it internally
 		List resultRows = it.dataRows();
-		QueryLogger.logSelectCount(observer.queryLogLevel(), resultRows.size());
+		QueryLogger.logSelectCount(
+			observer.queryLogLevel(),
+			resultRows.size(),
+			System.currentTimeMillis() - t1);
 		observer.nextDataRows(transl.getQuery(), resultRows);
 	}
 
