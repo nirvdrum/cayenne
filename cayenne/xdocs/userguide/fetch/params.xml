@@ -9,8 +9,84 @@
 <body>
     <section name="7. Using SelectQueries">        
         <subsection name="7.5 Reusing SelectQueries: Parametrized Queries.">
-	<p>TO BE DONE		
-	</p>
+		<p>SelectQuery objects can be rather complex. They may contain big qualifiers
+    	and lots of tuning parameters. <i>Parametrized Queries</i> is a feature in Cayenne
+    	that addresses reusability of complex queries. With this feature, for each group of queries
+    	that differ only in the values used in the qualifier, a developer may create a single shared
+    	"prototype" query, and use it later as a factory for other queries. All settings
+    	configured in the prototype object will be passed to the final queries. Qualifier of the 
+    	prototype query may use named parameters that are substituted for real values when a final
+    	query is created from the prototype. Each named parameter is an instance of <a href=
+    	"../../api/cayenne/org/objectstyle/cayenne/exp/ExpressionParam.html">ExpressionParam</a>
+    	class.
+		</p>             	
+	<p>Here is an example of building a prototype query:</p>
+<source>import java.util.List;
+import java.util.ArrayList;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+...
+
+// create a qualifier with two named parameters: "pname" and "aname"
+List list = new ArrayList();
+list.add(ExpressionFactory.matchExp("paintingTitle", new ExpressionParam("pname")));
+list.add(ExpressionFactory.matchExp("toArtist.artistName", new ExpressionParam("aname")));
+Expression qual = ExpressionFactory.joinExp(Expression.OR, list);
+
+// build a prototype of a query
+// "prototype" is simply another select query
+SelectQuery proto = new SelectQuery(Painting.class, qual);
+proto.setDistinct(true);
+</source>
+
+		<p>Prototype built in the example above can be used to create other queries. API used is:</p>
+		<ul>
+			<li>public SelectQuery <b>queryWithParams</b>(Map params, boolean pruneMissing)<br/>
+            Creates and returns a new SelectQuery using current query as a prototype. Map of 
+            parameters is used to substitute named parameters in the qualifier with the real values.
+            Returned query is a independent from the original prototype and can be customized at
+            will. <code>pruneMissing</code> defines the method behavior for situations when 
+            some of the named parameters don't have their values resolved in the provided map. 
+            If set to <code>true</code>, Cayenne would prune expressions that can not be resolved.
+            If set to <code>false</code>, the method would throw an exception if some of the values
+            are missing.
+            <p></p>
+            </li>
+            
+			<li>public SelectQuery <b>queryWithParams</b>(Map params)<br/>
+            A shortcut for <code>public SelectQuery queryWithParams(Map params, true)</code>.
+            <p></p>
+            </li>
+        </ul>
+        <p>Extending the example above, the following example shows how to
+        build a query from a parametrized prototype:</p>
+        
+<source>import java.util.Map;
+import java.util.HashMap;
+import org.objectstyle.cayenne.query.SelectQuery;
+...
+
+SelectQuery proto = ... // this was built in the example above
+
+// create a query
+Map params1 = new HashMap();
+params1.set("aname", "Dali");
+SelectQuery query1 = proto.queryWithParams(params1);
+
+// further customize returned query 
+// without affecting the prototype
+query1.setFetchLimit(100);
+... 
+
+// create another query with a different set of parameters
+Map params2 = new HashMap();
+params2.set("aname", "Monet");
+params2.set("pname", "The Beach at Trouville");
+SelectQuery query2 = proto.queryWithParams(params2);
+... 
+
+</source>
         </subsection>
     </section>
 </body>
