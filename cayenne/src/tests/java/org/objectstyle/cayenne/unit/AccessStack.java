@@ -65,8 +65,10 @@ import org.objectstyle.cayenne.access.DataNode;
  */
 public interface AccessStack {
     public AccessStackAdapter getAdapter(DataNode node);
-    
+
     public DataDomain getDataDomain();
+
+    public void createTestData(Class testCase, String testName) throws Exception;
 
     public void deleteTestData() throws Exception;
 

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.unit;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -63,15 +64,23 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Procedure;
 
 /**
+ * Default implementation of the AccessStack that has a single DataNode
+ * per DataMap.
+ * 
  * @author Andrei Adamchik
  */
 public class SimpleAccessStack extends AbstractAccessStack implements AccessStack {
 
     protected DataDomain domain;
+    protected DataSetFactory dataSetFactory;
 
-    public SimpleAccessStack(CayenneTestResources resources, DataMap[] maps)
+    public SimpleAccessStack(
+        CayenneTestResources resources,
+        DataSetFactory dataSetFactory,
+        DataMap[] maps)
         throws Exception {
 
+        this.dataSetFactory = dataSetFactory;
         this.resources = resources;
         this.domain = new DataDomain("domain");
         for (int i = 0; i < maps.length; i++) {
@@ -93,8 +102,22 @@ public class SimpleAccessStack extends AbstractAccessStack implements AccessStac
         this.domain.addNode(node);
     }
 
+    /**
+     * Returns DataDomain for this AccessStack.
+     */
     public DataDomain getDataDomain() {
         return domain;
+    }
+
+    /**
+     * Creates test data for a given test case and test name.
+     */
+    public void createTestData(Class testCase, String testName) throws Exception {
+        Collection queries = dataSetFactory.dataSetQueries(testCase, testName);
+
+        if (queries != null && !queries.isEmpty()) {
+            createTestData(getDataDomain(), queries);
+        }
     }
 
     /** 

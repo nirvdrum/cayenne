@@ -59,9 +59,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.testdo.inherit.AbstractPerson;
 import org.objectstyle.cayenne.testdo.inherit.CustomerRepresentative;
 import org.objectstyle.cayenne.testdo.inherit.Employee;
@@ -79,7 +77,7 @@ public class DataContextInheritanceTst extends PeopleTestCase {
 
         context = createDataContext();
         deleteTestData();
-        setupData();
+        createTestData("test");
     }
 
     public void testNoInheritanceResolving() throws Exception {
@@ -130,40 +128,5 @@ public class DataContextInheritanceTst extends PeopleTestCase {
         assertEquals(1, customerReps.size());
         assertEquals(5, employees.size());
         assertEquals(2, managers.size());
-    }
-
-    private void setupData() throws Exception {
-        List queries = new ArrayList();
-        queries.add(
-            new SqlModifyQuery(
-                AbstractPerson.class,
-                "insert into PERSON (CLIENT_COMPANY_ID, CLIENT_CONTACT_TYPE, DEPARTMENT_ID, NAME, PERSON_ID, PERSON_TYPE, SALARY) "
-                    + "values (null, null, null, 'e1', 1, 'EE', 20000)"));
-        queries.add(
-            new SqlModifyQuery(
-                AbstractPerson.class,
-                "insert into PERSON (CLIENT_COMPANY_ID, CLIENT_CONTACT_TYPE, DEPARTMENT_ID, NAME, PERSON_ID, PERSON_TYPE, SALARY) "
-                    + "values (null, null, null, 'e2', 2, 'EE', 25000)"));
-        queries.add(
-            new SqlModifyQuery(
-                AbstractPerson.class,
-                "insert into PERSON (CLIENT_COMPANY_ID, CLIENT_CONTACT_TYPE, DEPARTMENT_ID, NAME, PERSON_ID, PERSON_TYPE, SALARY) "
-                    + "values (null, null, null, 'e3', 3, 'EE', 28000)"));
-        queries.add(
-            new SqlModifyQuery(
-                AbstractPerson.class,
-                "insert into PERSON (CLIENT_COMPANY_ID, CLIENT_CONTACT_TYPE, DEPARTMENT_ID, NAME, PERSON_ID, PERSON_TYPE, SALARY) "
-                    + "values (null, null, null, 'm1', 4, 'EM', 30000)"));
-        queries.add(
-            new SqlModifyQuery(
-                AbstractPerson.class,
-                "insert into PERSON (CLIENT_COMPANY_ID, CLIENT_CONTACT_TYPE, DEPARTMENT_ID, NAME, PERSON_ID, PERSON_TYPE, SALARY) "
-                    + "values (null, null, null, 'm2', 5, 'EM', 40000)"));
-        queries.add(
-            new SqlModifyQuery(
-                AbstractPerson.class,
-                "insert into PERSON (CLIENT_COMPANY_ID, CLIENT_CONTACT_TYPE, DEPARTMENT_ID, NAME, PERSON_ID, PERSON_TYPE, SALARY)"
-                    + "values (null, null, null, 'c1', 6, 'C', null)"));
-        context.performQueries(queries, new DefaultOperationObserver());
     }
 }

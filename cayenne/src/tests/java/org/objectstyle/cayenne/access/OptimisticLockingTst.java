@@ -53,9 +53,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.testdo.locking;
+package org.objectstyle.cayenne.access;
 
-public class DateLockingTest
-    extends org.objectstyle.cayenne.testdo.locking.auto._DateLockingTest {
+import org.objectstyle.cayenne.unit.LockingTestCase;
 
+/**
+ * @author Andrei Adamchik
+ */
+public class OptimisticLockingTst extends LockingTestCase {
+    public void testSimpleLocking() throws Exception {
+        createTestData("testSimpleLocking");
+
+    }
 }

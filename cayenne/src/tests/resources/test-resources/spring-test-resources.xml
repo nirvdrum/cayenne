@@ -69,26 +69,38 @@
 	</bean>
 	
 	<!-- ======================================= -->
+	<!-- DataSetFactory -->
+	<!-- ======================================= -->
+	<bean id="DataSetFactory" class="org.objectstyle.cayenne.unit.XMLDataSetFactory">
+		<property name="baseDir"><value>src/tests/resources/test-resources/dml</value></property>
+	</bean>
+	
+	<!-- ======================================= -->
 	<!-- Access Stacks -->
 	<!-- ======================================= -->
 	<bean id="TestStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg><list><ref bean="TestMap"/></list></constructor-arg>
 	</bean>
 	<bean id="PeopleStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg><list><ref bean="PeopleMap"/></list></constructor-arg>
 	</bean>
 	<bean id="LockingStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg><list><ref bean="LockingMap"/></list></constructor-arg>
 	</bean>
 	<bean id="OneWayStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg><list><ref bean="OneWayMap"/></list></constructor-arg>
 	</bean>
 	<bean id="MultiNodeStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg>
 			<list><ref bean="DB1Map"/><ref bean="DB2Map"/></list>
 		</constructor-arg>
@@ -96,6 +108,7 @@
 	<!-- Used to create DB schema to avoid conflicts when schema for individual stacks is generated. -->
 	<bean id="SchemaSetupStack" class="org.objectstyle.cayenne.unit.SimpleAccessStack">
 		<constructor-arg><ref bean="TestResources"/></constructor-arg>
+		<constructor-arg><ref bean="DataSetFactory"/></constructor-arg>
 		<constructor-arg>
 			<list><ref bean="TestMap"/><ref bean="PeopleMap"/><ref bean="LockingMap"/></list>
 		</constructor-arg>
@@ -118,5 +131,6 @@
 				<entry key="org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter"><ref bean="HSQLDBStackAdapter"/></entry>
 			</map>
 		</constructor-arg>
+		<property name="testResourcesDir"><value>build/tests/deps/test-resources</value></property>
 	</bean>
 </beans>

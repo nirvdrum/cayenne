@@ -120,7 +120,6 @@ public class CayenneTestResources implements BeanFactoryAware {
 
         // must finish config manually
         resources.setConnectionKey(System.getProperty(CONNECTION_NAME_KEY));
-        resources.setTestResourcesDir(testDir);
 
         try {
             resources.rebuildSchema();

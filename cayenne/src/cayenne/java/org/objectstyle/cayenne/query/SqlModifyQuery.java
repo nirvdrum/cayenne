@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.map.DbEntity;
@@ -67,85 +67,90 @@ import org.objectstyle.cayenne.map.ObjEntity;
  */
 public class SqlModifyQuery extends AbstractQuery {
     protected String sqlString;
-    
+
     /** Creates empty SqlModifyQuery. */
-    public SqlModifyQuery() {}
-    
-    private void init(Object root, String sqlString) {
-    	setRoot(root);
-    	setSqlString(sqlString);
+    public SqlModifyQuery() {
     }
-    
-     /**
-     * Creates a SqlModifyQuery with no initial sqlString, for the specifed DbEntity
-     * @param root the DbEntity to use as root
+
+    private void init(Object root, String sqlString) {
+        setRoot(root);
+        setSqlString(sqlString);
+    }
+
+    /**
+    * Creates a SqlModifyQuery with no initial sqlString, for the specifed DbEntity
+    * @param root the DbEntity to use as root
     */
     public SqlModifyQuery(DbEntity root) {
-    	this(root, null);
+        this(root, null);
     }
-    
-     /**
-     * Creates a SqlModifyQuery using the given DbEntity as a root, with the given sql string 
-     * @param root the DbEntity to use as root
-     * @param sqlString the sql to execute
-     */
-   public SqlModifyQuery(DbEntity root, String sqlString) {
-		init(root, sqlString);
+
+    /**
+    * Creates a SqlModifyQuery using the given DbEntity as a root, with the given sql string 
+    * @param root the DbEntity to use as root
+    * @param sqlString the sql to execute
+    */
+    public SqlModifyQuery(DbEntity root, String sqlString) {
+        init(root, sqlString);
     }
-   
+
     /**
      * Creates a SqlModifyQuery with null qualifier, for the specifed ObjEntity
      * @param root the ObjEntity this SqlModifyQuery is for.
      */
     public SqlModifyQuery(ObjEntity root) {
-    	this(root, null);
+        this(root, null);
     }
-    
-     /**
-     * Creates a SqlModifyQuery  for the specifed ObjEntity with the given qualifier
-     * @param root the ObjEntity this SqlModifyQuery is for.
-     * @param sqlString the sql to execute
-     */
-   public SqlModifyQuery(ObjEntity root, String sqlString) {
-		init(root, sqlString);
+
+    /**
+    * Creates a SqlModifyQuery  for the specifed ObjEntity with the given qualifier
+    * @param root the ObjEntity this SqlModifyQuery is for.
+    * @param sqlString the sql to execute
+    */
+    public SqlModifyQuery(ObjEntity root, String sqlString) {
+        init(root, sqlString);
     }
-    
-     /**
-     * Creates a SqlModifyQuery with null qualifier, for the entity which uses the given class
+
+    /**
+    * Creates a SqlModifyQuery with null qualifier, for the entity which uses the given class
+    * @param root the Class of objects this SqlModifyQuery is for.
+    */
+    public SqlModifyQuery(Class rootClass) {
+        this(rootClass, null);
+    }
+
+    /**
+     * Creates a SqlModifyQuery for the entity which uses the given class,  with the given qualifier
      * @param root the Class of objects this SqlModifyQuery is for.
-     */
-   public SqlModifyQuery(Class rootClass) {
-    	this(rootClass, null);
-    }
-    
-	/**
-	 * Creates a SqlModifyQuery for the entity which uses the given class,  with the given qualifier
-	 * @param root the Class of objects this SqlModifyQuery is for.
      * @param sqlString the sql to execute
      */
-   public SqlModifyQuery(Class rootClass, String sqlString) {
-    	init(rootClass, sqlString);
+    public SqlModifyQuery(Class rootClass, String sqlString) {
+        init(rootClass, sqlString);
     }
-    
+
     /** Creates SqlModifyQuery with <code>objEntityName</code> parameter. */
     public SqlModifyQuery(String objEntityName) {
         this(objEntityName, null);
     }
-    
+
     /** Creates SqlModifyQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
     public SqlModifyQuery(String objEntityName, String sqlString) {
         init(objEntityName, sqlString);
     }
-    
+
     public int getQueryType() {
         return UNKNOWN_QUERY;
     }
-    
+
     public void setSqlString(String sqlString) {
+        if (sqlString != null) {
+            sqlString = sqlString.trim();
+        }
+        
         this.sqlString = sqlString;
     }
-    
+
     public String getSqlString() {
         return sqlString;
-    }    
+    }
 }

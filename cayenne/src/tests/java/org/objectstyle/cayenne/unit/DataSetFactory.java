@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,9 +53,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.testdo.locking;
+package org.objectstyle.cayenne.unit;
 
-public class DateLockingTest
-    extends org.objectstyle.cayenne.testdo.locking.auto._DateLockingTest {
+import java.util.Collection;
 
+/**
+ * @author Andrei Adamchik
+ */
+public interface DataSetFactory {
+    /**
+     * Returns a Collection of Cayenne queries for a given test.
+     */
+    public Collection dataSetQueries(Class testCase, String testName);
 }

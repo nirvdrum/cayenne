@@ -1,5 +1,5 @@
 /* ====================================================================
- *
+ * 
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,9 +53,93 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.testdo.locking;
+package org.objectstyle.cayenne.unit;
 
-public class DateLockingTest
-    extends org.objectstyle.cayenne.testdo.locking.auto._DateLockingTest {
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+
+/**
+ * DataSetFactory that loads DataSets from XML using Spring.
+ * 
+ * @author Andrei Adamchik
+ */
+public class XMLDataSetFactory implements DataSetFactory {
+    private static Logger logObj = Logger.getLogger(XMLDataSetFactory.class);
+
+    protected File baseDir;
+    protected Map dataSets;
+
+    public XMLDataSetFactory() {
+        this.dataSets = new HashMap();
+    }
+
+    /**
+     * Returns a Collection of Cayenne queries for a given test.
+     */
+    public Collection dataSetQueries(Class testCase, String testName) {
+        // use test case class name as a key to locate BeanFactory
+        // use test name to locate DataSet
+
+        BeanFactory factory = (BeanFactory) dataSets.get(testCase);
+        if (factory == null) {
+            // if the key exists, however the value is null, return null
+            if (dataSets.containsKey(testCase)) {
+                return null;
+            }
+
+            // load XML file
+            File file = dataSetXML(testCase);
+            if (!file.isFile()) {
+                logObj.info(
+                    "No test data for "
+                        + testCase.getName()
+                        + ", file used: "
+                        + file.getAbsolutePath());
+                dataSets.put(testCase, null);
+                return null;
+            }
+
+            InputStream in = null;
+            try {
+                in = new FileInputStream(file);
+            }
+            catch (IOException ioex) {
+                logObj.error("Can't open test resources...", ioex);
+                throw new RuntimeException("Error loading");
+            }
+
+            factory = new XmlBeanFactory(in);
+            dataSets.put(testCase, factory);
+        }
+
+        return (Collection) factory.getBean(testName, Collection.class);
+    }
+
+    protected File dataSetXML(Class testCase) {
+        String name = testCase.getName();
+
+        // strip "org.objectstyle.cayenne"
+        if (name.startsWith("org.objectstyle.cayenne.")) {
+            name = name.substring("org.objectstyle.cayenne.".length());
+        }
+
+        return new File(baseDir, name + ".xml");
+    }
+
+    public File getBaseDir() {
+        return baseDir;
+    }
+
+    public void setBaseDir(File file) {
+        baseDir = file;
+    }
 }

@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.event.EventManager;
  */
 public abstract class CayenneTestCase extends BasicTestCase {
     public static final String TEST_ACCESS_STACK = "TestStack";
-    
+
     static {
         // create dummy shared config
         Configuration config = new DefaultConfiguration() {
@@ -120,6 +120,14 @@ public abstract class CayenneTestCase extends BasicTestCase {
 
     protected DataDomain getDomain() {
         return accessStack.getDataDomain();
+    }
+
+    /**
+     * Creates test data via a mechanism preconfigured in the access stack.
+     * Default mechanism is loading test data DML from XML file. 
+     */
+    protected void createTestData(String testName) throws Exception {
+        accessStack.createTestData(this.getClass(), testName);
     }
 
     protected DataNode getNode() {

@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -66,12 +65,10 @@ import org.objectstyle.art.FlattenedTest2;
 import org.objectstyle.art.FlattenedTest3;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.MockupDataRowUtils;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -290,7 +287,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
     }
 
     public void testTakeObjectSnapshotFlattenedFault() throws Exception {
-        prepareSnapshotManagerTest();
+        createTestData("test");
 
         // fetch 
         List ft3s = ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
@@ -308,7 +305,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
     }
 
     public void testIsToOneTargetModifiedFlattenedFault1() throws Exception {
-        prepareSnapshotManagerTest();
+        createTestData("test");
 
         // fetch 
         List ft3s = ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
@@ -332,7 +329,7 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
     }
 
     public void testRefetchWithFlattenedFaultToOneTarget1() throws Exception {
-        prepareSnapshotManagerTest();
+        createTestData("test");
 
         // fetch 
         List ft3s = ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
@@ -345,27 +342,4 @@ public class CayenneDataObjectFlattenedRelTst extends CayenneDOTestBase {
         ctxt.performQuery(new SelectQuery(FlattenedTest3.class));
         assertTrue(ft3.readPropertyDirectly("toFT1") instanceof Fault);
     }
-
-    private void prepareSnapshotManagerTest() {
-        List queries = new ArrayList();
-        queries.add(
-            new SqlModifyQuery(
-                FlattenedTest3.class,
-                "insert into FLATTENED_TEST_1 (FT1_ID, NAME) values (1, 'ft1')"));
-        queries.add(
-            new SqlModifyQuery(
-                FlattenedTest3.class,
-                "insert into FLATTENED_TEST_1 (FT1_ID, NAME) values (2, 'ft12')"));
-        queries.add(
-            new SqlModifyQuery(
-                FlattenedTest3.class,
-                "insert into FLATTENED_TEST_2 (FT2_ID, FT1_ID, NAME) values (1, 1, 'ft2')"));
-        queries.add(
-            new SqlModifyQuery(
-                FlattenedTest3.class,
-                "insert into FLATTENED_TEST_3 (FT3_ID, FT2_ID, NAME) values (1, 1, 'ft3')"));
-
-        ctxt.performQueries(queries, new DefaultOperationObserver());
-    }
-
 }

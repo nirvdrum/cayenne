@@ -75,62 +75,63 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     protected int pageSize;
 
     /** Creates empty SqlSelectQuery. */
-    public SqlSelectQuery() {}
+    public SqlSelectQuery() {
+    }
 
     private void init(Object root, String sqlString) {
-    	setRoot(root);
-    	setSqlString(sqlString);
+        setRoot(root);
+        setSqlString(sqlString);
     }
-    
+
     /**
      * Creates a SqlSelectQuery with no initial sqlString, for the specifed ObjEntity
      * @param root the ObjEntity to use as root
     */
     public SqlSelectQuery(ObjEntity root) {
-    	this(root, null);
+        this(root, null);
     }
-    
-     /**
-     * Creates a SqlSelectQuery using the given ObjEntity as a root, with the given sql string 
-     * @param root the ObjEntity to use as root
-     * @param sqlString the sql to execute
-     */
-   public SqlSelectQuery(ObjEntity root, String sqlString) {
-		init(root, sqlString);
+
+    /**
+    * Creates a SqlSelectQuery using the given ObjEntity as a root, with the given sql string 
+    * @param root the ObjEntity to use as root
+    * @param sqlString the sql to execute
+    */
+    public SqlSelectQuery(ObjEntity root, String sqlString) {
+        init(root, sqlString);
     }
-    
+
     /**
      * Creates a SqlSelectQuery with no initial sqlString, for the specifed DbEntity
      * @param root the DbEntity to use as root
     */
     public SqlSelectQuery(DbEntity root) {
-    	this(root, null);
+        this(root, null);
     }
-    
-     /**
-     * Creates a SqlSelectQuery using the given DbEntity as a root, with the given sql string 
-     * @param root the DbEntity to use as root
-     * @param sqlString the sql to execute
-     */
-   public SqlSelectQuery(DbEntity root, String sqlString) {
-		init(root, sqlString);
+
+    /**
+    * Creates a SqlSelectQuery using the given DbEntity as a root, with the given sql string 
+    * @param root the DbEntity to use as root
+    * @param sqlString the sql to execute
+    */
+    public SqlSelectQuery(DbEntity root, String sqlString) {
+        init(root, sqlString);
     }
-    
-     /**
-     * Creates a SqlSelectQuery with null qualifier, for the entity which uses the given class
+
+    /**
+    * Creates a SqlSelectQuery with null qualifier, for the entity which uses the given class
+    * @param root the Class of objects this SqlSelectQuery is for.
+    */
+    public SqlSelectQuery(Class rootClass) {
+        this(rootClass, null);
+    }
+
+    /**
+     * Creates a SqlSelectQuery for the entity which uses the given class,  with the given qualifier
      * @param root the Class of objects this SqlSelectQuery is for.
-     */
-   public SqlSelectQuery(Class rootClass) {
-    	this(rootClass, null);
-    }
-    
-	/**
-	 * Creates a SqlSelectQuery for the entity which uses the given class,  with the given qualifier
-	 * @param root the Class of objects this SqlSelectQuery is for.
      * @param sqlString the sql to execute
      */
-   public SqlSelectQuery(Class rootClass, String sqlString) {
-    	init(rootClass, sqlString);
+    public SqlSelectQuery(Class rootClass, String sqlString) {
+        init(rootClass, sqlString);
     }
     /** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
     public SqlSelectQuery(String objEntityName) {
@@ -147,6 +148,10 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     }
 
     public void setSqlString(String sqlString) {
+        if (sqlString != null) {
+            sqlString = sqlString.trim();
+        }
+
         this.sqlString = sqlString;
     }
 
@@ -176,7 +181,7 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     public boolean isFetchingDataRows() {
         return true;
     }
-    
+
     /**
      * Currently always returns <code>true</code>.
      * 
@@ -194,7 +199,7 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
     public boolean isResolvingInherited() {
         return false;
     }
-    
+
     /**
      * Returns the resultDescriptors.
      * @return DbAttribute[]

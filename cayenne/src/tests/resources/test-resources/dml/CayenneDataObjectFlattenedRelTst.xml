@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans default-lazy-init="true">	
+	<!-- ======================================= -->
+	<!-- Named Queries -->
+	<!-- ======================================= -->
+	<bean id="FT11" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.FlattenedTest1</value></constructor-arg>
+		<constructor-arg><value>
+		insert into FLATTENED_TEST_1 (FT1_ID, NAME) values (1, 'ft1')
+		</value></constructor-arg>
+	</bean>
+	<bean id="FT12" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.FlattenedTest1</value></constructor-arg>
+		<constructor-arg><value>
+		insert into FLATTENED_TEST_1 (FT1_ID, NAME) values (2, 'ft12')
+		</value></constructor-arg>
+	</bean>
+	<bean id="FT2" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.FlattenedTest2</value></constructor-arg>
+		<constructor-arg><value>
+		insert into FLATTENED_TEST_2 (FT2_ID, FT1_ID, NAME) values (1, 1, 'ft2')
+		</value></constructor-arg>
+	</bean>
+	<bean id="FT3" class="org.objectstyle.cayenne.query.SqlModifyQuery">
+		<constructor-arg type="java.lang.Class"><value>org.objectstyle.art.FlattenedTest3</value></constructor-arg>
+		<constructor-arg><value>
+		insert into FLATTENED_TEST_3 (FT3_ID, FT2_ID, NAME) values (1, 1, 'ft3')
+		</value></constructor-arg>
+	</bean>
+
+	<!-- ======================================= -->
+	<!-- Data Sets -->
+	<!-- ======================================= -->	
+	<bean id="test" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<ref bean="FT11"/>
+				<ref bean="FT12"/>
+				<ref bean="FT2"/>
+				<ref bean="FT3"/>
+			</list>
+		</constructor-arg>
+	</bean>	
+</beans>
