@@ -109,7 +109,8 @@ public class ProjectTraversal {
         } else {
             String nodeClass =
                 (rootNode != null) ? rootNode.getClass().getName() : "(null)";
-            throw new IllegalArgumentException("Unsupported root node: " + nodeClass);
+            throw new IllegalArgumentException(
+                "Unsupported root node: " + nodeClass);
         }
     }
 
@@ -148,7 +149,13 @@ public class ProjectTraversal {
     public void traverseNodes(List nodes, ProjectPath path) {
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
-            handler.projectNode(path.appendToPath(it.next()));
+            DataNode node = (DataNode) it.next();
+            ProjectPath nodePath = path.appendToPath(node);
+            handler.projectNode(nodePath);
+
+            if (handler.shouldReadChildren(node, path)) {
+                traverseMaps(node.getMapList(), nodePath);
+            }
         }
     }
 

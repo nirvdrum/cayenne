@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.project;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.objectstyle.cayenne.access.DataNode;
+
 /**
  * FlatProjectView converts a project tree into a list of nodes,
  * thus flattening the tree. Normally used as a singleton.
@@ -81,10 +83,9 @@ public class FlatProjectView {
     public List flattenProjectTree(Object rootNode) {
         List nodes = new ArrayList();
         TraversalHelper helper = new TraversalHelper(nodes);
-        new ProjectTraversal(helper).traverse(rootNode);        
+        new ProjectTraversal(helper).traverse(rootNode);
         return nodes;
     }
-    
 
     /**
      * Helper class that serves as project traversal helper.
@@ -101,10 +102,13 @@ public class FlatProjectView {
         }
 
         /**
-         * Always returns true.
+         * Returns true unless an object is a DataNode.
          */
-        public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
-            return true;
+        public boolean shouldReadChildren(
+            Object node,
+            ProjectPath parentPath) {
+            // don't read linked maps
+            return !(node instanceof DataNode);
         }
     }
 }

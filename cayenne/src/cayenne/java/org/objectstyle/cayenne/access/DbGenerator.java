@@ -424,12 +424,23 @@ public class DbGenerator {
 	 */
 	private List dbEntitiesInInsertOrder() {
 		List list = map.getDbEntitiesAsList();
+		
+		// remove derived db entities
+	    List filteredList = new ArrayList();
+	    Iterator it = list.iterator();
+	    while(it.hasNext()) {
+	    	Object next = it.next();
+	    	if(!(next instanceof DerivedDbEntity)) {
+	    	    filteredList.add(next);
+	    	}
+	    }
 
+        // sort the list
 		OperationSorter sorter = getAdapter().getOpSorter(node);
 		if (sorter != null) {
-			list=sorter.sortedEntitiesInInsertOrder(list);
+		    filteredList = sorter.sortedEntitiesInInsertOrder(filteredList);
 		}
-		return list;
+		return filteredList;
 	}
 
 }

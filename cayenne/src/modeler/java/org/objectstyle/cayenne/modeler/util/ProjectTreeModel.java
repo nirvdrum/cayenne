@@ -64,6 +64,7 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectPath;
@@ -203,7 +204,8 @@ public class ProjectTreeModel extends DefaultTreeModel {
         public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
             return (node instanceof Project)
                 || (node instanceof DataDomain)
-                || (node instanceof DataMap);
+                || (node instanceof DataMap)
+                || (node instanceof DataNode);
         }
     }
 }
