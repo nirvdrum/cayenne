@@ -33,4 +33,5 @@ to reconfigure itself.
 
 9. {Modeler} Full support of stored procedures mapping in the modeler.
 
-
+10. Fixed API bug that prevented users from creating parameterized LIKE
+expressions. Bug 754742.

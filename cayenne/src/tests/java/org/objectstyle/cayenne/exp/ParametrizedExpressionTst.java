@@ -111,22 +111,21 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
      * @throws Exception
      */
     public void testFailOnMissingParams() throws Exception {
-        Expression e1 =
-            ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
+        Expression e1 = ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
         e1 = e1.orExp(ExpressionFactory.matchExp("k2", "v2"));
         e1 = e1.orExp(ExpressionFactory.matchExp("k3", "v3"));
 
         try {
             e1.expWithParameters(new HashMap(), false);
             fail("Parameter was missing, but no exception was thrown.");
-        } catch (ExpressionException ex) {
+        }
+        catch (ExpressionException ex) {
             // exception expected
         }
     }
 
     public void testParams1() throws Exception {
-        Expression e1 =
-            ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
+        Expression e1 = ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
 
         Map map = new HashMap();
         map.put("test", "xyz");
@@ -137,9 +136,20 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
         assertEquals("xyz", e2.getOperand(1));
     }
 
+    public void testParams2() throws Exception {
+        Expression e1 = ExpressionFactory.likeExp("k1", new ExpressionParameter("test"));
+
+        Map map = new HashMap();
+        map.put("test", "xyz");
+        Expression e2 = e1.expWithParameters(map, false);
+        assertNotNull(e2);
+        assertEquals(2, e2.getOperandCount());
+        assertEquals(Expression.LIKE, e2.getType());
+        assertEquals("xyz", e2.getOperand(1));
+    }
+
     public void testNoParams1() throws Exception {
-        Expression e1 =
-            ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
+        Expression e1 = ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
 
         Expression e2 = e1.expWithParameters(new HashMap(), true);
 
@@ -149,14 +159,10 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
 
     public void testNoParams2() throws Exception {
         List list = new ArrayList();
-        list.add(
-            ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
-        list.add(
-            ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
-        list.add(
-            ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
-        list.add(
-            ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
+        list.add(ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
+        list.add(ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
+        list.add(ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
+        list.add(ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
         Expression e1 = ExpressionFactory.joinExp(Expression.OR, list);
 
         Map params = new HashMap();
@@ -166,9 +172,7 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
 
         // some expression nodes must be pruned
         assertNotNull(e2);
-        assertTrue(
-            "Not a list expression: " + e2,
-            e2 instanceof ListExpression);
+        assertTrue("Not a list expression: " + e2, e2 instanceof ListExpression);
 
         ListExpression le = (ListExpression) e2;
         assertEquals(2, le.getOperandCount());
@@ -182,14 +186,10 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
 
     public void testNoParams3() throws Exception {
         List list = new ArrayList();
-        list.add(
-            ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
-        list.add(
-            ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
-        list.add(
-            ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
-        list.add(
-            ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
+        list.add(ExpressionFactory.matchExp("k1", new ExpressionParameter("test1")));
+        list.add(ExpressionFactory.matchExp("k2", new ExpressionParameter("test2")));
+        list.add(ExpressionFactory.matchExp("k3", new ExpressionParameter("test3")));
+        list.add(ExpressionFactory.matchExp("k4", new ExpressionParameter("test4")));
         Expression e1 = ExpressionFactory.joinExp(Expression.OR, list);
 
         Map params = new HashMap();
