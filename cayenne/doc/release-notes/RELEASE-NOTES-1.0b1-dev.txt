@@ -13,5 +13,12 @@ Changes in this release:
 cascade along a relationship, nullify the inverse, or completely deny the deletion 
 based on the status of the related objects.
 
-2. Modeler stratup scripts are updated to guess CAYENNE_HOME based on the standard
+2. Modeler startup scripts are updated to guess CAYENNE_HOME based on the standard
 distribution structure, if it is not set explicitly.
+
+3. As a result of refactoring of Expressions, "Expression.binaryPathExp" can no longer
+be used with AND and OR expressions. Suggested substitutes are:
+ExpressionFactory.matchAll, ExpressionFactory.matchAny, ExpressionFactory.joinExp,
+Expression.orExp, Expression.andExp
+
+

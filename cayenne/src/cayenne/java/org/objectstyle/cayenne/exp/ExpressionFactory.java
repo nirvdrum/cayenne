@@ -61,12 +61,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 /** 
  * Helper class to build expressions. 
  * 
  * @author Andrei Adamchik
  */
 public class ExpressionFactory {
+    private static Logger logObj = Logger.getLogger(ExpressionFactory.class);
+
     private static Class[] typeLookup;
 
     static {
@@ -240,7 +244,7 @@ public class ExpressionFactory {
             throw new ExpressionException("Bad list expression type: " + type);
         }
 
-        ((ListExpression)exp).appendOperands(operands);
+        ((ListExpression) exp).appendOperands(operands);
         return exp;
     }
 
@@ -256,9 +260,16 @@ public class ExpressionFactory {
         Object rightOperand) {
         Expression exp = expressionOfType(type);
         if (!(exp instanceof BinaryExpression)) {
-            // if this is AND/OR expression, make exception more informative
+            // if this is AND/OR expression, provide a temporary workaround
             if (type == Expression.AND || type == Expression.OR) {
-                throw new ExpressionException("AND/OR Expressions are no longer 'binary', use ListExpression instead.");
+                logObj.warn(
+                    "Use of AND/OR Expressions as 'binary' is deprecated, "
+                        + "use ListExpression instead.");
+
+                List list = new ArrayList();
+                list.add(leftOperand);
+                list.add(rightOperand);
+                return listExp(type, list);
             }
 
             throw new ExpressionException(
