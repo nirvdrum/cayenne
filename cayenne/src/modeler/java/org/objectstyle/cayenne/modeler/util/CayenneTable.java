@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.modeler.util;
 
 import java.awt.Component;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.EventObject;
 
