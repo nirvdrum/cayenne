@@ -152,7 +152,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new Object[] { conf, domain, map, oe1 },
             validator);
-        assertValidator(ValidationResult.ERROR); //Must be valid - this class has a name
+        assertValidator(ValidationResult.WARNING); //Must be valid - this class has a name
 	}
 
 }

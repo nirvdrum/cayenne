@@ -113,7 +113,7 @@ public class ObjEntityValidator extends TreeNodeValidator {
             }
 
             if (className.equals(otherEnt.getClassName())) {
-                validator.registerError("Duplicate ObjEntity class name: " + className + ".", path);
+                validator.registerWarning("Duplicate ObjEntity class name: " + className + ".", path);
                 break;
             }
         }
