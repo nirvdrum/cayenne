@@ -14,8 +14,8 @@ public class ${classGen.superPrefix}${classGen.className} extends $classGen.supe
 ## Create attribute set/get methods
 #foreach( $attr in ${classGen.Entity.Attributes} )
 #set( $classGen.Prop = $attr.Name )## let controller know about current property
-    public void set${classGen.cappedProp}($classGen.formatJavaType(${attr.Type}) ${attr.Name}) {
-        writeProperty("${attr.Name}", ${attr.Name});
+    public void set${classGen.cappedProp}($classGen.formatJavaType(${attr.Type}) $classGen.formatVariableName(${attr.Name})) {
+        writeProperty("${attr.Name}", $classGen.formatVariableName(${attr.Name}));
     }
     public $classGen.formatJavaType(${attr.Type}) get${classGen.cappedProp}() {
         return ($classGen.formatJavaType(${attr.Type}))readProperty("${attr.Name}");
@@ -38,8 +38,8 @@ public class ${classGen.superPrefix}${classGen.className} extends $classGen.supe
         return (List)readProperty("${rel.name}");
     }
 #else
-    public void set${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) ${rel.name}) {
-        setToOneTarget("${rel.name}", ${rel.name}, true);
+    public void set${classGen.cappedProp}($classGen.formatJavaType(${rel.TargetEntity.ClassName}) $classGen.formatVariableName(${rel.name})) {
+        setToOneTarget("${rel.name}", $classGen.formatVariableName(${rel.name}), true);
     }
     
     public $classGen.formatJavaType(${rel.TargetEntity.ClassName}) get${classGen.cappedProp}() {

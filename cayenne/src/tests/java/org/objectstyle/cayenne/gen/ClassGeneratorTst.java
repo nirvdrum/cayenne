@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.gen;
 
 import java.io.StringWriter;
 
+import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -67,10 +68,22 @@ public class ClassGeneratorTst extends CayenneTestCase {
 	private static final String FQ_SUPER_CLASS_NAME=SUPER_CLASS_PACKAGE+"."+SUPER_CLASS_NAME;
 	
     protected ClassGenerator cgen;
+    protected ObjEntity testEntity;
 
     public void setUp() throws Exception {
         cgen = new ClassGenerator(MapClassGenerator.SUPERCLASS_TEMPLATE);
+        testEntity = getDomain().getEntityResolver().lookupObjEntity("Painting");
+
+        // add attribute with reserved keyword name
+        ObjAttribute reservedAttribute = new ObjAttribute("abstract");
+        reservedAttribute.setType("boolean");
+		testEntity.addAttribute(reservedAttribute);
     }
+
+	public void tearDown() {
+		// remove attribute to restore entity
+		testEntity.removeAttribute("abstract");
+	}
 
     /** All tests are done in one method to avoid Velocity template parsing
       * every time a new generator instance is made for each test. */
@@ -89,12 +102,12 @@ public class ClassGeneratorTst extends CayenneTestCase {
 		
         // final template test
         StringWriter out = new StringWriter();
-        ObjEntity pe = getDomain().getEntityResolver().lookupObjEntity("Painting");
-        cgen.generateClass(out, pe);
+        cgen.generateClass(out, testEntity);
         out.flush();
         out.close();
 
         String classCode = out.toString();
+        System.out.println(classCode);
 
         assertNotNull(classCode);
         assertTrue(classCode.length() > 0);
@@ -110,6 +123,9 @@ public class ClassGeneratorTst extends CayenneTestCase {
        		//Should probably also check for the extends clause, but there can be arbitrary whitespace between extends and
        		// the class name - would need regex to do that easily and correctly... a task for another time.
         }
+
+		// basic test that our reserved attribute has been generated correctly
+        assertTrue(classCode.indexOf("_abstract") != -1);
     }
 
     private void doClassName() throws Exception {
@@ -123,7 +139,6 @@ public class ClassGeneratorTst extends CayenneTestCase {
         cgen.setSuperPrefix(prefix);
         assertEquals(prefix, cgen.getSuperPrefix());
     }
-
 
     public void doPackageName() throws Exception {
         assertFalse(cgen.isUsingPackage());

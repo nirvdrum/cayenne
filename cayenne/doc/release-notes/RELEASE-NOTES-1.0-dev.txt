@@ -16,3 +16,6 @@ Changes in this release:
    refetched as it should've been.
    
 3. [MODELER BUG 770803] Fixed navigating items that failed validation.
+
+4. [new] Generated classes with attributes named the same as Java keywords now work
+   correctly.

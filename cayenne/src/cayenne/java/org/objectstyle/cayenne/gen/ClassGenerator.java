@@ -57,7 +57,10 @@
 package org.objectstyle.cayenne.gen;
 
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -75,6 +78,16 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 public class ClassGenerator {
 	
 	private static boolean initDone;
+
+	private static Set reservedKeywords = new HashSet(Arrays.asList(new Object[] {
+		"abstract", "default", "if", "private", "this", "boolean", "do",
+		"implements", "protected", "throw", "break", "double", "import",
+		"public", "throws", "byte", "else", "instanceof", "return", "transient",
+		"case", "extends", "int", "short", "try", "catch", "final", "interface",
+		"static", "void", "char", "finally", "long", "strictfp", "volatile",
+		"class", "float", "native", "super", "while", "const", "for", "new",
+		"switch", "continue", "goto", "package", "synchronized" }
+	));
 
 	/** 
 	 * Allows to configure ClassGenerator to load class 
@@ -220,6 +233,14 @@ public class ClassGenerator {
 		}
 
 		return type;
+	}
+
+	public String formatVariableName(String variableName) {
+		if (reservedKeywords.contains(variableName)) {
+			return "_" + variableName;
+		} else {
+			return variableName;
+		}
 	}
 
 	/** Returns prefix used to distinguish between superclass
