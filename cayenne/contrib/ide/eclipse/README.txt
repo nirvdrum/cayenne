@@ -13,5 +13,21 @@ If you have copied the files from outside eclipse (Windows explorer,
 command line..) you will need to restart in order to have the project
 recognized as 'Java project'.
 
+You can import the Cayenne project coding standards using Eclipse 3.0.
+
+* Windows -> Preferences -> Java -> Code Style -> Code Templates -> Import -> file "codetemplates.xml"
+* Windows -> Preferences -> Java -> Code Style -> Formatter -> Import -> file "formatting.xml"
+* Windows -> Preferences -> Java -> Code Style -> Organize Imports -> Import -> file "imports.txt"
+
+If you are using Eclipse 3.1, you can import the Cayenne project coding standards into your Cayenne project.
+
+* Project -> Properties -> Java Code Style -> Formatter -> enable project specific settings -> true
+* Project -> Properties -> Java Code Style -> Formatter -> Import -> file "formatting.xml"
+* Project -> Properties -> Java Code Style -> Organize Imports -> enable project specific settings -> true
+* Project -> Properties -> Java Code Style -> Organize Imports -> Import -> file "imports.txt"
+
+Unfortunately, there's not yet a way to define Code Templates per-project.
+
+
 For further help send mail to cayenne-devel@objectstyle.org!
 
