@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.datamap;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,18 +53,22 @@ package org.objectstyle.cayenne.gui.datamap;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.datamap;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 import org.objectstyle.cayenne.access.types.DefaultType;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
-public class Util
-{
-	/** Get array of db attribute names for DbEntity mapped to current ObjEntity. */
+
+public class Util {
+	
+	/** 
+	 * Returns array of db attribute names for DbEntity mapped to 
+	 * current ObjEntity. 
+	 */
 	public static String[] getDbAttributeNames(Mediator mediator, DbEntity entity) {
 		java.util.List list = entity.getAttributeList();
 		int list_size = list.size() + 1;
@@ -75,6 +78,8 @@ public class Util
 			DbAttribute attribute = (DbAttribute)list.get(i-1);
 			arr[i] = attribute.getName();
 		}
+		
+		Arrays.sort(arr);
 		return arr;
 	}
 	

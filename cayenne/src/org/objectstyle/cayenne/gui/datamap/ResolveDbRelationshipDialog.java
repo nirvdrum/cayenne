@@ -155,6 +155,10 @@ public class ResolveDbRelationshipDialog
 		getContentPane().setLayout(
 			new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
+        if(!isReverseDbRelNew) {
+        	reverseCheckLabel.setText("Update Reverse:");
+        }
+        
 		// If this is relationship of DbEntity to itself, disable 
 		// reverse relationship check box
 		if (start == end) {
@@ -224,20 +228,11 @@ public class ResolveDbRelationshipDialog
 		col = table.getColumnModel().getColumn(3);
 		col.setMinWidth(150);
 
-		// Make label for save button Create or Update
-		if (isDbRelNew) {
-			setTitle(
-				"Create relationship between table "
-					+ start.getName()
-					+ " and "
-					+ end.getName());
-		} else {
-			setTitle(
-				"Change relationship between table "
-					+ start.getName()
-					+ " and "
-					+ end.getName());
-		}
+		setTitle(
+			"DbRelationship Info: "
+				+ start.getName()
+				+ " to "
+				+ end.getName());
 
 		JPanel buttons =
 			PanelFactory.createButtonPanel(
