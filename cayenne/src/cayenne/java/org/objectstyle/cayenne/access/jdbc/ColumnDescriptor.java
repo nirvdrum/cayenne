@@ -260,8 +260,8 @@ public class ColumnDescriptor {
         jdbcType = i;
     }
 
-    public void setName(String string) {
-        name = string;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

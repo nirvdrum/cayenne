@@ -135,8 +135,7 @@ public class SQLTemplateAction implements SQLAction {
             }
 
             // TODO: we may cache prep statements for this loop, using merged string as a
-            // key
-            // since it is very likely that it will be the same for multiple parameter
+            // key since it is very likely that it will be the same for multiple parameter
             // sets...
             PreparedStatement statement = connection.prepareStatement(compiled.getSql());
             try {
