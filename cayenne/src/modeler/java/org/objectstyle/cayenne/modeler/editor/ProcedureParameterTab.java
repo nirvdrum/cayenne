@@ -237,7 +237,7 @@ public class ProcedureParameterTab
             CayenneWidgetFactory.createComboBox(
                 ProcedureParameterTableModel.PARAMETER_DIRECTION_NAMES,
                 false);
-        directionEditor.setEditable(true);
+        directionEditor.setEditable(false);
         directionColumn.setCellEditor(new DefaultCellEditor(directionEditor));
 
         moveUp.setEnabled(false);

@@ -111,15 +111,7 @@ public abstract class TextAreaAdapter extends TextComponentAdapter {
             return;
         }
 
-        try {
-            initModel(e);
-            clear();
-        }
-        catch (ValidationException vex) {
-
-            textComponent.setBackground(errorColor);
-            textComponent.setToolTipText(vex.getUnlabeledMessage());
-        }
+        verify(textComponent);
     }
 
     public void setText(String text) {

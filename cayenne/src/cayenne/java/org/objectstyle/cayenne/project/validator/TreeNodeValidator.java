@@ -68,44 +68,42 @@ import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
 import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.query.ProcedureQuery;
+import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * Validator of a single node in a project object tree. 
- * <i>Do not confuse with org.objectstyle.cayenne.access.DataNode.</i>
+ * Validator of a single node in a project object tree. <i>Do not confuse with
+ * org.objectstyle.cayenne.access.DataNode. </i>
  * 
  * @author Andrei Adamchik
  */
 public abstract class TreeNodeValidator {
+
     private static Logger logObj = Logger.getLogger(TreeNodeValidator.class);
 
     // initialize singleton validators
     protected static final DomainValidator domainValidator = new DomainValidator();
     protected static final DataNodeValidator nodeValidator = new DataNodeValidator();
     protected static final DataMapValidator mapValidator = new DataMapValidator();
-    protected static final ObjEntityValidator objEntityValidator =
-        new ObjEntityValidator();
-    protected static final ObjAttributeValidator objAttrValidator =
-        new ObjAttributeValidator();
-    protected static final ObjRelationshipValidator objRelValidator =
-        new ObjRelationshipValidator();
+    protected static final ObjEntityValidator objEntityValidator = new ObjEntityValidator();
+    protected static final ObjAttributeValidator objAttrValidator = new ObjAttributeValidator();
+    protected static final ObjRelationshipValidator objRelValidator = new ObjRelationshipValidator();
     protected static final DbEntityValidator dbEntityValidator = new DbEntityValidator();
-    protected static final DbAttributeValidator dbAttrValidator =
-        new DbAttributeValidator();
-    protected static final DbRelationshipValidator dbRelValidator =
-        new DbRelationshipValidator();
+    protected static final DbAttributeValidator dbAttrValidator = new DbAttributeValidator();
+    protected static final DbRelationshipValidator dbRelValidator = new DbRelationshipValidator();
 
-    protected static final ProcedureValidator procedureValidator =
-        new ProcedureValidator();
+    protected static final ProcedureValidator procedureValidator = new ProcedureValidator();
 
-    protected static final ProcedureParameterValidator procedureParameterValidator =
-        new ProcedureParameterValidator();
-    protected static final SelectQueryValidator selectQueryValidator =
-        new SelectQueryValidator();
+    protected static final ProcedureParameterValidator procedureParameterValidator = new ProcedureParameterValidator();
+    protected static final SelectQueryValidator selectQueryValidator = new SelectQueryValidator();
+
+    protected static final ProcedureQueryValidator procedureQueryValidator = new ProcedureQueryValidator();
+
+    protected static final SQLTemplateValidator sqlTemplateValidator = new SQLTemplateValidator();
 
     /**
-     * Validates an object, appending any validation messages 
-     * to the validator provided.
+     * Validates an object, appending any validation messages to the validator provided.
      */
     public static void validate(ProjectPath path, Validator validator) {
         Object validatedObj = path.getObject();
@@ -146,10 +144,15 @@ public abstract class TreeNodeValidator {
         else if (validatedObj instanceof SelectQuery) {
             validatorObj = selectQueryValidator;
         }
+        else if (validatedObj instanceof SQLTemplate) {
+            validatorObj = sqlTemplateValidator;
+        }
+        else if (validatedObj instanceof ProcedureQuery) {
+            validatorObj = procedureQueryValidator;
+        }
         else {
             // ignore unknown nodes
-            String className =
-                (validatedObj != null)
+            String className = (validatedObj != null)
                     ? validatedObj.getClass().getName()
                     : "(null object)";
             logObj.info("Validation not supported for object of class: " + className);
@@ -167,11 +170,10 @@ public abstract class TreeNodeValidator {
     }
 
     /**
-     * Validates an object, appending any warnings or errors to the validator. 
-     * Object to be validated is the last object in a <code>treeNodePath</code> 
-     * array argument.
-     * Concrete implementations would expect an object of a specific type.
-     * Otherwise, ClassCastException will be thrown.
+     * Validates an object, appending any warnings or errors to the validator. Object to
+     * be validated is the last object in a <code>treeNodePath</code> array argument.
+     * Concrete implementations would expect an object of a specific type. Otherwise,
+     * ClassCastException will be thrown.
      */
     public abstract void validateObject(ProjectPath treeNodePath, Validator validator);
 }

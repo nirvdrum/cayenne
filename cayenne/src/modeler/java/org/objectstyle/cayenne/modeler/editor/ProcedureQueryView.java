@@ -100,7 +100,7 @@ public class ProcedureQueryView extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter() {
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
                 setQueryName(text);
@@ -192,7 +192,10 @@ public class ProcedureQueryView extends JPanel {
      */
     void setQueryName(String string) {
         string = (string == null) ? "" : string.trim();
-
+        if (string.length() == 0) {
+            throw new ValidationException("Enter name for ProcedureQuery");
+        }
+        
         DataMap map = mediator.getCurrentDataMap();
         Query query = mediator.getCurrentQuery();
 

@@ -109,7 +109,7 @@ public class SelectQueryMainTab extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter() {
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
                 setQueryName(text);
@@ -119,7 +119,7 @@ public class SelectQueryMainTab extends JPanel {
         queryRoot = CayenneWidgetFactory.createComboBox();
         queryRoot.setRenderer(CellRenderers.listRendererWithIcons());
 
-        qualifier = new TextFieldAdapter() {
+        qualifier = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
                 setQueryQualifier(text);
@@ -261,7 +261,10 @@ public class SelectQueryMainTab extends JPanel {
      */
     void setQueryName(String string) {
         string = (string == null) ? "" : string.trim();
-
+        if (string.length() == 0) {
+            throw new ValidationException("Enter name for SelectQuery");
+        }
+        
         DataMap map = mediator.getCurrentDataMap();
         Query query = getQuery();
 

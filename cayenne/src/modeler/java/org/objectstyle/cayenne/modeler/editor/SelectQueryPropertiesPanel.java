@@ -133,14 +133,14 @@ public class SelectQueryPropertiesPanel extends JPanel {
         dataRows = new JCheckBox();
         refreshesResults = new JCheckBox();
 
-        fetchLimit = new TextFieldAdapter(7) {
+        fetchLimit = new TextFieldAdapter(CayenneWidgetFactory.createTextField(7)) {
 
             protected void initModel(String text) {
                 setFetchLimit(text);
             }
         };
 
-        pageSize = new TextFieldAdapter(7) {
+        pageSize = new TextFieldAdapter(CayenneWidgetFactory.createTextField(7)) {
 
             protected void initModel(String text) {
                 setPageSize(text);

@@ -170,6 +170,8 @@ public class SelectQueryValidator extends TreeNodeValidator {
         }
 
         // check for duplicate names in the parent context
+        Query sameNameQuery = map.getQuery(query.getName());
+        
         Iterator it = map.getQueries().iterator();
         while (it.hasNext()) {
             Query otherQuery = (Query) it.next();

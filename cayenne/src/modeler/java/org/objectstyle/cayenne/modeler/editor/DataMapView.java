@@ -62,12 +62,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.InputVerifier;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
@@ -81,21 +78,20 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
+import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
- * Detail view of the DataNode and DataSourceInfo
- * 
- * @author Michael Misha Shengaout 
- * @author Andrei Adamchik
+/**
+ * Panel for editing a DataMap.
  */
-public class DataMapView extends JPanel implements DataMapDisplayListener {
+public class DataMapView extends JPanel {
 
     protected EventController eventController;
 
-    protected JTextField name;
+    protected TextFieldAdapter name;
     protected JLabel location;
     protected JComboBox nodeSelector;
 
@@ -108,7 +104,13 @@ public class DataMapView extends JPanel implements DataMapDisplayListener {
 
     protected void initView() {
         // create widgets
-        name = CayenneWidgetFactory.createTextField();
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+
+            protected void initModel(String text) {
+                setDataMapName(text);
+            }
+        };
+
         location = CayenneWidgetFactory.createLabel("");
         nodeSelector = CayenneWidgetFactory.createComboBox();
         nodeSelector.setRenderer(CellRenderers.listRendererWithIcons());
@@ -119,61 +121,27 @@ public class DataMapView extends JPanel implements DataMapDisplayListener {
     }
 
     protected void initController() {
-        eventController.addDataMapDisplayListener(this);
-        name.setInputVerifier(new FieldVerifier());
+        eventController.addDataMapDisplayListener(new DataMapDisplayListener() {
+
+            public void currentDataMapChanged(DataMapDisplayEvent e) {
+                DataMap map = e.getDataMap();
+                if (map != null) {
+                    initFromModel(map);
+                }
+            }
+        });
 
         nodeSelector.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
-                DataNode node = (DataNode) nodeSelector.getSelectedItem();
-                DataMap map = eventController.getCurrentDataMap();
-
-                // no change?
-                if (node != null && node.getDataMaps().contains(map)) {
-                    return;
-                }
-
-                boolean hasChanges = false;
-
-                // unlink map from any nodes
-                Iterator nodes =
-                    eventController.getCurrentDataDomain().getDataNodes().iterator();
-
-                while (nodes.hasNext()) {
-                    DataNode nextNode = (DataNode) nodes.next();
-
-                    // Theoretically only one node may contain a datamap at each given time.
-                    // Being paranoid, we will still scan through all.
-                    if (nextNode != node && nextNode.getDataMaps().contains(map)) {
-                        nextNode.removeDataMap(map.getName());
-
-                        // announce DataNode change
-                        eventController.fireDataNodeEvent(
-                            new DataNodeEvent(this, nextNode));
-
-                        hasChanges = true;
-                    }
-                }
-
-                // link to a selected node
-                if (node != null) {
-                    node.addDataMap(map);
-                    hasChanges = true;
-
-                    // announce DataNode change
-                    eventController.fireDataNodeEvent(new DataNodeEvent(this, node));
-                }
-
-                if (hasChanges) {
-                    // TODO: maybe reindexing is an overkill in the modeler?
-                    eventController.getCurrentDataDomain().reindexNodes();
-                }
+                setDataNode();
             }
         });
     }
 
     /**
-     * Updates the view from the current model state.
-     * Invoked when a currently displayed ObjEntity is changed.
+     * Updates the view from the current model state. Invoked when a currently displayed
+     * ObjEntity is changed.
      */
     private void initFromModel(DataMap map) {
         name.setText(map.getName());
@@ -208,67 +176,84 @@ public class DataMapView extends JPanel implements DataMapDisplayListener {
     }
 
     private JPanel buildTopPanel() {
-        FormLayout layout =
-            new FormLayout("right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)", "");
+        FormLayout layout = new FormLayout(
+                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DataMap Configuration");
-        builder.append("DataMap Name:", name);
+        builder.append("DataMap Name:", name.getTextField());
         builder.append("File:", location);
         builder.append("DataNode:", nodeSelector);
         return builder.getPanel();
     }
 
+    void setDataMapName(String text) {
+        if (text == null || text.trim().length() == 0) {
+            throw new ValidationException("Enter name for DataMap");
+        }
 
-    /**
-     * Refreshes the view, rebuilds the list of other DataMaps that this one 
-     * may depend upon. 
-     */
-    public void currentDataMapChanged(DataMapDisplayEvent e) {
-        DataMap map = e.getDataMap();
-        if (null == map) {
+        DataDomain domain = eventController.getCurrentDataDomain();
+        DataMap map = eventController.getCurrentDataMap();
+        DataMap matchingMap = domain.getMap(text);
+
+        if (matchingMap == null) {
+            // completely new name, set new name for domain
+            DataMapEvent e = new DataMapEvent(this, map, map.getName());
+            MapUtil.setDataMapName(domain, map, text);
+            eventController.fireDataMapEvent(e);
+        }
+        else if (matchingMap != map) {
+
+            // there is an entity with the same name
+            throw new ValidationException("There is another DataMap named '"
+                    + text
+                    + "'. Use a different name.");
+        }
+    }
+
+    void setDataNode() {
+        DataNode node = (DataNode) nodeSelector.getSelectedItem();
+        DataMap map = eventController.getCurrentDataMap();
+
+        // no change?
+        if (node != null && node.getDataMaps().contains(map)) {
             return;
         }
 
-        initFromModel(map);
-    }
+        boolean hasChanges = false;
 
-    class FieldVerifier extends InputVerifier {
-        public boolean verify(JComponent input) {
-            if (input == name) {
-                return verifyName();
-            }
-            else {
-                return true;
+        // unlink map from any nodes
+        Iterator nodes = eventController.getCurrentDataDomain().getDataNodes().iterator();
+
+        while (nodes.hasNext()) {
+            DataNode nextNode = (DataNode) nodes.next();
+
+            // Theoretically only one node may contain a datamap at each given time.
+            // Being paranoid, we will still scan through all.
+            if (nextNode != node && nextNode.getDataMaps().contains(map)) {
+                nextNode.removeDataMap(map.getName());
+
+                // announce DataNode change
+                eventController.fireDataNodeEvent(new DataNodeEvent(this, nextNode));
+
+                hasChanges = true;
             }
         }
 
-        protected boolean verifyName() {
-            String text = name.getText();
-            if (text == null || text.trim().length() == 0) {
-                text = "";
-            }
+        // link to a selected node
+        if (node != null) {
+            node.addDataMap(map);
+            hasChanges = true;
 
-            DataDomain domain = eventController.getCurrentDataDomain();
-            DataMap map = eventController.getCurrentDataMap();
-            DataMap matchingMap = domain.getMap(text);
+            // announce DataNode change
+            eventController.fireDataNodeEvent(new DataNodeEvent(this, node));
+        }
 
-            if (matchingMap == null) {
-                // completely new name, set new name for domain
-                DataMapEvent e = new DataMapEvent(this, map, map.getName());
-                MapUtil.setDataMapName(domain, map, text);
-                eventController.fireDataMapEvent(e);
-                return true;
-            }
-            else if (matchingMap == map) {
-                // no name changes, just return
-                return true;
-            }
-            else {
-                // there is an entity with the same name
-                return false;
-            }
+        if (hasChanges) {
+            // TODO: maybe reindexing is an overkill in the modeler?
+            eventController.getCurrentDataDomain().reindexNodes();
         }
     }
 }

@@ -57,17 +57,13 @@
 package org.objectstyle.cayenne.modeler.editor;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Map;
 
-import javax.swing.InputVerifier;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -81,23 +77,25 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
-import org.objectstyle.cayenne.modeler.dialog.validator.ValidatorDialog;
+import org.objectstyle.cayenne.modeler.util.TextFieldAdapter;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.validation.ValidationException;
 
 import com.jgoodies.forms.builder.DefaultFormBuilder;
 import com.jgoodies.forms.layout.FormLayout;
 
-/** 
+/**
  * Panel for editing DataDomain.
  */
 public class DataDomainView extends JPanel implements DomainDisplayListener {
+
     private static Logger logObj = Logger.getLogger(DataDomainView.class);
 
     protected EventController eventController;
 
-    protected JTextField name;
-    protected JTextField cacheSize;
+    protected TextFieldAdapter name;
+    protected TextFieldAdapter cacheSize;
     protected JCheckBox objectValidation;
     protected JCheckBox externalTransactions;
     protected JCheckBox sharedCache;
@@ -110,90 +108,102 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         // Create and layout components
         initView();
 
-        // hook up listeners to widgets 
+        // hook up listeners to widgets
         initController();
     }
 
     protected void initView() {
 
         // create widgets
-        this.name = CayenneWidgetFactory.createTextField();
+        this.name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
+
+            protected void initModel(String text) {
+                setDomainName(text);
+            }
+        };
+
+        this.cacheSize = new TextFieldAdapter(CayenneWidgetFactory.createTextField(10)) {
+
+            protected void initModel(String text) {
+                setCacheSize(text);
+            }
+        };
+
         this.objectValidation = new JCheckBox();
         this.externalTransactions = new JCheckBox();
-        this.cacheSize = CayenneWidgetFactory.createTextField(10);
+
         this.sharedCache = new JCheckBox();
         this.remoteUpdates = new JCheckBox();
         this.configRemoteUpdates = new JButton("Configure");
         configRemoteUpdates.setEnabled(false);
 
         // assemble
-        this.setLayout(new BorderLayout());
-        FormLayout layout =
-            new FormLayout(
+
+        FormLayout layout = new FormLayout(
                 "right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DataDomain Configuration");
-        builder.append("DataDomain Name:", name, 3);
+        builder.append("DataDomain Name:", name.getTextField(), 3);
         builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
         builder.append("Container-Managed Transactions:", externalTransactions, 3);
 
         builder.appendSeparator("Cache Configuration");
-        builder.append("Max. Number of Objects:", cacheSize, 3);
+        builder.append("Max. Number of Objects:", cacheSize.getTextField(), 3);
         builder.append("Use Shared Cache:", sharedCache, 3);
-        builder.append(
-            "Remote Change Notifications:",
-            remoteUpdates,
-            configRemoteUpdates);
+        builder
+                .append(
+                        "Remote Change Notifications:",
+                        remoteUpdates,
+                        configRemoteUpdates);
 
-        this.add(builder.getPanel());
+        this.setLayout(new BorderLayout());
+        this.add(builder.getPanel(), BorderLayout.CENTER);
     }
 
     protected void initController() {
         eventController.addDomainDisplayListener(this);
 
-        // set InputVeryfier for text fields
-        InputVerifier inputCheck = new FieldVerifier();
-        name.setInputVerifier(inputCheck);
-        cacheSize.setInputVerifier(inputCheck);
-
         // add action listener to checkboxes
         objectValidation.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 String value = objectValidation.isSelected() ? "true" : "false";
                 setDomainProperty(
-                    DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
-                    value,
-                    Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT));
+                        DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
+                        value,
+                        Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT));
             }
         });
 
         externalTransactions.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 String value = externalTransactions.isSelected() ? "true" : "false";
                 setDomainProperty(
-                    DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
-                    value,
-                    Boolean.toString(DataDomain.USING_EXTERNAL_TRANSACTIONS_DEFAULT));
+                        DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
+                        value,
+                        Boolean.toString(DataDomain.USING_EXTERNAL_TRANSACTIONS_DEFAULT));
             }
         });
 
         sharedCache.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 String value = sharedCache.isSelected() ? "true" : "false";
                 setDomainProperty(
-                    DataDomain.SHARED_CACHE_ENABLED_PROPERTY,
-                    value,
-                    Boolean.toString(DataDomain.SHARED_CACHE_ENABLED_DEFAULT));
+                        DataDomain.SHARED_CACHE_ENABLED_PROPERTY,
+                        value,
+                        Boolean.toString(DataDomain.SHARED_CACHE_ENABLED_DEFAULT));
 
                 // turning off shared cache should result in disabling remote events
 
                 remoteUpdates.setEnabled(sharedCache.isSelected());
 
                 if (!sharedCache.isSelected()) {
-                    // uncheck remote updates... 
+                    // uncheck remote updates...
                     remoteUpdates.setSelected(false);
                 }
 
@@ -203,6 +213,7 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         });
 
         remoteUpdates.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 String value = remoteUpdates.isSelected() ? "true" : "false";
 
@@ -210,13 +221,14 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
                 configRemoteUpdates.setEnabled(remoteUpdates.isSelected());
 
                 setDomainProperty(
-                    DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
-                    value,
-                    Boolean.toString(DataRowStore.REMOTE_NOTIFICATION_DEFAULT));
+                        DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
+                        value,
+                        Boolean.toString(DataRowStore.REMOTE_NOTIFICATION_DEFAULT));
             }
         });
 
         configRemoteUpdates.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent e) {
                 new CacheSyncConfigController(eventController).startup();
             }
@@ -224,13 +236,10 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     }
 
     /**
-     * Helper method that updates domain properties. If a value equals to default, 
-     * null value is used instead.
+     * Helper method that updates domain properties. If a value equals to default, null
+     * value is used instead.
      */
-    protected void setDomainProperty(
-        String property,
-        String value,
-        String defaultValue) {
+    protected void setDomainProperty(String property, String value, String defaultValue) {
 
         DataDomain domain = eventController.getCurrentDataDomain();
         if (domain == null) {
@@ -272,8 +281,8 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
     }
 
     /**
-     * Invoked on domain selection event. Updates view with
-     * the values from the currently selected domain.
+     * Invoked on domain selection event. Updates view with the values from the currently
+     * selected domain.
      */
     public void currentDomainChanged(DomainDisplayEvent e) {
         DataDomain domain = e.getDomain();
@@ -284,105 +293,65 @@ public class DataDomainView extends JPanel implements DomainDisplayListener {
         // extract values from the new domain object
         name.setText(domain.getName());
 
-        cacheSize.setText(
-            getDomainProperty(
+        cacheSize.setText(getDomainProperty(
                 DataRowStore.SNAPSHOT_CACHE_SIZE_PROPERTY,
                 Integer.toString(DataRowStore.SNAPSHOT_CACHE_SIZE_DEFAULT)));
 
-        objectValidation.setSelected(
-            getDomainBooleanProperty(
+        objectValidation.setSelected(getDomainBooleanProperty(
                 DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
                 Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT)));
 
-        externalTransactions.setSelected(
-            getDomainBooleanProperty(
+        externalTransactions.setSelected(getDomainBooleanProperty(
                 DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
                 Boolean.toString(DataDomain.USING_EXTERNAL_TRANSACTIONS_DEFAULT)));
 
-        sharedCache.setSelected(
-            getDomainBooleanProperty(
+        sharedCache.setSelected(getDomainBooleanProperty(
                 DataDomain.SHARED_CACHE_ENABLED_PROPERTY,
                 Boolean.toString(DataDomain.SHARED_CACHE_ENABLED_DEFAULT)));
 
-        remoteUpdates.setSelected(
-            getDomainBooleanProperty(
+        remoteUpdates.setSelected(getDomainBooleanProperty(
                 DataRowStore.REMOTE_NOTIFICATION_PROPERTY,
                 Boolean.toString(DataRowStore.REMOTE_NOTIFICATION_DEFAULT)));
         remoteUpdates.setEnabled(sharedCache.isSelected());
-        configRemoteUpdates.setEnabled(
-            remoteUpdates.isEnabled() && remoteUpdates.isSelected());
+        configRemoteUpdates.setEnabled(remoteUpdates.isEnabled()
+                && remoteUpdates.isSelected());
     }
 
-    class FieldVerifier extends InputVerifier {
-        public boolean verify(JComponent input) {
-            if (input == name) {
-                return verifyName();
+    void setDomainName(String text) {
+        if (text == null || text.trim().length() == 0) {
+            throw new ValidationException("Enter name for DataDomain");
+        }
+
+        Configuration configuration = ((ApplicationProject) CayenneModelerFrame
+                .getProject()).getConfiguration();
+        DataDomain domain = eventController.getCurrentDataDomain();
+
+        DataDomain matchingDomain = configuration.getDomain(text);
+
+        if (matchingDomain == null) {
+            // completely new name, set new name for domain
+            DomainEvent e = new DomainEvent(this, domain, domain.getName());
+            MapUtil.setDataDomainName(configuration, domain, text);
+            eventController.fireDomainEvent(e);
+        }
+        else if (matchingDomain != domain) {
+            throw new ValidationException("There is another DataDomain named '"
+                    + text
+                    + "'. Use a different name.");
+        }
+    }
+
+    void setCacheSize(String text) {
+        if (text.length() > 0) {
+            try {
+                Integer.parseInt(text);
             }
-            else if (input == cacheSize) {
-                return verifyCacheSize();
-            }
-            else {
-                return true;
+            catch (NumberFormatException ex) {
+                throw new ValidationException("Cache size must be an integer: " + text);
             }
         }
 
-        protected boolean verifyName() {
-            String text = name.getText();
-            if (text == null || text.trim().length() == 0) {
-                text = "";
-            }
-
-            Configuration configuration =
-                ((ApplicationProject) CayenneModelerFrame.getProject())
-                    .getConfiguration();
-            DataDomain domain = eventController.getCurrentDataDomain();
-
-            DataDomain matchingDomain = configuration.getDomain(text);
-
-            if (matchingDomain == null) {
-                // completely new name, set new name for domain
-                DomainEvent e = new DomainEvent(this, domain, domain.getName());
-                MapUtil.setDataDomainName(configuration, domain, text);
-                eventController.fireDomainEvent(e);
-                return true;
-            }
-            else if (matchingDomain == domain) {
-                // no name changes, just return
-                return true;
-            }
-            else {
-                // there is an entity with the same name
-                return false;
-            }
-        }
-
-        protected boolean verifyCacheSize() {
-            String text = cacheSize.getText().trim();
-
-            if (text.length() > 0) {
-                try {
-                    Integer.parseInt(text);
-                }
-                catch (NumberFormatException ex) {
-                    return validationWarning(cacheSize);
-                }
-            }
-
-            setDomainProperty(
-                DataRowStore.SNAPSHOT_CACHE_SIZE_PROPERTY,
-                text,
-                Integer.toString(DataRowStore.SNAPSHOT_CACHE_SIZE_DEFAULT));
-            return validationSuccess(cacheSize);
-        }
-
-        protected boolean validationWarning(JTextField field) {
-            field.setBackground(ValidatorDialog.WARNING_COLOR);
-            return false;
-        }
-
-        protected boolean validationSuccess(JTextField field) {
-            field.setBackground(Color.WHITE);
-            return true;
-        }
+        setDomainProperty(DataRowStore.SNAPSHOT_CACHE_SIZE_PROPERTY, text, Integer
+                .toString(DataRowStore.SNAPSHOT_CACHE_SIZE_DEFAULT));
     }
 }

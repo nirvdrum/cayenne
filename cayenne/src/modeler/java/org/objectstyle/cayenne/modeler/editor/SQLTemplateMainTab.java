@@ -105,7 +105,7 @@ public class SQLTemplateMainTab extends JPanel {
 
     private void initView() {
         // create widgets
-        name = new TextFieldAdapter() {
+        name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
                 setQueryName(text);
@@ -214,7 +214,8 @@ public class SQLTemplateMainTab extends JPanel {
     }
 
     protected SQLTemplate getQuery() {
-        return (SQLTemplate) mediator.getCurrentQuery();
+        Query query = mediator.getCurrentQuery();
+        return (query instanceof SQLTemplate) ? (SQLTemplate) query : null;
     }
 
     /**
@@ -222,6 +223,9 @@ public class SQLTemplateMainTab extends JPanel {
      */
     void setQueryName(String string) {
         string = (string == null) ? "" : string.trim();
+        if (string.length() == 0) {
+            throw new ValidationException("Enter name for SQLTemplate Query");
+        }
 
         DataMap map = mediator.getCurrentDataMap();
         Query query = getQuery();
