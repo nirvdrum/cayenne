@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access.types;
 
 import java.lang.reflect.Method;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -73,7 +74,9 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 public class DefaultType extends AbstractType {
 
     private static final Map readMethods = new HashMap();
+    private static final Map procReadMethods = new HashMap();
     private static Method readObjectMethod;
+    private static Method procReadObjectMethod;
 
     static {
         try {
@@ -120,6 +123,50 @@ public class DefaultType extends AbstractType {
                 rsClass.getMethod("getTimestamp", paramTypes));
 
             readObjectMethod = rsClass.getMethod("getObject", paramTypes);
+
+            // init procedure read methods
+            Class csClass = CallableStatement.class;
+            procReadMethods.put(
+                TypesMapping.JAVA_LONG,
+                csClass.getMethod("getLong", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_BIGDECIMAL,
+                csClass.getMethod("getBigDecimal", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_BOOLEAN,
+                csClass.getMethod("getBoolean", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_BYTE,
+                csClass.getMethod("getByte", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_BYTES,
+                csClass.getMethod("getBytes", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_SQLDATE,
+                csClass.getMethod("getDate", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_DOUBLE,
+                csClass.getMethod("getDouble", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_FLOAT,
+                csClass.getMethod("getFloat", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_INTEGER,
+                csClass.getMethod("getInt", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_SHORT,
+                csClass.getMethod("getShort", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_STRING,
+                csClass.getMethod("getString", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_TIME,
+                csClass.getMethod("getTime", paramTypes));
+            procReadMethods.put(
+                TypesMapping.JAVA_TIMESTAMP,
+                csClass.getMethod("getTimestamp", paramTypes));
+
+            procReadObjectMethod = csClass.getMethod("getObject", paramTypes);
         } catch (Exception ex) {
             throw new CayenneRuntimeException(
                 "Error initializing read methods.",
@@ -134,27 +181,38 @@ public class DefaultType extends AbstractType {
 
     protected String className;
     protected Method readMethod;
-    protected Object[] args = new Object[1];
+    protected Method procReadMethod;
 
     /** 
      * CreatesDefaultType to read objects from ResultSet
      * using "getObject" method.
      */
     public DefaultType() {
-        className = Object.class.getName();
-        readMethod = readObjectMethod;
+        this.className = Object.class.getName();
+        this.readMethod = readObjectMethod;
+        this.procReadMethod = procReadObjectMethod;
     }
 
     public DefaultType(String className) {
         this.className = className;
-        readMethod = (Method) readMethods.get(className);
+        this.readMethod = (Method) readMethods.get(className);
 
-        if (readMethod == null)
+        if (readMethod == null) {
             throw new CayenneRuntimeException(
                 "Unsupported default class: "
                     + className
                     + ". If you want a non-standard class to map to JDBC type,"
                     + " you will need to implement ExtendedType interface yourself.");
+        }
+
+        this.procReadMethod = (Method) procReadMethods.get(className);
+        if (procReadMethod == null) {
+            throw new CayenneRuntimeException(
+                "Unsupported default class: "
+                    + className
+                    + ". If you want a non-standard class to map to JDBC type,"
+                    + " you will need to implement ExtendedType interface yourself.");
+        }
     }
 
     public String getClassName() {
@@ -163,8 +221,13 @@ public class DefaultType extends AbstractType {
 
     public Object materializeObject(ResultSet rs, int index, int type)
         throws Exception {
-        args[0] = new Integer(index);
-        Object val = readMethod.invoke(rs, args);
+        Object val = readMethod.invoke(rs, new Object[] {new Integer(index)});
         return (rs.wasNull()) ? null : val;
+    }
+
+    public Object materializeObject(CallableStatement st, int index, int type)
+        throws Exception {
+        Object val = procReadMethod.invoke(st, new Object[] {new Integer(index)});
+        return (st.wasNull()) ? null : val;
     }
 }

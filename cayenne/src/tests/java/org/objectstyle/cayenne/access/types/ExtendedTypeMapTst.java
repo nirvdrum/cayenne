@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.access.types;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
 
 public class ExtendedTypeMapTst extends CayenneTestCase {
 
@@ -67,16 +67,19 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
         ExtendedTypeMap map = new ExtendedTypeMap();
         TestExtType tstType = new TestExtType();
 
-        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+        assertSame(
+            map.getDefaultType(),
+            map.getRegisteredType(tstType.getClassName()));
 
         map.registerType(tstType);
         assertSame(tstType, map.getRegisteredType(tstType.getClassName()));
 
         map.unregisterType(tstType.getClassName());
-        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+        assertSame(
+            map.getDefaultType(),
+            map.getRegisteredType(tstType.getClassName()));
     }
-    
-    
+
     public void testRegisterArrayType() throws Exception {
         ExtendedTypeMap map = new ExtendedTypeMap();
         ByteArrayType tstType = new ByteArrayType(false, true);
@@ -86,7 +89,9 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
         assertSame(tstType, map.getRegisteredType(byte[].class));
 
         map.unregisterType(tstType.getClassName());
-        assertSame(map.getDefaultType(), map.getRegisteredType(tstType.getClassName()));
+        assertSame(
+            map.getDefaultType(),
+            map.getRegisteredType(tstType.getClassName()));
     }
 
     public void testRegisteredTypeName() throws Exception {
@@ -121,9 +126,19 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
             return new Object();
         }
 
-        public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+        public Object materializeObject(ResultSet rs, int index, int type)
+            throws Exception {
             Object val = rs.getObject(index);
             return (rs.wasNull()) ? null : val;
+        }
+
+        public Object materializeObject(
+            CallableStatement cs,
+            int index,
+            int type)
+            throws Exception {
+            Object val = cs.getObject(index);
+            return (cs.wasNull()) ? null : val;
         }
 
         public void setJdbcObject(
@@ -137,4 +152,3 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
 
     }
 }
-

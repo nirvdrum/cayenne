@@ -68,6 +68,7 @@ import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParam;
 import org.objectstyle.cayenne.query.ProcedureQuery;
@@ -140,7 +141,7 @@ public class ProcedureTranslator
     public PreparedStatement createStatement(Level logLevel) throws Exception {
         long t1 = System.currentTimeMillis();
 
-        this.callParams = getProcedure().getCallParamsList();
+        this.callParams = getProcedure().getCallParams();
         this.values = new ArrayList(callParams.size());
 
         initValues();
@@ -176,11 +177,27 @@ public class ProcedureTranslator
     }
 
     /**
+     * Returns a result descriptor for the stored procedure OUT parameters. 
+     */
+    public ResultDescriptor getProcedureResultDescriptor() {
+        ResultDescriptor descriptor =
+            new ResultDescriptor(getAdapter().getExtendedTypes(), null);
+
+        Iterator it = getProcedure().getCallOutParams().iterator();
+        while(it.hasNext()) {
+            descriptor.addDbAttribute((DbAttribute)it.next());
+        }
+
+        descriptor.index();
+        return descriptor;
+    }
+
+    /**
      * Set IN and OUT parameters.
      */
     protected void initStatement(CallableStatement stmt) throws Exception {
         if (values != null && values.size() > 0) {
-            List params = getProcedure().getCallParamsList();
+            List params = getProcedure().getCallParams();
 
             int len = values.size();
             for (int i = 0; i < len; i++) {
@@ -188,12 +205,12 @@ public class ProcedureTranslator
 
                 // !Stored procedure parameter can be both in and out 
                 // at the same time
-                if (param.isInParam()) {
-                    setInParam(stmt, param, values.get(i), i + 1);
-                }
-
                 if (param.isOutParam()) {
                     setOutParam(stmt, param, i + 1);
+                }
+                
+                if (param.isInParam()) {
+                    setInParam(stmt, param, values.get(i), i + 1);
                 }
             }
         }

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -112,12 +113,30 @@ public class Procedure extends DbEntity {
     }
 
     /**
-     * Returns a list of calll parameters.
+     * Returns a list of call parameters.
      * 
      * @return List
      */
-    public List getCallParamsList() {
+    public List getCallParams() {
         return callParams;
+    }
+    
+    /**
+     * Returns a list of OUT and INOUT call parameters. If procedure has a
+     * return value, it will also be included as a call parameter.
+     * @return
+     */
+    public List getCallOutParams() {
+        List outParams = new ArrayList(callParams.size());
+        Iterator it = callParams.iterator();
+        while(it.hasNext()) {
+            ProcedureParam param = (ProcedureParam)it.next();
+            if(param.isOutParam()) {
+                outParams.add(param);
+            }
+        }
+        
+        return outParams;
     }
 
     /**

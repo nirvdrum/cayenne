@@ -115,10 +115,6 @@ public class ResultDescriptor {
     public void index() {
 
         // assert validity
-        if (dbAttributes.size() == 0) {
-            throw new IllegalArgumentException("No DbAttributes specified.");
-        }
-
         if (javaTypes.size() > 0 && javaTypes.size() != dbAttributes.size()) {
             throw new IllegalArgumentException("DbAttributes and Java type arrays must have the same size.");
         }
@@ -242,5 +238,12 @@ public class ResultDescriptor {
 
     public String[] getNames() {
         return names;
+    }
+    
+    /**
+     * Returns a count of columns in the result.
+     */
+    public int getResultWidth() {
+        return dbAttributes.size();
     }
 }

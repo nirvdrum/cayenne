@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,7 +64,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -73,6 +76,7 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -80,6 +84,7 @@ import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.access.util.DefaultSorter;
 import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.access.util.NullSorter;
+import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -91,7 +96,7 @@ import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * Describes a single physical data source, e.g. a database server.
+ * Describes a single physical data source. This can be a database server, LDAP server, etc.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
@@ -539,20 +544,54 @@ public class DataNode implements QueryEngine {
         throws SQLException, Exception {
         long t1 = System.currentTimeMillis();
 
-        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        ProcedureTranslator transl =
+            (ProcedureTranslator) getAdapter().getQueryTranslator(query);
         transl.setEngine(this);
         transl.setCon(con);
 
-        PreparedStatement prepStmt =
-            transl.createStatement(query.getLoggingLevel());
+        CallableStatement statement =
+            (CallableStatement) transl.createStatement(query.getLoggingLevel());
         boolean readAll = !delegate.isIteratedResult();
 
-        // stored procedure may contain a mixture of update counts and result sets.
+        // stored procedure may contain a mixture of update counts and result sets,
+        // and out parameters. Read out parameters first, then
         // iterate until we exhaust all results
-        boolean hasResultSet = prepStmt.execute();
+        boolean hasResultSet = statement.execute();
+        
+        ResultDescriptor outDesc = transl.getProcedureResultDescriptor();
+        int resultWidth = outDesc.getResultWidth();
+        if (resultWidth > 0) {
+            // TODO: Reading Stored Procedure out parameters is in many respects
+            // similar to how DefaultResultIterator reads rows from ResultSet
+            // so DataNode feels like a wrong place to put this code, may need to move 
+            // it elsewhere
+            Map dataRow = new HashMap(resultWidth * 2, 0.75f);
+            ExtendedType[] converters = outDesc.getConverters();
+            int[] jdbcTypes = outDesc.getJdbcTypes();
+            String[] names = outDesc.getNames();
+
+            // process result row columns,
+            for (int i = 0; i < resultWidth; i++) {
+                // note: jdbc column indexes start from 1, not 0 unlike everywhere else
+                Object val =
+                    converters[i].materializeObject(
+                        statement,
+                        i + 1,
+                        jdbcTypes[i]);
+                dataRow.put(names[i], val);
+            }
+
+            // for now treat out parameters as a separate data row set
+            QueryLogger.logSelectCount(
+                query.getLoggingLevel(),
+                1,
+                System.currentTimeMillis() - t1);
+            delegate.nextDataRows(query, Collections.singletonList(dataRow));
+        }
+
         while (true) {
-            if (hasResultSet) { 
-                ResultSet rs = prepStmt.getResultSet();
+            if (hasResultSet) {
+                ResultSet rs = statement.getResultSet();
 
                 // sanity check 
                 SelectQueryTranslator assembler =
@@ -560,7 +599,7 @@ public class DataNode implements QueryEngine {
                 DefaultResultIterator it =
                     new DefaultResultIterator(
                         con,
-                        prepStmt,
+                        statement,
                         rs,
                         assembler.getResultDescriptor(rs),
                         ((GenericSelectQuery) query).getFetchLimit());
@@ -593,15 +632,17 @@ public class DataNode implements QueryEngine {
                     }
                 }
             } else {
-                int updateCount = prepStmt.getUpdateCount();
+                int updateCount = statement.getUpdateCount();
                 if (updateCount == -1) {
                     break;
                 }
-                QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
+                QueryLogger.logUpdateCount(
+                    query.getLoggingLevel(),
+                    updateCount);
                 delegate.nextCount(query, updateCount);
             }
 
-            hasResultSet = prepStmt.getMoreResults();
+            hasResultSet = statement.getMoreResults();
         }
     }
 

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.types;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -89,12 +90,22 @@ public interface ExtendedType {
         throws Exception;
 
     /** 
-     * Reads an object from JDBC ResultSet column converting it to class
+     * Reads an object from JDBC ResultSet column, converting it to class
      * returned by 'getClassName' method.
      *
      * @throws Exception if read error ocurred, or an object can't be converted
      * to a target Java class.
      */
     public Object materializeObject(ResultSet rs, int index, int type)
+        throws Exception;
+        
+    /** 
+     * Reads an object from a stored procedure OUT parameter, converting it to class
+     * returned by 'getClassName' method.
+     *
+     * @throws Exception if read error ocurred, or an object can't be converted
+     * to a target Java class.
+     */
+    public Object materializeObject(CallableStatement rs, int index, int type)
         throws Exception;
 }

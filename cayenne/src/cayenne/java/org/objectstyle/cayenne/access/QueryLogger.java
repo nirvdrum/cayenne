@@ -61,6 +61,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * A QueryLogger is intended to log special events during query executions.
@@ -315,6 +316,10 @@ public class QueryLogger {
     }
 
     public static void logQueryError(Level logLevel, Throwable th) {
+        if(th != null) {
+            th = Util.unwindException(th);
+        }
+        
         logObj.log(logLevel, "*** error.", th);
     }
 

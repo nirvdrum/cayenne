@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access.types;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
@@ -105,6 +106,19 @@ public class UtilDateType extends AbstractType {
             ? null
             : new java.util.Date(((java.util.Date) val).getTime());
     }
+    
+    public Object materializeObject(CallableStatement cs, int index, int type)
+         throws Exception {
+         Object val = cs.getObject(index);
+
+         // all sql time/date classes are subclasses of java.util.Date,
+         // so lets cast it to Date,
+         // if it is not date, ClassCastException will be thrown,
+         // which is what we want
+         return (cs.wasNull())
+             ? null
+             : new java.util.Date(((java.util.Date) val).getTime());
+     }
 
     public void setJdbcObject(
         PreparedStatement st,

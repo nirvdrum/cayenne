@@ -78,6 +78,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
     public static final String UPDATE_STORED_PROCEDURE = "cayenne_tst_upd_proc";
     public static final String SELECT_STORED_PROCEDURE =
         "cayenne_tst_select_proc";
+    public static final String OUT_STORED_PROCEDURE = "cayenne_tst_out_proc";
 
     protected DataContext ctxt;
 
@@ -102,7 +103,6 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("paintingPrice", new Integer(3000));
         DefaultOperationObserver observer = new DefaultOperationObserver();
-        observer.setLoggingLevel(Level.WARN);
         ctxt.performQuery(q, observer);
 
         // check that price have doubled
@@ -141,19 +141,55 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
-        q.setLoggingLevel(Level.WARN);
         List artists = ctxt.performQuery(q);
 
         // check the results
         assertNotNull("Null result from StoredProcedure.", artists);
         assertEquals(1, artists.size());
         Map artistRow = (Map) artists.get(0);
-        Artist a = (Artist)ctxt.objectFromDataRow("Artist", artistRow);
+        Artist a = (Artist) ctxt.objectFromDataRow("Artist", artistRow);
         Painting p = (Painting) a.getPaintingArray().get(0);
-        
+
         // invalidate painting, it may have been updated in the proc
         ctxt.invalidateObject(p);
         assertEquals(2000, p.getEstimatedPrice().intValue());
+    }
+
+    public void testOutParams() throws Exception {
+        // Don't run this on MySQL
+        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+            return;
+        }
+
+        // create and run stored procedure
+        Procedure proc = new Procedure(OUT_STORED_PROCEDURE);
+        ProcedureParam param1 =
+            new ProcedureParam(
+                "in_param",
+                Types.INTEGER,
+                ProcedureParam.IN_PARAM);
+        ProcedureParam param2 =
+            new ProcedureParam(
+                "out_param",
+                Types.INTEGER,
+                ProcedureParam.OUT_PARAM);
+        proc.addCallParam(param1);
+        proc.addCallParam(param2);
+
+        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
+        q.addParam("in_param", new Integer(20));
+
+        QueryResult resultHolder = new QueryResult();
+        ctxt.performQuery(q, resultHolder);
+
+        // check the results
+        List results = resultHolder.getResults(q);
+        assertNotNull(results);
+        assertEquals(1, results.size());
+        Map outParams = (Map) results.get(0);
+        Number price = (Number) outParams.get("out_param");
+        assertNotNull(price);
+        assertEquals(40, price.intValue());
     }
 
     protected void createArtist(double paintingPrice) {

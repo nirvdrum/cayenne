@@ -12,4 +12,6 @@
         FROM ARTIST A, PAINTING P
         WHERE A.ARTIST_ID = P.ARTIST_ID AND
         A.ARTIST_NAME = a_name;
+        
+        return artists;
  END;

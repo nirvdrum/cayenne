@@ -60,11 +60,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+
+import org.objectstyle.cayenne.CayenneException;
 
 /** 
  * Handles CHAR type for JDBC drivers that don't trim trailing spaces.
@@ -95,11 +98,37 @@ public class CharType extends AbstractType {
         if (type == Types.CLOB) {
             val =
                 (isUsingClobs())
-                    ? readClob(rs, index)
+                    ? readClob(rs.getClob(index))
                     : readCharStream(rs, index);
         } else {
 
             val = rs.getString(index);
+
+            // trim CHAR type
+            if (val != null && type == Types.CHAR && isTrimmingChars()) {
+                val = val.trim();
+            }
+        }
+
+        return val;
+    }
+
+    /** Return trimmed string. */
+    public Object materializeObject(CallableStatement cs, int index, int type)
+        throws Exception {
+
+        String val = null;
+
+        // CLOB handling
+        if (type == Types.CLOB) {
+            if (!isUsingClobs()) {
+                throw new CayenneException("Character streams are not supported in stored procedure parameters.");
+            }
+
+            val = readClob(cs.getClob(index));
+        } else {
+
+            val = cs.getString(index);
 
             // trim CHAR type
             if (val != null && type == Types.CHAR && isTrimmingChars()) {
@@ -127,10 +156,7 @@ public class CharType extends AbstractType {
         }
     }
 
-    protected String readClob(ResultSet rs, int index)
-        throws IOException, SQLException {
-
-        Clob clob = rs.getClob(index);
+    protected String readClob(Clob clob) throws IOException, SQLException {
 
         // sanity check on size
         if (clob.length() > Integer.MAX_VALUE) {

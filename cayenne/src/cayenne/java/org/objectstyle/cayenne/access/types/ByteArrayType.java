@@ -60,10 +60,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+
+import org.objectstyle.cayenne.CayenneException;
 
 /**
  * @author Andrei Adamchik
@@ -114,10 +117,33 @@ public class ByteArrayType extends AbstractType {
         if (type == Types.BLOB) {
             bytes =
                 (isUsingBlobs())
-                    ? readBlob(rs, index)
+                    ? readBlob(rs.getBlob(index))
                     : readBinaryStream(rs, index);
         } else {
             bytes = rs.getBytes(index);
+
+            // trim BINARY type
+            if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
+                bytes = trimBytes(bytes);
+            }
+        }
+
+        return bytes;
+    }
+
+    public Object materializeObject(CallableStatement cs, int index, int type)
+        throws Exception {
+
+        byte[] bytes = null;
+
+        if (type == Types.BLOB) {
+            if (!isUsingBlobs()) {
+                throw new CayenneException("Binary streams are not supported in stored procedure parameters.");
+            }
+            bytes = readBlob(cs.getBlob(index));
+        } else {
+            
+            bytes = cs.getBytes(index);
 
             // trim BINARY type
             if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
@@ -145,10 +171,7 @@ public class ByteArrayType extends AbstractType {
         }
     }
 
-    protected byte[] readBlob(ResultSet rs, int index)
-        throws IOException, SQLException {
-
-        Blob blob = rs.getBlob(index);
+    protected byte[] readBlob(Blob blob) throws IOException, SQLException {
 
         // sanity check on size
         if (blob.length() > Integer.MAX_VALUE) {

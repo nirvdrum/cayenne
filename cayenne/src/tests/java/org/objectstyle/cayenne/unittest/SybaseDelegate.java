@@ -80,11 +80,13 @@ public class SybaseDelegate extends DatabaseSetupDelegate {
     public void createdTables(Connection con, DataMap map) throws Exception {
         executeDDL(con, super.ddlFile("sybase", "create-select-sp.sql"));
         executeDDL(con, super.ddlFile("sybase", "create-update-sp.sql"));
+        executeDDL(con, super.ddlFile("sybase", "create-out-sp.sql"));
     }
 
     public void willDropTables(Connection con, DataMap map) throws Exception {
         executeDDL(con, super.ddlFile("sybase", "drop-select-sp.sql"));
         executeDDL(con, super.ddlFile("sybase", "drop-update-sp.sql"));
+        executeDDL(con, super.ddlFile("sybase", "drop-out-sp.sql"));
     }
 
     public boolean supportsLobs() {
