@@ -198,8 +198,10 @@ public class DataNode implements QueryEngine {
         this.dataSource = dataSource;
     }
 
-    /** Returns DbAdapter object. This is a plugin for
-      * that handles RDBMS vendor-specific features. */
+    /**
+     * Returns DbAdapter object. This is a plugin
+     * that handles RDBMS vendor-specific features.
+     */
     public DbAdapter getAdapter() {
         return adapter;
     }
@@ -211,8 +213,8 @@ public class DataNode implements QueryEngine {
     // other methods
 
     /**
-     * Returns this object if it can hanle queries for
-     * <code>objEntity</code>, returns null otherwise.
+     * Returns this object if it can handle queries for <code>objEntity</code>,
+     * returns null otherwise.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null) ? this : null;
@@ -239,7 +241,6 @@ public class DataNode implements QueryEngine {
         boolean rolledBackFlag = false;
 
         try {
-
             // check for invalid iterated query
             if (opObserver.isIteratedResult() && listSize > 1) {
                 throw new CayenneException(
