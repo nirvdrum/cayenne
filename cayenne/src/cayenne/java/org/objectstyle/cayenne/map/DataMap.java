@@ -149,6 +149,12 @@ public class DataMap {
         super();
         this.setName(mapName);
     }
+    
+    public String toString() {
+    	StringBuffer buf = new StringBuffer();
+    	buf.append("DataMap '").append(name).append("'");
+    	return buf.toString();
+    }
 
     /**
      * Adds a data map that has entities used by this map.

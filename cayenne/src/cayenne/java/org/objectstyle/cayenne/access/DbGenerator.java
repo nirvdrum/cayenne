@@ -72,10 +72,12 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.conn.*;
+import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.PkGenerator;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
@@ -92,11 +94,19 @@ public class DbGenerator {
 	protected DataNode node;
 	protected DataMap map;
 
+	// stores generated SQL statements
 	protected Map dropTables;
 	protected Map createTables;
 	protected Map createFK;
 	protected List createPK;
 	protected List dropPK;
+
+	/**
+	 * Contains all DbEntities ordered considering their interdependencies.
+	 * DerivedDbEntities are filtered out of this list.
+	 */
+	protected List dbEntitiesInInsertOrder;
+	protected List dbEntitiesRequiringAutoPK;
 
 	protected boolean shouldDropTables;
 	protected boolean shouldCreateTables;
@@ -111,10 +121,15 @@ public class DbGenerator {
 			throw new IllegalArgumentException("Adapter must not be null.");
 		}
 
+		if (map == null) {
+			throw new IllegalArgumentException("DataMap must not be null.");
+		}
+		
 		this.map = map;
 		this.node = adapter.createDataNode("internal");
 		node.addDataMap(map);
 
+		prepareDbEntities();
 		resetToDefaults();
 		buildStatements();
 	}
@@ -138,16 +153,10 @@ public class DbGenerator {
 		createFK = new HashMap();
 
 		DbAdapter adapter = getAdapter();
-		List dbEntities = new ArrayList(map.getDbEntities());
-		Iterator it = dbEntities.iterator();
+		Iterator it = dbEntitiesInInsertOrder.iterator();
 		boolean supportsFK = adapter.supportsFkConstraints();
 		while (it.hasNext()) {
 			DbEntity dbe = (DbEntity) it.next();
-
-			// view creation support is pending
-			if (dbe instanceof DerivedDbEntity) {
-				continue;
-			}
 
 			String name = dbe.getName();
 
@@ -163,8 +172,9 @@ public class DbGenerator {
 			}
 		}
 
-		dropPK = adapter.getPkGenerator().dropAutoPkStatements(dbEntities);
-		createPK = adapter.getPkGenerator().createAutoPkStatements(dbEntities);
+		PkGenerator pkGenerator = adapter.getPkGenerator();
+		dropPK = pkGenerator.dropAutoPkStatements(dbEntitiesRequiringAutoPK);
+		createPK = pkGenerator.createAutoPkStatements(dbEntitiesRequiringAutoPK);
 	}
 
 	/** Returns DbAdapter associated with this DbGenerator. */
@@ -178,10 +188,11 @@ public class DbGenerator {
 	 */
 	public List configuredStatements() {
 		List list = new ArrayList();
-		List orderedEnts = dbEntitiesInInsertOrder();
 
 		if (shouldDropTables) {
-			ListIterator it = orderedEnts.listIterator(orderedEnts.size());
+			ListIterator it =
+				dbEntitiesInInsertOrder.listIterator(
+					dbEntitiesInInsertOrder.size());
 			while (it.hasPrevious()) {
 				DbEntity ent = (DbEntity) it.previous();
 				list.add(dropTables.get(ent.getName()));
@@ -189,7 +200,7 @@ public class DbGenerator {
 		}
 
 		if (shouldCreateTables) {
-			Iterator it = orderedEnts.iterator();
+			Iterator it = dbEntitiesInInsertOrder.iterator();
 			while (it.hasNext()) {
 				DbEntity ent = (DbEntity) it.next();
 				list.add(createTables.get(ent.getName()));
@@ -198,7 +209,7 @@ public class DbGenerator {
 
 		if (shouldCreateFKConstraints
 			&& getAdapter().supportsFkConstraints()) {
-			Iterator it = orderedEnts.iterator();
+			Iterator it = dbEntitiesInInsertOrder.iterator();
 			while (it.hasNext()) {
 				DbEntity ent = (DbEntity) it.next();
 				List fks = (List) createFK.get(ent.getName());
@@ -243,7 +254,6 @@ public class DbGenerator {
 	 */
 	public void runGenerator(DataSource ds) throws Exception {
 		Connection con = ds.getConnection();
-		List orderedEnts = dbEntitiesInInsertOrder();
 
 		try {
 			List nonExistent = filterNonExistentTables(con);
@@ -252,7 +262,8 @@ public class DbGenerator {
 			try {
 				if (shouldDropTables) {
 					ListIterator it =
-						orderedEnts.listIterator(orderedEnts.size());
+						dbEntitiesInInsertOrder.listIterator(
+							dbEntitiesInInsertOrder.size());
 					while (it.hasPrevious()) {
 						DbEntity ent = (DbEntity) it.previous();
 
@@ -270,7 +281,7 @@ public class DbGenerator {
 				List createdTables = new ArrayList();
 
 				if (shouldCreateTables) {
-					Iterator it = orderedEnts.iterator();
+					Iterator it = dbEntitiesInInsertOrder.iterator();
 					while (it.hasNext()) {
 						DbEntity ent = (DbEntity) it.next();
 
@@ -287,7 +298,7 @@ public class DbGenerator {
 				if (shouldCreateTables
 					&& shouldCreateFKConstraints
 					&& getAdapter().supportsFkConstraints()) {
-					Iterator it = orderedEnts.iterator();
+					Iterator it = dbEntitiesInInsertOrder.iterator();
 					while (it.hasNext()) {
 						DbEntity ent = (DbEntity) it.next();
 
@@ -312,12 +323,15 @@ public class DbGenerator {
 
 		try {
 			if (shouldDropPKSupport) {
-
-				getAdapter().getPkGenerator().dropAutoPk(node, orderedEnts);
+				getAdapter().getPkGenerator().dropAutoPk(
+					node,
+					dbEntitiesInInsertOrder);
 			}
 
 			if (shouldCreatePKSupport) {
-				getAdapter().getPkGenerator().createAutoPk(node, orderedEnts);
+				getAdapter().getPkGenerator().createAutoPk(
+					node,
+					dbEntitiesInInsertOrder);
 			}
 		} finally {
 			node.setDataSource(null);
@@ -427,22 +441,56 @@ public class DbGenerator {
 
 	/** 
 	 * Helper method that orders DbEntities to satisfy referential
-	 * constraints and returns an ordered list. 
+	 * constraints and returns an ordered list. It also filters out
+	 * DerivedDbEntities.
 	 */
-	private List dbEntitiesInInsertOrder() {
+	private void prepareDbEntities() {
 		// remove derived db entities
-		List filteredList = new ArrayList();
+		List tables = new ArrayList();
+		List tablesWithAutoPk = new ArrayList();
 		Iterator it = map.getDbEntities().iterator();
 		while (it.hasNext()) {
-			Object next = it.next();
-			if (!(next instanceof DerivedDbEntity)) {
-				filteredList.add(next);
+			DbEntity nextEntity = (DbEntity) it.next();
+			if (nextEntity instanceof DerivedDbEntity) {
+				continue;
 			}
+
+			tables.add(nextEntity);
+
+			// check if an automatic PK generation can be potentailly supported
+			// in this entity. For now simply check that the key is not propagated
+			Iterator relationships = nextEntity.getRelationships().iterator();
+			
+			// create a copy of the original PK list, 
+			// since the list will be modified locally
+			List pkAttributes = new ArrayList(nextEntity.getPrimaryKey());
+            while(pkAttributes.size() > 0 && relationships.hasNext()) {
+            	DbRelationship nextRelationship = (DbRelationship)relationships.next();
+            	if(!nextRelationship.isToMasterPK()) {
+            		continue;
+            	}
+            	
+            	// supposedly all source attributes of the relationship
+            	// to master entity must be a part of primary key,
+            	// so 
+            	Iterator joins = nextRelationship.getJoins().iterator();
+            	while(joins.hasNext()) {
+            		DbAttributePair join = (DbAttributePair)joins.next();
+            		pkAttributes.remove(join.getSource());         	
+            	}
+            }
+            
+            // primary key is needed only if at least one of the primary key attributes
+            // is not propagated via releationship
+            if(pkAttributes.size() > 0) {
+				tablesWithAutoPk.add(nextEntity);
+            }
 		}
 
 		// sort the list
-		node.getDependencySorter().sortDbEntities(filteredList, false);
-		return filteredList;
-	}
+		this.node.getDependencySorter().sortDbEntities(tables, false);
 
+		this.dbEntitiesInInsertOrder = tables;
+		this.dbEntitiesRequiringAutoPK = tablesWithAutoPk;
+	}
 }

@@ -55,7 +55,9 @@
  */
 package org.objectstyle.cayenne.access;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /** Test cases for DbGenerator.
@@ -63,43 +65,59 @@ import org.objectstyle.cayenne.unittest.CayenneTestCase;
   * @author Andrei Adamchik
   */
 public class DbGeneratorTst extends CayenneTestCase {
+	Logger logObj = Logger.getLogger(DbGeneratorTst.class);
+	
+	protected DbGenerator gen;
 
-    protected DbGenerator gen;
+	public void setUp() throws Exception {
+		gen =
+			new DbGenerator(
+				getNode().getAdapter(),
+				getDomain().getMap("testmap"));
+	}
 
-    public void setUp() throws Exception {
-        gen =
-            new DbGenerator(
-                getNode().getAdapter(),
-                (DataMap)getNode().getDataMaps().iterator().next());
-    }
+	public void testAdapter() throws Exception {
+		assertSame(getNode().getAdapter(), gen.getAdapter());
+	}
 
-    public void testAdapter() throws Exception {
-        assertSame(getNode().getAdapter(), gen.getAdapter());
-    }
+	public void testPkFilteringLogic() throws Exception {
+		DataMap map = getDomain().getMap("testmap");
+		DbEntity artistExhibit = map.getDbEntity("ARTIST_EXHIBIT");
+		DbEntity exhibit = map.getDbEntity("EXHIBIT");
 
-    public void testCreatePkSupport() throws Exception {
-        assertTrue(gen.shouldCreatePKSupport());
-        gen.setShouldCreatePKSupport(false);
-        assertFalse(gen.shouldCreatePKSupport());
+		// sanity check
+		assertNotNull(artistExhibit);
+		assertNotNull(exhibit);
+		assertNotNull(gen.dbEntitiesRequiringAutoPK);
 
-    }
+		// real test
+		assertTrue(gen.dbEntitiesRequiringAutoPK.contains(exhibit));
+		assertFalse(gen.dbEntitiesRequiringAutoPK.contains(artistExhibit));
+	}
 
-    public void testShouldCreateTables() throws Exception {
-        assertTrue(gen.shouldCreateTables());
-        gen.setShouldCreateTables(false);
-        assertFalse(gen.shouldCreateTables());
-    }
+	public void testCreatePkSupport() throws Exception {
+		assertTrue(gen.shouldCreatePKSupport());
+		gen.setShouldCreatePKSupport(false);
+		assertFalse(gen.shouldCreatePKSupport());
 
-    public void testDropPkSupport() throws Exception {
+	}
 
-        assertFalse(gen.shouldDropPKSupport());
-        gen.setShouldDropPKSupport(true);
-        assertTrue(gen.shouldDropPKSupport());
-    }
+	public void testShouldCreateTables() throws Exception {
+		assertTrue(gen.shouldCreateTables());
+		gen.setShouldCreateTables(false);
+		assertFalse(gen.shouldCreateTables());
+	}
 
-    public void testShouldDropTables() throws Exception {
-        assertFalse(gen.shouldDropTables());
-        gen.setShouldDropTables(true);
-        assertTrue(gen.shouldDropTables());
-    }
+	public void testDropPkSupport() throws Exception {
+
+		assertFalse(gen.shouldDropPKSupport());
+		gen.setShouldDropPKSupport(true);
+		assertTrue(gen.shouldDropPKSupport());
+	}
+
+	public void testShouldDropTables() throws Exception {
+		assertFalse(gen.shouldDropTables());
+		gen.setShouldDropTables(true);
+		assertTrue(gen.shouldDropTables());
+	}
 }

@@ -60,9 +60,9 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
- * DbLoaderDelegate defines an API for DbLoader to notify the
- * a special object about the progress of the database reverse
- * engineering. Delegate can influence the flow of events.
+ * DbLoaderDelegate defines API that allows to control the behavior of
+ * DbLoader during the database reverse-engineering. Delegate is also notified
+ * of the progress of reverse-engineering.
  * 
  * @author Andrei Adamchik
  */
