@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 package org.objectstyle.cayenne.gui.datamap;
 
@@ -74,26 +74,31 @@ import org.objectstyle.cayenne.gui.util.*;
  * @author Michael Misha Shengaout 
  * @author Andrei Adamchik
  */
-public class DbEntityPane extends JPanel
-implements DocumentListener, DbEntityDisplayListener
-, ExistingSelectionProcessor
-{
+public class DbEntityPane
+	extends JPanel
+	implements
+		DocumentListener,
+		DbEntityDisplayListener,
+		ExistingSelectionProcessor,
+		ActionListener {
 	Mediator mediator;
-	
-	JTextField	name;
-	String		oldName;
-	JTextField	catalog;
-	JTextField	schema;
-	
+
+	JTextField name;
+	String oldName;
+	JTextField catalog;
+	JTextField schema;
+	JComboBox parentEntities;
+	JLabel parentLabel;
+
 	/** 
 	 * Cludge to prevent marking data map as dirty 
 	 * during initial load. 
 	 */
 	private boolean ignoreChange = false;
-	
+
 	public DbEntityPane(Mediator temp_mediator) {
-		super();		
-		mediator = temp_mediator;		
+		super();
+		mediator = temp_mediator;
 		mediator.addDbEntityDisplayListener(this);
 		// Create and layout components
 		init();
@@ -101,47 +106,57 @@ implements DocumentListener, DbEntityDisplayListener
 		name.getDocument().addDocumentListener(this);
 		catalog.getDocument().addDocumentListener(this);
 		schema.getDocument().addDocumentListener(this);
+		parentEntities.addActionListener(this);
 	}
 
-	private void init(){
+	private void init() {
 		SpringLayout layout = new SpringLayout();
 		this.setLayout(layout);
 
 		JLabel nameLabel = new JLabel("Entity name: ");
 		name = new JTextField(25);
-		
-		JLabel catalogLabel= new JLabel("Catalog: ");
+
+		JLabel catalogLabel = new JLabel("Catalog: ");
 		catalog = new JTextField(25);
-		
+
 		JLabel schemaLabel = new JLabel("Schema: ");
 		schema = new JTextField(25);
 
-		Component[] leftCol = new Component[] {
-			nameLabel, catalogLabel, schemaLabel
-		};
-		
-		Component[] rightCol = new Component[] {
-			name, catalog, schema
-		};
-		
-		JPanel temp = PanelFactory.createForm(leftCol, rightCol, 5,5,5,5);
+		parentLabel = new JLabel("Parent entity: ");
+		parentLabel.setEnabled(false);
+		parentEntities = new JComboBox();
+		parentEntities.setEditable(false);
+		parentEntities.setEnabled(false);
+
+		Component[] leftCol =
+			new Component[] {
+				nameLabel,
+				catalogLabel,
+				schemaLabel,
+				parentLabel };
+
+		Component[] rightCol =
+			new Component[] { name, catalog, schema, parentEntities };
+
+		JPanel temp = PanelFactory.createForm(leftCol, rightCol, 5, 5, 5, 5);
 		Spring pad = Spring.constant(5);
 		add(temp);
 		SpringLayout.Constraints cons = layout.getConstraints(temp);
 		cons.setY(pad);
 		cons.setX(pad);
+
 	}
 
-	public void insertUpdate(DocumentEvent e)  { 
-		textFieldChanged(e); 
+	public void insertUpdate(DocumentEvent e) {
+		textFieldChanged(e);
 	}
-	
-	public void changedUpdate(DocumentEvent e) { 
-		textFieldChanged(e); 
+
+	public void changedUpdate(DocumentEvent e) {
+		textFieldChanged(e);
 	}
-	
-	public void removeUpdate(DocumentEvent e)  { 
-		textFieldChanged(e); 
+
+	public void removeUpdate(DocumentEvent e) {
+		textFieldChanged(e);
 	}
 
 	private void textFieldChanged(DocumentEvent e) {
@@ -152,38 +167,80 @@ implements DocumentListener, DbEntityDisplayListener
 		DbEntity current_entity = mediator.getCurrentDbEntity();
 		if (doc == name.getDocument()) {
 			// Change the name of the current db entity
-			GuiFacade.setDbEntityName(map, (DbEntity)current_entity, name.getText());
+			GuiFacade.setDbEntityName(
+				map,
+				(DbEntity) current_entity,
+				name.getText());
 			// Make sure new name is sent out to all listeners.
 			EntityEvent event = new EntityEvent(this, current_entity, oldName);
 			oldName = name.getText();
 			mediator.fireDbEntityEvent(event);
-		}
-		else if (doc == catalog.getDocument()) {
+		} else if (doc == catalog.getDocument()) {
 			current_entity.setCatalog(catalog.getText());
-		}
-		else if (doc == schema.getDocument()) {
+		} else if (doc == schema.getDocument()) {
 			current_entity.setSchema(schema.getText());
 		}
 	}
 
-
-	public void processExistingSelection()
-	{
+	public void processExistingSelection() {
 		EntityDisplayEvent e;
-		e = new EntityDisplayEvent(this, mediator.getCurrentDbEntity()
-			, mediator.getCurrentDataMap(), mediator.getCurrentDataDomain());
+		e =
+			new EntityDisplayEvent(
+				this,
+				mediator.getCurrentDbEntity(),
+				mediator.getCurrentDataMap(),
+				mediator.getCurrentDataDomain());
 		mediator.fireDbEntityDisplayEvent(e);
 	}
-	
+
 	public void currentDbEntityChanged(EntityDisplayEvent e) {
-		DbEntity entity = (DbEntity)e.getEntity();
-		if (null == entity || !e.isEntityChanged()) 
+		DbEntity entity = (DbEntity) e.getEntity();
+		if (null == entity || !e.isEntityChanged()) {
 			return;
+		}
+
 		ignoreChange = true;
 		name.setText(entity.getName());
 		oldName = entity.getName();
 		catalog.setText(entity.getCatalog() != null ? entity.getCatalog() : "");
 		schema.setText(entity.getSchema() != null ? entity.getSchema() : "");
 		ignoreChange = false;
-	}	
+
+		if (entity instanceof DerivedDbEntity) {
+			parentLabel.setEnabled(true);
+			parentEntities.setEnabled(true);
+			java.util.List ents =
+				mediator.getCurrentDataMap().getDbEntityNames(true);
+			ents.remove(entity.getName());
+			DefaultComboBoxModel model =
+				new DefaultComboBoxModel(ents.toArray());
+			DbEntity parent = ((DerivedDbEntity) entity).getParentEntity();
+			if (parent != null) {
+				model.setSelectedItem(parent.getName());
+			}
+
+			parentEntities.setModel(model);
+		} else {
+			parentLabel.setEnabled(false);
+			parentEntities.setEnabled(false);
+			parentEntities.setSelectedIndex(-1);
+		}
+	}
+	
+	/**
+	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+	 */
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == parentEntities) {
+			DerivedDbEntity current = (DerivedDbEntity)mediator.getCurrentDbEntity();
+			String name = (String)parentEntities.getSelectedItem();
+			DbEntity ent = (name != null) ? mediator.getCurrentDataMap().getDbEntity(name, true) : null;
+			((DerivedDbEntity)mediator.getCurrentDbEntity()).setParentEntity(ent);
+			
+			EntityEvent event = new EntityEvent(this, current);
+			mediator.fireDbEntityEvent(event);
+		}
+	}
+
+
 }

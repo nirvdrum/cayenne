@@ -418,8 +418,7 @@ public class Validator {
 						map,
 						rel));
 			}
-			
-			
+
 			if (rel.getTargetEntity() == null) {
 				addErrorMessage(
 					new RelationshipErrorMsg(
@@ -500,6 +499,17 @@ public class Validator {
 						domain,
 						map,
 						entities[i]));
+			} else if (
+				(entities[i] instanceof DerivedDbEntity)
+					&& ((DerivedDbEntity) entities[i]).getParentEntity()
+						== null) {
+				addErrorMessage(
+					new EntityErrorMsg(
+						"No parent selected for derived entity \"" + name + "\".",
+						ErrorMsg.ERROR,
+						domain,
+						map,
+						entities[i]));
 			}
 			name_map.put(name, map);
 
@@ -575,8 +585,7 @@ public class Validator {
 						domain,
 						map,
 						rel));
-			}
-			else if(rel.getJoins().size() == 0) {
+			} else if (rel.getJoins().size() == 0) {
 				addErrorMessage(
 					new RelationshipErrorMsg(
 						"Must specify at least one join",
@@ -585,7 +594,7 @@ public class Validator {
 						map,
 						rel));
 			}
-			
+
 			if (rel.getName() == null || rel.getName().trim().length() == 0) {
 				addErrorMessage(
 					new RelationshipErrorMsg(
@@ -594,7 +603,7 @@ public class Validator {
 						domain,
 						map,
 						rel));
-			}			
+			}
 		}
 	}
 }

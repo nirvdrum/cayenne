@@ -224,7 +224,7 @@ public class DbRelationshipPane
 	private DefaultComboBoxModel createComboModel() {
 		DataMap map = mediator.getCurrentDataMap();
 		Vector elements = new Vector();
-		java.util.List db_entities = map.getDbEntitiesAsList();
+		java.util.List db_entities = map.getDbEntitiesAsList(true);
 		Iterator iter = db_entities.iterator();
 		while (iter.hasNext()) {
 			DbEntity entity = (DbEntity) iter.next();

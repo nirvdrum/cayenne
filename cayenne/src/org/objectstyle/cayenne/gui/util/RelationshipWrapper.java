@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,15 @@ package org.objectstyle.cayenne.gui.util;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.gui.util;
 
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.Relationship;
 
 
-/** Wrapper for Relationship. 
- *  Used to put relationships into the JTree and any other place where 
- *  toString() method must return relationship name.
+/** 
+ * Wrapper for Relationship. 
+ * Used to put relationships into the JTree and any other place where 
+ * toString() method must return relationship name.
  */
 public class RelationshipWrapper{
 	Relationship rel = null;
@@ -82,5 +83,5 @@ public class RelationshipWrapper{
 			return false;
 		return this.toString().equals(obj.toString());
 	}
-}// End class RelationshipWrapper
+}
 	

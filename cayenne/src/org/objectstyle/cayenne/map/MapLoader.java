@@ -121,10 +121,10 @@ public class MapLoader extends DefaultHandler {
 				system_id.substring(system_id.lastIndexOf('/') + 1);
 			dataMap = new DataMap(mapName);
 			Iterator it = deps.iterator();
-			while(it.hasNext()) {
-				dataMap.addDependency((DataMap)it.next());
+			while (it.hasNext()) {
+				dataMap.addDependency((DataMap) it.next());
 			}
-			
+
 			dbRelationshipMap = new HashMap();
 			XMLReader parser = Util.createXmlReader();
 
@@ -134,15 +134,12 @@ public class MapLoader extends DefaultHandler {
 			parser.parse(src);
 		} catch (SAXException e) {
 			logObj.log(Level.INFO, "SAX Exception.", e);
-
-			Exception wrappedEx = e.getException();
-			if (e.getCause() != null) {
-				logObj.log(Level.INFO, "SAX Exception cause.", e.getCause());
-			}
+			logObj.log(Level.INFO, "Wrapped Exception.", e.getException());
+			logObj.log(Level.INFO, "SAX Exception cause.", e.getCause());
 
 			dataMap = null;
 			throw new DataMapException(
-				"Wrong DataMap format: " + e.getMessage());
+				"Wrong DataMap format." + e.getMessage());
 		} catch (Exception e) {
 			logObj.log(Level.INFO, "Exception.", e);
 			dataMap = null;
@@ -312,17 +309,28 @@ public class MapLoader extends DefaultHandler {
 				out.print(temp.getCatalog());
 				out.print('\"');
 			}
+
+			if (temp instanceof DerivedDbEntity) {
+				DbEntity parent =
+					((DerivedDbEntity) temp).getParentEntity();
+				String name = (parent != null) ? parent.getName() : "";
+				out.print(" parentName=\"");
+				out.print(name);
+				out.print('\"');
+			}
+
 			out.println('>');
 
 			storeDbAttribute(out, temp);
 			out.println("\t</db-entity>");
 			dbRelationships.addAll(temp.getRelationshipList());
-		} // End while()
+		}
 	}
 
-	private void storeDbAttribute(PrintWriter out, DbEntity db_entity) {
-		Collection db_attributes = db_entity.getAttributeMap().values();
+	private void storeDbAttribute(PrintWriter out, DbEntity dbEntity) {
+		Collection db_attributes = dbEntity.getAttributeMap().values();
 		Iterator iter = db_attributes.iterator();
+
 		while (iter.hasNext()) {
 			DbAttribute temp = (DbAttribute) iter.next();
 			out.print("\t\t<db-attribute name=\"" + temp.getName() + '\"');
@@ -333,8 +341,9 @@ public class MapLoader extends DefaultHandler {
 			}
 
 			// If attribute is part of primary key
-			if (temp.isPrimaryKey())
+			if (temp.isPrimaryKey()) {
 				out.print(" isPrimaryKey=\"true\"");
+			}
 
 			if (temp.isMandatory())
 				out.print(" isMandatory=\"true\"");
@@ -350,7 +359,45 @@ public class MapLoader extends DefaultHandler {
 				out.print(temp.getPrecision());
 				out.print('\"');
 			}
-			out.println("/>");
+
+			if (dbEntity instanceof DerivedDbEntity) {
+				if (((DerivedDbEntity) dbEntity)
+					.getGroupByAttributes()
+					.contains(temp)) {
+					out.print(" isGroupBy=\"true\"");
+				}
+			}
+
+			if (temp instanceof DerivedDbAttribute) {
+				DerivedDbAttribute derived = (DerivedDbAttribute) temp;
+				String spec = derived.getExpressionSpec();
+				if (spec != null && spec.trim().length() > 0) {
+					out.print(" spec=\"");
+					out.print(spec);
+					out.print('\"');
+				}
+
+				List params = derived.getParams();
+
+				if (params.size() > 0) {
+					out.println(">");
+
+					Iterator refs = params.iterator();
+					while (refs.hasNext()) {
+						DbAttribute ref = (DbAttribute) refs.next();
+						out.println(
+							"\t\t\t<db-attribute-ref name=\""
+								+ ref.getName()
+								+ "\"/>");
+					}
+					out.println("\t\t</db-attribute>");
+				}
+				else {
+					out.println("/>");
+				}
+			} else {
+				out.println("/>");
+			}
 		}
 
 	}
@@ -503,18 +550,13 @@ public class MapLoader extends DefaultHandler {
 		String parentName = atts.getValue("", "parentName");
 
 		if (parentName != null) {
+			dbEntity = new DerivedDbEntity(name);
+
 			// search parent in this data map and all its dependencies
 			DbEntity parent = dataMap.getDbEntity(parentName, true);
-			if (parent == null) {
-				throw new SAXException(
-					"Can't find parent DbEntity '"
-						+ parentName
-						+ "' for derived entity '"
-						+ name
-						+ "'.");
+			if (parent != null) {
+				((DerivedDbEntity) dbEntity).setParentEntity(parent);
 			}
-			dbEntity = new DerivedDbEntity(name);
-			((DerivedDbEntity) dbEntity).setParentEntity(parent);
 		} else {
 			dbEntity = new DbEntity(name);
 		}
@@ -643,7 +685,7 @@ public class MapLoader extends DefaultHandler {
 					+ printAttributes(atts).toString());
 		}
 
-		DbEntity target = dataMap.getDbEntity(temp);
+		DbEntity target = dataMap.getDbEntity(temp, true);
 		if (null == target) {
 			throw new SAXException(
 				"MapLoaderImpl::processStartDbRelationship(),"

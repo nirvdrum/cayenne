@@ -243,7 +243,6 @@ public class DataMapDetailView
 
 		oldName = map.getName();
 		ignoreChange = true;
-		logObj.severe("set name to: " + oldName);
 		name.setText(oldName);
 		location.setText(map.getLocation());
 		ignoreChange = false;
@@ -306,8 +305,6 @@ public class DataMapDetailView
 
 		if (map != null) {
 			DataMap curMap = mediator.getCurrentDataMap();
-			logObj.severe(
-				"cur map: " + curMap.getName() + "; checked: " + map.getName());
 			if (e.getStateChange() == ItemEvent.SELECTED) {
 				curMap.addDependency(map);
 			} else if (e.getStateChange() == ItemEvent.DESELECTED) {

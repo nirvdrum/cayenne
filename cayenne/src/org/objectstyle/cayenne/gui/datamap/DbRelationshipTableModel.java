@@ -137,11 +137,8 @@ class DbRelationshipTableModel extends CayenneTableModel {
 			case NAME :
 				return rel.getName();
 			case TARGET :
-				DbEntity temp = (DbEntity) rel.getTargetEntity();
-				if (null != temp)
-					return temp.getName();
-				else
-					return null;
+				DbEntity target = (DbEntity) rel.getTargetEntity();
+				return (target != null) ? target.getName() : null;
 			case TO_DEPENDENT_KEY :
 				return new Boolean(rel.isToDependentPK());
 			case CARDINALITY :
@@ -176,7 +173,7 @@ class DbRelationshipTableModel extends CayenneTableModel {
 			if ("".equals(target_name))
 				target = null;
 			else
-				target = mediator.getCurrentDataMap().getDbEntity(target_name);
+				target = mediator.getCurrentDataMap().getDbEntity(target_name, true);
 			rel.setTargetEntity(target);
 			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireDbRelationshipEvent(e);
