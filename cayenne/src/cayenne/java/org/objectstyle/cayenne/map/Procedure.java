@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
@@ -93,7 +94,7 @@ public class Procedure extends MapObject {
      */
     public void encodeAsXML(XMLEncoder encoder) {
         encoder.print("<procedure name=\"");
-        encoder.print(getName());
+        encoder.print(Util.encodeXmlAttribute(getName()));
         encoder.print('\"');
 
         if (getSchema() != null && getSchema().trim().length() > 0) {

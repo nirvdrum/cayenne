@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
@@ -101,7 +102,7 @@ public class ProcedureParameter extends MapObject implements XMLSerializable {
      * @since 1.1
      */
     public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<procedure-parameter name=\"" + getName() + '\"');
+        encoder.print("<procedure-parameter name=\"" + Util.encodeXmlAttribute(getName()) + '\"');
 
         String type = TypesMapping.getSqlNameByType(getType());
         if (type != null) {
