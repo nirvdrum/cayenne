@@ -105,7 +105,9 @@
     	</item>
 
 		<item name="13. Ant Tasks"  href="/userguide/ant/index.html">
-    		<item name="13.1 cdbgen: DB Schema Generator"  href="/userguide/ant/cdbgen.html"/>
+    		<item name="13.1 cgen: Java Class Generator"  href="/userguide/ant/cgen.html"/>
+			<item name="13.2 cdbgen: DB Schema Generator"  href="/userguide/ant/cdbgen.html"/>
+			<item name="13.3 cdeploy: Deployment Configurator"  href="/userguide/ant/cdeploy.html"/>
     	</item>
 		
 		<item name="14. Access Stack Internals"  href="/userguide/access-stack/index.html">

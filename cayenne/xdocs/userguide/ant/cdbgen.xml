@@ -3,7 +3,7 @@
 	<toc name="toc-user-guide" chapter="13. Ant Tasks"/>
 	<body>
 		<section name="13. Ant Tasks">
-			<subsection name="13.1 cdbgen: DB Schema Generator">
+			<subsection name="13.2 cdbgen: DB Schema Generator">
 				<h3>Description</h3>
 				<p><code>cdbgen</code> is an Ant task that uses Cayenne DataMap 
 					to drop and/or generate schema objects of a specified database.</p>
