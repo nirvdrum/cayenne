@@ -1,13 +1,13 @@
 <document>
 <title>User Guide - Miscellaneous Information</title>
-<toc name="toc-user-guide" chapter="15. Miscellaneous Information"/>
+<toc name="toc-user-guide" chapter="16. Miscellaneous Information"/>
 <body>
-    <section name="15. Miscellaneous Information">
+    <section name="16. Miscellaneous Information">
     	<p>This section contains information not directly related to 
     	Cayenne development, but still important in the context of this 
     	User Guide.</p>
     	
-        <subsection name="15.1 Cayenne and WebObjects" anchor="webobjects">
+        <subsection name="16.1 Cayenne and WebObjects" anchor="webobjects">
             <p>For those who have never heard what WebObjects is, here is a little
             introduction. WebObjects is one of the first and one of the best
             web application development frameworks. It was created by NeXT (now
@@ -33,7 +33,7 @@
             the latest Java technologies to create an opensource database solution
             for any kind of Java applications.</p>
             
-            <subsection name="15.1.1 Terms Translation" anchor="terms">
+            <subsection name="16.1.1 Terms Translation" anchor="terms">
             <p>Some design patterns used in Cayenne may be familiar to the EOF folk. 
             This section is intended to make Cayenne understanding 
             easier if you have WebObjects/EOF background. Below Cayenne 

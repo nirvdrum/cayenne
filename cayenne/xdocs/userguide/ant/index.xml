@@ -1,0 +1,16 @@
+<document>
+	<title>User Guide - Ant Tasks</title>
+	<toc name="toc-user-guide" chapter="13. Ant Tasks"/>
+	<body>
+		<section name="13. Ant Tasks">
+			<p>Cayenne ships with Ant tasks that provide Ant 
+				frontend to a number of useful operations implemented elsewhere 
+				in Cayenne. Currently these three tasks are available:</p>
+				<ul>
+					<li>cgen - Java class generator</li>
+					<li>cdbgen - Database schema generator</li>
+					<li>cdeploy - Deployment configurator</li>
+				</ul>
+		</section>
+	</body>
+</document>

@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - DataViews</title>
-<toc name="toc-user-guide" chapter="14. DataViews"/>
+<toc name="toc-user-guide" chapter="15. DataViews"/>
 <body>
-    <section name="14. DataViews">
-		<subsection name="14.1 Swing Applications">
+    <section name="15. DataViews">
+		<subsection name="15.1 Swing Applications">
 		<p>Those who have experience of Swing GUI development
     knows how much time it takes to work out all the minutest details of
     formatting, in-place input validation, handling the interactive data

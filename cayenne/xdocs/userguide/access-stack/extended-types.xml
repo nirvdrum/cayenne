@@ -1,9 +1,9 @@
 <document>
 	<title>User Guide - Design</title>
-	<toc name="toc-user-guide" chapter="13. Access Stack Internals"/>
+	<toc name="toc-user-guide" chapter="14. Access Stack Internals"/>
 	<body>
-		<section name="13. Access Stack Internals">
-			<subsection name="13.2 Extended Types">
+		<section name="14. Access Stack Internals">
+			<subsection name="14.2 Extended Types">
 				<p>JDBC specification defines a set of "standard" database 
 					column types (defined in java.sql.Types class) and a very 
 					specific mapping of these types to Java Object Types, such 
@@ -18,7 +18,7 @@
 					an object of the custom type to a JDBC-compatible 
 					object.</p>
 					
-					<subsection name="13.2.1 Supporting Non-Standard Types">
+					<subsection name="14.2.1 Supporting Non-Standard Types">
 						<p><a 
 							href="../../api/cayenne/org/objectstyle/cayenne/access/types/ExtendedType.html">ExtendedType</a> 
 							interface serves to integrate a custom attribute 
@@ -43,7 +43,7 @@ DataNode node = domain.getNode("node_name_from_the_project");
 node.getAdapter().getExtendedTypes().registerType(customType);]]></source>
 					</subsection>
 
-			<subsection name="13.2.2 DbAdapters and Extended Types">
+			<subsection name="14.2.2 DbAdapters and Extended Types">
 				<p>As shown in the example above, ExtendedTypes are stored by 
 					DbAdapter. In fact DbAdapters often install their own 
 					extended types to address incompatibilities, incompletness 

@@ -103,20 +103,24 @@
     		<item name="12.6 Configuring Logging"  href="/userguide/deploy/logging.html"/>
     	</item>
 
-		<item name="13. Access Stack Internals"  href="/userguide/access-stack/index.html">
-    		<item name="13.1 DbAdapter Internals"  href="/userguide/access-stack/dbadapter.html"/>
-    		<item name="13.2 Extended Types"  href="/userguide/access-stack/extended-types.html"/>
+		<item name="13. Ant Tasks"  href="/userguide/ant/index.html">
+    		<item name="13.1 cdbgen: DB Schema Generator"  href="/userguide/ant/cdbgen.html"/>
     	</item>
 		
-    	<item name="14. DataViews"  href="/userguide/dataview/index.html">
-    		<item name="14.1 Swing Applications"  href="/userguide/dataview/dvrationale.html"/>
-    		<item name="14.2 DataView Concepts"  href="/userguide/dataview/dvconcepts.html"/>
-    		<item name="14.3 DVModeler GUI Tool"  href="/userguide/dataview/dvmodeler.html"/>
-    		<item name="14.4 DataViews in Action"  href="/userguide/dataview/dvinaction.html"/>
+		<item name="14. Access Stack Internals"  href="/userguide/access-stack/index.html">
+    		<item name="14.1 DbAdapter Internals"  href="/userguide/access-stack/dbadapter.html"/>
+    		<item name="14.2 Extended Types"  href="/userguide/access-stack/extended-types.html"/>
+    	</item>
+		
+    	<item name="15. DataViews"  href="/userguide/dataview/index.html">
+    		<item name="15.1 Swing Applications"  href="/userguide/dataview/dvrationale.html"/>
+    		<item name="15.2 DataView Concepts"  href="/userguide/dataview/dvconcepts.html"/>
+    		<item name="15.3 DVModeler GUI Tool"  href="/userguide/dataview/dvmodeler.html"/>
+    		<item name="15.4 DataViews in Action"  href="/userguide/dataview/dvinaction.html"/>
     	</item>
     	
-    	<item name="15. Miscellaneous Information"  href="/userguide/misc.html">
-    		<item name="15.1 Cayenne and WebObjects"  href="/userguide/misc.html"/>
+    	<item name="16. Miscellaneous Information"  href="/userguide/misc.html">
+    		<item name="16.1 Cayenne and WebObjects"  href="/userguide/misc.html"/>
     	</item>
     </toc-user-guide>
 

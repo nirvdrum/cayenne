@@ -1,8 +1,8 @@
 <document>
 	<title>User Guide - Design</title>
-	<toc name="toc-user-guide" chapter="13. Access Stack Internals"/>
+	<toc name="toc-user-guide" chapter="14. Access Stack Internals"/>
 	<body>
-		<section name="13. Access Stack Internals">
+		<section name="14. Access Stack Internals">
 			<p>"Access stack" is a term used for the runtime engine in the 
 				heart of Cayenne. Its operation conditions are defined by the 
 				object-relational mapping and deployment information built 

@@ -1,11 +1,11 @@
 <document>
 <title>User Guide - DataViews</title>
-<toc name="toc-user-guide" chapter="14. DataViews"/>
+<toc name="toc-user-guide" chapter="15. DataViews"/>
 <body>
-    <section name="14. DataViews">
-        <subsection name="14.2 DataView Concepts" >
+    <section name="15. DataViews">
+        <subsection name="15.2 DataView Concepts" >
         
-        <subsection name="14.2.1 DataView Hierarchy">
+        <subsection name="15.2.1 DataView Hierarchy">
             <p>The class diagram on the figure below captures the structure of Data
     Views and how they rely on the classes in the Cayenne subpackages. 
     Single <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/DataView.html">DataView</a> 
@@ -64,7 +64,7 @@
     <p> </p>
     </subsection>
     
-    <subsection name="14.2.2 Field Data Types">
+    <subsection name="15.2.2 Field Data Types">
     
     <p> Cayenne defines the mapping between several
     Java Class types and JDBC types. It is convenient to use and sufficient in
@@ -85,7 +85,7 @@
 	</subsection>
     
 
-	<subsection name="14.2.3 FormatFactory">
+	<subsection name="15.2.3 FormatFactory">
     <p><a href="../../api/cayenne/org/objectstyle/cayenne/dataview/FormatFactory.html">FormatFactory</a>
     shown on the next
     figure provides the means to create instances of the edit and display
@@ -106,7 +106,7 @@
     <p> </p>
 	</subsection>
 	
-	<subsection name="14.2.4 CellRenderers and CellEditors">
+	<subsection name="15.2.4 CellRenderers and CellEditors">
 
     <p>The following figure presents the utility class 
     <a href="../../api/cayenne/org/objectstyle/cayenne/dataview/CellRenderers.html">CellRenderers</a>
@@ -136,7 +136,7 @@
 	  <p> </p>
 	</subsection>
 	
-	<subsection name="14.2.5 Miscellaneous Features">
+	<subsection name="15.2.5 Miscellaneous Features">
 	<p>One more useful feature is
     a centralized EventDispatcher within the DataView class. It is used by the
     fields to fire the events whenever their values are changed. Thus the

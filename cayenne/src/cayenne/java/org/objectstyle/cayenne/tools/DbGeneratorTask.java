@@ -64,6 +64,7 @@ import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
 import org.objectstyle.cayenne.util.Util;
@@ -76,6 +77,8 @@ import org.xml.sax.InputSource;
  * @author nirvdrum, Andrei Adamchik
  * @since 1.2
  */
+// TODO: need a simple way to support arbitrary classpath for drivers (and adapters).
+// otherwise this is not very usable...
 public class DbGeneratorTask extends Task {
 
     protected DbAdapter adapter;
@@ -104,6 +107,12 @@ public class DbGeneratorTask extends Task {
     public void execute() {
 
         configureLogging();
+
+        // prepare defaults
+        if (adapter == null) {
+            adapter = new JdbcAdapter();
+        }
+
         validateAttributes();
 
         try {
@@ -148,10 +157,6 @@ public class DbGeneratorTask extends Task {
 
         if (map == null) {
             error.append("The 'map' attribute must be set.\n");
-        }
-
-        if (adapter == null) {
-            error.append("The 'adapter' attribute must be set.\n");
         }
 
         if (driver == null) {
