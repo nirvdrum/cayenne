@@ -1,0 +1,34 @@
+<document>
+<title>User Guide - Deployment</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/deploy/cdeploy.html</prev>
+	<next>/userguide/misc.html</next>
+</navigator>    
+<body>
+    <section name="13. Deployment">        
+           <subsection name="13.7 Configuring Logging">
+            <p>Cayenne logging is based on <a href="http://jakarta.apache.org/log4j">Log4J
+            package</a> from Jakarta Apache Project. This is the most powerful and flexible logging 
+            framework available in Java.</p>
+            
+            <panel name="Other logging frameworks users:">
+            If your application uses another package for its own logging purposes 
+            (like JDK 1.4 java.util.logging, or commons-logging from Jakarta), 
+            Cayenne Log4J-based logging will not interfere with your other logging configurations.
+            </panel>
+            
+            <panel name="Log4J users:">
+            If your application already uses Log4J, you may need to merge cayenne logging
+            configuration and your existing one, using one of the approaches described in 
+            this chapter.
+            </panel>
+            
+        </subsection>
+    </section>
+</body>
+</document>

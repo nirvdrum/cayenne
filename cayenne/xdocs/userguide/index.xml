@@ -102,6 +102,7 @@
                 <li><a href="deploy/index.html#custom">13.4 Customizing Configuration</a></li>
                 <li><a href="deploy/index.html#jndi">13.5 Using JNDI</a></li>
                 <li><a href="deploy/cdeploy.html">13.6 Deployment Configuration With Ant</a></li>
+                <li><a href="deploy/logging.html">13.7 Configuring Logging</a></li>
             </ul><br/></li>
             
             <li><a href="misc.html"><strong>14. Miscellaneous Information</strong></a>
