@@ -154,6 +154,11 @@ public class SqlSelectTranslator
         return (SqlSelectQuery) query;
     }
 
+    /**
+     * Creates and returns a ResultDescriptor instance for the raw SQL
+     * query. Uses information provided by the query itself if possible. 
+     * If not, result information is deduced from the ResultSetMetadata.
+     */
     public ResultDescriptor getResultDescriptor(ResultSet rs) {
         ResultDescriptor descriptor =
             new ResultDescriptor(getAdapter().getExtendedTypes(), null);
@@ -180,6 +185,12 @@ public class SqlSelectTranslator
         return descriptor;
     }
 
+    /**
+     * Returns <code>false</code>.  Since this translator deals
+     * with raw SQL queries, it is the responsibility of the 
+     * caller to format SQL appropriately. The translator itself
+     * will not modify the query.
+     */
     public boolean supportsTableAliases() {
         return false;
     }
