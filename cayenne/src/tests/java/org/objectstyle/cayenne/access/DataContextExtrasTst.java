@@ -145,6 +145,11 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testCommitChangesError() throws Exception {
+        // can't run this test due to the nature of some adapters
+        if(!getDatabaseSetupDelegate().supportsDroppingPK()) {
+            return;
+        }
+        
         JdbcPkGenerator gen = (JdbcPkGenerator) getNode().getAdapter().getPkGenerator();
         int cache = gen.getPkCacheSize();
 

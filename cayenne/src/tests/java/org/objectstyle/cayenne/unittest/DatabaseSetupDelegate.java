@@ -170,6 +170,10 @@ public class DatabaseSetupDelegate {
         return true;
     }
     
+    public boolean supportsDroppingPK() {
+        return true;
+    }
+    
     protected void executeDDL(Connection con, String ddl) throws Exception {
         logObj.info(ddl);
         Statement st = con.createStatement();

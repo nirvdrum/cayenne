@@ -69,4 +69,8 @@ public class OpenBaseDelegate extends DatabaseSetupDelegate {
     public boolean supportsHaving() {
         return false;
     }
+    
+    public boolean supportsDroppingPK() {
+        return false;
+    }
 }
