@@ -54,6 +54,7 @@
  * <http://objectstyle.org/>.
  */
 package org.objectstyle.cayenne.modeler.action;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -62,7 +63,10 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
+import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerController;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.dialog.ErrorDebugDialog;
@@ -71,10 +75,12 @@ import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
 import org.scopemvc.core.Control;
+
 /**
  * @author Andrei Adamchik
  */
 public class OpenProjectAction extends ProjectAction {
+
     private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
 
     protected ProjectOpener fileChooser = new ProjectOpener();
@@ -117,8 +123,8 @@ public class OpenProjectAction extends ProjectAction {
         }
     }
 
-    /** 
-     * Opens cayenne.xml file using file chooser dialog. 
+    /**
+     * Opens cayenne.xml file using file chooser dialog.
      */
     public void openProject() {
         try {
@@ -135,27 +141,30 @@ public class OpenProjectAction extends ProjectAction {
 
     /** Opens specified project file. File must already exist. */
     public void openProject(File file) {
+        // Using fresh ModelerClassLoader, as we need to support custom adapters
+        ConfigurationHack.setResourceLoader(ModelerClassLoader
+                .getClassLoader()
+                .createClassLoader());
+
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         try {
             // Save dir path to the preferences
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
             CayenneModelerFrame.getFrame().addToLastProjList(file.getAbsolutePath());
-            // Initialize gui configuration
-            // uncomment to debug GUI
+
             Project project = Project.createProject(file);
             CayenneModelerFrame
-                .getFrame()
-                .getController()
-                .getTopModel()
-                .setCurrentProject(
-                project);
+                    .getFrame()
+                    .getController()
+                    .getTopModel()
+                    .setCurrentProject(project);
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             }
             else {
                 CayenneModelerFrame.getFrame().getController().handleControl(
-                    new Control(ModelerController.PROJECT_OPENED_ID, project));
+                        new Control(ModelerController.PROJECT_OPENED_ID, project));
             }
         }
         catch (Exception ex) {
@@ -168,8 +177,7 @@ public class OpenProjectAction extends ProjectAction {
         // must really concat all messages, this is a temp hack...
         String msg = (String) project.getUpgradeMessages().get(0);
         // need an upgrade
-        int returnCode =
-            JOptionPane.showConfirmDialog(
+        int returnCode = JOptionPane.showConfirmDialog(
                 CayenneModelerFrame.getFrame(),
                 "Project needs an upgrade to a newer version. " + msg + ". Upgrade?",
                 "Upgrade Needed",
@@ -182,5 +190,13 @@ public class OpenProjectAction extends ProjectAction {
         logObj.info("Will upgrade project " + project.getMainFile());
         project.upgrade();
         return true;
+    }
+
+    static final class ConfigurationHack extends DefaultConfiguration {
+
+        // TODO: get rid of this once we are out of the API freeze..
+        static void setResourceLoader(ClassLoader loader) {
+            Configuration.resourceLoader = loader;
+        }
     }
 }

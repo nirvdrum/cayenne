@@ -61,6 +61,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -74,7 +75,9 @@ import org.objectstyle.cayenne.conf.JNDIDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.ModelerClassLoader;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayListener;
@@ -425,24 +428,37 @@ public class DataNodeView extends JPanel implements DocumentListener {
     }
 
     private void setAdapterName(String adapterName) {
+        DataNode node = mediator.getCurrentDataNode();
+
+        if (node == null) {
+            return;
+        }
 
         DbAdapter newAdapter = null;
         if (adapterName != null && adapterName.trim().length() > 0) {
             try {
-                newAdapter = (DbAdapter) Class
-                        .forName(adapterName)
-                        .getDeclaredConstructors()[0].newInstance(new Object[0]);
+                Class adapterClass = ModelerClassLoader.getClassLoader().loadClass(
+                        adapterName);
+                newAdapter = (DbAdapter) adapterClass.newInstance();
             }
             catch (Exception ex) {
-
-                // TODO: show validation dialog, or just store adapter string...
-                adapter.setSelectedIndex(-1);
+                ex.printStackTrace();
+                JOptionPane
+                        .showMessageDialog(
+                                CayenneModelerFrame.getFrame(),
+                                ex.getMessage(),
+                                "Error loading adapter",
+                                JOptionPane.ERROR_MESSAGE);
+                DbAdapter oldAdapter = node.getAdapter();
+                initDbAdapter(oldAdapter != null
+                        ? oldAdapter.getClass().getName().trim()
+                        : null);
                 return;
             }
         }
 
-        mediator.getCurrentDataNode().setAdapter(newAdapter);
-        mediator.setDirty(true);
+        node.setAdapter(newAdapter);
+        mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
     }
 
     private void initDbAdapter(String adapterClass) {

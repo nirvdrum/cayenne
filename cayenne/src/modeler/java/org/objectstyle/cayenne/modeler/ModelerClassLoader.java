@@ -120,6 +120,14 @@ public class ModelerClassLoader {
         load();
         return nonNullClassLoader().loadClass(className);
     }
+    
+    /**
+     * Returns a ClassLoader based on the current configured CLASSPATH settings.
+     */
+    public ClassLoader createClassLoader() {
+        load();
+        return nonNullClassLoader();
+    }
 
     /**
      * Returns an unmodifiable list of configured CLASSPATH locations.

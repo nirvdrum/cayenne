@@ -57,6 +57,9 @@ package org.objectstyle.cayenne.dataview;
 
 import org.objectstyle.cayenne.DataObject;
 
+/**
+ * @deprecated Unused since 1.1. 
+ */
 public class DataObjectUtils {
 
     public static Object readProperty(DataObject obj, String propertyName) {

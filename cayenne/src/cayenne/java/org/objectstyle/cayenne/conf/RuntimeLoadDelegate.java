@@ -401,7 +401,10 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
         DbAdapter dbAdapter = null;
 
         try {
-            dbAdapter = (DbAdapter) Class.forName(adapter).newInstance();
+            ClassLoader cl = Configuration.getResourceLoader();
+            Class dbAdapterClass = (cl != null) ? cl.loadClass(adapter) : Class
+                    .forName(adapter);
+            dbAdapter = (DbAdapter) dbAdapterClass.newInstance();
         }
         catch (Exception ex) {
             logObj.log(
@@ -460,7 +463,6 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                 nodeName,
                 "can't load node, unknown domain: " + domainName);
         }
-
     }
 
     public void shouldLinkDataMap(String domainName, String nodeName, String mapName) {

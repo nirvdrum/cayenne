@@ -236,6 +236,10 @@ public class SelectQueryMainTab extends JPanel {
         }
 
         SelectQuery query = getQuery();
+        if(query == null) {
+            return;
+        }
+        
         StringConvertor convertor = StringConvertors.forClass(Expression.class);
         try {
             String oldQualifier = convertor.valueAsString(query.getQualifier());
@@ -260,7 +264,11 @@ public class SelectQueryMainTab extends JPanel {
         }
 
         Query query = getQuery();
-
+ 
+        if(query == null) {
+            return;
+        }
+        
         if (Util.nullSafeEquals(newName, query.getName())) {
             return;
         }

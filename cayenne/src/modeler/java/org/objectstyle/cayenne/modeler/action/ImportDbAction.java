@@ -190,7 +190,10 @@ public class ImportDbAction extends CayenneAction {
     public DbAdapter createAdapter(DataSourceInfo dsi) {
         // load adapter
         try {
-            return (DbAdapter) Class.forName(dsi.getAdapterClassName()).newInstance();
+            Class adapterClass = ModelerClassLoader.getClassLoader().loadClass(
+                    dsi.getAdapterClassName());
+
+            return (DbAdapter) adapterClass.newInstance();
         }
         catch (Exception e) {
             e.printStackTrace();

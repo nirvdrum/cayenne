@@ -279,23 +279,25 @@ public class ObjEntityViewField {
             return null;
         Object value = null;
         if (!isLookup() && objAttribute != null) {
-            value = DataObjectUtils.readProperty(obj, objAttribute.getName());
+            value = obj.readProperty(objAttribute.getName());
         }
         else if (isLookup() && objRelationship != null) {
-            value = DataObjectUtils.readProperty(obj, objRelationship.getName());
+            value = obj.readProperty(objRelationship.getName());
         }
         return value;
     }
 
     public void setRawValue(DataObject obj, Object value) {
-        if (!isLookup() && objAttribute != null) {
-            DataObjectUtils.writeProperty(obj, objAttribute.getName(), value);
-        }
-        else if (isLookup() && objRelationship != null) {
-            obj.setToOneTarget(
-                    objRelationship.getName(),
-                    (DataObject) value,
-                    objRelationship.getReverseRelationship() != null);
+        if (obj != null) {
+            if (!isLookup() && objAttribute != null) {
+                obj.writeProperty(objAttribute.getName(), value);
+            }
+            else if (isLookup() && objRelationship != null) {
+                obj.setToOneTarget(
+                        objRelationship.getName(),
+                        (DataObject) value,
+                        objRelationship.getReverseRelationship() != null);
+            }
         }
     }
 
