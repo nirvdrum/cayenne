@@ -549,7 +549,7 @@ public class MapLoader extends DefaultHandler {
 			out.print(" source=\"");
 			out.print(rel.getSourceEntity().getName());
 			out.print("\" target=\"");
-			out.print(rel.getTargetEntity().getName());
+			out.print(rel.getTargetEntityName());
 			out.print("\" name=\"");
 			out.print(rel.getName());
 			out.println("\"/>");
@@ -567,7 +567,7 @@ public class MapLoader extends DefaultHandler {
 			out.print("\" source=\"");
 			out.print(temp.getSourceEntity().getName());
 			out.print("\" target=\"");
-			out.print(temp.getTargetEntity().getName());
+			out.print(temp.getTargetEntityName());
 			out.print("\" toDependentPK=\"");
 			out.print(temp.isToDependentPK() ? TRUE : FALSE);
 			out.print("\" toMany=\"");
