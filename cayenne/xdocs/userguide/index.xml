@@ -18,9 +18,10 @@
             <ul>
                 <li><a href="install/index.html#sys_req">2.1 System Requirements</a></li>
                 <li><a href="install/index.html#inst">2.2 Installation</a></li>
-                <li><a href="install/index.html#jar">2.3 Cayenne JAR Files</a></li>
-                <li><a href="install/index.html#tests">2.4 Unit Tests</a></li>
-                <li><a href="install/index.html#compile">2.5 Compiling Cayenne from Source</a></li>
+                <li><a href="install/index.html#db">2.3 Database Configuration</a></li>
+                <li><a href="install/index.html#jar">2.4 Cayenne JAR Files</a></li>
+                <li><a href="install/index.html#tests">2.5 Unit Tests</a></li>
+                <li><a href="install/index.html#compile">2.6 Compiling Cayenne from Source</a></li>
             </ul></li>
             
             <li><a href="quickstart/index.html">3. Quick Start</a>
@@ -58,10 +59,11 @@
             <li><a href="modeler/index.html">6. CayenneModeler GUI Tool</a>
             <ul>
                 <li><a href="modeler/index.html#intro">6.1 Introduction</a></li>
-                <li><a href="modeler/index.html#run">6.2 Running CayenneModeler</a></li>
-                <li><a href="modeler/index.html#concepts">6.3. Concepts and Terminology</a></li>
-                <li><a href="modeler/index.html#map_first">6.4. Creating Data Map First and Database Schema After That</a></li>
-                <li><a href="modeler/index.html#map_from_db">6.5 Using Existing Database Schema to Create Data Map</a></li>
+                <li><a href="modeler/runmodeler.html">6.2 Running CayenneModeler</a></li>
+                <li><a href="modeler/modelerconcepts.html">6.3. Concepts and Terminology</a></li>
+                <li><a href="modeler/mapschema.html">6.4. DataMap First, Database Second</a></li>
+                <li><a href="modeler/schemamap.html">6.5 Database First, DataMap Second</a></li>
+                <li><a href="modeler/pksupport.html">6.6 Generating Primary Key Support in the Database</a></li>
             </ul></li>
             
             <li><a href="webobjects.html">7. Cayenne and WebObjects</a>

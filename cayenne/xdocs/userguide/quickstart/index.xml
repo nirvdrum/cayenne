@@ -10,17 +10,24 @@
 </navigator> 
 <body>
     <section name="3. Quick Start">
-    	<p>Before getting any deeper into details of Cayenne design, it may be helpful to go through
+      	<p>Before getting any deeper into details of Cayenne design, it may be helpful to go through
     	a few simple examples. This may be all the information needed to start writing
-    	Cayenne applications. This section contains a few simple tutorials 
-    	that explain how to use Cayenne:
+    	Cayenne applications. </p>
+    	
+        <p>Each of the following tutorials provides a simple SQL script to create 
+        the tables and data needed. Database schema used in all the tutorials in 
+        this chapter is shown below:</p>
+            
+        <img src="/images/schema.jpg" width="494" height="250" border="0" 
+        align="middle" alt="Art Catalog Schema"/>        
+        
+    	<p>Cayenne Tutorials:</p>
     	
     	<ul>
     		<li><a href="modeler.html">"Using CayenneModeler" Tutorial</a></li>
     		<li><a href="comline.html">"Command-line Application" Tutorial</a></li>
     		<li><a href="webapp.html">"Web Application" Tutorial</a></li>
     	</ul>
-    	</p>
     </section>
 </body>
 </document>

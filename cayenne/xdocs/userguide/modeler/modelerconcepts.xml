@@ -1,0 +1,158 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/modeler/runmodeler.html</prev>
+	<next>/userguide/modeler/mapschema.html</next>
+</navigator>
+<body>
+    <section name="6. CayenneModeler GUI Tool">
+ 	<subsection name="6.3. Concepts and Terminology" anchor="concepts">
+		<p>
+			CayenneModeler is a GUI tool for creating the data access classes
+			and associated data model.
+			This section describes the techniques of its use as well as the
+			deployment
+			of the files it produces.
+			Before we start describing how to create Cayenne data model with the
+			Modeler,
+			let us introduce core concepts of this model.
+		</p>
+		<table width="100%" border="1">
+		<tr valign="top">
+			<th width="28%">Cayenne term</th>
+			<th width="78%">Definition</th>
+		</tr>
+		<tr valign="top">
+			<td>Db Entity</td>
+			<td>Database table</td>
+		</tr>
+		<tr valign="top">
+			<td>DbAttribute</td>
+			<td>Field of the database table</td>
+		</tr>
+		<tr valign="top">
+			<td>DbRelationship</td>
+			<td>Relationship between database tables</td>
+		</tr>
+		<tr valign="top">
+			<td>ObjEntity</td>
+			<td>Java data access class. May include reference to the
+				underlying database table (Db Entity)
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>ObjAttribute</td>
+			<td>Java class member variable.
+				May include reference to the underlying database table field (Db
+				Attribute)
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>ObjRelationship</td>
+			<td>Has a relationship between Java classes.
+				May include reference to the underlying relationship
+				between database tables (Db Relationship)
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>DataMap</td>
+			<td>Collection of the entities, attributes and relationships (Db and
+			Obj)
+				describing the database schema, corresponding data access
+				classes,
+				their relationships, etc. Cannot span more than one database
+				schema.
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>DataNode</td>
+			<td>Description of the information source.
+				Currently there are two types of Data Nodes.<br/>
+				<strong>JNDI</strong> - when it has the information
+					for accessing data source configured in the container
+					(e.g. your WebLogic or Tomcat server).<br/>
+				<strong>DIRECT</strong> - when it has all the information
+					for the direct connection to the database.
+					To enable data access classes to use the database
+					you have to associate (add) the corresponding data map to
+					the
+					data node describing the database.
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Domain (DataDomain)</td>
+			<td>Virtual data source.
+				Cayenne's way to treat multiple databases as if they are one
+				data source.
+				Each domain contains data maps and data nodes
+			</td>
+		</tr>
+		<tr valign="top">
+			<td>Project</td>
+			<td>Application. Collection of domains to be used at the same time.
+			</td>
+		</tr>
+		</table>
+
+		<br/><br/>
+		<p>
+		The Cayenne data model is created as a set of the .xml file.
+		Here are the types of files it may have:
+		</p>
+
+		<table>
+		<tr valign="top">
+			<th>Type of file</th>
+			<th>Description</th>
+		</tr>
+		<tr>
+			<td>Project file</td>
+			<td>One per project.
+				Contains all the domains for the project.
+				Always called <strong>cayenne.xml</strong>.
+				Located in the project directory.
+				All other files are located under project directory.
+				All paths used in this and other files are relative to the
+				project directory.
+			</td>
+		</tr>
+		<tr>
+			<td>Data node file</td>
+			<td>One per DIRECT data node
+				(see earlier in the section definitions of DIRECT and JNDI data
+				nodes).
+				JNDI data node information, as well as data node to data map
+				association
+				is stored directly in the project file.
+			</td>
+		</tr>
+		<tr>
+			<td>Data map file</td>
+			<td>One per data map. </td>
+		</tr>
+		</table>
+
+		<p>
+		CayenneModeler supports three scenarios of use:
+		<ol>
+		<li>	Creating the Data Map and generating database schema from it</li
+		>
+		<li>	Using existing database schema to create Data Map </li>
+		<li>	Combination of 1 and 2. </li>
+		</ol>
+		This document will concentrate on scenarios 1 and 2.
+		</p>
+		</subsection>
+    </section>
+</body>
+</document>
+
+
+
+
+

@@ -44,13 +44,6 @@
             configure Cayenne in a few ways. Possible deployment scenarious include 
             standalone application, web application, EJB application.
             </p>
-            
-            <p>Database schema used in all the examples later in this chapter is 
-            shown below:
-            </p>
-            
-            <img src="/images/schema.jpg" width="500" height="309" border="0" align="middle" alt="Art Catalog Schema"/>
-        
         </subsection>
     </section>
 </body>

@@ -28,9 +28,10 @@
     		<li><a href="#1">Tutorial Setup.</a></li>
     		<li><a href="#2">Prepare Tutorial Database.</a></li>
     		<li><a href="#3">Create Cayenne Configuration Files.</a></li>
-    		<li><a href="#4">Generate Java Code for DataObjects.</a></li>
-    		<li><a href="#5">Write Application Code.</a></li>
-    		<li><a href="#6">Compile and Run the Application.</a></li>
+    		<li><a href="#4">Create Database Primary Key Support.</a></li>
+    		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
+    		<li><a href="#6">Write Application Code.</a></li>
+    		<li><a href="#7">Compile and Run the Application.</a></li>
     	</ul>
     	
        	<subsection name="3.2.1 Tutorial Setup" anchor="1">
@@ -72,11 +73,10 @@
     			<li><a href="../../tutorial/0/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
-    		These XML files should be copied to the project directory. To perform any further
-    		modifications to these files, user should open <code>cayenne.xml</code> file
-    		in CayenneModeler (after opening a project, select green "datanode" icon on the left). 
-    		Of course changes can be done using a simple text editor
-    		as well. The following changes may be needed in order to run the tutorial:
+    		These XML files should reside in the project directory. To perform any further
+    		modifications, user should open <code>cayenne.xml</code> file
+    		in CayenneModeler. Of course changes can be done using a simple text editor
+    		as well. The following changes are most likely needed in order to run the tutorial:
     		
     		<ul>
     			<li>if the database used is NOT MySQL, <code>cayenne.xml</code>
@@ -87,7 +87,13 @@
     		</p>
     	</subsection>
     	
-    	<subsection name="3.2.4 Generate Java Code for DataObjects" anchor="4">
+    	<subsection name="3.2.4 Create Database Primary Key Support." anchor="4">
+    	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
+    	objects for primary key support by following these  
+    	<a href="../modeler/pksupport.html">instructions</a>.</p>
+    	</subsection>
+    	
+    	<subsection name="3.2.5 Generate Java Code for DataObjects" anchor="5">
     		<p>Use CayenneModeler to generate Java classes for DataObjects. Sample generated
     		files that can be used with this tutorial can be found here:
     		
@@ -105,12 +111,12 @@
     		</p>    	
     	</subsection>
     	
-    	<subsection name="3.2.5 Write Application Code" anchor="5">
+    	<subsection name="3.2.6 Write Application Code" anchor="6">
     		<p>Create a simple application that uses Cayenne. Here is a sample Java class source code:
     		<a href="../../tutorial/0/test/Main.java">Main.java</a>. Download it and save under "test" directory in project directory.</p>    	
     	</subsection>
     	
-    	<subsection name="3.2.6 Compile and Run the Application" anchor="6">
+    	<subsection name="3.2.7 Compile and Run the Application" anchor="7">
     		<p>Compile the source code (assume that JAVA_HOME variable points to the JSDK 1.4 installation). 
     		On Windows:</p>
 <source>

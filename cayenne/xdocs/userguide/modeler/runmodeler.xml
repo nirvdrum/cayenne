@@ -1,0 +1,40 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/modeler/index.html</prev>
+	<next>/userguide/modeler/modelerconcepts.html</next>
+</navigator>
+<body>
+    <section name="6. CayenneModeler GUI Tool">
+        <subsection name="6.2 Running CayenneModeler" anchor="run">
+        	<p>CayenneModeler is a regular Java application and can be run on
+        	a JSDK1.4 compatible JVM. Main class is
+        	<code>org.objectstyle.cayenne.gui.Editor</code>. For convenience
+        	Cayenne distribution provides run scripts to start modeler on
+        	Windows
+        	and UNIX platforms. To take advantage of these scripts, user must
+        	set
+        	CAYENNE_HOME and JAVA_HOME environment variables as described in the
+        	<a href="../install.html#inst">installation section</a>. To run
+        	CayenneModeler use the following commands. Windows:
+        	</p>
+
+        	<source>%CAYENNE_HOME%\bin\modeler.bat</source>
+
+        	<p>UNIX:</p>
+
+        	<source>$CAYENNE_HOME/bin/modeler.sh</source>
+        </subsection>
+    </section>
+</body>
+</document>
+
+
+
+
+

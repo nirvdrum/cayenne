@@ -1,0 +1,50 @@
+<document>
+<title>User Guide - Writing Cayenne Applications</title>
+
+    <properties>
+        <author>Andrei Adamchik</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/modeler/mapschema.html</prev>
+	<next>/userguide/modeler/pksupport.html</next>
+</navigator>
+<body>
+    <section name="6. CayenneModeler GUI Tool">
+ 	 <subsection name="6.5 Database First, DataMap Second" anchor="map_from_db" >
+
+		<ol>
+		<li>Do steps 1 through 6 of the previous section to create project and a domain.</li>
+		<li>Click Tools->Reverse Engineer Database.
+			System will bring up Enter JDBC Information dialog.</li>
+		<li>Type in the connection information for the database and click
+		Ok.
+			In my case (I am connecting to the MySQL database).
+			Make sure JDBC driver is in your Classpath or in jre\lib\ext.
+			Also make sure you select RDBMS Adapter for your
+			database.
+			The adapter determines the generation of the SQL.</li>
+		<li>If the database has multiple schemas,
+			it will bring the Select schema dialog.
+			Select the desired schema and click Ok.</li>
+		<li>System may take several minutes to reverse engineer the database
+		depending on its size.
+			Once it is finished, it will add a new data map to the Domain.
+			The new data map will have Db Entity generated per each DB table and
+			Obj Entity generated per each Db Entity.
+			If you database does not support foreign keys (like MySQL),
+			no relationships will be generated.</li>
+		</ol>
+		<p>
+		See previous section for more details on editing and saving the newly
+		created model, as well as creating data nodes.
+		</p>
+	</subsection>
+    </section>
+</body>
+</document>
+
+
+
+
+

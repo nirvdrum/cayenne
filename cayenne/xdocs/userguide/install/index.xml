@@ -93,12 +93,21 @@
             </p>
         </subsection>
         
+        <subsection name="2.3 Database Configuration" anchor="db">
+           	<p>Databases used with Cayenne must be configured appropriately
+           	for Cayenne automatic primary key generation feature. This is 
+           	a part of required configuration, but it is normally
+           	deferred till the first project is created. Detailed instructions on
+           	database configuration via CayenneModeler are given 
+           	<a href="../modeler/pksupport.html">here</a>.</p>
+        </subsection>
         
-        <subsection name="2.3 Cayenne JAR Files" anchor="jar">
+        
+        <subsection name="2.4 Cayenne JAR Files" anchor="jar">
             <p>There are two JAR files in <code>[cayenne_install_dir]/lib</code>
             directory: <ul>
-            	<li><code>cayenne.jar</code></li>
-				<li><code>cayenne-nodeps.jar</code></li>
+            	<li><strong><code>cayenne.jar</code></strong></li>
+				<li><strong><code>cayenne-nodeps.jar</code></strong></li>
 			</ul>
 			
             Either one or another should be used (<strong>but not both of them</strong>
@@ -130,8 +139,7 @@
             
         </subsection>
         
-        
-        <subsection name="2.4 Unit Tests" anchor="tests">        
+        <subsection name="2.5 Unit Tests" anchor="tests">        
             <p>[Optional] Run tests. To do that, you will need to set CAYENNE_HOME and 
             JAVA_HOME environment variables as described <a href="#inst">above</a>. Then 
             make sure that an account used to connect to the database has enough
@@ -185,7 +193,7 @@ GRANT CREATE VIEW TO "AUSER"
 			<p>Test results will be printed in a terminal window.</p>
         </subsection>
         
-		<subsection name="2.5 Compiling Cayenne from Source" anchor="compile">
+		<subsection name="2.6 Compiling Cayenne from Source" anchor="compile">
 			<panel name="Note:">Normally users don't need to compile Cayenne. Prebuilt JAR's
 			are included with both source and binary distributions.</panel>
 
