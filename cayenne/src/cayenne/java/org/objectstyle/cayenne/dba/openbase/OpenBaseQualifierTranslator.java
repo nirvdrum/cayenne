@@ -96,7 +96,7 @@ public class OpenBaseQualifierTranslator extends QualifierTranslator {
         Object val,
         DbAttribute attr,
         Expression parentExpression) {
-
+ 
         // OpenBase LIKE looks like this: "WHERE column LIKE '[A][b][C]%'"
         // Should we support nonString bindings?
         if (val instanceof String
@@ -119,7 +119,7 @@ public class OpenBaseQualifierTranslator extends QualifierTranslator {
             val = buffer.toString();
         }
 
-        super.appendLiteralDirect(buf, val, attr, parentExpression);
+        super.appendLiteral(buf, val, attr, parentExpression);
     }
 
     public void endBinaryNode(Expression node, Expression parentNode) {

@@ -150,32 +150,32 @@ public class CayenneDOTestBase extends CayenneTestCase {
     }
     
     protected Artist fetchArtist() {
-        SelectQuery q = new SelectQuery(
-        "Artist", 
-        ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", artistName)
-        );
+        SelectQuery q =
+            new SelectQuery(
+                "Artist",
+                ExpressionFactory.matchExp("artistName", artistName));
         List ats = ctxt.performQuery(q);
-        return (ats.size() > 0) ? (Artist)ats.get(0) : null;
+        return (ats.size() > 0) ? (Artist) ats.get(0) : null;
     }
     
     protected Painting fetchPainting() {
-        SelectQuery q = new SelectQuery(
-        "Painting", 
-        ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "paintingTitle", paintingName)
-        );
+        SelectQuery q =
+            new SelectQuery(
+                "Painting",
+                ExpressionFactory.matchExp("paintingTitle", paintingName));
         List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (Painting)pts.get(0) : null;
+        return (pts.size() > 0) ? (Painting) pts.get(0) : null;
     }
     
     protected PaintingInfo fetchPaintingInfo() {
         // we are using "LIKE" comparison, since Sybase does not allow
         // "=" comparisons on "text" columns
-        SelectQuery q = new SelectQuery(
-        "PaintingInfo", 
-        ExpressionFactory.binaryPathExp(Expression.LIKE, "textReview", textReview)
-        );
+        SelectQuery q =
+            new SelectQuery(
+                "PaintingInfo",
+                ExpressionFactory.likeExp("textReview", textReview));
         List pts = ctxt.performQuery(q);
-        return (pts.size() > 0) ? (PaintingInfo)pts.get(0) : null;
+        return (pts.size() > 0) ? (PaintingInfo) pts.get(0) : null;
     }
 }
 
