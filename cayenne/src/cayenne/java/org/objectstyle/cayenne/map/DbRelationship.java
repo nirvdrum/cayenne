@@ -266,24 +266,43 @@ public class DbRelationship extends Relationship {
         }
     }
 
-	/** Common code to srcSnapshotWithTargetSnapshot.  Both are functionally the
-	 * same, except for the name, and whether they operate on a toMany or a toOne.*/
-	private Map srcSnapshotWithTargetSnapshot(Map targetSnapshot) {
-		Map idMap = new HashMap();
-		int len = joins.size();
-		for (int i = 0; i < len; i++) {
-			DbAttributePair join = (DbAttributePair) joins.get(i);
-			Object val = targetSnapshot.get(join.getTarget().getName());
-			if (val == null) {
-				throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
-			}
-			else {
-				idMap.put(join.getSource().getName(), val);
-			}
-		}
+	/** 
+     * Common code to srcSnapshotWithTargetSnapshot. Both are functionally the
+	 * same, except for the name, and whether they operate on a toMany or a toOne.
+     */
+    private Map srcSnapshotWithTargetSnapshot(Map targetSnapshot) {
+        Map idMap;
+        int len = joins.size();
 
-		return idMap;
-	}
+        // optimize for the most common single column join
+        if (len == 1) {
+            DbAttributePair join = (DbAttributePair) joins.get(0);
+            Object val = targetSnapshot.get(join.getTarget().getName());
+            if (val == null) {
+                throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
+            }
+            else {
+                idMap = Collections.singletonMap(join.getSource().getName(), val);
+            }
+        }
+        // general case
+        else {
+            idMap = new HashMap(len * 2);
+            for (int i = 0; i < len; i++) {
+                DbAttributePair join = (DbAttributePair) joins.get(i);
+                Object val = targetSnapshot.get(join.getTarget().getName());
+                if (val == null) {
+                    throw new CayenneRuntimeException("Some parts of FK are missing in snapshot.");
+                }
+                else {
+                    idMap.put(join.getSource().getName(), val);
+                }
+            }
+        }
+
+        return idMap;
+    }
+    
 	/** 
 	 * Creates a snapshot of foreign key attributes of a source
 	 * object of this relationship based on a snapshot of a target.
