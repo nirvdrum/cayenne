@@ -12,7 +12,7 @@
     <classpathentry exported="true" kind="lib" path="otherlib/ant-1.5.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/ashwood-28012003.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/bcel-5.0.jar"/>
-    <classpathentry exported="true" kind="lib" path="otherlib/commons-beanutils-1.5.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/commons-beanutils-1.6.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-collections-2.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-lang-1.0.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-logging-1.0.2.jar"/>
