@@ -105,7 +105,7 @@ public class ConnectionSetup  {
 
         DataSourceInfo dsi = factory.getDriverInfo();            
         DataDomain dom = conf.getDomain();
-        dsi.setAdapterClass(((DataNode)(dom.getDataNodesAsList().get(0))).getAdapter().getClass().getName());
+        dsi.setAdapterClass(((DataNode)(dom.getDataNodes().iterator().next())).getAdapter().getClass().getName());
         return dsi;
     }
 

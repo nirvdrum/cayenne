@@ -181,7 +181,7 @@ public class CayenneTestResources {
     }
 
     public DataNode getSharedNode() {
-        return (DataNode)sharedDomain.getDataNodesAsList().get(0);
+        return (DataNode)sharedDomain.getDataNodes().iterator().next();
     }
 
     public DataSourceInfo getFreshConnInfo() throws Exception {
@@ -260,7 +260,7 @@ public class CayenneTestResources {
     protected void createDbSetup() {
         try {
             sharedDatabaseSetup =
-                new CayenneTestDatabaseSetup(this, (DataMap)getSharedNode().getDataMapsAsList().get(0));
+                new CayenneTestDatabaseSetup(this, (DataMap)getSharedNode().getDataMaps().iterator().next());
         } catch (Exception ex) {
             logObj.error("Can not create shared DatabaseSetup.", ex);
             throw new CayenneRuntimeException("Can not create shared DatabaseSetup.", ex);

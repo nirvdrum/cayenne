@@ -56,8 +56,8 @@
 package org.objectstyle.cayenne.access;
 
 import java.sql.Types;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
@@ -107,7 +107,7 @@ public class DbLoaderTst extends CayenneTestCase {
             if (supportsFK) {
                 // *** TESTING THIS ***
                 loader.loadDbRelationships(map);
-                List rels = getDbEntity(map, "ARTIST").getRelationshipList();
+                Collection rels = getDbEntity(map, "ARTIST").getRelationships();
                 assertNotNull(rels);
                 assertTrue(rels.size() > 0);
             }
@@ -129,7 +129,7 @@ public class DbLoaderTst extends CayenneTestCase {
             if (supportsFK) {
                 // *** TESTING THIS ***
                 loader.loadObjRelationships(map);
-                List rels = ae.getRelationshipList();
+                Collection rels = ae.getRelationships();
                 assertNotNull(rels);
                 assertTrue(rels.size() > 0);
             }
@@ -217,7 +217,7 @@ public class DbLoaderTst extends CayenneTestCase {
     }
 
     private DataMap originalMap() {
-        return (DataMap) getNode().getDataMapsAsList().get(0);
+        return (DataMap)getNode().getDataMaps().iterator().next();
     }
 
     /** Selectively check how different types were processed. */
@@ -276,7 +276,7 @@ public class DbLoaderTst extends CayenneTestCase {
             DbEntity origEnt = (DbEntity) entIt.next();
             DbEntity newEnt = map.getDbEntity(origEnt.getName());
 
-            Iterator it = origEnt.getAttributeList().iterator();
+            Iterator it = origEnt.getAttributes().iterator();
             while (it.hasNext()) {
                 DbAttribute origAttr = (DbAttribute) it.next();
                 DbAttribute newAttr =

@@ -213,7 +213,7 @@ public class PerformMain {
             node.addDataMap(map);
 
             // generate pk's
-            Iterator dataMaps = node.getDataMapsAsList().iterator();
+            Iterator dataMaps = node.getDataMaps().iterator();
 			while (dataMaps.hasNext()) {
                 node.getAdapter().getPkGenerator().createAutoPk(
                     node,

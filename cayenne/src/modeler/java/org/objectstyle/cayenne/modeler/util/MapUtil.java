@@ -144,7 +144,7 @@ public class MapUtil {
 			}
 
 			// check indiv. attributes
-			Iterator atts = ent.getAttributeList().iterator();
+			Iterator atts = ent.getAttributes().iterator();
 			while (atts.hasNext()) {
 				ObjAttribute att = (ObjAttribute) atts.next();
 				DbAttribute dbAtt = att.getDbAttribute();
@@ -156,11 +156,11 @@ public class MapUtil {
 			}
 
 			// check indiv. relationships
-			Iterator rels = ent.getRelationshipList().iterator();
+			Iterator rels = ent.getRelationships().iterator();
 			while (rels.hasNext()) {
 				ObjRelationship rel = (ObjRelationship) rels.next();
 
-				Iterator dbRels = new ArrayList(rel.getDbRelationshipList()).iterator();
+				Iterator dbRels = new ArrayList(rel.getDbRelationships()).iterator();
 				while (dbRels.hasNext()) {
 					DbRelationship dbRel = (DbRelationship) dbRels.next();
 					Entity srcEnt = dbRel.getSourceEntity();
@@ -195,7 +195,7 @@ public class MapUtil {
 			}
 		}
 
-		Iterator rel_it = entity.getRelationshipList().iterator();
+		Iterator rel_it = entity.getRelationships().iterator();
 		while (rel_it.hasNext()) {
 			ObjRelationship obj_rel = (ObjRelationship) rel_it.next();
 			obj_rel.clearDbRelationships();

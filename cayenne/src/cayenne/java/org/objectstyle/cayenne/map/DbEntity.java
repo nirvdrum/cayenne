@@ -164,7 +164,7 @@ public class DbEntity extends Entity {
         while (relIt.hasNext()) {
             DbRelationship dbRel = (DbRelationship) relIt.next();
             sb.append("\n   Rel. to: ").append(
-                dbRel.getTargetEntity().getName());
+                dbRel.getTargetEntityName());
             sb.append("\n------------------");
         }
 

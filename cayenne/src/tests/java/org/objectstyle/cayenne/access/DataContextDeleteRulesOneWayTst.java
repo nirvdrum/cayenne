@@ -72,7 +72,7 @@ public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
 		setup.cleanTableData();
 
 		DataDomain dom = getDomain();
-		setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
+		setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
 
 		context = dom.createDataContext();
 	}

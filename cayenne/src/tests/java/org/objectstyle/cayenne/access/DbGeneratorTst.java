@@ -70,7 +70,7 @@ public class DbGeneratorTst extends CayenneTestCase {
         gen =
             new DbGenerator(
                 getNode().getAdapter(),
-                (DataMap)getNode().getDataMapsAsList().get(0));
+                (DataMap)getNode().getDataMaps().iterator().next());
     }
 
     public void testAdapter() throws Exception {

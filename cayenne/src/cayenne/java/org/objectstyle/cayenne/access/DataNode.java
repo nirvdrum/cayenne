@@ -146,10 +146,10 @@ public class DataNode implements QueryEngine {
 	}
 
 	/**
-	 * Returns a collection of DataMaps handled by this DataNode.
+	 * Returns an unmodifiable collection of DataMaps handled by this DataNode.
 	 */
 	public Collection getDataMaps() {
-		return entityResolver.getDataMapsList();
+		return entityResolver.getDataMaps();
 	}
 
     public void setDataMaps(Collection dataMaps) {

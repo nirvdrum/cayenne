@@ -213,7 +213,7 @@ public class CayenneTestDatabaseSetup {
         DbAdapter adapter = node.getAdapter();
         adapter.getPkGenerator().createAutoPk(
             node,
-            ((DataMap) node.getDataMapsAsList().get(0)).getDbEntitiesAsList());
+            ((DataMap)node.getDataMaps().iterator().next()).getDbEntitiesAsList());
     }
 
     /** 
@@ -223,11 +223,11 @@ public class CayenneTestDatabaseSetup {
      * key support.
      */
     public void createPkSupportForMapEntities(DataNode node) throws Exception {
-        Iterator dataMaps = node.getDataMapsAsList().iterator();
+        Iterator dataMaps = node.getDataMaps().iterator();
         while (dataMaps.hasNext()) {
             node.getAdapter().getPkGenerator().createAutoPk(
                 node,
-                ((DataMap) dataMaps.next()).getDbEntitiesAsList());
+                ((DataMap)dataMaps.next()).getDbEntitiesAsList());
         }
     }
 
@@ -279,7 +279,7 @@ public class CayenneTestDatabaseSetup {
                 
                 // check for LOB attributes
                 boolean hasLob = false;
-                Iterator attrs = ent.getAttributeList().iterator();
+                Iterator attrs = ent.getAttributes().iterator();
                 while(attrs.hasNext()) {
                 	DbAttribute attr = (DbAttribute)attrs.next();
                 	if(attr.getType() == Types.BLOB || attr.getType() == Types.CLOB) {

@@ -102,18 +102,18 @@ public class DerivedDbEntity extends DbEntity {
 	 * and replaces them with the data of the parent entity.
 	 */
 	public void resetToParentView() {
-		clearAttributes();
-		clearRelationships();
+		this.clearAttributes();
+		this.clearRelationships();
 
 		// copy attributes
-		Iterator it = getParentEntity().getAttributeList().iterator();
+		Iterator it = getParentEntity().getAttributes().iterator();
 		while (it.hasNext()) {
-			DbAttribute at = (DbAttribute) it.next();
-			addAttribute(new DerivedDbAttribute(this, at));
+			this.addAttribute(new DerivedDbAttribute(this, (DbAttribute)it.next()));
 		}
 
 		// copy relationships
-		Iterator rit = getParentEntity().getRelationshipList().iterator();
+		// Iterator rit = new ArrayList(this.getParentEntity().getRelationships()).iterator();
+		Iterator rit = this.getParentEntity().getRelationships().iterator();
 		while (rit.hasNext()) {
 			DbRelationship protoRel = (DbRelationship) rit.next();
 			DbRelationship rel = new DbRelationship();
@@ -124,15 +124,12 @@ public class DerivedDbEntity extends DbEntity {
 			Iterator joins = protoRel.getJoins().iterator();
 			while (joins.hasNext()) {
 				DbAttributePair protoJoin = (DbAttributePair) joins.next();
-
-				DbAttribute src =
-					(DbAttribute) getAttribute(protoJoin.getSource().getName());
-				DbAttributePair join =
-					new DbAttributePair(src, protoJoin.getTarget());
+				DbAttribute src = (DbAttribute)getAttribute(protoJoin.getSource().getName());
+				DbAttributePair join = new DbAttributePair(src, protoJoin.getTarget());
 				rel.addJoin(join);
 			}
 
-			addRelationship(rel);
+			this.addRelationship(rel);
 		}
 	}
 
@@ -173,7 +170,7 @@ public class DerivedDbEntity extends DbEntity {
 	 */
 	public List getGroupByAttributes() {
 		List list = new ArrayList();
-		Iterator it = super.getAttributeList().iterator();
+		Iterator it = super.getAttributes().iterator();
 		while(it.hasNext()) {
 			DerivedDbAttribute attr = (DerivedDbAttribute)it.next();
 			if(attr.isGroupBy()) {

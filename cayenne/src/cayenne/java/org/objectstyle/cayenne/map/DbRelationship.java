@@ -119,7 +119,7 @@ public class DbRelationship extends Relationship {
 		Entity src = getSourceEntity();
 		DbAttributePair testJoin = new DbAttributePair(null, null);
 
-		Iterator it = target.getRelationshipList().iterator();
+		Iterator it = target.getRelationships().iterator();
 		while (it.hasNext()) {
 			DbRelationship rel = (DbRelationship) it.next();
 			if (rel.getTargetEntity() != src)

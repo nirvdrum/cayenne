@@ -119,6 +119,6 @@ public abstract class CayennePerformanceTest extends PerformanceTest {
     }
 
     public Connection getConnection() throws Exception {
-        return ((DataNode)getDomain().getDataNodesAsList().get(0)).getDataSource().getConnection();
+        return ((DataNode)getDomain().getDataNodes().iterator().next()).getDataSource().getConnection();
     }
 }

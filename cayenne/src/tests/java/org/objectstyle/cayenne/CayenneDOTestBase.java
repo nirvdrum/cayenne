@@ -92,7 +92,7 @@ public class CayenneDOTestBase extends CayenneTestCase {
         DataDomain dom = getDomain();
         Level oldLevel = QueryLogger.getLoggingLevel();
         // QueryLogger.setLoggingLevel(Level.ERROR);
-        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
+        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
         QueryLogger.setLoggingLevel(oldLevel);
         resetContext();
     }

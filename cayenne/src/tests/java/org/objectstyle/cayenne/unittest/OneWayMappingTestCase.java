@@ -83,6 +83,6 @@ public class OneWayMappingTestCase extends CayenneTestCase {
      * @see org.objectstyle.cayenne.unittest.CayenneTestCase#getNode()
      */
     public DataNode getNode() {
-        return (DataNode)getDomain().getDataNodesAsList().get(0);
+        return (DataNode)getDomain().getDataNodes().iterator().next();
     }
 }

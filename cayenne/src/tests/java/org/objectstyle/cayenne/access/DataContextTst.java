@@ -106,7 +106,7 @@ public class DataContextTst extends CayenneTestCase {
 
 		DataDomain dom = getDomain();
 		setup.createPkSupportForMapEntities(
-			(DataNode) dom.getDataNodesAsList().get(0));
+			(DataNode) dom.getDataNodes().iterator().next());
 
 		ctxt = dom.createDataContext();
 		opObserver = new TestOperationObserver();
@@ -607,7 +607,7 @@ public class DataContextTst extends CayenneTestCase {
 	public void testDerivedEntityFetch1() throws Exception {
 		// Skip HSQLDB, since it currently does not support HAVING;
 		// this is supposed to appear in the next release.
-		if (((DataNode) getDomain().getDataNodesAsList().get(0))
+		if (((DataNode) getDomain().getDataNodes().iterator().next())
 			.getAdapter()
 			.getClass()
 			== HSQLDBAdapter.class) {
@@ -631,7 +631,7 @@ public class DataContextTst extends CayenneTestCase {
 	public void testDerivedEntityFetch2() throws Exception {
 		// Skip HSQLDB, since it currently does not support HAVING;
 		// this is supposed to appear in the next release.
-		if (((DataNode) getDomain().getDataNodesAsList().get(0))
+		if (((DataNode) getDomain().getDataNodes().iterator().next())
 			.getAdapter()
 			.getClass()
 			== HSQLDBAdapter.class) {

@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access.trans;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -471,7 +472,7 @@ public class SelectTranslatorTst extends CayenneTestCase {
             transl.createSqlString();
 
             List columns = transl.getColumnList();
-            List dbAttrs = artistEnt.getAttributeList();
+            Collection dbAttrs = artistEnt.getAttributes();
 
             assertEquals(dbAttrs.size(), columns.size());
             Iterator it = dbAttrs.iterator();

@@ -153,7 +153,7 @@ public class EntityResolver {
 	}
 
 	/**
-	 * Returns a list of internal DataMaps by copy.
+	 * Returns an unmodifiable collection of DataMaps.
 	 */
 	public Collection getDataMaps() {
 		return mapsRef;

@@ -390,7 +390,7 @@ public class MapLoader extends DefaultHandler {
             storeDbAttribute(out, dbe);
             storeDbKeyGenerator(out, dbe.getPrimaryKeyGenerator());
             out.println("\t</db-entity>");
-            dbRelationships.addAll(dbe.getRelationshipList());
+            dbRelationships.addAll(dbe.getRelationships());
         }
 
         Iterator diter = sortedDerivedDbEntities(map).iterator();
@@ -420,12 +420,12 @@ public class MapLoader extends DefaultHandler {
 
             storeDbAttribute(out, dbe);
             out.println("\t</db-entity>");
-            dbRelationships.addAll(dbe.getRelationshipList());
+            dbRelationships.addAll(dbe.getRelationships());
         }
     }
 
     private void storeDbAttribute(PrintWriter out, DbEntity dbe) {
-        Iterator iter = sortedAttributes(dbe).iterator();
+        Iterator iter = this.sortedAttributes(dbe).iterator();
 
         while (iter.hasNext()) {
             DbAttribute attr = (DbAttribute) iter.next();
@@ -558,7 +558,7 @@ public class MapLoader extends DefaultHandler {
     }
 
     private void storeObjEntities(PrintWriter out, DataMap map) {
-        Iterator iter = sortedObjEntities(map).iterator();
+        Iterator iter = this.sortedObjEntities(map).iterator();
         while (iter.hasNext()) {
             ObjEntity temp = (ObjEntity) iter.next();
             out.print("\t<obj-entity name=\"");
@@ -597,13 +597,13 @@ public class MapLoader extends DefaultHandler {
             Iterator relIt = objRels.iterator();
             while (relIt.hasNext()) {
                 ObjRelationship objRel = (ObjRelationship) relIt.next();
-                dbRelationshipRefs.addAll(objRel.getDbRelationshipList());
+                dbRelationshipRefs.addAll(objRel.getDbRelationships());
             }
         }
     }
 
     private void storeObjAttribute(PrintWriter out, ObjEntity obj_entity) {
-        Iterator iter = sortedAttributes(obj_entity).iterator();
+        Iterator iter = this.sortedAttributes(obj_entity).iterator();
         while (iter.hasNext()) {
             ObjAttribute temp = (ObjAttribute) iter.next();
             out.print("\t\t<obj-attribute name=\"" + temp.getName() + '\"');
@@ -626,7 +626,7 @@ public class MapLoader extends DefaultHandler {
 
     private void storeObjRelationships(PrintWriter out)
         throws DataMapException {
-        Iterator iter = sortedRelationships(objRelationships).iterator();
+        Iterator iter = this.sortedRelationships(objRelationships).iterator();
         while (iter.hasNext()) {
             ObjRelationship rel = (ObjRelationship) iter.next();
             ObjEntity srcEnt = (ObjEntity) rel.getSourceEntity();
@@ -655,7 +655,7 @@ public class MapLoader extends DefaultHandler {
                 out.print(" deleteRule=\"" + deleteRule + '\"');
             }
             out.println('>');
-            storeDbRelationshipRef(out, rel);
+            this.storeDbRelationshipRef(out, rel);
             out.println("\t</obj-relationship>");
         }
     }
@@ -664,7 +664,7 @@ public class MapLoader extends DefaultHandler {
         PrintWriter out,
         ObjRelationship obj_rel)
         throws DataMapException {
-        Iterator iter = obj_rel.getDbRelationshipList().iterator();
+        Iterator iter = obj_rel.getDbRelationships().iterator();
         while (iter.hasNext()) {
             DbRelationship rel = (DbRelationship) iter.next();
             if (!dbRelationships.contains(rel)) {
@@ -694,7 +694,7 @@ public class MapLoader extends DefaultHandler {
 
     private void storeDbRelationships(PrintWriter out)
         throws DataMapException {
-        Iterator iter = sortedRelationships(dbRelationships).iterator();
+        Iterator iter = this.sortedRelationships(dbRelationships).iterator();
         while (iter.hasNext()) {
             DbRelationship temp = (DbRelationship) iter.next();
             out.print("\t<");
@@ -710,7 +710,7 @@ public class MapLoader extends DefaultHandler {
             out.print("\" toMany=\"");
             out.print(temp.isToMany() ? TRUE : FALSE);
             out.println("\">");
-            storeDbAttributePair(out, temp);
+            this.storeDbAttributePair(out, temp);
             out.print("\t</");
             out.print(DB_RELATIONSHIP_TAG);
             out.println('>');
@@ -1184,24 +1184,20 @@ public class MapLoader extends DefaultHandler {
     }
 
     protected List sortedAttributes(Entity ent) {
-        List list = new ArrayList(ent.getAttributeList());
+        List list = new ArrayList(ent.getAttributes());
         Collections.sort(list, new PropertyComparator("name", Attribute.class));
         return list;
     }
 
     protected List sortedRelationships(Entity ent) {
-        List list = new ArrayList(ent.getRelationshipList());
-        Collections.sort(
-            list,
-            new PropertyComparator("name", Relationship.class));
+        List list = new ArrayList(ent.getRelationships());
+        Collections.sort(list, new PropertyComparator("name", Relationship.class));
         return list;
     }
 
     protected List sortedRelationships(List rels) {
         List list = new ArrayList(rels);
-        Collections.sort(
-            list,
-            new PropertyComparator("name", Relationship.class));
+        Collections.sort(list, new PropertyComparator("name", Relationship.class));
         return list;
     }
 

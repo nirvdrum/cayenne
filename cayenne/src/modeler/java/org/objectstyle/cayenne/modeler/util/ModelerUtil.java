@@ -55,11 +55,11 @@
  */
 package org.objectstyle.cayenne.modeler.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.modeler.ModelerConstants;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -84,16 +84,11 @@ public class ModelerUtil {
     public static String[] getDbAttributeNames(
         EventController mediator,
         DbEntity entity) {
-        List list = entity.getAttributeList();
-        int list_size = list.size() + 1;
-        String[] arr = new String[list_size];
-        arr[0] = "";
-        for (int i = 1; i < list_size; i++) {
-            DbAttribute attribute = (DbAttribute) list.get(i - 1);
-            arr[i] = attribute.getName();
-        }
-
-        Arrays.sort(arr);
+		List list = new ArrayList(32);
+		list.add("");
+		list.addAll(entity.getAttributeMap().keySet());
+		String[] arr = (String[])(list.toArray(new String[list.size()]));
+		Arrays.sort(arr);
         return arr;
     }
 

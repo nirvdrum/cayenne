@@ -209,7 +209,7 @@ public class DataDomain implements QueryEngine {
 	/**
 	 * Returns a list of DataNodes associated with this domain.
 	 * List is returned by copy.
-	 * @deprecated Since 1.0 Beta1; use #getDataNodes instead.
+	 * @deprecated Since 1.0 Beta1; use #getDataNodes() instead.
 	 */
 	public List getDataNodesAsList() {
 		synchronized (nodes) {
@@ -255,15 +255,17 @@ public class DataDomain implements QueryEngine {
 			nodes.put(node.getName(), node);
 
 			// add node to "ent name->node" map
-			Iterator nodeMaps = node.getDataMapsAsList().iterator();
+			Iterator nodeMaps = node.getDataMaps().iterator();
 			while (nodeMaps.hasNext()) {
 				DataMap map = (DataMap) nodeMaps.next();
-				addMap(map);
+				this.addMap(map);
+
 				Iterator entities = map.getObjEntitiesAsList().iterator();
 				while (entities.hasNext()) {
 					ObjEntity e = (ObjEntity) entities.next();
 					nodesByEntityName.put(e.getName(), node);
 				}
+
 				entities = map.getDbEntitiesAsList().iterator();
 				while (entities.hasNext()) {
 					DbEntity e = (DbEntity) entities.next();
@@ -293,10 +295,10 @@ public class DataDomain implements QueryEngine {
 		DataNode node = (DataNode) nodesByEntityName.get(objEntityName);
 
 		// if lookup fails, it may mean that internal index
-		// in 'nodesByEntityName' need to be updated
+		// in 'nodesByEntityName' might need to be updated;
 		// do it and then try again.
 		if (node == null) {
-			reindexNodes();
+			this.reindexNodes();
 			return (DataNode) nodesByEntityName.get(objEntityName);
 		} else {
 			return node;
@@ -310,18 +312,20 @@ public class DataDomain implements QueryEngine {
 		nodesByEntityName.clear();
 		nodesByDbEntityName.clear();
 
-		Iterator nodes = this.getDataNodesAsList().iterator();
+		Iterator nodes = this.getDataNodes().iterator();
 		while (nodes.hasNext()) {
 			DataNode node = (DataNode) nodes.next();
-			Iterator nodeMaps = node.getDataMapsAsList().iterator();
+			Iterator nodeMaps = node.getDataMaps().iterator();
 			while (nodeMaps.hasNext()) {
 				DataMap map = (DataMap) nodeMaps.next();
-				addMap(map);
+				this.addMap(map);
+
 				Iterator it = map.getObjEntitiesAsList().iterator();
 				while (it.hasNext()) {
 					ObjEntity e = (ObjEntity) it.next();
 					nodesByEntityName.put(e.getName(), node);
 				}
+
 				it = map.getDbEntitiesAsList().iterator();
 				while (it.hasNext()) {
 					DbEntity e = (DbEntity) it.next();
@@ -445,8 +449,9 @@ public class DataDomain implements QueryEngine {
 
 	public EntityResolver getEntityResolver() {
 		if (entityResolver == null) {
-			entityResolver = new EntityResolver(getDataMapsAsList());
+			entityResolver = new EntityResolver(this.getDataMaps());
 		}
+
 		return entityResolver;
 	}
 

@@ -290,8 +290,9 @@ public abstract class Entity extends MapObject {
         private Entity currentEnt;
 
         PathIterator(Entity ent, String path) {
+        	super();
+			this.currentEnt = ent;
             this.toks = new StringTokenizer(path, PATH_SEPARATOR);
-            this.currentEnt = ent;
         }
 
         public boolean hasNext() {

@@ -78,7 +78,7 @@ public class OneWayManyToOneTst extends OneWayMappingTestCase {
         CayenneTestDatabaseSetup setup = getDatabaseSetup();
         setup.cleanTableData();
         DataDomain dom = getDomain();
-        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodesAsList().get(0));
+        setup.createPkSupportForMapEntities((DataNode)dom.getDataNodes().iterator().next());
 
         ctxt = getDomain().createDataContext();
     }
