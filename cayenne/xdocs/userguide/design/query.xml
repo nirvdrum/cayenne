@@ -50,22 +50,23 @@
             
 <source>import org.objectstyle.cayenne.query.SelectQuery;
 ...
-// this is a valid Cayenne query that would alow to fetches
+// this is a valid Cayenne query that would allow to fetch
 // all records from the ARTIST table as Artist objects
 SelectQuery query = new SelectQuery("Artist");
 </source>
 		</subsection>
 		
 		<subsection name="4.3.2 Qualifiers">
-			<p>Of course in the real life situations programmers would need a more fine
+			<p>Of course in the real life situations programmers would need a more fine-grained
 			control of what objects should be retrieved from the database. In this
 			case qualifier expression should be used. Qualifier is an instance of
 			a class implementing <a href=
-            "../../api/org/objectstyle/cayenne/exp/Expression.html">Expression</a> interface.
+            "../../api/org/objectstyle/cayenne/exp/Expression.html">Expression interface</a>.
 			The easiest way to build valid expressions is by using <a href=
-            "../../api/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory</a>
-            class. Extending the previous example, here is how to add an expression 
-            that would tell Cayenne to fetch artists that have a name that starts with "John":
+            "../../api/org/objectstyle/cayenne/exp/ExpressionFactory.html">ExpressionFactory
+            class</a>. Extending the previous example, the following code builds a query  
+            that would tell Cayenne to fetch artists that have a name that starts with "A"
+            ignoring case:
 			</p>
 			
 <source>import org.objectstyle.cayenne.query.SelectQuery;
@@ -74,11 +75,11 @@ import org.objectstyle.cayenne.exp.ExpressionFactory;
 ...
 SelectQuery query = new SelectQuery("Artist");
 Expression qualifier 
-   = Expressionfactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "john%");
+   = ExpressionFactory.binaryPathExp(Expression.LIKE_IGNORE_CASE, "artistName", "a%");
 query.setQualifier(qualifier);
 </source>
 
-   			<p>Note that we are using a method "binaryPathExpression" to create an expresion.
+   			<p>Note that we are using a method "binaryPathExp" to create an expresion.
    			"Binary" indicates the fact that the target expression has two operands.
    			"Path" indicates that second argument, the left hand operand of a binary expression ("artistName"),
    			will be converted to a "path expression" - expression of type <a href=
@@ -97,7 +98,7 @@ SelectQuery query = new SelectQuery("Artist");
 
 // Will match all artists that have paintings displayed in a Metropolitan Museum
 Expression qualifier 
-   = Expressionfactory.binaryPathExp(Expression.EQUALS_TO, 
+   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
                                      "paintingArray.toGallery.galleryName", 
                                      "Metropolitan Museum");
 query.setQualifier(qualifier);
@@ -122,9 +123,9 @@ SelectQuery query = new SelectQuery("Artist");
 
 // Will match all artists that have paintings displayed in a Metropolitan Museum
 // Note that the last component of the object path expression
-// is a relationship name, not an attribute like in previous examples
+// is a relationship name, not an attribute like in previous examples:
 Expression qualifier 
-   = Expressionfactory.binaryPathExp(Expression.EQUALS_TO, 
+   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
                                      "paintingArray.toGallery", 
                                      metroGallery);
 query.setQualifier(qualifier);
@@ -144,13 +145,13 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 ...
 SelectQuery query = new SelectQuery("Artist");
-
-// Will match all artists that have paintings displayed in a Metropolitan Museum
 Expression qualifier 
-   = Expressionfactory.binaryPathExp(Expression.EQUALS_TO, 
+   = ExpressionFactory.binaryPathExp(Expression.EQUALS_TO, 
                                      "paintingArray.toGallery.galleryName", 
                                      "Metropolitan Museum");
 query.setQualifier(qualifier);
+
+// add ordering by Artist name:
 query.addOrdering("artistName", true);
 </source>    
             </subsection>
