@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -84,6 +85,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class EntityResolver {
     protected Map dbEntityCache;
     protected Map objEntityCache;
+    protected Map procedureCache;
     protected List maps;
     protected List mapsRef;
 
@@ -92,6 +94,7 @@ public class EntityResolver {
         this.mapsRef = Collections.unmodifiableList(maps);
         this.dbEntityCache = new HashMap();
         this.objEntityCache = new HashMap();
+        this.procedureCache = new HashMap();
     }
 
     /**
@@ -144,20 +147,20 @@ public class EntityResolver {
         clearCache();
     }
 
-	/**
-	 * Returns a list of internal DataMaps by copy.
-	 * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
-	 */
-	public List getDataMapsList() {
-		return new ArrayList(maps);
-	}
+    /**
+     * Returns a list of internal DataMaps by copy.
+     * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
+     */
+    public List getDataMapsList() {
+        return new ArrayList(maps);
+    }
 
-	/**
-	 * Returns an unmodifiable collection of DataMaps.
-	 */
-	public Collection getDataMaps() {
-		return mapsRef;
-	}
+    /**
+     * Returns an unmodifiable collection of DataMaps.
+     */
+    public Collection getDataMaps() {
+        return mapsRef;
+    }
 
     /**
      * Removes all entity mappings from the cache.
@@ -168,6 +171,7 @@ public class EntityResolver {
     protected synchronized void clearCache() {
         dbEntityCache.clear();
         objEntityCache.clear();
+        procedureCache.clear();
     }
 
     /**
@@ -180,14 +184,18 @@ public class EntityResolver {
         Iterator mapIterator = maps.iterator();
         while (mapIterator.hasNext()) {
             DataMap thisMap = (DataMap) mapIterator.next();
+
+            // index entities
             Iterator objEntities = thisMap.getObjEntities().iterator();
             while (objEntities.hasNext()) {
-                ObjEntity oe = (ObjEntity)objEntities.next();
+                ObjEntity oe = (ObjEntity) objEntities.next();
                 DbEntity de = oe.getDbEntity();
                 dbEntityCache.put(oe, de);
                 Class entityClass;
                 try {
-                  entityClass = Configuration.getResourceLoader().loadClass(oe.getClassName());
+                    entityClass =
+                        Configuration.getResourceLoader().loadClass(
+                            oe.getClassName());
                 } catch (ClassNotFoundException e) {
                     throw new CayenneRuntimeException(
                         "Cannot find class " + oe.getClassName());
@@ -209,6 +217,13 @@ public class EntityResolver {
                 objEntityCache.put(entityClass, oe);
                 dbEntityCache.put(oe.getName(), de);
                 objEntityCache.put(oe.getName(), oe);
+            }
+
+            // index stored procedures
+            Iterator procedures = thisMap.getProcedures().iterator();
+            while (procedures.hasNext()) {
+                Procedure proc = (Procedure) procedures.next();
+                procedureCache.put(proc.getName(), proc);
             }
         }
     }
@@ -383,5 +398,28 @@ public class EntityResolver {
     public SelectQuery lookupQuery(Class queryRoot, String queryName) {
         Entity ent = lookupObjEntity(queryRoot);
         return (ent != null) ? ent.getQuery(queryName) : null;
+    }
+
+    public Procedure lookupProcedure(Query q) {
+        Object root = q.getRoot();
+        if (root instanceof Procedure) {
+            return (Procedure) root;
+        } else if (root instanceof String) {
+            return this.lookupProcedure((String) root);
+        }
+        return null;
+    }
+
+    public Procedure lookupProcedure(String procedureName) {
+        
+        Procedure result = (Procedure) procedureCache.get(procedureName);
+        if (result == null) {
+            // reconstruct cache just in case some of the datamaps
+            // have changed and now contain the required information
+            constructCache();
+            result = (Procedure) procedureCache.get(procedureName);
+        }
+        
+        return result;
     }
 }

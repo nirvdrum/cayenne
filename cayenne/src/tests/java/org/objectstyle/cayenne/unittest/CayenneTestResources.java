@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.unittest;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.Types;
+import java.util.Iterator;
 
 import javax.sql.DataSource;
 
@@ -76,6 +77,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -152,6 +154,7 @@ public class CayenneTestResources {
             createSharedDomain();
             createDbSetup();
             createTestDatabase();
+            tweakMapping();
         } else {
             logObj.warn(
                 "No property for '"
@@ -229,7 +232,8 @@ public class CayenneTestResources {
             Class adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
 
             if (sharedConnInfo.getAdapterClassName() != null) {
-                adapterClass = Class.forName(sharedConnInfo.getAdapterClassName());
+                adapterClass =
+                    Class.forName(sharedConnInfo.getAdapterClassName());
             }
 
             DbAdapter adapter = (DbAdapter) adapterClass.newInstance();
@@ -289,6 +293,29 @@ public class CayenneTestResources {
             CayenneTestDatabaseSetup dbSetup = getSharedDatabaseSetup();
             dbSetup.dropTestTables();
             dbSetup.setupTestTables();
+        } catch (Exception ex) {
+            logObj.error("Error creating test database.", ex);
+            throw new CayenneRuntimeException(
+                "Error creating test database.",
+                ex);
+        }
+    }
+
+    protected void tweakMapping() {
+        try {
+            DatabaseSetupDelegate delegate =
+                getSharedDatabaseSetup().getDelegate();
+
+            Iterator maps = getSharedDomain().getDataMaps().iterator();
+            while (maps.hasNext()) {
+                DataMap map = (DataMap) maps.next();
+                Iterator procedures = map.getProcedures().iterator();
+                while (procedures.hasNext()) {
+                    Procedure proc = (Procedure) procedures.next();
+                    delegate.tweakProcedure(proc);
+                }
+            }
+
         } catch (Exception ex) {
             logObj.error("Error creating test database.", ex);
             throw new CayenneRuntimeException(

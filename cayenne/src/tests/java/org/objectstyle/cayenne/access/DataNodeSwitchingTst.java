@@ -129,7 +129,7 @@ public class DataNodeSwitchingTst extends CayenneTestCase {
 
     public void testProcedureQuery() throws Exception {
         assertQuery(
-            new ProcedureQuery(Artist.class, new Procedure()),
+            new ProcedureQuery(new Procedure()),
             "runStoredProcedure");
     }
 

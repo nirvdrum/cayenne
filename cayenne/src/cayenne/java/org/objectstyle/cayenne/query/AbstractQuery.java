@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.query;
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 
 /** 
  * Superclass of all query classes. 
@@ -99,20 +100,26 @@ public abstract class AbstractQuery implements Query {
     /**
      * Sets the root of the query
      * @param value The new root
-     * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity or Class
+     * @throws IllegalArgumentException if value is not a String, ObjEntity, DbEntity,
+     * Procedure, or Class
      */
     public void setRoot(Object value) {
+        // sanity check
         if (!((value instanceof String)
             || (value instanceof ObjEntity)
             || (value instanceof DbEntity)
-            || (value instanceof Class))) {
+            || (value instanceof Class)
+            || (value instanceof Procedure))) {
             String rootClass =
                 (value != null) ? value.getClass().getName() : "null";
+
             throw new IllegalArgumentException(
                 getClass().getName()
-                    + ".setRoot takes a String, ObjEntity, DbEntity or Class only. It was passed a "
+                    + ".setRoot takes a String, ObjEntity, DbEntity, Procedure, "
+                    + "or Class only. It was passed a "
                     + rootClass);
         }
+        
         this.root = value;
     }
 

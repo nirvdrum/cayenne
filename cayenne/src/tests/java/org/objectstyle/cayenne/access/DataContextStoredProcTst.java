@@ -91,19 +91,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         // create an artist with painting in the database  
         createArtist(1000.0);
 
-        // create and run stored procedure
-        Procedure proc = new Procedure(UPDATE_STORED_PROCEDURE);
-        ProcedureParameter param =
-            new ProcedureParameter(
-                "paintingPrice",
-                Types.INTEGER,
-                ProcedureParameter.IN_PARAMETER);
-        proc.addCallParameter(param);
-
-        // allow delegate to tweak procedure
-        getDatabaseSetupDelegate().willRunProcedure(proc);
-
-        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
+        ProcedureQuery q = new ProcedureQuery(UPDATE_STORED_PROCEDURE);
         q.addParam("paintingPrice", new Integer(3000));
         DefaultOperationObserver observer = new DefaultOperationObserver();
         ctxt.performQuery(q, observer);
@@ -129,22 +117,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         // create an artist with painting in the database
         createArtist(1000.0);
 
-        // create and run stored procedure
-        Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
-        ProcedureParameter param1 =
-            new ProcedureParameter("aName", Types.VARCHAR, ProcedureParameter.IN_PARAMETER);
-        ProcedureParameter param2 =
-            new ProcedureParameter(
-                "paintingPrice",
-                Types.INTEGER,
-                ProcedureParameter.IN_PARAMETER);
-        proc.addCallParameter(param1);
-        proc.addCallParameter(param2);
-
-        // allow delegate to tweak procedure
-        getDatabaseSetupDelegate().willRunProcedure(proc);
-
-        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
+        ProcedureQuery q = new ProcedureQuery(SELECT_STORED_PROCEDURE);
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
         List artists = ctxt.performQuery(q);
@@ -170,22 +143,40 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         // create an artist with painting in the database
         createArtist(1000.0);
 
-        // create and run stored procedure
-        Procedure proc = new Procedure(SELECT_STORED_PROCEDURE);
-        ProcedureParameter param1 =
-            new ProcedureParameter("aName", Types.VARCHAR, ProcedureParameter.IN_PARAMETER);
-        ProcedureParameter param2 =
-            new ProcedureParameter(
-                "paintingPrice",
-                Types.INTEGER,
-                ProcedureParameter.IN_PARAMETER);
-        proc.addCallParameter(param1);
-        proc.addCallParameter(param2);
+        ProcedureQuery q = new ProcedureQuery(SELECT_STORED_PROCEDURE);
+        q.addParam("aName", "An Artist");
+        q.addParam("paintingPrice", new Integer(3000));
 
-        // allow delegate to tweak procedure
-        getDatabaseSetupDelegate().willRunProcedure(proc);
+        QueryResult result = new QueryResult();
 
-        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
+        ctxt.performQuery(q, result);
+
+        List artists = result.getFirstRows(q);
+
+        // check the results
+        assertNotNull("Null result from StoredProcedure.", artists);
+        assertEquals(1, artists.size());
+        Map artistRow = (Map) artists.get(0);
+        Artist a = (Artist) ctxt.objectFromDataRow("Artist", artistRow);
+        Painting p = (Painting) a.getPaintingArray().get(0);
+
+        // invalidate painting, it may have been updated in the proc
+        ctxt.invalidateObject(p);
+        assertEquals(2000, p.getEstimatedPrice().intValue());
+    }
+
+    public void testSelect3() throws Exception {
+        // Don't run this on MySQL
+        if (!getDatabaseSetupDelegate().supportsStoredProcedures()) {
+            return;
+        }
+
+        // create an artist with painting in the database
+        createArtist(1000.0);
+        
+        // test ProcedureQuery with Procedure as root
+        Procedure proc = ctxt.getEntityResolver().lookupProcedure(SELECT_STORED_PROCEDURE);
+        ProcedureQuery q = new ProcedureQuery(proc);
         q.addParam("aName", "An Artist");
         q.addParam("paintingPrice", new Integer(3000));
 
@@ -213,25 +204,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
             return;
         }
 
-        // create and run stored procedure
-        Procedure proc = new Procedure(OUT_STORED_PROCEDURE);
-        ProcedureParameter param1 =
-            new ProcedureParameter(
-                "in_param",
-                Types.INTEGER,
-                ProcedureParameter.IN_PARAMETER);
-        ProcedureParameter param2 =
-            new ProcedureParameter(
-                "out_param",
-                Types.INTEGER,
-                ProcedureParameter.OUT_PARAMETER);
-        proc.addCallParameter(param1);
-        proc.addCallParameter(param2);
-
-        // allow delegate to tweak procedure
-        getDatabaseSetupDelegate().willRunProcedure(proc);
-
-        ProcedureQuery q = new ProcedureQuery(Artist.class, proc);
+        ProcedureQuery q = new ProcedureQuery(OUT_STORED_PROCEDURE);
         q.addParam("in_param", new Integer(20));
 
         QueryResult resultHolder = new QueryResult();

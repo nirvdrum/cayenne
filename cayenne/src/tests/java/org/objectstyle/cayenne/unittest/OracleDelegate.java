@@ -111,7 +111,7 @@ public class OracleDelegate extends DatabaseSetupDelegate {
         return true;
     }
     
-    public void willRunProcedure(Procedure proc) {
+    public void tweakProcedure(Procedure proc) {
       if(DataContextStoredProcTst.SELECT_STORED_PROCEDURE.equals(proc.getName())) {
           List params = new ArrayList(proc.getCallParameters());
         

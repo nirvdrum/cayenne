@@ -127,7 +127,7 @@ public class DatabaseSetupDelegate {
      * Callback method that allows Delegate to customize
      * test procedure.
      */
-    public void willRunProcedure(Procedure proc) {
+    public void tweakProcedure(Procedure proc) {
     }
 
     public void willCreateTables(Connection con, DataMap map)

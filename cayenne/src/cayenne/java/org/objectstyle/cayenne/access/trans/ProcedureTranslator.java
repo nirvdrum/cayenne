@@ -173,7 +173,7 @@ public class ProcedureTranslator
     }
 
     public Procedure getProcedure() {
-        return getProcedureQuery().getProcedure();
+        return engine.getEntityResolver().lookupProcedure(query);
     }
 
     public ProcedureQuery getProcedureQuery() {
