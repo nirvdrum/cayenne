@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.art.oneway.Artist;
@@ -63,9 +63,11 @@ import org.objectstyle.art.oneway.Painting;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestDatabaseSetup;
 import org.objectstyle.cayenne.unittest.OneWayMappingTestCase;
 
@@ -85,28 +87,31 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
     }
 
     public void testReadList() throws Exception {
-        // prepare and save a gallery
-        Painting p11 = newPainting("g1");
-        Painting p12 = newPainting("g1");
-        ctxt.commitChanges();
+        // save bypassing DataContext
+        List queries = new ArrayList(3);
+        queries.add(
+            new SqlModifyQuery(
+                Artist.class,
+                "INSERT INTO ARTIST (ARTIST_ID, ARTIST_NAME, DATE_OF_BIRTH) "
+                    + "VALUES (201, 'artist with one painting', null)"));
 
-        Artist a1 = newArtist();
-        a1.addToPaintingArray(p11);
-        a1.addToPaintingArray(p12);
+        queries.add(
+            new SqlModifyQuery(
+                Artist.class,
+                "INSERT INTO PAINTING (ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID, "
+                    + "PAINTING_ID, PAINTING_TITLE) VALUES (201, null, null, 201, 'p1')"));
+        queries.add(
+            new SqlModifyQuery(
+                Artist.class,
+                "INSERT INTO PAINTING (ARTIST_ID, ESTIMATED_PRICE, GALLERY_ID, "
+                    + "PAINTING_ID, PAINTING_TITLE) VALUES (201, null, null, 202, 'p2')"));
 
-        // test before save
-        assertEquals(2, a1.getPaintingArray().size());
-        ctxt.commitChanges();
-
-        ctxt = createDataContext();
+        ctxt.performQueries(queries, new DefaultOperationObserver());
 
         Artist a2 = fetchArtist();
         assertNotNull(a2);
 
-        Iterator it = a2.getPaintingArray().iterator();
-        while (it.hasNext()) {
-            it.next();
-        }
+        assertEquals(2, a2.getPaintingArray().size());
     }
 
    public void testRevertModification() throws Exception {

@@ -113,6 +113,9 @@ public class ObjectId implements Serializable {
         if (idKeys != null) {
             this.setIdKeys(Collections.unmodifiableMap(idKeys));
         }
+        else {
+            this.setIdKeys(Collections.EMPTY_MAP);
+        }
     }
 
     protected void setIdKeys(Map idKeys) {
