@@ -90,8 +90,5 @@ public class TopController extends BasicController {
         	control.markUnmatched();
             statusController.doHandleControl(control);
         }
-        else if(control.matchesID(TopModel.CURRENT_PROJECT_KEY)) {
-        	
-        }
     }
 }

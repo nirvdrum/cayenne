@@ -140,9 +140,6 @@ public class SaveAction extends CayenneAction {
                 throw new CayenneRuntimeException("Error on save", ex);
             }
 
-            mediator.getDirtyDataMaps().clear();
-            mediator.getDirtyDomains().clear();
-            mediator.getDirtyDataNodes().clear();
             mediator.setDirty(false);
         }
 

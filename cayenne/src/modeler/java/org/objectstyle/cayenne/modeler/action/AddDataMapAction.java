@@ -57,17 +57,11 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
-import java.io.File;
-import javax.swing.JFileChooser;
-import javax.swing.AbstractAction;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.modeler.ModelerPreferences;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.modeler.AddDataMapDialog;
-import org.objectstyle.cayenne.modeler.event.*;
-import org.objectstyle.cayenne.modeler.util.*;
+import org.objectstyle.cayenne.modeler.event.DataNodeEvent;
+import org.objectstyle.cayenne.modeler.event.Mediator;
 
 
 /** 
