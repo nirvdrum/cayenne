@@ -7,206 +7,26 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/expressions/nulls.html</prev>
-	<next>/userguide/advmodel/index.html</next>
+	<next>/userguide/perform/prefetching.html</next>
 </navigator>    
 <body>
     <section name="11. Performance Tuning">        
-            <p>Working with tables that contain huge number of rows
-            (from tens of thousands to millions) often causes performance problems with 
-            traditional O/R approach. The reasons are obvious and in many cases are
-            not specific to O/R, but rather common to any database application: </p>
-            <ul>
-            	<li>It takes lots of time to create objects from a 
-            	large ResultSet returned from the database.</li>
-            	<li>It takes lots of memory to store all objects from
-            	a large ResultSet. Application may eventually run out of
-            	memory and crash.</li>
-            </ul>
+    <p>Most performance problems in database applications, including those using ORM,
+    are related to the inefficient queries and/or large volumes of data in the database.
+    Here is a few common issues that a typical application may run into:</p>
+    
+    <ul>
+    	<li>Converting a large ResultSet into objects takes very long time.</li>
+        <li>Storing objects from a large ResultSet takes large amounts of memory. 
+        Application may eventually run out of memory and crash.</li>
+        <li>Given a list of objects, there may be a need to retrieve a list
+        of related objects. Often this is done in a suboptimal way, by issuing 
+        a single query for each dependent object.</li>
+    </ul>
            
-            
-            <p>There is no single design pattern that solves all these issues, therefore
-            Cayenne offers a few solutions suitable for different cases.</p>
-            
-            <subsection name="11.1 Data Rows" anchor="data_rows">
-            <p>DataObjects creation and registering with DataContext is an expensive operation.
-            There are cases when only a few objects are really used, but the application still
-            has to fetch a lot of objects. For instance when a user performs a search, result may
-            contain thousands of records, but user will only check 2-3 of them. Cayenne allows
-            programmers to explicitly disable objects creation for such cases. Results will be returned
-            in the form of java.util.Map's. In Cayenne such maps are called <code>Data Rows</code>.
-            </p>
-            
-            <p>Benefits of <code>Data Rows</code>: </p>
-            <ul>
-            	<li>Fetch speed increase. Our tests show 2x to 5x performance increase.</li>
-            	<li>Using regular Cayenne query API.</li>
-            	<li>Using same DataMaps.</li>
-            	<li>Easy to convert to DataObjects.</li>
-            </ul>
-            
-            <p>Data rows don't have all the object-oriented features of DataObjects. In 
-            particular, data rows don't support relationships. It is easy to create a DataObject
-            from a row though. See examples below.</p>
-            
-            <p>Data rows example: </p>
-<source>
-import java.util.List;
-import java.util.Map;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.art.Artist;
-...
-DataContext ctxt;
-
-// create a query returning data rows
-SelectQuery q = new SelectQuery(Artist.class);
-q.setFetchingDataRows(true);
-
-List artistRows = ctxt.performQuery(q);
-
-// since query was configured to return data rows,
-// result list elements are java.util.Map's
-Map row = (Map)artistRows.get(0);
-
-// convert row to an artist
-Artist artist = (Artist)ctxt.objectFromDataRow("Artist", row);
-...
-</source>
-			</subsection>
-            
-			<subsection name="11.2 ResultIterator: Incremental Data Processing" anchor="iterator">
-			<p>There are cases when the result sets are so large that even when fetching data rows, 
-			application can run out of memory. For instance, a user may be creating a report
-			that requires in-memory processing of hundreds of thousands of database rows. 
-			In such cases normal Cayenne behavior of reading the whole <code>java.sql.ResultSet</code> 
-			in the memory before returning it to the user may result in an application exhausing all
-			memory and crashing.</p>
-			
-			<p>Cayenne solves this by allowing to 
-			obtain results in the form of <a href=
-			"../../api/cayenne/org/objectstyle/cayenne/access/ResultIterator.html"><code>ResultIterator</code></a>. 
-			<code>ResultIterator</code> is connected
-			to an open <code>java.sql.ResultSet</code>, therefore it's methods may throw checked 
-			exceptions. ResultIterator returns data rows (not DataObjects) one at a time, reading them
-			on demand from the open ResultSet. Each data row can be converted to a DataObject or accessed
-			directly. <strong>Open ResultIterator locks the database connection, therefore 
-			ResultIterator always requires explicit closing
-			in the user code.</strong></p>
-			
-			<panel name="Note:">
-			In web applications, programmers must ensure
-			that no open ResultIterators are kept between HTTP requests. Failure to do so
-			may result in too many database connections being locked, thus quickly exhausting 
-			connection pool. In general, an application with Web GUI is NOT a good candidate
-			for implementation using ResultIterators.
-			</panel>
-			
-			<p>When working with open ResultIterator, users still can perform any other database
-			operations: select queries, traversing object relationships, etc. Any parallel data
-			operation will internally check out an unused connection from the connection pool
-			as it would normally do, while ResultIterator still locks its own connection.
-			</p>
-			
-			<p>ResultIterator annotated example: </p>
-<source>
-import java.util.List;
-import java.util.Map;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.access.ResultIterator;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.art.Artist;
-...
-DataContext ctxt;
-
-// create a usual query
-SelectQuery q = new SelectQuery(Artist.class);
-ResultIterator it = null;
-
-// ResultIterator operations all throw checked CayenneException
-try {
-   // special "performIteratedQuery" method is used
-   it = ctxt.performIteratedQuery(q);
-
-   while(it.hasNextRow()) {
-      // ResultIterator always returns data rows 
-      Map row = it.nextDataRow();
-      
-      // do something with the row...
-      ...
-   }
-}
-catch(CayenneException ex) {
-   ex.printStackTrace();
-}
-finally {
-   try {
-      // explicit closing of the iterator is required !!!
-      it.close();
-   }
-   catch(CayenneException closeEx) {
-       closeEx.printStackTrace();
-   }
-}
-...
-</source>
-			</subsection>
-            
-			<subsection name="11.3 Paged Queries" anchor="paged">
-            <p>Another common situation found in interactive applications is when it is needed
-            to fetch a large number of rows, and at the same time only a small subset of objects
-            is accessed directly. An example of such application would be a search page. 
-            User would like to see how many total results exist that match a certain criteria,
-            but she will only look at a few pages of results out of possibly hundreds or thousands.
-            It will be extremely inefficient to fetch all objects in the memory.</p>
-            
-            <p>A solution
-            offered by Cayenne is "paged" queries. A user can set a size of a "page" of a select query.
-            If page size is greater than zero, on query execution Cayenne will only fetch the first
-            "page" as DataObjects. For the rest of the result set, only primary keys are read.
-            When a user accesses an object that has not been resolved
-            yet, the whole page containing this object will be resolved all at once. Most important, 
-            this happens totally transparent to the user.</p>
-            
-            <p>Our tests show 5x to 7x speed increase when comparing the time it  
-            takes to read a full list of 2000 objects, and the time it takes
-            to do the initial paged query fetch with page size of 50.</p>
-            
-            <p>Paged query example:</p>
-            
-<source>
-import java.util.List;
-import java.util.Map;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.art.Artist;
-...
-DataContext ctxt;
-
-// create a query returning data rows
-SelectQuery q = new SelectQuery(Artist.class);
-q.setPageSize(50);
-
-// the fact that result is paged is transparent
-List artistRows = ctxt.performQuery(q);
-
-
-// we are reading from the first page (index &lt; 50), 
-// this will simply return an object
-Artist artist1 = (Artist)artistRows.get(3);
-
-// we are reading from the 4th page, 
-// this will transparently resolve all objects on "Page #4"
-// and then return an object in question
-Artist artist2 = (Artist)artistRows.get(153);
-
-
-// This is safe and will NOT trigger a full fetch
-int size = artistRows.size();
-...
-
-</source> 
-			</subsection>
+    <p>There is no single solution to all performance problems.
+    Cayenne offers a few strategies to improve performance. They should be
+    applied where appropriate.</p> 
     </section>
 </body>
 </document>

@@ -84,9 +84,10 @@
             
             <li><a href="perform/index.html"><strong>11. Performance Tuning</strong></a>
             <ul>
-                <li><a href="perform/index.html#data_rows">11.1 Data Rows</a></li>
-                <li><a href="perform/index.html#iterator">11.2 ResultIterator: Incremental Data Processing</a></li>
-                <li><a href="perform/index.html#paged">11.3 Paged Queries</a></li>
+            	<li><a href="perform/prefetching.html">11.1 Prefetching</a></li>
+                <li><a href="perform/data-rows.html">11.2 Data Rows</a></li>
+                <li><a href="perform/result-iterator.html">11.3 ResultIterator: Incremental Data Processing</a></li>
+                <li><a href="perform/paged-queries.html">11.4 Paged Queries</a></li>
             </ul><br/></li>
             
             <li><a href="advmodel/index.html"><strong>12. Advanced modelling</strong></a>
