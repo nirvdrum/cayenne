@@ -88,7 +88,7 @@ import org.objectstyle.cayenne.project.ProjectDataSource;
 public class DataNodeDetailView
     extends JPanel
     implements DocumentListener, ActionListener, DataNodeDisplayListener {
-    static Logger logObj = Logger.getLogger(DataNodeDetailView.class.getName());
+    private static Logger logObj = Logger.getLogger(DataNodeDetailView.class);
 
     protected EventController mediator;
     protected DataNode node;

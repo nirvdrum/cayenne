@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.modeler.util.PreferenceField;
  * @author Misha Shengauot
  */
 public class DbLoginPanel extends CayenneDialog implements ActionListener {
-	static Logger logObj = Logger.getLogger(DbLoginPanel.class.getName());
+	private static Logger logObj = Logger.getLogger(DbLoginPanel.class);
 
 	protected DataSourceInfo dataSrcInfo;
 

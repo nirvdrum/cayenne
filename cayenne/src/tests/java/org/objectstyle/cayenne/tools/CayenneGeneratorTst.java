@@ -66,8 +66,7 @@ import org.objectstyle.cayenne.unittest.*;
 import org.objectstyle.cayenne.util.*;
 
 public class CayenneGeneratorTst extends CayenneTestCase {
-	static Logger logObj =
-		Logger.getLogger(CayenneGeneratorTst.class.getName());
+	private static Logger logObj = Logger.getLogger(CayenneGeneratorTst.class);
 
 	private static final Perl5Util regexUtil = new Perl5Util();
 	private static final Project project = new Project();

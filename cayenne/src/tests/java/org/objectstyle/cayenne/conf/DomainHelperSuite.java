@@ -62,7 +62,7 @@ import org.apache.log4j.*;
 
 /** Runs multiple domain config cases. */
 public abstract class DomainHelperSuite {
-    static Logger logObj = Logger.getLogger(DomainHelperSuite.class.getName());
+    private static Logger logObj = Logger.getLogger(DomainHelperSuite.class);
 
     protected List cases = new ArrayList();
 

@@ -70,9 +70,9 @@ public class DbAttributePair {
 
     public DbAttributePair() {}
     
-	public DbAttributePair(DbAttribute source, DbAttribute target) {
-		setSource(source);
-		setTarget(target);
+	public DbAttributePair(DbAttribute sourceAttribute, DbAttribute targetAttribute) {
+		setSource(sourceAttribute);
+		setTarget(targetAttribute);
 	}
 
 	/** Returns DbAttribute on on the left side of the join. */
@@ -81,8 +81,8 @@ public class DbAttributePair {
 	}
 
 	/** Set DbAttribute name on on the left side of the join. */
-	public void setSource(DbAttribute source) {
-		this.source = source;
+	public void setSource(DbAttribute sourceAttribute) {
+		this.source = sourceAttribute;
 	}
 
 	/** Returns DbAttribute on on the right side of the join. */
@@ -91,8 +91,8 @@ public class DbAttributePair {
 	}
 
 	/** Set DbAttribute name on on the right side of the join. */
-	public void setTarget(DbAttribute target) {
-		this.target = target;
+	public void setTarget(DbAttribute targetAttribute) {
+		this.target = targetAttribute;
 	}
 
 	public int hashCode() {

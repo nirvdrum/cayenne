@@ -64,8 +64,8 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public abstract class MapObject implements CayenneMapEntry {
-	protected String name;
-	protected Object parent;
+	protected String objName;
+	protected Object objParent;
 
 	/**
 	 * Constructor for MapObject.
@@ -82,21 +82,21 @@ public abstract class MapObject implements CayenneMapEntry {
 	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getName()
 	 */
 	public String getName() {
-		return name;
+		return objName;
 	}
 
 	/**
 	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getParent()
 	 */
 	public Object getParent() {
-		return parent;
+		return objParent;
 	}
 
 	/**
 	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#setParent(Object)
 	 */
 	public void setParent(Object parent) {
-		this.parent = parent;
+		this.objParent = parent;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public abstract class MapObject implements CayenneMapEntry {
 	 * @param name The name to set
 	 */
 	public void setName(String name) {
-		this.name = name;
+		this.objName = name;
 	}
 }
 

@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class ClassGeneratorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(ClassGeneratorTst.class.getName());
+    private static Logger logObj = Logger.getLogger(ClassGeneratorTst.class);
 
 	private static final String SUPER_CLASS_PACKAGE="org.objectstyle.art";
 	private static final String SUPER_CLASS_NAME="ArtDataObject";

@@ -83,8 +83,7 @@ import org.objectstyle.cayenne.wocompat.EOModelProcessor;
  * @author Andrei Adamchik
  */
 public class ImportEOModelAction extends CayenneAction {
-	static Logger logObj =
-		Logger.getLogger(ImportEOModelAction.class.getName());
+	private static Logger logObj = Logger.getLogger(ImportEOModelAction.class);
 
 	public static final String ACTION_NAME = "Import EOModel";
 

@@ -75,7 +75,7 @@ import org.apache.log4j.*;
  * @author Andrei Adamchik
  */
 public class RequestQueue {
-    static Logger logObj = Logger.getLogger(RequestQueue.class.getName());
+    private static Logger logObj = Logger.getLogger(RequestQueue.class);
 
     protected List queue;
     protected int maxSize;

@@ -67,7 +67,7 @@ import org.apache.log4j.*;
  * @author Andrei Adamchik
  */
 public class CayenneUserDir {
-	static final Logger logObj = Logger.getLogger(CayenneUserDir.class.getName());
+	static final Logger logObj = Logger.getLogger(CayenneUserDir.class);
 	
     protected static CayenneUserDir sharedInstance;
 

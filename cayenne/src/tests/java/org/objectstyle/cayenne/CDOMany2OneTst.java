@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.query.*;
 
 public class CDOMany2OneTst extends CayenneDOTestBase {
-    static Logger logObj = Logger.getLogger(CDOMany2OneTst.class.getName());
+    private static Logger logObj = Logger.getLogger(CDOMany2OneTst.class);
 
     public CDOMany2OneTst(String name) {
         super(name);

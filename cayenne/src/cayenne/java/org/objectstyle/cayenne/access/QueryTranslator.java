@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public abstract class QueryTranslator {
-	static Logger logObj = Logger.getLogger(QueryTranslator.class.getName());
+	private static Logger logObj = Logger.getLogger(QueryTranslator.class);
 
 	/** Query being translated. */
 	protected Query query;

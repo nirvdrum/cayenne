@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class SybasePkGenerator extends JdbcPkGenerator {
-    static Logger logObj = Logger.getLogger(SybasePkGenerator.class.getName());
+    private static Logger logObj = Logger.getLogger(SybasePkGenerator.class);
 
     /** Generates database objects to provide
      *  automatic primary key support. Method will execute the following

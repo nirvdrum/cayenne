@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.query.*;
 
 public class CayenneDataObjectRelTst extends CayenneDOTestBase {
-	static Logger logObj = Logger.getLogger(CayenneDataObjectRelTst.class.getName());
+	private static Logger logObj = Logger.getLogger(CayenneDataObjectRelTst.class);
 
 	public CayenneDataObjectRelTst(String name) {
 		super(name);

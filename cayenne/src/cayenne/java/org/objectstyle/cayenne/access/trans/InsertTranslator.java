@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.*;
   * @author Andrei Adamchik  
  */
 public class InsertTranslator extends QueryAssembler {
-	static Logger logObj = Logger.getLogger(InsertTranslator.class.getName());
+	private static Logger logObj = Logger.getLogger(InsertTranslator.class);
 
 	protected List columnList = new ArrayList();
 

@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.conf.*;
  * @author Andrei Adamchik
  */
 public class ProjectDataSourceFactory extends DriverDataSourceFactory {
-    static Logger logObj = Logger.getLogger(ProjectDataSourceFactory.class.getName());
+    private static Logger logObj = Logger.getLogger(ProjectDataSourceFactory.class);
 
     protected File projectDir;
 

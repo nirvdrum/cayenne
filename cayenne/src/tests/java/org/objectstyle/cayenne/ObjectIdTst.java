@@ -61,7 +61,7 @@ import org.apache.log4j.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class ObjectIdTst extends CayenneTestCase {
-	static Logger logObj = Logger.getLogger(ObjectIdTst.class.getName());
+	private static Logger logObj = Logger.getLogger(ObjectIdTst.class);
 
 	public ObjectIdTst(String name) {
 		super(name);

@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.unittest.*;
   * @author Andrei Adamchik
   */
 public class DbGeneratorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
+    private static Logger logObj = Logger.getLogger(DbLoaderTst.class);
 
     protected DbGenerator gen;
 

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class SqlSelectTranslator extends SelectQueryAssembler {
-	static Logger logObj = Logger.getLogger(SqlSelectTranslator.class);
+	private static Logger logObj = Logger.getLogger(SqlSelectTranslator.class);
 
 	public String createSqlString() throws Exception {
 		return getRawQuery().getSqlString();

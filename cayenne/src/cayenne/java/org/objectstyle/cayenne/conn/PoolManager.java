@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public class PoolManager implements DataSource, ConnectionEventListener {
-    static Logger logObj = Logger.getLogger(PoolManager.class.getName());
+    private static Logger logObj = Logger.getLogger(PoolManager.class);
 
     /** 
      * Defines a maximum number of threads that could wait in the

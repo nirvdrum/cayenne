@@ -73,8 +73,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class DefaultOperationObserver implements OperationObserver {
-	static Logger logObj =
-		Logger.getLogger(DefaultOperationObserver.class.getName());
+	private static Logger logObj = Logger.getLogger(DefaultOperationObserver.class);
 
 	public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
 

@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.unittest.*;
 
 
 public class UtilTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(UtilTst.class.getName());
+    private static Logger logObj = Logger.getLogger(UtilTst.class);
 
     private File fTmpFileInCurrentDir;
     private String fTmpFileName;

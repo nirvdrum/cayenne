@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.unittest.*;
  * @author Andrei Adamchik
  */
 public class MiscTst extends CayenneTestCase {
-	static Logger logObj = Logger.getLogger(MiscTst.class);
+	private static Logger logObj = Logger.getLogger(MiscTst.class);
 
     /**
      * Constructor for MiscTest.

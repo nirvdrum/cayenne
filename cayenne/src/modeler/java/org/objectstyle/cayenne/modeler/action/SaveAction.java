@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Misha Shengaout
  */
 public class SaveAction extends CayenneAction {
-    static Logger logObj = Logger.getLogger(SaveAction.class);
+    private static Logger logObj = Logger.getLogger(SaveAction.class);
 
     public static final String ACTION_NAME = "Save";
 

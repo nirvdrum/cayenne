@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.unittest.*;
  * @author Andrei Adamchik
  */
 public class RequestQueueTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(RequestQueueTst.class.getName());
+    private static Logger logObj = Logger.getLogger(RequestQueueTst.class);
 
     /**
      * Constructor for RequestQueueTst.

@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.modeler.util.ModelerUtil;
  * @author Andrei Adamchik
  */
 public class ProjectOpener extends JFileChooser {
-    static Logger logObj = Logger.getLogger(ProjectOpener.class);
+    private static Logger logObj = Logger.getLogger(ProjectOpener.class);
 
     /**
      * Constructor for ProjectOpener.

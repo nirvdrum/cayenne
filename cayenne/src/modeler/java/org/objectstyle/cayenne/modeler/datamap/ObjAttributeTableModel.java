@@ -79,7 +79,7 @@ public class ObjAttributeTableModel extends CayenneTableModel {
 	static final int DB_ATTRIBUTE_TYPE = 3;
 
 	static final Logger logObj =
-		Logger.getLogger(ObjAttributeTableModel.class.getName());
+		Logger.getLogger(ObjAttributeTableModel.class);
 
 	protected ObjEntity entity;
 	protected DbEntity dbEntity;

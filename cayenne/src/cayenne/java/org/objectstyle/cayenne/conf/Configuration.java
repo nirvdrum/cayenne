@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public abstract class Configuration {
-	static Logger logObj = Logger.getLogger(Configuration.class);
+	private static Logger logObj = Logger.getLogger(Configuration.class);
 
 	public static final String LOGGING_PROPS =
 		".cayenne/cayenne-log.properties";

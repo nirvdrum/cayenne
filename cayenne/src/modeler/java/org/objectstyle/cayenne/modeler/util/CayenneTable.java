@@ -75,7 +75,7 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class CayenneTable extends JTable {
-	static Logger logObj = Logger.getLogger(CayenneTable.class.getName());
+	private static Logger logObj = Logger.getLogger(CayenneTable.class);
 
 	protected void createDefaultEditors() {
 		super.createDefaultEditors();

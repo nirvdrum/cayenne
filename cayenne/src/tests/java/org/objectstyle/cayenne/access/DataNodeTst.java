@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class DataNodeTst extends IteratorTestBase {
-	protected DataNode node;
+	protected DataNode sharedNode;
 
 	public DataNodeTst(String name) {
 		super(name);
@@ -80,7 +80,7 @@ public class DataNodeTst extends IteratorTestBase {
 
 		try {
 			init();
-			node.runSelect(observer, st, transl);
+			sharedNode.runSelect(observer, st, transl);
 			assertEquals(
 				DataContextTst.artistCount,
 				observer.getResults(transl.getQuery()).size());
@@ -95,7 +95,7 @@ public class DataNodeTst extends IteratorTestBase {
 		IteratedObserver observer = new IteratedObserver();
 
 		init();
-		node.runIteratedSelect(observer, st, transl);
+		sharedNode.runIteratedSelect(observer, st, transl);
 		assertEquals(DataContextTst.artistCount, observer.getResultCount());
 
 		// no cleanup is needed, since observer will close the iterator
@@ -109,8 +109,9 @@ public class DataNodeTst extends IteratorTestBase {
 		queries.add(new SelectQuery("Artist"));
 		queries.add(new SelectQuery("Artist"));
 
-		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
+		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Level oldLevel = observerLogger.getLevel();
+        observerLogger.setLevel(Level.ERROR);
 
 		try {
 			getNode().performQueries(queries, observer);
@@ -120,7 +121,7 @@ public class DataNodeTst extends IteratorTestBase {
 				"Iterated queries are not allowed in batches.",
 				observer.hasExceptions());
 		} finally {
-			DefaultOperationObserver.logObj.setLevel(oldLevel);
+			observerLogger.setLevel(oldLevel);
 		}
 	}
 
@@ -132,7 +133,7 @@ public class DataNodeTst extends IteratorTestBase {
 
 	protected void init() throws Exception {
 		super.init();
-		node = newDataNode();
+		sharedNode = newDataNode();
 	}
 
 	class IteratedObserver extends DefaultOperationObserver {

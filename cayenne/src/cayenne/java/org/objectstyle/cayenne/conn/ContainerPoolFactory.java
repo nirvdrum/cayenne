@@ -131,7 +131,7 @@ import org.apache.log4j.*;
  */
 
 public class ContainerPoolFactory implements ObjectFactory {
-    static Logger logObj = Logger.getLogger(ContainerPoolFactory.class.getName());
+    private static Logger logObj = Logger.getLogger(ContainerPoolFactory.class);
 
 
     /**

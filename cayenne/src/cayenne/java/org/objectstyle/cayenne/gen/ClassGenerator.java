@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.util.*;
   * @author Andrei Adamchik
   */
 public class ClassGenerator {
-	static Logger logObj = Logger.getLogger(ClassGenerator.class);
+	private static Logger logObj = Logger.getLogger(ClassGenerator.class);
 	
 	private static boolean initDone;
 
@@ -114,8 +114,10 @@ public class ClassGenerator {
 			}
 
 			// always add Filesystem loader for default templates
-			if (loaderProp.indexOf("file") < 0) {
-				loaderProp += ",file";
+			if (loaderProp != null) {
+				if (loaderProp.indexOf("file") < 0) {
+					loaderProp += ",file";
+				}
 			}
 
 			// use custom file loader

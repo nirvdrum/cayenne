@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class OrderingTranslatorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class.getName());
+    private static Logger logObj = Logger.getLogger(OrderingTranslatorTst.class);
 
     protected TstQueryAssembler qa;
     protected SelectQuery q;

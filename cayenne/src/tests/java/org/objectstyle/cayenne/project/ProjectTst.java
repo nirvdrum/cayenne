@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.unittest.*;
  * @author Andrei Adamchik
  */
 public class ProjectTst extends CayenneTestCase {
-	static Logger logObj = Logger.getLogger(ProjectTst.class);
+	private static Logger logObj = Logger.getLogger(ProjectTst.class);
 	
     protected Project p;
     protected File f;

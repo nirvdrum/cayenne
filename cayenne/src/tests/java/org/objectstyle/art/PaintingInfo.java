@@ -60,7 +60,7 @@ import org.objectstyle.cayenne.*;
 
 
 public class PaintingInfo extends CayenneDataObject {
-    static Logger logObj = Logger.getLogger(PaintingInfo.class.getName());
+    private static Logger logObj = Logger.getLogger(PaintingInfo.class);
 
     public void setImageBlob(byte[] imageBlob) {
         writeProperty("imageBlob", imageBlob);

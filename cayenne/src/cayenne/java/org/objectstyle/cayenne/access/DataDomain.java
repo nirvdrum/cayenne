@@ -81,7 +81,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class DataDomain implements QueryEngine {
-	static Logger logObj = Logger.getLogger(DataDomain.class.getName());
+	private static Logger logObj = Logger.getLogger(DataDomain.class);
 
 	/** Stores "name" property. */
 	protected String name;
@@ -125,18 +125,18 @@ public class DataDomain implements QueryEngine {
 	}
 
 	/** Returns DataMap matching <code>name</code> parameter. */
-	public DataMap getMap(String name) {
-		return (DataMap) maps.get(name);
+	public DataMap getMap(String mapName) {
+		return (DataMap) maps.get(mapName);
 	}
 
 	/** 
 	 * Unregisters DataMap matching <code>name</code> parameter.
 	 * Also removes map from any child DataNodes that use it.
 	 */
-	public void removeMap(String name) {
-		DataMap map = (DataMap) maps.remove(name);
+	public synchronized void removeMap(String mapName) {
+		DataMap map = (DataMap) maps.remove(mapName);
 		if (map == null) {
-			logObj.debug("attempt to remove non-existing map: " + name);
+			logObj.debug("attempt to remove non-existing map: " + mapName);
 			return;
 		}
 
@@ -144,7 +144,7 @@ public class DataDomain implements QueryEngine {
 		Iterator it = dataNodes.keySet().iterator();
 		while (it.hasNext()) {
 			DataNode node = (DataNode) dataNodes.get(it.next());
-			node.removeDataMap(name);
+			node.removeDataMap(mapName);
 		}
 
 		// reindex nodes to remove references on removed map entities
@@ -152,11 +152,11 @@ public class DataDomain implements QueryEngine {
 	}
 
 	/** Unregisters DataNode. Also removes entities mapped to the current node. */
-	public void removeDataNode(String name) {
-		DataNode node_to_remove = (DataNode) dataNodes.get(name);
+	public synchronized void removeDataNode(String nodeName) {
+		DataNode node_to_remove = (DataNode) dataNodes.get(nodeName);
 		if (null == node_to_remove)
 			return;
-		dataNodes.remove(name);
+		dataNodes.remove(nodeName);
 		Iterator iter = nodesByEntityName.keySet().iterator();
 		while (iter.hasNext()) {
 			String text = (String) iter.next();
@@ -238,17 +238,17 @@ public class DataDomain implements QueryEngine {
 			dataNodes.put(node.getName(), node);
 
 			// add node to "ent name->node" map
-			DataMap[] maps = node.getDataMaps();
-			if (maps != null) {
-				int mapsCount = maps.length;
+			DataMap[] nodeMaps = node.getDataMaps();
+			if (nodeMaps != null) {
+				int mapsCount = nodeMaps.length;
 				for (int i = 0; i < mapsCount; i++) {
-					addMap(maps[i]);
-					Iterator it = maps[i].getObjEntitiesAsList().iterator();
+					addMap(nodeMaps[i]);
+					Iterator it = nodeMaps[i].getObjEntitiesAsList().iterator();
 					while (it.hasNext()) {
 						ObjEntity e = (ObjEntity) it.next();
 						nodesByEntityName.put(e.getName(), node);
 					}
-					it = maps[i].getDbEntitiesAsList().iterator();
+					it = nodeMaps[i].getDbEntitiesAsList().iterator();
                     while (it.hasNext()) {
                         DbEntity e = (DbEntity) it.next();
                         nodesByDbEntityName.put(e.getName(), node);
@@ -292,25 +292,25 @@ public class DataDomain implements QueryEngine {
 	/**
 	 * Updates internal index of DataNodes stored by the entity name.
 	 */
-	public void reindexNodes() {
+	public synchronized void reindexNodes() {
 		nodesByEntityName.clear();
  		nodesByDbEntityName.clear();
 
 		DataNode[] nodes = this.getDataNodes();
 		for (int j = 0; j < nodes.length; j++) {
 			DataNode node = nodes[j];
-			DataMap[] maps = node.getDataMaps();
+			DataMap[] nodeMaps = node.getDataMaps();
 
-			if (maps != null) {
-				int mapsCount = maps.length;
+			if (nodeMaps != null) {
+				int mapsCount = nodeMaps.length;
 				for (int i = 0; i < mapsCount; i++) {
-					addMap(maps[i]);
-					Iterator it = maps[i].getObjEntitiesAsList().iterator();
+					addMap(nodeMaps[i]);
+					Iterator it = nodeMaps[i].getObjEntitiesAsList().iterator();
 					while (it.hasNext()) {
 						ObjEntity e = (ObjEntity) it.next();
 						nodesByEntityName.put(e.getName(), node);
 					}
-					it = maps[i].getDbEntitiesAsList().iterator();
+					it = nodeMaps[i].getDbEntitiesAsList().iterator();
                     while (it.hasNext()) {
                         DbEntity e = (DbEntity) it.next();
                         nodesByDbEntityName.put(e.getName(), node);
@@ -331,8 +331,8 @@ public class DataDomain implements QueryEngine {
 
 	/** Returns ObjEntity whose name matches <code>name</code> parameter. 
      * @deprecated use getEntityResolver.lookupObjEntity()*/
-	public ObjEntity lookupEntity(String name) {
-		return this.getEntityResolver().lookupObjEntity(name);
+	public ObjEntity lookupEntity(String objEntityName) {
+		return this.getEntityResolver().lookupObjEntity(objEntityName);
 	}
 
 	public DataNode dataNodeForDbEntity(DbEntity dbEntity) {
@@ -358,11 +358,11 @@ public class DataDomain implements QueryEngine {
 	 * Returns a DataMap that contains DbEntity matching the 
 	 * <code>entityName</code> parameter.
 	 */
-	public DataMap getMapForDbEntity(String entityName) {
+	public DataMap getMapForDbEntity(String dbEntityName) {
 		Iterator it = maps.values().iterator();
 		while (it.hasNext()) {
 			DataMap map = (DataMap) it.next();
-			if (map.getDbEntity(entityName) != null) {
+			if (map.getDbEntity(dbEntityName) != null) {
 				return map;
 			}
 		}
@@ -373,11 +373,11 @@ public class DataDomain implements QueryEngine {
 	 * Returns a DataMap that contains ObjEntity matching the 
 	 * <code>entityName</code> parameter.
 	 */
-	public DataMap getMapForObjEntity(String entityName) {
+	public DataMap getMapForObjEntity(String objEntityName) {
 		Iterator it = maps.values().iterator();
 		while (it.hasNext()) {
 			DataMap map = (DataMap) it.next();
-			if (map.getObjEntity(entityName) != null) {
+			if (map.getObjEntity(objEntityName) != null) {
 				return map;
 			}
 		}

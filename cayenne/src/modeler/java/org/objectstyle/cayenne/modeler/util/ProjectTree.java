@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.project.Project;
  * @author Andrei Adamchik
  */
 public class ProjectTree extends JTree {
-    static Logger logObj = Logger.getLogger(ProjectTree.class);
+    private static Logger logObj = Logger.getLogger(ProjectTree.class);
 
     /**
      * Constructor for ProjectTree.

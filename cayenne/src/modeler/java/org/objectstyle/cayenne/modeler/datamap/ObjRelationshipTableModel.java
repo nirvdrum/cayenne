@@ -72,8 +72,7 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class ObjRelationshipTableModel extends CayenneTableModel {
-	static Logger logObj =
-		Logger.getLogger(ObjRelationshipTableModel.class.getName());
+	private static Logger logObj = Logger.getLogger(ObjRelationshipTableModel.class);
 
 	// Columns
 	static final int REL_NAME = 0;

@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class OraclePkGenerator extends JdbcPkGenerator {
-	static Logger logObj = Logger.getLogger(OraclePkGenerator.class.getName());
+	private static Logger logObj = Logger.getLogger(OraclePkGenerator.class);
 
 	private static final String _SEQUENCE_PREFIX = "pk_";
 

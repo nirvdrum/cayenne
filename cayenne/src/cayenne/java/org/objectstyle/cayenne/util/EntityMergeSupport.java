@@ -69,14 +69,14 @@ import org.objectstyle.cayenne.map.*;
  */
 public class EntityMergeSupport {
 	protected DataMap map;
-	protected ObjEntity entity;
+	protected ObjEntity objEntity;
 
 	public EntityMergeSupport(DataMap map) {
 		this.map = map;
 	}
 
 	protected void reset() {
-		entity = null;
+		objEntity = null;
 	}
 
 	/**
@@ -133,13 +133,13 @@ public class EntityMergeSupport {
 	 */
 	protected List getAttributesToAdd() {
 		List missing = new ArrayList();
-		Iterator it = entity.getDbEntity().getAttributeList().iterator();
-		List rels = entity.getDbEntity().getRelationshipList();
+		Iterator it = objEntity.getDbEntity().getAttributeList().iterator();
+		List rels = objEntity.getDbEntity().getRelationshipList();
 
 		while (it.hasNext()) {
 			DbAttribute dba = (DbAttribute) it.next();
 			// already there
-			if (entity.getAttributeForDbAttribute(dba) != null) {
+			if (objEntity.getAttributeForDbAttribute(dba) != null) {
 				continue;
 			}
 
@@ -175,7 +175,7 @@ public class EntityMergeSupport {
 
 	protected List getRelationshipsToAdd() {
 		List missing = new ArrayList();
-		Iterator it = entity.getDbEntity().getRelationshipList().iterator();
+		Iterator it = objEntity.getDbEntity().getRelationshipList().iterator();
 		while (it.hasNext()) {
 			DbRelationship dbrel = (DbRelationship) it.next();
 			// check if adding it makes sense at all
@@ -183,7 +183,7 @@ public class EntityMergeSupport {
 				continue;
 			}
 
-			if (entity.getRelationshipForDbRelationship(dbrel) == null) {
+			if (objEntity.getRelationshipForDbRelationship(dbrel) == null) {
 				missing.add(dbrel);
 			}
 		}
@@ -192,11 +192,11 @@ public class EntityMergeSupport {
 	}
 
 	public ObjEntity getEntity() {
-		return entity;
+		return objEntity;
 	}
 
 	public void setEntity(ObjEntity entity) {
-		this.entity = entity;
+		this.objEntity = entity;
 	}
 
 	public DataMap getMap() {

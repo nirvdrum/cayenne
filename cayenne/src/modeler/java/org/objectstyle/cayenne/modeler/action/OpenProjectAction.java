@@ -54,6 +54,7 @@
  *
  */
 package org.objectstyle.cayenne.modeler.action;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -69,25 +70,32 @@ import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.modeler.view.ProjectOpener;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
+
 /**
  * @author Andrei Adamchik
  */
+
 public class OpenProjectAction extends ProjectAction {
-    static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
+    private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
     public static final String ACTION_NAME = "Open Project";
+
     protected ProjectOpener fileChooser = new ProjectOpener();
+
     /**
      * Constructor for OpenProjectAction.
      */
     public OpenProjectAction() {
         super(ACTION_NAME);
     }
+
     public String getIconName() {
         return "icon-open.gif";
     }
+
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
     }
+
     /**
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */

@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.query.*;
  *
  */
 public final class QueryHelper {
-	static Logger logObj = Logger.getLogger(QueryHelper.class.getName());
+	private static Logger logObj = Logger.getLogger(QueryHelper.class);
 
 	/** Returns an update query for the DataObject that can be used to commit
 	 *  object state changes to the database. If no changes are found, null is returned.
@@ -108,19 +108,21 @@ public final class QueryHelper {
 				upd.addUpdAttribute(attrName, newValue);
 		}
 
-		// original snapshot can have extra keys that are missing in current snapshot
-		// process those
-		Iterator origit = committedSnapshot.keySet().iterator();
-		while (origit.hasNext()) {
-			String attrName = (String) origit.next();
-			if (currentSnapshot.containsKey(attrName))
-				continue;
-
-			Object oldValue = committedSnapshot.get(attrName);
-			if (oldValue == null)
-				continue;
-
-			upd.addUpdAttribute(attrName, null);
+		// original snapshot can have extra keys that are missing in the
+		// current snapshot; process those
+		if (committedSnapshot != null) {
+			Iterator origit = committedSnapshot.keySet().iterator();
+			while (origit.hasNext()) {
+				String attrName = (String) origit.next();
+				if (currentSnapshot.containsKey(attrName))
+					continue;
+	
+				Object oldValue = committedSnapshot.get(attrName);
+				if (oldValue == null)
+					continue;
+	
+				upd.addUpdAttribute(attrName, null);
+			}
 		}
 
 		if (upd.getUpdAttributes().size() > 0) {
@@ -212,10 +214,15 @@ public final class QueryHelper {
 			r = (Relationship) it.next();
 		}
 
-		//newQ.setObjEntityName(r.getTargetEntity().getName());
-		newQ.setRoot(r.getTargetEntity());
-		newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
-		return newQ;
+		if (r != null) {
+			newQ.setRoot(r.getTargetEntity());
+			newQ.setQualifier(transformQualifier(ent, q.getQualifier(), prefetchPath));
+			return newQ;
+		}
+		else {
+			// TODO: what else could we do here?
+			return null;
+		}
 	}
 
     /**
@@ -285,14 +292,14 @@ public final class QueryHelper {
 	static final class ExpressionTranslator extends TraversalHelper {
 		protected Map expMap = new HashMap();
 		protected Map expFill = new HashMap();
-		protected String relPath;
-		protected String relDbPath;
+		protected String relationshipPath;
+		protected String relationshipDbPath;
 		protected String prependObjPath;
 		protected String prependDbPath;
 
 		public ExpressionTranslator(ObjEntity e, String relPath) {
-			this.relPath = relPath;
-			this.relDbPath = forwardDbPath(e, relPath);
+			this.relationshipPath = relPath;
+			this.relationshipDbPath = forwardDbPath(e, relPath);
 			this.prependObjPath = reversePath(e, relPath);
 			this.prependDbPath = reverseDbPath(e, relPath);
 		}
@@ -409,9 +416,9 @@ public final class QueryHelper {
 
 				// operands of object expression need translation
 				if (parentPeer.getType() == Expression.OBJ_PATH) {
-					operand = processPath((String) operand, relPath, prependObjPath);
+					operand = processPath((String) operand, relationshipPath, prependObjPath);
 				} else if (parentPeer.getType() == Expression.DB_PATH) {
-					operand = processPath((String) operand, relDbPath, prependDbPath);
+					operand = processPath((String) operand, relationshipDbPath, prependDbPath);
 				}
 
 				parentPeer.setOperand(ind, operand);

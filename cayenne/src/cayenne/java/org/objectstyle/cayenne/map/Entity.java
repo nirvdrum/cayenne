@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik 
  */
 public abstract class Entity extends MapObject {
-	static Logger logObj = Logger.getLogger(Entity.class);
+	private static Logger logObj = Logger.getLogger(Entity.class);
 	
 	public static final String PATH_SEPARATOR = ".";
 

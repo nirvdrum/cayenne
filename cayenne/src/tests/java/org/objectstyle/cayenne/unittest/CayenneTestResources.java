@@ -75,7 +75,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public class CayenneTestResources {
-    static Logger logObj = Logger.getLogger(CayenneTestResources.class);
+    private static Logger logObj = Logger.getLogger(CayenneTestResources.class);
 
     public static final String CONNECTION_NAME_KEY = "cayenne.test.connection";
     public static final String TEST_DIR_KEY = "cayenne.test.dir";

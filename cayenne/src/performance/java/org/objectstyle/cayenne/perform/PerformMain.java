@@ -68,7 +68,7 @@ import org.objectstyle.perform.*;
 
 /** Runs performance tests. */
 public class PerformMain {
-    static Logger logObj = Logger.getLogger(PerformMain.class);
+    private static Logger logObj = Logger.getLogger(PerformMain.class);
 
     public static DataDomain sharedDomain;
 

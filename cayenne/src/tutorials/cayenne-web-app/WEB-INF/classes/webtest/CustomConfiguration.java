@@ -9,7 +9,7 @@ import org.objectstyle.cayenne.conf.*;
  * custom tasks on servlet container startup.
  */
 public class CustomConfiguration extends ServletConfiguration {
-    static Logger logObj = Logger.getLogger(CustomConfiguration.class);
+    private static Logger logObj = Logger.getLogger(CustomConfiguration.class);
 
     public CustomConfiguration() {
         super();

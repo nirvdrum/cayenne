@@ -193,15 +193,16 @@ public class DataContextExtrasTst extends CayenneTestCase {
         gen.dropAutoPk(getNode(), map.getDbEntitiesAsList());
 
         // disable logging for thrown exceptions
-        Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-        DefaultOperationObserver.logObj.setLevel(Level.ERROR);
+		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Level oldLevel = observerLogger.getLevel();
+        observerLogger.setLevel(Level.ERROR);
         try {
             ctxt.commitChanges(Level.DEBUG);
             fail("Exception expected but not thrown due to missing PK generation routine.");
         } catch (CayenneRuntimeException ex) {
             // exception expected
         } finally {
-            DefaultOperationObserver.logObj.setLevel(oldLevel);
+            observerLogger.setLevel(oldLevel);
         }
     }
 
@@ -214,15 +215,16 @@ public class DataContextExtrasTst extends CayenneTestCase {
             new SqlSelectQuery("Artist", "SELECT * FROM NON_EXISTENT_TABLE");
 
         // disable logging for thrown exceptions
-        Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-        DefaultOperationObserver.logObj.setLevel(Level.ERROR);
+		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Level oldLevel = observerLogger.getLevel();
+        observerLogger.setLevel(Level.ERROR);
         try {
             ctxt.performQuery(q, new DataContextExtended().getSelectObserver());
             fail("Query was invalid and was supposed to fail.");
         } catch (RuntimeException ex) {
             // exception expected
         } finally {
-            DefaultOperationObserver.logObj.setLevel(oldLevel);
+            observerLogger.setLevel(oldLevel);
         }
     }
 

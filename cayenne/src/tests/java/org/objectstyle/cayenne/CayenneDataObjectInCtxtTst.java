@@ -65,8 +65,7 @@ import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class CayenneDataObjectInCtxtTst extends CayenneTestCase {
-    static Logger logObj =
-        Logger.getLogger(CayenneDataObjectInCtxtTst.class.getName());
+    private static Logger logObj = Logger.getLogger(CayenneDataObjectInCtxtTst.class);
 
     protected DataContext ctxt;
 

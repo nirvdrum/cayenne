@@ -75,7 +75,7 @@ import org.xml.sax.helpers.*;
  * @author Andrei Adamchik
  */
 public class DriverDataSourceFactory implements DataSourceFactory {
-    static Logger logObj = Logger.getLogger(DriverDataSourceFactory.class.getName());
+    private static Logger logObj = Logger.getLogger(DriverDataSourceFactory.class);
 
     private static boolean applyWebAppPatch;
 

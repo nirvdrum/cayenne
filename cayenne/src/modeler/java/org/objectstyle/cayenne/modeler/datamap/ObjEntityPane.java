@@ -94,7 +94,7 @@ public class ObjEntityPane
     extends JPanel
     implements ActionListener, ObjEntityDisplayListener, ExistingSelectionProcessor, ItemListener {
 
-    static Logger logObj = Logger.getLogger(ObjEntityPane.class.getName());
+    private static Logger logObj = Logger.getLogger(ObjEntityPane.class);
 
     protected EventController mediator;
     protected JTextField name;

@@ -70,7 +70,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 
 public class PreferenceField extends JComboBox {
-	static Logger logObj = Logger.getLogger(PreferenceField.class);
+	private static Logger logObj = Logger.getLogger(PreferenceField.class);
 
 	private String key;
 

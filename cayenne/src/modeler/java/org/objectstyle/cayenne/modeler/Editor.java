@@ -110,7 +110,7 @@ public class Editor
         DbAttributeDisplayListener,
         ObjRelationshipDisplayListener,
         DbRelationshipDisplayListener {
-    static Logger logObj = Logger.getLogger(Editor.class.getName());
+    private static Logger logObj = Logger.getLogger(Editor.class);
 
     /** 
      * Label that indicates as a part of the title that

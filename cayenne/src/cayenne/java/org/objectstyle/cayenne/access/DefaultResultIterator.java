@@ -76,7 +76,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class DefaultResultIterator implements ResultIterator {
-    static Logger logObj = Logger.getLogger(DefaultResultIterator.class);
+    private static Logger logObj = Logger.getLogger(DefaultResultIterator.class);
 
     protected PreparedStatement prepStmt;
     protected ResultSet resultSet;

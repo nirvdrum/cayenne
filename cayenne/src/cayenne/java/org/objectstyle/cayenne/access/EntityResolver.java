@@ -133,7 +133,7 @@ public class EntityResolver {
     /**
      * Returns a list of internal DataMaps by copy.
      */
-    public synchronized List getDataMapsList() {
+    public List getDataMapsList() {
         return new ArrayList(maps);
     }
 
@@ -259,7 +259,7 @@ public class EntityResolver {
      * Looks up the DbEntity for the given query by using the query's getRoot method and passing to lookupDbEntity
      * @return the root DbEntity of the query
      */
-    public DbEntity lookupDbEntity(Query q) {
+    public synchronized DbEntity lookupDbEntity(Query q) {
 		Object root=q.getRoot();
 		if(root instanceof DbEntity) {
 			return (DbEntity)root;
@@ -338,7 +338,7 @@ public class EntityResolver {
      * from a DbEntity to an ObjEntity as a DbEntity may be the source for multiple ObjEntities.  It is not safe
      * to rely on such behaviour).
      */
-    public ObjEntity lookupObjEntity(Query q) {
+    public synchronized ObjEntity lookupObjEntity(Query q) {
     	
     	Object root=q.getRoot();
 		if(root instanceof DbEntity) {

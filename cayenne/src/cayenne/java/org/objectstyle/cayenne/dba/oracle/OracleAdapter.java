@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.query.*;
 
 /** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
 public class OracleAdapter extends JdbcAdapter {
-    static Logger logObj = Logger.getLogger(OracleAdapter.class.getName());
+    private static Logger logObj = Logger.getLogger(OracleAdapter.class);
 
     protected Map sorters = new HashMap();
 

@@ -93,7 +93,7 @@ public class DbRelationshipPane
 		ExistingSelectionProcessor,
 		ListSelectionListener,
 		TableModelListener {
-	static Logger logObj = Logger.getLogger(DbRelationshipPane.class.getName());
+	private static Logger logObj = Logger.getLogger(DbRelationshipPane.class);
 
 	EventController mediator;
 

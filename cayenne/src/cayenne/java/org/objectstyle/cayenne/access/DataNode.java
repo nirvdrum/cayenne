@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.query.*;
   * @author Andrei Adamchik
   */
 public class DataNode implements QueryEngine {
-    static Logger logObj = Logger.getLogger(DataNode.class);
+    private static Logger logObj = Logger.getLogger(DataNode.class);
 
     public static final Class DEFAULT_ADAPTER_CLASS = JdbcAdapter.class;
 
@@ -169,8 +169,8 @@ public class DataNode implements QueryEngine {
         entityResolver.addDataMap(map);
     }
 
-    public void removeDataMap(String name) {
-        DataMap map = entityResolver.getDataMap(name);
+    public void removeDataMap(String mapName) {
+        DataMap map = entityResolver.getDataMap(mapName);
         if (map != null) {
             entityResolver.removeDataMap(map);
         }

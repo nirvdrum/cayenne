@@ -60,7 +60,7 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 
 /** Class that can collect login information via GUI or command line interface.  */
 public class InteractiveLogin {
-    static Logger logObj = Logger.getLogger(InteractiveLogin.class.getName());
+    private static Logger logObj = Logger.getLogger(InteractiveLogin.class);
 
     protected DataSourceInfo dataSrcInfo;
 

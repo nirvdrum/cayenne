@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.access.*;
   * @author Andrei Adamchik
   */
 public class JNDIDataSourceFactory implements DataSourceFactory {
-    static Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class.getName());
+    private static Logger logObj = Logger.getLogger(JNDIDataSourceFactory.class);
 
 	protected Configuration parentConfig;
 	

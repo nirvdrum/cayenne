@@ -72,7 +72,7 @@ import org.apache.log4j.*;
  * @author Andrei Adamchik
  */
 public class PooledConnectionImpl implements PooledConnection {
-    static Logger logObj = Logger.getLogger(PooledConnectionImpl.class.getName());
+    private static Logger logObj = Logger.getLogger(PooledConnectionImpl.class);
 
     private Connection connectionObj;
     private List connectionEventListeners;

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Craig Miskell
  */
 public class OrderingTranslator extends QueryAssemblerHelper {
-    static Logger logObj = Logger.getLogger(OrderingTranslator.class.getName());
+    private static Logger logObj = Logger.getLogger(OrderingTranslator.class);
 
     public OrderingTranslator(QueryAssembler queryAssembler) {
         super(queryAssembler);

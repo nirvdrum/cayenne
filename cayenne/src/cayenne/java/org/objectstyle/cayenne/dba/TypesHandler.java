@@ -71,7 +71,7 @@ import org.xml.sax.helpers.*;
   * @author Andrei Adamchik
   */
 public class TypesHandler {
-    static Logger logObj = Logger.getLogger(TypesHandler.class);
+    private static volatile Logger logObj = Logger.getLogger(TypesHandler.class);
 
     private static Map handlerMap = new HashMap();
 

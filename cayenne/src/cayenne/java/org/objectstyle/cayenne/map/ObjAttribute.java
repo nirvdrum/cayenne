@@ -65,7 +65,7 @@ package org.objectstyle.cayenne.map;
  */
 public class ObjAttribute extends Attribute {
     // Full name of Java class representing the property type.
-    protected String type;
+    protected String attrType;
 
     // The name of the corresponding database table column
     protected String dbAttributeName;
@@ -88,13 +88,13 @@ public class ObjAttribute extends Attribute {
      * Type returned is a string that specifies full name of a Java class
      * used to represent this attribute. */
 	public String getType() {
-        return type;
+        return attrType;
     }
 
 
 	/** Sets the type of the data object property.*/
     public void setType(String type) {
-        this.type = type;
+        this.attrType = type;
     }
 
 

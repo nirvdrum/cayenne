@@ -67,8 +67,7 @@ import org.objectstyle.cayenne.query.*;
 public class QualifierTranslator
 	extends QueryAssemblerHelper
 	implements TraversalHandler {
-	static Logger logObj =
-		Logger.getLogger(QualifierTranslator.class.getName());
+	private static Logger logObj = Logger.getLogger(QualifierTranslator.class);
 
 	private ExpressionTraversal treeWalker = new ExpressionTraversal();
 	private StringBuffer qualBuf = new StringBuffer();

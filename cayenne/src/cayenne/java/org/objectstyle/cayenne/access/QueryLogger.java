@@ -56,9 +56,10 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.*;
+import org.apache.log4j.*;
 
 /** 
- * A QueryLogger is intended to log special events during query exectutions.
+ * A QueryLogger is intended to log special events during query executions.
  * This includes generated SQL statements, result counts, connection events etc.
  * It is a single consistent place for that kind of logging and should be used
  * by all Cayenne classes that work with the database directly.
@@ -74,8 +75,7 @@ import java.util.*;
  * @author Andrei Adamchik
  */
 public class QueryLogger {
-    static org.apache.log4j.Logger logObj =
-        org.apache.log4j.Logger.getLogger(QueryLogger.class);
+    private static Logger logObj = Logger.getLogger(QueryLogger.class);
 
     /** Utility method that appends SQL literal for the specified object to the buffer.
     *  This value will be quoted as needed. Conversion of the value is done based on Java class.
@@ -142,22 +142,22 @@ public class QueryLogger {
     /** 
      * Returns current logging level.
      */
-    public static org.apache.log4j.Level getLoggingLevel() {
+    public static Level getLoggingLevel() {
         return logObj.getLevel();
     }
 
     /**
      * Sets logging level.
      */
-    public static void setLoggingLevel(org.apache.log4j.Level level) {
+    public static void setLoggingLevel(Level level) {
         logObj.setLevel(level);
     }
 
     /**
      * Logs database connection event using container data source.
      */
-    public static void logConnect(org.apache.log4j.Level logLevel, String dataSource) {
-        if (logObj.isEnabledFor(logLevel)) {
+    public static void logConnect(Level logLevel, String dataSource) {
+        if (isLoggable(logLevel)) {
             logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
         }
     }
@@ -165,8 +165,8 @@ public class QueryLogger {
     /**
      * Logs database connection event.
      */
-    public static void logConnect(org.apache.log4j.Level logLevel, DataSourceInfo dsi) {
-        if (logObj.isEnabledFor(logLevel)) {
+    public static void logConnect(Level logLevel, DataSourceInfo dsi) {
+        if (isLoggable(logLevel)) {
             StringBuffer buf = new StringBuffer("Connecting. DataSource information:");
 
             if (dsi != null) {
@@ -193,16 +193,16 @@ public class QueryLogger {
         }
     }
 
-    public static void logConnectSuccess(org.apache.log4j.Level logLevel) {
+    public static void logConnectSuccess(Level logLevel) {
         logObj.log(logLevel, "+++ Connecting: SUCCESS.");
     }
 
-    public static void logConnectFailure(org.apache.log4j.Level logLevel, Throwable th) {
+    public static void logConnectFailure(Level logLevel, Throwable th) {
         logObj.log(logLevel, "*** Connecting: FAILURE.", th);
     }
 
     public static void logQuery(
-        org.apache.log4j.Level logLevel,
+        Level logLevel,
         String queryStr,
         List params) {
         logQuery(logLevel, queryStr, params, -1);
@@ -216,11 +216,11 @@ public class QueryLogger {
      * executing query in prepared statement.
      */
     public static void logQuery(
-        org.apache.log4j.Level logLevel,
+        Level logLevel,
         String queryStr,
         List params,
         long time) {
-        if (logObj.isEnabledFor(logLevel)) {
+        if (isLoggable(logLevel)) {
             StringBuffer buf = new StringBuffer(queryStr);
             if (params != null && params.size() > 0) {
                 buf.append(" [params: ");
@@ -244,57 +244,62 @@ public class QueryLogger {
         }
     }
 
-    public static void logSelectCount(org.apache.log4j.Level logLevel, int count) {
+    public static void logSelectCount(Level logLevel, int count) {
         logSelectCount(logLevel, count, -1);
     }
 
     public static void logSelectCount(
-        org.apache.log4j.Level logLevel,
+        Level logLevel,
         int count,
         long time) {
-        StringBuffer buf = new StringBuffer();
-
-        if (count == 1) {
-            buf.append("=== returned 1 row.");
-        } else {
-            buf.append("=== returned ").append(count).append(" rows.");
-        }
-
-        if (time >= 0) {
-            buf.append(" - took ").append(time).append(" ms.");
-        }
-
-        logObj.log(logLevel, buf.toString());
+		if (isLoggable(logLevel)) {
+	        StringBuffer buf = new StringBuffer();
+	
+	        if (count == 1) {
+	            buf.append("=== returned 1 row.");
+	        } else {
+	            buf.append("=== returned ").append(count).append(" rows.");
+	        }
+	
+	        if (time >= 0) {
+	            buf.append(" - took ").append(time).append(" ms.");
+	        }
+	
+	        logObj.log(logLevel, buf.toString());
+		}
     }
 
-    public static void logUpdateCount(org.apache.log4j.Level logLevel, int count) {
-        String countStr =
-            (count == 1) ? "=== updated 1 row." : "=== updated " + count + " rows.";
-        logObj.log(logLevel, countStr);
+    public static void logUpdateCount(Level logLevel, int count) {
+		if (isLoggable(logLevel)) {
+	        String countStr =
+	            (count == 1) ? "=== updated 1 row." : "=== updated " + count + " rows.";
+	        logObj.log(logLevel, countStr);
+		}
     }
 
-    public static void logCommitTransaction(org.apache.log4j.Level logLevel) {
+    public static void logCommitTransaction(Level logLevel) {
         logObj.log(logLevel, "+++ transaction committed.");
     }
 
-    public static void logRollbackTransaction(org.apache.log4j.Level logLevel) {
-        logObj.log(logLevel, "*** transaction rolledback.");
+    public static void logRollbackTransaction(Level logLevel) {
+        logObj.log(logLevel, "*** transaction rolled back.");
     }
 
-    public static void logQueryError(org.apache.log4j.Level logLevel, Throwable th) {
+    public static void logQueryError(Level logLevel, Throwable th) {
         logObj.log(logLevel, "*** error.", th);
     }
 
-    public static void logQueryStart(org.apache.log4j.Level logLevel, int count) {
-        String countStr =
-            (count == 1)
-                ? "--- will run 1 query."
-                : "--- will run " + count + " queries.";
-        logObj.log(logLevel, countStr);
-
+    public static void logQueryStart(Level logLevel, int count) {
+		if (isLoggable(logLevel)) {
+	        String countStr =
+	            (count == 1)
+	                ? "--- will run 1 query."
+	                : "--- will run " + count + " queries.";
+	        logObj.log(logLevel, countStr);
+		}
     }
 
-    public static boolean isLoggable(org.apache.log4j.Level logLevel) {
+    public static boolean isLoggable(Level logLevel) {
         return logObj.isEnabledFor(logLevel);
     }
 }

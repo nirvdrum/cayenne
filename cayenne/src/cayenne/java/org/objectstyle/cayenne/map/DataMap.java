@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Craig Miskell
  */
 public class DataMap {
-	static Logger logObj = Logger.getLogger(DataMap.class);
+	private static Logger logObj = Logger.getLogger(DataMap.class);
 
 	protected String name;
 	protected String location;
@@ -97,8 +97,8 @@ public class DataMap {
 	}
 
 	/** Creates an empty DataMap and assigns it a <code>name</code>. */
-	public DataMap(String name) {
-		this.name = name;
+	public DataMap(String mapName) {
+		this.name = mapName;
 	}
 
 	/**
@@ -341,12 +341,12 @@ public class DataMap {
 	 * Returnms DbEntity matching the <code>name</code> parameter.
 	 * No dependencies will be searched.
 	 */
-	public DbEntity getDbEntity(String name) {
-		return getDbEntity(name, false);
+	public DbEntity getDbEntity(String dbEntityName) {
+		return getDbEntity(dbEntityName, false);
 	}
 
-	public DbEntity getDbEntity(String name, boolean searchDependencies) {
-		DbEntity ent = (DbEntity) dbEntityMap.get(name);
+	public DbEntity getDbEntity(String dbEntityName, boolean searchDependencies) {
+		DbEntity ent = (DbEntity) dbEntityMap.get(dbEntityName);
 		if (ent != null || !searchDependencies) {
 			return ent;
 		}
@@ -355,7 +355,7 @@ public class DataMap {
 		while (it.hasNext()) {
 			DataMap dep = (DataMap) it.next();
 			// using "false" to avoid problems with circular dependencies
-			DbEntity e = dep.getDbEntity(name, false);
+			DbEntity e = dep.getDbEntity(dbEntityName, false);
 			if (e != null) {
 				return e;
 			}
@@ -364,12 +364,12 @@ public class DataMap {
 	}
 
 	/** Get ObjEntity by its name. */
-	public ObjEntity getObjEntity(String name) {
-		return (ObjEntity) objEntityMap.get(name);
+	public ObjEntity getObjEntity(String objEntityName) {
+		return (ObjEntity) objEntityMap.get(objEntityName);
 	}
 
-	public ObjEntity getObjEntity(String name, boolean searchDependencies) {
-		ObjEntity ent = (ObjEntity) objEntityMap.get(name);
+	public ObjEntity getObjEntity(String objEntityName, boolean searchDependencies) {
+		ObjEntity ent = (ObjEntity) objEntityMap.get(objEntityName);
 		if (ent != null || !searchDependencies) {
 			return ent;
 		}
@@ -378,7 +378,7 @@ public class DataMap {
 		while (it.hasNext()) {
 			DataMap dep = (DataMap) it.next();
 			// using "false" to avoid problems with circular dependencies
-			ObjEntity e = dep.getObjEntity(name, false);
+			ObjEntity e = dep.getObjEntity(objEntityName, false);
 			if (e != null) {
 				return e;
 			}
@@ -418,8 +418,8 @@ public class DataMap {
 	}
 
 	/** "Dirty" remove of the DbEntity from the data map. */
-	public void removeDbEntity(String name) {
-		dbEntityMap.remove(name);
+	public void removeDbEntity(String dbEntityName) {
+		dbEntityMap.remove(dbEntityName);
 	}
 
 	/** Clean remove of the DbEntity from the data map.
@@ -428,13 +428,13 @@ public class DataMap {
 	 *  are re-established. Also, if the ObjEntity is removed, all the
 	 *  ObjRelationships referencing it are removed as well.
 	 */
-	public void deleteDbEntity(String entity_name) {
-		DbEntity db_entity = getDbEntity(entity_name);
+	public void deleteDbEntity(String dbEntityName) {
+		DbEntity db_entity = getDbEntity(dbEntityName);
 		// No db entity to remove? return.
 		if (null == db_entity) {
 			return;
 		}
-		dbEntityMap.remove(entity_name);
+		dbEntityMap.remove(dbEntityName);
 
 		DbEntity[] db_entity_arr = getDbEntities();
 		for (int i = 0; i < db_entity_arr.length; i++) {
@@ -474,12 +474,12 @@ public class DataMap {
 	 * Clean remove of the ObjEntity from the data map.
 	 * Removes all ObjRelationships referencing this ObjEntity
 	 */
-	public void deleteObjEntity(String entity_name) {
-		ObjEntity entity = (ObjEntity) objEntityMap.get(entity_name);
+	public void deleteObjEntity(String objEntityName) {
+		ObjEntity entity = (ObjEntity) objEntityMap.get(objEntityName);
 		if (null == entity) {
 			return;
 		}
-		objEntityMap.remove(entity_name);
+		objEntityMap.remove(objEntityName);
 		ObjEntity[] obj_entity_arr = getObjEntities();
 		for (int i = 0; i < obj_entity_arr.length; i++) {
 			Iterator rel_iter = obj_entity_arr[i].getRelationshipList().iterator();
@@ -493,10 +493,10 @@ public class DataMap {
 	}
 
 	/** "Dirty" remove of the ObjEntity from the data map.*/
-	public void removeObjEntity(String entity_name) {
-		ObjEntity objEntity=(ObjEntity)objEntityMap.get(entity_name);
+	public void removeObjEntity(String objEntityName) {
+		ObjEntity objEntity=(ObjEntity)objEntityMap.get(objEntityName);
 		if(objEntity!=null) {
-			objEntityMap.remove(entity_name);
+			objEntityMap.remove(objEntityName);
 		}
 	}
 }

@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.dba.*;
 
 /** Handles Java types mapped to JDBC types in JDBC sepcification. */
 public class DefaultType implements ExtendedType {
-    static Logger logObj = Logger.getLogger(DefaultType.class.getName());
+    private static Logger logObj = Logger.getLogger(DefaultType.class);
 
     private static final Map readMethods = new HashMap();
     private static Method readObjectMethod;

@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.util.*;
   * @author Andrei Adamchik
   */
 public class ConnectionSetup  {
-    static Logger logObj = Logger.getLogger(ConnectionSetup.class);
+    private static Logger logObj = Logger.getLogger(ConnectionSetup.class);
 
     private boolean interactive;
  

@@ -73,7 +73,7 @@ import org.apache.log4j.*;
   * the application. </p>
   */
 public class ExtendedTypeMap {
-    static Logger logObj = Logger.getLogger(ExtendedTypeMap.class.getName());
+    private static Logger logObj = Logger.getLogger(ExtendedTypeMap.class);
 
     protected Map typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();

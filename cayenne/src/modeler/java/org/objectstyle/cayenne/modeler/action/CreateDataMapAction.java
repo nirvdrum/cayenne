@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.util.NamedObjectFactory;
  * @author Andrei Adamchik
  */
 public class CreateDataMapAction extends CayenneAction {
-    static Logger logObj = Logger.getLogger(CreateDataMapAction.class.getName());
+    private static Logger logObj = Logger.getLogger(CreateDataMapAction.class);
 
     public static final String ACTION_NAME = "Create DataMap";
 

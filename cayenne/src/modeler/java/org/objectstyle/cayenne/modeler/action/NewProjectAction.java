@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.project.Project;
  * @author Andrei Adamchik
  */
 public class NewProjectAction extends ProjectAction {
-    static Logger logObj = Logger.getLogger(NewProjectAction.class);
+    private static Logger logObj = Logger.getLogger(NewProjectAction.class);
     public static final String ACTION_NAME = "New Project";
 
     public NewProjectAction() {

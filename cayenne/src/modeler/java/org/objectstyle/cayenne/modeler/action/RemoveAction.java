@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.project.ApplicationProject;
  * @author Misha Shengaout
  */
 public class RemoveAction extends CayenneAction {
-	static Logger logObj = Logger.getLogger(RemoveAction.class.getName());
+	private static Logger logObj = Logger.getLogger(RemoveAction.class);
 	public static final String ACTION_NAME = "Remove";
 		
 	public RemoveAction() {

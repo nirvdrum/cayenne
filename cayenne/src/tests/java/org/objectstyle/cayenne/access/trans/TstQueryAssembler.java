@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class TstQueryAssembler extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(TstQueryAssembler.class.getName());
+    private static Logger logObj = Logger.getLogger(TstQueryAssembler.class);
 
     protected List dbRels = new ArrayList();
 

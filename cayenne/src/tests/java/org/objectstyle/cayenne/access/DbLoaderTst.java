@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class DbLoaderTst extends CayenneTestCase {
-	static Logger logObj = Logger.getLogger(DbLoaderTst.class.getName());
+	private static Logger logObj = Logger.getLogger(DbLoaderTst.class);
 
 	protected DbLoader loader;
 

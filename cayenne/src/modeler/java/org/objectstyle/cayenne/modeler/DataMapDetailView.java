@@ -84,7 +84,7 @@ public class DataMapDetailView
     extends JPanel
     implements DocumentListener, DataMapDisplayListener, ItemListener {
 
-    static Logger logObj = Logger.getLogger(DataMapDetailView.class.getName());
+    private static Logger logObj = Logger.getLogger(DataMapDetailView.class);
 
     protected EventController mediator;
 

@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.project.validator.*;
  * @author Andrei Adamchik
  */
 public abstract class Project {
-    static Logger logObj = Logger.getLogger(Project.class);
+    private static volatile Logger logObj = Logger.getLogger(Project.class);
 
     public static final String CURRENT_PROJECT_VERSION = "1.0";
 
@@ -276,7 +276,7 @@ public abstract class Project {
             }
 
             // substitute Windows backslashes if needed
-            if (File.separatorChar != '/') {
+            if ((symbolicName != null) && (File.separatorChar != '/')) {
                 symbolicName = symbolicName.replace(File.separatorChar, '/');
             }
 

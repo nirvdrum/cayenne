@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class CayenneTestDatabaseSetup {
-	static Logger logObj = Logger.getLogger(CayenneTestDatabaseSetup.class);
+	private static Logger logObj = Logger.getLogger(CayenneTestDatabaseSetup.class);
 
 	protected DataMap map;
 	protected CayenneTestResources resources;

@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.util.EntityMergeSupport;
  * @author Andrei Adamchik
  */
 public class ObjEntitySyncAction extends CayenneAction {
-	static Logger logObj = Logger.getLogger(ObjEntitySyncAction.class.getName());
+	private static Logger logObj = Logger.getLogger(ObjEntitySyncAction.class);
 	
 	public static final String ACTION_NAME = "Sync ObjEntity with DbEntity";
 

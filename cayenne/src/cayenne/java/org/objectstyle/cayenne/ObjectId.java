@@ -74,12 +74,12 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public class ObjectId implements Serializable {
-	static Logger logObj = Logger.getLogger(ObjectId.class.getName());
+	private static Logger logObj = Logger.getLogger(ObjectId.class);
 
 	// Keys: DbAttribute objects;
 	// Values database values of the corresponding attribute
-	protected Map idKeys;
-	protected Class objClass;
+	protected Map objectIdKeys;
+	protected Class objectClass;
 	
 	/**
 	 * Convenience constructor for entities that have a 
@@ -94,7 +94,7 @@ public class ObjectId implements Serializable {
 	 * single column as their id.
 	 */
 	public ObjectId(Class objClass,  String keyName, Object id) {
-		this.objClass = objClass;
+		this.objectClass = objClass;
 		Map keys = new HashMap();
 		keys.put(keyName, id);
 		setIdKeys(keys);
@@ -103,12 +103,12 @@ public class ObjectId implements Serializable {
 
 	/** Creates new ObjectId */
 	public ObjectId(Class objClass, Map idKeys) {
-		this.objClass = objClass;
+		this.objectClass = objClass;
 		setIdKeys(idKeys);
 	}
 
 	protected void setIdKeys(Map idKeys) {
-		this.idKeys = idKeys;
+		this.objectIdKeys = idKeys;
 	}
 
 	public boolean equals(Object object) {
@@ -123,13 +123,13 @@ public class ObjectId implements Serializable {
 		ObjectId id = (ObjectId) object;
 		//CTM Use the class name because two objectid's should be equal even if their objClass'es were loaded
 		// by different class loaders.
-		return objClass.getName().equals(id.objClass.getName()) && Util.nullSafeEquals(id.idKeys, this.idKeys);
+		return objectClass.getName().equals(id.objectClass.getName()) && Util.nullSafeEquals(id.objectIdKeys, this.objectIdKeys);
 	}
 
 	/** Returns a map of id components. 
 	 * Keys in the map are DbAttribute names, values are database values of corresponding columns */
 	public Map getIdSnapshot() {
-		return Collections.unmodifiableMap(idKeys);
+		return Collections.unmodifiableMap(objectIdKeys);
 	}
 
     /**
@@ -137,7 +137,7 @@ public class ObjectId implements Serializable {
      * name of DbAttribute.
      */
 	public Object getValueForAttribute(String attrName) {
-		return idKeys.get(attrName);
+		return objectIdKeys.get(attrName);
 	}
 
     /**
@@ -148,15 +148,15 @@ public class ObjectId implements Serializable {
 	}
 
 	public String toString() {
-		StringBuffer buf = new StringBuffer(objClass.getName());
+		StringBuffer buf = new StringBuffer(objectClass.getName());
 		if (isTemporary())
 			buf.append(" (temp)");
 		buf.append(": ");
-		if (idKeys != null) {
-			Iterator it = idKeys.keySet().iterator();
+		if (objectIdKeys != null) {
+			Iterator it = objectIdKeys.keySet().iterator();
 			while (it.hasNext()) {
 				String nextKey = (String) it.next();
-				Object value = idKeys.get(nextKey);
+				Object value = objectIdKeys.get(nextKey);
 				buf.append(" <").append(nextKey).append(": ").append(
 					value).append(
 					'>');
@@ -169,9 +169,9 @@ public class ObjectId implements Serializable {
      * @see java.lang.Object#hashCode()
      */
     public int hashCode() {
-    	int mapHash = (idKeys != null) ? idKeys.hashCode() : 0;
+    	int mapHash = (objectIdKeys != null) ? objectIdKeys.hashCode() : 0;
  		//CTM Use the class name because we don't care about classes from different class loaders being "different"
-        return objClass.getName().hashCode() + mapHash;
+        return objectClass.getName().hashCode() + mapHash;
     }
     
 	/**
@@ -179,7 +179,7 @@ public class ObjectId implements Serializable {
 	 * @return Class
 	 */
 	public Class getObjClass() {
-		return objClass;
+		return objectClass;
 	}
 
 }

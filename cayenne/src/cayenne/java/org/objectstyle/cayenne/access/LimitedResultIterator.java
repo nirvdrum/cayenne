@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.dba.*;
  * @author Andrei Adamchik
  */
 public class LimitedResultIterator extends DefaultResultIterator {
-	static Logger logObj = Logger.getLogger(LimitedResultIterator.class.getName());
+	private static Logger logObj = Logger.getLogger(LimitedResultIterator.class);
 	
 	protected int fetchedSoFar;
 	protected int fetchLimit;

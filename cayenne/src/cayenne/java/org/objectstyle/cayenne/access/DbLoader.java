@@ -72,7 +72,7 @@ import org.objectstyle.cayenne.util.*;
   * @author Andrei Adamchik
  */
 public class DbLoader {
-    static Logger logObj = Logger.getLogger(DbLoader.class.getName());
+    private static Logger logObj = Logger.getLogger(DbLoader.class);
 
     public static final String WILDCARD = "%";
 

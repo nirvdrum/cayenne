@@ -68,7 +68,7 @@ public abstract class Relationship extends MapObject {
 
 	/** Returns relationship source entity. */
 	public Entity getSourceEntity() {
-		return (Entity) parent;
+		return (Entity)this.getParent();
 	}
 
 	/** Sets relationship source entity. */
@@ -120,7 +120,7 @@ public abstract class Relationship extends MapObject {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer(this.getClass().getName());
-		sb.append(" - relationship name '").append(name);
+		sb.append(" - relationship name '").append(this.getName());
 		if (toMany) {
 			sb.append("' (to-many)\n");
 		}

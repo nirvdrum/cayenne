@@ -93,7 +93,7 @@ public class DbAttributePane
 		ExistingSelectionProcessor,
 		ActionListener {
 
-	static Logger logObj = Logger.getLogger(DbAttributePane.class.getName());
+	private static Logger logObj = Logger.getLogger(DbAttributePane.class);
 
 	protected EventController mediator;
 	protected CayenneTable table;

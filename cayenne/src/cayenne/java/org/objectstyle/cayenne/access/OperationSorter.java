@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class OperationSorter {
-	static Logger logObj = Logger.getLogger(OperationSorter.class.getName());
+	private static Logger logObj = Logger.getLogger(OperationSorter.class);
 
 	private QueryComparator queryComparator;
 	private List sortedEntities;
@@ -81,12 +81,14 @@ public class OperationSorter {
 	/** Creates new OperationSorter based on all entities in DataMap array*/
 	public OperationSorter(QueryEngine queryEngine, DataMap[] maps) {
 		List entities = new ArrayList();
-		int len = (maps == null) ? 0 : maps.length;
 
-		// copy all entities to the list ignoring the order
-		for (int i = 0; i < len; i++) {
-			entities.addAll(maps[i].getDbEntitiesAsList());
+		if (maps != null) {
+			// copy all entities to the list ignoring the order
+			for (int i = 0; i < maps.length; i++) {
+				entities.addAll(maps[i].getDbEntitiesAsList());
+			}
 		}
+
 		List sortedEntityNames = InsertOrderSorter.sortedDbEntityNames(entities);
 		queryComparator = new QueryComparator(queryEngine, sortedEntityNames);
 	}
@@ -248,7 +250,7 @@ public class OperationSorter {
 	/** Used as a comparator to sort in place a list of objects into insert Order */
 	static final class ObjectComparator implements Comparator {
 		private List sortedDbEntities;
-		private List objects;
+		private List dataObjects;
 		private int direction;
 
 		//Entities that have one or more reflexive relationships.  Key is the entity, 
@@ -264,8 +266,9 @@ public class OperationSorter {
 		}
 		/**
 		 * Create a comparator that will be able to sort a list of objects.  Is private because
-		 * the insert boolean flag is not totally clear, and theres' only two uses for it.
+		 * the insert boolean flag is not totally clear, and there are only two uses for it.
 		 * These users are provided for by the more clearly named static methods.
+		 * 
 		 * @param objects a List of DataObjects to be sorted into insert/delete order.
 		 * This parameter is necessary to determine both the list of entities for
 		 * gross sorting by entity, and to sort within an entity if there are any
@@ -324,7 +327,7 @@ public class OperationSorter {
 					}
 				}
 			}
-			this.objects = objects;
+			this.dataObjects = objects;
 		}
 
 		public final int compare(Object o1, Object o2) {

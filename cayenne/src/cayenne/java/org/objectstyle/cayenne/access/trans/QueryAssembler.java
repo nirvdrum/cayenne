@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik 
  */
 public abstract class QueryAssembler extends QueryTranslator {
-    static Logger logObj = Logger.getLogger(QueryAssembler.class.getName());
+    private static Logger logObj = Logger.getLogger(QueryAssembler.class);
 
     /** PreparedStatement values. */
     protected List values = new ArrayList();

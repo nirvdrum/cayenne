@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class SelectQuery extends QualifiedQuery implements GenericSelectQuery {
-	static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
+	private static Logger logObj = Logger.getLogger(SelectQuery.class);
 
 	protected List custDbAttributes = new ArrayList();
 	protected List orderings = new ArrayList();

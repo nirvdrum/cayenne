@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class SelectTranslator extends SelectQueryAssembler {
-    static Logger logObj = Logger.getLogger(SelectTranslator.class.getName());
+    private static Logger logObj = Logger.getLogger(SelectTranslator.class);
 
     private final Map aliasLookup = new HashMap();
     private final List columnList = new ArrayList();

@@ -68,7 +68,7 @@ import org.xml.sax.*;
  *  Utility methods sink.
  */
 public class Util {
-    static Logger logObj = Logger.getLogger(Util.class);
+    private static Logger logObj = Logger.getLogger(Util.class);
 
     private static final Perl5Util regexUtil = new Perl5Util();
 

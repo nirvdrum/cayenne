@@ -73,8 +73,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public class DefaultConfiguration extends Configuration {
-	static Logger logObj =
-		Logger.getLogger(DefaultConfiguration.class.getName());
+	private static Logger logObj = Logger.getLogger(DefaultConfiguration.class);
 
 	protected ResourceLocator locator;
 	protected File projectFile;

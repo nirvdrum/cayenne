@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.*;
  *  @author Andrei Adamchik
  */
 public class DeleteTranslator extends QueryAssembler {
-	static Logger logObj = Logger.getLogger(DeleteTranslator.class.getName());
+	private static Logger logObj = Logger.getLogger(DeleteTranslator.class);
 
 	public String aliasForTable(DbEntity dbEnt) {
 		throw new RuntimeException("aliases not supported");

@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class QueryAssemblerTst extends CayenneTestCase {
-	static Logger logObj = Logger.getLogger(QueryAssemblerTst.class.getName());
+	private static Logger logObj = Logger.getLogger(QueryAssemblerTst.class);
 
 	protected TstQueryAssembler qa;
 

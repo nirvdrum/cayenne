@@ -68,7 +68,7 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class BrowserControl {
-	static Logger logObj = Logger.getLogger(BrowserControl.class.getName());	
+	private static Logger logObj = Logger.getLogger(BrowserControl.class);	
 
 	// Used to identify the windows platform.
 	private static final String WIN_ID = "Windows";

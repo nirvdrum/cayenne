@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.query.*;
   * @author Andrei Adamchik
   */
 public class DataContext implements QueryEngine, Serializable {
-    static Logger logObj = Logger.getLogger(DataContext.class.getName());
+    private static Logger logObj = Logger.getLogger(DataContext.class);
 	private Map flattenedInserts = new HashMap();
 	private Map flattenedDeletes = new HashMap();
 
@@ -962,9 +962,8 @@ public class DataContext implements QueryEngine, Serializable {
                     + value);
         }
 
-        //CayenneDataObjects have a transient datacontext
+        // CayenneDataObjects have a transient datacontext
         // because at deserialize time the datacontext may need to be different
-
         // than the one at serialize time (for programmer defined reasons).
         // So, when a dataobject is resurrected because it's datacontext was
         // serialized, it will then set the objects datacontext to the correctone

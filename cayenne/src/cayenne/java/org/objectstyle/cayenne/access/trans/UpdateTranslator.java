@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.query.*;
   * @author Andrei Adamchik
   */
 public class UpdateTranslator extends QueryAssembler {
-	static Logger logObj = Logger.getLogger(UpdateTranslator.class.getName());
+	private static Logger logObj = Logger.getLogger(UpdateTranslator.class);
 
 	public String aliasForTable(DbEntity dbEnt) {
 		throw new RuntimeException("aliases not supported");

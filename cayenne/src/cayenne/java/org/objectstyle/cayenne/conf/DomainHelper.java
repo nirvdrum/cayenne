@@ -84,7 +84,7 @@ import org.xml.sax.helpers.*;
  * @author Andrei Adamchik 
  */
 public class DomainHelper {
-	static Logger logObj = Logger.getLogger(DomainHelper.class.getName());
+	private static Logger logObj = Logger.getLogger(DomainHelper.class);
 
 	private Level logLevel = Level.DEBUG;
 	private Configuration config;

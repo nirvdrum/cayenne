@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.query.*;
 
 /** Class works as a translator of raw SELECT queries to JDBC statements. */
 public class SqlModifyTranslator extends QueryAssembler {
-    static Logger logObj = Logger.getLogger(SqlSelectTranslator.class.getName());
+    private static Logger logObj = Logger.getLogger(SqlSelectTranslator.class);
 
     public String createSqlString() throws java.lang.Exception {
         return ((SqlModifyQuery)query).getSqlString();

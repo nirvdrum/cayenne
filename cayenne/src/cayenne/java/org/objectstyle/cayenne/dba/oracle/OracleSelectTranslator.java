@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public class OracleSelectTranslator extends SelectTranslator {
-    static Logger logObj = Logger.getLogger(OracleSelectTranslator.class.getName());
+    private static Logger logObj = Logger.getLogger(OracleSelectTranslator.class);
 
     private static boolean testedDriver;
     private static boolean useOptimizations;

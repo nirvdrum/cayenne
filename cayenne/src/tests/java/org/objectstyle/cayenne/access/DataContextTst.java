@@ -71,7 +71,7 @@ import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class DataContextTst extends CayenneTestCase {
-	static Logger logObj = Logger.getLogger(DataContextTst.class.getName());
+	private static Logger logObj = Logger.getLogger(DataContextTst.class);
 
 	public static final int artistCount = 25;
 	public static final int galleryCount = 10;

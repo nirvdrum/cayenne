@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class CDOMany2OneNoRevTst extends CayenneDOTestBase {
-	static Logger logObj = Logger.getLogger(CDOMany2OneNoRevTst.class);
+	private static Logger logObj = Logger.getLogger(CDOMany2OneNoRevTst.class);
 	
     /**
      * Constructor for CDOMany2OneNoRevTst.

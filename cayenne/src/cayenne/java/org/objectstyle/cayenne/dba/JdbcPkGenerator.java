@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class JdbcPkGenerator implements PkGenerator {
-	static Logger logObj = Logger.getLogger(JdbcPkGenerator.class.getName());
+	private static Logger logObj = Logger.getLogger(JdbcPkGenerator.class);
 
 	private static final String NEXT_ID = "NEXT_ID";
 	private static final ObjAttribute[] objDesc =

@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.exp.*;
 import org.objectstyle.cayenne.query.*;
 
 public class DOPrefetchTst extends CayenneDOTestBase {
-    static Logger logObj = Logger.getLogger(DOPrefetchTst.class.getName());
+    private static Logger logObj = Logger.getLogger(DOPrefetchTst.class);
 
     public DOPrefetchTst(String name) {
         super(name);

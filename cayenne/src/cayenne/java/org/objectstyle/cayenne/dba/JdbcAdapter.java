@@ -74,7 +74,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class JdbcAdapter implements DbAdapter {
-    static Logger logObj = Logger.getLogger(JdbcAdapter.class.getName());
+    private static Logger logObj = Logger.getLogger(JdbcAdapter.class);
 
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;

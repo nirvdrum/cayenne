@@ -102,7 +102,7 @@ public class DbAttribute extends Attribute {
 	}
 
 	public String getAliasedName(String alias) {
-		return (alias != null) ? alias + '.' + name : name;
+		return (alias != null) ? alias + '.' + this.getName() : this.getName();
 	}
 
 	/** 
@@ -164,7 +164,7 @@ public class DbAttribute extends Attribute {
 	 *  efficient in some cases. For example, when printing all
 	 *  attributes of a single entity together. */
 	public StringBuffer toStringBuffer(StringBuffer buf) {
-		buf.append("   Column name: " + name + "\n");
+		buf.append("   Column name: " + this.getName() + "\n");
 		buf.append("   Column type: " + type + "\n");
 		return buf;
 	}

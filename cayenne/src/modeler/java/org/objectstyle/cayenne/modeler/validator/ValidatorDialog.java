@@ -83,7 +83,7 @@ public class ValidatorDialog
     extends CayenneDialog
     implements ListSelectionListener, ActionListener {
 
-    static Logger logObj = Logger.getLogger(ValidatorDialog.class.getName());
+    private static Logger logObj = Logger.getLogger(ValidatorDialog.class);
 
     protected static ValidatorDialog instance;
     public static final Color WARNING_COLOR = new Color(245, 194, 194);

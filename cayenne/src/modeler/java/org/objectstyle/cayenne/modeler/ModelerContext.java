@@ -69,7 +69,7 @@ import org.scopemvc.view.swing.SwingView;
  * @author Andrei Adamchik
  */
 public class ModelerContext extends SwingContext {
-    static Logger logObj = Logger.getLogger(ModelerContext.class);
+    private static Logger logObj = Logger.getLogger(ModelerContext.class);
 
     public static void setupContext() {
         ViewContext.clearThreadContext();

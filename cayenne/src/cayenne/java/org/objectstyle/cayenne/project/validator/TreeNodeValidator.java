@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.project.*;
  * @author Andrei Adamchik
  */
 public abstract class TreeNodeValidator {
-	static Logger logObj = Logger.getLogger(TreeNodeValidator.class);
+	private static Logger logObj = Logger.getLogger(TreeNodeValidator.class);
     
     // initialize singleton validators
     protected static final DomainValidator domainValidator = new DomainValidator();

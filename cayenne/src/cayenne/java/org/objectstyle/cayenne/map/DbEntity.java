@@ -136,7 +136,7 @@ public class DbEntity extends Entity {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("DbEntity:");
-		sb.append("\nTable name: ").append(name);
+		sb.append("\nTable name: ").append(this.getName());
 
 		// 1. print attributes
 		Iterator attIt = attributes.values().iterator();

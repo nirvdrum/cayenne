@@ -65,7 +65,7 @@ import junit.framework.*;
 
 /** Helper class to process test queries results. */
 public class TestOperationObserver extends DefaultOperationObserver {
-    static Logger logObj = Logger.getLogger(TestOperationObserver.class.getName());
+    private static Logger logObj = Logger.getLogger(TestOperationObserver.class);
     
     protected Map resultObjs = new HashMap();
     protected Map resultCounts = new HashMap();

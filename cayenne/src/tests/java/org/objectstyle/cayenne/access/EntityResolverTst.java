@@ -7,16 +7,16 @@ import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class EntityResolverTst extends CayenneTestCase {
-    protected EntityResolver resolver;
-    private List maps = new ArrayList();
+    protected EntityResolver sharedResolver;
+    private List allMaps = new ArrayList();
 
     public EntityResolverTst(String name) {
         super(name);
-        maps.addAll(getDomain().getMapList());
+        allMaps.addAll(getDomain().getMapList());
     }
 
     protected void setUp() throws Exception {
-        resolver = new EntityResolver(maps);
+        sharedResolver = new EntityResolver(allMaps);
     }
 
     ////Private conveniences
@@ -42,39 +42,39 @@ public class EntityResolverTst extends CayenneTestCase {
     ////Test DbEntitylookups
 
     public void testLookupDbEntityByEntityName() throws Exception {
-        assertIsArtistDbEntity(resolver.lookupDbEntity("Artist"));
+        assertIsArtistDbEntity(sharedResolver.lookupDbEntity("Artist"));
     }
 
     public void testLookupDbEntityByObjEntity() throws Exception {
-        assertIsArtistDbEntity(resolver.lookupDbEntity(getArtistObjEntity()));
+        assertIsArtistDbEntity(sharedResolver.lookupDbEntity(getArtistObjEntity()));
     }
 
     public void testLookupDbEntityByClass() throws Exception {
-        assertIsArtistDbEntity(resolver.lookupDbEntity(Artist.class));
+        assertIsArtistDbEntity(sharedResolver.lookupDbEntity(Artist.class));
     }
     
     public void testLookupDbEntityByDataobject() throws Exception {
     	Artist artist=(Artist)this.createDataContext().createAndRegisterNewObject("Artist");
-        assertIsArtistDbEntity(resolver.lookupDbEntity(artist));
+        assertIsArtistDbEntity(sharedResolver.lookupDbEntity(artist));
     }
 
     ////Test ObjEntity lookups
 
     public void testLookupObjEntityByEntityName() throws Exception {
-        assertIsArtistObjEntity(resolver.lookupObjEntity("Artist"));
+        assertIsArtistObjEntity(sharedResolver.lookupObjEntity("Artist"));
     }
 
     public void testLookupObjEntityByClass() throws Exception {
-        assertIsArtistObjEntity(resolver.lookupObjEntity(Artist.class));
+        assertIsArtistObjEntity(sharedResolver.lookupObjEntity(Artist.class));
     }
 
     public void testLookupObjEntityByInstance() throws Exception {
-        assertIsArtistObjEntity(resolver.lookupObjEntity(new Artist()));
+        assertIsArtistObjEntity(sharedResolver.lookupObjEntity(new Artist()));
     }
 
     public void testLookupObjEntityByDataobject() throws Exception {
     	Artist artist=(Artist)this.createDataContext().createAndRegisterNewObject("Artist");
-        assertIsArtistObjEntity(resolver.lookupObjEntity(artist));
+        assertIsArtistObjEntity(sharedResolver.lookupObjEntity(artist));
     }
 
     public void testGetDataMapList() throws Exception {

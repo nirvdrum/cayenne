@@ -87,7 +87,7 @@ public class ObjAttributePane
 		ObjAttributeListener,
 		ExistingSelectionProcessor,
 		ListSelectionListener {
-	static Logger logObj = Logger.getLogger(ObjAttributePane.class.getName());
+	private static Logger logObj = Logger.getLogger(ObjAttributePane.class);
 
 	EventController mediator;
 	CayenneTable table;

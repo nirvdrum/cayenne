@@ -74,7 +74,7 @@ import org.apache.log4j.*;
  * @author Andrei Adamchik
  */
 public class PoolDataSource implements ConnectionPoolDataSource {
-	static Logger logObj = Logger.getLogger(PoolDataSource.class.getName());
+	private static Logger logObj = Logger.getLogger(PoolDataSource.class);
 
 	private DataSource nonPooledDatasource;
 

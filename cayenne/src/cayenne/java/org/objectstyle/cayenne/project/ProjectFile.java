@@ -68,13 +68,13 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public abstract class ProjectFile {
-	static Logger logObj = Logger.getLogger(ProjectFile.class);
+	private static Logger logObj = Logger.getLogger(ProjectFile.class);
 	
     protected static final List fileTypes = new ArrayList();
 
     protected String location;
     protected File tempFile;
-    protected Project project;
+    protected Project projectObj;
 
     static {
         fileTypes.add(new ApplicationProjectFile());
@@ -104,7 +104,7 @@ public abstract class ProjectFile {
      */
     public ProjectFile(Project project, String location) {
         this.location = location;
-        this.project = project;
+        this.projectObj = project;
     }
 
     /**
@@ -280,7 +280,7 @@ public abstract class ProjectFile {
       * @return Project
       */
     public Project getProject() {
-        return project;
+        return projectObj;
     }
 
     public boolean isRenamed() {

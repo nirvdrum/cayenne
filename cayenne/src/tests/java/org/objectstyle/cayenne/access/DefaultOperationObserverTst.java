@@ -78,28 +78,30 @@ public class DefaultOperationObserverTst extends CayenneTestCase {
 	}
 
 	public void testHasExceptions1() throws Exception {
-		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
+		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Level oldLevel = observerLogger.getLevel();
+        observerLogger.setLevel(Level.ERROR);
 
 		try {
 			assertTrue(!observer.hasExceptions());
 			observer.nextGlobalException(new Exception());
 			assertTrue(observer.hasExceptions());
 		} finally {
-			DefaultOperationObserver.logObj.setLevel(oldLevel);
+			observerLogger.setLevel(oldLevel);
 		}
 	}
 
 	public void testHasExceptions2() throws Exception {
-		Level oldLevel = DefaultOperationObserver.logObj.getLevel();
-		DefaultOperationObserver.logObj.setLevel(Level.ERROR);
+		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Level oldLevel = observerLogger.getLevel();
+        observerLogger.setLevel(Level.ERROR);
 
 		try {
 			assertTrue(!observer.hasExceptions());
 			observer.nextQueryException(new SelectQuery(), new Exception());
 			assertTrue(observer.hasExceptions());
 		} finally {
-			DefaultOperationObserver.logObj.setLevel(oldLevel);
+			observerLogger.setLevel(oldLevel);
 		}
 	}
 }

@@ -70,7 +70,7 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class CayenneDataObject implements DataObject {
-    static Logger logObj = Logger.getLogger(CayenneDataObject.class.getName());
+    private static Logger logObj = Logger.getLogger(CayenneDataObject.class);
 
     // used for dependent to one relationships
     // to indicate that destination relationship was fetched and is null
@@ -82,8 +82,8 @@ public class CayenneDataObject implements DataObject {
      *
      * @deprecated use PersistenceState.persistenceStateName() instead.
      */
-    public static String persistenceStateString(int persistenceState) {
-			return PersistenceState.persistenceStateName(persistenceState);
+    public static String persistenceStateString(int persistenceStateValue) {
+			return PersistenceState.persistenceStateName(persistenceStateValue);
     }
 
     protected ObjectId objectId;

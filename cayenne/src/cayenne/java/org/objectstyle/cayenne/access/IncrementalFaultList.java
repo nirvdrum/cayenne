@@ -82,13 +82,13 @@ import org.objectstyle.cayenne.query.*;
  * @author Andrei Adamchik
  */
 public class IncrementalFaultList implements List {
-    static Logger logObj = Logger.getLogger(IncrementalFaultList.class.getName());
+    private static Logger logObj = Logger.getLogger(IncrementalFaultList.class);
 
-    protected int pageSize;
-    protected List elements;
-    protected DataContext dataContext;
-    protected ObjEntity rootEntity;
-    protected SelectQuery internalQuery;
+    protected volatile int pageSize;
+    protected volatile List elements;
+    protected volatile DataContext dataContext;
+    protected volatile ObjEntity rootEntity;
+    protected volatile SelectQuery internalQuery;
     protected int unfetchedObjects;
 
     /**
@@ -210,8 +210,8 @@ public class IncrementalFaultList implements List {
         		toIndex = elements.size();
         	}
         	
-            List quals = new ArrayList();
-            List ids = new ArrayList();
+            List quals = new ArrayList(pageSize);
+            List ids = new ArrayList(pageSize);
             for (int i = fromIndex; i < toIndex; i++) {
                 Object obj = elements.get(i);
                 if (obj instanceof Map) {
@@ -229,8 +229,6 @@ public class IncrementalFaultList implements List {
                 new SelectQuery(
                     rootEntity.getName(),
                     ExpressionFactory.joinExp(Expression.OR, quals));
-
-            query.setLoggingLevel(query.getLoggingLevel());
 
             List objects = dataContext.performQuery(query);
 

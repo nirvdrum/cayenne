@@ -80,7 +80,7 @@ import org.objectstyle.cayenne.modeler.model.TopModel;
  */
 public class EventController {
 
-    protected static Logger logObj = Logger.getLogger(EventController.class);
+    private static Logger logObj = Logger.getLogger(EventController.class);
 
     protected EventListenerList listenerList;
     protected TopModel model;

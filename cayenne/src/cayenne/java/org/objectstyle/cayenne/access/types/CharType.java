@@ -62,7 +62,7 @@ import org.apache.log4j.*;
 
 /** Handles CHAR type for JDBC drivers that don't trim trailing spaces. */
 public class CharType implements ExtendedType {
-    static Logger logObj = Logger.getLogger(CharType.class.getName());
+    private static Logger logObj = Logger.getLogger(CharType.class);
 
     public String getClassName() {
         return "java.lang.String";

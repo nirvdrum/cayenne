@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.conf.*;
 public class DataNodeFile extends ProjectFile {
     public static final String LOCATION_SUFFIX = ".driver.xml";
 
-    protected DataNode node;
+    protected DataNode nodeObj;
 
     public DataNodeFile() {}
 
@@ -80,25 +80,25 @@ public class DataNodeFile extends ProjectFile {
      */
     public DataNodeFile(Project project, DataNode node) {
         super(project, node.getDataSourceLocation());
-        this.node = node;
+        this.nodeObj = node;
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
      */
     public Object getObject() {
-        return node;
+        return nodeObj;
     }
 
     /**
      * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
      */
     public String getObjectName() {
-        return node.getName();
+        return nodeObj.getName();
     }
 
     public void save(PrintWriter out) throws Exception {
-        ProjectDataSource src = (ProjectDataSource) node.getDataSource();
+        ProjectDataSource src = (ProjectDataSource) nodeObj.getDataSource();
         DomainHelper.storeDataNode(out, src.getDataSourceInfo());
     }
 
@@ -131,8 +131,8 @@ public class DataNodeFile extends ProjectFile {
     public void willSave() {
         super.willSave();
 
-        if (node != null && canHandle(node)) {
-            node.setDataSourceLocation(getLocation());
+        if (nodeObj != null && canHandle(nodeObj)) {
+            nodeObj.setDataSourceLocation(getLocation());
         }
     }
 

@@ -89,7 +89,7 @@ import org.objectstyle.cayenne.modeler.util.YesNoToAllDialog;
  * @author Andrei Adamchik
  */
 public class ImportDbAction extends CayenneAction {
-    static Logger logObj = Logger.getLogger(ImportDbAction.class.getName());
+    private static Logger logObj = Logger.getLogger(ImportDbAction.class);
     public static final String ACTION_NAME = "Reengineer Database Schema";
 
     public ImportDbAction() {

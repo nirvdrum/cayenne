@@ -73,7 +73,7 @@ import org.xml.sax.helpers.*;
  * @author Andrei Adamchik
  */
 public class MapLoader extends DefaultHandler {
-    static Logger logObj = Logger.getLogger(MapLoader.class);
+    private static volatile Logger logObj = Logger.getLogger(MapLoader.class);
 
     public static final String DATA_MAP_TAG = "data-map";
     public static final String DB_ENTITY_TAG = "db-entity";
@@ -367,8 +367,8 @@ public class MapLoader extends DefaultHandler {
         }
     }
 
-    private void storeDbAttribute(PrintWriter out, DbEntity dbEntity) {
-        Iterator iter = sortedAttributes(dbEntity).iterator();
+    private void storeDbAttribute(PrintWriter out, DbEntity dbe) {
+        Iterator iter = sortedAttributes(dbe).iterator();
 
         while (iter.hasNext()) {
             DbAttribute attr = (DbAttribute) iter.next();

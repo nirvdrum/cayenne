@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.query.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public class SelectTranslatorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(SelectTranslatorTst.class.getName());
+    private static Logger logObj = Logger.getLogger(SelectTranslatorTst.class);
 
     protected SelectQuery q;
     protected DbEntity artistEnt;

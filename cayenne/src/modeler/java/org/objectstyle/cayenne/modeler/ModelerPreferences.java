@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.project.CayenneUserDir;
  * @author Andrei Adamchik
  */
 public class ModelerPreferences extends ExtendedProperties {
-    static final Logger logObj = Logger.getLogger(ModelerPreferences.class.getName());
+    static final Logger logObj = Logger.getLogger(ModelerPreferences.class);
 
     /** 
      * Name of the preferences file.

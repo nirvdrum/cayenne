@@ -90,7 +90,7 @@ import org.objectstyle.cayenne.modeler.util.FileSystemViewDecorator;
 public class GenerateDbDialog
     extends CayenneDialog
     implements ActionListener, ItemListener {
-    static Logger logObj = Logger.getLogger(Editor.class.getName());
+    private static Logger logObj = Logger.getLogger(Editor.class);
 
     private static final int WIDTH = 380;
     private static final int HEIGHT = 190;

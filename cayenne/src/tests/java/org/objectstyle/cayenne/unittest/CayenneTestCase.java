@@ -70,7 +70,7 @@ import junit.framework.*;
  * @author Andrei Adamchik
  */
 public class CayenneTestCase extends TestCase {
-    static Logger logObj = Logger.getLogger(CayenneTestCase.class);
+    private static Logger logObj = Logger.getLogger(CayenneTestCase.class);
     
     /**
      * Constructor for CayenneTestCase.

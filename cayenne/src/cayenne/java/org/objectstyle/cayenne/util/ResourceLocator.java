@@ -67,7 +67,7 @@ import org.apache.log4j.*;
   * @author Andrei Adamchik
   */
 public class ResourceLocator {
-	static Logger logObj = Logger.getLogger(ResourceLocator.class.getName());
+	private static Logger logObj = Logger.getLogger(ResourceLocator.class);
 
 	protected boolean skipHomeDir;
 	protected boolean skipCurDir;

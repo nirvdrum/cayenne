@@ -60,7 +60,7 @@ import org.objectstyle.cayenne.*;
 import org.objectstyle.cayenne.unittest.*;
 
 public abstract class SelectQueryBase extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(SelectQueryBase.class.getName());
+    private static Logger logObj = Logger.getLogger(SelectQueryBase.class);
 
     protected SelectQuery query;
     protected TestOperationObserver opObserver;

@@ -69,7 +69,7 @@ import org.objectstyle.cayenne.map.*;
  * @author Andrei Adamchik
  */
 public abstract class QueryAssemblerHelper {
-    static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class.getName());
+    private static Logger logObj = Logger.getLogger(QueryAssemblerHelper.class);
 
     protected QueryAssembler queryAssembler;
 

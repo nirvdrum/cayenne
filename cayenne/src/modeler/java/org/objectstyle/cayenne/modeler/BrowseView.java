@@ -103,7 +103,7 @@ public class BrowseView
         ObjEntityDisplayListener,
         DbEntityListener,
         DbEntityDisplayListener {
-    static Logger logObj = Logger.getLogger(BrowseView.class.getName());
+    private static Logger logObj = Logger.getLogger(BrowseView.class);
 
     private static final int DOMAIN_NODE = 1;
     private static final int NODE_NODE = 2;

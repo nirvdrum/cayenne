@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.util.*;
  * @author Andrei Adamchik
  */
 public class DataNodeValidator extends TreeNodeValidator {
-    static Logger logObj = Logger.getLogger(DataNodeValidator.class);
+    private static Logger logObj = Logger.getLogger(DataNodeValidator.class);
 
     /**
      * Constructor for DataNodeValidator.

@@ -67,7 +67,7 @@ import org.scopemvc.core.ControlException;
  * @author Andrei Adamchik
  */
 public class ProjectTypeSelectControl extends BasicController {
-    static Logger logObj = Logger.getLogger(ProjectTypeSelectControl.class);
+    private static Logger logObj = Logger.getLogger(ProjectTypeSelectControl.class);
 
     public static final String CREATE_APP_PROJECT_CONTROL =
         "cayenne.modeler.project.app.button";

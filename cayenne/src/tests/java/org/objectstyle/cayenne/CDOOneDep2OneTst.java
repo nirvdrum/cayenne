@@ -59,7 +59,7 @@ import org.apache.log4j.*;
 import org.objectstyle.art.*;
 
 public class CDOOneDep2OneTst extends CayenneDOTestBase {
-    static Logger logObj = Logger.getLogger(CDOOneDep2OneTst.class.getName());
+    private static Logger logObj = Logger.getLogger(CDOOneDep2OneTst.class);
 
     public CDOOneDep2OneTst(String name) {
         super(name);
