@@ -27,7 +27,7 @@
     	<ul>
     		<li><a href="#1">Tutorial Setup.</a></li>
     		<li><a href="#2">Prepare Tutorial Database.</a></li>
-    		<li><a href="#3">Create Cayenne Configuration Files.</a></li>
+    		<li><a href="#3">Setup Cayenne Configuration Files.</a></li>
     		<li><a href="#4">Create Database Primary Key Support.</a></li>
     		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
     		<li><a href="#6">Write Application Code.</a></li>
@@ -39,9 +39,9 @@
        		installation instructions</a>. In particular, JSDK 1.4 must be installed.
        		</p>
        		
-    		<p>- Copy cayenne.jar file that is a part of Cayenne distribution to
-    		the JRE extensions directory (normally a directory like $JAVA_HOME/jre/lib/ext) 
-    		or make it otherwise accessible in the CLASSPATH of the application.</p>
+    		<p>- Add cayenne.jar to the CLASSPATH of the application. Do not
+    		put it in JRE extendsions directory - eventually this will lead to 
+    		ClassNotFound exceptions.</p>
     		
     		<p>- Create tutorial project directory (further referred to as "project directory") 
     		anywhere on the filesystem. For example:</p>
@@ -51,21 +51,17 @@
 # mkdir cayenne-tutorial
 # cd cayenne-tutorial
 </source>
-
+         <p>Unpack downloaded tutorial file (<code>cayenne-tutorial-0.tar.gz</code>) in this directory.</p>
     	</subsection>
     	
     	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
-    		<p>To run this tutorial user must have access to a relational database with 
-    		privileges sufficient to perform tables creation, select, insert and update queries. 
-    		Run the following script to create test tables (script is tested on MySQL, 
-    		but it should be easy to port to any other RDBMS): 
-    		<a href="../../tutorial/0/tutorialdb.sql">tutorialdb.sql</a>.</p>
+    		<p>Run the <a href="../../tutorial/0/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		script to create test tables. This script is tested on MySQL, 
+    		but it should be easy to port to any other RDBMS.</p>
     	</subsection>
     	
-    	<subsection name="3.2.3 Create Cayenne Configuration Files" anchor="3">
-    		<p>Use CayenneModler tool to create Cayenne configuration files including "cayenne.xml",
-    		data map file and data source file.
-    		Sample files used for this tutorial can be downloaded from here:
+    	<subsection name="3.2.3 Setup Cayenne Configuration Files" anchor="3">
+    		<p>Configuration files included in this tutorial are:
     		
     		<ul>
     			<li><a href="../../tutorial/0/cayenne.xml">cayenne.xml</a></li>
@@ -73,18 +69,17 @@
     			<li><a href="../../tutorial/0/driverinfo.xml">driverinfo.xml</a></li>
     		</ul>
     		
-    		These XML files should reside in the project directory. To perform any further
-    		modifications, user should open <code>cayenne.xml</code> file
-    		in CayenneModeler. Of course changes can be done using a simple text editor
-    		as well. The following changes are most likely needed in order to run the tutorial:
-    		
+    		Open <code>cayenne.xml</code> 
+    		file in CayenneModeler and make the following changes:
     		<ul>
     			<li>if the database used is NOT MySQL, <code>cayenne.xml</code>
     			must be modified to use <code>node adapter</code> for the appropriate database.</li>
     			<li><code>driverinfo.xml</code> must be modified to reflect connection and
     			driver information of the test database.</li>
-    		</ul> 
+    		</ul>         	
     		</p>
+    	    <img src="/images/tutorial-cfg-node.gif" width="639" height="503" border="0" align="middle"
+			alt="Configure Node Panel"/>
     	</subsection>
     	
     	<subsection name="3.2.4 Create Database Primary Key Support." anchor="4">

@@ -172,7 +172,7 @@ public class DataNodeDetailView
 		factory.setModel(model);
 		factory.setSelectedIndex(-1);
 
-		adapterLabel = new JLabel("DB query adapter:");
+		adapterLabel = new JLabel("DB adapter:");
 		adapter = new JComboBox();
 		adapter.setEditable(true);
 		String[] arr1 =

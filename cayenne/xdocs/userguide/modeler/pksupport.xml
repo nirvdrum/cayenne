@@ -31,7 +31,7 @@
         	</ul>
         	
         	 <img src="/images/dbgen-menu.gif" width="391" height="286" border="0" align="middle"
-			alt="Cayenne Login Panel"/>
+			alt="Generate Schema Menu"/>
         	
         	<ul>
         	   <li>When a login panel pops up, enter database information. If the DataMap
@@ -42,7 +42,7 @@
         	   and <strong>"Create Primary Key Support"</strong> choices checked:</li>
         	</ul>
         	<img src="/images/dbgen-mysql.gif" width="581" height="500" border="0" align="middle"
-			alt="Cayenne Login Panel"/>
+			alt="Generate Schema Dialog"/>
         	
         	<ul>
         	   <li>Now, if you have enough database privileges to execute listed
