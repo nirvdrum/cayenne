@@ -8,12 +8,17 @@
     	
     	<p>Almost any database that has a JDBC driver will work with Cayenne. But there are
     	certain database specific issues that arise mostly when doing schema operations. This is 
-    	discussed in detail <a href="../userguide/design/crossdb.html">here</a>.
-    	</p>
-    	
-    	<p>Having said that, Cayenne is tested and proven to be 100% compatible with 
-    	the following engines: 
-    	Oracle (8, 8i, 9i), Sybase (11.9), MySQL. Adapters for other engines are coming.</p>
+    	discussed in detail <a href="../userguide/design/crossdb.html">here</a>. Having said that, 
+    	Cayenne is tested and proven to be 100% compatible with 
+    	the following engines:
+    	<ul> 
+    		<li><a href="http://oracle.com/">Oracle</a> (8, 8i, 9i)</li>
+    		<li><a href="http://www.sybase.com/">Sybase (11.9)</a></li>
+    		<li><a href="http://www.mysql.com/">MySQL</a></li>
+    		<li><a href="http://www.postgresql.org/">PostgreSQL</a> (7.3 and newer)</li>
+    		<li><a href="http://hsqldb.sourceforge.net/">HSQLDB</a></li> 
+    	</ul>
+    	Adapters for other engines are constantly added. Users can create their own adapters as well.</p>
     	</subsection>
     	
 		<subsection name="Q 3.2 When I start my application, Cayenne immediately connects to the database. How about lazy connection that happens on the first database call?" 

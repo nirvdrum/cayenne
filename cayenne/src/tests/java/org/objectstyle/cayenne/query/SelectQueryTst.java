@@ -60,7 +60,6 @@ import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Level;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
