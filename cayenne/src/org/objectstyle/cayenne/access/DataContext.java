@@ -77,7 +77,6 @@ public class DataContext implements QueryEngine {
     protected QueryEngine parent;
     protected HashMap registeredMap = new HashMap();
     protected HashMap committedSnapshots = new HashMap();
-    protected QueryHelper queryHelper = new QueryHelper(this);
     protected RelationshipDataSource relDataSource = new RelationshipDataSource();
 
     public DataContext() {
@@ -93,11 +92,6 @@ public class DataContext implements QueryEngine {
      */
     public DataContext(QueryEngine parent) {
         this.parent = parent;
-    }
-
-    /** Returns an object used to build queries within this context */
-    public QueryHelper getQueryHelper() {
-        return queryHelper;
     }
 
     /** Returns parent QueryEngine object. */
@@ -167,9 +161,12 @@ public class DataContext implements QueryEngine {
 
         return obj;
     }
-    
+
     private final DataObject newDataObject(String className) throws Exception {
-        return (DataObject)Configuration.getResourceLoader().loadClass(className).newInstance();
+        return (DataObject) Configuration
+            .getResourceLoader()
+            .loadClass(className)
+            .newInstance();
     }
 
     /** Replaces all object attribute values with snapshot values. */
@@ -388,7 +385,7 @@ public class DataContext implements QueryEngine {
     /** Refetches object data for ObjectId. For example, this method is used internally by Cayenne
      *  to resolve objects in PersistenceState.HOLLOW or just to refresh certain objects. */
     public DataObject refetchObject(ObjectId oid) {
-        SelectQuery sel = queryHelper.selectObjectForId(oid);
+        SelectQuery sel = QueryHelper.selectObjectForId(oid);
         List results = this.performQuery(sel);
         if (results.size() != 1)
             throw new CayenneRuntimeException(
@@ -426,7 +423,7 @@ public class DataContext implements QueryEngine {
             }
             // 2. deal with deletes
             else if (objectState == PersistenceState.DELETED) {
-                queryList.add(queryHelper.deleteQuery(nextObject));
+                queryList.add(QueryHelper.deleteQuery(nextObject));
                 delObjects.add(nextObject);
             }
             // 3. deal with updates
@@ -445,7 +442,7 @@ public class DataContext implements QueryEngine {
             while (insIt.hasNext()) {
                 DataObject nextObject = (DataObject) insIt.next();
                 queryList.add(
-                    queryHelper.insertQuery(
+                    QueryHelper.insertQuery(
                         takeObjectSnapshot(nextObject),
                         nextObject.getObjectId()));
             }
@@ -456,7 +453,7 @@ public class DataContext implements QueryEngine {
             Iterator updIt = rawUpdObjects.iterator();
             while (updIt.hasNext()) {
                 DataObject nextObject = (DataObject) updIt.next();
-                UpdateQuery updateQuery = queryHelper.updateQuery(nextObject);
+                UpdateQuery updateQuery = QueryHelper.updateQuery(nextObject);
                 if (updateQuery != null) {
                     queryList.add(updateQuery);
                     updObjects.add(nextObject);
@@ -473,7 +470,6 @@ public class DataContext implements QueryEngine {
                 }
             }
         }
-        
 
         if (queryList.size() > 0) {
             CommitProcessor result =
@@ -509,23 +505,55 @@ public class DataContext implements QueryEngine {
     /** Performs a single database select query. */
     public List performQuery(SelectQuery query, Level logLevel) {
         SelectProcessor result = new SelectProcessor(logLevel);
-        parent.performQuery(query, result);
+        performQuery(query, result);
         return result.getLastResult();
     }
 
-   	/** Delegates node lookup to parent QueryEngine. */
+    /** Delegates node lookup to parent QueryEngine. */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
         return parent.dataNodeForObjEntity(objEntity);
     }
-    
-    /** Delegates queries execution to parent QueryEngine. */
+
+    /** 
+     * Delegates queries execution to parent QueryEngine. If there are select
+     * queries that require prefetching relationships, will create additional
+     * queries to perform necessary prefetching. */
     public void performQueries(List queries, OperationObserver resultConsumer) {
-        parent.performQueries(queries, resultConsumer);
+
+        // find queries that require prefetching
+        List prefetch = new ArrayList();
+        Iterator it = queries.iterator();
+        while (it.hasNext()) {
+            Object q = it.next();
+            if (q instanceof SelectQuery) {
+                SelectQuery sel = (SelectQuery) q;
+                List prefetchRels = sel.getPrefetchList();
+                if (prefetchRels != null && prefetchRels.size() > 0) {
+                    Iterator prIt = prefetchRels.iterator();
+                    while (prIt.hasNext()) {
+                        prefetch.add(QueryHelper.selectPrefetchPath(this, sel, (String) prIt.next()));
+                    }
+                }
+            }
+        }
+        
+        List finalQueries = null;
+        if(prefetch.size() == 0) {
+            finalQueries = queries;
+        }
+        else {
+            prefetch.addAll(0, queries);
+            finalQueries = prefetch;
+        }
+
+        parent.performQueries(finalQueries, resultConsumer);
     }
 
     /** Delegates query execution to parent QueryEngine. */
     public void performQuery(Query query, OperationObserver resultConsumer) {
-        parent.performQuery(query, resultConsumer);
+        ArrayList qWrapper = new ArrayList(1);
+        qWrapper.add(query);
+        this.performQueries(qWrapper, resultConsumer);
     }
 
     /** Delegates entity name resolution to parent QueryEngine. */
@@ -670,7 +698,7 @@ public class DataContext implements QueryEngine {
             if (autoPkDone) {
                 throw new CayenneRuntimeException("Primary Key autogeneration only works for a single attribute.");
             }
-            
+
             try {
                 PkGenerator gen = aNode.getAdapter().getPkGenerator();
                 Object pk = gen.generatePkForDbEntity(aNode, objEntity.getDbEntity());
@@ -825,7 +853,7 @@ public class DataContext implements QueryEngine {
                 list.setObjectList(new ArrayList());
             else {
                 SelectQuery sel =
-                    queryHelper.selectRelationshipObjects(list.getSrcObjectId(), list.getRelName());
+                    QueryHelper.selectRelationshipObjects(DataContext.this, list.getSrcObjectId(), list.getRelName());
                 List results = performQuery(sel);
                 list.setObjectList(results);
             }

@@ -53,31 +53,31 @@ package org.objectstyle.cayenne.access;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.TestCase;
 
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.map.DbEntity;
-
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public class DataNodeExtrasTst extends TestCase {
-    
+
     public DataNodeExtrasTst(String name) {
         super(name);
     }
-    
-    
-    
+
     public void testCreatePkSupportForMapEntities() throws java.lang.Exception {
         TestMain.getSharedDatabaseSetup().cleanTableData();
         DataNode node = TestMain.getSharedDomain().getDataNodes()[0];
         node.createPkSupportForMapEntities();
-        
+
         DbEntity artistEnt = node.lookupEntity("Artist").getDbEntity();
-        assertNotNull(node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
-        
+        assertNotNull(
+            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, artistEnt));
+
         DbEntity exhibitEnt = node.lookupEntity("Exhibit").getDbEntity();
-        assertNotNull(node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
+        assertNotNull(
+            node.getAdapter().getPkGenerator().generatePkForDbEntity(node, exhibitEnt));
     }
 }

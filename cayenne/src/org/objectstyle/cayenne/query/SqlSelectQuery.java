@@ -55,6 +55,9 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectstyle.cayenne.map.ObjAttribute;
 
 
@@ -65,7 +68,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 public class SqlSelectQuery extends Query {
     protected String sqlString;
     protected ObjAttribute[] resultDesc;
-    
+        
     /** Creates empty SqlSelectQuery. */
     public SqlSelectQuery() {}
     

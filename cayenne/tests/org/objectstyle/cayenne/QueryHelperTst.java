@@ -53,23 +53,33 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import junit.framework.TestCase;
 
+import org.objectstyle.TestMain;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
+
 public class QueryHelperTst extends TestCase {
-    protected QueryHelper helper;
-    
     public QueryHelperTst(String name) {
         super(name);
     }
-    
-    public void setUp() throws java.lang.Exception {
-        helper = org.objectstyle.TestMain.getSharedDomain().createDataContext().getQueryHelper();
+
+    public void testSelectPrefetchPath1() throws Exception {
+        SelectQuery q = new SelectQuery("Artist");
+        SelectQuery reverseQ =
+            QueryHelper.selectPrefetchPath(TestMain.getSharedDomain(), q, "paintingArray");
+        assertEquals("Painting", reverseQ.getObjEntityName());
     }
-    
-    public void testGetQueryEngine() throws Exception {
-        assertNotNull(helper.getQueryEngine());
+
+    public void testSelectPrefetchPath2() throws Exception {
+        SelectQuery q = new SelectQuery("Artist");
+        q.setQualifier(
+            ExpressionFactory.binaryPathExp(Expression.EQUAL_TO, "artistName", "abc"));
+        SelectQuery reverseQ =
+            QueryHelper.selectPrefetchPath(TestMain.getSharedDomain(), q, "paintingArray");
+        assertNotNull("Null transformed qualifier.", reverseQ.getQualifier());
     }
 }
-

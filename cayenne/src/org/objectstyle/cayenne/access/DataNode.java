@@ -61,12 +61,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
+
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /** Wrapper class for javax.sql.DataSource. Links Cayenne framework
   * with JDBC layer, providing query execution facilities.
@@ -240,6 +242,14 @@ public class DataNode implements QueryEngine {
 
                             // 3.a send results back to consumer
                             opObserver.nextSnapshots(nextQuery, resultSnapshots);
+                            
+                            // 4. do prefetching if needed
+                            if(nextQuery instanceof SelectQuery) {
+                                List prefetches = ((SelectQuery)nextQuery).getPrefetchList();
+                                if(prefetches != null && prefetches.size() > 0) {
+                                    
+                                }
+                            }
                         }
                         else {
                             // 2.b execute update

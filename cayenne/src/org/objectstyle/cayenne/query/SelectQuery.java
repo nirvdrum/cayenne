@@ -116,6 +116,7 @@ public class SelectQuery extends QualifiedQuery {
         this.distinct = distinct;
     }
     
+    
     /**
      * Returns a list of relationships that must be prefetched 
      * as a part of this query.
@@ -126,7 +127,7 @@ public class SelectQuery extends QualifiedQuery {
     
     /** 
      * Adds a relationship path (ObjRelationship names separated by ".")
-     * to the list of relationships that should be prefetched when the
+     * to the list of relationship paths that should be prefetched when the
      * query is executed.
      */
     public void addPrefetch(String relPath) {

@@ -167,7 +167,7 @@ public class CayenneDataObject implements DataObject {
 
 
         // need to fetch
-        SelectQuery sel = dataContext.getQueryHelper().selectRelationshipObjects(objectId, relName);
+        SelectQuery sel = QueryHelper.selectRelationshipObjects(dataContext, objectId, relName);
         List results = dataContext.performQuery(sel);
 
         // unexpected

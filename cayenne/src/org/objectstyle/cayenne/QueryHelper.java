@@ -53,7 +53,7 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -67,29 +67,17 @@ import org.objectstyle.cayenne.query.*;
 /**
  *
  */
-public class QueryHelper  {
+public final class QueryHelper {
     static Logger logObj = Logger.getLogger(QueryHelper.class.getName());
-
-    protected QueryEngine queryEngine;
-
-    public QueryHelper(QueryEngine queryEngine) {
-        this.queryEngine = queryEngine;
-    }
-
-    /** Returns QueryEngine object. QueryHelper always has an associated
-     *  QueryEngine object to resolve entity names, etc. */
-    public QueryEngine getQueryEngine() {
-        return queryEngine;
-    }
 
     /** Returns a qualifier that matches an all values in the
      *  map as defined in ObjectId. Keys are DbAttribute names, values - database values. */
-    private Expression qualifierForDbMap(Map map) {
+    private static Expression qualifierForDbMap(Map map) {
         ArrayList list = new ArrayList();
 
         Iterator it = map.keySet().iterator();
-        while(it.hasNext()) {
-            String attr = (String)it.next();
+        while (it.hasNext()) {
+            String attr = (String) it.next();
             Object value = map.get(attr);
             Expression dbPathExp = ExpressionFactory.unaryExp(Expression.DB_NAME, attr);
             list.add(ExpressionFactory.binaryExp(Expression.EQUAL_TO, dbPathExp, value));
@@ -103,7 +91,7 @@ public class QueryHelper  {
      *  @param dataObject data object that potentially can have changes that need
      *  to be synchronized with the database.
      */
-    public UpdateQuery updateQuery(DataObject dataObject) {
+    public static UpdateQuery updateQuery(DataObject dataObject) {
         UpdateQuery upd = new UpdateQuery();
 
         ObjectId id = dataObject.getObjectId();
@@ -113,17 +101,17 @@ public class QueryHelper  {
         Map currentSnapshot = dataObject.getCurrentSnapshot();
 
         Iterator it = currentSnapshot.keySet().iterator();
-        while(it.hasNext()) {
-            String attrName = (String)it.next();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
             Object newValue = currentSnapshot.get(attrName);
 
             // if snapshot exists, compare old values and new values,
             // only add attribute to the update clause if the value has changed
-            if(committedSnapshot != null) {
+            if (committedSnapshot != null) {
                 Object oldValue = committedSnapshot.get(attrName);
-                if(oldValue != null && !oldValue.equals(newValue))
+                if (oldValue != null && !oldValue.equals(newValue))
                     upd.addUpdAttribute(attrName, newValue);
-                else if(oldValue == null && newValue != null)
+                else if (oldValue == null && newValue != null)
                     upd.addUpdAttribute(attrName, newValue);
             }
             // if no snapshot exists, just add the fresh value to update clause
@@ -134,19 +122,19 @@ public class QueryHelper  {
         // original snapshot can have extra keys that are missing in current snapshot
         // process those
         Iterator origit = committedSnapshot.keySet().iterator();
-        while(origit.hasNext()) {
-            String attrName = (String)origit.next();
-            if(currentSnapshot.containsKey(attrName))
+        while (origit.hasNext()) {
+            String attrName = (String) origit.next();
+            if (currentSnapshot.containsKey(attrName))
                 continue;
 
             Object oldValue = committedSnapshot.get(attrName);
-            if(oldValue == null)
+            if (oldValue == null)
                 continue;
 
             upd.addUpdAttribute(attrName, null);
         }
 
-        if(upd.getUpdAttributes().size() > 0) {
+        if (upd.getUpdAttributes().size() > 0) {
             // set qualifier
             upd.setQualifier(qualifierForDbMap(id.getIdSnapshot()));
             return upd;
@@ -156,7 +144,7 @@ public class QueryHelper  {
     }
 
     /** Generates a delete query for a specified data object */
-    public DeleteQuery deleteQuery(DataObject dataObject) {
+    public static DeleteQuery deleteQuery(DataObject dataObject) {
         DeleteQuery del = new DeleteQuery();
         ObjectId id = dataObject.getObjectId();
         del.setObjEntityName(id.getObjEntityName());
@@ -170,7 +158,7 @@ public class QueryHelper  {
      *  @param permId permanent object id that will be assigned to this data object after
      *  it is committed to the database.
      */
-    public InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
+    public static InsertQuery insertQuery(Map objectSnapshot, ObjectId permId) {
         InsertQuery ins = new InsertQuery();
         ins.setObjEntityName(permId.getObjEntityName());
         ins.setObjectSnapshot(objectSnapshot);
@@ -178,22 +166,59 @@ public class QueryHelper  {
         return ins;
     }
 
-
     /** Generates a select query that can be used to fetch an object for object id. */
-    public SelectQuery selectObjectForId(ObjectId oid) {
+    public static SelectQuery selectObjectForId(ObjectId oid) {
         SelectQuery sel = new SelectQuery();
         sel.setObjEntityName(oid.getObjEntityName());
         sel.setQualifier(qualifierForDbMap(oid.getIdSnapshot()));
         return sel;
     }
 
+    /** 
+     * Creates and returns SelectQuery for a given SelectQuery and
+     * relationship prefetching path.
+     */
+    public static SelectQuery selectPrefetchPath(
+        QueryEngine e,
+        SelectQuery q,
+        String prefetchPath) {
+        ObjEntity ent = e.lookupEntity(q.getObjEntityName());
+        SelectQuery newQ = new SelectQuery();
 
-    /** Generates a select query that can be used to fetch object relationship destination. */
-    public SelectQuery selectRelationshipObjects(ObjectId oid, String relName) {
+        Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, prefetchPath);
+        Iterator it = ent.resolvePathComponents(exp);
+        Relationship r = null;
+        while (it.hasNext()) {
+            r = (Relationship) it.next();
+        }
+
+        newQ.setObjEntityName(r.getTargetEntity().getName());
+        newQ.setQualifier(transformQualifier(q, prefetchPath));
+        return newQ;
+    }
+
+    public static Expression transformQualifier(QualifiedQuery q, String relPath) {
+        Expression qual = q.getQualifier();
+        if (qual == null) {
+            return null;
+        }
+
+        return ExpressionFactory.binaryExp(Expression.EQUAL_TO, "a", "b");
+    }
+
+    /** 
+     * Generates a SelectQuery that can be used to fetch 
+     * relationship destination objects given a source object
+     * of a to-many relationship. 
+     */
+    public static SelectQuery selectRelationshipObjects(
+        QueryEngine e,
+        ObjectId oid,
+        String relName) {
         SelectQuery sel = new SelectQuery();
-        ObjEntity ent = queryEngine.lookupEntity(oid.getObjEntityName());
-        ObjRelationship rel = (ObjRelationship)ent.getRelationship(relName);
-        ObjEntity destEnt = (ObjEntity)rel.getTargetEntity();
+        ObjEntity ent = e.lookupEntity(oid.getObjEntityName());
+        ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
+        ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
         sel.setObjEntityName(destEnt.getName());
 
         // convert source PK into destination FK definition,
@@ -201,11 +226,14 @@ public class QueryHelper  {
         List dbRels = rel.getDbRelationshipList();
 
         // no support for flattened rels yet...
-        if(dbRels == null || dbRels.size() != 1)
-            throw new CayenneRuntimeException("ObjRelationship has invalid/unsupported DbRelationships...");
+        if (dbRels == null || dbRels.size() != 1) {
+            throw new CayenneRuntimeException("ObjRelationship has invalid/unsupported DbRelationships.");
+        }
 
-        DbRelationship dbRel = (DbRelationship)dbRels.get(0);
-        Map fkAttrs = dbRel.getReverseRelationship().srcFkSnapshotWithTargetSnapshot(oid.getIdSnapshot());
+        DbRelationship dbRel = (DbRelationship) dbRels.get(0);
+        Map fkAttrs =
+            dbRel.getReverseRelationship().srcFkSnapshotWithTargetSnapshot(
+                oid.getIdSnapshot());
         sel.setQualifier(qualifierForDbMap(fkAttrs));
         return sel;
     }

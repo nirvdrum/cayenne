@@ -160,8 +160,9 @@ public abstract class Entity {
     }
 
 
-    /** Processes expression <code>objPathExp</code> and returns an Iterator
-     * of path components that contains a sequence of ObjAttributes and ObjRelationships.
+    /** 
+     * Processes expression <code>objPathExp</code> and returns an Iterator
+     * of path components that contains a sequence of Attributes and Relationships.
      * Note that if path is invalid and can not be resolved from this entity,
      * this method will still return an Iterator, but an attempt to read the first
      * invalid path component will result in ExpressionException.
@@ -183,7 +184,7 @@ public abstract class Entity {
 
 
     // Used to return an iterator to callers of 'resolvePathComponents'
-    class PathIterator implements Iterator {
+    final class PathIterator implements Iterator {
         private StringTokenizer toks;
         private Entity currentEnt;
 

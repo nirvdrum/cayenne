@@ -61,9 +61,10 @@ import java.util.List;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.query.Query;
 
-/** Subclass of DefaultOperationObserver that accumulates 
- *  select query results in internal list. This is a helper
- *  class for classes that work with DataNode directly, bypassing DataContext. 
+/** 
+ * Subclass of DefaultOperationObserver that accumulates 
+ * select query results in internal list. This is a helper
+ * class for classes that work with DataNode directly, bypassing DataContext. 
  * 
  * <p>If exceptions happen during the execution, they are immediately rethrown.
  * </p>
@@ -72,7 +73,17 @@ import org.objectstyle.cayenne.query.Query;
  */
 public class SelectOperationObserver extends DefaultOperationObserver {
     protected ArrayList results = new ArrayList();
+    protected int selectCount;
 
+    /** 
+     * Returns a count of select queries that returned results
+     * since the last time "clear" was called, or since this object
+     * was created.
+     */
+    public int getSelectCount() {
+        return selectCount;
+    }
+    
     /** Returns query results accumulated during query execution with this
      * object as an operation observer. */
     public List getResults() {
@@ -81,6 +92,7 @@ public class SelectOperationObserver extends DefaultOperationObserver {
 
     /** Clears fetched objects stored in an internal list. */
     public void clear() {
+        selectCount = 0;
         results.clear();
     }
     
@@ -93,6 +105,8 @@ public class SelectOperationObserver extends DefaultOperationObserver {
         if(resultSnapshots != null) {
             results.addAll(resultSnapshots);
         }
+        
+        selectCount++;
     }
     
     /** Overrides superclass implementation to rethrow an exception

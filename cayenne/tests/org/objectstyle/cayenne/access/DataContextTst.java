@@ -89,7 +89,7 @@ public class DataContextTst extends TestCase {
         TestMain.getSharedDatabaseSetup().cleanTableData();
         populateTables();
 
-        DataDomain dom = org.objectstyle.TestMain.getSharedDomain();
+        DataDomain dom = TestMain.getSharedDomain();
         dom.getDataNodes()[0].createPkSupportForMapEntities();
 
         ctxt = dom.createDataContext();
@@ -161,6 +161,17 @@ public class DataContextTst extends TestCase {
         assertNull(ctxt.lookupEntity("NonExistent"));
     }
 
+   public void testPrefetch1() throws java.lang.Exception {
+        SelectQuery q = new SelectQuery("Artist");
+        q.addPrefetch("paintingArray");
+        
+        SelectOperationObserver o = new SelectOperationObserver();
+        o.
+        ctxt.performQuery(q, o);
+        assertEquals(2, o.getSelectCount());
+    }
+    
+    
     public void testPerformQueries() throws Exception {
         SelectQuery q1 = new SelectQuery();
         q1.setObjEntityName("Artist");
