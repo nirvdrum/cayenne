@@ -75,3 +75,7 @@ in a HOLLOW object that will be fully fetched when it is
 21. Fixed flattened relationships on a series of toOne dbrelationships 
 (didn't work at all before)
 
+22. Made connection pool more robust performing automated reconnection on certain errors
+(works only on Oracle), lazy initial connection, and accurate connection events logging.
+
+
