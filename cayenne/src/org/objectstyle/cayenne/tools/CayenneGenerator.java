@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.tools;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
@@ -80,6 +82,7 @@ public class CayenneGenerator extends Task {
 
 	protected File map;
 	protected File project;
+	protected File[] mapDeps;
 	protected DefaultClassGenerator generator;
 	protected DisconnectedConfiguration config;
 
@@ -125,7 +128,8 @@ public class CayenneGenerator extends Task {
 		DataMap[] dataMaps = loadDataMaps();
 
 		for (int i = 0; i < dataMaps.length; i++) {
-			File mapFile = new File(config.projectDir(), dataMaps[i].getLocation());
+			File mapFile =
+				new File(config.projectDir(), dataMaps[i].getLocation());
 			generator.setTimestamp(mapFile.lastModified());
 			generator.setObjEntities(dataMaps[i].getObjEntitiesAsList());
 			generator.validateAttributes();
@@ -146,22 +150,40 @@ public class CayenneGenerator extends Task {
 		// Configuration.setLogLevel(Level.SEVERE);
 		config = new DisconnectedConfiguration(project);
 		config.init();
-		
+
 		ArrayList allMaps = new ArrayList();
 		Iterator domains = config.getDomainList().iterator();
-		while(domains.hasNext()) {
-			DataDomain dom = (DataDomain)domains.next();
+		while (domains.hasNext()) {
+			DataDomain dom = (DataDomain) domains.next();
 			allMaps.addAll(dom.getMapList());
 		}
-		
+
 		DataMap[] maps = new DataMap[allMaps.size()];
-		return (DataMap[])allMaps.toArray(maps);
+		return (DataMap[]) allMaps.toArray(maps);
 	}
 
 	/** Loads and returns DataMap based on <code>map</code> attribute. */
 	protected DataMap loadDataMap() throws Exception {
 		InputSource in = new InputSource(map.getCanonicalPath());
-		return new GenMapLoader().loadDataMap(in);
+		return new GenMapLoader().loadDataMap(in, loadDependencies());
+	}
+
+	/**
+	 * Loads and returns DataMaps that are required by this map to resolve
+	 * dependencies. If no dependencies found, returns empty array.
+	 */
+	protected List loadDependencies() throws Exception {
+		ArrayList deps = new ArrayList();
+
+		if (mapDeps != null && mapDeps.length > 0) {
+			GenMapLoader loader = new GenMapLoader();
+			for (int i = 0; i < mapDeps.length; i++) {
+				InputSource in = new InputSource(mapDeps[i].getCanonicalPath());
+				deps.add(loader.loadDataMap(in));
+			}
+		}
+
+		return deps;
 	}
 
 	/** 
@@ -195,6 +217,10 @@ public class CayenneGenerator extends Task {
 	 */
 	public void setDestDir(File destDir) {
 		generator.setDestDir(destDir);
+	}
+
+	public void setMapDeps(String mapDeps) {
+		this.mapDeps = new MapDependencies(mapDeps).getMaps();
 	}
 
 	/**
@@ -237,5 +263,26 @@ public class CayenneGenerator extends Task {
 	 */
 	public void setSuperpkg(String superpkg) {
 		generator.setSuperPkg(superpkg);
+	}
+
+	class MapDependencies {
+		File[] maps;
+
+		public MapDependencies(String str) {
+			if (str != null) {
+				StringTokenizer toks = new StringTokenizer(str, ",");
+				int len = toks.countTokens();
+				maps = new File[len];
+				for (int i = 0; i < len; i++) {
+					maps[i] = new File(toks.nextToken());
+				}
+			} else {
+				maps = new File[0];
+			}
+		}
+
+		public File[] getMaps() {
+			return maps;
+		}
 	}
 }
