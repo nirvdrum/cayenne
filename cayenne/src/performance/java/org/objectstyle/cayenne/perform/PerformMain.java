@@ -55,6 +55,8 @@
  */
 package org.objectstyle.cayenne.perform;
 
+import java.util.Iterator;
+
 import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
@@ -214,12 +216,11 @@ public class PerformMain {
             node.addDataMap(map);
 
             // generate pk's
-            DataMap[] dataMaps = node.getDataMaps();
-            int len = dataMaps.length;
-            for (int i = 0; i < len; i++) {
+            Iterator dataMaps = node.getDataMapsAsList().iterator();
+			while (dataMaps.hasNext()) {
                 node.getAdapter().getPkGenerator().createAutoPk(
                     node,
-                    dataMaps[i].getDbEntitiesAsList());
+                    ((DataMap)dataMaps.next()).getDbEntitiesAsList());
             }
 
             // domain

@@ -74,7 +74,7 @@ public class PkGeneratorTst extends CayenneTestCase {
     protected void setUp() throws java.lang.Exception {
         getDatabaseSetup().cleanTableData();
 
-        node = getDomain().getDataNodes()[0];
+        node = (DataNode)getDomain().getDataNodesAsList().get(0);
         pkGen = node.getAdapter().getPkGenerator();
         paintEnt = node.getEntityResolver().lookupObjEntity("Painting").getDbEntity();
         List list = new ArrayList();

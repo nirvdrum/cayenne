@@ -167,19 +167,14 @@ public class EntityResolver {
         clearCache();
         Iterator mapIterator = maps.iterator();
         while (mapIterator.hasNext()) {
-            int i;
             DataMap thisMap = (DataMap) mapIterator.next();
-
-            ObjEntity[] objEntities = thisMap.getObjEntities();
-
-            for (i = 0; i < objEntities.length; i++) {
-                ObjEntity oe = objEntities[i];
+            Iterator objEntities = thisMap.getObjEntitiesAsList().iterator();
+            while (objEntities.hasNext()) {
+                ObjEntity oe = (ObjEntity)objEntities.next();
                 DbEntity de = oe.getDbEntity();
                 dbEntityCache.put(oe, de);
                 Class entityClass;
                 try {
-                    //CTM Should this be using  Configuration.getResourceLoader().loadClass(oe.getClassName()) ???
-                    //entityClass = Class.forName(oe.getClassName());
                   entityClass = Configuration.getResourceLoader().loadClass(oe.getClassName());
                 } catch (ClassNotFoundException e) {
                     throw new CayenneRuntimeException(
