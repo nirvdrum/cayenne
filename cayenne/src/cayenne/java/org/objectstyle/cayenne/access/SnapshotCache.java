@@ -156,7 +156,9 @@ public class SnapshotCache implements Serializable {
                 "No matching objects found for ObjectId " + oid);
         }
         else {
-            return (Snapshot) results.get(0);
+        	Snapshot snapshot = (Snapshot) results.get(0);
+			snapshots.addObject(oid, snapshot);
+            return snapshot;
         }
     }
 

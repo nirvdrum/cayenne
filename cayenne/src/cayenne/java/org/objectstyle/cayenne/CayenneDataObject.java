@@ -209,7 +209,6 @@ public class CayenneDataObject implements DataObject {
         }
 
         try {
-            // first try refreshing from snapshot
             Map snapshot =
                 dataContext.getObjectStore().getSnapshot(objectId, dataContext);
 

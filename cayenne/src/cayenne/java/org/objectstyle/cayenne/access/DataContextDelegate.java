@@ -59,20 +59,17 @@ package org.objectstyle.cayenne.access;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 
 /**
- * Defines a set of callback methods for a DataContext to notify interested 
- * objects about different stages of context operation.  This Interface adds 
- * callback methods.
- *
- * <p>Implementing objects are registered with a DataContext. DataContext will pass
- * information about the execution of certain kinds of operations to the interested
- * objects.  Registered delegates are not notified in any particular order.</p>
- * 
- * <p><i>For more information see <a href="../../../../../../userguide/index.html"
- * target="_top">Cayenne User Guide.</a></i></p>
+ * Defines API for a DataContext "delegate" - an object that is temporarily passed control 
+ * by DataContext at some critical points in the normal flow of execution. A delegate thus can 
+ * modify the flow, abort an operation, modify the objects participating in an operation, 
+ * or perform any other tasks it deems necessary.
  * 
  * @see org.objectstyle.cayenne.access.DataContext
  * 
  * @author Mike Kienenberger
+ * @author Andrus Adamchik
+ * 
+ * @since 1.1
  */
 public interface DataContextDelegate {
 	
