@@ -480,9 +480,11 @@ implements TreeSelectionListener, DomainDisplayListener, DomainListener
 		while (data_sources.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode)data_sources.nextElement();
-			DataNodeWrapper wrap = (DataNodeWrapper)temp_node.getUserObject();
-			if (wrap.getDataNode() == data)
-				return temp_node;
+			if (temp_node.getUserObject() instanceof DataNodeWrapper) {
+				DataNodeWrapper wrap = (DataNodeWrapper)temp_node.getUserObject();
+				if (wrap.getDataNode() == data)
+					return temp_node;
+			}
 		}
 		return null;
 	}

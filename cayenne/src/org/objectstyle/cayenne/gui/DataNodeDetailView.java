@@ -151,8 +151,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 
 		Component[] right_comp = new Component[3];
 		right_comp[0] = name;
-		right_comp[1] = location;
-		right_comp[2] = fileChooser;
+		right_comp[1] = fileChooser;
+		right_comp[2] = factory;
 
 		JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
 		add(temp, constraints);
@@ -189,6 +189,7 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		temp = PanelFactory.createForm(left_comp, right_comp, 5,5,5,5);
 		TitledBorder border;
 		border = BorderFactory.createTitledBorder("Data Source Info");
+		temp.setBorder(border);
 		constraints.gridheight = 2;
 		constraints.gridy = 1;
 		add(temp, constraints);

@@ -140,6 +140,8 @@ implements ActionListener
             createDomain();
         } else if (src == createDataMapMenu) {
         	mediator.addDataMap(this, new DataMap(DataMapWrapper.sessionUniqueDomainName()));
+    	} else if (src == createDataSourceMenu) {
+    		createDataNode();
         } else if (src == createObjEntityMenu) {
         	createObjEntity();
         } else if (src == createDbEntityMenu) {
@@ -472,6 +474,17 @@ implements ActionListener
 		mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
 	}
 		
+	private void createDataNode() {
+		DataNode node = new DataNode("Untitled");
+		GuiDataSource src;
+		src = new GuiDataSource(new DataSourceInfo());
+		node.setDataSource(src);
+		DataDomain domain = mediator.getCurrentDataDomain();
+		domain.addNode(node);
+		mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
+		mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
+	}
+		
 	
 	public void currentDomainChanged(DomainDisplayEvent e){
 		enableDomainMenu();
@@ -567,7 +580,7 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
     JPanel detailPanel = new JPanel();
     JPanel emptyPanel = new JPanel();
     DomainDetailView domainView;
-    JPanel nodeView = new JPanel();
+    DataNodeDetailView nodeView;
     JPanel dataMapView = new JPanel();
     ObjDetailView objDetailView;
     DbDetailView dbDetailView;
@@ -590,6 +603,8 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
 		detailPanel.add(temp, EMPTY_VIEW);
 		domainView = new DomainDetailView(temp_mediator);
 		detailPanel.add(domainView, DOMAIN_VIEW);
+		nodeView = new DataNodeDetailView(temp_mediator);
+		detailPanel.add(nodeView, NODE_VIEW);
 		
         objDetailView = new ObjDetailView(temp_mediator);
         detailPanel.add(objDetailView, OBJ_VIEW);
@@ -610,7 +625,7 @@ implements ObjEntityDisplayListener, DbEntityDisplayListener
 
    	public void currentDataNodeChanged(DataNodeDisplayEvent e)
    	{
-   		detailLayout.show(detailPanel, EMPTY_VIEW);
+   		detailLayout.show(detailPanel, NODE_VIEW);
    	}
     
 
