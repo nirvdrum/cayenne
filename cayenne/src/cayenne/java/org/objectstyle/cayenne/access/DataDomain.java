@@ -96,9 +96,9 @@ public class DataDomain implements QueryEngine {
         "cayenne.DataDomain.validatingObjectsOnCommit";
     public static final boolean VALIDATING_OBJECTS_ON_COMMIT_DEFAULT = true;
 
-    public static final String USING_INTERNAL_TRANSACTIONS_PROPERTY =
-        "cayenne.DataDomain.usingInternalTransactions";
-    public static final boolean USING_INTERNAL_TRANSACTIONS_DEFAULT = true;
+    public static final String USING_EXTERNAL_TRANSACTIONS_PROPERTY =
+        "cayenne.DataDomain.usingExternalTransactions";
+    public static final boolean USING_EXTERNAL_TRANSACTIONS_DEFAULT = false;
 
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
@@ -128,9 +128,11 @@ public class DataDomain implements QueryEngine {
     protected DataRowStore sharedSnapshotCache;
     protected TransactionDelegate transactionDelegate;
     protected String name;
+
+    // these are initializable from properties...
     protected boolean sharedCacheEnabled;
     protected boolean validatingObjectsOnCommit;
-    protected boolean usingInternalTransactions;
+    protected boolean usingExternalTransactions;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -140,9 +142,12 @@ public class DataDomain implements QueryEngine {
         this("default");
     }
 
-    /** Creates DataDomain and assigns it a <code>name</code>. */
+    /** 
+     * Creates a DataDomain and assigns it a name. 
+     */
     public DataDomain(String name) {
-        this(name, null);
+        setName(name);
+        resetProperties();
     }
 
     /**
@@ -154,13 +159,28 @@ public class DataDomain implements QueryEngine {
      */
     public DataDomain(String name, Map properties) {
         setName(name);
-        initFromProperties(properties);
+        initWithProperties(properties);
     }
 
     /**
      * @since 1.1
      */
-    protected void initFromProperties(Map properties) {
+    protected void resetProperties() {
+        if (properties != null) {
+            properties.clear();
+        }
+
+        sharedCacheEnabled = SHARED_CACHE_ENABLED_DEFAULT;
+        validatingObjectsOnCommit = VALIDATING_OBJECTS_ON_COMMIT_DEFAULT;
+        usingExternalTransactions = USING_EXTERNAL_TRANSACTIONS_DEFAULT;
+    }
+
+    /**
+     * Reinitializes domain state with a new set of properties.
+     * 
+     * @since 1.1
+     */
+    public void initWithProperties(Map properties) {
         // create map with predictable modification and synchronization behavior
         Map localMap = new HashMap();
         if (properties != null) {
@@ -172,8 +192,8 @@ public class DataDomain implements QueryEngine {
         Object sharedCacheEnabled = localMap.get(SHARED_CACHE_ENABLED_PROPERTY);
         Object validatingObjectsOnCommit =
             localMap.get(VALIDATING_OBJECTS_ON_COMMIT_PROPERTY);
-        Object usingInternalTransactions =
-            localMap.get(USING_INTERNAL_TRANSACTIONS_PROPERTY);
+        Object usingExternalTransactions =
+            localMap.get(USING_EXTERNAL_TRANSACTIONS_PROPERTY);
 
         if (logObj.isDebugEnabled()) {
             logObj.debug(
@@ -186,7 +206,11 @@ public class DataDomain implements QueryEngine {
                     + VALIDATING_OBJECTS_ON_COMMIT_PROPERTY
                     + " = "
                     + validatingObjectsOnCommit);
-
+            logObj.debug(
+                "DataDomain property "
+                    + USING_EXTERNAL_TRANSACTIONS_PROPERTY
+                    + " = "
+                    + usingExternalTransactions);
         }
 
         // init ivars from properties
@@ -198,10 +222,10 @@ public class DataDomain implements QueryEngine {
             (validatingObjectsOnCommit != null)
                 ? "true".equalsIgnoreCase(validatingObjectsOnCommit.toString())
                 : VALIDATING_OBJECTS_ON_COMMIT_DEFAULT;
-        this.usingInternalTransactions =
-            (usingInternalTransactions != null)
-                ? "true".equalsIgnoreCase(usingInternalTransactions.toString())
-                : USING_INTERNAL_TRANSACTIONS_DEFAULT;
+        this.usingExternalTransactions =
+            (usingExternalTransactions != null)
+                ? "true".equalsIgnoreCase(usingExternalTransactions.toString())
+                : USING_EXTERNAL_TRANSACTIONS_DEFAULT;
     }
 
     /** Returns "name" property value. */
@@ -256,8 +280,8 @@ public class DataDomain implements QueryEngine {
      * 
      * @since 1.1
      */
-    public boolean isUsingInternalTransactions() {
-        return usingInternalTransactions;
+    public boolean isUsingExternalTransactions() {
+        return usingExternalTransactions;
     }
 
     /**
@@ -266,8 +290,8 @@ public class DataDomain implements QueryEngine {
      * 
      * @since 1.1
      */
-    public void setUsingInternalTransactions(boolean flag) {
-        this.usingInternalTransactions = flag;
+    public void setUsingExternalTransactions(boolean flag) {
+        this.usingExternalTransactions = flag;
     }
 
     /**
@@ -499,9 +523,9 @@ public class DataDomain implements QueryEngine {
      * @since 1.1
      */
     public Transaction createTransaction() {
-        return (isUsingInternalTransactions())
-            ? Transaction.internalTransaction(getTransactionDelegate())
-            : Transaction.externalTransaction(getTransactionDelegate());
+        return (isUsingExternalTransactions())
+            ? Transaction.externalTransaction(getTransactionDelegate())
+            : Transaction.internalTransaction(getTransactionDelegate());
     }
 
     /** 

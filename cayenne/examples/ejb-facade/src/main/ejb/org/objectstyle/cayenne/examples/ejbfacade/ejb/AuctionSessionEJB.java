@@ -52,9 +52,7 @@ import javax.ejb.EJBException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.examples.ejbfacade.model.Auction;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -62,7 +60,7 @@ import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
- * SessionBean Facade to the Auction business
+ * SessionBean Facade to the Auction business.
  * 
  * @author Andrei Adamchik
  * 
@@ -75,7 +73,6 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class AuctionSessionEJB implements SessionBean {
 
     protected SessionContext ejbContext;
-    protected DataContext cayenneContext;
 
     public AuctionSessionEJB() {
     }
@@ -87,11 +84,6 @@ public class AuctionSessionEJB implements SessionBean {
      */
     public void ejbCreate() throws CreateException {
         System.out.println("AuctionSessionEJB.ejbCreate()");
-
-        // configure container transactions
-        Configuration.getSharedConfiguration().getDomain().setUsingInternalTransactions(
-            false);
-        cayenneContext = DataContext.createDataContext();
     }
 
     /**
@@ -108,6 +100,11 @@ public class AuctionSessionEJB implements SessionBean {
         SelectQuery query = new SelectQuery(Auction.class, qualifier);
         query.addOrdering("name", Ordering.ASC);
 
+        // note that if we want to reuse a DataContext across remote method
+        // invocations, it must be rolled back in the beginning of each method.
+        // We'll be creating a new one for each call.
+        DataContext cayenneContext = DataContext.createDataContext();
+
         return cayenneContext.performQuery(query);
     }
 
@@ -119,6 +116,11 @@ public class AuctionSessionEJB implements SessionBean {
     public void createAuction(String name, Date starts, Date ends)
         throws RemoteException {
         System.out.println("AuctionSessionEJB.createAuction()");
+
+        // note that if we want to reuse a DataContext across remote method
+        // invocations, it must be rolled back in the beginning of each method.
+        // We'll be creating a new one for each call.
+        DataContext cayenneContext = DataContext.createDataContext();
 
         Auction auction =
             (Auction) cayenneContext.createAndRegisterNewObject(Auction.class);
@@ -134,16 +136,7 @@ public class AuctionSessionEJB implements SessionBean {
         // must commit Cayenne context explicitly
         // since Cayenne is running under container transaction control
         // this will store the data to DB, but will not commit the underlying connections
-        try {
-            cayenneContext.commitChanges();
-        }
-        catch (CayenneRuntimeException ex) {
-            // make sure we do not leave dirty context for the next invocation
-            // .. alternatively we can create a new one on each request
-            cayenneContext.rollbackChanges();
-            throw ex;
-        }
-
+        cayenneContext.commitChanges();
     }
 
     public void ejbActivate() throws EJBException, RemoteException {
@@ -156,9 +149,6 @@ public class AuctionSessionEJB implements SessionBean {
 
     public void ejbRemove() throws EJBException, RemoteException {
         System.out.println("AuctionSessionEJB.ejbRemove()");
-
-        // might as well reset the context
-        cayenneContext = null;
     }
 
     public void setSessionContext(SessionContext ejbContext)

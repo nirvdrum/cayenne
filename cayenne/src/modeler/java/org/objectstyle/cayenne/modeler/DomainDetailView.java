@@ -101,6 +101,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
     protected JTextField name;
     protected JTextField cacheSize;
     protected JCheckBox objectValidation;
+    protected JCheckBox externalTransactions;
     protected JCheckBox sharedCache;
     protected JCheckBox remoteUpdates;
     protected JButton configRemoteUpdates;
@@ -116,16 +117,19 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
     }
 
     protected void initView() {
-        this.setLayout(new BorderLayout());
 
+        // create widgets
         this.name = CayenneWidgetFactory.createTextField();
         this.objectValidation = new JCheckBox();
+        this.externalTransactions = new JCheckBox();
         this.cacheSize = CayenneWidgetFactory.createTextField(10);
         this.sharedCache = new JCheckBox();
         this.remoteUpdates = new JCheckBox();
         this.configRemoteUpdates = new JButton("Configure");
         configRemoteUpdates.setEnabled(false);
 
+        // assemble
+        this.setLayout(new BorderLayout());
         FormLayout layout =
             new FormLayout(
                 "right:max(50dlu;pref), 3dlu, left:max(20dlu;pref), 3dlu, left:150",
@@ -136,6 +140,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
         builder.appendSeparator("DataDomain Configuration");
         builder.append("DataDomain Name:", name, 3);
         builder.append("Child DataContexts Validate Objects:", objectValidation, 3);
+        builder.append("Container Transactions Control:", externalTransactions, 3);
 
         builder.appendSeparator("Cache Configuration");
         builder.append("Max. Number of Objects:", cacheSize, 3);
@@ -164,6 +169,16 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
                     DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
                     value,
                     Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT));
+            }
+        });
+
+        externalTransactions.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String value = externalTransactions.isSelected() ? "true" : "false";
+                setDomainProperty(
+                    DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
+                    value,
+                    Boolean.toString(DataDomain.USING_EXTERNAL_TRANSACTIONS_DEFAULT));
             }
         });
 
@@ -280,6 +295,11 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
             getDomainBooleanProperty(
                 DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
                 Boolean.toString(DataDomain.VALIDATING_OBJECTS_ON_COMMIT_DEFAULT)));
+
+        externalTransactions.setSelected(
+            getDomainBooleanProperty(
+                DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
+                Boolean.toString(DataDomain.USING_EXTERNAL_TRANSACTIONS_DEFAULT)));
 
         sharedCache.setSelected(
             getDomainBooleanProperty(

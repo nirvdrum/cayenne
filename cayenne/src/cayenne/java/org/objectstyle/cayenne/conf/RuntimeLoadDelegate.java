@@ -170,7 +170,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             throw new ConfigurationException("Domain is not loaded: " + domainName);
         }
         
-        domain.getProperties().putAll(properties);
+        domain.initWithProperties(properties);
     }
 
 

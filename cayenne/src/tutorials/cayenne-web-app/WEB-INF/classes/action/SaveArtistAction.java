@@ -32,7 +32,7 @@ public final class SaveArtistAction extends Action {
 		errors = artistForm.validate(mapping, request);
 
 		// Report any errors we have discovered back to the original form
-		if (!errors.empty()) {
+		if (!errors.isEmpty()) {
 			saveErrors(request, errors);
 			saveToken(request);
 			return (new ActionForward(mapping.getInput()));

@@ -363,12 +363,45 @@ public class QueryLogger {
         }
     }
 
+    /**
+     * @deprecated Since 1.1 use {@link #logCommitTransaction(Level,String)}.
+     */
     public static void logCommitTransaction(Level logLevel) {
         logObj.log(logLevel, "+++ transaction committed.");
     }
 
+    /**
+     * @deprecated Since 1.1 use {@link #logRollbackTransaction(Level,String)}.
+     */
     public static void logRollbackTransaction(Level logLevel) {
         logObj.log(logLevel, "*** transaction rolled back.");
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public static void logBeginTransaction(Level logLevel, String transactionLabel) {
+        if (isLoggable(logLevel)) {
+            logObj.log(logLevel, "--- " + transactionLabel);
+        }
+    }
+    
+    /**
+     * @since 1.1
+     */
+    public static void logCommitTransaction(Level logLevel, String transactionLabel) {
+        if (isLoggable(logLevel)) {
+            logObj.log(logLevel, "+++ " + transactionLabel);
+        }
+    }
+
+    /**
+     * @since 1.1
+     */
+    public static void logRollbackTransaction(Level logLevel, String transactionLabel) {
+        if (isLoggable(logLevel)) {
+            logObj.log(logLevel, "*** " + transactionLabel);
+        }
     }
 
     public static void logQueryError(Level logLevel, Throwable th) {

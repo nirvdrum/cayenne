@@ -187,7 +187,9 @@ public class DataDomainTst extends CayenneTestCase {
 
     public void testCreateDataContextWithLocalCache() throws Exception {
         Map properties = new HashMap();
-        properties.put(DataDomain.SHARED_CACHE_ENABLED_PROPERTY, Boolean.FALSE.toString());
+        properties.put(
+            DataDomain.SHARED_CACHE_ENABLED_PROPERTY,
+            Boolean.FALSE.toString());
 
         DataDomain domain = new DataDomain("d1", properties);
         assertFalse(domain.isSharedCacheEnabled());
@@ -213,7 +215,7 @@ public class DataDomainTst extends CayenneTestCase {
             c1.getObjectStore().getDataRowCache());
     }
 
-    public void testCreatedataContextValidation() throws Exception {
+    public void testCreateDataContextValidation() throws Exception {
         Map properties = new HashMap();
         properties.put(
             DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
@@ -226,7 +228,7 @@ public class DataDomainTst extends CayenneTestCase {
         assertTrue(c1.isValidatingObjectsOnCommit());
     }
 
-    public void testCreatedataContextNoValidation() throws Exception {
+    public void testCreateDataContextNoValidation() throws Exception {
         Map properties = new HashMap();
         properties.put(
             DataDomain.VALIDATING_OBJECTS_ON_COMMIT_PROPERTY,
@@ -237,5 +239,31 @@ public class DataDomainTst extends CayenneTestCase {
 
         DataContext c1 = domain.createDataContext(true);
         assertFalse(c1.isValidatingObjectsOnCommit());
+    }
+
+    public void testDataDomainInternalTransactions() throws Exception {
+        Map properties = new HashMap();
+        properties.put(
+            DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
+            Boolean.FALSE.toString());
+
+        DataDomain domain = new DataDomain("d1", properties);
+        assertFalse(domain.isUsingExternalTransactions());
+
+        Transaction transaction = domain.createTransaction();
+        assertTrue(transaction instanceof Transaction.InternalTransaction);
+    }
+
+    public void testDataDomainExternalTransactions() throws Exception {
+        Map properties = new HashMap();
+        properties.put(
+            DataDomain.USING_EXTERNAL_TRANSACTIONS_PROPERTY,
+            Boolean.TRUE.toString());
+
+        DataDomain domain = new DataDomain("d1", properties);
+        assertTrue(domain.isUsingExternalTransactions());
+
+        Transaction transaction = domain.createTransaction();
+        assertTrue(transaction instanceof Transaction.ExternalTransaction);
     }
 }

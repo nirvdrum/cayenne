@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 
 /**
@@ -99,6 +100,7 @@ public abstract class Transaction {
     protected List connections;
     protected int status;
     protected TransactionDelegate delegate;
+    protected Level logLevel;
 
     /**
      * Factory method returning a new transaction instance that would
@@ -132,6 +134,14 @@ public abstract class Transaction {
       */
     protected Transaction() {
         status = STATUS_NO_TRANSACTION;
+    }
+
+    public Level getLogLevel() {
+        return logLevel != null ? logLevel : QueryLogger.DEFAULT_LOG_LEVEL;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
     }
 
     public TransactionDelegate getDelegate() {
@@ -258,11 +268,15 @@ public abstract class Transaction {
         }
 
         protected void processCommit() throws SQLException, CayenneException {
-            // NOOP
+            QueryLogger.logCommitTransaction(
+                getLogLevel(),
+                "no commit - transaction controlled externally.");
         }
 
         protected void processRollback() throws SQLException, CayenneException {
-            // NOOP
+            QueryLogger.logRollbackTransaction(
+                getLogLevel(),
+                "no rollback - transaction controlled externally.");
         }
 
         /**
@@ -288,6 +302,11 @@ public abstract class Transaction {
 
         InternalTransaction(TransactionDelegate delegate) {
             super(delegate);
+        }
+
+        public void begin() {
+            super.begin();
+            QueryLogger.logBeginTransaction(getLogLevel(), "transaction started.");
         }
 
         protected void fixConnectionState(Connection connection) throws SQLException {
@@ -329,12 +348,20 @@ public abstract class Transaction {
                 }
 
                 if (deferredException != null) {
+                    QueryLogger.logRollbackTransaction(
+                        getLogLevel(),
+                        "transaction rolledback.");
                     if (deferredException instanceof SQLException) {
                         throw (SQLException) deferredException;
                     }
                     else {
                         throw new CayenneException(deferredException);
                     }
+                }
+                else {
+                    QueryLogger.logCommitTransaction(
+                        getLogLevel(),
+                        "transaction committed.");
                 }
             }
         }
