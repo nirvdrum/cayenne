@@ -112,6 +112,9 @@ public class PanelFactory {
 		return panel;
 	}
 
+	/**
+	 * @deprecated since Beta 1; use createForm() instead.
+	 */
 	public static JPanel createJDK13Form(
 		Component[] leftComponents,
 		Component[] rightComponents,
