@@ -67,7 +67,7 @@ Oracle types mapping
        <db-type name="DATE"/>
    </jdbc-type>
    <jdbc-type name="TINYINT">
-       <db-type name="TINYINT"/>
+       <db-type name="SMALLINT"/>
    </jdbc-type>
    <jdbc-type name="VARBINARY">
        <db-type name="RAW"/>

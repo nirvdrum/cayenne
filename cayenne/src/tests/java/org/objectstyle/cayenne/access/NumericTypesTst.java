@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.objectstyle.art.SmallintTest;
+import org.objectstyle.art.TinyintTest;
 import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
@@ -99,10 +100,41 @@ public class NumericTypesTst extends CayenneTestCase {
         SmallintTest object = (SmallintTest) objects.get(0);
         assertEquals(new Short("9999"), object.getSmallintCol());
     }
-    
-	public void testShortInInsert() throws Exception {
-		SmallintTest object = (SmallintTest) context.createAndRegisterNewObject("SmallintTest");
-		object.setSmallintCol(new Short("1"));
-		context.commitChanges();
-	}
+
+    public void testShortInInsert() throws Exception {
+        SmallintTest object =
+            (SmallintTest) context.createAndRegisterNewObject("SmallintTest");
+        object.setSmallintCol(new Short("1"));
+        context.commitChanges();
+    }
+
+    public void testTinyintInQualifier() throws Exception {
+        // populate
+        List inserts = new ArrayList(2);
+        inserts.add(
+            new SqlModifyQuery(
+                TinyintTest.class,
+                "insert into TINYINT_TEST (ID, TINYINT_COL) values (1, 81)"));
+        inserts.add(
+            new SqlModifyQuery(
+                TinyintTest.class,
+                "insert into TINYINT_TEST (ID, TINYINT_COL) values (2, 50)"));
+
+        context.performQueries(inserts, new DefaultOperationObserver());
+
+        // test
+        Expression qual = ExpressionFactory.matchExp("tinyintCol", new Byte((byte)81));
+        List objects = context.performQuery(new SelectQuery(TinyintTest.class, qual));
+        assertEquals(1, objects.size());
+
+        TinyintTest object = (TinyintTest) objects.get(0);
+        assertEquals(new Byte((byte)81), object.getTinyintCol());
+    }
+
+    public void testTinyintInInsert() throws Exception {
+        TinyintTest object =
+            (TinyintTest) context.createAndRegisterNewObject("TinyintTest");
+        object.setTinyintCol(new Byte((byte)1));
+        context.commitChanges();
+    }
 }

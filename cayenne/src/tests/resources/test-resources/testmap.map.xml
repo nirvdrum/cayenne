@@ -141,6 +141,10 @@
 		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="SMALLINT_COL" type="SMALLINT"/>
 	</db-entity>
+	<db-entity name="TINYINT_TEST">
+		<db-attribute name="ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="TINYINT_COL" type="TINYINT"/>
+	</db-entity>
 	<db-entity name="ARTIST_ASSETS" parentName="PAINTING">
 		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isGroupBy="true" spec="%@">
 			<db-attribute-ref name="ARTIST_ID"/>
@@ -266,6 +270,9 @@
 	</obj-entity>
 	<obj-entity name="SubPainting" className="org.objectstyle.art.SubPainting" dbEntityName="PAINTING">
 		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-path="PAINTING_TITLE"/>
+	</obj-entity>
+	<obj-entity name="TinyintTest" className="org.objectstyle.art.TinyintTest" dbEntityName="TINYINT_TEST">
+		<obj-attribute name="tinyintCol" type="java.lang.Byte" db-attribute-path="TINYINT_COL"/>
 	</obj-entity>
 	<db-relationship name="artistExhibitArray" source="ARTIST" target="ARTIST_EXHIBIT" toDependentPK="true" toMany="true">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>

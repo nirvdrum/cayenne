@@ -53,75 +53,55 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.dba.sybase;
+package org.objectstyle.cayenne.access.types;
 
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.ResultSet;
 
-import org.objectstyle.cayenne.access.types.ByteArrayType;
-import org.objectstyle.cayenne.access.types.ByteType;
-import org.objectstyle.cayenne.access.types.CharType;
-import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.access.types.ShortType;
-import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.dba.PkGenerator;
-
-/** 
- * DbAdapter implementation for <a href="http://www.sybase.com">Sybase RDBMS</a>.
- *
+/**
+ * Addresses bugs in certain JDBC drivers that do not handle java.lang.Byte 
+ * properly. Recasts java.lang.Byte to java.lang.Integer when 
+ * binding values to PreparedStatement. Drivers that are proven to have issues with
+ * short values are Sybase and Oracle (Mac OS X only).
+ * 
  * @author Andrei Adamchik
+ * @since 1.0.3
  */
-public class SybaseAdapter extends JdbcAdapter {
+public class ByteType extends DefaultType {
+    protected boolean widenBytes;
 
-    /**
-     * Installs appropriate ExtendedTypes as converters for passing values
-     * between JDBC and Java layers.
-     */
-    protected void configureExtendedTypes(ExtendedTypeMap map) {
-        super.configureExtendedTypes(map);
-
-        // create specially configured CharType handler
-        map.registerType(new CharType(true, false));
-
-        // create specially configured ByteArrayType handler
-        map.registerType(new ByteArrayType(true, false));
-
-        // address Sybase driver inability to handle java.lang.Short and java.lang.Byte
-        map.registerType(new ShortType(true));
-        map.registerType(new ByteType(true));
+    public ByteType(boolean widenBytes) {
+        this.widenBytes = widenBytes;
     }
 
-    /** 
-     * Creates and returns a primary key generator. 
-     * Overrides superclass implementation to return an
-     * instance of SybasePkGenerator.
-     */
-    protected PkGenerator createPkGenerator() {
-        return new SybasePkGenerator();
+    public String getClassName() {
+        return Byte.class.getName();
     }
-    /**
-     *
-     */
 
-    public void bindParameter(
-        PreparedStatement statement,
-        Object object,
+    public Object materializeObject(ResultSet rs, int index, int type) throws Exception {
+        byte b = rs.getByte(index);
+        return (rs.wasNull()) ? null : new Byte(b);
+    }
+
+    public Object materializeObject(CallableStatement st, int index, int type)
+        throws Exception {
+        byte b = st.getByte(index);
+        return (st.wasNull()) ? null : new Byte(b);
+    }
+
+    public void setJdbcObject(
+        PreparedStatement st,
+        Object val,
         int pos,
-        int sqlType,
+        int type,
         int precision)
-        throws SQLException, Exception {
+        throws Exception {
 
-        // Sybase driver doesn't like CLOBs and BLOBs as parameters
-        if (object == null) {
-            if (sqlType == Types.CLOB) {
-                sqlType = Types.VARCHAR;
-            }
-            else if (sqlType == Types.BLOB) {
-                sqlType = Types.VARBINARY;
-            }
+        if (widenBytes && (val instanceof Byte)) {
+            val = new Integer(((Byte) val).intValue());
         }
 
-        super.bindParameter(statement, object, pos, sqlType, precision);
+        super.setJdbcObject(st, val, pos, type, precision);
     }
 }
