@@ -56,19 +56,14 @@
 package org.objectstyle.cayenne.gui.util;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.util.logging.Logger;
 
-import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
-import javax.swing.text.Document;
-
-import org.objectstyle.cayenne.gui.Editor;
+import javax.swing.text.JTextComponent;
 
 /**  
  * Common superclass of tables used in Cayenne. COntains some common configuration
@@ -82,7 +77,7 @@ public class CayenneTable extends JTable {
 
 	protected void createDefaultEditors() {
 		super.createDefaultEditors();
-		DefaultCellEditor  temp = new DefaultCellEditor (new JTextField());
+		DefaultCellEditor temp = new DefaultCellEditor(new JTextField());
 		setDefaultEditor(Object.class, temp);
 		setDefaultEditor(String.class, temp);
 	}
@@ -114,4 +109,38 @@ public class CayenneTable extends JTable {
 			getSelectionModel().setSelectionInterval(index, index);
 		}
 	}
+
+	/**
+	 * @see javax.swing.event.CellEditorListener#editingStopped(ChangeEvent)
+	 */
+	public void editingStopped(ChangeEvent e) {
+		super.editingStopped(e);
+
+		// select a row below current row, if this was a text component
+		TableCellEditor editor =
+			this.getCellEditor(getSelectedRow(), getSelectedColumn());
+		if (editor instanceof DefaultCellEditor) {
+			Component comp = ((DefaultCellEditor) editor).getComponent();
+			if (comp instanceof JTextComponent) {
+				int selected = getSelectedRow();
+				if (selected >= 0) {
+					select(selected + 1);
+				}
+			}
+		}
+	}
+
+	/**
+	 * @see javax.swing.JTable#prepareEditor(TableCellEditor, int, int)
+	 */
+	public Component prepareEditor(
+		TableCellEditor editor,
+		int row,
+		int column) {
+
+		logObj.severe("prepare editor");
+		Thread.dumpStack();
+		return super.prepareEditor(editor, row, column);
+	}
+
 }
