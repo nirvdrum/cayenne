@@ -74,148 +74,154 @@ import org.objectstyle.cayenne.CayenneException;
  */
 public class CharType extends AbstractType {
 
-    private static final int BUF_SIZE = 8 * 1024;
+	private static final int BUF_SIZE = 8 * 1024;
 
-    protected boolean trimmingChars;
-    protected boolean usingClobs;
+	protected boolean trimmingChars;
+	protected boolean usingClobs;
 
-    public CharType(boolean trimingChars, boolean usingClobs) {
-        this.trimmingChars = trimingChars;
-        this.usingClobs = usingClobs;
-    }
+	public CharType(boolean trimingChars, boolean usingClobs) {
+		this.trimmingChars = trimingChars;
+		this.usingClobs = usingClobs;
+	}
 
-    public String getClassName() {
-        return String.class.getName();
-    }
+	public String getClassName() {
+		return String.class.getName();
+	}
 
-    /** Return trimmed string. */
-    public Object materializeObject(ResultSet rs, int index, int type)
-        throws Exception {
+	/** Return trimmed string. */
+	public Object materializeObject(ResultSet rs, int index, int type)
+		throws Exception {
 
-        String val = null;
+		String val = null;
 
-        // CLOB handling
-        if (type == Types.CLOB) {
-            val =
-                (isUsingClobs())
-                    ? readClob(rs.getClob(index))
-                    : readCharStream(rs, index);
-        } else {
+		// CLOB handling
+		if (type == Types.CLOB) {
+			val =
+				(isUsingClobs())
+					? readClob(rs.getClob(index))
+					: readCharStream(rs, index);
+		} else {
 
-            val = rs.getString(index);
+			val = rs.getString(index);
 
-            // trim CHAR type
-            if (val != null && type == Types.CHAR && isTrimmingChars()) {
-                val = val.trim();
-            }
+			// trim CHAR type
+			if (val != null && type == Types.CHAR && isTrimmingChars()) {
+				val = val.trim();
+			}
+		}
+
+		return val;
+	}
+
+	/** Return trimmed string. */
+	public Object materializeObject(CallableStatement cs, int index, int type)
+		throws Exception {
+
+		String val = null;
+
+		// CLOB handling
+		if (type == Types.CLOB) {
+			if (!isUsingClobs()) {
+				throw new CayenneException("Character streams are not supported in stored procedure parameters.");
+			}
+
+			val = readClob(cs.getClob(index));
+		} else {
+
+			val = cs.getString(index);
+
+			// trim CHAR type
+			if (val != null && type == Types.CHAR && isTrimmingChars()) {
+				val = val.trim();
+			}
+		}
+
+		return val;
+	}
+
+	public void setJdbcObject(
+		PreparedStatement st,
+		Object val,
+		int pos,
+		int type,
+		int precision)
+		throws Exception {
+
+		// if this is a CLOB column, set the value as "String"
+		// instead. This should work with most drivers
+		if (type == Types.CLOB) {
+			st.setString(pos, (String) val);
+		} else {
+			super.setJdbcObject(st, val, pos, type, precision);
+		}
+	}
+
+	protected String readClob(Clob clob) throws IOException, SQLException {
+        if(clob == null) {
+        	return null;
         }
 
-        return val;
-    }
+		// sanity check on size
+		if (clob.length() > Integer.MAX_VALUE) {
+			throw new IllegalArgumentException(
+				"CLOB is too big to be read as String in memory: "
+					+ clob.length());
+		}
 
-    /** Return trimmed string. */
-    public Object materializeObject(CallableStatement cs, int index, int type)
-        throws Exception {
+		int size = (int) clob.length();
+		int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
 
-        String val = null;
+		Reader in = clob.getCharacterStream();
+		return (in != null)
+			? readValueStream(new BufferedReader(in, bufSize), size, bufSize)
+			: null;
+	}
 
-        // CLOB handling
-        if (type == Types.CLOB) {
-            if (!isUsingClobs()) {
-                throw new CayenneException("Character streams are not supported in stored procedure parameters.");
-            }
+	protected String readCharStream(ResultSet rs, int index)
+		throws IOException, SQLException {
+		Reader in = rs.getCharacterStream(index);
 
-            val = readClob(cs.getClob(index));
-        } else {
+		return (in != null) ? readValueStream(in, -1, BUF_SIZE) : null;
+	}
 
-            val = cs.getString(index);
+	protected String readValueStream(Reader in, int streamSize, int bufSize)
+		throws IOException {
+		char[] buf = new char[bufSize];
+		int read;
+		StringWriter out =
+			(streamSize > 0)
+				? new StringWriter(streamSize)
+				: new StringWriter();
 
-            // trim CHAR type
-            if (val != null && type == Types.CHAR && isTrimmingChars()) {
-                val = val.trim();
-            }
-        }
+		try {
+			while ((read = in.read(buf, 0, bufSize)) >= 0) {
+				out.write(buf, 0, read);
+			}
+			return out.toString();
+		} finally {
+			in.close();
+		}
+	}
 
-        return val;
-    }
+	/**
+	 * Returns <code>true</code> if 'materializeObject' method should trim
+	 * trailing spaces from the CHAR columns. This addresses an issue with some
+	 * JDBC drivers (e.g. Oracle), that return Strings for CHAR columsn  padded
+	 * with spaces.
+	 */
+	public boolean isTrimmingChars() {
+		return trimmingChars;
+	}
 
-    public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+	public void setTrimmingChars(boolean trimingChars) {
+		this.trimmingChars = trimingChars;
+	}
 
-        // if this is a CLOB column, set the value as "String"
-        // instead. This should work with most drivers
-        if (type == Types.CLOB) {
-            st.setString(pos, (String) val);
-        } else {
-            super.setJdbcObject(st, val, pos, type, precision);
-        }
-    }
+	public boolean isUsingClobs() {
+		return usingClobs;
+	}
 
-    protected String readClob(Clob clob) throws IOException, SQLException {
-
-        // sanity check on size
-        if (clob.length() > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(
-                "CLOB is too big to be read as String in memory: "
-                    + clob.length());
-        }
-
-        int size = (int) clob.length();
-        int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
-
-        Reader in = new BufferedReader(clob.getCharacterStream(), bufSize);
-
-        return readValueStream(in, size, bufSize);
-    }
-
-    protected String readCharStream(ResultSet rs, int index)
-        throws IOException, SQLException {
-        return readValueStream(rs.getCharacterStream(index), -1, BUF_SIZE);
-    }
-
-    protected String readValueStream(Reader in, int streamSize, int bufSize)
-        throws IOException {
-        char[] buf = new char[bufSize];
-        int read;
-        StringWriter out =
-            (streamSize > 0)
-                ? new StringWriter(streamSize)
-                : new StringWriter();
-
-        try {
-            while ((read = in.read(buf, 0, bufSize)) >= 0) {
-                out.write(buf, 0, read);
-            }
-            return out.toString();
-        } finally {
-            in.close();
-        }
-    }
-
-    /**
-     * Returns <code>true</code> if 'materializeObject' method should trim
-     * trailing spaces from the CHAR columns. This addresses an issue with some
-     * JDBC drivers (e.g. Oracle), that return Strings for CHAR columsn  padded
-     * with spaces.
-     */
-    public boolean isTrimmingChars() {
-        return trimmingChars;
-    }
-
-    public void setTrimmingChars(boolean trimingChars) {
-        this.trimmingChars = trimingChars;
-    }
-
-    public boolean isUsingClobs() {
-        return usingClobs;
-    }
-
-    public void setUsingClobs(boolean usingClobs) {
-        this.usingClobs = usingClobs;
-    }
+	public void setUsingClobs(boolean usingClobs) {
+		this.usingClobs = usingClobs;
+	}
 }

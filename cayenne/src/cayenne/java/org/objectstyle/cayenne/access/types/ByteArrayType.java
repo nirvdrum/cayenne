@@ -73,166 +73,173 @@ import org.objectstyle.cayenne.CayenneException;
  */
 public class ByteArrayType extends AbstractType {
 
-    private static final int BUF_SIZE = 8 * 1024;
+	private static final int BUF_SIZE = 8 * 1024;
 
-    protected boolean trimmingBytes;
-    protected boolean usingBlobs;
+	protected boolean trimmingBytes;
+	protected boolean usingBlobs;
 
-    /**
-     * Strips null bytes from the byte array, returning a potentially smaller
-     * array that contains no trailing zero bytes.
-     */
-    public static byte[] trimBytes(byte[] bytes) {
-        int bytesToTrim = 0;
-        for (int i = bytes.length - 1; i >= 0; i--) {
-            if (bytes[i] != 0) {
-                bytesToTrim = bytes.length - 1 - i;
-                break;
-            }
-        }
+	/**
+	 * Strips null bytes from the byte array, returning a potentially smaller
+	 * array that contains no trailing zero bytes.
+	 */
+	public static byte[] trimBytes(byte[] bytes) {
+		int bytesToTrim = 0;
+		for (int i = bytes.length - 1; i >= 0; i--) {
+			if (bytes[i] != 0) {
+				bytesToTrim = bytes.length - 1 - i;
+				break;
+			}
+		}
 
-        if (bytesToTrim == 0) {
-            return bytes;
-        }
+		if (bytesToTrim == 0) {
+			return bytes;
+		}
 
-        byte[] dest = new byte[bytes.length - bytesToTrim];
-        System.arraycopy(bytes, 0, dest, 0, dest.length);
-        return dest;
-    }
+		byte[] dest = new byte[bytes.length - bytesToTrim];
+		System.arraycopy(bytes, 0, dest, 0, dest.length);
+		return dest;
+	}
 
-    public ByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
-        this.usingBlobs = usingBlobs;
-        this.trimmingBytes = trimmingBytes;
-    }
+	public ByteArrayType(boolean trimmingBytes, boolean usingBlobs) {
+		this.usingBlobs = usingBlobs;
+		this.trimmingBytes = trimmingBytes;
+	}
 
-    public String getClassName() {
-        return "byte[]";
-    }
+	public String getClassName() {
+		return "byte[]";
+	}
 
-    public Object materializeObject(ResultSet rs, int index, int type)
-        throws Exception {
+	public Object materializeObject(ResultSet rs, int index, int type)
+		throws Exception {
 
-        byte[] bytes = null;
+		byte[] bytes = null;
 
-        if (type == Types.BLOB) {
-            bytes =
-                (isUsingBlobs())
-                    ? readBlob(rs.getBlob(index))
-                    : readBinaryStream(rs, index);
-        } else {
-            bytes = rs.getBytes(index);
+		if (type == Types.BLOB) {
+			bytes =
+				(isUsingBlobs())
+					? readBlob(rs.getBlob(index))
+					: readBinaryStream(rs, index);
+		} else {
+			bytes = rs.getBytes(index);
 
-            // trim BINARY type
-            if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
-                bytes = trimBytes(bytes);
-            }
-        }
+			// trim BINARY type
+			if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
+				bytes = trimBytes(bytes);
+			}
+		}
 
-        return bytes;
-    }
+		return bytes;
+	}
 
-    public Object materializeObject(CallableStatement cs, int index, int type)
-        throws Exception {
+	public Object materializeObject(CallableStatement cs, int index, int type)
+		throws Exception {
 
-        byte[] bytes = null;
+		byte[] bytes = null;
 
-        if (type == Types.BLOB) {
-            if (!isUsingBlobs()) {
-                throw new CayenneException("Binary streams are not supported in stored procedure parameters.");
-            }
-            bytes = readBlob(cs.getBlob(index));
-        } else {
-            
-            bytes = cs.getBytes(index);
+		if (type == Types.BLOB) {
+			if (!isUsingBlobs()) {
+				throw new CayenneException("Binary streams are not supported in stored procedure parameters.");
+			}
+			bytes = readBlob(cs.getBlob(index));
+		} else {
 
-            // trim BINARY type
-            if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
-                bytes = trimBytes(bytes);
-            }
-        }
+			bytes = cs.getBytes(index);
 
-        return bytes;
-    }
+			// trim BINARY type
+			if (bytes != null && type == Types.BINARY && isTrimmingBytes()) {
+				bytes = trimBytes(bytes);
+			}
+		}
 
-    public void setJdbcObject(
-        PreparedStatement st,
-        Object val,
-        int pos,
-        int type,
-        int precision)
-        throws Exception {
+		return bytes;
+	}
 
-        // if this is a BLOB column, set the value as "bytes"
-        // instead. This should work with most drivers
-        if (type == Types.BLOB) {
-            st.setBytes(pos, (byte[]) val);
-        } else {
-            super.setJdbcObject(st, val, pos, type, precision);
-        }
-    }
+	public void setJdbcObject(
+		PreparedStatement st,
+		Object val,
+		int pos,
+		int type,
+		int precision)
+		throws Exception {
 
-    protected byte[] readBlob(Blob blob) throws IOException, SQLException {
+		// if this is a BLOB column, set the value as "bytes"
+		// instead. This should work with most drivers
+		if (type == Types.BLOB) {
+			st.setBytes(pos, (byte[]) val);
+		} else {
+			super.setJdbcObject(st, val, pos, type, precision);
+		}
+	}
 
-        // sanity check on size
-        if (blob.length() > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(
-                "BLOB is too big to be read as byte[] in memory: "
-                    + blob.length());
-        }
+	protected byte[] readBlob(Blob blob) throws IOException, SQLException {
+		if (blob == null) {
+			return null;
+		}
 
-        int size = (int) blob.length();
-        int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
-        InputStream in =
-            new BufferedInputStream(blob.getBinaryStream(), bufSize);
+		// sanity check on size
+		if (blob.length() > Integer.MAX_VALUE) {
+			throw new IllegalArgumentException(
+				"BLOB is too big to be read as byte[] in memory: "
+					+ blob.length());
+		}
 
-        return readValueStream(in, size, bufSize);
-    }
+		int size = (int) blob.length();
+		int bufSize = (size < BUF_SIZE) ? size : BUF_SIZE;
+		InputStream in = blob.getBinaryStream();
+		return (in != null)
+			? readValueStream(
+				new BufferedInputStream(in, bufSize),
+				size,
+				bufSize)
+			: null;
+	}
 
-    protected byte[] readBinaryStream(ResultSet rs, int index)
-        throws IOException, SQLException {
-        return readValueStream(rs.getBinaryStream(index), -1, BUF_SIZE);
-    }
+	protected byte[] readBinaryStream(ResultSet rs, int index)
+		throws IOException, SQLException {
+		InputStream in = rs.getBinaryStream(index);
+		return (in != null) ? readValueStream(in, -1, BUF_SIZE) : null;
+	}
 
-    protected byte[] readValueStream(
-        InputStream in,
-        int streamSize,
-        int bufSize)
-        throws IOException {
+	protected byte[] readValueStream(
+		InputStream in,
+		int streamSize,
+		int bufSize)
+		throws IOException {
 
-        byte[] buf = new byte[bufSize];
-        int read;
-        ByteArrayOutputStream out =
-            (streamSize > 0)
-                ? new ByteArrayOutputStream(streamSize)
-                : new ByteArrayOutputStream();
+		byte[] buf = new byte[bufSize];
+		int read;
+		ByteArrayOutputStream out =
+			(streamSize > 0)
+				? new ByteArrayOutputStream(streamSize)
+				: new ByteArrayOutputStream();
 
-        try {
-            while ((read = in.read(buf, 0, bufSize)) >= 0) {
-                out.write(buf, 0, read);
-            }
-            return out.toByteArray();
-        } finally {
-            in.close();
-        }
-    }
+		try {
+			while ((read = in.read(buf, 0, bufSize)) >= 0) {
+				out.write(buf, 0, read);
+			}
+			return out.toByteArray();
+		} finally {
+			in.close();
+		}
+	}
 
-    /**
-     * Returns <code>true</code> if byte columns are handled as BLOBs
-     * internally.
-     */
-    public boolean isUsingBlobs() {
-        return usingBlobs;
-    }
+	/**
+	 * Returns <code>true</code> if byte columns are handled as BLOBs
+	 * internally.
+	 */
+	public boolean isUsingBlobs() {
+		return usingBlobs;
+	}
 
-    public void setUsingBlobs(boolean usingBlobs) {
-        this.usingBlobs = usingBlobs;
-    }
+	public void setUsingBlobs(boolean usingBlobs) {
+		this.usingBlobs = usingBlobs;
+	}
 
-    public boolean isTrimmingBytes() {
-        return trimmingBytes;
-    }
+	public boolean isTrimmingBytes() {
+		return trimmingBytes;
+	}
 
-    public void setTrimmingBytes(boolean trimingBytes) {
-        this.trimmingBytes = trimingBytes;
-    }
+	public void setTrimmingBytes(boolean trimingBytes) {
+		this.trimmingBytes = trimingBytes;
+	}
 }
