@@ -89,6 +89,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
+import org.objectstyle.cayenne.modeler.control.MapObjRelationshipController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
@@ -229,7 +230,7 @@ public class ObjRelationshipPane
         List db_rel_list = rel.getDbRelationships();
 
         // Choose the relationship to resolve this obj relationship
-        ChooseDbRelationshipDialog dg;
+    /*    ChooseDbRelationshipDialog dg;
         dg =
             new ChooseDbRelationshipDialog(
                 mediator.getCurrentDataMap(),
@@ -259,7 +260,9 @@ public class ObjRelationshipPane
         // If user pressed "Save"
         if (!dialog.isCancelPressed())
             this.copyDbRelationship(rel, dialog.getDbRelationships());
-        dialog.dispose();
+        dialog.dispose(); */
+        
+        new MapObjRelationshipController(mediator, rel).startup();
     }
 
     /**

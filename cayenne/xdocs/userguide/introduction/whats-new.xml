@@ -74,6 +74,10 @@
             <subsection name="1.1.11 CayenneModeler Support for Custom Class Templates.">
             <p></p>
             </subsection>
+            
+            <subsection name="1.1.12 CayenneModeler Support for UI Customizable Classpath for jars.">
+            <p></p>
+            </subsection>
         </subsection>
     </section>
 </body>

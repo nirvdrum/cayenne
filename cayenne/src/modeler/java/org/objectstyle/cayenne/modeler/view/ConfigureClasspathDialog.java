@@ -111,7 +111,7 @@ public class ConfigureClasspathDialog extends SPanel {
 
         STableModel model = new STableModel(table);
         model.setSelector(ConfigureClasspathModel.CUSTOM_CLASSPATH_SELECTOR);
-        model.setColumnNames(new String[] { "Classpath" });
+        model.setColumnNames(new String[] { "Custom Classpath" });
         model.setColumnSelectors(new String[] { "absolutePath" });
 
         table.setModel(model);
@@ -140,6 +140,11 @@ public class ConfigureClasspathDialog extends SPanel {
 
     class ConfigureClasspathTable extends STable {
         final Dimension preferredSize = new Dimension(500, 300);
+
+        ConfigureClasspathTable() {
+            setRowHeight(25);
+            setRowMargin(3);
+        }
 
         public Dimension getPreferredScrollableViewportSize() {
             return preferredSize;
