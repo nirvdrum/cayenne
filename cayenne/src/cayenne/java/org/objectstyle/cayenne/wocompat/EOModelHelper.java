@@ -81,6 +81,7 @@ public class EOModelHelper {
     protected Map entityIndex;
     protected Map entityClassIndex;
     protected DataMap dataMap;
+	private Map prototypeValues;
 
     static {
         // configure locator 
@@ -180,8 +181,6 @@ public class EOModelHelper {
     public Iterator modelNames() {
         return entityClassIndex.keySet().iterator();
     }
-
-    private Map prototypeValues = null;
 
     public Map getPrototypeAttributeMapFor(String aPrototypeAttributeName) {
         if (prototypeValues == null) {

@@ -83,15 +83,6 @@ public abstract class BatchQueryBuilder {
     }
 
     /**
-     * Translates BatchQuery to parameterized SQL string.
-     * 
-     * @deprecated Since 1.0Beta3, createSqlString is used.
-     */
-    public String query(BatchQuery batch) {
-        return createSqlString(batch);
-    }
-
-    /**
      * Translates BatchQuery into an SQL string formatted to use 
      * in a PreparedStatement.
      */

@@ -213,15 +213,6 @@ public abstract class QueryAssemblerHelper {
         buf.append(dbAttr.getAliasedName(alias));
     }
 
-    /**
-     * @deprecated Since 1.0B5, use method that also takes and Expression parameter.
-     */
-    protected void appendLiteral(
-        StringBuffer buf,
-        Object val,
-        DbAttribute attr) {
-        appendLiteral(buf, val, attr, null);
-    }
 
     /**
      * Appends SQL code to the query buffer to handle <code>val</code> as a

@@ -153,13 +153,6 @@ public class Procedure extends MapObject {
     }
 
     /**
-     * @deprecated Since 1.0b4 use getCallOutParameters
-     */
-    public List getCallOutParams() {
-        return getCallOutParameters();
-    }
-
-    /**
      * Returns a list of OUT and INOUT call parameters. If procedure has a
      * return value, it will also be included as a call parameter.
      */

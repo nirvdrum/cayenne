@@ -77,7 +77,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 import org.objectstyle.cayenne.util.NameConverter;
@@ -600,48 +599,6 @@ public class DbLoader {
 
         relationship.setToDependentPK(toDependentPK);
         relationship.setToMany(toMany);
-    }
-
-    /** 
-     * Creates ObjRelationships based on map's previously loaded DbRelationships. 
-     * 
-     * @deprecated Since 1.0b5 this method is no longer used, since loadObjEntities 
-     * takes care of loading attributes and relationships.
-     */
-    public void loadObjRelationships(DataMap map) throws SQLException {
-        Iterator it = map.getObjEntities().iterator();
-        while (it.hasNext()) {
-            ObjEntity objEnt = (ObjEntity) it.next();
-            DbEntity dbEnt = objEnt.getDbEntity();
-
-            // no assumptions should be made about current state of the model,
-            // it might as well contain ObjEntities without DbEntities
-            if (dbEnt == null) {
-                continue;
-            }
-
-            Iterator relIt = dbEnt.getRelationships().iterator();
-            while (relIt.hasNext()) {
-                DbRelationship dbRel = (DbRelationship) relIt.next();
-
-                ObjEntity targetEntity =
-                    (ObjEntity) map
-                        .getMappedEntities((DbEntity) dbRel.getTargetEntity())
-                        .iterator()
-                        .next();
-
-                String name =
-                    uniqueRelName(
-                        objEnt,
-                        targetEntity.getName(),
-                        dbRel.isToMany());
-                ObjRelationship objRel = new ObjRelationship(name);
-                objRel.addDbRelationship(dbRel);
-                objRel.setSourceEntity(objEnt);
-                objRel.setTargetEntity(targetEntity);
-                objEnt.addRelationship(objRel);
-            }
-        }
     }
 
     /** 

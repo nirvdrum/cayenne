@@ -61,7 +61,6 @@ import java.util.List;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
-import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -313,18 +312,6 @@ public class QueryLogger {
 
             logObj.log(logLevel, buf.toString());
         }
-    }
-
-    /**
-     * @deprecated Since 1.0 Beta3 use "logQueryParameters(Level,String,List)"
-     */
-    public static void logBatchQueryParameters(
-        Level logLevel,
-        BatchQuery batch) {
-        logQueryParameters(
-            logLevel,
-            "batch params",
-            batch.getValuesForUpdateParameters());
     }
 
     public static void logQueryParameters(

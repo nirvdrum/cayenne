@@ -89,15 +89,6 @@ public abstract class MapEvent extends CayenneEvent {
 	/**
 	 * Constructor for MapEvent.
 	 * 
-	 * @deprecated Since 1.0b4, use MapEvent(Object, String)
-	 */
-	public MapEvent(Object source, String oldName, String newName) {
-		this(source, oldName);
-	}
-	
-	/**
-	 * Constructor for MapEvent.
-	 * 
 	 * @param source event source
 	 */
 	public MapEvent(Object source, String oldName) {
