@@ -62,6 +62,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -78,6 +80,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -93,9 +96,9 @@ import org.objectstyle.cayenne.project.validator.Validator;
  * @author Michael Misha Shengaout
  * @author Andrei Adamchik
  */
-public class ValidatorDialog
-    extends CayenneDialog
-    implements ListSelectionListener, ActionListener {
+public class ValidatorDialog extends CayenneDialog implements ActionListener {
+
+    private static Logger logObj = Logger.getLogger(ValidatorDialog.class);
 
     protected static ValidatorDialog instance;
 
@@ -161,8 +164,29 @@ public class ValidatorDialog
 
         init();
 
-        this.messages.getSelectionModel().addListSelectionListener(this);
+        this
+            .messages
+            .getSelectionModel()
+            .addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                showFailedObject();
+            }
+        });
+
         this.closeBtn.addActionListener(this);
+
+        // this even handler is needed to show failed object
+        // when the user clicks on an already selected row
+        this.messages.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int row = messages.rowAtPoint(e.getPoint());
+
+                // if this happens to be a selected row, re-run object selection
+                if (row >= 0 && messages.getSelectedRow() == row) {
+                    showFailedObject();
+                }
+            }
+        });
 
         this.pack();
         this.centerWindow();
@@ -192,7 +216,8 @@ public class ValidatorDialog
         messages.getColumnModel().getColumn(1).setPreferredWidth(400);
 
         JButton revalidateBtn =
-            new JButton(Editor.getFrame().getAction(ValidateAction.ACTION_NAME));
+            new JButton(
+                Editor.getFrame().getAction(ValidateAction.ACTION_NAME));
         revalidateBtn.setText("Refresh");
         closeBtn = new JButton("Close");
         JPanel panel =
@@ -202,9 +227,10 @@ public class ValidatorDialog
         getContentPane().add(panel, BorderLayout.CENTER);
     }
 
-    public void valueChanged(ListSelectionEvent e) {
+    protected void showFailedObject() {
         if (messages.getSelectedRow() >= 0) {
-            ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
+            ValidatorTableModel model =
+                (ValidatorTableModel) messages.getModel();
             ValidationInfo obj = model.getValue(messages.getSelectedRow());
             ValidationDisplayHandler.getErrorMsg(obj).displayField(
                 mediator,
@@ -287,11 +313,9 @@ public class ValidatorDialog
                     return "ERROR";
                 else
                     return "WARNING";
-            }
-            else if (col == 1) {
+            } else if (col == 1) {
                 return msg.getMessage();
-            }
-            else
+            } else
                 return "";
         }
 

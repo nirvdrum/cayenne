@@ -8,4 +8,9 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 
-1. 
+1. [BUG 743029] CayenneModeler had problems recognizing one-to-one relationships during
+   reverse engineering. Also "To Dep PK" flag was never set when appropriate. Both problems
+   are fixed.
+   
+2. [BUG 776375] Modifying values of HOLLOW objects was not handled correctly. Object wasn't 
+   refetched as it should've been.
