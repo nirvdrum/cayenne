@@ -93,7 +93,7 @@ public abstract class Configuration {
 	public static final String DEFAULT_CONFIG_CLASS =
 		"org.objectstyle.cayenne.conf.DefaultConfiguration";
 
-	private static Configuration sharedConfig;
+	protected static Configuration sharedConfig;
 	private static boolean loggingConfigured;
 	protected static Level logLevel = Level.DEBUG;
 

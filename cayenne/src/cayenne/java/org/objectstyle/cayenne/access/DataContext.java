@@ -111,12 +111,36 @@ import org.objectstyle.cayenne.query.UpdateQuery;
   */
 public class DataContext implements QueryEngine, Serializable {
     private static Logger logObj = Logger.getLogger(DataContext.class);
-	private Map flattenedInserts = new HashMap();
-	private Map flattenedDeletes = new HashMap();
+    private Map flattenedInserts = new HashMap();
+    private Map flattenedDeletes = new HashMap();
 
     protected transient QueryEngine parent;
     protected transient ObjectStore objectStore;
     protected transient SnapshotManager snapshotManager;
+
+    /**
+     * Convenience method to create a new instance of 
+     * DataContext based on default domain. If more
+     * than one domain exists, createDataContext(String) 
+     * must be used.
+     */
+    public static DataContext createDataContext() {
+        return Configuration.getSharedConfig().getDomain().createDataContext();
+    }
+
+    /**
+     * Convenience method to create a new instance of 
+     * DataContext based on a named domain.
+     * If there is no domain matching the name,
+     * an exception is thrown.
+     */
+    public static DataContext createDataContext(String domainName) {
+    	DataDomain domain = Configuration.getSharedConfig().getDomain(domainName);
+    	if(domain == null) {
+    		throw new IllegalArgumentException("Non-existent domain: " + domainName);
+    	}
+        return domain.createDataContext();
+    }
 
     public DataContext() {
         this(null);
@@ -148,9 +172,9 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     public SnapshotManager getSnapshotManager() {
-    	return snapshotManager;
+        return snapshotManager;
     }
-    
+
     /**
      * Returns ObjectStore associated with this DataContext.
      */
@@ -224,8 +248,13 @@ public class DataContext implements QueryEngine, Serializable {
             if (obj == null) {
                 try {
                     obj = newDataObject(oid.getObjClass().getName());
-              } catch (Exception ex) {
-                    String entity = (oid != null) ? getEntityResolver().lookupObjEntity(oid.getObjClass()).getName() :null;
+                } catch (Exception ex) {
+                    String entity =
+                        (oid != null)
+                            ? getEntityResolver()
+                                .lookupObjEntity(oid.getObjClass())
+                                .getName()
+                            : null;
                     throw new CayenneRuntimeException(
                         "Error creating object for entity '" + entity + "'.",
                         ex);
@@ -342,7 +371,8 @@ public class DataContext implements QueryEngine, Serializable {
      * is determined from ObjEntity. Object class must have a default constructor. 
      */
     public DataObject createAndRegisterNewObject(String objEntityName) {
-        String objClassName = this.getEntityResolver().lookupObjEntity(objEntityName).getClassName();
+        String objClassName =
+            this.getEntityResolver().lookupObjEntity(objEntityName).getClassName();
         DataObject dobj = null;
         try {
             dobj = newDataObject(objClassName);
@@ -362,7 +392,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void registerNewObject(DataObject dataObject, String objEntityName) {
         ObjEntity objEntity = getEntityResolver().lookupObjEntity(objEntityName);
-		registerNewObjectWithEntity(dataObject, objEntity);
+        registerNewObjectWithEntity(dataObject, objEntity);
     }
 
     /** Registers a new object (that is not yet persistent) with itself.
@@ -371,13 +401,15 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void registerNewObject(DataObject dataObject) {
         ObjEntity objEntity = getEntityResolver().lookupObjEntity(dataObject);
-		registerNewObjectWithEntity(dataObject, objEntity);
+        registerNewObjectWithEntity(dataObject, objEntity);
     }
 
-    private void registerNewObjectWithEntity(DataObject dataObject, ObjEntity objEntity) {
+    private void registerNewObjectWithEntity(
+        DataObject dataObject,
+        ObjEntity objEntity) {
         TempObjectId tempId = new TempObjectId(dataObject.getClass());
         dataObject.setObjectId(tempId);
-		// TODO: maybe do a sanity check against class/entity mismatch?
+        // TODO: maybe do a sanity check against class/entity mismatch?
         snapshotManager.prepareForInsert(objEntity, dataObject);
         objectStore.addObject(dataObject);
         dataObject.setDataContext(this);
@@ -428,7 +460,7 @@ public class DataContext implements QueryEngine, Serializable {
      * @param deleteObject data object that we want to delete.
      */
     public void deleteObject(DataObject deleteObject) {
-    	//TODO - figure out what to do when an object is still in PersistenceState.NEW (unregister maybe?)
+        //TODO - figure out what to do when an object is still in PersistenceState.NEW (unregister maybe?)
         deleteObject.setPersistenceState(PersistenceState.DELETED);
     }
 
@@ -464,31 +496,34 @@ public class DataContext implements QueryEngine, Serializable {
      * Rollsback any changes that have occurred to objects
      * registered with this data context.
      */
-	public void rollbackChanges() {
+    public void rollbackChanges() {
         synchronized (objectStore) {
             Iterator it = objectStore.getObjectIterator();
             while (it.hasNext()) {
                 DataObject thisObject = (DataObject) it.next();
                 int objectState = thisObject.getPersistenceState();
-				switch(objectState) {
-					case PersistenceState.NEW:
-						this.unregisterObject(thisObject);
-						break;
-					case PersistenceState.DELETED:
-						//Do the same as for modified... deleted is only a persistence state, so 
-						// rolling the object back will set the state to committed
-					case PersistenceState.MODIFIED:
-						ObjEntity oe=getEntityResolver().lookupObjEntity(thisObject);
-						snapshotManager.refreshObjectWithSnapshot(oe, thisObject, thisObject.getCommittedSnapshot());
-						break;
-					default:
-						//Transient, committed and hollow need no handling
-						break;
-				}
+                switch (objectState) {
+                    case PersistenceState.NEW :
+                        this.unregisterObject(thisObject);
+                        break;
+                    case PersistenceState.DELETED :
+                        //Do the same as for modified... deleted is only a persistence state, so 
+                        // rolling the object back will set the state to committed
+                    case PersistenceState.MODIFIED :
+                        ObjEntity oe = getEntityResolver().lookupObjEntity(thisObject);
+                        snapshotManager.refreshObjectWithSnapshot(
+                            oe,
+                            thisObject,
+                            thisObject.getCommittedSnapshot());
+                        break;
+                    default :
+                        //Transient, committed and hollow need no handling
+                        break;
+                }
             }
         }
-		
-	}
+
+    }
 
     /** 
      * Synchronizes object graph with the database. Executes needed
@@ -537,14 +572,14 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-		if(delObjects.size() > 0 ) {
-			OperationSorter.sortObjectsInDeleteOrder(delObjects);
-			Iterator delIt=delObjects.iterator();
-			while(delIt.hasNext()) {
-				queryList.add(QueryHelper.deleteQuery((DataObject)delIt.next()));
-			}
+        if (delObjects.size() > 0) {
+            OperationSorter.sortObjectsInDeleteOrder(delObjects);
+            Iterator delIt = delObjects.iterator();
+            while (delIt.hasNext()) {
+                queryList.add(QueryHelper.deleteQuery((DataObject) delIt.next()));
+            }
 
-		}
+        }
         // prepare inserts (create id's, build queries) 
         if (insObjects.size() > 0) {
             // create permanent id's and orders insObjects in the correct order for insertion
@@ -555,20 +590,20 @@ public class DataContext implements QueryEngine, Serializable {
             Iterator insIt = insObjects.iterator();
             while (insIt.hasNext()) {
                 DataObject nextObject = (DataObject) insIt.next();
-                
-                if(logObj.isDebugEnabled()) {
-	                logObj.debug("Creating InsertQuery for object of class "+nextObject.getClass());
+
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug(
+                        "Creating InsertQuery for object of class "
+                            + nextObject.getClass());
                 }
-                Map snapshot=takeObjectSnapshot(nextObject);
-                
+                Map snapshot = takeObjectSnapshot(nextObject);
+
                 //Don't create the string (expensive) if it's not needed
-                if(logObj.isDebugEnabled()) {
-	                logObj.debug("snapshot for insert :"+snapshot);
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug("snapshot for insert :" + snapshot);
                 }
                 queryList.add(
-                    QueryHelper.insertQuery(
-                        snapshot,
-                        nextObject.getObjectId()));
+                    QueryHelper.insertQuery(snapshot, nextObject.getObjectId()));
             }
         }
 
@@ -594,7 +629,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-		queryList.addAll(this.getFlattenedUpdateQueries());
+        queryList.addAll(this.getFlattenedUpdateQueries());
 
         if (queryList.size() > 0) {
             ContextCommitObserver result =
@@ -629,7 +664,7 @@ public class DataContext implements QueryEngine, Serializable {
      * mapped to a "read-only" entity.
      */
     private void filterReadOnly(DataObject dataObj) throws CayenneRuntimeException {
-    	ObjEntity oe=getEntityResolver().lookupObjEntity(dataObj);
+        ObjEntity oe = getEntityResolver().lookupObjEntity(dataObj);
         if (oe.isReadOnly()) {
             throw new CayenneRuntimeException(
                 "Attempt to commit a read-only object, " + oe.getName() + ".");
@@ -815,8 +850,8 @@ public class DataContext implements QueryEngine, Serializable {
      * @deprecated use getEntityResolver.lookupObjEntity()
      */
     public ObjEntity lookupEntity(String objEntityName) {
-    	return this.getEntityResolver().lookupObjEntity(objEntityName);
-     }
+        return this.getEntityResolver().lookupObjEntity(objEntityName);
+    }
 
     /**
      * Returns ObjectId if id needs to be updated 
@@ -849,8 +884,7 @@ public class DataContext implements QueryEngine, Serializable {
      *  related to this object. 
      */
     private void appendPkFromMasterRelationships(Map map, DataObject dataObject) {
-        ObjEntity objEntity =
-			this.getEntityResolver().lookupObjEntity(dataObject);
+        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(dataObject);
         DbEntity dbEntity = objEntity.getDbEntity();
 
         Iterator it = dbEntity.getRelationshipMap().values().iterator();
@@ -900,7 +934,7 @@ public class DataContext implements QueryEngine, Serializable {
         OperationSorter.sortObjectsInInsertOrder(objects);
         Iterator it = objects.iterator();
         while (it.hasNext()) {
-             createPermId((DataObject)it.next());
+            createPermId((DataObject) it.next());
         }
     }
 
@@ -924,15 +958,17 @@ public class DataContext implements QueryEngine, Serializable {
      *   @return Newly created ObjectId.
      */
     public ObjectId createPermId(DataObject anObject) throws CayenneRuntimeException {
-    	ObjectId id=anObject.getObjectId();
-    	if(!(id instanceof TempObjectId)) {
-    		return id; //If the id is not a temp, then it must be permanent.  Return it and do nothing else
-    	}
-        TempObjectId tempId = (TempObjectId) id;
-        if(tempId.getPermId()!=null) {
-        	return tempId.getPermId();
+        ObjectId id = anObject.getObjectId();
+        if (!(id instanceof TempObjectId)) {
+            return id;
+            //If the id is not a temp, then it must be permanent.  Return it and do nothing else
         }
-        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(tempId.getObjClass());
+        TempObjectId tempId = (TempObjectId) id;
+        if (tempId.getPermId() != null) {
+            return tempId.getPermId();
+        }
+        ObjEntity objEntity =
+            this.getEntityResolver().lookupObjEntity(tempId.getObjClass());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = parent.dataNodeForObjEntity(objEntity);
 
@@ -1044,106 +1080,123 @@ public class DataContext implements QueryEngine, Serializable {
         // initialized new snapshot manager
         snapshotManager = new SnapshotManager(new RelationshipDataSource(this));
     }
-    
-   	public EntityResolver getEntityResolver() {
-   		return parent.getEntityResolver();
-   	}
-   	
-   	
-   	public void registerFlattenedRelationshipInsert(DataObject source, String relName, DataObject destination) {
-		//Register this combination (so we can remove it later if an insert occurs before commit)
-		Map insertsForObject = (Map) flattenedInserts.get(source);
-		Map deletesForObject = (Map) flattenedDeletes.get(source);
 
-		List insertedObjsForRel = (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
-		List deletedObjsForRel = (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
-		//Check to see if the value has been inserted, in which case simply don't insert it
-		if ((deletedObjsForRel != null) && (deletedObjsForRel.contains(destination))) {
-			deletedObjsForRel.remove(destination);
-		} else {
-			//Nope, val not already inserted.  Delete it for real
-			if (insertedObjsForRel == null) {
-				if (insertsForObject == null) {
-					insertsForObject = new HashMap();
-					flattenedInserts.put(source, insertsForObject);
-				}
-				insertedObjsForRel = new ArrayList();
-				insertsForObject.put(relName, insertedObjsForRel);
-			}
-			insertedObjsForRel.add(destination);
-		}
-	}
+    public EntityResolver getEntityResolver() {
+        return parent.getEntityResolver();
+    }
 
-	public void registerFlattenedRelationshipDelete(DataObject source, String relName, DataObject destination) {
-		//Register this combination (so we can remove it later if an insert occurs before commit)
-		Map insertsForObject = (Map) flattenedInserts.get(source);
-		Map deletesForObject = (Map) flattenedDeletes.get(source);
+    public void registerFlattenedRelationshipInsert(
+        DataObject source,
+        String relName,
+        DataObject destination) {
+        //Register this combination (so we can remove it later if an insert occurs before commit)
+        Map insertsForObject = (Map) flattenedInserts.get(source);
+        Map deletesForObject = (Map) flattenedDeletes.get(source);
 
-		List insertedObjsForRel = (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
-		List deletedObjsForRel = (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
-		//Check to see if the value has been inserted, in which case simply don't insert it
-		if ((insertedObjsForRel != null) && (insertedObjsForRel.contains(destination))) {
-			insertedObjsForRel.remove(destination);
-		} else {
-			//Nope, val not already inserted.  Delete it for real
-			if (deletedObjsForRel == null) {
-				if (deletesForObject == null) {
-					deletesForObject = new HashMap();
-					flattenedDeletes.put(source, deletesForObject);
-				}
-				deletedObjsForRel = new ArrayList();
-				deletesForObject.put(relName, deletedObjsForRel);
-			}
-			deletedObjsForRel.add(destination);
-		}
-	}
+        List insertedObjsForRel =
+            (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
+        List deletedObjsForRel =
+            (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
+        //Check to see if the value has been inserted, in which case simply don't insert it
+        if ((deletedObjsForRel != null) && (deletedObjsForRel.contains(destination))) {
+            deletedObjsForRel.remove(destination);
+        } else {
+            //Nope, val not already inserted.  Delete it for real
+            if (insertedObjsForRel == null) {
+                if (insertsForObject == null) {
+                    insertsForObject = new HashMap();
+                    flattenedInserts.put(source, insertsForObject);
+                }
+                insertedObjsForRel = new ArrayList();
+                insertsForObject.put(relName, insertedObjsForRel);
+            }
+            insertedObjsForRel.add(destination);
+        }
+    }
 
-	/**
-	 * Returns a list of queries (typically insert/delete types) that should be performed in order
-	 * to commit any changes to flattened relationships that have occurred.
-	 * @return List a list of Query objects to be performed
-	 */
-	public List getFlattenedUpdateQueries() {
-		List result=new ArrayList();
-		int i;
-		Iterator objectIterator;
-		
-		objectIterator=flattenedInserts.keySet().iterator();
-		while(objectIterator.hasNext()) {
-			DataObject sourceObject=(DataObject)objectIterator.next();
-			Map insertsForObject=(Map)flattenedInserts.get(sourceObject);
-			Iterator relNameIterator=insertsForObject.keySet().iterator();
-			while(relNameIterator.hasNext()) {
-				String relName=(String)relNameIterator.next();
-				List objects=(List)insertsForObject.get(relName);
-				for(i=0; i<objects.size(); i++) {
-					result.add(new FlattenedRelationshipInsertQuery(sourceObject, (DataObject)objects.get(i), relName));
-				}
-			}
-		}
+    public void registerFlattenedRelationshipDelete(
+        DataObject source,
+        String relName,
+        DataObject destination) {
+        //Register this combination (so we can remove it later if an insert occurs before commit)
+        Map insertsForObject = (Map) flattenedInserts.get(source);
+        Map deletesForObject = (Map) flattenedDeletes.get(source);
 
-		objectIterator=flattenedDeletes.keySet().iterator();
-		while(objectIterator.hasNext()) {
-			DataObject sourceObject=(DataObject)objectIterator.next();
-			Map deletesForObject=(Map)flattenedDeletes.get(sourceObject);
-			Iterator relNameIterator=deletesForObject.keySet().iterator();
-			while(relNameIterator.hasNext()) {
-				String relName=(String)relNameIterator.next();
-				List objects=(List)deletesForObject.get(relName);
-				for(i=0; i<objects.size(); i++) {
-					result.add(new FlattenedRelationshipDeleteQuery(sourceObject, (DataObject)objects.get(i), relName));
-				}
-			}
-		}		
-		return result;
+        List insertedObjsForRel =
+            (insertsForObject == null) ? null : (List) insertsForObject.get(relName);
+        List deletedObjsForRel =
+            (deletesForObject == null) ? null : (List) deletesForObject.get(relName);
+        //Check to see if the value has been inserted, in which case simply don't insert it
+        if ((insertedObjsForRel != null) && (insertedObjsForRel.contains(destination))) {
+            insertedObjsForRel.remove(destination);
+        } else {
+            //Nope, val not already inserted.  Delete it for real
+            if (deletedObjsForRel == null) {
+                if (deletesForObject == null) {
+                    deletesForObject = new HashMap();
+                    flattenedDeletes.put(source, deletesForObject);
+                }
+                deletedObjsForRel = new ArrayList();
+                deletesForObject.put(relName, deletedObjsForRel);
+            }
+            deletedObjsForRel.add(destination);
+        }
+    }
 
-	}
-	/**
-	 * Should be called once the queries returned by getFlattenedUpdateQueries have been succesfully executed
-	 * ,or reverted and are no longer needed.
-	 */
-	public void clearFlattenedUpdateQueries() {
-		this.flattenedDeletes=new HashMap();
-		this.flattenedInserts=new HashMap();
-	}
+    /**
+     * Returns a list of queries (typically insert/delete types) that should be performed in order
+     * to commit any changes to flattened relationships that have occurred.
+     * @return List a list of Query objects to be performed
+     */
+    public List getFlattenedUpdateQueries() {
+        List result = new ArrayList();
+        int i;
+        Iterator objectIterator;
+
+        objectIterator = flattenedInserts.keySet().iterator();
+        while (objectIterator.hasNext()) {
+            DataObject sourceObject = (DataObject) objectIterator.next();
+            Map insertsForObject = (Map) flattenedInserts.get(sourceObject);
+            Iterator relNameIterator = insertsForObject.keySet().iterator();
+            while (relNameIterator.hasNext()) {
+                String relName = (String) relNameIterator.next();
+                List objects = (List) insertsForObject.get(relName);
+                for (i = 0; i < objects.size(); i++) {
+                    result.add(
+                        new FlattenedRelationshipInsertQuery(
+                            sourceObject,
+                            (DataObject) objects.get(i),
+                            relName));
+                }
+            }
+        }
+
+        objectIterator = flattenedDeletes.keySet().iterator();
+        while (objectIterator.hasNext()) {
+            DataObject sourceObject = (DataObject) objectIterator.next();
+            Map deletesForObject = (Map) flattenedDeletes.get(sourceObject);
+            Iterator relNameIterator = deletesForObject.keySet().iterator();
+            while (relNameIterator.hasNext()) {
+                String relName = (String) relNameIterator.next();
+                List objects = (List) deletesForObject.get(relName);
+                for (i = 0; i < objects.size(); i++) {
+                    result.add(
+                        new FlattenedRelationshipDeleteQuery(
+                            sourceObject,
+                            (DataObject) objects.get(i),
+                            relName));
+                }
+            }
+        }
+        return result;
+
+    }
+    /**
+     * Should be called once the queries returned by getFlattenedUpdateQueries have been succesfully executed
+     * ,or reverted and are no longer needed.
+     */
+    public void clearFlattenedUpdateQueries() {
+        this.flattenedDeletes = new HashMap();
+        this.flattenedInserts = new HashMap();
+    }
 }
