@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.event;
 import java.io.Serializable;
 
 import javax.jms.Message;
+import javax.jms.MessageFormatException;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
@@ -86,10 +87,28 @@ public class JMSBridge extends EventBridge implements MessageListener {
 
     protected String topicConnectionFactoryName;
 
-    protected TopicConnection connection;
-    protected TopicSession session;
+    protected TopicConnection sendConnection;
+    protected TopicSession sendSession;
+    protected TopicConnection receivedConnection;
     protected TopicPublisher publisher;
     protected TopicSubscriber subscriber;
+
+    protected static String convertToExternalSubject(EventSubject localSubject) {
+        // substitute all chars that can be incorrectly interpreted by JNDI
+        char[] chars = localSubject.getSubjectName().toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '/' || chars[i] == '.') {
+                chars[i] = '_';
+            }
+        }
+
+        return new String(chars);
+    }
+
+    public JMSBridge(EventSubject localSubject, String topicConnectionFactoryName) {
+        super(localSubject, convertToExternalSubject(localSubject));
+        this.topicConnectionFactoryName = topicConnectionFactoryName;
+    }
 
     public JMSBridge(
         EventSubject localSubject,
@@ -130,12 +149,12 @@ public class JMSBridge extends EventBridge implements MessageListener {
                 eventManager.postEvent(event, localSubject);
             }
 
+        } catch (MessageFormatException mfex) {
+            Exception linkedException = mfex.getLinkedException();
+            Exception logException = (linkedException != null) ? linkedException : mfex;
+            logObj.info("Message Format Exception: ", logException);
         } catch (Exception ex) {
-            if (logObj.isDebugEnabled()) {
-                logObj.info("Exception while processing message: ", ex);
-            } else if (logObj.isInfoEnabled()) {
-                logObj.info("Exception while processing message: " + ex.getMessage());
-            }
+            logObj.info("Exception while processing message: ", ex);
         }
     }
 
@@ -151,9 +170,6 @@ public class JMSBridge extends EventBridge implements MessageListener {
         TopicConnectionFactory connectionFactory =
             (TopicConnectionFactory) jndiContext.lookup(topicConnectionFactoryName);
 
-        this.connection = connectionFactory.createTopicConnection();
-        this.session = connection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-
         Topic topic = null;
 
         try {
@@ -167,10 +183,21 @@ public class JMSBridge extends EventBridge implements MessageListener {
             }
         }
 
-        this.publisher = session.createPublisher(topic);
-        this.subscriber = session.createSubscriber(topic);
+        // config publisher
+        this.sendConnection = connectionFactory.createTopicConnection();
+        this.sendSession =
+            sendConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
+        this.publisher = sendSession.createPublisher(topic);
+
+        // config subscriber
+        this.receivedConnection = connectionFactory.createTopicConnection();
+        this.subscriber =
+            receivedConnection.createTopicSession(
+                false,
+                Session.AUTO_ACKNOWLEDGE).createSubscriber(
+                topic);
         this.subscriber.setMessageListener(this);
-        this.connection.start();
+        this.receivedConnection.start();
     }
 
     /**
@@ -201,21 +228,21 @@ public class JMSBridge extends EventBridge implements MessageListener {
         }
 
         try {
-            session.close();
+            receivedConnection.close();
         } catch (Exception ex) {
             lastException = ex;
         }
 
         try {
-            connection.close();
+            sendConnection.close();
         } catch (Exception ex) {
             lastException = ex;
         }
 
         publisher = null;
         subscriber = null;
-        session = null;
-        connection = null;
+        receivedConnection = null;
+        sendConnection = null;
         if (lastException != null) {
             throw lastException;
         }
@@ -223,7 +250,7 @@ public class JMSBridge extends EventBridge implements MessageListener {
 
     protected void sendExternalEvent(CayenneEvent localEvent) throws Exception {
         ObjectMessage message =
-            session.createObjectMessage(eventToMessageObject(localEvent));
+            sendSession.createObjectMessage(eventToMessageObject(localEvent));
         publisher.publish(message);
     }
 
