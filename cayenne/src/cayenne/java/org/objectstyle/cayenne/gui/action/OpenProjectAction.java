@@ -67,7 +67,6 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.ErrorDebugDialog;
-import org.objectstyle.cayenne.gui.GuiConfiguration;
 import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.cayenne.gui.util.RecentFileMenuItem;

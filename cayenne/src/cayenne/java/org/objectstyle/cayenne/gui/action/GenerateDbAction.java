@@ -65,9 +65,9 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.GuiDataSource;
 import org.objectstyle.cayenne.gui.InteractiveLogin;
 import org.objectstyle.cayenne.gui.datamap.GenerateDbDialog;
+import org.objectstyle.cayenne.project.ProjectDataSource;
 
 /** 
  * Action that generates database tables from a DataMap.
@@ -161,7 +161,7 @@ public class GenerateDbAction extends CayenneAction {
         DataSourceInfo dsi = null;
         if (currentNode != null) {
             dsi =
-                ((GuiDataSource) currentNode.getDataSource())
+                ((ProjectDataSource) currentNode.getDataSource())
                     .getDataSourceInfo()
                     .cloneInfo();
             if (currentNode.getAdapter() != null) {

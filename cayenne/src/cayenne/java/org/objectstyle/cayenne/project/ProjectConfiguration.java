@@ -58,14 +58,13 @@ package org.objectstyle.cayenne.project;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.Iterator;
+
+import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.ConfigException;
-import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
-import org.objectstyle.cayenne.conf.DomainHelper;
 
 /**
  * Subclass of Configuration used in the project model.

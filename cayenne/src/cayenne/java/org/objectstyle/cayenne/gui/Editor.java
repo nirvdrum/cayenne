@@ -474,7 +474,7 @@ public class Editor
     }
 
     public void projectOpened(File projectFile) {
-    	logObj.debug("Creting new project in " + projectFile);
+    	logObj.debug("Creating new project: " + projectFile);
     	
     	// create a new project
     	projects.createProject(DEFAULT_PROJECT_NAME, projectFile, true);

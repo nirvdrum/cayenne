@@ -58,26 +58,28 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.apache.log4j.Logger;
 
-import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.conf.DomainHelper;
 import org.objectstyle.cayenne.gui.Editor;
-import org.objectstyle.cayenne.gui.GuiDataSource;
-import org.objectstyle.cayenne.gui.event.*;
-import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
-import org.objectstyle.cayenne.gui.util.XmlFilter;
-import org.objectstyle.cayenne.gui.validator.*;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.validator.ErrorMsg;
+import org.objectstyle.cayenne.gui.validator.Validator;
+import org.objectstyle.cayenne.gui.validator.ValidatorDialog;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.MapLoader;
+import org.objectstyle.cayenne.project.ProjectDataSource;
 
 /** 
  * Parent class for all Editor actions related to saving project.
@@ -203,7 +205,7 @@ public class SaveAction extends CayenneAction {
 		try {
 			PrintWriter pw = new PrintWriter(fw);
 			try {
-				GuiDataSource src = (GuiDataSource) node.getDataSource();
+				ProjectDataSource src = (ProjectDataSource) node.getDataSource();
 				DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
 			} finally {
 				pw.close();

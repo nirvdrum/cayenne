@@ -88,8 +88,8 @@ import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.gui.util.FileSystemViewDecorator;
 import org.objectstyle.cayenne.gui.util.PreferenceField;
 import org.objectstyle.cayenne.gui.util.SaveHandler;
+import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.util.Preferences;
-import org.objectstyle.cayenne.util.Util;
 
 /** 
  * Detail view of the DataNode and DataSourceInfo.
@@ -285,7 +285,7 @@ public class DataNodeDetailView
             return;
         }
 
-        GuiDataSource src = (GuiDataSource) node.getDataSource();
+        ProjectDataSource src = (ProjectDataSource) node.getDataSource();
         DataSourceInfo info = src.getDataSourceInfo();
 
         if (e.getDocument() == name.getDocument()) {
@@ -360,7 +360,7 @@ public class DataNodeDetailView
         }
 
         Object src = e.getSource();
-        DataSourceInfo info = ((GuiDataSource) node.getDataSource()).getDataSourceInfo();
+        DataSourceInfo info = ((ProjectDataSource) node.getDataSource()).getDataSourceInfo();
 
         DataNode aNode = mediator.getCurrentDataNode();
 
@@ -519,7 +519,7 @@ public class DataNodeDetailView
         if (null == node) {
             return;
         }
-        GuiDataSource src = (GuiDataSource) node.getDataSource();
+        ProjectDataSource src = (ProjectDataSource) node.getDataSource();
         oldName = node.getName();
         ignoreChange = true;
         name.setText(oldName);

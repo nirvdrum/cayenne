@@ -57,9 +57,13 @@ package org.objectstyle.cayenne.gui.action;
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.gui.GuiDataSource;
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DataSourceInfo;
+import org.objectstyle.cayenne.gui.event.DataNodeDisplayEvent;
+import org.objectstyle.cayenne.gui.event.DataNodeEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.project.ProjectDataSource;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**
@@ -103,7 +107,7 @@ public class CreateNodeAction extends CayenneAction {
 		DataDomain domain = mediator.getCurrentDataDomain();
 		DataNode node =
 			(DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
-		GuiDataSource src = new GuiDataSource(new DataSourceInfo());
+		ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
 		node.setDataSource(src);
 
 		domain.addNode(node);
