@@ -166,12 +166,7 @@ implements ActionListener
     	
     	this.addWindowListener(new WindowAdapter() {
     		public void windowClosing(WindowEvent e) {
-    			if (!checkSaveOnClose())
-    				return;
-    			Preferences.getPreferences().storePreferences(Editor.this);
-    			Editor.this.setVisible(false);
-    			Editor.this.dispose();
-    			System.exit(0);
+    			exitEditor();
     		}
     	});
     }
@@ -186,7 +181,7 @@ implements ActionListener
 
 	/** Return false if cancel closing the window, true otherwise. */
 	private boolean checkSaveOnClose() {
-		if (mediator.isDirty()) 
+		if (mediator != null && mediator.isDirty()) 
 		{
 			int ret_code = JOptionPane.showConfirmDialog(this
 											, "You have unsaved data. "
@@ -197,6 +192,15 @@ implements ActionListener
 				saveAll();
 		}
 		return true;	
+	}
+
+	private void exitEditor() {
+		if (!checkSaveOnClose())
+			return;
+		Preferences.getPreferences().storePreferences(Editor.this);
+		Editor.this.setVisible(false);
+		Editor.this.dispose();
+		System.exit(0);
 	}
 
     private void init() {
@@ -312,10 +316,7 @@ implements ActionListener
         } else if (src == generateMenu) {
             generateClasses();
         } else if (src == exitMenu) {
-        	Preferences.getPreferences().storePreferences(this);
-            setVisible(false);
-            dispose();
-            System.exit(0);
+        	exitEditor();
         }
     }
 
