@@ -67,7 +67,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.util.parser.PlistParser;
+import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
  * A <b>PropertyListSerialization</b> is a utility class 
@@ -89,7 +89,7 @@ public class PropertyListSerialization {
 			throw new FileNotFoundException("No such file: " + f);
 		}
 
-		return new PlistParser(f).propertyList();
+		return new Parser(f).propertyList();
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class PropertyListSerialization {
 	 * but can also be a String or a Number. 
 	 */
 	public static Object propertyListFromStream(InputStream in) {
-		return new PlistParser(in).propertyList();
+		return new Parser(in).propertyList();
 	}
 
 	/**

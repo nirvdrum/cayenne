@@ -41,10 +41,11 @@
      *  8. doc          - builds Cayenne documentation including Javadocs.
      *  9. api          - builds Javdoc API documentation.
      * 10. javacc       - runs javacc
-     * 11. test         - runs JUnit tests
-     * 12. performance  - runs performance tests
-     * 13. regression   - runs regression test application
-     * 14. help         - prints this message
+     * 11. jjtree       - runs jjtree
+     * 12. test         - runs JUnit tests
+     * 13. performance  - runs performance tests
+     * 14. regression   - runs regression test application
+     * 15. help         - prints this message
      *
      *
      * ENVIRONMENT:
@@ -177,6 +178,13 @@
     <!-- ========================================== -->
     <target name="javacc">
         <ant antfile="build-cayenne.xml" target="javacc"/>
+    </target>
+
+    <!-- ========================================== -->
+    <!-- Updates any code generated via JJTree.     -->
+    <!-- ========================================== -->
+    <target name="jjtree">
+        <ant antfile="build-cayenne.xml" target="jjtree"/>
     </target>
 
     <!-- ========================================== -->

@@ -66,7 +66,7 @@ import java.util.Map;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.util.ResourceLocator;
-import org.objectstyle.cayenne.util.parser.PlistParser;
+import org.objectstyle.cayenne.wocompat.parser.Parser;
 
 /**
  *  Helper class used by EOModelProcessor. During creation, it loads
@@ -77,7 +77,7 @@ import org.objectstyle.cayenne.util.parser.PlistParser;
 public class EOModelHelper {
     private static final ResourceLocator locator = new ResourceLocator();
 
-    private PlistParser plistParser = new PlistParser();
+    private Parser plistParser = new Parser();
     protected URL modelUrl;
     protected Map entityIndex;
     protected Map entityClassIndex;

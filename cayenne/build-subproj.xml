@@ -69,7 +69,7 @@
 	</target>
 	
 	
-	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">	
+	<target name="jjtree" depends="javacc-nodir,javacc-nogrammar">	
 		<java dir="${basedir}" fork="true" classname="jjtree" failonerror="true">
 			<classpath refid="javacc-classpath"/>
 			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
@@ -83,6 +83,14 @@
 		</java>
 	</target>
 	
+	<target name="javacc" depends="javacc-nodir,javacc-nogrammar">	
+		<java dir="${basedir}" fork="true" classname="javacc" failonerror="true">
+			<classpath refid="javacc-classpath"/>
+			<arg value="-OUTPUT_DIRECTORY:${parser.dir}"/>
+			<arg value="${parser.dir}/${parser.base}.jj"/>
+		</java>
+	</target>
+
 	<target name="javacc-nodir" unless="parser.dir">
 		<fail>"parser.dir" is undefined.</fail>
 	</target>
