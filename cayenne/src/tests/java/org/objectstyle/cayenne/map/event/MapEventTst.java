@@ -55,92 +55,49 @@
  */
 package org.objectstyle.cayenne.map.event;
 
-import org.objectstyle.cayenne.event.CayenneEvent;
-import org.objectstyle.cayenne.util.Util;
+import junit.framework.TestCase;
 
 /**
- * Superclass of CayenneModeler events.
- * 
  * @author Andrei Adamchik
  */
-public abstract class MapEvent extends CayenneEvent {
+public class MapEventTst extends TestCase {
 
-    /**
-     * A type that describes object modification events. CHANGE is a default type of new
-     * MapEvents, unless the type is specified explicitly.
-     */
-    public static final int CHANGE = 1;
-
-    /**
-     * A type that describes object creation events.
-     */
-    public static final int ADD = 2;
-
-    /**
-     * A type that describes object removal events.
-     */
-    public static final int REMOVE = 3;
-
-    protected int id = CHANGE;
-    protected String oldName;
-    protected boolean oldNameSet;
-
-    /**
-     * Constructor for MapEvent.
-     * 
-     * @param source event source
-     */
-    public MapEvent(Object source) {
-        super(source);
+    public void testNoNameChange() throws Exception {
+        MapEvent event = new MapEventFixture(new Object(), "someName");
+        assertEquals("someName", event.getNewName());
+        assertFalse(event.isNameChange());
     }
 
-    /**
-     * Constructor for MapEvent.
-     * 
-     * @param source event source
-     */
-    public MapEvent(Object source, String oldName) {
-        super(source);
-        setOldName(oldName);
+    public void testNameChange() throws Exception {
+        MapEvent event = new MapEventFixture(new Object(), "someName", "someOldName");
+        assertEquals("someName", event.getNewName());
+        assertTrue(event.isNameChange());
     }
 
-    public boolean isNameChange() {
-        return oldNameSet && !Util.nullSafeEquals(getOldName(), getNewName());
+    public void testOldName() throws Exception {
+        MapEvent event = new MapEventFixture(new Object(), "someName");
+        assertNull(event.getOldName());
+
+        event.setOldName("oldName");
+        assertEquals("oldName", event.getOldName());
     }
 
-    /**
-     * Returns the id.
-     * 
-     * @return int
-     */
-    public int getId() {
-        return id;
-    }
+    final class MapEventFixture extends MapEvent {
 
-    /**
-     * Returns the newName of the object that caused this event.
-     */
-    public abstract String getNewName();
+        String newName;
 
-    /**
-     * Returns the oldName.
-     */
-    public String getOldName() {
-        return oldName;
-    }
+        public MapEventFixture(Object source, String newName) {
+            super(source);
+            this.newName = newName;
+        }
 
-    /**
-     * Sets the id.
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
+        public MapEventFixture(Object source, String newName, String oldName) {
+            super(source, oldName);
+            this.newName = newName;
+        }
 
-    /**
-     * Sets the oldName.
-     */
-    public void setOldName(String oldName) {
-        this.oldName = oldName;
-        this.oldNameSet = true;
+        public String getNewName() {
+            return newName;
+        }
     }
 }

@@ -53,14 +53,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler;
 
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 import org.apache.log4j.Logger;
@@ -78,19 +80,20 @@ import org.objectstyle.cayenne.project.ProjectTraversalHandler;
  * @author Andrei Adamchik
  */
 public class ProjectTreeModel extends DefaultTreeModel {
+
     private static Logger logObj = Logger.getLogger(ProjectTreeModel.class);
 
     /**
-     * Creates a tree of Swing TreeNodes wrapping Cayenne project.
-     * Returns the root node of the tree.
+     * Creates a tree of Swing TreeNodes wrapping Cayenne project. Returns the root node
+     * of the tree.
      */
     public static DefaultMutableTreeNode wrapProject(Project project) {
         return wrapProjectNode(project);
     }
 
     /**
-     * Creates a tree of Swing TreeNodes wrapping Cayenne project object.
-     * Returns the root node of the tree.
+     * Creates a tree of Swing TreeNodes wrapping Cayenne project object. Returns the root
+     * node of the tree.
      */
     public static DefaultMutableTreeNode wrapProjectNode(Object node) {
         TraversalHelper helper = new TraversalHelper();
@@ -99,12 +102,12 @@ public class ProjectTreeModel extends DefaultTreeModel {
     }
 
     /**
-       * Creates a tree of Swing TreeNodes wrapping Cayenne project object.
-       * Returns the root node of the tree.
-       */
+     * Creates a tree of Swing TreeNodes wrapping Cayenne project object. Returns the root
+     * node of the tree.
+     */
     public static DefaultMutableTreeNode wrapProjectNode(
-        Object node,
-        DefaultMutableTreeNode parentPath) {
+            Object node,
+            DefaultMutableTreeNode parentPath) {
 
         TraversalHelper helper = new TraversalHelper();
 
@@ -120,6 +123,7 @@ public class ProjectTreeModel extends DefaultTreeModel {
 
     /**
      * Constructor for ProjectTreeModel.
+     * 
      * @param root
      */
     public ProjectTreeModel(Project project) {
@@ -127,14 +131,69 @@ public class ProjectTreeModel extends DefaultTreeModel {
     }
 
     /**
-     * Fixes ordering of nodes.
+     * Re-inserts a tree node to preserve the correct ordering of items. Assumes that the
+     * tree is already ordered, except for one node.
      */
-    public void reorder() {
-        CopyTraversalHelper helper = new CopyTraversalHelper();
-        new ProjectTraversal(helper).traverse(
-            getRootNode().getUserObject(),
-            new ProjectPath());
-        setRoot(helper.getStartNode());
+    public void positionNode(
+            MutableTreeNode parent,
+            DefaultMutableTreeNode treeNode,
+            Comparator comparator) {
+
+        if (treeNode == null) {
+            return;
+        }
+
+        if (parent == null && treeNode != getRoot()) {
+            parent = (MutableTreeNode) treeNode.getParent();
+            if (parent == null) {
+                parent = getRootNode();
+            }
+        }
+
+        Object object = treeNode.getUserObject();
+
+        int len = parent.getChildCount();
+        int ins = -1;
+        int rm = -1;
+
+        for (int i = 0; i < len; i++) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
+
+            // remember to remove node
+            if (node == treeNode) {
+                rm = i;
+                continue;
+            }
+
+            // no more insert checks
+            if (ins >= 0) {
+                continue;
+            }
+
+            // ObjEntities go before DbEntities
+            if (comparator.compare(object, node.getUserObject()) <= 0) {
+                ins = i;
+            }
+        }
+
+        if (ins < 0) {
+            ins = len;
+        }
+
+        if (rm == ins) {
+            return;
+        }
+
+        // remove
+        if (rm >= 0) {
+            removeNodeFromParent(treeNode);
+            if (rm < ins) {
+                ins--;
+            }
+        }
+
+        // insert
+        insertNodeInto(treeNode, parent, ins);
     }
 
     /**
@@ -142,18 +201,6 @@ public class ProjectTreeModel extends DefaultTreeModel {
      */
     public DefaultMutableTreeNode getRootNode() {
         return (DefaultMutableTreeNode) super.getRoot();
-    }
-
-    /** 
-     * Wraps an object into a tree node and inserts it as one 
-     * of the children of supplied node.
-     */
-    public DefaultMutableTreeNode insertObject(
-        Object obj,
-        DefaultMutableTreeNode parent) {
-        DefaultMutableTreeNode node = wrapProjectNode(obj, parent);
-        super.insertNodeInto(node, parent, parent.getChildCount());
-        return node;
     }
 
     public DefaultMutableTreeNode getNodeForObjectPath(Object[] path) {
@@ -173,8 +220,8 @@ public class ProjectTreeModel extends DefaultTreeModel {
             DefaultMutableTreeNode foundNode = null;
             Enumeration children = currentNode.children();
             while (children.hasMoreElements()) {
-                DefaultMutableTreeNode child =
-                    (DefaultMutableTreeNode) children.nextElement();
+                DefaultMutableTreeNode child = (DefaultMutableTreeNode) children
+                        .nextElement();
                 if (child.getUserObject() == path[i]) {
                     foundNode = child;
                     break;
@@ -193,6 +240,7 @@ public class ProjectTreeModel extends DefaultTreeModel {
     }
 
     static class TraversalHelper implements ProjectTraversalHandler {
+
         protected DefaultMutableTreeNode startNode;
         protected Map nodesMap;
 
@@ -239,8 +287,8 @@ public class ProjectTreeModel extends DefaultTreeModel {
                 startNode = node;
             }
             else {
-                DefaultMutableTreeNode nodeParent =
-                    (DefaultMutableTreeNode) nodesMap.get(parent);
+                DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) nodesMap
+                        .get(parent);
                 nodeParent.add(node);
             }
 
@@ -250,21 +298,21 @@ public class ProjectTreeModel extends DefaultTreeModel {
         public boolean shouldReadChildren(Object node, ProjectPath parentPath) {
             // do not read deatils of linked maps
             if ((node instanceof DataMap)
-                && parentPath != null
-                && (parentPath.getObject() instanceof DataNode)) {
+                    && parentPath != null
+                    && (parentPath.getObject() instanceof DataNode)) {
                 return false;
             }
 
             return (node instanceof Project)
-                || (node instanceof DataDomain)
-                || (node instanceof DataMap)
-                || (node instanceof DataNode);
+                    || (node instanceof DataDomain)
+                    || (node instanceof DataMap)
+                    || (node instanceof DataNode);
         }
     }
 
     /**
-     * Traversal hanlder that rebuilds the tree from another tree.
-     * Used to reorder tree nodes.
+     * Traversal hanlder that rebuilds the tree from another tree. Used to reorder tree
+     * nodes.
      */
     class CopyTraversalHelper extends TraversalHelper {
 
@@ -276,10 +324,10 @@ public class ProjectTreeModel extends DefaultTreeModel {
                 node = startNode;
             }
             else {
-                DefaultMutableTreeNode original =
-                    ProjectTreeModel.this.getNodeForObjectPath(nodePath.getPath());
-                DefaultMutableTreeNode nodeParent =
-                    (DefaultMutableTreeNode) nodesMap.get(nodePath.getObjectParent());
+                DefaultMutableTreeNode original = ProjectTreeModel.this
+                        .getNodeForObjectPath(nodePath.getPath());
+                DefaultMutableTreeNode nodeParent = (DefaultMutableTreeNode) nodesMap
+                        .get(nodePath.getObjectParent());
                 node = new DefaultMutableTreeNode(original.getUserObject());
                 nodeParent.add(node);
             }

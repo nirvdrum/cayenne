@@ -118,7 +118,7 @@ public class DataMapView extends JPanel {
         initController();
     }
 
-    protected void initView() {
+    private void initView() {
         // create widgets
         name = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
@@ -186,7 +186,7 @@ public class DataMapView extends JPanel {
         add(builder.getPanel(), BorderLayout.CENTER);
     }
 
-    protected void initController() {
+    private void initController() {
         eventController.addDataMapDisplayListener(new DataMapDisplayListener() {
 
             public void currentDataMapChanged(DataMapDisplayEvent e) {

@@ -55,92 +55,35 @@
  */
 package org.objectstyle.cayenne.map.event;
 
-import org.objectstyle.cayenne.event.CayenneEvent;
-import org.objectstyle.cayenne.util.Util;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.access.DataNode;
 
 /**
- * Superclass of CayenneModeler events.
- * 
  * @author Andrei Adamchik
  */
-public abstract class MapEvent extends CayenneEvent {
+public class DataNodeEventTst extends TestCase {
 
-    /**
-     * A type that describes object modification events. CHANGE is a default type of new
-     * MapEvents, unless the type is specified explicitly.
-     */
-    public static final int CHANGE = 1;
-
-    /**
-     * A type that describes object creation events.
-     */
-    public static final int ADD = 2;
-
-    /**
-     * A type that describes object removal events.
-     */
-    public static final int REMOVE = 3;
-
-    protected int id = CHANGE;
-    protected String oldName;
-    protected boolean oldNameSet;
-
-    /**
-     * Constructor for MapEvent.
-     * 
-     * @param source event source
-     */
-    public MapEvent(Object source) {
-        super(source);
+    public void testNewName() throws Exception {
+        MapEvent event = new DataNodeEvent(new Object(), new DataNode("someName"));
+        assertEquals("someName", event.getNewName());
     }
 
-    /**
-     * Constructor for MapEvent.
-     * 
-     * @param source event source
-     */
-    public MapEvent(Object source, String oldName) {
-        super(source);
-        setOldName(oldName);
+    public void testNoNameChange() throws Exception {
+        MapEvent event = new DataNodeEvent(new Object(), new DataNode("someName"));
+        assertFalse(event.isNameChange());
+        
+        event.setOldName("someOldName");
+        assertTrue(event.isNameChange());
     }
 
-    public boolean isNameChange() {
-        return oldNameSet && !Util.nullSafeEquals(getOldName(), getNewName());
+    public void testNameChange() throws Exception {
+        MapEvent event = new DataNodeEvent(
+                new Object(),
+                new DataNode("someName"),
+                "someOldName");
+        assertEquals("someName", event.getNewName());
+        assertTrue(event.isNameChange());
     }
 
-    /**
-     * Returns the id.
-     * 
-     * @return int
-     */
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * Returns the newName of the object that caused this event.
-     */
-    public abstract String getNewName();
-
-    /**
-     * Returns the oldName.
-     */
-    public String getOldName() {
-        return oldName;
-    }
-
-    /**
-     * Sets the id.
-     */
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    /**
-     * Sets the oldName.
-     */
-    public void setOldName(String oldName) {
-        this.oldName = oldName;
-        this.oldNameSet = true;
-    }
 }

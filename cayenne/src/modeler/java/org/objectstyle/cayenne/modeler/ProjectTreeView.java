@@ -64,6 +64,7 @@ import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -101,7 +102,6 @@ import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CellRenderers;
 import org.objectstyle.cayenne.modeler.util.Comparators;
-import org.objectstyle.cayenne.modeler.util.ProjectTree;
 import org.objectstyle.cayenne.query.Query;
 
 /**
@@ -208,9 +208,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void procedureAdded(ProcedureEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
 
         DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] {
@@ -241,9 +238,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void procedureRemoved(ProcedureEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
 
         removeNode(new Object[] {
                 mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
@@ -252,9 +246,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void queryAdded(QueryEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
 
         DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] {
@@ -286,10 +277,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void queryRemoved(QueryEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
-
         removeNode(new Object[] {
                 mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
                 e.getQuery()
@@ -297,44 +284,41 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void currentQueryChanged(QueryDisplayEvent e) {
-        if (e.getSource() == this || !e.isQueryChanged())
-            return;
-
         showNode(new Object[] {
                 e.getDomain(), e.getDataMap(), e.getQuery()
         });
     }
 
     public void domainChanged(DomainEvent e) {
-        if (e.getSource() == this)
-            return;
 
-        updateNode(new Object[] {
+        Object[] path = new Object[] {
             e.getDomain()
-        });
+        };
+
+        updateNode(path);
+
+        if (e.isNameChange()) {
+            positionNode(path, Comparators.getNamedObjectComparator());
+            showNode(path);
+        }
     }
 
     public void domainAdded(DomainEvent e) {
-        if (e.getSource() == this)
-            return;
-        browseTree.getProjectModel().insertObject(e.getDomain(), (DefaultMutableTreeNode) browseTree
-                .getProjectModel()
-                .getRoot());
+        DataDomain dataDomain = e.getDomain();
+        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(dataDomain, false);
+
+        positionNode(null, newNode, Comparators.getNamedObjectComparator());
+        showNode(newNode);
+        this.currentNode = newNode;
     }
 
     public void domainRemoved(DomainEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
-
         removeNode(new Object[] {
             e.getDomain()
         });
     }
 
     public void dataNodeChanged(DataNodeEvent e) {
-        if (e.getSource() == this)
-            return;
 
         DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] {
@@ -351,29 +335,37 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
             else {
 
                 browseTree.getProjectModel().nodeChanged(node);
-                List maps = new ArrayList(e.getDataNode().getDataMaps());
-                int mapCount = maps.size();
 
-                // If added map to this node
+                // check for DataMap additions/removals...
+
+                Object[] maps = e.getDataNode().getDataMaps().toArray();
+                int mapCount = maps.length;
+
+                // DataMap was linked
                 if (mapCount > node.getChildCount()) {
 
-                    // Find DataMap not already under node and add it
                     for (int i = 0; i < mapCount; i++) {
                         boolean found = false;
                         for (int j = 0; j < node.getChildCount(); j++) {
                             DefaultMutableTreeNode child = (DefaultMutableTreeNode) node
                                     .getChildAt(j);
-                            if (maps.get(i) == child.getUserObject()) {
+                            if (maps[i] == child.getUserObject()) {
                                 found = true;
                                 break;
                             }
                         }
+
                         if (!found) {
-                            browseTree.getProjectModel().insertObject(maps.get(i), node);
+                            DefaultMutableTreeNode newMapNode = new DefaultMutableTreeNode(
+                                    maps[i],
+                                    false);
+                            positionNode(node, newMapNode, Comparators
+                                    .getNamedObjectComparator());
                             break;
                         }
                     }
                 }
+                // DataMap was unlinked
                 else if (mapCount < node.getChildCount()) {
                     for (int j = 0; j < node.getChildCount(); j++) {
                         boolean found = false;
@@ -381,7 +373,7 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
                         child = (DefaultMutableTreeNode) node.getChildAt(j);
                         Object obj = child.getUserObject();
                         for (int i = 0; i < mapCount; i++) {
-                            if (maps.get(i) == obj) {
+                            if (maps[i] == obj) {
                                 found = true;
                                 break;
                             }
@@ -427,9 +419,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void dataMapChanged(DataMapEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
 
         Object[] path = new Object[] {
                 mediator.getCurrentDataDomain(), e.getDataMap()
@@ -444,10 +433,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void dataMapAdded(DataMapEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
-
         DefaultMutableTreeNode node = browseTree.getProjectModel().getNodeForObjectPath(
                 new Object[] {
                     mediator.getCurrentDataDomain()
@@ -464,10 +449,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
     }
 
     public void dataMapRemoved(DataMapEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
-
         DataMap map = e.getDataMap();
         DataDomain domain = mediator.getCurrentDataDomain();
 
@@ -517,7 +498,7 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
      * </ul>
      */
     protected void entityChanged(EntityEvent e) {
-        if (e.getSource() != this && e.isNameChange()) {
+        if (e.isNameChange()) {
             Object[] path = new Object[] {
                     mediator.getCurrentDataDomain(), mediator.getCurrentDataMap(),
                     e.getEntity()
@@ -534,9 +515,6 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
      * and make it selected.
      */
     protected void entityAdded(EntityEvent e) {
-        if (e.getSource() == this) {
-            return;
-        }
 
         Entity entity = e.getEntity();
 
@@ -791,66 +769,17 @@ public class ProjectTreeView extends JScrollPane implements DomainDisplayListene
             return;
         }
 
-        positionNode((DefaultMutableTreeNode) node.getParent(), node, comparator);
+        positionNode(null, node, comparator);
     }
 
-    /**
-     * Inserts entity node in alphabetical order. Assumes that the tree is already
-     * ordered, except for one node.
-     */
     private void positionNode(
-            DefaultMutableTreeNode parent,
+            MutableTreeNode parent,
             DefaultMutableTreeNode treeNode,
             Comparator comparator) {
 
-        if (parent == null || treeNode == null) {
-            return;
-        }
-
-        Object object = treeNode.getUserObject();
-
-        int len = parent.getChildCount();
-        int ins = -1;
-        int rm = -1;
-
-        for (int i = 0; i < len; i++) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) parent.getChildAt(i);
-
-            // remember to remove node
-            if (node == treeNode) {
-                rm = i;
-                continue;
-            }
-
-            // no more insert checks
-            if (ins >= 0) {
-                continue;
-            }
-
-            // ObjEntities go before DbEntities
-            if (comparator.compare(object, node.getUserObject()) <= 0) {
-                ins = i;
-            }
-        }
-
-        if (ins < 0) {
-            ins = len;
-        }
-
-        // suppress events while we order the node..
         browseTree.removeTreeSelectionListener(treeSelectionListener);
         try {
-
-            // remove
-            if (rm >= 0) {
-                browseTree.getProjectModel().removeNodeFromParent(treeNode);
-                if (rm < ins) {
-                    ins--;
-                }
-            }
-
-            // insert
-            browseTree.getProjectModel().insertNodeInto(treeNode, parent, ins);
+            browseTree.getProjectModel().positionNode(parent, treeNode, comparator);
         }
         finally {
             browseTree.addTreeSelectionListener(treeSelectionListener);

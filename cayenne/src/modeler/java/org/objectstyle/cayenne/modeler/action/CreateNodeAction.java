@@ -59,6 +59,7 @@ import java.awt.event.ActionEvent;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.EventController;
@@ -113,6 +114,9 @@ public class CreateNodeAction extends CayenneAction {
             (DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
         ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
         node.setDataSource(src);
+        
+        // by default create JDBC Node
+        node.setDataSourceFactory(DriverDataSourceFactory.class.getName());
 
         domain.addNode(node);
         mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));

@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.modeler;
 
 import java.io.File;
 import java.util.Enumeration;
@@ -73,7 +73,8 @@ import org.objectstyle.cayenne.project.Project;
  * @author Andrei Adamchik
  */
 public class ProjectTree extends JTree {
-    static Logger logObj = Logger.getLogger(ProjectTree.class);
+
+    private static final Logger logObj = Logger.getLogger(ProjectTree.class);
 
     /**
      * Constructor for ProjectTree.
@@ -84,28 +85,14 @@ public class ProjectTree extends JTree {
         setRootVisible(false);
         setModel(model);
 
-        logObj.debug("Model: " + model.getRootNode().getChildCount());
         // expand top level
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         Enumeration level = model.getRootNode().children();
         while (level.hasMoreElements()) {
             DefaultMutableTreeNode node = (DefaultMutableTreeNode) level.nextElement();
             TreePath path = new TreePath(node.getPath());
-            logObj.debug("Expanding: " + path);
             expandPath(path);
         }
-    }
-
-    /**
-     * Reorders the model, preserving current selection.
-     */
-    public void reorder() {
-       // TreePath selection =
-      //      getSelectionModel().getSelectionPath().getPath();
-        getProjectModel().reorder();
-        
-        
-      //  expandPath(selection);
     }
 
     /**
@@ -119,12 +106,12 @@ public class ProjectTree extends JTree {
      * Returns a "name" property of the tree node.
      */
     public String convertValueToText(
-        Object value,
-        boolean selected,
-        boolean expanded,
-        boolean leaf,
-        int row,
-        boolean hasFocus) {
+            Object value,
+            boolean selected,
+            boolean expanded,
+            boolean leaf,
+            int row,
+            boolean hasFocus) {
 
         // unwrap
         while (value instanceof DefaultMutableTreeNode) {
@@ -144,14 +131,15 @@ public class ProjectTree extends JTree {
 
         // read name property
         try {
-            return (value != null)
-                ? String.valueOf(PropertyUtils.getProperty(value, "name"))
-                : "";
+            return (value != null) ? String.valueOf(PropertyUtils.getProperty(
+                    value,
+                    "name")) : "";
 
         }
         catch (Exception e) {
-            String objectClass =
-                (value == null) ? "(unknown)" : value.getClass().getName();
+            String objectClass = (value == null) ? "(unknown)" : value
+                    .getClass()
+                    .getName();
             logObj.warn("Exception reading property 'name', class " + objectClass, e);
             return "";
         }
