@@ -66,6 +66,7 @@ import javax.sql.DataSource;
 import org.objectstyle.cayenne.ConnectionSetup;
 import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.*;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conn.PoolDataSource;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -83,182 +84,193 @@ import org.objectstyle.cayenne.map.MapLoaderImpl;
  *  @author Andrei Adamchik
  */
 public class TestMain implements TestConstants {
-    static Logger logObj = Logger.getLogger(TestMain.class.getName());
+	static Logger logObj = Logger.getLogger(TestMain.class.getName());
 
-    private static TestResources resources = new TestResources();
-    private static boolean noGui;
+	private static TestResources resources = new TestResources();
+	private static boolean noGui;
 
-    public static TestResources getResources() {
-        return resources;
-    }
+	public static TestResources getResources() {
+		return resources;
+	}
 
-    public static boolean noGui() {
-        return noGui;
-    }
+	public static boolean noGui() {
+		return noGui;
+	}
 
-    public static void main(String[] args) {
-        // check for "-nogui" flag
-        noGui = false;
-        boolean xmlDataSource = false;
-        if (args != null && args.length > 0) {
-            if ("-nogui".equals(args[0]))
-                noGui = true;
-            else if ("-xml".equals(args[0])) {
-                noGui = true;
-                xmlDataSource = true;
-            }
-        }
+	public static void main(String[] args) {
+		// check for "-nogui" flag
+		noGui = false;
+		boolean xmlDataSource = false;
+		if (args != null && args.length > 0) {
+			if ("-nogui".equals(args[0]))
+				noGui = true;
+			else if ("-xml".equals(args[0])) {
+				noGui = true;
+				xmlDataSource = true;
+			}
+		}
+		// bootstrap ClassLoader
+		Configuration.bootstrapSharedConfig(TestMain.class);
 
-        // configure properties
-        configureProps();
+		// configure properties
+		configureProps();
 
-        // initialize shared resources
-        try {
-            DataSourceInfo dsi =
-                (xmlDataSource)
-                    ? new ConnectionSetup(false, false).buildConnectionInfo()
-                    : new ConnectionSetup(true, !noGui).buildConnectionInfo();
+		// initialize shared resources
+		try {
+			DataSourceInfo dsi =
+				(xmlDataSource)
+					? new ConnectionSetup(false, false).buildConnectionInfo()
+					: new ConnectionSetup(true, !noGui).buildConnectionInfo();
 
-            resources.setSharedConnInfo(dsi);
-        }
-        catch (Exception ex) {
-            logObj.log(Level.SEVERE, "Can not load connection info.", ex);
-            System.exit(1);
-        }
+			resources.setSharedConnInfo(dsi);
+		} catch (Exception ex) {
+			logObj.log(Level.SEVERE, "Can not load connection info.", ex);
+			System.exit(1);
+		}
 
-        resources.setSharedDomain(createSharedDomain());
-        resources.setSharedDatabaseSetup(createDbSetup());
+		resources.setSharedDomain(createSharedDomain());
+		resources.setSharedDatabaseSetup(createDbSetup());
 
-        // initialize other stuff
-        createTestDatabase();
-        ClassGenerator.bootstrapVelocity(ClassGenerator.class);
+		// initialize other stuff
+		createTestDatabase();
+		ClassGenerator.bootstrapVelocity(ClassGenerator.class);
 
-        // run tests
-        boolean success = true;
-        if (System.getProperty(TestMain.SINGLE_TEST_PROP) != null)
-            success =
-                ObjectStyleTestRunner.runSingleTestCase(System.getProperty(SINGLE_TEST_PROP));
-        else
-            success = ObjectStyleTestRunner.runTests();
+		// run tests
+		boolean success = true;
+		if (System.getProperty(TestMain.SINGLE_TEST_PROP) != null)
+			success =
+				ObjectStyleTestRunner.runSingleTestCase(
+					System.getProperty(SINGLE_TEST_PROP));
+		else
+			success = ObjectStyleTestRunner.runTests();
 
-        if (!success) {
-            logObj.warning("Some tests have failed.");
-            System.exit(1);
-        }
-    }
+		if (!success) {
+			logObj.warning("Some tests have failed.");
+			System.exit(1);
+		}
+	}
 
-    public static DatabaseSetup getSharedDatabaseSetup() {
-        return getResources().getSharedDatabaseSetup();
-    }
+	public static DatabaseSetup getSharedDatabaseSetup() {
+		return getResources().getSharedDatabaseSetup();
+	}
 
-    public static Connection getSharedConnection() {
-        return getResources().getSharedConnection();
-    }
+	public static Connection getSharedConnection() {
+		return getResources().getSharedConnection();
+	}
 
-    public static DataDomain getSharedDomain() {
-        return getResources().getSharedDomain();
-    }
+	public static DataDomain getSharedDomain() {
+		return getResources().getSharedDomain();
+	}
 
-    public static DataNode getSharedNode() {
-        return getResources().getSharedNode();
-    }
+	public static DataNode getSharedNode() {
+		return getResources().getSharedNode();
+	}
 
-    public static DataSourceInfo getFreshConnInfo() throws java.lang.Exception {
-        return getResources().getFreshConnInfo();
-    }
+	public static DataSourceInfo getFreshConnInfo()
+		throws java.lang.Exception {
+		return getResources().getFreshConnInfo();
+	}
 
-    private static DatabaseSetup createDbSetup() {
-        try {
-            return new DatabaseSetup(resources.getSharedNode().getDataMaps()[0]);
-        }
-        catch (Exception ex) {
-            logObj.log(Level.SEVERE, "Can not create shared DatabaseSetup.", ex);
-            System.exit(1);
-        }
+	private static DatabaseSetup createDbSetup() {
+		try {
+			return new DatabaseSetup(
+				resources.getSharedNode().getDataMaps()[0]);
+		} catch (Exception ex) {
+			logObj.log(
+				Level.SEVERE,
+				"Can not create shared DatabaseSetup.",
+				ex);
+			System.exit(1);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    private static DataDomain createSharedDomain() {
-        try {
+	private static DataDomain createSharedDomain() {
+		try {
+			// data source
+			DataSourceInfo dsi = getFreshConnInfo();
+			PoolDataSource poolDS =
+				new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
+			DataSource ds =
+				new PoolManager(
+					poolDS,
+					1,
+					2,
+					dsi.getUserName(),
+					dsi.getPassword());
 
-            // data source
-            DataSourceInfo dsi = getFreshConnInfo();
-            PoolDataSource poolDS =
-                new PoolDataSource(dsi.getJdbcDriver(), dsi.getDataSourceUrl());
-            DataSource ds =
-                new PoolManager(poolDS, 1, 2, dsi.getUserName(), dsi.getPassword());
+			// map
+			String[] maps = new String[] { TEST_MAP_PATH };
+			DataMap map = new MapLoaderImpl().loadDataMaps(maps)[0];
 
-            // map
-            String[] maps = new String[] { TEST_MAP_PATH };
-            DataMap map = new MapLoaderImpl().loadDataMaps(maps)[0];
+			// node
+			DataNode node = new DataNode("node");
+			node.setDataSource(ds);
+			String adapterClass = dsi.getAdapterClass();
+			if (adapterClass == null)
+				adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
+			node.setAdapter(
+				(DbAdapter) Class.forName(adapterClass).newInstance());
+			node.addDataMap(map);
 
-            // node
-            DataNode node = new DataNode("node");
-            node.setDataSource(ds);
-            String adapterClass = dsi.getAdapterClass();
-            if (adapterClass == null)
-                adapterClass = DataNode.DEFAULT_ADAPTER_CLASS;
-            node.setAdapter((DbAdapter) Class.forName(adapterClass).newInstance());
-            node.addDataMap(map);
+			// domain
+			DataDomain domain = new DataDomain("Shared Domain");
+			domain.addNode(node);
+			return domain;
+		} catch (java.lang.Exception ex) {
+			logObj.log(Level.SEVERE, "Can not create shared domain.", ex);
+			System.exit(1);
+		}
+		return null;
+	}
 
-            // domain
-            DataDomain domain = new DataDomain("Shared Domain");
-            domain.addNode(node);
-            return domain;
-        }
-        catch (java.lang.Exception ex) {
-            logObj.log(Level.SEVERE, "Can not create shared domain.", ex);
-            System.exit(1);
-        }
-        return null;
-    }
+	private static void createTestDatabase() {
+		try {
+			DatabaseSetup dbSetup = getSharedDatabaseSetup();
+			dbSetup.dropTestTables();
+			dbSetup.setupTestTables();
+		} catch (java.lang.Exception ex) {
+			logObj.log(Level.SEVERE, "Error creating test database.", ex);
+			System.exit(1);
+		}
+	}
 
-    private static void createTestDatabase() {
-        try {
-            DatabaseSetup dbSetup = getSharedDatabaseSetup();
-            dbSetup.dropTestTables();
-            dbSetup.setupTestTables();
-        }
-        catch (java.lang.Exception ex) {
-            logObj.log(Level.SEVERE, "Error creating test database.", ex);
-            System.exit(1);
-        }
-    }
+	private static void configureProps() {
+		// load user property overrides
+		File propsFile =
+			new File(
+				System.getProperty("user.home") + File.separator + USER_PROPS);
+		if (propsFile.exists()) {
+			Properties props = new Properties();
 
-    private static void configureProps() {
-        // load user property overrides
-        File propsFile =
-            new File(System.getProperty("user.home") + File.separator + USER_PROPS);
-        if (propsFile.exists()) {
-            Properties props = new Properties();
+			try {
+				FileInputStream in = new FileInputStream(propsFile);
+				props.load(in);
+				in.close();
+			} catch (IOException ioex) {
+				logObj.log(Level.SEVERE, "Error loading properties.", ioex);
+				System.exit(1);
+			}
 
-            try {
-                FileInputStream in = new FileInputStream(propsFile);
-                props.load(in);
-                in.close();
-            }
-            catch (IOException ioex) {
-                logObj.log(Level.SEVERE, "Error loading properties.", ioex);
-                System.exit(1);
-            }
+			Properties sysProps = System.getProperties();
+			sysProps.putAll(props);
+			System.setProperties(sysProps);
+		}
 
-            Properties sysProps = System.getProperties();
-            sysProps.putAll(props);
-            System.setProperties(sysProps);
-        }
-
-        File logPropsFile =
-            new File(System.getProperty("user.home") + File.separator + LOGGING_PROPS);
-        if (logPropsFile.exists()) {
-            try {
-                FileInputStream in = new FileInputStream(logPropsFile);
-                LogManager.getLogManager().readConfiguration(in);
-                in.close();
-            }
-            catch (IOException ioex) {
-                throw new RuntimeException("Error reading config.", ioex);
-            }
-        }
-    }
+		File logPropsFile =
+			new File(
+				System.getProperty("user.home")
+					+ File.separator
+					+ LOGGING_PROPS);
+		if (logPropsFile.exists()) {
+			try {
+				FileInputStream in = new FileInputStream(logPropsFile);
+				LogManager.getLogManager().readConfiguration(in);
+				in.close();
+			} catch (IOException ioex) {
+				throw new RuntimeException("Error reading config.", ioex);
+			}
+		}
+	}
 }

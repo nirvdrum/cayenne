@@ -63,6 +63,9 @@ public class AllTests {
 	
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("Cayenne Tools Tests");
+		
+		// load class via bootstrapped ClassLoader, 
+		// otherwise there are cases when ant classes may not be found
 		suite.addTestSuite(CayenneGeneratorTst.class);
 		return suite;
 	}
