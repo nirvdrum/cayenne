@@ -269,7 +269,6 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
-                    //                    batch.add(context.takeObjectSnapshot(o));
                     Map snapshot = BatchQueryUtils.buildSnapshotForInsert(
                             entity,
                             o,
