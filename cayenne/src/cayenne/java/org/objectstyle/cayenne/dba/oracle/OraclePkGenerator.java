@@ -146,7 +146,7 @@ public class OraclePkGenerator extends JdbcPkGenerator {
             .append(sequenceName(ent))
             .append(" START WITH 200")
             .append(" INCREMENT BY ")
-            .append(getPkCacheSize());
+            .append(pkCacheSize(ent));
         return buf.toString();
     }
 
@@ -168,58 +168,87 @@ public class OraclePkGenerator extends JdbcPkGenerator {
      * SELECT pk_table_name.nextval FROM DUAL
      * </pre>
      */
-    protected int pkFromDatabase(DataNode node, DbEntity ent)
-		throws Exception {
+    protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
 
         DbKeyGenerator pkGenerator = ent.getPrimaryKeyGenerator();
         String pkGeneratingSequenceName;
-        if (pkGenerator != null &&
-            DbKeyGenerator.ORACLE_TYPE.equals(pkGenerator.getGeneratorType()) &&
-            pkGenerator.getGeneratorName() != null)
+        if (pkGenerator != null
+            && DbKeyGenerator.ORACLE_TYPE.equals(pkGenerator.getGeneratorType())
+            && pkGenerator.getGeneratorName() != null)
             pkGeneratingSequenceName = pkGenerator.getGeneratorName();
-        else pkGeneratingSequenceName = sequenceName(ent);
+        else
+            pkGeneratingSequenceName = sequenceName(ent);
 
         Connection con = node.getDataSource().getConnection();
         try {
-          Statement st = con.createStatement();
-          try {
-            ResultSet rs = st.executeQuery( "SELECT "
-                + pkGeneratingSequenceName
-                + ".nextval FROM DUAL");
+            Statement st = con.createStatement();
             try {
-              //Object pk = null;
-              if (!rs.next()) {
-                throw new CayenneRuntimeException(
-                    "Error generating pk for DbEntity "
-                    + ent.getName());
-              }
-              return rs.getInt(1);
-            } finally {
-              rs.close();
+                ResultSet rs =
+                    st.executeQuery(
+                        "SELECT " + pkGeneratingSequenceName + ".nextval FROM DUAL");
+                try {
+                    //Object pk = null;
+                    if (!rs.next()) {
+                        throw new CayenneRuntimeException(
+                            "Error generating pk for DbEntity " + ent.getName());
+                    }
+                    return rs.getInt(1);
+                }
+                finally {
+                    rs.close();
+                }
             }
-          } finally {
-            st.close();
-          }
-        } finally {
-          con.close();
+            finally {
+                st.close();
+            }
+        }
+        finally {
+            con.close();
+        }
+    }
+
+    protected int pkCacheSize(DbEntity entity) {
+        // use custom generator if possible
+        DbKeyGenerator keyGenerator = entity.getPrimaryKeyGenerator();
+        if (keyGenerator != null
+            && DbKeyGenerator.ORACLE_TYPE.equals(keyGenerator.getGeneratorType())
+            && keyGenerator.getGeneratorName() != null) {
+
+            Integer size = keyGenerator.getKeyCacheSize();
+            return (size != null && size.intValue() >= 1)
+                ? size.intValue()
+                : super.getPkCacheSize();
+        }
+        else {
+            return super.getPkCacheSize();
         }
     }
 
     /** Returns expected primary key sequence name for a DbEntity. */
-    protected String sequenceName(DbEntity ent) {
-        String entName = ent.getName();
-        String seqName = _SEQUENCE_PREFIX + entName.toLowerCase();
+    protected String sequenceName(DbEntity entity) {
 
-        if (ent.getSchema() != null && ent.getSchema().length() > 0) {
-            seqName = ent.getSchema() + "." + seqName;
+        // use custom generator if possible
+        DbKeyGenerator keyGenerator = entity.getPrimaryKeyGenerator();
+        if (keyGenerator != null
+            && DbKeyGenerator.ORACLE_TYPE.equals(keyGenerator.getGeneratorType())
+            && keyGenerator.getGeneratorName() != null) {
+
+            return keyGenerator.getGeneratorName().toLowerCase();
         }
+        else {
+            String entName = entity.getName();
+            String seqName = _SEQUENCE_PREFIX + entName.toLowerCase();
 
-        return seqName;
+            if (entity.getSchema() != null && entity.getSchema().length() > 0) {
+                seqName = entity.getSchema() + "." + seqName;
+            }
+            return seqName;
+        }
     }
 
     protected String stripSchemaName(String sequenceName) {
-    	int ind = sequenceName.indexOf('.');
-    	return (ind >= 0) ? sequenceName.substring(ind + 1) : sequenceName;
+        int ind = sequenceName.indexOf('.');
+        return (ind >= 0) ? sequenceName.substring(ind + 1) : sequenceName;
     }
 
     /**
@@ -234,24 +263,24 @@ public class OraclePkGenerator extends JdbcPkGenerator {
         try {
             Statement sel = con.createStatement();
             try {
-                StringBuffer q = new StringBuffer();
-                q.append(
-                    "SELECT LOWER(SEQUENCE_NAME) FROM ALL_SEQUENCES WHERE LOWER(SEQUENCE_NAME)");
-                q.append(" LIKE '").append(_SEQUENCE_PREFIX).append("%'");
-                ResultSet rs = sel.executeQuery(q.toString());
+                ResultSet rs =
+                    sel.executeQuery("SELECT LOWER(SEQUENCE_NAME) FROM ALL_SEQUENCES");
                 try {
                     List sequenceList = new ArrayList();
                     while (rs.next()) {
                         sequenceList.add(rs.getString(1));
                     }
                     return sequenceList;
-                } finally {
+                }
+                finally {
                     rs.close();
                 }
-            } finally {
+            }
+            finally {
                 sel.close();
             }
-        } finally {
+        }
+        finally {
             con.close();
         }
     }
