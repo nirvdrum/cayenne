@@ -55,17 +55,43 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import org.objectstyle.cayenne.access.DataDomain;
 
 /**
  * @author Andrei Adamchik
  */
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Validator Package Tests");
-	    suite.addTestSuite(ValidatorTst.class);
-	    suite.addTestSuite(DomainValidatorTst.class);
-		return suite;
-	}
-}
+public class DomainValidatorTst extends ValidatorTestBase {
 
+    /**
+     * Constructor for DomainValidatorTst.
+     * @param arg0
+     */
+    public DomainValidatorTst(String arg0) {
+        super(arg0);
+    }
+
+    public void testValidateDomains() throws Exception {
+        // should succeed
+        DataDomain d1 = new DataDomain("abc");
+        validator.reset();
+        
+        new DomainValidator().validateObject(new Object[] { conf, d1 }, validator);
+        assertValidator(ValidationResult.VALID);
+
+        // should complain about no name
+        DataDomain d2 = new DataDomain();
+        validator.reset();
+         new DomainValidator().validateObject(new Object[] { conf, d2 }, validator);
+        assertValidator(ValidationResult.ERROR);
+
+        // should complain about duplicate name
+        DataDomain d3 = new DataDomain("xyz");
+        conf.addDomain(d3);
+        conf.addDomain(d1);
+        d3.setName(d1.getName());
+        validator.reset();
+        new DomainValidator().validateObject(new Object[] { conf, d3 }, validator);
+        assertValidator(ValidationResult.ERROR);
+    }
+
+}

@@ -200,12 +200,19 @@ public class Project {
     }
 
     /**
-     * Returns Cayenne configuration object assocaiated with this
-     * project. 
+     * Returns Cayenne configuration object associated with this project. 
      */
     public Configuration getConfig() {
         return config;
     }
+    
+    /**
+     * Sets Cayenne configuration object associated with this project. 
+     */
+    public void setConfig(Configuration config) {
+        this.config = config;
+    }
+    
 
     /** 
      * Returns project directory. This is a directory where

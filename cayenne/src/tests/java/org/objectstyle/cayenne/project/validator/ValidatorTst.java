@@ -77,9 +77,6 @@ import org.objectstyle.cayenne.project.Project;
  * @author Andrei Adamchik
  */
 public class ValidatorTst extends CayenneTestCase {
-	protected Validator validator;
-	protected DataMap map;
-	private static int counter = 1;
 
 	/**
 	 * Constructor for ValidatorTst.
@@ -87,15 +84,10 @@ public class ValidatorTst extends CayenneTestCase {
 	public ValidatorTst(String name) {
 		super(name);
 	}
-
-	public void setUp() throws Exception {
-		map = new DataMap();
-		validator = new Validator(null);
-	}
-	
+    
 	public void testProject() throws Exception {
 		Project project = new Project("abc", new File(System.getProperty("user.dir")));
-		validator = new Validator(project);
+		Validator validator = new Validator(project);
 		assertSame(project, validator.getProject());
 	}
 
@@ -309,7 +301,4 @@ public class ValidatorTst extends CayenneTestCase {
 	}
 
 */
-	protected void assertValidator(int expectedSeverity) {
-		assertEquals(expectedSeverity, validator.getMaxSeverity());
-	}
 }

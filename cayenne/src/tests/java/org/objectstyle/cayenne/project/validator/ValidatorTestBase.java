@@ -55,17 +55,40 @@
  */
 package org.objectstyle.cayenne.project.validator;
 
-import junit.framework.TestSuite;
+import java.io.File;
+
+import org.objectstyle.cayenne.CayenneTestCase;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.project.Project;
 
 /**
  * @author Andrei Adamchik
  */
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Validator Package Tests");
-	    suite.addTestSuite(ValidatorTst.class);
-	    suite.addTestSuite(DomainValidatorTst.class);
-		return suite;
-	}
+public class ValidatorTestBase extends CayenneTestCase {
+	protected Validator validator;
+	protected Configuration conf;
+
+    /**
+     * Constructor for ValidatorTestBase.
+     * @param arg0
+     */
+    public ValidatorTestBase(String arg0) {
+        super(arg0);
+    }
+
+
+    /**
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception {
+        super.setUp();
+        Project project = new Project("abc", new File(System.getProperty("user.dir")));
+        validator = new Validator(project);      
+        conf = project.getConfig();  
+    }
+    
+    protected void assertValidator(int errorLevel) throws Exception {
+    	assertEquals(errorLevel, validator.getMaxSeverity());
+    }
 }
 
