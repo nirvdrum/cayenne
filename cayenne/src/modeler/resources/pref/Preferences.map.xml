@@ -3,17 +3,17 @@
 	<property name="defaultLockType" value="optimistic"/>
 	<property name="defaultPackage" value="org.objectstyle.cayenne.pref"/>
 	<db-entity name="domain">
-		<db-attribute name="description" type="VARCHAR" length="254"/>
+		<db-attribute name="description" type="VARCHAR"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="level" type="INTEGER" isMandatory="true"/>
-		<db-attribute name="name" type="VARCHAR" isMandatory="true" length="100"/>
+		<db-attribute name="name" type="VARCHAR" isMandatory="true"/>
 		<db-attribute name="parent_id" type="INTEGER"/>
-		<db-attribute name="version" type="VARCHAR" length="254"/>
+		<db-attribute name="version" type="VARCHAR"/>
 	</db-entity>
 	<db-entity name="domain_preference">
 		<db-attribute name="domain_id" type="INTEGER" isMandatory="true"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="key" type="VARCHAR" isMandatory="true" length="254"/>
+		<db-attribute name="key" type="VARCHAR" isMandatory="true"/>
 		<db-attribute name="key_value_pairs" type="LONGVARCHAR"/>
 	</db-entity>
 	<obj-entity name="Domain" className="org.objectstyle.cayenne.pref.Domain" lock-type="optimistic" dbEntityName="domain">

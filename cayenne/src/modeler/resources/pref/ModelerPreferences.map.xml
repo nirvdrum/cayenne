@@ -13,23 +13,23 @@
 	<db-entity name="data_map_defaults">
 		<db-attribute name="generate_pairs" type="INTEGER"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="output_path" type="VARCHAR" length="254"/>
-		<db-attribute name="subclass_template" type="VARCHAR" length="254"/>
-		<db-attribute name="superclass_package_suffix" type="VARCHAR" length="254"/>
-		<db-attribute name="superclass_template" type="VARCHAR" length="254"/>
+		<db-attribute name="output_path" type="VARCHAR"/>
+		<db-attribute name="subclass_template" type="VARCHAR"/>
+		<db-attribute name="superclass_package_suffix" type="VARCHAR"/>
+		<db-attribute name="superclass_template" type="VARCHAR"/>
 	</db-entity>
 	<db-entity name="data_node_defaults">
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="local_data_source" type="VARCHAR" length="255"/>
+		<db-attribute name="local_data_source" type="VARCHAR"/>
 	</db-entity>
 	<db-entity name="db_connection_info">
-		<db-attribute name="db_adapter" type="VARCHAR" length="254"/>
+		<db-attribute name="db_adapter" type="VARCHAR"/>
 		<db-attribute name="domain_preference_id" type="INTEGER"/>
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="jdbc_driver" type="VARCHAR" length="254"/>
-		<db-attribute name="password" type="VARCHAR" length="254"/>
-		<db-attribute name="url" type="VARCHAR" length="254"/>
-		<db-attribute name="user_name" type="VARCHAR" length="254"/>
+		<db-attribute name="jdbc_driver" type="VARCHAR"/>
+		<db-attribute name="password" type="VARCHAR"/>
+		<db-attribute name="url" type="VARCHAR"/>
+		<db-attribute name="user_name" type="VARCHAR"/>
 	</db-entity>
 	<db-entity name="db_generator_defaults">
 		<db-attribute name="create_fk" type="INTEGER"/>
@@ -41,7 +41,7 @@
 	</db-entity>
 	<db-entity name="fs_path">
 		<db-attribute name="id" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
-		<db-attribute name="path" type="VARCHAR" length="254"/>
+		<db-attribute name="path" type="VARCHAR"/>
 	</db-entity>
 	<obj-entity name="ComponentGeometry" className="org.objectstyle.cayenne.modeler.pref.ComponentGeometry" dbEntityName="component_geometry" superClassName="org.objectstyle.cayenne.pref.PreferenceDetail">
 		<obj-attribute name="height" type="java.lang.Integer" db-attribute-path="height"/>
