@@ -104,18 +104,26 @@ class OracleProcedureAction extends ProcedureAction {
                 int index = outParamIndexes[i];
 
                 if (jdbcTypes[index] == resultSetType) {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
-                    // else
+                    // note: jdbc column indexes start from 1, not 0
                     ResultSet rs = (ResultSet) statement.getObject(index + 1);
-                    ResultDescriptor nextDesc = ResultDescriptor.createDescriptor(
-                            rs,
-                            getAdapter().getExtendedTypes());
 
-                    readResultSet(rs, nextDesc, (GenericSelectQuery) query, delegate);
+                    try {
+                        ResultDescriptor nextDesc = ResultDescriptor.createDescriptor(
+                                rs,
+                                getAdapter().getExtendedTypes());
+
+                        readResultSet(rs, nextDesc, (GenericSelectQuery) query, delegate);
+                    }
+                    finally {
+                        try {
+                            rs.close();
+                        }
+                        catch (SQLException ex) {
+                        }
+                    }
                 }
                 else {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
-                    // else
+                    // note: jdbc column indexes start from 1, not 0
                     Object val = converters[index].materializeObject(
                             statement,
                             index + 1,

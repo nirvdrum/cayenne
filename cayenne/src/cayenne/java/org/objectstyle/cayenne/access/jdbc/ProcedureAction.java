@@ -97,7 +97,7 @@ public class ProcedureAction extends BaseSQLAction {
             // stored procedure may contain a mixture of update counts and result sets,
             // and out parameters. Read out parameters first, then
             // iterate until we exhaust all results
-            boolean hasResultSet = statement.execute();
+            statement.execute();
 
             // read out parameters
             readStoredProcedureOutParameters(statement, transl
@@ -105,14 +105,23 @@ public class ProcedureAction extends BaseSQLAction {
 
             // read the rest of the query
             while (true) {
-                if (hasResultSet) {
+                if (statement.getMoreResults()) {
                     ResultSet rs = statement.getResultSet();
 
-                    readResultSet(
-                            rs,
-                            transl.getResultDescriptor(rs),
-                            (GenericSelectQuery) query,
-                            observer);
+                    try {
+                        readResultSet(
+                                rs,
+                                transl.getResultDescriptor(rs),
+                                (GenericSelectQuery) query,
+                                observer);
+                    }
+                    finally {
+                        try {
+                            rs.close();
+                        }
+                        catch (SQLException ex) {
+                        }
+                    }
                 }
                 else {
                     int updateCount = statement.getUpdateCount();
@@ -122,8 +131,6 @@ public class ProcedureAction extends BaseSQLAction {
                     QueryLogger.logUpdateCount(query.getLoggingLevel(), updateCount);
                     observer.nextCount(query, updateCount);
                 }
-
-                hasResultSet = statement.getMoreResults();
             }
         }
         finally {
