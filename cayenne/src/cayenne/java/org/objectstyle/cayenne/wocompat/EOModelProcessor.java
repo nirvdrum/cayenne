@@ -277,21 +277,17 @@ public class EOModelProcessor {
                 continue;
             }
 
-            Expression exp = ExpressionFactory.unaryExp(Expression.OBJ_PATH, targetPath);
-            Iterator path = e.resolvePathComponents(exp);
+            Expression exp = ExpressionFactory.unaryExp(Expression.DB_PATH, targetPath);
+            Iterator path = e.getDbEntity().resolvePathComponents(exp);
 
             ObjRelationship flatRel = new ObjRelationship();
             flatRel.setName((String) relMap.get("name"));
 
-            ObjRelationship firstRel = null;
-            ObjRelationship lastRel = null;
+            DbRelationship firstRel = null;
+            DbRelationship lastRel = null;
             while (path.hasNext()) {
-                lastRel = (ObjRelationship) path.next();
-
-                // expecting 1 step relationships
-                DbRelationship dbRel =
-                    (DbRelationship) lastRel.getDbRelationshipList().get(0);
-                flatRel.addDbRelationship(dbRel);
+                lastRel = (DbRelationship) path.next();
+                flatRel.addDbRelationship(lastRel);
 
                 if (firstRel == null) {
                     firstRel = lastRel;
@@ -301,7 +297,22 @@ public class EOModelProcessor {
             if ((firstRel != null) && (lastRel != null)) {
                 boolean toMany = firstRel.isToMany();
                 flatRel.setSourceEntity(e);
-                flatRel.setTargetEntity(lastRel.getTargetEntity());
+
+                List potentialTargets =
+                    e.getDataMap().getMappedEntities(
+                        (DbEntity) lastRel.getTargetEntity());
+
+                // sanity check
+                if (potentialTargets.size() != 1) {
+                    throw new CayenneRuntimeException(
+                        "One and only one entity should be mapped"
+                            + " to "
+                            + lastRel.getTargetEntity().getName()
+                            + ". Instead found : "
+                            + potentialTargets.size());
+                }
+
+                flatRel.setTargetEntity((ObjEntity) potentialTargets.get(0));
                 flatRel.setToMany(toMany);
 
                 e.addRelationship(flatRel);
