@@ -81,6 +81,12 @@ import org.apache.log4j.Logger;
 public class CayenneTable extends JTable {
     private static Logger logObj = Logger.getLogger(CayenneTable.class);
 
+    public CayenneTable() {
+        super();
+        this.setRowHeight(25);
+        this.setRowMargin(3);
+    }
+
     protected void createDefaultEditors() {
         super.createDefaultEditors();
         

@@ -14,3 +14,5 @@ Changes in this release:
    
 2. [BUG 776375] Modifying values of HOLLOW objects was not handled correctly. Object wasn't 
    refetched as it should've been.
+   
+3. [MODELER BUG 770803] Fixed navigating items that failed validation.

@@ -52,13 +52,10 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.table.AbstractTableModel;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DataMapException;
@@ -67,165 +64,149 @@ import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
-
+import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 
 /** Model for editing DbAttributePair-s. Changes in the join attributes
  *  don't take place until commit() is called. Creation of the new
  *  DbAttributes is not allowed - user should choose from the existing ones.
 */
-public class DbAttributePairTableModel extends AbstractTableModel
-{
-	EventController mediator;
-	Object src;
-	
-	private DbRelationship rel;
-	private DbEntity source;
-	private DbEntity target;
-	private List joins;
+public class DbAttributePairTableModel extends CayenneTableModel {
 
-	/** Is the table editable. */
-	private boolean editable = false;
-	
-	// Columns
-	static final int SOURCE = 0;
-	static final int SOURCE_TYPE = 1;
-	static final int TARGET = 2;
-	static final int TARGET_TYPE = 3;
-	
-	public DbAttributePairTableModel(DbRelationship temp_rel,
-										EventController temp_mediator,
-										Object temp_src) {
-		mediator = temp_mediator;
-		src = temp_src;
-		rel = temp_rel;
-		source = (DbEntity)rel.getSourceEntity();
-		target = (DbEntity)rel.getTargetEntity();
-		joins = new ArrayList();
-		List relJoins = rel.getJoins();
-		if (relJoins != null) {
-			joins.addAll(relJoins);
-		}
-	}
+    // Columns
+    static final int SOURCE = 0;
+    static final int SOURCE_TYPE = 1;
+    static final int TARGET = 2;
+    static final int TARGET_TYPE = 3;
 
-	public DbAttributePairTableModel(DbRelationship temp_rel,
-										EventController temp_mediator,
-										Object temp_src,
-										boolean temp_editable) {
-		this(temp_rel, temp_mediator, temp_src);
-		editable = temp_editable;
-	}	
+    protected DbRelationship relationship;
+    protected DbEntity source;
+    protected DbEntity target;
 
-	/** Mode new attribute pairs from list to the DbRelationship. */
-	public void commit() throws DataMapException {
-		rel.setJoins(joins);
-	}	
-	
-	public int getRowCount() {
-		return joins.size();
-	}
-	
-	public int getColumnCount()
-	{
-		return 4;
-	}
-	
-	public String getColumnName(int column) {
-		if (column == SOURCE)
-			return "Source";
-		else if (column == SOURCE_TYPE)
-			return "Type";
-		else if (column == TARGET)
-			return "Target";
-		else if (column == TARGET_TYPE)
-			return "Type";
-		else return "";
-	}
-	
-	public Object getValueAt(int row, int column)
-	{
-		DbAttributePair pair = (DbAttributePair)joins.get(row);
-		DbAttribute source_attr = pair.getSource();
-		DbAttribute target_attr = pair.getTarget();
+    /** Is the table editable. */
+    private boolean editable;
 
-		if (column == SOURCE) {
-			if (null == source_attr)
-				return null;
-			return source_attr.getName();
-		}
-		else if (column == SOURCE_TYPE) {
-			if (null == source_attr)
-				return null;
-			return TypesMapping.getSqlNameByType(source_attr.getType());
-		}
-		else if (column == TARGET) {
-			if (null == target_attr)
-				return null;
-			return target_attr.getName();
-		}
-		else if (column == TARGET_TYPE) {
-			if (null == target_attr)
-				return null;
-			return TypesMapping.getSqlNameByType(target_attr.getType());
-		}
-		else return null;
+    public DbAttributePairTableModel(
+        DbRelationship relationship,
+        EventController mediator,
+        Object src) {
 
-	}// End getValueAt()
-	
+        super(mediator, src, new ArrayList(relationship.getJoins()));
+        this.relationship = relationship;
+        this.source = (DbEntity) relationship.getSourceEntity();
+        this.target = (DbEntity) relationship.getTargetEntity();
+    }
+
+    public DbAttributePairTableModel(
+        DbRelationship relationship,
+        EventController mediator,
+        Object src,
+        boolean editable) {
+
+        this(relationship, mediator, src);
+        this.editable = editable;
+    }
+
+    public Class getElementsClass() {
+        return DbAttributePair.class;
+    }
+
+    /** Mode new attribute pairs from list to the DbRelationship. */
+    public void commit() throws DataMapException {
+        relationship.setJoins(getObjectList());
+    }
     
-    public void setValueAt(Object aValue, int row, int column) {
-		DbAttributePair pair = (DbAttributePair)joins.get(row);
-		String value = (String)aValue;
+    /**
+     * Returns null to disable ordering.
+     */
+    public String getOrderingKey() { 
+        return null;
+    }
 
-		if (column == SOURCE) {
-			if (null == source)
-				return;
-			DbAttribute attrib = (DbAttribute)source.getAttribute(value);
-			if (null == attrib) {				
-				return;
-			}
-			pair.setSource(attrib);
-		}
-		else if (column == TARGET) {
-			if (null == target)
-				return;
-			DbAttribute attrib = (DbAttribute)target.getAttribute(value);
-			if (null == attrib) {
-				return;
-			}
-			pair.setTarget(attrib);
-		}
-		fireTableRowsUpdated(row, row);
-    }// End setValueAt()
+    public int getColumnCount() {
+        return 4;
+    }
 
-	
-	/** Don't allow adding more than one new attributes. 
-	 * @return true if new row was added, false if not. */
-	public boolean addRow() {		
-		DbAttributePair pair = new DbAttributePair(null, null);
-		joins.add(pair);
-		fireTableDataChanged();
-		return true;
-	}
+    public String getColumnName(int column) {
+        if (column == SOURCE)
+            return "Source";
+        else if (column == SOURCE_TYPE)
+            return "Type";
+        else if (column == TARGET)
+            return "Target";
+        else if (column == TARGET_TYPE)
+            return "Type";
+        else
+            return "";
+    }
 
-	public void removeRow(int row) {
-		if (row < 0)
-			return;
-		joins.remove(row);
-		fireTableDataChanged();
-	}	
+    public DbAttributePair getJoin(int row) {
+        return (row >= 0 && row < objectList.size())
+            ? (DbAttributePair) objectList.get(row)
+            : null;
+    }
 
-	public boolean isCellEditable(int row, int col) {
-		if (col == SOURCE) {
-			if (rel.getSourceEntity() == null)
-				return false;
-			return (editable && true);		
-		}
-		else if (col == TARGET) {
-			if (rel.getTargetEntity() == null)
-				return false;
-			return (editable && true);
-		}
-		return false;
-	}// End isCellEditable()
-}// End DbAttributePairTableModel
+    public Object getValueAt(int row, int column) {
+        DbAttributePair join = getJoin(row);
+        if (join == null) {
+            return null;
+        }
 
+        if (column == SOURCE) {
+            return (join.getSource() == null)
+                ? null
+                : join.getSource().getName();
+        } else if (column == SOURCE_TYPE) {
+            return (join.getSource() == null)
+                ? null
+                : TypesMapping.getSqlNameByType(join.getSource().getType());
+        } else if (column == TARGET) {
+            return (join.getTarget() == null)
+                ? null
+                : join.getTarget().getName();
+        } else if (column == TARGET_TYPE) {
+            return (join.getTarget() == null)
+                ? null
+                : TypesMapping.getSqlNameByType(join.getTarget().getType());
+        } else
+            return null;
+
+    }
+
+    public void setUpdatedValueAt(Object aValue, int row, int column) {
+        DbAttributePair join = getJoin(row);
+        if (join == null) {
+            return;
+        }
+
+        String value = (String) aValue;
+
+        if (column == SOURCE) {
+            if (null == source)
+                return;
+            DbAttribute attrib = (DbAttribute) source.getAttribute(value);
+            if (null == attrib) {
+                return;
+            }
+            join.setSource(attrib);
+        } else if (column == TARGET) {
+            if (null == target)
+                return;
+            DbAttribute attrib = (DbAttribute) target.getAttribute(value);
+            if (null == attrib) {
+                return;
+            }
+            join.setTarget(attrib);
+        }
+        fireTableRowsUpdated(row, row);
+    }
+
+    public boolean isCellEditable(int row, int col) {
+        if (col == SOURCE) {
+            return relationship.getSourceEntity() != null && editable;
+        } else if (col == TARGET) {
+            return relationship.getTargetEntity() != null && editable;
+        }
+        
+        return false;
+    }
+}
