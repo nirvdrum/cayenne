@@ -36,7 +36,7 @@
 		<db-attribute-derived name="PAINTINGS_COUNT" type="INTEGER" length="10" precision="2" spec="COUNT(%@)">
 			<db-attribute-ref name="PAINTING_ID"/>
 		</db-attribute-derived>
-		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isGroupBy="true" spec="%@">
+		<db-attribute-derived name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isGroupBy="true" spec="%@">
 			<db-attribute-ref name="ARTIST_ID"/>
 		</db-attribute-derived>
 	</db-entity>
@@ -68,6 +68,14 @@
 	<obj-entity name="ArtistAssets" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="estimatedPrice" type="java.math.BigDecimal" db-attribute-name="ESTIMATED_PRICE"/>
 		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
+	</obj-entity>
+	
+	<obj-entity name="ArtistPaintingCounts" className="org.objectstyle.art.ArtistAssets" dbEntityName="ARTIST_ASSETS">
+		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
+	</obj-entity>
+	
+	<obj-entity name="SubPainting" className="org.objectstyle.art.Painting" dbEntityName="PAINTING">
+		<obj-attribute name="paintingTitle" type="java.lang.String" db-attribute-name="PAINTING_TITLE"/>
 	</obj-entity>
 	
 	<obj-entity name="PaintingInfo" className="org.objectstyle.art.PaintingInfo" dbEntityName="PAINTING_INFO">

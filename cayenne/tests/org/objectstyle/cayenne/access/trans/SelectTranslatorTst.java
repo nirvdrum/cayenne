@@ -65,8 +65,8 @@ import junit.framework.TestCase;
 import org.objectstyle.TestMain;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -81,7 +81,7 @@ public class SelectTranslatorTst extends TestCase {
 		super(name);
 	}
 
-	protected void setUp() throws java.lang.Exception {
+	protected void setUp() throws Exception {
 		q = new SelectQuery();
 		artistEnt =
 			TestMain.getSharedDomain().lookupEntity("Artist").getDbEntity();
@@ -96,7 +96,7 @@ public class SelectTranslatorTst extends TestCase {
 		return t;
 	}
 
-	public void testCreateSqlString1() throws java.lang.Exception {
+	public void testCreateSqlString1() throws Exception {
 		Connection con = TestMain.getSharedConnection();
 
 		try {
@@ -147,6 +147,7 @@ public class SelectTranslatorTst extends TestCase {
 		Connection con = TestMain.getSharedConnection();
 
 		try {
+			// configure query with entity that maps one-to-one to DbEntity
 			q.setObjEntityName("Artist");
 			SelectTranslator transl = buildTranslator(con);
 			transl.createSqlString();
@@ -184,6 +185,53 @@ public class SelectTranslatorTst extends TestCase {
 			for (int i = 0; i < dbAttrs.length; i++) {
 				assertTrue(columns.contains(dbAttrs[i]));
 			}
+
+		} finally {
+			con.close();
+		}
+	}
+
+	public void testBuildColumnList3() throws Exception {
+		Connection con = TestMain.getSharedConnection();
+
+		try {
+			// configure query with entity that maps to a subset of DbEntity
+			q.setObjEntityName("SubPainting");
+			SelectTranslator transl = buildTranslator(con);
+			transl.createSqlString();
+
+			List columns = transl.getColumnList();
+
+			ObjEntity subPainting =
+				TestMain.getSharedDomain().lookupEntity("SubPainting");
+
+            // assert that the number of attributes in the query is right
+            // 1 (obj attr) + 1 (pk) = 2 
+			assertEquals(2, columns.size());
+
+		} finally {
+			con.close();
+		}
+	}
+	
+	public void testBuildColumnList4() throws Exception {
+		Connection con = TestMain.getSharedConnection();
+
+		try {
+			// configure query with derived entity that maps to a subset of DbEntity
+			q.setObjEntityName("ArtistPaintingCounts");
+			SelectTranslator transl = buildTranslator(con);
+			transl.createSqlString();
+
+			List columns = transl.getColumnList();
+
+			ObjEntity countsEnt =
+				TestMain.getSharedDomain().lookupEntity("ArtistPaintingCounts");
+
+
+            // assert that the number of attributes in the query is right
+            // 1 (obj attr) + 1 (pk) = 2 
+			assertEquals(2, columns.size());
 
 		} finally {
 			con.close();

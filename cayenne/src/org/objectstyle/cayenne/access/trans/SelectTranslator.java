@@ -251,7 +251,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 		String newAlias = "t" + aliasCounter++;
 		tableList.add(dbEntity);
 		aliasList.add(newAlias);
-		columnList.addAll(extractQueryAttributes());
+		appendAttributes();
 	}
 
 	/**
@@ -267,22 +267,60 @@ public class SelectTranslator extends SelectQueryAssembler {
 	/** 
 	 * Returns a list of DbAttributes used in query.
 	 */
-	private List extractQueryAttributes() {
-		DbEntity dbe = getRootEntity().getDbEntity();
+	private void appendAttributes() {
+		ObjEntity oe = getRootEntity();
+		DbEntity dbe = oe.getDbEntity();
 		SelectQuery q = getSelectQuery();
 
-		if (!q.isFetchingCustAttributes()) {
-			return dbe.getAttributeList();
-		}
+		// extract custom attributes from the query
+		if (q.isFetchingCustAttributes()) {
+			List custAttrNames = q.getCustDbAttributes();
+			int len = custAttrNames.size();
+			for (int i = 0; i < len; i++) {
+				columnList.add(dbe.getAttribute((String) custAttrNames.get(i)));
+			}
+		} else {
+			// build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
 
-		List custAttrNames = q.getCustDbAttributes();
-		int len = custAttrNames.size();
-		ArrayList attrs = new ArrayList(len);
-		for (int i = 0; i < len; i++) {
-			attrs.add(dbe.getAttribute((String) custAttrNames.get(i)));
-		}
+			// ObjEntity attrs
+			List attrs = oe.getAttributeList();
+			int len = attrs.size();
+			for (int i = 0; i < len; i++) {
+				ObjAttribute oa = (ObjAttribute) attrs.get(i);
+				columnList.add(oa.getDbAttribute());
+			}
 
-		return attrs;
+			// relationship keys
+			List rels = oe.getRelationshipList();
+			int rLen = rels.size();
+			for (int i = 0; i < rLen; i++) {
+				ObjRelationship rel = (ObjRelationship) rels.get(i);
+				DbRelationship dbRel =
+					(DbRelationship) rel.getDbRelationshipList().get(0);
+
+				List joins = dbRel.getJoins();
+				int jLen = joins.size();
+				for (int j = 0; j < jLen; j++) {
+					DbAttributePair join = (DbAttributePair) joins.get(j);
+					DbAttribute src = join.getSource();
+					if (!columnList.contains(src)) {
+						columnList.add(src);
+					}
+				}
+			}
+
+			// add remaining needed attrs from DbEntity
+			List dbattrs = dbe.getAttributeList();
+			int dLen = dbattrs.size();
+			for (int i = 0; i < dLen; i++) {
+				DbAttribute dba = (DbAttribute) dbattrs.get(i);
+				if (dba.isPrimaryKey()) {
+					if (!columnList.contains(dba)) {
+						columnList.add(dba);
+					}
+				}
+			}
+		}
 	}
 
 	private void appendColumn(StringBuffer queryBuf, int index) {
