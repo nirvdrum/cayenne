@@ -65,7 +65,7 @@ my $status = system(
 	"cvs", 
 	"-z3",
 	"-q",
-	"-d:pserver:anonymous\@cvs.cayenne.sourceforge.net:/cvsroot/cayenne",
+	"-d:pserver:anonymous\@cvs.sourceforge.net:/cvsroot/cayenne",
 	"export",
 	"-D",
 	"1 minute ago",
