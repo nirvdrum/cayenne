@@ -133,7 +133,7 @@ public class Validator
 		if (factory == null)
 			factory = "";
 		else factory = factory.trim();
-		// If directo factory, make sure the location is a valid file name.
+		// If direct factory, make sure the location is a valid file name.
 		if (factory.equals(DataSourceFactory.DIRECT_FACTORY)) {
 			String location = node.getDataSourceLocation();
 			if (location == null)
@@ -197,6 +197,7 @@ public class Validator
 		if (location == null)
 			location = "";
 		else location = location.trim();
+		// Must have data map file name
 		if (location.length() == 0) {
 			msg = new DataMapErrorMsg("Must specify valid Data Map file name"
 									, ErrorMsg.ERROR, domain, map);
@@ -204,11 +205,13 @@ public class Validator
 			status = ErrorMsg.ERROR;
 		}
 		
+		// Validate obj entities
 		ObjEntity[] entities = map.getObjEntities();
 		int temp_err_level = validateObjEntities(domain, map, entities);
 		if (temp_err_level > status) 
 			status = temp_err_level;
 
+		// Validate db entities
 		DbEntity[] db_entities = map.getDbEntities();
 		temp_err_level = validateDbEntities(domain, map, db_entities);
 		if (temp_err_level > status)
@@ -265,12 +268,14 @@ public class Validator
 		Iterator iter = attributes.iterator();
 		while (iter.hasNext()) {
 			ObjAttribute attribute = (ObjAttribute)iter.next();
+			// Must have name
 			if (attribute.getName() == null || attribute.getName().trim().length() == 0) {
 				msg = new AttributeErrorMsg("Attribute has no name"
 									, ErrorMsg.ERROR, domain, map, attribute);
 				errMsg.add(msg);
 				status = ErrorMsg.ERROR;
 			}
+			// Should have type (WARNING)
 			if (attribute.getType() == null || attribute.getType().trim().length() == 0) {
 				msg = new AttributeErrorMsg("Must specify attribute type"
 									, ErrorMsg.WARNING, domain, map, attribute);
@@ -322,11 +327,13 @@ public class Validator
 			if (name == null)
 				name = "";
 			else name = name.trim();
+			// Must have name
 			if (name.length() == 0) {
 				msg = new EntityErrorMsg("Entity has no name", ErrorMsg.ERROR
 											, domain, map, entities[i]);
 				errMsg.add(msg);
 				status = ErrorMsg.ERROR;
+			// Cannot have duplicate names within data map
 			} else if (name_map.containsKey(name)) {
 				msg = new EntityErrorMsg("Duplicate entity name \""
 										+name+"\".", ErrorMsg.ERROR
@@ -356,8 +363,20 @@ public class Validator
 		Iterator iter = attributes.iterator();
 		while (iter.hasNext()) {
 			DbAttribute attribute = (DbAttribute)iter.next();
+			// Must have name
 			if (attribute.getName() == null || attribute.getName().trim().length() == 0) {
 				msg = new AttributeErrorMsg("Attribute has no name"
+									, ErrorMsg.ERROR, domain, map, attribute);
+				errMsg.add(msg);
+				status = ErrorMsg.ERROR;
+			}
+			// VARCHAR and CHAR attributes must have max length
+			else if (attribute.getMaxLength() == -1
+					&& (attribute.getType() == java.sql.Types.VARCHAR
+						|| attribute.getType() == java.sql.Types.CHAR))
+			{
+				msg = new AttributeErrorMsg("Attribute \""+ attribute.getName() 
+									  + "\" doesn't have max length"
 									, ErrorMsg.ERROR, domain, map, attribute);
 				errMsg.add(msg);
 				status = ErrorMsg.ERROR;

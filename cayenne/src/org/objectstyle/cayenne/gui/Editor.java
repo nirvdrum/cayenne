@@ -56,7 +56,6 @@ package org.objectstyle.cayenne.gui;
  */
 
 
-//import java.awt.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Dimension;
@@ -85,6 +84,8 @@ import org.objectstyle.cayenne.gui.datamap.*;
 import org.objectstyle.cayenne.gui.validator.*;
 import org.objectstyle.cayenne.ConfigException;
 
+import org.objectstyle.cayenne.gui.action.*;
+
 /** Window for the Cayenne Modeler.
   * Responsibilities include coordination of enabling/disabling of
   * menu and toolbar.
@@ -104,6 +105,7 @@ implements ActionListener
     Mediator mediator;
     /** The object last selected in BrowseView. */
     Object context;
+    ActionMap actionMap = new ActionMap();
 
     JMenuBar  menuBar    	= new JMenuBar();
     JMenu  fileMenu    			= new JMenu("File");
@@ -243,6 +245,14 @@ implements ActionListener
     }
 
 
+	private void initAction() {
+		actionMap = new ActionMap();
+		actionMap.put("CreateDataMap", new CreateDataMapAction(mediator));
+		actionMap.put("SaveAll", new SaveAction(mediator));
+		actionMap.put("ImportDb", new ImportDbAction(mediator));
+		actionMap.put("GenerateDb", new GenerateDbAction(mediator));
+	}
+
     private void reloadLastProjList() {
 		// Get list of last opened proj files and trim it down to 4
     	Preferences pref = Preferences.getPreferences();
@@ -263,7 +273,7 @@ implements ActionListener
     }
 
 	/** Adds path to the list of last opened projects in preferences. */
-	private void addToLastProjList(String path) {
+	public void addToLastProjList(String path) {
     	Preferences pref = Preferences.getPreferences();
        	Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
 		// Add proj path to the preferences
@@ -352,7 +362,10 @@ implements ActionListener
 			if (ret_code == JOptionPane.CANCEL_OPTION)
 				return false;
 			else if (ret_code == JOptionPane.YES_OPTION)
-				saveAll();
+        		actionMap.get("SaveAll").actionPerformed(
+        				new ActionEvent(this
+        								, ActionEvent.ACTION_PERFORMED
+        								, "SaveAll"));
 		}
 		return true;
 	}
@@ -381,7 +394,7 @@ implements ActionListener
         } else if (src == createDomainMenu || src == createDomainBtn) {
             createDomain();
         } else if (src == createDataMapMenu || src == createDataMapBtn) {
-        	this.createDataMap();
+        	actionMap.get("CreateDataMap").actionPerformed(e);
     	} else if (src == createDataSourceMenu || src == createDataSourceBtn) {
     		createDataNode();
         } else if (src == createObjEntityMenu || src == createObjEntityBtn) {
@@ -391,16 +404,16 @@ implements ActionListener
         } else if (src == removeMenu || src == removeBtn) {
         	remove();
         } else if (src == saveMenu) {
-            saveAll();
+        	actionMap.get("SaveAll").actionPerformed(e);
         } else if (src == importDbMenu) {
-            importDb();
+        	actionMap.get("ImportDb").actionPerformed(e);
         } else if (src == setPackageMenu) {
         	// Set the same package name for all obj entities.
             setPackageName();
         } else if (src == generateMenu) {
             generateClasses();
         } else if (src == generateDbMenu) {
-            generateDb();
+        	actionMap.get("GenerateDb").actionPerformed(e);
         } else if (src == exitMenu) {
         	exitEditor();
         } else if (src == aboutMenu) {
@@ -544,163 +557,7 @@ implements ActionListener
 		return true;
 	}
 
-	private void generateDb() {
-        DataSourceInfo dsi = new DataSourceInfo();
-        Connection conn = null;
-        DbAdapter adapter = null;
-        // Get connection
-        while (conn == null) {
-	        InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
-	        loginObj.collectLoginInfo();
-	        // connect
-	        dsi = loginObj.getDataSrcInfo();
-	        if (null == dsi) {
-	        	return;
-	        }
-	        if (dsi.getAdapterClass() == null 
-	        	|| dsi.getAdapterClass().trim().length() == 0) {
-	        	JOptionPane.showMessageDialog(this, "Must specify DB Adapter");
-	        	continue;
-	        }
-	        try {
-		        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
-		        conn = DriverManager.getConnection(
-		              					dsi.getDataSourceUrl(),
-		                   				dsi.getUserName(),
-		                   				dsi.getPassword());
-		        adapter = (DbAdapter)Class.forName(dsi.getAdapterClass()).newInstance();
-			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error Connecting to the Database"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error creating DbAdapter"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error creating DbAdapter"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error creating DbAdapter"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
-			}
-		}// End while()
 
-		DataMap map = mediator.getCurrentDataMap();
-		try {
-			GenerateDbDialog dialog;
-			dialog = new GenerateDbDialog(mediator, conn, adapter);
-		} 
-		finally {
-			try {
-				conn.close();
-			} catch (Exception e) {e.printStackTrace();}
-		}
-	}// End generateDb()
-
-
-
-
-	private void importDb() {
-        DataSourceInfo dsi = new DataSourceInfo();
-        Connection conn = null;
-        // Get connection
-        while (conn == null) {
-	        InteractiveLogin loginObj = InteractiveLogin.getGuiLoginObject(dsi);
-	        loginObj.collectLoginInfo();
-	        // connect
-	        dsi = loginObj.getDataSrcInfo();
-	        if (null == dsi) {
-	        	return;
-	        }
-	        try {
-		        Driver driver = (Driver)Class.forName(dsi.getJdbcDriver()).newInstance();
-		        conn = DriverManager.getConnection(
-		              					dsi.getDataSourceUrl(),
-		                   				dsi.getUserName(),
-		                   				dsi.getPassword());
-			} catch (SQLException e) {
-				System.out.println(e.getMessage());
-				SQLException ex = e.getNextException();
-				if (ex != null) {
-					System.out.println(ex.getMessage());
-				}
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error Connecting to the Database"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
-			} catch (Exception e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error loading driver"
-							, JOptionPane.ERROR_MESSAGE);
-				continue;
-			}
-		}// End while()
-
-		ArrayList schemas;
-		DbLoader loader = new DbLoader(conn);
-		try {
-			schemas = loader.getSchemas();
-		} catch (SQLException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error loading schemas"
-							, JOptionPane.ERROR_MESSAGE);
-				return;
-		}
-		String schema_name = null;
-		if (schemas.size() != 0) {
-			ChooseSchemaDialog dialog = new ChooseSchemaDialog(schemas);
-			dialog.show();
-			if (dialog.getChoice() == ChooseSchemaDialog.CANCEL) {
-				dialog.dispose();
-				return;
-			}
-			schema_name = dialog.getSchemaName();
-			dialog.dispose();
-		}
-		if (schema_name != null && schema_name.length() == 0)
-			schema_name = null;
-		DataMap map;
-		try {
-			map = mediator.getCurrentDataMap();
-			if (map != null )
-				loader.loadDataMapFromDB(schema_name, null, map);
-			else
-				map = loader.createDataMapFromDB(schema_name);
-		} catch (SQLException e) {
-				e.printStackTrace();
-				JOptionPane.showMessageDialog(this
-							, e.getMessage(), "Error reverse engineering database"
-							, JOptionPane.ERROR_MESSAGE);
-				return;
-		}
-		// If this is adding to existing data map, remove it
-		// and re-add to the BroseView
-		if (mediator.getCurrentDataMap() != null) {
-			mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.REMOVE));
-			mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.ADD));
-			mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(this
-												, map
-												, mediator.getCurrentDataDomain()
-												, mediator.getCurrentDataNode()));
-		} else {
-			mediator.addDataMap(this, map);
-		}
-	}
 
 
 	private void createObjEntity() {
@@ -851,6 +708,7 @@ implements ActionListener
 
     private void project(Mediator temp_mediator) {
         mediator = temp_mediator;
+		initAction();
 
         view = new EditorView(mediator);
         getContentPane().add(view, BorderLayout.CENTER);
@@ -869,278 +727,6 @@ implements ActionListener
     }
 
 
-	/** Save data map to a different location.
-	  * If there already exists proj tree, saves it under that tree.
-	  * otherwise saves using absolute path. */
-	private void saveMapAs(DataMap map) {
-        try {
-            // Get the project file name (always cayenne.xml)
-            File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            fc = new JFileChooser(file_view);
-            fc.setDialogType(JFileChooser.SAVE_DIALOG);
-            fc.setDialogTitle("Save data map - " + map.getName());
-            if (null != proj_dir)
-            	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showSaveDialog(this);
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fc.getSelectedFile();
-			System.out.println("File path is " + file.getAbsolutePath());
-            String old_loc = map.getLocation();
-            // Get absolute path for old location
-            if (null != proj_dir)
-            	old_loc = proj_dir + File.separator + old_loc;
-			// Create new file
-			if (!file.exists())
-				file.createNewFile();
-			MapLoader saver = new MapLoaderImpl();
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			saver.storeDataMap(pw, map);
-			pw.close();
-			fw.close();
-			// Determine and set new data map name
-			String new_file_name = file.getName();
-			String new_name;
-			int index = new_file_name.indexOf(".");
-			if (index >= 0)
-				new_name = new_file_name.substring(0, index);
-			else
-				new_name = new_file_name;
-			map.setName(new_name);
-			// Determine and set new data map location
-			String new_file_location = file.getAbsolutePath();
-			String relative_location;
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
-			else
-				relative_location
-					= new_file_location.substring(proj_dir_str.length() + 1);
-			map.setLocation(relative_location);
-            // If data map already exists, delete old location after saving new
-            if (null != old_loc) {
-            	System.out.println("Old location is " + old_loc);
-            	File old_loc_file = new File(old_loc);
-            	if (old_loc_file.exists()) {
-            		System.out.println("Deleting old file");
-            		old_loc_file.delete();
-            	}
-            }
-            // Map location changed - mark current domain dirty
-			mediator.fireDataMapEvent(new DataMapEvent(this, map, DataMapEvent.CHANGE));
-
-        } catch (Exception e) {
-            System.out.println("Error loading project file, " + e.getMessage());
-            e.printStackTrace();
-        }
-	}
-
-
-	/** Save data node (DataSourceInfo) to a different location.
-	  * If there already exists proj tree, saves it under that tree.
-	  * otherwise saves using absolute path. */
-	private void saveNodeAs(DataNode node) {
-		GuiDataSource src = (GuiDataSource)node.getDataSource();
-        try {
-            // Get the project file name (always cayenne.xml)
-            File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            fc = new JFileChooser(file_view);
-            fc.setFileFilter(xmlFilter);
-            fc.setDialogType(JFileChooser.SAVE_DIALOG);
-            fc.setDialogTitle("Save data node - " + node.getName());
-            if (null != proj_dir)
-            	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showSaveDialog(this);
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fc.getSelectedFile();
-			System.out.println("File path is " + file.getAbsolutePath());
-            String old_loc = node.getDataSourceLocation();
-            // Get absolute path for old location
-            if (null != proj_dir)
-            	old_loc = proj_dir + File.separator + old_loc;
-			// Create new file
-			if (!file.exists())
-				file.createNewFile();
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-			pw.close();
-			fw.close();
-			// Determine and set new data map location
-			String new_file_location = file.getAbsolutePath();
-			String relative_location;
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
-			else
-				relative_location
-					= new_file_location.substring(proj_dir_str.length() + 1);
-			node.setDataSourceLocation(relative_location);
-            // If data map already exists, delete old location after saving new
-            if (null != old_loc) {
-            	System.out.println("Old location is " + old_loc);
-            	File old_loc_file = new File(old_loc);
-            	if (old_loc_file.exists()) {
-            		System.out.println("Deleting old file");
-            		old_loc_file.delete();
-            	}
-            }
-            // Map location changed - mark current domain dirty
-			mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.CHANGE));
-
-        } catch (Exception e) {
-            System.out.println("Error saving DataNode " + node.getName() +": " + e.getMessage());
-            e.printStackTrace();
-        }
-	}
-
-	private void save() {
-		if (mediator.getCurrentDataMap() != null) {
-			saveDataMap(mediator.getCurrentDataMap());
-		}
-		else
-			saveProject();
-	}
-
-	private void saveAll() {
-		Validator val = new Validator(mediator);
-		int ret_code = val.validate();
-		// If no errors or no serious errors, save.
-		if (ret_code == ErrorMsg.NO_ERROR || ret_code == ErrorMsg.WARNING) {
-			Iterator iter = mediator.getDirtyDataMaps().iterator();
-			while (iter.hasNext()) {
-				DataMap map = (DataMap)iter.next();
-				saveDataMap(map);
-			}// End saving maps
-			mediator.getDirtyDataMaps().clear();
-
-			iter = mediator.getDirtyDataNodes().iterator();
-			while (iter.hasNext()) {
-				DataNode node = (DataNode)iter.next();
-				logObj.fine("Editor::saveAll(), node name "
-									+ node.getName() + ", factory "
-									+ node.getDataSourceFactory());
-				// If using direct connection, save into separate file
-				if (node.getDataSourceFactory().equals(DataSourceFactory.DIRECT_FACTORY)) {
-					logObj.fine("Editor::saveAll(), saving node name "
-									+ node.getName());
-					saveDataNode(node);
-				}
-			}// End saving DataNode-s
-			saveProject();
-			mediator.getDirtyDomains().clear();
-			mediator.getDirtyDataNodes().clear();
-
-			mediator.setDirty(false);
-		}
-		// If there were errors or warnings at validation, display them
-		if (ret_code == ErrorMsg.ERROR || ret_code == ErrorMsg.WARNING) {
-			ValidatorDialog dialog;
-			dialog = new ValidatorDialog(this, mediator
-								, val.getErrorMessages(), ret_code);
-			dialog.setVisible(true);
-		}
-
-	}
-
-	private void saveProject() {
-		File file = mediator.getConfig().getProjFile();
-		System.out.println("Saving project to " + file.getAbsolutePath());
-		try {
-			if (!file.exists()) {
-				file.createNewFile();
-			}
-            addToLastProjList(file.getAbsolutePath());
-			FileWriter fw = new FileWriter(file);
-			DomainHelper.storeDomains(new PrintWriter(fw), mediator.getDomains());
-			fw.flush();
-			fw.close();
-			mediator.getDirtyDomains().clear();
-			if (mediator.getDirtyDataMaps().size() <=0
-				&& mediator.getDirtyDataNodes().size() <=0 )
-			{
-				mediator.setDirty(false);
-			}
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-	/** Save data map to the file. */
-	private void saveDataMap(DataMap map) {
-		try {
-            File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
-			file = new File(proj_dir_str + File.separator + map.getLocation());
-			if (!file.exists()) {
-				saveMapAs(map);
-				return;
-			}
-			MapLoader saver = new MapLoaderImpl();
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			saver.storeDataMap(pw, map);
-			pw.close();
-			fw.close();
-			/* Causes problem with concurrent update
-			mediator.getDirtyDataMaps().remove(map);
-			if (mediator.getDirtyDataMaps().size() <=0
-				&& mediator.getDirtyDataNodes().size() <=0
-				&& mediator.getDirtyDomains().size() <= 0)
-			{
-				mediator.setDirty(false);
-			}
-			*/
-		} catch (Exception e) {}
-	}
-
-
-	/** Save data source info if data source factory is DIRECT_FACTORY. */
-	private void saveDataNode(DataNode node) {
-		try {
-            File file = null;
-            String proj_dir_str = mediator.getConfig().getProjDir();
-			file = new File(proj_dir_str + File.separator + node.getDataSourceLocation());
-			if (!file.exists()) {
-				System.out.println("Editor::saveDataNode(), "
-									+"calling save as for node name "
-									+ node.getName());
-				saveNodeAs(node);
-				return;
-			}
-			FileWriter fw = new FileWriter(file);
-			PrintWriter pw = new PrintWriter(fw);
-			GuiDataSource src = (GuiDataSource)node.getDataSource();
-			System.out.println("Editor::saveDataNode(), node name "
-								+ node.getName());
-			DomainHelper.storeDataNode(pw, src.getDataSourceInfo());
-			pw.close();
-			fw.close();
-		} catch (Exception e) {
-            System.out.println("SaveDataNode(), Error saving DataNode "
-            				+ node.getName()  +": " + e.getMessage());
-            e.printStackTrace();
-		}
-	}
 
 	private void createDomain() {
 		DataDomain domain = new DataDomain(NameGenerator.getDomainName());
@@ -1166,67 +752,6 @@ implements ActionListener
 		mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
 	}
 
-
-	private void addDataMap() {
-		DataNode node = mediator.getCurrentDataNode();
-		List map_list = mediator.getCurrentDataDomain().getMapList();
-		AddDataMapDialog dialog = new AddDataMapDialog(node, map_list);
-		System.out.println("Node has " + node.getDataMaps().length + " maps");
-		mediator.fireDataNodeEvent(new DataNodeEvent(this, node));
-	}
-
-	private void createDataMap() {
-		// If have current data node, don't create new data map, add to it 
-		// the existing one.
-		if (mediator.getCurrentDataNode() != null) {
-			addDataMap();
-			return;
-		}
-    	Preferences pref = Preferences.getPreferences();
-       	String init_dir = (String)pref.getProperty(Preferences.LAST_DIR);
-       	// Data map file
-   	    File file = null;
-   	    // Map location relative to proj dir
-   	    String relative_location = null;
-        try {
-            String proj_dir_str = mediator.getConfig().getProjDir();
-            File proj_dir = null;
-            if (proj_dir_str != null)
-            	proj_dir = new File(proj_dir_str);
-            JFileChooser fc;
-            FileSystemViewDecorator file_view;
-            file_view = new FileSystemViewDecorator(proj_dir);
-            // Get the data map file name
-            fc = new JFileChooser(file_view);
-            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            fc.setDialogTitle("Enter data map file name");
-            if (null != init_dir) {
-            	File init_dir_file = new File(init_dir);
-            	if (init_dir_file.exists())
-            		fc.setCurrentDirectory(init_dir_file);
-            }
-            int ret_code = fc.showSaveDialog(this);
-            if ( ret_code != JFileChooser.APPROVE_OPTION)
-                return;
-            file = fc.getSelectedFile();
-            if (!file.exists())
-            	file.createNewFile();
-			String new_file_location = file.getAbsolutePath();
-			// If it is set, use path striped of proj dir and following separator
-			// If proj dir not set, use absolute location.
-			if (proj_dir_str == null)
-			 	relative_location = new_file_location;
-			else
-				relative_location
-					= new_file_location.substring(proj_dir_str.length() + 1);
-        } catch (Exception e) {
-            System.out.println("Error lcreating data map file, " + e.getMessage());
-            e.printStackTrace();
-        }
-		DataMap map = new DataMap(NameGenerator.getDataMapName());
-		map.setLocation(relative_location);
-		mediator.addDataMap(this, map);
-	}
 
 
 	public void currentDomainChanged(DomainDisplayEvent e){
@@ -1355,91 +880,4 @@ implements ActionListener
     					 ,(screenSize.height - frameSize.height) / 2);
    		frame.setVisible(true);
    	}
-}
-
-class AddDataMapDialog extends JDialog implements ActionListener
-{
-	private static final int WIDTH  = 380;
-	private static final int HEIGHT = 150;
-
-	DataNode node;
-
-	private JList list;
-	private JButton add = new JButton("Add");
-	private JButton cancel = new JButton("Cancel");
-	
-	public AddDataMapDialog(DataNode temp_node, List map_list) {
-		super(Editor.getFrame(), "Add data maps to the data node", true);
-
-		DataMap[] maps = temp_node.getDataMaps();
-		if (map_list.size() == maps.length) {
-			dispose();
-			return;
-		}
-
-		node = temp_node;
-		
-		getContentPane().setLayout(new BorderLayout());
-		
-		list = new JList(populate(temp_node, map_list));
-		getContentPane().add(list, BorderLayout.CENTER);
-		
-		JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		temp.add(add);
-		temp.add(cancel);
-		add.addActionListener(this);
-		cancel.addActionListener(this);
-		getContentPane().add(temp, BorderLayout.SOUTH);
-
-		setSize(WIDTH, HEIGHT);
-		JFrame frame = Editor.getFrame();
-		Point point = frame.getLocationOnScreen();
-		int width = frame.getWidth();
-		int x = (width - WIDTH)/2;
-		int height = frame.getHeight();
-		int y = (height - HEIGHT)/2;
-		
-		point.setLocation(point.x + x, point.y + y);
-		this.setLocation(point);
-		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.setVisible(true);
-	}
-	
-	private Vector populate(DataNode temp_node, List map_list) {
-		DataMap[] maps = temp_node.getDataMaps();
-		Vector new_maps = new Vector();
-		Iterator iter = map_list.iterator();
-		while(iter.hasNext()) {
-			DataMap map = (DataMap)iter.next();
-			System.out.println("map " + map.getName());
-			boolean found = false;
-			for (int i = 0; maps != null && i < maps.length; i++) {
-				if (map == maps[i]) {
-					found = true;
-					break;
-				}
-			}// End for()
-			if (!found)
-				new_maps.add(new DataMapWrapper(map));
-		}// End while()
-		return new_maps;
-	}
-	
-	public void actionPerformed(ActionEvent e)
-	{
-		if (e.getSource() == add) {
-			Object[] sel = list.getSelectedValues();
-			DataMap [] old_maps = node.getDataMaps();
-			DataMap[] new_maps = new DataMap[old_maps.length + sel.length];
-			for (int i = 0; i < old_maps.length; i++) {
-				new_maps[i] = old_maps[i];
-			}
-			for (int i = 0; i < sel.length; i++) {
-				new_maps[i + old_maps.length] = ((DataMapWrapper)sel[i]).getDataMap();
-			}
-			node.setDataMaps(new_maps);
-		}// End add
-		setVisible(false);
-		dispose();
-	}
 }
