@@ -65,6 +65,7 @@ public class SelectQuery extends QualifiedQuery {
     
     private ArrayList orderings = new ArrayList();  
     private boolean distinct;
+    private ArrayList prefetches = new ArrayList();
     
     /** Creates empty SelectQuery. */
     public SelectQuery() {}
@@ -113,5 +114,22 @@ public class SelectQuery extends QualifiedQuery {
     /** Sets <code>distinct</code> property. */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
+    }
+    
+    /**
+     * Returns a list of relationships that must be prefetched 
+     * as a part of this query.
+     */
+    public List getPrefetches() {
+        return prefetches;
+    }
+    
+    /** 
+     * Adds a relationship path (ObjRelationship names separated by ".")
+     * to the list of relationships that should be prefetched when the
+     * query is executed.
+     */
+    public void addPrefetch(String relPath) {
+        prefetches.add(relPath);
     }
 }
