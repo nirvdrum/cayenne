@@ -1,14 +1,6 @@
 {
     attributes = (
         {
-            allowsNull = Y; 
-            columnName = "EXHIBIT_TYPE_ID"; 
-            externalType = int; 
-            name = exhibitTypeId; 
-            valueClassName = NSNumber; 
-            valueType = i; 
-        }, 
-        {
             columnName = "CLOSING_DATE"; 
             externalType = datetime; 
             name = closingDate; 
@@ -18,6 +10,14 @@
             columnName = "EXHIBIT_ID"; 
             externalType = int; 
             name = exhibitId; 
+            valueClassName = NSNumber; 
+            valueType = i; 
+        }, 
+        {
+            allowsNull = Y; 
+            columnName = "EXHIBIT_TYPE_ID"; 
+            externalType = int; 
+            name = exhibitTypeId; 
             valueClassName = NSNumber; 
             valueType = i; 
         }, 
@@ -51,13 +51,6 @@
     primaryKeyAttributes = (exhibitId); 
     relationships = (
         {
-            destination = ExhibitType; 
-            isToMany = N; 
-            joinSemantic = EOInnerJoin; 
-            joins = ({destinationAttribute = exhibitTypeId; sourceAttribute = exhibitTypeId; }); 
-            name = toExhibitType; 
-        }, 
-        {
             deleteRule = EODeleteRuleCascade; 
             destination = ArtistExhibit; 
             isToMany = Y; 
@@ -66,6 +59,13 @@
             name = artistExhibitArray; 
             ownsDestination = Y; 
             propagatesPrimaryKey = Y; 
+        }, 
+        {
+            destination = ExhibitType; 
+            isToMany = N; 
+            joinSemantic = EOInnerJoin; 
+            joins = ({destinationAttribute = exhibitTypeId; sourceAttribute = exhibitTypeId; }); 
+            name = toExhibitType; 
         }, 
         {
             destination = Gallery; 
