@@ -56,12 +56,89 @@
 
 package org.objectstyle.cayenne.dba.hsqldb;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DbAttributePair;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 
 /**
  * DbAdapter implementation for the <a href="http://hsqldb.sourceforge.net/">HSQLDB RDBMS</a>.
  */
 public class HSQLDBAdapter extends JdbcAdapter {
+	private static Logger logObj = Logger.getLogger(HSQLDBAdapter.class);
+
+	protected Map sorters = new HashMap();
+
+	/**
+	 * @see JdbcAdapter#createFkConstraint(DbRelationship)
+	 */
+	public String createFkConstraint(DbRelationship rel) {
+		StringBuffer buf = new StringBuffer();
+		StringBuffer refBuf = new StringBuffer();
+
+		buf.append("ALTER TABLE ");
+		buf.append(((DbEntity)rel.getSourceEntity()).getFullyQualifiedName());
+
+		// hsqldb requires the ADD CONSTRAINT statement
+		String constraintName = this.getConstraintNameForRelationship(rel);
+		if (constraintName != null) {
+			buf.append(" ADD CONSTRAINT ");
+			buf.append(constraintName);
+		}
+
+		buf.append(" FOREIGN KEY (");
+
+		Iterator jit = rel.getJoins().iterator();
+		boolean first = true;
+		while (jit.hasNext()) {
+			DbAttributePair join = (DbAttributePair) jit.next();
+			if (!first) {
+				buf.append(", ");
+				refBuf.append(", ");
+			} else
+				first = false;
+
+			buf.append(join.getSource().getName());
+			refBuf.append(join.getTarget().getName());
+		}
+
+		buf.append(") REFERENCES ");
+		buf.append(((DbEntity)rel.getTargetEntity()).getFullyQualifiedName());
+		buf.append(" (");
+		buf.append(refBuf.toString());
+		buf.append(')');
+
+		return buf.toString();
+	}
+
+	protected String getConstraintNameForRelationship(DbRelationship rel) {
+		StringBuffer buf = new StringBuffer(64);
+
+		buf.append("FK_");
+		buf.append(((DbEntity)rel.getSourceEntity()).getFullyQualifiedName());
+		buf.append("_");
+		buf.append((int)(Math.random()*100));
+
+		return buf.toString();
+	}
+
+	public OperationSorter getOpSorter(DataNode node) {
+		synchronized (sorters) {
+			OperationSorter sorter = (OperationSorter) sorters.get(node);
+			if (sorter == null) {
+				sorter = new OperationSorter(node, node.getDataMapsAsList());
+				sorters.put(node, sorter);
+			}
+			return sorter;
+		}
+	}
 
 }
 
