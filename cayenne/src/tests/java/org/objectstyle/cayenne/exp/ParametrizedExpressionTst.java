@@ -111,6 +111,22 @@ public class ParametrizedExpressionTst extends CayenneTestCase {
      *
      * @throws Exception
      */
+    public void testInParameter() throws Exception {
+        Expression inExp = Expression.fromString("k1 in $test");
+        Expression e1 = Expression.fromString("k1 in ('a', 'b')");
+
+        TstTraversalHandler.compareExps(
+            e1,
+            inExp.expWithParameters(
+                Collections.singletonMap("test", new Object[] { "a", "b" })));
+    }
+
+    /**
+     * Tests how parameter substitution algorithm works on an expression
+     * with no parameters.
+     *
+     * @throws Exception
+     */
     public void testFailOnMissingParams() throws Exception {
         Expression e1 = ExpressionFactory.matchExp("k1", new ExpressionParameter("test"));
         e1 = e1.orExp(ExpressionFactory.matchExp("k2", "v2"));

@@ -365,7 +365,8 @@ public abstract class Expression implements Serializable, XMLSerializable {
                     }
                 }
                 else {
-                    return parameters.get(name);
+                    // wrap lists (for now)
+                    return ExpressionFactory.wrapPathOperand(parameters.get(name));
                 }
             }
         };
@@ -539,7 +540,7 @@ public abstract class Expression implements Serializable, XMLSerializable {
             else {
                 visitor.objectNode(child, this);
             }
-            
+
             visitor.finishedChild(this, i, i < count - 1);
         }
 

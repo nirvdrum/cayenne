@@ -239,8 +239,11 @@ public class ExpressionFactory {
      * expressions. Applied only in path expressions.
      */
     protected static Object wrapPathOperand(Object op) {
-        if ((op instanceof List) || (op instanceof Object[])) {
-            return unaryExp(Expression.LIST, op);
+        if (op instanceof Collection) {
+            return new ASTList((Collection) op);
+        }
+        else if (op instanceof Object[]) {
+            return new ASTList((Object[]) op);
         }
         else {
             return op;

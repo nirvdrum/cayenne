@@ -147,7 +147,9 @@ void simpleCondition() : {}
 	|
 	    "likeIgnoreCase"  scalarCharExpression() #LikeIgnoreCase(2)
 	|  
-		"in"  "(" scalarCommaList() ")"  #In(2)
+		"in"  
+		(  namedParameter() | "(" scalarCommaList() ")" )
+		#In(2)
 	|  
 		"between"  scalarExpression() "and" scalarExpression() #Between(3)
 	)?
@@ -162,7 +164,9 @@ void simpleNotCondition() : {}
 	|
 	    "likeIgnoreCase"  scalarCharExpression() #NotLikeIgnoreCase(2)
 	|  
-		"in"  "(" scalarCommaList() ")"  #NotIn(2)
+		"in"  
+		(  namedParameter() |  "(" scalarCommaList() ")" )
+		#NotIn(2)
 	|  
 		"between"  scalarExpression() "and" scalarExpression() #NotBetween(3)
 	)

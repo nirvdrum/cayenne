@@ -3,6 +3,9 @@ package org.objectstyle.cayenne.exp.parser;
 import org.objectstyle.cayenne.exp.ExpressionException;
 
 /**
+ * Superclass of conditional expressions.
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
 public abstract class ConditionNode extends SimpleNode {

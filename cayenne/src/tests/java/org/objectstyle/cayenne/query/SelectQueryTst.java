@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.query;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -143,10 +144,10 @@ public class SelectQueryTst extends SelectQueryBase {
     }
 
     public void testSelectLikeCaseSensitive() throws Exception {
-        if(!getDatabaseSetupDelegate().supportsCaseSensitiveLike()) {
+        if (!getDatabaseSetupDelegate().supportsCaseSensitiveLike()) {
             return;
         }
-        
+
         query.setRoot(Artist.class);
         Expression qual = ExpressionFactory.likeExp("artistName", "aRtIsT%");
         query.setQualifier(qual);
@@ -205,6 +206,31 @@ public class SelectQueryTst extends SelectQueryBase {
         List objects = opObserver.objectsForQuery(query);
         assertNotNull(objects);
         assertEquals(_artistCount, objects.size());
+    }
+
+    public void testSelectIn() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual = Expression.fromString("artistName in ('artist1', 'artist2')");
+        query.setQualifier(qual);
+        performQuery();
+
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertEquals(2, objects.size());
+    }
+
+    public void testSelectParameterizedIn() throws Exception {
+        query.setRoot(Artist.class);
+        Expression qual = Expression.fromString("artistName in $list");
+        query.setQualifier(qual);
+        query =
+            query.queryWithParameters(
+                Collections.singletonMap("list", new Object[] { "artist1", "artist2" }));
+        performQuery();
+
+        // check query results
+        List objects = opObserver.objectsForQuery(query);
+        assertEquals(2, objects.size());
     }
 
     public void testSelectCustAttributes() throws Exception {
