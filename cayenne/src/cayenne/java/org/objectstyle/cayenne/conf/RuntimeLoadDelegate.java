@@ -176,7 +176,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                         logLevel,
                         "Error: missing dependent map name for map: "
                             + mapName);
-                    getStatus().getFailedMaps().put(mapName, location);
+                    getStatus().addFailedMap(mapName, location, "missing dependent map: " + domainName + "." + depMapName);
                     return;
                 }
 
@@ -190,7 +190,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                     logObj.log(
                         logLevel,
                         "Error: unknown dependent map: " + depMapName);
-                    getStatus().getFailedMaps().put(mapName, location);
+                    getStatus().addFailedMap(mapName, location,  "missing dependent map: " + domainName + "." + depMapName);
                 }
             }
         }
@@ -199,7 +199,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
 
         if (mapIn == null) {
             logObj.log(logLevel, "Warning: map location not found.");
-            getStatus().getFailedMaps().put(mapName, location);
+            getStatus().addFailedMap(mapName, location, "map location not found");
             return;
         }
 
@@ -222,12 +222,12 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
                 findDomain(domainName).addMap(map);
             } catch (FindException ex) {
                 logObj.log(logLevel, "Error: unknown domain: " + domainName);
-                getStatus().getFailedMaps().put(mapName, location);
+                getStatus().addFailedMap(mapName, location, "unknown parent domain: " + domainName);
             }
 
         } catch (DataMapException dmex) {
             logObj.log(logLevel, "Warning: map loading failed.", dmex);
-            getStatus().getFailedMaps().put(mapName, location);
+            getStatus().addFailedMap(mapName, location, "map loading failed - " + dmex.getMessage());
         }
     }
 
@@ -280,7 +280,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             dbAdapter = (DbAdapter) Class.forName(adapter).newInstance();
         } catch (Exception ex) {
             logObj.log(logLevel, "instantiating adapter failed, using default adapter.", ex);
-            getStatus().getFailedAdapters().put(nodeName, adapter);
+            getStatus().addFailedAdapter(nodeName, adapter, "instantiating adapter failed - " + ex.getMessage());
             dbAdapter = new JdbcAdapter();
         }
 
@@ -313,7 +313,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             }
         } catch (Exception ex) {
             logObj.log(logLevel, "Error: DataSource load failed", ex);
-            getStatus().getFailedDataSources().put(nodeName, dataSource);
+            getStatus().addFailedDataSource(nodeName, dataSource, "DataSource load failed - " + ex.getMessage());
         }
 
         try {
@@ -322,7 +322,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             logObj.log(
                 logLevel,
                 "Error: can't load node, unknown domain: " + domainName);
-            getStatus().getFailedDataSources().put(nodeName, nodeName);
+            getStatus().addFailedDataSource(nodeName, nodeName,  "can't load node, unknown domain: " + domainName);
         }
 
     }
@@ -345,7 +345,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             map = findMap(domainName, mapName);
         } catch (FindException ex) {
             logObj.log(logLevel, "Error: unknown map: " + mapName);
-            getStatus().getFailedMapRefs().add(mapName);
+            getStatus().addFailedMapRefs(mapName, "unknown map: " + mapName);
             return;
         }
 
@@ -353,7 +353,7 @@ public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
             node = findNode(domainName, nodeName);
         } catch (FindException ex) {
             logObj.log(logLevel, "Error: unknown node: " + nodeName);
-            getStatus().getFailedMapRefs().add(mapName);
+			getStatus().addFailedMapRefs(mapName, "unknown node: " + nodeName);
             return;
         }
 
