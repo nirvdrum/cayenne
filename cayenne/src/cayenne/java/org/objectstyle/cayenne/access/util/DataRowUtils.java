@@ -359,9 +359,13 @@ public class DataRowUtils {
         if (object.getPersistenceState() != PersistenceState.MODIFIED) {
             return false;
         }
+        
+        Object targetObject = object.readPropertyDirectly(relationship.getName());
+        if (targetObject instanceof RelationshipFault) {
+            return false;
+        }
 
-        DataObject toOneTarget =
-            (DataObject) object.readPropertyDirectly(relationship.getName());
+        DataObject toOneTarget = (DataObject) targetObject;
         ObjectId currentId = (toOneTarget != null) ? toOneTarget.getObjectId() : null;
 
         // check if ObjectId map is a subset of a stored snapshot;
@@ -474,7 +478,7 @@ public class DataRowUtils {
     /**
      * Instantiation is not allowed.
      */
-    private DataRowUtils() {
+    protected DataRowUtils() {
         super();
     }
 

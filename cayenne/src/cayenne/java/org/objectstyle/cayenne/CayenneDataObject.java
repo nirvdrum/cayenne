@@ -351,34 +351,46 @@ public class CayenneDataObject implements DataObject {
     }
 
     public void setToOneTarget(
-        String relationship,
+        String relationshipName,
         DataObject value,
         boolean setReverse) {
         if ((value != null) && (dataContext != value.getDataContext())) {
             throw new CayenneRuntimeException(
                 "Cannot set object as destination of relationship "
-                    + relationship
+                    + relationshipName
                     + " because it is in a different DataContext");
         }
 
-        Object oldTarget = readPropertyDirectly(relationship);
+        Object oldTarget = readPropertyDirectly(relationshipName);
         if (oldTarget == value) {
             return;
         }
 
+        ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
+        if (relationship.isFlattened()) {
+            if (relationship.isReadOnly()) {
+                throw new CayenneRuntimeException(
+                    "Cannot modify the read-only flattened relationship " + relationshipName);
+            }
+            
+            // Handle adding to a flattened relationship
+            dataContext.registerFlattenedRelationshipInsert(this, relationship, value);
+        }
+        
+               
         if (setReverse) {
             // unset old reverse relationship
             if (oldTarget instanceof DataObject) {
-                unsetReverseRelationship(relationship, (DataObject) oldTarget);
+                unsetReverseRelationship(relationshipName, (DataObject) oldTarget);
             }
 
             // set new reverse relationship
             if (value != null) {
-                setReverseRelationship(relationship, value);
+                setReverseRelationship(relationshipName, value);
             }
         }
 
-        writeProperty(relationship, value);
+        writeProperty(relationshipName, value);
     }
 
     private ObjRelationship getRelationshipNamed(String relName) {
