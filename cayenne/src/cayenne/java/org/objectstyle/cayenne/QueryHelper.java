@@ -58,6 +58,7 @@ package org.objectstyle.cayenne;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -274,52 +275,49 @@ public final class QueryHelper {
         QueryEngine e,
         DataObject source,
         String relName) {
-        	
-        SelectQuery sel = new SelectQuery();
+
         ObjEntity ent = e.getEntityResolver().lookupObjEntity(source);
         ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
         ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
-        sel.setRoot(destEnt);
-        sel.setQualifier(
-            ExpressionFactory.binaryPathExp(
-                Expression.EQUAL_TO,
-                rel.getReverseRelationship().getName(),
-                source));
-                
-        return sel;
-    }
 
-    /** 
-     * Generates a SelectQuery that can be used to fetch 
-     * relationship destination objects given a source object
-     * of a to-many relationship.
-     *  
-     * @deprecated use selectRelationshipObjects(QueryEngine, DataObject, String) instead
-     */
-    public static SelectQuery selectRelationshipObjects(
-        QueryEngine e,
-        ObjectId oid,
-        String relName) {
-        SelectQuery sel = new SelectQuery();
-        ObjEntity ent = e.getEntityResolver().lookupObjEntity(oid.getObjClass());
-        ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
-        ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
-        sel.setRoot(destEnt);
-
-        // convert source PK into destination FK definition,
-        // use it to build a qualifier that will be applied to the destination entity
         List dbRels = rel.getDbRelationshipList();
 
-        // no support for flattened rels yet...
-        if (dbRels == null || dbRels.size() != 1) {
-            throw new CayenneRuntimeException("ObjRelationship has invalid/unsupported DbRelationships.");
+        // sanity check
+        if (dbRels == null || dbRels.size() == 0) {
+            throw new CayenneRuntimeException(
+                "ObjRelatitionship '" + rel.getName() + "' is unmapped.");
         }
 
-        DbRelationship dbRel = (DbRelationship) dbRels.get(0);
-        Map fkAttrs =
-            dbRel.getReverseRelationship().srcFkSnapshotWithTargetSnapshot(
-                oid.getIdSnapshot());
-        sel.setQualifier(ExpressionFactory.matchAllDbExp(fkAttrs, Expression.EQUAL_TO));
+        // build a reverse DB path
+        // ...while reverse ObjRelationship may be absent,
+        // reverse DB must always be there...
+        StringBuffer buf = new StringBuffer();
+        ListIterator it = dbRels.listIterator(dbRels.size());
+        while (it.hasPrevious()) {
+            if (buf.length() > 0) {
+                buf.append(".");
+            }
+            DbRelationship dbRel = (DbRelationship) it.previous();
+            DbRelationship reverse = dbRel.getReverseRelationship();
+
+            // another sanity check
+            if (reverse == null) {
+                throw new CayenneRuntimeException(
+                    "DbRelatitionship '"
+                        + dbRel.getName()
+                        + "' has no reverse relationship");
+            }
+
+            buf.append(reverse.getName());
+        }
+
+        SelectQuery sel = new SelectQuery(destEnt);
+        sel.setQualifier(
+            ExpressionFactory.binaryDbPathExp(
+                Expression.EQUAL_TO,
+                buf.toString(),
+                source));
+
         return sel;
     }
 

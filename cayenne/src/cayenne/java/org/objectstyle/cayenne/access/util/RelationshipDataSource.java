@@ -79,6 +79,10 @@ public class RelationshipDataSource implements ToManyListDataSource, Serializabl
 	}
 	
 	
+	/**
+	 * Will fetch to-many relationship destination 
+	 * objects and update ToManyList with the objects fetched.
+	 */
     public void updateListData(ToManyList list) {
         if (list.getSrcObjectId().isTemporary())
             list.setObjectList(new ArrayList());

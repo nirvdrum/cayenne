@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.art.oneway.Artist;
@@ -109,12 +110,10 @@ public class OneWayOneToManyTst extends OneWayMappingTestCase {
         Artist a2 = fetchArtist();
         assertNotNull(a2);
 
-        /* TODO: this fails:
         Iterator it = a2.getPaintingArray().iterator();
         while (it.hasNext()) {
-            Painting p = (Painting) it.next();
+            it.next();
         }
-        */
     }
 
    public void testRevertModification() throws Exception {
