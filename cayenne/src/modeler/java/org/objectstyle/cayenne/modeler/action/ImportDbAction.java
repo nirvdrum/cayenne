@@ -118,6 +118,15 @@ public class ImportDbAction extends CayenneAction {
     public void importDb() {
         EventController mediator = getMediator();
         DataNode currentNode = mediator.getCurrentDataNode();
+        
+        // try a node that belongs to the current DataMap ...
+        if (currentNode == null) {
+            DataMap map = mediator.getCurrentDataMap();
+            if (map != null) {
+                currentNode = mediator.getCurrentDataDomain().lookupDataNode(map);
+            }
+        }
+        
         DataSourceInfo dsi = null;
         if (currentNode != null) {
             dsi = ((ProjectDataSource) currentNode.getDataSource())
