@@ -121,6 +121,11 @@ public class RequestQueueTst extends CayenneTestCase {
         try {
             testCase1.start();
 
+			// wait for the first dequeue to get added to the queue
+			while (testCase1.getQueue().getSize() == 0) {
+				Thread.yield();
+			}
+
             // thread must exit immediately
             synchronized (testCase2.getLock()) {
                 testCase2.start();

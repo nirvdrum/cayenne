@@ -58,3 +58,4 @@ hardcoded file or directory names.
 
 15. Relationships between DataObjects in different DataContexts are prevented.
 
+16. Fixed occasional failure in RequestQueueTst (due to the test setup)
