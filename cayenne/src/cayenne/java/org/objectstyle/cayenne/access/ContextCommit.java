@@ -79,6 +79,7 @@ import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.TempObjectId;
 import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
+import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -115,9 +116,7 @@ class ContextCommit {
     private List objEntitiesToInsert;
     private List objEntitiesToDelete;
     private List objEntitiesToUpdate;
-    private Map objEntitiesToInsertByNode;
-    private Map objEntitiesToDeleteByNode;
-    private Map objEntitiesToUpdateByNode;
+    private List nodeHelpers;
     private Map updatedIds;
     private List insObjects; //event support
     private List delObjects; //event support
@@ -132,6 +131,7 @@ class ContextCommit {
      */
     void commit(Level logLevel) throws CayenneException {
         this.logLevel = logLevel;
+
         categorizeObjects();
         createPrimaryKeys();
         Map flattenedInsertBatches =
@@ -139,26 +139,23 @@ class ContextCommit {
         Map flattenedDeleteBatches =
             categorizeFlattenedDeletesAndCreateBatches();
         updatedIds = new SequencedHashMap();
-        Set nodes = new HashSet(objEntitiesToInsertByNode.keySet());
-        nodes.addAll(objEntitiesToDeleteByNode.keySet());
-        nodes.addAll(objEntitiesToUpdateByNode.keySet());
-        Map queriesByNode = new SequencedHashMap(nodes.size());
+
         insObjects = new ArrayList();
         delObjects = new ArrayList();
         updObjects = new ArrayList();
-        for (Iterator i = nodes.iterator(); i.hasNext();) {
-            DataNode node = (DataNode) i.next();
-            List queries = new ArrayList();
-            prepareInsertQueries(node, queries);
+
+        for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
+            DataNodeCommitHelper nodeHelper = (DataNodeCommitHelper) i.next();
+            DataNode node = nodeHelper.getNode();
+            List queries = nodeHelper.getQueries();
+
+            prepareInsertQueries(nodeHelper);
             //Side effect - fills insObjects
             prepareFlattenedQueries(node, queries, flattenedInsertBatches);
-            prepareUpdateQueries(node, queries);
+            prepareUpdateQueries(nodeHelper);
             //Side effect - fills updObjects
             prepareFlattenedQueries(node, queries, flattenedDeleteBatches);
-            prepareDeleteQueries(node, queries);
-            //Side effect - fills delObjects
-            if (!queries.isEmpty())
-                queriesByNode.put(node, queries);
+            prepareDeleteQueries(nodeHelper);
         }
 
         CommitObserver observer =
@@ -172,21 +169,20 @@ class ContextCommit {
             observer.registerForDataContextEvents();
         try {
             context.fireWillCommit();
-            for (Iterator i = queriesByNode.entrySet().iterator();
-                i.hasNext();
-                ) {
-                Map.Entry entry = (Map.Entry) i.next();
-                DataNode nodeToCommit = (DataNode) entry.getKey();
-                List queries = (List) entry.getValue();
-                nodeToCommit.performQueries(queries, observer);
+            for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
+                DataNodeCommitHelper nodeHelper =
+                    (DataNodeCommitHelper) i.next();
+                List queries = nodeHelper.getQueries();
+                nodeHelper.getNode().performQueries(queries, observer);
 
                 if (observer.isTransactionRolledback()) {
                     context.fireTransactionRolledback();
                     throw new CayenneException("Transaction was rolledback.");
-                } else if (!observer.isTransactionCommitted())
+                } else if (!observer.isTransactionCommitted()) {
                     throw new CayenneException("Error committing transaction.");
+                }
 
-                postprocess(nodeToCommit);
+                postprocess(nodeHelper);
             }
             context.clearFlattenedUpdateQueries();
             context.fireTransactionCommitted();
@@ -196,82 +192,80 @@ class ContextCommit {
         }
     }
 
-    private void postprocess(DataNode committedNode) {
+    /**
+     * Performs necessary changes to objects after they are committed for a
+     * particular DataNode.
+     */
+    private void postprocess(DataNodeCommitHelper nodeHelper) {
         ObjectStore objectStore = context.getObjectStore();
-        Collection entitiesForNode =
-            (Collection) objEntitiesToInsertByNode.get(committedNode);
+        Collection entitiesForNode = nodeHelper.getObjEntitiesForInsert();
 
         // postprocess inserted objects in context
-        if (entitiesForNode != null) {
-
-            for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
-                ObjEntity entity = (ObjEntity) i.next();
-                Collection objects =
-                    (Collection) newObjectsByObjEntity.get(
-                        entity.getClassName());
-                for (Iterator j = objects.iterator(); j.hasNext();) {
-                    DataObject o = (DataObject) j.next();
-                    TempObjectId tempId = (TempObjectId) o.getObjectId();
-                    ObjectId permId = tempId.getPermId();
-                    objectStore.changeObjectKey(tempId, permId);
-                    o.setObjectId(permId);
-                    Map snapshot = context.takeObjectSnapshot(o);
-                    objectStore.addSnapshot(permId, snapshot);
-                    o.setPersistenceState(PersistenceState.COMMITTED);
-                }
+        for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
+            ObjEntity entity = (ObjEntity) i.next();
+            Collection objects =
+                (Collection) newObjectsByObjEntity.get(entity.getClassName());
+            for (Iterator j = objects.iterator(); j.hasNext();) {
+                DataObject o = (DataObject) j.next();
+                TempObjectId tempId = (TempObjectId) o.getObjectId();
+                ObjectId permId = tempId.getPermId();
+                objectStore.changeObjectKey(tempId, permId);
+                o.setObjectId(permId);
+                Map snapshot = context.takeObjectSnapshot(o);
+                objectStore.addSnapshot(permId, snapshot);
+                o.setPersistenceState(PersistenceState.COMMITTED);
             }
         }
 
         // postprocess deleted objects in context
-        entitiesForNode =
-            (Collection) objEntitiesToDeleteByNode.get(committedNode);
-        if (entitiesForNode != null) {
-            for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
-                ObjEntity entity = (ObjEntity) i.next();
-                Collection objects =
-                    (Collection) objectsToDeleteByObjEntity.get(
-                        entity.getClassName());
-                for (Iterator j = objects.iterator(); j.hasNext();) {
-                    DataObject o = (DataObject) j.next();
-                    ObjectId anId = o.getObjectId();
-                    objectStore.removeObject(anId);
-                    o.setPersistenceState(PersistenceState.TRANSIENT);
-                    o.setDataContext(null);
-                }
+        entitiesForNode = nodeHelper.getObjEntitiesForDelete();
+        for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
+            ObjEntity entity = (ObjEntity) i.next();
+            Collection objects =
+                (Collection) objectsToDeleteByObjEntity.get(
+                    entity.getClassName());
+            for (Iterator j = objects.iterator(); j.hasNext();) {
+                DataObject o = (DataObject) j.next();
+                ObjectId anId = o.getObjectId();
+                objectStore.removeObject(anId);
+                o.setPersistenceState(PersistenceState.TRANSIENT);
+                o.setDataContext(null);
             }
         }
 
         // postprocess updated objects in context
-        entitiesForNode =
-            (Collection) objEntitiesToUpdateByNode.get(committedNode);
-        if (entitiesForNode != null) {
-            for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
-                ObjEntity entity = (ObjEntity) i.next();
-                Collection objects =
-                    (Collection) objectsToUpdateByObjEntity.get(
-                        entity.getClassName());
-                for (Iterator j = objects.iterator(); j.hasNext();) {
-                    DataObject o = (DataObject) j.next();
-                    ObjectId oldId = (ObjectId) o.getObjectId();
-                    ObjectId newId = (ObjectId) updatedIds.get(oldId);
-                    Map snapshot = context.takeObjectSnapshot(o);
-                    objectStore.addSnapshot(oldId, snapshot);
-                    if (newId != null) {
-                        objectStore.changeObjectKey(oldId, newId);
-                        o.setObjectId(newId);
-                    }
-                    o.setPersistenceState(PersistenceState.COMMITTED);
+        entitiesForNode = nodeHelper.getObjEntitiesForUpdate();
+
+        for (Iterator i = entitiesForNode.iterator(); i.hasNext();) {
+            ObjEntity entity = (ObjEntity) i.next();
+            Collection objects =
+                (Collection) objectsToUpdateByObjEntity.get(
+                    entity.getClassName());
+            for (Iterator j = objects.iterator(); j.hasNext();) {
+                DataObject o = (DataObject) j.next();
+                ObjectId oldId = (ObjectId) o.getObjectId();
+                ObjectId newId = (ObjectId) updatedIds.get(oldId);
+                Map snapshot = context.takeObjectSnapshot(o);
+                objectStore.addSnapshot(oldId, snapshot);
+                if (newId != null) {
+                    objectStore.changeObjectKey(oldId, newId);
+                    o.setObjectId(newId);
                 }
+                o.setPersistenceState(PersistenceState.COMMITTED);
             }
         }
     }
 
-    private void prepareInsertQueries(DataNode node, List queries)
+    private void prepareInsertQueries(DataNodeCommitHelper commitHelper)
         throws CayenneException {
-        List entities = (List) objEntitiesToInsertByNode.get(node);
-        if (entities == null)
+
+        List entities = commitHelper.getObjEntitiesForInsert();
+        if (entities.isEmpty()) {
             return;
-        RefIntegritySupport sorter = node.getReferentialIntegritySupport();
+        }
+
+        RefIntegritySupport sorter =
+            commitHelper.getNode().getReferentialIntegritySupport();
         if (sorter != null)
             Collections.sort(entities, sorter.getObjEntityComparator());
         for (Iterator i = entities.iterator(); i.hasNext();) {
@@ -292,17 +286,22 @@ class ContextCommit {
                 batch.add(context.takeObjectSnapshot(o));
                 //queries.add(QueryHelper.insertQuery(context.takeObjectSnapshot(o), o.getObjectId()));
             }
-            queries.add(batch);
+
+            commitHelper.getQueries().add(batch);
             insObjects.addAll(objects);
         }
     }
 
-    private void prepareDeleteQueries(DataNode node, List queries)
+    private void prepareDeleteQueries(DataNodeCommitHelper commitHelper)
         throws CayenneException {
-        List entities = (List) objEntitiesToDeleteByNode.get(node);
-        if (entities == null)
+
+        List entities = commitHelper.getObjEntitiesForDelete();
+        if (entities.isEmpty()) {
             return;
-        RefIntegritySupport sorter = node.getReferentialIntegritySupport();
+        }
+
+        RefIntegritySupport sorter =
+            commitHelper.getNode().getReferentialIntegritySupport();
         if (sorter != null)
             Collections.sort(
                 entities,
@@ -329,16 +328,19 @@ class ContextCommit {
                     batch.add(id);
                 //queries.add(QueryHelper.deleteQuery(o));
             }
-            queries.add(batch);
+
+            commitHelper.getQueries().add(batch);
             delObjects.addAll(objects);
         }
     }
 
-    private void prepareUpdateQueries(DataNode node, List queries)
+    private void prepareUpdateQueries(DataNodeCommitHelper commitHelper)
         throws CayenneException {
-        List entities = (List) objEntitiesToUpdateByNode.get(node);
-        if (entities == null)
+        List entities = commitHelper.getObjEntitiesForUpdate();
+        if (entities.isEmpty()) {
             return;
+        }
+
         for (Iterator i = entities.iterator(); i.hasNext();) {
             ObjEntity entity = (ObjEntity) i.next();
             List objects =
@@ -390,7 +392,8 @@ class ContextCommit {
                 */
 
             }
-            queries.addAll(batches.values());
+
+            commitHelper.getQueries().addAll(batches.values());
         }
     }
 
@@ -406,7 +409,12 @@ class ContextCommit {
         }
     }
 
+    /**
+     * Organizes committed objects by node, performs sorting operations.
+     */
     private void categorizeObjects() throws CayenneException {
+        this.nodeHelpers = new ArrayList();
+
         Iterator it = context.getObjectStore().getObjectIterator();
         newObjectsByObjEntity = new HashMap();
         objectsToDeleteByObjEntity = new HashMap();
@@ -416,9 +424,7 @@ class ContextCommit {
         objEntitiesToInsert = new ArrayList();
         objEntitiesToDelete = new ArrayList();
         objEntitiesToUpdate = new ArrayList();
-        objEntitiesToInsertByNode = new HashMap();
-        objEntitiesToDeleteByNode = new HashMap();
-        objEntitiesToUpdateByNode = new HashMap();
+
         while (it.hasNext()) {
             DataObject nextObject = (DataObject) it.next();
             int objectState = nextObject.getPersistenceState();
@@ -439,24 +445,24 @@ class ContextCommit {
     private void objectToInsert(DataObject o) throws CayenneException {
         if (!classifyByEntityAndNode(o,
             newObjectsByObjEntity,
-            objEntitiesToInsertByNode,
-            objEntitiesToInsert))
+            objEntitiesToInsert,
+            DataNodeCommitHelper.INSERT))
             throw new CayenneException("Classification failed");
     }
 
     private void objectToDelete(DataObject o) throws CayenneException {
         if (!classifyByEntityAndNode(o,
             objectsToDeleteByObjEntity,
-            objEntitiesToDeleteByNode,
-            objEntitiesToDelete))
+            objEntitiesToDelete,
+            DataNodeCommitHelper.DELETE))
             throw new CayenneException("Classification failed");
     }
 
     private void objectToUpdate(DataObject o) throws CayenneException {
         if (!classifyByEntityAndNode(o,
             objectsToUpdateByObjEntity,
-            objEntitiesToUpdateByNode,
-            objEntitiesToUpdate))
+            objEntitiesToUpdate,
+            DataNodeCommitHelper.UPDATE))
             throw new CayenneException("Classification failed");
     }
 
@@ -475,32 +481,38 @@ class ContextCommit {
     private boolean classifyByEntityAndNode(
         DataObject o,
         Map objectsByObjEntity,
-        Map objEntitiesByNode,
-        List objEntities) {
+        List objEntities,
+        int operationType) {
+
         Class objEntityClass = o.getObjectId().getObjClass();
         ObjEntity entity = null;
-        if (readOnlyObjEntities.contains(objEntityClass))
+
+        if (readOnlyObjEntities.contains(objEntityClass)) {
             return false;
+        }
+
         if (!writableObjEntities.contains(objEntityClass)) {
             entity = classifyAsWritable(objEntityClass);
-            if (entity == null)
+            if (entity == null) {
                 return false;
+            }
         } else {
             entity =
                 context.getEntityResolver().lookupObjEntity(objEntityClass);
         }
+
         Collection objectsForObjEntity =
             (Collection) objectsByObjEntity.get(objEntityClass.getName());
         if (objectsForObjEntity == null) {
             objEntities.add(entity);
             DataNode responsibleNode = context.dataNodeForObjEntity(entity);
-            Collection entitiesForNode =
-                (Collection) objEntitiesByNode.get(responsibleNode);
-            if (entitiesForNode == null) {
-                entitiesForNode = new ArrayList();
-                objEntitiesByNode.put(responsibleNode, entitiesForNode);
-            }
-            entitiesForNode.add(entity);
+
+            DataNodeCommitHelper commitHelper =
+                DataNodeCommitHelper.getHelperForNode(
+                    nodeHelpers,
+                    responsibleNode);
+
+            commitHelper.addToEntityList(entity, operationType);
             objectsForObjEntity = new ArrayList();
             objectsByObjEntity.put(
                 objEntityClass.getName(),
