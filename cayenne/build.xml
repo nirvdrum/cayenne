@@ -188,10 +188,16 @@
 
 
     <!-- ========================================== -->
-    <!-- Clean distribution files and subprojects.  -->
+    <!-- Cleans distribution files and subprojects. -->
     <!-- ========================================== -->
-    <target name="clean">
+    <target name="clean" depends="clean-java">
         <delete dir="${dist.base}"/>
+    </target>
+    
+    <!-- ========================================== -->
+    <!-- Cleans Java build directories.             -->
+    <!-- ========================================== -->
+    <target name="clean-java">
         <ant dir="src" target="clean"/>
         <ant dir="tests" target="clean"/>
     </target>

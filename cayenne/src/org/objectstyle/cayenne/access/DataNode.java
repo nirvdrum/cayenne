@@ -311,14 +311,19 @@ public class DataNode implements QueryEngine {
 
 
     /** Creates primary key support for all node DbEntities.
-     *  Will use its PkGenerator to create primary key support in the database
-     *  for all DbEntities in the maps supported by this DataNode. */
+     *  Will use its facilities provided by DbAdapter to generate
+     *  any necessary database objects and data for primary
+     *  key support. */
     public void createPkSupportForMapEntities() throws Exception {
+        // generate common PK support
+        adapter.createAutoPkSupport(this);
+        
+        // generate PK support for each indiv. entity.
         int len = dataMaps.length;
         for (int i = 0; i < len; i++) {
             DbEntity[] ents = dataMaps[i].getDbEntities();
             for (int j = 0; j < ents.length; j++) {
-                getAdapter().createAutoPkSupportForDbEntity(this, ents[j]);
+                adapter.createAutoPkSupportForDbEntity(this, ents[j]);
             }
         }
     }

@@ -74,25 +74,44 @@ public class PkGenerator {
     private static final ObjAttribute[] resultDesc =
         new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
 
+
     /** Generates database objects to provide
      *  automatic primary key support. This implementation will create
-     *  a lookup table like that:
+     *  a lookup table called "AUTO_PK_SUPPORT" unless it already exists:
      * 
-     *<code><pre>
+     <pre>
      *CREATE TABLE AUTO_PK_SUPPORT (
      *TABLE_NAME           CHAR(100) NOT NULL,
      *NEXT_ID              INTEGER NOT NULL
      *)
-     *</pre></code>
+     *</pre>
      *
      *  @param node node that provides access to a DataSource.
      */
     public void createAutoPkSupport(DataNode node) throws Exception {
-        StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE AUTO_PK_SUPPORT ").append(
-            "(TABLE_NAME CHAR(100) NOT NULL, NEXT_ID INTEGER NOT NULL)");
+        // check if a table exists
+        Connection con = node.getDataSource().getConnection();
+        boolean shouldCreate = true;
+        try {
+            DatabaseMetaData md = con.getMetaData();
+            ResultSet tables = md.getTables(null, null, "AUTO_PK_SUPPORT", null);
+            shouldCreate = !tables.next();
+            tables.close();
+        }
+        finally {
+            // return connection to the pool
+            if (con != null)
+                con.close();
+        }
+        
 
-        runSchemaUpdate(node, buf.toString());
+        if (shouldCreate) {
+            StringBuffer buf = new StringBuffer();
+            buf.append("CREATE TABLE AUTO_PK_SUPPORT ").append(
+                "(TABLE_NAME CHAR(100) NOT NULL, NEXT_ID INTEGER NOT NULL)");
+
+            runSchemaUpdate(node, buf.toString());
+        }
     }
 
     /** Will drop table named "AUTO_PK_SUPPORT" if it exists in the 
@@ -118,7 +137,6 @@ public class PkGenerator {
             runSchemaUpdate(node, "DROP TABLE AUTO_PK_SUPPORT");
         }
     }
-    
 
     /** <p>Perform necessary database operations to do primary key generation
      *  for a particular DbEntity.
@@ -208,7 +226,6 @@ public class PkGenerator {
         public boolean useAutoCommit() {
             return false;
         }
-
 
         public void nextSnapshots(Query query, List resultObjects) {
             super.nextSnapshots(query, resultObjects);
