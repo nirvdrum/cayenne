@@ -70,7 +70,6 @@ public class DefaultResultIteratorTst extends TestCase {
 	private DefaultResultIterator it;
 	private Connection conn;
 	private PreparedStatement st;
-	private ResultSet rs;
 
 	public DefaultResultIteratorTst(String name) {
 		super(name);
@@ -79,7 +78,6 @@ public class DefaultResultIteratorTst extends TestCase {
 	public void setUp() throws java.lang.Exception {
 		conn = null;
 		st = null;
-		rs = null;
 		it = null;
 
 		TestMain.getSharedDatabaseSetup().cleanTableData();
@@ -149,9 +147,9 @@ public class DefaultResultIteratorTst extends TestCase {
 		}
 	}
 
-	protected void cleanup() throws SQLException {
-		if (rs != null) {
-			rs.close();
+	protected void cleanup() throws Exception {
+		if (it != null) {
+			it.close();
 		}
 
 		if (st != null) {
@@ -179,8 +177,7 @@ public class DefaultResultIteratorTst extends TestCase {
 		st =
 			assembler.createStatement(
 				DefaultOperationObserver.DEFAULT_LOG_LEVEL);
-		rs = st.executeQuery();
 
-		it = new DefaultResultIterator(rs, adapter, assembler);
+		it = new DefaultResultIterator(st, adapter, assembler);
 	}
 }

@@ -226,18 +226,18 @@ public class DataNode implements QueryEngine {
 				// catch exceptions for each individual query
 				try {
 					// translate query
-					QueryTranslator queryTranslator =
+					QueryTranslator transl =
 						getAdapter().getQueryTranslator(nextQuery);
-					queryTranslator.setEngine(this);
-					queryTranslator.setCon(con);
+					transl.setEngine(this);
+					transl.setCon(con);
 					PreparedStatement prepStmt =
-						queryTranslator.createStatement(logLevel);
+						transl.createStatement(logLevel);
 
 					try {
 						if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-							runSelect(opObserver, prepStmt, queryTranslator);
+							runSelect(opObserver, prepStmt, transl);
 						} else {
-							runUpdate(opObserver, prepStmt, queryTranslator);
+							runUpdate(opObserver, prepStmt, transl);
 						}
 					} finally {
 						// important - prepared statement must be closed 
@@ -317,14 +317,17 @@ public class DataNode implements QueryEngine {
 		PreparedStatement prepStmt,
 		QueryTranslator transl)
 		throws Exception {
+
 		ResultSet rs = null;
+		DefaultResultIterator it = null;
 
 		try {
-			rs = prepStmt.executeQuery();
-
 			SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-			DefaultResultIterator it =
-				new DefaultResultIterator(rs, this.getAdapter(), assembler);
+			it =
+				new DefaultResultIterator(
+					prepStmt,
+					this.getAdapter(),
+					assembler);
 
 			List resultSnapshots = it.dataRows();
 			QueryLogger.logSelectCount(
@@ -334,8 +337,8 @@ public class DataNode implements QueryEngine {
 			observer.nextDataRows(transl.getQuery(), resultSnapshots);
 
 		} finally {
-			if (rs != null) {
-				rs.close();
+			if (it != null) {
+				it.close();
 			}
 		}
 	}
@@ -356,7 +359,6 @@ public class DataNode implements QueryEngine {
 		// 3.b send results back to consumer
 		observer.nextCount(transl.getQuery(), count);
 	}
-	
 
 	public void performQuery(Query query, OperationObserver opObserver) {
 		ArrayList qWrapper = new ArrayList(1);

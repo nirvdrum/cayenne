@@ -55,8 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 
 import org.objectstyle.cayenne.CayenneException;
@@ -76,6 +75,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @author Andrei Adamchik
  */
 public class DefaultResultIterator implements ResultIterator {
+	protected PreparedStatement prepStmt;
 	protected ResultSet resultSet;
 	protected Map dataRow;
 	protected DbAttribute[] rowDescriptor;
@@ -87,12 +87,13 @@ public class DefaultResultIterator implements ResultIterator {
 	 * with ResultSet and query metadata.
 	 */
 	public DefaultResultIterator(
-		ResultSet resultSet,
+		PreparedStatement prepStmt,
 		DbAdapter adapter,
 		SelectQueryAssembler queryAssembler)
 		throws SQLException, CayenneException {
-
-		this.resultSet = resultSet;
+			
+		this.prepStmt = prepStmt;
+		this.resultSet = prepStmt.executeQuery();
 		this.rowDescriptor = queryAssembler.getSnapshotDesc(resultSet);
 		String[] rowTypes = queryAssembler.getResultTypes(resultSet);
 
@@ -144,21 +145,21 @@ public class DefaultResultIterator implements ResultIterator {
 		return row;
 	}
 
-    /**
-     * Returns all unread data rows from ResultSet and closes
-     * this iterator.
-     */
-    public List dataRows() throws CayenneException {
-    	ArrayList list = new ArrayList();
-    	while(this.hasNextRow()) {
-    		list.add(this.nextDataRow());
-    	}
-    	
-    	this.close();
-    	
-    	return list;
-    }
-    
+	/**
+	 * Returns all unread data rows from ResultSet and closes
+	 * this iterator.
+	 */
+	public List dataRows() throws CayenneException {
+		ArrayList list = new ArrayList();
+		while (this.hasNextRow()) {
+			list.add(this.nextDataRow());
+		}
+
+		this.close();
+
+		return list;
+	}
+
 	/** 
 	 * Reads a row from the internal ResultSet at the current
 	 * cursor position.
@@ -197,10 +198,19 @@ public class DefaultResultIterator implements ResultIterator {
 	 */
 	public void close() throws CayenneException {
 		dataRow = null;
+		
 		try {
 			resultSet.close();
 		} catch (SQLException sqex) {
 			throw new CayenneException("Exception closing ResultSet.", sqex);
+		}
+
+		try {
+			prepStmt.close();
+		} catch (SQLException sqex) {
+			throw new CayenneException(
+				"Exception closing PreparedStatement.",
+				sqex);
 		}
 	}
 }
