@@ -71,6 +71,8 @@ import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 
+import com.jgoodies.plaf.plastic.PlasticXPLookAndFeel;
+
 /** 
  * Main class responsible for starting CayenneModeler.
  * 
@@ -91,29 +93,20 @@ public class Main {
         ModelerPreferences prefs = ModelerPreferences.getPreferences();
 
         // set L&F
+        String laf = prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
+        if (laf == null) {
+            // JGoddies plastic L&F is default
+            laf = PlasticXPLookAndFeel.class.getName();
+        }
         try {
-            String laf = prefs.getString(ModelerPreferences.EDITOR_LAFNAME);
-
-            if (laf != null) {
-                LookAndFeelInfo[] installed = UIManager.getInstalledLookAndFeels();
-                for (int i = 0; i < installed.length; i++) {
-                    LookAndFeelInfo lif = installed[i];
-                    if (lif.getName().equals(laf)) {
-                        UIManager.setLookAndFeel(lif.getClassName());
-                        break;
-                    }
-                }
-            } else {
-                // no L&F set - use native platform look
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            }
+            UIManager.setLookAndFeel(laf);
         } catch (Exception e) {
             logObj.warn("Could not set selected LookAndFeel - using default.", e);
         } finally {
             // remember L&F in prefs
             prefs.setProperty(
                 ModelerPreferences.EDITOR_LAFNAME,
-                UIManager.getLookAndFeel().getName());
+                UIManager.getLookAndFeel().getClass().getName());
         }
 
         // check jdk version
