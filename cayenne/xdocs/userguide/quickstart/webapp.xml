@@ -72,8 +72,9 @@
     		</li>
     		</ul>
     		
-    		Tutorial was testsed with Struts 1.1rc1, other versions of Struts may
+    		Tutorial was testsed with Struts 1.1, other versions of Struts may
     		require a different setup.</p>
+    		<br/>
     	</subsection>
     	
        <subsection name="3.3.2 Prepare Tutorial Database" anchor="2">
@@ -106,6 +107,7 @@
     		</p>
     	    <img src="/images/modelerguide/select-adapter.jpg" width="520" height="336" border="0" align="middle"
 			alt="Configure Node Panel"/>
+			<br/>
     	</subsection>
     	
     	
