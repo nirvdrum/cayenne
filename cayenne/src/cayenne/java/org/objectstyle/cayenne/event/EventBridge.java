@@ -67,13 +67,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * event subjects. A "local" subject - to communicate with local EventManager, and a "remote"
  * subject - to work with an external events interface.
  * 
- * <p>Application can register multiple EventBridge instances with EventManager using
- * <code>EventManager.addBridge()</code> method. "Local" events will trigger 
- * <code>onLocalEvent()</code> method. It is a responsibility of the subclass to
- * call <code>onExternalEvent()</code> after an "external" events is received.</p>
- * 
  * <p>If a subclass needs to prepare itself to receive incoming events it should
- * override <code>init()</code> method.</p>
+ * properly implement <code>startup(EventManager)</code> method.</p>
  * 
  * <p>This class is an example of the <a href="http://en.wikipedia.org/wiki/Bridge_pattern">"bridge"</a> 
  * design pattern, hence the name.

@@ -331,6 +331,7 @@ public class EventManager extends Object {
     final class DispatchThread extends Thread {
         public DispatchThread(String name) {
             super(name);
+            setDaemon(true);
             logObj.debug("starting event dispatch thread: " + name);
         }
 
