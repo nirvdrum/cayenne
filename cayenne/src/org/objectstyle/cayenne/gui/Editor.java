@@ -114,7 +114,6 @@ public class Editor
 	JMenuItem closeProjectMenu = new JMenuItem("Close Project");
 	JMenuItem exitMenu = new JMenuItem("Exit");
 
-	JMenuItem createDataSourceMenu = new JMenuItem("Create Data Source");
 	JMenuItem createObjEntityMenu = new JMenuItem("Create Object Entity");
 	JMenuItem createDbEntityMenu = new JMenuItem("Create DB Entity");
 	JMenuItem synchObjEntityMenu = new JMenuItem("Synchronize with DbEntity");
@@ -128,7 +127,6 @@ public class Editor
 
 	JMenuItem aboutMenu = new JMenuItem("About");
 
-	JButton createDataSourceBtn;
 	JButton createObjEntityBtn;
 	JButton createDbEntityBtn;
 
@@ -162,7 +160,7 @@ public class Editor
 		// these are legacy methods being refactored out
 		init();
 		initActions();
-		
+
 	}
 
 	/**
@@ -192,6 +190,9 @@ public class Editor
 
 		CayenneAction createDomainAction = new CreateDomainAction();
 		actionMap.put(createDomainAction.getKey(), createDomainAction);
+
+		CayenneAction createNodeAction = new CreateNodeAction();
+		actionMap.put(createNodeAction.getKey(), createNodeAction);
 
 		CayenneAction createMapAction = new CreateDataMapAction();
 		actionMap.put(createMapAction.getKey(), createMapAction);
@@ -231,8 +232,9 @@ public class Editor
 		fileMenu.add(exitMenu);
 
 		projectMenu.add(getAction(CreateDomainAction.ACTION_NAME).buildMenu());
+		projectMenu.add(getAction(CreateNodeAction.ACTION_NAME).buildMenu());
 		projectMenu.add(getAction(CreateDataMapAction.ACTION_NAME).buildMenu());
-		projectMenu.add(createDataSourceMenu);
+
 		projectMenu.add(createObjEntityMenu);
 		projectMenu.add(createDbEntityMenu);
 		projectMenu.addSeparator();
@@ -256,8 +258,8 @@ public class Editor
 		Image icon = Toolkit.getDefaultToolkit().createImage(url);
 		this.setIconImage(icon);
 		*/
-		
-	     initToolBar();
+
+		initToolBar();
 	}
 
 	protected void initActions() {
@@ -282,7 +284,6 @@ public class Editor
 		disableMenu();
 		closeProjectMenu.setEnabled(false);
 
-		createDataSourceMenu.addActionListener(this);
 		createObjEntityMenu.addActionListener(this);
 		createDbEntityMenu.addActionListener(this);
 
@@ -293,7 +294,6 @@ public class Editor
 		setPackageMenu.addActionListener(this);
 		aboutMenu.addActionListener(this);
 
-		createDataSourceBtn.addActionListener(this);
 		createObjEntityBtn.addActionListener(this);
 		createDbEntityBtn.addActionListener(this);
 
@@ -332,7 +332,7 @@ public class Editor
 	protected void initToolBar() {
 		ClassLoader cl = Editor.class.getClassLoader();
 
-	    JToolBar toolBar = new JToolBar();
+		JToolBar toolBar = new JToolBar();
 		toolBar.add(getAction(NewProjectAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(OpenProjectAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(SaveAction.ACTION_NAME).buildButton());
@@ -341,18 +341,10 @@ public class Editor
 		toolBar.addSeparator();
 
 		toolBar.add(getAction(CreateDomainAction.ACTION_NAME).buildButton());
-
-		URL url =
-			cl.getResource(
-				CayenneAction.RESOURCE_PATH + "images/icon-node.gif");
-		ImageIcon nodeIcon = new ImageIcon(url);
-		createDataSourceBtn = new JButton(nodeIcon);
-		createDataSourceBtn.setToolTipText("create new data node");
-		toolBar.add(createDataSourceBtn);
-
+        toolBar.add(getAction(CreateNodeAction.ACTION_NAME).buildButton());
 		toolBar.add(getAction(CreateDataMapAction.ACTION_NAME).buildButton());
 
-		url =
+		URL url =
 			cl.getResource(
 				CayenneAction.RESOURCE_PATH + "images/icon-dbentity.gif");
 		ImageIcon dbEntityIcon = new ImageIcon(url);
@@ -501,9 +493,6 @@ public class Editor
 				((ProjectAction) getAction(NewProjectAction.ACTION_NAME))
 					.closeProject();
 			} else if (
-				src == createDataSourceMenu || src == createDataSourceBtn) {
-				createDataNode();
-			} else if (
 				src == createObjEntityMenu || src == createObjEntityBtn) {
 				createObjEntity();
 			} else if (src == createDbEntityMenu || src == createDbEntityBtn) {
@@ -598,31 +587,6 @@ public class Editor
 				mediator.getCurrentDataDomain()));
 	}
 
-	/** 
-	 * Creates a new data node. Data node may consist of two pieces of information:
-	 * <ul>
-	 *   <li>Name/location</li>
-	 *   <li>Database url/uid/password (for direct connection to DB).</li>
-	 * </ul>
-	 * 
-	 * First piece of info is stored directly into the cayenne.xml.
-	 * Second piece of data should be stored in the separate file
-	 * if the factory requires it. 
-	 */
-	private void createDataNode() {
-		DataDomain domain = mediator.getCurrentDataDomain();
-		DataNode node =
-			(DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
-		GuiDataSource src = new GuiDataSource(new DataSourceInfo());
-		node.setDataSource(src);
-
-		domain.addNode(node);
-		mediator.fireDataNodeEvent(
-			new DataNodeEvent(this, node, DataNodeEvent.ADD));
-		mediator.fireDataNodeDisplayEvent(
-			new DataNodeDisplayEvent(this, domain, node));
-	}
-
 	public void currentDomainChanged(DomainDisplayEvent e) {
 		if (e.getDomain() == null) {
 			disableMenu();
@@ -695,8 +659,8 @@ public class Editor
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(false);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(false);
 		getAction(AddDataMapAction.ACTION_NAME).setEnabled(false);
-
-		createDataSourceMenu.setEnabled(false);
+        getAction(CreateNodeAction.ACTION_NAME).setEnabled(false);
+		
 		createObjEntityMenu.setEnabled(false);
 		createDbEntityMenu.setEnabled(false);
 
@@ -708,7 +672,7 @@ public class Editor
 		generateDbMenu.setEnabled(false);
 		setPackageMenu.setEnabled(false);
 
-		createDataSourceBtn.setEnabled(false);
+		
 		createObjEntityBtn.setEnabled(false);
 		createDbEntityBtn.setEnabled(false);
 	}
@@ -718,13 +682,11 @@ public class Editor
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(true);
 		getAction(CreateDomainAction.ACTION_NAME).setEnabled(true);
+        getAction(CreateNodeAction.ACTION_NAME).setEnabled(true);
 
-		createDataSourceMenu.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
 		importDbMenu.setEnabled(true);
 		importEOMMenu.setEnabled(true);
-
-		createDataSourceBtn.setEnabled(true);
 	}
 
 	private void enableDataMapMenu() {
