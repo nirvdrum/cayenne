@@ -4,7 +4,11 @@
 
     <body>        
         <section name="Cayenne News Archive">
-         <p><u><i>[February 8, 2004]</i></u> <strong>Release 1.1a-pre2 of Cayenne and Cayenne Examples</strong></p>
+         <p><u><strong><i>February 29, 2004</i></strong></u> <strong>M3 - New Cayenne 1.1 Milestone  Release</strong></p>
+         <p>This release features major enhancement of Expressions API and allows to build SelectQueries using CayenneModeler.
+         </p>
+         
+         <p><u><strong><i>February 8, 2004</i></strong></u> <strong>Release 1.1a-pre2 of Cayenne and Cayenne Examples</strong></p>
          <p>Cayenne and Cayenne Examples 1.1a-pre2 (Second Alpha Preview) are released. This release features 
          1.1 release. Among its features are:
          <ul>
@@ -29,15 +33,12 @@
         page at a time.</li>
         </ul>
         
-        <p>Details can be found in the <a href="RELEASE-NOTES-1.0.3.txt">release notes</a>.
-        </p>
-        
         <p><u><strong><i>November 16, 2003:</i></strong> <strong>Cayenne Examples 1.0.3 Release</strong></u></p>
         
         <p>Cayenne Examples 1.0.3 is 
         <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
         download</a>. It contains new aggregate queries mapping example. Examples documentation is now a part
-        of the main Cayenne site. Details can be found in the <a href="RELEASE-NOTES-1.0.3.examples.txt">release notes</a>.
+        of the main Cayenne site.
         </p>
         
         <p><u><strong><i>October 27, 2003:</i></strong> <strong>Cayenne 1.0.2 Maintenance Release</strong></u></p>
@@ -45,7 +46,7 @@
         <p>Cayenne 1.0.2 is 
         <a href="http://sourceforge.net/project/showfiles.php?group_id=48132">available for 
         download</a>. It contains a number of adapter fixes, as well as support for binary
-        primary keys. Details can be found in <a href="RELEASE-NOTES-1.0.2.txt">release notes</a>.
+        primary keys.
         </p>
         
         <p>

@@ -86,16 +86,38 @@
             </ul>
             </subsection>
             
-            <subsection name="1.1.10 Lazy Relationship Creation">
-            <p></p>
+            <subsection name="1.1.10 Various Performance Enhancements">
+            <ul>
+            	<li>Lazy Relationship Creation - when new objects are fetched, their relationships
+            	are not initialized immediately; a Fault singleton is used isntead as a placeholder.
+            	Of course in the past Cayenne also had "lazy" relationships, meaning that they didn't
+            	get resolved via a DB query until accessed. Current optimization goes further -
+            	it prevents a number of Java objects (such as empty Lists for to-many relationship, or
+            	"hollow" DataObjects for to-ones)
+            	from being created until absolutely necessary.</li>
+            	
+            	<li>To-many relationships do not have to be fully resolved on modification - if an 
+            	unresolved to-many
+            	relationship is modified (i.e. an object is added or removed from it), it is
+            	not resolved until the next "read" (i.e. until a call to "size()" or "iterator()" method).
+            	This is especially helpful with bi-directional one-to-many relationships.
+            	E.g. "painting.addToArtist(artist)" used to trigger the fetch of all paintings
+            	that belong to an artist. Not anymore.</li>
+            </ul>
             </subsection>
             
-            <subsection name="1.1.11 OpenBase Adapter">
-            <p>A dedicated adapter is implemented for OpenBase DB Engine.</p>
+            <subsection name="1.1.11 DbAdapters for More Databases">
+            <p>Cayenne features new database adapters:</p>
+            <ul>
+            	<li>OpenBase Adapter</li>
+            	<li>MS SQL Server Adapter</li>
+            </ul>
             </subsection>
             
-            <subsection name="1.1.12 SQL Server Adapter">
-            <p>A dedicated adapter is implemented for MS SQL Server Engine.</p>
+            <subsection name="1.1.12 Support for To-One Relationships Not Pointing to a PK.">
+            <p>Added support for one-to-one relationships between PK and non-PK columns
+            of related tables. In the past this could only be modeled as one-to-many. CayenneModeler
+            will create UNIQUE constraint for a non-PK columns during schema generation.</p>
             </subsection>
             
             <subsection name="1.1.13 New Default CayenneModeler Look and Feel">

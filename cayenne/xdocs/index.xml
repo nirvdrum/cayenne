@@ -6,9 +6,10 @@
         <!-- News section -->
         <section name="Cayenne News">
         
-         <p><u><i>[February 29, 2004]</i></u> <strong>M3 - New Cayenne 1.1 Milestone  Release</strong></p>
-         <p>This release features major enhancement of Expressions API and allows to build SelectQueries using CayenneModeler.
-         For details see <a href="RELEASE-NOTES.txt">release notes</a> and <a href="UPGRADE.txt">upgrade instructions.</a>.
+         <p><u><i>[March 4, 2004]</i></u> <strong>M4 - New Cayenne 1.1 Milestone  Release</strong></p>
+         <p>This release fixes serious bugs found in M3, adds suppport for to-one relationships with an FK column
+         target and implements performance enhancements for to-many relationships.
+         For details see <a href="RELEASE-NOTES.txt">release notes</a> and <a href="UPGRADE.txt">upgrade instructions</a>.
          </p>
          
         <p><u><i>[January 26, 2004]</i></u> <strong>Cayenne 1.0.6 Released</strong></p>
