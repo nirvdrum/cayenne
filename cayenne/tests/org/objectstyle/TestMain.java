@@ -132,8 +132,10 @@ public class TestMain implements TestConstants {
         else
             success = ObjectStyleTestRunner.runTests();
         
-        if(!success) 
+        if(!success) {
+            logObj.warning("Some tests have failed.");
             System.exit(1);
+        }
     }
 
 

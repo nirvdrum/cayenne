@@ -109,7 +109,7 @@ public class ObjectStyleTestRunner extends junit.textui.TestRunner {
     protected int errorCount;
 
     public boolean hasFailures() {
-        return errorCount + failureCount > 0;
+        return (errorCount + failureCount) > 0;
     }
     
     public void printAll() {
