@@ -377,10 +377,12 @@ public class DataRowStore implements Serializable {
         }
 
         Collection deletedSnapshotIds = event.getDeletedIds();
+        Collection invalidatedSnapshotIds = event.getInvalidatedIds();
         Map diffs = event.getModifiedDiffs();
         Collection indirectlyModifiedIds = event.getIndirectlyModifiedIds();
 
         if (deletedSnapshotIds.isEmpty()
+                && invalidatedSnapshotIds.isEmpty()
                 && diffs.isEmpty()
                 && indirectlyModifiedIds.isEmpty()) {
             logObj.warn("processRemoteEvent.. bogus call... no changes.");
@@ -389,13 +391,29 @@ public class DataRowStore implements Serializable {
 
         synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
+            processInvalidatedIDs(deletedSnapshotIds);
             processUpdateDiffs(diffs);
             sendUpdateNotification(
                     event.getSource(),
                     diffs,
                     deletedSnapshotIds,
+                    invalidatedSnapshotIds,
                     indirectlyModifiedIds);
         }
+    }
+
+    /**
+     * Processes changes made to snapshots. Modifies internal cache state, and then sends
+     * the event to all listeners. Source of these changes is usually an ObjectStore.
+     * @deprecated 
+     */
+    public void processSnapshotChanges(
+            Object source,
+            Map updatedSnapshots,
+            Collection deletedSnapshotIds,
+            Collection indirectlyModifiedIds) {
+
+        this.processSnapshotChanges(source, updatedSnapshots, deletedSnapshotIds, Collections.EMPTY_LIST, indirectlyModifiedIds);
     }
 
     /**
@@ -406,11 +424,13 @@ public class DataRowStore implements Serializable {
             Object source,
             Map updatedSnapshots,
             Collection deletedSnapshotIds,
+            Collection invalidatedSnapshotIds,
             Collection indirectlyModifiedIds) {
 
         // update the internal cache, prepare snapshot event
 
         if (deletedSnapshotIds.isEmpty()
+                && invalidatedSnapshotIds.isEmpty()
                 && updatedSnapshots.isEmpty()
                 && indirectlyModifiedIds.isEmpty()) {
             logObj.warn("postSnapshotsChangeEvent.. bogus call... no changes.");
@@ -419,11 +439,13 @@ public class DataRowStore implements Serializable {
 
         synchronized (this) {
             processDeletedIDs(deletedSnapshotIds);
+            processInvalidatedIDs(invalidatedSnapshotIds);
             Map diffs = processUpdatedSnapshots(updatedSnapshots);
             sendUpdateNotification(
                     source,
                     diffs,
                     deletedSnapshotIds,
+                    invalidatedSnapshotIds,
                     indirectlyModifiedIds);
         }
     }
@@ -432,6 +454,16 @@ public class DataRowStore implements Serializable {
         // DELETED: evict deleted snapshots
         if (!deletedSnapshotIDs.isEmpty()) {
             Iterator it = deletedSnapshotIDs.iterator();
+            while (it.hasNext()) {
+                snapshots.remove(it.next());
+            }
+        }
+    }
+
+    private void processInvalidatedIDs(Collection invalidatedSnapshotIds) {
+        // INVALIDATED: forget snapshot, treat as expired from cache
+        if (!invalidatedSnapshotIds.isEmpty()) {
+            Iterator it = invalidatedSnapshotIds.iterator();
             while (it.hasNext()) {
                 snapshots.remove(it.next());
             }
@@ -517,15 +549,28 @@ public class DataRowStore implements Serializable {
         }
     }
 
+    /**
+     * @deprecated 
+     */
     private void sendUpdateNotification(
             Object source,
             Map diffs,
             Collection deletedSnapshotIDs,
             Collection indirectlyModifiedIds) {
+        this.sendUpdateNotification(source, diffs, deletedSnapshotIDs, Collections.EMPTY_LIST, indirectlyModifiedIds);
+    }
+
+    private void sendUpdateNotification(
+            Object source,
+            Map diffs,
+            Collection deletedSnapshotIDs,
+            Collection invalidatedSnapshotIDs,
+            Collection indirectlyModifiedIds) {
 
         // do not send bogus events... e.g. inserted objects are not counted
         if ((diffs != null && !diffs.isEmpty())
                 || (deletedSnapshotIDs != null && !deletedSnapshotIDs.isEmpty())
+                || (invalidatedSnapshotIDs != null && !invalidatedSnapshotIDs.isEmpty())
                 || (indirectlyModifiedIds != null && !indirectlyModifiedIds.isEmpty())) {
 
             SnapshotEvent event = new SnapshotEvent(
@@ -533,6 +578,7 @@ public class DataRowStore implements Serializable {
                     this,
                     diffs,
                     deletedSnapshotIDs,
+                    invalidatedSnapshotIDs,
                     indirectlyModifiedIds);
 
             if (logObj.isDebugEnabled()) {

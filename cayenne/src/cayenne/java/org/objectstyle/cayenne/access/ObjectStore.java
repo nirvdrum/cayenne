@@ -255,6 +255,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         getDataRowCache().processSnapshotChanges(
                 this,
                 Collections.EMPTY_MAP,
+                Collections.EMPTY_LIST,
                 ids,
                 Collections.EMPTY_LIST);
     }
@@ -451,6 +452,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         this,
                         modified,
                         Collections.EMPTY_LIST,
+                        Collections.EMPTY_LIST,
                         Collections.EMPTY_LIST);
             }
         }
@@ -594,6 +596,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                                     ? modifiedSnapshots
                                     : Collections.EMPTY_MAP,
                             deletedIds != null ? deletedIds : Collections.EMPTY_LIST,
+                            Collections.EMPTY_LIST,
                             !indirectlyModifiedIds.isEmpty() ? new ArrayList(
                                     indirectlyModifiedIds) : Collections.EMPTY_LIST);
         }
@@ -856,6 +859,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         synchronized (this) {
             processUpdatedSnapshots(event.getModifiedDiffs());
             processDeletedIDs(event.getDeletedIds());
+            processInvalidatedIDs(event.getInvalidatedIds());
             processIndirectlyModifiedIDs(event.getIndirectlyModifiedIds());
         }
     }
@@ -1017,6 +1021,51 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                             delegate.finishedProcessDelete(object);
                         }
 
+                        break;
+                }
+            }
+        }
+    }
+
+    /**
+     * @since 1.1
+     */
+    void processInvalidatedIDs(Collection invalidatedIDs) {
+        if (invalidatedIDs != null && !invalidatedIDs.isEmpty()) {
+            Iterator it = invalidatedIDs.iterator();
+            while (it.hasNext()) {
+                ObjectId oid = (ObjectId) it.next();
+                DataObject object = getObject(oid);
+
+                if (object == null) {
+                    continue;
+                }
+
+                // TODO: refactor "switch" to avoid code duplication
+
+                switch (object.getPersistenceState()) {
+                    case PersistenceState.COMMITTED:
+                        object.setPersistenceState(PersistenceState.HOLLOW);
+                        break;
+                    case PersistenceState.MODIFIED:
+                        DataContext context = object.getDataContext();
+                    	DataRow diff = getSnapshot(oid, context);
+	                    // consult delegate if it exists
+                    	DataContextDelegate delegate = context.nonNullDelegate();
+	                    if (delegate.shouldMergeChanges(object, diff)) {
+	                        ObjEntity entity = context
+	                                .getEntityResolver()
+	                                .lookupObjEntity(object);
+	                        DataRowUtils.forceMergeWithSnapshot(entity, object, diff);
+	                        delegate.finishedMergeChanges(object);
+	                    }
+                    
+                    case PersistenceState.HOLLOW:
+                        // do nothing
+                        break;
+
+                    case PersistenceState.DELETED:
+                        // TODO: Do nothing? Or treat as merged?
                         break;
                 }
             }

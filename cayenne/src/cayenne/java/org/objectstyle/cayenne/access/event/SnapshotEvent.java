@@ -71,21 +71,37 @@ public class SnapshotEvent extends CayenneEvent {
 
     protected long timestamp;
     protected Collection deletedIds;
+    protected Collection invalidatedIds;
     protected Map modifiedDiffs;
     protected Collection indirectlyModifiedIds;
 
+/**
+ * @deprecated 
+ */
     public SnapshotEvent(
-        Object source,
-        Object postedBy,
-        Map modifiedDiffs,
-        Collection deletedIds,
-        Collection indirectlyModifiedIds) {
-            
+            Object source,
+            Object postedBy,
+            Map modifiedDiffs,
+            Collection deletedIds,
+            Collection indirectlyModifiedIds) {
+                
+    	this(source, postedBy, modifiedDiffs, deletedIds, Collections.EMPTY_LIST, indirectlyModifiedIds);
+    }
+
+    public SnapshotEvent(
+            Object source,
+            Object postedBy,
+            Map modifiedDiffs,
+            Collection deletedIds,
+            Collection invalidatedIds,
+            Collection indirectlyModifiedIds) {
+                
         super(source, postedBy, null);
-    
+        
         this.timestamp = System.currentTimeMillis();
         this.modifiedDiffs = modifiedDiffs;
         this.deletedIds = deletedIds;
+        this.invalidatedIds = invalidatedIds;
         this.indirectlyModifiedIds = indirectlyModifiedIds;
     }
 
@@ -99,6 +115,10 @@ public class SnapshotEvent extends CayenneEvent {
 
     public Collection getDeletedIds() {
         return (deletedIds != null) ? deletedIds : Collections.EMPTY_LIST;
+    }
+    
+    public Collection getInvalidatedIds() {
+        return (invalidatedIds != null) ? invalidatedIds : Collections.EMPTY_LIST;
     }
     
     public Collection getIndirectlyModifiedIds() {
@@ -117,6 +137,11 @@ public class SnapshotEvent extends CayenneEvent {
         Collection deleted = getDeletedIds();
         if (!deleted.isEmpty()) {
             buffer.append(", deleted ").append(deleted.size()).append(" id(s)");
+        }
+        
+        Collection invalidated = getInvalidatedIds();
+        if (!invalidated.isEmpty()) {
+            buffer.append(", invalidated ").append(invalidated.size()).append(" id(s)");
         }
         
         Collection related = getIndirectlyModifiedIds();
