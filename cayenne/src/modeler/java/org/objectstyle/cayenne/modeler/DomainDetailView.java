@@ -56,13 +56,12 @@
 
 package org.objectstyle.cayenne.modeler;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.Spring;
-import javax.swing.SpringLayout;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -83,17 +82,17 @@ import org.objectstyle.cayenne.util.Util;
 public class DomainDetailView
     extends JPanel
     implements DocumentListener, DomainDisplayListener {
-    EventController mediator;
 
-    JLabel nameLabel;
-    JTextField name;
-    String oldName;
+    protected EventController mediator;
+    protected JTextField name;
+    protected String oldName;
+
     /** Cludge to prevent marking domain as dirty during initial load. */
     private boolean ignoreChange = false;
 
-    public DomainDetailView(EventController temp_mediator) {
+    public DomainDetailView(EventController mediator) {
         super();
-        mediator = temp_mediator;
+        this.mediator = mediator;
         mediator.addDomainDisplayListener(this);
         // Create and layout components
         init();
@@ -102,24 +101,16 @@ public class DomainDetailView
     }
 
     private void init() {
-        SpringLayout layout = new SpringLayout();
-        this.setLayout(layout);
-
-        nameLabel = new JLabel("Domain name: ");
-        name = new JTextField(20);
-
-        Component[] left_comp = new Component[1];
-        left_comp[0] = nameLabel;
-        Component[] right_comp = new Component[1];
-        right_comp[0] = name;
-        JPanel temp =
-            PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
-        Spring pad = Spring.constant(5);
-        Spring ySpring = pad;
-        add(temp);
-        SpringLayout.Constraints cons = layout.getConstraints(temp);
-        cons.setY(ySpring);
-        cons.setX(pad);
+        this.setLayout(new BorderLayout());
+        this.name = new JTextField(25);
+        this.add(
+            PanelFactory.createForm(
+                new Component[] { new JLabel("Domain name: ")},
+                new Component[] { name },
+                5,
+                5,
+                5,
+                5));
     }
 
     public void insertUpdate(DocumentEvent e) {

@@ -120,10 +120,9 @@ public class DataMapDetailView
     }
 
     protected void init() {
-        BorderLayout layout = new BorderLayout();
-        this.setLayout(layout);
+        this.setLayout(new BorderLayout());
         nameLabel = new JLabel("Data map name: ");
-        name = new JTextField(20);
+        name = new JTextField(25);
         locationLabel = new JLabel("File: ");
         location = new JTextField(25);
         location.setEditable(false);

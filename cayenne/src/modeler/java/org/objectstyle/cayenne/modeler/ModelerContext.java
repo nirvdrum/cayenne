@@ -89,7 +89,7 @@ public class ModelerContext extends SwingContext {
     }
 
     /**
-     * Overrides super implementation to create closable dialogs.
+     * Overrides super implementation to create closeable dialogs.
      */
     protected void showViewInDialog(SwingView inView) {
     	// NOTE: 

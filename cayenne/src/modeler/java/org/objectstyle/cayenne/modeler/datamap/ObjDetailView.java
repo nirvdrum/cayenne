@@ -56,8 +56,10 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -87,7 +89,7 @@ public class ObjDetailView
         ObjEntityDisplayListener,
         ObjRelationshipDisplayListener,
         ObjAttributeDisplayListener {
-        	
+
     protected EventController mediator;
     protected JTabbedPane tab;
     protected ObjEntityPane entityPanel;
@@ -105,8 +107,13 @@ public class ObjDetailView
         tab = new JTabbedPane();
         tab.setTabPlacement(JTabbedPane.TOP);
         add(tab, BorderLayout.CENTER);
+
+        // add panels to tabs
+        // note that those panels that have no internal scrollable tables 
+        // must be wrapped in a scroll pane
+
         entityPanel = new ObjEntityPane(mediator);
-        tab.addTab("Entity", entityPanel);
+        tab.addTab("Entity", new JScrollPane(entityPanel));
         attributesPanel = new ObjAttributePane(mediator);
         tab.addTab("Attributes", attributesPanel);
         relationshipsPanel = new ObjRelationshipPane(mediator);
@@ -119,8 +126,13 @@ public class ObjDetailView
      * Notifies a child that it is has been selected.
      */
     public void stateChanged(ChangeEvent e) {
-        ExistingSelectionProcessor proc =
-            (ExistingSelectionProcessor) tab.getSelectedComponent();
+        // find source view
+        Component selected = tab.getSelectedComponent();
+        while (selected instanceof JScrollPane) {
+            selected = ((JScrollPane) selected).getViewport().getView();
+        }
+
+        ExistingSelectionProcessor proc = (ExistingSelectionProcessor) selected;
         proc.processExistingSelection();
     }
 

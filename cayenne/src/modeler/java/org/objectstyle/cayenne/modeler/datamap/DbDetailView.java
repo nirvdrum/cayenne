@@ -56,8 +56,10 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -99,8 +101,13 @@ public class DbDetailView
         tab = new JTabbedPane();
         tab.setTabPlacement(JTabbedPane.TOP);
         add(tab, BorderLayout.CENTER);
+        
+        // add panels to tabs
+        // note that those panels that have no internal scrollable tables 
+        // must be wrapped in a scroll pane
+        
         entityPanel = new DbEntityPane(mediator);
-        tab.addTab("Entity", entityPanel);
+        tab.addTab("Entity", new JScrollPane(entityPanel));
         attributesPanel = new DbAttributePane(mediator);
         tab.addTab("Attributes", attributesPanel);
         relationshipsPanel = new DbRelationshipPane(mediator);
@@ -111,8 +118,13 @@ public class DbDetailView
 
     /** Handle focus when tab changes. */
     public void stateChanged(ChangeEvent e) {
-        ExistingSelectionProcessor proc;
-        proc = (ExistingSelectionProcessor) tab.getSelectedComponent();
+        // find source view
+        Component selected = tab.getSelectedComponent();
+        while (selected instanceof JScrollPane) {
+			selected = ((JScrollPane)selected).getViewport().getView();
+        }
+
+        ExistingSelectionProcessor proc = (ExistingSelectionProcessor)selected;
         proc.processExistingSelection();
     }
 
@@ -136,7 +148,7 @@ public class DbDetailView
         Relationship rel = e.getRelationship();
         if (rel instanceof DbRelationship) {
             relationshipsPanel.selectRelationship((DbRelationship) rel);
-        } 
+        }
 
         // Display relationship tab
         tab.setSelectedIndex(2);
@@ -145,14 +157,13 @@ public class DbDetailView
     public void currentDbAttributeChanged(AttributeDisplayEvent e) {
         if (e.getEntity() == null)
             return;
-            
+
         // update relationship selection
         Attribute attr = e.getAttribute();
         if (attr instanceof DbAttribute) {
             attributesPanel.selectAttribute((DbAttribute) attr);
         }
-        
-        
+
         // Display attribute tab
         tab.setSelectedIndex(1);
     }

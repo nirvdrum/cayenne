@@ -58,11 +58,12 @@ package org.objectstyle.cayenne.modeler;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -92,7 +93,6 @@ public class EditorView
         DataMapDisplayListener,
         DataNodeDisplayListener,
         PropertyChangeListener {
-  
 
     private static final int INIT_DIVIDER_LOCATION = 170;
 
@@ -103,60 +103,65 @@ public class EditorView
     private static final String OBJ_VIEW = "ObjView";
     private static final String DB_VIEW = "DbView";
 
-	protected EventController mediator;
+    protected EventController mediator;
     protected JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true);
     protected BrowseView treePanel;
-    protected JPanel detailPanel = new JPanel();
-    protected JPanel emptyPanel = new JPanel();
+    protected JPanel detailPanel;
+    protected JPanel emptyPanel;
     protected DomainDetailView domainView;
     protected DataNodeDetailView nodeView;
     protected DataMapDetailView dataMapView;
     protected ObjDetailView objDetailView;
     protected DbDetailView dbDetailView;
     protected CardLayout detailLayout;
-	protected ModelerPreferences prefs;
+    protected ModelerPreferences prefs;
 
     public EditorView(EventController eventController) {
         super(new BorderLayout());
-        mediator = eventController;
+
+        this.mediator = eventController;
+        this.detailPanel = new JPanel();
+        this.emptyPanel = new JPanel();
 
         add(splitPane, BorderLayout.CENTER);
-		treePanel = new BrowseView(eventController);
+        treePanel = new BrowseView(eventController);
         splitPane.setLeftComponent(treePanel);
         splitPane.setRightComponent(detailPanel);
-		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
+        splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 
-        Dimension minimumSize = new Dimension(350, 200);
-        detailPanel.setMinimumSize(minimumSize);
-        minimumSize = new Dimension(INIT_DIVIDER_LOCATION, 200);
-        treePanel.setMinimumSize(minimumSize);
+        treePanel.setMinimumSize(new Dimension(INIT_DIVIDER_LOCATION, 200));
 
-		prefs = ModelerPreferences.getPreferences();
-		int preferredSize = prefs.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
-		splitPane.setDividerLocation(preferredSize);
+        prefs = ModelerPreferences.getPreferences();
+        int preferredSize =
+            prefs.getInt(ModelerPreferences.EDITOR_TREE_WIDTH, INIT_DIVIDER_LOCATION);
+        splitPane.setDividerLocation(preferredSize);
 
         detailLayout = new CardLayout();
         detailPanel.setLayout(detailLayout);
 
-        JPanel temp = new JPanel(new FlowLayout());
-        detailPanel.add(temp, EMPTY_VIEW);
+        // some but not all panels must be wrapped in a scroll pane
+        addPanelToDetailView(new JPanel(), EMPTY_VIEW);
         domainView = new DomainDetailView(eventController);
-        detailPanel.add(domainView, DOMAIN_VIEW);
+        addPanelToDetailView(new JScrollPane(domainView), DOMAIN_VIEW);
         nodeView = new DataNodeDetailView(eventController);
-        detailPanel.add(nodeView, NODE_VIEW);
+        addPanelToDetailView(new JScrollPane(nodeView), NODE_VIEW);
         dataMapView = new DataMapDetailView(eventController);
-        detailPanel.add(dataMapView, DATA_MAP_VIEW);
+        addPanelToDetailView(new JScrollPane(dataMapView), DATA_MAP_VIEW);
 
         objDetailView = new ObjDetailView(eventController);
-        detailPanel.add(objDetailView, OBJ_VIEW);
+        addPanelToDetailView(objDetailView, OBJ_VIEW);
         dbDetailView = new DbDetailView(eventController);
-        detailPanel.add(dbDetailView, DB_VIEW);
+        addPanelToDetailView(dbDetailView, DB_VIEW);
 
         mediator.addDomainDisplayListener(this);
         mediator.addDataNodeDisplayListener(this);
         mediator.addDataMapDisplayListener(this);
         mediator.addObjEntityDisplayListener(this);
         mediator.addDbEntityDisplayListener(this);
+    }
+
+    protected void addPanelToDetailView(JComponent panel, String name) {
+        detailPanel.add(panel, name);
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
@@ -194,11 +199,12 @@ public class EditorView
             detailLayout.show(detailPanel, DB_VIEW);
     }
 
-	public void propertyChange(PropertyChangeEvent e) {
-		if (e.getSource() == splitPane) {
-			prefs.put(ModelerPreferences.EDITOR_TREE_WIDTH,
-						String.valueOf(splitPane.getDividerLocation()));
-		}
-	}
+    public void propertyChange(PropertyChangeEvent e) {
+        if (e.getSource() == splitPane) {
+            prefs.put(
+                ModelerPreferences.EDITOR_TREE_WIDTH,
+                String.valueOf(splitPane.getDividerLocation()));
+        }
+    }
 
 }
