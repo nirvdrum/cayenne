@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.modeler.util;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,7 @@ import javax.swing.AbstractListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -167,6 +169,30 @@ public class MultiColumnBrowser extends JPanel {
         }
     }
 
+    private void scrollToColumn(int column) {
+        if (getParent() instanceof JViewport) {
+
+            JViewport viewport = (JViewport) getParent();
+
+            // find a rectangle in the middle of the browser
+            // and scroll it...
+            double x = getWidth() * column / ((double) getMinColumns());
+            double y = getHeight() / 2;
+
+            if (preferredColumnSize != null) {
+                x -= preferredColumnSize.width / 2;
+                if (x < 0) {
+                    x = 0;
+                }
+            }
+
+            Rectangle rectangle = new Rectangle((int) x, (int) y, 1, 1);
+
+            // Scroll the area into view.
+            viewport.scrollRectToVisible(rectangle);
+        }
+    }
+
     private BrowserPanel appendColumn() {
         BrowserPanel panel = new BrowserPanel();
         panel.addListSelectionListener(browserSelector);
@@ -200,7 +226,6 @@ public class MultiColumnBrowser extends JPanel {
         if (!model.isLeaf(model.getRoot())) {
             BrowserPanel firstPanel = (BrowserPanel) columns.get(0);
             firstPanel.setRootNode(root);
-            logObj.debug("initFromModel:: updated with: " + root);
         }
     }
 
@@ -224,6 +249,7 @@ public class MultiColumnBrowser extends JPanel {
             lastPanel.setRootNode(selectedNode);
             logObj.debug(
                 "column: " + (panelIndex + 1) + ", updated with: " + selectedNode);
+            scrollToColumn(panelIndex + 1);
         }
 
     }
