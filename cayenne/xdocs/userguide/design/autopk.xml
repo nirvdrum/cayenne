@@ -3,7 +3,7 @@
 <toc name="toc-user-guide" chapter="4. Design"/>
 <body>
     <section name="4. Design">
-        <subsection name="4.7 Primary Key Generation" anchor="pk">
+        <subsection name="4.7 Primary Key Generation">
             <p>Depending on the type of persistent objects and the database
             design, primary key values can be handled in a few different ways. 
             A decision to use one or another technique will affect how 

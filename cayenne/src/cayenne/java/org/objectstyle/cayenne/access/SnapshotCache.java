@@ -268,8 +268,9 @@ public class SnapshotCache implements Serializable {
     }
 
     /**
-     * Stores a preference value for notifying child ObjectStores
-     * of snapshot changes. SnapshotChangeEvents are still posted 
+     * Returns a property that defines whether child ObjectStores
+     * are allowed to register as SnapshotEventListeners. 
+     * SnapshotEvents are still posted 
      * via EventManager, even if this value is false. Rather this setting
      * has effect on {@link #startReceivingSnapshotEvents(ObjectStore) 
      * startReceivingSnapshotEvents(ObjectStore)} behavior.
@@ -278,6 +279,12 @@ public class SnapshotCache implements Serializable {
         return notifyingObjectStores;
     }
 
+    /**
+     * Sets a property that defines whether child ObjectStores
+     * are allowed to register as SnapshotEventListeners via
+     * {@link #startReceivingSnapshotEvents(ObjectStore) 
+     * startReceivingSnapshotEvents(ObjectStore)}
+     */
     public void setNotifyingObjectStores(boolean b) {
         notifyingObjectStores = b;
     }

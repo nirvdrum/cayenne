@@ -1,0 +1,61 @@
+<document>
+<title>User Guide - Design</title>
+<toc name="toc-user-guide" chapter="4. Design"/>
+<body>
+    <section name="4. Design">
+        <subsection name="4.8 Understanding Caching">
+            <p>As of version 1.1, Cayenne implements a two-tier caching of persistent data.
+            Lower level of caching, represented by SnapshotCache class, stores row snapshots as 
+            Map objects. Higher level - ObjectStore - caches DataObjects. The most common cache
+            configuration is to have a single SnapshotCache per DataDomain, and have a single 
+            ObjectStore per each DataContext.
+            </p>
+            
+            <subsection name="4.8.1 Synchronizing ObjectStores using SnapshotEvents.">
+            <p>SnapshotCache posts SnapshotEvents for any changes made to the cache. User classes 
+            can take advantage of these events by implementing SnapshotEventListener
+            interface and registering with EventManager:</p>
+<source>
+SnapshotEventListener customListener;
+SnapshotCache cache;
+...
+EventManager.getDefaultManager().addListener(
+                customListener,
+                "snapshotsChanged",
+                SnapshotEvent.class,
+                cache.getSnapshotEventSubject(),
+                cache);
+</source>
+
+			<p>SnapshotCache can be configured to add all child ObjectStores (that happen
+			to implement SnapshotEventListener interface) to the list of SnapshotEvent listeners.
+			This would allow ObjectStores to update their state on any changes made to the 
+			database originating from peer ObjectStores. To enable these notifications, 
+			<code>notifyingObjectStores</code> property must be set to <code>true</code>:
+			</p>
+			
+<source>
+SnapshotCache cache;
+...
+// enable notifications for all added ObjectStores
+cache.setNotifyingObjectStores(true);
+</source>
+			<p>Note that this property is <code>false</code> by default, since sending SnapshotEvents
+			may not be a desired or useful behavior in many cases. For example in web applications
+			ObjectStores associated with session DataContexts may be serialized after the response
+			processing and deserialized again on subsequent requests.
+			This means that any events posted between requests will not reach their destination
+			ObjectStore. So an approach using explicit synchronization should be used. It is described below.
+			</p>
+			
+			<p>On the other hand in client-server applications such feature can be ideal for 
+			synchronizing multiple ObjectStores in real time.</p>
+            </subsection>
+            
+            <subsection name="4.8.2 Explicitly Synchronizing ObjectStores by Calling 'synchronizeWithCache()'.">
+            
+            </subsection>
+        </subsection>
+    </section>
+</body>
+</document>

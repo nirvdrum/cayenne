@@ -53,6 +53,7 @@
     		<item name="4.5 Cayenne DataSource"  href="/userguide/design/datasrc.html"/>
     		<item name="4.6 Cross-Database Issues"  href="/userguide/design/crossdb.html"/>
     		<item name="4.7 Primary Key Generation"  href="/userguide/design/autopk.html"/>
+    		<item name="4.8 Understanding Caching"  href="/userguide/design/caching.html"/>
     	</item>
     	
     	<item name="5. Generating Classes with Ant"  href="/userguide/javagen.html"/>
