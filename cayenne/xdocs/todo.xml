@@ -36,67 +36,8 @@
  
         <!-- Tasks section -->
         <section name="Tasks">
-            <subsection name="Top Priority">
-                <p><strong>Cayenne Modeler GUI.</strong> Currently in progress.</p>
-                <p><strong>Stored Procedure Support</strong></p>
-                <p><strong>Test with Oracle.</strong> Make sure test cases pass</p>
-                <p><strong>Test with PostgreSQL.</strong> Make sure test cases pass.</p>
-                <p><strong>Add "revert" function to DataContext</strong></p>
-                <p><strong>Test numeric types handling</strong></p>
-            </subsection>
-
-            <subsection name="Medium Priority">
-                <p><strong>Allow SelectQuery to hold arbitrary attributes beyond 
-                ObjEntity attributes set.</strong> Right now only SqlSelectQuery has 
-                this feature, must add it to SelectQuery as well.</p>
-                
-                <p><strong>Add prefetching support to queries.</strong></p>
-                
-                <p><strong>Performance testing/optimization.</strong></p>
-                
-                <p><strong>Blob/Clob support</strong></p>
-                
-                <p><strong>Mapping of query qualifier parameters to DbAttributes (or maybe database 
-                types).</strong></p>
-
-                <p><strong>SQL schemas support in test cases.</strong></p>
-            </subsection>
-
-            <subsection name="Lower Priority">
-           <p><strong>Test with other database engines</strong> Current implementation should support
-           Oracle, Sybase, MySQL and PostgreSQL. We need to write database adapters for other engines as well
-            </p>
-            
-            <p><strong>Application server integration.</strong> Cayenne has basic JNDI support. 
-            We are running with Jakarta-Tomcat container. Research on how to use Cayenne with other containers
-            like WebLogic, WebSphere, etc. still needs to be done.
-            </p>
-
-            <p><strong>"To Many" relationship Ordering.</strong> Users should be able to specify 
-            "to many" relationship ordering in the map. 
-            In current release objects will be returned in a database "natural" order.
-            </p>
-
-            <p><strong>Flattened relationships.</strong> Though current API "supports" mapping 
-            of ObjRelationship across multiple DbRelationships, it doesn't really work. 
-            Real support still needs to be built in Cayenne.
-            </p>
-
-            <p><strong>Selecting attributes for optimistic locking.</strong> 
-            DataMap should support arbitrary attributes in "optimistic" locking. 
-            Now only primary key attributes are used.</p>
-            
-            <p><strong>Subquery support</strong></p>
-            
-            <p><strong>Union query support</strong></p>
-            
-            <p><strong>Aggregate functions and "group by"/"having" support</strong></p>
-            
-            <p><strong>Cascading delete rules</strong></p>
-            </subsection>
-        
-        
-       
+            <p>For the latest list of tasks visit our 
+            <a href="http://sourceforge.net/pm/?group_id=48132">task tracker</a>.</p>       
         </section>
     </body>
 </document>
