@@ -55,16 +55,14 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.util.*;
 import java.util.*;
-import java.io.*;
-import java.net.*;
-import java.util.logging.*;
-import java.sql.*;
-import junit.framework.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import junit.framework.Assert;
+
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
 /** Helper class to process test queries results. */
 public class TestOperationObserver extends DefaultOperationObserver {

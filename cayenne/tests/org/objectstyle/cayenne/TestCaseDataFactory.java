@@ -55,11 +55,8 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import org.objectstyle.art.*;
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 
 public class TestCaseDataFactory {
     

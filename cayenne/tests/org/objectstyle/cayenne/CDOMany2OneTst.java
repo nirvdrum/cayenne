@@ -55,14 +55,9 @@ package org.objectstyle.cayenne;
  *
  */ 
 
+import java.util.logging.Logger;
+
 import org.objectstyle.art.*;
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
 
 public class CDOMany2OneTst extends CayenneDOTestBase {
     static Logger logObj = Logger.getLogger(CDOMany2OneTst.class.getName());

@@ -55,17 +55,9 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.gui.*;
-import org.objectstyle.cayenne.conn.*;
-import org.objectstyle.cayenne.map.*;
-import java.util.*;
-import java.util.regex.*;
-import java.io.*;
-import java.net.*;
-import java.util.logging.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.util.logging.Logger;
 
 
 /** Cleanup database tables to run tests. Delete all data */

@@ -55,14 +55,9 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.access.DataContext;
 
 public class CayenneDataObjectTst extends TestCase {
     protected DataContext ctxt;

@@ -55,17 +55,19 @@ package org.objectstyle.cayenne;
  *
  */
 
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.gui.*;
-import org.objectstyle.testui.*;
-import org.objectstyle.cayenne.conn.*;
+import java.io.InputStream;
+import java.util.logging.Logger;
+
+import javax.sql.DataSource;
+
+import org.objectstyle.TestConstants;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.conf.*;
-import java.io.*;
-import java.net.*;
-import java.util.logging.*;
-import javax.sql.*;
+import org.objectstyle.cayenne.conn.PoolManager;
+import org.objectstyle.cayenne.gui.InteractiveLogin;
+import org.objectstyle.testui.TestLogin;
+import org.objectstyle.util.ResourceLocator;
 
 
 /** Creates database connection info to run tests.

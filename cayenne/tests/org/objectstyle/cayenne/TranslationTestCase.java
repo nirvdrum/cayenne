@@ -55,10 +55,10 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import junit.framework.Assert;
 
 
 public class TranslationTestCase {

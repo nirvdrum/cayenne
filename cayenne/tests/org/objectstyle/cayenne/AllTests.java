@@ -55,8 +55,7 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
+import junit.framework.TestSuite;
 
 /**
  */

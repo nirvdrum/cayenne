@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.map;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.xml.sax.*;
@@ -96,14 +97,13 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 
     /** Loads the data map from the input source (usually file). */
     public synchronized DataMap loadDataMap(InputSource src)
-    throws DataMapException {
+        throws DataMapException {
         try {
             String system_id = src.getSystemId();
-            logObj.fine("MapLoaderImpl::loadDataMap(), system id is "
-                        + system_id);
             if (null == system_id)
                 system_id = "Untitled";
-            String mapName = system_id.substring(system_id.lastIndexOf('/')+1);
+
+            String mapName = system_id.substring(system_id.lastIndexOf('/') + 1);
             dataMap = new DataMap(mapName);
             dbRelationshipMap = new HashMap();
             XMLReader parser = Util.createXmlReader();
@@ -112,40 +112,35 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             parser.setErrorHandler(this);
 
             parser.parse(src);
-        } catch (SAXException e) {
-            Exception exc = e.getException();
-            if (null != exc) {
-                System.out.println(exc.getMessage());
-                exc.printStackTrace();
+        }
+        catch (SAXException e) {
+            logObj.log(Level.INFO, "SAX Exception.", e);
+
+            Exception wrappedEx = e.getException();
+            if (e.getCause() != null) {
+                logObj.log(Level.INFO, "SAX Exception cause.", e.getCause());
             }
 
-            System.out.println(e.getMessage());
-            e.printStackTrace();
             dataMap = null;
-            throw new DataMapException("Wrong DataMap format: "
-                                       +e.getMessage());
+            throw new DataMapException("Wrong DataMap format: " + e.getMessage());
         }
         catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
+            logObj.log(Level.INFO, "Exception.", e);
             dataMap = null;
-            throw new DataMapException("DataMap could not be loaded: "
-                                       +e.getMessage());
+            throw new DataMapException("DataMap could not be loaded: " + e.getMessage());
         }
         return dataMap;
     }
 
     /** Load multiple DataMaps at once. */
-    public DataMap[] loadDataMaps(InputSource[] src)
-    throws DataMapException {
+    public DataMap[] loadDataMaps(InputSource[] src) throws DataMapException {
         int len = src.length;
         DataMap[] maps = new DataMap[len];
-        for(int i = 0; i < src.length; i++) {
+        for (int i = 0; i < src.length; i++) {
             maps[i] = loadDataMap(src[i]);
         }
         return maps;
     }
-
 
     /** Loads the array of data maps per array of map file URI's.
      * This is a convenience method that would resolve string URI's
@@ -154,16 +149,16 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
      * @throws DataMapException if source URI's do not resolve to valid map files
      * @throws NullPointerException if <code>src</code> parameter is null.
      */
-    public DataMap[] loadDataMaps(String[] src)  throws DataMapException {
+    public DataMap[] loadDataMaps(String[] src) throws DataMapException {
         int len = src.length;
         DataMap[] dataMaps = new DataMap[len];
-        for(int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++) {
 
             InputStream in = ResourceLocator.findResourceInClasspath(src[i]);
-            if(in == null)
+            if (in == null)
                 in = ResourceLocator.findResourceInFileSystem(src[i]);
 
-            if(in == null)
+            if (in == null)
                 throw new DataMapException("Can't find data map " + src[i]);
 
             try {
@@ -172,76 +167,98 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             finally {
                 try {
                     in.close();
-                } catch(IOException ioex) {}
+                }
+                catch (IOException ioex) {}
             }
         }
         return dataMaps;
     }
 
-
-    public void startElement(String namespace_uri, String local_name
-                             , String q_name, Attributes atts) throws SAXException {
+    public void startElement(
+        String namespace_uri,
+        String local_name,
+        String q_name,
+        Attributes atts)
+        throws SAXException {
         if (local_name.equals(DATA_MAP_TAG)) {}
         else if (local_name.equals(DB_ENTITY_TAG)) {
             processStartDbEntity(atts);
-        } else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
+        }
+        else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
             processStartDbAttribute(atts);
-        } else if (local_name.equals(OBJ_ENTITY_TAG)) {
+        }
+        else if (local_name.equals(OBJ_ENTITY_TAG)) {
             processStartObjEntity(atts);
-        } else if (local_name.equals(OBJ_ATTRIBUTE_TAG)) {
+        }
+        else if (local_name.equals(OBJ_ATTRIBUTE_TAG)) {
             processStartObjAttribute(atts);
-        } else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
+        }
+        else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
             processStartDbRelationship(atts);
-        } else if (local_name.equals(DB_ATTRIBUTE_PAIR_TAG)) {
+        }
+        else if (local_name.equals(DB_ATTRIBUTE_PAIR_TAG)) {
             processStartDbAttributePair(atts);
-        } else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
+        }
+        else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
             processStartObjRelationship(atts);
-        } else if (local_name.equals(DB_RELATIONSHIP_REF_TAG)) {
+        }
+        else if (local_name.equals(DB_RELATIONSHIP_REF_TAG)) {
             processStartDbRelationshipRef(atts);
         }
     }
 
     public void endElement(String namespaceURI, String local_name, String qName)
-    throws SAXException {
+        throws SAXException {
         if (local_name.equals(DATA_MAP_TAG)) {}
         else if (local_name.equals(DB_ENTITY_TAG)) {
             processEndDbEntity();
-        } else if (local_name.equals(OBJ_ENTITY_TAG)) {
+        }
+        else if (local_name.equals(OBJ_ENTITY_TAG)) {
             processEndObjEntity();
-        } else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
+        }
+        else if (local_name.equals(DB_RELATIONSHIP_TAG)) {
             processEndDbRelationship();
-        } else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
+        }
+        else if (local_name.equals(OBJ_RELATIONSHIP_TAG)) {
             processEndObjRelationship();
         }
     }
 
-
     public void warning(SAXParseException e) throws SAXException {
-        System.out.println("**Parsing warning**\n" +
-                           "Line:"+ e.getLineNumber() + "\nMessage:" + e.getMessage());
+        System.out.println(
+            "**Parsing warning**\n"
+                + "Line:"
+                + e.getLineNumber()
+                + "\nMessage:"
+                + e.getMessage());
         throw new SAXException("Warning!");
     }
-
 
     public void error(SAXParseException e) throws SAXException {
-        System.out.println("**Parsing error**\n" +
-                           "Line:"+ e.getLineNumber() + "\nMessage:" + e.getMessage());
+        System.out.println(
+            "**Parsing error**\n"
+                + "Line:"
+                + e.getLineNumber()
+                + "\nMessage:"
+                + e.getMessage());
         throw new SAXException("Warning!");
     }
-
 
     public void fatalError(SAXParseException e) throws SAXException {
-        System.out.println("**Parsing fatal error**\n" +
-                           "Line:"+ e.getLineNumber() + "\nMessage:" + e.getMessage());
+        System.out.println(
+            "**Parsing fatal error**\n"
+                + "Line:"
+                + e.getLineNumber()
+                + "\nMessage:"
+                + e.getMessage());
         throw new SAXException("Warning!");
     }
-
 
     /* * * STORE TO XML PART * * */
 
     /** Archives provided <code>map</code> to XML and stores it to <code>out</code> PrintStream. */
     public synchronized void storeDataMap(PrintWriter out, DataMap map)
-    throws DataMapException {
+        throws DataMapException {
         objRelationships = new ArrayList();
         dbRelationshipRefs = new ArrayList();
         dbRelationships = new ArrayList();
@@ -261,8 +278,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         Collection db_entities = map.getDbEntityMap().values();
         Iterator iter = db_entities.iterator();
         while (iter.hasNext()) {
-            DbEntity temp = (DbEntity)iter.next();
-            out.print("\t<db-entity name=\"" + temp.getName() +'\"');
+            DbEntity temp = (DbEntity) iter.next();
+            out.print("\t<db-entity name=\"" + temp.getName() + '\"');
             if (null != temp.getSchema()) {
                 out.print(" schema=\"");
                 out.print(temp.getSchema());
@@ -278,14 +295,14 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             storeDbAttribute(out, temp);
             out.println("\t</db-entity>");
             dbRelationships.addAll(temp.getRelationshipList());
-        }// End while()
+        } // End while()
     }
 
     private void storeDbAttribute(PrintWriter out, DbEntity db_entity) {
         Collection db_attributes = db_entity.getAttributeMap().values();
         Iterator iter = db_attributes.iterator();
         while (iter.hasNext()) {
-            DbAttribute temp = (DbAttribute)iter.next();
+            DbAttribute temp = (DbAttribute) iter.next();
             out.print("\t\t<db-attribute name=\"");
             out.print(temp.getName());
             out.print("\" type=\"");
@@ -319,7 +336,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         Collection obj_entities = map.getObjEntityMap().values();
         Iterator iter = obj_entities.iterator();
         while (iter.hasNext()) {
-            ObjEntity temp = (ObjEntity)iter.next();
+            ObjEntity temp = (ObjEntity) iter.next();
             out.print("\t<obj-entity name=\"");
             out.print(temp.getName());
             out.print("\" className=\"");
@@ -341,8 +358,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 
             ArrayList dbRels = new ArrayList();
             Iterator relIt = objRels.iterator();
-            while(relIt.hasNext()) {
-                ObjRelationship objRel = (ObjRelationship)relIt.next();
+            while (relIt.hasNext()) {
+                ObjRelationship objRel = (ObjRelationship) relIt.next();
                 dbRelationshipRefs.addAll(objRel.getDbRelationshipList());
             }
         }
@@ -352,7 +369,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         Collection obj_attributes = obj_entity.getAttributeMap().values();
         Iterator iter = obj_attributes.iterator();
         while (iter.hasNext()) {
-            ObjAttribute temp = (ObjAttribute)iter.next();
+            ObjAttribute temp = (ObjAttribute) iter.next();
             out.print("\t\t<obj-attribute name=\"");
             out.print(temp.getName());
             out.print("\" type=\"");
@@ -369,10 +386,9 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         }
     }
 
-
     private void storeObjRelationships(PrintWriter out) throws DataMapException {
         Iterator iter = objRelationships.iterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             ObjRelationship temp = (ObjRelationship) iter.next();
             out.print("\t<obj-relationship name=\"" + temp.getName() + '\"');
             out.print(" source=\"" + temp.getSourceEntity().getName() + '\"');
@@ -381,20 +397,25 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             out.println('>');
             storeDbRelationshipRef(out, temp);
             out.println("\t</obj-relationship>");
-        }// End while()
+        } // End while()
     }
 
     private void storeDbRelationshipRef(PrintWriter out, ObjRelationship obj_rel)
-    throws DataMapException {
+        throws DataMapException {
         Iterator iter = obj_rel.getDbRelationshipList().iterator();
         while (iter.hasNext()) {
             DbRelationship rel = (DbRelationship) iter.next();
             if (!dbRelationships.contains(rel)) {
-                throw new DataMapException("Broken reference. Obj Relationship " +
-                                           obj_rel.getSourceEntity().getName() + "->" +
-                                           obj_rel.getTargetEntity().getName() + " uses DbRelationship " +
-                                           rel.getSourceEntity().getName()  + "->" +
-                                           rel.getTargetEntity().getName() + " which doesn't exist anymore.");
+                throw new DataMapException(
+                    "Broken reference. Obj Relationship "
+                        + obj_rel.getSourceEntity().getName()
+                        + "->"
+                        + obj_rel.getTargetEntity().getName()
+                        + " uses DbRelationship "
+                        + rel.getSourceEntity().getName()
+                        + "->"
+                        + rel.getTargetEntity().getName()
+                        + " which doesn't exist anymore.");
             }
 
             out.print("\t\t<");
@@ -406,12 +427,12 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             out.print("\" name=\"");
             out.print(rel.getName());
             out.println("\"/>");
-        }// End while()
+        } // End while()
     }
 
     private void storeDbRelationships(PrintWriter out) {
         Iterator iter = dbRelationships.iterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             DbRelationship temp = (DbRelationship) iter.next();
             out.print("\t<");
             out.print(DB_RELATIONSHIP_TAG);
@@ -430,7 +451,7 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             out.print("\t</");
             out.print(DB_RELATIONSHIP_TAG);
             out.println('>');
-        }// End while()
+        } // End while()
     }
 
     private void storeDbAttributePair(PrintWriter out, DbRelationship db_rel) {
@@ -442,12 +463,10 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             out.print(" source=\"");
             out.print(pair.getSource().getName());
             out.println("\" target=\"" + pair.getTarget().getName() + "\"/>");
-        }// End while()
+        } // End while()
     }
 
-
     /* * * LOAD FROM XML PART * * */
-
 
     private void processStartDbEntity(Attributes atts) {
         String name = atts.getValue("", "name");
@@ -464,9 +483,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         String name = atts.getValue("", "name");
         String type = atts.getValue("", "type");
 
-        DbAttribute attrib = new DbAttribute(name
-                                             , TypesMapping.getSqlTypeByName(type)
-                                             , dbEntity);
+        DbAttribute attrib =
+            new DbAttribute(name, TypesMapping.getSqlTypeByName(type), dbEntity);
         dbEntity.addAttribute(attrib);
 
         String temp = atts.getValue("", "length");
@@ -476,10 +494,10 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         if (null != temp)
             attrib.setPrecision(Integer.parseInt(temp));
         temp = atts.getValue("", "isPrimaryKey");
-        if (null != temp && temp.equalsIgnoreCase(TRUE) )
+        if (null != temp && temp.equalsIgnoreCase(TRUE))
             attrib.setPrimaryKey(true);
         temp = atts.getValue("", "isMandatory");
-        if (null != temp && temp.equalsIgnoreCase(TRUE) )
+        if (null != temp && temp.equalsIgnoreCase(TRUE))
             attrib.setMandatory(true);
 
     }
@@ -492,9 +510,8 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             DbEntity db_temp = dataMap.getDbEntity(temp);
             objEntity.setDbEntity(db_temp);
         }
-    }// End processStartObjEntity
+    } // End processStartObjEntity
 
-    
     private void processStartObjAttribute(Attributes atts) {
         String name = atts.getValue("", "name");
         String type = atts.getValue("", "type");
@@ -506,40 +523,44 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         // Navigate to db attribute in the corresponding table
         if (null != temp) {
             if (null != objEntity.getDbEntity()) {
-                DbAttribute db_temp = (DbAttribute)objEntity.getDbEntity().getAttribute(temp);
+                DbAttribute db_temp = (DbAttribute) objEntity.getDbEntity().getAttribute(temp);
                 attrib.setDbAttribute(db_temp);
             }
-        }// End if db attribute
+        } // End if db attribute
     } // End processStartObjAttribute
-
-
 
     private void processStartDbRelationship(Attributes atts) throws SAXException {
 
         String temp = atts.getValue("", "source");
         if (null == temp) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationship(),"
-                                   +" Unable to parse source. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationship(),"
+                    + " Unable to parse source. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
 
         DbEntity source = dataMap.getDbEntity(temp);
         if (null == source) {
-            System.out.println("MapLoaderImpl::processStartDbRelationship(),"
-                               +" Unable to find source " + temp);
+            System.out.println(
+                "MapLoaderImpl::processStartDbRelationship(),"
+                    + " Unable to find source "
+                    + temp);
             return;
         }
         temp = atts.getValue("", "target");
         if (null == temp) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationship(),"
-                                   +" Unable to parse target. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationship(),"
+                    + " Unable to parse target. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
 
         DbEntity target = dataMap.getDbEntity(temp);
         if (null == target) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationship(),"
-                                   +" Unable to find target " + temp);
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationship(),"
+                    + " Unable to find target "
+                    + temp);
         }
 
         temp = atts.getValue("", "toMany");
@@ -550,9 +571,10 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
 
         String name = atts.getValue("", "name");
         if (null == name) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationship(),"
-                                   +" Unable to parse name. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationship(),"
+                    + " Unable to parse name. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
 
         dbRelationship = new DbRelationship();
@@ -563,55 +585,64 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
         dbRelationship.setToDependentPK(toDependentPK);
         // Save the reference to this db relationship for later resolution
         // in the ObjRelationship
-        dbRelationshipMap.put(new SourceTarget(source.getName(), target.getName(), name)
-                              , dbRelationship);
+        dbRelationshipMap.put(
+            new SourceTarget(source.getName(), target.getName(), name),
+            dbRelationship);
 
         source.addRelationship(dbRelationship);
     }
 
-
-    private void processStartDbRelationshipRef(Attributes atts) throws SAXException {
+    private void processStartDbRelationshipRef(Attributes atts)
+        throws SAXException {
         String source = atts.getValue("", "source");
         if (null == source) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationshipRef(),"
-                                   +" Unable to parse source. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationshipRef(),"
+                    + " Unable to parse source. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
         String target = atts.getValue("", "target");
         if (null == target) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationshipRef(),"
-                                   +" Unable to parse target. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationshipRef(),"
+                    + " Unable to parse target. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
 
         String name = atts.getValue("", "name");
 
-
         SourceTarget key = new SourceTarget(source, target, name);
-        DbRelationship temp = (DbRelationship)dbRelationshipMap.get(key);
+        DbRelationship temp = (DbRelationship) dbRelationshipMap.get(key);
         if (null == temp) {
-            throw new SAXException("MapLoaderImpl::processStartDbRelationshipRef()"
-                                   +", Unresolved reference from " + source + " to " + target);
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbRelationshipRef()"
+                    + ", Unresolved reference from "
+                    + source
+                    + " to "
+                    + target);
         }
         objRelationship.addDbRelationship(temp);
     }
 
-
-    private void processStartDbAttributePair(Attributes atts)  throws SAXException {
+    private void processStartDbAttributePair(Attributes atts) throws SAXException {
         String source = atts.getValue("", "source");
         if (null == source) {
-            throw new SAXException("MapLoaderImpl::processStartDbAttributePair(),"
-                                   +" Unable to parse target. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbAttributePair(),"
+                    + " Unable to parse target. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
         String target = atts.getValue("", "target");
         if (null == target) {
-            throw new SAXException("MapLoaderImpl::processStartDbAttributePair(),"
-                                   +" Unable to parse source. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartDbAttributePair(),"
+                    + " Unable to parse source. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
-        DbAttribute db_source = (DbAttribute)dbRelationship.getSourceEntity().getAttribute(source);
-        DbAttribute db_target = (DbAttribute)dbRelationship.getTargetEntity().getAttribute(target);
+        DbAttribute db_source =
+            (DbAttribute) dbRelationship.getSourceEntity().getAttribute(source);
+        DbAttribute db_target =
+            (DbAttribute) dbRelationship.getTargetEntity().getAttribute(target);
 
         DbAttributePair pair = new DbAttributePair(db_source, db_target);
         dbRelationship.addJoin(pair);
@@ -620,25 +651,31 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
     private void processStartObjRelationship(Attributes atts) throws SAXException {
         String temp = atts.getValue("", "source");
         if (null == temp) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
-                                   +" Unable to parse source. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartObjRelationship(),"
+                    + " Unable to parse source. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
         ObjEntity source = dataMap.getObjEntity(temp);
         if (null == source) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
-                                   +" Unable to find source " + temp);
+            throw new SAXException(
+                "MapLoaderImpl::processStartObjRelationship(),"
+                    + " Unable to find source "
+                    + temp);
         }
         temp = atts.getValue("", "target");
         if (null == temp) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
-                                   +" Unable to parse target. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartObjRelationship(),"
+                    + " Unable to parse target. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
         ObjEntity target = dataMap.getObjEntity(temp);
         if (null == target) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
-                                   +" Unable to find target " + temp);
+            throw new SAXException(
+                "MapLoaderImpl::processStartObjRelationship(),"
+                    + " Unable to find target "
+                    + temp);
         }
         temp = atts.getValue("", "toMany");
         boolean to_many = false;
@@ -646,21 +683,20 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
             to_many = true;
         String name = atts.getValue("", "name");
         if (null == name) {
-            throw new SAXException("MapLoaderImpl::processStartObjRelationship(),"
-                                   +" Unable to parse target. Attributes:\n"
-                                   + printAttributes(atts).toString());
+            throw new SAXException(
+                "MapLoaderImpl::processStartObjRelationship(),"
+                    + " Unable to parse target. Attributes:\n"
+                    + printAttributes(atts).toString());
         }
         objRelationship = new ObjRelationship(source, target, to_many);
         objRelationship.setName(name);
         source.addRelationship(objRelationship);
     }
 
-
     private void processEndDbEntity() {
         dataMap.addDbEntity(dbEntity);
         dbEntity = null;
     }
-
 
     private void processEndObjEntity() {
         dataMap.addObjEntity(objEntity);
@@ -688,7 +724,6 @@ public class MapLoaderImpl extends DefaultHandler implements MapLoader {
     }
 }
 
-
 /** Used for creating the key in DbRelationship map */
 class SourceTarget {
     public String source;
@@ -698,23 +733,23 @@ class SourceTarget {
     public SourceTarget(String temp1, String temp2, String temp3) {
         source = temp1;
         target = temp2;
-        name   = temp3;
+        name = temp3;
     }
 
     public int hashCode() {
-        int code = + source.hashCode() * 100000 + target.hashCode() * 10000;
+        int code = +source.hashCode() * 100000 + target.hashCode() * 10000;
         if (null != name)
             code += name.hashCode();
         return code;
     }
 
     public boolean equals(Object obj) {
-        if (! (obj instanceof SourceTarget) )
+        if (!(obj instanceof SourceTarget))
             return false;
-        SourceTarget other = (SourceTarget)obj;
+        SourceTarget other = (SourceTarget) obj;
         if (source.equals(other.source)
-                && target.equals(other.target)
-                && name.equals(other.name)) {
+            && target.equals(other.target)
+            && name.equals(other.name)) {
             return true;
         }
         return false;

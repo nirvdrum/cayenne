@@ -55,14 +55,17 @@ package org.objectstyle.cayenne;
  *
  */ 
 
+import java.util.List;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
 import org.objectstyle.art.*;
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 public class CayenneDataObjectInCtxtTst extends TestCase {
     static Logger logObj = Logger.getLogger(CayenneDataObjectInCtxtTst.class.getName());

@@ -55,16 +55,12 @@ package org.objectstyle.cayenne;
  *
  */ 
 
-import junit.framework.*;
-import java.util.logging.*;
-import java.util.*;
-import java.io.*;
-import org.objectstyle.util.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.map.*;
-import java.sql.*;
-import org.objectstyle.art.*;
+import java.util.HashMap;
+import java.util.logging.Logger;
+
+import junit.framework.TestCase;
+
+import org.objectstyle.cayenne.map.DbAttribute;
 
 
 
