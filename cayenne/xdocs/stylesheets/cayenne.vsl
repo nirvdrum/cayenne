@@ -237,7 +237,7 @@
                     $section.getAttributeValue("name")
 #if( $section.getAttributeValue("toc") )
                 #set ($toc = "table of contents...")
-                <td class="small-black" align="right">#projectanchor($toc $section.getAttributeValue("toc"))</td>
+                <td class="small-black" align="right" valign="bottom">#projectanchor($toc $section.getAttributeValue("toc"))</td>
 #end
                 </td></tr></table>
                 </td>
