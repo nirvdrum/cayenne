@@ -96,6 +96,7 @@ import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
+import org.objectstyle.cayenne.query.PrefetchSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
@@ -113,6 +114,16 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class DataContext implements QueryEngine, Serializable {
     private static Logger logObj = Logger.getLogger(DataContext.class);
 
+    // noop delegate 
+    private static final DataContextDelegate defaultDelegate =
+        new DataContextDelegate() {
+        public GenericSelectQuery willPerformSelect(
+            DataContext context,
+            GenericSelectQuery query) {
+            return query;
+        }
+    };
+
     // DataContext events
     public static final EventSubject WILL_COMMIT =
         EventSubject.getSubject(DataContext.class, "DataContextWillCommit");
@@ -126,6 +137,9 @@ public class DataContext implements QueryEngine, Serializable {
 
     // enable/disable event handling for individual instances
     private boolean transactionEventsEnabled;
+
+    // Set of DataContextDelegates to be notified.
+    private DataContextDelegate delegate;
 
     private List flattenedInserts = new ArrayList();
     private List flattenedDeletes = new ArrayList();
@@ -198,6 +212,28 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public void setParent(QueryEngine parent) {
         this.parent = parent;
+    }
+
+    /**
+     * Sets a DataContextDelegate for this context.
+     */
+    public void setDelegate(DataContextDelegate delegate) {
+        this.delegate = delegate;
+    }
+
+    /**
+     * Returns a delegate currently associated with this DataContext.
+     */
+    public DataContextDelegate getDelegate() {
+        return delegate;
+    }
+
+    /**
+     * Returns delegate instance if it is initialized, or a shared
+     * noop implementation if not. 
+     */
+    private DataContextDelegate nonNullDelegate() {
+        return (delegate != null) ? delegate : DataContext.defaultDelegate;
     }
 
     /**
@@ -299,7 +335,7 @@ public class DataContext implements QueryEngine, Serializable {
      */
     public List objectsFromDataRows(ObjEntity entity, List dataRows, boolean refresh) {
         // TODO: (Andrus) maybe move this to SnapshotManager?
-        
+
         if (dataRows == null && dataRows.size() == 0) {
             return new ArrayList(1);
         }
@@ -357,7 +393,7 @@ public class DataContext implements QueryEngine, Serializable {
             // at the moment...
             else {
                 if (object.getPersistenceState() == PersistenceState.HOLLOW) {
-                    SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);                  
+                    SnapshotManager.mergeObjectWithSnapshot(entity, object, dataRow);
                 }
             }
 
@@ -391,22 +427,26 @@ public class DataContext implements QueryEngine, Serializable {
      * objectsFromDataRows(Class, List, boolean)}, that allows to easily create an object
      * from a map of values.</p>
      */
-    public DataObject objectFromDataRow(Class objectClass, Map dataRow, boolean refresh) {
-        List list = objectsFromDataRows(objectClass, Collections.singletonList(dataRow), refresh);
+    public DataObject objectFromDataRow(
+        Class objectClass,
+        Map dataRow,
+        boolean refresh) {
+        List list =
+            objectsFromDataRows(objectClass, Collections.singletonList(dataRow), refresh);
         return (DataObject) list.get(0);
     }
-    
-	/**
+
+    /**
       * @deprecated Since 1.1 use {@link 
       * #objectsFromDataRows(Class,java.util.List,boolean)
       * objectFromDataRow(Class, List, boolean)}, using <code>false</code>
       * boolean parameter.</p>
-	 */
-	public DataObject objectFromDataRow(String entityName, Map dataRow) {
-		ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
-		List list = objectsFromDataRows(ent, Collections.singletonList(dataRow), false);
-		return (DataObject) list.get(0);
-	}
+     */
+    public DataObject objectFromDataRow(String entityName, Map dataRow) {
+        ObjEntity ent = this.getEntityResolver().lookupObjEntity(entityName);
+        List list = objectsFromDataRows(ent, Collections.singletonList(dataRow), false);
+        return (DataObject) list.get(0);
+    }
 
     /**
       * @deprecated Since 1.1 use {@link 
@@ -862,38 +902,63 @@ public class DataContext implements QueryEngine, Serializable {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
 
-        // find queries that require prefetching
-        List prefetch = new ArrayList();
+        DataContextDelegate localDelegate = nonNullDelegate();
+        List finalQueries = new ArrayList(queries.size());
+        boolean hasPrefetches = false;
 
-        // if we expect iterated queries, ignore prefetching
-        if (!resultConsumer.isIteratedResult()) {
-            Iterator it = queries.iterator();
+        Iterator it = queries.iterator();
+        while (it.hasNext()) {
+            Object query = it.next();
+
+            if (query instanceof GenericSelectQuery) {
+                GenericSelectQuery genericSelect = (GenericSelectQuery) query;
+
+                // filter via a delegate
+                GenericSelectQuery filteredSelect =
+                    localDelegate.willPerformSelect(this, genericSelect);
+
+                // suppressed by the delegate
+                if (filteredSelect != null) {
+                    finalQueries.add(filteredSelect);
+
+                    // check if prefetching is required
+                    if (!hasPrefetches && (filteredSelect instanceof SelectQuery)) {
+                        hasPrefetches =
+                            !((SelectQuery) filteredSelect).getPrefetches().isEmpty();
+                    }
+                }
+            }
+            else {
+				finalQueries.add(query);
+            }
+        }
+
+        if (!resultConsumer.isIteratedResult() && hasPrefetches) {
+            // do a second pass to add prefetches (prefetches must go after all main queries)
+            it = queries.iterator();
             while (it.hasNext()) {
-                Object q = it.next();
-                if (q instanceof SelectQuery) {
-                    SelectQuery sel = (SelectQuery) q;
-                    Collection prefetchRels = sel.getPrefetches();
-                    if (prefetchRels.size() > 0) {
-                        Iterator prIt = prefetchRels.iterator();
-                        while (prIt.hasNext()) {
-                            prefetch.add(
-                                QueryUtils.selectPrefetchPath(
-                                    this,
-                                    sel,
-                                    (String) prIt.next()));
+                SelectQuery select = (SelectQuery) it.next();
+                Collection prefetchRels = select.getPrefetches();
+                if (prefetchRels.size() > 0) {
+                    Iterator prIt = prefetchRels.iterator();
+                    while (prIt.hasNext()) {
+                        PrefetchSelectQuery prefetchQuery =
+                            QueryUtils.selectPrefetchPath(
+                                this,
+                                select,
+                                (String) prIt.next());
+
+                        // filter via a delegate
+                        GenericSelectQuery filteredPrefetch =
+                            localDelegate.willPerformSelect(this, prefetchQuery);
+
+                        // if not suppressed by delegate
+                        if (filteredPrefetch != null) {
+                            finalQueries.add(filteredPrefetch);
                         }
                     }
                 }
             }
-        }
-
-        List finalQueries = null;
-        if (prefetch.size() == 0) {
-            finalQueries = queries;
-        }
-        else {
-            prefetch.addAll(0, queries);
-            finalQueries = prefetch;
         }
 
         this.getParent().performQueries(finalQueries, resultConsumer);
@@ -1027,14 +1092,12 @@ public class DataContext implements QueryEngine, Serializable {
             return id;
             //If the id is not a temp, then it must be permanent.  Return it and do nothing else
         }
-        
-    
+
         if (id.getReplacementId() != null) {
             return id.getReplacementId();
         }
-        
-        ObjEntity objEntity =
-            this.getEntityResolver().lookupObjEntity(id.getObjClass());
+
+        ObjEntity objEntity = this.getEntityResolver().lookupObjEntity(id.getObjClass());
         DbEntity dbEntity = objEntity.getDbEntity();
         DataNode aNode = this.dataNodeForObjEntity(objEntity);
 
@@ -1080,7 +1143,7 @@ public class DataContext implements QueryEngine, Serializable {
         ObjectId permId = new ObjectId(anObject.getClass(), idMap);
 
         // note that object registration did not change (new id is not attached to context, only to temp. oid)
-		id.setReplacementId(permId);
+        id.setReplacementId(permId);
         return permId;
     }
 
