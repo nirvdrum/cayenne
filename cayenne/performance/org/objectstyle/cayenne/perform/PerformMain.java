@@ -105,8 +105,14 @@ public class PerformMain implements TestConstants {
 			
 		suite.addTestPair(
 		    "Select Small Lists",
-		    "Select one records over and over again, JDBC Prep. Statement. vs. JDBC Statement",
+		    "Select one record over and over again, JDBC Prep. Statement. vs. JDBC Statement",
 			"org.objectstyle.cayenne.perform.test.PreparedSmallSelectTest",
+			"org.objectstyle.cayenne.perform.test.SmallSelectTest");
+			
+		suite.addTestPair(
+		    "Select Small Lists",
+		    "Select one record over and over again, Cayenne vs. JDBC Statement",
+			"org.objectstyle.cayenne.perform.test.CayenneSmallSelectTest",
 			"org.objectstyle.cayenne.perform.test.SmallSelectTest");
 
 		return suite;
