@@ -63,285 +63,300 @@ import java.util.*;
  * 
  * @author Andrei Adamchik
  */
-public class ExpressionFactory {    
-    private static Class[] typeLookup;
+public class ExpressionFactory {
+	private static Class[] typeLookup;
 
-    static {
-        // make sure all types are small integers, then we can use
-        // them as indexes in lookup array
-        int[] allTypes =
-            new int[] {
-                Expression.AND,
-                Expression.OR,
-                Expression.NOT,
-                Expression.EQUAL_TO,
-                Expression.NOT_EQUAL_TO,
-                Expression.LESS_THAN,
-                Expression.GREATER_THAN,
-                Expression.LESS_THAN_EQUAL_TO,
-                Expression.GREATER_THAN_EQUAL_TO,
-                Expression.BETWEEN,
-                Expression.IN,
-                Expression.LIKE,
-                Expression.LIKE_IGNORE_CASE,
-                Expression.EXISTS,
-                Expression.ADD,
-                Expression.SUBTRACT,
-                Expression.MULTIPLY,
-                Expression.DIVIDE,
-                Expression.NEGATIVE,
-                Expression.POSITIVE,
-                Expression.ALL,
-                Expression.SOME,
-                Expression.ANY,
-                Expression.RAW_SQL,
-                Expression.OBJ_PATH,
-                Expression.DB_PATH,
-                Expression.LIST,
-                Expression.SUBQUERY,
-                Expression.COUNT,
-                Expression.SUM,
-                Expression.AVG,
-                Expression.MIN,
-                Expression.MAX };
+	static {
+		// make sure all types are small integers, then we can use
+		// them as indexes in lookup array
+		int[] allTypes =
+			new int[] {
+				Expression.AND,
+				Expression.OR,
+				Expression.NOT,
+				Expression.EQUAL_TO,
+				Expression.NOT_EQUAL_TO,
+				Expression.LESS_THAN,
+				Expression.GREATER_THAN,
+				Expression.LESS_THAN_EQUAL_TO,
+				Expression.GREATER_THAN_EQUAL_TO,
+				Expression.BETWEEN,
+				Expression.IN,
+				Expression.LIKE,
+				Expression.LIKE_IGNORE_CASE,
+				Expression.EXISTS,
+				Expression.ADD,
+				Expression.SUBTRACT,
+				Expression.MULTIPLY,
+				Expression.DIVIDE,
+				Expression.NEGATIVE,
+				Expression.POSITIVE,
+				Expression.ALL,
+				Expression.SOME,
+				Expression.ANY,
+				Expression.RAW_SQL,
+				Expression.OBJ_PATH,
+				Expression.DB_PATH,
+				Expression.LIST,
+				Expression.SUBQUERY,
+				Expression.COUNT,
+				Expression.SUM,
+				Expression.AVG,
+				Expression.MIN,
+				Expression.MAX };
 
-        int max = 0;
-        int min = 0;
-        int allLen = allTypes.length;
-        for (int i = 0; i < allLen; i++) {
-            if (allTypes[i] > max)
-                max = allTypes[i];
-            else if (allTypes[i] < min)
-                min = allTypes[i];
-        }
+		int max = 0;
+		int min = 0;
+		int allLen = allTypes.length;
+		for (int i = 0; i < allLen; i++) {
+			if (allTypes[i] > max)
+				max = allTypes[i];
+			else if (allTypes[i] < min)
+				min = allTypes[i];
+		}
 
-        // sanity check....
-        if (max > 500)
-            throw new RuntimeException("Types values are too big: " + max);
-        if (min < 0)
-            throw new RuntimeException("Types values are too small: " + min);
+		// sanity check....
+		if (max > 500)
+			throw new RuntimeException("Types values are too big: " + max);
+		if (min < 0)
+			throw new RuntimeException("Types values are too small: " + min);
 
-        // now we know that if types are used as indexes, 
-        // they will fit in array "max + 1" long (though gaps are possible)
+		// now we know that if types are used as indexes, 
+		// they will fit in array "max + 1" long (though gaps are possible)
 
-        typeLookup = new Class[max + 1];
+		typeLookup = new Class[max + 1];
 
-        // ternary types
-        typeLookup[Expression.BETWEEN] = TernaryExpression.class;
+		// ternary types
+		typeLookup[Expression.BETWEEN] = TernaryExpression.class;
 
-        // binary types
-        typeLookup[Expression.AND] = BinaryExpression.class;
-        typeLookup[Expression.OR] = BinaryExpression.class;
-        typeLookup[Expression.EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.NOT_EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.LESS_THAN] = BinaryExpression.class;
-        typeLookup[Expression.GREATER_THAN] = BinaryExpression.class;
-        typeLookup[Expression.LESS_THAN_EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.GREATER_THAN_EQUAL_TO] = BinaryExpression.class;
-        typeLookup[Expression.IN] = BinaryExpression.class;
-        typeLookup[Expression.LIKE] = BinaryExpression.class;
-        typeLookup[Expression.LIKE_IGNORE_CASE] = BinaryExpression.class;
-        typeLookup[Expression.ADD] = BinaryExpression.class;
-        typeLookup[Expression.SUBTRACT] = BinaryExpression.class;
-        typeLookup[Expression.MULTIPLY] = BinaryExpression.class;
-        typeLookup[Expression.DIVIDE] = BinaryExpression.class;
+		// binary types
+		typeLookup[Expression.AND] = BinaryExpression.class;
+		typeLookup[Expression.OR] = BinaryExpression.class;
+		typeLookup[Expression.EQUAL_TO] = BinaryExpression.class;
+		typeLookup[Expression.NOT_EQUAL_TO] = BinaryExpression.class;
+		typeLookup[Expression.LESS_THAN] = BinaryExpression.class;
+		typeLookup[Expression.GREATER_THAN] = BinaryExpression.class;
+		typeLookup[Expression.LESS_THAN_EQUAL_TO] = BinaryExpression.class;
+		typeLookup[Expression.GREATER_THAN_EQUAL_TO] = BinaryExpression.class;
+		typeLookup[Expression.IN] = BinaryExpression.class;
+		typeLookup[Expression.LIKE] = BinaryExpression.class;
+		typeLookup[Expression.LIKE_IGNORE_CASE] = BinaryExpression.class;
+		typeLookup[Expression.ADD] = BinaryExpression.class;
+		typeLookup[Expression.SUBTRACT] = BinaryExpression.class;
+		typeLookup[Expression.MULTIPLY] = BinaryExpression.class;
+		typeLookup[Expression.DIVIDE] = BinaryExpression.class;
 
-        // unary types
-        typeLookup[Expression.EXISTS] = UnaryExpression.class;
-        typeLookup[Expression.NOT] = UnaryExpression.class;
-        typeLookup[Expression.NEGATIVE] = UnaryExpression.class;
-        typeLookup[Expression.POSITIVE] = UnaryExpression.class;
-        typeLookup[Expression.ALL] = UnaryExpression.class;
-        typeLookup[Expression.SOME] = UnaryExpression.class;
-        typeLookup[Expression.ANY] = UnaryExpression.class;
-        typeLookup[Expression.RAW_SQL] = UnaryExpression.class;
-        typeLookup[Expression.OBJ_PATH] = UnaryExpression.class;
-        typeLookup[Expression.DB_PATH] = UnaryExpression.class;
-        typeLookup[Expression.LIST] = UnaryExpression.class;
-        typeLookup[Expression.SUBQUERY] = UnaryExpression.class;
-        typeLookup[Expression.SUM] = UnaryExpression.class;
-        typeLookup[Expression.AVG] = UnaryExpression.class;
-        typeLookup[Expression.COUNT] = UnaryExpression.class;
-        typeLookup[Expression.MIN] = UnaryExpression.class;
-        typeLookup[Expression.MAX] = UnaryExpression.class;
-    }
+		// unary types
+		typeLookup[Expression.EXISTS] = UnaryExpression.class;
+		typeLookup[Expression.NOT] = UnaryExpression.class;
+		typeLookup[Expression.NEGATIVE] = UnaryExpression.class;
+		typeLookup[Expression.POSITIVE] = UnaryExpression.class;
+		typeLookup[Expression.ALL] = UnaryExpression.class;
+		typeLookup[Expression.SOME] = UnaryExpression.class;
+		typeLookup[Expression.ANY] = UnaryExpression.class;
+		typeLookup[Expression.RAW_SQL] = UnaryExpression.class;
+		typeLookup[Expression.OBJ_PATH] = UnaryExpression.class;
+		typeLookup[Expression.DB_PATH] = UnaryExpression.class;
+		typeLookup[Expression.LIST] = UnaryExpression.class;
+		typeLookup[Expression.SUBQUERY] = UnaryExpression.class;
+		typeLookup[Expression.SUM] = UnaryExpression.class;
+		typeLookup[Expression.AVG] = UnaryExpression.class;
+		typeLookup[Expression.COUNT] = UnaryExpression.class;
+		typeLookup[Expression.MIN] = UnaryExpression.class;
+		typeLookup[Expression.MAX] = UnaryExpression.class;
+	}
 
-    /** 
-     * Creates a new expression for the type requested. 
-     * If type is unknown, ExpressionException is thrown. 
-     */
-    public static Expression expressionOfType(int type) {
-        if (type < 0 || type >= typeLookup.length)
-            throw new ExpressionException("Bad expression type: " + type);
+	/** 
+	 * Creates a new expression for the type requested. 
+	 * If type is unknown, ExpressionException is thrown. 
+	 */
+	public static Expression expressionOfType(int type) {
+		if (type < 0 || type >= typeLookup.length)
+			throw new ExpressionException("Bad expression type: " + type);
 
-        if (typeLookup[type] == null)
-            throw new ExpressionException("Bad expression type: " + type);
+		if (typeLookup[type] == null)
+			throw new ExpressionException("Bad expression type: " + type);
 
-        if (BinaryExpression.class == typeLookup[type])
-            return new BinaryExpression(type);
+		if (BinaryExpression.class == typeLookup[type])
+			return new BinaryExpression(type);
 
-        if (UnaryExpression.class == typeLookup[type])
-            return new UnaryExpression(type);
+		if (UnaryExpression.class == typeLookup[type])
+			return new UnaryExpression(type);
 
-        if (TernaryExpression.class == typeLookup[type])
-            return new TernaryExpression(type);
+		if (TernaryExpression.class == typeLookup[type])
+			return new TernaryExpression(type);
 
-        throw new ExpressionException("Bad expression type: " + type);
-    }
+		throw new ExpressionException("Bad expression type: " + type);
+	}
+	
+	/**
+	 * Applies a few default rules for adding operands to
+	 * expressions. In particular wraps all lists into LIST
+	 * expressions. Applied only in path expressions.
+	 */
+	protected static Object wrapPathOperand(Object op) {
+		if(op instanceof List) {
+			return unaryExp(Expression.LIST, op);
+		}
+		else {
+			return op;
+		}
+	}
 
-    /** Creates a unary expression. Unary expression is an expression with only single operand.
-     * <code>type</code> must be a valid type defined in Expression interface. It must also
-     * resolve to a unary expression, or an ExpressionException will be thrown. 
-     *
-     * <p>An example of valid unary expression is "negative" (Expression.NEGATIVE). 
-     * Important Cayenne unary expression type is Expression.OBJ_PATH. It specifies 
-     * an property or an object related to an object (or an attribute or an entity related to
-     * an entity) using DataMap terms. 
-     */
-    public static Expression unaryExp(int type, Object operand) {
-        Expression exp = expressionOfType(type);
-        if (!(exp instanceof UnaryExpression))
-            throw new ExpressionException("Bad unary expression type: " + type);
+	/** Creates a unary expression. Unary expression is an expression with only single operand.
+	 * <code>type</code> must be a valid type defined in Expression interface. It must also
+	 * resolve to a unary expression, or an ExpressionException will be thrown. 
+	 *
+	 * <p>An example of valid unary expression is "negative" (Expression.NEGATIVE). 
+	 * Important Cayenne unary expression type is Expression.OBJ_PATH. It specifies 
+	 * an property or an object related to an object (or an attribute or an entity related to
+	 * an entity) using DataMap terms. 
+	 */
+	public static Expression unaryExp(int type, Object operand) {
+		Expression exp = expressionOfType(type);
+		if (!(exp instanceof UnaryExpression))
+			throw new ExpressionException("Bad unary expression type: " + type);
 
-        exp.setOperand(0, operand);
-        return exp;
-    }
+		exp.setOperand(0, operand);
+		return exp;
+	}
 
-    /** 
-     * Creates a binary expression. Binary expression is an expression 
-     * with two operands. <code>type</code> must be a valid type defined 
-     * in Expression interface. It must also resolve to a binary expression, 
-     * or an ExpressionException will be thrown. 
-     */
-    public static Expression binaryExp(
-        int type,
-        Object leftOperand,
-        Object rightOperand) {
-        Expression exp = expressionOfType(type);
-        if (!(exp instanceof BinaryExpression))
-            throw new ExpressionException("Bad binary expression type: " + type);
+	/** 
+	 * Creates a binary expression. Binary expression is an expression 
+	 * with two operands. <code>type</code> must be a valid type defined 
+	 * in Expression interface. It must also resolve to a binary expression, 
+	 * or an ExpressionException will be thrown. 
+	 */
+	public static Expression binaryExp(
+		int type,
+		Object leftOperand,
+		Object rightOperand) {
+		Expression exp = expressionOfType(type);
+		if (!(exp instanceof BinaryExpression))
+			throw new ExpressionException("Bad binary expression type: " + type);
 
-        exp.setOperand(0, leftOperand);
-        exp.setOperand(1, rightOperand);
-        return exp;
-    }
+		exp.setOperand(0, leftOperand);
+		exp.setOperand(1, rightOperand);
+		return exp;
+	}
 
-    /** 
-     * Creates a binary expression with left operand being Expression.OBJ_PATH. 
-     * This is a more useful method to build binary expressions then 
-     * generic {@link #binaryExp(int, Object, Object) binaryExp}.
-     * It is intended for cases when one of the operands is OBJ_PATH. 
-     * This method wraps <code>pathSpec</code> string representing the path in a 
-     * {@link org.objectstyle.cayenne.exp.Expression#OBJ_PATH OBJ_PATH} expression 
-     * and uses it as a left operand of binary expression.
-     *
-     * @see #binaryExp(int, Object, Object)
-     */
-    public static Expression binaryPathExp(
-        int type,
-        String pathSpec,
-        Object value) {
-        return binaryExp(type, unaryExp(Expression.OBJ_PATH, pathSpec), value);
-    }
-    
-    /** 
-     * Creates a binary expression with left operand being Expression.DB_NAME. 
-     * This is a useful method to build binary expressions that match DbAttributes
-     * not included in the entities (for instance primary keys).
-     *
-     * @see #binaryExp(int, Object, Object)
-     */
-    public static Expression binaryDbNameExp(
-        int type,
-        String pathSpec,
-        Object value) {
-        return binaryExp(type, unaryExp(Expression.DB_PATH, pathSpec), value);
-    }
+	/** 
+	 * Creates a binary expression with left operand being Expression.OBJ_PATH. 
+	 * This is a more useful method to build binary expressions then 
+	 * generic {@link #binaryExp(int, Object, Object) binaryExp}.
+	 * It is intended for cases when one of the operands is OBJ_PATH. 
+	 * This method wraps <code>pathSpec</code> string representing the path in a 
+	 * {@link org.objectstyle.cayenne.exp.Expression#OBJ_PATH OBJ_PATH} expression 
+	 * and uses it as a left operand of binary expression.
+	 *
+	 * @see #binaryExp(int, Object, Object)
+	 */
+	public static Expression binaryPathExp(int type, String pathSpec, Object value) {
+		return binaryExp(type, unaryExp(Expression.OBJ_PATH, pathSpec), wrapPathOperand(value));
+	}
 
-    /** 
-     * Creates a ternary expression. Ternary expression is an expression with three operands.
-     * <code>type</code> must be a valid type defined in Expression interface. It must also
-     * resolve to a ternary expression, or an ExpressionException will be thrown.
-     *
-     * <p>Example of ternary expression type is Expression.BETWEEN.</p>
-     */
-    public static Expression ternaryExp(
-        int type,
-        Object firstOperand,
-        Object secondOperand,
-        Object thirdOperand) {
-        Expression exp = expressionOfType(type);
-        if (!(exp instanceof TernaryExpression))
-            throw new ExpressionException("Bad ternary expression type: " + type);
+	/** 
+	 * Creates a binary expression with left operand being 
+	 * Expression.DB_PATH. This is a useful method to build 
+	 * binary expressions that match DbAttributes not included 
+	 * in the entities (for instance primary keys).
+	 *
+	 * @see #binaryExp(int, Object, Object)
+	 */
+	public static Expression binaryDbPathExp(int type, String pathSpec, Object value) {
+		return binaryExp(type, unaryExp(Expression.DB_PATH, pathSpec), wrapPathOperand(value));
+	}
 
-        exp.setOperand(0, firstOperand);
-        exp.setOperand(1, secondOperand);
-        exp.setOperand(2, thirdOperand);
-        return exp;
-    }
+	/**
+	 * @deprecated use <code>binaryDbPathExp</code> instead.
+	 */
+	public static Expression binaryDbNameExp(int type, String pathSpec, Object value) {
+		return binaryDbPathExp(type, pathSpec, value);
+	}
 
-    /** Creates an expression that matches all key-values pairs in <code>map</code>.
-      * 
-      * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
-      * Key is considered to be a OBJ_PATH expression. Therefore all keys must be java.lang.String
-      * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
-      */
-    public static Expression matchAllExp(Map map, int pairType) {
-        ArrayList pairs = new ArrayList();
+	/** 
+	 * Creates a ternary expression. Ternary expression is an expression with three operands.
+	 * <code>type</code> must be a valid type defined in Expression interface. It must also
+	 * resolve to a ternary expression, or an ExpressionException will be thrown.
+	 *
+	 * <p>Example of ternary expression type is Expression.BETWEEN.</p>
+	 */
+	public static Expression ternaryExp(
+		int type,
+		Object firstOperand,
+		Object secondOperand,
+		Object thirdOperand) {
+		Expression exp = expressionOfType(type);
+		if (!(exp instanceof TernaryExpression))
+			throw new ExpressionException("Bad ternary expression type: " + type);
 
-        Iterator it = map.keySet().iterator();
-        while (it.hasNext()) {
-            String key = (String) it.next();
-            Object value = map.get(key);
-            pairs.add(binaryPathExp(pairType, key, value));
-        }
+		exp.setOperand(0, firstOperand);
+		exp.setOperand(1, secondOperand);
+		exp.setOperand(2, thirdOperand);
+		return exp;
+	}
 
-        return joinExp(Expression.AND, pairs);
-    }
-    
-    
-    /**
-     * An shortcut for <code>binaryPathExp(Expression.EQUAL_TO, pathSpec, value)</code>.
-     */
-    public static Expression matchExp(String pathSpec, Object value) {
-    	return binaryPathExp(Expression.EQUAL_TO, pathSpec, value);
-    }
-    
-    /**
-     * An shortcut for <code>binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value)</code>.
-     */
-    public static Expression matchDbExp(String pathSpec, Object value) {
-    	return binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value);
-    }
+	/** Creates an expression that matches all key-values pairs in <code>map</code>.
+	  * 
+	  * <p>For each pair <code>pairType</code> operator is used to build a binary expression. 
+	  * Key is considered to be a OBJ_PATH expression. Therefore all keys must be java.lang.String
+	  * objects, or ClassCastException is thrown. AND is used to join pair binary expressions.
+	  */
+	public static Expression matchAllExp(Map map, int pairType) {
+		ArrayList pairs = new ArrayList();
 
-    /** 
-     * Joins all <code>expressions</code> in a single expression. 
-     * <code>type</code> is used as an expression type for expressions joining 
-     * each one of the items on the list. <code>type</code> must be binary 
-     * expression type.
-     * 
-     * <p>For example, if type is Expression.AND, resulting expression would match 
-     * all expressions in the list. If type is Expression.OR, resulting expression 
-     * would match any of the expressions. </p>
-     */
-    public static Expression joinExp(int type, List expressions) {
-        int len = expressions.size();
-        if (len == 0)
-            return null;
+		Iterator it = map.keySet().iterator();
+		while (it.hasNext()) {
+			String key = (String) it.next();
+			Object value = map.get(key);
+			pairs.add(binaryPathExp(pairType, key, value));
+		}
 
-        Expression currentExp = (Expression) expressions.get(0);
-        if (len == 1) {
-            return currentExp;
-        }
+		return joinExp(Expression.AND, pairs);
+	}
 
-        for (int i = 1; i < len; i++) {
-            Expression exp = expressionOfType(type);
-            exp.setOperand(0, currentExp);
-            // cast to expression, so that invalid entries will not go through
-            exp.setOperand(1, (Expression) expressions.get(i));
-            currentExp = exp;
-        }
+	/**
+	 * An shortcut for <code>binaryPathExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+	 */
+	public static Expression matchExp(String pathSpec, Object value) {
+		return binaryPathExp(Expression.EQUAL_TO, pathSpec, value);
+	}
 
-        return currentExp;
-    }   
+	/**
+	 * An shortcut for <code>binaryDbNameExp(Expression.EQUAL_TO, pathSpec, value)</code>.
+	 */
+	public static Expression matchDbExp(String pathSpec, Object value) {
+		return binaryDbPathExp(Expression.EQUAL_TO, pathSpec, value);
+	}
+
+	/** 
+	 * Joins all <code>expressions</code> in a single expression. 
+	 * <code>type</code> is used as an expression type for expressions joining 
+	 * each one of the items on the list. <code>type</code> must be binary 
+	 * expression type.
+	 * 
+	 * <p>For example, if type is Expression.AND, resulting expression would match 
+	 * all expressions in the list. If type is Expression.OR, resulting expression 
+	 * would match any of the expressions. </p>
+	 */
+	public static Expression joinExp(int type, List expressions) {
+		int len = expressions.size();
+		if (len == 0)
+			return null;
+
+		Expression currentExp = (Expression) expressions.get(0);
+		if (len == 1) {
+			return currentExp;
+		}
+
+		for (int i = 1; i < len; i++) {
+			Expression exp = expressionOfType(type);
+			exp.setOperand(0, currentExp);
+			// cast to expression, so that invalid entries will not go through
+			exp.setOperand(1, (Expression) expressions.get(i));
+			currentExp = exp;
+		}
+
+		return currentExp;
+	}
 }

@@ -128,9 +128,11 @@ public class QueryLogger {
 				buf.append(b[i]);
 			}
 			buf.append('\'');
-		} else
+		} 
+        else {
 			throw new org.objectstyle.cayenne.CayenneRuntimeException(
 				"Unsupported type : " + anObject.getClass().getName());
+		}
 	}
 
 	/** 
@@ -167,9 +169,7 @@ public class QueryLogger {
 	/**
 	 * Logs database connection event using container data source.
 	 */
-	public static void logConnect(
-		org.apache.log4j.Level logLevel,
-		String dataSource) {
+	public static void logConnect(org.apache.log4j.Level logLevel, String dataSource) {
 		if (logObj.isEnabledFor(logLevel)) {
 			logObj.log(logLevel, "Connecting. JNDI path: " + dataSource);
 		}
@@ -178,28 +178,22 @@ public class QueryLogger {
 	/**
 	 * Logs database connection event.
 	 */
-	public static void logConnect(
-		org.apache.log4j.Level logLevel,
-		DataSourceInfo dsi) {
+	public static void logConnect(org.apache.log4j.Level logLevel, DataSourceInfo dsi) {
 		if (logObj.isEnabledFor(logLevel)) {
-			StringBuffer buf =
-				new StringBuffer("Connecting. DataSource information:");
+			StringBuffer buf = new StringBuffer("Connecting. DataSource information:");
 
 			if (dsi != null) {
 				buf.append("\nDriver class: ").append(dsi.getJdbcDriver());
 
 				if (dsi.getAdapterClass() != null) {
-					buf.append("\nCayenne DbAdapter: ").append(
-						dsi.getAdapterClass());
+					buf.append("\nCayenne DbAdapter: ").append(dsi.getAdapterClass());
 				}
-				
-			    if (dsi.getMinConnections() >= 0) {
-					buf.append("\nMin. Pool Size: ").append(
-						dsi.getMinConnections());
-			    }
-			    if (dsi.getMaxConnections() >= 0) {
-					buf.append("\nMax. Pool Size: ").append(
-						dsi.getMaxConnections());
+
+				if (dsi.getMinConnections() >= 0) {
+					buf.append("\nMin. Pool Size: ").append(dsi.getMinConnections());
+				}
+				if (dsi.getMaxConnections() >= 0) {
+					buf.append("\nMax. Pool Size: ").append(dsi.getMaxConnections());
 				}
 				buf.append("\nDatabase URL: ").append(dsi.getDataSourceUrl());
 				buf.append("\nLogin: ").append(dsi.getUserName());
@@ -216,9 +210,7 @@ public class QueryLogger {
 		logObj.log(logLevel, "+++ Connecting: SUCCESS.");
 	}
 
-	public static void logConnectFailure(
-		org.apache.log4j.Level logLevel,
-		Throwable th) {
+	public static void logConnectFailure(org.apache.log4j.Level logLevel, Throwable th) {
 		logObj.log(logLevel, "*** Connecting: FAILURE.", th);
 	}
 
@@ -278,15 +270,11 @@ public class QueryLogger {
 	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
 	 * Use corresponding Log4J method.
 	 */
-	public static void logSelectCount(
-		java.util.logging.Level logLevel,
-		int count) {
+	public static void logSelectCount(java.util.logging.Level logLevel, int count) {
 		logSelectCount(Log4JConverter.getLog4JLogLevel(logLevel), count);
 	}
 
-	public static void logSelectCount(
-		org.apache.log4j.Level logLevel,
-		int count) {
+	public static void logSelectCount(org.apache.log4j.Level logLevel, int count) {
 		logSelectCount(logLevel, count, -1);
 	}
 
@@ -313,19 +301,13 @@ public class QueryLogger {
 	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
 	 * Use corresponding Log4J method.
 	 */
-	public static void logUpdateCount(
-		java.util.logging.Level logLevel,
-		int count) {
+	public static void logUpdateCount(java.util.logging.Level logLevel, int count) {
 		logUpdateCount(Log4JConverter.getLog4JLogLevel(logLevel), count);
 	}
 
-	public static void logUpdateCount(
-		org.apache.log4j.Level logLevel,
-		int count) {
+	public static void logUpdateCount(org.apache.log4j.Level logLevel, int count) {
 		String countStr =
-			(count == 1)
-				? "=== updated 1 row."
-				: "=== updated " + count + " rows.";
+			(count == 1) ? "=== updated 1 row." : "=== updated " + count + " rows.";
 		logObj.log(logLevel, countStr);
 	}
 
@@ -345,13 +327,11 @@ public class QueryLogger {
 	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
 	 * Use corresponding Log4J method.
 	 */
-	public static void logRollbackTransaction(
-		java.util.logging.Level logLevel) {
+	public static void logRollbackTransaction(java.util.logging.Level logLevel) {
 		logRollbackTransaction(Log4JConverter.getLog4JLogLevel(logLevel));
 	}
 
-	public static void logRollbackTransaction(
-		org.apache.log4j.Level logLevel) {
+	public static void logRollbackTransaction(org.apache.log4j.Level logLevel) {
 		logObj.log(logLevel, "*** transaction rolledback.");
 	}
 
@@ -359,15 +339,11 @@ public class QueryLogger {
 	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
 	 * Use corresponding Log4J method.
 	 */
-	public static void logQueryError(
-		java.util.logging.Level logLevel,
-		Throwable th) {
+	public static void logQueryError(java.util.logging.Level logLevel, Throwable th) {
 		logQueryError(Log4JConverter.getLog4JLogLevel(logLevel), th);
 	}
 
-	public static void logQueryError(
-		org.apache.log4j.Level logLevel,
-		Throwable th) {
+	public static void logQueryError(org.apache.log4j.Level logLevel, Throwable th) {
 		logObj.log(logLevel, "*** error.", th);
 	}
 
@@ -375,15 +351,11 @@ public class QueryLogger {
 	 * @deprecated Use of JSDK 1.4 logging API is deprecated. 
 	 * Use corresponding Log4J method.
 	 */
-	public static void logQueryStart(
-		java.util.logging.Level logLevel,
-		int count) {
+	public static void logQueryStart(java.util.logging.Level logLevel, int count) {
 		logQueryStart(Log4JConverter.getLog4JLogLevel(logLevel), count);
 	}
 
-	public static void logQueryStart(
-		org.apache.log4j.Level logLevel,
-		int count) {
+	public static void logQueryStart(org.apache.log4j.Level logLevel, int count) {
 		String countStr =
 			(count == 1)
 				? "--- will run 1 query."
