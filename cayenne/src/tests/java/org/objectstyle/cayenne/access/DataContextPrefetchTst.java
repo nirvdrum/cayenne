@@ -473,28 +473,28 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         queries.add(
             new SqlModifyQuery(
                 CompoundPkTest.class,
-                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values (101, 201, 'CPK1')"));
+                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values ('101', '201', 'CPK1')"));
         queries.add(
             new SqlModifyQuery(
                 CompoundPkTest.class,
-                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values (102, 202, 'CPK2')"));
+                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values ('102', '202', 'CPK2')"));
         queries.add(
             new SqlModifyQuery(
                 CompoundPkTest.class,
-                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values (103, 203, 'CPK3')"));
+                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values ('103', '203', 'CPK3')"));
 
         queries.add(
             new SqlModifyQuery(
                 CompoundPkTest.class,
-                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (301, 102, 202, 'CFK1')"));
+                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (301, '102', '202', 'CFK1')"));
         queries.add(
             new SqlModifyQuery(
                 CompoundPkTest.class,
-                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (302, 102, 202, 'CFK2')"));
+                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (302, '102', '202', 'CFK2')"));
         queries.add(
             new SqlModifyQuery(
                 CompoundPkTest.class,
-                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (303, 101, 201, 'CFK3')"));
+                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (303, '101', '201', 'CFK3')"));
 
         context.performQueries(queries, new DefaultOperationObserver());
     }
