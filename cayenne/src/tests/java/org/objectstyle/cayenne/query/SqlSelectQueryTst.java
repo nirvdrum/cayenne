@@ -76,13 +76,13 @@ public class SqlSelectQueryTst extends CayenneTestCase {
         assertSame(sqlString, q1.getSqlString());
     }
 
-    public void testResultDesc() throws Exception {
+    public void testObjDescriptors() throws Exception {
         SqlSelectQuery q1 = new SqlSelectQuery();
-        assertNull(q1.getResultDesc());
+        assertNull(q1.getObjDescriptors());
         
         ObjAttribute[] attrs = new ObjAttribute[] {new ObjAttribute()};
-        q1.setResultDesc(attrs);
-        assertSame(attrs, q1.getResultDesc());
+        q1.setObjDescriptors(attrs);
+        assertSame(attrs, q1.getObjDescriptors());
     }
 
 }
