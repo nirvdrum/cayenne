@@ -172,6 +172,7 @@
         	<fileset dir="${core.build.deps}/org/apache/velocity">
         		<include name="texen/**"/>
         		<include name="test/**"/>
+        		<include name="servlet/**"/>
         	</fileset>
         	
         	<fileset dir="${core.build.deps}/org/apache/log4j">
