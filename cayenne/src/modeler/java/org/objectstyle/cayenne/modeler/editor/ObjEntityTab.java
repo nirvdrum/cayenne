@@ -63,11 +63,9 @@ import java.awt.event.ActionListener;
 import java.util.Arrays;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.InputVerifier;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -117,8 +115,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
     protected ProjectController mediator;
     protected TextAdapter name;
-    protected JTextField className;
-    protected JTextField superClassName;
+    protected TextAdapter className;
+    protected TextAdapter superClassName;
     protected TextAdapter qualifier;
     protected JComboBox dbEntityCombo;
     protected JComboBox superEntityCombo;
@@ -140,8 +138,18 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
                 setEntityName(text);
             }
         };
-        superClassName = CayenneWidgetFactory.createTextField();
-        className = CayenneWidgetFactory.createTextField();
+        superClassName = new TextAdapter(new JTextField()) {
+
+            protected void updateModel(String text) {
+                setSuperClassName(text);
+            }
+        };
+        className = new TextAdapter(new JTextField()) {
+
+            protected void updateModel(String text) {
+                setClassName(text);
+            }
+        };
         qualifier = new TextAdapter(new JTextField()) {
 
             protected void updateModel(String text) {
@@ -172,8 +180,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
 
         builder.appendSeparator();
 
-        builder.append("Java Class:", className);
-        builder.append("Superclass:", superClassName);
+        builder.append("Java Class:", className.getComponent());
+        builder.append("Superclass:", superClassName.getComponent());
         builder.append("Qualifier", qualifier.getComponent());
         builder.append("Read-Only:", readOnly);
         builder.append("Optimistic Locking:", optimisticLocking);
@@ -185,34 +193,6 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         // initialize events processing and tracking of UI updates...
 
         mediator.addObjEntityDisplayListener(this);
-
-        className.setInputVerifier(new InputVerifier() {
-
-            public boolean verify(JComponent input) {
-                setClassName(className.getText());
-                return true;
-            }
-        });
-
-        superClassName.setInputVerifier(new InputVerifier() {
-
-            public boolean verify(JComponent input) {
-                String parentClassText = superClassName.getText();
-                if (parentClassText != null && parentClassText.trim().length() == 0) {
-                    parentClassText = null;
-                }
-
-                ObjEntity ent = mediator.getCurrentObjEntity();
-
-                if (ent != null
-                        && !Util.nullSafeEquals(ent.getSuperClassName(), parentClassText)) {
-                    ent.setSuperClassName(parentClassText);
-                    mediator.fireObjEntityEvent(new EntityEvent(this, ent));
-                }
-
-                return true;
-            }
-        });
 
         dbEntityCombo.addActionListener(new ActionListener() {
 
@@ -385,6 +365,20 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         }
     }
 
+    void setSuperClassName(String text) {
+
+        if (text != null && text.trim().length() == 0) {
+            text = null;
+        }
+
+        ObjEntity ent = mediator.getCurrentObjEntity();
+
+        if (ent != null && !Util.nullSafeEquals(ent.getSuperClassName(), text)) {
+            ent.setSuperClassName(text);
+            mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+        }
+    }
+
     void setQualifier(String text) {
         if (text != null && text.trim().length() == 0) {
             text = null;
@@ -416,7 +410,7 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
         }
 
         ObjEntity entity = mediator.getCurrentObjEntity();
-        if(entity == null) {
+        if (entity == null) {
             return;
         }
 
@@ -500,8 +494,8 @@ public class ObjEntityTab extends JPanel implements ObjEntityDisplayListener,
     }
 
     void activateFields(boolean active) {
-        superClassName.setEnabled(active);
-        superClassName.setEditable(active);
+        superClassName.getComponent().setEnabled(active);
+        superClassName.getComponent().setEditable(active);
         dbEntityCombo.setEnabled(active);
     }
 
