@@ -454,16 +454,9 @@ public class DataNode implements QueryEngine {
         throws Exception {
 
         try {
-            // ProcedureTranslator procTransl = (ProcedureTranslator)transl;
-            // Procedure proc = procTransl.getProcedure();
 
             // execute procedure
             prepStmt.execute();
-
-            // process result
-            // List columns = proc.getResultAttributesList();
-
-            // ignore OUT params for now...
 
         } finally {
             prepStmt.close();
