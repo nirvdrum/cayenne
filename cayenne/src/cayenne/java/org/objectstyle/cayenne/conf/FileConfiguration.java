@@ -62,16 +62,22 @@ import org.objectstyle.cayenne.ConfigurationException;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
- *
- * @HH todo
+ * FileConfiguration loads a Cayenne configuraton file from a given
+ * location in the file system.
  *
  * @author Holger Hoffstätte
  */
 public class FileConfiguration extends DefaultConfiguration {
-	private static Logger logObj = Logger.getLogger(DefaultConfiguration.class);
+	private static Logger logObj = Logger.getLogger(FileConfiguration.class);
 
+	/**
+	 * The main project file used for loading this configuration
+	 */
 	protected File projectFile;
 
+	/**
+	 * Disabled default constructor to force FileConfiguration(File)
+	 */
 	private FileConfiguration() {
 		super();
 	}
@@ -79,10 +85,12 @@ public class FileConfiguration extends DefaultConfiguration {
 	/**
 	 * Creates configuration object that uses the provided file 
 	 * for the main project file, ignoring any other lookup strategies.
+	 * @throws ConfigurationException when projectFile is <code>null</code>,
+	 * a directory or not readable.
 	 */
 	public FileConfiguration(File projectFile) {
 		this();
-		logObj.debug("using projectFile: " + projectFile);
+		logObj.debug("using project file: " + projectFile);
 
 		// set the project file
 		this.setProjectFile(projectFile);
@@ -98,43 +106,48 @@ public class FileConfiguration extends DefaultConfiguration {
 	}
 
 	/**
-	 * @HH todo
+	 * Only returns <code>true</code> when #getProjectFile() does not
+	 * return <code>null</code>. If so, also creates a ResourceLocator
+	 * configured for files in the file system.
 	 */
-	public boolean shouldInitialize() {
+	protected boolean shouldInitialize() {
 		// I can only initialize myself when I have a valid file
-		return (this.getProjectFile() != null);
+		if (this.getProjectFile() != null) {
+			// create a new ResourceLocator suitable for plain files
+			ResourceLocator l = new ResourceLocator();
+			l.setSkipAbsolutePath(false);
+			l.setSkipClasspath(true);
+			l.setSkipCurrentDirectory(false);
+			l.setSkipHomeDirectory(true);
+
+			// normalize the file location & add it to the file search path
+			File projectDirectory = this.getProjectDirectory();
+			if (projectDirectory != null) {
+				l.addFilesystemPath(projectDirectory);
+			}
+	
+			// set the locator
+			this.setResourceLocator(l);
+
+			// go!
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	/**
-	 * @HH todo
-	 */
-	public void initialize() throws Exception {
-		// create a new ResourceLocator suitable for looking up files in the file system
-		ResourceLocator l = new ResourceLocator();
-		l.setSkipAbsolutePath(false);
-		l.setSkipClasspath(true);
-		l.setSkipCurrentDirectory(true);
-		l.setSkipHomeDirectory(true);
-
-		// normalize the file location & add it to the file search path
-		l.addFilesystemPath(this.getProjectDirectory());
-
-		// set the locator
-		this.setResourceLocator(l);
-
-		// go!
-		super.initialize();
-	}
-
-	/**
-	 * @HH todo
+	 * Returns the main file used for this configuration. 
 	 */
 	public File getProjectFile() {
 		return projectFile;
 	}
 
 	/**
-	 * @HH todo
+	 * Sets the main file used for this configuration.
+	 * @throws ConfigurationException if <code>projectFile</code> is null,
+	 * a directory or not readable.
 	 */
 	protected void setProjectFile(File projectFile) {
 		if (projectFile != null) {
@@ -142,14 +155,19 @@ public class FileConfiguration extends DefaultConfiguration {
 				this.projectFile = projectFile;
 			}
 			else {
-				throw new ConfigurationException("Cannot use a directory as project file: "
-													+ projectFile);
+				throw new ConfigurationException("Project file: "
+													+ projectFile
+													+ " is a directory or not readable.");
 			}
+		}
+		else {
+			throw new ConfigurationException("Cannot use null as project file.");
 		}
 	}
 
 	/**
-	 * @HH todo
+	 * Returns the directory of the current project file as
+	 * returned by #getProjectFile().
 	 */
 	public File getProjectDirectory() {
 		File pfile = this.getProjectFile();

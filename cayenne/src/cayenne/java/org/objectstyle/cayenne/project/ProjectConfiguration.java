@@ -94,7 +94,8 @@ public class ProjectConfiguration extends FileConfiguration {
 	}
 
     /**
-     * @see org.objectstyle.cayenne.conf.Configuration#getOverrideFactory()
+     * Returns a DataSource factory for projects.
+     * @see org.objectstyle.cayenne.project.ProjectDataSourceFactory
      */
     public DataSourceFactory getDataSourceFactory() {
         try {
