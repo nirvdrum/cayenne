@@ -20,6 +20,9 @@
         		database objects creation, BLOB handling, etc. are handled differently
         		by different vendors. 
         		</li>
+        		<li>Data type definitions vary across RDBMS. Data types may have different 
+        		names, size and precision.
+        		</li>
         		<li>Vendors provide their own extensions of SQL and JDBC functionality.
         		Taking advantage of these extensions and creating portable code at the 
         		same time is not a trivial task.
@@ -29,20 +32,47 @@
         	<p>
         	This becomes even a bigger problem in a generic product like Cayenne that should
         	support any database. Therefore Cayenne provides <a href=
-        	"../../api/org/objectstyle/cayenne/dba/package-overview.html">DbAdapter 
+        	"../../api/org/objectstyle/cayenne/dba/package-summary.html">DbAdapter 
         	architecture</a> as a way of handling database differences. It works in 
-        	conjunction with JDBC. 
+        	conjunction with JDBC.
         	</p>
         	
         	<subsection name="3.5.1 DbAdapter Design Overview">
-        	<p>To Be Done...</p>
+        	<p>DataNode (Cayenne access class closest to DataSource) always has a <a href=
+        	"../../api/org/objectstyle/cayenne/dba/DbAdapter.html">DbAdapter</a>
+        	object associated with it. DataNode delegates certain database-related functions
+        	to DbAdapter, so that adapter could perform them in a way appropriate for
+        	the specific database.</p>
+        	
+        	<p>There is a generic implementation of DbAdapter -
+        	<a href=
+        	"../../api/org/objectstyle/cayenne/dba/JdbcAdapter.html">JdbcAdapter</a>. 
+        	For most operations it works with almost any database as is. Database-specific 
+        	implementations of DbAdapter are usually created to refine certain functions 
+        	of JdbcAdapter. For example <a href=
+        	"../../api/org/objectstyle/cayenne/dba/oracle/OracleAdapter.html">OracleAdapter</a>
+        	extends JdbcAdapter to provide a special PkGenerator and to optimize certain 
+        	operations for Oracle. Class diagram with DbAdapter and related classes is shown below:
+        	</p>
+        	
+        	<img src="/images/dbadapter-class.gif" alt="DbAdapter Class Diagram"/>
+        	
+        	<p>DbAdapter performs the following functions:</p>
+        	<ul>
+        		<li>maps database data types to JDBC "standard" types.</li>
+        		<li>serves as a factory of <a href=
+        	    "../../api/org/objectstyle/cayenne/access/QueryTranslator.html">QueryTranslator</a>
+        	    objects.</li>
+        	    <li>provides information about the features supported by a target database.</li>
+        	    <li>provides <a href="autopk.html">automatic primary key 
+        	    generation</a> via a PkGenerator instance.</li>
+        	</ul>
+        	
+        	
         	</subsection>
         	
-        	<subsection name="3.5.2 Primary Key Generation">
-        	<p>To Be Done...</p>
-        	</subsection>
         	
-        	<subsection name="3.5.3 Porting Cayenne to a new RDBMS">
+        	<subsection name="3.5.2 Porting Cayenne to a new RDBMS">
         	<p>To Be Done...</p>
         	</subsection>
         </subsection>

@@ -28,7 +28,7 @@
         	(shown in yellow) to provide DataSource 
         	with connection pooling. </p>
         	
-        	<img src="/images/conn-chart.gif" alt="DataSource Implementation Chart"/>
+        	<img src="/images/conn-chart.gif" alt="DataSource Implementation Diagram"/>
         	
         	<p>Normally instances of <a href=
         	"../../api/org/objectstyle/cayenne/conn/PoolManager.html">PoolManager</a>
