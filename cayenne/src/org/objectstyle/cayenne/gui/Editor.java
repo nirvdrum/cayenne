@@ -184,9 +184,11 @@ public class Editor
 		actionMap = new ActionMap();
 
 		CayenneAction newProjectAction = new NewProjectAction();
+		newProjectAction.setEnabled(true);
 		actionMap.put(newProjectAction.getKey(), newProjectAction);
 		
 		CayenneAction openProjectAction = new OpenProjectAction();
+		openProjectAction.setEnabled(true);
 		actionMap.put(openProjectAction.getKey(), openProjectAction);
 
 		CayenneAction createMapAction = new CreateDataMapAction();
@@ -200,7 +202,6 @@ public class Editor
 
 		CayenneAction saveAction = new SaveAction();
 		actionMap.put(saveAction.getKey(), saveAction);
-
 	}
 
 	protected void init() {
@@ -403,9 +404,10 @@ public class Editor
 		createDomainMenu.setEnabled(false);
 		createDomainBtn.setEnabled(false);
 	
-		Editor.getFrame().repaint();
-		Editor.getFrame().getAction(RemoveAction.ACTION_NAME).setName("Remove");
-		Editor.getFrame().setProjectTitle(null);
+		repaint();
+		getAction(RemoveAction.ACTION_NAME).setName("Remove");
+		getAction(SaveAction.ACTION_NAME).setEnabled(false);
+		setProjectTitle(null);
     }
     
     public void projectOpened() {
@@ -425,6 +427,8 @@ public class Editor
 		createDomainMenu.setEnabled(true);
 		createDomainBtn.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
+		
+		getAction(SaveAction.ACTION_NAME).setEnabled(false);
 
 		this.validate();
 	}
@@ -470,10 +474,12 @@ public class Editor
 	public void setDirty(boolean flag) {
 		String title = getTitle();
 		if (flag) {
+			getAction(SaveAction.ACTION_NAME).setEnabled(true);
 			if (!title.startsWith(DIRTY_STRING)) {
 				setTitle(DIRTY_STRING + title);
 			}
 		} else {
+			getAction(SaveAction.ACTION_NAME).setEnabled(false);
 			if (title.startsWith(DIRTY_STRING)) {
 				setTitle(
 					title.substring(DIRTY_STRING.length(), title.length()));
@@ -705,7 +711,6 @@ public class Editor
 		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(false);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(false);
 		getAction(AddDataMapAction.ACTION_NAME).setEnabled(false);
-		getAction(SaveAction.ACTION_NAME).setEnabled(false);
 
 		createDataSourceMenu.setEnabled(false);
 		createObjEntityMenu.setEnabled(false);
@@ -726,12 +731,11 @@ public class Editor
 
 	private void enableDomainMenu() {
 		disableMenu();
-		actionMap.get(CreateDataMapAction.ACTION_NAME).setEnabled(true);
+		getAction(CreateDataMapAction.ACTION_NAME).setEnabled(true);
 		getAction(RemoveAction.ACTION_NAME).setEnabled(true);
 
 		createDataSourceMenu.setEnabled(true);
 		closeProjectMenu.setEnabled(true);
-		getAction(SaveAction.ACTION_NAME).setEnabled(true);
 		importDbMenu.setEnabled(true);
 		importEOMMenu.setEnabled(true);
 

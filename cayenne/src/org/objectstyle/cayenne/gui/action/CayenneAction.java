@@ -88,6 +88,8 @@ public abstract class CayenneAction extends AbstractAction {
 		if (accelerator != null) {
 			super.putValue(Action.ACCELERATOR_KEY, accelerator);
 		}
+		
+		setEnabled(false);
 	}
 
 	/** 

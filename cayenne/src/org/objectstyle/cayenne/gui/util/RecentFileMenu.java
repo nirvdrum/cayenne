@@ -65,6 +65,10 @@ import org.objectstyle.cayenne.gui.action.OpenProjectAction;
 import org.objectstyle.cayenne.util.Preferences;
 
 /**
+ * Menu that contains a list of previously used files.
+ * It is built from CayenneModeler preferences by calling 
+ * <code>rebuildFromPreferences</code>.
+ * 
  * @author Andrei Adamchik
  */
 public class RecentFileMenu extends JMenu {
@@ -88,17 +92,18 @@ public class RecentFileMenu extends JMenu {
 	 * CayenneModeler properences.
 	 */
 	public void rebuildFromPreferences() {
-		Preferences pref = Preferences.getPreferences();
+		Preferences pref = Preferences.getPreferences();		
 		Vector arr = pref.getVector(Preferences.LAST_PROJ_FILES);
 		while (arr.size() > 4) {
 			arr.remove(arr.size() - 1);
 		}
 
 		// readd menus
-		Component[] comps = getComponents();
+		Component[] comps = getMenuComponents();
 		int curSize = comps.length;
-
-		for (int i = 0; i < arr.size(); i++) {
+        int prefSize = arr.size(); 
+        
+		for (int i = 0; i < prefSize; i++) {
 			String name = (String) arr.get(i);
 
 			if (i < curSize) {
@@ -115,8 +120,8 @@ public class RecentFileMenu extends JMenu {
 		}
 
 		// remove any hanging items
-		for (int i = arr.size(); i < curSize; i++) {
-            remove(comps[i]);
+		for (int i = curSize - 1; i >= prefSize; i--) {
+            remove(i);
 		}
 	}
 }
