@@ -5,7 +5,12 @@
 	<section name="4. Common Modeling Tasks">
 	<subsection name="4.7 Setting DataMap Defaults">
  	 	<p>DataMap editing panel allows to define a number of default values for the entities 
-		in this map. Defaults are stored in the DataMap XML file and used in CayenneModeler 
+		in this map.</p>
+
+<img src="/images/modelerguide/datamap-defaults.jpg" width="512" height="256" border="0" 
+        align="middle" alt="DataMap Defaults"/>
+
+		<p>Defaults are stored in the DataMap XML file and used in CayenneModeler 
 		to make entity creation/modification easier. The following defaults are supported:</p>
 
 	<ul>

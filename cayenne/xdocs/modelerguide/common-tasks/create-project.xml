@@ -4,35 +4,24 @@
 <body>
 	<section name="4. Common Modeling Tasks">
 	<subsection name="4.1 Create New Project">
- 	 	<p><strong>Prerequisites.</strong> Start CayenneModeler as described
- 	 	<a href="../modeler-intro/runmodeler.html">earlier</a>.</p>
+ 	 	<p><i>Prerequisites: before creating a new project you must start CayenneModeler as described
+ 	 	<a href="../modeler-intro/runmodeler.html">earlier</a>.</i></p>
  	 	
- 	    <p><strong>Start New Project</strong>. Select "File -> New Project" menu item or click
- 	    on new project icon:</p>
+ 	    <p><strong>Start New Project</strong>. Select <code>"File > New Project"</code> menu item (or click
+ 	    <code>"New Project"</code> toolbar button):</p>
  	    
         <img src="/images/modelerguide/new-project.jpg" width="400" height="240" border="0" align="middle"
 		alt="Create Project"/>
  	 	
-		<p>From a list of project types displayed select "Create Application"
-		(the only one available now). A new project will be created.
+		<p>A new project is created with a single empty DataDomain:
 		</p>
-		
-		<p><strong>Create New DataDomain</strong>. First thing to create in a new project
-		is a new DataDomain. Most projects will only have
-		a single DataDomain. Select "Project -> Create DataDomain" menu item or click
- 	    on new domain icon:</p>
- 	    
-        <img src="/images/modelerguide/new-domain.jpg" width="400" height="240" border="0" align="middle"
-		alt="Create DataDomain"/>
+	
+        <img src="/images/modelerguide/new-project-done.jpg" width="400" height="240" border="0" align="middle"
+		alt="New Project Done"/>
  	 	
-		<p>After the domain is created, you can assign it any name you want instead of the default
-		"UntitledDomain1".
+		<p>When you click on "UntitledDomain", this opens an editor for this domain and also activates two new actions: 
+		<code>"Create DataNode"</code> and <code>"Create DataMap"</code>.
 		</p>
-		
-		
-        <p><strong>Save New Project</strong>. When saving a new project you will be prompted to specify
-        location. Main project file, "cayenne.xml", will be saved in a directory that you choose. Locations
-        of project DataMap and DataNode files will be relative to the main project directory.</p>
         </subsection>
     </section>
 </body>

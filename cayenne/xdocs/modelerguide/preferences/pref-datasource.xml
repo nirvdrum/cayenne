@@ -10,6 +10,9 @@
 			useful to separate your local connection information from the one in the deployment environment. For example a JNDI
 			DataNode can be used for the database access from the Modeler in the absence of JNDI container.
 			</p>
+
+<img src="/images/modelerguide/prefs-datasource.jpg" width="560" height="292" border="0" align="middle"
+		alt="Preferences Panel: Local DataSource"/>
 		</subsection>
         </section>
     </body>

@@ -17,7 +17,7 @@
         <p>Database schema used in all tutorials in 
         this chapter is shown below:</p>
             
-        <img src="/images/schema.jpg" width="494" height="250" border="0" 
+        <img src="/images/userguide/quickstart-schema.jpg" width="400" height="200" border="0" 
         align="middle" alt="Art Catalog Schema"/>
     </section>
 </body>

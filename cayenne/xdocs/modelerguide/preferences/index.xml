@@ -13,10 +13,16 @@
 			file under <a href="../modeler-intro/cayenne-user-dir.html">Cayenne user directory</a>. 
 			</p>
 
-			<p>To display Preferences Panel, select <code>"Tools &gt; Preferences"</code> from the menu. 
-			To navigate to a specific type of preferences, select an item from the list on the left. When "Save" button is
-			clicked, preference selections are permanently stored in the preferences database and will not be lost 
-			when the Modeler is restarted.</p>
+			<p>To display Preferences Panel, select <code>"Tools &gt; Preferences"</code> from the menu:</p>
+
+			<img src="/images/modelerguide/prefs-open.jpg" width="400" height="200" border="0" align="middle"
+		alt="Display Preferences Panel"/>
+			<p>A dialog window opens. To navigate to a specific type of preferences, select an item 
+			from the list on the left. When "Save" button is clicked, preference selections are permanently 
+			stored in the preferences database and will not be lost 
+			when Modeler is restarted.</p>
+			<img src="/images/modelerguide/prefs-panel.jpg" width="560" height="292" border="0" align="middle"
+		alt="Preferences Panel"/>
         </section>
     </body>
 </document>
