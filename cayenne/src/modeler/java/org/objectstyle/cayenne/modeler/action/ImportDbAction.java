@@ -149,23 +149,21 @@ public class ImportDbAction extends CayenneAction {
             }
         }
 
-        try {
-            new DbLoaderHelper(mediator, connection, adapter, dsi.getUserName())
-                    .execute();
-        }
-        catch (Throwable th) {
-            logObj.warn("Error on reverse engineering...", th);
-        }
-        finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                }
+        // from here pass control to DbLoaderHelper, running it from a thread separate
+        // from EventDispatch
+
+        final DbLoaderHelper helper = new DbLoaderHelper(
+                mediator,
+                connection,
+                adapter,
+                dsi.getUserName());
+        Thread th = new Thread(new Runnable() {
+
+            public void run() {
+                helper.execute();
             }
-            catch (SQLException e) {
-                logObj.warn("Error closing connection.", e);
-            }
-        }
+        });
+        th.start();
     }
 
     public DbAdapter createAdapter(DataSourceInfo dsi) {

@@ -59,10 +59,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.access.DbLoaderDelegate;
 import org.objectstyle.cayenne.dba.DbAdapter;
@@ -75,6 +80,7 @@ import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
+import org.objectstyle.cayenne.modeler.util.LongRunningTask;
 import org.objectstyle.cayenne.project.NamedObjectFactory;
 
 /**
@@ -83,6 +89,8 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
  * @author Andrei Adamchik
  */
 public class DbLoaderHelper {
+
+    private static final Logger logObj = Logger.getLogger(DbLoaderHelper.class);
 
     // TODO: this is a temp hack... need to delegate to DbAdapter, or configurable in
     // preferences...
@@ -103,6 +111,9 @@ public class DbLoaderHelper {
     protected DataMap dataMap;
     protected String schemaName;
     protected String tableNamePattern;
+    protected List schemas;
+
+    protected String loadStatusNote;
 
     static synchronized DbLoaderMergeDialog getMergeDialogInstance() {
         if (mergeDialog == null) {
@@ -144,79 +155,81 @@ public class DbLoaderHelper {
     }
 
     /**
-     * Performs reverse engineering of the DB using internal DbLoader.
+     * Performs reverse engineering of the DB using internal DbLoader. This method should
+     * be invoked outside EventDispatchThread, or it will throw an exception.
      */
-    public void execute() throws SQLException {
+    public void execute() {
+        stoppingReverseEngineering = false;
 
-        // start by loading schemas...
-        try {
-            loadSchemas();
-        }
-        catch (SQLException ex) {
-            JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
-                    ex.getMessage(),
-                    "Error loading available schemas",
-                    JOptionPane.ERROR_MESSAGE);
-            throw ex;
+        // load schemas...
+        LongRunningTask loadSchemasTask = new LoadSchemasTask(CayenneModelerFrame
+                .getFrame(), "Loading Schemas");
+
+        loadSchemasTask.startAndWait();
+
+        if (stoppingReverseEngineering) {
+            return;
         }
 
-        // init DataMap
-        this.dataMap = mediator.getCurrentDataMap();
-        this.existingMap = dataMap != null;
-        
-        if (!existingMap) {
-            dataMap = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
-            dataMap.setName(NamedObjectFactory.createName(DataMap.class, mediator
-                    .getCurrentDataDomain()));
-            dataMap.setDefaultSchema(schemaName);
-        }
-
-        // do the actual reverse engineering...
-        try {
-            loader.loadDataMapFromDB(schemaName, tableNamePattern, dataMap);
-        }
-        catch (SQLException ex) {
-            JOptionPane.showMessageDialog(
-                    CayenneModelerFrame.getFrame(),
-                    ex.getMessage(),
-                    "Error reverse engineering database",
-                    JOptionPane.ERROR_MESSAGE);
-            throw ex;
-        }
-
-        // fire up events
-        if (mediator.getCurrentDataMap() != null) {
-            mediator.fireDataMapEvent(new DataMapEvent(
-                    CayenneModelerFrame.getFrame(),
-                    dataMap,
-                    MapEvent.CHANGE));
-            mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(CayenneModelerFrame
-                    .getFrame(), dataMap, mediator.getCurrentDataDomain(), mediator
-                    .getCurrentDataNode()));
-        }
-        else {
-            mediator.addDataMap(CayenneModelerFrame.getFrame(), dataMap);
-        }
-    }
-
-    protected void loadSchemas() throws SQLException {
-        DbLoaderOptionsDialog dialog = new DbLoaderOptionsDialog(
-                loader.getSchemas(),
+        final DbLoaderOptionsDialog dialog = new DbLoaderOptionsDialog(
+                schemas,
                 dbUserName);
-        dialog.show();
+
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                public void run() {
+                    dialog.show();
+                    dialog.dispose();
+                }
+            });
+        }
+        catch (Throwable th) {
+            processException(th, "Error Reengineering Database");
+            return;
+        }
+
         if (dialog.getChoice() == DbLoaderOptionsDialog.CANCEL) {
             return;
         }
 
-        dialog.dispose();
         this.schemaName = dialog.getSelectedSchema();
         this.tableNamePattern = dialog.getTableNamePattern();
+
+        // load DataMap...
+        LongRunningTask loadDataMapTask = new LoadDataMapTask(CayenneModelerFrame
+                .getFrame(), "Reengineering DB");
+        loadDataMapTask.startAndWait();
     }
 
-    class LoaderDelegate implements DbLoaderDelegate {
+    protected void processException(final Throwable th, final String message) {
+        cleanup();
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                JOptionPane.showMessageDialog(CayenneModelerFrame.getFrame(), th
+                        .getMessage(), message, JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
+
+    protected void cleanup() {
+        loadStatusNote = "Closing connection...";
+        try {
+            if (loader.getCon() != null) {
+                loader.getCon().close();
+            }
+        }
+        catch (SQLException e) {
+            logObj.warn("Error closing connection.", e);
+        }
+    }
+
+    final class LoaderDelegate implements DbLoaderDelegate {
 
         public boolean overwriteDbEntity(DbEntity ent) throws CayenneException {
+            checkCanceled();
+
             if (!overwritePreferenceSet) {
                 DbLoaderMergeDialog dialog = DbLoaderHelper.getMergeDialogInstance();
                 dialog.initFromModel(DbLoaderHelper.this, ent.getName());
@@ -233,6 +246,10 @@ public class DbLoaderHelper {
         }
 
         public void dbEntityAdded(DbEntity entity) {
+            checkCanceled();
+
+            loadStatusNote = "Importing table '" + entity.getName() + "'...";
+
             // TODO: hack to prevent PK tables from being visible... this should really be
             // delegated to DbAdapter to decide...
             if (EXCLUDED_TABLES.contains(entity.getName()) && entity.getDataMap() != null) {
@@ -245,6 +262,10 @@ public class DbLoaderHelper {
         }
 
         public void objEntityAdded(ObjEntity entity) {
+            checkCanceled();
+
+            loadStatusNote = "Creating ObjEntity '" + entity.getName() + "'...";
+
             if (existingMap) {
                 mediator
                         .fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
@@ -252,6 +273,8 @@ public class DbLoaderHelper {
         }
 
         public void dbEntityRemoved(DbEntity entity) {
+            checkCanceled();
+
             if (existingMap) {
                 mediator.fireDbEntityEvent(new EntityEvent(
                         CayenneModelerFrame.getFrame(),
@@ -261,6 +284,8 @@ public class DbLoaderHelper {
         }
 
         public void objEntityRemoved(ObjEntity entity) {
+            checkCanceled();
+
             if (existingMap) {
                 mediator.fireObjEntityEvent(new EntityEvent(CayenneModelerFrame
                         .getFrame(), entity, EntityEvent.REMOVE));
@@ -270,6 +295,118 @@ public class DbLoaderHelper {
         public void setSchema(DbEntity entity, String schema) {
             // noop, deprecated in the interface
         }
+
+        void checkCanceled() {
+            if (isStoppingReverseEngineering()) {
+                throw new CayenneRuntimeException("Reengineering was canceled.");
+            }
+        }
     }
 
+    abstract class DbLoaderTask extends LongRunningTask {
+
+        public DbLoaderTask(JFrame frame, String title) {
+            super(frame, title);
+            setMinValue(0);
+            setMaxValue(10);
+        }
+
+        protected String getCurrentNote() {
+            return loadStatusNote;
+        }
+
+        protected int getCurrentValue() {
+            return getMinValue();
+        }
+
+        protected boolean isIndeterminate() {
+            return true;
+        }
+
+        public boolean isCanceled() {
+            return isStoppingReverseEngineering();
+        }
+
+        public void setCanceled(boolean b) {
+            if (b) {
+                loadStatusNote = "Canceling..";
+            }
+
+            setStoppingReverseEngineering(b);
+        }
+    }
+
+    final class LoadSchemasTask extends DbLoaderTask {
+
+        public LoadSchemasTask(JFrame frame, String title) {
+            super(frame, title);
+        }
+
+        protected void execute() {
+            loadStatusNote = "Loading available schemas...";
+
+            try {
+                schemas = loader.getSchemas();
+            }
+            catch (Throwable th) {
+                processException(th, "Error Loading Schemas");
+            }
+        }
+    }
+
+    final class LoadDataMapTask extends DbLoaderTask {
+
+        public LoadDataMapTask(JFrame frame, String title) {
+            super(frame, title);
+        }
+
+        protected void execute() {
+
+            loadStatusNote = "Preparing...";
+
+            DbLoaderHelper.this.dataMap = mediator.getCurrentDataMap();
+            DbLoaderHelper.this.existingMap = dataMap != null;
+
+            if (!existingMap) {
+                dataMap = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
+                dataMap.setName(NamedObjectFactory.createName(DataMap.class, mediator
+                        .getCurrentDataDomain()));
+                dataMap.setDefaultSchema(schemaName);
+            }
+
+            if (isCanceled()) {
+                return;
+            }
+
+            loadStatusNote = "Importing tables...";
+
+            try {
+                loader.loadDataMapFromDB(schemaName, tableNamePattern, dataMap);
+            }
+            catch (Throwable th) {
+                if (!isCanceled()) {
+                    processException(th, "Error Reengineering Database");
+                }
+            }
+
+            cleanup();
+
+            // fire up events
+            loadStatusNote = "Updating view...";
+            if (mediator.getCurrentDataMap() != null) {
+                mediator.fireDataMapEvent(new DataMapEvent(
+                        CayenneModelerFrame.getFrame(),
+                        dataMap,
+                        MapEvent.CHANGE));
+                mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(
+                        CayenneModelerFrame.getFrame(),
+                        dataMap,
+                        mediator.getCurrentDataDomain(),
+                        mediator.getCurrentDataNode()));
+            }
+            else {
+                mediator.addDataMap(CayenneModelerFrame.getFrame(), dataMap);
+            }
+        }
+    }
 }
