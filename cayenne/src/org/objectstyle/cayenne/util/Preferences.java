@@ -1,5 +1,3 @@
-package org.objectstyle.cayenne.util;
-
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,7 +52,8 @@ package org.objectstyle.cayenne.util;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.util;
 
 import java.io.*;
 import java.util.logging.Level;
@@ -65,30 +64,41 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.collections.ExtendedProperties;
 
-
+/** 
+ * Class that supports persistent Cayenne preferences. 
+ * Preferences are saved in the user home directory in "<code>.cayenne</code>" 
+ * subdirectory.
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public class Preferences extends ExtendedProperties {
-    static final Logger logObj = Logger.getLogger(Preferences.class.getName());
-    
+	static final Logger logObj = Logger.getLogger(Preferences.class.getName());
+
 	/** Directory for preferences in User home. */
-	private static final String PREF_DIR = ".cayenne";
-	/** Name of the preferences file in the CAYENNE_PREF_DIR.
-	  * General standard for keys in the preferences:
-	  * Use class name (optionally with the package name) and 
-	  * the name of the field which uses this preference. */
-	private static final String PREF = "modeler.preferences";
+	public static final String PREF_DIR = ".cayenne";
+
+	/** 
+	 * Name of the preferences file in the CAYENNE_PREF_DIR.
+	 * General standard for keys in the preferences:
+	 * Use class name (optionally with the package name) and 
+	 * the name of the field which uses this preference. */
+	public static final String PREF = "modeler.preferences";
 
 	/* Keys for the preference file. */
 
 	/** The directory of the cayenne project edited last. */
 	public static final String LAST_DIR = "Editor.lastProject";
-	
+
 	/** The directory where the last EOModel was imported. */
 	public static final String LAST_EOM_DIR = "Editor.lastEOModel";
-	
+
 	/** List of the last 4 opened project files. */
-	public static final String LAST_PROJ_FILES = "Editor.lastSeveralProjectFiles";
+	public static final String LAST_PROJ_FILES =
+		"Editor.lastSeveralProjectFiles";
 	/** The directory of the last generated classes. */
-	public static final String LAST_GENERATED_CLASSES_DIR = "gui.datamap.GenerateClassDialog.lastDir";
+	public static final String LAST_GENERATED_CLASSES_DIR =
+		"gui.datamap.GenerateClassDialog.lastDir";
 	/** User name */
 	public static final String USER_NAME = "DbLoginPanel.unInput";
 	/** JDBC Driver Class */
@@ -97,12 +107,12 @@ public class Preferences extends ExtendedProperties {
 	public static final String DB_URL = "DbLoginPanel.urlInput";
 	/** RDBMS Adapter */
 	public static final String RDBMS_ADAPTER = "DbLoginPanel.adapterInput";
-	
+
 	private static Preferences preferences;
 
+	private Preferences() {
+	}
 
-	private Preferences() {super();}
-	
 	public static Preferences getPreferences() {
 		if (null == preferences) {
 			preferences = new Preferences();
@@ -110,68 +120,71 @@ public class Preferences extends ExtendedProperties {
 		}
 		return preferences;
 	}
-	
-	/** Store preferences.
-	  * Preferences stored to User Home\cayenne\.preferences file. 
-	  * @param frame Used for JOptionPane dialogs. If null, default frame used.*/
+
+	/** 
+	 * Returns preferences directory <code>$HOME/.cayenne</code>. 
+	 * If such directory does not exist, it is created as a side 
+	 * effect of this method.
+	 */
+	public File prefsDir() {
+		File homeDir = new File(System.getProperty("user.home"));
+		File prefsDir = new File(homeDir, PREF_DIR);
+		
+		if(!prefsDir.exists()) {
+			prefsDir.mkdirs();
+		}
+		
+		return prefsDir;
+	}
+
+	/** 
+	 * Saves preferences. Preferences stored in
+	 * <code>$HOME/.cayenne/modeler.preferences</code> file. 
+	 */
 	public void storePreferences(JFrame frame) {
-		logObj.fine("Storing preferences");
-		String home_dir = System.getProperty("user.home");
-		if (null == home_dir)
-			home_dir = "";
-		String pref_dir = home_dir + File.separator + PREF_DIR 
-						+ File.separator + PREF;
-		File pref_file = new File(pref_dir);
+		File prefFile = new File(prefsDir(), PREF);
 		try {
-			if (!pref_file.exists()) {
-				logObj.fine("Cannot save preferences - file " 
-									+ pref_dir + " does not exist");
+			if (!prefFile.exists()) {
+				logObj.fine(
+					"Cannot save preferences - file "
+						+ prefFile
+						+ " does not exist");
 				return;
 			}
-			save(new FileOutputStream(pref_file), "");
+			save(new FileOutputStream(prefFile), "");
 		} catch (IOException e) {
-			logObj.log(Level.INFO, "Error saving preferences: ", e.getMessage());
+			logObj.log(
+				Level.INFO,
+				"Error saving preferences: ",
+				e.getMessage());
 		}
 	}
-	
-	/** Store preferences.
-	  * Preferences stored to User Home\cayenne\.preferences file. 
-	  * @param frame Used for JOptionPane dialogs. If null, default frame used.*/
+
+
+	/** 
+	 * Loads preferences from <code>$HOME/.cayenne/modeler.preferences</code> 
+	 * file.
+	 */
 	public void loadPreferences(JFrame frame) {
-		String home_dir = System.getProperty("user.home");
-		if (null == home_dir) {
-			JOptionPane.showMessageDialog(frame
-							, "User home directory is not specified. "
-							+ " Loading from current directory");
-			home_dir = "";
-		}
-		String pref_dir = home_dir + File.separator + PREF_DIR;
-		logObj.fine("Preferences dir path is " + pref_dir);
-		File pref_dir_file = new File(pref_dir);
 		try {
-			if (!pref_dir_file.exists()) {
-				if (false == pref_dir_file.mkdir()) {
-					JOptionPane.showMessageDialog(frame
-							, "Error creating preferences directory. ");
+			File prefsFile = new File(prefsDir(), PREF);
+			if (!prefsFile.exists()) {
+				if (!prefsFile.createNewFile()) {
+					JOptionPane.showMessageDialog(
+						frame,
+						"Error creating preferences file. ");
 					return;
 				}
 			}
-			String pref_file_name = pref_dir + File.separator + PREF;
-			File pref_file = new File(pref_file_name);
-			if (!pref_file.exists()) {
-				if (false == pref_file.createNewFile()) {
-					JOptionPane.showMessageDialog(frame
-							, "Error creating preferences file. ");
-					return;
-				}
-			}
-			load(new FileInputStream(pref_file));
+			
+			load(new FileInputStream(prefsFile));
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(frame
-							, "Error loading preferences. Preferences ignored. ");
+			JOptionPane.showMessageDialog(
+				frame,
+				"Error loading preferences. Preferences ignored. ");
 			System.out.println(e.getMessage());
 			e.printStackTrace();
 		}
 	}
-	
-}// End class Preferences
+
+}

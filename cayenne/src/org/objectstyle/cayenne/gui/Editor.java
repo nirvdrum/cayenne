@@ -58,8 +58,7 @@ package org.objectstyle.cayenne.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -73,6 +72,7 @@ import org.objectstyle.cayenne.gui.util.RecentFileMenu;
 import org.objectstyle.cayenne.gui.util.XmlFilter;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.objectstyle.cayenne.util.Preferences;
 
 /** 
@@ -647,7 +647,10 @@ public class Editor
 	}
 
 	public static void main(String[] args) {
-		JFrame frame = new Editor();
+		// redirect all logging to the log file
+		configLogging();
+
+		Editor frame = new Editor();
 		//Center the window
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		Dimension frameSize = frame.getSize();
@@ -661,6 +664,28 @@ public class Editor
 			(screenSize.width - frameSize.width) / 2,
 			(screenSize.height - frameSize.height) / 2);
 		frame.setVisible(true);
+	}
+
+	/** 
+	 * Configures modeler to log its stdout and stderr to a logfile.
+	 */
+	public static void configLogging() {
+		try {
+			String log =
+				Preferences.getPreferences().prefsDir().getCanonicalPath()
+					+ File.separator
+					+ "modeler.log";
+			Logger p1 = logObj;
+			Logger p2 = null;
+			while ((p2 = p1.getParent()) != null) {
+				p1 = p2;
+			}
+			p1.addHandler(
+				new CayenneFileHandler(log, 2 * 1024 * 1024, 4, true));
+		}
+		catch(IOException ioex) {
+			logObj.log(Level.WARNING, "Error setting logging.", ioex);
+		}
 	}
 
 	/**
