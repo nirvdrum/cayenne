@@ -71,8 +71,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbKeyGenerator;
 
 /**
- * Default PK generator for PostgreSQL. Since Cayenne 1.2 inhertis from OraclePkGenerator
- * and uses sequences instead of AUTO_PK_TABLE.
+ * Default PK generator for PostgreSQL that uses sequences for PK generation.
  */
 public class PostgresPkGenerator extends OraclePkGenerator {
 
@@ -95,11 +94,7 @@ public class PostgresPkGenerator extends OraclePkGenerator {
      * <code>dbEntity</code>. Executed SQL looks like this:
      * 
      * <pre>
-     * 
-     *  
-     *   SELECT pk_table_name.nextval FROM DUAL
-     *   
-     *  
+     *   SELECT nextval(pk_table_name)
      * </pre>
      */
     protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
