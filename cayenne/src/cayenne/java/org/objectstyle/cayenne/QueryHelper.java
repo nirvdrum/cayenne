@@ -197,7 +197,7 @@ public final class QueryHelper {
         }
 
         SelectQuery sel = new SelectQuery();
-        sel.setRoot(((ObjectId) oids.get(1)).getObjClass());
+        sel.setRoot(((ObjectId) oids.get(0)).getObjClass());
 
         Iterator it = oids.iterator();
 

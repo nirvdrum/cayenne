@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A mapping descriptor for the database stored procedure.
+ * A mapping descriptor for a database stored procedure.
  * 
  * @author Andrei Adamchik
  */

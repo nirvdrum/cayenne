@@ -92,11 +92,11 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class IncrementalFaultList implements List {
     private static Logger logObj = Logger.getLogger(IncrementalFaultList.class);
 
-    protected volatile int pageSize;
-    protected volatile List elements;
-    protected volatile DataContext dataContext;
-    protected volatile ObjEntity rootEntity;
-    protected volatile SelectQuery internalQuery;
+    protected int pageSize;
+    protected List elements;
+    protected DataContext dataContext;
+    protected ObjEntity rootEntity;
+    protected SelectQuery internalQuery;
     protected int unfetchedObjects;
 
     /**
