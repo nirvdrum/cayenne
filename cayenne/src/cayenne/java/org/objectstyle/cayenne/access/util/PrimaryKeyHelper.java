@@ -245,7 +245,7 @@ public class PrimaryKeyHelper {
 
 	private List collectAllDbEntities() {
 		List entities = new ArrayList();
-		for (Iterator i = queryEngine.getDataMapsAsList().iterator();
+		for (Iterator i = queryEngine.getDataMaps().iterator();
 			i.hasNext();
 			) {
 			entities.addAll(((DataMap) i.next()).getDbEntitiesAsList());

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -79,7 +80,10 @@ public abstract class Entity extends MapObject {
     public static final String PATH_SEPARATOR = ".";
 
     protected CayenneMap attributes = new CayenneMap(this);
+	protected Map attributesMapRef = Collections.unmodifiableMap(attributes);
+	protected Collection attributesRef = Collections.unmodifiableCollection(attributes.values());
     protected CayenneMap relationships = new CayenneMap(this);
+    protected Collection relationshipsRef = Collections.unmodifiableCollection(relationships.values());
     protected CayenneMap queries = new CayenneMap(this);
 
     /**
@@ -200,32 +204,48 @@ public abstract class Entity extends MapObject {
         return Collections.unmodifiableMap(relationships);
     }
 
-    /** Returns a list of Relationship's that exist in this entity. */
-    public List getRelationshipList() {
-        List list = new ArrayList();
-        Iterator it = relationships.keySet().iterator();
-        while (it.hasNext()) {
-            list.add(relationships.get(it.next()));
-        }
+	/**
+	 * Returns a list of Relationships that exist in this entity.
+	 * @deprecated Since 1.0 Beta1; use #getRelationships() instead.
+	 */
+	public List getRelationshipList() {
+		List list = new ArrayList();
+		Iterator it = relationships.keySet().iterator();
+		while (it.hasNext()) {
+			list.add(relationships.get(it.next()));
+		}
 
-        return list;
-    }
+		return list;
+	}
 
-    /** Returns entity attributes as an unmodifiable map. */
+	/**
+	 * Returns a collection of Relationships that exist in this entity.
+	 */
+	public Collection getRelationships() {
+		return relationshipsRef;
+	}
+
+    /**
+     * Returns entity attributes as an unmodifiable map.
+     */
     public Map getAttributeMap() {
-        return Collections.unmodifiableMap(attributes);
+    	return attributesMapRef;
     }
 
-    /** Returns entity attributes as a list. */
-    public List getAttributeList() {
-        List list = new ArrayList();
-        Iterator it = attributes.keySet().iterator();
-        while (it.hasNext()) {
-            list.add(attributes.get(it.next()));
-        }
+	/**
+	 * Returns entity attributes as a list.
+	 * @deprecated Since 1.0 Beta1; use #getAttributes() instead.
+	 */
+	public List getAttributeList() {
+		return new ArrayList(this.getAttributes());
+	}
 
-        return list;
-    }
+	/**
+	 * Returns entity attributes.
+	 */
+	public Collection getAttributes() {
+		return attributesRef;
+	}
 
     /**
      * Processes expression <code>objPathExp</code> and returns an Iterator

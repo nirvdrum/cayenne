@@ -56,6 +56,8 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -83,9 +85,11 @@ public class EntityResolver {
     protected Map dbEntityCache;
     protected Map objEntityCache;
     protected List maps;
+    protected List mapsRef;
 
     public EntityResolver() {
         this.maps = new ArrayList();
+        this.mapsRef = Collections.unmodifiableList(maps);
         this.dbEntityCache = new HashMap();
         this.objEntityCache = new HashMap();
     }
@@ -93,9 +97,9 @@ public class EntityResolver {
     /**
      * Constructor for EntityResolver.
      */
-    public EntityResolver(List dataMaps) {
+    public EntityResolver(Collection dataMaps) {
         this();
-        maps.addAll(dataMaps); //Take a copy
+        this.maps.addAll(dataMaps); //Take a copy
         this.constructCache();
     }
 
@@ -134,18 +138,26 @@ public class EntityResolver {
         return null;
     }
 
-    public synchronized void setDataMaps(List maps) {
+    public synchronized void setDataMaps(Collection maps) {
         this.maps.clear();
         this.maps.addAll(maps);
         clearCache();
     }
 
-    /**
-     * Returns a list of internal DataMaps by copy.
-     */
-    public List getDataMapsList() {
-        return new ArrayList(maps);
-    }
+	/**
+	 * Returns a list of internal DataMaps by copy.
+	 * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
+	 */
+	public List getDataMapsList() {
+		return new ArrayList(maps);
+	}
+
+	/**
+	 * Returns a list of internal DataMaps by copy.
+	 */
+	public Collection getDataMaps() {
+		return mapsRef;
+	}
 
     /**
      * Removes all entity mappings from the cache.

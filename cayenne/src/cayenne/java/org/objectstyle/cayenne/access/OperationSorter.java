@@ -316,8 +316,6 @@ public class OperationSorter {
 				this.rel = relationship;
     		ObjEntity targetEntity=(ObjEntity)this.rel.getTargetEntity();
 				try {
-//				  this.targetClass =
-//						Class.forName(targetEntity.getClassName());
                   this.targetClass =
                       Configuration.getResourceLoader().loadClass(targetEntity.getClassName());
 				} catch (Exception e) {
@@ -352,7 +350,7 @@ public class OperationSorter {
 					// we do a quick check at the dbrelationship/snapshot level just to be sure.  If
 					// an object turns up, then it must have been the above situation, so we use that object
 					if(dest==null) {
-						DbRelationship finalRel= (DbRelationship) toOneRel.getDbRelationshipList().get(0);
+						DbRelationship finalRel = (DbRelationship)toOneRel.getDbRelationships().get(0);
 						Map snapshot=obj.getCommittedSnapshot();
 						if(snapshot==null) {
 							snapshot=obj.getCurrentSnapshot();
@@ -717,7 +715,7 @@ public class OperationSorter {
 					foundEntities = new HashSet();
 				}
 				foundEntities.add(start);
-				Iterator relIterator = start.getRelationshipList().iterator();
+				Iterator relIterator = start.getRelationships().iterator();
 				while (relIterator.hasNext()) {
 					DbRelationship thisRel = (DbRelationship) relIterator.next();
 					//When looking for entities to do after 'start', then if the rel is toMany *OR* it's dependent,

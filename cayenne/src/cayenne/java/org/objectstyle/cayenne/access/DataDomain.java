@@ -96,18 +96,18 @@ public class DataDomain implements QueryEngine {
 	protected String name;
 
 	/** Stores mapping of data nodes to DataNode name keys. */
-	protected Map dataNodes = Collections.synchronizedMap(new HashMap());
-	protected Map nodesByDbEntityName =
-		Collections.synchronizedMap(new HashMap());
+	protected Map nodes = Collections.synchronizedMap(new HashMap());
+	protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
+	protected Collection nodesRef = Collections.unmodifiableCollection(nodes.values());
 
 	/** Stores DataMaps by name. */
 	protected Map maps = Collections.synchronizedMap(new HashMap());
+	protected Map mapsRef = Collections.unmodifiableMap(maps);
 
 	/** Stores mapping of data nodes to ObjEntity names.
 	  * Its goal is to speed up lookups for data operation
 	  * switching. */
-	protected Map nodesByEntityName =
-		Collections.synchronizedMap(new HashMap());
+	protected Map nodesByEntityName = Collections.synchronizedMap(new HashMap());
 
 	protected EntityResolver entityResolver;
 
@@ -154,9 +154,9 @@ public class DataDomain implements QueryEngine {
 		}
 
 		// remove from data nodes
-		Iterator it = dataNodes.keySet().iterator();
+		Iterator it = nodes.keySet().iterator();
 		while (it.hasNext()) {
-			DataNode node = (DataNode) dataNodes.get(it.next());
+			DataNode node = (DataNode) nodes.get(it.next());
 			node.removeDataMap(mapName);
 		}
 
@@ -166,10 +166,10 @@ public class DataDomain implements QueryEngine {
 
 	/** Unregisters DataNode. Also removes entities mapped to the current node. */
 	public synchronized void removeDataNode(String nodeName) {
-		DataNode node_to_remove = (DataNode) dataNodes.get(nodeName);
+		DataNode node_to_remove = (DataNode) nodes.get(nodeName);
 		if (null == node_to_remove)
 			return;
-		dataNodes.remove(nodeName);
+		nodes.remove(nodeName);
 		Iterator iter = nodesByEntityName.keySet().iterator();
 		while (iter.hasNext()) {
 			String text = (String) iter.next();
@@ -189,40 +189,39 @@ public class DataDomain implements QueryEngine {
 
 	}
 
-	/** Returns a list of registered DataMap objects. */
+	/**
+	 * Returns a list of registered DataMap objects.
+	 * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
+	 */
 	public List getDataMapsAsList() {
 		synchronized (maps) {
-			return new ArrayList(maps.values());
+			return new ArrayList(this.getDataMaps());
 		}
+	}
+
+	/**
+	 * Returns a collection of registered DataMaps.
+	 */
+	public Collection getDataMaps() {
+		return mapsRef.values();
 	}
 
 	/**
 	 * Returns a list of DataNodes associated with this domain.
 	 * List is returned by copy.
+	 * @deprecated Since 1.0 Beta1; use #getDataNodes instead.
 	 */
 	public List getDataNodesAsList() {
-		synchronized (dataNodes) {
-			return new ArrayList(dataNodes.values());
+		synchronized (nodes) {
+			return new ArrayList(this.getDataNodes());
 		}
 	}
 
 	/**
-	 * Returns an array of DataNodes (by copy)
-	 * @deprecated since b1; use #getDataNodesAsList instead.
+	 * Returns an unmodifiable collection of DataNodes associated with this domain.
 	 */
-	public DataNode[] getDataNodes() {
-		DataNode[] dataNodesArray = null;
-		synchronized (dataNodes) {
-			Collection nodes = dataNodes.values();
-
-			if (nodes == null || nodes.size() == 0)
-				dataNodesArray = new DataNode[0];
-			else {
-				dataNodesArray = new DataNode[nodes.size()];
-				nodes.toArray(dataNodesArray);
-			}
-		}
-		return dataNodesArray;
+	public Collection getDataNodes() {
+		return nodesRef;
 	}
 
 	/**
@@ -230,8 +229,8 @@ public class DataDomain implements QueryEngine {
 	 * of available nodes.
 	 */
 	public void reset() {
-		synchronized (dataNodes) {
-			dataNodes.clear();
+		synchronized (nodes) {
+			nodes.clear();
 			nodesByEntityName.clear();
 			nodesByDbEntityName.clear();
 			if (entityResolver != null) {
@@ -251,9 +250,9 @@ public class DataDomain implements QueryEngine {
 
 	/** Adds new DataNode to this domain. */
 	public void addNode(DataNode node) {
-		synchronized (dataNodes) {
+		synchronized (nodes) {
 			// add node to name->node map
-			dataNodes.put(node.getName(), node);
+			nodes.put(node.getName(), node);
 
 			// add node to "ent name->node" map
 			Iterator nodeMaps = node.getDataMapsAsList().iterator();
@@ -282,7 +281,7 @@ public class DataDomain implements QueryEngine {
 	/** Returns registered DataNode whose name matches
 	  * <code>name</code> parameter. */
 	public DataNode getNode(String nodeName) {
-		return (DataNode) dataNodes.get(nodeName);
+		return (DataNode) nodes.get(nodeName);
 	}
 
 	/**

@@ -60,10 +60,12 @@ public abstract class Relationship extends MapObject {
 	protected String targetEntityName;
 	protected boolean toMany;
 
-	public Relationship() {}
+	public Relationship() {
+	}
 
 	public Relationship(String name) {
-		setName(name);
+		this();
+		this.setName(name);
 	}
 
 	/** Returns relationship source entity. */
@@ -85,9 +87,9 @@ public abstract class Relationship extends MapObject {
 	 */
 	public void setTargetEntity(Entity targetEntity) {
 		if (targetEntity != null) {
-			setTargetEntityName(targetEntity.getName());
+			this.setTargetEntityName(targetEntity.getName());
 		} else {
-			setTargetEntityName(null);
+			this.setTargetEntityName(null);
 		}
 	}
 
@@ -129,7 +131,7 @@ public abstract class Relationship extends MapObject {
 		}
 
 		sb.append("Source entity: ");
-		Entity src = getSourceEntity();
+		Entity src = this.getSourceEntity();
 		if (src == null) {
 			sb.append("<null>");
 		} else {
@@ -137,7 +139,7 @@ public abstract class Relationship extends MapObject {
 		}
 
 		sb.append(" Target entity: ");
-		Entity target = getTargetEntity();
+		Entity target = this.getTargetEntity();
 		if (target == null)
 			sb.append("<null>");
 		else

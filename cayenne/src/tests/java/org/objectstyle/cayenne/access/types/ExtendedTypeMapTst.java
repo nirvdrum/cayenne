@@ -115,7 +115,7 @@ public class ExtendedTypeMapTst extends CayenneTestCase {
         }
 
         /**
-         * @deprecated 
+         * @deprecated Since 1.0 Beta1
          */
         public Object toJdbcObject(Object val, int type) throws Exception {
             return new Object();

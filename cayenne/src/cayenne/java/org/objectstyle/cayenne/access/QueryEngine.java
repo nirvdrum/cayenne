@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.objectstyle.cayenne.map.ObjEntity;
@@ -96,9 +97,17 @@ public interface QueryEngine {
      */
     public EntityResolver getEntityResolver();
 
-    /** 
-     * Returns a list of DataMap objects associated with this QueryEngine.
-     */
-    public List getDataMapsAsList();
+	/** 
+	 * Returns a list of DataMap objects associated with this QueryEngine.
+	 * @deprecated Since 1.0 beta 1; use #getDataMaps() instead.
+	 */
+	public List getDataMapsAsList();
+
+	/** 
+	 * Returns an unmodifiable collection of DataMap objects associated
+	 * with this QueryEngine.
+	 */
+	public Collection getDataMaps();
+
 }
 

@@ -183,7 +183,7 @@ public class DefaultResultIterator implements ResultIterator {
     }
 
     /**
-     * @deprecated since 1.0-Beta1 this method is no longer used.
+     * @deprecated Since 1.0 Beta1 this method is no longer used.
      */
     protected void init(SelectQueryAssembler assembler)
         throws SQLException, CayenneException {

@@ -59,7 +59,8 @@ package org.objectstyle.cayenne.access;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -136,24 +137,22 @@ public class DataNode implements QueryEngine {
         this.dataSourceFactory = dataSourceFactory;
     }
 
-    /**
-     * Returns a list of DataMaps handled by this DataNode.
-     */
-    public List getDataMapsAsList() {
-        return entityResolver.getDataMapsList();
-    }
+	/**
+	 * Returns a list of DataMaps handled by this DataNode.
+	 * @deprecated Since 1.0 Beta1; use #getDataMaps() instead.
+	 */
+	public List getDataMapsAsList() {
+		return entityResolver.getDataMapsList();
+	}
 
-    /**
-     * Returns an array of DataMaps handled by this DataNode.
-     * @deprecated since b1; use #getDataMapsAsList() instead.
-     */
-    public DataMap[] getDataMaps() {
-        List maps = entityResolver.getDataMapsList();
-        DataMap[] mapsArray = new DataMap[maps.size()];
-        return (DataMap[]) maps.toArray(mapsArray);
-    }
+	/**
+	 * Returns a collection of DataMaps handled by this DataNode.
+	 */
+	public Collection getDataMaps() {
+		return entityResolver.getDataMapsList();
+	}
 
-    public void setDataMaps(List dataMaps) {
+    public void setDataMaps(Collection dataMaps) {
         entityResolver.setDataMaps(dataMaps);
         dependencySorter.indexSorter(this);
     }
@@ -464,9 +463,7 @@ public class DataNode implements QueryEngine {
     }
 
     public void performQuery(Query query, OperationObserver opObserver) {
-        List qWrapper = new ArrayList(1);
-        qWrapper.add(query);
-        this.performQueries(qWrapper, opObserver);
+        this.performQueries(Collections.singletonList(query), opObserver);
     }
 
     /**

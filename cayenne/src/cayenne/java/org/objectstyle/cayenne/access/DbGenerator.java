@@ -338,7 +338,7 @@ public class DbGenerator {
 		}
 
 		List list = new ArrayList();
-		Iterator it = dbEnt.getRelationshipList().iterator();
+		Iterator it = dbEnt.getRelationships().iterator();
 		while (it.hasNext()) {
 			DbRelationship rel = (DbRelationship) it.next();
 			if (!rel.isToMany() && !rel.isToDependentPK()) {

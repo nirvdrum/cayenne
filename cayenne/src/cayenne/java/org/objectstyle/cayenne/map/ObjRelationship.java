@@ -75,18 +75,21 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  */
 public class ObjRelationship extends Relationship {
 
-	//What to do with any inverse relationship when the source object
+	// What to do with any inverse relationship when the source object
 	// is deleted
 	private int deleteRule = DeleteRule.NO_ACTION;
 
-	//Not flattened initially - will be set when dbRels are added that make it flattened
+	// Not flattened initially;
+	// will be set when dbRels are added that make it flattened
 	private boolean isFlattened = false;
 
-	//Initially all relationships are read/write - a flattened relationship may be readonly (in certain circumstances)
-	//Will be set in that case
+	// Initially all relationships are read/write;
+	// a flattened relationship may be readonly (in certain circumstances),
+	// will be set in that case
 	private boolean isReadOnly = false;
 
 	private List dbRelationships = new ArrayList();
+	private List dbRelationshipsRef = Collections.unmodifiableList(dbRelationships);
 
 	public ObjRelationship() {
 	}
@@ -126,22 +129,23 @@ public class ObjRelationship extends Relationship {
 		return map.getObjEntity(getTargetEntityName(), true);
 	}
 
-	/** Returns true if underlying DbRelationships point to dependent entity. */
+	/**
+	 * Returns true if underlying DbRelationships point to dependent entity.
+	 */
 	public boolean isToDependentEntity() {
 		return ((DbRelationship) dbRelationships.get(0)).isToDependentPK();
 	}
 
-	/** Returns ObjRelationship that is the opposite of this ObjRelationship.
-	* returns null if no such relationship exists. */
+	/**
+	 * Returns ObjRelationship that is the opposite of this ObjRelationship.
+	 * returns null if no such relationship exists.
+	 */
 	public ObjRelationship getReverseRelationship() {
-		Entity target = getTargetEntity();
-		Entity src = getSourceEntity();
-
 		// reverse the list
 		List reversed = new ArrayList();
-		Iterator rit = getDbRelationshipList().iterator();
+		Iterator rit = this.getDbRelationships().iterator();
 		while (rit.hasNext()) {
-			DbRelationship rel = (DbRelationship) rit.next();
+			DbRelationship rel = (DbRelationship)rit.next();
 			DbRelationship reverse = rel.getReverseRelationship();
 			if (reverse == null)
 				return null;
@@ -149,13 +153,16 @@ public class ObjRelationship extends Relationship {
 			reversed.add(0, reverse);
 		}
 
-		Iterator it = target.getRelationshipList().iterator();
+		Entity target = this.getTargetEntity();
+		Entity src = this.getSourceEntity();
+
+		Iterator it = target.getRelationships().iterator();
 		while (it.hasNext()) {
-			ObjRelationship rel = (ObjRelationship) it.next();
+			ObjRelationship rel = (ObjRelationship)it.next();
 			if (rel.getTargetEntity() != src)
 				continue;
 
-			List otherRels = rel.getDbRelationshipList();
+			List otherRels = rel.getDbRelationships();
 			if (reversed.size() != otherRels.size())
 				continue;
 
@@ -175,19 +182,29 @@ public class ObjRelationship extends Relationship {
 		return null;
 	}
 
-	/** Returns a list of underlying DbRelationships */
+	/**
+	 * Returns a list of underlying DbRelationships.
+	 * @deprecated Since 1.0 Beta1; use #getDbRelationships() instead.
+	 */
 	public List getDbRelationshipList() {
-		return Collections.unmodifiableList(dbRelationships);
+		return this.getDbRelationships();
+	}
+
+	/**
+	 * Returns a list of underlying DbRelationships.
+	 */
+	public List getDbRelationships() {
+		return dbRelationshipsRef;
 	}
 
 	/** Appends a DbRelationship to the existing list of DbRelationships.*/
 	public void addDbRelationship(DbRelationship dbRel) {
 		//Adding a second is creating a flattened relationship.
 		//Ensure that the new relationship properly continues on the flattened path
-		if (dbRelationships.size() > 0) {
+		int numDbRelationships = dbRelationships.size(); 
+		if (numDbRelationships > 0) {
 			DbRelationship lastRel =
-				(DbRelationship) dbRelationships.get(
-					dbRelationships.size() - 1);
+				(DbRelationship)dbRelationships.get(numDbRelationships - 1);
 			if (!lastRel
 				.getTargetEntityName()
 				.equals(dbRel.getSourceEntity().getName())) {
@@ -248,17 +265,17 @@ public class ObjRelationship extends Relationship {
 					+ " could not obtain a DataMap for the destination of "
 					+ firstRel.getName());
 		}
-		DbEntity intermediateEntity =
-			map.getDbEntity(firstRel.getTargetEntityName(), true);
+
+		DbEntity intermediateEntity = map.getDbEntity(firstRel.getTargetEntityName(), true);
 		List pkAttribs = intermediateEntity.getPrimaryKey();
-		List allAttribs = intermediateEntity.getAttributeList();
-		int i;
-		for (i = 0; i < allAttribs.size(); i++) {
-			if (!pkAttribs.contains(allAttribs.get(i))) {
+		Iterator allAttribs = intermediateEntity.getAttributes().iterator();
+		while (allAttribs.hasNext()) {
+			if (!pkAttribs.contains(allAttribs.next())) {
 				return true;
 				//one of the attributes of intermediate entity is not in the pk.  Must be readonly
 			}
 		}
+
 		return false;
 	}
 

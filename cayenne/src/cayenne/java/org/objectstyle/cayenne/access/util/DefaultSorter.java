@@ -134,7 +134,7 @@ public class DefaultSorter implements DependencySorter {
         Collection tables = new ArrayList();
         dbEntityToTableMap = new HashMap();
         reflexiveDbEntities = new HashMap();
-        for (Iterator i = queryEngine.getDataMapsAsList().iterator();
+        for (Iterator i = queryEngine.getDataMaps().iterator();
             i.hasNext();
             ) {
             DataMap map = (DataMap) i.next();

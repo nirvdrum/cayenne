@@ -561,7 +561,7 @@ public class DbLoader {
                 continue;
             }
 
-            Iterator relIt = dbEnt.getRelationshipList().iterator();
+            Iterator relIt = dbEnt.getRelationships().iterator();
             while (relIt.hasNext()) {
                 DbRelationship dbRel = (DbRelationship) relIt.next();
                 ObjRelationship objRel = new ObjRelationship(dbRel.getName());
@@ -578,7 +578,7 @@ public class DbLoader {
     }
 
     /**
-     * @deprecated Since Beta 1 use <code>createDataMapFromDB</code> with table
+     * @deprecated Since 1.0 Beta1 use <code>createDataMapFromDB</code> with table
      * name pattern parameter.
      */
     public DataMap createDataMapFromDB(String schemaName) throws SQLException {

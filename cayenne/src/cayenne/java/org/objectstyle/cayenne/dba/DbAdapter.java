@@ -127,7 +127,7 @@ public interface DbAdapter {
     public String[] externalTypesForJdbcType(int type);
 
     /**
-     * @deprecated Since 1.0Beta1 'getExtendedTypes' is used since this method
+     * @deprecated Since 1.0 Beta1 'getExtendedTypes' is used since this method
      * name is confusing.
      */
     public ExtendedTypeMap getTypeConverter();

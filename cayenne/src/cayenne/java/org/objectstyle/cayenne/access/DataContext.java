@@ -496,7 +496,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         //Do the right thing with all the relationships of the deleted object
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
-        Iterator relationshipIterator = entity.getRelationshipList().iterator();
+        Iterator relationshipIterator = entity.getRelationships().iterator();
         while (relationshipIterator.hasNext()) {
             ObjRelationship thisRelationship =
                 (ObjRelationship) relationshipIterator.next();
@@ -1176,12 +1176,18 @@ public class DataContext implements QueryEngine, Serializable {
         return this.postDataContextTransactionEvents;
     }
 
-    public List getDataMapsAsList() {
-        return (parent != null)
-            ? parent.getDataMapsAsList()
-            : Collections.EMPTY_LIST;
-    }
+	/**
+	 * @deprecated Since 1.0 Beta 1; use getDataMaps instead.
+	 */
+	public List getDataMapsAsList() {
+		return new ArrayList(this.getDataMaps());
+	}
 
+	public Collection getDataMaps() {
+		return (parent != null)
+			? parent.getDataMaps()
+			: Collections.EMPTY_LIST;
+	}
 
     void fireWillCommit() {
         // post event: WILL_COMMIT
