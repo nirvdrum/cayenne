@@ -157,10 +157,13 @@ public class ProjectConfigurator {
                 targetDriverFile.delete();
             }
 
-            if (nodeInfo.getDriverFile() == null) {           
+            if (nodeInfo.getDriverFile() != null
+                && !nodeInfo.getDriverFile().equals(targetDriverFile)) {
                 // need to copy file from another location
-                if(!Util.copy(nodeInfo.getDriverFile(), targetDriverFile)) {
-                	throw new ProjectException("Can't copy driver file from " + nodeInfo.getDriverFile());
+                if (!Util.copy(nodeInfo.getDriverFile(), targetDriverFile)) {
+                    throw new ProjectException(
+                        "Can't copy driver file from "
+                            + nodeInfo.getDriverFile());
                 }
             }
         }

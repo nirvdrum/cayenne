@@ -71,6 +71,9 @@ import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.DomainEvent;
+import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.util.Util;
 
 /** 
  * Detail view of the Data Domain
@@ -109,7 +112,8 @@ public class DomainDetailView
         left_comp[0] = nameLabel;
         Component[] right_comp = new Component[1];
         right_comp[0] = name;
-        JPanel temp = PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
+        JPanel temp =
+            PanelFactory.createForm(left_comp, right_comp, 5, 5, 5, 5);
         Spring pad = Spring.constant(5);
         Spring ySpring = pad;
         add(temp);
@@ -129,19 +133,30 @@ public class DomainDetailView
     }
 
     private void textFieldChanged(DocumentEvent e) {
-        if (ignoreChange)
+        if (ignoreChange) {
             return;
-        String new_name = name.getText();
-        DataDomain domain = mediator.getCurrentDataDomain();
-        // If name hasn't changed, do nothing
-        if (new_name.equals(domain.getName()))
-            return;
-        domain.setName(new_name);
-        DomainEvent event;
-        event = new DomainEvent(this, domain, oldName);
-        mediator.fireDomainEvent(event);
-        oldName = new_name;
+        }
 
+        DataDomain domain = mediator.getCurrentDataDomain();
+        String newName = name.getText();
+        String aName = domain.getName();
+
+        // If name hasn't changed, do nothing
+        if (Util.nullSafeEquals(newName, aName)) {
+            return;
+        }
+
+        domain.setName(newName);
+
+        Project project = Editor.getProject();
+        if (project instanceof ApplicationProject) {
+            ((ApplicationProject) project).getConfig().removeDomain(aName);
+            ((ApplicationProject) project).getConfig().addDomain(domain);
+        }
+
+        DomainEvent event = new DomainEvent(this, domain, aName);
+        mediator.fireDomainEvent(event);
+        oldName = newName;
     }
 
     public void currentDomainChanged(DomainDisplayEvent e) {
