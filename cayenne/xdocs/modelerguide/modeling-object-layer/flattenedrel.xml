@@ -1,35 +1,31 @@
 <document>
-<title>User Guide - Flattened relationships</title>
-<toc name="toc-user-guide" chapter="12. Advanced Modeling"/>  
+<title>User Guide - Flattened Relationships</title>
+<toc name="toc-modeler-guide" chapter="6. Modeling Object Layer"/>  
 <body>
-    <section name="12. Advanced Modeling">
-    	<subsection name="12.1 Flattened relationships">
-	<p>
-	Flattened relationships take a sequence (or path) of Object level 
-	relationships, and "flatten" them into the root entity.  For example if we
-	had an Employee entity, with a toOne relationship "toDept" to the Department 
-	entity; and the Department entity has a toOne relationship "toCorporateUnit" to the 
-	CorporateUnit entity, indicating the unit the department belongs to.  We could create
-	a flattened relationship from Employee to CorporateUnit, following toDept.toCorporateUnit
-	relationship path.
-	The generated class files for Employee would then contain a getToCorporateUnit() 
-	method, which when called will return the Unit for the Department to which
-	this employee belongs.  The class will also contain a setToCorporateUnit() method,
-	but this will throw an exception if used, as the relationship is considered
-	read-only.  The slight advantage of this setup would come if you did not
-	intend on touching Department very often, and would much more likely be wanting
-	to find an Employee's CorporateUnit.  When an employee is fetched, it's corporate unit object 
-	will be in the HOLLOW state.  When an attribute of that object is read, the object itself is 
-	transparently fetched.
-	</p>
-	<p>
-	These flattened relationships work across any particular combination of toOne and toMany DbRelationships.
-	If all the relationships are toOne, then the resultant flattened relationship is toOne.  If any are toMany, the result
-	is toMany.  Most of the possible combinations are read only, but a certain particularly useful subset are read-write:
-	Many-to-many (n:m) relationships.
-	</p>
-	<p>
-	Scenario:<BR/>
+    <section name="6. Modeling Object Layer">
+   
+	<subsection name="6.2 Flattened Relationships">
+	<p>ObjRelationships that map to more than a single DbRelationship are called
+	"flattened".</p>
+	
+	<p>The most common case for using flattened relationships is modeling 
+	many-to-many relationships with a join table. 
+	E.g. ARTIST DbEntity has to-many relationship to ARTIST_EXHIBIT;
+	ARTIST_EXHIBIT in turn has a to-one relationship to EXHIBIT DbEntity. We can 
+	create a single ObjRelationship from Artist ObjEntity to Exhibit ObjEntity that
+	spawns two DbRelationships. This will be a to-many relationship. Lets say it is 
+	called "exhibitArray". Generated class file for Artist would contain a getExhibitArray() 
+	method returning a list of Exhibits for a given artist instance. An obvious advantage 
+	of having a flattened relationship in this case is to avoid mapping a join table as an object,
+	meaningless in the context of the object model.</p>
+	
+	<p>Flattened relationships work across any particular combination of to-one and to-many DbRelationships.
+	If all the relationships are to-one, then the resulting flattened relationship is also to-one.  
+	If there is at least one to-many, the result is to-many as well. Most of the possible combinations are 
+	read only. One particularly useful combination is read/write. It is many-to-many (n:m) 
+	relationships mentioned above.</p>
+	
+	<p>Scenario:<BR/>
 	Assume that we have an employee who can work on several projects and each project can have several Employees. 
 	Our database data model would look like:
 	</p>
@@ -114,56 +110,7 @@ Normally, there should be no need for identifiers in the object model, so they c
      <p>
      The definition of the Employee to Project relationship works exactly the same way, only in reverse.
      After this we can finally generate our classes .
-     </p><p>
-     <h4>Java coding</h4>
-		So, now we have our database model and our Object Model. 
-		After inserting a couple of employees and projects we should attempt to link them. 
-		Since this example only seeks to show how to use flattened relationships, we insert the projects and employees 
-		directly using the sql client:<BR/>
-		</p>
-		<source>
-		insert into employees values ( 1,  'Scott');
-		insert into projects values  ( 10, 'Cayenne');
-		</source>
-		<p>
-		Next we will link Scott to the Cayenne Project. The steps we have to perform is first to get an instance of Scott, 
-		then we would have to get an instance of Cayenne and finally we would have to add Scott to Cayenne.
-		</p>
-		<source>
-		[..]
-    DataContext mContext =      
-      Configuration.getSharedConfig().getDomain().createDataContext();
-
-    // Get the first Employee you can find (Scott)
-    SelectQuery qry = new SelectQuery (Employee.class);   
-    List emps       = mContext.performQuery(qry);       
-    Employee emp    = (Employee) emps.get(0);
-    
-    // Get the first Project you can find (Cayenne)
-    qry             = new SelectQuery (Project.class);   
-    List prjs       = mContext.performQuery(qry);       
-    Project prj     = (Project) prjs.get(0);
-
-    // Add Scott to the Cayenne project
-    emp.addToProjects(prj);
-    
-    // Commit changes.
-    mContext.commitChanges();
-[..]	
-		</source>
-		<p>
-		That's it! Now you can query your database and see what happened there (mysql output below):
-		</p>
-<source>
-mysql> select * from prj_emp;
-+--------+--------+
-| emp_id | prj_id |
-+--------+--------+
-|      1 |     10 |
-+--------+--------+
-1 row in set (0.00 sec)
-</source>
-
+     </p>
 	</subsection>
     </section>
 </body>

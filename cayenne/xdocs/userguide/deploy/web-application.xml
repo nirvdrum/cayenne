@@ -1,10 +1,10 @@
 <document>
 <title>User Guide - Deployment</title>
-<toc name="toc-user-guide" chapter="13. Deployment"/>
+<toc name="toc-user-guide" chapter="12. Deployment"/>
 <body>
-     <section name="13. Deployment">
+     <section name="12. Deployment">
            
-           <subsection name="13.2 Web Applications" anchor="web">
+           <subsection name="12.2 Web Applications" anchor="web">
                <p>When deploying an application in a web container, it is still possible 
                to use the procedure described for the standalone applications. Just make sure that
                all Cayenne project XML files are in the location accessible to the ClassLoader 
@@ -26,7 +26,7 @@
                There are a few different ways to achieve that:
                </p>
                
-               <subsection name="13.2.1 Initialization Servlet"> 
+               <subsection name="12.2.1 Initialization Servlet"> 
                <p>This is the most common approach
                - use <code>init</code> method of the very first servlet loaded
                in the application. Sometimes a special initialization servlet is created
@@ -65,7 +65,7 @@ public class MyServlet extends HttpServlet {
 ...
 </source>
 			</subsection>
-			<subsection name="13.2.2 Using Context and Session Listeners">   
+			<subsection name="12.2.2 Using Context and Session Listeners">   
                <p>Servlet Specification 2.3
                introduces a set of container events that can be sent to the interested
                listeners. Cayenne implements such listener that would automatically configure 
@@ -93,7 +93,7 @@ public class MyServlet extends HttpServlet {
 </source>
 		</subsection>
 		
-		<subsection name="13.2.3 Obtaining Session DataContext">      
+		<subsection name="12.2.3 Obtaining Session DataContext">      
         <p>Recommended way to use Cayenne in web applications is to have
         one DataContext per HttpSession. 
         No matter how the web application was configured (using default configuration

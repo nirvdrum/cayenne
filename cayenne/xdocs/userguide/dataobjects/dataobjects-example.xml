@@ -1,12 +1,14 @@
  <document>
-<title>User Guide - Modifying DataObjects</title>
-<toc name="toc-user-guide" chapter="8. Modifying DataObjects"/>
+<title>User Guide - Working with DataObjects</title>
+<toc name="toc-user-guide" chapter="8. Working with DataObjects"/>
 <body>
-    <section name="8. Modifying DataObjects">
-    	<subsection name="8.1 Using DataContext">
+    <section name="8. Working with DataObjects">
+    	<subsection name="8.3 DataObjects Example">
 	<p>As discussed in "DataContext" chapter, any changes made to the DataObjects
-	via "set*" methods can be synchronized with the database by calling <code>DataContext.commitChanges</code>.
-	Here is an example showing how the painting object is fetched, modified and saved back.
+	via "set*" methods can be synchronized with the database by calling 
+	<code>DataContext.commitChanges</code>.
+	Here is an example showing how the <code>Painting</code> object is fetched, 
+	modified and saved back.
 	The following modifications are performed: 
             the price of the first retrieved painting is doubled, a new painting is added
             that belongs to the same artist as the 
@@ -27,8 +29,7 @@ import org.objectstyle.art.Artist;
 DataContext ctxt;
 ...
 Expression e = 
-  ExpressionFactory.binaryPathExp(Expression.GREATER_THAN, 
-                        "estimatedPrice", 
+  ExpressionFactory.greaterExp("estimatedPrice", 
                         new BigDecimal(100000.0));
 SelectQuery q = new SelectQuery(Painting.class, e);
 List realExpensiveArt = ctxt.performQuery(q);

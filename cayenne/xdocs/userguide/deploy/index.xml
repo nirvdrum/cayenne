@@ -1,8 +1,8 @@
 <document>
 <title>User Guide - Deployment</title>
-<toc name="toc-user-guide" chapter="13. Deployment"/>
+<toc name="toc-user-guide" chapter="12. Deployment"/>
 <body>
-     <section name="13. Deployment">        
+     <section name="12. Deployment">        
            <p>Cayenne application deployment is about configuring the application 
            so that at runtime it can find a main project file (cayenne.xml) and 
            associated resources, such as DataMap and DataNode XML files.

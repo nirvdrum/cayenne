@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Deployment</title>
-<toc name="toc-user-guide" chapter="13. Deployment"/>
+<toc name="toc-user-guide" chapter="12. Deployment"/>
 <body>
-     <section name="13. Deployment">        
-           <subsection name="13.1 Standalone Applications" anchor="standalone">
+     <section name="12. Deployment">        
+           <subsection name="12.1 Standalone Applications" anchor="standalone">
                <p>In a standalone Java application, normally a <a href=
                "../../api/cayenne/org/objectstyle/cayenne/conf/DefaultConfiguration.html">DefaultConfiguration</a>
                 will be used to locate and load configuration files. This approach

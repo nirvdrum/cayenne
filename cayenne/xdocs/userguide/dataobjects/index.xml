@@ -1,0 +1,16 @@
+<document>
+<title>User Guide - Working with DataObjects</title>
+<toc name="toc-user-guide" chapter="8. Working with DataObjects"/>
+<body>
+    <section name="8. Working with DataObjects">
+    	<p>DataObjects can have simple properties (also called "attributes",
+    	e.g. String, Number, or Date attributes) or relationships to 
+    	other DataObjects or collections of DataObjects. Application will 
+    	read and modify DataObjects properties simply by calling 
+    	corresponding set/get methods. Examples of working with
+    	DataObject attributes and relationships are given in this chapter.
+    	</p>
+    </section>
+</body>
+</document>
+

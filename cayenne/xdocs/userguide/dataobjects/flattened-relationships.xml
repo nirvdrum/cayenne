@@ -1,0 +1,98 @@
+<document>
+<title>User Guide - Working with DataObjects</title>
+<toc name="toc-user-guide" chapter="8. Working with DataObjects"/>
+<body>
+    <section name="8. Working with DataObjects">
+    	<subsection name="8.2 Flattened Relationships">
+    	<p>Working with flattened relationships is not much different 
+    	from working with normal relationships. Lets take the <a 
+    	href="../../modelerguide/modeling-object-layer/flattenedrel.html">example
+    	discussed in the modeler guide</a>. 
+		Assume that the following rows are manually inserted to the database prior
+		to running the Java code:<BR/>
+		</p>
+<source>insert into employees values ( 1,  'Scott');
+insert into projects values  ( 10, 'Cayenne');
+</source>
+		<p>
+		Lets link employee named Scott to the Cayenne Project. The steps we have to 
+		perform is first to get an instance of Scott, then we would have to get an 
+		instance of Cayenne project and finally we would have to add Scott to Cayenne.
+		</p>
+<source>...
+DataContext context =      
+Configuration.getSharedConfig().getDomain().createDataContext();
+
+// Get the first Employee you can find (Scott)
+SelectQuery qry = new SelectQuery (Employee.class);   
+List emps       = context.performQuery(qry);       
+Employee emp    = (Employee) emps.get(0);
+    
+// Get the first Project you can find (Cayenne)
+qry = new SelectQuery (Project.class);   
+List prjs = context.performQuery(qry);       
+Project prj = (Project) prjs.get(0);
+
+// Add Scott to the Cayenne project
+emp.addToProjects(prj);
+    
+// Commit changes.
+context.commitChanges();
+...
+</source>
+
+		<p>
+		That's it! Now you can query your database and see what happened there (mysql output below):
+		</p>
+<source>
+mysql> select * from prj_emp;
++--------+--------+
+| emp_id | prj_id |
++--------+--------+
+|      1 |     10 |
++--------+--------+
+1 row in set (0.00 sec)
+</source>
+
+		<subsection name="8.2.1 Deleting Objects with Flattened Relationships">
+		<p>Given a many-to-many flattened relationship, deleting an object on one side of it
+		should delete the record in the join table, as well as the record for the object being deleted.
+		To achieve that, an object must be removed from the appropriate flattened relationship first,
+		and then deleted. E.g.:</p>
+		
+<source>
+Artist artist;
+DataContext context;
+
+// before deleting artist, remove all Exhibits manually
+// Iterate over the copy of the original collection to
+// avoid ConcurrentModificationExceptions
+Iterator it = new ArrayList(artist.getExhibitArray()).iterator();
+while(it.hasNext()) {
+    Exhibit nextExhibit = (Exhibit)it.next();
+    artist.removeFromUntitledRel1(nextExhibit);
+}
+context.deleteObject(artist);
+context.commitChanges();
+</source>
+	<p>If an artist had two exhibits, Cayenne may generate the output 
+	similar to this:</p>
+<source>
+[main 12-22 15:50:19] QueryLogger: --- will run 2 queries.
+[main 12-22 15:50:19] QueryLogger: DELETE FROM ARTIST_EXHIBIT WHERE 
+ARTIST_ID = ? AND EXHIBIT_ID = ?
+[main 12-22 15:50:19] QueryLogger: [bind: 280, 200]
+[main 12-22 15:50:19] QueryLogger: === updated 1 row.
+[main 12-22 15:50:19] QueryLogger: [bind: 280, 201]
+[main 12-22 15:50:19] QueryLogger: === updated 1 row.
+[main 12-22 15:50:19] QueryLogger: DELETE FROM ARTIST WHERE ARTIST_ID = ?
+[main 12-22 15:50:19] QueryLogger: [bind: 280]
+[main 12-22 15:50:19] QueryLogger: === updated 1 row.
+[main 12-22 15:50:19] QueryLogger: +++ transaction committed.
+</source>
+		</subsection>
+    	</subsection>
+    </section>
+</body>
+</document>
+

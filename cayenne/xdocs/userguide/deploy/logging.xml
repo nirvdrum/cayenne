@@ -1,9 +1,9 @@
 <document>
 <title>User Guide - Deployment</title>
-<toc name="toc-user-guide" chapter="13. Deployment"/>
+<toc name="toc-user-guide" chapter="12. Deployment"/>
 <body>
-    <section name="13. Deployment">        
-           <subsection name="13.6 Configuring Logging">
+    <section name="12. Deployment">        
+           <subsection name="12.6 Configuring Logging">
             <p>Cayenne logging is based on <a href="http://jakarta.apache.org/log4j">Log4J
             package</a> from Jakarta Apache Project. This is the most powerful and flexible logging 
             framework available in Java. Log4J configuration is normally done using a property file. 
@@ -36,7 +36,7 @@ log4j.logger.org.objectstyle.cayenne.access.QueryLogger = INFO
             If your application already uses Log4J, Cayenne will simply use your existing configuration.
             </panel>
             
-            <subsection name="13.6.1 Essential Loggers.">
+            <subsection name="12.6.1 Essential Loggers.">
             <p><strong>SQL Tracing.</strong>
             Very important logging feature of Cayenne is tracing the execution of SQL statements. 
             If configured appropriately, Cayenne will log opened connections, 
@@ -72,7 +72,7 @@ log4j.logger.org.objectstyle.cayenne.util = DEBUG
 </source>
             </subsection>
             
-            <subsection name="13.6.2 Default Configuration">
+            <subsection name="12.6.2 Default Configuration">
             <p>Default behaviour of Cayenne is to look for a file called <code>cayenne-log.properties</code>, 
             first in the directory $HOME/.cayenne/, then in the CLASSPATH. $HOME is a system specific home directory of a user
             running the application. If you don't know what it is, try printing it from Java like this:
@@ -84,7 +84,7 @@ log4j.logger.org.objectstyle.cayenne.util = DEBUG
             </p>
             </subsection>
             
-            <subsection name="13.6.3 Custom Configuration File">
+            <subsection name="12.6.3 Custom Configuration File">
             <p>If you are not satisfied with the default location or default file name of the logging configuration,
             you can supply your own:</p>
  
@@ -101,7 +101,7 @@ org.objectstyle.cayenne.conf.Configuration.configureCommonLogging(url);
             </p>
             </subsection>
             
-            <subsection name="13.6.4 Configuring Log4J outside of Cayenne.">
+            <subsection name="12.6.4 Configuring Log4J outside of Cayenne.">
             <p>Finally, if your application already uses Log4J and implements its own logic to configure logging,
             it would be undesirable for Cayenne to use its default behavior and override any application settings. Also
             it is convenient to use a single logging configuration file per application. Cayenne detects
