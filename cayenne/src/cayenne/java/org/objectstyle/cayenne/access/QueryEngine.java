@@ -72,11 +72,22 @@ import org.objectstyle.cayenne.query.Query;
  * @author Andrei Adamchik
  */
 public interface QueryEngine {
+    
+    /**
+     * Executes queries in the transactional context provided by the caller. 
+     * It is caller's responsibility to commit or rollback the Transaction 
+     * and close any connections that were added to it.
+     * 
+     * @since 1.1
+     * @see {@link OperationObserver}
+     * @see {@link Transaction}
+     */
+    public void performQueries(Collection queries, OperationObserver resultConsumer, Transaction transaction);
 
-    /** Executes a list of queries. Will notify <code>resultConsumer</code>
-     * about queries progress and results.
-     *
-     * @see org.objectstyle.cayenne.access.OperationObserver
+    /** 
+     * Executes a list of queries wrapping them in its own transaction. 
+     * Results of execution are passed to {@link OperationObserver} object via its 
+     * callback methods.
      */
     public void performQueries(List queries, OperationObserver resultConsumer);
 
@@ -84,13 +95,14 @@ public interface QueryEngine {
      * Executes a single query. Will notify <code>resultConsumer</code>
      * about query progress and results.
      *
-     * @deprecated Since 1.1 use performQueries(List queries, OperationObserver resultConsumer).
-     * This method is redundant and doesn't add value.
+     * @deprecated Since 1.1 use {@link #performQueries(java.util.Collection,OperationObserver,Transaction)}
      */
     public void performQuery(Query query, OperationObserver resultConsumer);
 
-   	/** Returns DataNode that should handle database operations for
-      * a specified <code>objEntity</code>. */
+   	/** 
+     * Returns a DataNode that handles database operations for
+     * a specified <code>ObjEntity</code>.
+     */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity);
 
     /**
@@ -100,10 +112,8 @@ public interface QueryEngine {
     public EntityResolver getEntityResolver();
 
 	/** 
-	 * Returns an unmodifiable collection of DataMap objects associated
-	 * with this QueryEngine.
+	 * Returns a collection of DataMaps associated with this QueryEngine.
 	 */
 	public Collection getDataMaps();
-
 }
 

@@ -96,10 +96,7 @@ public class ContextCommitObserver
         List delObjects) {
             
         super.setLoggingLevel(logLevel);
-        
-        // when committing a DataContext, transaction is mandatory
-        super.setTransaction(context.getParentDataDomain().createTransaction());
-        
+
         this.context = context;
         this.insObjects = insObjects;
         this.updObjects = updObjects;

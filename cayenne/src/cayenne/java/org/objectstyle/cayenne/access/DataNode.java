@@ -63,6 +63,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +71,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
@@ -80,6 +82,7 @@ import org.objectstyle.cayenne.access.util.DefaultSorter;
 import org.objectstyle.cayenne.access.util.DependencySorter;
 import org.objectstyle.cayenne.access.util.NullSorter;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
+import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
@@ -88,7 +91,6 @@ import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.ProcedureQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.conn.PoolManager;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server, etc.
@@ -121,8 +123,6 @@ public class DataNode implements QueryEngine {
     public DataNode(String name) {
         this.name = name;
     }
-
-    // setters/getters
 
     /** Returns node "name" property. */
     public String getName() {
@@ -206,12 +206,11 @@ public class DataNode implements QueryEngine {
         // control from the user, maybe via ContextCommitObserver?
         if (adapter != null && adapter.supportsFkConstraints()) {
             this.dependencySorter = new DefaultSorter(this);
-        } else {
+        }
+        else {
             this.dependencySorter = NullSorter.NULL_SORTER;
         }
     }
-
-    // other methods
 
     /**
      * Returns this object if it can handle queries for <code>objEntity</code>,
@@ -222,6 +221,36 @@ public class DataNode implements QueryEngine {
             ? this
             : null;
     }
+    
+    /** 
+     * Wraps queries in an internal transaction, and executes them via connection obtained from 
+     * internal DataSource.
+     */
+    public void performQueries(List queries, OperationObserver resultConsumer) {
+        Transaction transaction = Transaction.internalTransaction(null);
+
+        try {
+            transaction.begin();
+            performQueries(queries, resultConsumer, transaction);
+            transaction.commit();
+        }
+        catch (Exception ex) {
+            try {
+                transaction.rollback();
+            }
+            catch (Exception rollbackEx) {
+            }
+            
+            // must rethrow
+            if (ex instanceof CayenneRuntimeException) {
+                throw (CayenneRuntimeException)ex;
+            }
+            else {
+                throw new CayenneRuntimeException(ex);
+            }
+        }
+    }
+    
 
     /** 
      * Calls "performQueries()" wrapping a query argument into a list.
@@ -233,10 +262,17 @@ public class DataNode implements QueryEngine {
         this.performQueries(Collections.singletonList(query), operationObserver);
     }
 
-    /** Run multiple queries using one of the pooled connections. */
-    public void performQueries(List queries, OperationObserver opObserver) {
-        Level logLevel = opObserver.getLoggingLevel();
-        Transaction transaction = opObserver.getTransaction();
+    /** 
+     * Runs queries using connection obtained from internal DataSource.
+     * 
+     * @since 1.1 
+     */
+    public void performQueries(
+        Collection queries,
+        OperationObserver resultConsumer,
+        Transaction transaction) {
+
+        Level logLevel = resultConsumer.getLoggingLevel();
 
         int listSize = queries.size();
         QueryLogger.logQueryStart(logLevel, listSize);
@@ -244,13 +280,16 @@ public class DataNode implements QueryEngine {
             return;
         }
 
+        // since 1.1 Transaction object is required
+        if (transaction == null) {
+            throw new CayenneRuntimeException("No transaction associated with the queries.");
+        }
+
         Connection connection = null;
-        boolean rolledBackFlag = false;
-        boolean commitExplicitly = false;
 
         try {
             // check for invalid iterated query
-            if (opObserver.isIteratedResult() && listSize > 1) {
+            if (resultConsumer.isIteratedResult() && listSize > 1) {
                 throw new CayenneException(
                     "Iterated queries are not allowed in a batch. Batch size: "
                         + listSize);
@@ -258,86 +297,7 @@ public class DataNode implements QueryEngine {
 
             // check out connection, create statement
             connection = this.getDataSource().getConnection();
-            if (transaction != null) {
-                if (connection.getAutoCommit()) {
-                    connection.setAutoCommit(false);
-                }
-                transaction.addConnection(connection);
-            } else {
-                commitExplicitly = !connection.getAutoCommit();
-            }
-
-            for (int i = 0; i < listSize; i++) {
-                Query nextQuery = (Query) queries.get(i);
-
-                // catch exceptions for each individual query
-                try {
-
-                    // figure out query type and call appropriate worker method
-
-                    // 1. All kinds of SELECT
-                    if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
-                        boolean isIterated = opObserver.isIteratedResult();
-                        Connection localCon = connection;
-
-                        if (isIterated) {
-                            // if ResultIterator is returned to the user,
-                            // DataNode is not responsible for closing the connections
-                            // exception handling, and other housekeeping.
-                            // trick "finally" to avoid closing connection here
-                            // it will be closed by the ResultIterator
-                            connection = null;
-                        }
-
-                        runSelect(localCon, nextQuery, opObserver);
-                    }
-                    // 2. All kinds of MODIFY - INSERT, DELETE, UPDATE, UNKNOWN
-                    else {
-
-                        if (nextQuery instanceof BatchQuery) {
-                            runBatchUpdate(
-                                connection,
-                                (BatchQuery) nextQuery,
-                                opObserver);
-                        } else if (nextQuery instanceof ProcedureQuery) {
-                            runStoredProcedure(connection, nextQuery, opObserver);
-                        } else {
-                            runUpdate(connection, nextQuery, opObserver);
-                        }
-                    }
-
-                } catch (Exception queryEx) {
-                    QueryLogger.logQueryError(logLevel, queryEx);
-
-                    // notify consumer of the exception,
-                    // stop running further queries
-                    opObserver.nextQueryException(nextQuery, queryEx);
-
-                    // rollback transaction
-                    rolledBackFlag = true;
-
-                    if (transaction != null) {
-                        transaction.setRollbackOnly();
-                    } else if (commitExplicitly) {
-                        try {
-                            connection.rollback();
-                            QueryLogger.logRollbackTransaction(logLevel);
-                        } catch (SQLException sqlEx) {
-                            QueryLogger.logQueryError(logLevel, sqlEx);
-                            opObserver.nextQueryException(nextQuery, sqlEx);
-                        }
-                    }
-
-                    break;
-                }
-            }
-
-            // commit transaction if needed
-            if (!rolledBackFlag && commitExplicitly) {
-                connection.commit();
-                QueryLogger.logCommitTransaction(logLevel);
-            }
-
+            transaction.addConnection(connection);
         }
         // catch stuff like connection allocation errors, etc...
         catch (Exception globalEx) {
@@ -345,32 +305,54 @@ public class DataNode implements QueryEngine {
 
             if (connection != null) {
                 // rollback failed transaction
-                rolledBackFlag = true;
+                transaction.setRollbackOnly();
+            }
 
-                if (transaction != null) {
-                    transaction.setRollbackOnly();
-                } else if (commitExplicitly) {
-                    try {
-                        connection.rollback();
-                        QueryLogger.logRollbackTransaction(logLevel);
-                    } catch (SQLException ex) {
-                        // do nothing....
+            resultConsumer.nextGlobalException(globalEx);
+            return;
+        }
+
+        Iterator it = queries.iterator();
+        while (it.hasNext()) {
+            Query nextQuery = (Query) it.next();
+
+            // catch exceptions for each individual query
+            try {
+
+                // figure out query type and call appropriate worker method
+
+                // 1. All kinds of SELECT
+                if (nextQuery.getQueryType() == Query.SELECT_QUERY) {
+                    runSelect(connection, nextQuery, resultConsumer);
+                }
+                // 2. All kinds of MODIFY - INSERT, DELETE, UPDATE, UNKNOWN
+                else {
+
+                    if (nextQuery instanceof BatchQuery) {
+                        runBatchUpdate(
+                            connection,
+                            (BatchQuery) nextQuery,
+                            resultConsumer);
+                    }
+                    else if (nextQuery instanceof ProcedureQuery) {
+                        runStoredProcedure(connection, nextQuery, resultConsumer);
+                    }
+                    else {
+                        runUpdate(connection, nextQuery, resultConsumer);
                     }
                 }
-            }
 
-            opObserver.nextGlobalException(globalEx);
-        } finally {
-            try {
-                // return connection to the pool if it was checked out
-                // and not under transaction control
-                if (transaction == null && connection != null) {
-                    connection.close();
-                }
             }
-            // finally catch connection closing exceptions...
-            catch (Exception finalEx) {
-                opObserver.nextGlobalException(finalEx);
+            catch (Exception queryEx) {
+                QueryLogger.logQueryError(logLevel, queryEx);
+
+                // notify consumer of the exception,
+                // stop running further queries
+                resultConsumer.nextQueryException(nextQuery, queryEx);
+
+                // rollback transaction
+                transaction.setRollbackOnly();
+                break;
             }
         }
     }
@@ -412,11 +394,13 @@ public class DataNode implements QueryEngine {
                 System.currentTimeMillis() - t1);
 
             delegate.nextDataRows(query, resultRows);
-        } else {
+        }
+        else {
             try {
                 it.setClosingConnection(true);
                 delegate.nextDataRows(transl.getQuery(), it);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 it.close();
                 throw ex;
             }
@@ -442,7 +426,8 @@ public class DataNode implements QueryEngine {
 
             // send results back to consumer
             delegate.nextCount(transl.getQuery(), count);
-        } finally {
+        }
+        finally {
             prepStmt.close();
         }
     }
@@ -482,7 +467,8 @@ public class DataNode implements QueryEngine {
         // run batch
         if (adapter.supportsBatchUpdates()) {
             runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
-        } else {
+        }
+        else {
             runBatchUpdateAsIndividualQueries(con, query, queryBuilder, delegate);
         }
     }
@@ -530,10 +516,12 @@ public class DataNode implements QueryEngine {
             if (isLoggable) {
                 QueryLogger.logUpdateCount(logLevel, statement.getUpdateCount());
             }
-        } finally {
+        }
+        finally {
             try {
                 statement.close();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
             }
         }
     }
@@ -580,10 +568,12 @@ public class DataNode implements QueryEngine {
                     QueryLogger.logUpdateCount(logLevel, updated);
                 }
             }
-        } finally {
+        }
+        finally {
             try {
                 statement.close();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
             }
         }
     }
@@ -625,7 +615,8 @@ public class DataNode implements QueryEngine {
                     assembler.getResultDescriptor(rs),
                     (GenericSelectQuery) query,
                     delegate);
-            } else {
+            }
+            else {
                 int updateCount = statement.getUpdateCount();
                 if (updateCount == -1) {
                     break;
@@ -688,11 +679,13 @@ public class DataNode implements QueryEngine {
                 System.currentTimeMillis() - t1);
 
             delegate.nextDataRows(query, resultRows);
-        } else {
+        }
+        else {
             try {
                 resultReader.setClosingConnection(true);
                 delegate.nextDataRows(query, resultReader);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 resultReader.close();
                 throw ex;
             }
@@ -719,7 +712,8 @@ public class DataNode implements QueryEngine {
             if (ds instanceof PoolManager) {
                 ((PoolManager) ds).dispose();
             }
-        } catch (SQLException ex) {
+        }
+        catch (SQLException ex) {
         }
     }
 }

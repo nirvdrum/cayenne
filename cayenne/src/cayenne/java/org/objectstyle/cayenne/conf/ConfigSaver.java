@@ -120,6 +120,7 @@ public class ConfigSaver {
 
         // store properties
         Iterator properties = delegate.propertyNames(domainName);
+        boolean hasProperties = properties.hasNext();
         while (properties.hasNext()) {
             String name = (String) properties.next();
             if(name == null) {
@@ -134,9 +135,14 @@ public class ConfigSaver {
             pw.print("\t<property name=\"" + Util.encodeXmlAttribute(name.trim()));
             pw.println("\" value=\"" + Util.encodeXmlAttribute(value.trim()) + "\"/>");
         }
+        
+        if(hasProperties) {
+            pw.println();
+        }
                
         // store maps
         Iterator maps = delegate.mapNames(domainName);
+        boolean hasMaps = maps.hasNext();
         while (maps.hasNext()) {
             String mapName = (String) maps.next();
             String mapLocation = delegate.mapLocation(domainName, mapName);
@@ -157,6 +163,10 @@ public class ConfigSaver {
 
                 pw.println("\t</map>");
             }
+        }
+        
+        if (hasMaps) {
+            pw.println();
         }
 
         // store nodes

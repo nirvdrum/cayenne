@@ -96,6 +96,10 @@ public class DataDomain implements QueryEngine {
         "cayenne.DataDomain.validatingObjectsOnCommit";
     public static final boolean VALIDATING_OBJECTS_ON_COMMIT_DEFAULT = true;
 
+    public static final String USING_INTERNAL_TRANSACTIONS_PROPERTY =
+        "cayenne.DataDomain.usingInternalTransactions";
+    public static final boolean USING_INTERNAL_TRANSACTIONS_DEFAULT = true;
+
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new TreeMap());
     protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
@@ -126,6 +130,7 @@ public class DataDomain implements QueryEngine {
     protected String name;
     protected boolean sharedCacheEnabled;
     protected boolean validatingObjectsOnCommit;
+    protected boolean usingInternalTransactions;
 
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
@@ -167,6 +172,8 @@ public class DataDomain implements QueryEngine {
         Object sharedCacheEnabled = localMap.get(SHARED_CACHE_ENABLED_PROPERTY);
         Object validatingObjectsOnCommit =
             localMap.get(VALIDATING_OBJECTS_ON_COMMIT_PROPERTY);
+        Object usingInternalTransactions =
+            localMap.get(USING_INTERNAL_TRANSACTIONS_PROPERTY);
 
         if (logObj.isDebugEnabled()) {
             logObj.debug(
@@ -191,6 +198,10 @@ public class DataDomain implements QueryEngine {
             (validatingObjectsOnCommit != null)
                 ? "true".equalsIgnoreCase(validatingObjectsOnCommit.toString())
                 : VALIDATING_OBJECTS_ON_COMMIT_DEFAULT;
+        this.usingInternalTransactions =
+            (usingInternalTransactions != null)
+                ? "true".equalsIgnoreCase(usingInternalTransactions.toString())
+                : USING_INTERNAL_TRANSACTIONS_DEFAULT;
     }
 
     /** Returns "name" property value. */
@@ -237,6 +248,26 @@ public class DataDomain implements QueryEngine {
      */
     public void setValidatingObjectsOnCommit(boolean flag) {
         this.validatingObjectsOnCommit = flag;
+    }
+
+    /**
+     * Returns whether this DataDomain should internally commit 
+     * all transactions, or let container do that.
+     * 
+     * @since 1.1
+     */
+    public boolean isUsingInternalTransactions() {
+        return usingInternalTransactions;
+    }
+
+    /**
+     * Sets a property defining whether this DataDomain should internally commit 
+     * all transactions, or let container do that.
+     * 
+     * @since 1.1
+     */
+    public void setUsingInternalTransactions(boolean flag) {
+        this.usingInternalTransactions = flag;
     }
 
     /**
@@ -460,16 +491,17 @@ public class DataDomain implements QueryEngine {
     }
 
     /**
-     * Creates and returns a new inactive transaction, serving as a factory method.
-     * If there is a TransactionDelegate, adds the delegate to the newly
-     * created Transaction.
+     * Creates and returns a new inactive transaction. If there is a 
+     * TransactionDelegate, adds the delegate to the newly created Transaction.
+     * Behavior of the returned Transaction depends on "usingInternalTransactions"
+     * property setting.
      * 
      * @since 1.1
      */
     public Transaction createTransaction() {
-        Transaction transaction = new Transaction();
-        transaction.setDelegate(getTransactionDelegate());
-        return transaction;
+        return (isUsingInternalTransactions())
+            ? Transaction.internalTransaction(getTransactionDelegate())
+            : Transaction.externalTransaction(getTransactionDelegate());
     }
 
     /** 
@@ -618,60 +650,152 @@ public class DataDomain implements QueryEngine {
         return null;
     }
 
-    /** Analyzes each query and sends it to appropriate DataNode for execution. */
-    public void performQueries(List queries, OperationObserver resultCons) {
-        Iterator it = queries.iterator();
-        Map queryMap = new HashMap();
-        // organize queries by node
-        while (it.hasNext()) {
-            DataNode aNode = null;
-            Query nextQuery = (Query) it.next();
+    /** 
+     * Inspects the queries, sending them to appropriate DataNodes for execution.
+     * May modify transaction settings on the OperationObserver.
+     * 
+     * @since 1.1
+     */
+    public void performQueries(
+        Collection queries,
+        OperationObserver resultConsumer,
+        Transaction transaction) {
 
-            // try DbEntity root
-            DbEntity dbe = this.getEntityResolver().lookupDbEntity(nextQuery);
-            if (dbe != null) {
-                aNode = this.dataNodeForDbEntity(dbe);
-            }
-            // try StoredProcedure root
-            else {
-                Procedure procedure = this.getEntityResolver().lookupProcedure(nextQuery);
-                if (procedure != null) {
-                    aNode = this.dataNodeForProcedure(procedure);
+        if (queries.size() == 0) {
+            return;
+        }
+
+        // optimize for single node 
+        // TODO: some refactoring wouldn't hurt
+        if (nodes.size() == 1 || queries.size() == 1) {
+            DataNode singleNode = null;
+
+            // run a quick sanity check
+            Iterator it = queries.iterator();
+
+            while (it.hasNext()) {
+                DataNode node = null;
+                Query nextQuery = (Query) it.next();
+
+                // try DbEntity root
+                DbEntity dbe = this.getEntityResolver().lookupDbEntity(nextQuery);
+                if (dbe != null) {
+                    node = this.dataNodeForDbEntity(dbe);
+                }
+                // try StoredProcedure root
+                else {
+                    Procedure procedure =
+                        this.getEntityResolver().lookupProcedure(nextQuery);
+                    if (procedure != null) {
+                        node = this.dataNodeForProcedure(procedure);
+                    }
+                }
+
+                if (node == null) {
+                    throw new CayenneRuntimeException(
+                        "No suitable DataNode to handle query with root: "
+                            + nextQuery.getRoot());
+                }
+
+                if (singleNode == null) {
+                    singleNode = node;
+                }
+                else if (singleNode != node) {
+                    throw new CayenneRuntimeException(
+                        "No suitable DataNode to handle query with root: "
+                            + nextQuery.getRoot());
                 }
             }
 
-            if (aNode == null) {
-                throw new CayenneRuntimeException(
-                    "No suitable DataNode to handle query with root: "
-                        + nextQuery.getRoot());
-            }
-
-            List nodeQueries = (List) queryMap.get(aNode);
-            if (nodeQueries == null) {
-                nodeQueries = new ArrayList();
-                queryMap.put(aNode, nodeQueries);
-            }
-            nodeQueries.add(nextQuery);
+            singleNode.performQueries(queries, resultConsumer, transaction);
         }
+        else {
+            Iterator it = queries.iterator();
+            Map queryMap = new HashMap();
+            // organize queries by node
+            while (it.hasNext()) {
+                DataNode node = null;
+                Query nextQuery = (Query) it.next();
 
-        // perform queries on each node
-        Iterator nodeIt = queryMap.keySet().iterator();
-        while (nodeIt.hasNext()) {
-            DataNode nextNode = (DataNode) nodeIt.next();
-            List nodeQueries = (List) queryMap.get(nextNode);
-            // ? maybe this should be run in parallel on different nodes ?
-            // (then resultCons will have to be prepared to handle results coming
-            // from multiple threads)
-            // another way of handling this (which actually preserves
-            nextNode.performQueries(nodeQueries, resultCons);
+                // try DbEntity root
+                DbEntity dbe = this.getEntityResolver().lookupDbEntity(nextQuery);
+                if (dbe != null) {
+                    node = this.dataNodeForDbEntity(dbe);
+                }
+                // try StoredProcedure root
+                else {
+                    Procedure procedure =
+                        this.getEntityResolver().lookupProcedure(nextQuery);
+                    if (procedure != null) {
+                        node = this.dataNodeForProcedure(procedure);
+                    }
+                }
+
+                if (node == null) {
+                    throw new CayenneRuntimeException(
+                        "No suitable DataNode to handle query with root: "
+                            + nextQuery.getRoot());
+                }
+
+                List nodeQueries = (List) queryMap.get(node);
+                if (nodeQueries == null) {
+                    nodeQueries = new ArrayList();
+                    queryMap.put(node, nodeQueries);
+                }
+                nodeQueries.add(nextQuery);
+            }
+
+            // perform queries on each node
+            Iterator nodeIt = queryMap.entrySet().iterator();
+            while (nodeIt.hasNext()) {
+                Map.Entry entry = (Map.Entry) nodeIt.next();
+                DataNode nextNode = (DataNode) entry.getKey();
+                List nodeQueries = (List) entry.getValue();
+
+                // TODO: Maybe this should be run in parallel on different nodes ?
+                // (then resultCons will have to be prepared to handle results coming
+                // from multiple threads)
+                nextNode.performQueries(nodeQueries, resultConsumer, transaction);
+            }
+        }
+    }
+
+    /** 
+     * Wraps queries in an internal transaction and sends them to appropriate DataNodes 
+     * for execution.
+     */
+    public void performQueries(List queries, OperationObserver resultConsumer) {
+        Transaction transaction =
+            (resultConsumer.isIteratedResult())
+                ? Transaction.noTransaction()
+                : createTransaction();
+
+        try {
+            transaction.begin();
+            performQueries(queries, resultConsumer, transaction);
+            transaction.commit();
+        }
+        catch (Exception ex) {
+            try {
+                transaction.rollback();
+            }
+            catch (Exception rollbackEx) {
+            }
+
+            // must rethrow
+            if (ex instanceof CayenneRuntimeException) {
+                throw (CayenneRuntimeException) ex;
+            }
+            else {
+                throw new CayenneRuntimeException(ex);
+            }
         }
     }
 
     /** 
      * Calls "performQueries()" wrapping a query argument into a list.
      * 
-     * @deprecated Since 1.1 use performQueries(List, OperationObserver).
-     * This method is redundant and doesn't add value.
+     * @deprecated Since 1.1 use {@link #performQueries(java.util.Collection,OperationObserver,Transaction)}
      */
     public void performQuery(Query query, OperationObserver operationObserver) {
         this.performQueries(Collections.singletonList(query), operationObserver);

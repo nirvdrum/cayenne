@@ -67,7 +67,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.ResultIterator;
-import org.objectstyle.cayenne.access.Transaction;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -90,21 +89,6 @@ public class DefaultOperationObserver implements OperationObserver {
     protected List globalExceptions = new ArrayList();
     protected Map queryExceptions = new HashMap();
     protected Level loggingLevel = DEFAULT_LOG_LEVEL;
-    protected Transaction transaction;
-
-    /**
-     * @since 1.1
-     */
-    public Transaction getTransaction() {
-        return transaction;
-    }
-    
-    /**
-     * @since 1.1
-     */
-    public void setTransaction(Transaction transaction) {
-        this.transaction = transaction;
-    }
 
     /**
      * Prints the information about query and global exceptions. 

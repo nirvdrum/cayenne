@@ -168,43 +168,44 @@ class ContextCommit {
                         insObjects,
                         updObjects,
                         delObjects);
-
+                
                 if (context.isTransactionEventsEnabled()) {
                     observer.registerForDataContextEvents();
                 }
 
                 try {
                     context.fireWillCommit();
-
-                    observer.getTransaction().begin();
+                    
+                    Transaction transaction = context.getParentDataDomain().createTransaction();
+                    transaction.begin();
 
                     try {
-                        for (Iterator i = nodeHelpers.iterator(); i.hasNext();) {
+                        Iterator i = nodeHelpers.iterator();
+                        while (i.hasNext()) {
                             DataNodeCommitHelper nodeHelper =
                                 (DataNodeCommitHelper) i.next();
                             List queries = nodeHelper.getQueries();
 
                             if (queries.size() > 0) {
                                 // note: observer throws on error
-                                nodeHelper.getNode().performQueries(queries, observer);
+                                nodeHelper.getNode().performQueries(queries, observer, transaction);
                             }
                         }
 
                         // commit
-                        observer.getTransaction().commit();
-
+                        transaction.commit();
                     }
                     catch (Throwable th) {
                         try {
                             // rollback
-                            observer.getTransaction().rollback();
+                            transaction.rollback();
                         }
                         catch (Throwable rollbackTh) {
                             // ignoring...
                         }
 
                         context.fireTransactionRolledback();
-                        throw new CayenneException("Transaction was rolledback.");
+                        throw new CayenneException("Transaction was rolledback.", Util.unwindException(th));
                     }
 
                     context.getObjectStore().objectsCommitted();
@@ -218,27 +219,6 @@ class ContextCommit {
             }
         }
     }
-
-    /**
-     * Checks if any updated or deleted objects have been modified in the
-     * underlying store. Ask delegate what to do about it.
-     */
-  /*  private void checkConcurrentModifications(DataObject object) {
-        DataContextDelegate delegate = context.getDelegate();
-        if (delegate == null) {
-            return;
-        }
-
-        DataRowStore store = context.getObjectStore().getDataRowCache();
-
-        // maybe opt for a cheaper "getCachedSnapshot" and treat nulls
-        // as "modification"? Ah... probably not.
-        DataRow snapshotInStore =
-            store.getSnapshot(object.getObjectId(), context.getParent());
-        if (object.getSnapshotVersion() != snapshotInStore.getVersion()) {
-            delegate.shouldMergeChanges(object, snapshotInStore);
-        }
-    } */
 
     private void prepareInsertQueries(DataNodeCommitHelper commitHelper)
         throws CayenneException {

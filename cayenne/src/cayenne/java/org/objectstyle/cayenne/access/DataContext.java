@@ -148,13 +148,13 @@ public class DataContext implements QueryEngine, Serializable {
         public boolean shouldProcessDelete(DataObject object) {
             return true;
         }
-        
+
         public void finishedMergeChanges(DataObject object) {
-            
+
         }
-        
+
         public void finishedProcessDelete(DataObject object) {
-            
+
         }
     };
 
@@ -174,7 +174,6 @@ public class DataContext implements QueryEngine, Serializable {
 
     // Set of DataContextDelegates to be notified.
     private DataContextDelegate delegate;
-
 
     protected boolean usingSharedSnaphsotCache;
     protected boolean validatingObjectsOnCommit;
@@ -793,7 +792,7 @@ public class DataContext implements QueryEngine, Serializable {
         registerNewObjectWithEntity(dataObject, entity);
         return dataObject;
     }
-    
+
     /**
      * Instantiates new object and registers it with itself. Object class must have a 
      * default constructor.
@@ -804,7 +803,7 @@ public class DataContext implements QueryEngine, Serializable {
         if (objectClass == null) {
             throw new NullPointerException("DataObject class can't be null.");
         }
-        
+
         ObjEntity entity = getEntityResolver().lookupObjEntity(objectClass);
         if (entity == null) {
             throw new IllegalArgumentException(
@@ -953,7 +952,7 @@ public class DataContext implements QueryEngine, Serializable {
                 ? PersistenceState.TRANSIENT
                 : PersistenceState.DELETED;
         anObject.setPersistenceState(newState);
-        
+
         //Do the right thing with all the relationships of the deleted object
         ObjEntity entity = this.getEntityResolver().lookupObjEntity(anObject);
         Iterator relationshipIterator = entity.getRelationships().iterator();
@@ -1055,13 +1054,12 @@ public class DataContext implements QueryEngine, Serializable {
                         "Unknown type of delete rule " + relationship.getDeleteRule());
             }
         }
-        
+
         // if an object was NEW, we must throw it out of the ObjectStore
         if (oldState == PersistenceState.NEW) {
-            getObjectStore().objectsUnregistered(
-                Collections.singletonList(anObject));
+            getObjectStore().objectsUnregistered(Collections.singletonList(anObject));
             anObject.setDataContext(null);
-        }      
+        }
     }
 
     /**
@@ -1137,8 +1135,8 @@ public class DataContext implements QueryEngine, Serializable {
             if (!this.hasChanges()) {
                 return;
             }
-            
-            if(isValidatingObjectsOnCommit()) {
+
+            if (isValidatingObjectsOnCommit()) {
                 getObjectStore().validateUncommittedObjects();
             }
 
@@ -1185,7 +1183,10 @@ public class DataContext implements QueryEngine, Serializable {
 
         IteratedSelectObserver observer = new IteratedSelectObserver();
         observer.setLoggingLevel(query.getLoggingLevel());
-        performQueries(Collections.singletonList(query), observer);
+        performQueries(
+            Collections.singletonList(query),
+            observer,
+            Transaction.noTransaction());
         return observer.getResultIterator();
     }
 
@@ -1197,12 +1198,50 @@ public class DataContext implements QueryEngine, Serializable {
         return this.getParent().dataNodeForObjEntity(objEntity);
     }
 
-    /**
+    /** 
      * Delegates queries execution to parent QueryEngine. If there are select
      * queries that require prefetching relationships, will create additional
      * queries to perform necessary prefetching.
      */
     public void performQueries(List queries, OperationObserver resultConsumer) {
+        Transaction transaction =
+            (resultConsumer.isIteratedResult())
+                ? Transaction.noTransaction()
+                : getParentDataDomain().createTransaction();
+
+        try {
+            transaction.begin();
+            performQueries(queries, resultConsumer, transaction);
+            transaction.commit();
+        }
+        catch (Exception ex) {
+            try {
+                transaction.rollback();
+            }
+            catch (Exception rollbackEx) {
+            }
+
+            // must rethrow
+            if (ex instanceof CayenneRuntimeException) {
+                throw (CayenneRuntimeException) ex;
+            }
+            else {
+                throw new CayenneRuntimeException(ex);
+            }
+        }
+    }
+
+    /**
+     * Delegates queries execution to parent QueryEngine. If there are select
+     * queries that require prefetching relationships, will create additional
+     * queries to perform necessary prefetching.
+     * 
+     * @since 1.1
+     */
+    public void performQueries(
+        Collection queries,
+        OperationObserver resultConsumer,
+        Transaction transaction) {
         if (this.getParent() == null) {
             throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
         }
@@ -1266,7 +1305,7 @@ public class DataContext implements QueryEngine, Serializable {
             }
         }
 
-        this.getParent().performQueries(finalQueries, resultConsumer);
+        this.getParent().performQueries(finalQueries, resultConsumer, transaction);
     }
 
     /**
@@ -1540,8 +1579,6 @@ public class DataContext implements QueryEngine, Serializable {
         return this.getParent().getEntityResolver();
     }
 
-
-
     /**
      * Sets default for posting transaction events by new DataContexts.
      */
@@ -1569,7 +1606,7 @@ public class DataContext implements QueryEngine, Serializable {
     public boolean isUsingSharedSnapshotCache() {
         return usingSharedSnaphsotCache;
     }
-    
+
     /**
      * Returns whether this DataContext performs object validation before
      * commit is executed.
@@ -1579,7 +1616,7 @@ public class DataContext implements QueryEngine, Serializable {
     public boolean isValidatingObjectsOnCommit() {
         return validatingObjectsOnCommit;
     }
-    
+
     /**
      * Sets the property defining whether this DataContext should perform 
      * object validation before commit is executed.
@@ -1589,7 +1626,6 @@ public class DataContext implements QueryEngine, Serializable {
     public void setValidatingObjectsOnCommit(boolean flag) {
         this.validatingObjectsOnCommit = flag;
     }
-    
 
     public Collection getDataMaps() {
         return (parent != null) ? parent.getDataMaps() : Collections.EMPTY_LIST;
@@ -1621,8 +1657,7 @@ public class DataContext implements QueryEngine, Serializable {
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
         }
     }
-    
-    
+
     /**
      * @deprecated Since 1.1 this method is not used in Cayenne. 
      * All flattened relationship logic was moved to the ObjectStore
@@ -1631,22 +1666,22 @@ public class DataContext implements QueryEngine, Serializable {
         objectStore.flattenedDeletes.clear();
         objectStore.flattenedInserts.clear();
     }
-    
+
     /**
      * @deprecated Since 1.1 this method is not used in Cayenne. 
      * All flattened relationship logic was moved to the ObjectStore
-     */    
+     */
     public void registerFlattenedRelationshipDelete(
         DataObject source,
         ObjRelationship relationship,
         DataObject destination) {
         objectStore.flattenedRelationshipUnset(source, relationship, destination);
     }
-    
+
     /**
      * @deprecated Since 1.1 this method is not used in Cayenne. 
      * All flattened relationship logic was moved to the ObjectStore
-     */    
+     */
     public void registerFlattenedRelationshipInsert(
         DataObject source,
         ObjRelationship relationship,

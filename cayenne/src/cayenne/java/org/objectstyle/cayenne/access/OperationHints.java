@@ -59,7 +59,6 @@ package org.objectstyle.cayenne.access;
 import org.apache.log4j.Level;
 
 /**
- * 
  * Defines an API that allows QueryEngine to obtain information about 
  * query execution. Defines query running strategies, logging, etc. 
  * 
@@ -93,11 +92,5 @@ public interface OperationHints {
      * results are expected as a list.
      */
     public boolean isIteratedResult();
-    
-    /**
-     * @return Transaction object assocaited with this operation, or null if
-     * no transactional control is used.
-     */
-    public Transaction getTransaction();
 }
 
