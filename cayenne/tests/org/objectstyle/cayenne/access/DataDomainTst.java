@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.access;
 
 import junit.framework.*;
 import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 
 /** DataDomain unit tests.
@@ -108,6 +109,35 @@ public class DataDomainTst extends TestCase {
 
         d1.removeMap(m1.getName());
         assertNull(d1.getMap(m1.getName()));
+    }
+    
+    
+    public void testDataNodeForObjEntity() throws java.lang.Exception {
+        DataDomain domain = new DataDomain("dom1");
+        assertNull(domain.getMap("map"));
+
+        DataMap map = new DataMap("map");
+        ObjEntity oe = new ObjEntity("a");
+        map.addObjEntity(oe);
+        DataNode node = new DataNode("1");
+        node.addDataMap(map);
+
+        domain.addNode(node);
+        assertSame(node, domain.dataNodeForObjEntity(oe));
+    }
+
+    public void testDataNodeForObjEntityName() throws java.lang.Exception {
+        DataDomain domain = new DataDomain("dom1");
+        assertNull(domain.getMap("map"));
+
+        DataMap map = new DataMap("map");
+        ObjEntity oe = new ObjEntity("a");
+        map.addObjEntity(oe);
+        DataNode node = new DataNode("1");
+        node.addDataMap(map);
+
+        domain.addNode(node);
+        assertSame(node, domain.dataNodeForObjEntityName(oe.getName()));
     }
 
 }
