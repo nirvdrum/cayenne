@@ -160,8 +160,8 @@ sub set_release_label() {
                              "doc/release-notes/RELEASE-NOTES-$version.txt") 
                              or die_with_email("Can't copy RELEASE-NOTES: $!\n");	
 			# copy UPGRADE
-			copy("doc/release-notes/UPGRADE-$1.txt", 
-                             "doc/release-notes/UPGRADE-$version.txt") 
+			copy("doc/upgrade/UPGRADE-$1.txt", 
+                             "doc/upgrade/UPGRADE-$version.txt") 
                              or die_with_email("Can't copy UPGRADE: $!\n");	
 
 
