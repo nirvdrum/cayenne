@@ -81,18 +81,20 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
 import org.objectstyle.cayenne.util.EntityMergeSupport;
 import org.objectstyle.cayenne.util.NameConverter;
 
-/** Utility class that does reverse engineering of the database. 
-  * It can create DataMaps using database meta data obtained via JDBC driver.
-  *
-  * @author Michael Shengaout
-  * @author Andrei Adamchik
+/**
+ * Utility class that does reverse engineering of the database. It can create DataMaps
+ * using database meta data obtained via JDBC driver.
+ * 
+ * @author Michael Shengaout
+ * @author Andrei Adamchik
  */
 public class DbLoader {
+
     private static Logger logObj = Logger.getLogger(DbLoader.class);
 
     public static final String WILDCARD = "%";
 
-    /** List of db entities to process.*/
+    /** List of db entities to process. */
     private List dbEntityList = new ArrayList();
 
     /** Creates default name for loaded relationship */
@@ -133,16 +135,16 @@ public class DbLoader {
         return metaData;
     }
 
-    /** 
+    /**
      * Returns database connection used by this DbLoader.
      */
     public Connection getCon() {
         return con;
     }
 
-    /** 
+    /**
      * Retrieves catalogues for the database associated with this DbLoader.
-     *
+     * 
      * @return List with the catalog names, empty Array if none found.
      */
     public List getCatalogs() throws SQLException {
@@ -161,7 +163,7 @@ public class DbLoader {
         return catalogs;
     }
 
-    /** 
+    /**
      * Retrieves the schemas for the database.
      * 
      * @return List with the schema names, empty Array if none found.
@@ -182,11 +184,11 @@ public class DbLoader {
         return schemas;
     }
 
-    /** 
-     * Returns all the table types for the given database.
-     * Types may be such as "TABLE", "VIEW", "SYSTEM TABLE", etc.
+    /**
+     * Returns all the table types for the given database. Types may be such as "TABLE",
+     * "VIEW", "SYSTEM TABLE", etc.
      * 
-     * @return List of Strings, empty array if nothing found. 
+     * @return List of Strings, empty array if nothing found.
      */
     public List getTableTypes() throws SQLException {
         List types = new ArrayList();
@@ -203,29 +205,26 @@ public class DbLoader {
         return types;
     }
 
-    /** 
+    /**
      * Returns all table names for given combination of the criteria.
      * 
      * @param catalog The name of the catalog, may be null.
      * @param schemaPattern The pattern for schema name, use "%" for wildcard.
-     * @param tableNamePattern The pattern for table names, % for wildcard,
-     * if null or "" defaults to "%".
+     * @param tableNamePattern The pattern for table names, % for wildcard, if null or ""
+     *            defaults to "%".
      * @param types The types of table names to retrieve, null returns all types.
-     * 
      * @return List of TableInfo objects, empty array if nothing found.
      */
     public List getTables(
-        String catalog,
-        String schemaPattern,
-        String tableNamePattern,
-        String[] types)
-        throws SQLException {
+            String catalog,
+            String schemaPattern,
+            String tableNamePattern,
+            String[] types) throws SQLException {
 
         List tables = new ArrayList();
 
         if (logObj.isDebugEnabled()) {
-            logObj.debug(
-                "Read tables: catalog="
+            logObj.debug("Read tables: catalog="
                     + catalog
                     + ", schema="
                     + schemaPattern
@@ -239,8 +238,11 @@ public class DbLoader {
             }
         }
 
-        ResultSet rs =
-            getMetaData().getTables(catalog, schemaPattern, tableNamePattern, types);
+        ResultSet rs = getMetaData().getTables(
+                catalog,
+                schemaPattern,
+                tableNamePattern,
+                types);
 
         try {
             while (rs.next()) {
@@ -257,19 +259,17 @@ public class DbLoader {
         return tables;
     }
 
-    /** 
+    /**
      * Loads dbEntities for the specified tables.
      * 
      * @param map DataMap to be populated with DbEntities.
-     * 
-     * @param tables The list of org.objectstyle.ashwood.dbutil.Table objects
-     * for which DbEntities must be created.
-     * 
-     * @return true if need to continue, false if must stop loading. 
+     * @param tables The list of org.objectstyle.ashwood.dbutil.Table objects for which
+     *            DbEntities must be created.
+     * @return false if loading must be immediately aborted.
      */
     public boolean loadDbEntities(DataMap map, List tables) throws SQLException {
         this.dbEntityList = new ArrayList();
-        
+
         Iterator iter = tables.iterator();
         while (iter.hasNext()) {
             Table table = (Table) iter.next();
@@ -307,9 +307,8 @@ public class DbLoader {
             dbEntity.setSchema(table.getSchema());
             dbEntity.setCatalog(table.getCatalog());
 
-            // Create DbAttributes from column information  --
-            ResultSet rs =
-                getMetaData().getColumns(
+            // Create DbAttributes from column information --
+            ResultSet rs = getMetaData().getColumns(
                     table.getCatalog(),
                     table.getSchema(),
                     table.getName(),
@@ -317,8 +316,22 @@ public class DbLoader {
 
             try {
                 while (rs.next()) {
+                    // for a reason not quiet apparent to me, Oracle sometimes
+                    // returns duplicate record sets for the same table, messing up table
+                    // names. E.g. for the system table "WK$_ATTR_MAPPING" columns are returned
+                    // twice - as "WK$_ATTR_MAPPING" and "WK$$_ATTR_MAPPING"... Go figure
+
+                    String tableName = rs.getString("TABLE_NAME");
+                    if (!dbEntity.getName().equals(tableName)) {
+                        logObj.info("Incorrectly returned columns for '"
+                                + tableName
+                                + ", skipping.");
+                        continue;
+                    }
+
                     // gets attribute's (column's) information
                     String columnName = rs.getString("COLUMN_NAME");
+
                     boolean allowNulls = rs.getBoolean("NULLABLE");
                     int columnType = rs.getInt("DATA_TYPE");
                     int columnSize = rs.getInt("COLUMN_SIZE");
@@ -334,8 +347,7 @@ public class DbLoader {
                     }
 
                     // create attribute delegating this task to adapter
-                    DbAttribute attr =
-                        adapter.buildAttribute(
+                    DbAttribute attr = adapter.buildAttribute(
                             columnName,
                             typeName,
                             columnType,
@@ -356,10 +368,11 @@ public class DbLoader {
             if (delegate != null) {
                 delegate.dbEntityAdded(dbEntity);
             }
-            
-            // delegate might have thrown this entity out... so check if it is still around
+
+            // delegate might have thrown this entity out... so check if it is still
+            // around
             // before continuing processing
-            if(map.getDbEntity(table.getName()) == dbEntity) {
+            if (map.getDbEntity(table.getName()) == dbEntity) {
                 this.dbEntityList.add(dbEntity);
             }
         }
@@ -394,9 +407,9 @@ public class DbLoader {
         return true;
     }
 
-    /** 
-     * Creates an ObjEntity for each DbEntity in the map.
-     * ObjEntities are created empty without 
+    /**
+     * Creates an ObjEntity for each DbEntity in the map. ObjEntities are created empty
+     * without
      */
     public void loadObjEntities(DataMap map) {
 
@@ -407,7 +420,7 @@ public class DbLoader {
 
         List loadedEntities = new ArrayList(dbEntityList.size());
 
-        // load empty ObjEntities for all the tables 
+        // load empty ObjEntities for all the tables
         while (dbEntities.hasNext()) {
             DbEntity dbEntity = (DbEntity) dbEntities.next();
 
@@ -418,8 +431,9 @@ public class DbLoader {
                 continue;
             }
 
-            String objEntityName =
-                NameConverter.undescoredToJava(dbEntity.getName(), true);
+            String objEntityName = NameConverter.undescoredToJava(
+                    dbEntity.getName(),
+                    true);
             // this loop will terminate even if no valid name is found
             // to prevent loader from looping forever (though such case is very unlikely)
             String baseName = objEntityName;
@@ -453,25 +467,28 @@ public class DbLoader {
 
             // Get all the foreign keys referencing this table
             ResultSet rs = null;
-            
+
             try {
                 rs = md.getExportedKeys(
-                    pkEntity.getCatalog(),
-                    pkEntity.getSchema(),
-                    pkEntity.getName());
+                        pkEntity.getCatalog(),
+                        pkEntity.getSchema(),
+                        pkEntity.getName());
             }
-            catch(SQLException cay182Ex) {
+            catch (SQLException cay182Ex) {
                 // Sybase-specific - the line above blows on VIEWS, see CAY-182.
-                logObj.info("Error getting relationships for '" + pkEntName + "', ignoring.");
+                logObj.info("Error getting relationships for '"
+                        + pkEntName
+                        + "', ignoring.");
                 continue;
             }
-            
+
             try {
                 if (!rs.next())
                     continue;
 
                 // these will be initailzed every time a new target entity
-                // is found in the result set (which should be ordered by table name among other things)
+                // is found in the result set (which should be ordered by table name among
+                // other things)
                 DbRelationship forwardRelationship = null;
                 DbRelationship reverseRelationship = null;
                 DbEntity fkEntity = null;
@@ -491,25 +508,24 @@ public class DbLoader {
                         fkEntity = map.getDbEntity(fkEntityName);
 
                         if (fkEntity == null) {
-                            logObj.debug(
-                                "FK warning: no entity found for name '"
+                            logObj.debug("FK warning: no entity found for name '"
                                     + fkEntityName
                                     + "'");
                         }
                         else {
 
                             // init relationship
-                            forwardRelationship =
-                                new DbRelationship(
-                                    DbLoader.uniqueRelName(pkEntity, fkEntityName, true));
+                            forwardRelationship = new DbRelationship(DbLoader
+                                    .uniqueRelName(pkEntity, fkEntityName, true));
 
                             forwardRelationship.setSourceEntity(pkEntity);
                             forwardRelationship.setTargetEntity(fkEntity);
                             pkEntity.addRelationship(forwardRelationship);
 
-                            reverseRelationship =
-                                new DbRelationship(
-                                    uniqueRelName(fkEntity, pkEntName, false));
+                            reverseRelationship = new DbRelationship(uniqueRelName(
+                                    fkEntity,
+                                    pkEntName,
+                                    false));
                             reverseRelationship.setToMany(false);
                             reverseRelationship.setSourceEntity(fkEntity);
                             reverseRelationship.setTargetEntity(pkEntity);
@@ -521,26 +537,32 @@ public class DbLoader {
                         // Create and append joins
                         String pkName = rs.getString("PKCOLUMN_NAME");
                         String fkName = rs.getString("FKCOLUMN_NAME");
-                        
+
                         // skip invalid joins...
                         DbAttribute pkAtt = (DbAttribute) pkEntity.getAttribute(pkName);
-                        if(pkAtt == null) {
-                            logObj.info("no attribute for declared primary key: " + pkName);
+                        if (pkAtt == null) {
+                            logObj.info("no attribute for declared primary key: "
+                                    + pkName);
                             continue;
                         }
-                        
+
                         DbAttribute fkAtt = (DbAttribute) fkEntity.getAttribute(fkName);
                         if (fkAtt == null) {
-                            logObj.info(
-                                "no attribute for declared foreign key: " + fkName);
+                            logObj.info("no attribute for declared foreign key: "
+                                    + fkName);
                             continue;
                         }
-                        
-                        forwardRelationship.addJoin(new DbJoin(forwardRelationship, pkName, fkName));
-                        reverseRelationship.addJoin(new DbJoin(reverseRelationship, fkName, pkName));
+
+                        forwardRelationship.addJoin(new DbJoin(
+                                forwardRelationship,
+                                pkName,
+                                fkName));
+                        reverseRelationship.addJoin(new DbJoin(
+                                reverseRelationship,
+                                fkName,
+                                pkName));
                     }
-                }
-                while (rs.next());
+                } while (rs.next());
 
                 if (forwardRelationship != null) {
                     postprocessMasterDbRelationship(forwardRelationship);
@@ -555,8 +577,8 @@ public class DbLoader {
     }
 
     /**
-     * Detects correct relationship multiplicity and "to dep pk" flag. Only called
-     * on relationships from PK to FK, not the reverse ones.
+     * Detects correct relationship multiplicity and "to dep pk" flag. Only called on
+     * relationships from PK to FK, not the reverse ones.
      */
     protected void postprocessMasterDbRelationship(DbRelationship relationship) {
         boolean toPK = true;
@@ -577,8 +599,8 @@ public class DbLoader {
 
         if (toPK) {
             toDependentPK = true;
-            if (((DbEntity) relationship.getTargetEntity()).getPrimaryKey().size()
-                == joins.size()) {
+            if (((DbEntity) relationship.getTargetEntity()).getPrimaryKey().size() == joins
+                    .size()) {
                 toMany = false;
             }
         }
@@ -587,11 +609,8 @@ public class DbLoader {
         if (!toMany) {
             Entity source = relationship.getSourceEntity();
             source.removeRelationship(relationship.getName());
-            relationship.setName(
-                DbLoader.uniqueRelName(
-                    source,
-                    relationship.getTargetEntityName(),
-                    false));
+            relationship.setName(DbLoader.uniqueRelName(source, relationship
+                    .getTargetEntityName(), false));
             source.addRelationship(relationship);
         }
 
@@ -617,15 +636,14 @@ public class DbLoader {
         return types;
     }
 
-    /** 
-     * Performs database reverse engineering and generates DataMap
-     * that contains default mapping of the tables and views. 
-     * By default will include regular tables and views.
+    /**
+     * Performs database reverse engineering and generates DataMap that contains default
+     * mapping of the tables and views. By default will include regular tables and views.
      * 
      * @deprecated Since 1.1 Use "loadDataMapFromDB"
      */
     public DataMap createDataMapFromDB(String schemaName, String tablePattern)
-        throws SQLException {
+            throws SQLException {
 
         String[] types = getDefaultTableTypes();
         if (types.length == 0) {
@@ -635,35 +653,31 @@ public class DbLoader {
         return createDataMapFromDB(schemaName, tablePattern, types);
     }
 
-    /** 
-     * Performs database reverse engineering and generates DataMap object
-     * that contains default mapping of the tables and views. 
-     * Allows to limit types of tables to read. 
+    /**
+     * Performs database reverse engineering and generates DataMap object that contains
+     * default mapping of the tables and views. Allows to limit types of tables to read.
      * 
      * @deprecated Since 1.1 Use "loadDataMapFromDB"
      */
     public DataMap createDataMapFromDB(
-        String schemaName,
-        String tablePattern,
-        String[] tableTypes)
-        throws SQLException {
+            String schemaName,
+            String tablePattern,
+            String[] tableTypes) throws SQLException {
         DataMap dataMap = (DataMap) NamedObjectFactory.createObject(DataMap.class, null);
         dataMap.setDefaultSchema(schemaName);
         return loadDataMapFromDB(schemaName, tablePattern, tableTypes, dataMap);
     }
 
-    /** 
-     * Performs database reverse engineering and generates DataMap
-     * that contains default mapping of the tables and views. 
-     * By default will include regular tables and views.
+    /**
+     * Performs database reverse engineering and generates DataMap that contains default
+     * mapping of the tables and views. By default will include regular tables and views.
      * 
      * @since 1.0.7
      */
     public DataMap loadDataMapFromDB(
-        String schemaName,
-        String tablePattern,
-        DataMap dataMap)
-        throws SQLException {
+            String schemaName,
+            String tablePattern,
+            DataMap dataMap) throws SQLException {
 
         String[] types = getDefaultTableTypes();
         if (types.length == 0) {
@@ -673,24 +687,23 @@ public class DbLoader {
         return loadDataMapFromDB(schemaName, tablePattern, types, dataMap);
     }
 
-    /** 
-     * Performs database reverse engineering and generates DataMap object
-     * that contains default mapping of the tables and views. Allows to 
-     * limit types of tables to read. 
+    /**
+     * Performs database reverse engineering and generates DataMap object that contains
+     * default mapping of the tables and views. Allows to limit types of tables to read.
      */
     public DataMap loadDataMapFromDB(
-        String schemaName,
-        String tablePattern,
-        String[] tableTypes,
-        DataMap dataMap)
-        throws SQLException {
+            String schemaName,
+            String tablePattern,
+            String[] tableTypes,
+            DataMap dataMap) throws SQLException {
 
         if (tablePattern == null) {
             tablePattern = WILDCARD;
         }
 
-        if (!loadDbEntities(dataMap,
-            getTables(null, schemaName, tablePattern, tableTypes))) {
+        if (!loadDbEntities(
+                dataMap,
+                getTables(null, schemaName, tablePattern, tableTypes))) {
             return dataMap;
         }
 
