@@ -58,6 +58,8 @@ package org.objectstyle.cayenne.modeler.datamap;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import org.apache.log4j.Logger;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -214,7 +216,9 @@ public class DbAttributePane
 		col = table.getColumnModel().getColumn(model.typeColumnInd());
 		col.setMinWidth(90);
 
-		JComboBox comboBox = new JComboBox(TypesMapping.getDatabaseTypes());
+    String[] types=TypesMapping.getDatabaseTypes();
+    Arrays.sort(types);
+		JComboBox comboBox = new JComboBox(types);
 		comboBox.setEditable(true);
 		col.setCellEditor(new DefaultCellEditor(comboBox));
 
