@@ -379,13 +379,15 @@ public class ObjRelationshipPane
 		col.setMinWidth(150);
 		table.getSelectionModel().addListSelectionListener(this);
 
-		col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
+	    // Andrus: temporary disabling delete rule
+	    
+/*		col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
 		col.setMinWidth(60);
 		combo = new JComboBox(createDeleteRuleComboModel());
 		combo.setEditable(false);
 		combo.setSelectedIndex(0); //Default to the first value
 		editor = new DefaultCellEditor(combo);
 		editor.setClickCountToStart(1);
-		col.setCellEditor(editor);
+		col.setCellEditor(editor); */
 	}
 }
