@@ -222,19 +222,6 @@ public class DbLoader {
         throws SQLException {
 
         List tables = new ArrayList();
-        if (null == schemaPattern || schemaPattern.equals("")) {
-            schemaPattern = WILDCARD;
-        }
-        else if (schemaPattern.indexOf('*') >= 0) {
-            schemaPattern.replace('*', '%');
-        }
-
-        if (null == tableNamePattern || tableNamePattern.equals("")) {
-            tableNamePattern = WILDCARD;
-        }
-        else if (tableNamePattern.indexOf('*') >= 0) {
-            tableNamePattern.replace('*', '%');
-        }
 
         if (logObj.isDebugEnabled()) {
             logObj.debug(
