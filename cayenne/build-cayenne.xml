@@ -14,19 +14,6 @@
 	
 	<property name="plist.parser" value="${core.src}/org/objectstyle/cayenne/wocompat/parser"/>
 	<property name="plist.grammar" value="${plist.parser}/Parser.jj"/>
-
-
-	<!-- ========================================== -->
-    <!-- Define paths.                           -->
-    <!-- ========================================== -->    
-    <path id="core.dist.src">
-		<fileset dir="${core.src}"/>		
-		<fileset dir="${core.resources}">
-			<include name=".cayenne/**"/>
-            <include name="dotemplates/**"/>
-		</fileset>
-    </path>
-    
     
     
 	<!-- ========================================== -->
@@ -49,7 +36,11 @@
 	
 	<target name="dist-src" depends="dist-bin">
 		<copy todir="${core.dist.src}">
-            <fileset refid="core.dist.src"/>
+ 			<fileset dir="${core.src}"/>		
+			<fileset dir="${core.resources}">
+				<include name=".cayenne/**"/>
+            	<include name="dotemplates/**"/>
+			</fileset>
         </copy>
         <copy todir="${core.dist.src}/.." file="${core.resources}/scripts/build.xml"/>
 	</target>

@@ -9,16 +9,7 @@
 	<property name="test.src" value="src/tests/java"/>
 	<property name="test.bin" value="src/tests/bin"/>
 	<property name="test.resources" value="src/tests/resources"/>
-
-
-	<!-- ========================================== -->
-    <!-- Define paths.                              -->
-    <!-- ========================================== -->    
-    <path id="test.dist.src">
-		<fileset dir="${test.src}"/>		
-		<fileset dir="${test.resources}"/>
-    </path>
-    
+	
 
 	<target name="compile">
 		<ant antfile="build-subproj.xml" target="compile">
@@ -28,7 +19,8 @@
 	
 	<target name="dist-src" depends="dist-bin">
 		<copy todir="${test.dist.src}">
-            <fileset refid="test.dist.src"/>
+			<fileset dir="${test.src}"/>		
+			<fileset dir="${test.resources}"/>
         </copy>
 	</target>
 

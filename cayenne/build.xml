@@ -58,6 +58,7 @@
     <target name="release">
 		<ant antfile="build-doc.xml" target="dist-src"/>
 		<ant antfile="build-cayenne.xml" target="dist-src"/>
+		<ant antfile="build-tests.xml" target="dist-src"/>
 		
 		<copy todir="${dist}" file="doc/release-notes/RELEASE-NOTES-${project.version}.txt"/>
 		

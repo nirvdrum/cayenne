@@ -4,20 +4,21 @@
 <!--         Cayenne documentation buildfile.          -->
 <!--             (called from build.xml)               -->
 <!-- ================================================= -->
-<project name="cayenne-doc" default="doc" basedir=".">   
+<project name="cayenne-doc" default="doc" basedir=".">	  
     <path id="classpath">
     	<pathelement path="${ant.home}/lib/ant.jar"/>
         <fileset dir="otherlib">
             <include name="**.jar"/>
         </fileset>
     </path>
+    
 
     <!-- ============================================= -->
     <!-- Deploys Cayenne web site in a local directory -->
     <!-- ============================================= -->
-    <target name="deploy-web" depends="prepare,doc,api" if="deploy.web">
-    	 <delete dir="${deploy.web}/cayenne"/>
-         <mkdir dir="${deploy.web}/cayenne"/>
+    <target name="release-site" depends="nositedir,prepare,doc,api">
+    	 <delete dir="${site.dir}/cayenne"/>
+         <mkdir dir="${site.dir}/cayenne"/>
          
          <!-- copy tutorial distros -->
          <antcall target="tutorial-dist">
@@ -29,14 +30,14 @@
          
          
          <!-- copy all but HTML -->
-         <copy todir="${deploy.web}/cayenne">
+         <copy todir="${site.dir}/cayenne">
              <fileset dir="${dist}/doc"> 
              	<exclude name="**/*.html"/>
              </fileset>
          </copy>
          
          <!-- do replacement in HTML files -->
-         <copy todir="${deploy.web}/cayenne">
+         <copy todir="${site.dir}/cayenne">
              <fileset dir="${dist}/doc"> 
              	<include name="**/*.html"/>
              </fileset>
@@ -67,15 +68,20 @@
         <delete dir="${dist}/doc"/>
     </target>
     
+    <!-- ========================================== -->
+    <!-- Creates a fulldocumentation build.         -->
+    <!-- ========================================== -->
+    <target name="dist-src" depends="doc,api,tutorials"/>
+    
 
     <!-- ========================================== -->
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
-    <target name="doc" depends="prepare,doc-img,tutorials">
-        <!-- copy all licenses including ours -->
+    <target name="doc" depends="prepare,doc-img">
+        <!-- copy all licenses & release notes -->
         <copy todir="${dist}/doc">
-            <fileset dir="doc">
-               <include name="LICENSE*"/>
+            <fileset dir="doc/licenses">
+               <include name="**"/>
             </fileset>
             
             <fileset dir="doc/release-notes">
@@ -99,7 +105,7 @@
         
         <!-- copy DTD's -->
         <copy todir="${dist}/doc/dtd">
-            <fileset dir="src/dtd">
+            <fileset dir="src/cayenne/dtd">
                 <include name="**/*.dtd"/>
             </fileset>
         </copy>
@@ -167,11 +173,13 @@
 
 
     <!-- ========================================== -->
-    <!-- Builds API documenatation.                 -->
+    <!-- Lazy API documenatation build.             -->
     <!-- ========================================== -->
-    <target name="api" depends="prepare,doc-img">
+    <target name="api" depends="check-api,build-api"/>
+    
+    <target name="build-api" depends="prepare,doc-img" unless="api.up2date">
         <javadoc    packagenames="org.objectstyle.*"
-                    sourcepath="src"
+                    sourcepath="src/cayenne/java"
                     defaultexcludes="yes"
                     destdir="${dist}/doc/api"
                     author="true"
@@ -191,6 +199,16 @@
             </bottom>
             <classpath refid="classpath"/>
         </javadoc>
+    </target>
+    
+    <target name="check-api">
+		<uptodate property="api.up2date" targetfile="${dist}/doc/api/index.html" >
+			<srcfiles dir= "src/cayenne/java" includes="**/*.java"/>
+		</uptodate>
+    </target>
+    
+    <target name="nositedir" unless="site.dir">
+    	<fail>"site.dir" must be defined.</fail>
     </target>
 </project>
 
