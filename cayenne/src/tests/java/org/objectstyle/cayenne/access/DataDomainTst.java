@@ -149,9 +149,9 @@ public class DataDomainTst extends CayenneTestCase {
         DataDomain domain = new DataDomain("dom1");
         DataMap map = new DataMap("map");
         DataNode node = new DataNode("1");
-        
+
         domain.addNode(node);
-        
+
         assertNull(domain.nodesByDataMapName.get("map"));
         node.addDataMap(map);
         assertNull(domain.nodesByDataMapName.get("map"));
@@ -160,6 +160,20 @@ public class DataDomainTst extends CayenneTestCase {
         domain.reindexNodes();
 
         assertSame(node, domain.nodesByDataMapName.get("map"));
+    }
+
+    public void testEntityResolverRefresh() throws Exception {
+        DataDomain domain = new DataDomain("dom1");
+        org.objectstyle.cayenne.map.EntityResolver resolver = domain.getEntityResolver();
+        assertNotNull(resolver);
+
+        DataMap map = new DataMap("map");
+        ObjEntity entity = new ObjEntity("TestEntity");
+        map.addObjEntity(entity);
+
+        domain.addMap(map);
+
+        assertSame(entity, resolver.getObjEntity("TestEntity"));
     }
 
     public void testEntityResolver() {

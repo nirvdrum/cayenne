@@ -63,6 +63,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -84,8 +85,8 @@ import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.AshwoodEntitySorter;
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.EntitySorter;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.BatchQuery;
@@ -115,9 +116,16 @@ public class DataNode implements QueryEngine {
     protected DbAdapter adapter;
     protected String dataSourceLocation;
     protected String dataSourceFactory;
-    protected org.objectstyle.cayenne.map.EntityResolver entityResolver =
-        new org.objectstyle.cayenne.map.EntityResolver();
+    protected org.objectstyle.cayenne.map.EntityResolver entityResolver;
     protected EntitySorter entitySorter = NULL_SORTER;
+
+    // ====================================================
+    // DataMaps
+    // ====================================================
+    private Map dataMaps = new HashMap();
+    private Map dataMapsRef = Collections.unmodifiableMap(dataMaps);
+    private Collection dataMapsValuesRef =
+        Collections.unmodifiableCollection(dataMaps.values());
 
     /** Creates unnamed DataNode. */
     public DataNode() {
@@ -160,11 +168,16 @@ public class DataNode implements QueryEngine {
      * Returns an unmodifiable collection of DataMaps handled by this DataNode.
      */
     public Collection getDataMaps() {
-        return entityResolver.getDataMaps();
+        return dataMapsValuesRef;
     }
 
     public void setDataMaps(Collection dataMaps) {
-        entityResolver.setDataMaps(dataMaps);
+        Iterator it = dataMaps.iterator();
+        while (it.hasNext()) {
+            DataMap map = (DataMap) it.next();
+            this.dataMaps.put(map.getName(), map);
+        }
+
         entitySorter.setDataMaps(dataMaps);
     }
 
@@ -172,14 +185,14 @@ public class DataNode implements QueryEngine {
      * Adds a DataMap to be handled by this node.
      */
     public void addDataMap(DataMap map) {
-        entityResolver.addDataMap(map);
+        this.dataMaps.put(map.getName(), map);
+
         entitySorter.setDataMaps(getDataMaps());
     }
 
     public void removeDataMap(String mapName) {
-        DataMap map = entityResolver.getDataMap(mapName);
+        DataMap map = (DataMap) dataMaps.remove(mapName);
         if (map != null) {
-            entityResolver.removeDataMap(map);
             entitySorter.setDataMaps(getDataMaps());
         }
     }
@@ -224,9 +237,8 @@ public class DataNode implements QueryEngine {
      * {@link ObjEntity#getDataMap()} to obtain DataMap from ObjEntity.
      */
     public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
-        return (this.getEntityResolver().lookupObjEntity(objEntity.getName()) != null)
-            ? this
-            : null;
+        // we don't know any better than to return ourselves...
+        return this;
     }
 
     /**
@@ -236,9 +248,8 @@ public class DataNode implements QueryEngine {
      * @since 1.1
      */
     public DataNode lookupDataNode(DataMap dataMap) {
-        return (getEntityResolver().getDataMap(dataMap.getName()) == dataMap)
-            ? this
-            : null;
+        // we don't know any better than to return ourselves...
+        return this;
     }
 
     /** 
@@ -718,6 +729,18 @@ public class DataNode implements QueryEngine {
      */
     public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
         return entityResolver;
+    }
+
+    /**
+     * Sets EntityResolver. DataNode relies on externally set EntityResolver, 
+     * so if the node is created outside of DataDomain stack, a valid EntityResolver
+     * must be provided explicitly.
+     * 
+     * @since 1.1
+     */
+    public void setEntityResolver(
+        org.objectstyle.cayenne.map.EntityResolver entityResolver) {
+        this.entityResolver = entityResolver;
     }
 
     /**

@@ -111,10 +111,6 @@ public class DataDomain implements QueryEngine {
      */
     protected Map properties = Collections.synchronizedMap(new TreeMap());
 
-    /** Stores DataMaps by name. */
-    protected Map maps = Collections.synchronizedMap(new TreeMap());
-    protected Map mapsRef = Collections.unmodifiableMap(maps);
-
     protected org.objectstyle.cayenne.map.EntityResolver entityResolver;
     protected PrimaryKeyHelper primaryKeyHelper;
     protected DataRowStore sharedSnapshotCache;
@@ -125,7 +121,7 @@ public class DataDomain implements QueryEngine {
     protected boolean sharedCacheEnabled;
     protected boolean validatingObjectsOnCommit;
     protected boolean usingExternalTransactions;
-    
+
     /** 
      * @deprecated Since 1.1 unnamed domains are not allowed. This constructor
      * creates a DataDomain with name "default".
@@ -336,12 +332,12 @@ public class DataDomain implements QueryEngine {
 
     /** Registers new DataMap with this domain. */
     public void addMap(DataMap map) {
-        maps.put(map.getName(), map);
+        getEntityResolver().addDataMap(map);
     }
 
     /** Returns DataMap matching <code>name</code> parameter. */
     public DataMap getMap(String mapName) {
-        return (DataMap) maps.get(mapName);
+        return getEntityResolver().getDataMap(mapName);
     }
 
     /**
@@ -349,7 +345,7 @@ public class DataDomain implements QueryEngine {
      * Also removes map from any child DataNodes that use it.
      */
     public synchronized void removeMap(String mapName) {
-        DataMap map = (DataMap) maps.remove(mapName);
+        DataMap map = getMap(mapName);
         if (map == null) {
             logObj.debug("attempt to remove non-existing map: " + mapName);
             return;
@@ -361,6 +357,9 @@ public class DataDomain implements QueryEngine {
             DataNode node = (DataNode) nodes.get(it.next());
             node.removeDataMap(mapName);
         }
+
+        // remove from EntityResolver
+        getEntityResolver().removeDataMap(map);
 
         // reindex nodes to remove references on removed map entities
         reindexNodes();
@@ -374,6 +373,8 @@ public class DataDomain implements QueryEngine {
         if (nodeToRemove == null) {
             return;
         }
+        
+        nodeToRemove.setEntityResolver(null);
 
         Iterator it = nodesByDataMapName.entrySet().iterator();
         while (it.hasNext()) {
@@ -388,7 +389,7 @@ public class DataDomain implements QueryEngine {
      * Returns a collection of registered DataMaps.
      */
     public Collection getDataMaps() {
-        return mapsRef.values();
+        return getEntityResolver().getDataMaps();
     }
 
     /**
@@ -419,7 +420,7 @@ public class DataDomain implements QueryEngine {
      * "reset" before doing that.
      */
     public void clearDataMaps() {
-        maps.clear();
+        getEntityResolver().setDataMaps(Collections.EMPTY_LIST);
     }
 
     /** 
@@ -429,6 +430,7 @@ public class DataDomain implements QueryEngine {
 
         // add node to name->node map
         nodes.put(node.getName(), node);
+        node.setEntityResolver(this.getEntityResolver());
 
         // add node to "ent name->node" map
         Iterator nodeMaps = node.getDataMaps().iterator();
@@ -526,7 +528,6 @@ public class DataDomain implements QueryEngine {
         return lookupDataNode(objEntity.getDataMap());
     }
 
- 
     /**
      * Returns a DataNode that should handle queries for all
      * entities in a DataMap.
@@ -545,7 +546,7 @@ public class DataDomain implements QueryEngine {
             }
         }
     }
-    
+
     /**
      * @deprecated Since 1.1 use {@link #lookupDataNode(DataMap)}
      */
@@ -581,34 +582,22 @@ public class DataDomain implements QueryEngine {
      * Returns a DataMap that contains DbEntity matching the
      * <code>entityName</code> parameter.
      * 
-     * @deprecated Since 1.1 Use "getEntityResolver().lookupDbEntity(name).getDataMap()"
+     * @deprecated Since 1.1 Use "getEntityResolver().getDbEntity(name).getDataMap()"
      */
     public DataMap getMapForDbEntity(String dbEntityName) {
-        Iterator it = maps.values().iterator();
-        while (it.hasNext()) {
-            DataMap map = (DataMap) it.next();
-            if (map.getDbEntity(dbEntityName) != null) {
-                return map;
-            }
-        }
-        return null;
+        DbEntity entity = getEntityResolver().getDbEntity(dbEntityName);
+        return entity != null ? entity.getDataMap() : null;
     }
 
     /**
      * Returns a DataMap that contains ObjEntity matching the
      * <code>entityName</code> parameter.
      * 
-     * @deprecated Since 1.1 Use "getEntityResolver().lookupObjEntity(name).getDataMap()"
+     * @deprecated Since 1.1 Use "getEntityResolver().getObjEntity(name).getDataMap()"
      */
     public DataMap getMapForObjEntity(String objEntityName) {
-        Iterator it = maps.values().iterator();
-        while (it.hasNext()) {
-            DataMap map = (DataMap) it.next();
-            if (map.getObjEntity(objEntityName) != null) {
-                return map;
-            }
-        }
-        return null;
+        ObjEntity entity = getEntityResolver().getObjEntity(objEntityName);
+        return entity != null ? entity.getDataMap() : null;
     }
 
     /** 
@@ -644,7 +633,7 @@ public class DataDomain implements QueryEngine {
                     throw new CayenneRuntimeException(
                         "No DataMap found for query with root: " + nextQuery.getRoot());
                 }
-                
+
                 node = lookupDataNode(dataMap);
                 if (node == null) {
                     throw new CayenneRuntimeException(
@@ -738,12 +727,33 @@ public class DataDomain implements QueryEngine {
 
     public org.objectstyle.cayenne.map.EntityResolver getEntityResolver() {
         if (entityResolver == null) {
-            entityResolver = new org.objectstyle.cayenne.map.EntityResolver(this.getDataMaps());
+            createEntityResolver();
         }
 
         return entityResolver;
     }
 
+    /**
+     * Sets EntityResolver. If not set explicitly, DataDomain creates 
+     * a default EntityResolver internally on demand.
+     * 
+     * @since 1.1
+     */
+    public void setEntityResolver(
+        org.objectstyle.cayenne.map.EntityResolver entityResolver) {
+        this.entityResolver = entityResolver;
+    }
+
+    // creates default entity resolver if there is none set yet
+    private synchronized void createEntityResolver() {
+        if (entityResolver == null) {
+            // entity resolver will be self-indexing as we add all our maps
+            // to it as they are added to the DataDomain
+            entityResolver = new org.objectstyle.cayenne.map.EntityResolver();
+        }
+    }
+
+    // creates default PrimaryKeyHelper
     private void createKeyGenerator() {
         primaryKeyHelper = new PrimaryKeyHelper(this);
     }

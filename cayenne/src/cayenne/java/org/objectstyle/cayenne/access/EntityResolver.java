@@ -189,32 +189,38 @@ public class EntityResolver {
             Iterator objEntities = map.getObjEntities().iterator();
             while (objEntities.hasNext()) {
                 ObjEntity oe = (ObjEntity) objEntities.next();
-                Class entityClass;
-                try {
-                    entityClass =
-                        Configuration.getResourceLoader().loadClass(oe.getClassName());
-                }
-                catch (ClassNotFoundException e) {
-                    throw new CayenneRuntimeException(
-                        "Cannot find class " + oe.getClassName());
-                }
 
-                if (objEntityCache.get(entityClass) != null) {
-                    throw new CayenneRuntimeException(
-                        getClass().getName()
-                            + ": More than one ObjEntity ("
-                            + oe.getName()
-                            + " and "
-                            + ((ObjEntity) objEntityCache.get(entityClass)).getName()
-                            + ") uses the class "
-                            + entityClass.getName());
-                }
-
-                objEntityCache.put(entityClass, oe);
+                // index by name
                 objEntityCache.put(oe.getName(), oe);
 
-                if (oe.getDbEntity() != null) {
-                    dbEntityCache.put(entityClass, oe.getDbEntity());
+                // index by class
+                String className = oe.getClassName();
+                if (className != null) {
+                    Class entityClass;
+                    try {
+                        entityClass =
+                            Configuration.getResourceLoader().loadClass(className);
+                    }
+                    catch (ClassNotFoundException e) {
+                        throw new CayenneRuntimeException(
+                            "Cannot find class " + oe.getClassName());
+                    }
+
+                    if (objEntityCache.get(entityClass) != null) {
+                        throw new CayenneRuntimeException(
+                            getClass().getName()
+                                + ": More than one ObjEntity ("
+                                + oe.getName()
+                                + " and "
+                                + ((ObjEntity) objEntityCache.get(entityClass)).getName()
+                                + ") uses the class "
+                                + entityClass.getName());
+                    }
+
+                    objEntityCache.put(entityClass, oe);
+                    if (oe.getDbEntity() != null) {
+                        dbEntityCache.put(entityClass, oe.getDbEntity());
+                    }
                 }
 
                 // build inheritance tree... include nodes that 

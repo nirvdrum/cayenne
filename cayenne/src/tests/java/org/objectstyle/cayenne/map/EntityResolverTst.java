@@ -162,6 +162,7 @@ public class EntityResolverTst extends CayenneTestCase {
 
         assertEquals(1, resolver.getDataMaps().size());
         assertSame(oe1, resolver.lookupObjEntity(Object.class));
+        assertEquals(resolver, m1.getNamespace());
     }
 
     public void testRemoveDataMap() throws Exception {

@@ -103,7 +103,12 @@ public class EntityResolver
     }
 
     public synchronized void addDataMap(DataMap map) {
-        super.addDataMap(map);
+        // in addition to super logic, we must set parent namespace
+        if (!maps.contains(map)) {
+            maps.add(map);
+            map.setNamespace(this);
+            clearCache();
+        }
     }
 
     public synchronized void clearCache() {

@@ -84,10 +84,13 @@ public class DataNodeTst extends BasicTestCase {
         assertEquals(tstName, node.getDataSourceFactory());
     }
 
-
-    public void testEmptyNodeEntityResolver() {
-        //Test a brand new otherwise empty node
+    public void testNodeEntityResolver() {
         DataNode node = new DataNode();
-        assertNotNull(node.getEntityResolver());
+        assertNull(node.getEntityResolver());
+
+        org.objectstyle.cayenne.map.EntityResolver resolver =
+            new org.objectstyle.cayenne.map.EntityResolver();
+        node.setEntityResolver(resolver);
+        assertSame(resolver, node.getEntityResolver());
     }
 }

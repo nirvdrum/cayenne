@@ -79,6 +79,7 @@ public class DataNodeIteratedQueriesTst extends JDBCAccessTestCase {
         super.init();
         testNode = getNode().getAdapter().createDataNode("dummy");
         testNode.setDataMaps(getNode().getDataMaps());
+        testNode.setEntityResolver(getNode().getEntityResolver());
     }
 
     public void testRunIteratedSelect() throws Exception {
