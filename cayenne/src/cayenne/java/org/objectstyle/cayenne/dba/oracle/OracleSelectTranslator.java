@@ -59,14 +59,11 @@ package org.objectstyle.cayenne.dba.oracle;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.Types;
-import java.util.Iterator;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
-import org.objectstyle.cayenne.map.DbAttribute;
 
 /**
  * Select translator that implements Oracle-specific optimizations.
@@ -84,20 +81,6 @@ public class OracleSelectTranslator extends SelectTranslator {
     private static final Object[] rowPrefetchArgs = new Object[] {
         new Integer(100)
     };
-
-    private static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
-            Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR
-    };
-
-    protected static boolean isUnsupportedForDistinct(int type) {
-        for (int i = 0; i < UNSUPPORTED_DISTINCT_TYPES.length; i++) {
-            if (UNSUPPORTED_DISTINCT_TYPES[i] == type) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * Determines if we can use Oracle optimizations. If yes, configure this object to use
@@ -137,44 +120,6 @@ public class OracleSelectTranslator extends SelectTranslator {
 
             logObj.info(buf.toString());
         }
-    }
-
-    boolean suppressingDistinct;
-
-    /**
-     * Customizes SELECT query creation to strip "DISTINCT" keyword if the result contains
-     * columns that do not support the use of DISTINCT. Caller can determine whether
-     * expected DISTINCT was suppressed by invoking "isSuppressingDistinct" after this
-     * method.
-     */
-    public String createSqlString() throws Exception {
-        suppressingDistinct = false;
-
-        String string = super.createSqlString();
-
-        if (string.startsWith("SELECT DISTINCT ")) {
-            // check columns
-            Iterator it = getColumns().iterator();
-            while (it.hasNext()) {
-                DbAttribute attribute = (DbAttribute) it.next();
-                if (attribute != null && isUnsupportedForDistinct(attribute.getType())) {
-
-                    suppressingDistinct = true;
-                    string = "SELECT " + string.substring("SELECT DISTINCT ".length());
-                    break;
-                }
-            }
-        }
-
-        return string;
-    }
-
-    /**
-     * Returns whether DISTINCT was explicitly suppressed. This method can be invoked only
-     * after "createSqlString()", as before that this information is unknown.
-     */
-    boolean isSuppressingDistinct() {
-        return suppressingDistinct;
     }
 
     /**

@@ -55,13 +55,10 @@
  */
 package org.objectstyle.cayenne.dba.sqlserver;
 
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Cayenne DbAdapter implementation for <a
@@ -71,11 +68,15 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * 
  * <pre>
  * 
- *  sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
- *  sqlserver.jdbc.username = test
- *  sqlserver.jdbc.password = secret
- *  sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
- *  sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
+ *  
+ *   
+ *    sqlserver.cayenne.adapter = org.objectstyle.cayenne.dba.sqlserver.SQLServerAdapter
+ *    sqlserver.jdbc.username = test
+ *    sqlserver.jdbc.password = secret
+ *    sqlserver.jdbc.url = jdbc:microsoft:sqlserver://192.168.0.65;databaseName=cayenne;SelectMethod=cursor
+ *    sqlserver.jdbc.driver = com.microsoft.jdbc.sqlserver.SQLServerDriver
+ *    
+ *   
  *  
  * </pre>
  * 
@@ -100,30 +101,5 @@ public class SQLServerAdapter extends SybaseAdapter {
         return new TrimmingQualifierTranslator(
                 queryAssembler,
                 SQLServerAdapter.TRIM_FUNCTION);
-    }
-
-    /**
-     * Returns SQLServerDataNode instance.
-     * 
-     * @since 1.1
-     */
-    public DataNode createDataNode(String name) {
-        DataNode node = new SQLServerDataNode(name);
-        node.setAdapter(this);
-        return node;
-    }
-    
-    /**
-     * Returns SQLServerSelectTranslator class for object SELECT queries.
-     * 
-     * @since 1.1
-     */
-    protected Class queryTranslatorClass(Query q) {
-        if (q instanceof SelectQuery) {
-            return SQLServerSelectTranslator.class;
-        }
-        else {
-            return super.queryTranslatorClass(q);
-        }
     }
 }

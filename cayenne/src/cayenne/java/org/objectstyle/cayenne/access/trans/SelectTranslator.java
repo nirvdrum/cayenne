@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.access.trans;
 
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -79,10 +80,24 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Class that serves as a translator of SELECT queries to JDBC statements.
- *
+ * 
  * @author Andrei Adamchik
  */
 public class SelectTranslator extends QueryAssembler implements SelectQueryTranslator {
+
+    protected static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
+            Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR
+    };
+
+    protected static boolean isUnsupportedForDistinct(int type) {
+        for (int i = 0; i < UNSUPPORTED_DISTINCT_TYPES.length; i++) {
+            if (UNSUPPORTED_DISTINCT_TYPES[i] == type) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private final Map aliasLookup = new HashMap();
     private final List columnList = new ArrayList();
@@ -92,27 +107,28 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     private List groupByList;
     private int aliasCounter;
 
-    /**
-     * If set to <code>true</code>, indicates that distinct
-     * select query is required no matter what the original query
-     * settings where. This flag can be set when joins are created
-     * using "to-many" relationships.
-     */
-    private boolean forceDistinct;
+    private boolean suppressingDistinct;
 
     /**
-     * Returns a list of DbAttributes representing columns
-     * in this query.
+     * If set to <code>true</code>, indicates that distinct select query is required no
+     * matter what the original query settings where. This flag can be set when joins are
+     * created using "to-many" relationships.
+     */
+    private boolean forcingDistinct;
+
+    /**
+     * Returns a list of DbAttributes representing columns in this query.
      */
     protected List getColumns() {
         return columnList;
     }
 
     /**
-     * Returns query translated to SQL. This is a main work method of the SelectTranslator.
+     * Returns query translated to SQL. This is a main work method of the
+     * SelectTranslator.
      */
     public String createSqlString() throws Exception {
-        forceDistinct = false;
+        forcingDistinct = false;
 
         // build column list
         buildColumnList();
@@ -144,8 +160,24 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         StringBuffer queryBuf = new StringBuffer();
         queryBuf.append("SELECT ");
 
-        if (forceDistinct || getSelectQuery().isDistinct()) {
-            queryBuf.append("DISTINCT ");
+        if (forcingDistinct || getSelectQuery().isDistinct()) {
+
+            // check if DISTINCT is appropriate
+            // side effect: "suppressingDistinct" flag may end up being flipped here
+            suppressingDistinct = false;
+            Iterator it = getColumns().iterator();
+            while (it.hasNext()) {
+                DbAttribute attribute = (DbAttribute) it.next();
+                if (attribute != null && isUnsupportedForDistinct(attribute.getType())) {
+
+                    suppressingDistinct = true;
+                    break;
+                }
+            }
+
+            if (!suppressingDistinct) {
+                queryBuf.append("DISTINCT ");
+            }
         }
 
         List selectColumnExpList = new ArrayList();
@@ -154,9 +186,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             selectColumnExpList.add(getColumn(i));
         }
 
-        // append any column expressions used in the order by if this query 
+        // append any column expressions used in the order by if this query
         // uses the DISTINCT modifier
-        if (forceDistinct || getSelectQuery().isDistinct()) {
+        if (forcingDistinct || getSelectQuery().isDistinct()) {
             List orderByColumnList = orderingTranslator.getOrderByColumnList();
             for (int i = 0; i < orderByColumnList.size(); i++) {
                 String orderByColumnExp = (String) orderByColumnList.get(i);
@@ -256,6 +288,17 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         return queryBuf.toString();
     }
 
+    /**
+     * Returns true if SelectTranslator determined that a query requiring DISTINCT can't
+     * be run with DISTINCT keyword for internal reasons. If this method returns true,
+     * DataNode may need to do in-memory distinct filtering.
+     * 
+     * @since 1.1
+     */
+    public boolean isSuppressingDistinct() {
+        return suppressingDistinct;
+    }
+
     private SelectQuery getSelectQuery() {
         return (SelectQuery) getQuery();
     }
@@ -292,14 +335,15 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             for (int i = 0; i < len; i++) {
                 Attribute attr = dbe.getAttribute((String) custAttrNames.get(i));
                 if (attr == null) {
-                    throw new CayenneRuntimeException(
-                        "Attribute does not exist: " + custAttrNames.get(i));
+                    throw new CayenneRuntimeException("Attribute does not exist: "
+                            + custAttrNames.get(i));
                 }
                 columnList.add(attr);
             }
         }
         else {
-            // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP BY's
+            // build a list of attributes mentioned in ObjEntity + PK's + FK's + GROUP
+            // BY's
 
             ObjEntity oe = getRootEntity();
             EntityInheritanceTree tree = null;
@@ -309,10 +353,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
 
             // ObjEntity attrs
-            Iterator attrs =
-                (tree != null)
-                    ? tree.allAttributes().iterator()
-                    : oe.getAttributes().iterator();
+            Iterator attrs = (tree != null) ? tree.allAttributes().iterator() : oe
+                    .getAttributes()
+                    .iterator();
             while (attrs.hasNext()) {
                 ObjAttribute oa = (ObjAttribute) attrs.next();
                 Iterator dbPathIterator = oa.getDbPathIterator();
@@ -326,7 +369,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                         DbAttribute dbAttr = (DbAttribute) pathPart;
                         if (dbAttr == null) {
                             throw new CayenneRuntimeException(
-                                "ObjAttribute has no DbAttribute: " + oa.getName());
+                                    "ObjAttribute has no DbAttribute: " + oa.getName());
                         }
 
                         if (!columnList.contains(dbAttr)) {
@@ -337,10 +380,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             }
 
             // relationship keys
-            Iterator rels =
-                (tree != null)
-                    ? tree.allRelationships().iterator()
-                    : oe.getRelationships().iterator();
+            Iterator rels = (tree != null) ? tree.allRelationships().iterator() : oe
+                    .getRelationships()
+                    .iterator();
             while (rels.hasNext()) {
                 ObjRelationship rel = (ObjRelationship) rels.next();
                 DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
@@ -372,7 +414,7 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 ObjRelationship r = pq.getLastPrefetchHint();
                 if ((r != null) && (r.getReverseRelationship() == null)) {
                     // Prefetching a single step toMany relationship which
-                    // has no reverse obj relationship.  Add the FK attributes
+                    // has no reverse obj relationship. Add the FK attributes
                     // of the relationship (wouldn't otherwise be included)
                     DbRelationship dbRel = (DbRelationship) r.getDbRelationships().get(0);
 
@@ -429,25 +471,18 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
                 andFlag = true;
             }
 
-            queryBuf
-                .append(srcAlias)
-                .append('.')
-                .append(join.getSourceName())
-                .append(" = ")
-                .append(targetAlias)
-                .append('.')
-                .append(join.getTargetName());
+            queryBuf.append(srcAlias).append('.').append(join.getSourceName()).append(
+                    " = ").append(targetAlias).append('.').append(join.getTargetName());
         }
     }
 
     /**
-     * Stores a new relationship in an internal list.
-     * Later it will be used to create joins to relationship
-     * destination table.
+     * Stores a new relationship in an internal list. Later it will be used to create
+     * joins to relationship destination table.
      */
     public void dbRelationshipAdded(DbRelationship rel) {
         if (rel.isToMany()) {
-            forceDistinct = true;
+            forcingDistinct = true;
         }
 
         String existAlias = (String) aliasLookup.get(rel);
@@ -480,9 +515,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
     }
 
     /**
-     * Overrides superclass implementation. Will return an alias that
-     * should be used for a specified DbEntity in the query
-     * (or null if this DbEntity is not included in the FROM clause).
+     * Overrides superclass implementation. Will return an alias that should be used for a
+     * specified DbEntity in the query (or null if this DbEntity is not included in the
+     * FROM clause).
      */
     public String aliasForTable(DbEntity ent) {
         if (ent instanceof DerivedDbEntity) {
@@ -495,17 +530,14 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
         }
         else {
             StringBuffer msg = new StringBuffer();
-            msg
-                .append("Alias not found, DbEntity: '")
-                .append(ent != null ? ent.getName() : "<null entity>")
-                .append("'\nExisting aliases:");
+            msg.append("Alias not found, DbEntity: '").append(
+                    ent != null ? ent.getName() : "<null entity>").append(
+                    "'\nExisting aliases:");
 
             int len = aliasList.size();
             for (int i = 0; i < len; i++) {
-                String dbeName =
-                    (tableList.get(i) != null)
-                        ? ((DbEntity) tableList.get(i)).getName()
-                        : "<null entity>";
+                String dbeName = (tableList.get(i) != null) ? ((DbEntity) tableList
+                        .get(i)).getName() : "<null entity>";
                 msg.append("\n").append(aliasList.get(i)).append(" => ").append(dbeName);
             }
 
@@ -528,8 +560,9 @@ public class SelectTranslator extends QueryAssembler implements SelectQueryTrans
             descriptor = new ResultDescriptor(getAdapter().getExtendedTypes());
         }
         else {
-            descriptor =
-                new ResultDescriptor(getAdapter().getExtendedTypes(), getRootEntity());
+            descriptor = new ResultDescriptor(
+                    getAdapter().getExtendedTypes(),
+                    getRootEntity());
         }
 
         descriptor.addColumns(columnList);

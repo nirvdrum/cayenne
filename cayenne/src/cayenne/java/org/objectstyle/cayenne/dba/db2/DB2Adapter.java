@@ -62,7 +62,6 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.types.AbstractType;
@@ -74,27 +73,28 @@ import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * DbAdapter implementation for the <a href="http://www.ibm.com/db2/"> DB2 RDBMS</a>.
- * Sample <a target="_top" href="../../../../../../../developerguide/unit-tests.html">connection 
- * settings</a> to use with DB2 are shown below:
+ * DbAdapter implementation for the <a href="http://www.ibm.com/db2/"> DB2 RDBMS </a>.
+ * Sample <a target="_top"
+ * href="../../../../../../../developerguide/unit-tests.html">connection settings </a> to
+ * use with DB2 are shown below:
  * 
-<pre>
-test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
-test-db2.jdbc.username = test
-test-db2.jdbc.password = secret
-test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
-test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
-</pre>
- *
+ * <pre>
+ * 
+ *  test-db2.cayenne.adapter = org.objectstyle.cayenne.dba.db2.DB2Adapter
+ *  test-db2.jdbc.username = test
+ *  test-db2.jdbc.password = secret
+ *  test-db2.jdbc.url = jdbc:db2://servername:50000/databasename
+ *  test-db2.jdbc.driver = com.ibm.db2.jcc.DB2Driver
+ *  
+ * </pre>
+ * 
  * @author Holger Hoffstaette
  */
 public class DB2Adapter extends JdbcAdapter {
-    
+
     public DB2Adapter() {
     }
 
@@ -110,28 +110,26 @@ public class DB2Adapter extends JdbcAdapter {
 
         // create specially configured CharType handler
         map.registerType(new CharType(true, true));
-        
+
         // configure boolean type to work with numeric columns
         map.registerType(new DB2BooleanType());
     }
 
     /**
-      * Returns a SQL string that can be used to create database table
-      * corresponding to <code>ent</code> parameter.
-      */
+     * Returns a SQL string that can be used to create database table corresponding to
+     * <code>ent</code> parameter.
+     */
     public String createTable(DbEntity ent) {
         // later we may support view creation
         // for derived DbEntities
         if (ent instanceof DerivedDbEntity) {
-            throw new CayenneRuntimeException(
-                "Can't create table for derived DbEntity '"
+            throw new CayenneRuntimeException("Can't create table for derived DbEntity '"
                     + ent.getName()
                     + "'.");
         }
 
         StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(
-            " (");
+        buf.append("CREATE TABLE ").append(ent.getFullyQualifiedName()).append(" (");
 
         // columns
         Iterator it = ent.getAttributes().iterator();
@@ -139,7 +137,8 @@ public class DB2Adapter extends JdbcAdapter {
         while (it.hasNext()) {
             if (first) {
                 first = false;
-            } else {
+            }
+            else {
                 buf.append(", ");
             }
 
@@ -147,8 +146,7 @@ public class DB2Adapter extends JdbcAdapter {
 
             // attribute may not be fully valid, do a simple check
             if (at.getType() == TypesMapping.NOT_DEFINED) {
-                throw new CayenneRuntimeException(
-                    "Undefined type for attribute '"
+                throw new CayenneRuntimeException("Undefined type for attribute '"
                         + ent.getFullyQualifiedName()
                         + "."
                         + at.getName()
@@ -157,8 +155,7 @@ public class DB2Adapter extends JdbcAdapter {
 
             String[] types = externalTypesForJdbcType(at.getType());
             if (types == null || types.length == 0) {
-                throw new CayenneRuntimeException(
-                    "Undefined type for attribute '"
+                throw new CayenneRuntimeException("Undefined type for attribute '"
                         + ent.getFullyQualifiedName()
                         + "."
                         + at.getName()
@@ -172,10 +169,7 @@ public class DB2Adapter extends JdbcAdapter {
             // append size and precision (if applicable)
             if (TypesMapping.supportsLength(at.getType())) {
                 int len = at.getMaxLength();
-                int prec =
-                    TypesMapping.isDecimal(at.getType())
-                        ? at.getPrecision()
-                        : -1;
+                int prec = TypesMapping.isDecimal(at.getType()) ? at.getPrecision() : -1;
 
                 // sanity check
                 if (prec > len) {
@@ -229,69 +223,43 @@ public class DB2Adapter extends JdbcAdapter {
     public QualifierTranslator getQualifierTranslator(QueryAssembler queryAssembler) {
         return new DB2QualifierTranslator(queryAssembler, "RTRIM");
     }
-    
-    /**
-     * Returns DB2SelectTranslator class for object SELECT queries.
-     * 
-     * @since 1.1
-     */
-    protected Class queryTranslatorClass(Query q) {
-        if (q instanceof SelectQuery) {
-            return DB2SelectTranslator.class;
-        }
-        else {
-            return super.queryTranslatorClass(q);
-        }
-    }
-    
-    /**
-     * Returns SQLServerDataNode instance.
-     * 
-     * @since 1.1
-     */
-    public DataNode createDataNode(String name) {
-        DataNode node = new DB2DataNode(name);
-        node.setAdapter(this);
-        return node;
-    }
-    
+
     final class DB2BooleanType extends AbstractType {
-        
+
         public String getClassName() {
             return Boolean.class.getName();
         }
-        
+
         /**
          * @since 1.1
          */
         public boolean validateProperty(
-            Object source,
-            String property,
-            Object value,
-            DbAttribute dbAttribute,
-            ValidationResult validationResult) {
+                Object source,
+                String property,
+                Object value,
+                DbAttribute dbAttribute,
+                ValidationResult validationResult) {
             return true;
         }
 
         public Object materializeObject(ResultSet rs, int index, int type)
-            throws Exception {
+                throws Exception {
             boolean b = rs.getBoolean(index);
             return (rs.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
         }
 
         public Object materializeObject(CallableStatement st, int index, int type)
-            throws Exception {
+                throws Exception {
             boolean b = st.getBoolean(index);
             return (st.wasNull()) ? null : b ? Boolean.TRUE : Boolean.FALSE;
         }
 
         public void setJdbcObject(
-            PreparedStatement st,
-            Object val,
-            int pos,
-            int type,
-            int precision)
-            throws Exception {
+                PreparedStatement st,
+                Object val,
+                int pos,
+                int type,
+                int precision) throws Exception {
 
             if (val != null) {
                 st.setInt(pos, ((Boolean) val).booleanValue() ? 1 : 0);

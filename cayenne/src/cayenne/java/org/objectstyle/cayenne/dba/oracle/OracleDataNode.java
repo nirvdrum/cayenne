@@ -76,18 +76,13 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.DefaultResultIterator;
-import org.objectstyle.cayenne.access.DistinctResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
-import org.objectstyle.cayenne.access.QueryTranslator;
-import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
 import org.objectstyle.cayenne.access.trans.LOBInsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBUpdateBatchQueryBuilder;
-import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -457,63 +452,6 @@ public class OracleDataNode extends DataNode {
         catch (Exception e) {
             throw new CayenneRuntimeException("Error processing BLOB.", Util
                     .unwindException(e));
-        }
-    }
-
-    /**
-     * Overrides default implementation to handle queries that require DISTINCT
-     */
-    protected void runSelect(
-            Connection connection,
-            Query query,
-            OperationObserver delegate) throws SQLException, Exception {
-        long t1 = System.currentTimeMillis();
-
-        QueryTranslator transl = getAdapter().getQueryTranslator(query);
-        transl.setEngine(this);
-        transl.setCon(connection);
-
-        PreparedStatement prepStmt = transl.createStatement(query.getLoggingLevel());
-        ResultSet rs = prepStmt.executeQuery();
-
-        SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
-        DefaultResultIterator workerIterator = new DefaultResultIterator(
-                connection,
-                prepStmt,
-                rs,
-                assembler.getResultDescriptor(rs),
-                ((GenericSelectQuery) query).getFetchLimit());
-
-        ResultIterator it = workerIterator;
-
-        // CUSTOMIZATION: wrap result iterator if distinct has to be suppressed
-        if (assembler instanceof OracleSelectTranslator) {
-            OracleSelectTranslator customTranslator = (OracleSelectTranslator) assembler;
-            if (customTranslator.isSuppressingDistinct()) {
-                it = new DistinctResultIterator(workerIterator, customTranslator
-                        .getRootDbEntity());
-            }
-        }
-
-        if (!delegate.isIteratedResult()) {
-            // note that we don't need to close ResultIterator
-            // since "dataRows" will do it internally
-            List resultRows = it.dataRows(true);
-            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
-                    .currentTimeMillis()
-                    - t1);
-
-            delegate.nextDataRows(query, resultRows);
-        }
-        else {
-            try {
-                workerIterator.setClosingConnection(true);
-                delegate.nextDataRows(transl.getQuery(), it);
-            }
-            catch (Exception ex) {
-                it.close();
-                throw ex;
-            }
         }
     }
 }

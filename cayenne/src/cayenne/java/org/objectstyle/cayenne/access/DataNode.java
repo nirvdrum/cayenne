@@ -80,6 +80,7 @@ import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
 import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
+import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.conn.PoolManager;
@@ -375,10 +376,6 @@ public class DataNode implements QueryEngine {
     protected void runSelect(Connection connection, Query query, OperationObserver delegate)
         throws SQLException, Exception {
 
-        // *** WARNING: Oracle and SQLServer DataNode subclasses override this method to
-        // implement translation customizations. Make sure those are updated whenever this
-        // method changes!! Ideally this should be reimplemented as a pluggable "strategy".
-
         long t1 = System.currentTimeMillis();
 
         QueryTranslator translator = getAdapter().getQueryTranslator(query);
@@ -389,13 +386,24 @@ public class DataNode implements QueryEngine {
         ResultSet rs = prepStmt.executeQuery();
 
         SelectQueryTranslator assembler = (SelectQueryTranslator) translator;
-        DefaultResultIterator it = new DefaultResultIterator(
+        DefaultResultIterator workerIterator = new DefaultResultIterator(
                 connection,
                 prepStmt,
                 rs,
                 assembler.getResultDescriptor(rs),
                 ((GenericSelectQuery) query).getFetchLimit());
 
+        ResultIterator it = workerIterator;
+
+        // wrap result iterator if distinct has to be suppressed
+        if (assembler instanceof SelectTranslator) {
+            SelectTranslator customTranslator = (SelectTranslator) assembler;
+            if (customTranslator.isSuppressingDistinct()) {
+                it = new DistinctResultIterator(workerIterator, customTranslator
+                        .getRootDbEntity());
+            }
+        }
+        
         // TODO: Should do something about closing ResultSet and PreparedStatement in this
         // method, instead of relying on DefaultResultIterator to do that later
 
@@ -411,7 +419,7 @@ public class DataNode implements QueryEngine {
         }
         else {
             try {
-                it.setClosingConnection(true);
+                workerIterator.setClosingConnection(true);
                 delegate.nextDataRows(translator.getQuery(), it);
             }
             catch (Exception ex) {

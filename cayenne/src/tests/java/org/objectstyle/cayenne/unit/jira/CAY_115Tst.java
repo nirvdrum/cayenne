@@ -74,6 +74,10 @@ public class CAY_115Tst extends RelationshipTestCase {
     }
 
     public void testDistinctClobFetch() throws Exception {
+        if (!super.getAccessStackAdapter().supportsLobs()) {
+            return;
+        }
+
         super.createTestData("testDistinctClobFetch");
 
         DataContext context = createDataContext();
@@ -93,6 +97,10 @@ public class CAY_115Tst extends RelationshipTestCase {
     }
 
     public void testDistinctClobFetchWithToManyJoin() throws Exception {
+        if (!super.getAccessStackAdapter().supportsLobs()) {
+            return;
+        }
+
         super.createTestData("testDistinctClobFetchWithToManyJoin");
 
         DataContext context = createDataContext();

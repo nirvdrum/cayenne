@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.map.DbEntity;
  * @since 1.1
  * @author Andrei Adamchik
  */
-public class DistinctResultIterator implements ResultIterator {
+class DistinctResultIterator implements ResultIterator {
 
     protected ResultIterator wrappedIterator;
     protected Set fetchedIds;
