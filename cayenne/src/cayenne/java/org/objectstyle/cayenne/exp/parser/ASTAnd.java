@@ -68,6 +68,14 @@ import org.objectstyle.cayenne.exp.Expression;
  */
 public class ASTAnd extends SimpleNode {
 
+    public ASTAnd(Object[] nodes) {
+        super(ExpressionParserTreeConstants.JJTAND);
+        int len = nodes.length;
+        for (int i = 0; i < len; i++) {
+            jjtAddChild((Node) nodes[i], i);
+        }
+    }
+
     public ASTAnd(Collection nodes) {
         super(ExpressionParserTreeConstants.JJTAND);
         int len = nodes.size();
@@ -83,7 +91,6 @@ public class ASTAnd extends SimpleNode {
     ASTAnd(int id) {
         super(id);
     }
-    
 
     /**
      * Creates a copy of this expression node, without copying children.

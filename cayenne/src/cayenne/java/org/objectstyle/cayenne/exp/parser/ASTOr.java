@@ -67,7 +67,15 @@ import org.objectstyle.cayenne.exp.Expression;
  * @author Andrei Adamchik
  */
 public class ASTOr extends SimpleNode {
-    
+
+    public ASTOr(Object[] nodes) {
+        super(ExpressionParserTreeConstants.JJTAND);
+        int len = nodes.length;
+        for (int i = 0; i < len; i++) {
+            jjtAddChild((Node) nodes[i], i);
+        }
+    }
+
     public ASTOr(Collection nodes) {
         super(ExpressionParserTreeConstants.JJTOR);
         int len = nodes.size();
@@ -80,7 +88,7 @@ public class ASTOr extends SimpleNode {
     ASTOr(int id) {
         super(id);
     }
-    
+
     /**
      * Creates a copy of this expression node, without copying children.
      */
