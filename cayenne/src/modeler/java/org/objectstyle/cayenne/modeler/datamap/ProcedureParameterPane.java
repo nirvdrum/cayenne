@@ -58,16 +58,21 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTable;
+import javax.swing.table.TableColumn;
 
+import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ProcedureDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
+import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
 /**
  * @author Andrei Adamchik
@@ -112,9 +117,46 @@ public class ProcedureParameterPane
       */
     public void currentProcedureChanged(ProcedureDisplayEvent e) {
         Procedure procedure = e.getProcedure();
-        if (procedure == null || !e.isProcedureChanged()) {
-            return;
+        if (procedure != null && e.isProcedureChanged()) {
+            rebuildTable(procedure);
         }
+    }
+
+    protected void rebuildTable(Procedure procedure) {
+        ProcedureParameterTableModel model =
+            new ProcedureParameterTableModel(procedure, eventController, this);
+
+        table.setModel(model);
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+
+        // name column tweaking
+        TableColumn nameColumn =
+            table.getColumnModel().getColumn(ProcedureParameterTableModel.PARAMETER_NAME);
+        nameColumn.setMinWidth(150);
+
+        // types column tweaking
+        TableColumn typesColumn =
+            table.getColumnModel().getColumn(ProcedureParameterTableModel.PARAMETER_TYPE);
+        typesColumn.setMinWidth(90);
+
+        JComboBox typesEditor =
+            CayenneWidgetFactory.createComboBox(TypesMapping.getDatabaseTypes(), true);
+        typesEditor.setEditable(true);
+        typesColumn.setCellEditor(new DefaultCellEditor(typesEditor));
+
+        // direction column tweaking
+        TableColumn directionColumn =
+            table.getColumnModel().getColumn(
+                ProcedureParameterTableModel.PARAMETER_DIRECTION);
+        directionColumn.setMinWidth(90);
+
+        JComboBox directionEditor =
+            CayenneWidgetFactory.createComboBox(
+                ProcedureParameterTableModel.PARAMETER_DIRECTION_NAMES,
+                false);
+        directionEditor.setEditable(true);
+        directionColumn.setCellEditor(new DefaultCellEditor(directionEditor));
     }
 
 }
