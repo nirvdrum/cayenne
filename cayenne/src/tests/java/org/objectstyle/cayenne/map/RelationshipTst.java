@@ -55,52 +55,59 @@
  */
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 public class RelationshipTst extends CayenneTestCase {
-	protected Relationship rel;
+    protected Relationship rel;
 
-	public RelationshipTst(String name) {
-		super(name);
-	}
+    public RelationshipTst(String name) {
+        super(name);
+    }
 
-	public void setUp() throws Exception {
-		// create an anonymous inner Relationship subclass, since Relationship is abstract
-		rel = new Relationship() {
-			public Entity getTargetEntity() {
-				return null;
-			}
-		};
-	}
+    public void setUp() throws Exception {
+        // create an anonymous inner Relationship subclass, since Relationship is abstract
+        rel = new Relationship() {
+            public Entity getTargetEntity() {
+                return null;
+            }
+        };
+    }
 
-	public void testName() throws Exception {
-		String tstName = "tst_name";
-		rel.setName(tstName);
-		assertEquals(tstName, rel.getName());
-	}
+    public void testName() throws Exception {
+        String tstName = "tst_name";
+        rel.setName(tstName);
+        assertEquals(tstName, rel.getName());
+    }
 
-	public void testSourceEntity() throws Exception {
-		Entity tstEntity = new Entity() {};
-		rel.setSourceEntity(tstEntity);
-		assertSame(tstEntity, rel.getSourceEntity());
-	}
+    public void testSourceEntity() throws Exception {
+        Entity tstEntity = new Entity() {
+            protected void validateQueryRoot(Query query) {
+            }
+        };
+        rel.setSourceEntity(tstEntity);
+        assertSame(tstEntity, rel.getSourceEntity());
+    }
 
-	public void testTargetEntity() throws Exception {
-		Entity tstEntity = new Entity() {};
-		tstEntity.setName("abc");
-		rel.setTargetEntity(tstEntity);
-		assertSame("abc", rel.getTargetEntityName());
-	}
+    public void testTargetEntity() throws Exception {
+        Entity tstEntity = new Entity() {
+            protected void validateQueryRoot(Query query) {
+            }
+        };
+        tstEntity.setName("abc");
+        rel.setTargetEntity(tstEntity);
+        assertSame("abc", rel.getTargetEntityName());
+    }
 
-	public void testTargetEntityName() throws Exception {
-		rel.setTargetEntityName("abc");
-		assertSame("abc", rel.getTargetEntityName());
-	}
+    public void testTargetEntityName() throws Exception {
+        rel.setTargetEntityName("abc");
+        assertSame("abc", rel.getTargetEntityName());
+    }
 
-	public void testToMany() throws Exception {
-		rel.setToMany(true);
-		assertTrue(rel.isToMany());
-		rel.setToMany(false);
-		assertTrue(!rel.isToMany());
-	}
+    public void testToMany() throws Exception {
+        rel.setToMany(true);
+        assertTrue(rel.isToMany());
+        rel.setToMany(false);
+        assertTrue(!rel.isToMany());
+    }
 }

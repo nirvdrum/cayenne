@@ -25,7 +25,11 @@ application expressions.
 5. Added parametrized queries based on parametrized expressions.
 
 6. DomainHelper is refactored (and deprecated) into 2 classes - 
-ConfigLoader and ConfigSaver.
+ConfigLoader and ConfigSaver. Implementation is changed to use external delegates
+to process loaded XML. This allows alternative loaders.
+
+7. Named queries can now be associated with Entities. This is a good way to cache shared 
+query definitions.
 
 
 

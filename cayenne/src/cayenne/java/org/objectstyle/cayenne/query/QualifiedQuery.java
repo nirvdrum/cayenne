@@ -57,6 +57,12 @@ package org.objectstyle.cayenne.query;
 
 import org.objectstyle.cayenne.exp.Expression;
 
+/**
+ * An abstract superclass of queries that have qualifiers. Those include select,
+ * update and delete queries.
+ * 
+ * @author Andrei Adamchik
+ */
 public abstract class QualifiedQuery extends AbstractQuery {
 	protected Expression qualifier;
 

@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.query.Query;
+
 /** 
  * A DbEntity is a mapping descriptor that defines a structure of a database table. 
  * 
@@ -66,106 +68,107 @@ import java.util.List;
  * @author Andrei Adamchik
  */
 public class DbEntity extends Entity {
-	protected String catalog;
-	protected String schema;
+    protected String catalog;
+    protected String schema;
 
-   /**
-    * Creates an unnamed DbEntity. 
-    */
-	public DbEntity() {}
+    /**
+     * Creates an unnamed DbEntity. 
+     */
+    public DbEntity() {
+    }
 
     /**
      * Creates a named DbEntity. 
      */
-	public DbEntity(String name) {
-		setName(name);
-	}
+    public DbEntity(String name) {
+        setName(name);
+    }
 
-	/**
-	 * Returns table name including schema, if present.
-	 */
-	public String getFullyQualifiedName() {
-		return (schema != null) ? schema + '.' + getName() : getName();
-	}
+    /**
+     * Returns table name including schema, if present.
+     */
+    public String getFullyQualifiedName() {
+        return (schema != null) ? schema + '.' + getName() : getName();
+    }
 
-	/** 
-	 * Returns database schema of this table.
-	 * 
-	 * @return table's schema, null if not set.
-	 */
-	public String getSchema() {
-		return schema;
-	}
+    /** 
+     * Returns database schema of this table.
+     * 
+     * @return table's schema, null if not set.
+     */
+    public String getSchema() {
+        return schema;
+    }
 
-	/** 
-	 * Sets the database schema name of the table described
-	 * by this DbEntity. 
-	 */
-	public void setSchema(String schema) {
-		this.schema = schema;
-	}
+    /** 
+     * Sets the database schema name of the table described
+     * by this DbEntity. 
+     */
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
 
-	/** 
-	 * Returns the catalog name of the table described
-	 * by this DbEntity. 
-	 */
-	public String getCatalog() {
-		return catalog;
-	}
+    /** 
+     * Returns the catalog name of the table described
+     * by this DbEntity. 
+     */
+    public String getCatalog() {
+        return catalog;
+    }
 
-	/** 
-	 * Sets the catalog name of the table described
-	 * by this DbEntity. 
-	 */
-	public void setCatalog(String catalog) {
-		this.catalog = catalog;
-	}
+    /** 
+     * Sets the catalog name of the table described
+     * by this DbEntity. 
+     */
+    public void setCatalog(String catalog) {
+        this.catalog = catalog;
+    }
 
-	/** 
-	 * Returns a list of DbAttributes representing the primary
-	 * key of the table described by this DbEntity. 
-	 */
-	public List getPrimaryKey() {
-		List list = new ArrayList();
-		Iterator it = this.getAttributeList().iterator();
-		while (it.hasNext()) {
-			DbAttribute dba = (DbAttribute) it.next();
-			if (dba.isPrimaryKey())
-				list.add(dba);
-		}
-		return list;
-	}
+    /** 
+     * Returns a list of DbAttributes representing the primary
+     * key of the table described by this DbEntity. 
+     */
+    public List getPrimaryKey() {
+        List list = new ArrayList();
+        Iterator it = this.getAttributeList().iterator();
+        while (it.hasNext()) {
+            DbAttribute dba = (DbAttribute) it.next();
+            if (dba.isPrimaryKey())
+                list.add(dba);
+        }
+        return list;
+    }
 
-	public String toString() {
-		StringBuffer sb = new StringBuffer("DbEntity:");
-		sb.append("\nTable name: ").append(this.getName());
+    public String toString() {
+        StringBuffer sb = new StringBuffer("DbEntity:");
+        sb.append("\nTable name: ").append(this.getName());
 
-		// 1. print attributes
-		Iterator attIt = attributes.values().iterator();
-		while (attIt.hasNext()) {
-			DbAttribute dbAttribute = (DbAttribute) attIt.next();
-			String name = dbAttribute.getName();
-			int type = dbAttribute.getType();
-			sb.append("\n   Column name: ").append(name);
-			if (dbAttribute.isPrimaryKey())
-				sb.append(" (pk)");
+        // 1. print attributes
+        Iterator attIt = attributes.values().iterator();
+        while (attIt.hasNext()) {
+            DbAttribute dbAttribute = (DbAttribute) attIt.next();
+            String name = dbAttribute.getName();
+            int type = dbAttribute.getType();
+            sb.append("\n   Column name: ").append(name);
+            if (dbAttribute.isPrimaryKey())
+                sb.append(" (pk)");
 
-			sb.append("\n   Column type: ").append(type);
-			sb.append("\n------------------");
-		}
+            sb.append("\n   Column type: ").append(type);
+            sb.append("\n------------------");
+        }
 
-		// 2. print relationships
-		Iterator relIt = getRelationshipList().iterator();
-		while (relIt.hasNext()) {
-			DbRelationship dbRel = (DbRelationship) relIt.next();
-			sb.append("\n   Rel. to: ").append(
-				dbRel.getTargetEntity().getName());
-			sb.append("\n------------------");
-		}
+        // 2. print relationships
+        Iterator relIt = getRelationshipList().iterator();
+        while (relIt.hasNext()) {
+            DbRelationship dbRel = (DbRelationship) relIt.next();
+            sb.append("\n   Rel. to: ").append(
+                dbRel.getTargetEntity().getName());
+            sb.append("\n------------------");
+        }
 
-		return sb.toString();
-	}
-	
+        return sb.toString();
+    }
+
     /**
      * Removes attribute from the entity, removes any relationship
      * joins containing this attribute.
@@ -173,29 +176,37 @@ public class DbEntity extends Entity {
      * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
      */
     public void removeAttribute(String attrName) {
-    	Attribute attr = getAttribute(attrName);
-    	if(attr == null) {
-    		return;
-    	}
-    	
-    	DataMap map = getDataMap();
-    	if(map != null) {
-    		DbEntity[] ents = map.getDbEntities();
-    		for(int i = 0; i < ents.length; i++) {
-    			Iterator it = ents[i].getRelationshipList().iterator();
-    			while(it.hasNext()) {
-    				DbRelationship rel = (DbRelationship)it.next();
-    				Iterator joins = rel.getJoins().iterator();
-    				while(joins.hasNext()) {
-    					DbAttributePair join = (DbAttributePair)joins.next();
-    					if(join.getSource() == attr || join.getTarget() == attr) {
-    						joins.remove();
-    					}
-    				}
-    			}    			
-    		}
-    	}
-    	    	
+        Attribute attr = getAttribute(attrName);
+        if (attr == null) {
+            return;
+        }
+
+        DataMap map = getDataMap();
+        if (map != null) {
+            DbEntity[] ents = map.getDbEntities();
+            for (int i = 0; i < ents.length; i++) {
+                Iterator it = ents[i].getRelationshipList().iterator();
+                while (it.hasNext()) {
+                    DbRelationship rel = (DbRelationship) it.next();
+                    Iterator joins = rel.getJoins().iterator();
+                    while (joins.hasNext()) {
+                        DbAttributePair join = (DbAttributePair) joins.next();
+                        if (join.getSource() == attr
+                            || join.getTarget() == attr) {
+                            joins.remove();
+                        }
+                    }
+                }
+            }
+        }
+
         super.removeAttribute(attrName);
+    }
+
+    protected void validateQueryRoot(Query query)
+        throws IllegalArgumentException {
+        if (query.getRoot() != this) {
+            throw new IllegalArgumentException("Wrong query root for DbEntity: " + query.getRoot());
+        }
     }
 }

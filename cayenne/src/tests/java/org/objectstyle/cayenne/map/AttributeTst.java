@@ -53,40 +53,49 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
+import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
 
 public class AttributeTst extends CayenneTestCase {
     protected Attribute attr;
-    
+
     public AttributeTst(String name) {
         super(name);
     }
-    
+
     public void setUp() throws Exception {
         // create an anonymous inner Attribute subclass, since Attribute is abstract
         attr = new Attribute() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
+            public String getNameToDisplay() {
+                return null;
+            }
+            public String getTypenameToDisplay() {
+                return null;
+            }
         };
     }
-    
+
     public void testName() throws Exception {
         String tstName = "tst_name";
         attr.setName(tstName);
         assertEquals(tstName, attr.getName());
     }
-    
-    
+
     public void testEntity() throws Exception {
         Entity tstEntity = new Entity() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
+            public String getNameToDisplay() {
+                return null;
+            }
+            public String getTypenameToDisplay() {
+                return null;
+            }
+            protected void validateQueryRoot(Query query) {
+            }
         };
         attr.setEntity(tstEntity);
         assertSame(tstEntity, attr.getEntity());
     }
-    
+
 }

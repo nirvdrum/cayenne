@@ -52,15 +52,16 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.map;
 
 import java.util.Iterator;
 
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
-
 
 public class EntityTst extends CayenneTestCase {
     protected Entity ent;
@@ -68,106 +69,126 @@ public class EntityTst extends CayenneTestCase {
     public EntityTst(String name) {
         super(name);
     }
-    
+
     public void setUp() throws Exception {
         // create an anonymous inner Entity subclass, since Entity is abstract
         ent = new Entity() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
+            public String getNameToDisplay() {
+                return null;
+            }
+            public String getTypenameToDisplay() {
+                return null;
+            }
+            protected void validateQueryRoot(Query query) {
+            }
         };
     }
-    
-    
+
     public void testName() throws Exception {
         String tstName = "tst_name";
         ent.setName(tstName);
         assertEquals(tstName, ent.getName());
     }
-    
-    
+
     public void testAttribute() throws Exception {
         Attribute attr = new Attribute() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
+            public String getNameToDisplay() {
+                return null;
+            }
+            public String getTypenameToDisplay() {
+                return null;
+            }
         };
         attr.setName("tst_name");
         ent.addAttribute(attr);
         assertSame(attr, ent.getAttribute(attr.getName()));
-        
+
         // attribute must have its entity switched to our entity.
         assertSame(ent, attr.getEntity());
-        
+
         // remove attribute
         ent.removeAttribute(attr.getName());
         assertNull(ent.getAttribute(attr.getName()));
     }
-    
-    
+
+    public void testQuery() throws Exception {
+        SelectQuery q = new SelectQuery("Abc");
+        ent.addQuery("Query1", q);
+        assertSame(q, ent.getQuery("Query1"));
+
+        // remove query
+        ent.removeQuery("Query1");
+        assertNull(ent.getQuery("Query1"));
+    }
+
     public void testRelationship() throws Exception {
         Relationship rel = new Relationship() {
-            public Entity getTargetEntity() {return null;}             
+            public Entity getTargetEntity() {
+                return null;
+            }
         };
         rel.setName("tst_name");
         ent.addRelationship(rel);
         assertSame(rel, ent.getRelationship(rel.getName()));
-        
+
         // attribute must have its entity switched to our entity.
         assertSame(ent, rel.getSourceEntity());
-        
+
         // remove attribute
         ent.removeRelationship(rel.getName());
         assertNull(ent.getRelationship(rel.getName()));
     }
-    
-    
+
     public void testResolveBadObjPath1() throws Exception {
         // test invalid expression path
-        Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        Expression pathExpr =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "invalid.invalid");
-        
+
         // itertator should be returned, but when trying to read 1st component,
         // it should throw an exception....
-        ObjEntity galleryEnt = getDomain().getEntityResolver().lookupObjEntity("Gallery");
+        ObjEntity galleryEnt =
+            getDomain().getEntityResolver().lookupObjEntity("Gallery");
         Iterator it = galleryEnt.resolvePathComponents(pathExpr);
         assertTrue(it.hasNext());
-        
+
         try {
             it.next();
             fail();
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             // exception expected
         }
     }
-    
-    
+
     public void testResolveBadObjPath2() throws Exception {
         // test invalid expression type
-        Expression badPathExpr = ExpressionFactory.expressionOfType(Expression.IN); 
+        Expression badPathExpr =
+            ExpressionFactory.expressionOfType(Expression.IN);
         badPathExpr.setOperand(0, "a.b.c");
-        ObjEntity galleryEnt = getDomain().getEntityResolver().lookupObjEntity("Gallery");
-        
+        ObjEntity galleryEnt =
+            getDomain().getEntityResolver().lookupObjEntity("Gallery");
+
         try {
             galleryEnt.resolvePathComponents(badPathExpr);
             fail();
-        }
-        catch(Exception ex) {
+        } catch (Exception ex) {
             // exception expected
         }
     }
-    
-    
+
     public void testResolveObjPath1() throws Exception {
-        Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        Expression pathExpr =
+            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "galleryName");
-        
-        ObjEntity galleryEnt = getDomain().getEntityResolver().lookupObjEntity("Gallery");
+
+        ObjEntity galleryEnt =
+            getDomain().getEntityResolver().lookupObjEntity("Gallery");
         Iterator it = galleryEnt.resolvePathComponents(pathExpr);
-        
+
         // iterator must contain a single ObjAttribute
         assertNotNull(it);
         assertTrue(it.hasNext());
-        ObjAttribute next = (ObjAttribute)it.next();
+        ObjAttribute next = (ObjAttribute) it.next();
         assertNotNull(next);
         assertTrue(!it.hasNext());
         assertSame(galleryEnt.getAttribute("galleryName"), next);
