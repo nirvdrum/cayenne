@@ -268,8 +268,7 @@ $tag
     #set ($menus = $project.getChildren("menu"))
     #foreach ( $menu in $menus )
     <p>
-    <strong class="body-white">$menu.getAttributeValue("name")</strong><br><br>
-    
+    <strong class="body-white">$menu.getAttributeValue("name")</strong><br>
     #foreach ( $item in $menu.getChildren() )
     #set ($name = $item.getAttributeValue("name"))
        #menuprojectanchor($name $item.getAttributeValue("href"))<br>
