@@ -56,9 +56,58 @@
 
 package org.objectstyle.cayenne.event;
 
-import java.util.EventListener;
+/**
+ * This class encapsulates the String that is used to identify the <em>subject</em> 
+ * that a listener is  interested in. Using plain Strings causes several
+ * problems:
+ * <ul>
+ * <li>it's easy to misspell a subject, leading to undesired behaviour at
+ * runtime that is hard to debug.</li>
+ * <li>in systems with many different subjects there is no safeguard for
+ * defining the same subject twice for different purposes. This is especially
+ * true in a distributed setting.
+ * </ul>
+ * 
+ * @author Dirk Olmes
+ * @author Holger Hoffstätte
+ */
 
-public interface ObserverEventListener extends EventListener {
+public class EventSubject extends Object {
+	private String _subject;
+	
+	public static EventSubject getSubject(Class subjectOwner, String subjectName) {
+		if (subjectOwner == null) {
+			throw new IllegalArgumentException("sender class must not be null");
+		}
+
+		if ((subjectName == null) || (subjectName.length() == 0)) {
+			throw new IllegalArgumentException("subjectName must not be empty");
+		}
+
+		return new EventSubject(subjectOwner.getName() + "." + subjectName);
+	}
+
+	// make sure that the only way to create subjects is via the factory method
+	private EventSubject() {
+		super();
+	}
+
+	private EventSubject(String subject) {
+		this();
+		_subject = subject;
+	}
+	
+	public String toString() {
+        StringBuffer buf = new StringBuffer(64);
+
+        buf.append("<");
+        buf.append(this.getClass().getName());
+        buf.append(" 0x");
+        buf.append(Integer.toHexString(System.identityHashCode(this)));
+        buf.append("> ");
+        buf.append(_subject);
+        
+        return buf.toString();
+	}
 
 }
-

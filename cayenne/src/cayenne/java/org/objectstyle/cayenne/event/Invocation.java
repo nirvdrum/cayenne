@@ -58,16 +58,17 @@ package org.objectstyle.cayenne.event;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.util.EventObject;
 
 import org.apache.log4j.Logger;
 
-public class ObserverInvocation extends Object {
-	private static final Logger log = Logger.getLogger(ObserverInvocation.class);
+public class Invocation extends Object {
+	private static final Logger log = Logger.getLogger(Invocation.class);
 	
 	private Method _method;
 	private WeakReference _target;
 	
-	public ObserverInvocation(Object target, Method method) {
+	public Invocation(Object target, Method method) {
 		super();
 
 		if (target == null) {
@@ -82,7 +83,7 @@ public class ObserverInvocation extends Object {
 		_target = new WeakReference(target);
 	}
 
-	public boolean fire(ObserverEvent event) {
+	public boolean fire(EventObject event) {
 		boolean success = true;
 
 		if (event == null) {
@@ -110,7 +111,7 @@ public class ObserverInvocation extends Object {
 
 	public boolean equals(Object obj) {
 		if ((obj != null) && (obj.getClass().equals(this.getClass()))) {
-			ObserverInvocation otherInvocation = (ObserverInvocation)obj;
+			Invocation otherInvocation = (Invocation)obj;
 			if (_method.equals(otherInvocation.getMethod())) {
 				Object otherTarget = otherInvocation.getTarget();
 				Object target = _target.get();
