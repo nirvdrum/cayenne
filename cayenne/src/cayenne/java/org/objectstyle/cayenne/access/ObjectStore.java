@@ -657,15 +657,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
         if (event.getRootSource() == this || event.getSource() == this) {
-            if (logObj.isDebugEnabled()) {
-                logObj.debug("SnapshotEvent by this ObjectStore, ignoring: " + event);
-            }
             return;
         }
 
         // merge objects with changes in event...
         if (logObj.isDebugEnabled()) {
-            logObj.debug("new SnapshotEvent: " + event);
+            logObj.debug("Received: " + event);
         }
 
         synchronized (this) {
@@ -733,6 +730,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                         cleanDeletedObjectFromCollections(object, deletedIDs);
 
                     case PersistenceState.HOLLOW :
+                        // TODO: HOLLOW objects have a good chance to be present in
+                        // ToMany lists, but we can't detect this here... Need a solution
+                    
                     case PersistenceState.DELETED :
 
                         // consult delegate if it exists
@@ -827,6 +827,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 if (deletedIDs.contains(relatedObject.getObjectId())) {
                     continue;
                 }
+
+                logObj.info(
+                    "removing "
+                        + object.getObjectId()
+                        + " from "
+                        + relatedObject.getObjectId());
 
                 relatedObject.removeToManyTarget(
                     inverseRelationship.getName(),

@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.event;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.Iterator;
@@ -114,6 +115,19 @@ public class EventManager extends Object {
         // start dispatch threads
         for (int i = 0; i < dispatchThreadCount; i++) {
             new DispatchThread("EventDispatchThread-" + i).start();
+        }
+    }
+    
+    /**
+     * Returns a list of currently queued events. Queue is returned by copy.
+     * This method is useful for inspecting the state of the event queue at
+     * any particular moment, but doesn't allow callers to alter the queue state.
+     * 
+     * @since 1.1
+     */
+    public List getEventQueue() {
+        synchronized(eventQueue) {
+            return new ArrayList(eventQueue);
         }
     }
 
