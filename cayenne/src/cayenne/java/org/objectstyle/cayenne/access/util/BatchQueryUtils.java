@@ -310,27 +310,35 @@ public class BatchQueryUtils {
             String dbAttrPath = (String) entry.getKey();
             boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
             Object newValue = entry.getValue();
+            
+            // ... if not for flattened attributes, we could've used DataRow.createDiff()..
+            
             // if snapshot exists, compare old values and new values,
             // only add attribute to the update clause if the value has changed
             Object oldValue = committedSnapshot.get(dbAttrPath);
             if (!Util.nullSafeEquals(oldValue, newValue)) {
-                if (isRootDbEntity && !compoundDbAttr) {
-                    snapshot.put(dbAttrPath, newValue);
-                }
-                else if (!isRootDbEntity && compoundDbAttr) {
-                    Iterator pathIterator =
-                        entity.getDbEntity().resolvePathComponents(dbAttrPath);
-                    if (pathIterator.hasNext()
-                        && masterDependentRel.equals(pathIterator.next())) {
-                        DbAttribute dbAttr = (DbAttribute) pathIterator.next();
-                        snapshot.put(dbAttr.getName(), newValue);
+                
+                if (!isRootDbEntity) {
+                    if (compoundDbAttr) {
+                        Iterator pathIterator = entity
+                                .getDbEntity()
+                                .resolvePathComponents(dbAttrPath);
+                        if (pathIterator.hasNext()
+                                && masterDependentRel.equals(pathIterator.next())) {
+                            DbAttribute dbAttr = (DbAttribute) pathIterator.next();
+                            snapshot.put(dbAttr.getName(), newValue);
+                        }
+                    }
+                    else {
+                        String pkAttrName = getTargetDbAttributeName(
+                                dbAttrPath,
+                                masterDependentRel);
+                        if (pkAttrName != null)
+                            snapshot.put(pkAttrName, newValue);
                     }
                 }
-                else if (!isRootDbEntity && !compoundDbAttr) {
-                    String pkAttrName =
-                        getTargetDbAttributeName(dbAttrPath, masterDependentRel);
-                    if (pkAttrName != null)
-                        snapshot.put(pkAttrName, newValue);
+                else if (!compoundDbAttr) {
+                    snapshot.put(dbAttrPath, newValue);
                 }
             }
         }

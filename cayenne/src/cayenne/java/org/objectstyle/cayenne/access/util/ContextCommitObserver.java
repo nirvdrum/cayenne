@@ -121,13 +121,6 @@ public class ContextCommitObserver
         }
     }
 
-    /**
-     * @deprecated Since 1.1 this method is no longer used by Cayenne.
-     */
-    public boolean useAutoCommit() {
-        return false;
-    }
-
     public void nextQueryException(Query query, Exception ex) {
         super.nextQueryException(query, ex);
         throw new CayenneRuntimeException(

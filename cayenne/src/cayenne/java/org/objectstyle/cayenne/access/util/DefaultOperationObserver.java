@@ -141,22 +141,6 @@ public class DefaultOperationObserver implements OperationObserver {
     }
 
     /**
-     * @return always returns false.
-     * @deprecated since 1.1 this is deprecated
-     */
-    public boolean isTransactionCommitted() {
-        return false;
-    }
-
-    /**
-     * @return always returns false.
-     * @deprecated since 1.1 this is deprecated
-     */
-    public boolean isTransactionRolledback() {
-        return false;
-    }
-
-    /**
      * Returns a log level level that should be used when
      * logging query execution.
      */
@@ -199,29 +183,6 @@ public class DefaultOperationObserver implements OperationObserver {
 
     public void nextGlobalException(Exception ex) {
         globalExceptions.add(Util.unwindException(ex));
-    }
-
-    /**
-     * @deprecated since 1.1
-     */
-    public void transactionCommitted() {
-        // noop
-    }
-
-    /**
-      * @deprecated since 1.1
-      */
-    public void transactionRolledback() {
-        // noop
-    }
-
-    /** 
-     * Returns <code>true</code> so that individual queries are executed in separate transactions. 
-     * 
-     * @deprecated Since 1.1 this method is no longer used by Cayenne.
-     */
-    public boolean useAutoCommit() {
-        return true;
     }
 
     /**

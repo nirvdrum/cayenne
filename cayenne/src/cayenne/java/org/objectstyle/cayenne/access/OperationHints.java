@@ -72,20 +72,6 @@ public interface OperationHints {
      */ 
     public Level getLoggingLevel();
     
-    /** <p>DataNode executing a list of statements will consult OperationHints
-     *  about transactional behavior by calling this method.</p>
-     * 
-     *  <ul>
-     *  	<li>If this method returns true, each statement in a batch will be run as a separate 
-     *  transaction.</li>
-     *  	<li>If this method returns false, the whole batch will be wrapped in a transaction.</li>
-     *  </ul>
-     * 
-     * @deprecated Since 1.1 this method is no longer called and is therefore meaningless.
-     */
-    public boolean useAutoCommit();
-    
-    
     /** 
      * Returns <code>true</code> to indicate that any results of a select operation
      * should be returned as a ResultIterator. <code>false</code> is returned when the

@@ -402,13 +402,6 @@ public class JdbcPkGenerator implements PkGenerator {
             this.entName = entName;
         }
 
-        /**
-         * @deprecated Since 1.1 this method is no longer used by Cayenne.
-         */
-        public boolean useAutoCommit() {
-            return false;
-        }
-
         public int getNextId() {
             if (nextId != null) {
                 return nextId.intValue();

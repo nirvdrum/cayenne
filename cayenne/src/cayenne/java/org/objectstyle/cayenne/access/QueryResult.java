@@ -63,6 +63,7 @@ import java.util.List;
 
 import org.apache.commons.collections.map.LinkedMap;
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
 
@@ -72,8 +73,7 @@ import org.objectstyle.cayenne.util.Util;
  * 
  * @author Andrei Adamchik
  */
-public class QueryResult
-    extends org.objectstyle.cayenne.access.util.DefaultOperationObserver {
+public class QueryResult extends DefaultOperationObserver {
 
     // SequencedHashMap guarantees that iterating over 
     // its keys is done in the original insertion order-

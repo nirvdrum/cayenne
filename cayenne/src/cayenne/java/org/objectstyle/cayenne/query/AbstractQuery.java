@@ -150,11 +150,4 @@ public abstract class AbstractQuery implements Query {
         
         this.root = value;
     }
-    
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public int getQueryType() {
-        return Query.UNKNOWN_QUERY;
-    }
 }

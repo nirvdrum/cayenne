@@ -68,31 +68,6 @@ public interface Query {
     public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
 
     /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int SELECT_QUERY = 1;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int INSERT_QUERY = 2;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int UPDATE_QUERY = 3;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int DELETE_QUERY = 4;
-
-    /**
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public static final int UNKNOWN_QUERY = 5;
-
-    /**
      * Returns a symbolic name of the query.
      * 
      * @since 1.1
@@ -113,13 +88,6 @@ public interface Query {
     public Level getLoggingLevel();
 
     public void setLoggingLevel(Level level);
-
-    /**
-     * Returns one of the values: SELECT_QUERY, INSERT_QUERY, UPDATE_QUERY, DELETE_QUERY
-     * 
-     * @deprecated Since 1.1 Query type is no longer relevant.
-     */
-    public int getQueryType();
 
     /**
      * Returns the root object of this query. Might be a String, ObjEntity, DbEntity or

@@ -116,8 +116,6 @@ public class DataRow extends HashMap {
     /**
      * Builds a new DataRow, merging changes from <code>diff</code>
      * parameter with data contained in this DataRow.
-     * 
-     * @since 1.1
      */
     public DataRow applyDiff(DataRow diff) {
         DataRow merged = new DataRow(this);
@@ -137,8 +135,6 @@ public class DataRow extends HashMap {
       * <code>row</code> parameter. It is assumed that key 
       * sets are compatible in both rows (e.g. they represent
       * snapshots for the same entity). Returns null if no differences are found.
-      * 
-      * @since 1.1
       */
     public DataRow createDiff(DataRow row) {
 
