@@ -61,7 +61,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-
 /** Runs multiple domain config cases. */
 public abstract class ConfigLoaderSuite {
     private static Logger logObj = Logger.getLogger(ConfigLoaderSuite.class);
@@ -72,19 +71,8 @@ public abstract class ConfigLoaderSuite {
         buildCases();
     }
 
-    /** Evaluates multiple cases */
-    public void test(ConfigLoader helper) throws Exception {
-        Iterator it = cases.iterator();
-        while(it.hasNext()) {
-            ConfigLoaderCase aCase = (ConfigLoaderCase)it.next();
-
-            try {
-                aCase.test(helper);
-            } catch(Exception ex) {
-                logObj.info("Failed Case: " + aCase);
-                throw ex;
-            }
-        }
+    public List getCases() {
+        return cases;
     }
 
     /** Populate 'cases' list with DomainHelperCase objects. */

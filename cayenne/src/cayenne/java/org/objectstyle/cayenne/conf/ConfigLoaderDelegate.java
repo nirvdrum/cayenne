@@ -1,8 +1,8 @@
 /* ====================================================================
- * 
- * The ObjectStyle Group Software License, Version 1.0 
  *
- * Copyright (c) 2002 The ObjectStyle Group 
+ * The ObjectStyle Group Software License, Version 1.0
+ *
+ * Copyright (c) 2002 The ObjectStyle Group
  * and individual authors of the software.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer. 
+ *    notice, this list of conditions and the following disclaimer.
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -18,15 +18,15 @@
  *    distribution.
  *
  * 3. The end-user documentation included with the redistribution, if
- *    any, must include the following acknowlegement:  
- *       "This product includes software developed by the 
+ *    any, must include the following acknowlegement:
+ *       "This product includes software developed by the
  *        ObjectStyle Group (http://objectstyle.org/)."
  *    Alternately, this acknowlegement may appear in the software itself,
  *    if and wherever such third-party acknowlegements normally appear.
  *
- * 4. The names "ObjectStyle Group" and "Cayenne" 
+ * 4. The names "ObjectStyle Group" and "Cayenne"
  *    must not be used to endorse or promote products derived
- *    from this software without prior written permission. For written 
+ *    from this software without prior written permission. For written
  *    permission, please contact andrus@objectstyle.org.
  *
  * 5. Products derived from this software may not be called "ObjectStyle"
@@ -56,15 +56,49 @@
 
 package org.objectstyle.cayenne.conf;
 
-import org.objectstyle.cayenne.access.DataDomain;
+import java.util.List;
 
-/** Configuration object used for tests that does not require "cayenne.xml". */
-public class EmptyConfiguration extends DefaultConfiguration {
-	public EmptyConfiguration() {
-	    ignoringLoadFailures = true;
-	}
+/**
+ * Interface that defines callback API used by ConfigLoader to process loaded
+ * configuration. Main responsibility of ConfigLoaderDelegate is to create
+ * objects, while ConfigLoader is mainly concerned with XML parsing. 
+ * 
+ * @author Andrei Adamchik
+ */
+public interface ConfigLoaderDelegate {
+    public void startedLoading();
+    
+	public void finishedLoading();
 	
-    public void addDomain(DataDomain domain) {
-        // noop
-    }
+    public void shouldLoadDataDomain(String name);
+
+    public void shouldLoadDataMap(
+        String domainName,
+        String mapName,
+        String location,
+        List depMapNames);
+
+    public void shouldLoadDataNode(
+        String domainName,
+        String nodeName,
+        String dataSource,
+        String adapter,
+        String factory);
+
+    public void shouldLinkDataMap(
+        String domainName,
+        String nodeName,
+        String mapName);
+
+    /**
+     * Gives delegate an opportunity to process the error.
+     * 
+     * @param th
+     * @return boolean indicating whether ConfigLoader should proceed with
+     * further processing. Ultimately it is up to the ConfigLoader to make this
+     * decision.
+     */
+    public boolean loadError(Throwable th);
+    
+    public ConfigStatus getStatus();
 }

@@ -55,7 +55,11 @@
  */
 package org.objectstyle.cayenne.conf;
 
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -71,12 +75,40 @@ public class DomainHelper extends ConfigLoader {
 
     /** Creates new DomainHelper. */
     public DomainHelper(Configuration config) throws Exception {
-        super(config);
+        super(config.getLoaderDelegate());
     }
 
     /** Creates new DomainHelper that uses specified level of verbosity. */
     public DomainHelper(Configuration config, Level level) throws Exception {
-        super(config, level);
+        super(config.getLoaderDelegate());
+    }
+
+    /** @deprecated factory argument is ignored. */
+    public boolean loadDomains(InputStream in, DataSourceFactory factory)
+        throws Exception {
+        return loadDomains(in);
+    }
+
+    /** @deprecated */
+    public List getDomains() {
+        return new ArrayList(
+            ((RuntimeConfigDelegate) getDelegate()).getDomains().values());
+    }
+
+    public Map getFailedAdapters() {
+        return getDelegate().getStatus().getFailedAdapters();
+    }
+
+    public Map getFailedMaps() {
+        return getDelegate().getStatus().getFailedMaps();
+    }
+
+    public List getFailedMapRefs() {
+        return getDelegate().getStatus().getFailedMapRefs();
+    }
+
+    public Map getFailedDataSources() {
+        return getDelegate().getStatus().getFailedDataSources();
     }
 
     /** Saves domains into the specified file.

@@ -72,14 +72,15 @@ public class ConfigLoaderCase {
 
 
     /** Evaluates test case built from this object state. */
-    public void test(ConfigLoader helper) throws Exception {
+    public void test(ConfigLoader loader) throws Exception {
         InputStream in = new ByteArrayInputStream(configInfo.getBytes());
-        helper.loadDomains(in);
-        Assert.assertEquals(totalDomains, helper.getDomains().size());
-        Assert.assertEquals(failedMaps, helper.getStatus().getFailedMaps().size());
-        Assert.assertEquals(failedDataSources, helper.getStatus().getFailedDataSources().size());
-        Assert.assertEquals(failedAdapters, helper.getStatus().getFailedAdapters().size());
-        Assert.assertEquals(failedMapRefs, helper.getStatus().getFailedMapRefs().size());
+        loader.loadDomains(in);
+        RuntimeConfigDelegate delegate = (RuntimeConfigDelegate)loader.getDelegate();
+        Assert.assertEquals(totalDomains, delegate.getDomains().size());
+        Assert.assertEquals(failedMaps, delegate.getStatus().getFailedMaps().size());
+        Assert.assertEquals(failedDataSources, delegate.getStatus().getFailedDataSources().size());
+        Assert.assertEquals(failedAdapters, delegate.getStatus().getFailedAdapters().size());
+        Assert.assertEquals(failedMapRefs, delegate.getStatus().getFailedMapRefs().size());
     }
 
     public void setTotalDomains(int totalDomains) {

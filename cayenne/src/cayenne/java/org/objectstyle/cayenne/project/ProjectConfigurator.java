@@ -143,9 +143,16 @@ public class ProjectConfigurator {
             }
         }
         
+        // drop 
+        
         // load project
         ApplicationProject project = new ApplicationProject(projectFile);
-       
+        if(project.getLoadStatus().hasFailures()) {
+        	throw new ProjectException("Failed loading project: " + projectFile);
+        }
+        
+        
+        
     }
 
     /**

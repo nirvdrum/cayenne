@@ -217,6 +217,10 @@ public abstract class Configuration {
             throw new RuntimeException("Error initializing shared Configuration");
         }
     }
+    
+    public ConfigLoaderDelegate getLoaderDelegate() {
+    	return new RuntimeConfigDelegate(this, Configuration.getLoggingLevel());
+    }
 
     /** Returns domain configuration as a stream or null if it
       * can not be found. */
@@ -226,8 +230,10 @@ public abstract class Configuration {
       * can not be found. */
     public abstract InputStream getMapConfig(String location);
 
-    /** Initializes all Cayenne resources. Loads all configured domains and their
-      * data maps, initializes all domain Nodes and their DataSources. */
+    /** 
+     * Initializes all Cayenne resources. Loads all configured domains and their
+     * data maps, initializes all domain Nodes and their DataSources.
+     */
     public void init() throws Exception {
         configLogging();
         InputStream in = getDomainConfig();
@@ -243,24 +249,17 @@ public abstract class Configuration {
             throw new ConfigException(msg.toString());
         }
 
-        ConfigLoader helper = new ConfigLoader(this, getLoggingLevel());
-        try {
-            if (!helper.loadDomains(in)) {
-                StringBuffer msg = new StringBuffer();
-                msg.append("[").append(this.getClass().getName()).append(
-                    "] : Failed to load domain and/or its maps/nodes.");
-
-                if (!ignoringLoadFailures) {
-                    throw new ConfigException(msg.toString());
-                }
-            }
-        } finally {
-            this.loadStatus = helper.getStatus();
+        ConfigLoaderDelegate delegate = getLoaderDelegate();
+        if(delegate == null) {
+        	delegate = new RuntimeConfigDelegate(this, Configuration.getLoggingLevel());
         }
-
-        Iterator it = helper.getDomains().iterator();
-        while (it.hasNext()) {
-            addDomain((DataDomain) it.next());
+        
+        ConfigLoader loader = new ConfigLoader(delegate);
+        
+        try {
+            loader.loadDomains(in);
+        } finally {
+            this.loadStatus = delegate.getStatus();
         }
     }
 

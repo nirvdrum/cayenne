@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
+import org.objectstyle.cayenne.conf.RuntimeConfigDelegate;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
@@ -95,21 +96,18 @@ public class ConnectionSetup  {
 		DisconnectedFactory factory = new DisconnectedFactory();
         DefaultConfiguration conf = new DefaultConfiguration();
 		conf.setOverrideFactory(factory);
-        ConfigLoader helper = new ConfigLoader(conf);
+        ConfigLoader loader = new ConfigLoader(conf.getLoaderDelegate());
         InputStream in = ResourceLocator.findResourceInFileSystem(Configuration.DOMAIN_FILE);
         if(in == null)
             throw new RuntimeException("Can't find '" + Configuration.DOMAIN_FILE + "'.");
 
         
-        if(!helper.loadDomains(in)) {
+        if(!loader.loadDomains(in)) {
             throw new RuntimeException("Error loading configuration.");
         }
 
-        DataSourceInfo dsi = factory.getDriverInfo();
-        if(helper.getDomains().size() != 1)
-            throw new RuntimeException("Error loading configuration. Exactly one domain expected.");
-            
-        DataDomain dom = (DataDomain)helper.getDomains().get(0);
+        DataSourceInfo dsi = factory.getDriverInfo();            
+        DataDomain dom = conf.getDomain();
         dsi.setAdapterClass(dom.getDataNodes()[0].getAdapter().getClass().getName());
         return dsi;
     }
