@@ -210,11 +210,11 @@ public class ImportDbAction extends CayenneAction {
 
             return (DbAdapter) adapterClass.newInstance();
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        catch (Throwable th) {
+            th.printStackTrace();
             JOptionPane.showMessageDialog(
                     CayenneModelerFrame.getFrame(),
-                    e.getMessage(),
+                    th.getMessage(),
                     "Error loading adapter",
                     JOptionPane.ERROR_MESSAGE);
             return null;
@@ -255,12 +255,22 @@ public class ImportDbAction extends CayenneAction {
                     + System.getProperty("java.class.path"), e);
             JOptionPane.showMessageDialog(
                     CayenneModelerFrame.getFrame(),
-                    "Class not found: " + driverClassName,
+                    "Class not found: " + e.getLocalizedMessage(),
                     "Error Loading Driver",
                     JOptionPane.ERROR_MESSAGE);
             return null;
         }
-        catch (Exception e) {
+        catch (NoClassDefFoundError e) {
+            logObj.warn("Error loading driver. Classpath: "
+                    + System.getProperty("java.class.path"), e);
+            JOptionPane.showMessageDialog(
+                    CayenneModelerFrame.getFrame(),
+                    "Error Loading Driver: " + e.getLocalizedMessage(),
+                    "Error Loading Driver",
+                    JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        catch (Throwable e) {
             logObj.warn("Error Connecting to the Database", e);
             JOptionPane.showMessageDialog(
                     CayenneModelerFrame.getFrame(),
