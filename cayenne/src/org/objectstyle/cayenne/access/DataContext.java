@@ -230,8 +230,12 @@ public class DataContext implements QueryEngine {
 			.newInstance();
 	}
 
-	/** Replaces all object attribute values with snapshot values. */
-	void refreshObjectWithSnapshot(DataObject anObject, Map snapshot) {
+
+	/** 
+	 * Replaces all object attribute values with snapshot values. 
+	 * Sets object state to COMMITTED.
+	 */
+	protected void refreshObjectWithSnapshot(DataObject anObject, Map snapshot) {
 		ObjEntity ent = lookupEntity(anObject.getObjectId().getObjEntityName());
 
 		Map attrMap = ent.getAttributeMap();
@@ -281,8 +285,8 @@ public class DataContext implements QueryEngine {
 		anObject.setPersistenceState(PersistenceState.COMMITTED);
 	}
 
-	/** Merge (a potentially modified object) with a provided snapshot values. */
-	void mergeObjectWithSnapshot(DataObject anObject, Map snapshot) {
+	/** Merge a potentially modified object with provided data row values. */
+	protected void mergeObjectWithSnapshot(DataObject anObject, Map snapshot) {
 		if (anObject.getPersistenceState() == PersistenceState.HOLLOW) {
 			refreshObjectWithSnapshot(anObject, snapshot);
 			return;
@@ -314,7 +318,7 @@ public class DataContext implements QueryEngine {
 			}
 		}
 	}
-
+	
 	/** Takes a snapshot of current object state. */
 	public Map takeObjectSnapshot(DataObject anObject) {
 		HashMap map = new HashMap();
@@ -383,7 +387,9 @@ public class DataContext implements QueryEngine {
 	 */
 	public DataObject objectFromDataRow(String entityName, Map dataRow) {
 		ObjEntity ent = this.lookupEntity(entityName);
-		return this.objectFromDataRow(ent, dataRow, false);
+		return (ent.isReadOnly())
+			? readOnlyObjectFromDataRow(ent, dataRow, false)
+			: objectFromDataRow(ent, dataRow, false);
 	}
 
 	/** 
@@ -403,6 +409,26 @@ public class DataContext implements QueryEngine {
 			// we are asked to refresh an existing object with new values
 			mergeObjectWithSnapshot(obj, dataRow);
 			committedSnapshots.put(anId, dataRow);
+		}
+
+		return obj;
+	}
+
+	/** 
+	 * Creates and returns a read-only DataObject from a data row (snapshot).
+	 * Newly created object is registered with this DataContext.
+	 */
+	protected DataObject readOnlyObjectFromDataRow(
+		ObjEntity objEntity,
+		Map dataRow,
+		boolean refresh) {
+		ObjectId anId = objEntity.objectIdFromSnapshot(dataRow);
+
+		// this will create a HOLLOW object if it is not registered yet
+		DataObject obj = registeredObject(anId);
+
+		if (refresh || obj.getPersistenceState() == PersistenceState.HOLLOW) {
+			refreshObjectWithSnapshot(obj, dataRow);
 		}
 
 		return obj;
@@ -507,10 +533,15 @@ public class DataContext implements QueryEngine {
 		commitChanges(null);
 	}
 
-	/** Check what objects have changed in the context. Generate appropriate
-	 *  insert, update and delete queries to commit their state to the database. 
-	 *  @param logLevel if logLevel is higher or equals to the level set for 
-	 *  org.objectstyle.cayenne.access.QueryLogger, query execution will be logged. */
+	/** 
+	 * Commits changes of the object graph to the database.
+	 * Checks what objects have changed in the context. 
+	 * Generates appropriate insert, update and delete queries to 
+	 * commit their state to the database. 
+	 * 
+	 * @param logLevel if logLevel is higher or equals to the level 
+	 * set for QueryLogger, statements execution will be logged. 
+	 */
 	public void commitChanges(Level logLevel) throws CayenneRuntimeException {
 		ArrayList queryList = new ArrayList();
 		ArrayList rawUpdObjects = new ArrayList();

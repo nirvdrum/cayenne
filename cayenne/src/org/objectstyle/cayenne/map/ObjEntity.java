@@ -53,119 +53,136 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 import java.util.*;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 
-
 /** Metadata for the data object class. Each data object class is tied
  *  to the relational table. The metadata for that relational table is
  *  in the corresponding "DbEntity". */
- public class ObjEntity extends Entity {
-     private String className;
-     private DbEntity dbEntity;
+public class ObjEntity extends Entity {
+	protected String className;
+	protected DbEntity dbEntity;
+	protected boolean readOnly;
 
-     public ObjEntity() {}
+	public ObjEntity() {
+	}
 
-     public ObjEntity(String name) {
-         setName(name);
-     }
+	public ObjEntity(String name) {
+		setName(name);
+	}
 
+	/** Returns the name of the corresponding data object class */
+	public String getClassName() {
+		return className;
+	}
 
-     /** Returns the name of the corresponding data object class */
-     public String getClassName() {
-         return className;
-     }
+	/** Sets the name of the data object class described by this obj entity*/
+	public void setClassName(String className) {
+		this.className = className;
+	}
 
-     /** Sets the name of the data object class described by this obj entity*/
-     public void setClassName(String className) {
-         this.className = className;
-     }
+	/** Returns the corresponding db entity. */
+	public DbEntity getDbEntity() {
+		return dbEntity;
+	}
 
+	/** Sets the DbEntity used by this ObjEntity. */
+	public void setDbEntity(DbEntity dbEntity) {
+		this.dbEntity = dbEntity;
+	}
 
-     /** Returns the corresponding db entity. */
-     public DbEntity getDbEntity() {
-         return dbEntity;
-     }
+	/** 
+	 * Returns ObjAttribute of this entity that maps to <code>dbAttr</code>
+	 * parameter. Returns null if no such attribute is found. 
+	 */
+	public ObjAttribute getAttributeForDbAttribute(DbAttribute dbAttr) {
+		Iterator it = getAttributeMap().values().iterator();
+		while (it.hasNext()) {
+			ObjAttribute objAttr = (ObjAttribute) it.next();
+			if (objAttr.getDbAttribute() == dbAttr)
+				return objAttr;
+		}
+		return null;
+	}
 
-     /** Set the db entity mapping. */
-     public void setDbEntity(DbEntity dbEntity) {
-         this.dbEntity = dbEntity;
-     }
+	/** 
+	 * Returns ObjRelationship of this entity that maps to 
+	 * <code>dbRel</code> parameter. Returns null if no 
+	 * such relationship is found. 
+	 */
+	public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRel) {
+		Iterator it = getRelationshipMap().values().iterator();
+		while (it.hasNext()) {
+			ObjRelationship objRel = (ObjRelationship) it.next();
+			List relList = objRel.getDbRelationshipList();
+			if (relList.size() != 1)
+				continue;
 
+			if (relList.get(0) == dbRel)
+				return objRel;
+		}
+		return null;
+	}
 
-     /** Returns ObjAttribute of this entity that maps to <code>dbAttr</code>
-       * parameter. Returns null if no such attribute is found. */
-     public ObjAttribute getAttributeForDbAttribute(DbAttribute dbAttr) {
-         Iterator it = getAttributeMap().values().iterator();
-         while(it.hasNext()) {
-             ObjAttribute objAttr = (ObjAttribute)it.next();
-             if(objAttr.getDbAttribute() == dbAttr)
-                 return objAttr;
-         }
-         return null;
-    }
+	/** Creates an object id from the values in object snapshot.
+	 * If needed attributes are missing in a snapshot or if it is null,
+	 * CayenneRuntimeException is thrown. */
+	public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
+		HashMap idMap = new HashMap();
+		Iterator it = getDbEntity().getPrimaryKey().iterator();
+		while (it.hasNext()) {
+			DbAttribute attr = (DbAttribute) it.next();
+			Object val = objectSnapshot.get(attr.getName());
+			if (val == null)
+				throw new CayenneRuntimeException(
+					"Invalid snapshot value for '"
+						+ attr.getName()
+						+ "'. Must be present and not null.");
 
-    /** Returns ObjRelationship of this entity that maps to <code>dbRel</code>
-    * parameter. Returns null if no such relationship is found. */
-    public ObjRelationship getRelationshipForDbRelationship(DbRelationship dbRel) {
-        Iterator it = getRelationshipMap().values().iterator();
-        while(it.hasNext()) {
-            ObjRelationship objRel = (ObjRelationship)it.next();
-            List relList = objRel.getDbRelationshipList();
-            if(relList.size() != 1)
-                continue;
+			idMap.put(attr.getName(), val);
+		}
 
-            if(relList.get(0) == dbRel)
-                return objRel;
-        }
-        return null;
-    }
+		return new ObjectId(this.getName(), idMap);
+	}
 
+	/** Clears all the mapping between this obj entity and its current db entity.
+	 *  Clears mapping between entities, attributes and relationships. */
+	public void clearDbMapping() {
+		if (dbEntity == null)
+			return;
 
-    /** Creates an object id from the values in object snapshot.
-     * If needed attributes are missing in a snapshot or if it is null,
-     * CayenneRuntimeException is thrown. */
-    public ObjectId objectIdFromSnapshot(Map objectSnapshot) {
-        HashMap idMap = new HashMap();
-        Iterator it = getDbEntity().getPrimaryKey().iterator();
-        while(it.hasNext()) {
-            DbAttribute attr = (DbAttribute)it.next();
-            Object val = objectSnapshot.get(attr.getName());
-            if(val == null)
-                throw new CayenneRuntimeException("Invalid snapshot value for '" + attr.getName() + "'. Must be present and not null.");
+		Iterator it = getAttributeMap().values().iterator();
+		while (it.hasNext()) {
+			ObjAttribute objAttr = (ObjAttribute) it.next();
+			DbAttribute dbAttr = objAttr.getDbAttribute();
+			if (null != dbAttr) {
+				objAttr.setDbAttribute(null);
+			}
+		} // End while()
 
-            idMap.put(attr.getName(), val);
-        }
+		Iterator rel_it = getRelationshipList().iterator();
+		while (rel_it.hasNext()) {
+			ObjRelationship obj_rel = (ObjRelationship) rel_it.next();
+			obj_rel.clearDbRelationships();
+		}
+		dbEntity = null;
+	}
 
-        return new ObjectId(this.getName(), idMap);
-    }
-    
-     /** Clears all the mapping between this obj entity and its current db entity.
-      *  Clears mapping between entities, attributes and relationships. */
-     public void clearDbMapping() {
-     	if (dbEntity == null)
-     		return;
+	/**
+	 * Returns <code>true</code> if this ObjEntity represents 
+	 * a set of read-only objects.
+	 * 
+	 * @return boolean
+	 */
+	public boolean isReadOnly() {
+		return readOnly;
+	}
 
-        Iterator it = getAttributeMap().values().iterator();
-        while (it.hasNext()) {
-             ObjAttribute objAttr = (ObjAttribute)it.next();
-             DbAttribute dbAttr = objAttr.getDbAttribute();
-             if (null != dbAttr) {
-             	objAttr.setDbAttribute(null);
-             }
-        }// End while()
-        
-        Iterator rel_it = getRelationshipList().iterator();
-        while(rel_it.hasNext()) {
-        	ObjRelationship obj_rel = (ObjRelationship)rel_it.next();
-        	obj_rel.clearDbRelationships();
-        }
-        dbEntity = null;
-     }
-    
+	public void setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly;
+	}
 }

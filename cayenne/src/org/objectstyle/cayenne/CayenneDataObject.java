@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,8 +53,12 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.access.DataContext;
@@ -64,7 +67,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
 
 
 /**
- * Suggested superclass of Cayenne persistent objects. 
+ * Default superclass of Cayenne persistent objects. 
  *
  * <p>This implementation of DataObject will use WeakReferences in to-many relationships. This will allow
  * to clean up memory when needed, while still be preserving the ability to access data on the
@@ -78,7 +81,7 @@ public class CayenneDataObject implements DataObject {
     // to indicate that destination relationship was fetched and is null
     private static final CayenneDataObject nullValue = new CayenneDataObject();
 
-    /** Returns string label for persistence state. Useful for debugging. */
+    /** Returns string label for persistence state. Useed for debugging. */
     public static String persistenceStateString(int persistenceState) {
         switch(persistenceState) {
         case PersistenceState.TRANSIENT:
@@ -234,8 +237,13 @@ public class CayenneDataObject implements DataObject {
     }
 
 
-    /** Initializes reverse relationship from object <code>val</code> to this object.
-      * @param relName name of relationship from this object to <code>val</code>. */
+    /** 
+     * Initializes reverse relationship from object <code>val</code> 
+     * to this object.
+     * 
+     * @param relName name of relationship from this object 
+     * to <code>val</code>. 
+     */
     protected void setReverseRelationship(String relName, DataObject val) {
         ObjRelationship rel = (ObjRelationship)dataContext.lookupEntity(objectId.getObjEntityName()).getRelationship(relName);
         ObjRelationship revRel =  rel.getReverseRelationship();
