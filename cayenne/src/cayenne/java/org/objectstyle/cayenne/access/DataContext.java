@@ -77,6 +77,7 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.QueryHelper;
 import org.objectstyle.cayenne.TempObjectId;
+import org.objectstyle.cayenne.access.event.DataContextEvent;
 import org.objectstyle.cayenne.access.event.DataContextTransactionEventHandler;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.ContextSelectObserver;
@@ -688,9 +689,16 @@ public class DataContext implements QueryEngine, Serializable {
 	 * set for QueryLogger, statements execution will be logged. 
 	 */
 	public void commitChanges(Level logLevel) throws CayenneRuntimeException {
+		// are we set up properly?
 		if (this.getParent() == null) {
 			throw new CayenneRuntimeException("Cannot use a DataContext without a parent");
 		}
+
+		// is there anything to do?
+		if (this.hasChanges() == false) {
+			return;
+		}
+
 		List queryList = new ArrayList();
 		List rawUpdObjects = new ArrayList();
 		List updObjects = new ArrayList();
@@ -698,9 +706,12 @@ public class DataContext implements QueryEngine, Serializable {
 		List insObjects = new ArrayList();
 		Map updatedIds = new HashMap();
 
+		DataContextEvent commitChangesEvent = null;
+
 		// post observer events
 		if (this.postDataContextTransactionEvents) {
-			ObserverManager.getDefaultManager().postObserverEvent(WILL_COMMIT, this);
+			commitChangesEvent = new DataContextEvent(this, null);
+			ObserverManager.getDefaultManager().postObserverEvent(WILL_COMMIT, commitChangesEvent);
 		}
 
 		synchronized (objectStore) {
@@ -845,8 +856,8 @@ public class DataContext implements QueryEngine, Serializable {
 		}
 
 		// post observer event
-		if (this.postDataContextTransactionEvents) {
-			ObserverManager.getDefaultManager().postObserverEvent(DID_COMMIT, this);
+		if ((this.postDataContextTransactionEvents) && (commitChangesEvent != null)) {
+			ObserverManager.getDefaultManager().postObserverEvent(DID_COMMIT, commitChangesEvent);
 		}
 	}
 
@@ -1443,7 +1454,8 @@ public class DataContext implements QueryEngine, Serializable {
 	 * Enable/disable posting of transaction events by this DataContext.
 	 */
 	public void setTransactionEventsEnabled(boolean onOrOff) {
-		DataContextTransactionEventHandler.registerForDataContextEvents();
+		// make sure the event handler is properly initialized
+		DataContextTransactionEventHandler.initialize();
 		this.postDataContextTransactionEvents = onOrOff;
 	}
 
