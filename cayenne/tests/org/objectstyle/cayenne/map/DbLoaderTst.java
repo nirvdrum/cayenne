@@ -167,6 +167,8 @@ public class DbLoaderTst extends TestCase {
             msgForTypeMismatch(Types.VARCHAR, varcharAttr),
             Types.VARCHAR,
             varcharAttr.getType());
+         assertEquals(255, varcharAttr.getMaxLength());
+        
         
         // check integer
         assertEquals(

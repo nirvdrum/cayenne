@@ -262,12 +262,7 @@ public class DbLoader {
                 String columnName = rs.getString("COLUMN_NAME");
                 boolean allowNulls = rs.getBoolean("NULLABLE");
                 int columnType = rs.getInt("DATA_TYPE");
-
-                // ignore size of numeric columns
-                int columnSize = -1;
-                if (TypesMapping.isNumeric(columnType)) {
-                    columnSize = rs.getInt("COLUMN_SIZE");
-                }
+                int columnSize =  rs.getInt("COLUMN_SIZE");
 
                 // ignore precision of non-decimal columns
                 int decimalDigits = -1;
