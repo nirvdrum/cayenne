@@ -180,8 +180,26 @@ public class DataContext implements QueryEngine {
 		return objectsInState(PersistenceState.MODIFIED);
 	}
 
-	/** Returns an object for given ObjectId. If object is not registered 
-	 * with this context, new object is created and registered. */
+	/** 
+	 * Returns an object for a given ObjectId. 
+	 * If object is not registered with this context, 
+	 * it is being fetched. If no such object exists,
+	 * a <code>CayenneRuntimeException</code> is thrown. 
+	 */
+	public DataObject registeredExistingObject(ObjectId oid) {
+		DataObject obj = (DataObject) registeredMap.get(oid);
+		if (obj == null) {
+			obj = refetchObject(oid);
+		}
+
+		return obj;
+	}
+
+	/** 
+	 * Returns an object for a given ObjectId. 
+	 * If object is not registered with this context, 
+	 * a "hollow" object fault is created, registered and returned to the caller. 
+	 */
 	public DataObject registeredObject(ObjectId oid) {
 		DataObject obj = (DataObject) registeredMap.get(oid);
 		if (obj == null) {
@@ -452,15 +470,30 @@ public class DataContext implements QueryEngine {
 		deleteObject.setPersistenceState(PersistenceState.DELETED);
 	}
 
-	/** Refetches object data for ObjectId. For example, this method is used internally by Cayenne
-	 *  to resolve objects in PersistenceState.HOLLOW or just to refresh certain objects. */
+	/** 
+	 * Refetches object data for ObjectId. This method is used 
+	 * internally by Cayenne to resolve objects in state 
+	 * <code>PersistenceState.HOLLOW</code>. It can also be used
+	 * to refresh certain objects. 
+	 * 
+	 * @throws CayenneRuntimeException if object id doesn't match 
+	 * any records, or if there is more than one object is fetched.
+	 */
 	public DataObject refetchObject(ObjectId oid) {
 		SelectQuery sel = QueryHelper.selectObjectForId(oid);
 		List results = this.performQuery(sel);
-		if (results.size() != 1)
-			throw new CayenneRuntimeException(
-				"One and only one object can match object id, found "
-					+ results.size());
+		if (results.size() != 1) {
+			String msg =
+				(results.size() == 0)
+					? "No matching objects found for ObjectId " + oid
+					: "More than 1 object found for ObjectId "
+						+ oid
+						+ ". Fetch matched "
+						+ results.size()
+						+ " objects.";
+
+			throw new CayenneRuntimeException(msg);
+		}
 
 		return (DataObject) results.get(0);
 	}
@@ -584,9 +617,9 @@ public class DataContext implements QueryEngine {
 			(query.isFetchingDataRows())
 				? new SelectObserver(query.getLogLevel())
 				: new SelectProcessor(query.getLogLevel());
-				
-		performQuery((Query)query, observer);
-		return observer.getResults((Query)query);
+
+		performQuery((Query) query, observer);
+		return observer.getResults((Query) query);
 	}
 
 	/** 
@@ -609,7 +642,7 @@ public class DataContext implements QueryEngine {
 
 		IteratedSelectObserver observer = new IteratedSelectObserver();
 		observer.setQueryLogLevel(query.getLogLevel());
-		performQuery((Query)query, observer);
+		performQuery((Query) query, observer);
 		return observer.getResultIterator();
 	}
 
