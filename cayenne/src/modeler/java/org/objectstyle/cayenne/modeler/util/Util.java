@@ -53,14 +53,16 @@
  * <http://objectstyle.org/>.
  *
  */ 
-package org.objectstyle.cayenne.modeler.datamap;
+package org.objectstyle.cayenne.modeler.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import org.objectstyle.cayenne.access.types.DefaultType;
-import org.objectstyle.cayenne.modeler.event.Mediator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.modeler.event.Mediator;
 
 
 public class Util {

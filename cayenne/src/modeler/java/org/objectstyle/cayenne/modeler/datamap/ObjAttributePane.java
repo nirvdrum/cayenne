@@ -67,6 +67,7 @@ import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.event.*;
+import org.objectstyle.cayenne.modeler.util.*;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;

@@ -101,7 +101,7 @@ public abstract class Project {
             return new DataMapProject(projectFile);
         }
         else {
-        	throw new ProjectException("Unsupported project file.");
+        	throw new ProjectException("Unsupported project file: " + projectFile);
         }
     }    
 
