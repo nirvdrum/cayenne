@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,11 +53,17 @@ package org.objectstyle.cayenne.query;
  * <http://objectstyle.org/>.
  *
  */ 
+ 
+package org.objectstyle.cayenne.query;
+
+import java.util.logging.Level;
 
 
-
-
-/** Superclass of classes that describe possible database operations. */
+/** 
+ * Superclass of all query classes. 
+ * 
+ * @author Andrei Adamchik
+ */
 public abstract class Query {
     
     public static final int SELECT_QUERY = 1;
@@ -70,6 +75,7 @@ public abstract class Query {
     
     /** Name of the ObjEntity that is the base of this query. */
     protected String objEntityName;
+    protected Level logLevel;
     
     /** Returns one of the values: SELECT_QUERY, INSERT_QUERY, UPDATE_QUERY, DELETE_QUERY  */
     public abstract int getQueryType();
@@ -82,4 +88,24 @@ public abstract class Query {
     public String getObjEntityName() {
         return objEntityName;
     }
+    
+    
+	/**
+	 * Returns the <code>logLevel</code> property of this query.
+	 * Log level is a hint to QueryEngine that performs this query
+	 * to log execution with a certain priority.
+	 */
+	public Level getLogLevel() {
+		return logLevel;
+	}
+
+
+	/**
+	 * Sets the <code>logLevel</code> property.
+	 */
+	public void setLogLevel(Level logLevel) {
+		this.logLevel = logLevel;
+	}
+
+
 }

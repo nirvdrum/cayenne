@@ -42,7 +42,9 @@ Configuration.bootstrapSharedConfig(MyClass.class);
  			For instance to log the execution of a select query do something like this:
 			</p>
 <source>
-List objects = dataContext.performQuery(selectQuery, Level.SEVERE);
+SelectQuery q = new SelectQuery();
+q.setLogLevel(Level.SEVERE);
+List objects = dataContext.performQuery(q);
 </source>
 			<p>To log commit execution do this:</p>
 <source>

@@ -567,42 +567,35 @@ public class DataContext implements QueryEngine {
 
 	/** 
 	 * Performs a single database select query. 
-	 * SQL execution logging is done using default log level. 
 	 */
 	public List performQuery(SelectQuery query) {
-		return performQuery(query, (Level) null);
-	}
-
-	/** 
-	 * Performs a single database select query.
-	 * SQL execution logging is done using specified log level. 
-	 */
-	public List performQuery(SelectQuery query, Level logLevel) {
-		SelectProcessor observer = new SelectProcessor(logLevel);
+		SelectProcessor observer = new SelectProcessor(query.getLogLevel());
 		performQuery(query, observer);
 		return observer.getResults(query);
 	}
 
 	/** 
-	 * Performs a single database select query returning result as a ResultIterator. 
-	 * SQL execution logging is done using default log level. 
+	 * Performs a single database select query.
+	 * SQL execution logging is done using specified log level. 
+	 * 
+	 * @deprecated Set log level of the query object instead, use performQuery(Query).
 	 */
-	public ResultIterator performIteratedQuery(SelectQuery query)
-		throws CayenneException {
-		return performIteratedQuery(query, (Level) null);
+	public List performQuery(SelectQuery query, Level logLevel) {
+		return performQuery(query);
 	}
+
 
 	/** 
 	 * Performs a single database select query returning result as a ResultIterator.
-	 * SQL execution logging is done using specified log level. 
+	 * Returned ResultIterator will provide access to "data rows" 
+	 * - maps with database data that can be used to create DataObjects.
 	 */
 	public ResultIterator performIteratedQuery(
-		SelectQuery query,
-		Level logLevel)
+		SelectQuery query)
 		throws CayenneException {
 			
 		IteratedSelectObserver observer = new IteratedSelectObserver();
-		observer.setQueryLogLevel(logLevel);
+		observer.setQueryLogLevel(query.getLogLevel());
 		performQuery(query, observer);
 		return observer.getResultIterator();
 	}

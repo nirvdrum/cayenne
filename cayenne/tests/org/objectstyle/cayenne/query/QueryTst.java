@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.query;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,12 +54,11 @@ package org.objectstyle.cayenne.query;
  *
  */ 
 
-import junit.framework.*;
-import junit.runner.*;
-import java.util.logging.*;
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
+package org.objectstyle.cayenne.query;
+
+import java.util.logging.Level;
+
+import junit.framework.TestCase;
 
 
 public class QueryTst extends TestCase {    
@@ -75,6 +73,14 @@ public class QueryTst extends TestCase {
         
         query.setObjEntityName("SomeEntity");
         assertSame("SomeEntity", query.getObjEntityName());
+    }
+    
+    public void testLogLevel() throws Exception {
+        Query query = new TstUnqualifiedQuery();
+        assertNull(query.getLogLevel());
+        
+        query.setLogLevel(Level.SEVERE);
+        assertSame(Level.SEVERE, query.getLogLevel());
     }
     
 }
