@@ -59,14 +59,12 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.control.ProjectTypeSelectControl;
 
 /**
  * @author Andrei Adamchik
  */
 public class NewProjectAction extends ProjectAction {
-    private static Logger logObj = Logger.getLogger(NewProjectAction.class);
     public static final String ACTION_NAME = "New Project";
 
     public NewProjectAction() {

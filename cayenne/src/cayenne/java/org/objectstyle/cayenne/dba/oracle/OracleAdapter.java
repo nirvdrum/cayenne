@@ -57,10 +57,7 @@
 package org.objectstyle.cayenne.dba.oracle;
 
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
@@ -93,13 +90,9 @@ test-oracle.jdbc.driver = oracle.jdbc.driver.OracleDriver
 </pre>
  */
 public class OracleAdapter extends JdbcAdapter {
-    private static Logger logObj = Logger.getLogger(OracleAdapter.class);
-
     public static final String ORACLE_FLOAT = "FLOAT";
     public static final String ORACLE_BLOB = "BLOB";
     public static final String ORACLE_CLOB = "CLOB";
-
-    protected Map sorters = new HashMap();
 
     /**
      * Installs appropriate ExtendedTypes as converters for passing values

@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.postgres;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
@@ -71,8 +68,6 @@ import org.objectstyle.cayenne.map.DbEntity;
 /** DbAdapter implementation for <a href="http://postgresql.org">PostgreSQL RDBMS</a>. */
 public class PostgresAdapter extends JdbcAdapter
 {
-	protected Map sorters = new HashMap();
-	
     /**
      * Installs appropriate ExtendedTypes as converters for passing values
      * between JDBC and Java layers.

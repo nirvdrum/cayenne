@@ -1,14 +1,15 @@
 package cayenne.tutorial.tapestry.pages;
 
-import java.util.List;
-
 import cayenne.tutorial.tapestry.Visit;
 import cayenne.tutorial.tapestry.domain.Artist;
 import cayenne.tutorial.tapestry.domain.Painting;
 
+import java.util.List;
+
 import net.sf.tapestry.IRequestCycle;
 import net.sf.tapestry.RequestCycleException;
 import net.sf.tapestry.html.BasePage;
+
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;

@@ -4,6 +4,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import net.sf.tapestry.ApplicationServlet;
+
 import org.apache.log4j.Level;
 import org.objectstyle.cayenne.conf.BasicServletConfiguration;
 import org.objectstyle.cayenne.conf.Configuration;

@@ -59,9 +59,9 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.AddDataMapDialog;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /** 

@@ -74,13 +74,13 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.map.event.AttributeEvent;
-import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 

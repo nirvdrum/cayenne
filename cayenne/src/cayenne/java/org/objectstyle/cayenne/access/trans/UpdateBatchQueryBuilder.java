@@ -56,10 +56,13 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import java.util.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.query.*;
+import java.util.Iterator;
+import java.util.List;
+
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.query.BatchQuery;
+import org.objectstyle.cayenne.query.UpdateBatchQuery;
 
 /**
  *

@@ -82,6 +82,15 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.event.DataMapEvent;
+import org.objectstyle.cayenne.map.event.DataMapListener;
+import org.objectstyle.cayenne.map.event.DataNodeEvent;
+import org.objectstyle.cayenne.map.event.DataNodeListener;
+import org.objectstyle.cayenne.map.event.DbEntityListener;
+import org.objectstyle.cayenne.map.event.DomainEvent;
+import org.objectstyle.cayenne.map.event.DomainListener;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.action.CayenneAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
@@ -93,15 +102,6 @@ import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.ObjEntityDisplayListener;
-import org.objectstyle.cayenne.map.event.DataMapEvent;
-import org.objectstyle.cayenne.map.event.DataMapListener;
-import org.objectstyle.cayenne.map.event.DataNodeEvent;
-import org.objectstyle.cayenne.map.event.DataNodeListener;
-import org.objectstyle.cayenne.map.event.DbEntityListener;
-import org.objectstyle.cayenne.map.event.DomainEvent;
-import org.objectstyle.cayenne.map.event.DomainListener;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.modeler.util.ProjectTree;
 
 /** 
@@ -125,12 +125,6 @@ public class BrowseView
         DbEntityListener,
         DbEntityDisplayListener {
     private static Logger logObj = Logger.getLogger(BrowseView.class);
-
-    private static final int DOMAIN_NODE = 1;
-    private static final int NODE_NODE = 2;
-    private static final int MAP_NODE = 3;
-    private static final int OBJ_ENTITY_NODE = 4;
-    private static final int DB_ENTITY_NODE = 5;
 
     protected EventController mediator;
     protected ProjectTree browseTree;

@@ -66,17 +66,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.conf.Configuration;
 
 /**
  * Class provides a set of sorting utilities for Cayenne. For instance it
@@ -93,10 +92,7 @@ import org.objectstyle.cayenne.conf.Configuration;
  * not be used.
  */
 public class OperationSorter {
-	private static Logger logObj = Logger.getLogger(OperationSorter.class);
-
 	private QueryComparator queryComparator;
-	private List sortedEntities;
 
 	/** Creates new OperationSorter based on all entities in DataMap array*/
 	public OperationSorter(QueryEngine queryEngine, List maps) {

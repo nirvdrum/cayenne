@@ -14,6 +14,7 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+
 import webtest.Gallery;
 import webtest.Painting;
 

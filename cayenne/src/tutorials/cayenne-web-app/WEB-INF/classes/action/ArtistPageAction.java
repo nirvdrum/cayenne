@@ -13,6 +13,7 @@ import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SelectQuery;
+
 import webtest.Artist;
 
 public final class ArtistPageAction extends Action {

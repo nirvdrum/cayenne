@@ -1,5 +1,7 @@
 package action;
 
+import formbean.GalleryForm;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,9 +11,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.objectstyle.cayenne.access.DataContext;
-import webtest.Gallery;
 
-import formbean.GalleryForm;
+import webtest.Gallery;
 
 public final class SaveGalleryAction extends Action {
 

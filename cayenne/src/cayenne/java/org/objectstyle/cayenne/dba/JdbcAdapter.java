@@ -58,7 +58,6 @@ package org.objectstyle.cayenne.dba;
 
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
@@ -66,18 +65,8 @@ import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.trans.DeleteBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.DeleteTranslator;
-import org
-    .objectstyle
-    .cayenne
-    .access
-    .trans
-    .FlattenedRelationshipDeleteTranslator;
-import org
-    .objectstyle
-    .cayenne
-    .access
-    .trans
-    .FlattenedRelationshipInsertTranslator;
+import org.objectstyle.cayenne.access.trans.FlattenedRelationshipDeleteTranslator;
+import org.objectstyle.cayenne.access.trans.FlattenedRelationshipInsertTranslator;
 import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.InsertTranslator;
 import org.objectstyle.cayenne.access.trans.ProcedureTranslator;
@@ -117,8 +106,6 @@ import org.objectstyle.cayenne.query.UpdateQuery;
  * @author Andrei Adamchik
  */
 public class JdbcAdapter implements DbAdapter {
-    private static Logger logObj = Logger.getLogger(JdbcAdapter.class);
-
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
@@ -145,10 +132,10 @@ public class JdbcAdapter implements DbAdapter {
 
     public JdbcAdapter() {
         // create Pk generator
-        pkGenerator = createPkGenerator();
+        pkGenerator = this.createPkGenerator();
         typesHandler = TypesHandler.getHandler(this.getClass());
         extendedTypes = new ExtendedTypeMap();
-        configureExtendedTypes(extendedTypes);
+        this.configureExtendedTypes(extendedTypes);
     }
 
     /**

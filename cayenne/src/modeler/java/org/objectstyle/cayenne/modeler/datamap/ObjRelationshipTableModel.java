@@ -61,8 +61,8 @@ import org.objectstyle.cayenne.map.DeleteRule;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.map.Relationship;
-import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 

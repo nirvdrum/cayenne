@@ -60,8 +60,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;

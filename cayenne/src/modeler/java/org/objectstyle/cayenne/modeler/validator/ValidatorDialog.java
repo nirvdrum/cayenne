@@ -79,7 +79,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
@@ -97,9 +96,8 @@ public class ValidatorDialog
     extends CayenneDialog
     implements ListSelectionListener, ActionListener {
 
-    private static Logger logObj = Logger.getLogger(ValidatorDialog.class);
-
     protected static ValidatorDialog instance;
+
     public static final Color WARNING_COLOR = new Color(245, 194, 194);
     public static final Color ERROR_COLOR = new Color(237, 121, 121);
 

@@ -56,8 +56,8 @@
 
 package org.objectstyle.cayenne.access.trans;
 
-import org.objectstyle.cayenne.dba.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.dba.DbAdapter;
+import org.objectstyle.cayenne.query.BatchQuery;
 
 /**
  *

@@ -56,11 +56,8 @@
 
 package org.objectstyle.cayenne.dba.hsqldb;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -81,9 +78,6 @@ test-hsqldb.jdbc.driver = org.hsqldb.jdbcDriver
 </pre>
  */
 public class HSQLDBAdapter extends JdbcAdapter {
-	private static Logger logObj = Logger.getLogger(HSQLDBAdapter.class);
-
-	protected Map sorters = new HashMap();
 
 	/**
 	 * Adds an ADD CONSTRAINT clause to a relationship constraint.

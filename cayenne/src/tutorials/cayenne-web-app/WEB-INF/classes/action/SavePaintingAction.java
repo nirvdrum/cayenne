@@ -1,5 +1,7 @@
 package action;
 
+import formbean.PaintingForm;
+
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,10 +16,9 @@ import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
+
 import webtest.Artist;
 import webtest.Painting;
-
-import formbean.PaintingForm;
 
 public final class SavePaintingAction extends Action {
 

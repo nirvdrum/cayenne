@@ -61,8 +61,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
-
 /** 
  * Contains a map of ExtendedType objects, that serve as handlers for converting
  * values between Java application and JDBC layer.
@@ -73,13 +71,11 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class ExtendedTypeMap {
-    private static Logger logObj = Logger.getLogger(ExtendedTypeMap.class);
-
     protected Map typeMap = new HashMap();
     protected DefaultType defaultType = new DefaultType();
 
     public ExtendedTypeMap() {
-        initDefaultTypes();
+        this.initDefaultTypes();
     }
 
     /** 

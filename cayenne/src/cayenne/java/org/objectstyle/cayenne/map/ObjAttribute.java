@@ -57,8 +57,9 @@
 package org.objectstyle.cayenne.map;
 
 import java.util.Iterator;
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.commons.collections.IteratorUtils;
+import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneException;
 
 /**

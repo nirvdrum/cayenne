@@ -76,7 +76,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.log4j.Logger;
 import org.apache.oro.text.perl.Perl5Util;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
@@ -89,8 +88,6 @@ import org.xml.sax.XMLReader;
  * @author Andrei Adamchik
  */
 public class Util {
-    private static Logger logObj = Logger.getLogger(Util.class);
-
     private static final Perl5Util regexUtil = new Perl5Util();
 
     /**
@@ -116,7 +113,9 @@ public class Util {
         return buf.toString();
     }
 
-    /** Makes up for the lack of file copying utilities in Java */
+    /**
+     * Makes up for the lack of file copying utilities in Java
+     */
     public static boolean copy(File from, File to) {
         BufferedInputStream fin = null;
         BufferedOutputStream fout = null;
@@ -146,7 +145,9 @@ public class Util {
         return true;
     }
 
-    /** Save URL contents to a file */
+    /**
+     * Save URL contents to a file.
+     */
     public static boolean copy(URL from, File to) {
         BufferedInputStream urlin = null;
         BufferedOutputStream fout = null;
@@ -201,7 +202,9 @@ public class Util {
         out.flush();
     }
 
-    /** Improved File.delete method that allows recursive directory deletion. */
+    /**
+     * Improved File.delete method that allows recursive directory deletion.
+     */
     public static boolean delete(String filePath, boolean recursive) {
         File file = new File(filePath);
         if (!file.exists())
@@ -251,8 +254,10 @@ public class Util {
         return th;
     }
 
-    /** Compare two objects just like "equals" would. Unlike Object.equals,
-    * this method allows any of the 2 objects to be null. */
+    /**
+     * Compare two objects just like "equals" would. Unlike Object.equals,
+     * this method allows any of the 2 objects to be null.
+     */
     public static boolean nullSafeEquals(Object obj1, Object obj2) {
         if (obj1 == null && obj2 == null)
             return true;
@@ -269,7 +274,9 @@ public class Util {
         return str == null || str.length() == 0;
     }
 
-    /** Create object copy using serialization mechanism. */
+    /**
+     * Create object copy using serialization mechanism.
+     */
     public static Object cloneViaSerialization(Serializable obj)
         throws Exception {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -285,9 +292,11 @@ public class Util {
         return objCopy;
     }
 
-    /** Creates an XMLReader with default feature set. Note that all Cayenne
-      * internal XML parsers should probably use XMLReader obtained via this
-      * method for consistency sake, and can customize feature sets as needed. */
+    /**
+     * Creates an XMLReader with default feature set. Note that all Cayenne
+     * internal XML parsers should probably use XMLReader obtained via this
+     * method for consistency sake, and can customize feature sets as needed.
+     */
     public static XMLReader createXmlReader()
         throws SAXException, ParserConfigurationException {
         SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -304,10 +313,12 @@ public class Util {
         return reader;
     }
 
-    /** Returns package information for the <code>className</code>
-      * parameter as a path separated with forward slash ('/').
-      * For example for class a.b.c.ClassName "a/b/c" will be returned.
-      * Method is used to lookup resources that are located in package subdirectories. */
+    /**
+     * Returns package information for the <code>className</code>
+     * parameter as a path separated with forward slash ('/').
+     * For example for class a.b.c.ClassName "a/b/c" will be returned.
+     * Method is used to lookup resources that are located in package subdirectories.
+     */
     public static String getPackagePath(String className) {
         if (regexUtil.match("/\\./", className)) {
             String path = regexUtil.substitute("s/\\./\\//g", className);

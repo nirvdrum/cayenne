@@ -1,12 +1,13 @@
 package cayenne.tutorial.tapestry.pages;
 
-import java.math.BigDecimal;
-
 import cayenne.tutorial.tapestry.Visit;
 import cayenne.tutorial.tapestry.domain.Artist;
 import cayenne.tutorial.tapestry.domain.Painting;
 
+import java.math.BigDecimal;
+
 import net.sf.tapestry.IRequestCycle;
+
 import org.objectstyle.cayenne.access.DataContext;
 
 /**

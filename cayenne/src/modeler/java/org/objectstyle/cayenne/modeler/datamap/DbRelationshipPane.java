@@ -72,20 +72,19 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.event.DbEntityListener;
+import org.objectstyle.cayenne.map.event.DbRelationshipListener;
+import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneActionPanel;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DbEntityDisplayListener;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.map.event.DbEntityListener;
-import org.objectstyle.cayenne.map.event.DbRelationshipListener;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 
 /** 
@@ -103,8 +102,6 @@ public class DbRelationshipPane
         ExistingSelectionProcessor,
         ListSelectionListener,
         TableModelListener {
-    private static Logger logObj = Logger.getLogger(DbRelationshipPane.class);
-
     protected EventController mediator;
     protected CayenneTable table;
     protected JButton resolve;
@@ -202,15 +199,6 @@ public class DbRelationshipPane
                 mediator.getCurrentDataDomain());
 
         mediator.fireDbRelationshipDisplayEvent(ev);
-    }
-
-    private void stopEditing() {
-        // Stop whatever editing may be taking place
-        int col_index = table.getEditingColumn();
-        if (col_index >= 0) {
-            TableColumn col = table.getColumnModel().getColumn(col_index);
-            col.getCellEditor().stopCellEditing();
-        }
     }
 
     private void resolveRelationship() {

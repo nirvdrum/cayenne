@@ -55,9 +55,6 @@
  */
 package org.objectstyle.cayenne.dba.sybase;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
@@ -71,7 +68,6 @@ import org.objectstyle.cayenne.dba.PkGenerator;
  * @author Andrei Adamchik
  */
 public class SybaseAdapter extends JdbcAdapter {
-    protected Map sorters = new HashMap();
 
     /**
      * Installs appropriate ExtendedTypes as converters for passing values

@@ -67,7 +67,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.apache.commons.collections.iterators.SingletonIterator;
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.util.Invocation;
 
 /**
@@ -79,7 +78,6 @@ import org.objectstyle.cayenne.util.Invocation;
  * @author Holger Hoffstätte
  */
 public class EventManager extends Object {
-	private static final Logger log = Logger.getLogger(EventManager.class);
 	private static final EventManager _defaultManager = new EventManager();
 
 	// keeps weak references to subjects

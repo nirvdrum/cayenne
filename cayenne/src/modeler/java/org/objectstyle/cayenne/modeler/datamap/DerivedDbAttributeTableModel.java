@@ -57,8 +57,8 @@ package org.objectstyle.cayenne.modeler.datamap;
 
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
-import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
+import org.objectstyle.cayenne.modeler.control.EventController;
 
 /**
  * Table model for derived DbAttributes.

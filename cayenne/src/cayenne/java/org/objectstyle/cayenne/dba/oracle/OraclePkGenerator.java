@@ -68,7 +68,8 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcPkGenerator;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbKeyGenerator;
 
 /**
  * Sequence-based primary key generator implementation for Oracle.

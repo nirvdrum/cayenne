@@ -2,8 +2,8 @@ package cayenne.tutorial.tapestry.pages;
 
 import cayenne.tutorial.tapestry.Visit;
 import cayenne.tutorial.tapestry.domain.Gallery;
-
 import net.sf.tapestry.IRequestCycle;
+
 import org.objectstyle.cayenne.access.DataContext;
 
 /**
