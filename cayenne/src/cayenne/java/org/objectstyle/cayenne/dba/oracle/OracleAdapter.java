@@ -72,6 +72,7 @@ import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.access.types.ByteArrayType;
 import org.objectstyle.cayenne.access.types.CharType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.access.types.ShortType;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.dba.PkGenerator;
@@ -195,6 +196,9 @@ public class OracleAdapter extends JdbcAdapter {
 
         // override date handler with Oracle handler
         map.registerType(new OracleUtilDateType());
+        
+        // At least on MacOS X, driver does not handle Short properly
+        map.registerType(new ShortType(true));
     }
 
     /**
