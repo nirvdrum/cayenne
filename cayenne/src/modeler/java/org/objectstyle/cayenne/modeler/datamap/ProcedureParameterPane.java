@@ -57,15 +57,20 @@
 package org.objectstyle.cayenne.modeler.datamap;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParameter;
@@ -84,10 +89,19 @@ import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
  */
 public class ProcedureParameterPane
     extends JPanel
-    implements ProcedureParameterListener, ProcedureDisplayListener, ExistingSelectionProcessor {
+    implements
+        ProcedureParameterListener,
+        ProcedureDisplayListener,
+        ExistingSelectionProcessor,
+        ActionListener {
+
+    private static Logger logObj = Logger.getLogger(ProcedureParameterPane.class);
+
     protected EventController eventController;
 
     protected CayenneTable table;
+    protected JButton moveUp;
+    protected JButton moveDown;
 
     public ProcedureParameterPane(EventController eventController) {
         this.eventController = eventController;
@@ -107,15 +121,23 @@ public class ProcedureParameterPane
     protected void init() {
         setLayout(new BorderLayout());
 
+        moveUp = new JButton("Up");
+        moveDown = new JButton("Down");
+
         // Create table with two columns and no rows.
         table = new CayenneTable();
-        JPanel panel = PanelFactory.createTablePanel(table, new JButton[] {
-        });
+        JPanel panel =
+            PanelFactory.createTablePanel(table, new JButton[] { moveUp, moveDown });
         add(panel, BorderLayout.CENTER);
     }
 
     public void processExistingSelection() {
+
+        logObj.warn("SELECTED: " + table.getSelectedRow());
+
         ProcedureParameter parameter = null;
+        boolean enableButtons = false;
+
         if (table.getSelectedRow() >= 0) {
             ProcedureParameterTableModel model =
                 (ProcedureParameterTableModel) table.getModel();
@@ -123,7 +145,14 @@ public class ProcedureParameterPane
 
             // scroll table
             table.scroll(table.getSelectedRow(), 0);
+
+            if (table.getRowCount() > 1) {
+                enableButtons = true;
+            }
         }
+
+        moveUp.setEnabled(enableButtons);
+        moveDown.setEnabled(enableButtons);
 
         ProcedureParameterDisplayEvent e =
             new ProcedureParameterDisplayEvent(
@@ -170,6 +199,14 @@ public class ProcedureParameterPane
         table.setRowHeight(25);
         table.setRowMargin(3);
 
+        // number column tweaking
+        TableColumn numberColumn =
+            table.getColumnModel().getColumn(ProcedureParameterTableModel.PARAMETER_NUMBER);
+        numberColumn.setPreferredWidth(35);
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+		renderer.setHorizontalAlignment(SwingConstants.CENTER);
+		numberColumn.setCellRenderer(renderer);
+
         // name column tweaking
         TableColumn nameColumn =
             table.getColumnModel().getColumn(ProcedureParameterTableModel.PARAMETER_NAME);
@@ -197,6 +234,9 @@ public class ProcedureParameterPane
                 false);
         directionEditor.setEditable(true);
         directionColumn.setCellEditor(new DefaultCellEditor(directionEditor));
+
+        moveUp.setEnabled(false);
+        moveDown.setEnabled(false);
     }
 
     public void procedureParameterAdded(ProcedureParameterEvent e) {
@@ -214,5 +254,9 @@ public class ProcedureParameterPane
         int ind = model.getObjectList().indexOf(e.getParameter());
         model.removeRow(e.getParameter());
         table.select(ind);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+
     }
 }

@@ -71,11 +71,12 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class ProcedureParameterTableModel extends CayenneTableModel {
-    public static final int PARAMETER_NAME = 0;
-    public static final int PARAMETER_DIRECTION = 1;
-    public static final int PARAMETER_TYPE = 2;
-    public static final int PARAMETER_LENGTH = 3;
-    public static final int PARAMETER_PRECISION = 4;
+    public static final int PARAMETER_NUMBER = 0;
+    public static final int PARAMETER_NAME = 1;
+    public static final int PARAMETER_DIRECTION = 2;
+    public static final int PARAMETER_TYPE = 3;
+    public static final int PARAMETER_LENGTH = 4;
+    public static final int PARAMETER_PRECISION = 5;
 
     public static final String IN_PARAMETER = "IN";
     public static final String OUT_PARAMETER = "OUT";
@@ -92,6 +93,7 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
 
     private static final int[] PARAMETER_INDEXES =
         new int[] {
+            PARAMETER_NUMBER,
             PARAMETER_NAME,
             PARAMETER_DIRECTION,
             PARAMETER_TYPE,
@@ -99,7 +101,7 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
             PARAMETER_PRECISION };
 
     private static final String[] PARAMETER_NAMES =
-        new String[] { "Name", "Direction", "Type", "Max Length", "Precision" };
+        new String[] { "No.", "Name", "Direction", "Type", "Max Length", "Precision" };
 
     protected Procedure procedure;
 
@@ -234,6 +236,8 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
         }
 
         switch (columnIndex) {
+            case PARAMETER_NUMBER :
+                return getParameterNumber(rowIndex, parameter);
             case PARAMETER_NAME :
                 return getParameterName(parameter);
             case PARAMETER_DIRECTION :
@@ -246,6 +250,17 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
                 return getParameterPrecision(parameter);
             default :
                 return "";
+        }
+    }
+
+    protected Object getParameterNumber(int rowIndex, ProcedureParameter parameter) {
+        boolean hasReturnValue = parameter.getProcedure().isReturningValue();
+
+        if (hasReturnValue) {
+            return (rowIndex == 0) ? "R" : "" + rowIndex;
+        }
+        else {
+            return "" + (rowIndex + 1);
         }
     }
 
@@ -303,6 +318,6 @@ public class ProcedureParameterTableModel extends CayenneTableModel {
     }
 
     public boolean isCellEditable(int row, int col) {
-        return true;
+        return col != PARAMETER_NUMBER;
     }
 }
