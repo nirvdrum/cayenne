@@ -205,17 +205,20 @@ public class ContextCommitObserver
                 this,
                 "dataContextWillCommit",
                 DataContextEvent.class,
-                DataContext.WILL_COMMIT);
+                DataContext.WILL_COMMIT,
+                this.context);
             mgr.addListener(
                 this,
                 "dataContextDidCommit",
                 DataContextEvent.class,
-                DataContext.DID_COMMIT);
+                DataContext.DID_COMMIT,
+                this.context);
             mgr.addListener(
                 this,
                 "dataContextDidRollback",
                 DataContextEvent.class,
-                DataContext.DID_ROLLBACK);
+                DataContext.DID_ROLLBACK,
+                this.context);
         } catch (NoSuchMethodException nsm) {
             // this really should not happen since we implement all required methods
             throw new CayenneRuntimeException(nsm);
@@ -230,10 +233,6 @@ public class ContextCommitObserver
     }
 
     public void dataContextWillCommit(DataContextEvent event) {
-        if (event.getDataContext() != context) {
-            return;
-        }
-
         Iterator iter = objectsToNotify.iterator();
         while (iter.hasNext()) {
             ((DataObjectTransactionEventListener) iter.next()).willCommit();
@@ -241,10 +240,6 @@ public class ContextCommitObserver
     }
 
     public void dataContextDidCommit(DataContextEvent event) {
-        if (event.getDataContext() != context) {
-            return;
-        }
-
         Iterator iter = objectsToNotify.iterator();
         while (iter.hasNext()) {
             ((DataObjectTransactionEventListener) iter.next()).didCommit();
@@ -252,10 +247,6 @@ public class ContextCommitObserver
     }
 
     public void dataContextDidRollback(DataContextEvent event) {
-        if (event.getDataContext() != context) {
-            return;
-        }
-
         // do nothing for now
     }
 }
