@@ -369,6 +369,7 @@ public class MapLoader extends DefaultHandler {
             "<data-map project-version=\""
                 + Project.CURRENT_PROJECT_VERSION
                 + "\">");
+        storeProcedures(out, map);
         storeDbEntities(out, map);
         storeObjEntities(out, map);
         storeDbRelationships(out);
@@ -377,6 +378,80 @@ public class MapLoader extends DefaultHandler {
         objRelationships = null;
         dbRelationships = null;
         dbRelationshipRefs = null;
+    }
+
+    private void storeProcedures(PrintWriter out, DataMap map) {
+
+        Iterator iter = sortedProcedures(map).iterator();
+        while (iter.hasNext()) {
+            Procedure procedure = (Procedure) iter.next();
+            out.print("\t<procedure name=\"" + procedure.getName() + '\"');
+            if (procedure.getSchema() != null
+                && procedure.getSchema().trim().length() > 0) {
+                out.print(" schema=\"");
+                out.print(procedure.getSchema());
+                out.print('\"');
+            }
+
+            if (procedure.getCatalog() != null
+                && procedure.getCatalog().trim().length() > 0) {
+                out.print(" catalog=\"");
+                out.print(procedure.getCatalog());
+                out.print('\"');
+            }
+
+            if (procedure.isReturningValue()) {
+                out.print(" returningValue=\"true\"");
+            }
+
+            out.println('>');
+
+            storeProcedureParameters(out, procedure);
+            out.println("\t</procedure>");
+        }
+    }
+
+    private void storeProcedureParameters(
+        PrintWriter out,
+        Procedure procedure) {
+
+        Iterator iter = procedure.getCallParameters().iterator();
+
+        while (iter.hasNext()) {
+            ProcedureParameter parameter = (ProcedureParameter) iter.next();
+            out.print(
+                "\t\t<procedure-parameter name=\""
+                    + parameter.getName()
+                    + '\"');
+
+            String type = TypesMapping.getSqlNameByType(parameter.getType());
+            if (type != null) {
+                out.print(" type=\"" + type + '\"');
+            }
+
+            if (parameter.getMaxLength() > 0) {
+                out.print(" length=\"");
+                out.print(parameter.getMaxLength());
+                out.print('\"');
+            }
+
+            if (parameter.getPrecision() > 0) {
+                out.print(" precision=\"");
+                out.print(parameter.getPrecision());
+                out.print('\"');
+            }
+
+            int direction = parameter.getDirection();
+            if (direction == ProcedureParameter.IN_PARAMETER) {
+                out.print(" direction=\"in\"");
+            } else if (direction == ProcedureParameter.IN_OUT_PARAMETER) {
+                out.print(" direction=\"in_out\"");
+            } else if (direction == ProcedureParameter.OUT_PARAMETER) {
+                out.print(" direction=\"out\"");
+            } 
+
+            out.println("/>");
+        }
     }
 
     private void storeDbEntities(PrintWriter out, DataMap map) {
@@ -1225,6 +1300,12 @@ public class MapLoader extends DefaultHandler {
             sb.append("Name: " + name + "\tValue: " + value + "\n");
         }
         return sb;
+    }
+
+    protected List sortedProcedures(DataMap map) {
+        List list = new ArrayList(map.getProcedures());
+        Collections.sort(list, new PropertyComparator("name", ObjEntity.class));
+        return list;
     }
 
     protected List sortedRegularDbEntities(DataMap map) {
