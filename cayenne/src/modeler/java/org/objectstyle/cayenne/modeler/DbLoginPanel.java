@@ -99,6 +99,9 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 	protected JButton ok;
 	protected JButton cancel;
 
+	private static String COMMAND_OK = "ok";
+	private static String COMMAND_CANCEL = "cancel";
+	
 	public DbLoginPanel(Editor frame) {
 		super(frame, "Driver And Login Information", true);
 		setResizable(false);
@@ -202,16 +205,16 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 				urlInput,
 				adapterInput };
 
-		return PanelFactory.createJDK13Form(left, right, 5, 5, 5, 5);
+		return PanelFactory.createForm(left, right, 5, 5, 5, 5);
 	}
 
 	private JPanel initButtons() {
 		// buttons
 		ok = new JButton("Ok");
-		ok.setActionCommand("ok");
+		ok.setActionCommand(COMMAND_OK);
 
 		cancel = new JButton("Cancel");
-		cancel.setActionCommand("cancel");
+		cancel.setActionCommand(COMMAND_CANCEL);
 
 		ok.addActionListener(this);
 		cancel.addActionListener(this);
@@ -230,7 +233,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals("ok") && dataSrcInfo != null) {
+		if (e.getActionCommand().equals(COMMAND_OK) && dataSrcInfo != null) {
 			// populate DataSourceInfo with text values
 			String un = unInput.getText();
 			if (un != null && un.length() == 0)
