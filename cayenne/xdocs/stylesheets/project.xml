@@ -23,7 +23,7 @@
 
     <menu name="DEVELOPER">
         <item name="Developer Guide"  href="/developerguide/index.html"/>
-        <item name="Bugs"  href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068"/>
+        <item name="Bugs"  href="/bugs.html"/>
         <item name="Mailing Lists"  href="http://objectstyle.org/cayenne/lists.html"/>
     </menu>
     

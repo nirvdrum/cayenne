@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<document>
+    <title>Bug Tracking</title>
+
+    <body>        
+        <!-- News section -->
+        <section name="Bug Tracking">
+      	<p>Cayenne project is using bug tracker system provided by SourceForge.</p>
+      	
+      	<ul>
+      		<li><a href="http://sourceforge.net/tracker/?func=add&amp;group_id=48132&amp;atid=452068">Submit New Bug</a></li>
+      		<li><a href="http://sourceforge.net/tracker/?group_id=48132&amp;atid=452068">Browse Open Bugs</a></li>
+      	</ul>
+        </section>
+    </body>
+</document>
