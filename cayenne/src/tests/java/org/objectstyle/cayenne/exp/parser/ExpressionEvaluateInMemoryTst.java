@@ -97,15 +97,6 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         assertEquals(new Integer(-3), node.evaluate(b2));
     }
 
-    /*
-     * public void testEvaluateOBJ_PATH_JavaBeanToMany() throws Exception { ASTObjPath
-     * node = new ASTObjPath("collection.string"); TestBean b1 =
-     * TestBean.testFixtureWithCollection("r1", "rc1"); Object o1 = node.evaluate(b1);
-     * assertTrue(o1 instanceof Collection); Collection c1 = (Collection) o1;
-     * assertEquals(10, c1.size()); Object first = c1.iterator().next(); assertTrue(first
-     * instanceof String); assertEquals("rc10", first); }
-     */
-
     public void testEvaluateOBJ_PATH_ObjEntity() throws Exception {
         ASTObjPath node = new ASTObjPath("paintingArray.paintingTitle");
 
@@ -126,6 +117,28 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
 
         Object dbTarget = e.evaluate(ade);
         assertTrue(dbTarget instanceof DbAttribute);
+    }
+    
+    public void testEvaluateEQUAL_TOBigDecimal() throws Exception {
+        BigDecimal bd1 = new BigDecimal("2.0");
+        BigDecimal bd2 = new BigDecimal("2.0");
+        BigDecimal bd3 = new BigDecimal("2.00");
+        BigDecimal bd4 = new BigDecimal("2.01");
+
+        Expression equalTo = new ASTEqual(new ASTObjPath(
+                Painting.ESTIMATED_PRICE_PROPERTY), bd1);
+
+        Painting p = new Painting();
+        p.setEstimatedPrice(bd2);
+        assertTrue(equalTo.match(p));
+
+        // BigDecimals must compare regardless of the number of trailing zeros
+        // (see CAY-280)
+        p.setEstimatedPrice(bd3);
+        assertTrue(equalTo.match(p));
+
+        p.setEstimatedPrice(bd4);
+        assertFalse(equalTo.match(p));
     }
 
     public void testEvaluateEQUAL_TO() throws Exception {
@@ -153,7 +166,7 @@ public class ExpressionEvaluateInMemoryTst extends CayenneTestCase {
         noMatch.setArtistName("123");
         assertFalse("Failed: " + equalTo, equalTo.match(noMatch));
     }
-    
+
     public void testEvaluateNOT_EQUAL_TONull() throws Exception {
         Expression equalTo = new ASTNotEqual(new ASTObjPath("artistName"), null);
 
