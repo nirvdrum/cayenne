@@ -82,6 +82,8 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.map.event.EntityEvent;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.AdapterMapping;
 import org.objectstyle.cayenne.modeler.Application;
 import org.objectstyle.cayenne.modeler.ProjectController;
@@ -256,6 +258,7 @@ public class ImportEOModelAction extends CayenneAction {
 
             Collection originalOE = new ArrayList(currentMap.getObjEntities());
             Collection originalDE = new ArrayList(currentMap.getDbEntities());
+            Collection originalQueries = new ArrayList(currentMap.getQueries());
 
             currentMap.mergeWithDataMap(map);
             map = currentMap;
@@ -263,8 +266,10 @@ public class ImportEOModelAction extends CayenneAction {
             // postprocess changes
             Collection newOE = new ArrayList(currentMap.getObjEntities());
             Collection newDE = new ArrayList(currentMap.getDbEntities());
+            Collection newQueries = new ArrayList(currentMap.getQueries());
 
             EntityEvent entityEvent = new EntityEvent(Application.getFrame(), null);
+            QueryEvent queryEvent = new QueryEvent(Application.getFrame(), null);
 
             Collection addedOE = CollectionUtils.subtract(newOE, originalOE);
             Iterator it = addedOE.iterator();
@@ -300,6 +305,25 @@ public class ImportEOModelAction extends CayenneAction {
                 entityEvent.setEntity(e);
                 entityEvent.setId(EntityEvent.REMOVE);
                 mediator.fireDbEntityEvent(entityEvent);
+            }
+            
+            // queries
+            Collection addedQueries = CollectionUtils.subtract(newQueries, originalQueries);
+            it = addedQueries.iterator();
+            while (it.hasNext()) {
+                Query q = (Query) it.next();
+                queryEvent.setQuery(q);
+                queryEvent.setId(QueryEvent.ADD);
+                mediator.fireQueryEvent(queryEvent);
+            }
+
+            Collection removedQueries = CollectionUtils.subtract(originalQueries, newQueries);
+            it = removedQueries.iterator();
+            while (it.hasNext()) {
+            	Query q = (Query) it.next();
+                queryEvent.setQuery(q);
+                queryEvent.setId(QueryEvent.REMOVE);
+                mediator.fireQueryEvent(queryEvent);
             }
 
             mediator.fireDataMapDisplayEvent(new DataMapDisplayEvent(Application

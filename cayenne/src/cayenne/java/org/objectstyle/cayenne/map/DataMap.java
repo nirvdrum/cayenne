@@ -332,11 +332,11 @@ public class DataMap implements XMLSerializable, MappingNamespace {
     }
 
     /**
-     * Adds all Object and DB entities from another map to this map. Overwrites all
-     * existing entities with the new ones.
+     * Adds all Object and DB entities and Queries from another map to this map. Overwrites all
+     * existing entities and queries with the new ones.
      * <p>
      * <i>TODO: will need to implement advanced merge that allows different policies for
-     * overwriting entities. </i>
+     * overwriting entities / queries. </i>
      * </p>
      */
     public void mergeWithDataMap(DataMap map) {
@@ -352,6 +352,13 @@ public class DataMap implements XMLSerializable, MappingNamespace {
             ObjEntity ent = (ObjEntity) objs.next();
             this.removeObjEntity(ent.getName());
             this.addObjEntity(ent);
+        }
+        
+        Iterator queries = new ArrayList(map.getQueries()).iterator();
+        while (queries.hasNext()) {
+            Query query = (Query) queries.next();
+            this.removeQuery(query.getName());
+            this.addQuery(query);
         }
     }
 

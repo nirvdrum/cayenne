@@ -226,7 +226,7 @@ public class EOModelProcessor {
             Iterator queries = helper.queryNames(name);
             while (queries.hasNext()) {
                 String queryName = (String) queries.next();
-
+                System.out.println("Processing FetchSpecification: " + queryName);
                 EOObjEntity entity = (EOObjEntity) dataMap.getObjEntity(name);
                 makeQuery(helper, entity, queryName);
             }
@@ -267,11 +267,16 @@ public class EOModelProcessor {
         if (queryPlist == null) {
             return null;
         }
-
-        EOQuery query = new EOQuery(entity, queryPlist);
+        
+        Query query;
+        if (queryPlist.containsKey("hints")) { // just a predefined SQL query
+        		query = new EOSQLQuery(entity, queryPlist);
+        } else {
+        		query = new EOQuery(entity, queryPlist);
+        }
         query.setName(entity.qualifiedQueryName(queryName));
         dataMap.addQuery(query);
-
+        
         return query;
     }
 
