@@ -102,6 +102,8 @@ public interface DbAdapter {
 		"org.objectstyle.cayenne.dba.hsqldb.HSQLDBAdapter";
 	public static final String DB2 =
 		"org.objectstyle.cayenne.dba.db2.DB2Adapter";
+	public static final String FIREBIRD =
+		"org.objectstyle.cayenne.dba.firebird.FirebirdAdapter";
 
 	/**
 	 * All available DbAdapter subclass names.
@@ -110,11 +112,13 @@ public interface DbAdapter {
 		new String[] {
 			DbAdapter.JDBC,
 			DbAdapter.DB2,
+			DbAdapter.FIREBIRD,
 			DbAdapter.HSQLDB,
 			DbAdapter.MYSQL,
 			DbAdapter.ORACLE,
 			DbAdapter.POSTGRES,
-			DbAdapter.SYBASE };
+			DbAdapter.SYBASE
+		};
 
 	/**
 	 * Creates an returns a named instance of a DataNode. Sets node adapter to be this object.
