@@ -92,12 +92,14 @@ public class DataMapTst extends CayenneTestCase {
 		ObjEntity e = new ObjEntity("b");
 		map.addObjEntity(e);
 		assertSame(e, map.getObjEntity(e.getName()));
+		assertSame(map, e.getDataMap());
 	}
 
 	public void testAddDbEntity() throws Exception {
 		DbEntity e = new DbEntity("b");
 		map.addDbEntity(e);
 		assertSame(e, map.getDbEntity(e.getName()));
+		assertSame(map, e.getDataMap());
 	}
 	
 	public void testAddDependency1() throws Exception {

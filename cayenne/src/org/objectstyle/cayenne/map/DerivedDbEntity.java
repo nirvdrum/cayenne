@@ -70,9 +70,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrei Adamchik
  */
 public class DerivedDbEntity extends DbEntity {
-	protected DbEntity parentEntity;
-	protected ArrayList groupByAttributes = new ArrayList();
-
+	protected String parentEntityName;
+	
 	/**
 	 * Constructor for DerivedDbEntity.
 	 */
@@ -144,7 +143,16 @@ public class DerivedDbEntity extends DbEntity {
 	 * @return DbEntity
 	 */
 	public DbEntity getParentEntity() {
-		return parentEntity;
+		if(parentEntityName == null) {
+			return null;
+		}
+		
+		DataMap map = getDataMap();
+		if(map == null) {
+			return null;
+		}
+		
+		return map.getDbEntity(parentEntityName, true);
 	}
 
 	/**
@@ -153,33 +161,27 @@ public class DerivedDbEntity extends DbEntity {
 	 * @param parentEntity The parentEntity to set
 	 */
 	public void setParentEntity(DbEntity parentEntity) {
-		this.parentEntity = parentEntity;
+		if(parentEntity == null) {
+			setParentEntityName(null);
+		}
+		else {
+		    setParentEntityName(parentEntity.getName());
+		}
 	}
 
 	/** 
 	 * Returns attributes used in GROUP BY as an unmodifiable list.
 	 */
 	public List getGroupByAttributes() {
-		return Collections.unmodifiableList(groupByAttributes);
-	}
-
-	/** Adds an attribute to the GROUP BY clause. */
-	public void addGroupByAttribute(DbAttribute dbAttr) {
-		if (!groupByAttributes.contains(dbAttr)) {
-			groupByAttributes.add(dbAttr);
+		ArrayList list = new ArrayList();
+		Iterator it = super.getAttributeList().iterator();
+		while(it.hasNext()) {
+			DerivedDbAttribute attr = (DerivedDbAttribute)it.next();
+			if(attr.isGroupBy()) {
+				list.add(attr);
+			}
 		}
-	}
-
-	/** 
-	 * Removes an  attribute from the list of attributes used 
-	 * in GROUP BY clause. 
-	 */
-	public void removeGroupByAttribute(String attrName) {
-		groupByAttributes.remove(getAttribute(attrName));
-	}
-
-	public void clearGroupByAttributes() {
-		groupByAttributes.clear();
+		return list;
 	}
 
 	/**
@@ -220,18 +222,26 @@ public class DerivedDbEntity extends DbEntity {
 	}
 
 	/**
-	 * @see org.objectstyle.cayenne.map.Entity#clearAttributes()
-	 */
-	public void clearAttributes() {
-		super.clearAttributes();
-		clearGroupByAttributes();
-	}
-
-	/**
 	 * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
 	 */
 	public void removeAttribute(String attrName) {
 		super.removeAttribute(attrName);
-		removeGroupByAttribute(attrName);
+	}
+	
+	/**
+	 * Returns the parentEntityName.
+	 * @return String
+	 */
+	public String getParentEntityName() {
+		return parentEntityName;
+	}
+
+
+	/**
+	 * Sets the parentEntityName.
+	 * @param parentEntityName The parentEntityName to set
+	 */
+	public void setParentEntityName(String parentEntityName) {
+		this.parentEntityName = parentEntityName;
 	}
 }

@@ -105,8 +105,7 @@ public class EntityTst extends CayenneTestCase {
     
     public void testRelationship() throws Exception {
         Relationship rel = new Relationship() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
+            public Entity getTargetEntity() {return null;}             
         };
         rel.setName("tst_name");
         ent.addRelationship(rel);

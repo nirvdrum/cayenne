@@ -94,17 +94,10 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
 	 * result columns in the in the ResultSet. Uses ResultSet info. 
 	 */
 	public DbAttribute[] getSnapshotDesc(ResultSet rs) {
-		ObjAttribute[] attrs = getRawQuery().getResultDesc();
-		if (attrs == null || attrs.length == 0) {
-			return getSnapshotLabelsFromMetadata(rs);
-		}
-
-		int len = attrs.length;
-		DbAttribute[] desc = new DbAttribute[len];
-		for (int i = 0; i < len; i++) {
-			desc[i] = attrs[i].getDbAttribute();
-		}
-		return desc;
+		DbAttribute[] attrs = getRawQuery().getResultDescriptors();
+		return (attrs == null || attrs.length == 0)
+			? getSnapshotLabelsFromMetadata(rs)
+			: attrs;
 	}
 
 	/** 
@@ -150,9 +143,10 @@ public class SqlSelectTranslator extends SelectQueryAssembler {
 	/** Returns ordered list of Java class names that
 	  *  should be used for fetched values. */
 	public String[] getResultTypes(ResultSet rs) {
-		ObjAttribute[] attrs = getRawQuery().getResultDesc();
-		if (attrs == null || attrs.length == 0)
+		ObjAttribute[] attrs = getRawQuery().getObjDescriptors();
+		if (attrs == null || attrs.length == 0) {
 			return getResultTypesFromMetadata(rs);
+		}
 
 		int len = attrs.length;
 		String[] types = new String[len];

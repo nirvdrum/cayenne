@@ -57,26 +57,28 @@ package org.objectstyle.cayenne.map;
 
 import java.util.*;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.util.CayenneMap;
 
 /** Superclass of metadata classes. */
 public abstract class Entity extends MapObject {
+	static Logger logObj = Logger.getLogger(Entity.class);
+	
 	public static final String PATH_SEPARATOR = ".";
 
 	protected CayenneMap attributes = new CayenneMap(this);
-	protected HashMap relationships = new HashMap();
+	protected CayenneMap relationships = new CayenneMap(this);
 
-    public DataMap getDataMap() {
-    	return (DataMap)getParent();
-    }
-    
-    public void setDataMap(DataMap dataMap) {
-    	setParent(dataMap);
-    }
-    
-    
+	public DataMap getDataMap() {
+		return (DataMap) getParent();
+	}
+
+	public void setDataMap(DataMap dataMap) {
+		setParent(dataMap);
+	}
+
 	/** 
 	 * Returns attribute with name <code>attrName</code>.
 	 * Will return null if no attribute with this name exists. 
@@ -92,10 +94,10 @@ public abstract class Entity extends MapObject {
 	 * Also sets <code>attr</code>'s entity to be this entity. 
 	 */
 	public void addAttribute(Attribute attr) {
-		if(attr.getName() == null) {
+		if (attr.getName() == null) {
 			throw new IllegalArgumentException("Attempt to insert unnamed attribute.");
 		}
-		
+
 		attributes.put(attr.getName(), attr);
 	}
 
@@ -120,9 +122,6 @@ public abstract class Entity extends MapObject {
 	/** Adds new relationship to the entity. */
 	public void addRelationship(Relationship rel) {
 		relationships.put(rel.getName(), rel);
-
-		// set rel's source entity to be "this" entity
-		rel.setSourceEntity(this);
 	}
 
 	/** Removes a relationship named <code>attrName</code>.*/

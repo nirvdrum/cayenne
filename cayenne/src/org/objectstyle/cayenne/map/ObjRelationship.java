@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,9 +53,12 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /** Metadata for the navigational association between the data objects.
  *  For example, if class "Employee" you may need to get to the department
@@ -87,6 +89,24 @@ public class ObjRelationship extends Relationship {
         else
             setName("to" + target.getName());
 	}
+    
+    public Entity getTargetEntity() {
+    	if(getTargetEntityName() == null) {
+    		return null;
+    	}
+    	 
+      	Entity src = getSourceEntity();
+    	if(src == null) {
+    		return null;
+    	}
+    	
+    	DataMap map = src.getDataMap();
+    	if(map == null) {
+    		return null;
+    	}
+    	
+        return map.getObjEntity(getTargetEntityName(), true);
+    }
     
     /** Returns true if underlying DbRelationships point to dependent entity. */
     public boolean isToDependentEntity() {
@@ -156,30 +176,5 @@ public class ObjRelationship extends Relationship {
 
     public void clearDbRelationships() {
     	dbRelationships.clear();
-    }
-
-
-    public String toString() {
-        StringBuffer sb = new StringBuffer("ObjRelationship: \n");
-        sb.append("Relationship '").append(name);
-        if(toMany)
-            sb.append("' (to-many)\n");
-        else
-            sb.append("' (to-one)\n");
-
-        sb.append("Source entity: ");
-        if(sourceEntity == null)
-            sb.append("<null>");
-        else
-            sb.append(sourceEntity.getName());
-
-        sb.append("Target entity: ");
-        if(targetEntity == null)
-            sb.append("<null>");
-        else
-            sb.append(targetEntity.getName());
-
-        sb.append("\n------------------\n");
-        return sb.toString();
     }
 }

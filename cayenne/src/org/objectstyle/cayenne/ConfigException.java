@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,6 +54,7 @@ package org.objectstyle.cayenne;
  *
  */ 
 
+package org.objectstyle.cayenne;
 
 /** 
  * RuntimeException subclass thrown in cases of failed

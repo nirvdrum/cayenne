@@ -55,10 +55,19 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
 import org.objectstyle.cayenne.access.types.ExtendedType;
@@ -76,6 +85,8 @@ import org.objectstyle.cayenne.map.DbAttribute;
  * @author Andrei Adamchik
  */
 public class DefaultResultIterator implements ResultIterator {
+	static Logger logObj = Logger.getLogger(DefaultResultIterator.class);
+	
 	protected PreparedStatement prepStmt;
 	protected ResultSet resultSet;
 	protected Connection connection;
@@ -102,6 +113,7 @@ public class DefaultResultIterator implements ResultIterator {
 		this.connection = assembler.getCon();
 		this.resultSet = prepStmt.executeQuery();
 		this.rowDescriptor = assembler.getSnapshotDesc(resultSet);
+		
 		String[] rowTypes = assembler.getResultTypes(resultSet);
 
 		resultSize = rowDescriptor.length;
@@ -113,11 +125,12 @@ public class DefaultResultIterator implements ResultIterator {
 
 		init(assembler);
 	}
-	
+
 	/**
 	 * Reads the first row of data.
 	 */
-	protected void init(SelectQueryAssembler assembler) throws SQLException, CayenneException {
+	protected void init(SelectQueryAssembler assembler)
+		throws SQLException, CayenneException {
 		checkNextRow();
 	}
 
@@ -201,9 +214,8 @@ public class DefaultResultIterator implements ResultIterator {
 			// rethrow unmodified
 			throw cex;
 		} catch (Exception otherex) {
-			throw new CayenneException(
-				"Exception materializing column.",
-				otherex);
+			logObj.warn("Error", otherex);
+			throw new CayenneException("Exception materializing column.", otherex);
 		}
 	}
 
@@ -254,8 +266,7 @@ public class DefaultResultIterator implements ResultIterator {
 			StringBuffer buf = errors.getBuffer();
 
 			if (buf.length() > 0) {
-				throw new CayenneException(
-					"Error closing ResultIterator: " + buf);
+				throw new CayenneException("Error closing ResultIterator: " + buf);
 			}
 
 			isClosed = true;

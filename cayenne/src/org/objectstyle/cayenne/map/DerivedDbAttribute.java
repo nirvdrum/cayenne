@@ -78,6 +78,7 @@ public class DerivedDbAttribute extends DbAttribute {
 
 	protected String expressionSpec;
 	protected ArrayList params = new ArrayList();
+	protected boolean groupBy;
 
 	/**
 	 * Constructor for DerivedDbAttribute.
@@ -85,20 +86,23 @@ public class DerivedDbAttribute extends DbAttribute {
 	public DerivedDbAttribute() {
 		super();
 	}
-
+	
+	/**
+	 * Constructor for DerivedDbAttribute.
+	 */
+	public DerivedDbAttribute(String name) {
+		super(name);
+	}
+	
 	/**
 	 * Constructor for DerivedDbAttribute.
 	 * 
 	 */
-	public DerivedDbAttribute(
-		String name,
-		int type,
-		DbEntity entity,
-		String spec) {
-
+	public DerivedDbAttribute(String name, int type, DbEntity entity, String spec) {
 		super(name, type, entity);
 		setExpressionSpec(spec);
 	}
+	
 
 	/**
 	 * Creates and initializes a derived attribute with 
@@ -111,7 +115,7 @@ public class DerivedDbAttribute extends DbAttribute {
 		setMaxLength(parentProto.getMaxLength());
 		setPrecision(parentProto.getPrecision());
 		setPrimaryKey(parentProto.isPrimaryKey());
-		
+
 		setExpressionSpec(ATTRIBUTE_TOKEN);
 		addParam(parentProto);
 		setEntity(entity);
@@ -149,23 +153,11 @@ public class DerivedDbAttribute extends DbAttribute {
 	 * clause of the parent entity.
 	 */
 	public boolean isGroupBy() {
-		if (getEntity() instanceof DerivedDbEntity) {
-			return ((DerivedDbEntity) getEntity())
-				.getGroupByAttributes()
-				.contains(
-				this);
-		} else {
-			return false;
-		}
+		return groupBy;
 	}
 
 	public void setGroupBy(boolean flag) {
-		if (flag) {
-			((DerivedDbEntity) getEntity()).addGroupByAttribute(this);
-		} else {
-			((DerivedDbEntity) getEntity()).removeGroupByAttribute(
-				this.getName());
-		}
+		groupBy = flag;
 	}
 
 	/**

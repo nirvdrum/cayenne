@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -55,19 +54,28 @@ package org.objectstyle.cayenne.map;
  *
  */ 
 
+package org.objectstyle.cayenne.map;
 
 
-
-/** Metadata for the data object property.
- *  Also used to map properties to the database table columns. */
+/** 
+ * Metadata for the data object property.
+ * Also used to map properties to the database table columns. 
+ * 
+ * @author Misha Shengaout
+ * @author Andrei Adamchik
+ */
 public class ObjAttribute extends Attribute {
     // Full name of Java class representing the property type.
-    private String type;
+    protected String type;
 
     // The name of the corresponding database table column
-    private DbAttribute dbAttribute;
+    protected String dbAttributeName;
 
 	public ObjAttribute() {}
+	
+	public ObjAttribute(String name) {
+		super(name);
+	}
 
 
 	public ObjAttribute(String name, String type, ObjEntity entity) {
@@ -91,17 +99,55 @@ public class ObjAttribute extends Attribute {
     }
 
 
-	/** Return the corresponding database table column.
-     *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
+	/** 
+	 * Returns an attribute describing a mapped database 
+	 * table column.
+	 */
     public DbAttribute getDbAttribute() {
-        return dbAttribute;
+    	if(dbAttributeName == null) {
+    		return null;
+    	}
+    	
+    	ObjEntity ent = (ObjEntity)getEntity();
+    	if(ent == null) {
+    		return null;
+    	}
+    	
+    	DbEntity dbEnt = ent.getDbEntity();
+    	if(dbEnt == null) {
+    		return null;
+    	}
+    	
+        return (DbAttribute)dbEnt.getAttribute(dbAttributeName);
     }
 
 
 	/** Set the corresponding database table column.
      *  @see org.objectstyle.cayenne.map.DbAttribute#getName() */
     public void setDbAttribute(DbAttribute dbAttribute) {
-        this.dbAttribute = dbAttribute;
+    	if(dbAttribute == null) {
+    		setDbAttributeName(null);
+    	}
+    	else {
+    		setDbAttributeName(dbAttribute.getName());
+    	}
     }
 
+
+	/**
+	 * Returns the dbAttributeName.
+	 * @return String
+	 */
+	public String getDbAttributeName() {
+		return dbAttributeName;
+	}
+
+
+	/**
+	 * Sets the dbAttributeName.
+	 * @param dbAttributeName The dbAttributeName to set
+	 */
+	public void setDbAttributeName(String dbAttributeName) {
+		this.dbAttributeName = dbAttributeName;
+	}
 }

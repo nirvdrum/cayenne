@@ -173,17 +173,16 @@ public class ObjRelationshipTableModel extends CayenneTableModel {
 			}
 			// Remove db relationship mappings.
 			rel.clearDbRelationships();
+			
 			// Set new target, if applicable
 			ObjEntity target = null;
-			if ("".equals(target_name))
-				target = null;
-			else {
+			if (!"".equals(target_name)) {
 				DataMap map = mediator.getCurrentDataMap();
 				target = map.getObjEntity(target_name, true);
 			}
+			
 			rel.setTargetEntity(target);
-			RelationshipEvent e;
-			e = new RelationshipEvent(eventSource, rel, entity);
+			RelationshipEvent e = new RelationshipEvent(eventSource, rel, entity);
 			mediator.fireObjRelationshipEvent(e);
 		} else if (column == REL_CARDINALITY) {
 			Boolean temp = (Boolean) aValue;

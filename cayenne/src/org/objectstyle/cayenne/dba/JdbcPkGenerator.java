@@ -58,12 +58,18 @@ package org.objectstyle.cayenne.dba;
 
 import java.sql.*;
 import java.util.*;
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.access.SelectObserver;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
+import org.objectstyle.cayenne.query.SqlSelectQuery;
 
 /** 
  * Default primary key generator implementation. Uses a lookup table named
@@ -75,17 +81,14 @@ public class JdbcPkGenerator implements PkGenerator {
 	static Logger logObj = Logger.getLogger(JdbcPkGenerator.class.getName());
 
 	private static final String NEXT_ID = "NEXT_ID";
-	private static final ObjAttribute[] resultDesc =
-		new ObjAttribute[] {
-			 new ObjAttribute("nextId", Integer.class.getName(), null)};
+	private static final ObjAttribute[] objDesc =
+		new ObjAttribute[] { new ObjAttribute("nextId", Integer.class.getName(), null)};
+	private static final DbAttribute[] resultDesc =
+		new DbAttribute[] { new DbAttribute(NEXT_ID, Types.INTEGER, null)};
 
 	protected HashMap pkCache = new HashMap();
 	protected int pkCacheSize = 20;
 
-	static {
-		resultDesc[0].setDbAttribute(
-			new DbAttribute(NEXT_ID, Types.INTEGER, null));
-	}
 
 	public void createAutoPk(DataNode node, List dbEntities) throws Exception {
 		// check if a table exists
@@ -128,7 +131,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	public void dropAutoPk(DataNode node, List dbEntities) throws Exception {
 		if (autoPkTableExists(node)) {
 			runUpdate(node, dropAutoPkString());
-		}	
+		}
 	}
 
 	public List dropAutoPkStatements(List dbEntities) {
@@ -198,7 +201,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	protected String dropAutoPkString() {
 		return "DROP TABLE AUTO_PK_SUPPORT";
 	}
-	
+
 	/** 
 	 * Checks if AUTO_PK_TABLE already exists in the database.
 	 */
@@ -207,8 +210,7 @@ public class JdbcPkGenerator implements PkGenerator {
 		boolean exists = false;
 		try {
 			DatabaseMetaData md = con.getMetaData();
-			ResultSet tables =
-				md.getTables(null, null, "AUTO_PK_SUPPORT", null);
+			ResultSet tables = md.getTables(null, null, "AUTO_PK_SUPPORT", null);
 			try {
 				exists = tables.next();
 			} finally {
@@ -221,7 +223,6 @@ public class JdbcPkGenerator implements PkGenerator {
 
 		return exists;
 	}
-	
 
 	/** 
 	 * Runs JDBC update over a Connection obtained from DataNode. 
@@ -275,8 +276,7 @@ public class JdbcPkGenerator implements PkGenerator {
 	 * implementations should be created for cleaner approach (like Oracle
 	 * sequences, for example).</p>
 	 */
-	public Object generatePkForDbEntity(DataNode node, DbEntity ent)
-		throws Exception {
+	public Object generatePkForDbEntity(DataNode node, DbEntity ent) throws Exception {
 
 		PkRange r = (PkRange) pkCache.get(ent.getName());
 		if (r == null || r.isExhausted()) {
@@ -304,16 +304,15 @@ public class JdbcPkGenerator implements PkGenerator {
 	 * generation solutions should override this method, 
 	 * not "generatePkForDbEntity".</p>
 	 */
-	protected int pkFromDatabase(DataNode node, DbEntity ent)
-		throws Exception {
+	protected int pkFromDatabase(DataNode node, DbEntity ent) throws Exception {
 
 		// run queries via DataNode to utilize its transactional behavior
 		ArrayList queries = new ArrayList(2);
 
 		// 1. prepare select 
-		SqlSelectQuery sel =
-			new SqlSelectQuery(null, pkSelectString(ent.getName()));
-		sel.setResultDesc(resultDesc);
+		SqlSelectQuery sel = new SqlSelectQuery(null, pkSelectString(ent.getName()));
+		sel.setObjDescriptors(objDesc);
+		sel.setResultDescriptors(resultDesc);
 		queries.add(sel);
 
 		// 2. prepare update 
@@ -379,8 +378,7 @@ public class JdbcPkGenerator implements PkGenerator {
 			}
 			if (dataRows.size() > 1) {
 				throw new CayenneRuntimeException(
-					"Error generating PK : too many rows for entity: "
-						+ entName);
+					"Error generating PK : too many rows for entity: " + entName);
 			}
 
 			Map lastPk = (Map) dataRows.get(0);
@@ -395,8 +393,7 @@ public class JdbcPkGenerator implements PkGenerator {
 
 			if (resultCount != 1)
 				throw new CayenneRuntimeException(
-					"Error generating PK : update count is wrong: "
-						+ resultCount);
+					"Error generating PK : update count is wrong: " + resultCount);
 		}
 
 		public void transactionCommitted() {
@@ -406,8 +403,7 @@ public class JdbcPkGenerator implements PkGenerator {
 
 		public void nextQueryException(Query query, Exception ex) {
 			super.nextQueryException(query, ex);
-			String entityName =
-				(query != null) ? query.getObjEntityName() : null;
+			String entityName = (query != null) ? query.getObjEntityName() : null;
 			throw new CayenneRuntimeException(
 				"Error generating PK for entity '" + entityName + "'.",
 				ex);

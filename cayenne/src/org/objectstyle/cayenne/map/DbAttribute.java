@@ -92,7 +92,7 @@ public class DbAttribute extends Attribute {
 	}
 	
 	public DbAttribute(String name) {
-		setName(name);
+		super(name);
 	}
 
 	public DbAttribute(String name, int type, DbEntity entity) {

@@ -112,7 +112,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 		if (len == 0) {
 			throw new CayenneRuntimeException("Call 'createStatement' first");
 		}
-
+        	
 		DbAttribute[] desc = new DbAttribute[len];
 		columnList.toArray(desc);
 		return desc;
@@ -147,7 +147,7 @@ public class SelectTranslator extends SelectQueryAssembler {
 	/**
 	 * Returns query translated to SQL. This is a main work method of the SelectTranslator.
 	 */
-	public String createSqlString() throws java.lang.Exception {
+	public String createSqlString() throws Exception {
 		forceDistinct = false;
 
 		// build column list
@@ -322,12 +322,12 @@ public class SelectTranslator extends SelectQueryAssembler {
 			int len = attrs.size();
 			for (int i = 0; i < len; i++) {
 				ObjAttribute oa = (ObjAttribute) attrs.get(i);
-				Attribute attr = oa.getDbAttribute();
-				if (attr == null) {
+				Attribute dbAttr = oa.getDbAttribute();
+				if (dbAttr == null) {
 					throw new CayenneRuntimeException(
 						"ObjAttribute has no DbAttribute: " + oa.getName());
 				}
-				columnList.add(attr);
+				columnList.add(dbAttr);
 			}
 
 			// relationship keys

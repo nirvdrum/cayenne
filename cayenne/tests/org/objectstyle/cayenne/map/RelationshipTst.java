@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,57 +52,55 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 
-
 public class RelationshipTst extends CayenneTestCase {
-    protected Relationship rel;
-    
-    public RelationshipTst(String name) {
-        super(name);
-    }
-    
-    public void setUp() throws Exception {
-        // create an anonymous inner Relationship subclass, since Relationship is abstract
-        rel = new Relationship() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
-        };
-    }
-    
-    public void testName() throws Exception {
-        String tstName = "tst_name";
-        rel.setName(tstName);
-        assertEquals(tstName, rel.getName());
-    }
-    
-    
-    public void testSourceEntity() throws Exception {
-        Entity tstEntity = new Entity() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;}
-        };
-        rel.setSourceEntity(tstEntity);
-        assertSame(tstEntity, rel.getSourceEntity());
-    }
-    
-    
-    public void testTargetEntity() throws Exception {
-        Entity tstEntity = new Entity() {
-            public String getNameToDisplay() {return null;} 
-            public String getTypenameToDisplay() {return null;} 
-        };
-        rel.setTargetEntity(tstEntity);
-        assertSame(tstEntity, rel.getTargetEntity());
-    }
-    
-    
-    public void testToMany() throws Exception {
-        rel.setToMany(true);
-        assertTrue(rel.isToMany());
-        rel.setToMany(false);
-        assertTrue(!rel.isToMany());
-    }
+	protected Relationship rel;
+
+	public RelationshipTst(String name) {
+		super(name);
+	}
+
+	public void setUp() throws Exception {
+		// create an anonymous inner Relationship subclass, since Relationship is abstract
+		rel = new Relationship() {
+			public Entity getTargetEntity() {
+				return null;
+			}
+		};
+	}
+
+	public void testName() throws Exception {
+		String tstName = "tst_name";
+		rel.setName(tstName);
+		assertEquals(tstName, rel.getName());
+	}
+
+	public void testSourceEntity() throws Exception {
+		Entity tstEntity = new Entity() {};
+		rel.setSourceEntity(tstEntity);
+		assertSame(tstEntity, rel.getSourceEntity());
+	}
+
+	public void testTargetEntity() throws Exception {
+		Entity tstEntity = new Entity() {};
+		tstEntity.setName("abc");
+		rel.setTargetEntity(tstEntity);
+		assertSame("abc", rel.getTargetEntityName());
+	}
+
+	public void testTargetEntityName() throws Exception {
+		rel.setTargetEntityName("abc");
+		assertSame("abc", rel.getTargetEntityName());
+	}
+
+	public void testToMany() throws Exception {
+		rel.setToMany(true);
+		assertTrue(rel.isToMany());
+		rel.setToMany(false);
+		assertTrue(!rel.isToMany());
+	}
 }

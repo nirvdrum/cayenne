@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.map;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -68,6 +68,24 @@ public class ObjRelationshipTst extends CayenneTestCase {
     
     public void setUp() throws Exception {
         rel = new ObjRelationship();
+    }
+    
+    public void testTargetEntity() throws Exception {
+    	rel.setTargetEntityName("targ");
+    	assertNull(rel.getTargetEntity());
+    	
+    	ObjEntity src = new ObjEntity("src");
+    	src.addRelationship(rel);
+    	assertNull(rel.getTargetEntity());
+    	
+    	DataMap map = new DataMap();
+    	map.addObjEntity(src);
+    	assertNull(rel.getTargetEntity());
+    	
+    	ObjEntity targ = new ObjEntity("targ");
+    	map.addObjEntity(targ);
+    	rel.setTargetEntity(targ);
+    	assertSame(targ, rel.getTargetEntity());
     }
     
     public void testGetReverseRel1() throws Exception {

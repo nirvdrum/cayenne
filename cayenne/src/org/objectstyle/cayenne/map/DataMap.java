@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.map;
 
 import java.util.*;
 
+import org.objectstyle.cayenne.util.CayenneMap;
+
 /**
  * Provides the entry point into the relational and object meta information.
  * In many ways, particularly for the tools responsible for creation of the
@@ -74,14 +76,16 @@ public class DataMap {
 	 */
 	protected ArrayList dependencies = new ArrayList();
 
-	/** ObjEntities representing the data object classes.
-	  * The name of ObjEntity serves as a key. */
-	private SortedMap objEntityMap = new TreeMap();
+	/** 
+	 * ObjEntities representing the data object classes.
+	 * The name of ObjEntity serves as a key. 
+	 */
+	private CayenneMap objEntityMap = new CayenneMap(this);
 
 	/** DbEntities representing metadata for individual database tables.
 	  * The name of DbEntity (which is also a database table
 	  * name) serves as a key. */
-	private SortedMap dbEntityMap = new TreeMap();
+	private CayenneMap dbEntityMap = new CayenneMap(this);
 
 	/** Creates an empty DataMap */
 	public DataMap() {}
@@ -120,32 +124,32 @@ public class DataMap {
 		return Collections.unmodifiableList(dependencies);
 	}
 
-    /**
-     * Returns <code>true</code> if this map
-     * depends on DataMap supplied as a <code>map</code>
-     * parameter. Checks for nested dependencies as well.
-     * For instance if the following dependency exists:
-     * map1 -> map2 -> map3, calling <code>map1.isDependentOn(map3)</code>
-     * will return <code>true</code>.
-     */
+	/**
+	 * Returns <code>true</code> if this map
+	 * depends on DataMap supplied as a <code>map</code>
+	 * parameter. Checks for nested dependencies as well.
+	 * For instance if the following dependency exists:
+	 * map1 -> map2 -> map3, calling <code>map1.isDependentOn(map3)</code>
+	 * will return <code>true</code>.
+	 */
 	public boolean isDependentOn(DataMap map) {
-		if(dependencies.contains(map)) {
+		if (dependencies.contains(map)) {
 			return true;
 		}
-		
-		if(dependencies.size() == 0) {
+
+		if (dependencies.size() == 0) {
 			return false;
 		}
-		
+
 		Iterator it = dependencies.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			// check dependencies recursively
-			DataMap dep = (DataMap)it.next();
-			if(dep.isDependentOn(map)) {
+			DataMap dep = (DataMap) it.next();
+			if (dep.isDependentOn(map)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -214,32 +218,31 @@ public class DataMap {
 		return Collections.unmodifiableSortedMap(dbEntityMap);
 	}
 
-	/** Adds ObjEntity to the list of map entities.
-	  * If there is another entity registered under the same name
-	  * already, does nothing. */
+	/** 
+	 * Adds ObjEntity to the list of map entities.
+	 * If there is another entity registered under the same name,
+	 * throws an IllegalArgumentException.
+	 */
 	public void addObjEntity(ObjEntity objEntity) {
-		String name = objEntity.getName();
-		if (!objEntityMap.containsKey(name)) {
-			objEntityMap.put(name, objEntity);
-		}
+		objEntityMap.put(objEntity.getName(), objEntity);
 	}
 
-	/** Adds DbEntity to the list of map entities.
-	  * If there is another entity registered under the same name
-	  * already, does nothing. */
+	/** 
+	 * Adds DbEntity to the list of map entities.
+	 * If there is another entity registered under the same name,
+	 * throws an IllegalArgumentException.
+	 */
 	public void addDbEntity(DbEntity dbEntity) {
-		String name = dbEntity.getName();
-		if (!dbEntityMap.containsKey(name)) {
-			dbEntityMap.put(name, dbEntity);
-		}
+		dbEntityMap.put(dbEntity.getName(), dbEntity);
 	}
 
 	/** Returns a by copy array of object entities. */
 	public ObjEntity[] getObjEntities() {
 		Collection objEnts = getObjEntityMap().values();
 		ObjEntity[] immutableEnts = null;
-		if (objEnts == null || objEnts.size() == 0)
+		if (objEnts == null || objEnts.size() == 0) {
 			immutableEnts = new ObjEntity[0];
+		}
 		else {
 			immutableEnts = new ObjEntity[objEnts.size()];
 			objEnts.toArray(immutableEnts);
@@ -251,8 +254,9 @@ public class DataMap {
 	public DbEntity[] getDbEntities() {
 		Collection dbEnts = getDbEntityMap().values();
 		DbEntity[] immutableEnts = null;
-		if (dbEnts == null || dbEnts.size() == 0)
+		if (dbEnts == null || dbEnts.size() == 0) {
 			immutableEnts = new DbEntity[0];
+		}
 		else {
 			immutableEnts = new DbEntity[dbEnts.size()];
 			dbEnts.toArray(immutableEnts);
@@ -308,6 +312,9 @@ public class DataMap {
 		return ents;
 	}
 
+    /**
+     * Returns a list of DbEntity names.
+     */
 	public List getDbEntityNames(boolean includeDeps) {
 		ArrayList ents = new ArrayList(dbEntityMap.keySet());
 
@@ -315,7 +322,8 @@ public class DataMap {
 			Iterator it = dependencies.iterator();
 			while (it.hasNext()) {
 				DataMap dep = (DataMap) it.next();
-				// using "false" to avoid problems with circular dependencies
+				// using "false" to avoid problems with circular 
+				// dependencies
 				ents.addAll(dep.getDbEntityNames(false));
 			}
 		}
@@ -403,15 +411,15 @@ public class DataMap {
 	}
 
 	/** "Dirty" remove of the DbEntity from the data map. */
-	public void removeDbEntity(String entity_name) {
-		dbEntityMap.remove(entity_name);
+	public void removeDbEntity(String name) {
+		dbEntityMap.remove(name);
 	}
 
 	/** Clean remove of the DbEntity from the data map.
 	 *  If there are any ObjEntities or ObjRelationship entities
 	 *  referencing given entity, removes them as well. No relationships
 	 *  are re-established. Also, if the ObjEntity is removed, all the
-	 *  ObjRelationship-s referencing it are removed as well.
+	 *  ObjRelationships referencing it are removed as well.
 	 */
 	public void deleteDbEntity(String entity_name) {
 		DbEntity db_entity = getDbEntity(entity_name);

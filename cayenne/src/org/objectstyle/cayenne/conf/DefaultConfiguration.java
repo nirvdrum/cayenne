@@ -114,7 +114,7 @@ public class DefaultConfiguration extends Configuration {
 			if (projectFile != null) {
 				return new FileInputStream(projectFile);
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
             logObj.warn("Error opening project file.", ex);
             throw new ConfigException("Error opening project file.", ex);
 		}
@@ -140,7 +140,7 @@ public class DefaultConfiguration extends Configuration {
 			if (dir != null) {
 				return new FileInputStream(new File(dir, location));
 			}
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
             logObj.warn("Error opening map file.", ex);
             throw new ConfigException("Error opening map file.", ex);
 		}

@@ -82,7 +82,7 @@ public class DisconnectedConfiguration extends DefaultConfiguration {
 	protected DataSourceFactory getOverrideFactory() {
 		try {
 			return new DisconnectedFactory();
-		} catch (Exception ex) {
+		} catch (Throwable ex) {
             logObj.warn("Error initializing factory.", ex);
             throw new ConfigException("Error initializing factory.", ex);
 		}

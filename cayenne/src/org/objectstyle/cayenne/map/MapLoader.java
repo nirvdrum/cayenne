@@ -84,8 +84,7 @@ public class MapLoader extends DefaultHandler {
 	public static final String DB_ENTITY_TAG = "db-entity";
 	public static final String OBJ_ENTITY_TAG = "obj-entity";
 	public static final String DB_ATTRIBUTE_TAG = "db-attribute";
-	public static final String DB_ATTRIBUTE_DERIVED_TAG =
-		"db-attribute-derived";
+	public static final String DB_ATTRIBUTE_DERIVED_TAG = "db-attribute-derived";
 	public static final String DB_ATTRIBUTE_REF_TAG = "db-attribute-ref";
 	public static final String OBJ_ATTRIBUTE_TAG = "obj-attribute";
 	public static final String OBJ_RELATIONSHIP_TAG = "obj-relationship";
@@ -110,8 +109,7 @@ public class MapLoader extends DefaultHandler {
 	private ArrayList dbRelationshipRefs;
 
 	/** Loads the data map from the input source (usually file). */
-	public synchronized DataMap loadDataMap(InputSource src)
-		throws DataMapException {
+	public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
 		return loadDataMap(src, new ArrayList());
 	}
 
@@ -143,7 +141,7 @@ public class MapLoader extends DefaultHandler {
 
 			dataMap = null;
 			throw new DataMapException("Wrong DataMap format.", e);
-			
+
 		} catch (Exception e) {
 			logObj.log(Level.INFO, "Exception.", e);
 			dataMap = null;
@@ -193,8 +191,7 @@ public class MapLoader extends DefaultHandler {
 		} finally {
 			try {
 				in.close();
-			} catch (IOException ioex) {
-			}
+			} catch (IOException ioex) {}
 		}
 
 	}
@@ -205,8 +202,9 @@ public class MapLoader extends DefaultHandler {
 		String q_name,
 		Attributes atts)
 		throws SAXException {
-		if (local_name.equals(DATA_MAP_TAG)) {
-		} else if (local_name.equals(DB_ENTITY_TAG)) {
+		if (local_name
+			.equals(DATA_MAP_TAG)) {} else if (local_name
+			.equals(DB_ENTITY_TAG)) {
 			processStartDbEntity(atts);
 		} else if (local_name.equals(DB_ATTRIBUTE_TAG)) {
 			processStartDbAttribute(atts);
@@ -229,13 +227,11 @@ public class MapLoader extends DefaultHandler {
 		}
 	}
 
-	public void endElement(
-		String namespaceURI,
-		String local_name,
-		String qName)
+	public void endElement(String namespaceURI, String local_name, String qName)
 		throws SAXException {
-		if (local_name.equals(DATA_MAP_TAG)) {
-		} else if (local_name.equals(DB_ENTITY_TAG)) {
+		if (local_name
+			.equals(DATA_MAP_TAG)) {} else if (local_name
+			.equals(DB_ENTITY_TAG)) {
 			processEndDbEntity();
 		} else if (local_name.equals(OBJ_ENTITY_TAG)) {
 			processEndObjEntity();
@@ -306,14 +302,12 @@ public class MapLoader extends DefaultHandler {
 		while (iter.hasNext()) {
 			DbEntity dbe = (DbEntity) iter.next();
 			out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-			if (dbe.getSchema() != null
-				&& dbe.getSchema().trim().length() > 0) {
+			if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
 				out.print(" schema=\"");
 				out.print(dbe.getSchema());
 				out.print('\"');
 			}
-			if (dbe.getCatalog() != null
-				&& dbe.getCatalog().trim().length() > 0) {
+			if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
 				out.print(" catalog=\"");
 				out.print(dbe.getCatalog());
 				out.print('\"');
@@ -330,14 +324,12 @@ public class MapLoader extends DefaultHandler {
 		while (diter.hasNext()) {
 			DerivedDbEntity dbe = (DerivedDbEntity) diter.next();
 			out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-			if (dbe.getSchema() != null
-				&& dbe.getSchema().trim().length() > 0) {
+			if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
 				out.print(" schema=\"");
 				out.print(dbe.getSchema());
 				out.print('\"');
 			}
-			if (dbe.getCatalog() != null
-				&& dbe.getCatalog().trim().length() > 0) {
+			if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
 				out.print(" catalog=\"");
 				out.print(dbe.getCatalog());
 				out.print('\"');
@@ -371,9 +363,7 @@ public class MapLoader extends DefaultHandler {
 
 	}
 
-	private void storeDerivedDbAttribute(
-		PrintWriter out,
-		DerivedDbAttribute attr) {
+	private void storeDerivedDbAttribute(PrintWriter out, DerivedDbAttribute attr) {
 		out.print("\t\t<db-attribute-derived name=\"" + attr.getName() + '\"');
 
 		String type = TypesMapping.getSqlNameByType(attr.getType());
@@ -401,9 +391,7 @@ public class MapLoader extends DefaultHandler {
 			out.print('\"');
 		}
 
-		if (((DerivedDbEntity) attr.getEntity())
-			.getGroupByAttributes()
-			.contains(attr)) {
+		if (((DerivedDbEntity) attr.getEntity()).getGroupByAttributes().contains(attr)) {
 			out.print(" isGroupBy=\"true\"");
 		}
 
@@ -422,8 +410,7 @@ public class MapLoader extends DefaultHandler {
 			Iterator refs = params.iterator();
 			while (refs.hasNext()) {
 				DbAttribute ref = (DbAttribute) refs.next();
-				out.println(
-					"\t\t\t<db-attribute-ref name=\"" + ref.getName() + "\"/>");
+				out.println("\t\t\t<db-attribute-ref name=\"" + ref.getName() + "\"/>");
 			}
 			out.println("\t\t</db-attribute-derived>");
 		} else {
@@ -478,7 +465,7 @@ public class MapLoader extends DefaultHandler {
 			if (temp.isReadOnly()) {
 				out.print("\" readOnly=\"true");
 			}
-			
+
 			out.print('\"');
 
 			if (temp.getDbEntity() != null) {
@@ -525,8 +512,7 @@ public class MapLoader extends DefaultHandler {
 		}
 	}
 
-	private void storeObjRelationships(PrintWriter out)
-		throws DataMapException {
+	private void storeObjRelationships(PrintWriter out) throws DataMapException {
 		Iterator iter = sortedRelationships(objRelationships).iterator();
 		while (iter.hasNext()) {
 			ObjRelationship temp = (ObjRelationship) iter.next();
@@ -540,9 +526,7 @@ public class MapLoader extends DefaultHandler {
 		}
 	}
 
-	private void storeDbRelationshipRef(
-		PrintWriter out,
-		ObjRelationship obj_rel)
+	private void storeDbRelationshipRef(PrintWriter out, ObjRelationship obj_rel)
 		throws DataMapException {
 		Iterator iter = obj_rel.getDbRelationshipList().iterator();
 		while (iter.hasNext()) {
@@ -614,12 +598,7 @@ public class MapLoader extends DefaultHandler {
 
 		if (parentName != null) {
 			dbEntity = new DerivedDbEntity(name);
-
-			// search parent in this data map and all its dependencies
-			DbEntity parent = dataMap.getDbEntity(parentName, true);
-			if (parent != null) {
-				((DerivedDbEntity) dbEntity).setParentEntity(parent);
-			}
+			((DerivedDbEntity) dbEntity).setParentEntityName(parentName);
 		} else {
 			dbEntity = new DbEntity(name);
 		}
@@ -628,10 +607,11 @@ public class MapLoader extends DefaultHandler {
 			dbEntity.setSchema(atts.getValue("", "schema"));
 			dbEntity.setCatalog(atts.getValue("", "catalog"));
 		}
+
+		dataMap.addDbEntity(dbEntity);
 	}
 
-	private void processStartDbAttributeRef(Attributes atts)
-		throws SAXException {
+	private void processStartDbAttributeRef(Attributes atts) throws SAXException {
 		String name = atts.getValue("", "name");
 		if ((attrib instanceof DerivedDbAttribute)
 			&& (dbEntity instanceof DerivedDbEntity)) {
@@ -651,12 +631,8 @@ public class MapLoader extends DefaultHandler {
 		String name = atts.getValue("", "name");
 		String type = atts.getValue("", "type");
 
-		attrib =
-			new DbAttribute(
-				name,
-				TypesMapping.getSqlTypeByName(type),
-				dbEntity);
-
+		attrib = new DbAttribute(name);
+		attrib.setType(TypesMapping.getSqlTypeByName(type));
 		dbEntity.addAttribute(attrib);
 
 		String temp = atts.getValue("", "length");
@@ -677,19 +653,14 @@ public class MapLoader extends DefaultHandler {
 		}
 	}
 
-	private void processStartDerivedDbAttribute(Attributes atts)
-		throws SAXException {
+	private void processStartDerivedDbAttribute(Attributes atts) throws SAXException {
 		String name = atts.getValue("", "name");
 		String type = atts.getValue("", "type");
 		String spec = atts.getValue("", "spec");
 
-		attrib =
-			new DerivedDbAttribute(
-				name,
-				TypesMapping.getSqlTypeByName(type),
-				dbEntity,
-				spec);
-
+		attrib = new DerivedDbAttribute(name);
+		attrib.setType(TypesMapping.getSqlTypeByName(type));
+		((DerivedDbAttribute)attrib).setExpressionSpec(spec);
 		dbEntity.addAttribute(attrib);
 
 		String temp = atts.getValue("", "length");
@@ -711,52 +682,37 @@ public class MapLoader extends DefaultHandler {
 
 		temp = atts.getValue("", "isGroupBy");
 		if (temp != null && temp.equalsIgnoreCase(TRUE)) {
-			if (dbEntity instanceof DerivedDbEntity) {
-				((DerivedDbEntity) dbEntity).addGroupByAttribute(attrib);
-			} else {
-				throw new SAXException(
-					"'isGroupBy' not supported for regular DbEntities. Offending attribute name '"
-						+ name
-						+ "'.");
-			}
+			((DerivedDbAttribute) attrib).setGroupBy(true);
 		}
 	}
 
 	private void processStartObjEntity(Attributes atts) {
 		objEntity = new ObjEntity(atts.getValue("", "name"));
 		objEntity.setClassName(atts.getValue("", "className"));
-		
+
 		String readOnly = atts.getValue("", "readOnly");
 		objEntity.setReadOnly(TRUE.equalsIgnoreCase(readOnly));
-		
+
 		String temp = atts.getValue("", "dbEntityName");
 		if (null != temp) {
 			DbEntity db_temp = dataMap.getDbEntity(temp);
 			objEntity.setDbEntity(db_temp);
 		}
+
+		dataMap.addObjEntity(objEntity);
 	}
 
 	private void processStartObjAttribute(Attributes atts) {
 		String name = atts.getValue("", "name");
 		String type = atts.getValue("", "type");
 
-		ObjAttribute attrib = new ObjAttribute(name, type, objEntity);
-		objEntity.addAttribute(attrib);
-
-		String temp = atts.getValue("", "db-attribute-name");
-		// Navigate to db attribute in the corresponding table
-		if (null != temp) {
-			if (null != objEntity.getDbEntity()) {
-				DbAttribute db_temp =
-					(DbAttribute) objEntity.getDbEntity().getAttribute(temp);
-				attrib.setDbAttribute(db_temp);
-			}
-		}
+		ObjAttribute oa = new ObjAttribute(name);
+		oa.setType(type);
+		objEntity.addAttribute(oa);
+		oa.setDbAttributeName(atts.getValue("", "db-attribute-name"));
 	}
 
-	private void processStartDbRelationship(Attributes atts)
-		throws SAXException {
-
+	private void processStartDbRelationship(Attributes atts) throws SAXException {
 		String temp = atts.getValue("", "source");
 		if (null == temp) {
 			throw new SAXException(
@@ -818,8 +774,7 @@ public class MapLoader extends DefaultHandler {
 		source.addRelationship(dbRelationship);
 	}
 
-	private void processStartDbRelationshipRef(Attributes atts)
-		throws SAXException {
+	private void processStartDbRelationshipRef(Attributes atts) throws SAXException {
 		String source = atts.getValue("", "source");
 		if (null == source) {
 			throw new SAXException(
@@ -850,8 +805,7 @@ public class MapLoader extends DefaultHandler {
 		objRelationship.addDbRelationship(temp);
 	}
 
-	private void processStartDbAttributePair(Attributes atts)
-		throws SAXException {
+	private void processStartDbAttributePair(Attributes atts) throws SAXException {
 		String source = atts.getValue("", "source");
 		if (null == source) {
 			throw new SAXException(
@@ -887,8 +841,7 @@ public class MapLoader extends DefaultHandler {
 		dbRelationship.addJoin(pair);
 	}
 
-	private void processStartObjRelationship(Attributes atts)
-		throws SAXException {
+	private void processStartObjRelationship(Attributes atts) throws SAXException {
 		String temp = atts.getValue("", "source");
 		if (null == temp) {
 			throw new SAXException(
@@ -938,12 +891,10 @@ public class MapLoader extends DefaultHandler {
 	}
 
 	private void processEndDbEntity() {
-		dataMap.addDbEntity(dbEntity);
 		dbEntity = null;
 	}
 
 	private void processEndObjEntity() {
-		dataMap.addObjEntity(objEntity);
 		objEntity = null;
 	}
 
@@ -977,9 +928,7 @@ public class MapLoader extends DefaultHandler {
 			}
 		}
 		if (derived.size() > 1) {
-			Collections.sort(
-				derived,
-				new PropertyComparator("name", DbEntity.class));
+			Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
 		}
 		return derived;
 	}
@@ -994,9 +943,7 @@ public class MapLoader extends DefaultHandler {
 			}
 		}
 		if (derived.size() > 1) {
-			Collections.sort(
-				derived,
-				new PropertyComparator("name", DbEntity.class));
+			Collections.sort(derived, new PropertyComparator("name", DbEntity.class));
 		}
 		return derived;
 	}
@@ -1015,17 +962,13 @@ public class MapLoader extends DefaultHandler {
 
 	protected List sortedRelationships(Entity ent) {
 		ArrayList list = new ArrayList(ent.getRelationshipList());
-		Collections.sort(
-			list,
-			new PropertyComparator("name", Relationship.class));
+		Collections.sort(list, new PropertyComparator("name", Relationship.class));
 		return list;
 	}
 
 	protected List sortedRelationships(List rels) {
 		ArrayList list = new ArrayList(rels);
-		Collections.sort(
-			list,
-			new PropertyComparator("name", Relationship.class));
+		Collections.sort(list, new PropertyComparator("name", Relationship.class));
 		return list;
 	}
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.map;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,65 +52,98 @@ package org.objectstyle.cayenne.map;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne.map;
 
 /** Superclass of metadata relationship classes. */
-public abstract class Relationship {
-    protected String name;
-    protected Entity sourceEntity;
-    protected Entity targetEntity;
-    protected boolean toMany;
+public abstract class Relationship extends MapObject {
+	protected String targetEntityName;
+	protected boolean toMany;
 
-    public Relationship() {}
-    
-    public Relationship(String name) {
-        setName(name);
-    }
+	public Relationship() {}
 
-    /** Returns relationship name. */
-    public String getName() {
-        return name;
-    }
+	public Relationship(String name) {
+		setName(name);
+	}
 
+	/** Returns relationship source entity. */
+	public Entity getSourceEntity() {
+		return (Entity) parent;
+	}
 
-    /** Sets relationship name. */
-    public void setName(String name) {
-        this.name = name;
-    }
+	/** Sets relationship source entity. */
+	public void setSourceEntity(Entity sourceEntity) {
+		setParent(sourceEntity);
+	}
 
+	/** Returns relationship target entity. */
+	public abstract Entity getTargetEntity();
 
-    /** Returns relationship source entity. */
-    public Entity getSourceEntity() {
-        return sourceEntity;
-    }
+	/** 
+	 * Sets relationship target entity. Internally
+	 * calls <code>setTargetEntityName</code>.
+	 */
+	public void setTargetEntity(Entity targetEntity) {
+		if (targetEntity != null) {
+			setTargetEntityName(targetEntity.getName());
+		} else {
+			setTargetEntityName(null);
+		}
+	}
 
+	/** Is relationship from source to target to-one or to-many.
+	  * If one-to-many, getxxx() method of the data object class would return a list. */
+	public boolean isToMany() {
+		return toMany;
+	}
 
-    /** Sets relationship source entity. */
-    public void setSourceEntity(Entity sourceEntity) {
-        this.sourceEntity = sourceEntity;
-    }
+	/** Set relationship multiplicity. */
+	public void setToMany(boolean toMany) {
+		this.toMany = toMany;
+	}
 
-    /** Returns relationship target entity. */
-    public Entity getTargetEntity() {
-        return targetEntity;
-    }
+	/**
+	 * Returns the targetEntityName.
+	 * @return String
+	 */
+	public String getTargetEntityName() {
+		return targetEntityName;
+	}
 
+	/**
+	 * Sets the targetEntityName.
+	 * @param targetEntityName The targetEntityName to set
+	 */
+	public void setTargetEntityName(String targetEntityName) {
+		this.targetEntityName = targetEntityName;
+	}
 
-    /** Sets relationship target entity. */
-    public void setTargetEntity(Entity targetEntity) {
-        this.targetEntity = targetEntity;
-    }
+	public String toString() {
+		StringBuffer sb = new StringBuffer(this.getClass().getName());
+		sb.append(" - relationship name '").append(name);
+		if (toMany) {
+			sb.append("' (to-many)\n");
+		}
+		else {
+			sb.append("' (to-one)\n");
+		}
 
+		sb.append("Source entity: ");
+		Entity src = getSourceEntity();
+		if (src == null) {
+			sb.append("<null>");
+		} else {
+			sb.append(src.getName());
+		}
 
-    /** Is relationship from source to target to-one or to-many.
-      * If one-to-many, getxxx() method of the data object class would return a list. */
-    public boolean isToMany() {
-        return toMany;
-    }
+		sb.append("Target entity: ");
+		Entity target = getTargetEntity();
+		if (target == null)
+			sb.append("<null>");
+		else
+			sb.append(target.getName());
 
-
-    /** Set relationship multiplicity. */
-    public void setToMany(boolean toMany) {
-        this.toMany = toMany;
-    }
+		sb.append("\n------------------\n");
+		return sb.toString();
+	}
 }

@@ -72,7 +72,7 @@ public class ObjAttributeTst extends CayenneTestCase {
     public void testDbAttribute() throws Exception {
         DbAttribute dbAttr = new DbAttribute("tst_name", java.sql.Types.INTEGER, null);
         attr.setDbAttribute(dbAttr);
-        assertSame(dbAttr, attr.getDbAttribute());
+        assertEquals(dbAttr.getName(), attr.getDbAttributeName());
     }
     
     

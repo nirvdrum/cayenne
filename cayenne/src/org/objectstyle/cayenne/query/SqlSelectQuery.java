@@ -53,13 +53,11 @@ package org.objectstyle.cayenne.query;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.ObjAttribute;
-
 
 /** 
  * Allows to send "raw" SQL select statements to the database 
@@ -69,47 +67,51 @@ import org.objectstyle.cayenne.map.ObjAttribute;
  * not portable accross database engines. 
  */
 public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery {
-    protected String sqlString;
-    protected ObjAttribute[] resultDesc;
-    protected int fetchLimit;
-        
-    /** Creates empty SqlSelectQuery. */
-    public SqlSelectQuery() {}
-    
-    
-    /** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
-    public SqlSelectQuery(String objEntityName) {
-        setObjEntityName(objEntityName);
-    }
-    
-    /** Creates SqlSelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
-    public SqlSelectQuery(String objEntityName, String sqlString) {
-        setObjEntityName(objEntityName);
-        setSqlString(sqlString);
-    }
-    
-    public int getQueryType() {
-        return SELECT_QUERY;
-    }
-    
-    public void setSqlString(String sqlString) {
-        this.sqlString = sqlString;
-    }
-    
-    public String getSqlString() {
-        return sqlString;
-    } 
-    
-    /** Sets resultDesc property. This allows to control
-      * Java types and key names in the query result. */
-    public void setResultDesc(ObjAttribute[] resultDesc) {
-        this.resultDesc = resultDesc;
-    }
-    
-    public ObjAttribute[] getResultDesc() {
-        return resultDesc;
-    }
-    
+	protected String sqlString;
+	protected DbAttribute[] resultDescriptors;
+	protected ObjAttribute[] objDescriptors;
+	protected int fetchLimit;
+
+	/** Creates empty SqlSelectQuery. */
+	public SqlSelectQuery() {}
+
+	/** Creates SqlSelectQuery with <code>objEntityName</code> parameter. */
+	public SqlSelectQuery(String objEntityName) {
+		setObjEntityName(objEntityName);
+	}
+
+	/** Creates SqlSelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+	public SqlSelectQuery(String objEntityName, String sqlString) {
+		setObjEntityName(objEntityName);
+		setSqlString(sqlString);
+	}
+
+	public int getQueryType() {
+		return SELECT_QUERY;
+	}
+
+	public void setSqlString(String sqlString) {
+		this.sqlString = sqlString;
+	}
+
+	public String getSqlString() {
+		return sqlString;
+	}
+
+	/**  
+	 * @deprecated use setObjDescriptors
+	 */
+	public void setResultDesc(ObjAttribute[] resultDesc) {
+		setObjDescriptors(resultDesc);
+	}
+
+	/**
+	 * @deprecated use getObjDescriptors.
+	 */
+	public ObjAttribute[] getResultDesc() {
+		return getObjDescriptors();
+	}
+
 	/**
 	 * Returns the fetchLimit.
 	 * @return int
@@ -118,7 +120,6 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
 		return fetchLimit;
 	}
 
-
 	/**
 	 * Sets the fetchLimit.
 	 * @param fetchLimit The fetchLimit to set
@@ -126,9 +127,41 @@ public class SqlSelectQuery extends AbstractQuery implements GenericSelectQuery 
 	public void setFetchLimit(int fetchLimit) {
 		this.fetchLimit = fetchLimit;
 	}
-	
+
 	/** Always returns <code>true</code>. */
 	public boolean isFetchingDataRows() {
 		return true;
+	}
+
+	/**
+	 * Returns the resultDescriptors.
+	 * @return DbAttribute[]
+	 */
+	public DbAttribute[] getResultDescriptors() {
+		return resultDescriptors;
+	}
+
+	/**
+	 * Sets the resultDescriptors.
+	 * @param resultDescriptors The resultDescriptors to set
+	 */
+	public void setResultDescriptors(DbAttribute[] resultDescriptors) {
+		this.resultDescriptors = resultDescriptors;
+	}
+
+	/**
+	 * Returns the objDescriptors.
+	 * @return ObjAttribute[]
+	 */
+	public ObjAttribute[] getObjDescriptors() {
+		return objDescriptors;
+	}
+
+	/**
+	 * Sets the objDescriptors.
+	 * @param objDescriptors The objDescriptors to set
+	 */
+	public void setObjDescriptors(ObjAttribute[] objDescriptors) {
+		this.objDescriptors = objDescriptors;
 	}
 }

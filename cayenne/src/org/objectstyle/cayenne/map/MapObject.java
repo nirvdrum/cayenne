@@ -72,6 +72,10 @@ public abstract class MapObject implements CayenneMapEntry {
 	public MapObject() {
 		super();
 	}
+	
+	public MapObject(String name) {
+		setName(name);
+	}
 
 	/**
 	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getName()

@@ -52,8 +52,8 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
- 
+ */
+
 package org.objectstyle.cayenne.map;
 
 /** 
@@ -62,15 +62,19 @@ package org.objectstyle.cayenne.map;
  * @author Andrei Adamchik
  */
 public abstract class Attribute extends MapObject {
+	public Attribute() {}
+	
+	public Attribute(String name) {
+		super(name);
+	}
 
-    /** Returns the entity that holds this attribute. */
-    public Entity getEntity() {
-        return (Entity)getParent();
-    }
+	/** Returns the entity that holds this attribute. */
+	public Entity getEntity() {
+		return (Entity) getParent();
+	}
 
-
-    /** Sets the entity that holds this attribute. */
-    public void setEntity(Entity entity) {
-        setParent(entity);
-    }
+	/** Sets the entity that holds this attribute. */
+	public void setEntity(Entity entity) {
+		setParent(entity);
+	}
 }

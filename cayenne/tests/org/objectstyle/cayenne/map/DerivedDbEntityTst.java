@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.CayenneTestCase;
  */
 public class DerivedDbEntityTst extends CayenneTestCase {
     protected DerivedDbEntity ent;
+    protected DataMap map;
 
 
     public DerivedDbEntityTst(String name) {
@@ -70,24 +71,29 @@ public class DerivedDbEntityTst extends CayenneTestCase {
 
 
     public void setUp() throws Exception {
-        ent = new DerivedDbEntity();
+        ent = new DerivedDbEntity("abc");
+        map = new DataMap();
+        map.addDbEntity(ent);
     }
 
     public void testParentEntity() throws Exception {
     	assertNull(ent.getParentEntity());
-    	DbEntity parent = new DbEntity();
+    	map.addDbEntity(ent);
+    	DbEntity parent = new DbEntity("xyz");
+    	map.addDbEntity(parent);
+    	
     	ent.setParentEntity(parent);
     	
     	assertSame(parent, ent.getParentEntity());
     }
     
     public void testGroupByAttributes() throws Exception {
-    	DbAttribute at = new DbAttribute();
+    	DerivedDbAttribute at = new DerivedDbAttribute();
     	at.setName("abc");
         ent.addAttribute(at);
     	assertEquals(0, ent.getGroupByAttributes().size());
     	
-    	ent.addGroupByAttribute(at);
+    	at.setGroupBy(true);
     	assertEquals(1, ent.getGroupByAttributes().size());
     }
     
@@ -145,7 +151,9 @@ public class DerivedDbEntityTst extends CayenneTestCase {
     }
     
     protected void assignParent() {
-    	ent.setParentEntity(new DbEntity());
+    	DbEntity parent = new DbEntity("qwerty");
+    	map.addDbEntity(parent);
+    	ent.setParentEntity(parent);
     }
 }
 
