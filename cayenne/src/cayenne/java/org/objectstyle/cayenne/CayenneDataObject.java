@@ -272,7 +272,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * @deprecated Since 1.1 this method is no longer needed, since "readProperty(String)" 
+     * @deprecated Since 1.0.1 this method is no longer needed, since "readProperty(String)" 
      * supports to-one dependent targets.
      */
     public DataObject readToOneDependentTarget(String relName) {
@@ -341,7 +341,7 @@ public class CayenneDataObject implements DataObject {
     }
 
     /**
-     * @deprecated Since 1.1 this method is no longer needed, since 
+     * @deprecated Since 1.0.1 this method is no longer needed, since 
      * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
      * as well.
      */

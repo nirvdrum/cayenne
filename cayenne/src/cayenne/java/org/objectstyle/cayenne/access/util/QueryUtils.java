@@ -216,7 +216,7 @@ public class QueryUtils {
 	}
 
     /**
-     * @deprecated Since 1.1 FlattenedObjectId is deprecated, so this 
+     * @deprecated Since 1.0.1 FlattenedObjectId is deprecated, so this 
      * method is deprecated too.
      */
 	public static SelectQuery selectObjectForFlattenedObjectId(

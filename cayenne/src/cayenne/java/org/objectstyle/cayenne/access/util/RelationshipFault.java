@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * the information from the relationship source object. These cases include dependent to-one 
  * relationships and flattened to-one relationships.
  * 
+ * @since 1.0.1
  * @author Andrei Adamchik
  */
 public class RelationshipFault implements Serializable {

@@ -103,6 +103,9 @@ public interface DataObject extends java.io.Serializable {
     /** Allows Cayenne framework classes to read object property values. */
     public Object readPropertyDirectly(String propName);
     
+	/**
+	 * @deprecated Since 1.0.1 this method is no longer needed.
+	 */
     public DataObject readToOneDependentTarget(String relName);
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse);
@@ -111,6 +114,11 @@ public interface DataObject extends java.io.Serializable {
     
     public void setToOneTarget(String relName, DataObject val, boolean setReverse);
     
+	/**
+	 * @deprecated Since 1.0.1 this method is no longer needed, since 
+	 * "setToOneTarget(String, DataObject, boolean)" supports dependent targets 
+	 * as well.
+	 */
     public void setToOneDependentTarget(String relName, DataObject val);
 
     /** 
