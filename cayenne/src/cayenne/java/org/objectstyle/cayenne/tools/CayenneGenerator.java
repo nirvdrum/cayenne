@@ -215,4 +215,14 @@ public class CayenneGenerator extends Task {
     public void setSuperpkg(String superpkg) {
         generator.setSuperPkg(superpkg);
     }
+    
+    /**
+     * Sets <code>encoding</code> property that allows to generate files using
+     * non-default encoding.
+     * 
+     * @since 1.2
+     */
+    public void setEncoding(String encoding) {
+        generator.setEncoding(encoding);
+    }
 }
