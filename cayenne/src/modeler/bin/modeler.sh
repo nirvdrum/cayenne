@@ -7,7 +7,6 @@
 
 MAIN_CLASS=org.objectstyle.cayenne.modeler.Main
 
-
 # OS specific support.
 cygwin=false
 case "`uname`" in
@@ -17,12 +16,6 @@ esac
 PATH_SEPARATOR=:
 if [ "$cygwin" = "true" ] ; then 
 	PATH_SEPARATOR=";"
-fi
-
-
-if [ "$JAVA_HOME" = "" ] ; then 
-    echo "Please define JAVA_HOME to point to your JSDK installation."
-    exit 1
 fi
 
 # Guess from startup directory
@@ -50,11 +43,15 @@ if [ ! -f $CAYENNE_HOME/bin/modeler.sh ] ; then
     exit 1
 fi
 
-JAVACMD=$JAVA_HOME/bin/java
-if [ ! -f $JAVACMD ] ; then
-	JAVACMD=$JAVA_HOME/jre/bin/java
+# Guess Java location from PATH or from JAVA_HOME
+if [ "$JAVA_HOME" = "" ] ; then 
+	JAVACMD=java
+else
+	JAVACMD=$JAVA_HOME/bin/java
+	if [ ! -f $JAVACMD ] ; then
+		JAVACMD=$JAVA_HOME/jre/bin/java
+	fi
 fi
-
 
 CAYENNE_MODELER_JAR_PATH="${CAYENNE_HOME}/lib/modeler/cayenne-modeler.jar"
 if [ "$cygwin" = "true" ] ; then 
@@ -68,5 +65,5 @@ OPTIONS="-classpath $CAYENNE_CLASSPATH"
 # Mac OS X Specific property - application name
 PROPERTIES="-Dcom.apple.mrj.application.apple.menu.about.name=CayenneModeler"
 
-$JAVACMD $OPTIONS $PROPERTIES $MAIN_CLASS $1 $2 $3 &
-
+# Start the Modeler
+$JAVACMD $OPTIONS $PROPERTIES $MAIN_CLASS $@ &
