@@ -82,16 +82,23 @@ public class DbAttributeTableModel extends CayenneTableModel {
 	private static final int DB_ATTRIBUTE_PRECISION = 5;
 
 	protected DbEntity entity;
-	protected DataMap dataMap;
 
 	public DbAttributeTableModel(
 		DbEntity entity,
 		Mediator mediator,
 		Object eventSource) {
 
-		super(mediator, eventSource, entity.getAttributeList());
+		this(entity, mediator, eventSource, entity.getAttributeList());
 		this.entity = entity;
-		this.dataMap = mediator.getCurrentDataMap();
+	}
+	
+   public DbAttributeTableModel(
+		DbEntity entity,
+		Mediator mediator,
+		Object eventSource,
+		java.util.List objectList) {
+
+		super(mediator, eventSource, objectList);
 	}
 
     public int nameColumnInd() {
@@ -313,5 +320,4 @@ public class DbAttributeTableModel extends CayenneTableModel {
 		}
 		return true;
 	}
-
 }

@@ -59,13 +59,17 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.event.*;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableColumn;
 
 import org.objectstyle.cayenne.gui.*;
-import org.objectstyle.cayenne.map.DerivedDbAttribute;
+import org.objectstyle.cayenne.gui.util.CayenneTable;
+import org.objectstyle.cayenne.gui.util.CayenneTableModel;
+import org.objectstyle.cayenne.map.*;
 
 /**
  * Dialog window that alows selecting DbAttributes 
@@ -76,8 +80,10 @@ import org.objectstyle.cayenne.map.DerivedDbAttribute;
 public class EditDerivedParamsDialog
 	extends CayenneDialog
 	implements ActionListener {
-	protected java.util.List params;
 
+	protected DerivedDbAttribute attr;
+
+	protected JTable table = new CayenneTable();
 	protected JButton add = new JButton("Add");
 	protected JButton remove = new JButton("Remove");
 	protected JButton save = new JButton("Save");
@@ -89,8 +95,7 @@ public class EditDerivedParamsDialog
 	public EditDerivedParamsDialog(DerivedDbAttribute attr) {
 		super(Editor.getFrame(), "Edit Derived Attribute Parameters", true);
 
-		// create a new collection to allow independent modifications
-		params = new ArrayList(attr.getParams());
+		this.attr = attr;
 
 		init();
 		pack();
@@ -101,15 +106,45 @@ public class EditDerivedParamsDialog
 		Container pane = getContentPane();
 		pane.setLayout(new BorderLayout());
 
-		JPanel buttons =
-			PanelFactory.createButtonPanel(
+		buildTable();
+
+		JPanel panel =
+			PanelFactory.createTablePanel(table,
 				new JButton[] { add, remove, save, cancel });
-		pane.add(buttons, BorderLayout.SOUTH);
+		pane.add(panel, BorderLayout.CENTER);
 
 		add.addActionListener(this);
 		remove.addActionListener(this);
 		save.addActionListener(this);
 		cancel.addActionListener(this);
+	}
+
+	protected void buildTable() {
+		DerivedAttributeParamsTableModel model =
+			new DerivedAttributeParamsTableModel(attr, getMediator(), this);
+		table.setModel(model);
+		table.setRowHeight(25);
+		table.setRowMargin(3);
+		TableColumn nameCol =
+			table.getColumnModel().getColumn(model.nameColumnInd());
+		nameCol.setMinWidth(150);
+
+		TableColumn typeCol = table.getColumnModel().getColumn(model.typeColumnInd());
+		typeCol.setMinWidth(90);
+
+        DbEntity parent = ((DerivedDbEntity)attr.getEntity()).getParentEntity();
+        java.util.List attrs = parent.getAttributeList();
+        
+        Object[] names = new Object[attrs.size() + 1];
+        names[0] = "";
+        
+        for(int i = 0; i < attrs.size(); i++) {
+        	names[i + 1] = ((Attribute)attrs.get(i)).getName();
+        }
+        
+		JComboBox comboBox = new JComboBox(names);
+		comboBox.setEditable(false);
+		nameCol.setCellEditor(new DefaultCellEditor(comboBox));
 	}
 
 	/**
@@ -133,11 +168,11 @@ public class EditDerivedParamsDialog
 	}
 
 	protected void addRow() {
-
+		((CayenneTableModel) table.getModel()).addRow(null);
 	}
 
 	protected void save() {
-        hide();
+		hide();
 	}
 
 	protected void cancel() {

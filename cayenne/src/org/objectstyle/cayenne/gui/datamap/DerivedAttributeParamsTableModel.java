@@ -53,93 +53,89 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.gui.action;
+package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.event.Mediator;
 import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /**
  * @author Andrei Adamchik
  */
-public class CreateAttributeAction extends CayenneAction {
-	public static final String ACTION_NAME = "Create Attribute";
+public class DerivedAttributeParamsTableModel extends DbAttributeTableModel {
+	private static final int DB_ATTRIBUTE_NAME = 0;
+	private static final int DB_ATTRIBUTE_TYPE = 1;
+
+	protected DerivedDbAttribute derived;
 
 	/**
-	 * Constructor for CreateAttributeAction.
-	 * @param name
+	 * Constructor for DerivedAttributeParamsTableModel.
 	 */
-	public CreateAttributeAction() {
-		super(ACTION_NAME);
+	public DerivedAttributeParamsTableModel(
+		DerivedDbAttribute derived,
+		Mediator mediator,
+		Object eventSource) {
+
+		super(
+			((DerivedDbEntity) derived.getEntity()).getParentEntity(),
+			mediator,
+			eventSource,
+			new ArrayList(derived.getParams()));
+		this.derived = derived;
 	}
 
-	public String getIconName() {
-		return "images/icon-attribute.gif";
-	}
-
+    public DbEntity getParentEntity() {
+    	return ((DerivedDbEntity) derived.getEntity()).getParentEntity();
+    }
+    
 	/**
-	 * @see org.objectstyle.cayenne.gui.action.CayenneAction#performAction(ActionEvent)
+	 * @see javax.swing.table.TableModel#getColumnCount()
 	 */
-	public void performAction(ActionEvent e) {
-		ObjEntity objEnt = getMediator().getCurrentObjEntity();
-		if (objEnt != null) {
-			createObjAttribute(objEnt);
-		} else {
-			DbEntity dbEnt = getMediator().getCurrentDbEntity();
-			if (dbEnt != null) {
-				createDbAttribute(dbEnt);
-			}
+	public int getColumnCount() {
+		return 2;
+	}
+
+	public String getColumnName(int col) {
+		switch(col) {
+			case DB_ATTRIBUTE_NAME: return "Name";
+			case DB_ATTRIBUTE_TYPE: return "Type";
+			default: return "";
+		}
+	}
+	
+	public Object getValueAt(int row, int column) {
+		DbAttribute attr = getAttribute(row);
+
+		if (attr == null) {
+			return "";
+		}
+
+		switch (column) {
+			case DB_ATTRIBUTE_NAME :
+				return getAttributeName(attr);
+			case DB_ATTRIBUTE_TYPE :
+				return getAttributeType(attr);
+			default :
+				return "";
 		}
 	}
 
-	public void createObjAttribute(ObjEntity objEnt) {
-		Mediator mediator = getMediator();
-
-		ObjAttribute attr =
-			(ObjAttribute) NamedObjectFactory.createObject(
-				ObjAttribute.class,
-				objEnt);
-		objEnt.addAttribute(attr);
-		mediator.fireObjAttributeEvent(
-			new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
-
-		mediator.fireObjAttributeDisplayEvent(
-			new AttributeDisplayEvent(
-				this,
-				attr,
-				objEnt,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain()));
+	public void setValueAt(Object newVal, int row, int col) {
+		if (col == nameColumnInd()) {
+			replaceParameter(row, (String)newVal);
+		}
 	}
 
-	public void createDbAttribute(DbEntity dbEnt) {
-		Class attrClass = null;
-		
-		if(dbEnt instanceof DerivedDbEntity) {
-			if(((DerivedDbEntity)dbEnt).getParentEntity() == null) {
-				return;
-			}
-			attrClass = DerivedDbAttribute.class;
+	/** Replaces parameter at index with the new attribute. */
+	protected void replaceParameter(int ind, String attrName) {
+		if (attrName != null) {
+			objectList.set(ind, getParentEntity().getAttribute(attrName));
+			fireTableDataChanged();
 		}
-		else {
-			attrClass =  DbAttribute.class;
-		}
-		
-		DbAttribute attr =
-			(DbAttribute) NamedObjectFactory.createObject(attrClass, dbEnt);
-		dbEnt.addAttribute(attr);
-		
-		Mediator mediator = getMediator();
-		mediator.fireDbAttributeEvent(
-			new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
-		mediator.fireDbAttributeDisplayEvent(
-			new AttributeDisplayEvent(
-				this,
-				attr,
-				dbEnt,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain()));
+	}
+
+	public boolean isCellEditable(int row, int col) {
+		return col == DB_ATTRIBUTE_NAME;
 	}
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.gui.util;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,20 +53,23 @@ package org.objectstyle.cayenne.gui.util;
  * <http://objectstyle.org/>.
  *
  */ 
-
+package org.objectstyle.cayenne.gui.util;
 
 import java.awt.Component;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.*;
-import javax.swing.text.*;
-import javax.swing.event.*;
+import javax.swing.text.Document;
 
 
 /**  Contains cludge to the JTable. It updates model every time
   *  data is changed in the TextField editor. Also,
   *  If user escapes (presses ESC), returns value in the model
   *  to its original.
+  * 
   *  @author Michael Misha Shengaout
   */
 public class CayenneTable extends JTable

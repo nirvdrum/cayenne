@@ -138,6 +138,10 @@ public abstract class CayenneTableModel extends AbstractTableModel {
 		return objectList;
 	}
 
+    public void addRow(Object row) {
+    	objectList.add(row);
+    	fireTableDataChanged();
+    }
 
 }
 

@@ -79,7 +79,7 @@ public class PanelFactory {
 		for (int i = 0; i < buttons.length; i++) {
 			panel.add(buttons[i]);
 		}
-
+	
 		return panel;
 	}
 
@@ -238,7 +238,7 @@ public class PanelFactory {
 		panel.setLayout(new BorderLayout(5, 5));
 
 		JPanel temp_panel = new JPanel(new BorderLayout());
-		
+
 		// Create table with two columns and no rows.
 		table.getSelectionModel().setSelectionMode(
 			ListSelectionModel.SINGLE_SELECTION);
