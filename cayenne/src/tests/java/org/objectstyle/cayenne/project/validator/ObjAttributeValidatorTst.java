@@ -83,13 +83,13 @@ public class ObjAttributeValidatorTst extends ValidatorTestBase {
         new ObjAttributeValidator().validateObject(
             new ProjectPath(new Object[] { project, d1, m1, oa1.getEntity(), oa1 }),
             validator);
-        assertValidator(ValidationResult.VALID);
+        assertValidator(ValidationInfo.VALID);
 
         oa1.setDbAttribute(null);
         validator.reset();
         new ObjAttributeValidator().validateObject(
             new ProjectPath(new Object[] { project, d1, m1, oa1.getEntity(), oa1 }),
             validator);
-        assertValidator(ValidationResult.WARNING);
+        assertValidator(ValidationInfo.WARNING);
     }
 }

@@ -84,7 +84,7 @@ public class DataNodeValidatorTst extends ValidatorTestBase {
 
         validator.reset();
         new DataNodeValidator().validateObject(new ProjectPath(new Object[] { project, d1, n1 }), validator);
-        assertValidator(ValidationResult.VALID);
+        assertValidator(ValidationInfo.VALID);
 
         // should complain about no location
         DataNode n2 = new DataNode("2");
@@ -94,7 +94,7 @@ public class DataNodeValidatorTst extends ValidatorTestBase {
 
         validator.reset();
         new DataNodeValidator().validateObject(new ProjectPath(new Object[] { project, d1, n2 }), validator);
-        assertValidator(ValidationResult.ERROR);
+        assertValidator(ValidationInfo.ERROR);
 
         // should complain about duplicate name
         DataNode n3 = new DataNode("3");
@@ -105,7 +105,7 @@ public class DataNodeValidatorTst extends ValidatorTestBase {
 
         validator.reset();
         new DataNodeValidator().validateObject(new ProjectPath(new Object[] { project, d1, n3 }), validator);
-        assertValidator(ValidationResult.ERROR);
+        assertValidator(ValidationInfo.ERROR);
     }
 
 }

@@ -53,61 +53,39 @@
  * <http://objectstyle.org/>.
  *
  */
+package org.objectstyle.cayenne.project.validator;
 
-package org.objectstyle.cayenne.modeler.validator;
-
-import javax.swing.JFrame;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationInfo;
+import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
- * DataDomain validation message.
- * 
- * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-public class EntityErrorMsg extends ValidationDisplayHandler {
-    protected DataMap map;
-    protected Entity entity;
+public class ValidationInfoTst extends CayenneTestCase {
 
     /**
-     * Constructor for EntityErrorMsg.
-     * @param result
+     * Constructor for ValidationInfoTst.
+     * @param name
      */
-    public EntityErrorMsg(ValidationInfo result) {
-        super(result);
-        
-        Object[] path = result.getPath().getPath();
-        int len = path.length;
-
-        if (len >= 1) {
-            entity = (Entity) path[len - 1];
-        }
-
-        if (len >= 2) {
-            map = (DataMap) path[len - 2];
-        }
-
-        if (len >= 3) {
-            domain = (DataDomain) path[len - 3];
-        }
+    public ValidationInfoTst(String name) {
+        super(name);
     }
 
-    public void displayField(EventController mediator, JFrame frame) {
-        EntityDisplayEvent event = new EntityDisplayEvent(frame, entity, map, domain);
-        event.setTabReset(true);
+    public void testSeverity() throws Exception {
+        int severity = ValidationInfo.WARNING;
+        ValidationInfo info = new ValidationInfo(severity, null, null);
+        assertEquals(severity, info.getSeverity());
+    }
 
-        if (entity instanceof ObjEntity) {
-            mediator.fireObjEntityDisplayEvent(event);
-        } else if (entity instanceof DbEntity) {
-            mediator.fireDbEntityDisplayEvent(event);
-        }
+    public void testMessage() throws Exception {
+        String message = "abcde";
+        ValidationInfo info = new ValidationInfo(-1, message, null);
+        assertEquals(message, info.getMessage());
+    }
+    
+    public void testPath() throws Exception {
+        ProjectPath path = new ProjectPath(new Object());
+        ValidationInfo info = new ValidationInfo(-1, null, path);
+        assertSame(path, info.getPath());
     }
 }

@@ -84,7 +84,7 @@ import org.objectstyle.cayenne.modeler.CayenneDialog;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 import org.objectstyle.cayenne.project.validator.Validator;
 
 /** 
@@ -141,7 +141,7 @@ public class ValidatorDialog
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
         String msg =
-            (validator.getMaxSeverity() < ValidationResult.ERROR)
+            (validator.getMaxSeverity() < ValidationInfo.ERROR)
                 ? "Saved project with validation warnings."
                 : "Validation errors. Project can not be saved.";
         JLabel label = new JLabel(msg);
@@ -174,7 +174,7 @@ public class ValidatorDialog
     public void valueChanged(ListSelectionEvent e) {
         if (messages.getSelectedRow() >= 0) {
             ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
-            ValidationResult obj = model.getValue(messages.getSelectedRow());
+            ValidationInfo obj = model.getValue(messages.getSelectedRow());
             ValidationDisplayHandler.getErrorMsg(obj).displayField(
                 mediator,
                 super.getParentEditor());
@@ -210,9 +210,9 @@ public class ValidatorDialog
                 return super.getCellRenderer(row, column);
             }
 
-            ValidationResult rowObj =
-                (ValidationResult) validator.validationResults().get(row);
-            return (rowObj.getSeverity() == ValidationResult.ERROR)
+            ValidationInfo rowObj =
+                (ValidationInfo) validator.validationResults().get(row);
+            return (rowObj.getSeverity() == ValidationInfo.ERROR)
                 ? ((column == 0) ? errorRenderer : errorMsgRenderer)
                 : ((column == 0) ? warnRenderer : warnMsgRenderer);
         }
@@ -243,7 +243,7 @@ public class ValidatorDialog
         }
 
         public Object getValueAt(int row, int col) {
-            ValidationResult msg = (ValidationResult) validationObjects.get(row);
+            ValidationInfo msg = (ValidationInfo) validationObjects.get(row);
             if (col == 0) {
                 if (msg.getSeverity() == ValidationDisplayHandler.ERROR)
                     return "ERROR";
@@ -259,8 +259,8 @@ public class ValidatorDialog
             return false;
         }
 
-        public ValidationResult getValue(int row) {
-            return (ValidationResult) validationObjects.get(row);
+        public ValidationInfo getValue(int row) {
+            return (ValidationInfo) validationObjects.get(row);
         }
     }
 

@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
  * DataMap validation message.
@@ -77,10 +77,10 @@ public class DataMapErrorMsg extends ValidationDisplayHandler {
      * Constructor for DataMapErrorMsg.
      * @param result
      */
-    public DataMapErrorMsg(ValidationResult result) {
+    public DataMapErrorMsg(ValidationInfo result) {
         super(result);
 
-        Object[] path = result.getTreeNodePath().getPath();
+        Object[] path = result.getPath().getPath();
         int len = path.length;
 
         if (len >= 1) {

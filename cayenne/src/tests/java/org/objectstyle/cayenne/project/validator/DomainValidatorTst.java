@@ -76,13 +76,13 @@ public class DomainValidatorTst extends ValidatorTestBase {
         validator.reset();
         DataDomain d1 = new DataDomain("abc");
         new DomainValidator().validateObject(new ProjectPath(new Object[] { project, d1 }), validator);
-        assertValidator(ValidationResult.VALID);
+        assertValidator(ValidationInfo.VALID);
 
         // should complain about no name
         DataDomain d2 = new DataDomain();
         validator.reset();
         new DomainValidator().validateObject(new ProjectPath(new Object[] { project, d2 }), validator);
-        assertValidator(ValidationResult.ERROR);
+        assertValidator(ValidationInfo.ERROR);
 
         // should complain about duplicate name
         DataDomain d3 = new DataDomain("xyz");
@@ -91,7 +91,7 @@ public class DomainValidatorTst extends ValidatorTestBase {
         d3.setName(d1.getName());
         validator.reset();
         new DomainValidator().validateObject(new ProjectPath(new Object[] { project, d3 }), validator);
-        assertValidator(ValidationResult.ERROR);
+        assertValidator(ValidationInfo.ERROR);
     }
 
 }

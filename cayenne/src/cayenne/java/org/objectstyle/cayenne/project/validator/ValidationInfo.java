@@ -58,35 +58,35 @@ package org.objectstyle.cayenne.project.validator;
 import org.objectstyle.cayenne.project.ProjectPath;
 
 /**
- * ValidationResult encapsulates information about a single node validation
+ * ValidationInfo encapsulates information about a single node validation
  * on the project tree.
  * 
  * @author Andrei Adamchik
  */
-public class ValidationResult {
+public class ValidationInfo {
     public static final int VALID = 0;
     public static final int WARNING = 1;
     public static final int ERROR = 2;
 
-    protected ProjectPath treeNodePath;
+    protected ProjectPath path;
     protected String message;
     protected int severity;
 
     /**
      * Constructor for ProjectValidationError.
      */
-    public ValidationResult(int severity, String message, ProjectPath treeNodePath) {
+    public ValidationInfo(int severity, String message, ProjectPath treeNodePath) {
         this.severity = severity;
         this.message = message;
-        this.treeNodePath = treeNodePath;
+        this.path = treeNodePath;
     }
 
     public Object getValidatedObject() {
-        return treeNodePath.getObject();
+        return path.getObject();
     }
 
     public Object getValidatedObjectParent() {
-        return treeNodePath.getObjectParent();
+        return path.getObjectParent();
     }
 
     public String toString() {
@@ -110,9 +110,10 @@ public class ValidationResult {
     }
 
     /**
-     * Returns the treeNodePath.
+     * Returns the ProjectPath object identifing a location
+     * described by this ValidationInfo.
      */
-    public ProjectPath getTreeNodePath() {
-        return treeNodePath;
+    public ProjectPath getPath() {
+        return path;
     }
 }

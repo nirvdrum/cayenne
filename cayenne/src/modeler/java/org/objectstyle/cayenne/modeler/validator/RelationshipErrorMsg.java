@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
  * Relationship validation message.
@@ -83,9 +83,9 @@ public class RelationshipErrorMsg extends ValidationDisplayHandler {
      * Constructor for RelationshipErrorMsg.
      * @param result
      */
-    public RelationshipErrorMsg(ValidationResult result) {
+    public RelationshipErrorMsg(ValidationInfo result) {
         super(result);
-        Object[] path = result.getTreeNodePath().getPath();
+        Object[] path = result.getPath().getPath();
         int len = path.length;
 
         if (len >= 1) {

@@ -55,11 +55,17 @@
  */
 package org.objectstyle.cayenne.project;
 
-
-
 /**
  * Immutable holder of a selection path within a Cayenne project.
+ * Mostly used by various tools (CayenneModeler comes to mind) 
+ * to navigate Cayenne projects. Contains a number of convenience methods 
+ * to access path elements. 
  * 
+ * <p>For instance, given a path 
+ * <code>Project -> DataMap -> ObjEntity -> ObjAttribute</code>,
+ * <code>getObject</code> will return ObjAttribute, <code>getObjectParent</code> -
+ * ObjEntity, <code>getRoot</code> - Project.</p>
+ *
  * @author Andrei Adamchik
  */
 public class ProjectPath {
@@ -122,7 +128,18 @@ public class ProjectPath {
     }
 
     /**
-     * Returns selected object - the last object in the path.
+     * Returns the root or starting object of the path.
+     */
+    public Object getRoot() {
+        if (path.length == 0) {
+            return null;
+        }
+
+        return path[0];
+    }
+
+    /**
+     * Returns the last object in the path.
      */
     public Object getObject() {
         if (path.length == 0) {
@@ -146,19 +163,19 @@ public class ProjectPath {
         // return next to last object
         return (path.length > 1) ? path[path.length - 2] : null;
     }
-    
+
     public String toString() {
-    	StringBuffer buf = new StringBuffer();
-    	buf.append("[ProjectPath: ");
-    	for(int i = 0; i < path.length; i++) {
-    		if(i > 0) {
-    			buf.append(", ");
-    		}
-    		
-    		String token = (path[i] != null) ? path[i].getClass().getName() : "<null>";
-    		buf.append(token);
-    	}
-    	buf.append("]");
-    	return buf.toString();
+        StringBuffer buf = new StringBuffer();
+        buf.append("[ProjectPath: ");
+        for (int i = 0; i < path.length; i++) {
+            if (i > 0) {
+                buf.append(", ");
+            }
+
+            String token = (path[i] != null) ? path[i].getClass().getName() : "<null>";
+            buf.append(token);
+        }
+        buf.append("]");
+        return buf.toString();
     }
 }

@@ -98,7 +98,7 @@ public class Validator {
         if (validationResults != null) {
             validationResults = new ArrayList();
         }
-        maxSeverity = ValidationResult.VALID;
+        maxSeverity = ValidationInfo.VALID;
     }
 
     /** 
@@ -116,7 +116,7 @@ public class Validator {
      * Leaves current value unchanged otherwise.
      */
     public void registerValidated(int severity, String message, ProjectPath treeNodePath) {
-        ValidationResult result = new ValidationResult(severity, message, treeNodePath);
+        ValidationInfo result = new ValidationInfo(severity, message, treeNodePath);
         validationResults.add(result);
         if (maxSeverity < severity) {
             maxSeverity = severity;
@@ -124,11 +124,11 @@ public class Validator {
     }
 
     public void registerError(String message, ProjectPath treeNodePath) {
-        registerValidated(ValidationResult.ERROR, message, treeNodePath);
+        registerValidated(ValidationInfo.ERROR, message, treeNodePath);
     }
 
     public void registerWarning(String message, ProjectPath treeNodePath) {
-        registerValidated(ValidationResult.WARNING, message, treeNodePath);
+        registerValidated(ValidationInfo.WARNING, message, treeNodePath);
     }
 
     /** Return collection of ValidationDisplayHandler objects from last validation. */
@@ -139,7 +139,7 @@ public class Validator {
     /** 
      * Validates all project elements.
      * 
-     * @return ValidationResult.VALID if no errors were found, 
+     * @return ValidationInfo.VALID if no errors were found, 
      * or an error code of the error with the highest severity 
      * if there were errors.
      */

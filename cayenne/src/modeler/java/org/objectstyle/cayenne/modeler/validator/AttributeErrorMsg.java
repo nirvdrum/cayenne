@@ -64,7 +64,7 @@ import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
  * Attribute validation message.
@@ -81,10 +81,10 @@ public class AttributeErrorMsg extends ValidationDisplayHandler {
      * Constructor for AttributeErrorMsg.
      * @param result
      */
-    public AttributeErrorMsg(ValidationResult result) {
+    public AttributeErrorMsg(ValidationInfo result) {
         super(result);
 
-        Object[] path = result.getTreeNodePath().getPath();
+        Object[] path = result.getPath().getPath();
         int len = path.length;
 
         if (len >= 1) {

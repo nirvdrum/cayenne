@@ -95,7 +95,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationResult.VALID);
+        assertValidator(ValidationInfo.VALID);
 
         // now remove the name
         oe1.setName(null);
@@ -104,7 +104,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationResult.ERROR);
+        assertValidator(ValidationInfo.ERROR);
     }
 
 	public void testValidateNoClassName() throws Exception {
@@ -117,7 +117,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationResult.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
+        assertValidator(ValidationInfo.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
 		
 	}
 
@@ -137,7 +137,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationResult.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
+        assertValidator(ValidationInfo.WARNING); //WARNING is ok - null class name will give that, but ERROR is bad
         
         //Give one a class name - still valid
         oe1.setClassName("java.class.name");
@@ -145,7 +145,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationResult.VALID); //Must be valid - this class has a name
+        assertValidator(ValidationInfo.VALID); //Must be valid - this class has a name
 
         //Give the other the same class name - no longer valid
         oe2.setClassName("java.class.name");
@@ -153,7 +153,7 @@ public class ObjEntityValidatorTst extends ValidatorTestBase {
         new ObjEntityValidator().validateObject(
             new ProjectPath(new Object[] { project, domain, map, oe1 }),
             validator);
-        assertValidator(ValidationResult.WARNING); // WARNING - it is OK to save multiple entities with the
+        assertValidator(ValidationInfo.WARNING); // WARNING - it is OK to save multiple entities with the
 	}
 
 }

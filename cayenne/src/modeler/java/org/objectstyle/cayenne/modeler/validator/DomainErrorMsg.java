@@ -61,7 +61,7 @@ import javax.swing.JFrame;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DomainDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
  * DataDomain validation message.
@@ -75,10 +75,10 @@ public class DomainErrorMsg extends ValidationDisplayHandler {
      * Constructor for DomainErrorMsg.
      * @param result
      */
-    public DomainErrorMsg(ValidationResult result) {
+    public DomainErrorMsg(ValidationInfo result) {
         super(result);
         
-        Object[] path = result.getTreeNodePath().getPath();
+        Object[] path = result.getPath().getPath();
         int len = path.length;
 
         if (len >= 1) {

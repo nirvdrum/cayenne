@@ -62,7 +62,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.DataNodeDisplayEvent;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
  * DataNode validation message.
@@ -77,9 +77,9 @@ public class DataNodeErrorMsg extends ValidationDisplayHandler {
      * Constructor for DataNodeErrorMsg.
      * @param result
      */
-    public DataNodeErrorMsg(ValidationResult result) {
+    public DataNodeErrorMsg(ValidationInfo result) {
         super(result);
-        Object[] path = result.getTreeNodePath().getPath();
+        Object[] path = result.getPath().getPath();
         int len = path.length;
 
         if (len >= 1) {

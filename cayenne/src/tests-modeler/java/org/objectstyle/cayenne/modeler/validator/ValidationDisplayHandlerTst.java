@@ -61,8 +61,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.modeler.control.EventController;
-import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /**
  * JUnit tests for ValidationDisplayHandler class.
@@ -71,48 +70,57 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  */
 public class ValidationDisplayHandlerTst extends TestCase {
 
-	/**
-	 * Constructor for ErrorMsgTst.
-	 */
-	public ValidationDisplayHandlerTst(String name) {
-		super(name);
-	}
+    /**
+     * Constructor for ErrorMsgTst.
+     */
+    public ValidationDisplayHandlerTst(String name) {
+        super(name);
+    }
 
-	public void testMessage() throws Exception {
-		ValidationDisplayHandler msg = new ConcreteErrorMsg(null, ValidationDisplayHandler.ERROR, null);
+    public void testValidationInfo() throws Exception {
+        ValidationInfo info = new ValidationInfo(-1, "123", null);
+        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
 
-		String message = "abc";
-		assertNull(msg.getMessage());
-		msg.setMessage(message);
-		assertSame(message, msg.getMessage());
-	}
+        assertSame(info, handler.getValidationInfo());
+    }
 
-	public void testSeverity() throws Exception {
-		ValidationDisplayHandler msg = new ConcreteErrorMsg(null, ValidationDisplayHandler.ERROR, null);
+    public void testMessage() throws Exception {
+        String msg = "abc";
+        ValidationInfo info = new ValidationInfo(-1, msg, null);
+        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
 
-		assertEquals(ValidationDisplayHandler.ERROR, msg.getSeverity());
-		msg.setSeverity(ValidationDisplayHandler.NO_ERROR);
-		assertEquals(ValidationDisplayHandler.NO_ERROR, msg.getSeverity());
-	}
+        assertSame(msg, handler.getMessage());
+    }
 
-	public void testDomain() throws Exception {
-		ValidationDisplayHandler msg = new ConcreteErrorMsg(null, ValidationDisplayHandler.ERROR, null);
+    public void testSeverity() throws Exception {
+        ValidationInfo info =
+            new ValidationInfo(ValidationDisplayHandler.ERROR, null, null);
+        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
 
-		DataDomain dom = new DataDomain();
-		assertNull(msg.getDomain());
-		msg.setDomain(dom);
-		assertSame(dom, msg.getDomain());
-	}
+        assertEquals(ValidationDisplayHandler.ERROR, handler.getSeverity());
+    }
 
-	class ConcreteErrorMsg extends ValidationDisplayHandler {
-		public ConcreteErrorMsg(
-			String message,
-			int severity,
-			DataDomain domain) {
-			super(new ValidationResult(severity, message, new ProjectPath(domain)));
-		}
+    public void testDomain() throws Exception {
+        ValidationInfo info =
+            new ValidationInfo(ValidationDisplayHandler.ERROR, null, null);
+        ValidationDisplayHandler handler = new ConcreteErrorMsg(info);
 
-		public void displayField(EventController mediator, JFrame frame) {
-		}
-	}
+        DataDomain dom = new DataDomain();
+        assertNull(handler.getDomain());
+        handler.setDomain(dom);
+        assertSame(dom, handler.getDomain());
+    }
+
+    class ConcreteErrorMsg extends ValidationDisplayHandler {
+
+        /**
+         * Constructor for ConcreteErrorMsg.
+         * @param validation
+         */
+        public ConcreteErrorMsg(ValidationInfo validation) {
+            super(validation);
+        }
+
+        public void displayField(EventController mediator, JFrame frame) {}
+    }
 }

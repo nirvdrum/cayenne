@@ -66,7 +66,8 @@ import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.project.ProjectException;
-import org.objectstyle.cayenne.project.validator.ValidationResult;
+import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.project.validator.ValidationInfo;
 
 /** 
  * Superclass of CayenneModeler validation messages.
@@ -75,15 +76,14 @@ import org.objectstyle.cayenne.project.validator.ValidationResult;
  * @author Andrei Adamchik
  */
 public abstract class ValidationDisplayHandler {
-    public static final int NO_ERROR = ValidationResult.VALID;
-    public static final int WARNING = ValidationResult.WARNING;
-    public static final int ERROR = ValidationResult.ERROR;
+    public static final int NO_ERROR = ValidationInfo.VALID;
+    public static final int WARNING = ValidationInfo.WARNING;
+    public static final int ERROR = ValidationInfo.ERROR;
 
-    protected String message;
-    protected int severity;
+    protected ValidationInfo validationInfo;
     protected DataDomain domain;
-
-    public static ValidationDisplayHandler getErrorMsg(ValidationResult result) {
+    
+    public static ValidationDisplayHandler getErrorMsg(ValidationInfo result) {
         Object validatedObj = result.getValidatedObject();
 
         ValidationDisplayHandler msg = null;
@@ -106,9 +106,8 @@ public abstract class ValidationDisplayHandler {
         return msg;
     }
 
-    public ValidationDisplayHandler(ValidationResult result) {
-        this.message = result.getMessage();
-        this.severity = result.getSeverity();
+    public ValidationDisplayHandler(ValidationInfo validationInfo) {
+    	this.validationInfo = validationInfo;
     }
 
     /** 
@@ -118,20 +117,12 @@ public abstract class ValidationDisplayHandler {
 
     /** Returns the text of the error message. */
     public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+        return validationInfo.getMessage();
     }
 
     /** Returns the severity of the error message.*/
     public int getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(int severity) {
-        this.severity = severity;
+        return validationInfo.getSeverity();
     }
 
     public DataDomain getDomain() {
@@ -144,5 +135,13 @@ public abstract class ValidationDisplayHandler {
 
     public String toString() {
         return getMessage();
+    }
+
+    public ProjectPath getPath() {
+        return validationInfo.getPath();
+    }
+    
+    public ValidationInfo getValidationInfo() {
+        return validationInfo;
     }
 }
