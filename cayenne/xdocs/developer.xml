@@ -10,11 +10,19 @@
         <section name="Developer Guide">
         <p>This section is intended for current and future Cayenne developers. "Developers" in this
         context means people who contribute code to Cayenne. If you simply downloaded Cayenne and want to
-        use it on your Java project, please visit <a href="userguide/index.html">User Guide section</a>.        
+        use it on your Java project, further information is
+        provided in the <a href="userguide/index.html">User Guide section</a>.        
         </p>
         
+        <ul>
+        	<li><a href="#cvs">CVS Access</a></li>
+        	<li><a href="#compile">Compiling Cayenne</a></li>
+        	<li><a href="#unit">Unit Tests</a></li>
+        	<li><a href="#eclipse">Using Eclipse IDE</a></li>
+        </ul>
+        
         <!-- CVS section -->
-        <subsection name="CVS Access">
+        <subsection name="CVS Access" anchor="cvs">
             <p>To get the source code via CVS, follow the instructions on Cayenne
             <a href="http://sourceforge.net/cvs/?group_id=48132">CVS SourceForge page</a>. 
             Module name is <code>cayenne</code>. Also you may find <a href="http://objectstyle.org/developer/cvs.html">
@@ -23,14 +31,14 @@
         </subsection>
         
         <!-- Compile section -->
-        <subsection name="Compiling Cayenne">
+        <subsection name="Compiling Cayenne" anchor="compile">
             <p>To compile Cayenne, run ant (must be version 1.4.1 or higher) on the main buildfile:</p>
             
             <source># cd cayenne
 # ant</source>
 		</subsection>
 		
-		<subsection name="Unit Tests">
+		<subsection name="Unit Tests" anchor="unit">
             <p>Cayenne provides a comprehensive suite of unit tests. To execute
             unit tests do the following:</p>
             
@@ -69,7 +77,7 @@ example2.jdbc.driver = com.xyz.MyDriverClass
 		path with the name of data source used).</p>
 
         </subsection>
-        <subsection name="Using Eclipse IDE">
+        <subsection name="Using Eclipse IDE" anchor="eclipse">
         	<p>Many of the current Cayenne developers use <a href="http://eclipse.org">Eclipse 
         	IDE</a>. This is by no means a requirement. This section simply documents the 
         	process of setting up Eclipse for Cayenne project.

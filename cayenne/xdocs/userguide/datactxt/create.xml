@@ -1,0 +1,19 @@
+<document>
+<title>User Guide - Using DataContext</title>
+<properties>
+      <author>Andrei Adamchik</author>
+</properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/datactxt/index.html</prev>
+	<next>/userguide/datactxt/performquery.html</next>
+</navigator>    
+<body>   	
+    
+    <section name="6. Using DataContext">
+	<subsection name="6.1 Obtaining DataContext">
+	
+	</subsection>
+    </section>
+</body>
+</document>

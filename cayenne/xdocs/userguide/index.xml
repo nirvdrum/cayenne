@@ -48,6 +48,9 @@
             
             <li><a href="datactxt/index.html">6. Using DataContext</a>
             <ul>
+            	<li><a href="datactxt/create.html">6.1 Obtaining DataContext</a></li>
+            	<li><a href="datactxt/performquery.html">6.2 Running Queries</a></li>
+            	<li><a href="datactxt/statemanagement.html">6.3 DataObject State Management</a></li>
             </ul><br/>
             </li>
             

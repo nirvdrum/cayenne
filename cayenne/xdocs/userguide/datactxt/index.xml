@@ -6,9 +6,10 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/appguide/javagen.html</prev>
-	<next>/userguide/fetch/index.html</next>
+	<next>/userguide/datactxt/create.html</next>
 </navigator>    
 <body>   	
+    
     <section name="6. Using DataContext" anchor="cayenne_dc">
 		<p>In a Cayenne application most of the database work is done via a 
 		<a href="../../api/cayenne/org/objectstyle/cayenne/access/DataContext.html">DataContext</a>
