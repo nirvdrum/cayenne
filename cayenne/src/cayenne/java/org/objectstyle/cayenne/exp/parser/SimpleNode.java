@@ -181,11 +181,15 @@ public abstract class SimpleNode extends Expression implements Node {
     }
 
     public void setOperand(int index, Object value) {
-        Node node =
-            (value == null || value instanceof Node)
+        Node node = (value == null || value instanceof Node)
                 ? (Node) value
                 : new ASTScalar(value);
         jjtAddChild(node, index);
+
+        // set the parent, as jjtAddChild doesn't do it...
+        if (node != null) {
+            node.jjtSetParent(this);
+        }
     }
 
     public void jjtOpen() {
