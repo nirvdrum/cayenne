@@ -59,6 +59,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Types;
 
+/**
+ * ExtendedType that allows Java application to use java.util.Date for all three
+ * database date/time types: TIME, DATE, TIMESTAMP.
+ * 
+ * @author Andrei Adamchik
+ */
 public class UtilDateType extends AbstractType {
 
     public String getClassName() {

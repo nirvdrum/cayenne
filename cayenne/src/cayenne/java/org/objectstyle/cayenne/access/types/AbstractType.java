@@ -58,7 +58,9 @@ package org.objectstyle.cayenne.access.types;
 import java.sql.PreparedStatement;
 
 /**
- * Superclass of extended types.
+ * Superclass of concrete ExtendedType implementations.
+ * 
+ * @author Andrei Adamchik
  */
 public abstract class AbstractType implements ExtendedType {
 	

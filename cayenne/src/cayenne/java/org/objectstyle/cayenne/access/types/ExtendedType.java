@@ -59,8 +59,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 /** 
- * Defines methods to read Java objects from JDBC result sets 
- * and write as parameters of PreparedStatements. 
+ * Defines methods to read Java objects from JDBC ResultSets 
+ * and write as parameters of PreparedStatements.
+ * 
+ * @author Andrei Adamchik
  */
 public interface ExtendedType {
     /** Returns a full name of Java class that this converter supports. */

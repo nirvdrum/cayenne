@@ -65,7 +65,12 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.TypesMapping;
 
-/** Handles Java types mapped to JDBC types in JDBC sepcification. */
+/** 
+ * Default implementation of ExtendedType that works exactly per JDBC
+ * specification.
+ * 
+ * @author Andrei Adamchik
+ */
 public class DefaultType extends AbstractType {
     private static Logger logObj = Logger.getLogger(DefaultType.class);
 

@@ -89,7 +89,7 @@ public class CharType extends AbstractType {
         int precision)
         throws Exception {
         	
-        // if this is a CLOB colums, treat it as VARCHAR
+        // if this is a CLOB column, treat it as VARCHAR
         // this would allow to build INSERT statements with many drivers
         if(type == Types.CLOB) {
             type = Types.VARCHAR;
