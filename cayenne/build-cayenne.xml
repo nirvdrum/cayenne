@@ -44,17 +44,7 @@
         <copy todir="${core.dist.src}/.." file="${core.resources}/scripts/build.xml"/>
 	</target>
 
-	<target name="dist-bin" depends="jar-nodeps,jar">
-	    <copy todir="${dist}/bin">
-            <fileset dir="${core.bin}" includes="*.bat,*.sh,*.ico"/>
-        </copy>
-
-        <chmod perm="gu+x">
-            <fileset dir="${dist}/bin">
-                <include name="**/*.sh"/>
-            </fileset>
-        </chmod>
-        
+	<target name="dist-bin" depends="jar-nodeps,jar">        
         <!-- Ant JAR is required for the Ant-specific tests to run. -->
         <copy file="otherlib/ant.jar" todir="${dist}/lib"/>
         
