@@ -155,8 +155,13 @@ public abstract class InteractiveLogin {
     
     
     protected static class GuiLogin extends InteractiveLogin {
+    	private Editor getFrame() {
+    		Editor frame = Editor.getFrame();
+    		return (frame != null) ? frame : new Editor();
+    	}
+    	
         public void collectLoginInfo() {
-            Editor frame = new Editor();
+            Editor frame = getFrame();
             DbLoginPanel loginPanel = new DbLoginPanel(frame);
             loginPanel.setDataSrcInfo(dataSrcInfo);
             frame.pack();
@@ -165,7 +170,6 @@ public abstract class InteractiveLogin {
             loginPanel.show();
             dataSrcInfo = loginPanel.getDataSrcInfo();
             loginPanel.dispose();
-            frame.dispose();
         }
     }
 }
