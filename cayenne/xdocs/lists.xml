@@ -17,7 +17,7 @@
         
     	    <subsection name="cayenne-user">
         	<p><strong>cayenne-user</strong> is a mailing list for Cayenne 
-        	users. It is the primary source of free support for Cayenne.
+        	users. It is the primary source of free Cayenne support.
         	It is also a place for general discussion of Cayenne-related topics. 
         	</p>
         	
@@ -57,10 +57,12 @@
         </subsection>
         
         <subsection name="cayenne-devel">
-        	<p><strong>cayenne-devel</strong> is a mailing list intended for Cayenne 
-        	developers. It is low traffic (0 - 5 messages a day). 
-        	You should subscribe if you are a part of Cayenne development team or if 
-        	you are interested in discussion of Cayenne development topics.
+        	<p><strong>cayenne-devel</strong> is a mailing list where Cayenne design issues
+        	are discussed. This includes current and future features, release schedules, and simply
+        	developer discussion of various Cayenne-related topics. It is a good idea for all
+        	Cayenne commiters to subscribe to this list. 
+        	Others are welcomed to subscribe and
+        	participate if they are interested in the topics discussed here.
         	</p>
         	
         	<p>To <strong>subscribe</strong> send empty email to
