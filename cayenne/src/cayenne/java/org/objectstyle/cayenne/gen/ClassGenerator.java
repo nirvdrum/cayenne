@@ -68,6 +68,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.context.Context;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.util.NameConverter;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
 /** Generates Java class source code using VTL (Velocity template engine) based on
@@ -268,6 +269,19 @@ public class ClassGenerator {
 		char c = Character.toUpperCase(prop.charAt(0));
 		return (prop.length() == 1) ? Character.toString(c) : c + prop.substring(1);
 	}
+    
+    /**
+     * @return a current property name converted to a format used by java 
+     * static final variables - all capitalized with underscores.
+     * 
+     * @since 1.0.3
+     */
+    public String getPropAsConstantName() {
+        if (prop == null || prop.length() == 0)
+            return prop;
+
+        return NameConverter.javaToUnderscored(prop);
+    }
 
 	/** 
 	 * Returns <code>true</code> if a class associated with 

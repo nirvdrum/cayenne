@@ -21,6 +21,23 @@ import java.util.List;
   */
 public class ${classGen.superPrefix}${classGen.className} extends $classGen.superClassName {
 
+## Create property names
+#foreach( $attr in ${classGen.Entity.Attributes} )
+#set( $classGen.Prop = $attr.Name )## let controller know about current property
+    public static final String ${classGen.propAsConstantName}_PROPERTY = "${attr.Name}";
+#end
+#foreach( $rel in ${classGen.Entity.Relationships} )
+#set( $classGen.Prop = $rel.Name )## let controller know about current property
+    public static final String ${classGen.propAsConstantName}_PROPERTY = "${rel.Name}";
+#end
+
+#if( $classGen.Entity.DbEntity )
+#foreach( $idAttr in ${classGen.Entity.DbEntity.PrimaryKey} )
+#set( $classGen.Prop = $idAttr.Name )## let controller know about current property
+    public static final String ${classGen.propAsConstantName}_PK_COLUMN = "${idAttr.Name}";
+#end
+#end
+
 ## Create attribute set/get methods
 #foreach( $attr in ${classGen.Entity.Attributes} )
 #set( $classGen.Prop = $attr.Name )## let controller know about current property

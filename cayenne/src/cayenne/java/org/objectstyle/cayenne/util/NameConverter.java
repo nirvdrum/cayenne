@@ -65,6 +65,35 @@ import java.util.StringTokenizer;
  */
 public class NameConverter {
 
+    /**
+     * Converts a String name to a String forllowing java convention for the 
+     * static final variables. E.g. "abcXyz" will be converted to "ABC_XYZ".
+     * 
+     * @since 1.0.3
+     */
+    public static String javaToUnderscored(String name) {
+        if (name == null) {
+            return null;
+        }
+
+        char charArray[] = name.toCharArray();
+        StringBuffer buffer = new StringBuffer();
+
+        for (int i = 0; i < charArray.length; i++) {
+            if ((Character.isUpperCase(charArray[i])) && (i != 0)) {
+                
+                char prevChar = charArray[i - 1];
+                if ((Character.isLowerCase(prevChar))) {
+                    buffer.append("_");
+                }
+            }
+
+            buffer.append(Character.toUpperCase(charArray[i]));
+        }
+
+        return buffer.toString();
+    }
+
     /** 
      * Converts names like "ABCD_EFG_123" to Java-style names like "abcdEfg123".
      * If <code>capitalize</code> is true, returned name is capitalized
@@ -77,43 +106,39 @@ public class NameConverter {
         boolean first = true;
         while (st.hasMoreTokens()) {
             String token = st.nextToken();
-            
+
             int len = token.length();
             if (len == 0) {
                 continue;
             }
-            
+
             // sniff mixed case vs. single case styles
             boolean hasLowerCase = false;
             boolean hasUpperCase = false;
-            for(int i = 0; i < len && !(hasUpperCase && hasLowerCase); i++) {
-                if(Character.isUpperCase(token.charAt(i))) {
+            for (int i = 0; i < len && !(hasUpperCase && hasLowerCase); i++) {
+                if (Character.isUpperCase(token.charAt(i))) {
                     hasUpperCase = true;
-                }
-                else if(Character.isLowerCase(token.charAt(i))) {
+                } else if (Character.isLowerCase(token.charAt(i))) {
                     hasLowerCase = true;
                 }
             }
-            
+
             // if mixed case, preserve it, if all upper, convert to lower
-            if(hasUpperCase && !hasLowerCase) {
+            if (hasUpperCase && !hasLowerCase) {
                 token = token.toLowerCase();
             }
-            
+
             if (first) {
                 // apply explicit capitalization rules, if this is the first token
                 first = false;
                 if (capitalize) {
                     buf.append(Character.toUpperCase(token.charAt(0)));
-                }
-                else {
+                } else {
                     buf.append(Character.toLowerCase(token.charAt(0)));
                 }
-            }
-            else {
+            } else {
                 buf.append(Character.toUpperCase(token.charAt(0)));
             }
-            
 
             if (len > 1) {
                 buf.append(token.substring(1, len));
