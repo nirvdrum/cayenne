@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<project name="cayenne_performance_sub" default="compile">
+  <property name="src" value="." />
+
+  <path id="classpath">
+    <fileset dir="../otherlib">
+        <include name="**/*.jar"/>
+    </fileset>
+    <pathelement location="${basedir}/../src/build/classes"/>
+    <pathelement location="${basedir}/../tests/build/classes"/>
+  </path>
+    
+  <target name="clean">
+    <delete dir="${build}" />
+  </target>
+  
+  <target name="prepare">
+        <!-- Create the build directory structure used by compile -->
+        <mkdir dir="${build}/classes" />
+  </target>
+  
+  <target name="compile" depends="prepare">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}/classes">
+         <classpath refid="classpath"/>
+    </javac>
+  </target>
+</project>

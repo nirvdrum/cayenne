@@ -41,7 +41,7 @@
      *  4. jar-nodep  - creates "lean" Cayenne JAR file, 
      *  5. jar        - creates full Cayenne JAR file, 
      *                  including all dependencies.
-     *  6. jar-tests  - creates Cayenne unit tests JAR file, 
+     *  6. jar-other  - creates optional Cayenne subproject jars. 
      *  7. clean      - cleans temporary build and distribution 
      *                  directories
      *  8. doc        - builds Cayenne documentation including Javadocs.
@@ -128,7 +128,7 @@
     <!-- It does not include source  code or        -->
     <!-- documentation.                             -->
     <!-- ========================================== -->
-    <target name="dist" depends="prepare,compile_subprojects,jar,jar-tests"
+    <target name="dist" depends="prepare,compile_subprojects,jar,jar-other"
         description="Creates Cayenne development, distribution including all code dependencies.">
         <copy file="otherlib/junit.jar" todir="${dist}/lib"/>
         <copy file="doc/LICENSE" todir="${dist}"/>
@@ -197,11 +197,16 @@
 
 
     <!-- ========================================== -->
-    <!-- Build unit tests JAR file.                 -->
+    <!-- Build optional JAR files.                   -->
     <!-- ========================================== -->
-    <target name="jar-tests" depends="prepare,compile_subprojects">
+    <target name="jar-other" depends="prepare,compile_subprojects">
         <jar jarfile="${dist}/lib/cayenne_tests.jar" manifest="tests/MANIFEST.MF">
             <fileset dir="tests/${build}/classes"/>
+            <metainf dir="doc" includes="LICENSE"/>
+        </jar>
+        
+        <jar jarfile="${dist}/lib/cayenne_perf.jar" manifest="performance/MANIFEST.MF">
+            <fileset dir="performance/${build}/classes"/>
             <metainf dir="doc" includes="LICENSE"/>
         </jar>
     </target>
@@ -214,12 +219,14 @@
         <delete dir="${dist.base}"/>
     </target>
     
+    
     <!-- ========================================== -->
     <!-- Cleans Java build directories.             -->
     <!-- ========================================== -->
     <target name="clean-java">
         <ant dir="src" target="clean"/>
         <ant dir="tests" target="clean"/>
+        <ant dir="performance" target="clean"/>
     </target>
 
 
@@ -294,6 +301,7 @@
     <target name="compile_subprojects">
         <ant dir="src" target="compile"/>
         <ant dir="tests" target="compile"/>
+        <ant dir="performance" target="compile"/>
     </target>
 </project>
 
