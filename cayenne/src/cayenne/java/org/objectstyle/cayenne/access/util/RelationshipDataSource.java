@@ -70,6 +70,7 @@ import org.objectstyle.cayenne.query.SelectQuery;
  * to-many relationships.
  * 
  * @author Andrei Adamchik
+ * @deprecated Since 1.1 this class is not used.
  */
 public class RelationshipDataSource implements ToManyListDataSource, Serializable {
 	private static Logger logObj = Logger.getLogger(RelationshipDataSource.class);

@@ -93,7 +93,6 @@ public class DataObjectSerializationTst extends CayenneTestCase {
         assertTrue(deserialized.getObjectId().isTemporary());
         assertEquals("artist1", deserialized.getArtistName());
 
-
         assertNull(
             "CDO serialized by itself shouldn't have a DataContext: "
                 + deserialized.getDataContext(),
@@ -102,9 +101,11 @@ public class DataObjectSerializationTst extends CayenneTestCase {
         // test that to-many relationships are initialized
         ToManyList paintings = (ToManyList) deserialized.getPaintingArray();
         assertNotNull(paintings);
-        assertNull(paintings.getListDataSource());
+        assertNotNull(paintings.getSource());
+        assertSame(deserialized, paintings.getSource());
+        assertEquals(0, paintings.size());
     }
-    
+
     public void testSerializeNewWithFaults() throws Exception {
         DataContext context = super.createDataContext();
         Artist artist = (Artist) context.createAndRegisterNewObject("Artist");
@@ -116,7 +117,6 @@ public class DataObjectSerializationTst extends CayenneTestCase {
         assertEquals(PersistenceState.NEW, deserialized.getPersistenceState());
         assertTrue(deserialized.getObjectId().isTemporary());
         assertEquals("artist1", deserialized.getArtistName());
-
 
         assertNull(
             "CDO serialized by itself shouldn't have a DataContext: "

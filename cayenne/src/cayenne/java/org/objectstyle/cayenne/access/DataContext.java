@@ -192,8 +192,6 @@ public class DataContext implements QueryEngine, Serializable {
      */
     protected transient String lazyInitParentDomainName;
 
-    protected transient ToManyListDataSource relationshipDataSource;
-
     /**
       * A factory method of DataObjects. Uses Configuration ClassLoader to
       * instantiate a new instance of DataObject of a given class.
@@ -273,7 +271,6 @@ public class DataContext implements QueryEngine, Serializable {
         }
 
         this.objectStore = new ObjectStore(snapshotCache);
-        this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
     }
 
@@ -289,7 +286,6 @@ public class DataContext implements QueryEngine, Serializable {
         setParent(parent);
 
         this.objectStore = new ObjectStore(snapshotCache);
-        this.relationshipDataSource = new RelationshipDataSource(this);
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
         this.usingSharedSnaphsotCache =
             getParentDataDomain() != null
@@ -382,16 +378,17 @@ public class DataContext implements QueryEngine, Serializable {
      * as static methods in DataRowUtils.
      */
     public SnapshotManager getSnapshotManager() {
-        return new SnapshotManager(relationshipDataSource);
+        return new SnapshotManager(new RelationshipDataSource(this));
     }
 
     /**
      * Returns ToManyListDataSource instance that uses this DataContext to populate relationships.
      * 
      * @return ToManyListDataSource instance that uses this DataContext to populate relationships.
+     * @deprecated Since 1.1 ToManyListDataSource is deprecated
      */
     public ToManyListDataSource getRelationshipDataSource() {
-        return this.relationshipDataSource;
+        return new RelationshipDataSource(this);
     }
 
     /**
@@ -1572,9 +1569,6 @@ public class DataContext implements QueryEngine, Serializable {
             DataRowStore cache = (DataRowStore) in.readObject();
             objectStore.setDataRowCache(cache);
         }
-
-        // initialized new relationship datasource
-        this.relationshipDataSource = new RelationshipDataSource(this);
 
         // CayenneDataObjects have a transient datacontext
         // because at deserialize time the datacontext may need to be different

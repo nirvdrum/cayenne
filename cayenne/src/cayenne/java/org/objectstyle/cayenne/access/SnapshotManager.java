@@ -134,11 +134,7 @@ public class SnapshotManager {
                 // rather we need to check if a relationship list exists, if not -
                 // create an empty one.
 
-                ToManyList relList =
-                    new ToManyList(
-                        relDataSource,
-                        anObject.getObjectId(),
-                        rel.getName());
+                ToManyList relList = new ToManyList(anObject, rel.getName());
                 anObject.writePropertyDirectly(rel.getName(), relList);
                 continue;
             }
@@ -148,29 +144,29 @@ public class SnapshotManager {
 
             // handle toOne flattened relationship
             if (rel.isFlattened()) {
-				// A flattened toOne relationship must be a series of
-				 // toOne dbRelationships.  Initialize fault for it, since 
-				 // creating a hollow object won't be right...
-				 anObject.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
-				 continue;
+                // A flattened toOne relationship must be a series of
+                // toOne dbRelationships.  Initialize fault for it, since 
+                // creating a hollow object won't be right...
+                anObject.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
+                continue;
             }
 
-            DbRelationship dbRel =
-                (DbRelationship) rel.getDbRelationships().get(0);
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
 
-			// dependent to one relationship is optional 
-			// use fault, since we do not know whether it is null or not...
-			if (dbRel.isToDependentPK()) {
-				anObject.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
-				continue;
-			}
+            // dependent to one relationship is optional 
+            // use fault, since we do not know whether it is null or not...
+            if (dbRel.isToDependentPK()) {
+                anObject.writePropertyDirectly(rel.getName(), Fault.getToOneFault());
+                continue;
+            }
 
             Map destMap = dbRel.targetPkSnapshotWithSrcSnapshot(snapshot);
             if (destMap == null) {
                 // nullify any old relationship targets
                 anObject.writePropertyDirectly(rel.getName(), null);
                 continue;
-            } else {
+            }
+            else {
                 ObjectId destId = new ObjectId(targetClass, destMap);
                 anObject.writePropertyDirectly(
                     rel.getName(),
@@ -179,7 +175,8 @@ public class SnapshotManager {
         }
         if (isPartialSnapshot) {
             anObject.setPersistenceState(PersistenceState.HOLLOW);
-        } else {
+        }
+        else {
             anObject.setPersistenceState(PersistenceState.COMMITTED);
         }
 
@@ -202,8 +199,7 @@ public class SnapshotManager {
         }
 
         DataContext context = anObject.getDataContext();
-        Map oldSnap =
-            context.getObjectStore().getSnapshot(anObject.getObjectId());
+        Map oldSnap = context.getObjectStore().getSnapshot(anObject.getObjectId());
 
         // attributes
         Map attrMap = entity.getAttributeMap();
@@ -243,14 +239,14 @@ public class SnapshotManager {
 
                 DbRelationship dbRelationship =
                     (DbRelationship) rel.getDbRelationships().get(0);
-                Map destMap =
-                    dbRelationship.targetPkSnapshotWithSrcSnapshot(snapshot);
+                Map destMap = dbRelationship.targetPkSnapshotWithSrcSnapshot(snapshot);
 
                 if (destMap == null) {
                     // nullify any old relationship targets
                     anObject.writePropertyDirectly(rel.getName(), null);
                     continue;
-                } else {
+                }
+                else {
                     ObjectId destId =
                         new ObjectId(
                             ((ObjEntity) rel.getTargetEntity()).getJavaClass(),
@@ -307,8 +303,7 @@ public class SnapshotManager {
 
         DataObject toOneTarget =
             (DataObject) object.readPropertyDirectly(relationship.getName());
-        ObjectId currentId =
-            (toOneTarget != null) ? toOneTarget.getObjectId() : null;
+        ObjectId currentId = (toOneTarget != null) ? toOneTarget.getObjectId() : null;
 
         // check if ObjectId map is a subset of a stored snapshot;
         // this is an equality condition
@@ -326,13 +321,13 @@ public class SnapshotManager {
                 if (storedSnapshot.get(propertyName) != null) {
                     return true;
                 }
-            } else {
+            }
+            else {
                 // for equality to be true, snapshot must contain all matching pk values
                 // note that we must use target entity names to extract id values.
                 if (!Util
                     .nullSafeEquals(
-                        currentId.getValueForAttribute(
-                            join.getTarget().getName()),
+                        currentId.getValueForAttribute(join.getTarget().getName()),
                         storedSnapshot.get(propertyName))) {
                     return true;
                 }
@@ -351,11 +346,7 @@ public class SnapshotManager {
         while (it.hasNext()) {
             ObjRelationship rel = (ObjRelationship) it.next();
             if (rel.isToMany()) {
-                ToManyList relList =
-                    new ToManyList(
-                        relDataSource,
-                        anObject.getObjectId(),
-                        rel.getName());
+                ToManyList relList = new ToManyList(anObject, rel.getName());
                 anObject.writePropertyDirectly(rel.getName(), relList);
             }
         }
@@ -393,8 +384,7 @@ public class SnapshotManager {
                 continue;
             }
 
-            DataObject target =
-                (DataObject) anObject.readPropertyDirectly(relName);
+            DataObject target = (DataObject) anObject.readPropertyDirectly(relName);
             if (target == null) {
                 continue;
             }
@@ -406,8 +396,7 @@ public class SnapshotManager {
                 continue;
             }
 
-            DbRelationship dbRel =
-                (DbRelationship) rel.getDbRelationships().get(0);
+            DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
             Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
             map.putAll(fk);
         }
@@ -452,8 +441,7 @@ public class SnapshotManager {
         }
 
         Class sourceObjectClass = ((DataObject) rootObjects.get(0)).getClass();
-        ObjRelationship reverseRelationship =
-            relationship.getReverseRelationship();
+        ObjRelationship reverseRelationship = relationship.getReverseRelationship();
         //Might be used later on... obtain and cast only once
         DbRelationship dbRelationship =
             (DbRelationship) relationship.getDbRelationships().get(0);
@@ -474,7 +462,8 @@ public class SnapshotManager {
                 sourceObject =
                     (DataObject) thisDestinationObject.readPropertyDirectly(
                         reverseRelationship.getName());
-            } else {
+            }
+            else {
                 //Reverse relationship doesn't exist... match objects manually
                 DataContext context = thisDestinationObject.getDataContext();
                 Map sourcePk =
@@ -482,8 +471,7 @@ public class SnapshotManager {
                         context.getObjectStore().getSnapshot(
                             thisDestinationObject.getObjectId()));
                 sourceObject =
-                    context.registeredObject(
-                        new ObjectId(sourceObjectClass, sourcePk));
+                    context.registeredObject(new ObjectId(sourceObjectClass, sourcePk));
             }
             //Find the list so far for this sourceObject
             List thisList = (List) toManyLists.get(sourceObject);
@@ -499,8 +487,7 @@ public class SnapshotManager {
         while (rootIterator.hasNext()) {
             DataObject thisRoot = (DataObject) rootIterator.next();
             ToManyList toManyList =
-                (ToManyList) thisRoot.readPropertyDirectly(
-                    relationship.getName());
+                (ToManyList) thisRoot.readPropertyDirectly(relationship.getName());
 
             toManyList.setObjectList((List) toManyLists.get(thisRoot));
         }

@@ -305,17 +305,16 @@ public class CayenneDataObject implements DataObject {
             throw new NullPointerException("Can't find relationship: " + relName);
         }
 
-        // if "setReverse" is false, avoid unneeded processing of flattened relationship
         getDataContext().getObjectStore().objectRelationshipSet(
             this,
             value,
             relationship,
             setReverse);
 
-        //Now do the rest of the normal handling (regardless of whether it was
+        // Now do the rest of the normal handling (regardless of whether it was
         // flattened or not)
-        List relList = (List) readProperty(relName);
-        relList.add(value);
+        List list = (List) readProperty(relName);
+        list.add(value);
         if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }

@@ -103,10 +103,7 @@ public abstract class Fault implements Serializable {
          * Resolves this fault to a List of objects.
          */
         public Object resolveFault(DataObject sourceObject, String relationshipName) {
-            return new ToManyList(
-                sourceObject.getDataContext().getRelationshipDataSource(),
-                sourceObject.getObjectId(),
-                relationshipName);
+            return new ToManyList(sourceObject, relationshipName);
         }
     }
 

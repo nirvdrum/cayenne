@@ -52,7 +52,7 @@
  * individuals and hosted on ObjectStyle Group web site.  For more
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
- */ 
+ */
 
 package org.objectstyle.cayenne.access;
 
@@ -63,11 +63,11 @@ package org.objectstyle.cayenne.access;
  * target="_top">Cayenne User Guide.</a></i></p>
  * 
  * @author Andrei Adamchik
+ * @deprecated Not used since 1.1.
  */
 public interface ToManyListDataSource {
-	
+
     /** Performs an update of ToManyList data. */
     public void updateListData(ToManyList list);
-    
-} 
-   
+
+}
