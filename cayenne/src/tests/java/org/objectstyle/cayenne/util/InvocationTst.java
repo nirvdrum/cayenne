@@ -239,7 +239,7 @@ public class InvocationTst extends CayenneTestCase {
 		System.gc();
 		System.gc();
 
-		Assert.assertEquals(false, inv0.fire());
+		Assert.assertFalse(inv0.fire());
 	}
 
 	

@@ -90,12 +90,12 @@ public class OrderingTst extends CayenneTestCase {
 
     public void testCaseInsensitive1() throws Exception {
        Ordering ord=new Ordering("", Ordering.ASC, true);
-       assertEquals(true, ord.isCaseInsensitive());
+       assertTrue(ord.isCaseInsensitive());
     }
 
     public void testCaseInsensitive2() throws Exception {
        Ordering ord=new Ordering("", Ordering.ASC, false);
-       assertEquals(false, ord.isCaseInsensitive());
+       assertFalse(ord.isCaseInsensitive());
     }
     
     
