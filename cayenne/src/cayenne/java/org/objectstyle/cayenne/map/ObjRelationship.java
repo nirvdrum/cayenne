@@ -71,12 +71,13 @@ import org.objectstyle.cayenne.util.Util;
 import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
- * Describes navigational association between two Java classes, represented
- * as source and target ObjEntity. Maps to a path of DbRelationships.
+ * Describes navigational association between two Java classes, represented as source and
+ * target ObjEntity. Maps to a path of DbRelationships.
  * 
  * @author Andrei Adamchik
  */
 public class ObjRelationship extends Relationship implements EventListener {
+
     private static Logger logObj = Logger.getLogger(ObjRelationship.class);
 
     int deleteRule = DeleteRule.NO_ACTION;
@@ -114,8 +115,9 @@ public class ObjRelationship extends Relationship implements EventListener {
     public void encodeAsXML(XMLEncoder encoder) {
         ObjEntity source = (ObjEntity) getSourceEntity();
         if (source == null) {
-            logObj.warn(
-                "No source entity, will not encode ObjRelationship: " + getName());
+            logObj
+                    .warn("No source entity, will not encode ObjRelationship: "
+                            + getName());
             return;
         }
 
@@ -156,8 +158,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns ObjRelationship that is the opposite of this ObjRelationship.
-     * returns null if no such relationship exists.
+     * Returns ObjRelationship that is the opposite of this ObjRelationship. returns null
+     * if no such relationship exists.
      */
     public ObjRelationship getReverseRelationship() {
         // reverse the list
@@ -214,17 +216,14 @@ public class ObjRelationship extends Relationship implements EventListener {
         refreshFromPath(true);
 
         // Adding a second is creating a flattened relationship.
-        // Ensure that the new relationship properly continues 
+        // Ensure that the new relationship properly continues
         // on the flattened path
         int numDbRelationships = dbRelationships.size();
         if (numDbRelationships > 0) {
-            DbRelationship lastRel =
-                (DbRelationship) dbRelationships.get(numDbRelationships - 1);
-            if (!lastRel
-                .getTargetEntityName()
-                .equals(dbRel.getSourceEntity().getName())) {
-                throw new CayenneRuntimeException(
-                    "Error adding db relationship "
+            DbRelationship lastRel = (DbRelationship) dbRelationships
+                    .get(numDbRelationships - 1);
+            if (!lastRel.getTargetEntityName().equals(dbRel.getSourceEntity().getName())) {
+                throw new CayenneRuntimeException("Error adding db relationship "
                         + dbRel
                         + " to ObjRelationship "
                         + this
@@ -235,11 +234,11 @@ public class ObjRelationship extends Relationship implements EventListener {
         }
 
         EventManager.getDefaultManager().addListener(
-            this,
-            "dbRelationshipDidChange",
-            RelationshipEvent.class,
-            DbRelationship.PROPERTY_DID_CHANGE,
-            dbRel);
+                this,
+                "dbRelationshipDidChange",
+                RelationshipEvent.class,
+                DbRelationship.PROPERTY_DID_CHANGE,
+                dbRel);
 
         dbRelationships.add(dbRel);
 
@@ -248,8 +247,7 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Removes the relationship <code>dbRel</code> from the list of
-     * relationships.
+     * Removes the relationship <code>dbRel</code> from the list of relationships.
      */
     public void removeDbRelationship(DbRelationship dbRel) {
         refreshFromPath(true);
@@ -257,9 +255,9 @@ public class ObjRelationship extends Relationship implements EventListener {
         dbRelationships.remove(dbRel);
         //Do not listen any more
         EventManager.getDefaultManager().removeListener(
-            this,
-            DbRelationship.PROPERTY_DID_CHANGE,
-            dbRel);
+                this,
+                DbRelationship.PROPERTY_DID_CHANGE,
+                dbRel);
 
         this.calculateReadOnlyValue();
         this.calculateToManyValue();
@@ -274,8 +272,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns a flag indicating whether modifying a target of such relationship 
-     * in any way will not change the underlying table row of the source.
+     * Returns a flag indicating whether modifying a target of such relationship in any
+     * way will not change the underlying table row of the source.
      * 
      * @since 1.1
      */
@@ -293,8 +291,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns true if the underlying DbRelationships point to a at least one 
-     * of the columns of the target entity.
+     * Returns true if the underlying DbRelationships point to a at least one of the
+     * columns of the target entity.
      * 
      * @since 1.1
      */
@@ -303,12 +301,11 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns true if the relationship is a "flattened" relationship.
-     * A relationship is considered "flattened" if it maps to more than one
-     * DbRelationship. Such chain of DbRelationships is also called "relationship 
-     * path". All flattened relationships are at least readable, but only those 
-     * formed across a many-many join table (with no custom attributes other than 
-     * foreign keys) can be automatically written.
+     * Returns true if the relationship is a "flattened" relationship. A relationship is
+     * considered "flattened" if it maps to more than one DbRelationship. Such chain of
+     * DbRelationships is also called "relationship path". All flattened relationships are
+     * at least readable, but only those formed across a many-many join table (with no
+     * custom attributes other than foreign keys) can be automatically written.
      * 
      * @see #isReadOnly
      * @return flag indicating if the relationship is flattened or not.
@@ -318,8 +315,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns true if the relationship is flattened, but is not of the single
-     * case that can have automatic write support. Otherwise, it returns false.
+     * Returns true if the relationship is flattened, but is not of the single case that
+     * can have automatic write support. Otherwise, it returns false.
      * 
      * @return flag indicating if the relationship is read only or not
      */
@@ -334,9 +331,9 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns the deleteRule. The delete rule is a constant from the
-     * DeleteRule class, and specifies what should happen to the destination
-     * object when the source object is deleted.
+     * Returns the deleteRule. The delete rule is a constant from the DeleteRule class,
+     * and specifies what should happen to the destination object when the source object
+     * is deleted.
      * 
      * @return int a constant from DeleteRule
      * @see #setDeleteRule
@@ -348,18 +345,18 @@ public class ObjRelationship extends Relationship implements EventListener {
     /**
      * Sets the delete rule of the relationship.
      * 
-     * @param value New delete rule. Must be one of the constants defined in DeleteRule class.
+     * @param value New delete rule. Must be one of the constants defined in DeleteRule
+     *            class.
      * @see DeleteRule
      * @throws IllegalArgumentException if the value is not a valid delete rule.
      */
     public void setDeleteRule(int value) {
         if ((value != DeleteRule.CASCADE)
-            && (value != DeleteRule.DENY)
-            && (value != DeleteRule.NULLIFY)
-            && (value != DeleteRule.NO_ACTION)) {
+                && (value != DeleteRule.DENY)
+                && (value != DeleteRule.NULLIFY)
+                && (value != DeleteRule.NO_ACTION)) {
 
-            throw new IllegalArgumentException(
-                "Delete rule value "
+            throw new IllegalArgumentException("Delete rule value "
                     + value
                     + " is not a constant from the DeleteRule class");
         }
@@ -371,7 +368,7 @@ public class ObjRelationship extends Relationship implements EventListener {
         this.calculateToManyValue();
     }
 
-    /** 
+    /**
      * Returns whether this attribute should be used for locking.
      * 
      * @since 1.1
@@ -380,7 +377,7 @@ public class ObjRelationship extends Relationship implements EventListener {
         return usedForLocking;
     }
 
-    /** 
+    /**
      * Sets whether this attribute should be used for locking.
      * 
      * @since 1.1
@@ -429,8 +426,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Returns dot-separated path over DbRelationships, only including
-     * components that have valid DbRelationships.
+     * Returns dot-separated path over DbRelationships, only including components that
+     * have valid DbRelationships.
      */
     String getValidRelationshipPath() {
         String path = getDbRelationshipPath();
@@ -440,14 +437,14 @@ public class ObjRelationship extends Relationship implements EventListener {
 
         ObjEntity entity = (ObjEntity) getSourceEntity();
         if (entity == null) {
-            throw new CayenneRuntimeException("Can't resolve DbRelationships, null source ObjEntity");
+            throw new CayenneRuntimeException(
+                    "Can't resolve DbRelationships, null source ObjEntity");
         }
 
         StringBuffer validPath = new StringBuffer();
 
-        Iterator it = entity.resolvePathComponents(new ASTDbPath(path));
         try {
-
+            Iterator it = entity.resolvePathComponents(new ASTDbPath(path));
             while (it.hasNext()) {
                 DbRelationship relationship = (DbRelationship) it.next();
 
@@ -485,9 +482,9 @@ public class ObjRelationship extends Relationship implements EventListener {
             while (removeIt.hasNext()) {
                 DbRelationship relationship = (DbRelationship) removeIt.next();
                 eventLoop.removeListener(
-                    this,
-                    DbRelationship.PROPERTY_DID_CHANGE,
-                    relationship);
+                        this,
+                        DbRelationship.PROPERTY_DID_CHANGE,
+                        relationship);
 
                 removeIt.remove();
             }
@@ -496,25 +493,25 @@ public class ObjRelationship extends Relationship implements EventListener {
 
                 ObjEntity entity = (ObjEntity) getSourceEntity();
                 if (entity == null) {
-                    throw new CayenneRuntimeException("Can't resolve DbRelationships, null source ObjEntity");
+                    throw new CayenneRuntimeException(
+                            "Can't resolve DbRelationships, null source ObjEntity");
                 }
 
-                // add new relationships from path
-                Iterator it =
-                    entity.resolvePathComponents(new ASTDbPath(this.dbRelationshipPath));
-
                 try {
+                    // add new relationships from path
+                    Iterator it = entity.resolvePathComponents(new ASTDbPath(
+                            this.dbRelationshipPath));
 
                     while (it.hasNext()) {
                         DbRelationship relationship = (DbRelationship) it.next();
 
                         // listen for changes
                         eventLoop.addListener(
-                            this,
-                            "dbRelationshipDidChange",
-                            RelationshipEvent.class,
-                            DbRelationship.PROPERTY_DID_CHANGE,
-                            relationship);
+                                this,
+                                "dbRelationshipDidChange",
+                                RelationshipEvent.class,
+                                DbRelationship.PROPERTY_DID_CHANGE,
+                                relationship);
 
                         dbRelationships.add(relationship);
                     }
@@ -534,8 +531,8 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Recalculates whether a relationship is toMany or toOne, based on the
-     * underlying db relationships.
+     * Recalculates whether a relationship is toMany or toOne, based on the underlying db
+     * relationships.
      */
     final void calculateToManyValue() {
         //If there is a single toMany along the path, then the flattend
@@ -555,8 +552,7 @@ public class ObjRelationship extends Relationship implements EventListener {
     }
 
     /**
-     * Recalculates a new readonly value based on the underlying 
-     * DbRelationships.
+     * Recalculates a new readonly value based on the underlying DbRelationships.
      */
     final void calculateReadOnlyValue() {
         //Quickly filter the single dbrel case
@@ -585,8 +581,7 @@ public class ObjRelationship extends Relationship implements EventListener {
         // intermediate table
         DataMap map = firstRel.getTargetEntity().getDataMap();
         if (map == null) {
-            throw new CayenneRuntimeException(
-                this.getClass().getName()
+            throw new CayenneRuntimeException(this.getClass().getName()
                     + " could not obtain a DataMap for the destination of "
                     + firstRel.getName());
         }
