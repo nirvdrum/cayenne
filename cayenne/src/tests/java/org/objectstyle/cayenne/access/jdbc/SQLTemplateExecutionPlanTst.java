@@ -67,7 +67,7 @@ import org.objectstyle.cayenne.access.DataContextTestBase;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
+import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 /**
  * @author Andrei Adamchik
@@ -96,7 +96,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
 
         Connection c = getConnection();
         try {
-            MockupOperationObserver observer = new MockupOperationObserver();
+            MockOperationObserver observer = new MockOperationObserver();
             plan.execute(c, template, observer);
 
             int[] batches = observer.countsForQuery(template);
@@ -108,7 +108,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
             c.close();
         }
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         SelectQuery query = new SelectQuery(Artist.class);
         getDomain().performQueries(Collections.singletonList(query), observer);
 
@@ -132,7 +132,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
 
         Connection c = getConnection();
         try {
-            MockupOperationObserver observer = new MockupOperationObserver();
+            MockOperationObserver observer = new MockOperationObserver();
             plan.execute(c, template, observer);
 
             int[] batches = observer.countsForQuery(template);
@@ -168,7 +168,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
 
         Connection c = getConnection();
         try {
-            MockupOperationObserver observer = new MockupOperationObserver();
+            MockOperationObserver observer = new MockOperationObserver();
             plan.execute(c, template, observer);
 
             int[] batches = observer.countsForQuery(template);
@@ -181,7 +181,7 @@ public class SQLTemplateExecutionPlanTst extends CayenneTestCase {
             c.close();
         }
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         SelectQuery query = new SelectQuery(Artist.class);
         query.addOrdering("db:ARTIST_ID", true);
         getDomain().performQueries(Collections.singletonList(query), observer);

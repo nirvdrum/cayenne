@@ -64,7 +64,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unit.util.MockupConfiguration;
+import org.objectstyle.cayenne.unit.util.MockConfiguration;
 import org.objectstyle.cayenne.unit.util.ThreadedTestHelper;
 
 import com.mockrunner.mock.web.MockHttpServletRequest;
@@ -178,7 +178,7 @@ public class WebApplicationContextProviderTst extends TestCase {
     protected WebApplicationContextProvider createTestProvider() throws Exception {
         // configure mockup objects for the web listener environment...
 
-        final Configuration config = new MockupConfiguration();
+        final Configuration config = new MockConfiguration();
         config.addDomain(new DataDomain("mockup"));
         return new WebApplicationContextProvider() {
 

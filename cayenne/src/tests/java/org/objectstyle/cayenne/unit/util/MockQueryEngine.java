@@ -56,71 +56,94 @@
 package org.objectstyle.cayenne.unit.util;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.MappingNamespace;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.access.Transaction;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.EntityResolver;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
 
 /**
+ * A query engine used for unit testing. Returns canned results instead of doing the
+ * actual query.
+ * 
  * @author Andrei Adamchik
  */
-public class MockupMappingNamespace implements MappingNamespace {
-    private Map dbEntities = new HashMap();
-    private Map objEntities = new HashMap();
-    private Map queries = new HashMap();
-    private Map procedures = new HashMap();
+public class MockQueryEngine implements QueryEngine {
 
-    public void addDbEntity(DbEntity entity) {
-        dbEntities.put(entity.getName(), entity);
-        entity.setParent(this);
+    // mockup the actual results
+    protected Map results = new HashMap();
+    protected EntityResolver entityResolver;
+    protected int runCount;
+
+    public void reset() {
+        runCount = 0;
+        results.clear();
     }
 
-    public void addObjEntity(ObjEntity entity) {
-        objEntities.put(entity.getName(), entity);
-        entity.setParent(this);
+    public int getRunCount() {
+        return runCount;
     }
 
-    public void addQuery(Query query) {
-        queries.put(query.getName(), query);
+    public void addExpectedResult(Query query, List result) {
+        results.put(query, result);
     }
 
-    public void addProcedure(Procedure procedure) {
-        procedures.put(procedure.getName(), procedure);
+    public void performQueries(
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
+        initWithPresetResults(queries, resultConsumer);
     }
 
-    public DbEntity getDbEntity(String name) {
-        return (DbEntity) dbEntities.get(name);
+    public void performQueries(Collection queries, OperationObserver resultConsumer) {
+        initWithPresetResults(queries, resultConsumer);
     }
 
-    public ObjEntity getObjEntity(String name) {
-        return (ObjEntity) objEntities.get(name);
+    private void initWithPresetResults(
+            Collection queries,
+            OperationObserver resultConsumer) {
+
+        runCount++;
+
+        // stick preset results to the consumer
+        Iterator it = queries.iterator();
+        while (it.hasNext()) {
+            Query query = (Query) it.next();
+            resultConsumer.nextDataRows(query, (List) results.get(query));
+        }
     }
 
-    public Procedure getProcedure(String name) {
-        return (Procedure) procedures.get(name);
+    public void performQuery(Query query, OperationObserver resultConsumer) {
     }
 
-    public Query getQuery(String name) {
-        return (Query) queries.get(name);
+    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+        return null;
     }
 
-    public Collection getDbEntities() {
-        return dbEntities.values();
+    public DataNode lookupDataNode(DataMap dataMap) {
+        return null;
     }
 
-    public Collection getObjEntities() {
-        return objEntities.values();
+    public EntityResolver getEntityResolver() {
+        return entityResolver;
     }
 
-    public Collection getProcedures() {
-        return procedures.values();
+    public void setEntityResolver(EntityResolver resolver) {
+        this.entityResolver = resolver;
     }
 
-    public Collection getQueries() {
-        return queries.values();
+    public Collection getDataMaps() {
+        return (entityResolver != null)
+                ? entityResolver.getDataMaps()
+                : Collections.EMPTY_LIST;
     }
 }

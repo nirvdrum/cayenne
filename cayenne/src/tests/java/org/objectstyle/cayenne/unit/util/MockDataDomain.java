@@ -53,102 +53,45 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+
 package org.objectstyle.cayenne.unit.util;
 
-import java.util.Map;
+import java.util.Collection;
 
-import org.objectstyle.cayenne.DataObject;
-import org.objectstyle.cayenne.ObjectId;
-import org.objectstyle.cayenne.access.DataContext;
-import org.objectstyle.cayenne.validation.ValidationResult;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.OperationObserver;
+import org.objectstyle.cayenne.access.QueryEngine;
+import org.objectstyle.cayenne.access.Transaction;
 
 /**
+ * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
+ * there should be no need to use MockupDataDomain for testing, since MockupQueryEngine
+ * should safice. Unfortunately DataContext currently assumes that its parent QueryEngine
+ * is a DataDomain...
+ * 
  * @author Andrei Adamchik
  */
-public class MockupDataObject implements DataObject {
+public class MockDataDomain extends DataDomain {
 
-    public DataContext getDataContext() {
-        return null;
+    protected QueryEngine engine;
+
+    public MockDataDomain(QueryEngine engine) {
+        this("test", engine);
     }
 
-    public void setDataContext(DataContext ctxt) {
+    public MockDataDomain(String name, QueryEngine engine) {
+        super(name);
+        this.engine = engine;
+        this.entityResolver = engine.getEntityResolver();
     }
 
-    public ObjectId getObjectId() {
-        return null;
-    }
-
-    public void setObjectId(ObjectId objectId) {
-    }
-
-    public int getPersistenceState() {
-        return 0;
-    }
-
-    public void setPersistenceState(int newState) {
-    }
-
-    public void writePropertyDirectly(String propertyName, Object val) {
-    }
-
-    public Object readPropertyDirectly(String propertyName) {
-        return null;
-    }
-
-    public Object readNestedProperty(String path) {
-        return null;
-    }
-
-    public Object readProperty(String propName) {
-        return null;
-    }
-
-    public void writeProperty(String propName, Object val) {
-    }
-
-    public DataObject readToOneDependentTarget(String relName) {
-        return null;
-    }
-
-    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
-    }
-
-    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
-    }
-
-    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
-    }
-
-    public void setToOneDependentTarget(String relName, DataObject val) {
-    }
-
-    public Map getCommittedSnapshot() {
-        return null;
-    }
-
-    public Map getCurrentSnapshot() {
-        return null;
-    }
-
-    public void fetchFinished() {
-    }
-
-    public long getSnapshotVersion() {
-        return 0;
-    }
-
-    public void setSnapshotVersion(long snapshotVersion) {
-    }
-
-    public void resolveFault() {
-    }
-
-    public void validateForInsert(ValidationResult validationResult) {
-    }
-
-    public void validateForUpdate(ValidationResult validationResult) {
-    }
-
-    public void validateForDelete(ValidationResult validationResult) {
+    /**
+     * Delegates query to the internal engine.
+     */
+    public void performQueries(
+            Collection queries,
+            OperationObserver resultConsumer,
+            Transaction transaction) {
+        engine.performQueries(queries, resultConsumer, transaction);
     }
 }

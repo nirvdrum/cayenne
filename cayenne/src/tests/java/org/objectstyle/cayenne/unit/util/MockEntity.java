@@ -55,45 +55,36 @@
  */
 package org.objectstyle.cayenne.unit.util;
 
-import java.io.InputStream;
+import java.util.Iterator;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.util.ResourceLocator;
+import org.objectstyle.cayenne.exp.Expression;
+import org.objectstyle.cayenne.exp.ExpressionException;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockupConfiguration extends Configuration {
+public class MockEntity extends Entity {
 
-    public MockupConfiguration() {
-        super();
+    /**
+     * @deprecated Unused since 1.1
+     */
+    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
     }
 
-    public boolean canInitialize() {
-        return true;
-    }
-
-    public void didInitialize() {
-    }
-
-    protected InputStream getDomainConfiguration() {
-        throw new NotImplementedException(
-                "this is an in-memory mockup...'getDomainConfiguration' is not implemented.");
-    }
-
-    protected InputStream getMapConfiguration(String name) {
+    public Expression translateToRelatedEntity(
+            Expression expression,
+            String relationshipPath) {
         return null;
     }
 
-    protected ResourceLocator getResourceLocator() {
+    public Iterator resolvePathComponents(Expression pathExp) throws ExpressionException {
         return null;
     }
 
-    protected InputStream getViewConfiguration(String location) {
-        return null;
+    public void encodeAsXML(XMLEncoder encoder) {
     }
 
-    public void initialize() throws Exception {
-    }
 }

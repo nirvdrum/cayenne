@@ -62,7 +62,7 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.unit.util.MockupConfiguration;
+import org.objectstyle.cayenne.unit.util.MockConfiguration;
 
 import com.mockrunner.mock.web.MockHttpSession;
 
@@ -90,7 +90,7 @@ public class WebApplicationListenerTst extends TestCase {
     protected WebApplicationListener createTestListener() throws Exception {
         // configure mockup objects for the web listener environment...
 
-        final Configuration config = new MockupConfiguration();
+        final Configuration config = new MockConfiguration();
         config.addDomain(new DataDomain("mockup"));
         return new WebApplicationListener() {
 

@@ -64,6 +64,7 @@ import java.util.Map;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.DataContext;
 import org.objectstyle.cayenne.access.ToManyList;
 import org.objectstyle.cayenne.exp.parser.ASTDbPath;
@@ -80,13 +81,13 @@ import org.objectstyle.cayenne.query.SelectQuery;
 public class PrefetchHelper {
 
     /**
-     * Resolves a toOne relationship for a list of objects.
-     * (performance tuning only)
+     * Resolves a toOne relationship for a list of objects. (performance tuning only)
      */
     public static void resolveToOneRelations(
-        DataContext context,
-        List objects,
-        String relName) {
+            DataContext context,
+            List objects,
+            String relName) {
+        
         int nobjects = objects.size();
         if (nobjects == 0)
             return;
@@ -95,33 +96,34 @@ public class PrefetchHelper {
 
         for (int i = 0; i < nobjects; i++) {
             DataObject sourceObject = (DataObject) objects.get(i);
-            DataObject targetObject =
-                (DataObject) sourceObject.readPropertyDirectly(relName);
+            DataObject targetObject = (DataObject) sourceObject.readProperty(relName);
 
-            ObjectId oid = targetObject.getObjectId();
-            oids.add(oid);
+            if (targetObject.getPersistenceState() == PersistenceState.HOLLOW) {
+                ObjectId oid = targetObject.getObjectId();
+                oids.add(oid);
+            }
         }
         // this maybe suboptimal, cause it uses an OR .. OR .. OR .. expression
-        // instead of IN (..) - to be compatble with compound keys - 
+        // instead of IN (..) - to be compatble with compound keys -
         // however, it seems to be quite fast as well
         SelectQuery sel = QueryUtils.selectQueryForIds(oids);
         context.performQuery(sel);
     }
 
     /**
-     * Resolves a toMany relation for a list of objects.
-     * (performance tuning only)
-     * 
-     * <p>WARNING: this is a bit of a hack - it works for my
-     * toMany's, but it possibly doesn't work in all cases.</p>
-     * 
-     * 
-     * <p>*** It definitly does not work for compound keys ***</p>
+     * Resolves a toMany relation for a list of objects. (performance tuning only)
+     * <p>
+     * WARNING: this is a bit of a hack - it works for my toMany's, but it possibly
+     * doesn't work in all cases.
+     * </p>
+     * <p>
+     * *** It definitly does not work for compound keys ***
+     * </p>
      */
     public static void resolveToManyRelations(
-        DataContext context,
-        List objects,
-        String relName) {
+            DataContext context,
+            List objects,
+            String relName) {
 
         int nobjects = objects.size();
         if (nobjects == 0)
@@ -139,15 +141,16 @@ public class PrefetchHelper {
             if (dbKey == null) {
                 Map id = oid.getIdSnapshot();
                 if (id.size() != 1) {
-                    throw new CayenneRuntimeException("resolveToManyRelations expects single keys for now...");
+                    throw new CayenneRuntimeException(
+                            "resolveToManyRelations expects single keys for now...");
                 }
                 dbKey = (String) id.keySet().iterator().next();
             }
             listMap.put(oid.getValueForAttribute(dbKey), new ArrayList());
         }
 
-        ObjEntity ent =
-            context.getEntityResolver().lookupObjEntity((DataObject) objects.get(0));
+        ObjEntity ent = context.getEntityResolver().lookupObjEntity(
+                (DataObject) objects.get(0));
         ObjRelationship rel = (ObjRelationship) ent.getRelationship(relName);
         ObjEntity destEnt = (ObjEntity) rel.getTargetEntity();
 
@@ -155,8 +158,9 @@ public class PrefetchHelper {
 
         // sanity check
         if (dbRels == null || dbRels.size() == 0) {
-            throw new CayenneRuntimeException(
-                "ObjRelationship '" + rel.getName() + "' is unmapped.");
+            throw new CayenneRuntimeException("ObjRelationship '"
+                    + rel.getName()
+                    + "' is unmapped.");
         }
 
         // build a reverse DB path
@@ -173,8 +177,7 @@ public class PrefetchHelper {
 
             // another sanity check
             if (reverse == null) {
-                throw new CayenneRuntimeException(
-                    "DbRelatitionship '"
+                throw new CayenneRuntimeException("DbRelatitionship '"
                         + dbRel.getName()
                         + "' has no reverse relationship");
             }

@@ -61,8 +61,8 @@ import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupDataDomain;
-import org.objectstyle.cayenne.unit.util.MockupQueryEngine;
+import org.objectstyle.cayenne.unit.util.MockDataDomain;
+import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
@@ -131,9 +131,9 @@ public class ObjectStoreValidationTst extends CayenneTestCase {
     }
 
     private DataContext createMockupDataContext(ObjectStore objectStore) {
-        MockupQueryEngine qe = new MockupQueryEngine();
+        MockQueryEngine qe = new MockQueryEngine();
         qe.setEntityResolver(getDomain().getEntityResolver());
-        MockupDataDomain dd = new MockupDataDomain(qe);
+        MockDataDomain dd = new MockDataDomain(qe);
         return new DataContext(dd, objectStore);
     }
 

@@ -85,16 +85,16 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Ordering;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
-import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
+import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 public class DataContextTst extends DataContextTestBase {
 
-    protected MockupOperationObserver opObserver;
+    protected MockOperationObserver opObserver;
 
     protected void setUp() throws Exception {
         super.setUp();
 
-        opObserver = new MockupOperationObserver();
+        opObserver = new MockOperationObserver();
     }
 
     public void testLocalObjects() throws Exception {

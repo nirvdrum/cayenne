@@ -53,33 +53,56 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.query;
+package org.objectstyle.cayenne.unit.util;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockOperationObserver;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.query.Query;
 
-public abstract class SelectQueryBase extends CayenneTestCase {
+/** 
+ * Helper class to process test queries results. 
+ */
+public class MockOperationObserver extends DefaultOperationObserver {
 
-    protected SelectQuery query;
-    protected MockOperationObserver opObserver;
+    protected Map resultRows = new HashMap();
+    protected Map resultCounts = new HashMap();
+    protected Map resultBatch = new HashMap();
 
-    protected void setUp() throws Exception {
-        deleteTestData();
-        populateTables();
-        query = new SelectQuery();
-        opObserver = new MockOperationObserver();
+    public List rowsForQuery(Query q) {
+        return (List) resultRows.get(q);
     }
 
-    protected void performQuery() throws Exception {
-        // run query
-        getDomain().performQueries(Collections.singletonList(getQuery()), opObserver);
+    public int countForQuery(Query q) {
+        Integer count = (Integer) resultCounts.get(q);
+        return (count != null) ? count.intValue() : -1;
     }
 
-    protected Query getQuery() {
-        return query;
+    public int[] countsForQuery(Query q) {
+        return (int[]) resultBatch.get(q);
     }
 
-    protected abstract void populateTables() throws java.lang.Exception;
+    public void nextCount(Query query, int resultCount) {
+        resultCounts.put(query, new Integer(resultCount));
+    }
+
+    public void nextDataRows(Query query, List dataRows) {
+        resultRows.put(query, dataRows);
+    }
+
+    public void nextBatchCount(Query query, int[] resultCount) {
+        resultBatch.put(query, resultCount);
+    }
+
+    public void nextGlobalException(Exception ex) {
+        throw new CayenneRuntimeException(ex);
+    }
+
+    public void nextQueryException(Query query, Exception ex) {
+        throw new CayenneRuntimeException(ex);
+    }
+
 }

@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,45 +53,56 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.access.util;
 
-package org.objectstyle.cayenne.unit.util;
+import java.util.Iterator;
+import java.util.List;
 
-import java.util.Collection;
-
-import org.objectstyle.cayenne.access.DataDomain;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.access.Transaction;
+import org.objectstyle.art.Artist;
+import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.Fault;
+import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.access.DataContextTestBase;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unit.CayenneTestCase;
 
 /**
- * A mockup DataDomain that delegates all queries to the underlying QueryEngine. Ideally
- * there should be no need to use MockupDataDomain for testing, since MockupQueryEngine
- * should safice. Unfortunately DataContext currently assumes that its parent QueryEngine
- * is a DataDomain...
- * 
  * @author Andrei Adamchik
  */
-public class MockupDataDomain extends DataDomain {
+public class PrefetchHelperTst extends CayenneTestCase {
 
-    protected QueryEngine engine;
+    protected void setUp() throws Exception {
+        super.setUp();
 
-    public MockupDataDomain(QueryEngine engine) {
-        this("test", engine);
+        deleteTestData();
     }
 
-    public MockupDataDomain(String name, QueryEngine engine) {
-        super(name);
-        this.engine = engine;
-        this.entityResolver = engine.getEntityResolver();
-    }
+    public void testResolveToOneRelations() throws Exception {
+        getAccessStack().createTestData(DataContextTestBase.class, "testArtists");
+        getAccessStack().createTestData(DataContextTestBase.class, "testPaintings");
 
-    /**
-     * Delegates query to the internal engine.
-     */
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
-        engine.performQueries(queries, resultConsumer, transaction);
+        DataContext context = createDataContext();
+        List paintings = context.performQuery(new SelectQuery(Painting.class));
+
+        // assert that artists are still faults...
+        Iterator it = paintings.iterator();
+        assertTrue(it.hasNext());
+        while (it.hasNext()) {
+            Painting p = (Painting) it.next();
+            assertTrue(p.readPropertyDirectly("toArtist") instanceof Fault);
+        }
+
+        PrefetchHelper.resolveToOneRelations(context, paintings, "toArtist");
+
+        // assert that artists are fully resolved
+        it = paintings.iterator();
+        while (it.hasNext()) {
+            Painting p = (Painting) it.next();
+            Object o = p.readPropertyDirectly("toArtist");
+            assertTrue(o instanceof Artist);
+            Artist artist = (Artist) o;
+            assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+        }
     }
 }

@@ -55,36 +55,100 @@
  */
 package org.objectstyle.cayenne.unit.util;
 
-import java.util.Iterator;
+import java.util.Map;
 
-import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.exp.ExpressionException;
-import org.objectstyle.cayenne.map.Entity;
-import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.DataContext;
+import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockupEntity extends Entity {
+public class MockDataObject implements DataObject {
 
-    /**
-     * @deprecated Unused since 1.1
-     */
-    protected void validateQueryRoot(Query query) throws IllegalArgumentException {
-    }
-
-    public Expression translateToRelatedEntity(
-            Expression expression,
-            String relationshipPath) {
+    public DataContext getDataContext() {
         return null;
     }
 
-    public Iterator resolvePathComponents(Expression pathExp) throws ExpressionException {
+    public void setDataContext(DataContext ctxt) {
+    }
+
+    public ObjectId getObjectId() {
         return null;
     }
 
-    public void encodeAsXML(XMLEncoder encoder) {
+    public void setObjectId(ObjectId objectId) {
     }
 
+    public int getPersistenceState() {
+        return 0;
+    }
+
+    public void setPersistenceState(int newState) {
+    }
+
+    public void writePropertyDirectly(String propertyName, Object val) {
+    }
+
+    public Object readPropertyDirectly(String propertyName) {
+        return null;
+    }
+
+    public Object readNestedProperty(String path) {
+        return null;
+    }
+
+    public Object readProperty(String propName) {
+        return null;
+    }
+
+    public void writeProperty(String propName, Object val) {
+    }
+
+    public DataObject readToOneDependentTarget(String relName) {
+        return null;
+    }
+
+    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
+    }
+
+    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
+    }
+
+    public void setToOneTarget(String relName, DataObject val, boolean setReverse) {
+    }
+
+    public void setToOneDependentTarget(String relName, DataObject val) {
+    }
+
+    public Map getCommittedSnapshot() {
+        return null;
+    }
+
+    public Map getCurrentSnapshot() {
+        return null;
+    }
+
+    public void fetchFinished() {
+    }
+
+    public long getSnapshotVersion() {
+        return 0;
+    }
+
+    public void setSnapshotVersion(long snapshotVersion) {
+    }
+
+    public void resolveFault() {
+    }
+
+    public void validateForInsert(ValidationResult validationResult) {
+    }
+
+    public void validateForUpdate(ValidationResult validationResult) {
+    }
+
+    public void validateForDelete(ValidationResult validationResult) {
+    }
 }

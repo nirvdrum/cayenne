@@ -55,23 +55,47 @@
  */
 package org.objectstyle.cayenne.unit.util;
 
-import org.objectstyle.cayenne.map.Attribute;
-import org.objectstyle.cayenne.util.XMLEncoder;
+import org.apache.log4j.Level;
+import org.objectstyle.cayenne.query.Query;
 
 /**
  * @author Andrei Adamchik
  */
-public class MockupAttribute extends Attribute {
+public class MockQuery implements Query {
+    protected String name;
 
-    public MockupAttribute() {
-        super();
+    public MockQuery() {
     }
 
-    public MockupAttribute(String name) {
-        super(name);
+    public MockQuery(String name) {
+        this.name = name;
     }
 
-    public void encodeAsXML(XMLEncoder encoder) {
+    public String getName() {
+        return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Level getLoggingLevel() {
+        return null;
+    }
+
+    public void setLoggingLevel(Level level) {
+
+    }
+
+    public int getQueryType() {
+        return 0;
+    }
+
+    public Object getRoot() {
+        return null;
+    }
+
+    public void setRoot(Object value) {
+
+    }
 }

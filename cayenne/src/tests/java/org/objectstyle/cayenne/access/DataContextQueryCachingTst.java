@@ -64,8 +64,8 @@ import org.objectstyle.cayenne.DataRow;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupDataDomain;
-import org.objectstyle.cayenne.unit.util.MockupQueryEngine;
+import org.objectstyle.cayenne.unit.util.MockDataDomain;
+import org.objectstyle.cayenne.unit.util.MockQueryEngine;
 
 /**
  * @author Andrei Adamchik
@@ -74,13 +74,13 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
 
     protected DataRowStore dataRowCache;
     protected DataContext context;
-    protected MockupQueryEngine engine;
+    protected MockQueryEngine engine;
 
     protected void setUp() throws Exception {
         super.setUp();
 
         // assemble mockup context
-        this.engine = new MockupQueryEngine();
+        this.engine = new MockQueryEngine();
         this.engine.setEntityResolver(getDomain().getEntityResolver());
 
         this.dataRowCache = new DataRowStore("test");
@@ -297,7 +297,7 @@ public class DataContextQueryCachingTst extends CayenneTestCase {
         DataContext context = new DataContext();
         context.objectStore = new ObjectStore(dataRowCache);
         context.usingSharedSnaphsotCache = true;
-        context.setParent(new MockupDataDomain(engine));
+        context.setParent(new MockDataDomain(engine));
 
         return context;
     }

@@ -55,95 +55,45 @@
  */
 package org.objectstyle.cayenne.unit.util;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
 
-import org.objectstyle.cayenne.access.DataNode;
-import org.objectstyle.cayenne.access.OperationObserver;
-import org.objectstyle.cayenne.access.QueryEngine;
-import org.objectstyle.cayenne.access.Transaction;
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.EntityResolver;
-import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.query.Query;
+import org.apache.commons.lang.NotImplementedException;
+import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.util.ResourceLocator;
 
 /**
- * A query engine used for unit testing. Returns canned results instead of doing the
- * actual query.
- * 
  * @author Andrei Adamchik
  */
-public class MockupQueryEngine implements QueryEngine {
+public class MockConfiguration extends Configuration {
 
-    // mockup the actual results
-    protected Map results = new HashMap();
-    protected EntityResolver entityResolver;
-    protected int runCount;
-
-    public void reset() {
-        runCount = 0;
-        results.clear();
+    public MockConfiguration() {
+        super();
     }
 
-    public int getRunCount() {
-        return runCount;
+    public boolean canInitialize() {
+        return true;
     }
 
-    public void addExpectedResult(Query query, List result) {
-        results.put(query, result);
+    public void didInitialize() {
     }
 
-    public void performQueries(
-            Collection queries,
-            OperationObserver resultConsumer,
-            Transaction transaction) {
-        initWithPresetResults(queries, resultConsumer);
+    protected InputStream getDomainConfiguration() {
+        throw new NotImplementedException(
+                "this is an in-memory mockup...'getDomainConfiguration' is not implemented.");
     }
 
-    public void performQueries(Collection queries, OperationObserver resultConsumer) {
-        initWithPresetResults(queries, resultConsumer);
-    }
-
-    private void initWithPresetResults(
-            Collection queries,
-            OperationObserver resultConsumer) {
-
-        runCount++;
-
-        // stick preset results to the consumer
-        Iterator it = queries.iterator();
-        while (it.hasNext()) {
-            Query query = (Query) it.next();
-            resultConsumer.nextDataRows(query, (List) results.get(query));
-        }
-    }
-
-    public void performQuery(Query query, OperationObserver resultConsumer) {
-    }
-
-    public DataNode dataNodeForObjEntity(ObjEntity objEntity) {
+    protected InputStream getMapConfiguration(String name) {
         return null;
     }
 
-    public DataNode lookupDataNode(DataMap dataMap) {
+    protected ResourceLocator getResourceLocator() {
         return null;
     }
 
-    public EntityResolver getEntityResolver() {
-        return entityResolver;
+    protected InputStream getViewConfiguration(String location) {
+        return null;
     }
 
-    public void setEntityResolver(EntityResolver resolver) {
-        this.entityResolver = resolver;
-    }
-
-    public Collection getDataMaps() {
-        return (entityResolver != null)
-                ? entityResolver.getDataMaps()
-                : Collections.EMPTY_LIST;
+    public void initialize() throws Exception {
     }
 }

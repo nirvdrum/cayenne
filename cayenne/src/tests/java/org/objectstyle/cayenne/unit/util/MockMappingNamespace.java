@@ -55,54 +55,72 @@
  */
 package org.objectstyle.cayenne.unit.util;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
-import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.MappingNamespace;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
 
-/** 
- * Helper class to process test queries results. 
+/**
+ * @author Andrei Adamchik
  */
-public class MockupOperationObserver extends DefaultOperationObserver {
+public class MockMappingNamespace implements MappingNamespace {
+    private Map dbEntities = new HashMap();
+    private Map objEntities = new HashMap();
+    private Map queries = new HashMap();
+    private Map procedures = new HashMap();
 
-    protected Map resultRows = new HashMap();
-    protected Map resultCounts = new HashMap();
-    protected Map resultBatch = new HashMap();
-
-    public List rowsForQuery(Query q) {
-        return (List) resultRows.get(q);
+    public void addDbEntity(DbEntity entity) {
+        dbEntities.put(entity.getName(), entity);
+        entity.setParent(this);
     }
 
-    public int countForQuery(Query q) {
-        Integer count = (Integer) resultCounts.get(q);
-        return (count != null) ? count.intValue() : -1;
+    public void addObjEntity(ObjEntity entity) {
+        objEntities.put(entity.getName(), entity);
+        entity.setParent(this);
     }
 
-    public int[] countsForQuery(Query q) {
-        return (int[]) resultBatch.get(q);
+    public void addQuery(Query query) {
+        queries.put(query.getName(), query);
     }
 
-    public void nextCount(Query query, int resultCount) {
-        resultCounts.put(query, new Integer(resultCount));
+    public void addProcedure(Procedure procedure) {
+        procedures.put(procedure.getName(), procedure);
     }
 
-    public void nextDataRows(Query query, List dataRows) {
-        resultRows.put(query, dataRows);
+    public DbEntity getDbEntity(String name) {
+        return (DbEntity) dbEntities.get(name);
     }
 
-    public void nextBatchCount(Query query, int[] resultCount) {
-        resultBatch.put(query, resultCount);
+    public ObjEntity getObjEntity(String name) {
+        return (ObjEntity) objEntities.get(name);
     }
 
-    public void nextGlobalException(Exception ex) {
-        throw new CayenneRuntimeException(ex);
+    public Procedure getProcedure(String name) {
+        return (Procedure) procedures.get(name);
     }
 
-    public void nextQueryException(Query query, Exception ex) {
-        throw new CayenneRuntimeException(ex);
+    public Query getQuery(String name) {
+        return (Query) queries.get(name);
     }
 
+    public Collection getDbEntities() {
+        return dbEntities.values();
+    }
+
+    public Collection getObjEntities() {
+        return objEntities.values();
+    }
+
+    public Collection getProcedures() {
+        return procedures.values();
+    }
+
+    public Collection getQueries() {
+        return queries.values();
+    }
 }

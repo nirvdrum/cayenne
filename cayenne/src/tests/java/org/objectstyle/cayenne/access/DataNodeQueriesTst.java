@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
+import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 /** 
  * DataNode test cases.
@@ -107,13 +107,13 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         bindings.put("dob", new Date(System.currentTimeMillis()));
         query.setParameters(bindings);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
         assertNotNull(observer.countsForQuery(query));
         assertEquals(1, observer.countsForQuery(query)[0]);
 
         // check the data
-        MockupOperationObserver checkObserver = new MockupOperationObserver();
+        MockOperationObserver checkObserver = new MockOperationObserver();
         SelectQuery checkQuery = new SelectQuery(Artist.class);
         getDomain().performQueries(Collections.singletonList(checkQuery), checkObserver);
         List data = checkObserver.rowsForQuery(checkQuery);
@@ -132,7 +132,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
             "SELECT #result('ARTIST_ID' 'int') FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template, true);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
 
         List data = observer.rowsForQuery(query);
@@ -149,7 +149,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
         SQLTemplate query = new SQLTemplate(Object.class, template, true);
         getSQLTemplateBuilder().updateSQLTemplate(query);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
 
         List data = observer.rowsForQuery(query);
@@ -169,7 +169,7 @@ public class DataNodeQueriesTst extends CayenneTestCase {
             "SELECT #result('ARTIST_ID' 'int' 'A') FROM ARTIST ORDER BY ARTIST_ID";
         SQLTemplate query = new SQLTemplate(Object.class, template, true);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         getNode().performQueries(Collections.singletonList(query), observer);
 
         List data = observer.rowsForQuery(query);

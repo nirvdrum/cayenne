@@ -68,7 +68,7 @@ import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.query.SQLTemplate;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupOperationObserver;
+import org.objectstyle.cayenne.unit.util.MockOperationObserver;
 
 /**
  * @author Andrei Adamchik
@@ -99,7 +99,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
         SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
@@ -137,7 +137,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
         SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
@@ -174,7 +174,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
         SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {
@@ -211,7 +211,7 @@ public class SQLTemplateSelectExecutionPlanTst extends CayenneTestCase {
         DbAdapter adapter = getAccessStackAdapter().getAdapter();
         SQLTemplateSelectExecutionPlan plan = new SQLTemplateSelectExecutionPlan(adapter);
 
-        MockupOperationObserver observer = new MockupOperationObserver();
+        MockOperationObserver observer = new MockOperationObserver();
         Connection c = getConnection();
 
         try {

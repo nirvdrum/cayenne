@@ -65,7 +65,7 @@ import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupQuery;
+import org.objectstyle.cayenne.unit.util.MockQuery;
 
 public class EntityResolverTst extends CayenneTestCase {
     protected EntityResolver resolver;
@@ -225,7 +225,7 @@ public class EntityResolverTst extends CayenneTestCase {
     public void testGetQuery() throws Exception {
         // create a resolver with a single map
         DataMap m1 = new DataMap();
-        Query q = new MockupQuery("query1");
+        Query q = new MockQuery("query1");
         m1.addQuery(q);
 
         EntityResolver resolver = new EntityResolver(Collections.singleton(m1));
@@ -234,7 +234,7 @@ public class EntityResolverTst extends CayenneTestCase {
         // check that the query added on-the-fly will be recognized
         assertNull(resolver.getQuery("query2"));
 
-        Query q2 = new MockupQuery("query2");
+        Query q2 = new MockQuery("query2");
         m1.addQuery(q2);
         assertSame(q2, resolver.getQuery("query2"));
     }

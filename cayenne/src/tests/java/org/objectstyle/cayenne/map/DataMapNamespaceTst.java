@@ -58,8 +58,8 @@ package org.objectstyle.cayenne.map;
 import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.unit.util.MockupMappingNamespace;
-import org.objectstyle.cayenne.unit.util.MockupQuery;
+import org.objectstyle.cayenne.unit.util.MockMappingNamespace;
+import org.objectstyle.cayenne.unit.util.MockQuery;
 
 /**
  * Test case for recursive lookup of DataMap resources via a parent
@@ -78,7 +78,7 @@ public class DataMapNamespaceTst extends TestCase {
     public void testNamespace() {
         assertNull(map.getNamespace());
 
-        MappingNamespace namespace = new MockupMappingNamespace();
+        MappingNamespace namespace = new MockMappingNamespace();
         map.setNamespace(namespace);
         assertSame(namespace, map.getNamespace());
 
@@ -87,7 +87,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetDbEntity() throws Exception {
-        MockupMappingNamespace namespace = new MockupMappingNamespace();
+        MockMappingNamespace namespace = new MockMappingNamespace();
         map.setNamespace(namespace);
 
         DbEntity e1 = new DbEntity("entity");
@@ -104,7 +104,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetObjEntity() throws Exception {
-        MockupMappingNamespace namespace = new MockupMappingNamespace();
+        MockMappingNamespace namespace = new MockMappingNamespace();
         map.setNamespace(namespace);
 
         ObjEntity e1 = new ObjEntity("entity");
@@ -121,7 +121,7 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetProcedure() throws Exception {
-        MockupMappingNamespace namespace = new MockupMappingNamespace();
+        MockMappingNamespace namespace = new MockMappingNamespace();
         map.setNamespace(namespace);
 
         Procedure p1 = new Procedure("procedure");
@@ -138,11 +138,11 @@ public class DataMapNamespaceTst extends TestCase {
     }
 
     public void testGetQuery() throws Exception {
-        MockupMappingNamespace namespace = new MockupMappingNamespace();
+        MockMappingNamespace namespace = new MockMappingNamespace();
         map.setNamespace(namespace);
 
-        Query q1 = new MockupQuery("query");
-        Query q2 = new MockupQuery("query");
+        Query q1 = new MockQuery("query");
+        Query q2 = new MockQuery("query");
         namespace.addQuery(q1);
 
         assertSame(q1, map.getQuery("query"));

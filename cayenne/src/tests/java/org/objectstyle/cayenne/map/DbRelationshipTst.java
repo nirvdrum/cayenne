@@ -59,7 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.objectstyle.cayenne.unit.CayenneTestCase;
-import org.objectstyle.cayenne.unit.util.MockupMappingNamespace;
+import org.objectstyle.cayenne.unit.util.MockMappingNamespace;
 
 public class DbRelationshipTst extends CayenneTestCase {
     protected DbEntity artistEnt;
@@ -103,7 +103,7 @@ public class DbRelationshipTst extends CayenneTestCase {
     public void testGetReverseRelationshipToSelf() throws Exception {
         
         // assemble mockup entity
-        MockupMappingNamespace namespace = new MockupMappingNamespace();
+        MockMappingNamespace namespace = new MockMappingNamespace();
         DbEntity e = new DbEntity("test");
         namespace.addDbEntity(e);
         DbRelationship rforward = new DbRelationship("rforward");
