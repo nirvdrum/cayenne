@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.modeler.editor;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.objectstyle.cayenne.modeler.EventController;
 import org.objectstyle.cayenne.modeler.event.QueryDisplayEvent;
@@ -73,6 +75,7 @@ public class SelectQueryTabbedView extends JTabbedPane {
     protected SelectQueryMainTab mainTab;
     protected SelectQueryPrefetchTab prefetchTab;
     protected SelectQueryOrderingTab orderingTab;
+    protected int lastSelectionIndex;
 
     public SelectQueryTabbedView(EventController mediator) {
         this.mediator = mediator;
@@ -98,13 +101,43 @@ public class SelectQueryTabbedView extends JTabbedPane {
         mediator.addQueryDisplayListener(new QueryDisplayListener() {
 
             public void currentQueryChanged(QueryDisplayEvent e) {
-                if (e.getQuery() == null)
-                    SelectQueryTabbedView.this.setVisible(false);
-                else {
-                    SelectQueryTabbedView.this.setSelectedIndex(0);
-                    SelectQueryTabbedView.this.setVisible(true);
-                }
+                initFromModel();
+            }
+        });
+
+        this.addChangeListener(new ChangeListener() {
+
+            public void stateChanged(ChangeEvent e) {
+                lastSelectionIndex = getSelectedIndex();
+                updateTabs();
             }
         });
     }
+
+    void initFromModel() {
+        if (model == null) {
+            setVisible(false);
+            return;
+        }
+
+        setVisible(true);
+
+        // tab did not change - force update
+        if (getSelectedIndex() == lastSelectionIndex) {
+            updateTabs();
+        }
+        // change tab, this will update newly displayed tab...
+        else {
+            setSelectedIndex(lastSelectionIndex);
+        }
+    }
+
+    void updateTabs() {
+        switch (lastSelectionIndex) {
+            case 1:
+                orderingTab.initFromModel();
+                break;
+        }
+    }
+
 }

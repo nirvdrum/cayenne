@@ -65,7 +65,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.parser.ParseException;
@@ -197,7 +196,8 @@ public class SelectQueryMainTab extends JPanel {
      */
     private void initFromModel(Query query) {
         if (!(query instanceof SelectQuery)) {
-            throw new CayenneRuntimeException("Expected SelectQuery, got " + query);
+            setVisible(false);
+            return;
         }
 
         SelectQuery selectQuery = (SelectQuery) query;
@@ -228,6 +228,8 @@ public class SelectQueryMainTab extends JPanel {
         queryRoot.setModel(model);
 
         properties.initFromModel(selectQuery);
+
+        setVisible(true);
     }
 
     protected SelectQuery getQuery() {

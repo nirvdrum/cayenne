@@ -254,15 +254,7 @@ public class MultiColumnBrowser extends JPanel {
             this.model = model;
 
             // display first column
-            Object root = model.getRoot();
-            this.selectionPath = new Object[] { root };
-
-            // TODO: to make it more generic, we must clean the columns first
-            // instead here we make an assumption that the browser hasn't been used yet
-            if (!model.isLeaf(model.getRoot())) {
-                BrowserPanel firstPanel = (BrowserPanel) columns.get(0);
-                firstPanel.setRootNode(root);
-            }
+            updateFromModel(model.getRoot(), -1);
         }
     }
 
@@ -394,6 +386,10 @@ public class MultiColumnBrowser extends JPanel {
      * Rebuilds view for the new object selection.
      */
     private synchronized void updateFromModel(Object selectedNode, int panelIndex) {
+        if(selectionPath == null) {
+            selectionPath = new Object[0];
+        }
+        
         // clean up extra columns
         int lastIndex = selectionPath.length;
 

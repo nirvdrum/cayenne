@@ -55,18 +55,284 @@
  */
 package org.objectstyle.cayenne.modeler.editor;
 
-import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Iterator;
 
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.event.QueryEvent;
 import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
+import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
+import org.objectstyle.cayenne.query.Ordering;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.util.CayenneMapEntry;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 /**
+ * A panel for picking SelectQuery orderings.
+ * 
  * @author Andrei Adamchik
  */
 public class SelectQueryOrderingTab extends JPanel {
 
+    static final Dimension BROWSER_CELL_DIM = new Dimension(150, 100);
+    static final Dimension TABLE_DIM = new Dimension(460, 60);
+
     protected EventController mediator;
+    protected SelectQuery selectQuery;
+
+    protected MultiColumnBrowser browser;
+    protected JTable table;
+    protected JButton addButton;
+    protected JButton removeButton;
 
     public SelectQueryOrderingTab(EventController mediator) {
         this.mediator = mediator;
+
+        initView();
+        initController();
+    }
+
+    private void initView() {
+        // create widgets
+        addButton = new JButton("Add Ordering");
+        removeButton = new JButton("Remove Ordering");
+
+        browser = new MultiColumnBrowser();
+        browser.setPreferredColumnSize(BROWSER_CELL_DIM);
+        browser.setDefaultRenderer();
+
+        table = new JTable();
+        table.setRowHeight(25);
+        table.setRowMargin(3);
+        table.setPreferredScrollableViewportSize(TABLE_DIM);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // assemble
+        setLayout(new BorderLayout());
+
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder builder = new PanelBuilder(new FormLayout(
+                "fill:min(400dlu;pref), 3dlu, fill:min(100dlu;pref)",
+                "top:p:grow, 3dlu, fill:100dlu"));
+
+        // orderings table must grow as the panel is resized
+        builder.add(new JScrollPane(table), cc.xy(1, 1, "d, fill"));
+        builder.add(removeButton, cc.xywh(3, 1, 1, 1));
+        builder.add(new JScrollPane(
+                browser,
+                JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED), cc.xywh(1, 3, 1, 1));
+
+        // while browser must fill the whole area, button must stay on top
+        builder.add(addButton, cc.xy(3, 3, "d, top"));
+        add(builder.getPanel(), BorderLayout.CENTER);
+    }
+
+    private void initController() {
+
+        // scroll to selected row whenever a selection even occurs
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    UIUtil.scrollToSelectedRow(table);
+                }
+            }
+        });
+
+        addButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                addOrdering();
+            }
+        });
+
+        removeButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent event) {
+                removeOrdering();
+            }
+        });
+    }
+
+    void initFromModel() {
+        Query query = mediator.getCurrentQuery();
+
+        if (!(query instanceof SelectQuery)) {
+            setVisible(false);
+            return;
+        }
+
+        if (!(query.getRoot() instanceof Entity)) {
+            setVisible(false);
+            return;
+        }
+
+        this.selectQuery = (SelectQuery) query;
+
+        browser.setModel(new EntityTreeModel((Entity) selectQuery.getRoot()));
+        table.setModel(new OrderingModel());
+
+        // init column sizes
+        table.getColumnModel().getColumn(0).setPreferredWidth(250);
+
+        setVisible(true);
+    }
+
+    void addOrdering() {
+
+        Object[] path = browser.getSelectionPath().getPath();
+
+        // first item in the path is Entity, so we must have
+        // at least two elements to constitute a valid ordering path
+        if (path != null && path.length < 2) {
+            return;
+        }
+
+        StringBuffer buffer = new StringBuffer();
+
+        // attribute or relationships
+        CayenneMapEntry first = (CayenneMapEntry) path[1];
+        buffer.append(first.getName());
+
+        for (int i = 2; i < path.length; i++) {
+            CayenneMapEntry pathEntry = (CayenneMapEntry) path[i];
+            buffer.append(".").append(pathEntry.getName());
+        }
+
+        String orderingPath = buffer.toString();
+
+        // check if such ordering already exists
+        Iterator it = selectQuery.getOrderings().iterator();
+        while (it.hasNext()) {
+            Ordering ord = (Ordering) it.next();
+            if (orderingPath.equals(ord.getSortSpecString())) {
+                return;
+            }
+        }
+
+        selectQuery.addOrdering(new Ordering(orderingPath, Ordering.ASC));
+        int index = selectQuery.getOrderings().size() - 1;
+
+        OrderingModel model = (OrderingModel) table.getModel();
+        model.fireTableRowsInserted(index, index);
+        mediator.fireQueryEvent(new QueryEvent(SelectQueryOrderingTab.this, selectQuery));
+    }
+
+    void removeOrdering() {
+        int selection = table.getSelectedRow();
+        if (selection < 0) {
+            return;
+        }
+
+        OrderingModel model = (OrderingModel) table.getModel();
+        Ordering ordering = model.getOrdering(selection);
+        selectQuery.removeOrdering(ordering);
+
+        model.fireTableRowsDeleted(selection, selection);
+        mediator.fireQueryEvent(new QueryEvent(SelectQueryOrderingTab.this, selectQuery));
+    }
+
+    /**
+     * A table model for the Ordering editing table.
+     */
+    final class OrderingModel extends AbstractTableModel {
+
+        Ordering getOrdering(int row) {
+            return (Ordering) selectQuery.getOrderings().get(row);
+        }
+
+        public int getColumnCount() {
+            return 3;
+        }
+
+        public int getRowCount() {
+            return selectQuery.getOrderings().size();
+        }
+
+        public Object getValueAt(int row, int column) {
+            Ordering ordering = getOrdering(row);
+
+            switch (column) {
+                case 0:
+                    return ordering.getSortSpecString();
+                case 1:
+                    return ordering.isAscending() ? Boolean.TRUE : Boolean.FALSE;
+                case 2:
+                    return ordering.isCaseInsensitive() ? Boolean.TRUE : Boolean.FALSE;
+                default:
+                    throw new IndexOutOfBoundsException("Invalid column: " + column);
+            }
+        }
+
+        public Class getColumnClass(int column) {
+            switch (column) {
+                case 0:
+                    return String.class;
+                case 1:
+                case 2:
+                    return Boolean.class;
+                default:
+                    throw new IndexOutOfBoundsException("Invalid column: " + column);
+            }
+        }
+
+        public String getColumnName(int column) {
+            switch (column) {
+                case 0:
+                    return "Path";
+                case 1:
+                    return "Ascending";
+                case 2:
+                    return "Ignore Case";
+                default:
+                    throw new IndexOutOfBoundsException("Invalid column: " + column);
+            }
+        }
+
+        public boolean isCellEditable(int row, int column) {
+            return column == 1 || column == 2;
+        }
+
+        public void setValueAt(Object value, int row, int column) {
+            Ordering ordering = getOrdering(row);
+
+            switch (column) {
+                case 1:
+                    ordering.setAscending(((Boolean) value).booleanValue());
+                    mediator.fireQueryEvent(new QueryEvent(
+                            SelectQueryOrderingTab.this,
+                            selectQuery));
+                    break;
+                case 2:
+                    ordering.setCaseInsensitive(((Boolean) value).booleanValue());
+                    mediator.fireQueryEvent(new QueryEvent(
+                            SelectQueryOrderingTab.this,
+                            selectQuery));
+                    break;
+                default:
+                    throw new IndexOutOfBoundsException("Invalid editable column: "
+                            + column);
+            }
+
+        }
     }
 }
