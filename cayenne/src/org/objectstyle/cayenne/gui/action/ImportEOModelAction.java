@@ -63,7 +63,7 @@ import javax.swing.JFileChooser;
 
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.gui.util.ProjFileFilter;
+import org.objectstyle.cayenne.gui.util.ProjectFileFilter;
 import org.objectstyle.util.Preferences;
 
 /**

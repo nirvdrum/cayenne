@@ -52,20 +52,32 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */
+ */ 
 package org.objectstyle.cayenne.gui.util;
 
-import junit.framework.TestSuite;
+import java.io.File;
 
-public class AllTests {
-    public static TestSuite suite() {
-        TestSuite suite = new TestSuite("GUI Util Package Tests");
+import javax.swing.filechooser.FileFilter;
 
-        // don't test GUI if no graphics environment present
-        if(!org.objectstyle.TestMain.noGui()) {
-            suite.addTestSuite(EOModelFileFilterTst.class);
-            suite.addTestSuite(ProjectFileFilterTst.class);
-        }
-        return suite;
-    }
+/**
+ * FileFilter used to select Cayenne project files.
+ */
+public class ProjectFileFilter extends FileFilter {
+	
+	public static final String PROJ_FILE_NAME = "cayenne.xml";
+	
+  	/**
+  	 * Accepts all directories and all cayenne.xml files.
+  	 */
+  	public boolean accept(File f) {
+		return f.isDirectory() || PROJ_FILE_NAME.equals(f.getName());
+	}
+
+  	/**
+  	 *  Returns description of this filter.
+  	 */
+  	public String getDescription() {
+    	return "Cayenne Project Files";
+  	}
 }
+

@@ -591,7 +591,7 @@ implements ActionListener
 		        file = fileChooser.getSelectedFile();
 		        if (!file.exists())
 		        	file.createNewFile();
-		        proj_file = new File(file, ProjFileFilter.PROJ_FILE_NAME);
+		        proj_file = new File(file, ProjectFileFilter.PROJ_FILE_NAME);
 		        if (proj_file.exists()) {
 		        	int ret = JOptionPane.showConfirmDialog(this
 		        						, "There is already "
@@ -674,7 +674,7 @@ implements ActionListener
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
-            fileChooser.setFileFilter(new ProjFileFilter());
+            fileChooser.setFileFilter(new ProjectFileFilter());
             fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             if (null != init_dir) {
