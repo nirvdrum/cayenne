@@ -60,6 +60,7 @@ public class EOModelProcessorTst extends BasicTestCase {
         assertLoaded("art", map);
         assertLoadedQueries(map);
         assertOneWayRelationships(map);
+        assertLoadedCustomTypes(map);
     }
 
     public void testLoadModelWithDependencies() throws Exception {
@@ -111,14 +112,29 @@ public class EOModelProcessorTst extends BasicTestCase {
         assertSame(map.getObjEntity("ExhibitType"), query.getRoot());
         assertTrue(query instanceof SelectQuery);
         assertTrue(query instanceof EOQuery);
-        
-        EOQuery eoQuery = (EOQuery) query; 
+
+        EOQuery eoQuery = (EOQuery) query;
         Collection bindings = eoQuery.getBindingNames();
         assertNotNull(bindings);
         assertEquals(3, bindings.size());
         assertEquals("java.lang.String", eoQuery.bindingClass("x"));
         assertEquals("java.lang.String", eoQuery.bindingClass("y"));
         assertEquals("java.lang.Object", eoQuery.bindingClass("z"));
+    }
+
+    protected void assertLoadedCustomTypes(DataMap map) throws Exception {
+
+        // check obj entities
+        ObjEntity customTypes = map.getObjEntity("CustomTypes");
+        assertNotNull(customTypes);
+        
+        ObjAttribute pk = (ObjAttribute) customTypes.getAttribute("pk");
+        assertNotNull(pk);
+        assertEquals("CustomType1", pk.getType());
+
+        ObjAttribute other = (ObjAttribute) customTypes.getAttribute("other");
+        assertNotNull(other);
+        assertEquals("CustomType2", other.getType());
     }
 
     protected void assertLoaded(String mapName, DataMap map) throws Exception {

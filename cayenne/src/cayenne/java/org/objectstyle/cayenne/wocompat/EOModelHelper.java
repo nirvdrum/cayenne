@@ -251,8 +251,8 @@ public class EOModelHelper {
                                 valueClassName).getName();
                     }
                     catch (ClassNotFoundException e) {
-                        throw new IllegalArgumentException("Unknown data type: "
-                                + valueClassName);
+                        // likely a custom class
+                        return valueClassName;
                     }
                 }
             }

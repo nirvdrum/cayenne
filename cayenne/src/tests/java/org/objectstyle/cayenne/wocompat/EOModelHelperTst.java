@@ -86,7 +86,7 @@ public class EOModelHelperTst extends BasicTestCase {
             list.add(names.next());
         }
 
-        assertEquals(7, list.size());
+        assertEquals(8, list.size());
         assertTrue(list.contains("Artist"));
         assertTrue(list.contains("Painting"));
         assertTrue(list.contains("ExhibitType"));

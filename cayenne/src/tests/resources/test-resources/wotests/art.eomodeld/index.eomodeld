@@ -5,6 +5,7 @@
     entities = (
         {className = "org.objectstyle.art.Artist"; name = Artist; }, 
         {className = "org.objectstyle.art.ArtistExhibit"; name = ArtistExhibit; }, 
+        {className = CustomTypes; name = CustomTypes; }, 
         {className = "org.objectstyle.art.Exhibit"; name = Exhibit; }, 
         {className = "org.objectstyle.cayenne.art.ExhibitType"; name = ExhibitType; }, 
         {className = "org.objectstyle.art.Gallery"; name = Gallery; }, 
