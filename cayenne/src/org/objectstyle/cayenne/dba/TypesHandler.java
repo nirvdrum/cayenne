@@ -55,20 +55,19 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
-import java.util.*;
-import java.util.logging.Logger;
-import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Types;
-import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.xml.sax.*;
-import org.xml.sax.helpers.*;
+import org.xml.sax.helpers.DefaultHandler;
 
-import org.objectstyle.util.Util;
+import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.util.ResourceLocator;
-import org.objectstyle.cayenne.*;
+import org.objectstyle.util.Util;
 
 
 /** Provides JDBC-RDBMS types mapping. Loads types info from a xml file.

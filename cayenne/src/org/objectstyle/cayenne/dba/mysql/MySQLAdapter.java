@@ -55,11 +55,9 @@ package org.objectstyle.cayenne.dba.mysql;
  *
  */ 
 
-import java.util.logging.*;
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
+import org.objectstyle.cayenne.map.DbRelationship;
 
 /** DbAdapter implementation for <a href="http://mysql.com">MySQL RDBMS</a>. */
 public class MySQLAdapter extends JdbcAdapter {

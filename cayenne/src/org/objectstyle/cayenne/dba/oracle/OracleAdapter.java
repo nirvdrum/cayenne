@@ -55,10 +55,7 @@ package org.objectstyle.cayenne.dba.oracle;
  *
  */ 
 
-import java.util.logging.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.dba.*;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 
 /** DbAdapter implementation for <a href="http://www.oracle.com">Oracle RDBMS</a>. */
 public class OracleAdapter extends JdbcAdapter {

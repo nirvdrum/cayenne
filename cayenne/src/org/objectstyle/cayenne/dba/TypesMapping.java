@@ -56,9 +56,9 @@ package org.objectstyle.cayenne.dba;
  */ 
 
 
-import java.util.*;
 import java.sql.*;
-import java.util.logging.*;
+import java.util.*;
+import java.util.logging.Logger;
 
 
 public class TypesMapping {

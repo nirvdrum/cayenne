@@ -55,14 +55,12 @@ package org.objectstyle.cayenne.dba;
  *
  */ 
 
-import java.util.*;
-import java.util.logging.*;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
-import org.objectstyle.cayenne.map.DbAttributePair;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.map.*;
 
 
 /** A generic DbAdapter implementation. 

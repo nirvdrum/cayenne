@@ -55,11 +55,10 @@ package org.objectstyle.cayenne.dba;
  *
  */ 
 
-import java.sql.*;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
 
 
 /** Defines API needed to handle differences between

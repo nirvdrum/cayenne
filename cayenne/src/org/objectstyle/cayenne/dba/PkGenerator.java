@@ -55,14 +55,15 @@ package org.objectstyle.cayenne.dba;
  *
  */
 
-import org.objectstyle.cayenne.*;
-import org.objectstyle.cayenne.access.*;
-import org.objectstyle.cayenne.map.*;
-import org.objectstyle.cayenne.query.*;
-import org.objectstyle.cayenne.exp.*;
-import java.sql.*;
 import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Logger;
+
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DefaultOperationObserver;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.query.*;
 
 
 public class PkGenerator {
