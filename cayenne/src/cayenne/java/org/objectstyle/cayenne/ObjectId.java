@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
@@ -77,6 +78,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Andrei Adamchik
  */
 public class ObjectId implements Serializable {
+
     // Keys: DbAttribute names
     // Values: database values of the corresponding attribute
     protected Map objectIdKeys;
@@ -160,14 +162,14 @@ public class ObjectId implements Serializable {
                 }
             }
             else {
-            	// takes care of comparing primitive arrays, such as byte[]
-				builder.append(value, id.objectIdKeys.get(key));
+                // takes care of comparing primitive arrays, such as byte[]
+                builder.append(value, id.objectIdKeys.get(key));
                 if (!builder.isEquals()) {
                     return false;
                 }
             }
         }
-        
+
         return true;
     }
 
@@ -225,13 +227,27 @@ public class ObjectId implements Serializable {
             builder.append(objectClass.getName().hashCode());
 
             if (objectIdKeys != null) {
-                Iterator entries = objectIdKeys.entrySet().iterator();
-                while (entries.hasNext()) {
+                int len = objectIdKeys.size();
+                
+                // handle cheap and most common case - single key
+                if (len == 1) {
+                    Iterator entries = objectIdKeys.entrySet().iterator();
                     Map.Entry entry = (Map.Entry) entries.next();
-
-                    // HashCodeBuilder will take care of processing object if it 
-                    // happens to be a primitive array such as byte[]
                     builder.append(entry.getKey()).append(entry.getValue());
+                }
+                // handle multiple keys - must sort the keys to use with HashCodeBuilder
+                else {
+                    Object[] keys = objectIdKeys.keySet().toArray();
+                    Arrays.sort(keys);
+
+                  
+                    for(int i = 0; i < len; i++) {
+                        // HashCodeBuilder will take care of processing object if it 
+                        // happens to be a primitive array such as byte[]
+                        
+                        // also we don't have to append the key hashcode, its index will work
+                        builder.append(i).append(objectIdKeys.get(keys[i]));
+                    }
                 }
             }
 

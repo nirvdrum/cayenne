@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -62,17 +63,21 @@ import org.apache.log4j.Level;
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.CompoundFkTest;
+import org.objectstyle.art.CompoundPkTest;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.CayenneDataObject;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.access.util.DefaultOperationObserver;
 import org.objectstyle.cayenne.access.util.SelectObserver;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.query.SqlModifyQuery;
 
 /**
  * @author Andrei Adamchik
@@ -415,4 +420,83 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         */
 
     }
+
+    /**
+     * Tests to-one prefetching over relationships with compound keys.
+     */
+    public void testPrefetch10() throws Exception {
+        populateCompoundKeyEntities();
+
+        Expression e = ExpressionFactory.matchExp("name", "CFK2");
+        SelectQuery q = new SelectQuery(CompoundFkTest.class, e);
+        q.addPrefetch("toCompoundPk");
+
+        List objects = context.performQuery(q);
+        assertEquals(1, objects.size());
+        CayenneDataObject fk1 = (CayenneDataObject) objects.get(0);
+        CayenneDataObject pk1 =
+            (CayenneDataObject) fk1.readPropertyDirectly("toCompoundPk");
+
+        assertEquals(PersistenceState.COMMITTED, pk1.getPersistenceState());
+        assertEquals("CPK2", pk1.readPropertyDirectly("name"));
+    }
+
+    /**
+     * Tests to-many prefetching over relationships with compound keys.
+     */
+    public void testPrefetch11() throws Exception {
+        populateCompoundKeyEntities();
+
+        Expression e = ExpressionFactory.matchExp("name", "CPK2");
+        SelectQuery q = new SelectQuery(CompoundPkTest.class, e);
+        q.addPrefetch("compoundFkArray");
+
+        List pks = context.performQuery(q);
+        assertEquals(1, pks.size());
+        CayenneDataObject pk1 = (CayenneDataObject) pks.get(0);
+
+        ToManyList toMany = (ToManyList) pk1.readPropertyDirectly("compoundFkArray");
+        assertNotNull(toMany);
+        assertFalse(toMany.needsFetch());
+        assertEquals(2, toMany.size());
+
+        CayenneDataObject fk1 = (CayenneDataObject) toMany.get(0);
+        assertEquals(PersistenceState.COMMITTED, fk1.getPersistenceState());
+
+        CayenneDataObject fk2 = (CayenneDataObject) toMany.get(1);
+        assertEquals(PersistenceState.COMMITTED, fk2.getPersistenceState());
+    }
+    
+
+    protected void populateCompoundKeyEntities() {
+        List queries = new ArrayList(6);
+        queries.add(
+            new SqlModifyQuery(
+                CompoundPkTest.class,
+                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values (101, 201, 'CPK1')"));
+        queries.add(
+            new SqlModifyQuery(
+                CompoundPkTest.class,
+                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values (102, 202, 'CPK2')"));
+        queries.add(
+            new SqlModifyQuery(
+                CompoundPkTest.class,
+                "insert into COMPOUND_PK_TEST (KEY1, KEY2, NAME) values (103, 203, 'CPK3')"));
+
+        queries.add(
+            new SqlModifyQuery(
+                CompoundPkTest.class,
+                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (301, 102, 202, 'CFK1')"));
+        queries.add(
+            new SqlModifyQuery(
+                CompoundPkTest.class,
+                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (302, 102, 202, 'CFK2')"));
+        queries.add(
+            new SqlModifyQuery(
+                CompoundPkTest.class,
+                "insert into COMPOUND_FK_TEST (PKEY, F_KEY1, F_KEY2, NAME) values (303, 101, 201, 'CFK3')"));
+
+        context.performQueries(queries, new DefaultOperationObserver());
+    }
+
 }

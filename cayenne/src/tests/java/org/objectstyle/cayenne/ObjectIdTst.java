@@ -61,143 +61,192 @@ import java.util.Map;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
+import com.sun.tools.jdi.LinkedHashMap;
+
 public class ObjectIdTst extends CayenneTestCase {
 
-	public void testObjEntityName() throws Exception {
-		Class class1=Number.class;
-		ObjectId oid = new ObjectId(class1, null);
-		assertEquals(class1, oid.getObjClass());
-	}
+    public void testObjEntityName() throws Exception {
+        Class class1 = Number.class;
+        ObjectId oid = new ObjectId(class1, null);
+        assertEquals(class1, oid.getObjClass());
+    }
 
-	public void testEquals0() throws Exception {
-		Class class1=Number.class;
-		ObjectId oid1 = new ObjectId(class1, null);
-		assertEquals(oid1, oid1);
-	}
+    public void testEquals0() throws Exception {
+        Class class1 = Number.class;
+        ObjectId oid1 = new ObjectId(class1, null);
+        assertEquals(oid1, oid1);
+        assertEquals(oid1.hashCode(), oid1.hashCode());
+    }
 
-	public void testEquals1() throws Exception {
-		Class class1=Number.class;
-		ObjectId oid1 = new ObjectId(class1, null);
-		ObjectId oid2 = new ObjectId(class1, null);
-		assertEquals(oid1, oid2);
-	}
+    public void testEquals1() throws Exception {
+        Class class1 = Number.class;
+        ObjectId oid1 = new ObjectId(class1, null);
+        ObjectId oid2 = new ObjectId(class1, null);
+        assertEquals(oid1, oid2);
+        assertEquals(oid1.hashCode(), oid2.hashCode());
+    }
 
-	public void testEquals2() throws Exception {
-		Class class1=Number.class;
-		Map hm = new HashMap();
-		ObjectId oid1 = new ObjectId(class1, hm);
-		ObjectId oid2 = new ObjectId(class1, hm);
-		assertEquals(oid1, oid2);
-	}
+    public void testEquals2() throws Exception {
+        Class class1 = Number.class;
+        Map hm = new HashMap();
+        ObjectId oid1 = new ObjectId(class1, hm);
+        ObjectId oid2 = new ObjectId(class1, hm);
+        assertEquals(oid1, oid2);
+        assertEquals(oid1.hashCode(), oid2.hashCode());
+    }
 
-	public void testEquals3() throws Exception {
-		Class class1=Number.class;
-		String pknm = "xyzabc";
+    public void testEquals3() throws Exception {
+        Class class1 = Number.class;
+        String pknm = "xyzabc";
 
-		Map hm1 = new HashMap();
-		hm1.put(pknm, "123");
+        Map hm1 = new HashMap();
+        hm1.put(pknm, "123");
 
-		Map hm2 = new HashMap();
-		hm2.put(pknm, "123");
+        Map hm2 = new HashMap();
+        hm2.put(pknm, "123");
 
-		ObjectId oid1 = new ObjectId(class1, hm1);
-		ObjectId oid2 = new ObjectId(class1, hm2);
-		assertEquals(oid1, oid2);
-	}
+        ObjectId oid1 = new ObjectId(class1, hm1);
+        ObjectId oid2 = new ObjectId(class1, hm2);
+        assertEquals(oid1, oid2);
+        assertEquals(oid1.hashCode(), oid2.hashCode());
+    }
 
-	public void testEquals4() throws Exception {
-		Class class1=Number.class;
-		String pknm = "xyzabc";
+    public void testEquals4() throws Exception {
+        Class class1 = Number.class;
+        String pknm = "xyzabc";
 
-		Map hm1 = new HashMap();
-		hm1.put(pknm, new Integer(1000));
+        Map hm1 = new HashMap();
+        hm1.put(pknm, new Integer(1000));
 
-		ObjectId ref = new ObjectId(class1, hm1);
-		ObjectId oid = new ObjectId(class1, pknm, 1000);
-		assertEquals(ref, oid);
-	}
+        ObjectId ref = new ObjectId(class1, hm1);
+        ObjectId oid = new ObjectId(class1, pknm, 1000);
+        assertEquals(ref, oid);
+        assertEquals(ref.hashCode(), oid.hashCode());
+    }
 
     /**
      * This is a test case reproducing conditions for the bug "8458963".
      */
-	public void testEquals5() throws Exception {
-		Class class1=Number.class;
+    public void testEquals5() throws Exception {
+        Class class1 = Number.class;
 
-		Map hm1 = new HashMap();
-		hm1.put("key1",  new Integer(1));
-		hm1.put("key2",  new Integer(11));
+        Map hm1 = new HashMap();
+        hm1.put("key1", new Integer(1));
+        hm1.put("key2", new Integer(11));
 
-		Map hm2 = new HashMap();
-		hm2.put("key1", new Integer(11));
-		hm2.put("key2",  new Integer(1));
+        Map hm2 = new HashMap();
+        hm2.put("key1", new Integer(11));
+        hm2.put("key2", new Integer(1));
 
-		ObjectId ref = new ObjectId(class1, hm1);
-		ObjectId oid = new ObjectId(class1, hm2);
-		assertFalse(ref.equals(oid));
-	}
-	
+        ObjectId ref = new ObjectId(class1, hm1);
+        ObjectId oid = new ObjectId(class1, hm2);
+        assertFalse(ref.equals(oid));
+    }
 
-	public void testEqualsBinaryKey() throws Exception {
-		Class class1 = Artist.class;
+    /**
+        * Multiple key objectId
+        */
+    public void testEquals6() throws Exception {
+        Class class1 = Number.class;
 
-		Map hm1 = new HashMap();
-		hm1.put("key1",  new byte[] {3, 4, 10, -1});
+        Map hm1 = new HashMap();
+        hm1.put("key1", new Integer(1));
+        hm1.put("key2", new Integer(2));
 
-		Map hm2 = new HashMap();
-		hm2.put("key1", new byte[] {3, 4, 10, -1});
+        Map hm2 = new HashMap();
+        hm2.put("key1", new Integer(1));
+        hm2.put("key2", new Integer(2));
 
-		ObjectId ref = new ObjectId(class1, hm1);
-		ObjectId oid = new ObjectId(class1, hm2);
-		assertEquals(ref.hashCode(), oid.hashCode());
-		assertTrue(ref.equals(oid));
-	}
+        ObjectId ref = new ObjectId(class1, hm1);
+        ObjectId oid = new ObjectId(class1, hm2);
+        assertTrue(ref.equals(oid));
+        assertEquals(ref.hashCode(), oid.hashCode());
+    }
 
+    /**
+     * Checks that hashCode works even if keys
+     * are inserted in the map in a different order...
+     */
+    public void testEquals7() throws Exception {
+        Class class1 = Number.class;
+        
+        // create maps with guaranteed iteration order
 
-	public void testEqualsNull() {
-		ObjectId o = new ObjectId(Artist.class, "ARTIST_ID", 42);
-		assertFalse(o.equals(null));
-	}
+        Map hm1 = new LinkedHashMap();
+        hm1.put("KEY1", new Integer(1));
+        hm1.put("KEY2", new Integer(2));
 
-	public void testIdAsMapKey() throws Exception {
-		Map map = new HashMap();
-		Object o1 = new Object();
+        Map hm2 = new LinkedHashMap();
+        // put same keys but in different order 
+        hm2.put("KEY2", new Integer(2));
+        hm2.put("KEY1", new Integer(1));
 
-		Class class1=Number.class;
-		String pknm = "xyzabc";
+        ObjectId ref = new ObjectId(class1, hm1);
+        ObjectId oid = new ObjectId(class1, hm2);
+        assertTrue(ref.equals(oid));
+        assertEquals(ref.hashCode(), oid.hashCode());
+    }
 
-		Map hm1 = new HashMap();
-		hm1.put(pknm, "123");
+    public void testEqualsBinaryKey() throws Exception {
+        Class class1 = Artist.class;
 
-		Map hm2 = new HashMap();
-		hm2.put(pknm, "123");
+        Map hm1 = new HashMap();
+        hm1.put("key1", new byte[] { 3, 4, 10, -1 });
 
-		ObjectId oid1 = new ObjectId(class1, hm1);
-		ObjectId oid2 = new ObjectId(class1, hm2);
+        Map hm2 = new HashMap();
+        hm2.put("key1", new byte[] { 3, 4, 10, -1 });
 
-		map.put(oid1, o1);
-		assertSame(o1, map.get(oid2));
-	}
+        ObjectId ref = new ObjectId(class1, hm1);
+        ObjectId oid = new ObjectId(class1, hm2);
+        assertEquals(ref.hashCode(), oid.hashCode());
+        assertTrue(ref.equals(oid));
+    }
 
-	public void testNotEqual1() throws Exception {
-		Class class1=Number.class;
-		Class class2=Boolean.class;
+    public void testEqualsNull() {
+        ObjectId o = new ObjectId(Artist.class, "ARTIST_ID", 42);
+        assertFalse(o.equals(null));
+    }
 
-		ObjectId oid1 = new ObjectId(class1, null);
-		ObjectId oid2 = new ObjectId(class2, null);
-		assertFalse(oid1.equals(oid2));
-	}
+    public void testIdAsMapKey() throws Exception {
+        Map map = new HashMap();
+        Object o1 = new Object();
 
-	public void testNotEqual2() throws Exception {
-		Class class1=Number.class;
+        Class class1 = Number.class;
+        String pknm = "xyzabc";
 
-		Map hm1 = new HashMap();
-		hm1.put("pk1", "123");
+        Map hm1 = new HashMap();
+        hm1.put(pknm, "123");
 
-		Map hm2 = new HashMap();
-		hm2.put("pk2", "123");
+        Map hm2 = new HashMap();
+        hm2.put(pknm, "123");
 
-		ObjectId oid1 = new ObjectId(class1, hm1);
-		ObjectId oid2 = new ObjectId(class1, hm2);
-		assertFalse(oid1.equals(oid2));
-	}
+        ObjectId oid1 = new ObjectId(class1, hm1);
+        ObjectId oid2 = new ObjectId(class1, hm2);
+
+        map.put(oid1, o1);
+        assertSame(o1, map.get(oid2));
+    }
+
+    public void testNotEqual1() throws Exception {
+        Class class1 = Number.class;
+        Class class2 = Boolean.class;
+
+        ObjectId oid1 = new ObjectId(class1, null);
+        ObjectId oid2 = new ObjectId(class2, null);
+        assertFalse(oid1.equals(oid2));
+    }
+
+    public void testNotEqual2() throws Exception {
+        Class class1 = Number.class;
+
+        Map hm1 = new HashMap();
+        hm1.put("pk1", "123");
+
+        Map hm2 = new HashMap();
+        hm2.put("pk2", "123");
+
+        ObjectId oid1 = new ObjectId(class1, hm1);
+        ObjectId oid2 = new ObjectId(class1, hm2);
+        assertFalse(oid1.equals(oid2));
+    }
 }
