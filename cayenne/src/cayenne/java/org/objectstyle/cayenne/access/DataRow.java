@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.objectstyle.cayenne.DataObject;
 
 /**
@@ -72,20 +73,20 @@ import org.objectstyle.cayenne.DataObject;
 // TODO: Maybe implement "locking" of snapshot after it has been created,
 // since snapshots are expected to be immutable 
 public class DataRow extends HashMap {
-	
-	// "volatile" is supposed to ensure consistency in read and increment operations;
-	// is this universally true?
-	
-	// make sure the starting value is different from DataObject default version value
-	private static volatile long currentVersion = DataObject.DEFAULT_VERSION + 1;
-	
+
+    // "volatile" is supposed to ensure consistency in read and increment operations;
+    // is this universally true?
+
+    // make sure the starting value is different from DataObject default version value
+    private static volatile long currentVersion = DataObject.DEFAULT_VERSION + 1;
+
     protected long version = currentVersion++;
     protected long replacesVersion = DataObject.DEFAULT_VERSION;
 
     public DataRow(Map map) {
-    	super(map);
+        super(map);
     }
-    
+
     public DataRow(int initialCapacity) {
         super(initialCapacity);
     }
@@ -93,12 +94,19 @@ public class DataRow extends HashMap {
     public long getVersion() {
         return version;
     }
-    
+
     public long getReplacesVersion() {
         return replacesVersion;
     }
 
     public void setReplacesVersion(long replacesVersion) {
         this.replacesVersion = replacesVersion;
+    }
+
+    public String toString() {
+        return new ToStringBuilder(this)
+            .append("version", version)
+            .append("values", super.toString())
+            .toString();
     }
 }

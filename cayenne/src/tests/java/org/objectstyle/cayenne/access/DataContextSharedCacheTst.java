@@ -43,12 +43,12 @@
  */
 package org.objectstyle.cayenne.access;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.conf.Configuration;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 import org.objectstyle.cayenne.util.Util;
 
@@ -67,16 +67,6 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         artist = (Artist) context.createAndRegisterNewObject("Artist");
         artist.setArtistName("version1");
         context.commitChanges();
-    }
-
-    protected Date getDateWithoutTime() {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
     }
 
     protected DataRowStore getDataRowCache() {
@@ -151,6 +141,9 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
+        // update.. first make sure that ALT is not hollow
+        altArtist.getArtistName();
+
         // update
         artist.setArtistName("version2");
         context.commitChanges();
@@ -178,8 +171,11 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertFalse(altArtist == artist);
         assertEquals(artist.getArtistName(), altArtist.getArtistName());
 
+        // update.. first make sure that ALT is not hollow
+        altArtist.getArtistName();
+
         // update
-        Date dob = getDateWithoutTime();
+        Date dob = CayenneTestCase.stripTime(new Date());
         artist.setDateOfBirth(dob);
         context.commitChanges();
 

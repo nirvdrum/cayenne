@@ -11,11 +11,11 @@
     <classpathentry kind="src" path="src/tutorials/cayenne-tapestry-app/WEB-INF/classes"/>
     <classpathentry kind="src" path="contrib/examples/data-port/src/java"/>
     <classpathentry exported="true" kind="lib" path="otherlib/ant-1.5.3.jar"/>
-    <classpathentry exported="true" kind="lib" path="otherlib/ashwood-28012003.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/ashwood-1.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/bcel-5.0.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-beanutils-1.6.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-collections-2.1.jar"/>
-    <classpathentry exported="true" kind="lib" path="otherlib/commons-lang-1.0.1.jar"/>
+    <classpathentry exported="true" kind="lib" path="otherlib/commons-lang-2.0.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/commons-logging-1.0.3.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/junit-3.8.1.jar"/>
     <classpathentry exported="true" kind="lib" path="otherlib/log4j-1.2.8.jar"/>

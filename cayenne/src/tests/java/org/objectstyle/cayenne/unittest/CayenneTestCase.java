@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.unittest;
 
 import java.io.File;
 import java.sql.Connection;
+import java.util.Calendar;
+import java.util.Date;
 
 import junit.framework.TestCase;
 
@@ -85,6 +87,20 @@ public abstract class CayenneTestCase extends TestCase {
             new File(new File(new File("build"), "tests"), "deps"),
             "test-resources");
     }
+    
+    /**
+     * Utility method to strip the time part from the Date.
+     */
+	public static Date stripTime(Date date) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(Calendar.HOUR_OF_DAY, 0);
+		cal.set(Calendar.MINUTE, 0);
+		cal.set(Calendar.SECOND, 0);
+		cal.set(Calendar.MILLISECOND, 0);
+		return cal.getTime();
+	}
+
 
     protected void setUp() throws Exception {
         // make sure that the right domain is setup as shared, as some tests

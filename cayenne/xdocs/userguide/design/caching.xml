@@ -92,7 +92,7 @@ cache.setNotifyingObjectStores(true);
             	snapshot is "retained" by ObjectStore, so that any changes to the underlying
             	DataRowStore could not affect modification process of this object.</li>
             	
-            	<li>[NOT IMPLEMENTED YET] On commit, if the version of retained snapshot 
+            	<li>On commit, if the version of retained snapshot 
             	and the version
             	of the currently stored snapshot differ (meaning that someone else has
             	modified the object, or maybe that the snapshot has been refreshed

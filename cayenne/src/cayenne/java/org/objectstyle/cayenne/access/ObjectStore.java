@@ -74,20 +74,20 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     protected Map objectMap = new HashMap();
 
     /**
-	 * Ensures access to the versions of DataObject snapshots (in the form of
-	 * DataRows) taken when an object was first modified.
-	 */
+     * Ensures access to the versions of DataObject snapshots (in the form of
+     * DataRows) taken when an object was first modified.
+     */
     protected Map retainedSnapshotMap = new HashMap();
 
     /**
-	 * Stores a reference to the SnapshotCache.
-	 * 
-	 * <p>
-	 * <i>Serialization note:</i> It is up to the owner of this ObjectStore
-	 * to initialize snapshot cache after deserialization of this object.
-	 * ObjectStore will not know how to restore the SnapshotCache by itself.
-	 * </p>
-	 */
+     * Stores a reference to the SnapshotCache.
+     * 
+     * <p>
+     * <i>Serialization note:</i> It is up to the owner of this ObjectStore
+     * to initialize snapshot cache after deserialization of this object.
+     * ObjectStore will not know how to restore the SnapshotCache by itself.
+     * </p>
+     */
     protected transient DataRowStore dataRowCache;
 
     public ObjectStore() {
@@ -99,51 +99,66 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Synchronizes the state of registered DataObjects with the current state
-	 * of SnapshotCache.
-	 */
+     * Synchronizes the state of registered DataObjects with the current state
+     * of SnapshotCache.
+     */
     public synchronized void synchronizeWithCache() {
         // TODO: do the actual synchronization
     }
 
     /**
-	 * Saves a committed snapshot for an object in a non-expiring cache. This
-	 * ensures that Cayenne can track object changes even if the underlying
-	 * cache entry has expired or replaced with a newer version. Retained
-	 * snapshots are evicted when an object is committed or rolled back.
-	 * 
-	 * <p>Committing modified objects comparing them with retained snapshots 
-	 * instead of the currently cached snapshots would allow to resolve certain
-	 * conflicts during concurrent modification of <strong>different attributes</code>
-	 * of the same objects by different DataContexts. 
-	 * </p>
-	 * 
-	 * @since 1.1
-	 */
+     * Saves a committed snapshot for an object in a non-expiring cache. This
+     * ensures that Cayenne can track object changes even if the underlying
+     * cache entry has expired or replaced with a newer version. Retained
+     * snapshots are evicted when an object is committed or rolled back.
+     * 
+     * <p>
+     * When committing modified objects, comparing them with retained snapshots
+     * instead of the currently cached snapshots would allow to resolve certain
+     * conflicts during concurrent modification of <strong>different
+     * attributes</strong> of the same objects by different DataContexts.
+     * </p>
+     * 
+     * @since 1.1
+     */
     public synchronized void retainSnapshot(DataObject dataObject) {
         ObjectId oid = dataObject.getObjectId();
         DataRow snapshot = getCachedSnapshot(oid);
 
-        // if cached snapshot is different or absent, use snapshot built from object
-        if (snapshot == null || snapshot.getVersion() != dataObject.getSnapshotVersion()) {
+        // if cached snapshot is different or absent, use snapshot built from
+        // object
+        if (snapshot == null
+            || snapshot.getVersion() != dataObject.getSnapshotVersion()) {
             snapshot =
                 (DataRow) dataObject.getDataContext().takeObjectSnapshot(dataObject);
         }
 
-        this.retainedSnapshotMap.put(oid, snapshot);
+        retainSnapshot(dataObject, snapshot);
     }
 
     /**
-	 * Returns a SnapshotCache associated with this ObjectStore.
-	 */
+     * Stores provided DataRow as a snapshot to be used to build UPDATE
+     * queries for an object. Updates object's snapshot version with the
+     * version of the new retained snapshot.
+     * 
+     * @since 1.1
+     */
+    public synchronized void retainSnapshot(DataObject object, DataRow snapshot) {
+        this.retainedSnapshotMap.put(object.getObjectId(), snapshot);
+        object.setSnapshotVersion(snapshot.getVersion());
+    }
+
+    /**
+     * Returns a SnapshotCache associated with this ObjectStore.
+     */
     public DataRowStore getDataRowCache() {
         return dataRowCache;
     }
 
     /**
-	 * Sets parent SnapshotCache. Registers to receive SnapshotEvents if the
-	 * cache is configured to allow ObjectStores to receive such events.
-	 */
+     * Sets parent SnapshotCache. Registers to receive SnapshotEvents if the
+     * cache is configured to allow ObjectStores to receive such events.
+     */
     public void setDataRowCache(DataRowStore snapshotCache) {
         if (this.dataRowCache != null) {
             this.dataRowCache.stopReceivingSnapshotEvents(this);
@@ -157,9 +172,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Invalidates a collection of DataObjects. Changes objects state to
-	 * HOLLOW.
-	 */
+     * Invalidates a collection of DataObjects. Changes objects state to
+     * HOLLOW.
+     */
     public synchronized void objectsInvalidated(Collection objects) {
         if (objects.isEmpty()) {
             return;
@@ -191,10 +206,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Evicts a collection of DataObjects from the ObjectStore. Object
-	 * snapshots are removed as well. Changes objects state to TRANSIENT. This
-	 * method can be used for manual cleanup of Cayenne cache.
-	 */
+     * Evicts a collection of DataObjects from the ObjectStore. Object
+     * snapshots are removed as well. Changes objects state to TRANSIENT. This
+     * method can be used for manual cleanup of Cayenne cache.
+     */
     public synchronized void objectsUnregistered(Collection objects) {
         if (objects.isEmpty()) {
             return;
@@ -219,23 +234,23 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Updates underlying SnapshotCache. If <code>refresh</code> is true, all
-	 * snapshots in <code>snapshots</code> will be loaded into SnapshotCache,
-	 * regardless of the existing cache state. If <code>refresh</code> is
-	 * false, only missing snapshots are loaded. This method is normally called
-	 * by Cayenne internally to synchronized snapshots of recently fetched
-	 * objects.
-	 * 
-	 * @param objects
-	 *            a list of object whose snapshots need to be updated in the
-	 *            SnapshotCache
-	 * @param snapshots
-	 *            a list of snapshots. Must be the same size and use the same
-	 *            order as <code>objects</code> list.
-	 * @param refresh
-	 *            controls whether existing cached snapshots should be replaced
-	 *            with the new ones.
-	 */
+     * Updates underlying SnapshotCache. If <code>refresh</code> is true, all
+     * snapshots in <code>snapshots</code> will be loaded into SnapshotCache,
+     * regardless of the existing cache state. If <code>refresh</code> is
+     * false, only missing snapshots are loaded. This method is normally called
+     * by Cayenne internally to synchronized snapshots of recently fetched
+     * objects.
+     * 
+     * @param objects
+     *            a list of object whose snapshots need to be updated in the
+     *            SnapshotCache
+     * @param snapshots
+     *            a list of snapshots. Must be the same size and use the same
+     *            order as <code>objects</code> list.
+     * @param refresh
+     *            controls whether existing cached snapshots should be replaced
+     *            with the new ones.
+     */
     public synchronized void snapshotsUpdatedForObjects(
         List objects,
         List snapshots,
@@ -277,9 +292,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Processes internal objects after the parent DataContext was committed.
-	 * Changes object persistence state and handles snapshot updates.
-	 */
+     * Processes internal objects after the parent DataContext was committed.
+     * Changes object persistence state and handles snapshot updates.
+     */
     public synchronized void objectsCommitted() {
         Iterator objects = this.getObjectIterator();
         List modifiedIds = null;
@@ -331,8 +346,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                     (DataRow) object.getDataContext().takeObjectSnapshot(object);
 
                 modifiedSnapshots.put(id, dataRow);
-				dataRow.setReplacesVersion(object.getSnapshotVersion());
-                
+                dataRow.setReplacesVersion(object.getSnapshotVersion());
+
                 object.setPersistenceState(PersistenceState.COMMITTED);
                 object.setSnapshotVersion(dataRow.getVersion());
             }
@@ -368,7 +383,7 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
                 DataRow dataRow =
                     (DataRow) object.getDataContext().takeObjectSnapshot(object);
                 modifiedSnapshots.put(id.getReplacementId(), dataRow);
-				dataRow.setReplacesVersion(object.getSnapshotVersion());
+                dataRow.setReplacesVersion(object.getSnapshotVersion());
 
                 // fix object state
                 object.setObjectId(id.getReplacementId());
@@ -392,12 +407,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Reregisters an object using a new id as a key. Returns the object if it
-	 * is found, or null if it is not registered in the object store.
-	 * 
-	 * @deprecated Since 1.1 all methods for snapshot manipulation via
-	 *             ObjectStore are deprecated due to architecture changes.
-	 */
+     * Reregisters an object using a new id as a key. Returns the object if it
+     * is found, or null if it is not registered in the object store.
+     * 
+     * @deprecated Since 1.1 all methods for snapshot manipulation via
+     *             ObjectStore are deprecated due to architecture changes.
+     */
     public synchronized DataObject changeObjectKey(ObjectId oldId, ObjectId newId) {
         DataObject object = (DataObject) objectMap.remove(oldId);
         if (object != null) {
@@ -425,13 +440,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Start tracking the registration of new objects. from this objectStore.
-	 * Used in conjunction with unregisterNewObjects() to control garbage
-	 * collection when an instance of ObjectStore is used over a longer time
-	 * for batch processing. (TODO: this won't work with changeObjectKey()?)
-	 * 
-	 * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
-	 */
+     * Start tracking the registration of new objects. from this objectStore.
+     * Used in conjunction with unregisterNewObjects() to control garbage
+     * collection when an instance of ObjectStore is used over a longer time
+     * for batch processing. (TODO: this won't work with changeObjectKey()?)
+     * 
+     * @see org.objectstyle.cayenne.access.ObjectStore#unregisterNewObjects()
+     */
     public synchronized void startTrackingNewObjects() {
         // TODO: something like shared DataContext or nested DataContext
         // would hopefully obsolete this feature...
@@ -439,13 +454,13 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Unregisters the newly registered DataObjects from this objectStore. Used
-	 * in conjunction with startTrackingNewObjects() to control garbage
-	 * collection when an instance of ObjectStore is used over a longer time
-	 * for batch processing. (TODO: this won't work with changeObjectKey()?)
-	 * 
-	 * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
-	 */
+     * Unregisters the newly registered DataObjects from this objectStore. Used
+     * in conjunction with startTrackingNewObjects() to control garbage
+     * collection when an instance of ObjectStore is used over a longer time
+     * for batch processing. (TODO: this won't work with changeObjectKey()?)
+     * 
+     * @see org.objectstyle.cayenne.access.ObjectStore#startTrackingNewObjects()
+     */
     public synchronized void unregisterNewObjects() {
         // TODO: something like shared DataContext or nested DataContext
         // would hopefully obsolete this feature...
@@ -472,9 +487,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * @deprecated Since 1.1 all methods for snapshot manipulation via
-	 *             ObjectStore are deprecated due to architecture changes.
-	 */
+     * @deprecated Since 1.1 all methods for snapshot manipulation via
+     *             ObjectStore are deprecated due to architecture changes.
+     */
     public synchronized void addSnapshot(ObjectId id, Map snapshot) {
         getDataRowCache().processSnapshotChanges(
             this,
@@ -483,37 +498,45 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * @deprecated Since 1.1 getCachedSnapshot(ObjectId) or
-	 *             getSnapshot(ObjectId,QueryEngine) must be used.
-	 */
+     * @deprecated Since 1.1 getCachedSnapshot(ObjectId) or
+     *             getSnapshot(ObjectId,QueryEngine) must be used.
+     */
     public synchronized Map getSnapshot(ObjectId id) {
         return getCachedSnapshot(id);
     }
 
-    /**
-	 * Returns a snapshot for ObjectId from the underlying snapshot cache. If
-	 * cache contains no snapshot, a null is returned.
-	 */
-    public DataRow getCachedSnapshot(ObjectId id) {
-        DataRow retained = (DataRow) retainedSnapshotMap.get(id);
-        return (retained != null) ? retained : getDataRowCache().getCachedSnapshot(id);
+    public DataRow getRetainedSnapshot(ObjectId oid) {
+        return (DataRow) retainedSnapshotMap.get(oid);
     }
 
     /**
-	 * Returns a snapshot for ObjectId from the underlying snapshot cache. If
-	 * cache contains no snapshot, it will attempt fetching it using provided
-	 * QueryEngine. If fetch attempt fails or inconsistent data is returned,
-	 * underlying cache will throw a CayenneRuntimeException.
-	 */
-    public DataRow getSnapshot(ObjectId id, QueryEngine engine) {
-        DataRow retained = (DataRow) retainedSnapshotMap.get(id);
-        return (retained != null) ? retained : getDataRowCache().getSnapshot(id, engine);
+     * Returns a snapshot for ObjectId from the underlying snapshot cache. If
+     * cache contains no snapshot, a null is returned.
+     * 
+     * @since 1.1
+     */
+    public DataRow getCachedSnapshot(ObjectId oid) {
+        DataRow retained = getRetainedSnapshot(oid);
+        return (retained != null) ? retained : getDataRowCache().getCachedSnapshot(oid);
     }
 
     /**
-	 * @deprecated Since 1.1 all methods for snapshot manipulation via
-	 *             ObjectStore are deprecated due to architecture changes.
-	 */
+     * Returns a snapshot for ObjectId from the underlying snapshot cache. If
+     * cache contains no snapshot, it will attempt fetching it using provided
+     * QueryEngine. If fetch attempt fails or inconsistent data is returned,
+     * underlying cache will throw a CayenneRuntimeException.
+     * 
+     * @since 1.1
+     */
+    public DataRow getSnapshot(ObjectId oid, QueryEngine engine) {
+        DataRow retained = getRetainedSnapshot(oid);
+        return (retained != null) ? retained : getDataRowCache().getSnapshot(oid, engine);
+    }
+
+    /**
+     * @deprecated Since 1.1 all methods for snapshot manipulation via
+     *             ObjectStore are deprecated due to architecture changes.
+     */
     public synchronized void removeObject(ObjectId id) {
         if (id != null) {
             objectMap.remove(id);
@@ -522,34 +545,34 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * @deprecated Since 1.1 all methods for snapshot manipulation via
-	 *             ObjectStore are deprecated due to architecture changes.
-	 */
+     * @deprecated Since 1.1 all methods for snapshot manipulation via
+     *             ObjectStore are deprecated due to architecture changes.
+     */
     public synchronized void removeSnapshot(ObjectId id) {
         dataRowCache.forgetSnapshot(id);
     }
 
     /**
-	 * Returns a list of objects that are registered with this DataContext,
-	 * regardless of their persistence state. List is returned by copy and can
-	 * be modified by the caller.
-	 */
+     * Returns a list of objects that are registered with this DataContext,
+     * regardless of their persistence state. List is returned by copy and can
+     * be modified by the caller.
+     */
     public synchronized List getObjects() {
         return new ArrayList(objectMap.values());
     }
 
     /**
-	 * Returns an iterator over the registered objects.
-	 */
+     * Returns an iterator over the registered objects.
+     */
     public synchronized Iterator getObjectIterator() {
         return objectMap.values().iterator();
     }
 
     /**
-	 * Returns <code>true</code> if there are any modified, deleted or new
-	 * objects registered with this ObjectStore, <code>false</code>
-	 * otherwise.
-	 */
+     * Returns <code>true</code> if there are any modified, deleted or new
+     * objects registered with this ObjectStore, <code>false</code>
+     * otherwise.
+     */
     public synchronized boolean hasChanges() {
 
         // TODO: This implementation is rather naive and would scan all
@@ -575,9 +598,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * Return a subset of registered objects that are in a certian persistence
-	 * state. Collection is returned by copy.
-	 */
+     * Return a subset of registered objects that are in a certian persistence
+     * state. Collection is returned by copy.
+     */
     public synchronized List objectsInState(int state) {
         List filteredObjects = new ArrayList();
 
@@ -592,9 +615,9 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     }
 
     /**
-	 * SnapshotEventListener implementation that processes snapshot change
-	 * event, updating DataObjects that have the changes.
-	 */
+     * SnapshotEventListener implementation that processes snapshot change
+     * event, updating DataObjects that have the changes.
+     */
     public void snapshotsChanged(SnapshotEvent event) {
         // ignore event if this ObjectStore was the originator
         if (event.getSource() == this) {

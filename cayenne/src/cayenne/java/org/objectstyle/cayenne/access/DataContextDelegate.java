@@ -88,6 +88,12 @@ public interface DataContextDelegate {
 	 * that a snapshot for object was modified in the underlying DataRowStore. It is invoked
 	 * for MODIFIED and DELETED objects about to be committed. Delegate can perform merging
 	 * of the snapshop, or abort commit by throwing an exception.
+	 * 
+	 * <p>Note that this delegate method may not be invoked even if the database row
+	 * has changed compared to the snapshot an update is built against. The reasons for 
+	 * that are the latency of distributed notifications and the fact that DataContext commit 
+	 * operations are not synchronized on DataRowStore.
+	 * </p>
 	 */
     public void snapshotChangedInDataRowStore(DataObject object, DataRow snapshotInStore);
 }

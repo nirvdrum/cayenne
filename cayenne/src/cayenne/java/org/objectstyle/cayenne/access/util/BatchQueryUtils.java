@@ -85,323 +85,313 @@ import org.objectstyle.cayenne.util.Util;
 
 public class BatchQueryUtils {
 
-	private BatchQueryUtils() {
-	}
+    private BatchQueryUtils() {
+    }
 
-	/**
-	 * Utility method that returns <code>true</code> if 
-	 * the query will update at least one BLOB or CLOB DbAttribute.
-	 */
-	public static boolean updatesLOBColumns(BatchQuery query) {
-		boolean isInsert = query instanceof InsertBatchQuery;
-		boolean isUpdate = query instanceof UpdateBatchQuery;
+    /**
+     * Utility method that returns <code>true</code> if 
+     * the query will update at least one BLOB or CLOB DbAttribute.
+     */
+    public static boolean updatesLOBColumns(BatchQuery query) {
+        boolean isInsert = query instanceof InsertBatchQuery;
+        boolean isUpdate = query instanceof UpdateBatchQuery;
 
-		if (!isInsert && !isUpdate) {
-			return false;
-		}
+        if (!isInsert && !isUpdate) {
+            return false;
+        }
 
-		List updatedAttributes =
-			(isInsert)
-				? query.getDbAttributes()
-				: ((UpdateBatchQuery) query).getUpdatedDbAttributes();
+        List updatedAttributes =
+            (isInsert)
+                ? query.getDbAttributes()
+                : ((UpdateBatchQuery) query).getUpdatedDbAttributes();
 
-		Iterator it = updatedAttributes.iterator();
-		while (it.hasNext()) {
-			int type = ((DbAttribute) it.next()).getType();
-			if (type == Types.CLOB || type == Types.BLOB) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
+        Iterator it = updatedAttributes.iterator();
+        while (it.hasNext()) {
+            int type = ((DbAttribute) it.next()).getType();
+            if (type == Types.CLOB || type == Types.BLOB) {
+                return true;
+            }
+        }
 
-	public static Map buildSnapshotForUpdate(DataObject o) {
-		Map committedSnapshot = o.getCommittedSnapshot();
-		Map currentSnapshot = o.getCurrentSnapshot();
-		Map snapshot = null;
+        return false;
+    }
 
-		if (committedSnapshot == null || committedSnapshot.isEmpty()) {
-			snapshot = Collections.unmodifiableMap(currentSnapshot);
-			return snapshot;
-		} else
-			snapshot = new HashMap(currentSnapshot.size());
+    public static Map buildSnapshotForUpdate(DataObject o) {
+        Map committedSnapshot = o.getCommittedSnapshot();
+        Map currentSnapshot = o.getCurrentSnapshot();
+        Map snapshot = null;
 
-		Iterator it = currentSnapshot.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String attrName = (String) entry.getKey();
-			Object newValue = entry.getValue();
-			// if snapshot exists, compare old values and new values,
-			// only add attribute to the update clause if the value has changed
-			Object oldValue = committedSnapshot.get(attrName);
-			if (!Util.nullSafeEquals(oldValue, newValue))
-				snapshot.put(attrName, newValue);
-		}
+        if (committedSnapshot == null || committedSnapshot.isEmpty()) {
+            snapshot = Collections.unmodifiableMap(currentSnapshot);
+            return snapshot;
+        }
+        else
+            snapshot = new HashMap(currentSnapshot.size());
 
-		// original snapshot can have extra keys that are missing in current snapshot
-		// process those
-		Iterator origit = committedSnapshot.entrySet().iterator();
-		while (origit.hasNext()) {
-			Map.Entry entry = (Map.Entry) origit.next();
-			String attrName = (String) entry.getKey();
-			Object oldValue = entry.getValue();
-			if (oldValue == null || currentSnapshot.containsKey(attrName))
-				continue;
-			snapshot.put(attrName, null);
-		}
+        Iterator it = currentSnapshot.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String attrName = (String) entry.getKey();
+            Object newValue = entry.getValue();
+            // if snapshot exists, compare old values and new values,
+            // only add attribute to the update clause if the value has changed
+            Object oldValue = committedSnapshot.get(attrName);
+            if (!Util.nullSafeEquals(oldValue, newValue))
+                snapshot.put(attrName, newValue);
+        }
 
-		return Collections.unmodifiableMap(snapshot);
-	}
+        // original snapshot can have extra keys that are missing in current snapshot
+        // process those
+        Iterator origit = committedSnapshot.entrySet().iterator();
+        while (origit.hasNext()) {
+            Map.Entry entry = (Map.Entry) origit.next();
+            String attrName = (String) entry.getKey();
+            Object oldValue = entry.getValue();
+            if (oldValue == null || currentSnapshot.containsKey(attrName))
+                continue;
+            snapshot.put(attrName, null);
+        }
+
+        return Collections.unmodifiableMap(snapshot);
+    }
 
     /**
      * @deprecated Since 1.1 use org.objectstyle.cayenne.util.Util.hashCode(Collectioin)
      */
-	public static int hashCode(Collection c) {
-		return Util.hashCode(c);
-	}
+    public static int hashCode(Collection c) {
+        return Util.hashCode(c);
+    }
 
-	public static Map buildFlattenedSnapshot(
-		Map sourceId,
-		Map destinationId,
-		DbRelationship firstRelationship,
-		DbRelationship secondRelationship) {
-		Map snapshot = new HashMap(sourceId.size() + destinationId.size());
-		List joins = firstRelationship.getJoins();
-		for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-			DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
-			DbAttribute sourceAttribute = thisJoin.getSource();
-			DbAttribute targetAttribute = thisJoin.getTarget();
-			snapshot.put(
-				targetAttribute.getName(),
-				sourceId.get(sourceAttribute.getName()));
-		}
+    public static Map buildFlattenedSnapshot(
+        Map sourceId,
+        Map destinationId,
+        DbRelationship firstRelationship,
+        DbRelationship secondRelationship) {
+        Map snapshot = new HashMap(sourceId.size() + destinationId.size());
+        List joins = firstRelationship.getJoins();
+        for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
+            DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
+            DbAttribute sourceAttribute = thisJoin.getSource();
+            DbAttribute targetAttribute = thisJoin.getTarget();
+            snapshot.put(
+                targetAttribute.getName(),
+                sourceId.get(sourceAttribute.getName()));
+        }
 
-		joins = secondRelationship.getJoins();
-		for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
-			DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
-			DbAttribute sourceAttribute = thisJoin.getSource();
-			DbAttribute targetAttribute = thisJoin.getTarget();
-			snapshot.put(
-				sourceAttribute.getName(),
-				destinationId.get(targetAttribute.getName()));
-		}
+        joins = secondRelationship.getJoins();
+        for (int i = 0, numJoins = joins.size(); i < numJoins; i++) {
+            DbAttributePair thisJoin = (DbAttributePair) joins.get(i);
+            DbAttribute sourceAttribute = thisJoin.getSource();
+            DbAttribute targetAttribute = thisJoin.getTarget();
+            snapshot.put(
+                sourceAttribute.getName(),
+                destinationId.get(targetAttribute.getName()));
+        }
 
-		return snapshot;
-	}
+        return snapshot;
+    }
 
-	public static Map buildSnapshotForInsert(
-		ObjEntity ent,
-		DataObject o,
-		DbRelationship masterDependentRel) {
-		boolean isMasterDbEntity = (masterDependentRel == null);
-		Map map = new HashMap();
+    public static Map buildSnapshotForInsert(
+        ObjEntity ent,
+        DataObject o,
+        DbRelationship masterDependentRel) {
+        boolean isMasterDbEntity = (masterDependentRel == null);
+        Map map = new HashMap();
 
-		Map attrMap = ent.getAttributeMap();
-		Iterator it = attrMap.keySet().iterator();
-		while (it.hasNext()) {
-			String attrName = (String) it.next();
-			ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
+        Map attrMap = ent.getAttributeMap();
+        Iterator it = attrMap.keySet().iterator();
+        while (it.hasNext()) {
+            String attrName = (String) it.next();
+            ObjAttribute objAttr = (ObjAttribute) attrMap.get(attrName);
 
-			if (isMasterDbEntity && !objAttr.isCompound()) {
-				map.put(
-					objAttr.getDbAttributePath(),
-					o.readPropertyDirectly(attrName));
-			} else if (!isMasterDbEntity && objAttr.isCompound()) {
-				DbAttribute dbAttr = objAttr.getDbAttribute();
-				if (dbAttr.getEntity() == masterDependentRel.getTargetEntity())
-					map.put(dbAttr.getName(), o.readPropertyDirectly(attrName));
-			}
-		}
+            if (isMasterDbEntity && !objAttr.isCompound()) {
+                map.put(objAttr.getDbAttributePath(), o.readPropertyDirectly(attrName));
+            }
+            else if (!isMasterDbEntity && objAttr.isCompound()) {
+                DbAttribute dbAttr = objAttr.getDbAttribute();
+                if (dbAttr.getEntity() == masterDependentRel.getTargetEntity())
+                    map.put(dbAttr.getName(), o.readPropertyDirectly(attrName));
+            }
+        }
 
-		if (isMasterDbEntity) {
-			Map relMap = ent.getRelationshipMap();
-			Iterator itr = relMap.keySet().iterator();
-			while (itr.hasNext()) {
-				String relName = (String) itr.next();
-				ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-				// to-many will be handled on the other side
-				if (rel.isToMany())
-					continue;
-				if (rel.isToDependentEntity())
-					continue;
-				DataObject target =
-					(DataObject) o.readPropertyDirectly(relName);
-				if (target == null)
-					continue;
-				DbRelationship dbRel =
-					(DbRelationship) rel.getDbRelationships().get(0);
-				Map idParts = target.getObjectId().getIdSnapshot();
-				// this may happen in uncommitted objects
-				if (idParts == null)
-					continue;
-				Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-				map.putAll(fk);
-			}
-		} else {
-			Map relMap = ent.getRelationshipMap();
-			Iterator itr = relMap.keySet().iterator();
-			while (itr.hasNext()) {
-				String relName = (String) itr.next();
-				ObjRelationship rel = (ObjRelationship) relMap.get(relName);
-				DbRelationship dbRel =
-					(DbRelationship) rel.getDbRelationships().get(1);
-				if (rel.isToMany())
-					continue;
-				if (dbRel.isToDependentPK())
-					continue;
-				DataObject target =
-					(DataObject) o.readPropertyDirectly(relName);
-				if (target == null)
-					continue;
-				if (dbRel.getSourceEntity()
-					!= masterDependentRel.getTargetEntity())
-					continue;
-				Map idParts = target.getObjectId().getIdSnapshot();
-				// this may happen in uncommitted objects
-				if (idParts == null)
-					continue;
-				Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
-				map.putAll(fk);
-			}
-		}
+        if (isMasterDbEntity) {
+            Map relMap = ent.getRelationshipMap();
+            Iterator itr = relMap.keySet().iterator();
+            while (itr.hasNext()) {
+                String relName = (String) itr.next();
+                ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+                // to-many will be handled on the other side
+                if (rel.isToMany())
+                    continue;
+                if (rel.isToDependentEntity())
+                    continue;
+                DataObject target = (DataObject) o.readPropertyDirectly(relName);
+                if (target == null)
+                    continue;
+                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(0);
+                Map idParts = target.getObjectId().getIdSnapshot();
+                // this may happen in uncommitted objects
+                if (idParts == null)
+                    continue;
+                Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+                map.putAll(fk);
+            }
+        }
+        else {
+            Map relMap = ent.getRelationshipMap();
+            Iterator itr = relMap.keySet().iterator();
+            while (itr.hasNext()) {
+                String relName = (String) itr.next();
+                ObjRelationship rel = (ObjRelationship) relMap.get(relName);
+                DbRelationship dbRel = (DbRelationship) rel.getDbRelationships().get(1);
+                if (rel.isToMany())
+                    continue;
+                if (dbRel.isToDependentPK())
+                    continue;
+                DataObject target = (DataObject) o.readPropertyDirectly(relName);
+                if (target == null)
+                    continue;
+                if (dbRel.getSourceEntity() != masterDependentRel.getTargetEntity())
+                    continue;
+                Map idParts = target.getObjectId().getIdSnapshot();
+                // this may happen in uncommitted objects
+                if (idParts == null)
+                    continue;
+                Map fk = dbRel.srcFkSnapshotWithTargetSnapshot(idParts);
+                map.putAll(fk);
+            }
+        }
 
-		// process object id map
-		// we should ignore any object id values if a corresponding attribute
-		// is a part of relationship "toMasterPK", since those values have been
-		// set above when db relationships where processed.
-		Map thisIdParts = o.getObjectId().getIdSnapshot();
-		if (thisIdParts != null) {
-			if (!isMasterDbEntity) {
-				thisIdParts =
-					masterDependentRel.targetPkSnapshotWithSrcSnapshot(
-						thisIdParts);
-			}
-			// put only thise that do not exist in the map
-			Iterator itm = thisIdParts.keySet().iterator();
-			while (itm.hasNext()) {
-				Object nextKey = itm.next();
-				if (!map.containsKey(nextKey))
-					map.put(nextKey, thisIdParts.get(nextKey));
-			}
-		}
-		return map;
-	}
+        // process object id map
+        // we should ignore any object id values if a corresponding attribute
+        // is a part of relationship "toMasterPK", since those values have been
+        // set above when db relationships where processed.
+        Map thisIdParts = o.getObjectId().getIdSnapshot();
+        if (thisIdParts != null) {
+            if (!isMasterDbEntity) {
+                thisIdParts =
+                    masterDependentRel.targetPkSnapshotWithSrcSnapshot(thisIdParts);
+            }
+            // put only thise that do not exist in the map
+            Iterator itm = thisIdParts.keySet().iterator();
+            while (itm.hasNext()) {
+                Object nextKey = itm.next();
+                if (!map.containsKey(nextKey))
+                    map.put(nextKey, thisIdParts.get(nextKey));
+            }
+        }
+        return map;
+    }
 
+    private static String getTargetDbAttributeName(
+        String srcDbAttributeName,
+        DbRelationship masterDependentRel) {
+        for (Iterator i = masterDependentRel.getJoins().iterator(); i.hasNext();) {
+            DbAttributePair join = (DbAttributePair) i.next();
+            if (srcDbAttributeName.equals(join.getSource().getName()))
+                return join.getTarget().getName();
+        }
+        return null;
+    }
 
-	private static String getTargetDbAttributeName(
-		String srcDbAttributeName,
-		DbRelationship masterDependentRel) {
-		for (Iterator i = masterDependentRel.getJoins().iterator();
-			i.hasNext();
-			) {
-			DbAttributePair join = (DbAttributePair) i.next();
-			if (srcDbAttributeName.equals(join.getSource().getName()))
-				return join.getTarget().getName();
-		}
-		return null;
-	}
+    public static Map buildSnapshotForUpdate(
+        ObjEntity entity,
+        DataObject o,
+        DbRelationship masterDependentRel) {
+        boolean isMasterDbEntity = (masterDependentRel == null);
+        Map committedSnapshot = o.getCommittedSnapshot();
+        Map currentSnapshot = o.getCurrentSnapshot();
+        Map snapshot = new HashMap(currentSnapshot.size());
 
-	public static Map buildSnapshotForUpdate(
-		ObjEntity entity,
-		DataObject o,
-		DbRelationship masterDependentRel) {
-		boolean isMasterDbEntity = (masterDependentRel == null);
-		Map committedSnapshot = o.getCommittedSnapshot();
-		Map currentSnapshot = o.getCurrentSnapshot();
-		Map snapshot = new HashMap(currentSnapshot.size());
+        if (committedSnapshot == null || committedSnapshot.isEmpty()) {
+            Iterator i = currentSnapshot.entrySet().iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry) i.next();
+                String dbAttrPath = (String) entry.getKey();
+                boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
+                Object newValue = entry.getValue();
+                if (isMasterDbEntity && !compoundDbAttr) {
+                    snapshot.put(dbAttrPath, newValue);
+                }
+                else if (!isMasterDbEntity && compoundDbAttr) {
+                    Iterator pathIterator =
+                        entity.getDbEntity().resolvePathComponents(dbAttrPath);
+                    if (pathIterator.hasNext()
+                        && masterDependentRel.equals(pathIterator.next())) {
+                        DbAttribute dbAttr = (DbAttribute) pathIterator.next();
+                        snapshot.put(dbAttr.getName(), newValue);
+                    }
+                }
+                else if (!isMasterDbEntity && !compoundDbAttr) {
+                    String pkAttrName =
+                        getTargetDbAttributeName(dbAttrPath, masterDependentRel);
+                    if (pkAttrName != null)
+                        snapshot.put(pkAttrName, newValue);
+                }
+            }
+            return Collections.unmodifiableMap(snapshot);
+        }
 
-		if (committedSnapshot == null || committedSnapshot.isEmpty()) {
-			for (Iterator i = currentSnapshot.entrySet().iterator();
-				i.hasNext();
-				) {
-				Map.Entry entry = (Map.Entry) i.next();
-				String dbAttrPath = (String) entry.getKey();
-				boolean compoundDbAttr =
-					dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
-				Object newValue = entry.getValue();
-				if (isMasterDbEntity && !compoundDbAttr) {
-					snapshot.put(dbAttrPath, newValue);
-				} else if (!isMasterDbEntity && compoundDbAttr) {
-					Iterator pathIterator =
-						entity.getDbEntity().resolvePathComponents(dbAttrPath);
-					if (pathIterator.hasNext()
-						&& masterDependentRel.equals(pathIterator.next())) {
-						DbAttribute dbAttr = (DbAttribute) pathIterator.next();
-						snapshot.put(dbAttr.getName(), newValue);
-					}
-				} else if (!isMasterDbEntity && !compoundDbAttr) {
-					String pkAttrName =
-						getTargetDbAttributeName(
-							dbAttrPath,
-							masterDependentRel);
-					if (pkAttrName != null)
-						snapshot.put(pkAttrName, newValue);
-				}
-			}
-			return Collections.unmodifiableMap(snapshot);
-		}
+        Iterator it = currentSnapshot.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String dbAttrPath = (String) entry.getKey();
+            boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
+            Object newValue = entry.getValue();
+            // if snapshot exists, compare old values and new values,
+            // only add attribute to the update clause if the value has changed
+            Object oldValue = committedSnapshot.get(dbAttrPath);
+            if (!Util.nullSafeEquals(oldValue, newValue)) {
+                if (isMasterDbEntity && !compoundDbAttr) {
+                    snapshot.put(dbAttrPath, newValue);
+                }
+                else if (!isMasterDbEntity && compoundDbAttr) {
+                    Iterator pathIterator =
+                        entity.getDbEntity().resolvePathComponents(dbAttrPath);
+                    if (pathIterator.hasNext()
+                        && masterDependentRel.equals(pathIterator.next())) {
+                        DbAttribute dbAttr = (DbAttribute) pathIterator.next();
+                        snapshot.put(dbAttr.getName(), newValue);
+                    }
+                }
+                else if (!isMasterDbEntity && !compoundDbAttr) {
+                    String pkAttrName =
+                        getTargetDbAttributeName(dbAttrPath, masterDependentRel);
+                    if (pkAttrName != null)
+                        snapshot.put(pkAttrName, newValue);
+                }
+            }
+        }
 
-		Iterator it = currentSnapshot.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry entry = (Map.Entry) it.next();
-			String dbAttrPath = (String) entry.getKey();
-			boolean compoundDbAttr =
-				dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
-			Object newValue = entry.getValue();
-			// if snapshot exists, compare old values and new values,
-			// only add attribute to the update clause if the value has changed
-			Object oldValue = committedSnapshot.get(dbAttrPath);
-			if (!Util.nullSafeEquals(oldValue, newValue)) {
-				if (isMasterDbEntity && !compoundDbAttr) {
-					snapshot.put(dbAttrPath, newValue);
-				} else if (!isMasterDbEntity && compoundDbAttr) {
-					Iterator pathIterator =
-						entity.getDbEntity().resolvePathComponents(dbAttrPath);
-					if (pathIterator.hasNext()
-						&& masterDependentRel.equals(pathIterator.next())) {
-						DbAttribute dbAttr = (DbAttribute) pathIterator.next();
-						snapshot.put(dbAttr.getName(), newValue);
-					}
-				} else if (!isMasterDbEntity && !compoundDbAttr) {
-					String pkAttrName =
-						getTargetDbAttributeName(
-							dbAttrPath,
-							masterDependentRel);
-					if (pkAttrName != null)
-						snapshot.put(pkAttrName, newValue);
-				}
-			}
-		}
-
-		// original snapshot can have extra keys that are missing in current snapshot
-		// process those
-		Iterator origit = committedSnapshot.entrySet().iterator();
-		while (origit.hasNext()) {
-			Map.Entry entry = (Map.Entry) origit.next();
-			String dbAttrPath = (String) entry.getKey();
-			boolean compoundDbAttr =
-				dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
-			Object oldValue = entry.getValue();
-			if (oldValue == null || currentSnapshot.containsKey(dbAttrPath))
-				continue;
-			if (isMasterDbEntity && !compoundDbAttr) {
-				snapshot.put(dbAttrPath, null);
-			} else if (!isMasterDbEntity && compoundDbAttr) {
-				Iterator pathIterator =
-					entity.getDbEntity().resolvePathComponents(dbAttrPath);
-				if (pathIterator.hasNext()
-					&& masterDependentRel.equals(pathIterator.next())) {
-					DbAttribute dbAttr = (DbAttribute) pathIterator.next();
-					snapshot.put(dbAttr.getName(), null);
-				}
-			} else if (!isMasterDbEntity && !compoundDbAttr) {
-				String pkAttrName =
-					getTargetDbAttributeName(dbAttrPath, masterDependentRel);
-				if (pkAttrName != null)
-					snapshot.put(pkAttrName, null);
-			}
-		}
-		return Collections.unmodifiableMap(snapshot);
-	}
+        // original snapshot can have extra keys that are missing in current snapshot
+        // process those
+        Iterator origit = committedSnapshot.entrySet().iterator();
+        while (origit.hasNext()) {
+            Map.Entry entry = (Map.Entry) origit.next();
+            String dbAttrPath = (String) entry.getKey();
+            boolean compoundDbAttr = dbAttrPath.indexOf(Entity.PATH_SEPARATOR) > 0;
+            Object oldValue = entry.getValue();
+            if (oldValue == null || currentSnapshot.containsKey(dbAttrPath))
+                continue;
+            if (isMasterDbEntity && !compoundDbAttr) {
+                snapshot.put(dbAttrPath, null);
+            }
+            else if (!isMasterDbEntity && compoundDbAttr) {
+                Iterator pathIterator =
+                    entity.getDbEntity().resolvePathComponents(dbAttrPath);
+                if (pathIterator.hasNext()
+                    && masterDependentRel.equals(pathIterator.next())) {
+                    DbAttribute dbAttr = (DbAttribute) pathIterator.next();
+                    snapshot.put(dbAttr.getName(), null);
+                }
+            }
+            else if (!isMasterDbEntity && !compoundDbAttr) {
+                String pkAttrName =
+                    getTargetDbAttributeName(dbAttrPath, masterDependentRel);
+                if (pkAttrName != null)
+                    snapshot.put(pkAttrName, null);
+            }
+        }
+        return Collections.unmodifiableMap(snapshot);
+    }
 }

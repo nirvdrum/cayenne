@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.apache.commons.collections.SequencedHashMap;
-import org.apache.commons.collections.iterators.IteratorChain;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
@@ -111,8 +110,8 @@ class ContextCommit {
     }
 
     /**
-	 * Commits changes in the enclosed DataContext.
-	 */
+     * Commits changes in the enclosed DataContext.
+     */
     void commit(Level logLevel) throws CayenneException {
         if (logLevel == null) {
             logLevel = QueryLogger.DEFAULT_LOG_LEVEL;
@@ -140,8 +139,6 @@ class ContextCommit {
 
             prepareDeleteQueries(nodeHelper);
         }
-
-        checkConcurrentModifications();
 
         ContextCommitObserver observer =
             new ContextCommitObserver(
@@ -197,10 +194,10 @@ class ContextCommit {
     }
 
     /**
-	 * Checks if any updated or deleted objects have been modified in the
-	 * underlying store. Ask delegate what to do about it.
-	 */
-    private void checkConcurrentModifications() {
+     * Checks if any updated or deleted objects have been modified in the
+     * underlying store. Ask delegate what to do about it.
+     */
+    private void checkConcurrentModifications(DataObject object) {
         DataContextDelegate delegate = context.getDelegate();
         if (delegate == null) {
             return;
@@ -208,25 +205,12 @@ class ContextCommit {
 
         DataRowStore store = context.getObjectStore().getDataRowCache();
 
-        IteratorChain it = new IteratorChain();
-        if (updObjects.size() > 0) {
-            it.addIterator(updObjects.iterator());
-        }
-
-        if (delObjects.size() > 0) {
-            it.addIterator(delObjects.iterator());
-        }
-
-        while (it.hasNext()) {
-            DataObject object = (DataObject) it.next();
-
-            // maybe opt for a cheaper "getCachedSnapshot" and treat nulls
-            // as "modification"? Ah... probably not.
-            DataRow snapshotInStore =
-                store.getSnapshot(object.getObjectId(), context.getParent());
-            if (object.getSnapshotVersion() != snapshotInStore.getVersion()) {
-                delegate.snapshotChangedInDataRowStore(object, snapshotInStore);
-            }
+        // maybe opt for a cheaper "getCachedSnapshot" and treat nulls
+        // as "modification"? Ah... probably not.
+        DataRow snapshotInStore =
+            store.getSnapshot(object.getObjectId(), context.getParent());
+        if (object.getSnapshotVersion() != snapshotInStore.getVersion()) {
+            delegate.snapshotChangedInDataRowStore(object, snapshotInStore);
         }
     }
 
@@ -347,6 +331,11 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
+                    
+					// check if object was modified from underneath and consult the delegate
+					// if this is the case...
+					checkConcurrentModifications(o);
+					
                     Map id = o.getObjectId().getIdSnapshot();
                     if (id != null && !id.isEmpty()) {
                         if (!isMasterDbEntity && masterDependentDbRel != null)
@@ -393,6 +382,11 @@ class ContextCommit {
 
                 for (Iterator k = objects.iterator(); k.hasNext();) {
                     DataObject o = (DataObject) k.next();
+                    
+                    // check if object was modified from underneath and consult the delegate
+                    // if this is the case...
+					checkConcurrentModifications(o);
+                    
                     Map snapshot =
                         BatchQueryUtils.buildSnapshotForUpdate(
                             entity,
@@ -407,15 +401,13 @@ class ContextCommit {
                     }
 
                     // after we filtered out "fake" modifications, check if an
-                    // attempt is made to
-                    // modify a read only entity
+                    // attempt is made to modify a read only entity
                     if (entity.isReadOnly()) {
                         throw attemptToCommitReadOnlyEntity(o.getClass(), entity);
                     }
 
                     // Need to wrap snapshot keys to a TreeSet to ensure
-                    // automatic ordering
-                    // so that we can build a valid hashcode
+                    // automatic ordering so that we can build a valid hashcode
                     TreeSet updatedAttributeNames = new TreeSet(snapshot.keySet());
                     Integer hashCode = new Integer(Util.hashCode(updatedAttributeNames));
 
@@ -470,8 +462,8 @@ class ContextCommit {
     }
 
     /**
-	 * Organizes committed objects by node, performs sorting operations.
-	 */
+     * Organizes committed objects by node, performs sorting operations.
+     */
     private void categorizeObjects() throws CayenneException {
         this.nodeHelpers = new ArrayList();
 
@@ -541,9 +533,9 @@ class ContextCommit {
     }
 
     /**
-	 * Performs classification of a DataObject for the DML operation. Throws
-	 * CayenneRuntimeException if an object can't be classified.
-	 */
+     * Performs classification of a DataObject for the DML operation. Throws
+     * CayenneRuntimeException if an object can't be classified.
+     */
     private void classifyByEntityAndNode(
         DataObject o,
         Map objectsByObjEntity,

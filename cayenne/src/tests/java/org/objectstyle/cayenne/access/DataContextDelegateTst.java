@@ -44,19 +44,30 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+import org.objectstyle.art.Artist;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.ObjectId;
+import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 import org.objectstyle.cayenne.unittest.MultiContextTestCase;
 
 /**
+ * Tests various DataContextDelegate methods invocation and consequences on
+ * DataContext behavior.
+ * 
  * @author Andrei Adamchik
  */
 public class DataContextDelegateTst extends MultiContextTestCase {
+
     protected Gallery gallery;
+    protected Artist artist;
 
     protected void setUp() throws Exception {
         super.setUp();
@@ -65,9 +76,17 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         gallery = (Gallery) context.createAndRegisterNewObject("Gallery");
         gallery.setGalleryName("version1");
         context.commitChanges();
+
+        // prepare a single artist record
+        artist = (Artist) context.createAndRegisterNewObject("Artist");
+        artist.setArtistName("version1");
+        context.commitChanges();
     }
 
-    public void testSnapshotChangedInDataRow() throws Exception {
+    /**
+     * Test that "snapshotChangedInDataRow" method is called when expected.
+     */
+    public void testSnapshotChangedInDataRow1() throws Exception {
         // prepare a second context
         DataContext altContext = mirrorDataContext(context);
 
@@ -91,9 +110,86 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         // test behavior on commit when snapshot has changed underneath
         altGallery.setGalleryName("version3");
         altContext.commitChanges();
-		assertNotNull(
-			"Delegate should have been notified, since we are using a different snapshot.",
-			altDelegate.getChangedSnapshot());
+        assertNotNull(
+            "Delegate should have been notified, since we are using a different snapshot.",
+            altDelegate.getChangedSnapshot());
+    }
+
+    /**
+     * Test that "snapshotChangedInDataRow" method has a power to abort the
+     * operations.
+     */
+    public void testSnapshotChangedInDataRow2() throws Exception {
+        // prepare a second context
+        DataContext altContext = mirrorDataContext(context);
+        TestDelegate altDelegate = new TestDelegate();
+        altContext.setDelegate(altDelegate);
+
+        Gallery altGallery =
+            (Gallery) altContext.getObjectStore().getObject(gallery.getObjectId());
+        assertNotNull(altGallery);
+
+        // update
+        gallery.setGalleryName("version2");
+        context.commitChanges();
+
+        // test behavior on commit when snapshot has changed underneath
+        altDelegate.setAbortCommit(true);
+        altGallery.setGalleryName("version3");
+
+        try {
+            altContext.commitChanges();
+            fail("Delegate failed to abort operation.");
+        }
+        catch (RuntimeException rex) {
+            // commit aborted, exception expected
+        }
+    }
+
+    /**
+     * Test that "snapshotChangedInDataRow" method can change snapshots,
+     * affecting UPDATE behavior.
+     */
+    public void testSnapshotChangedInDataRow3() throws Exception {
+        // prepare a second context
+        DataContext altContext = mirrorDataContext(context);
+        TestDelegate altDelegate = new TestDelegate();
+        altContext.setDelegate(altDelegate);
+
+        Artist altArtist =
+            (Artist) altContext.getObjectStore().getObject(artist.getObjectId());
+        assertNotNull(altArtist);
+
+        // update.. first make sure that ALT is not hollow
+        altArtist.getArtistName();
+
+        artist.setDateOfBirth(CayenneTestCase.stripTime(new Date()));
+        context.commitChanges();
+
+        assertNull(altArtist.getDateOfBirth());
+
+        // test behavior on commit when snapshot has changed underneath
+        altDelegate.setOverridesConcurrentModifictions(true);
+
+        altArtist.setArtistName("version2");
+        altContext.commitChanges();
+
+        // assert new snapshot ... must have null dob
+        ObjectId oid = artist.getObjectId();
+        DataRow snapshot =
+            context.getObjectStore().getDataRowCache().getCachedSnapshot(oid);
+        assertNull(snapshot.get("DATE_OF_BIRTH"));
+        assertEquals("version2", snapshot.get("ARTIST_NAME"));
+
+        // fetch fresh artist as DataRow to bypass caches... date of birth must be null
+        SelectQuery query = QueryUtils.selectObjectForId(oid);
+        query.setFetchingDataRows(true);
+
+        List artists = context.performQuery(query);
+        assertEquals(1, artists.size());
+        DataRow artistRow = (DataRow) artists.get(0);
+        assertNull(artistRow.get("DATE_OF_BIRTH"));
+        assertEquals("version2", artistRow.get("ARTIST_NAME"));
     }
 
     public void testWillPerformSelect1() throws Exception {
@@ -135,11 +231,27 @@ public class DataContextDelegateTst extends MultiContextTestCase {
         protected DataRow changedSnapshot;
         protected List queries = new ArrayList();
         protected boolean blockQueries;
+        protected boolean abortCommit;
+        protected boolean overridesConcurrentModifictions;
 
         public void snapshotChangedInDataRowStore(
             DataObject object,
             DataRow snapshotInStore) {
+
             this.changedSnapshot = snapshotInStore;
+
+            if (abortCommit) {
+                throw new RuntimeException("No commit for you.");
+            }
+
+            if (overridesConcurrentModifictions) {
+                // demonstrates how to implement a policy of overriding concurrent modifications
+                // instead of merging (which may have dubious practical value though).
+                object.getDataContext().getObjectStore().retainSnapshot(
+                    object,
+                    snapshotInStore);
+
+            }
         }
 
         public GenericSelectQuery willPerformSelect(
@@ -156,6 +268,14 @@ public class DataContextDelegateTst extends MultiContextTestCase {
 
         public void setBlockQueries(boolean flag) {
             this.blockQueries = flag;
+        }
+
+        public void setAbortCommit(boolean flag) {
+            this.abortCommit = flag;
+        }
+
+        public void setOverridesConcurrentModifictions(boolean flag) {
+            this.overridesConcurrentModifictions = flag;
         }
 
         public boolean containsQuery(GenericSelectQuery query) {
