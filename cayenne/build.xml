@@ -173,8 +173,9 @@
             <fileset dir="src/${build}/classes"/>
             <fileset dir="src/${build}/templates"/>
             <fileset dir="src/${build}/unjar"/>
-            <metainf dir="doc" includes="LICENSE"/>
-            <metainf dir="otherlib" includes="LICENSE.txt.velocity"/>
+            <metainf dir="doc">
+                <include name="LICENSE*"/>
+            </metainf>
             
             <manifest>
                <attribute name="Built-By" value="${user.name}"/>
@@ -215,7 +216,12 @@
     <!-- Builds Cayenne documenatation.             -->
     <!-- ========================================== -->
     <target name="doc" depends="prepare">
-        <copy file="doc/LICENSE" todir="${dist}/doc"/>
+        <!-- copy all licenses inclusing ours -->
+        <copy todir="${dist}/doc">
+            <fileset dir="doc">
+               <include name="LICENSE*"/>
+            </fileset>
+        </copy>
 
         <taskdef name="anakia" classname="org.apache.velocity.anakia.AnakiaTask">
             <classpath refid="classpath"/>
