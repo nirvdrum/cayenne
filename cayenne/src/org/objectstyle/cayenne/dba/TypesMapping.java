@@ -53,12 +53,10 @@ package org.objectstyle.cayenne.dba;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-
+ */
 
 import java.sql.*;
 import java.util.*;
-
 
 /** Handles mappings of JDBC data types to the database types 
   * and Java types. This is mostly a utility class.
@@ -113,7 +111,6 @@ public class TypesMapping {
     public static final String JAVA_TIME = "java.sql.Time";
     public static final String JAVA_TIMESTAMP = "java.sql.Timestamp";
 
-
     /** Keys: SQL string type names,
      *  Values: SQL int type definitions from java.sql.Types */
     private static final Map sqlStringType = new HashMap();
@@ -131,7 +128,6 @@ public class TypesMapping {
     private static final Map javaSqlEnum = new HashMap();
 
     private static final String[] emptyArray = new String[0];
-
 
     static {
         sqlStringType.put(SQL_ARRAY, new Integer(Types.ARRAY));
@@ -218,29 +214,45 @@ public class TypesMapping {
         javaSqlEnum.put(JAVA_TIMESTAMP, new Integer(Types.TIMESTAMP));
     }
 
+    /** 
+     * Returns true if supplied type is a numeric type.
+     */
+    public static boolean isNumeric(int type) {
+        return type == Types.BIGINT
+            || type == Types.BIT
+            || type == Types.DECIMAL
+            || type == Types.DOUBLE
+            || type == Types.FLOAT
+            || type == Types.INTEGER
+            || type == Types.NUMERIC
+            || type == Types.REAL
+            || type == Types.SMALLINT
+            || type == Types.TINYINT;
+    }
+
     /** Returns an array of string names of the default JDBC data types.*/
     public static String[] getDatabaseTypes() {
         Set keys = sqlStringType.keySet();
         int len = keys.size();
         String[] types = new String[len];
-        
+
         Iterator it = keys.iterator();
-        for(int i = 0; i < len; i++) {
-            types[i] = (String)it.next();
+        for (int i = 0; i < len; i++) {
+            types[i] = (String) it.next();
         }
-        
+
         return types;
     }
-    
+
     /** Method implements an algorithm to pick a data type from a list of alternatives
     * that most closely matches JDBC data type. */
     protected static String pickDataType(int jdbcType, TypeInfo[] alts) {
         int len = alts.length;
 
-        if(len == 0)
+        if (len == 0)
             return null;
 
-        if(len == 1)
+        if (len == 1)
             return alts[0].name;
 
         // now the fun starts.. try to guess the right type
@@ -248,92 +260,78 @@ public class TypesMapping {
         String jdbcName = getSqlNameByType(jdbcType).toUpperCase();
 
         // 1. exact match
-        for(int i = 0; i < len; i++) {
-            if(jdbcName.equalsIgnoreCase(alts[i].name))
+        for (int i = 0; i < len; i++) {
+            if (jdbcName.equalsIgnoreCase(alts[i].name))
                 return alts[i].name;
         }
 
-
-
-
         // 2. filter those with biggest precision
         long maxPrec = 0;
-        for(int i = 0; i < len; i++) {
-            if(maxPrec < alts[i].precision) {
+        for (int i = 0; i < len; i++) {
+            if (maxPrec < alts[i].precision) {
                 maxPrec = alts[i].precision;
             }
         }
 
         ArrayList list = new ArrayList();
-        for(int i = 0; i < len; i++) {
-            if(maxPrec == alts[i].precision) {
+        for (int i = 0; i < len; i++) {
+            if (maxPrec == alts[i].precision) {
                 list.add(alts[i]);
             }
         }
 
-
-
-
         // work with smaller list now.....
         int slen = list.size();
-        if(slen == 1)
-            return ((TypeInfo)list.get(0)).name;
-
+        if (slen == 1)
+            return ((TypeInfo) list.get(0)).name;
 
         // start/end match
-        for(int i = 0; i < slen; i++) {
-            String uppercase = ((TypeInfo)list.get(i)).name.toUpperCase();
-            if(uppercase.startsWith(jdbcName) || uppercase.endsWith(jdbcName))
-                return ((TypeInfo)list.get(i)).name;
+        for (int i = 0; i < slen; i++) {
+            String uppercase = ((TypeInfo) list.get(i)).name.toUpperCase();
+            if (uppercase.startsWith(jdbcName) || uppercase.endsWith(jdbcName))
+                return ((TypeInfo) list.get(i)).name;
         }
 
-
-
         // in the middle match
-        for(int i = 0; i < slen; i++) {
-            String uppercase = ((TypeInfo)list.get(i)).name.toUpperCase();
+        for (int i = 0; i < slen; i++) {
+            String uppercase = ((TypeInfo) list.get(i)).name.toUpperCase();
 
-            if(uppercase.indexOf(jdbcName) >= 0)
-                return ((TypeInfo)list.get(i)).name;
+            if (uppercase.indexOf(jdbcName) >= 0)
+                return ((TypeInfo) list.get(i)).name;
         }
 
         // out of ideas... return the first one
-        return ((TypeInfo)list.get(0)).name;
+        return ((TypeInfo) list.get(0)).name;
     }
 
     /** Gets the JDBC code for SQL type by its name.*/
     public static int getSqlTypeByName(String typeName) {
-        Integer tmp = (Integer)sqlStringType.get(typeName);
+        Integer tmp = (Integer) sqlStringType.get(typeName);
         return (null == tmp) ? NOT_DEFINED : tmp.intValue();
     }
 
-
     /** Gets the String representation of the SQL type from its JDBC code.*/
     public static String getSqlNameByType(int type) {
-        return (String)sqlEnumType.get(new Integer(type));
+        return (String) sqlEnumType.get(new Integer(type));
     }
-
 
     /** Get the java.sql.Types SQL type by the Java type name.
     *  @param javaTypeName Fully qualified Java type name.
     *  @return The SQL type or NOT_DEFINED if no type found. */
     public static int getSqlTypeByJava(String javaTypeName) {
-        Integer temp = (Integer)javaSqlEnum.get(javaTypeName);
+        Integer temp = (Integer) javaSqlEnum.get(javaTypeName);
         return (null == temp) ? NOT_DEFINED : temp.intValue();
     }
-
 
     /** Get the corresponding Java type by its java.sql.Types counterpart.
     *  @return Fully qualified Java type name or null if not found. */
     public static String getJavaBySqlType(int type) {
-        return (String)sqlEnumJava.get(new Integer(type));
+        return (String) sqlEnumJava.get(new Integer(type));
     }
-
 
     // *************************************************************
     // non-static code
     // *************************************************************
-
 
     protected HashMap databaseTypes = new HashMap();
 
@@ -342,16 +340,16 @@ public class TypesMapping {
         ResultSet rs = metaData.getTypeInfo();
 
         try {
-            while(rs.next()) {
+            while (rs.next()) {
                 TypeInfo info = new TypeInfo();
                 info.name = rs.getString("TYPE_NAME");
-                info.jdbcType = rs.getInt("DATA_TYPE");                
+                info.jdbcType = rs.getInt("DATA_TYPE");
                 info.precision = rs.getLong("PRECISION");
 
                 Integer key = new Integer(info.jdbcType);
-                ArrayList infos = (ArrayList)databaseTypes.get(key);
+                ArrayList infos = (ArrayList) databaseTypes.get(key);
 
-                if(infos == null) {
+                if (infos == null) {
                     infos = new ArrayList();
                     databaseTypes.put(key, infos);
                 }
@@ -368,72 +366,69 @@ public class TypesMapping {
         // 1. swap TIMESTAMP - DATE
         Integer ts = new Integer(Types.TIMESTAMP);
         Integer dt = new Integer(Types.DATE);
-        ArrayList tsInfo = (ArrayList)databaseTypes.get(ts);
-        ArrayList dtInfo = (ArrayList)databaseTypes.get(dt);
+        ArrayList tsInfo = (ArrayList) databaseTypes.get(ts);
+        ArrayList dtInfo = (ArrayList) databaseTypes.get(dt);
 
-        if(tsInfo != null && dtInfo == null)
+        if (tsInfo != null && dtInfo == null)
             databaseTypes.put(dt, tsInfo);
 
-        if(dtInfo != null && tsInfo == null)
+        if (dtInfo != null && tsInfo == null)
             databaseTypes.put(ts, dtInfo);
 
         // 2. Swap CLOB - LONGVARCHAR
         Integer clob = new Integer(Types.CLOB);
         Integer lvc = new Integer(Types.LONGVARCHAR);
-        ArrayList clobInfo = (ArrayList)databaseTypes.get(clob);
-        ArrayList lvcInfo = (ArrayList)databaseTypes.get(lvc);
+        ArrayList clobInfo = (ArrayList) databaseTypes.get(clob);
+        ArrayList lvcInfo = (ArrayList) databaseTypes.get(lvc);
 
-        if(clobInfo != null && lvcInfo == null)
+        if (clobInfo != null && lvcInfo == null)
             databaseTypes.put(lvc, clobInfo);
 
-        if(lvcInfo != null && clobInfo == null)
+        if (lvcInfo != null && clobInfo == null)
             databaseTypes.put(clob, lvcInfo);
 
         // 2. Swap BLOB - LONGVARBINARY
         Integer blob = new Integer(Types.BLOB);
         Integer lvb = new Integer(Types.LONGVARBINARY);
-        ArrayList blobInfo = (ArrayList)databaseTypes.get(blob);
-        ArrayList lvbInfo = (ArrayList)databaseTypes.get(lvb);
+        ArrayList blobInfo = (ArrayList) databaseTypes.get(blob);
+        ArrayList lvbInfo = (ArrayList) databaseTypes.get(lvb);
 
-        if(blobInfo != null && lvbInfo == null)
+        if (blobInfo != null && lvbInfo == null)
             databaseTypes.put(lvb, blobInfo);
 
-        if(lvbInfo != null && blobInfo == null)
+        if (lvbInfo != null && blobInfo == null)
             databaseTypes.put(blob, lvbInfo);
     }
-
 
     /** Returns name of data type in a database described by this object corresponding
      *  to a standard JDBC data type defined in java.sql.Types */
     public String[] getDatabaseTypes(int jdbcType) {
-        ArrayList infos = (ArrayList)databaseTypes.get(new Integer(jdbcType));
-        if(infos == null || infos.size() == 0)
+        ArrayList infos = (ArrayList) databaseTypes.get(new Integer(jdbcType));
+        if (infos == null || infos.size() == 0)
             return emptyArray;
 
         int len = infos.size();
         String[] types = new String[len];
-        for(int i = 0; i < len; i++) {
-            types[i] = ((TypeInfo)infos.get(i)).name;
+        for (int i = 0; i < len; i++) {
+            types[i] = ((TypeInfo) infos.get(i)).name;
         }
 
         return types;
     }
 
-
     /** Database might have more then 1 type mapping to a single JDBC type.
      *  try to guess the one that matches the best. */
     public String getFuzzyDataType(int jdbcType) {
-        if(jdbcType == NOT_DEFINED)
+        if (jdbcType == NOT_DEFINED)
             return null;
 
-        ArrayList alts = (ArrayList)databaseTypes.get(new Integer(jdbcType));
-        if(alts == null)
+        ArrayList alts = (ArrayList) databaseTypes.get(new Integer(jdbcType));
+        if (alts == null)
             return null;
 
-        TypeInfo[] altArray = (TypeInfo[])alts.toArray(new TypeInfo[alts.size()]);
+        TypeInfo[] altArray = (TypeInfo[]) alts.toArray(new TypeInfo[alts.size()]);
         return pickDataType(jdbcType, altArray);
     }
-
 
     /** Stores (incomplete) information about database data type */
     static class TypeInfo {

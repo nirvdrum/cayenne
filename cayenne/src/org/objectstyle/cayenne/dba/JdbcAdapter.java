@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,8 @@ package org.objectstyle.cayenne.dba;
  * <http://objectstyle.org/>.
  *
  */
+
+package org.objectstyle.cayenne.dba;
 
 import java.util.Iterator;
 import java.util.logging.Logger;
@@ -202,12 +203,16 @@ public class JdbcAdapter implements DbAdapter {
     public OperationSorter getOpSorter(DataNode node) {
         return null;
     }
-    
+
     public ExtendedTypeMap getTypeConverter() {
         return typeConverter;
     }
- 
-     public QualifierTranslatorFactory getQualifierFactory() {
-         return qualifierFactory ;
-     }
+
+    public QualifierTranslatorFactory getQualifierFactory() {
+        return qualifierFactory;
+    }
+
+    public DbAttribute buildAttribute(String name, int type, int size, int precision, boolean allowNulls) {
+        return null;
+    }
 }

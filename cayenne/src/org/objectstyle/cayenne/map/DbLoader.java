@@ -75,7 +75,7 @@ public class DbLoader {
     static Logger logObj = Logger.getLogger(DbLoader.class.getName());
 
     public static final String WILDCARD = "%";
-    
+
     /** List of db entities to process.*/
     private ArrayList dbEntityList = new ArrayList();
 
@@ -159,7 +159,7 @@ public class DbLoader {
         String tableNamePattern,
         String[] types)
         throws SQLException {
-            
+
         ArrayList tables = new ArrayList();
         if (null == schemaPattern || schemaPattern.equals("")) {
             schemaPattern = WILDCARD;
@@ -174,10 +174,10 @@ public class DbLoader {
         else if (tableNamePattern.indexOf('*') >= 0) {
             tableNamePattern.replace('*', '%');
         }
-        
+
         ResultSet rs =
             getMetaData().getTables(catalog, schemaPattern, tableNamePattern, types);
-            
+
         while (rs.next()) {
             String cat = rs.getString("TABLE_CAT");
             String schema = rs.getString("TABLE_SCHEM");
@@ -200,74 +200,76 @@ public class DbLoader {
      * 
      * @return true if need to continue, false if must stop loading. 
      */
-    public boolean loadDbEntities(DataMap map, ArrayList tables) throws SQLException {
-    	boolean ret_code = true;
-    	dbEntityList = new ArrayList();
-        Iterator iter = tables.iterator();        
+    public boolean loadDbEntities(DataMap map, ArrayList tables)
+        throws SQLException {
+        boolean ret_code = true;
+        dbEntityList = new ArrayList();
+        Iterator iter = tables.iterator();
         int duplicate = YesNoToAllDialog.UNDEFINED;
         while (iter.hasNext()) {
             TableInfo table = (TableInfo) iter.next();
-            
+
             // Check if there already is db entity under such name
             DbEntity temp = map.getDbEntity(table.getName());
             if (null != temp) {
-            	if (duplicate == YesNoToAllDialog.UNDEFINED ) {
-		        	YesNoToAllDialog dialog;
-		        	dialog = new YesNoToAllDialog("Duplicate table name"
-		        		, "Data map already contains db entity for table " 
-		        			+ table.getName() + ". Overwrite?" );
-		        	int code = dialog.getStatus();
-		        	dialog.dispose();
-		        	if (YesNoToAllDialog.CANCEL == code)
-		        		return false;
-		        	else if (YesNoToAllDialog.YES_TO_ALL == code
-		        				|| YesNoToAllDialog.NO_TO_ALL == code) {
-		        		duplicate = code;
-		        	} else if (YesNoToAllDialog.NO == code) {
-		        		continue;
-		        	} else if (YesNoToAllDialog.YES == code) {
-		        		map.deleteDbEntity(table.getName());
-		        	}
-            	}
-            	if (duplicate == YesNoToAllDialog.NO_TO_ALL)
-            		continue;
-            	if (duplicate == YesNoToAllDialog.YES_TO_ALL) {
-	        		map.deleteDbEntity(table.getName());
-            	}
+                if (duplicate == YesNoToAllDialog.UNDEFINED) {
+                    YesNoToAllDialog dialog;
+                    dialog =
+                        new YesNoToAllDialog(
+                            "Duplicate table name",
+                            "Data map already contains db entity for table "
+                                + table.getName()
+                                + ". Overwrite?");
+                    int code = dialog.getStatus();
+                    dialog.dispose();
+                    if (YesNoToAllDialog.CANCEL == code)
+                        return false;
+                    else if (
+                        YesNoToAllDialog.YES_TO_ALL == code || YesNoToAllDialog.NO_TO_ALL == code) {
+                        duplicate = code;
+                    }
+                    else if (YesNoToAllDialog.NO == code) {
+                        continue;
+                    }
+                    else if (YesNoToAllDialog.YES == code) {
+                        map.deleteDbEntity(table.getName());
+                    }
+                }
+                if (duplicate == YesNoToAllDialog.NO_TO_ALL)
+                    continue;
+                if (duplicate == YesNoToAllDialog.YES_TO_ALL) {
+                    map.deleteDbEntity(table.getName());
+                }
             }
             DbEntity dbEntity = new DbEntity();
             dbEntityList.add(dbEntity);
             dbEntity.setName(table.getName());
             dbEntity.setSchema(table.getSchema());
             dbEntity.setCatalog(table.getCatalog());
-            
-            ResultSet rs = getMetaData().getColumns(
-			                    	table.getCatalog(),
-			                    	table.getSchema(),
-			                    	table.getName(),
-			                    	"%");
-                    
+
+            ResultSet rs =
+                getMetaData().getColumns(
+                    table.getCatalog(),
+                    table.getSchema(),
+                    table.getName(),
+                    "%");
+
             while (rs.next()) {
                 // gets attribute's (column's) name and type,
                 // create DbAttribute and add to dbEntity
                 String columnName = rs.getString("COLUMN_NAME");
                 int columnType = rs.getInt("DATA_TYPE");
                 int columnSize = rs.getInt("COLUMN_SIZE");
-               
-               /*
-                logObj.severe("label for " + TypesMapping.getSqlNameByType(columnType) + " = " + rs.getString("TYPE_NAME"));
-              */
 
-                // FIXME!!! Need to ignore this param for the param types
-                // for which it is not applicable
-                int decimalDigits = rs.getInt("DECIMAL_DIGITS");
-                boolean nullable = rs.getBoolean("NULLABLE");
-                DbAttribute dbAttribute;
-                dbAttribute = new DbAttribute(columnName, columnType, dbEntity);
+                DbAttribute dbAttribute = new DbAttribute(columnName, columnType, dbEntity);
                 dbAttribute.setMaxLength(columnSize);
-                dbAttribute.setPrecision(decimalDigits);
-                dbAttribute.setMandatory(!nullable);
+                dbAttribute.setMandatory(!rs.getBoolean("NULLABLE"));
                 dbEntity.addAttribute(dbAttribute);
+
+                int decimalDigits = rs.getInt("DECIMAL_DIGITS");
+                if (!rs.wasNull() && TypesMapping.isNumeric(columnType)) {
+                    dbAttribute.setPrecision(decimalDigits);
+                }
             }
             rs.close();
             map.addDbEntity(dbEntity);
@@ -309,21 +311,29 @@ public class DbLoader {
 
                 String attName = NameConverter.undescoredToJava(dbAtt.getName(), false);
                 String type = TypesMapping.getJavaBySqlType(dbAtt.getType());
-                
-                if(logObj.isLoggable(Level.FINER)) {
+
+                if (logObj.isLoggable(Level.FINER)) {
                     if (type == null || type.trim().length() == 0) {
-                	    logObj.finer("DbLoader::loadObjEntities(), Entity " 
-                				+ dbEntity.getName() + ", attribute " + attName 
-                				+ " db type " + dbAtt.getType());
+                        logObj.finer(
+                            "DbLoader::loadObjEntities(), Entity "
+                                + dbEntity.getName()
+                                + ", attribute "
+                                + attName
+                                + " db type "
+                                + dbAtt.getType());
                     }
-                
+
                     if (dbAtt.getType() == Types.CLOB) {
-                	    logObj.finer("DbLoader::loadObjEntities(), Entity " 
-                				+ dbEntity.getName() + ", attribute " + attName 
-                				+ " type " + type);
+                        logObj.finer(
+                            "DbLoader::loadObjEntities(), Entity "
+                                + dbEntity.getName()
+                                + ", attribute "
+                                + attName
+                                + " type "
+                                + type);
                     }
                 }
-                
+
                 ObjAttribute objAtt = new ObjAttribute(attName, type, objEntity);
                 objAtt.setDbAttribute(dbAtt);
                 objEntity.addAttribute(objAtt);
@@ -422,21 +432,25 @@ public class DbLoader {
     public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
         throws SQLException {
         DataMap dataMap;
-        dataMap = new DataMap(org.objectstyle.cayenne.gui.util.NameGenerator.getDataMapName());
+        dataMap =
+            new DataMap(org.objectstyle.cayenne.gui.util.NameGenerator.getDataMapName());
         return loadDataMapFromDB(schemaName, tableTypes, dataMap);
     }
 
     /** Performs database reverse engineering and generates DataMap object
       * that contains default mapping of the tables and views. Allows to 
       * limit types of tables to read (usually only tables and views are relevant). */
-    public DataMap loadDataMapFromDB(String schemaName, String[] tableTypes, DataMap dataMap)
+    public DataMap loadDataMapFromDB(
+        String schemaName,
+        String[] tableTypes,
+        DataMap dataMap)
         throws SQLException {
-        if (false == loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes)))
-        	return dataMap;
+        if (false
+            == loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes)))
+            return dataMap;
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);
         loadObjRelationships(dataMap);
         return dataMap;
     }
 }
-

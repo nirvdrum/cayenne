@@ -59,8 +59,7 @@ package org.objectstyle.cayenne.dba;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.access.trans.QualifierTranslatorFactory;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.query.Query;
 
 /** 
@@ -97,12 +96,16 @@ public interface DbAdapter {
       * a database table corresponding to <code>ent</code> parameter. */
     public String dropTable(DbEntity ent);
 
-    /** Returns a SQL string that can be used to create
-      * a foreign key constraint for the relationship. */
+    /**
+     *  Returns a SQL string that can be used to create
+     * a foreign key constraint for the relationship. 
+     */
     public String createFkConstraint(DbRelationship rel);
 
-    /** Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
-      * Valid types are defined in java.sql.Types. */
+    /** 
+     * Returns an array of RDBMS types that can be used with JDBC <code>type</code>.
+     * Valid types are defined in java.sql.Types. 
+     */
     public String[] externalTypesForJdbcType(int type);
     
     /** 
@@ -112,13 +115,17 @@ public interface DbAdapter {
      */
     public ExtendedTypeMap getTypeConverter();
 
-    /** Returns an operation sorter or null if no sorting
-      * is required. Operation sorter is needed for databases
-      * (like Sybase) that do not have deferred constraint checking
-      * and need appropriate operation ordering within transactions. */
+    /** 
+     * Returns an operation sorter or null if no sorting
+     * is required. Operation sorter is needed for databases
+     * (like Sybase) that do not have deferred constraint checking
+     * and need appropriate operation ordering within transactions. 
+     */
     public OperationSorter getOpSorter(DataNode node);
 
-    /** Returns primary key generator associated with this DbAdapter. */
+    /** 
+     * Returns primary key generator associated with this DbAdapter. 
+     */
     public PkGenerator getPkGenerator();
 
 
@@ -134,4 +141,16 @@ public interface DbAdapter {
     public QueryTranslator getQueryTranslator(Query query) throws Exception;
     
     public QualifierTranslatorFactory getQualifierFactory();
+    
+    /**
+     * Creates and returns a DbAttribute based on supplied parameters 
+     * (usually obtained from database meta data).
+     * 
+     * @param name database column name
+     * @param type JDBC column type
+     * @param size database column size
+     * @param precision database column precision (ignored if less than zero)
+     * @param allowNulls database column nullable parameter
+     */ 
+    public DbAttribute buildAttribute(String name, int type, int size, int precision, boolean allowNulls);
 }
