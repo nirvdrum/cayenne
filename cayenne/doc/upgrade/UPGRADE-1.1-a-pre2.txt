@@ -1,0 +1,18 @@
+Upgrade Information
+============================================
+
+Cayenne 1.1 adds new elements to the XML format of its project files, 
+making them incompatible with the older versions of Cayenne. However 
+older files can still be deployed with 1.1, so it is backwards compatible. 
+To upgrade an old project, open it in CayenneModeler and click the 
+"Upgrade" button when the "Upgrade" Dialog appears.
+
+For the latest upgrade instructions see the Use Guide provided with Cayenne 
+download: 
+
+    [cayenne_install_dir]/doc/userguide/install/upgrade.html
+
+For the list of new features in 1.1 see another Use Guide chapter:
+
+    [cayenne_install_dir]/doc/userguide/introduction/whats-new.html
+
