@@ -193,13 +193,15 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected Object readProperty(String propName) {
-        try {
-            if (persistenceState == PersistenceState.HOLLOW) {
+        if (persistenceState == PersistenceState.HOLLOW) {
+            try {
                 dataContext.refetchObject(objectId);
+            } catch (Exception ex) {
+                // TODO: add some sort of delegate method here. Quietly
+                // making object TRANSIENT doesn't seem right
+                logObj.info("Error refetching object, making transient.", ex);
+                setPersistenceState(PersistenceState.TRANSIENT);
             }
-        } catch (Exception ex) {
-            logObj.info("Error refetching object, making transient.", ex);
-            setPersistenceState(PersistenceState.TRANSIENT);
         }
 
         return readPropertyDirectly(propName);
@@ -210,7 +212,17 @@ public class CayenneDataObject implements DataObject {
     }
 
     protected void writeProperty(String propName, Object val) {
-        if (persistenceState == PersistenceState.COMMITTED) {
+        if (persistenceState == PersistenceState.HOLLOW) {
+            try {
+                dataContext.refetchObject(objectId);
+                persistenceState = PersistenceState.MODIFIED;
+            } catch (Exception ex) {
+                // TODO: add some sort of delegate method here. Quietly
+                // making object TRANSIENT doesn't seem right
+                logObj.info("Error refetching object, making transient.", ex);
+                setPersistenceState(PersistenceState.TRANSIENT);
+            }
+        } else if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }
 
