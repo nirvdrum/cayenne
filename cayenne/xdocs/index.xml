@@ -9,7 +9,7 @@
     <body>
         <!-- News section -->
         <section name="Cayenne News">
-        <p><i>March 18:</i> <strong><font color="red">Cayenne CVS is migrated to SourceForge.net.</font></strong> 
+        <p><i>March 18:</i> <strong>Cayenne CVS is migrated to SourceForge.net.</strong> 
         Be aware that the old CVS server is no longer accessible. Go to
         <a href="http://objectstyle.org/cayenne/developer.html">this page</a> for the new CVS instructions.</p>
         

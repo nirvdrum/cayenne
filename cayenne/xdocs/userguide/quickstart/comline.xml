@@ -10,6 +10,7 @@
 </navigator> 
 <body>
     <section name="3. Quick Start">
+    	<p><h2><font color="red">WORK IN PROGRESS</font></h2></p>
     	<subsection name="3.2 &quot;Command-line Application&quot; Tutorial">
     	<p>This section shows how to write a simple command-line application
     	using Cayenne. For a more detailed discussion read <a href="../appguide/index.html">"Writing 
