@@ -82,7 +82,7 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class QueryLogger {
-    private static Logger logObj = Logger.getLogger(QueryLogger.class);
+    private static final Logger logObj = Logger.getLogger(QueryLogger.class);
 
     public static final Level DEFAULT_LOG_LEVEL = Query.DEFAULT_LOG_LEVEL;
     public static final int TRIM_VALUES_THRESHOLD = 300;

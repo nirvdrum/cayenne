@@ -63,6 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
@@ -73,6 +74,8 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @since 1.1
  */
 public abstract class Transaction {
+    private static final Logger logObj = Logger.getLogger(Transaction.class);
+    
     private static final Transaction NO_TRANSACTION = new Transaction() {
         public void begin() {
 
@@ -421,7 +424,17 @@ public abstract class Transaction {
 
         protected void fixConnectionState(Connection connection) throws SQLException {
             if (connection.getAutoCommit()) {
-                connection.setAutoCommit(false);
+                // some DBs are very particular about that, (e.g. Informix SE 7.0 per
+                // CAY-179), so do a try-catch and ignore exception
+                
+                // TODO: maybe allow adapter to provide transaction instance?
+
+                try {
+                    connection.setAutoCommit(false);
+                }
+                catch (SQLException cay179Ex) {
+                    logObj.info("Can't set connection autocommit to false, ignoring. Message: " + cay179Ex.getMessage());
+                }
             }
         }
 
