@@ -45,5 +45,6 @@ schema information
 
 15. Package org.objectstyle.util is renamed to org.objectstyle.util.cayenne
 
+16. Updated CayenneModeler look, added commonly used buttons to the toolbar
 
 
