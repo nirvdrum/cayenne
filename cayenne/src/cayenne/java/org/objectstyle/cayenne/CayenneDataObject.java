@@ -247,7 +247,7 @@ public class CayenneDataObject implements DataObject {
 				throw new CayenneRuntimeException("Cannot modify (remove from) the read-only relationship " + relName);
 			}
 			//Handle removing from a flattened relationship
-			dataContext.registerFlattenedRelationshipDelete(this, relName, val);
+			dataContext.registerFlattenedRelationshipDelete(this, relationship, val);
 		}
 		
 		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
@@ -283,7 +283,7 @@ public class CayenneDataObject implements DataObject {
 				throw new CayenneRuntimeException("Cannot modify (add to) the read-only relationship " + relName);
 			}
 			//Handle adding to a flattened relationship
-			dataContext.registerFlattenedRelationshipInsert(this, relName, val);
+			dataContext.registerFlattenedRelationshipInsert(this, relationship, val);
 		}
 		
 		//Now do the rest of the normal handling (regardless of whether it was flattened or not)
