@@ -55,7 +55,6 @@ package org.objectstyle.cayenne.map;
  *
  */
 
-
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -63,7 +62,6 @@ import java.util.logging.Level;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.dba.DbAdapter;
-
 
 /** Utility class that does forward engineering of the database.
   * It can generate database schema using the data map. It is a 
@@ -76,25 +74,21 @@ public class DbGenerator {
     private Connection con;
     private DbAdapter adapter;
 
-
     /** Creates and initializes new DbGenerator. */
     public DbGenerator(Connection con, DbAdapter adapter) {
         this.con = con;
         this.adapter = adapter;
     }
 
-
     /** Returns DbAdapter associated with this DbGenerator. */
     public DbAdapter getAdapter() {
         return adapter;
     }
 
-
     /** Returns JDBC connection object associated with this DbGenerator. */
     public Connection getCon() {
         return con;
     }
-
 
     /** Creates database tables using the information from the
       * <code>map</code>. Does not drop any existsing tables. */
@@ -110,32 +104,37 @@ public class DbGenerator {
 
         try {
             // DROP TABLE
-            if(drop) {
+            if (drop) {
                 Iterator it = map.getDbEntitiesAsList().iterator();
-                while(it.hasNext()) {
-                    String q = adapter.dropTable((DbEntity)it.next());
+                while (it.hasNext()) {
+                    String q = adapter.dropTable((DbEntity) it.next());
                     QueryLogger.logQuery(Level.INFO, q, null);
                     stmt.execute(q);
                 }
             }
 
             // CREATE TABLE
-            Iterator it = map.getDbEntitiesAsList().iterator();
-            while(it.hasNext()) {
-                String q = createTableQuery((DbEntity)it.next());
+            // Note: if drop was requested, we should recreate all
+            // tables in the map, if not - just those that are missing
+            List createThese =
+                (drop) ? map.getDbEntitiesAsList() : filterNonExistentTables(map);
+
+            Iterator it = createThese.iterator();
+            while (it.hasNext()) {
+                String q = createTableQuery((DbEntity) it.next());
                 QueryLogger.logQuery(Level.INFO, q, null);
                 stmt.execute(q);
             }
 
             // now see if we need FK constraints
-            if(adapter.supportsFkConstraints()) {
-                Iterator it2 = map.getDbEntitiesAsList().iterator();
-                while(it2.hasNext()) {
-                    List list = createFkConstraintsQueries((DbEntity)it2.next());
+            if (adapter.supportsFkConstraints()) {
+                Iterator it2 = createThese.iterator();
+                while (it2.hasNext()) {
+                    List list = createFkConstraintsQueries((DbEntity) it2.next());
 
                     Iterator cit = list.iterator();
-                    while(cit.hasNext()) {
-                        String cq = (String)cit.next();
+                    while (cit.hasNext()) {
+                        String cq = (String) cit.next();
                         QueryLogger.logQuery(Level.INFO, cq, null);
                         stmt.execute(cq);
                     }
@@ -151,33 +150,27 @@ public class DbGenerator {
       * corresponding to <code>ent</code> parameter. */
     public String createTableQuery(DbEntity ent) {
         StringBuffer buf = new StringBuffer();
-        buf.append("CREATE TABLE ")
-        .append(ent.getName())
-        .append(" (");
+        buf.append("CREATE TABLE ").append(ent.getName()).append(" (");
 
         // columns
         Iterator it = ent.getAttributeList().iterator();
         boolean first = true;
-        while(it.hasNext()) {
-            if(first)
+        while (it.hasNext()) {
+            if (first)
                 first = false;
             else
                 buf.append(", ");
 
-            DbAttribute at = (DbAttribute)it.next();
+            DbAttribute at = (DbAttribute) it.next();
             String type = adapter.externalTypesForJdbcType(at.getType())[0];
 
-            buf.append(at.getName())
-            .append(' ')
-            .append(type);
+            buf.append(at.getName()).append(' ').append(type);
 
             int len = at.getMaxLength();
-            if(len > 0)
-                buf.append('(')
-                .append(len)
-                .append(')');
+            if (len > 0)
+                buf.append('(').append(len).append(')');
 
-            if(at.isMandatory())
+            if (at.isMandatory())
                 buf.append(" NOT");
 
             buf.append(" NULL");
@@ -185,21 +178,21 @@ public class DbGenerator {
 
         // primary key clause
         Iterator pkit = ent.getPrimaryKey().iterator();
-        if(pkit.hasNext()) {
-            if(first)
+        if (pkit.hasNext()) {
+            if (first)
                 first = false;
             else
                 buf.append(", ");
 
             buf.append("PRIMARY KEY (");
             boolean firstPk = true;
-            while(pkit.hasNext()) {
-                if(firstPk)
+            while (pkit.hasNext()) {
+                if (firstPk)
                     firstPk = false;
                 else
                     buf.append(", ");
 
-                DbAttribute at = (DbAttribute)pkit.next();
+                DbAttribute at = (DbAttribute) pkit.next();
                 buf.append(at.getName());
             }
             buf.append(')');
@@ -208,21 +201,47 @@ public class DbGenerator {
         return buf.toString();
     }
 
-
     /** Returns an array of queries to create foreign key constraints
      * for a particular DbEntity. Throws CayenneRuntimeException, if called
      * for adapter that does not support FK constraints. */
     public List createFkConstraintsQueries(DbEntity dbEnt) {
-        if(!adapter.supportsFkConstraints())
+        if (!adapter.supportsFkConstraints())
             throw new CayenneRuntimeException("FK constraints are not supported by adapter.");
         ArrayList list = new ArrayList();
         Iterator it = dbEnt.getRelationshipList().iterator();
-        while(it.hasNext()) {
-            DbRelationship rel = (DbRelationship)it.next();
-            if(!rel.isToMany() && !rel.isToDependentPK())
+        while (it.hasNext()) {
+            DbRelationship rel = (DbRelationship) it.next();
+            if (!rel.isToMany() && !rel.isToDependentPK())
                 list.add(adapter.createFkConstraint(rel));
         }
         return list;
     }
 
+    /** Returns a subset of DbEntities from the <code>map</code>
+     *  that have no corresponding database tables. 
+     * 
+     * @throws SQLException if an error occurred while processing
+     * a list of database tables. 
+     */
+    private List filterNonExistentTables(DataMap map) throws SQLException {
+        // read a list of tables
+        DatabaseMetaData md = con.getMetaData();
+        ResultSet rs = md.getTables(null, null, "%", null);
+        ArrayList tables = new ArrayList();
+        while (rs.next()) {
+            tables.add(rs.getString("TABLE_NAME"));
+        }
+        rs.close();
+
+        // find tables that are in the map but not in the database
+        ArrayList missing = new ArrayList();
+        Iterator it = map.getDbEntitiesAsList().iterator();
+        while (it.hasNext()) {
+            DbEntity e = (DbEntity) it.next();
+            if (!tables.contains(e.getName())) {
+                missing.add(e);
+            }
+        }
+        return missing;
+    }
 }
