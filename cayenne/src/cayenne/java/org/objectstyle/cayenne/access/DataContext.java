@@ -597,6 +597,9 @@ public class DataContext implements QueryEngine, Serializable {
 								+ "as it's delete rule");
 					}
 					break;
+				case DeleteRule.NO_ACTION :
+				    // no action it is...
+				    break;
 				default :
 					//Clean up - we shouldn't be deleting this object
 					anObject.setPersistenceState(oldState);
