@@ -116,18 +116,36 @@ public class CayenneTable extends JTable {
 	public void editingStopped(ChangeEvent e) {
 		super.editingStopped(e);
 
+		if (getSelectedRow() >= 0) {
+			select(getSelectedRow() + 1);
+		}
+
 		// select a row below current row, if this was a text component
+		/*	int row = getSelectedRow();
+			if (getSelectedTextComponent() != null) {
+				
+		
+				if (row != getSelectedRow()) {
+					editCellAt(getSelectedRow(), getSelectedColumn());
+					JTextComponent newText = getSelectedTextComponent();
+					if(newText != null) {
+						newText.selectAll();
+						newText.setCaretPosition(newText.getDocument().getLength());
+					}
+				}
+			} */
+	}
+
+	public JTextComponent getSelectedTextComponent() {
 		TableCellEditor editor =
 			this.getCellEditor(getSelectedRow(), getSelectedColumn());
 		if (editor instanceof DefaultCellEditor) {
 			Component comp = ((DefaultCellEditor) editor).getComponent();
 			if (comp instanceof JTextComponent) {
-				int selected = getSelectedRow();
-				if (selected >= 0) {
-					select(selected + 1);
-				}
+				return (JTextComponent) comp;
 			}
 		}
+		return null;
 	}
 
 	/**
