@@ -86,7 +86,13 @@ public class ProjectFileTst extends CayenneTestCase {
         pf.setObjectModified(true);
         assertTrue(pf.isObjectModified());
     }
+    
+    public void testGetFileName() throws Exception {
+    	assertEquals("name.ext", pf.getFileName());
+    }
+    
 
+    // inner class to allow testing of the abstract ProjectFile
     class TestProjectFile extends ProjectFile {
 
         /**
