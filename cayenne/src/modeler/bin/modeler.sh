@@ -18,6 +18,6 @@ if [ ! -f $JAVACMD ] ; then
 	JAVACMD=$JAVA_HOME/jre/bin/java
 fi
 
-$JAVACMD -jar $CAYENNE_HOME/lib/cayenne-modeler.jar $1 $2 $3 & 
+$JAVACMD -jar $CAYENNE_HOME/lib/modeler/cayenne-modeler.jar $1 $2 $3 & 
 
 

@@ -15,6 +15,6 @@ echo Please define CAYENNE_HOME to point to your Cayenne installation.
 goto eof
 
 :run_modeler
-start %JAVA_HOME%\bin\javaw -jar %CAYENNE_HOME%\lib\cayenne-modeler.jar %*
+start %JAVA_HOME%\bin\javaw -jar %CAYENNE_HOME%\lib\modeler\cayenne-modeler.jar %*
 
 :eof

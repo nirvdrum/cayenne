@@ -44,6 +44,8 @@
             </fileset>
         </chmod>        
         
+        <copy file="otherlib/scope-bin.jar" todir="${dist}/lib/modeler"/>
+     
         <ant antfile="build-cayenne.xml" target="api"/>
 	</target>
 	
@@ -52,7 +54,9 @@
     <!-- Build Modeler JAR file.                    -->
     <!-- ========================================== -->
     <target name="jar" depends="compile,prepare-properties">
-        <jar jarfile="${dist}/lib/cayenne-modeler.jar">
+    	<mkdir dir="${dist}/lib/modeler"/>
+    	
+        <jar jarfile="${dist}/lib/modeler/cayenne-modeler.jar">
  			<fileset dir="${modeler.build}/classes"/>
 			<fileset dir="${modeler.build.properties}"/>
 			<fileset dir="${modeler.src}">
@@ -71,7 +75,7 @@
                <attribute name="Implementation-Version" value="${project.version}"/>
                <attribute name="Implementation-Vendor" value="ObjectStyle.org"/>
                <attribute name="Main-Class" value="org.objectstyle.cayenne.modeler.Editor"/>
-               <attribute name="Class-Path" value="cayenne.jar"/>
+               <attribute name="Class-Path" value="../cayenne.jar scope-bin.jar"/>
             </manifest>
         </jar>
     </target>  
