@@ -102,6 +102,10 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
     // TODO: we may implement more fine grained tracking of related objects
     // changes, requiring more sophisticated data structure to hold them
     protected List indirectlyModifiedIds = new ArrayList();
+    
+
+    protected List flattenedInserts = new ArrayList();
+    protected List flattenedDeletes = new ArrayList();
 
     /**
      * Ensures access to the versions of DataObject snapshots (in the form of
@@ -276,15 +280,89 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // no snapshot events needed... snapshots maybe cleared, but no
         // database changes have occured.
     }
+    
+    /**
+     * Reverts changes to all stored uncomitted objects.
+     * 
+     * @since 1.1
+     */
+    public synchronized void objectsRolledBack() {
+        Iterator it = getObjectIterator();
+
+        // collect candidates
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            int objectState = object.getPersistenceState();
+            switch (objectState) {
+                case PersistenceState.NEW :
+                    it.remove();
+                    
+                    object.setDataContext(null);
+                    object.setObjectId(null);
+                    object.setPersistenceState(PersistenceState.TRANSIENT);
+                    break;
+                case PersistenceState.DELETED :
+                    // Do the same as for modified... deleted is only a persistence state, so
+                    // rolling the object back will set the state to committed
+                case PersistenceState.MODIFIED :
+                    // this will clean any modifications and defer refresh from snapshot
+                    // till the next object accessor is called
+                    object.setPersistenceState(PersistenceState.HOLLOW);
+                    indirectlyModifiedIds.remove(object.getObjectId());
+                    break;
+                default :
+                    //Transient, committed and hollow need no handling
+                    break;
+            }
+        }
+
+        // finally clear flattened inserts & deletes
+        // this.clearFlattenedUpdateQueries();
+    }
 
     /**
      * Performs tracking of object relationship changes.
      * 
      * @since 1.1
      */
-    public void objectRelationshipChanged(
-        DataObject object,
-        ObjRelationship relationship) {
+    public void objectRelationshipUnset(
+        DataObject source,
+        DataObject target,
+        ObjRelationship relationship,
+        boolean processFlattened) {
+
+        objectRelationshipChanged(source, relationship);
+
+        if (processFlattened) {
+            flattenedRelationshipUnset(source, relationship, target);
+        }
+    }
+    
+    /**
+     * Performs tracking of object relationship changes.
+     * 
+     * @since 1.1
+     */
+    public void objectRelationshipSet(
+        DataObject source,
+        DataObject target,
+        ObjRelationship relationship,
+        boolean processFlattened) {
+
+        objectRelationshipChanged(source, relationship);
+
+        if (processFlattened) {
+            flattenedRelationshipSet(source, relationship, target);
+        }
+    }
+    
+    /**
+     * Performs tracking of object relationship changes.
+     * 
+     * @since 1.1
+     */
+    void objectRelationshipChanged(DataObject object, ObjRelationship relationship) {
+        // track modifications to an "independent" relationship
         if (relationship.isSourceIndependentFromTargetChange()) {
             int state = object.getPersistenceState();
             if (state == PersistenceState.COMMITTED
@@ -483,6 +561,8 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
         // clear caches
         this.retainedSnapshotMap.clear();
         this.indirectlyModifiedIds.clear();
+        this.flattenedDeletes.clear();
+        this.flattenedInserts.clear();
     }
 
     /**
@@ -658,7 +738,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
 
         // TODO: This implementation is rather naive and would scan all
         // registered
-        // objects. Any better ideas? Catching events or something....
+        // objects. Any better ideas? Catching events or something...
+        
+        
+        if (!flattenedInserts.isEmpty() || !flattenedDeletes.isEmpty()) {
+            return true;
+        }
 
         Iterator it = getObjectIterator();
         while (it.hasNext()) {
@@ -942,5 +1027,189 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             }
         }
     }
+    
+    /**
+     * Records the fact that flattened relationship was created.
+     * 
+     * @since 1.1
+     */
+    void flattenedRelationshipSet(
+        DataObject source,
+        ObjRelationship relationship,
+        DataObject destination) {
 
+        if (!relationship.isFlattened()) {
+            return;
+        }
+
+        if (relationship.isReadOnly()) {
+            throw new CayenneRuntimeException(
+                "Cannot set the read-only flattened relationship "
+                    + relationship.getName());
+        }
+
+        //Register this combination (so we can remove it later if an insert occurs before commit)
+        FlattenedRelationshipInfo info =
+            new FlattenedRelationshipInfo(source, destination, relationship);
+
+        if (flattenedDeletes.contains(info)) {
+            //If this combination has already been deleted, simply undelete it.
+            logObj.debug("Undeleting flattened relationship");
+            flattenedDeletes.remove(info);
+        }
+        else if (!flattenedInserts.contains(info)) {
+            logObj.debug("Inserting flattened relationship");
+            flattenedInserts.add(info);
+        }
+    }
+    
+    /**
+     * Records the fact that flattened relationship was broken down.
+     * 
+     * @since 1.1
+     */
+    void flattenedRelationshipUnset(
+        DataObject source,
+        ObjRelationship relationship,
+        DataObject destination) {
+
+        if (!relationship.isFlattened()) {
+            return;
+        }
+
+        if (relationship.isReadOnly()) {
+            throw new CayenneRuntimeException(
+                "Cannot unset the read-only flattened relationship "
+                    + relationship.getName());
+        }
+
+        // Register this combination,
+        // so we can remove it later if an insert occurs before commit
+        FlattenedRelationshipInfo info =
+            new FlattenedRelationshipInfo(source, destination, relationship);
+
+        if (flattenedInserts.contains(info)) {
+            // If this combination has already been inserted, simply uninsert it.
+            logObj.debug("Uninserting to simulate the delete");
+            flattenedInserts.remove(info);
+        }
+        else if (!flattenedDeletes.contains(info)) { //Do not delete it twice
+            logObj.debug("Registering for deletes");
+            flattenedDeletes.add(info);
+        }
+    }
+    
+    List getFlattenedInserts() {
+        return flattenedInserts;
+    }
+    
+    List getFlattenedDeletes() {
+        return flattenedDeletes;
+    }
+    
+    //Stores the information about a flattened relationship between two objects in a
+    // canonical form, such that equals returns true if both objects refer to the same
+    // pair of DataObjects connected by the same relationship (regardless of the
+    // direction of the relationship used to construct this info object)
+    static final class FlattenedRelationshipInfo extends Object {
+        private DataObject source;
+        private DataObject destination;
+        private ObjRelationship baseRelationship;
+        private String canonicalRelationshipName;
+
+        public FlattenedRelationshipInfo(
+            DataObject aSource,
+            DataObject aDestination,
+            ObjRelationship relationship) {
+            super();
+            this.source = aSource;
+            this.destination = aDestination;
+            this.baseRelationship = relationship;
+
+            //Calculate canonical relationship name
+            String relName1 = relationship.getName();
+            ObjRelationship reverseRel = relationship.getReverseRelationship();
+            if (reverseRel != null) {
+                String relName2 = reverseRel.getName();
+                //Find the lexically lesser name and use it first, then use the second.
+                //If equal (the same name), it doesn't matter which order.. be arbitrary
+                if (relName1.compareTo(relName2) <= 0) {
+                    this.canonicalRelationshipName = relName1 + "." + relName2;
+                }
+                else {
+                    this.canonicalRelationshipName = relName2 + "." + relName1;
+                }
+            }
+            else {
+                this.canonicalRelationshipName = relName1;
+            }
+        }
+
+        /**
+         * Does not care about the order of source/destination, only that the
+         * pair and the canonical relationship name match
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        public boolean equals(Object obj) {
+            if (!(obj instanceof FlattenedRelationshipInfo)) {
+                return false;
+            }
+            if (this == obj) {
+                return true;
+            }
+
+            FlattenedRelationshipInfo otherObj = (FlattenedRelationshipInfo) obj;
+
+            if (!this
+                .canonicalRelationshipName
+                .equals(otherObj.canonicalRelationshipName)) {
+                return false;
+            }
+            //Check that either direct mapping matches (src=>src, dest=>dest), or that
+            // cross mapping matches (src=>dest, dest=>src).
+            if (((this.source.equals(otherObj.source))
+                && (this.destination.equals(otherObj.destination)))
+                || ((this.source.equals(otherObj.destination))
+                    && (this.destination.equals(otherObj.source)))) {
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Because equals effectively ignores the order of dataObject1/2,
+         * summing the hashcodes is sufficient to fulfill the equals/hashcode
+         * contract
+         * @see java.lang.Object#hashCode()
+         */
+        public int hashCode() {
+            return source.hashCode()
+                + destination.hashCode()
+                + canonicalRelationshipName.hashCode();
+        }
+        /**
+         * Returns the baseRelationship.
+         * @return ObjRelationship
+         */
+        public ObjRelationship getBaseRelationship() {
+            return baseRelationship;
+        }
+
+        /**
+         * Returns the destination.
+         * @return DataObject
+         */
+        public DataObject getDestination() {
+            return destination;
+        }
+
+        /**
+         * Returns the source.
+         * @return DataObject
+         */
+        public DataObject getSource() {
+            return source;
+        }
+
+    }
 }

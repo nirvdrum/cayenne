@@ -73,7 +73,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
-import org.objectstyle.cayenne.access.DataContext.FlattenedRelationshipInfo;
+import org.objectstyle.cayenne.access.ObjectStore.FlattenedRelationshipInfo;
 import org.objectstyle.cayenne.access.util.BatchQueryUtils;
 import org.objectstyle.cayenne.access.util.ContextCommitObserver;
 import org.objectstyle.cayenne.access.util.DataNodeCommitHelper;
@@ -587,11 +587,10 @@ class ContextCommit {
     }
 
     private void categorizeFlattenedInsertsAndCreateBatches() {
-        Iterator i = context.getFlattenedInserts().iterator();
+        Iterator i = context.getObjectStore().getFlattenedInserts().iterator();
 
         while (i.hasNext()) {
-            DataContext.FlattenedRelationshipInfo info =
-                (FlattenedRelationshipInfo) i.next();
+            FlattenedRelationshipInfo info = (FlattenedRelationshipInfo) i.next();
 
             DataObject source = info.getSource();
             if (source.getPersistenceState() == PersistenceState.DELETED) {
@@ -638,10 +637,10 @@ class ContextCommit {
     }
 
     private void categorizeFlattenedDeletesAndCreateBatches() {
-        Iterator i = context.getFlattenedDeletes().iterator();
+        Iterator i = context.getObjectStore().getFlattenedDeletes().iterator();
 
         while (i.hasNext()) {
-            DataContext.FlattenedRelationshipInfo info =
+            FlattenedRelationshipInfo info =
                 (FlattenedRelationshipInfo) i.next();
             DataObject source = info.getSource();
             Map sourceId = source.getObjectId().getIdSnapshot();

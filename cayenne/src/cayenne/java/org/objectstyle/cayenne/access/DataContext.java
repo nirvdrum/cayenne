@@ -177,8 +177,6 @@ public class DataContext implements QueryEngine, Serializable {
     // Set of DataContextDelegates to be notified.
     private DataContextDelegate delegate;
 
-    private List flattenedInserts = new ArrayList();
-    private List flattenedDeletes = new ArrayList();
 
     protected boolean usingSharedSnaphsotCache;
     protected boolean validatingObjectsOnCommit;
@@ -408,12 +406,7 @@ public class DataContext implements QueryEngine, Serializable {
      * <code>false</code> otherwise.
      */
     public boolean hasChanges() {
-        // TODO: the logic checking flattened relationships should 
-        // most likely be pushed to the ObjectStore
-
-        return !this.getFlattenedInserts().isEmpty()
-            || !this.getFlattenedDeletes().isEmpty()
-            || getObjectStore().hasChanges();
+        return getObjectStore().hasChanges();
     }
 
     /** Returns a list of objects that are registered
@@ -1110,51 +1103,10 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Rollsback any changes that have occurred to objects
-     * registered with this data context.
+     * Reverts any changes that have occurred to objects registered with DataContext. 
      */
     public void rollbackChanges() {
-        synchronized (getObjectStore()) {
-            List objectsToUnregister = new ArrayList();
-            Iterator it = objectStore.getObjectIterator();
-
-            // collect candidates
-            while (it.hasNext()) {
-                DataObject thisObject = (DataObject) it.next();
-                int objectState = thisObject.getPersistenceState();
-                switch (objectState) {
-                    case PersistenceState.NEW :
-                        //We cannot unregister at this stage, because that would modify the map upon which
-                        // the iterator returned by objectStore.getObjectIterator() is based.  It is done outside the iterator loop
-                        objectsToUnregister.add(thisObject);
-                        break;
-                    case PersistenceState.DELETED :
-                        //Do the same as for modified... deleted is only a persistence state, so
-                        // rolling the object back will set the state to committed
-                    case PersistenceState.MODIFIED :
-                        // this will clean any modifications and defer refresh from snapshot
-                        // till the next object accessor is called
-                        thisObject.setPersistenceState(PersistenceState.HOLLOW);
-                        
-                        // TODO: whole rollback operation should likely be moved to the
-                        // ObjectStore level... for now we are using ugly direct access
-                        // to ObjectStore ivars
-                        getObjectStore().indirectlyModifiedIds.remove(thisObject.getObjectId());
-                        
-                        break;
-                    default :
-                        //Transient, committed and hollow need no handling
-                        break;
-                }
-            }
-
-            // unregister candidates
-            unregisterObjects(objectsToUnregister);
-
-            // finally clear flattened inserts & deletes
-            this.clearFlattenedUpdateQueries();
-        }
-
+        getObjectStore().objectsRolledBack();
     }
 
     /**
@@ -1193,7 +1145,6 @@ public class DataContext implements QueryEngine, Serializable {
 
             try {
                 worker.commit(logLevel);
-                this.clearFlattenedUpdateQueries();
             }
             catch (CayenneException ex) {
                 throw new CayenneRuntimeException(ex);
@@ -1588,79 +1539,7 @@ public class DataContext implements QueryEngine, Serializable {
         return this.getParent().getEntityResolver();
     }
 
-    /**
-     * Used internally by Cayenne. Users should not call this method directly.
-     */
-    public void registerFlattenedRelationshipInsert(
-        DataObject source,
-        ObjRelationship relationship,
-        DataObject destination) {
-        if (logObj.isDebugEnabled()) {
-            logObj.debug(
-                "registerFlattenedRelationshipInsert for source of class "
-                    + source.getClass().getName()
-                    + ", rel="
-                    + relationship.getName()
-                    + ", destination class="
-                    + destination.getClass().getName());
-        }
-        //Register this combination (so we can remove it later if an insert occurs before commit)
-        FlattenedRelationshipInfo info =
-            new FlattenedRelationshipInfo(source, destination, relationship);
 
-        if (flattenedDeletes.contains(info)) {
-            //If this combination has already been deleted, simply undelete it.
-            logObj.debug(
-                "This combination already deleted.. undeleting to simulate the insert");
-            flattenedDeletes.remove(info);
-        }
-        else if (!flattenedInserts.contains(info)) {
-            logObj.debug("This combination is not currently inserted... ok");
-            flattenedInserts.add(info);
-        }
-    }
-
-    /**
-     * Used internally by Cayenne. Users should not call this method directly.
-     */
-    public void registerFlattenedRelationshipDelete(
-        DataObject source,
-        ObjRelationship relationship,
-        DataObject destination) {
-        if (logObj.isDebugEnabled()) {
-            logObj.debug(
-                "registerFlattenedRelationshipDelete for source of class "
-                    + source.getClass().getName()
-                    + ", rel="
-                    + relationship.getName()
-                    + ", destination class="
-                    + destination.getClass().getName());
-        }
-        //Register this combination (so we can remove it later if an insert occurs before commit)
-        FlattenedRelationshipInfo info =
-            new FlattenedRelationshipInfo(source, destination, relationship);
-
-        if (flattenedInserts.contains(info)) {
-            //If this combination has already been inserted, simply uninsert it.
-            logObj.debug(
-                "This combination already inserted..uninserting to simulate the delete");
-            flattenedInserts.remove(info);
-        }
-        else if (!flattenedDeletes.contains(info)) { //Do not delete it twice
-            logObj.debug(
-                "This combination is not currently deleted... registering for deletes");
-            flattenedDeletes.add(info);
-        }
-    }
-
-    /**
-     * Should be called once the queries returned by getFlattenedUpdateQueries
-     * have been succesfully executed or reverted and are no longer needed.
-     */
-    protected void clearFlattenedUpdateQueries() {
-        this.flattenedDeletes = new ArrayList();
-        this.flattenedInserts = new ArrayList();
-    }
 
     /**
      * Sets default for posting transaction events by new DataContexts.
@@ -1741,119 +1620,36 @@ public class DataContext implements QueryEngine, Serializable {
             eventMgr.postEvent(commitChangesEvent, DataContext.DID_COMMIT);
         }
     }
-
-    List getFlattenedInserts() {
-        return flattenedInserts;
+    
+    
+    /**
+     * @deprecated Since 1.1 this method is not used in Cayenne. 
+     * All flattened relationship logic was moved to the ObjectStore
+     */
+    protected void clearFlattenedUpdateQueries() {
+        objectStore.flattenedDeletes.clear();
+        objectStore.flattenedInserts.clear();
     }
-
-    List getFlattenedDeletes() {
-        return flattenedDeletes;
+    
+    /**
+     * @deprecated Since 1.1 this method is not used in Cayenne. 
+     * All flattened relationship logic was moved to the ObjectStore
+     */    
+    public void registerFlattenedRelationshipDelete(
+        DataObject source,
+        ObjRelationship relationship,
+        DataObject destination) {
+        objectStore.flattenedRelationshipUnset(source, relationship, destination);
     }
-
-    //Stores the information about a flattened relationship between two objects in a
-    // canonical form, such that equals returns true if both objects refer to the same
-    // pair of DataObjects connected by the same relationship (regardless of the
-    // direction of the relationship used to construct this info object)
-    static final class FlattenedRelationshipInfo extends Object {
-        private DataObject source;
-        private DataObject destination;
-        private ObjRelationship baseRelationship;
-        private String canonicalRelationshipName;
-
-        public FlattenedRelationshipInfo(
-            DataObject aSource,
-            DataObject aDestination,
-            ObjRelationship relationship) {
-            super();
-            this.source = aSource;
-            this.destination = aDestination;
-            this.baseRelationship = relationship;
-
-            //Calculate canonical relationship name
-            String relName1 = relationship.getName();
-            ObjRelationship reverseRel = relationship.getReverseRelationship();
-            if (reverseRel != null) {
-                String relName2 = reverseRel.getName();
-                //Find the lexically lesser name and use it first, then use the second.
-                //If equal (the same name), it doesn't matter which order.. be arbitrary
-                if (relName1.compareTo(relName2) <= 0) {
-                    this.canonicalRelationshipName = relName1 + "." + relName2;
-                }
-                else {
-                    this.canonicalRelationshipName = relName2 + "." + relName1;
-                }
-            }
-            else {
-                this.canonicalRelationshipName = relName1;
-            }
-        }
-
-        /**
-         * Does not care about the order of source/destination, only that the
-         * pair and the canonical relationship name match
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
-        public boolean equals(Object obj) {
-            if (!(obj instanceof FlattenedRelationshipInfo)) {
-                return false;
-            }
-            if (this == obj) {
-                return true;
-            }
-
-            FlattenedRelationshipInfo otherObj = (FlattenedRelationshipInfo) obj;
-
-            if (!this
-                .canonicalRelationshipName
-                .equals(otherObj.canonicalRelationshipName)) {
-                return false;
-            }
-            //Check that either direct mapping matches (src=>src, dest=>dest), or that
-            // cross mapping matches (src=>dest, dest=>src).
-            if (((this.source.equals(otherObj.source))
-                && (this.destination.equals(otherObj.destination)))
-                || ((this.source.equals(otherObj.destination))
-                    && (this.destination.equals(otherObj.source)))) {
-                return true;
-            }
-            return false;
-        }
-
-        /**
-         * Because equals effectively ignores the order of dataObject1/2,
-         * summing the hashcodes is sufficient to fulfill the equals/hashcode
-         * contract
-         * @see java.lang.Object#hashCode()
-         */
-        public int hashCode() {
-            return source.hashCode()
-                + destination.hashCode()
-                + canonicalRelationshipName.hashCode();
-        }
-        /**
-         * Returns the baseRelationship.
-         * @return ObjRelationship
-         */
-        public ObjRelationship getBaseRelationship() {
-            return baseRelationship;
-        }
-
-        /**
-         * Returns the destination.
-         * @return DataObject
-         */
-        public DataObject getDestination() {
-            return destination;
-        }
-
-        /**
-         * Returns the source.
-         * @return DataObject
-         */
-        public DataObject getSource() {
-            return source;
-        }
-
+    
+    /**
+     * @deprecated Since 1.1 this method is not used in Cayenne. 
+     * All flattened relationship logic was moved to the ObjectStore
+     */    
+    public void registerFlattenedRelationshipInsert(
+        DataObject source,
+        ObjRelationship relationship,
+        DataObject destination) {
+        objectStore.flattenedRelationshipSet(source, relationship, destination);
     }
-
 }

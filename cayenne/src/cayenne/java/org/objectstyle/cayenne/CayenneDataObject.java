@@ -248,78 +248,67 @@ public class CayenneDataObject implements DataObject {
         return (DataObject) readProperty(relName);
     }
 
-    public void removeToManyTarget(String relName, DataObject val, boolean setReverse) {
+    public void removeToManyTarget(
+        String relName,
+        DataObject value,
+        boolean setReverse) {
+
         ObjRelationship relationship = this.getRelationshipNamed(relName);
-        
-        getDataContext().getObjectStore().objectRelationshipChanged(this, relationship);
-        
-        //Only delete the internal object if we should "setReverse" (or
-		// rather, if we aren't not setting the reverse).
-        //This kind of doubles up the meaning of that flag, so we may need to
-		// add another?
-        if (relationship.isFlattened() && setReverse) {
-            if (relationship.isReadOnly()) {
-                throw new CayenneRuntimeException(
-                    "Cannot modify (remove from) the read-only relationship " + relName);
-            }
-            //Handle removing from a flattened relationship
-            dataContext.registerFlattenedRelationshipDelete(this, relationship, val);
+
+        if (relationship == null) {
+            throw new NullPointerException("Can't find relationship: " + relName);
         }
 
-        //Now do the rest of the normal handling (regardless of whether it was
-		// flattened or not)
+        // if "setReverse" is false, avoid unneeded processing of flattened relationship
+        getDataContext().getObjectStore().objectRelationshipUnset(
+            this,
+            value,
+            relationship,
+            setReverse);
+
+        // Now do the rest of the normal handling (regardless of whether it was
+        // flattened or not)
         List relList = (List) readProperty(relName);
-        relList.remove(val);
+        relList.remove(value);
         if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }
 
-        if (val != null && setReverse) {
-            unsetReverseRelationship(relName, val);
+        if (value != null && setReverse) {
+            unsetReverseRelationship(relName, value);
         }
     }
 
-    public void addToManyTarget(String relName, DataObject val, boolean setReverse) {
-        if ((val != null) && (dataContext != val.getDataContext())) {
+    public void addToManyTarget(String relName, DataObject value, boolean setReverse) {
+        if ((value != null) && (dataContext != value.getDataContext())) {
             throw new CayenneRuntimeException(
                 "Cannot add object to relationship "
                     + relName
                     + " because it is in a different DataContext");
         }
-        
+
         ObjRelationship relationship = this.getRelationshipNamed(relName);
         if (relationship == null) {
-            throw new CayenneRuntimeException(
-                "Cannot add object to relationship "
-                    + relName
-                    + " because there is no relationship by that name");
-        }
-        
-        getDataContext().getObjectStore().objectRelationshipChanged(this, relationship);
-        
-        //Only create the internal object if we should "setReverse" (or
-		// rather, if we aren't not setting the reverse).
-        //This kind of doubles up the meaning of that flag, so we may need to
-		// add another?
-        if (relationship.isFlattened() && setReverse) {
-            if (relationship.isReadOnly()) {
-                throw new CayenneRuntimeException(
-                    "Cannot modify (add to) the read-only relationship " + relName);
-            }
-            //Handle adding to a flattened relationship
-            dataContext.registerFlattenedRelationshipInsert(this, relationship, val);
+            throw new NullPointerException("Can't find relationship: " + relName);
         }
 
+        // if "setReverse" is false, avoid unneeded processing of flattened relationship
+        getDataContext().getObjectStore().objectRelationshipSet(
+            this,
+            value,
+            relationship,
+            setReverse);
+
         //Now do the rest of the normal handling (regardless of whether it was
-		// flattened or not)
+        // flattened or not)
         List relList = (List) readProperty(relName);
-        relList.add(val);
+        relList.add(value);
         if (persistenceState == PersistenceState.COMMITTED) {
             persistenceState = PersistenceState.MODIFIED;
         }
 
-        if (val != null && setReverse)
-            setReverseRelationship(relName, val);
+        if (value != null && setReverse)
+            setReverseRelationship(relName, value);
     }
 
     /**
@@ -346,21 +335,18 @@ public class CayenneDataObject implements DataObject {
         if (oldTarget == value) {
             return;
         }
-
-        ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
         
-        getDataContext().getObjectStore().objectRelationshipChanged(this, relationship);
-
-        // Handle adding to a flattened relationship
-        if (relationship.isFlattened()) {
-            if (relationship.isReadOnly()) {
-                throw new CayenneRuntimeException(
-                    "Cannot modify the read-only flattened relationship "
-                        + relationshipName);
-            }
-
-            dataContext.registerFlattenedRelationshipInsert(this, relationship, value);
+        ObjRelationship relationship = this.getRelationshipNamed(relationshipName);
+        if (relationship == null) {
+            throw new NullPointerException("Can't find relationship: " + relationshipName);
         }
+
+        // if "setReverse" is false, avoid unneeded processing of flattened relationship
+        getDataContext().getObjectStore().objectRelationshipSet(
+            this,
+            value,
+            relationship,
+            setReverse);
 
         if (setReverse) {
             // unset old reverse relationship
