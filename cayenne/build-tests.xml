@@ -22,6 +22,7 @@
     		<include name="${mockrunner.jar}"/>
 			<include name="${spring.jar}"/>
 			<include name="${jgroups.jar}"/>
+			<include name="${jdom.jar}"/>
 		</fileset>
     	<fileset dir="${ant.home}/lib">
 			<include name="*.jar"/>		
