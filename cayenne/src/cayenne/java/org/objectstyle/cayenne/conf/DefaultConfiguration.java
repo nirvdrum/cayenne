@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.conf;
 
-import java.io.File;
 import java.io.InputStream;
 
 import org.apache.log4j.Logger;
@@ -75,7 +74,6 @@ public class DefaultConfiguration extends Configuration {
 	private static Logger logObj = Logger.getLogger(DefaultConfiguration.class);
 
 	protected ResourceLocator locator;
-	protected File projectFile;
 
 	/**
 	 * Default constructor. Simply calls {@link Configuration#Configuration()}.
