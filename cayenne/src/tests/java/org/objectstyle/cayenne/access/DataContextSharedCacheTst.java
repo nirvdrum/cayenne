@@ -125,11 +125,11 @@ public class DataContextSharedCacheTst extends MultiContextTestCase {
         assertFalse(
             Util.nullSafeEquals(artist.getArtistName(), altArtist.getArtistName()));
 
-        altContext.getObjectStore().synchronizeWithCache();
+        altContext.getObjectStore().synchronizeWithCache(true);
 
         // after sync
         // TODO: uncomment this test when the feature is implemented
-        // assertEquals(artist.getArtistName(), altArtist.getArtistName());
+        assertEquals(artist.getArtistName(), altArtist.getArtistName());
     }
 
     public void testCommitUpdateWithExternallyUpdatedSnapshot1() throws Exception {

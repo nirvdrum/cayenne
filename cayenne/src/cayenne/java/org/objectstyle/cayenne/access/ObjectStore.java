@@ -59,8 +59,9 @@ import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.access.event.SnapshotEvent;
 import org.objectstyle.cayenne.access.event.SnapshotEventListener;
-import org.objectstyle.cayenne.access.util.QueryUtils;
 import org.objectstyle.cayenne.access.util.DataRowUtils;
+import org.objectstyle.cayenne.access.util.QueryUtils;
+import org.objectstyle.cayenne.map.ObjEntity;
 
 /**
  * ObjectStore maintains a cache of objects and their snapshots.
@@ -102,8 +103,28 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * Synchronizes the state of registered DataObjects with the current state
      * of SnapshotCache.
      */
-    public synchronized void synchronizeWithCache() {
-        // TODO: do the actual synchronization
+    public synchronized void synchronizeWithCache(boolean refetchMissingSnapshots) {
+        Iterator objects = this.getObjectIterator();
+        while (objects.hasNext()) {
+            DataObject nextObject = (DataObject) objects.next();
+            ObjectId oid = nextObject.getObjectId();
+
+            DataRow snapshot =
+                (refetchMissingSnapshots)
+                    ? getSnapshot(oid, nextObject.getDataContext())
+                    : getCachedSnapshot(oid);
+
+            if (snapshot == null
+                || snapshot.getVersion() == nextObject.getSnapshotVersion()) {
+                continue;
+            }
+
+            ObjEntity entity =
+                nextObject.getDataContext().getEntityResolver().lookupObjEntity(
+                    nextObject);
+            DataRowUtils.mergeObjectWithSnapshot(entity, nextObject, snapshot);
+			nextObject.setSnapshotVersion(snapshot.getVersion());
+        }
     }
 
     /**
