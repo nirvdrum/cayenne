@@ -77,7 +77,10 @@ import org.apache.log4j.Logger;
  * @author Andrei Adamchik
  */
 public class QueryLogger {
-	private static Logger logObj = Logger.getLogger(QueryLogger.class);
+	private static Logger logObj = Logger.getLogger(QueryLogger.class);	
+	
+	public static final Level DEFAULT_LOG_LEVEL = Level.INFO;
+	
 
 	/** Utility method that appends SQL literal for the specified object to the buffer.
 	*  This value will be quoted as needed. Conversion of the value is done based on Java class.
@@ -147,7 +150,8 @@ public class QueryLogger {
 	 * Returns current logging level.
 	 */
 	public static Level getLoggingLevel() {
-		return logObj.getLevel();
+		Level level = logObj.getLevel();
+		return (level != null) ? level : DEFAULT_LOG_LEVEL;
 	}
 
 	/**
