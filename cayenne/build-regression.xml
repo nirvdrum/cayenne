@@ -32,8 +32,8 @@
 		      
 			<classpath refid="classpath"/>
 			
-			<jvmarg value="-Xms60m"/>
-			<jvmarg value="-Xmx60m"/>
+			<jvmarg value="-Xms64m"/>
+			<jvmarg value="-Xmx64m"/>
 			
 			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
 			<sysproperty key="test.new_objects_per_table" value="${regression.new_objects_per_table}"/>

@@ -71,6 +71,9 @@
     		<arg value="-f"/>
     		<arg value="build-tests.xml"/>
     		<arg value="unit-test-run"/>
+
+			<jvmarg value="-Xms64m"/>
+			<jvmarg value="-Xmx64m"/>
     		
 			<sysproperty key="cayenne.test.connection" value="${cayenne.test.connection}"/>
 			<sysproperty key="cayenne.test.report" value="${cayenne.test.report}"/>
