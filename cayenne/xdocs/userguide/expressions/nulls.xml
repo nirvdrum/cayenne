@@ -7,7 +7,19 @@
 </navigator>    
 <body>
     <section name="9. Using Expressions">        
-		<subsection name="9.4 NULL handling, etc.">
+		<subsection name="9.4 NULL handling.">
+		<p>Handling of Java null expression operands is no different from normal values. 
+		Instead of using special conditional operators, like SQL does, EQUAL_TO and NOT_EQUAL_TO 
+        expressions can be used directly with null values. It is up to Cayenne to 
+        translate expressions with nulls to the valid SQL.</p>
+        
+        <p>For example:</p>
+        
+<source>
+// this expression will be translated by Cayenne to the SQL like:
+// ...WHERE BIRTH_DATE IS NOT NULL
+Expression exp = ExpressionFactory.noMatchExp("birthDate", null);
+</source>
 		</subsection>
     </section>
 </body>

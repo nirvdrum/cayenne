@@ -47,21 +47,6 @@
              		</ul>
              		</li>
              	</ul>
-             	
-             	<p>Notes:</p>
-             	<ul>
-             		<li><b>Case insensitive comparison.</b> There is no LIKE_IGNORE_CASE in SQL. 
-             		This is a convenience expression that Cayenne provides.
-             		<p></p>
-             		</li>
-             		
-             		<li><b>NULL handling.</b> Null handling is done differently from SQL. Instead 
-             		of using special conditional operator, in Cayenne normal EQUAL_TO, NOT_EQUAL_TO 
-             		expressions are used to check if a value is null or not. It is up to Cayenne to 
-             		translate expressions with nulls to the valid SQL.
-             		<p></p>
-             		</li>
-             	</ul>
     </section>
 </body>
 </document>

@@ -72,8 +72,8 @@
             <ul>
             	<li><a href="expressions/common.html">9.1 General Approach to Building Expressions</a></li>
             	<li><a href="expressions/path.html">9.2 Path Expressions</a></li>
-            	<li><a href="expressions/shortcut.html">9.3 Shortcuts</a></li>
-            	<li><a href="expressions/nulls.html">9.4 NULL handling, etc.</a></li>
+            	<li><a href="expressions/shortcut.html">9.3 Simplified Expression API</a></li>
+            	<li><a href="expressions/nulls.html">9.4 NULL handling</a></li>
             </ul><br/></li>
             
             <li><a href="perform/index.html">10. Performance Tuning</a>
