@@ -39,9 +39,10 @@
     	</item>
     	
     	<item name="3. Quick Start"  href="/userguide/quickstart/index.html">
-    		<item name="3.1 Command-Line Tutorial"  href="/userguide/quickstart/comline.html"/>
-    		<item name="3.2 JSP/Struts Tutorial"  href="/userguide/quickstart/webapp.html"/>
-    		<item name="3.3 Tapestry Tutorial"  href="/userguide/quickstart/tapestrywebapp.html"/>
+    		<item name="3.1 Cayenne Application"  href="/userguide/quickstart/application.html"/>
+    		<item name="3.2 Command-Line Tutorial"  href="/userguide/quickstart/comline.html"/>
+    		<item name="3.3 JSP/Struts Tutorial"  href="/userguide/quickstart/webapp.html"/>
+    		<item name="3.4 Tapestry Tutorial"  href="/userguide/quickstart/tapestrywebapp.html"/>
     	</item>
     	
     	<item name="4. Design"  href="/userguide/design/index.html">
@@ -54,10 +55,7 @@
     		<item name="4.7 Primary Key Generation"  href="/userguide/design/autopk.html"/>
     	</item>
     	
-    	<item name="5. Writing Cayenne Applications"  href="/userguide/appguide/index.html">
-    		<item name="5.1 Cayenne Project"  href="/userguide/appguide/project.html"/>
-    		<item name="5.2 Generating Java Classes"  href="/userguide/appguide/javagen.html"/>
-    	</item>
+    	<item name="5. Generating Classes with Ant"  href="/userguide/javagen.html"/>
     	
     	<item name="6. Using DataContext"  href="/userguide/datactxt/index.html">
     		<item name="6.1 Obtaining DataContext"  href="/userguide/datactxt/create.html"/>
@@ -127,7 +125,10 @@
     		<item name="2.3 Converting an Existing Java Business Framework"  href="/modelerguide/object-relational-modeling/existing-java-framework.html"/>
     	</item>
     	
-    	<item name="3. Cayenne Model Structure"  href="/modelerguide/model-structure/index.html"/>
+    	<item name="3. Cayenne Project Structure"  href="/modelerguide/model-structure/index.html">
+    		<item name="3.1 Cayenne Projects"  href="/modelerguide/model-structure/project-structure.html"/>
+    		<item name="3.1 Cayenne DataMaps"  href="/modelerguide/model-structure/data-map-structure.html"/>
+    	</item>
     	
     	<item name="4. Common Modeling Tasks"  href="/modelerguide/common-tasks/index.html">
     		<item name="4.1 Create New Project"  href="/modelerguide/common-tasks/create-project.html"/>

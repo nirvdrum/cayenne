@@ -3,24 +3,14 @@
 <toc name="toc-user-guide" chapter="3. Quick Start"/>
 <body>
     <section name="3. Quick Start">
-      	<p>Before getting any deeper into details of Cayenne design, it may be helpful to go through
-    	a few simple examples. This may be all the information needed to start writing
-    	Cayenne applications. </p>
-    	
-        <p>Each of the following tutorials provides a simple SQL script to create 
-        the tables and data needed. Database schema used in all the tutorials in 
+      	<p>This chapter explains in short what steps are required to write a Cayenne 
+      	application, and then presents a few tutorials showing examples of various applications.
+      	Each of the tutorials provides a simple SQL script to create 
+        the tables and data needed. Database schema used in all tutorials in 
         this chapter is shown below:</p>
             
         <img src="/images/schema.jpg" width="494" height="250" border="0" 
-        align="middle" alt="Art Catalog Schema"/>        
-        
-    	<p>Cayenne Tutorials:</p>
-    	
-    	<ul>
-    		<li><a href="comline.html">"Command-line Application" Tutorial</a></li>
-    		<li><a href="webapp.html">"JSP/Struts Web Application" Tutorial</a></li>
-    		<li><a href="tapestrywebapp.html">"Tapestry Web Application" Tutorial</a></li>
-    	</ul>
+        align="middle" alt="Art Catalog Schema"/>
     </section>
 </body>
 </document>

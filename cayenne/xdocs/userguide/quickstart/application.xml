@@ -1,10 +1,11 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-<toc name="toc-user-guide" chapter="5. Writing Cayenne Applications"/>
+<title>User Guide - Quick Start</title>
+<toc name="toc-user-guide" chapter="3. Quick Start"/>
 <body>
-    <section name="5. Writing Cayenne Applications">
+    <section name="3. Quick Start">
+    	<subsection name="3.1 Cayenne Application">    	
             <p>The following steps are needed to write and deploy a Cayenne 
-            application. They are discussed in detail in the following chapters.</p>
+            application. They are discussed in detail later.</p>
             
             <p><strong>- Create Cayenne Project : </strong> 
             Cayenne project is a set of configuration files
@@ -30,6 +31,7 @@
             configure Cayenne in a few ways. Possible deployment scenarious include 
             standalone application, web application, EJB application.
             </p>
+    </subsection>
     </section>
 </body>
 </document>

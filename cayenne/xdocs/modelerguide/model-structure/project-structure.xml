@@ -1,15 +1,12 @@
 <document>
-<title>User Guide - Writing Cayenne Applications</title>
-<toc name="toc-user-guide" chapter="5. Writing Cayenne Applications"/>
+<title>CayenneModeler Guide</title>
+<toc name="toc-modeler-guide" chapter="3. Cayenne Project Structure"/>
 <body>
-    <section name="5. Writing Cayenne Applications">        
-        <subsection name="5.1 Cayenne Project" anchor="datamap">
-            <p>Cayenne project is a set of XML configuration files
-            needed for a Java application to work with Cayenne. While project
-            files can be edited by hand, there is a 
-            <a href="../../modelerguide/index.html">CayenneModeler GUI tool</a>
-            that is intended to work with project files. Loaded Cayenne project 
-            has the following structure:</p>
+	<section name="3. Cayenne Project Structure">
+ 	 	<subsection name="3.1 Cayenne Projects">
+ 	 	    <p>Cayenne project is a set of XML configuration files
+            needed for a Java application to work with Cayenne. It is editable
+            by CayenneModeler. A project has roughly the following structure:</p>
             
             <img src="/images/cayenne-project.gif" width="400" height="235" alt="Cayenne Project"/>
             
@@ -57,7 +54,7 @@
             and instead would use a DataSource provided by the container.</i> DTD for the DataSource file can be 
             found <a href="../../dtd/driver.dtd">here</a>.
             </p>
-        </subsection>
+ 	 	</subsection>
     </section>
 </body>
 </document>

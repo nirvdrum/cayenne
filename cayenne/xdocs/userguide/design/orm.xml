@@ -23,7 +23,7 @@
 
             <p>The following diagram shows how mapping is organized in Cayenne:</p>
             
-            <img src="/images/entities.gif" width="520" height="275" alt="Cayenne Map Class Diagram"/> 
+            <img src="/images/entities.gif" width="520" height="275" alt="Cayenne DataMap"/> 
             
             <p>Cayenne mapping is implemented as 2 layers: database layer and Java layer. 
             Java layer uses database layer to tie Java classes to the database
