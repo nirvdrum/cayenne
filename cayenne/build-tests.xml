@@ -23,6 +23,8 @@
 			<include name="${spring.jar}"/>
 			<include name="${jgroups.jar}"/>
 			<include name="${jdom.jar}"/>
+			<include name="${commons.dbcp.jar}"/>
+			<include name="${commons.pool.jar}"/>
 		</fileset>
     	<fileset dir="${ant.home}/lib">
 			<include name="*.jar"/>		
