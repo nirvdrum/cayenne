@@ -136,7 +136,7 @@ public class FileFilters {
             }
 
             String name = f.getName().toLowerCase();
-            return (name.endsWith(".jar") && !name.equals(".zip"));
+            return (name.length() > 4 && (name.endsWith(".jar") || name.endsWith(".zip")));
         }
 
         public String getDescription() {
