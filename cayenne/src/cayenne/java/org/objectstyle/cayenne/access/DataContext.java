@@ -1252,7 +1252,7 @@ public class DataContext implements QueryEngine, Serializable {
 
         ObjectId permId = new ObjectId(anObject.getClass(), idMap);
 
-        // note that object registration did not changed (new id is not attached to context, only to temp. oid)
+        // note that object registration did not change (new id is not attached to context, only to temp. oid)
         tempId.setPermId(permId);
         return permId;
     }
