@@ -63,13 +63,14 @@ import java.util.Map;
 import org.objectstyle.cayenne.util.Util;
 
 /** 
- * An ObjectId is a class that uniquely identifies a 
- * persistent object.
+ * An ObjectId is a globally unique identifier of DataObjects.
  * 
- * <p>Each data object has an id uniquely identifying it. 
- * ObjectId concept corresponds to a primary key concept 
- * in the relational world. Such id is needed to 
- * implement object uniquing and other persistence layer functions. 
+ * <p>Each non-transient DataObject has an associated ObjectId. 
+ * It is a global object identifier and does not depend on the 
+ * DataContext of a particular object instance.
+ * ObjectId conceptually close to a RDBMS primary key idea. 
+ * Among other things ObjectId is used to ensure object uniqueness 
+ * within DataContext. 
  * </p>
  * 
  * @author Andrei Adamchik

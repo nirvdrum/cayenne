@@ -100,15 +100,17 @@ import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.SelectQuery;
 
-/** User-level Cayenne access class. Provides isolated object view of
-  * the datasource to the application code. Normal use pattern is to
-  * create DataContext in a session scope.
-  *
-  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
-  * target="_top">Cayenne User Guide.</a></i></p>
-  *
-  * @author Andrei Adamchik
-  */
+/** 
+ * User-level Cayenne access class. Provides isolated object view of
+ * the datasource to the application code. Normal use pattern is to
+ * create one DataContext per session (whatever session may mean in
+ * a given application).
+ *
+ * <p><i>For more information see <a href="../../../../../../userguide/index.html"
+ * target="_top">Cayenne User Guide.</a></i></p>
+ *
+ * @author Andrei Adamchik
+ */
 public class DataContext implements QueryEngine, Serializable {
 	private static Logger logObj = Logger.getLogger(DataContext.class);
 

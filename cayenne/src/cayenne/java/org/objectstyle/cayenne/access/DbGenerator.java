@@ -86,9 +86,8 @@ import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
 
 /**
-  * Utility class that does forward engineering of the database.
-  * It can generate database schema using the data map. It is a 
-  * counterpart of DbLoader class. 
+  * Utility class that generates database schema based on Cayenne mapping.
+  * It is a logical counterpart of DbLoader class. 
   *
   * @author Andrei Adamchik
   */

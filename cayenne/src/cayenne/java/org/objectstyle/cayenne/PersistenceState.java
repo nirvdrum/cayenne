@@ -56,7 +56,13 @@
 package org.objectstyle.cayenne;
 
 /** 
- * Defines constants for the possible DataObject states.
+ * Defines a set of persistence states for DataObjects. PersistenceState describes
+ * the state of data stored in a DataObject relative to the external persistence store. If an object's
+ * state matches the state of the persistence store, the object is COMMITTED. If object is not 
+ * intended to be persistent or is not explicitly made persistent, the state is TRANSIENT, and so on.
+ * 
+ * <p>DataObject persistence states should not be modified directly. Rather it is a responsibility
+ * of a DataContext to maintain correct state of the objects that it manages.
  * 
  * @author Andrei Adamchik 
  */

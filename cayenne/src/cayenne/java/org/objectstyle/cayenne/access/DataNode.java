@@ -92,6 +92,8 @@ import org.objectstyle.cayenne.conn.PoolManager;
 
 /**
  * Describes a single physical data source. This can be a database server, LDAP server, etc.
+ * When the underlying connection layer is based on JDBC, DataNode works as a Cayenne
+ * wrapper of javax.sql.DataSource.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>

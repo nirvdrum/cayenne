@@ -59,10 +59,10 @@ import java.util.Collections;
 import java.util.Map;
 
 /** 
- * A TempObjectId is used as a temporary
- * id for data objects in <code>New</code> persistence state.
- * When such objects are committed to the database, 
- * temporary id is replaced with a permanent id object. 
+ * An ObjectId for new objects that hasn't been committed
+ * to the external data store. On commit, a TempObjectId is 
+ * replaced with a permanent ObjectId tied to a primary key 
+ * of an object in the external data store. 
  * 
  * @author Andrei Adamchik
  */

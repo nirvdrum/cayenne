@@ -73,17 +73,10 @@ import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.query.Query;
 
 /**
- * DataDomain is Cayenne "router". It has zero or more DataNodes that work
- * with data sources. For each query coming to DataDomain, an appropriate node
- * is selected and query is forwarded to this node. This way DataDomain creates
+ * DataDomain performs query routing functions in Cayenne. DataDomain creates
  * single data source abstraction hiding multiple physical data sources from the
- * user.
- *
- * Other functions of DataDomain are:
- * <ul>
- * <li>Factory of DataContexts
- * <li>Storage of DataMaps
- * </ul>
+ * user. When a child DataContext sends a query to the DataDomain, it is transparently
+ * routed to an appropriate DataNode.
  *
  * <p><i>For more information see <a href="../../../../../../userguide/index.html"
  * target="_top">Cayenne User Guide.</a></i></p>
