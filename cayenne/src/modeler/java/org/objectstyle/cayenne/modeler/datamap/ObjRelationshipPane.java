@@ -363,10 +363,10 @@ public class ObjRelationshipPane
 		table.setRowHeight(25);
 		table.setRowMargin(3);
 		
-		TableColumn col = table.getColumnModel().getColumn(model.REL_NAME);
+		TableColumn col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_NAME);
 		col.setMinWidth(150);
 		
-		col = table.getColumnModel().getColumn(model.REL_TARGET);
+		col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_TARGET);
 		col.setMinWidth(150);
 		JComboBox combo = new JComboBox(createObjEntityComboModel());
 		combo.setEditable(false);
@@ -375,11 +375,11 @@ public class ObjRelationshipPane
 		editor.setClickCountToStart(1);
 		col.setCellEditor(editor);
 		
-		col = table.getColumnModel().getColumn(model.REL_CARDINALITY);
+		col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_CARDINALITY);
 		col.setMinWidth(150);
 		table.getSelectionModel().addListSelectionListener(this);
 
-		col = table.getColumnModel().getColumn(model.REL_DELETERULE);
+		col = table.getColumnModel().getColumn(ObjRelationshipTableModel.REL_DELETERULE);
 		col.setMinWidth(60);
 		combo = new JComboBox(createDeleteRuleComboModel());
 		combo.setEditable(false);

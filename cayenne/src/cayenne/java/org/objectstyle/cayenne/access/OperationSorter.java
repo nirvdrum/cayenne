@@ -128,7 +128,7 @@ public class OperationSorter {
 	  *  Returns a new list containing all the DbEntities in <code>entities</code>,
 	  *  in the correct order for inserting objects int,o or creating the tables of, those entities.
 	  */
-	public static List sortedEntitiesInInsertOrder(List entities) {
+	public List sortedEntitiesInInsertOrder(List entities) {
 		return InsertOrderSorter.sortedDbEntities(entities);
 	}
 
@@ -158,7 +158,6 @@ public class OperationSorter {
 	 *  object, and reflexive relationships are correctly handled
 	 */
 	public static void sortObjectsInInsertOrder(List objects) {
-
 		Collections.sort(objects, ObjectComparator.comparatorForInsertOrder(objects));
 	}
 	

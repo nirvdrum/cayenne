@@ -241,9 +241,9 @@ public class DbRelationshipPane
 		table.setModel(model);
 		table.setRowHeight(25);
 		table.setRowMargin(3);
-		TableColumn col = table.getColumnModel().getColumn(model.NAME);
+		TableColumn col = table.getColumnModel().getColumn(DbRelationshipTableModel.NAME);
 		col.setMinWidth(150);
-		col = table.getColumnModel().getColumn(model.TARGET);
+		col = table.getColumnModel().getColumn(DbRelationshipTableModel.TARGET);
 		col.setMinWidth(150);
 		JComboBox combo = new JComboBox(createComboModel());
 		combo.setEditable(false);

@@ -194,9 +194,9 @@ public class ObjAttributePane
 		ObjAttributeTableModel model,
 		ObjEntity entity) {
 
-		TableColumn col = table.getColumnModel().getColumn(model.OBJ_ATTRIBUTE);
+		TableColumn col = table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE);
 		col.setMinWidth(150);
-		col = table.getColumnModel().getColumn(model.OBJ_ATTRIBUTE_TYPE);
+		col = table.getColumnModel().getColumn(ObjAttributeTableModel.OBJ_ATTRIBUTE_TYPE);
 		col.setMinWidth(150);
 
 		JComboBox combo = new JComboBox(ModelerUtil.getRegisteredTypeNames());
@@ -205,7 +205,7 @@ public class ObjAttributePane
 
 		// If DbEntity is specified, display Database info as well.
 		if (entity.getDbEntity() != null) {
-			col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE);
+			col = table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE);
 			col.setMinWidth(150);
 			combo =
 				new JComboBox(
@@ -214,7 +214,7 @@ public class ObjAttributePane
 						mediator.getCurrentObjEntity().getDbEntity()));
 			combo.setEditable(false);
 			col.setCellEditor(new DefaultCellEditor(combo));
-			col = table.getColumnModel().getColumn(model.DB_ATTRIBUTE_TYPE);
+			col = table.getColumnModel().getColumn(ObjAttributeTableModel.DB_ATTRIBUTE_TYPE);
 			col.setMinWidth(120);
 		}
 	}

@@ -82,8 +82,8 @@ public class DefaultConfiguration extends Configuration {
 
 	public DefaultConfiguration() {
 		// configure CLASSPATH-only locator
+		ResourceLocator.setLoggingLevel(Configuration.getLoggingLevel());
 		locator = new ResourceLocator();
-		locator.setLoggingLevel(Configuration.getLoggingLevel());
 		locator.setSkipAbsPath(true);
 		locator.setSkipClasspath(false);
 		locator.setSkipCurDir(true);
