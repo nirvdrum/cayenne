@@ -118,9 +118,9 @@ public class DataRowStore implements Serializable {
     protected String name;
     protected LRUMap snapshots;
     protected boolean notifyingRemoteListeners;
-    
+
     protected transient EventBridge remoteNotificationsHandler;
-    
+
     // IMPORTANT: EventSubject must be an ivar to avoid its deallocation
     // too early, and thus disabling events.
     protected transient EventSubject eventSubject;
@@ -148,7 +148,7 @@ public class DataRowStore implements Serializable {
         this.eventSubject = createSubject();
         initFromProperties(properties);
     }
-    
+
     private EventSubject createSubject() {
         return EventSubject.getSubject(this.getClass(), name);
     }
@@ -205,10 +205,9 @@ public class DataRowStore implements Serializable {
 
         // init ivars from properties
         this.notifyingRemoteListeners = notifyRemote;
-        
+
         // TODO: ENTRY EXPIRATION is not supported by commons LRU Map
         this.snapshots = new LRUMap(snapshotsCacheSize);
-          
 
         // init event bridge only if we are notifying remote listeners
         if (notifyingRemoteListeners) {
@@ -359,7 +358,7 @@ public class DataRowStore implements Serializable {
 
                     ObjectId key = (ObjectId) it.next();
                     DataRow newSnapshot = (DataRow) updatedSnapshots.get(key);
-                    DataRow oldSnapshot = (DataRow) snapshots.remove(key);
+                    DataRow oldSnapshot = (DataRow) snapshots.put(key, newSnapshot);
 
                     // generate diff for the updated event, if this not a new
                     // snapshot
@@ -397,8 +396,6 @@ public class DataRowStore implements Serializable {
                             diffs.put(key, diff);
                         }
                     }
-
-                    snapshots.put(key, newSnapshot);
                 }
             }
 
