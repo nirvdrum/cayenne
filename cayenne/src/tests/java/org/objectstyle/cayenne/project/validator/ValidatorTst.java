@@ -91,53 +91,9 @@ public class ValidatorTst extends CayenneTestCase {
 		assertSame(project, validator.getProject());
 	}
 
-/*	public void testValidateDomains() throws Exception {
-		// should succeed
-		DataDomain d1 = new DataDomain("abc");
-		validator.reset();
-		validator.validateDomains(new DataDomain[] { d1 });
-		assertValidator(ValidationResult.VALID);
+/*	
 
-		// should complain about no name
-		DataDomain d2 = new DataDomain();
-		validator.reset();
-		validator.validateDomains(new DataDomain[] { d2 });
-		assertValidator(ValidationResult.ERROR);
-
-		// should complain about duplicate name
-		DataDomain d3 = new DataDomain(d1.getName());
-		validator.reset();
-		validator.validateDomains(new DataDomain[] { d1, d3 });
-		assertValidator(ValidationResult.ERROR);
-	}
-
-	public void testValidateDataNodes() throws Exception {
-		// should succeed
-		DataDomain d1 = new DataDomain("abc");
-		DataNode n1 = new DataNode("xyz");
-		n1.setAdapter(new JdbcAdapter());
-		n1.setDataSourceFactory("123");
-		validator.reset();
-		validator.validateDataNodes(d1, new DataNode[] { n1 });
-		assertValidator(ValidationResult.VALID);
-
-		// should complain about no name
-		DataNode n2 = new DataNode();
-		n2.setAdapter(new JdbcAdapter());
-		n2.setDataSourceFactory("123");
-		validator.reset();
-		validator.validateDataNodes(d1, new DataNode[] { n2 });
-		assertValidator(ValidationResult.ERROR);
-
-		// should complain about duplicate name
-		DataNode n3 = new DataNode(n1.getName());
-		n3.setAdapter(new JdbcAdapter());
-		n3.setDataSourceFactory("123");
-		validator.reset();
-		validator.validateDataNodes(d1, new DataNode[] { n1, n3 });
-		assertValidator(ValidationResult.ERROR);
-	}
-
+	
 	public void testValidateObjAttributes() throws Exception {
 		// should succeed
 		DataDomain d1 = new DataDomain("abc");

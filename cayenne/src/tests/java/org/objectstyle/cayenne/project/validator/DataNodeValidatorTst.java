@@ -53,104 +53,58 @@
  * <http://objectstyle.org/>.
  *
  */
-
 package org.objectstyle.cayenne.project.validator;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.dba.JdbcAdapter;
 
-import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.project.ProjectTraversal;
-
-/** 
- * Used for validating Cayenne projects.
- * 
+/**
  * @author Andrei Adamchik
  */
-public class Validator {
-    protected Project project;
-    protected List validationResults = new ArrayList();
-    protected int maxSeverity;
+public class DataNodeValidatorTst extends ValidatorTestBase {
 
     /**
-     * Creates a new validator initialized with the project.
-     * 
-     * @param project
+     * Constructor for DataNodeValidatorTst.
+     * @param arg0
      */
-    public Validator(Project project) {
-        this.project = project;
+    public DataNodeValidatorTst(String arg0) {
+        super(arg0);
     }
 
-    /**
-     * Returns the project.
-     * @return Project
-     */
-    public Project getProject() {
-        return project;
+    public void testValidateDataNodes() throws Exception {
+        // should succeed
+        DataDomain d1 = new DataDomain("abc");
+        DataNode n1 = new DataNode("1");
+        n1.setAdapter(new JdbcAdapter());
+        n1.setDataSourceFactory("123");
+        n1.setDataSourceLocation("qqqq");
+        d1.addNode(n1);
+
+        validator.reset();
+        new DataNodeValidator().validateObject(new Object[] { conf, d1, n1 }, validator);
+        assertValidator(ValidationResult.VALID);
+
+        // should complain about no name
+        DataNode n2 = new DataNode("2");
+        n2.setAdapter(new JdbcAdapter());
+        n2.setDataSourceFactory("123");
+        d1.addNode(n2);
+
+        validator.reset();
+        new DataNodeValidator().validateObject(new Object[] { conf, d1, n2 }, validator);
+        assertValidator(ValidationResult.ERROR);
+
+        // should complain about duplicate name
+        DataNode n3 = new DataNode("3");
+        n3.setAdapter(new JdbcAdapter());
+        n3.setDataSourceFactory("123");
+        d1.addNode(n3);
+        n3.setName(n1.getName());
+
+        validator.reset();
+        new DataNodeValidator().validateObject(new Object[] { conf, d1, n3 }, validator);
+        assertValidator(ValidationResult.ERROR);
     }
 
-    /** 
-     * Resets internal state. 
-     * Called internally before starting validation.
-     */
-    protected void reset() {
-        if (validationResults != null) {
-            validationResults = new ArrayList();
-        }
-        maxSeverity = ValidationResult.VALID;
-    }
-
-    /** 
-     * Returns maximum severity level encountered during 
-     * the last validation run. 
-     */
-    public int getMaxSeverity() {
-        return maxSeverity;
-    }
-
-    /**
-     * Registers validation result. 
-     * Increases internally stored max severity if 
-     * <code>result</code> parameter has a higher severity then the current value. 
-     * Leaves current value unchanged otherwise.
-     */
-    public void registerValidated(int severity, String message, Object[] treeNodePath) {
-        ValidationResult result = new ValidationResult(severity, message, treeNodePath);
-        validationResults.add(result);
-        if (maxSeverity < severity) {
-            maxSeverity = severity;
-        }
-    }
-
-    public void registerError(String message, Object[] treeNodePath) {
-        registerValidated(ValidationResult.ERROR, message, treeNodePath);
-    }
-
-    public void registerWarning(String message, Object[] treeNodePath) {
-        registerValidated(ValidationResult.WARNING, message, treeNodePath);
-    }
-
-    /** Return collection of ValidationDisplayHandler objects from last validation. */
-    public List validationResults() {
-        return validationResults;
-    }
-
-    /** 
-     * Validates all project elements.
-     * 
-     * @return ValidationResult.VALID if no errors were found, 
-     * or an error code of the error with the highest severity 
-     * if there were errors.
-     */
-    public synchronized int validate() {
-        reset();
-
-        Iterator it = new ProjectTraversal(project).treeNodes();
-        while (it.hasNext()) {
-            TreeNodeValidator.validate((Object[]) it.next(), this);
-        }
-
-        return getMaxSeverity();
-    }
 }

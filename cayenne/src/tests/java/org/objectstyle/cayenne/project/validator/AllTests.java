@@ -65,6 +65,7 @@ public class AllTests {
 		TestSuite suite = new TestSuite("Project Validator Package Tests");
 	    suite.addTestSuite(ValidatorTst.class);
 	    suite.addTestSuite(DomainValidatorTst.class);
+	    suite.addTestSuite(DataNodeValidatorTst.class);
 		return suite;
 	}
 }

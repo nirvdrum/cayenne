@@ -72,16 +72,15 @@ public class DomainValidatorTst extends ValidatorTestBase {
 
     public void testValidateDomains() throws Exception {
         // should succeed
-        DataDomain d1 = new DataDomain("abc");
         validator.reset();
-        
+        DataDomain d1 = new DataDomain("abc");
         new DomainValidator().validateObject(new Object[] { conf, d1 }, validator);
         assertValidator(ValidationResult.VALID);
 
         // should complain about no name
         DataDomain d2 = new DataDomain();
         validator.reset();
-         new DomainValidator().validateObject(new Object[] { conf, d2 }, validator);
+        new DomainValidator().validateObject(new Object[] { conf, d2 }, validator);
         assertValidator(ValidationResult.ERROR);
 
         // should complain about duplicate name
