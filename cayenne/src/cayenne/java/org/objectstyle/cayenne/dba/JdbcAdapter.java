@@ -106,6 +106,8 @@ public class JdbcAdapter implements DbAdapter {
     protected PkGenerator pkGenerator;
     protected TypesHandler typesHandler;
     protected ExtendedTypeMap extendedTypes;
+    protected boolean supportsBatchUpdates;
+    
 
     public JdbcAdapter() {
         // create Pk generator
@@ -432,4 +434,11 @@ public class JdbcAdapter implements DbAdapter {
 		}
 	}
 
+	public boolean supportsBatchUpdates() {
+		return this.supportsBatchUpdates;
+	}
+	
+	public void setSupportsBatchUpdates(boolean flag) {
+		this.supportsBatchUpdates = flag;
+	}
 }

@@ -62,7 +62,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.objectstyle.cayenne.CayenneException;
@@ -75,7 +74,6 @@ import org.objectstyle.cayenne.access.trans.InsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.UpdateBatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
-import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
@@ -93,88 +91,6 @@ public class OracleDataNode extends DataNode {
 
 	public OracleDataNode(String name) {
 		super(name);
-	}
-
-	protected void runBatchUpdate(
-		Connection con,
-		BatchQuery query,
-		OperationObserver delegate)
-		throws SQLException, Exception {
-
-		// TODO: refactoring super implementation  shoild make this method smaller
-		// the only difference with super is using "addBatch" instead of "executeUpdate"
-
-		BatchQueryBuilder queryBuilder;
-		switch (query.getQueryType()) {
-			case Query.INSERT_QUERY :
-				queryBuilder = new InsertBatchQueryBuilder(getAdapter());
-				break;
-			case Query.UPDATE_QUERY :
-				queryBuilder =
-					new UpdateBatchQueryBuilder(
-						getAdapter(),
-						OracleAdapter.TRIM_FUNCTION);
-				break;
-			case Query.DELETE_QUERY :
-				queryBuilder =
-					new DeleteBatchQueryBuilder(
-						getAdapter(),
-						OracleAdapter.TRIM_FUNCTION);
-				break;
-			default :
-				throw new CayenneException(
-					"Unsupported batch type: " + query.getQueryType());
-		}
-
-		// translate batch
-		List dbAttributes = query.getDbAttributes();
-		int attributeCount = dbAttributes.size();
-		int[] attributeTypes = new int[attributeCount];
-		int[] attributeScales = new int[attributeCount];
-		for (int i = 0; i < attributeCount; i++) {
-			DbAttribute attribute = (DbAttribute) dbAttributes.get(i);
-			attributeTypes[i] = attribute.getType();
-			attributeScales[i] = attribute.getPrecision();
-		}
-		String queryStr = queryBuilder.query(query);
-
-		// log batch execution
-		QueryLogger.logQuery(
-			query.getLoggingLevel(),
-			queryStr,
-			Collections.EMPTY_LIST);
-
-		PreparedStatement st = con.prepareStatement(queryStr);
-		try {
-
-			query.reset();
-			while (query.next()) {
-				// log next batch parameters
-				QueryLogger.logBatchQueryParameters(
-					query.getLoggingLevel(),
-					query);
-
-				for (int i = 0; i < attributeCount; i++) {
-					Object value = query.getObject(i);
-					int type = attributeTypes[i];
-					adapter.bindParameter(st, value, i + 1, type, attributeScales[i]);
-				}
-
-				// this line differs from super
-				st.addBatch();
-			}
-
-			// this differs from super
-			int[] results = st.executeBatch();
-			delegate.nextBatchCount(query, results);
-
-			// TODO: Create QUeryLogger method to log batch counts
-		} finally {
-			try {
-				st.close();
-			} catch (Exception e) {
-			}
-		}
 	}
 
 	/**
@@ -237,4 +153,68 @@ public class OracleDataNode extends DataNode {
 			}
 		}
 	}
+
+    /**
+     * Implements Oracle-specific tweaks for BatchQuery processing. 
+     * Namely, Oracle requires trimming CHAR columns that are used in joins,
+     * special LOB handling, etc. 
+     */
+	protected void runBatchUpdate(
+		Connection con,
+		BatchQuery query,
+		OperationObserver delegate)
+		throws SQLException, Exception {
+			
+		// Oracle-specific note: supply trim functionfor batch queries
+		BatchQueryBuilder queryBuilder;
+		switch (query.getQueryType()) {
+			case Query.INSERT_QUERY :
+				queryBuilder = new InsertBatchQueryBuilder(getAdapter());
+				break;
+			case Query.UPDATE_QUERY :
+				queryBuilder =
+					new UpdateBatchQueryBuilder(
+						getAdapter(),
+						OracleAdapter.TRIM_FUNCTION);
+				break;
+			case Query.DELETE_QUERY :
+				queryBuilder =
+					new DeleteBatchQueryBuilder(
+						getAdapter(),
+						OracleAdapter.TRIM_FUNCTION);
+				break;
+			default :
+				throw new CayenneException(
+					"Unsupported batch type: " + query.getQueryType());
+		}
+
+		// translate the query
+		String queryStr = queryBuilder.query(query);
+
+		// log batch SQL execution
+		QueryLogger.logQuery(
+			query.getLoggingLevel(),
+			queryStr,
+			Collections.EMPTY_LIST);
+
+		PreparedStatement statement = con.prepareStatement(queryStr);
+		try {
+			// run batch
+			if (adapter.supportsBatchUpdates()) {
+				runBatchUpdateAsBatch(con, query, delegate, statement);
+			} else {
+				runBatchUpdateAsIndividualQueries(
+					con,
+					query,
+					delegate,
+					statement);
+			}
+		} finally {
+			try {
+				statement.close();
+			} catch (Exception e) {
+			}
+		}
+	}
+
 }

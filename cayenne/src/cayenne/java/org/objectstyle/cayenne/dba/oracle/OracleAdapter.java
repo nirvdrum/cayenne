@@ -138,6 +138,11 @@ public class OracleAdapter extends JdbcAdapter {
 
         return oracleCursorType;
     }
+    
+    public OracleAdapter() {
+    	// enable batch updates by default
+    	setSupportsBatchUpdates(true);
+    }
 
     /**
      * Installs appropriate ExtendedTypes as converters for passing values

@@ -112,6 +112,12 @@ public interface DbAdapter {
 
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
+    
+    /**
+     * Returns <code>true</code> if the target database supports
+     * batch updates.
+     */
+    public boolean supportsBatchUpdates();
 
     /**
      * Returns a SQL string that can be used to drop
