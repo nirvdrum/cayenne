@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.modeler.action;
 import java.awt.event.ActionEvent;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.control.ModelerController;
 import org.objectstyle.cayenne.modeler.view.UnsavedChangesDialog;
@@ -100,7 +100,7 @@ public class ProjectAction extends CayenneAction {
             return false;
         }
 
-        Editor.getFrame().getController().handleControl(
+        CayenneModelerFrame.getFrame().getController().handleControl(
             new Control(ModelerController.PROJECT_CLOSED_ID));
         
         logObj.info("Closed project.");
@@ -113,7 +113,7 @@ public class ProjectAction extends CayenneAction {
     public boolean checkSaveOnClose() {
         EventController mediator = getMediator();
         if (mediator != null && mediator.isDirty()) {
-            UnsavedChangesDialog dialog = new UnsavedChangesDialog(Editor.getFrame());
+            UnsavedChangesDialog dialog = new UnsavedChangesDialog(CayenneModelerFrame.getFrame());
             dialog.show();
 
             if (dialog.shouldCancel()) {
@@ -123,7 +123,7 @@ public class ProjectAction extends CayenneAction {
                 // save changes and close
                 ActionEvent e =
                     new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SaveAll");
-                Editor.getFrame().getAction(SaveAction.getActionName()).actionPerformed(e);
+                CayenneModelerFrame.getFrame().getAction(SaveAction.getActionName()).actionPerformed(e);
 				if(mediator.isDirty()) {
 					// save was canceled... do not close
 					return false;

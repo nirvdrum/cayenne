@@ -64,27 +64,27 @@ import java.awt.HeadlessException;
  */
 public class WarningDialog extends ErrorDebugDialog {
 
-	/**
-	 * Constructor for WarningDialog.
-	 * 
-	 * @param owner
-	 * @param title
-	 * @param throwable
-	 * @param detailed
-	 * @throws HeadlessException
-	 */
-	public WarningDialog(
-		Editor owner,
-		String title,
-		Throwable throwable,
-		boolean detailed)
-		throws HeadlessException {
-		super(owner, title, throwable, detailed);
-	}
+    /**
+     * Constructor for WarningDialog.
+     * 
+     * @param owner
+     * @param title
+     * @param throwable
+     * @param detailed
+     * @throws HeadlessException
+     */
+    public WarningDialog(
+        CayenneModelerFrame owner,
+        String title,
+        Throwable throwable,
+        boolean detailed)
+        throws HeadlessException {
+        super(owner, title, throwable, detailed);
+    }
 
-	protected String infoHTML() {
-		return "<font face='Arial,Helvetica' size='+1' color='blue'>"
-			+ getTitle()
-			+ "</font>";
-	}
+    protected String infoHTML() {
+        return "<font face='Arial,Helvetica' size='+1' color='blue'>"
+            + getTitle()
+            + "</font>";
+    }
 }

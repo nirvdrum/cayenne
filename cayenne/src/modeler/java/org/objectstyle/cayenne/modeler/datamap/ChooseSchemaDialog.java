@@ -72,7 +72,7 @@ import javax.swing.JTextField;
 import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 
@@ -98,7 +98,7 @@ public class ChooseSchemaDialog extends CayenneDialog implements ActionListener 
      * Creates and initializes new ChooseSchemaDialog.
      */
     public ChooseSchemaDialog(List schemaList, DataSourceInfo dsi) {
-        super(Editor.getFrame(), "Schema Selector", true);
+        super(CayenneModelerFrame.getFrame(), "Schema Selector", true);
         setResizable(false);
 
         this.schemaList = schemaList;

@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.map.event.EntityEvent;
 import org.objectstyle.cayenne.map.event.ObjEntityListener;
 import org.objectstyle.cayenne.map.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -280,7 +280,7 @@ public class ObjRelationshipPane
         }
 
         mediator.fireObjRelationshipEvent(
-            new RelationshipEvent(Editor.getFrame(), rel, rel.getSourceEntity()));
+            new RelationshipEvent(CayenneModelerFrame.getFrame(), rel, rel.getSourceEntity()));
     }
 
     /** Loads obj relationships into table. */

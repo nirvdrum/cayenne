@@ -63,7 +63,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.util.CayenneTableModel;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
@@ -195,7 +195,7 @@ public class DbRelationshipTableModel extends CayenneTableModel {
                 if (reverse != null && reverse.isToDependentPK()) {
                 	String message = "Unset reverse relationship's \"To Dep PK\" setting?";
                     int answer =
-                        JOptionPane.showConfirmDialog(Editor.getFrame(), message);
+                        JOptionPane.showConfirmDialog(CayenneModelerFrame.getFrame(), message);
                     if(answer != JOptionPane.YES_OPTION) {
                     	// no action needed
                     	return;

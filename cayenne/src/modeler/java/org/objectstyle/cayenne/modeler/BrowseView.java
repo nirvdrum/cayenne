@@ -145,7 +145,7 @@ public class BrowseView
         super();
         this.mediator = mediator;
 
-        browseTree = new ProjectTree(Editor.getProject());
+        browseTree = new ProjectTree(CayenneModelerFrame.getProject());
         browseTree.setCellRenderer(new BrowseViewRenderer());
         setViewportView(browseTree);
 

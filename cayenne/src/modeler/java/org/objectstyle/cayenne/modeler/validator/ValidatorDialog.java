@@ -82,7 +82,7 @@ import javax.swing.table.TableModel;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.action.ValidateAction;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -111,7 +111,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
     protected JButton closeBtn;
 
     public static synchronized void showDialog(
-        Editor editor,
+        CayenneModelerFrame editor,
         EventController mediator,
         Validator val) {
 
@@ -120,7 +120,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
     }
 
     public static synchronized void showDialog(
-        Editor editor,
+        CayenneModelerFrame editor,
         EventController mediator,
         Validator val,
         String message) {
@@ -130,12 +130,12 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
     }
 
     public static synchronized void showValidationSuccess(
-        Editor editor,
+        CayenneModelerFrame editor,
         EventController mediator,
         Validator val) {
         closeValidationDialog();
         JOptionPane.showMessageDialog(
-            Editor.getFrame(),
+            CayenneModelerFrame.getFrame(),
             "Project passed validation successfully.");
     }
 
@@ -147,14 +147,14 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
     }
 
     protected ValidatorDialog(
-        Editor editor,
+        CayenneModelerFrame editor,
         EventController mediator,
         Validator validator) {
         this(editor, mediator, validator, "Validation Problems");
     }
 
     protected ValidatorDialog(
-        Editor editor,
+        CayenneModelerFrame editor,
         EventController mediator,
         Validator validator,
         String warning) {
@@ -217,7 +217,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
         JButton revalidateBtn =
             new JButton(
-                Editor.getFrame().getAction(ValidateAction.getActionName()));
+                CayenneModelerFrame.getFrame().getAction(ValidateAction.getActionName()));
         revalidateBtn.setText("Refresh");
         closeBtn = new JButton("Close");
         JPanel panel =
@@ -229,8 +229,7 @@ public class ValidatorDialog extends CayenneDialog implements ActionListener {
 
     protected void showFailedObject() {
         if (messages.getSelectedRow() >= 0) {
-            ValidatorTableModel model =
-                (ValidatorTableModel) messages.getModel();
+            ValidatorTableModel model = (ValidatorTableModel) messages.getModel();
             ValidationInfo obj = model.getValue(messages.getSelectedRow());
             ValidationDisplayHandler.getErrorMsg(obj).displayField(
                 mediator,

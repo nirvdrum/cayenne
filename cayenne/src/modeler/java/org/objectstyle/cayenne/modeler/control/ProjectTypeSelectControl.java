@@ -55,7 +55,7 @@
  */
 package org.objectstyle.cayenne.modeler.control;
 
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.view.ProjectTypeSelectDialog;
 import org.objectstyle.cayenne.project.ApplicationProject;
 import org.objectstyle.cayenne.project.DataMapProject;
@@ -109,7 +109,7 @@ public class ProjectTypeSelectControl extends BasicController {
         Project project = new ApplicationProject(null);
 
         // send "Project Open" control to the main controller
-        Editor.getFrame().getController().handleControl(
+        CayenneModelerFrame.getFrame().getController().handleControl(
             new Control(ModelerController.PROJECT_OPENED_ID, project));
 
         shutdown();
@@ -119,7 +119,7 @@ public class ProjectTypeSelectControl extends BasicController {
         Project project = new DataMapProject(null);
 
         // send "Project Open" control to the main controller
-        Editor.getFrame().getController().handleControl(
+        CayenneModelerFrame.getFrame().getController().handleControl(
             new Control(ModelerController.PROJECT_OPENED_ID, project));
 
         shutdown();

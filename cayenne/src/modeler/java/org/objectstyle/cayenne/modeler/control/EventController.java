@@ -92,7 +92,7 @@ import org.objectstyle.cayenne.map.event.ProcedureListener;
 import org.objectstyle.cayenne.map.event.ProcedureParameterEvent;
 import org.objectstyle.cayenne.map.event.ProcedureParameterListener;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
@@ -163,16 +163,16 @@ public class EventController extends ModelerController {
         }
         else if (control.matchesID(PROJECT_OPENED_ID)) {
             setDirty(((Project) control.getParameter()).isLocationUndefined());
-            addDataNodeDisplayListener(Editor.getFrame());
-            addDataMapDisplayListener(Editor.getFrame());
-            addObjEntityDisplayListener(Editor.getFrame());
-            addDbEntityDisplayListener(Editor.getFrame());
-            addObjAttributeDisplayListener(Editor.getFrame());
-            addDbAttributeDisplayListener(Editor.getFrame());
-            addObjRelationshipDisplayListener(Editor.getFrame());
-            addDbRelationshipDisplayListener(Editor.getFrame());
-            addProcedureDisplayListener(Editor.getFrame());
-            addProcedureParameterDisplayListener(Editor.getFrame());
+            addDataNodeDisplayListener(CayenneModelerFrame.getFrame());
+            addDataMapDisplayListener(CayenneModelerFrame.getFrame());
+            addObjEntityDisplayListener(CayenneModelerFrame.getFrame());
+            addDbEntityDisplayListener(CayenneModelerFrame.getFrame());
+            addObjAttributeDisplayListener(CayenneModelerFrame.getFrame());
+            addDbAttributeDisplayListener(CayenneModelerFrame.getFrame());
+            addObjRelationshipDisplayListener(CayenneModelerFrame.getFrame());
+            addDbRelationshipDisplayListener(CayenneModelerFrame.getFrame());
+            addProcedureDisplayListener(CayenneModelerFrame.getFrame());
+            addProcedureParameterDisplayListener(CayenneModelerFrame.getFrame());
         }
     }
 
@@ -859,7 +859,7 @@ public class EventController extends ModelerController {
     public void setDirty(boolean dirty) {
         if (this.dirty != dirty) {
             this.dirty = dirty;
-            Editor.getFrame().setDirty(dirty);
+            CayenneModelerFrame.getFrame().setDirty(dirty);
         }
     }
 

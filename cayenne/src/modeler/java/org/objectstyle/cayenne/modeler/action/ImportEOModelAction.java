@@ -70,7 +70,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -110,7 +110,7 @@ public class ImportEOModelAction extends CayenneAction {
      */
     protected void importEOModel() {
         JFileChooser fileChooser = getEOModelChooser();
-        int status = fileChooser.showOpenDialog(Editor.getFrame());
+        int status = fileChooser.showOpenDialog(CayenneModelerFrame.getFrame());
 
         if (status == JFileChooser.APPROVE_OPTION) {
             // save preferences
@@ -164,17 +164,17 @@ public class ImportEOModelAction extends CayenneAction {
         // and re-add to the BroseView
         if (currentMap != null) {
             mediator.fireDataMapEvent(
-                new DataMapEvent(Editor.getFrame(), map, DataMapEvent.REMOVE));
+                new DataMapEvent(CayenneModelerFrame.getFrame(), map, DataMapEvent.REMOVE));
             mediator.fireDataMapEvent(
-                new DataMapEvent(Editor.getFrame(), map, DataMapEvent.ADD));
+                new DataMapEvent(CayenneModelerFrame.getFrame(), map, DataMapEvent.ADD));
             mediator.fireDataMapDisplayEvent(
                 new DataMapDisplayEvent(
-                    Editor.getFrame(),
+            CayenneModelerFrame.getFrame(),
                     map,
                     mediator.getCurrentDataDomain(),
                     mediator.getCurrentDataNode()));
         } else {
-            mediator.addDataMap(Editor.getFrame(), map);
+            mediator.addDataMap(CayenneModelerFrame.getFrame(), map);
         }
     }
 

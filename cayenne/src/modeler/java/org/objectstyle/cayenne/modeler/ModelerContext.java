@@ -138,13 +138,13 @@ public class ModelerContext extends SwingContext {
             return pane;
         }
 
-        return Editor.getFrame().getRootPane();
+        return CayenneModelerFrame.getFrame().getRootPane();
     }
 
     /**
      * @see org.scopemvc.controller.swing.SwingContext#getDefaultParentWindow()
      */
     protected Window getDefaultParentWindow() {
-        return Editor.getFrame();
+        return CayenneModelerFrame.getFrame();
     }
 }

@@ -58,7 +58,7 @@
 
 import java.awt.event.ActionEvent;
 
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.validator.ValidationDisplayHandler;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
@@ -86,15 +86,15 @@ public class ValidateAction extends CayenneAction {
 	 */
 	public void performAction(ActionEvent e) {
 		EventController mediator = getMediator();
-		Validator val = Editor.getProject().getValidator();
+		Validator val = CayenneModelerFrame.getProject().getValidator();
 		int validationCode = val.validate();
 
 		// If there were errors or warnings at validation, display them
 		if (validationCode >= ValidationDisplayHandler.WARNING) {
-			ValidatorDialog.showDialog(Editor.getFrame(), mediator, val);
+			ValidatorDialog.showDialog(CayenneModelerFrame.getFrame(), mediator, val);
 		}
 		else {
-			ValidatorDialog.showValidationSuccess(Editor.getFrame(), mediator, val);
+			ValidatorDialog.showValidationSuccess(CayenneModelerFrame.getFrame(), mediator, val);
 		}
 	}
 	

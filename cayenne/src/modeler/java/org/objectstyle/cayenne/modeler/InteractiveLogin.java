@@ -76,13 +76,8 @@ public class InteractiveLogin {
         return dataSrcInfo;
     }
 
-    private Editor getFrame() {
-        Editor frame = Editor.getFrame();
-        return (frame != null) ? frame : new Editor();
-    }
-
     public void collectLoginInfo() {
-        Editor frame = getFrame();
+        CayenneModelerFrame frame = CayenneModelerFrame.getFrame();
         DbLoginPanel loginPanel = new DbLoginPanel(frame);
         loginPanel.setDataSrcInfo(dataSrcInfo);
 

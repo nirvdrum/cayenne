@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 
 public class YesNoToAllDialog extends JDialog implements ActionListener
 {
@@ -36,7 +36,7 @@ public class YesNoToAllDialog extends JDialog implements ActionListener
 	private int status = CANCEL;
 
 	public YesNoToAllDialog(String title, String msg) {
-		super(Editor.getFrame(), title != null ? title : "Cayenne Db Import", true);
+		super(CayenneModelerFrame.getFrame(), title != null ? title : "Cayenne Db Import", true);
 		
 		getContentPane().setLayout(new BorderLayout());
 		
@@ -64,11 +64,11 @@ public class YesNoToAllDialog extends JDialog implements ActionListener
         
         Point point;
 
-		if (Editor.getFrame() != null) {
-			point = Editor.getFrame().getLocationOnScreen();
-			int width = Editor.getFrame().getWidth();
+		if (CayenneModelerFrame.getFrame() != null) {
+			point = CayenneModelerFrame.getFrame().getLocationOnScreen();
+			int width = CayenneModelerFrame.getFrame().getWidth();
 			int x = (width - YN_WIDTH)/2;
-			int height = Editor.getFrame().getHeight();
+			int height = CayenneModelerFrame.getFrame().getHeight();
 			int y = (height - YN_HEIGHT)/2;
 			point.setLocation(point.x + x, point.y + y);
 		} else {        

@@ -66,7 +66,7 @@ import javax.swing.JButton;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.model.TopModel;
@@ -172,11 +172,11 @@ public abstract class CayenneAction extends AbstractAction {
      * Returns shared CayenneModeler mediator.
      */
     public EventController getMediator() {
-        return Editor.getFrame().getController().getEventController();
+        return CayenneModelerFrame.getFrame().getController().getEventController();
     }
 
     public TopModel getTopModel() {
-        return Editor.getFrame().getController().getTopModel();
+        return CayenneModelerFrame.getFrame().getController().getTopModel();
     }
 
     /**

@@ -107,7 +107,7 @@ public class AboutDialog extends CayenneDialog implements ActionListener {
 	JPanel infoPanel = new JPanel();
 	JTextArea licenceText = new JTextArea();
 
-	public AboutDialog(Editor frame) {
+	public AboutDialog(CayenneModelerFrame frame) {
 		super(frame, "About CayenneModeler", true);
 		init();
 

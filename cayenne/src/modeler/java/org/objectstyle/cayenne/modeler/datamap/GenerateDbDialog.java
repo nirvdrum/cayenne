@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.access.DbGenerator;
 import org.objectstyle.cayenne.conn.DataSourceInfo;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.FileSystemViewDecorator;
 
@@ -99,7 +99,7 @@ import org.objectstyle.cayenne.modeler.util.FileSystemViewDecorator;
 public class GenerateDbDialog
     extends CayenneDialog
     implements ActionListener, ItemListener {
-    private static Logger logObj = Logger.getLogger(Editor.class);
+    private static Logger logObj = Logger.getLogger(GenerateDbDialog.class);
 
     private static final int GENERATEDB_WIDTH = 380;
     private static final int GENERATEDB_HEIGHT = 190;
@@ -120,7 +120,7 @@ public class GenerateDbDialog
     protected JCheckBox dropPK;
 
     public GenerateDbDialog(DataSourceInfo dsi, DbAdapter adapter, DbGenerator gen) {
-        super(Editor.getFrame(), "Generate Database Schema", true);
+        super(CayenneModelerFrame.getFrame(), "Generate Database Schema", true);
         
         this.dsi = dsi;
         this.adapter = adapter;
@@ -251,7 +251,7 @@ public class GenerateDbDialog
     }
 
     protected void storeSQL() {
-        File projDir = Editor.getProject().getProjectDirectory();
+        File projDir = CayenneModelerFrame.getProject().getProjectDirectory();
         FileSystemViewDecorator fileView = new FileSystemViewDecorator(projDir);
         JFileChooser fc = new JFileChooser(fileView);
         fc.setDialogType(JFileChooser.SAVE_DIALOG);

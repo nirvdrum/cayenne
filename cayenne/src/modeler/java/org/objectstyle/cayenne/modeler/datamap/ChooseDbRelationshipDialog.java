@@ -78,7 +78,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.Relationship;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
 import org.objectstyle.cayenne.modeler.util.RelationshipWrapper;
@@ -217,7 +217,7 @@ public class ChooseDbRelationshipDialog extends CayenneDialog implements ActionL
         DbEntity temp_start,
         DbEntity temp_end,
         boolean to_many) {
-        super(Editor.getFrame(), "Select DbRelationship", true);
+        super(CayenneModelerFrame.getFrame(), "Select DbRelationship", true);
         map = temp_map;
         start = temp_start;
         end = temp_end;
@@ -334,7 +334,7 @@ public class ChooseDbRelationshipDialog extends CayenneDialog implements ActionL
         RelationshipWrapper wrap;
         wrap = (RelationshipWrapper) relSelect.getSelectedItem();
         if (null == wrap || wrap.getRelationshipList() == null) {
-            JOptionPane.showMessageDialog(Editor.getFrame(), "Select the relationship");
+            JOptionPane.showMessageDialog(CayenneModelerFrame.getFrame(), "Select the relationship");
             return;
         }
         dbRels = wrap.getRelationshipList();

@@ -5,7 +5,7 @@
 # Certain parts are modeled after Tomcat startup scrips, 
 # Copyright Apache Software Foundation
 
-MAIN_CLASS=org.objectstyle.cayenne.modeler.Editor
+MAIN_CLASS=org.objectstyle.cayenne.modeler.Main
 
 
 # OS specific support.

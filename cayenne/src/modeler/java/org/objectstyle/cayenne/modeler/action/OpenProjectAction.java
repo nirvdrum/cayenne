@@ -62,7 +62,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.ErrorDebugDialog;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
 import org.objectstyle.cayenne.modeler.control.ModelerController;
@@ -78,9 +78,9 @@ public class OpenProjectAction extends ProjectAction {
     private static Logger logObj = Logger.getLogger(OpenProjectAction.class);
     protected ProjectOpener fileChooser = new ProjectOpener();
 
-	public static String getActionName() {
-		return "Open Project";
-	}
+    public static String getActionName() {
+        return "Open Project";
+    }
 
     /**
      * Constructor for OpenProjectAction.
@@ -117,7 +117,7 @@ public class OpenProjectAction extends ProjectAction {
     public void openProject() {
         try {
             // Get the project file name (always cayenne.xml)
-            File file = fileChooser.openProjectFile(Editor.getFrame());
+            File file = fileChooser.openProjectFile(CayenneModelerFrame.getFrame());
             if (file != null) {
                 openProject(file);
             }
@@ -131,16 +131,21 @@ public class OpenProjectAction extends ProjectAction {
         try {
             // Save dir path to the preferences
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
-            Editor.getFrame().addToLastProjList(file.getAbsolutePath());
+            CayenneModelerFrame.getFrame().addToLastProjList(file.getAbsolutePath());
             // Initialize gui configuration
             // uncomment to debug GUI
             Project project = Project.createProject(file);
-            Editor.getFrame().getController().getTopModel().setCurrentProject(project);
+            CayenneModelerFrame
+                .getFrame()
+                .getController()
+                .getTopModel()
+                .setCurrentProject(
+                project);
             // if upgrade was canceled
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             } else {
-                Editor.getFrame().getController().handleControl(
+                CayenneModelerFrame.getFrame().getController().handleControl(
                     new Control(ModelerController.PROJECT_OPENED_ID, project));
             }
         } catch (Exception ex) {
@@ -154,7 +159,7 @@ public class OpenProjectAction extends ProjectAction {
         // need an upgrade
         int returnCode =
             JOptionPane.showConfirmDialog(
-                Editor.getFrame(),
+                CayenneModelerFrame.getFrame(),
                 "Project needs an upgrade to a newer version. " + msg + ". Upgrade?",
                 "Upgrade Needed",
                 JOptionPane.YES_NO_OPTION);

@@ -57,7 +57,7 @@ package org.objectstyle.cayenne.modeler.control;
 
 import java.awt.BorderLayout;
 
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.EditorView;
 import org.objectstyle.cayenne.modeler.model.TopModel;
 import org.objectstyle.cayenne.modeler.validator.ValidatorDialog;
@@ -78,12 +78,12 @@ public class TopController extends ModelerController {
     protected ActionController actionController;
 
     // should refactor to SPanel
-    protected Editor mainFrame;
+    protected CayenneModelerFrame mainFrame;
 
     /**
      * Constructor for TopController.
      */
-    public TopController(Editor view) {
+    public TopController(CayenneModelerFrame view) {
         this.mainFrame = view;
         setModel(new TopModel());
 

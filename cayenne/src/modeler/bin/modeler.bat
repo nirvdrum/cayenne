@@ -11,7 +11,7 @@ rem -------------------------------------------------------------------
 rem  Variables:
 rem -------------------------------------------------------------------
 
-set MAIN_CLASS=org.objectstyle.cayenne.modeler.Editor
+set MAIN_CLASS=org.objectstyle.cayenne.modeler.Main
 
 
 if not "%JAVA_HOME%" == "" goto check_cayenne_home

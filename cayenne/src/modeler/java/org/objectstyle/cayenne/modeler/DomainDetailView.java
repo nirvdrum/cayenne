@@ -134,7 +134,7 @@ public class DomainDetailView extends JPanel implements DomainDisplayListener {
             }
 
             Configuration configuration =
-                ((ApplicationProject) Editor.getProject()).getConfiguration();
+                ((ApplicationProject) CayenneModelerFrame.getProject()).getConfiguration();
             DataDomain domain = eventController.getCurrentDataDomain();
 
             DataDomain matchingDomain = configuration.getDomain(text);

@@ -140,7 +140,7 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
         super(owner, title, modal, gc);
     }
 
-    public CayenneDialog(Editor frame, String title, boolean modal) {
+    public CayenneDialog(CayenneModelerFrame frame, String title, boolean modal) {
         super(frame, title, modal);
     }
 
@@ -185,8 +185,8 @@ public class CayenneDialog extends JDialog implements HyperlinkListener {
         this.setBounds(x, y, width, height);
     }
 
-    public Editor getParentEditor() {
-        return (Editor) super.getParent();
+    public CayenneModelerFrame getParentEditor() {
+        return (CayenneModelerFrame) super.getParent();
     }
 
     /** 

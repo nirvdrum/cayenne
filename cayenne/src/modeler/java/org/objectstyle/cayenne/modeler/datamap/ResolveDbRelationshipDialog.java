@@ -86,7 +86,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.CayenneDialog;
-import org.objectstyle.cayenne.modeler.Editor;
+import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
 import org.objectstyle.cayenne.modeler.PanelFactory;
 import org.objectstyle.cayenne.modeler.util.CayenneTable;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -136,7 +136,7 @@ public class ResolveDbRelationshipDialog
         DbEntity end,
         boolean toMany) {
 
-        super(Editor.getFrame(), "", true);
+        super(CayenneModelerFrame.getFrame(), "", true);
 
         this.map = getMediator().getCurrentDataMap();
         this.originalList = relationships;

@@ -105,7 +105,7 @@ public class DbLoginPanel extends CayenneDialog implements ActionListener {
     private static String COMMAND_OK = "ok";
     private static String COMMAND_CANCEL = "cancel";
 
-    public DbLoginPanel(Editor frame) {
+    public DbLoginPanel(CayenneModelerFrame frame) {
         super(frame, "Driver And Login Information", true);
         this.setResizable(false);
 
