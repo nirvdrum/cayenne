@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.datamap.GenerateClassDialog;
 
@@ -85,5 +86,22 @@ public class GenerateClassesAction extends CayenneAction {
         dialog = new GenerateClassDialog(Editor.getFrame(), getMediator());
         dialog.show();
         dialog.dispose();
+    }
+    
+    /**
+    * Returns <code>true</code> if path contains a DataMap object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataMap) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

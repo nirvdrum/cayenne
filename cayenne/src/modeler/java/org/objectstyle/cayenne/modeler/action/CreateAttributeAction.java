@@ -61,6 +61,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbAttribute;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
+import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.control.EventController;
@@ -72,81 +73,96 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
  * @author Andrei Adamchik
  */
 public class CreateAttributeAction extends CayenneAction {
-	public static final String ACTION_NAME = "Create Attribute";
+    public static final String ACTION_NAME = "Create Attribute";
 
-	/**
-	 * Constructor for CreateAttributeAction.
-	 * @param name
-	 */
-	public CreateAttributeAction() {
-		super(ACTION_NAME);
-	}
+    /**
+     * Constructor for CreateAttributeAction.
+     * @param name
+     */
+    public CreateAttributeAction() {
+        super(ACTION_NAME);
+    }
 
-	public String getIconName() {
-		return "icon-attribute.gif";
-	}
+    public String getIconName() {
+        return "icon-attribute.gif";
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		ObjEntity objEnt = getMediator().getCurrentObjEntity();
-		if (objEnt != null) {
-			createObjAttribute(objEnt);
-		} else {
-			DbEntity dbEnt = getMediator().getCurrentDbEntity();
-			if (dbEnt != null) {
-				createDbAttribute(dbEnt);
-			}
-		}
-	}
+    /**
+     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        ObjEntity objEnt = getMediator().getCurrentObjEntity();
+        if (objEnt != null) {
+            createObjAttribute(objEnt);
+        } else {
+            DbEntity dbEnt = getMediator().getCurrentDbEntity();
+            if (dbEnt != null) {
+                createDbAttribute(dbEnt);
+            }
+        }
+    }
 
-	public void createObjAttribute(ObjEntity objEnt) {
-		EventController mediator = getMediator();
+    public void createObjAttribute(ObjEntity objEnt) {
+        EventController mediator = getMediator();
 
-		ObjAttribute attr =
-			(ObjAttribute) NamedObjectFactory.createObject(
-				ObjAttribute.class,
-				objEnt);
-		objEnt.addAttribute(attr);
-		mediator.fireObjAttributeEvent(
-			new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
+        ObjAttribute attr =
+            (ObjAttribute) NamedObjectFactory.createObject(ObjAttribute.class, objEnt);
+        objEnt.addAttribute(attr);
+        mediator.fireObjAttributeEvent(
+            new AttributeEvent(this, attr, objEnt, AttributeEvent.ADD));
 
-		mediator.fireObjAttributeDisplayEvent(
-			new AttributeDisplayEvent(
-				this,
-				attr,
-				objEnt,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain()));
-	}
+        mediator.fireObjAttributeDisplayEvent(
+            new AttributeDisplayEvent(
+                this,
+                attr,
+                objEnt,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain()));
+    }
 
-	public void createDbAttribute(DbEntity dbEnt) {
-		Class attrClass = null;
-		
-		if(dbEnt instanceof DerivedDbEntity) {
-			if(((DerivedDbEntity)dbEnt).getParentEntity() == null) {
-				return;
-			}
-			attrClass = DerivedDbAttribute.class;
-		}
-		else {
-			attrClass =  DbAttribute.class;
-		}
-		
-		DbAttribute attr =
-			(DbAttribute) NamedObjectFactory.createObject(attrClass, dbEnt);
-		dbEnt.addAttribute(attr);
-		
-		EventController mediator = getMediator();
-		mediator.fireDbAttributeEvent(
-			new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
-		mediator.fireDbAttributeDisplayEvent(
-			new AttributeDisplayEvent(
-				this,
-				attr,
-				dbEnt,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataDomain()));
-	}
+    public void createDbAttribute(DbEntity dbEnt) {
+        Class attrClass = null;
+
+        if (dbEnt instanceof DerivedDbEntity) {
+            if (((DerivedDbEntity) dbEnt).getParentEntity() == null) {
+                return;
+            }
+            attrClass = DerivedDbAttribute.class;
+        } else {
+            attrClass = DbAttribute.class;
+        }
+
+        DbAttribute attr =
+            (DbAttribute) NamedObjectFactory.createObject(attrClass, dbEnt);
+        dbEnt.addAttribute(attr);
+
+        EventController mediator = getMediator();
+        mediator.fireDbAttributeEvent(
+            new AttributeEvent(this, attr, dbEnt, AttributeEvent.ADD));
+        mediator.fireDbAttributeDisplayEvent(
+            new AttributeDisplayEvent(
+                this,
+                attr,
+                dbEnt,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataDomain()));
+    }
+    
+    
+    /**
+     * Returns <code>true</code> if path contains an Entity object.
+     */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof Entity) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -65,6 +65,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataSourceInfo;
 import org.objectstyle.cayenne.access.DbLoader;
 import org.objectstyle.cayenne.access.DbLoaderDelegate;
@@ -252,10 +253,13 @@ public class ImportDbAction extends CayenneAction {
                 return map;
             } else {
                 map = loader.createDataMapFromDB(schemaName);
-                
+
                 // fix map name
-                map.setName(NamedObjectFactory.createName(DataMap.class, mediator.getCurrentDataDomain()));
-                
+                map.setName(
+                    NamedObjectFactory.createName(
+                        DataMap.class,
+                        mediator.getCurrentDataDomain()));
+
                 return map;
             }
         } catch (SQLException e) {
@@ -355,5 +359,22 @@ public class ImportDbAction extends CayenneAction {
                     new EntityEvent(Editor.getFrame(), ent, EntityEvent.REMOVE));
             }
         }
+    }
+
+    /**
+    * Returns <code>true</code> if path contains a DataDomain object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataDomain) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -101,4 +101,21 @@ public class ObjEntitySyncAction extends CayenneAction {
 				new EntityEvent(this, ent, EntityEvent.ADD));
 		}
 	}
+	
+	/**
+     * Returns <code>true</code> if path contains a ObjEntity object.
+     */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof ObjEntity) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

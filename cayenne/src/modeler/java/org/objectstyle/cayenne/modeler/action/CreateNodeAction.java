@@ -70,50 +70,65 @@ import org.objectstyle.cayenne.project.ProjectDataSource;
  * @author Andrei Adamchik
  */
 public class CreateNodeAction extends CayenneAction {
-	public static final String ACTION_NAME = "Create DataNode";
+    public static final String ACTION_NAME = "Create DataNode";
 
-	/**
-	 * Constructor for CreateNodeAction.
-	 * @param name
-	 */
-	public CreateNodeAction() {
-		super(ACTION_NAME);
-	}
+    /**
+     * Constructor for CreateNodeAction.
+     * @param name
+     */
+    public CreateNodeAction() {
+        super(ACTION_NAME);
+    }
 
-	public String getIconName() {
-		return "icon-node.gif";
-	}
+    public String getIconName() {
+        return "icon-node.gif";
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		createDataNode();
-	}
+    /**
+     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        createDataNode();
+    }
 
-	/** 
-	 * Creates a new data node. Data node may consist of two pieces of information:
-	 * <ul>
-	 *   <li>Name/location</li>
-	 *   <li>Database url/uid/password (for direct connection to DB).</li>
-	 * </ul>
-	 * 
-	 * First piece of info is stored directly into the cayenne.xml.
-	 * Second piece of data should be stored in the separate file
-	 * if the factory requires it. 
-	 */
-	protected void createDataNode() {
-		EventController mediator = getMediator();
-		DataDomain domain = mediator.getCurrentDataDomain();
-		DataNode node =
-			(DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
-		ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
-		node.setDataSource(src);
+    /** 
+     * Creates a new data node. Data node may consist of two pieces of information:
+     * <ul>
+     *   <li>Name/location</li>
+     *   <li>Database url/uid/password (for direct connection to DB).</li>
+     * </ul>
+     * 
+     * First piece of info is stored directly into the cayenne.xml.
+     * Second piece of data should be stored in the separate file
+     * if the factory requires it. 
+     */
+    protected void createDataNode() {
+        EventController mediator = getMediator();
+        DataDomain domain = mediator.getCurrentDataDomain();
+        DataNode node =
+            (DataNode) NamedObjectFactory.createObject(DataNode.class, domain);
+        ProjectDataSource src = new ProjectDataSource(new DataSourceInfo());
+        node.setDataSource(src);
 
-		domain.addNode(node);
-		mediator.fireDataNodeEvent(
-			new DataNodeEvent(this, node, DataNodeEvent.ADD));
-		mediator.fireDataNodeDisplayEvent(
-			new DataNodeDisplayEvent(this, domain, node));
-	}
+        domain.addNode(node);
+        mediator.fireDataNodeEvent(new DataNodeEvent(this, node, DataNodeEvent.ADD));
+        mediator.fireDataNodeDisplayEvent(new DataNodeDisplayEvent(this, domain, node));
+    }
+
+    /**
+    * Returns <code>true</code> if path contains a DataDomain object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataDomain) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

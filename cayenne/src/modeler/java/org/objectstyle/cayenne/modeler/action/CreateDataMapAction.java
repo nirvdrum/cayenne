@@ -94,4 +94,21 @@ public class CreateDataMapAction extends CayenneAction {
     public void performAction(ActionEvent e) {
         createDataMap();
     }
+
+    /**
+    * Returns <code>true</code> if path contains a DataDomain object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataDomain) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

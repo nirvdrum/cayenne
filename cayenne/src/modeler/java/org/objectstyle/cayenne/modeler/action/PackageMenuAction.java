@@ -114,4 +114,21 @@ public class PackageMenuAction extends CayenneAction {
         }
         getMediator().fireDataMapEvent(new DataMapEvent(this, map));
     }
+    
+   /**
+    * Returns <code>true</code> if path contains a DataMap object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataMap) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

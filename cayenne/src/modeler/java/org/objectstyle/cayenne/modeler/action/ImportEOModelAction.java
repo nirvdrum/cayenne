@@ -67,6 +67,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.modeler.Editor;
 import org.objectstyle.cayenne.modeler.ModelerPreferences;
@@ -83,154 +84,172 @@ import org.objectstyle.cayenne.wocompat.EOModelProcessor;
  * @author Andrei Adamchik
  */
 public class ImportEOModelAction extends CayenneAction {
-	private static Logger logObj = Logger.getLogger(ImportEOModelAction.class);
+    private static Logger logObj = Logger.getLogger(ImportEOModelAction.class);
 
-	public static final String ACTION_NAME = "Import EOModel";
+    public static final String ACTION_NAME = "Import EOModel";
 
-	protected JFileChooser eoModelChooser;
+    protected JFileChooser eoModelChooser;
 
-	public ImportEOModelAction() {
-		super(ACTION_NAME);
-	}
+    public ImportEOModelAction() {
+        super(ACTION_NAME);
+    }
 
-	/**
-	 * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
-	 */
-	public void performAction(ActionEvent event) {
-		importEOModel();
-	}
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(ActionEvent)
+     */
+    public void performAction(ActionEvent event) {
+        importEOModel();
+    }
 
-	/** 
-	 * Lets user select an EOModel, then imports it as a DataMap.
-	 */
-	protected void importEOModel() {
-		JFileChooser fileChooser = getEOModelChooser();
-		int status = fileChooser.showOpenDialog(Editor.getFrame());
+    /** 
+     * Lets user select an EOModel, then imports it as a DataMap.
+     */
+    protected void importEOModel() {
+        JFileChooser fileChooser = getEOModelChooser();
+        int status = fileChooser.showOpenDialog(Editor.getFrame());
 
-		if (status == JFileChooser.APPROVE_OPTION) {
-			// save preferences
-			File file = fileChooser.getSelectedFile();
-			if (file.isFile()) {
-				file = file.getParentFile();
-			}
+        if (status == JFileChooser.APPROVE_OPTION) {
+            // save preferences
+            File file = fileChooser.getSelectedFile();
+            if (file.isFile()) {
+                file = file.getParentFile();
+            }
 
-			ModelerPreferences.getPreferences().setProperty(
-				ModelerPreferences.LAST_EOM_DIR,
-				file.getParent());
+            ModelerPreferences.getPreferences().setProperty(
+                ModelerPreferences.LAST_EOM_DIR,
+                file.getParent());
 
-			try {
-				String path = file.getCanonicalPath();
-				DataMap map = new EOModelProcessor().loadEOModel(path);
-				addDataMap(map);
-			} catch (Exception ex) {
-				logObj.log(Level.INFO, "EOModel Loading Exception", ex);
-			}
+            try {
+                String path = file.getCanonicalPath();
+                DataMap map = new EOModelProcessor().loadEOModel(path);
+                addDataMap(map);
+            } catch (Exception ex) {
+                logObj.log(Level.INFO, "EOModel Loading Exception", ex);
+            }
 
-		}
-	}
+        }
+    }
 
-	/** 
-	 * Adds DataMap into the project.
-	 */
-	protected void addDataMap(DataMap map) {
-		DataMap currentMap = getMediator().getCurrentDataMap();
-		EventController mediator = getMediator();
+    /**
+    * Returns <code>true</code> if path contains a DataDomain object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
 
-		if (currentMap != null) {
-			// merge with existing map
-			// loader.loadDataMapFromDB(schema_name, null, map);
-			currentMap.mergeWithDataMap(map);
-			map = currentMap;
-		}
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataDomain) {
+                return true;
+            }
+        }
 
-		// If this is adding to existing data map, remove it
-		// and re-add to the BroseView
-		if (currentMap != null) {
-			mediator.fireDataMapEvent(
-				new DataMapEvent(Editor.getFrame(), map, DataMapEvent.REMOVE));
-			mediator.fireDataMapEvent(
-				new DataMapEvent(Editor.getFrame(), map, DataMapEvent.ADD));
-			mediator.fireDataMapDisplayEvent(
-				new DataMapDisplayEvent(
-					Editor.getFrame(),
-					map,
-					mediator.getCurrentDataDomain(),
-					mediator.getCurrentDataNode()));
-		} else {
-			mediator.addDataMap(Editor.getFrame(), map);
-		}
-	}
+        return false;
+    }
 
-	/** 
-	 * Returns EOModel chooser.
-	 */
-	public JFileChooser getEOModelChooser() {
+    /** 
+     * Adds DataMap into the project.
+     */
+    protected void addDataMap(DataMap map) {
+        DataMap currentMap = getMediator().getCurrentDataMap();
+        EventController mediator = getMediator();
 
-		if (eoModelChooser == null) {
-			eoModelChooser = new EOModelChooser("Select EOModel");
-		}
+        if (currentMap != null) {
+            // merge with existing map
+            // loader.loadDataMapFromDB(schema_name, null, map);
+            currentMap.mergeWithDataMap(map);
+            map = currentMap;
+        }
 
-		String startDir =
-			ModelerPreferences.getPreferences().getString(ModelerPreferences.LAST_EOM_DIR);
+        // If this is adding to existing data map, remove it
+        // and re-add to the BroseView
+        if (currentMap != null) {
+            mediator.fireDataMapEvent(
+                new DataMapEvent(Editor.getFrame(), map, DataMapEvent.REMOVE));
+            mediator.fireDataMapEvent(
+                new DataMapEvent(Editor.getFrame(), map, DataMapEvent.ADD));
+            mediator.fireDataMapDisplayEvent(
+                new DataMapDisplayEvent(
+                    Editor.getFrame(),
+                    map,
+                    mediator.getCurrentDataDomain(),
+                    mediator.getCurrentDataNode()));
+        } else {
+            mediator.addDataMap(Editor.getFrame(), map);
+        }
+    }
 
-		if (startDir == null) {
-			startDir =
-				ModelerPreferences.getPreferences().getString(ModelerPreferences.LAST_DIR);
-		}
+    /** 
+     * Returns EOModel chooser.
+     */
+    public JFileChooser getEOModelChooser() {
 
-		if (startDir != null) {
-			File startDirFile = new File(startDir);
-			if (startDirFile.exists()) {
-				eoModelChooser.setCurrentDirectory(startDirFile);
-			}
-		}
+        if (eoModelChooser == null) {
+            eoModelChooser = new EOModelChooser("Select EOModel");
+        }
 
-		return eoModelChooser;
-	}
+        String startDir =
+            ModelerPreferences.getPreferences().getString(
+                ModelerPreferences.LAST_EOM_DIR);
 
-	/** 
-	 * Custom file chooser that will pop up again if a bad directory is selected.
-	 */
-	class EOModelChooser extends JFileChooser {
-		protected FileFilter selectFilter;
-		protected JDialog cachedDialog;
+        if (startDir == null) {
+            startDir =
+                ModelerPreferences.getPreferences().getString(
+                    ModelerPreferences.LAST_DIR);
+        }
 
-		public EOModelChooser(String title) {
-			super.setFileFilter(new EOModelFileFilter());
-			super.setDialogTitle(title);
-			super.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        if (startDir != null) {
+            File startDirFile = new File(startDir);
+            if (startDirFile.exists()) {
+                eoModelChooser.setCurrentDirectory(startDirFile);
+            }
+        }
 
-			this.selectFilter = new EOModelSelectFilter();
-		}
+        return eoModelChooser;
+    }
 
-		public int showOpenDialog(Component parent) {
-			int status = super.showOpenDialog(parent);
-			if (status != JFileChooser.APPROVE_OPTION) {
-				cachedDialog = null;
-				return status;
-			}
+    /** 
+     * Custom file chooser that will pop up again if a bad directory is selected.
+     */
+    class EOModelChooser extends JFileChooser {
+        protected FileFilter selectFilter;
+        protected JDialog cachedDialog;
 
-			// make sure invalid directory is not selected
-			File file = this.getSelectedFile();
-			if (selectFilter.accept(file)) {
-				cachedDialog = null;
-				return JFileChooser.APPROVE_OPTION;
-			} else {
-				if (file.isDirectory()) {
-					this.setCurrentDirectory(file);
-				}
+        public EOModelChooser(String title) {
+            super.setFileFilter(new EOModelFileFilter());
+            super.setDialogTitle(title);
+            super.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 
-				return this.showOpenDialog(parent);
-			}
-		}
+            this.selectFilter = new EOModelSelectFilter();
+        }
 
-		protected JDialog createDialog(Component parent)
-			throws HeadlessException {
+        public int showOpenDialog(Component parent) {
+            int status = super.showOpenDialog(parent);
+            if (status != JFileChooser.APPROVE_OPTION) {
+                cachedDialog = null;
+                return status;
+            }
 
-			if (cachedDialog == null) {
-				cachedDialog = super.createDialog(parent);
-			}
-			return cachedDialog;
-		}
-	}
+            // make sure invalid directory is not selected
+            File file = this.getSelectedFile();
+            if (selectFilter.accept(file)) {
+                cachedDialog = null;
+                return JFileChooser.APPROVE_OPTION;
+            } else {
+                if (file.isDirectory()) {
+                    this.setCurrentDirectory(file);
+                }
+
+                return this.showOpenDialog(parent);
+            }
+        }
+
+        protected JDialog createDialog(Component parent) throws HeadlessException {
+
+            if (cachedDialog == null) {
+                cachedDialog = super.createDialog(parent);
+            }
+            return cachedDialog;
+        }
+    }
 }

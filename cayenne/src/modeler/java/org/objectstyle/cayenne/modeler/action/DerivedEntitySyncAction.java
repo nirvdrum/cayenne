@@ -65,33 +65,48 @@ import org.objectstyle.cayenne.modeler.util.MapUtil;
  * @author Andrei Adamchik
  */
 public class DerivedEntitySyncAction extends CayenneAction {
-	public static final String ACTION_NAME = "Reset Derived Entity";
+    public static final String ACTION_NAME = "Reset Derived Entity";
 
-	/**
-	 * Constructor for DerivedEntitySyncAction.
-	 * @param name
-	 */
-	public DerivedEntitySyncAction() {
-		super(ACTION_NAME);
-	}
+    /**
+     * Constructor for DerivedEntitySyncAction.
+     * @param name
+     */
+    public DerivedEntitySyncAction() {
+        super(ACTION_NAME);
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		DerivedDbEntity ent =
-			(DerivedDbEntity) getMediator().getCurrentDbEntity();
+    /**
+     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        DerivedDbEntity ent = (DerivedDbEntity) getMediator().getCurrentDbEntity();
 
-		if (ent != null && ent.getParentEntity() != null) {
-			ent.resetToParentView();
-			MapUtil.cleanObjMappings(getMediator().getCurrentDataMap());
-			
-			// fire a chain of "remove/add" events for entity
-			// this seems to be the only way to refresh the view
-			getMediator().fireObjEntityEvent(
-				new EntityEvent(this, ent, EntityEvent.REMOVE));
-			getMediator().fireObjEntityEvent(
-				new EntityEvent(this, ent, EntityEvent.ADD));
-		}
-	}
+        if (ent != null && ent.getParentEntity() != null) {
+            ent.resetToParentView();
+            MapUtil.cleanObjMappings(getMediator().getCurrentDataMap());
+
+            // fire a chain of "remove/add" events for entity
+            // this seems to be the only way to refresh the view
+            getMediator().fireObjEntityEvent(
+                new EntityEvent(this, ent, EntityEvent.REMOVE));
+            getMediator().fireObjEntityEvent(new EntityEvent(this, ent, EntityEvent.ADD));
+        }
+    }
+
+    /**
+    * Returns <code>true</code> if path contains a DerivedDbEntity object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DerivedDbEntity) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

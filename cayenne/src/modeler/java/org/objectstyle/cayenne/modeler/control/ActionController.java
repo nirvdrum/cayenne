@@ -101,7 +101,7 @@ public class ActionController extends ModelerController {
     }
 
     protected void domainSelected(DataDomain domain) {
-        enableDomainActions(domain);
+        enableDataDomainActions(domain);
         updateRemoveAction(domain);
     }
 
@@ -186,9 +186,23 @@ public class ActionController extends ModelerController {
     }
 
     /**
+     * Updates actions "on/off" state for the selected project path.
+     */
+    protected void updateActions(Object[] objectPath) {
+        Object[] keys = getTopModel().getActionMap().allKeys();
+        int len = keys.length;
+        for (int i = 0; i < len; i++) {
+            CayenneAction action =
+                (CayenneAction) getTopModel().getActionMap().get(keys[i]);
+
+            action.setEnabled(action.enableForObjectPath(objectPath));
+        }
+    }
+
+    /**
      * Configures actions to support an active DataDomain.
      */
-    protected void enableDomainActions(DataDomain domain) {
+    protected void enableDataDomainActions(DataDomain domain) {
         enableProjectActions();
 
         if (domain != null) {

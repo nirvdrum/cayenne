@@ -85,6 +85,7 @@ public abstract class Project {
     protected File projectDir;
     protected List files;
     protected List upgradeMessages;
+    protected boolean modified;
 
     /**
      * Factory method to create the right project type given project file.
@@ -479,5 +480,20 @@ public abstract class Project {
 
     protected boolean deleteFile(File f) {
         return (f.exists()) ? f.delete() : true;
+    }
+    
+    /**
+     * Returns <code>true</code> if the project is modified.
+     */
+    public boolean isModified() {
+        return modified;
+    }
+
+
+    /**
+     * Updates "modified" state of the project.
+     */
+    public void setModified(boolean modified) {
+        this.modified = modified;
     }
 }

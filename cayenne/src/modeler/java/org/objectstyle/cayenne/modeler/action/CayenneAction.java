@@ -84,6 +84,9 @@ public abstract class CayenneAction extends AbstractAction {
 
     protected boolean alwaysOn;
 
+    /**
+     * Creates a named CayenneAction.
+     */
     public CayenneAction(String name) {
         super(name);
         super.putValue(Action.DEFAULT, name);
@@ -153,6 +156,16 @@ public abstract class CayenneAction extends AbstractAction {
      * to allow for exception handling.
      */
     public abstract void performAction(ActionEvent e);
+    
+    /**
+     * Returns <code>true</code> if the action is enabled for the 
+     * specified "project path" - a path on the project tree to a 
+     * currently selected object. Default implementation simply 
+     * returns <code>false</code>.
+     */
+    public boolean enableForObjectPath(Object[] obj) {
+    	return false;
+    }
 
     /** 
      * Returns shared CayenneModeler mediator.

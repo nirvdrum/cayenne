@@ -108,7 +108,7 @@ public class SaveAction extends CayenneAction {
             if (projectDir == null) {
                 return false;
             }
-            
+
             p.setProjectDir(projectDir);
         }
 
@@ -133,8 +133,8 @@ public class SaveAction extends CayenneAction {
         // If no serious errors, perform save.
         if (validationCode < ValidationDisplayHandler.ERROR) {
             try {
-                if(!saveAll()) {
-                	return;
+                if (!saveAll()) {
+                    return;
                 }
             } catch (Exception ex) {
                 throw new CayenneRuntimeException("Error on save", ex);
@@ -147,5 +147,23 @@ public class SaveAction extends CayenneAction {
         if (validationCode >= warningLevel) {
             ValidatorDialog.showDialog(Editor.getFrame(), mediator, val);
         }
+    }
+
+    /**
+    * Returns <code>true</code> if path contains a Project object 
+    * and the project is modified.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof Project) {
+                return ((Project)path[i]).isModified();
+            }
+        }
+
+        return false;
     }
 }

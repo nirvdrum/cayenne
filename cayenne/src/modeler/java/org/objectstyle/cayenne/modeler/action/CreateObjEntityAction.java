@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.modeler.action;
 
 import java.awt.event.ActionEvent;
 
+import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.modeler.control.EventController;
 import org.objectstyle.cayenne.modeler.event.EntityDisplayEvent;
@@ -68,41 +69,56 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
  */
 public class CreateObjEntityAction extends CayenneAction {
     public static final String ACTION_NAME = "Create ObjEntity";
-    
-	/**
-	 * Constructor for CreateObjEntityAction.
-	 */
-	public CreateObjEntityAction() {
-		super(ACTION_NAME);
-	}
-	
-	public String getIconName() {
-		return "icon-objentity.gif";
-	}
 
-	/**
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		createObjEntity();
-	}
+    /**
+     * Constructor for CreateObjEntityAction.
+     */
+    public CreateObjEntityAction() {
+        super(ACTION_NAME);
+    }
 
-	private void createObjEntity() {
-		EventController mediator = getMediator();
-		ObjEntity entity =
-			(ObjEntity) NamedObjectFactory.createObject(
-				ObjEntity.class,
-				mediator.getCurrentDataMap());
-		mediator.getCurrentDataMap().addObjEntity(entity);
-		mediator.fireObjEntityEvent(
-			new EntityEvent(this, entity, EntityEvent.ADD));
-		mediator.fireObjEntityDisplayEvent(
-			new EntityDisplayEvent(
-				this,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataNode(),
-				mediator.getCurrentDataDomain()));
-	}
+    public String getIconName() {
+        return "icon-objentity.gif";
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        createObjEntity();
+    }
+
+    private void createObjEntity() {
+        EventController mediator = getMediator();
+        ObjEntity entity =
+            (ObjEntity) NamedObjectFactory.createObject(
+                ObjEntity.class,
+                mediator.getCurrentDataMap());
+        mediator.getCurrentDataMap().addObjEntity(entity);
+        mediator.fireObjEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
+        mediator.fireObjEntityDisplayEvent(
+            new EntityDisplayEvent(
+                this,
+                entity,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataNode(),
+                mediator.getCurrentDataDomain()));
+    }
+
+    /**
+    * Returns <code>true</code> if path contains a DataMap object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataMap) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
-

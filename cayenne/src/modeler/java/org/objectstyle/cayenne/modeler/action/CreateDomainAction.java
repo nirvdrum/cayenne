@@ -91,9 +91,9 @@ public class CreateDomainAction extends CayenneAction {
     }
 
     protected void createDomain() {
-    	// only ApplicationProjects can have domains, so this cast is reasonable
+        // only ApplicationProjects can have domains, so this cast is reasonable
         ApplicationProject project = (ApplicationProject) Editor.getProject();
-        
+
         EventController mediator = getMediator();
         DataDomain domain =
             (DataDomain) NamedObjectFactory.createObject(
@@ -102,5 +102,23 @@ public class CreateDomainAction extends CayenneAction {
         project.getConfig().addDomain(domain);
         mediator.fireDomainEvent(new DomainEvent(this, domain, DomainEvent.ADD));
         mediator.fireDomainDisplayEvent(new DomainDisplayEvent(this, domain));
+    }
+
+
+    /**
+    * Returns <code>true</code> if path contains a ApplicationProject object.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof ApplicationProject) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -117,4 +117,11 @@ public class ProjectAction extends CayenneAction {
 
         return true;
     }
+
+    /**
+     * Always returns true.
+     */
+    public boolean enableForObjectPath(Object[] path) {
+        return true;
+    }
 }

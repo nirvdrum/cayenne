@@ -68,48 +68,63 @@ import org.objectstyle.cayenne.project.NamedObjectFactory;
  * @author Andrei Adamchik
  */
 public class CreateDbEntityAction extends CayenneAction {
-	public static final String ACTION_NAME = "Create DbEntity";
+    public static final String ACTION_NAME = "Create DbEntity";
 
-	/**
-	 * Constructor for CreateDbEntityAction.
-	 */
-	public CreateDbEntityAction() {
-		super(ACTION_NAME);
-	}
+    /**
+     * Constructor for CreateDbEntityAction.
+     */
+    public CreateDbEntityAction() {
+        super(ACTION_NAME);
+    }
 
-	public String getIconName() {
-		return "icon-dbentity.gif";
-	}
+    public String getIconName() {
+        return "icon-dbentity.gif";
+    }
 
-	/**
-	 * Creates new DbEntity, adds it to the current DataMap,
-	 * fires DbEntityEvent and DbEntityDisplayEvent.
-	 * 
-	 * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
-	 */
-	public void performAction(ActionEvent e) {
-		EventController mediator = getMediator();
-		DbEntity entity = createEntity(mediator.getCurrentDataMap());
+    /**
+     * Creates new DbEntity, adds it to the current DataMap,
+     * fires DbEntityEvent and DbEntityDisplayEvent.
+     * 
+     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     */
+    public void performAction(ActionEvent e) {
+        EventController mediator = getMediator();
+        DbEntity entity = createEntity(mediator.getCurrentDataMap());
 
-		mediator.fireDbEntityEvent(
-			new EntityEvent(this, entity, EntityEvent.ADD));
-		mediator.fireDbEntityDisplayEvent(
-			new EntityDisplayEvent(
-				this,
-				entity,
-				mediator.getCurrentDataMap(),
-				mediator.getCurrentDataNode(),
-				mediator.getCurrentDataDomain()));
-	}
+        mediator.fireDbEntityEvent(new EntityEvent(this, entity, EntityEvent.ADD));
+        mediator.fireDbEntityDisplayEvent(
+            new EntityDisplayEvent(
+                this,
+                entity,
+                mediator.getCurrentDataMap(),
+                mediator.getCurrentDataNode(),
+                mediator.getCurrentDataDomain()));
+    }
 
-	/**
-	 * Constructs and returns a new DbEntity. Entity returned
-	 * is added to the DataMap.
-	 */
-	protected DbEntity createEntity(DataMap map) {
-		DbEntity entity =
-			(DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
-		map.addDbEntity(entity);
-		return entity;
-	}
+    /**
+     * Constructs and returns a new DbEntity. Entity returned
+     * is added to the DataMap.
+     */
+    protected DbEntity createEntity(DataMap map) {
+        DbEntity entity = (DbEntity) NamedObjectFactory.createObject(DbEntity.class, map);
+        map.addDbEntity(entity);
+        return entity;
+    }
+
+    /**
+     * Returns <code>true</code> if path contains a DataMap object.
+     */
+    public boolean enableForObjectPath(Object[] path) {
+        if (path == null) {
+            return false;
+        }
+
+        for (int i = 0; i < path.length; i++) {
+            if (path[i] instanceof DataMap) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

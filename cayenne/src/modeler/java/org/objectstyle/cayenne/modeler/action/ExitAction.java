@@ -86,4 +86,11 @@ public class ExitAction extends ProjectAction {
         Editor.getFrame().setVisible(false);
         System.exit(0);
     }
+
+    /**
+    * Always returns true.
+    */
+    public boolean enableForObjectPath(Object[] path) {
+        return true;
+    }
 }

@@ -81,4 +81,10 @@ public class AboutAction extends CayenneAction {
         new AboutDialog(Editor.getFrame());
     }
 
+    /**
+     * Always returns <code>true</code>.
+     */
+    public boolean enableForObjectPath(Object[] obj) {
+        return true;
+    }
 }
