@@ -56,6 +56,11 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.map.DataMap;
 
 /**
  * Cayenne project that consists of a single DataMap.
@@ -63,6 +68,7 @@ import java.io.File;
  * @author Andrei Adamchik
  */
 public class DataMapProject extends Project {
+    protected DataMap map;
 
     /**
      * Constructor for MapProject.
@@ -72,17 +78,37 @@ public class DataMapProject extends Project {
     public DataMapProject(File projectFile) {
         super(projectFile);
     }
-    
+
     /**
      * @see org.objectstyle.cayenne.project.Project#getMainProjectFile()
      */
     public File getMainProjectFile() {
         return null;
     }
-    
+
     /**
      * Does nothing.
      */
-    public void checkForUpgrades() {}
-}
+    public void checkForUpgrades() {
+        // do nothing
+    }
 
+    /**
+    * @see org.objectstyle.cayenne.project.Project#treeNodes()
+    */
+    public Iterator treeNodes() {
+        ArrayList list = new ArrayList();
+        ProjectTraversal.getInstance().addMaps(
+            list,
+            Collections.singletonList(map),
+            null);
+        return list.iterator();
+    }
+    
+    /**
+     * @see org.objectstyle.cayenne.project.Project#getRootNode()
+     */
+    public Object getRootNode() {
+        return map;
+    }
+}

@@ -182,7 +182,7 @@ public abstract class Project {
     public List buildFileList() {
         List projectFiles = new ArrayList();
 
-        Iterator nodes = new ProjectTraversal(this).treeNodes();
+        Iterator nodes = treeNodes();
         while (nodes.hasNext()) {
             Object[] nodePath = (Object[]) nodes.next();
             Object obj = ProjectTraversal.objectFromPath(nodePath);
@@ -295,6 +295,11 @@ public abstract class Project {
      * Returns a main file associated with this project.
      */
     public abstract File getMainProjectFile();
+    
+    /**
+     * Returns the topmost object (node) on the project tree.
+     */
+    public abstract Object getRootNode();
 
     /**
      * Determines whether the project needs to be upgraded.
@@ -302,6 +307,11 @@ public abstract class Project {
      * information.
      */
     public abstract void checkForUpgrades();
+    
+    /**
+     * Returns an Iterator over project tree of objects.
+     */
+    public abstract Iterator treeNodes();
 
     /**
      * Determines if a 
@@ -318,7 +328,7 @@ public abstract class Project {
         List filesToSave = new ArrayList();
         List wrappedObjects = new ArrayList();
 
-        Iterator nodes = new ProjectTraversal(this).treeNodes();
+        Iterator nodes = treeNodes();
         while (nodes.hasNext()) {
             Object[] nodePath = (Object[]) nodes.next();
             Object obj = ProjectTraversal.objectFromPath(nodePath);

@@ -59,6 +59,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
@@ -125,5 +126,22 @@ public class ApplicationProject extends Project {
         if (hasRenamedFiles()) {
             upgradeMessages.add("Some files require renaming");
         }
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.Project#treeNodes()
+     */
+    public Iterator treeNodes() {
+        ArrayList list = new ArrayList();
+        ProjectTraversal.getInstance().addConfig(list, config, null);
+        return list.iterator();
+    }
+    
+    
+    /**
+     * @see org.objectstyle.cayenne.project.Project#getRootNode()
+     */
+    public Object getRootNode() {
+        return config;
     }
 }

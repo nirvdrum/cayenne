@@ -57,6 +57,7 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -88,14 +89,19 @@ public class TstProject extends Project {
      * @see org.objectstyle.cayenne.project.Project#checkForUpgrades()
      */
     public void checkForUpgrades() {}
+
+    /**
+     * @see org.objectstyle.cayenne.project.Project#treeNodes()
+     */
+    public Iterator treeNodes() {
+        return new ArrayList().iterator();
+    }
     
     /**
-     * @see org.objectstyle.cayenne.project.Project#buildFileList()
+     * @see org.objectstyle.cayenne.project.Project#getRootNode()
      */
-    public List buildFileList() {
-        return new ArrayList();
+    public Object getRootNode() {
+        return null;
     }
-
-
 }
 

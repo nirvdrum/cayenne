@@ -146,7 +146,7 @@ public class Validator {
     public synchronized int validate() {
         reset();
 
-        Iterator it = new ProjectTraversal(project).treeNodes();
+        Iterator it = project.treeNodes();
         while (it.hasNext()) {
             TreeNodeValidator.validate((Object[]) it.next(), this);
         }

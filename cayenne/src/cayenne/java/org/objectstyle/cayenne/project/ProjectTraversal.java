@@ -78,8 +78,16 @@ import org.objectstyle.cayenne.map.Entity;
  * @author Andrei Adamchik
  */
 public class ProjectTraversal {
-    protected Project project;
-
+	
+	protected static final ProjectTraversal sharedInstance = new ProjectTraversal();
+	
+	/**
+	 * Returns ProjectTraversal singleton.
+	 */
+	public static ProjectTraversal getInstance() {
+		return sharedInstance;
+	}
+	
     /**
      * Returns an object corresponding to the node represented
      * by the path. This is the last object in the path.
@@ -129,30 +137,15 @@ public class ProjectTraversal {
         return newPath;
     }
 
-    /**
-     * Constructor for ProjectTreeTraversal.
-     */
-    public ProjectTraversal(Project project) {
-        this.project = project;
-    }
 
-    /**
-     * Returns an iterator over project nodes.
-     */
-    public Iterator treeNodes() {
-        return buildNodesList().iterator();
-    }
-
-    protected List buildNodesList() {
-        ArrayList list = new ArrayList();
-        Configuration config = ((ApplicationProject)project).getConfig();
-        Object[] path = buildPath(config, null);
-        list.add(path);
+    public void addConfig(List list, Configuration config, Object[] path) {
+        Object[] configPath = buildPath(config, path);
+        list.add(configPath);
+        
         addDomains(list, config.getDomainList(), path);
-        return list;
     }
 
-    protected void addDomains(List list, List domains, Object[] path) {
+    public void addDomains(List list, List domains, Object[] path) {
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
@@ -164,14 +157,14 @@ public class ProjectTraversal {
         }
     }
 
-    protected void addNodes(List list, List nodes, Object[] path) {
+    public void addNodes(List list, List nodes, Object[] path) {
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
             list.add(buildPath(it.next(), path));
         }
     }
 
-    protected void addMaps(List list, List maps, Object[] path) {
+    public void addMaps(List list, List maps, Object[] path) {
         Iterator it = maps.iterator();
         while (it.hasNext()) {
             DataMap map = (DataMap) it.next();
@@ -183,7 +176,7 @@ public class ProjectTraversal {
         }
     }
 
-    protected void addEntities(List list, List entities, Object[] path) {
+    public void addEntities(List list, List entities, Object[] path) {
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             Entity ent = (Entity) it.next();
@@ -195,14 +188,14 @@ public class ProjectTraversal {
         }
     }
 
-    protected void addAttributes(List list, List attributes, Object[] path) {
+    public void addAttributes(List list, List attributes, Object[] path) {
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
             list.add(buildPath(it.next(), path));
         }
     }
 
-    protected void addRelationships(List list, List relationships, Object[] path) {
+    public void addRelationships(List list, List relationships, Object[] path) {
         Iterator it = relationships.iterator();
         while (it.hasNext()) {
             list.add(buildPath(it.next(), path));
