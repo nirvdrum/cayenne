@@ -250,6 +250,10 @@ public class DbGenerator {
 					}
 				}
 
+				//Refresh the list to ensure all required tables will be created
+				nonExistent = filterNonExistentTables(con);
+				List createdTables=new ArrayList();
+				
 				if (shouldCreateTables) {
 					Iterator it = orderedEnts.iterator();
 					while (it.hasNext()) {
@@ -257,13 +261,14 @@ public class DbGenerator {
 
 						// only create missing tables
 						if (nonExistent.contains(ent.getName())) {
+							createdTables.add(ent.getName());
 							executeStatement(
 								(String) createTables.get(ent.getName()),
 								stmt);
 						}
 					}
 				}
-
+				
 				if (shouldCreateTables
 					&& shouldCreateFKConstraints
 					&& getAdapter().supportsFkConstraints()) {
@@ -271,8 +276,7 @@ public class DbGenerator {
 					while (it.hasNext()) {
 						DbEntity ent = (DbEntity) it.next();
 
-						// only create FK for the newly created tables
-						if (nonExistent.contains(ent.getName())) {
+						if (createdTables.contains(ent.getName())) {
 							List fks = (List) createFK.get(ent.getName());
 							Iterator fkIt = fks.iterator();
 							while (fkIt.hasNext()) {
