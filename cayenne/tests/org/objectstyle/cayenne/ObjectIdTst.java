@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
 
 import java.util.HashMap;
@@ -62,100 +62,107 @@ import junit.framework.TestCase;
 
 import org.objectstyle.cayenne.map.DbAttribute;
 
-
-
 public class ObjectIdTst extends TestCase {
-    static Logger logObj = Logger.getLogger(ObjectIdTst.class.getName());
-    
-    public ObjectIdTst(String name) {
-        super(name);
-    }
-    
-    
-    public void testObjEntityName() throws Exception {
-        String nm = "12345";
-        ObjectId oid = new ObjectId(nm, null);
-        assertEquals(nm, oid.getObjEntityName());       
-    }
-    
-    public void testEquals0() throws Exception {
-        String nm = "12345";
-        ObjectId oid1 = new ObjectId(nm, null);
-        assertEquals(oid1, oid1);       
-    }
-    
-    public void testEquals1() throws Exception {
-        String nm = "12345";
-        ObjectId oid1 = new ObjectId(nm, null);
-        ObjectId oid2 = new ObjectId(nm, null);
-        assertEquals(oid1, oid2);       
-    }
-    
-    
-    public void testEquals2() throws Exception {
-        String nm = "12345";
-        HashMap hm = new HashMap();
-        ObjectId oid1 = new ObjectId(nm, hm);
-        ObjectId oid2 = new ObjectId(nm, hm);
-        assertEquals(oid1, oid2);       
-    }
-    
-    
-    public void testEquals3() throws Exception {
-        String nm = "12345";
-        String pknm = "xyzabc";
+	static Logger logObj = Logger.getLogger(ObjectIdTst.class.getName());
 
-        HashMap hm1 = new HashMap();
-        hm1.put(pknm, "123");
-        
-        HashMap hm2 = new HashMap();
-        hm2.put(pknm, "123");
-        
-        ObjectId oid1 = new ObjectId(nm, hm1);
-        ObjectId oid2 = new ObjectId(nm, hm2);
-        assertEquals(oid1, oid2);       
-    }
-    
-    public void testIdAsMapKey() throws Exception {
-        HashMap map =  new HashMap();
-        Object o1 = new Object();
-        
-        String nm = "12345";
-        String pknm = "xyzabc";
+	public ObjectIdTst(String name) {
+		super(name);
+	}
 
-        HashMap hm1 = new HashMap();
-        hm1.put(pknm, "123");
-        
-        HashMap hm2 = new HashMap();
-        hm2.put(pknm, "123");
-        
-        ObjectId oid1 = new ObjectId(nm, hm1);
-        ObjectId oid2 = new ObjectId(nm, hm2);
-        
-        map.put(oid1, o1);
-        assertSame(o1, map.get(oid2));       
-    }
-    
-    public void testNotEqual1() throws Exception {
-        String nm1 = "12345";
-        String nm2 = "abcdef";
-        
-        ObjectId oid1 = new ObjectId(nm1, null);
-        ObjectId oid2 = new ObjectId(nm2, null);
-        assertTrue(!oid1.equals(oid2));       
-    }
-    
-    public void testNotEqual2() throws Exception {
-        String nm = "12345";
+	public void testObjEntityName() throws Exception {
+		String nm = "12345";
+		ObjectId oid = new ObjectId(nm, null);
+		assertEquals(nm, oid.getObjEntityName());
+	}
 
-        HashMap hm1 = new HashMap();
-        hm1.put("pk1", "123");
-        
-        HashMap hm2 = new HashMap();
-        hm2.put("pk2", "123");
-        
-        ObjectId oid1 = new ObjectId(nm, hm1);
-        ObjectId oid2 = new ObjectId(nm, hm2);
-        assertTrue(!oid1.equals(oid2));       
-    }
+	public void testEquals0() throws Exception {
+		String nm = "12345";
+		ObjectId oid1 = new ObjectId(nm, null);
+		assertEquals(oid1, oid1);
+	}
+
+	public void testEquals1() throws Exception {
+		String nm = "12345";
+		ObjectId oid1 = new ObjectId(nm, null);
+		ObjectId oid2 = new ObjectId(nm, null);
+		assertEquals(oid1, oid2);
+	}
+
+	public void testEquals2() throws Exception {
+		String nm = "12345";
+		HashMap hm = new HashMap();
+		ObjectId oid1 = new ObjectId(nm, hm);
+		ObjectId oid2 = new ObjectId(nm, hm);
+		assertEquals(oid1, oid2);
+	}
+
+	public void testEquals3() throws Exception {
+		String nm = "12345";
+		String pknm = "xyzabc";
+
+		HashMap hm1 = new HashMap();
+		hm1.put(pknm, "123");
+
+		HashMap hm2 = new HashMap();
+		hm2.put(pknm, "123");
+
+		ObjectId oid1 = new ObjectId(nm, hm1);
+		ObjectId oid2 = new ObjectId(nm, hm2);
+		assertEquals(oid1, oid2);
+	}
+
+	public void testEquals4() throws Exception {
+		String nm = "12345";
+		String pknm = "xyzabc";
+
+		HashMap hm1 = new HashMap();
+		hm1.put(pknm, new Integer(1000));
+
+		ObjectId ref = new ObjectId(nm, hm1);
+		ObjectId oid = new ObjectId(nm, pknm, 1000);
+		assertEquals(ref, oid);
+	}
+
+	public void testIdAsMapKey() throws Exception {
+		HashMap map = new HashMap();
+		Object o1 = new Object();
+
+		String nm = "12345";
+		String pknm = "xyzabc";
+
+		HashMap hm1 = new HashMap();
+		hm1.put(pknm, "123");
+
+		HashMap hm2 = new HashMap();
+		hm2.put(pknm, "123");
+
+		ObjectId oid1 = new ObjectId(nm, hm1);
+		ObjectId oid2 = new ObjectId(nm, hm2);
+
+		map.put(oid1, o1);
+		assertSame(o1, map.get(oid2));
+	}
+
+	public void testNotEqual1() throws Exception {
+		String nm1 = "12345";
+		String nm2 = "abcdef";
+
+		ObjectId oid1 = new ObjectId(nm1, null);
+		ObjectId oid2 = new ObjectId(nm2, null);
+		assertTrue(!oid1.equals(oid2));
+	}
+
+	public void testNotEqual2() throws Exception {
+		String nm = "12345";
+
+		HashMap hm1 = new HashMap();
+		hm1.put("pk1", "123");
+
+		HashMap hm2 = new HashMap();
+		hm2.put("pk2", "123");
+
+		ObjectId oid1 = new ObjectId(nm, hm1);
+		ObjectId oid2 = new ObjectId(nm, hm2);
+		assertTrue(!oid1.equals(oid2));
+	}
 }

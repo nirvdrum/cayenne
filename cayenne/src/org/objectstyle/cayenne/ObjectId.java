@@ -71,6 +71,17 @@ public class ObjectId {
 	private String objEntityName;
 	private int hash;
 
+	/**
+	 * Convenience constructor for entities that have a 
+	 * single Integer as their id.
+	 */
+	public ObjectId(String objEntityName, String keyName, int id) {
+		this.objEntityName = objEntityName;
+		HashMap keys = new HashMap();
+		keys.put(keyName, new Integer(id));
+		setIdKeys(keys);
+	}
+
 	/** Creates new ObjectId */
 	public ObjectId(String objEntityName, Map idKeys) {
 		this.objEntityName = objEntityName;
