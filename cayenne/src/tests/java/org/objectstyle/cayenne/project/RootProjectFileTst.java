@@ -55,16 +55,44 @@
  */
 package org.objectstyle.cayenne.project;
 
-import junit.framework.TestSuite;
+import java.io.File;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		suite.addTestSuite(ProjectFileTst.class);
-		suite.addTestSuite(RootProjectFileTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.CayenneTestCase;
+
+/**
+ * @author Andrei Adamchik
+ */
+public class RootProjectFileTst extends CayenneTestCase {
+    protected RootProjectFile rpf;
+    protected ProjectConfiguration conf;
+    
+    
+    /**
+     * Constructor for RootProjectFileTst.
+     * @param arg0
+     */
+    public RootProjectFileTst(String arg0) {
+        super(arg0);
+    }
+
+    /**
+     * @see junit.framework.TestCase#setUp()
+     */
+    protected void setUp() throws Exception {
+        super.setUp();
+        conf = new ProjectConfiguration(new File("tstproj.123"));
+        rpf = new RootProjectFile(conf);
+    }
+
+    public void testGetObject() throws Exception {
+    	assertSame(conf, rpf.getObject());
+    }
+    
+    public void testGetObjectName() throws Exception {
+    	assertEquals("cayenne", rpf.getObjectName());
+    }
+    
+    public void testGetFileName() throws Exception {
+    	assertEquals("cayenne.xml", rpf.getFileName());
+    }
 }

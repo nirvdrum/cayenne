@@ -55,16 +55,51 @@
  */
 package org.objectstyle.cayenne.project;
 
-import junit.framework.TestSuite;
+import java.io.File;
 
-public class AllTests {
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Project Package Tests");
-		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
-		suite.addTestSuite(ProjectTraversalTst.class);
-		suite.addTestSuite(ProjectFileTst.class);
-		suite.addTestSuite(RootProjectFileTst.class);
-		return suite;
-	}
+import org.objectstyle.cayenne.conf.Configuration;
+
+/**
+ * RootProjectFile is a ProjectFile abstraction of the 
+ * main project file in a Cayenne project. Right now Cayenne 
+ * projects can not be renamed, so all the name tracking functionality 
+ * is pretty much noop.
+ * 
+ * @author Andrei Adamchik
+ */
+public class RootProjectFile extends ProjectFile {
+	protected Configuration projectConfig;
+	
+
+    /**
+     * Constructor for RootProjectFile.
+     * @param name
+     * @param extension
+     */
+    public RootProjectFile(Configuration projectConfig) {
+        super("cayenne", "xml");
+        this.projectConfig = projectConfig;
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#getObject()
+     */
+    public Object getObject() {
+        return projectConfig;
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#getObjectName()
+     */
+    public String getObjectName() {
+        return "cayenne";
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.project.ProjectFile#saveToFile(File)
+     */
+    public void saveToFile(File f) throws Exception {
+        
+    }
 }
+

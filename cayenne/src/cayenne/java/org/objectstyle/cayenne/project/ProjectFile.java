@@ -60,10 +60,8 @@ import java.io.File;
 import org.objectstyle.cayenne.util.Util;
 
 /**
- * Represents a file in a Cayenne project.
- * File is characterized by a symbolic OS-neutral 
- * name, that can be resolved to a file in the file system
- * by calling <code>Project.resolveFile()</code>.
+ * ProjectFile is an adapter from an object in Cayenne project
+ * to its representation in the file system.
  * 
  * @author Andrei Adamchik
  */
