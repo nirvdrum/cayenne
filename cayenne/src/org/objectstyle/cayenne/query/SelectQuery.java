@@ -100,9 +100,9 @@ public class SelectQuery extends QualifiedQuery {
     }
     
     
-    /** Returns immutable list of orderings used by this query. */
+    /** Returns a list of orderings used by this query. */
     public List getOrderingList() {
-        return Collections.unmodifiableList(orderings);
+        return orderings;
     }
     
     
@@ -120,7 +120,7 @@ public class SelectQuery extends QualifiedQuery {
      * Returns a list of relationships that must be prefetched 
      * as a part of this query.
      */
-    public List getPrefetches() {
+    public List getPrefetchList() {
         return prefetches;
     }
     

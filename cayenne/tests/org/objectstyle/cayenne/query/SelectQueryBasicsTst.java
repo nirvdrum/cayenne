@@ -79,6 +79,13 @@ public class SelectQueryBasicsTst extends TestCase {
         assertSame(ord, q.getOrderingList().get(0));
     }
     
+    public void testAddPrefetching() throws Exception {
+        String path = "a.b.c";
+        q.addPrefetch(path);
+        assertEquals(1, q.getPrefetchList().size());
+        assertSame(path, q.getPrefetchList().get(0));
+    }
+    
     
     public void testAddOrdering2() throws Exception {        
         String path = "a.b.c";
