@@ -106,14 +106,14 @@ public class DataContextTst extends DataContextTestBase {
         assertNotNull(altArtists);
         assertEquals(artists.size(), altArtists.size());
 
-        // verify new artsists
+        // verify new artists
         Iterator it = altArtists.iterator();
         while (it.hasNext()) {
             DataObject a = (DataObject) it.next();
             assertSame(altContext, a.getDataContext());
         }
 
-        // verify original artsists
+        // verify original artists
         it = artists.iterator();
         while (it.hasNext()) {
             DataObject a = (DataObject) it.next();
