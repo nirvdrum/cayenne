@@ -916,6 +916,7 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @param anObject data object that we want to delete.
      * @throws DeleteDenyException if a DENY delete rule is applicable for object deletion.
+     * @throws NullPointerException if anObject is null.
      */
     public void deleteObject(DataObject anObject) {
         if (anObject.getPersistenceState() == PersistenceState.DELETED
