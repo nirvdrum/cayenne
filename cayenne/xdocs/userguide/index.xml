@@ -6,14 +6,14 @@
 <body>
     <section name="Table of Contents">        
         <ul>
-            <li><a href="intro.html">1. Introduction</a>
+            <li><a href="intro.html"><strong>1. Introduction</strong></a>
             <ul>
                 <li><a href="intro.html#about">1.1 About Cayenne</a></li>
                 <li><a href="intro.html#contrib">1.2 Acknowledgements</a></li>
                 <li><a href="intro.html#license">1.3 License</a></li>
             </ul><br/></li>  
             
-            <li><a href="install/index.html">2. Installation</a>
+            <li><a href="install/index.html"><strong>2. Installation</strong></a>
             <ul>
                 <li><a href="install/index.html#sys_req">2.1 System Requirements</a></li>
                 <li><a href="install/install.html#inst">2.2 Installation</a></li>
@@ -21,14 +21,14 @@
                 <li><a href="install/compile.html#compile">2.4 Compiling Cayenne from Source</a></li>
             </ul><br/></li>
             
-            <li><a href="quickstart/index.html">3. Quick Start</a>
+            <li><a href="quickstart/index.html"><strong>3. Quick Start</strong></a>
             <ul>
                 <li><a href="quickstart/comline.html">3.1 "Command-line Application" Tutorial</a></li>
                 <li><a href="quickstart/webapp.html">3.2 "JSP/Struts Web Application" Tutorial</a></li>
                 <li><a href="quickstart/tapestrywebapp.html">3.3 "Tapestry Web Application" Tutorial</a></li>
             </ul><br/></li>
             
-            <li><a href="design/index.html">4. Design</a>
+            <li><a href="design/index.html"><strong>4. Design</strong></a>
             <ul>
                 <li><a href="design/index.html#or_map">4.1 Object Relational Mapping</a></li>
                 <li><a href="design/graph.html#do">4.2 Object Graph</a></li>
@@ -39,13 +39,13 @@
                 <li><a href="design/autopk.html#pk">4.7 Primary Key Generation</a></li>
             </ul><br/></li>
             
-            <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>
+            <li><a href="appguide/index.html"><strong>5. Writing Cayenne Applications</strong></a>
             <ul>
                 <li><a href="appguide/project.html#datamap">5.1 Cayenne Project</a></li>
                 <li><a href="appguide/javagen.html#javagen">5.2 Generating Java Classes</a></li>
             </ul><br/></li>
             
-            <li><a href="datactxt/index.html">6. Using DataContext</a>
+            <li><a href="datactxt/index.html"><strong>6. Using DataContext</strong></a>
             <ul>
             	<li><a href="datactxt/create.html">6.1 Obtaining DataContext</a></li>
             	<li><a href="datactxt/performquery.html">6.2 Running Queries</a></li>
@@ -53,7 +53,7 @@
             </ul><br/>
             </li>
             
-            <li><a href="fetch/index.html">7. Using SelectQueries</a>
+            <li><a href="fetch/index.html"><strong>7. Using SelectQueries</strong></a>
             <ul>
                 <li><a href="fetch/selectQuery.html">7.1 SelectQuery</a></li>
                 <li><a href="fetch/exp.html">7.2 Qualifier Expressions</a></li>
@@ -63,12 +63,12 @@
                 <li><a href="fetch/raw.html">7.6 Executing raw SQL: SqlSelectQuery</a></li>
             </ul><br/></li>
             
-            <li><a href="modify/index.html">8. Modifying DataObjects</a>
+            <li><a href="modify/index.html"><strong>8. Modifying DataObjects</strong></a>
             <ul>
             	<li><a href="modify/data-context.html">8.1 Using DataContext</a></li>
             </ul><br/></li>
             
-            <li><a href="expressions/index.html">9. Using Expressions</a>
+            <li><a href="expressions/index.html"><strong>9. Using Expressions</strong></a>
             <ul>
             	<li><a href="expressions/common.html">9.1 General Approach to Building Expressions</a></li>
             	<li><a href="expressions/path.html">9.2 Path Expressions</a></li>
@@ -76,14 +76,14 @@
             	<li><a href="expressions/nulls.html">9.4 NULL handling</a></li>
             </ul><br/></li>
             
-            <li><a href="perform/index.html">10. Performance Tuning</a>
+            <li><a href="perform/index.html"><strong>10. Performance Tuning</strong></a>
             <ul>
                 <li><a href="perform/index.html#data_rows">10.1 Data Rows</a></li>
                 <li><a href="perform/index.html#iterator">10.2 ResultIterator: Incremental Data Processing</a></li>
                 <li><a href="perform/index.html#paged">10.3 Paged Queries</a></li>
             </ul><br/></li>
             
-            <li><a href="deploy/index.html">11. Deployment</a>
+            <li><a href="deploy/index.html"><strong>11. Deployment</strong></a>
             <ul>
                 <li><a href="deploy/index.html#config">11.1 Configuration</a></li>
                 <li><a href="deploy/index.html#standalone">11.2 Standalone Applications</a></li>
@@ -93,9 +93,9 @@
                 <li><a href="deploy/cdeploy.html">11.6 Deployment Configuration With Ant</a></li>
             </ul><br/></li>
             
-            <li><a href="misc.html">11. Miscellaneous Information</a>
+            <li><a href="misc.html"><strong>12. Miscellaneous Information</strong></a>
             <ul>
-                <li><a href="misc.html#webobjects">11.1 Cayenne and WebObjects</a></li>
+                <li><a href="misc.html#webobjects">12.1 Cayenne and WebObjects</a></li>
             </ul><br/></li>
         </ul>
     </section>

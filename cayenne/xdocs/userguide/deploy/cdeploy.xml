@@ -13,8 +13,8 @@
     <section name="11. Deployment">        
            <subsection name="11.6 Deployment Configuration With Ant">
             <p>There is a number of 
-            cases when it is highly desirable to automate changing Cayenne 
-            configuration file, including <code>cayenne.xml</code> and driver information files:</p>
+            cases when it is highly desirable to automate changing of Cayenne 
+            configuration files, including <code>cayenne.xml</code> and driver information files:</p>
             
             <ul>
             <li><i>Changing connection information when porting an application
