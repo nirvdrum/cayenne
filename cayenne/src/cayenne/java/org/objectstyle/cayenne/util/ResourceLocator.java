@@ -264,7 +264,14 @@ public class ResourceLocator {
 	 */
 	public static String classBaseUrl(Class aClass) {
 		String pathToClass = aClass.getName().replace('.', '/') + ".class";
-		URL selfUrl = aClass.getClassLoader().getResource(pathToClass);
+		ClassLoader classLoader = aClass.getClassLoader();
+		
+		if (classLoader == null) {
+		   classLoader = ClassLoader.getSystemClassLoader();
+	    }
+	    
+		URL selfUrl = classLoader.getResource(pathToClass);
+		
 		if (selfUrl == null) {
 			return null;
 		}
