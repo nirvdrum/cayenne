@@ -212,7 +212,7 @@ public class DatabaseSetup {
         Iterator it = dbEntitiesInInsertOrder().iterator();
         while (it.hasNext()) {
             DbEntity ent = (DbEntity) it.next();
-            queries.add(gen.createTableQuery(ent));
+            queries.add(adapter.createTable(ent));
         }
 
         // FK constraints

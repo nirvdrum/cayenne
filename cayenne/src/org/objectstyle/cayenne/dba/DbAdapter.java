@@ -92,10 +92,19 @@ public interface DbAdapter {
     /** Returns true if a target database supports FK constraints. */
     public boolean supportsFkConstraints();
 
-    /** Returns a SQL string that can be used to drop
-      * a database table corresponding to <code>ent</code> parameter. */
+    /** 
+     * Returns a SQL string that can be used to drop
+     * a database table corresponding to <code>ent</code> 
+     * parameter. 
+     */
     public String dropTable(DbEntity ent);
 
+    /** 
+     * Returns a SQL string that can be used to create database table
+	 * corresponding to <code>ent</code> parameter. 
+	 */
+	public String createTable(DbEntity ent);
+		
     /**
      *  Returns a SQL string that can be used to create
      * a foreign key constraint for the relationship. 

@@ -130,7 +130,7 @@ public class DbGenerator {
 			dropTables.put(name, adapter.dropTable(dbe));
 
 			// build "CREATE TABLE"
-			createTables.put(name, createTableQuery(dbe));
+			createTables.put(name, adapter.createTable(dbe));
 
 			// build "FK"
 			if (supportsFK) {
@@ -241,85 +241,11 @@ public class DbGenerator {
 		stmt.execute(stmtText);
 	}
 
-	/** Returns a query that can be used to create database table
-	  * corresponding to <code>ent</code> parameter. */
-	public String createTableQuery(DbEntity ent) {
-		StringBuffer buf = new StringBuffer();
-		buf.append("CREATE TABLE ").append(ent.getName()).append(" (");
-
-		// columns
-		Iterator it = ent.getAttributeList().iterator();
-		boolean first = true;
-		while (it.hasNext()) {
-			if (first) {
-				first = false;
-			} else {
-				buf.append(", ");
-			}
-
-			DbAttribute at = (DbAttribute) it.next();
-			String type = getAdapter().externalTypesForJdbcType(at.getType())[0];
-
-			buf.append(at.getName()).append(' ').append(type);
-
-			// append size and precision (if applicable)
-			if (TypesMapping.supportsLength(at.getType())) {
-				int len = at.getMaxLength();
-				int prec =
-					TypesMapping.isDecimal(at.getType())
-						? at.getPrecision()
-						: -1;
-
-				// sanity check
-				if (prec > len) {
-					prec = -1;
-				}
-
-				if (len > 0) {
-					buf.append('(').append(len);
-
-					if (prec >= 0) {
-						buf.append(", ").append(prec);
-					}
-
-					buf.append(')');
-				}
-			}
-
-			if (at.isMandatory())
-				buf.append(" NOT");
-
-			buf.append(" NULL");
-		}
-
-		// primary key clause
-		Iterator pkit = ent.getPrimaryKey().iterator();
-		if (pkit.hasNext()) {
-			if (first)
-				first = false;
-			else
-				buf.append(", ");
-
-			buf.append("PRIMARY KEY (");
-			boolean firstPk = true;
-			while (pkit.hasNext()) {
-				if (firstPk)
-					firstPk = false;
-				else
-					buf.append(", ");
-
-				DbAttribute at = (DbAttribute) pkit.next();
-				buf.append(at.getName());
-			}
-			buf.append(')');
-		}
-		buf.append(')');
-		return buf.toString();
-	}
-
-	/** Returns an array of queries to create foreign key constraints
+	/** 
+	 * Returns an array of queries to create foreign key constraints
 	 * for a particular DbEntity. Throws CayenneRuntimeException, if called
-	 * for adapter that does not support FK constraints. */
+	 * for adapter that does not support FK constraints.
+	 */
 	public List createFkConstraintsQueries(DbEntity dbEnt) {
 		if (!getAdapter().supportsFkConstraints()) {
 			throw new CayenneRuntimeException("FK constraints are not supported by adapter.");

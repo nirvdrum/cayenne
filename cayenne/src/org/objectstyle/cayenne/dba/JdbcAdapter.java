@@ -156,11 +156,92 @@ public class JdbcAdapter implements DbAdapter {
         return true;
     }
 
-    /** Returns a query string to drop a table corresponding
-      * to <code>ent</code> DbEntity. */
+    /** 
+     * Returns a SQL string to drop a table corresponding
+     * to <code>ent</code> DbEntity. 
+     */
     public String dropTable(DbEntity ent) {
         return "DROP TABLE " + ent.getName();
     }
+    
+    /** 
+     * Returns a SQL string that can be used to create database table
+	 * corresponding to <code>ent</code> parameter. 
+	 */
+	public String createTable(DbEntity ent) {
+		StringBuffer buf = new StringBuffer();
+		buf.append("CREATE TABLE ").append(ent.getName()).append(" (");
+
+		// columns
+		Iterator it = ent.getAttributeList().iterator();
+		boolean first = true;
+		while (it.hasNext()) {
+			if (first) {
+				first = false;
+			} else {
+				buf.append(", ");
+			}
+
+			DbAttribute at = (DbAttribute) it.next();
+			String type = this.externalTypesForJdbcType(at.getType())[0];
+
+			buf.append(at.getName()).append(' ').append(type);
+
+			// append size and precision (if applicable)
+			if (TypesMapping.supportsLength(at.getType())) {
+				int len = at.getMaxLength();
+				int prec =
+					TypesMapping.isDecimal(at.getType())
+						? at.getPrecision()
+						: -1;
+
+				// sanity check
+				if (prec > len) {
+					prec = -1;
+				}
+
+				if (len > 0) {
+					buf.append('(').append(len);
+
+					if (prec >= 0) {
+						buf.append(", ").append(prec);
+					}
+
+					buf.append(')');
+				}
+			}
+
+			if (at.isMandatory())
+				buf.append(" NOT");
+
+			buf.append(" NULL");
+		}
+
+		// primary key clause
+		Iterator pkit = ent.getPrimaryKey().iterator();
+		if (pkit.hasNext()) {
+			if (first)
+				first = false;
+			else
+				buf.append(", ");
+
+			buf.append("PRIMARY KEY (");
+			boolean firstPk = true;
+			while (pkit.hasNext()) {
+				if (firstPk)
+					firstPk = false;
+				else
+					buf.append(", ");
+
+				DbAttribute at = (DbAttribute) pkit.next();
+				buf.append(at.getName());
+			}
+			buf.append(')');
+		}
+		buf.append(')');
+		return buf.toString();
+	}
+	
 
     /** Returns a SQL string that can be used to create
       * a foreign key constraint for the relationship. */
