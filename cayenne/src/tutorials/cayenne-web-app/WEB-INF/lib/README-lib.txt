@@ -1,1 +1,1 @@
-Copy cayenne.jar and struts.jar in this directory
+Copy cayenne.jar, ognl.jar, and net.sf.tapestry.jar into this directory

@@ -2,9 +2,9 @@
 
 
 <!-- =============================================== -->
-<!-- cayenne-cmd-app tutorial buildfile.             -->
+<!-- cayenne-tapestry-app tutorial buildfile.             -->
 <!-- =============================================== -->
-<project name="cayenne-web-app" default="compile">
+<project name="cayenne-tapestry-app" default="compile">
     <property name="tutorial.subpath" value="tutorials/cayenne-tapestry-app"/>
     <property name="tutorial.build" value="${build}/${tutorial.subpath}/classes"/>
     <property name="tutorial.src" value="src/${tutorial.subpath}/WEB-INF/classes"/>
@@ -32,11 +32,16 @@
 		</javac>
 	</target>
 	
+       <!-- Copy to the dist directory all except build.xml (our internal file) and then
+       rename build-webapp.xml to build.xml so that end users can simply invoke ant and have things
+       built for them -->
 	<target name="dist-src" depends="prepare">
 		<copy todir="${tutorial.dist}">
             <fileset dir="src/${tutorial.subpath}">
             	<exclude name="build.xml"/>
             </fileset>
-        </copy>
-	</target>
+            </copy>
+               <move file="${tutorial.dist}/build-webapp.xml"
+                       tofile="${tutorial.dist}/build.xml" />
+       </target>
 </project>

@@ -6,12 +6,12 @@
 <navigator>
 	<up>/userguide/index.html</up>
 	<prev>/userguide/quickstart/comline.html</prev>
-	<next>/userguide/design/index.html</next>
+       <next>/userguide/quickstart/tapestrywebapp.html</next>
 </navigator> 
 <body>
     <section name="3. Quick Start">
-    	<subsection name="3.3 &quot;Web Application&quot; Tutorial">
-		<p>This section shows how to write and a deploy a web application
+       <subsection name="3.3 &quot;JSP/Struts Web Application&quot; Tutorial">
+               <p>This section shows how to write and a deploy a jsp web application
     	using Cayenne.</p>
     	
    	    <panel name="Note:">
@@ -29,7 +29,7 @@
     		<li><a href="#6">Compile and Deploy the Application.</a></li>
     	</ul>
     	
-       	<subsection name="3.2.1 Tutorial Setup" anchor="1">
+               <subsection name="3.3.1 Tutorial Setup" anchor="1">
        		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
        		installation instructions</a>. In particular, JSDK 1.4 must be installed.
        		</p>
@@ -95,7 +95,7 @@
     		likely require a different setup.</p>
     	</subsection>
     	
-    	<subsection name="3.2.2 Prepare Tutorial Database" anchor="2">
+       <subsection name="3.3.2 Prepare Tutorial Database" anchor="2">
     		<p>Run <a href="../../tutorials/cayenne-web-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
     		script located in the project directory to create test tables. 
     		This script is tested on MySQL, but it should be easy to port to any other RDBMS. Also
@@ -105,7 +105,7 @@
     		of this script to recreate tables from scratch.</p>
     	</subsection>
     	
-    	<subsection name="3.2.3 Setup Cayenne Configuration Files" anchor="3">
+       <subsection name="3.3.3 Setup Cayenne Configuration Files" anchor="3">
     		<p>Configuration files included in this tutorial are:
     		
     		<ul>
@@ -128,14 +128,14 @@
     	</subsection>
     	
     	
-    	<subsection name="3.2.4 Create Database Primary Key Support." anchor="4">
+       <subsection name="3.3.4 Create Database Primary Key Support." anchor="4">
     	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
     	objects for primary key support by following these  
     	<a href="../modeler/pksupport.html">instructions</a>. Skip this step if it was already 
     	done for another tutorial.</p>
     	</subsection>
     	
-    	<subsection name="3.2.5 Generate Java Code for DataObjects" anchor="5">
+       <subsection name="3.3.5 Generate Java Code for DataObjects" anchor="5">
     		<p>Open <code>cayenne.xml</code> in CayenneModeler and generate Java classes 
     		for DataObjects by going to <strong>"Tools -> Generate Classes"</strong> 
     		and selecting the <strong><code>WEB-INF/classes</code></strong> under the tutorial 
@@ -158,7 +158,7 @@
     		</ul>
     		</p>    	
     	</subsection>
-    	   	<subsection name="3.2.6 Compile and Deploy the Application" anchor="6">
+               <subsection name="3.3.6 Compile and Deploy the Application" anchor="6">
     		<p>Compile the source code like you would normally compile a webapplication.
     		The example is given for javac from the command line (assuming that JAVA_HOME variable 
     		points to the JDK 1.3 or 1.4 installation). Substitute <code>[servlet.jar]</code> 

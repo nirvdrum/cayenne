@@ -2,7 +2,7 @@
 
 
 <!-- =============================================== -->
-<!-- cayenne-cmd-app tutorial buildfile.             -->
+<!-- cayenne-web-app tutorial buildfile.             -->
 <!-- =============================================== -->
 <project name="cayenne-web-app" default="compile">
     <property name="tutorial.subpath" value="tutorials/cayenne-web-app"/>

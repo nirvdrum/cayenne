@@ -1,0 +1,116 @@
+<document>
+<title>User Guide - Quick Start</title>
+    <properties>
+        <author>Craig Miskell</author>
+    </properties>
+<navigator>
+	<up>/userguide/index.html</up>
+	<prev>/userguide/quickstart/webapp.html</prev>
+	<next>/userguide/design/index.html</next>
+</navigator> 
+<body>
+    <section name="3. Quick Start">
+    	<subsection name="3.4 &quot;Tapestry Web Application&quot; Tutorial">
+		<p><a href="http://tapestry.sourceforge.net/">Tapestry</a> is a powerful component-based 
+		web application framework. This section shows how to write and a deploy a Tapestry web 
+		application	using Cayenne as an O/R layer.</p>
+    	
+   	    <panel name="Note:">
+    		Full tutorial source code is included in Cayenne distribution in "src/tutorials" folder.
+    	</panel>
+
+   	<p>Tutorial steps:</p>
+    	
+    	<ul>
+    		<li><a href="#1">Tutorial Setup.</a></li>
+    		<li><a href="#2">Prepare Tutorial Database.</a></li>
+    		<li><a href="#3">Setup Cayenne Configuration Files.</a></li>
+    		<li><a href="#4">Create Database Primary Key Support.</a></li>
+    		<li><a href="#5">Generate Java Code for DataObjects.</a></li>
+    		<li><a href="#6">Compile and Deploy the Application.</a></li>
+    	</ul>
+    	
+       	<subsection name="3.4.1 Tutorial Setup" anchor="1">
+       		<p>- Follow the steps outlined in <a href="../install/index.html">Cayenne 
+       		installation instructions</a>. In particular, JSDK 1.4 must be installed.
+       		</p>
+       		
+       		<p>- Install a web container. This tutorial was tested with <a href=
+    		"http://jakarta.apache.org/tomcat/index.html">Tomcat</a> version 4.1.10.
+       		It should work with any other container that is compliant with Servlet 2.3
+       		specification (older containers will also work, but you will not be able
+       		to use some of ServletConfiguration features discussed below). 
+       		All references to Tomcat below should apply in some form to other web containers
+       		as well.</p>
+
+         		<p>- Obtain the latest (2.2) Tapestry distribution and unzip somewhere.  You will need to place some of the jars in an appropriate place</p>  		
+    		<p>- Use tutorial source directory distributed with Cayenne at
+    		<code>$CAYENNE_HOME/src/tutorials/cayenne-tapestry-app</code> 
+    		as a project directory.</p>
+    		
+    		<p>- Copy <code>cayenne.jar</code> to the <code>WEB-INF/lib</code> subdirectory of 
+    		the tutorial project directory.</p>
+
+    		
+    		<p> - Doublecheck the JDBC driver installation for the target database. If you haven't installed
+    		it already, you may copy the driver jar file to 
+       		<code>WEB-INF/lib</code> subdirectory of the tutorial project. Alternatively if you want it to be 
+       		shared by all web applications and you are using Tomcat, you may copy it to
+       		<code>$CATALINA_HOME/common/lib</code> instead.
+       		</p>
+       		
+    		<p>- Copy <code>ognl.jar</code> (probably version 2.1.4-opt) and <code>net.sf.tapestry-2.2.jar</code> from the Tapestry distribution (/lib/ext for ognl, /lib for tapestry-2.2.jar) to EITHER the <code>WEB-INF/lib</code> subdirectory of the tutorial project directory, or some other location that your web container will be able to locate.  E.g. for Tomcat, $CATALINA_HOME/shared/lib is a good place.  If you have Tapestry already installed, you may not need to perform this step</p>
+    	</subsection>
+    	
+    	<subsection name="3.4.2 Prepare Tutorial Database" anchor="2">
+    		<p>Run <a href="../../tutorials/cayenne-tapestry-app/tutorialdb.sql"><code>tutorialdb.sql</code></a>
+    		script located in the project directory to create test tables. 
+    		This script is tested on MySQL, but it should be easy to port to any other RDBMS. Also
+    		note that if you already tried "Command Line Application" tutorial or the "Web Application" tutorial in
+    		this chapter, you may already have tables with the same names in your database.
+    		In this case you may uncomment "DROP TABLE..." statements in the beginning
+    		of this script to recreate tables from scratch.</p>
+    	</subsection>
+    	
+    	<subsection name="3.4.3 Setup Cayenne Configuration Files" anchor="3">
+    		<p>Configuration files included in this tutorial are:
+    		
+    		<ul>
+    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/cayenne.xml">cayenne.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/datamap.xml">datamap.xml</a></li>
+    			<li><a href="../../tutorials/cayenne-tapestry-app/WEB-INF/driverinfo.xml">driverinfo.xml</a></li>
+    		</ul>
+    		
+    		These files are under WEB-INF subdirectory of the tutorial project folder. Open <code>cayenne.xml</code> 
+    		file in CayenneModeler and make the following changes:
+    		<ul>
+    			<li>if the database used is NOT MySQL, choose an adapter for the appropriate database.</li>
+    			<li><code>driverinfo.xml</code> must be modified to reflect connection and
+    			driver information of the test database.  Do this by editing the Data Source Info section of data node properties page</li>
+    		</ul>         	
+    		</p>
+    	    <img src="/images/tutorial-cfg-node.gif" width="639" height="503" border="0" align="middle"
+			alt="Configure Node Panel"/>
+    	</subsection>
+    	
+    	
+    	<subsection name="3.4.4 Create Database Primary Key Support." anchor="4">
+    	<p>Open <code>cayenne.xml</code> in CayenneModeler and generate needed database
+    	objects for primary key support by following these  
+    	<a href="../modeler/pksupport.html">instructions</a>. Skip this step if it was already 
+    	done for another tutorial.</p>
+    	</subsection>
+   	<subsection name="3.4.5 Compile and Deploy the Application" anchor="6">
+    		<p>To compile the application, the easiest way is to use ant.  Change into the cayenne-tapestry-app directory and invoke ant.  The application will be built</p>
+
+			<p>To deploy, simply copy <code>cayenne-tapestry-app</code> directory to Tomcat 
+			<code>webapps</code> directory and restart the Tomcat. URL of the new applications
+			is <a href=
+			"http://localhost:8080/cayenne-tapestry-app/artist">http://localhost:8080/cayenne-tapestry-app/artist</a>
+			(on containers other then Tomcat, the prefix will probably be different).
+			</p>
+    	</subsection>
+    	</subsection>
+    </section>
+</body>
+</document>
