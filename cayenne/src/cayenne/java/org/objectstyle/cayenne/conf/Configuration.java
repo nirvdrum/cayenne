@@ -240,10 +240,10 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * @deprecated Since 1.0 Beta1; use {@link #setSharedConfiguration(Configuration)} instead.
+	 * @deprecated Since 1.0 Beta1; use {@link #initializeSharedConfiguration(Configuration)} instead.
 	 */
 	public static void initSharedConfig(Configuration conf) {
-		Configuration.setSharedConfiguration(conf);
+		Configuration.initializeSharedConfiguration(conf);
 	}
 
 	/**
@@ -257,24 +257,54 @@ public abstract class Configuration {
 	}
 
 	/**
-	 * Creates and initializes shared Configuration object with
+	 * Creates and initializes a shared Configuration object of a
 	 * custom Configuration subclass.
 	 */
-	public static void initializeSharedConfiguration(Class configClass) {
+	public static void initializeSharedConfiguration(Class configurationClass) {
+		Configuration conf = null;
+
 		try {
-			Configuration conf = (Configuration)configClass.newInstance();
-			Configuration.setSharedConfiguration(conf);
+			conf = (Configuration)configurationClass.newInstance();
 		} catch (Exception ex) {
-			logObj.error("Error initializing shared Configuration", ex);
-			throw new ConfigurationException("Error initializing shared Configuration");
+			logObj.error("Error creating shared Configuration: ", ex);
+			throw new ConfigurationException("Error creating shared Configuration: ", ex);
 		}
+
+		Configuration.initializeSharedConfiguration(conf);
 	}
 
 	/**
 	 * Sets the shared Configuration object to a new Configuration object.
+	 * First calls {@link #canInitialize} and - if permitted -
+	 * {@link #initialize} followed by {@link #didInitialize}.
+	 */
+	public static void initializeSharedConfiguration(Configuration conf) {
+		// check to see whether we can proceed
+		if (!conf.canInitialize()) {
+			throw new ConfigurationException("Configuration of class "
+								+ conf.getClass().getName()
+								+ " refused to be initialized.");
+		}
+
+		try {
+			// initialize configuration
+			conf.initialize();
+
+			// call post-initialization hook
+			conf.didInitialize();
+
+			// set the initialized Configuration only after success
+			Configuration.sharedConfiguration = conf;
+		} catch (Exception ex) {
+			throw new ConfigurationException("Error during Configuration initialization: ", ex);
+		}
+	}
+
+	/**
+	 * @deprecated Since 1.0 Beta1; use {@link #initializeSharedConfiguration(Configuration)} instead.
 	 */
 	public static void setSharedConfiguration(Configuration conf) {
-		Configuration.sharedConfiguration = conf;
+		Configuration.initializeSharedConfiguration(conf);
 	}
 
 	/**
@@ -289,8 +319,8 @@ public abstract class Configuration {
 	/**
 	 * Default constructor for new Configuration instances using the
 	 * given resource name as the main domain file.
-	 * First calls {@link #configureLogging}, then {@link #shouldInitialize}
-	 * and - if permitted - {@link #initialize} follwed by {@link #didInitialize}.
+	 * First calls {@link #configureLogging}, then {@link #setDomainConfigurationName}
+	 * with the given domain configuration resource name.
 	 */
 	protected Configuration(String domainConfigurationName) {
 		super();
@@ -300,37 +330,26 @@ public abstract class Configuration {
 
 		// set domain configuration name
 		this.setDomainConfigurationName(domainConfigurationName);
-
-		// Load domains if we can; Subclasses can call #initialize() later
-		// when they feel like it.
-		if (this.shouldInitialize()) {
-			try {
-				this.initialize();
-				this.didInitialize();
-			} catch (Exception ex) {
-				throw new ConfigurationException(ex);
-			}
-		}
 	}
 
 
 	/**
-	 * Indicate whether {@link #initialize} should be called.
+	 * Indicates whether {@link #initialize} can be called.
 	 * Returning <code>false</code> allows new instances to delay
-	 * the initialization process.
+	 * or refuse the initialization process.
 	 */
-	protected abstract boolean shouldInitialize();
+	public abstract boolean canInitialize();
 
 	/**
 	 * Initializes the new instance.
 	 * @throws Exception
 	 */
-	protected abstract void initialize() throws Exception;
+	public abstract void initialize() throws Exception;
 
 	/**
-	 * Called after {@link #initialize} from the default constructor.
+	 * Called after successful completion of {@link #initialize}.
 	 */
-	protected abstract void didInitialize();
+	public abstract void didInitialize();
 
 	/**
 	 * Returns the resource locator used for finding and loading resources.

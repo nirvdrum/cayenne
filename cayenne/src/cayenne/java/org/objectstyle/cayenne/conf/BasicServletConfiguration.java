@@ -82,13 +82,16 @@ public class BasicServletConfiguration extends Configuration {
 
     public static BasicServletConfiguration initializeConfiguration(ServletContext ctxt) {
         BasicServletConfiguration conf = new BasicServletConfiguration(ctxt);
-        Configuration.setSharedConfiguration(conf);
+        Configuration.initializeSharedConfiguration(conf);
         return conf;
     }
 
-    public BasicServletConfiguration() {}
+    public BasicServletConfiguration() {
+    	super();
+    }
 
     public BasicServletConfiguration(ServletContext ctxt) {
+    	super();
         servletContext = ctxt;
     }
 
@@ -105,14 +108,14 @@ public class BasicServletConfiguration extends Configuration {
         return servletContext;
     }
 
-	protected boolean shouldInitialize() {
+	public boolean canInitialize() {
 		return true;
 	}
 
-	protected void initialize() throws Exception {
+	public void initialize() throws Exception {
 	}
 
-	protected void didInitialize() {
+	public void didInitialize() {
 	}
 
 	public ResourceLocator getResourceLocator() {

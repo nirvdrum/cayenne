@@ -95,42 +95,37 @@ public class DefaultConfiguration extends Configuration {
 	 */
 	public DefaultConfiguration(String domainConfigurationName) {
 		super(domainConfigurationName);
+
+		// configure CLASSPATH-only locator
+		ResourceLocator l = new ResourceLocator();
+		l.setSkipAbsolutePath(true);
+		l.setSkipClasspath(false);
+		l.setSkipCurrentDirectory(true);
+		l.setSkipHomeDirectory(true);
+
+		// add the current Configuration subclass' package as additional path.
+		if (!(this.getClass().equals(DefaultConfiguration.class))) {
+			l.addClassPath(Util.getPackagePath(this.getClass().getName()));
+		}
+
+		// Configuration superclass statically defines what 
+		// ClassLoader to use for resources. This
+		// allows applications to control where resources 
+		// are loaded from.
+		l.setClassLoader(Configuration.getResourceLoader());
+	
+		// remember configured ResourceLocator
+		this.setResourceLocator(l);
 	}
 
 	/**
-	 * Default implementation of {@link Configuration#shouldInitialize}.
+	 * Default implementation of {@link Configuration#canInitialize}.
 	 * Creates a ResourceLocator suitable for loading from the CLASSPATH,
 	 * unless it has already been set in a subclass.
 	 * Always returns <code>true</code>.
 	 */
-	protected boolean shouldInitialize() {
-		logObj.debug("shouldInitialize started.");
-
-		// a subclass might have set the ResourceLocator already;
-		// do not overwrite it.
-		if (this.getResourceLocator() == null) {
-			// configure CLASSPATH-only locator
-			ResourceLocator l = new ResourceLocator();
-			l.setSkipAbsolutePath(true);
-			l.setSkipClasspath(false);
-			l.setSkipCurrentDirectory(true);
-			l.setSkipHomeDirectory(true);
-
-			// add the current Configuration subclass' package as additional path.
-			if (!(this.getClass().equals(DefaultConfiguration.class))) {
-				l.addClassPath(Util.getPackagePath(this.getClass().getName()));
-			}
-
-			// Configuration superclass statically defines what 
-			// ClassLoader to use for resources. This
-			// allows applications to control where resources 
-			// are loaded from.
-			l.setClassLoader(Configuration.getResourceLoader());
-		
-			// remember configured ResourceLocator
-			this.setResourceLocator(l);
-		}
-
+	public boolean canInitialize() {
+		logObj.debug("canInitialize started.");
 		// allow to proceed
 		return true;
 	}
@@ -139,7 +134,7 @@ public class DefaultConfiguration extends Configuration {
 	 * Initializes all Cayenne resources. Loads all configured domains and their
 	 * data maps, initializes all domain Nodes and their DataSources.
 	 */
-	protected void initialize() throws Exception {
+	public void initialize() throws Exception {
 		logObj.debug("initialize starting.");
 
 		InputStream in = this.getDomainConfiguration();
@@ -169,6 +164,7 @@ public class DefaultConfiguration extends Configuration {
 			in.close();
 		}
 
+		// log successful initialization
 		logObj.debug("initialize finished.");
 	}
 
@@ -176,7 +172,7 @@ public class DefaultConfiguration extends Configuration {
 	 * Default implementation of {@link Configuration#didInitialize}.
 	 * Currently does nothing except logging.
 	 */
-	protected void didInitialize() {
+	public void didInitialize() {
 		// empty default implementation
 		logObj.debug("didInitialize finished.");
 	}

@@ -114,7 +114,7 @@ public class ServletConfiguration
     public void contextInitialized(ServletContextEvent sce) {
         this.servletContext = sce.getServletContext();
         servletContext.log("*************** app created");
-        Configuration.setSharedConfiguration(this);
+        Configuration.initializeSharedConfiguration(this);
     }
 
     /** Currently does nothing. <i>In the future it should close down

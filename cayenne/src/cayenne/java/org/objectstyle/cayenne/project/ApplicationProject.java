@@ -56,7 +56,6 @@
 package org.objectstyle.cayenne.project;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,6 +88,7 @@ public class ApplicationProject extends Project {
      */
     protected void postInitialize(File projectFile) {
     	logObj.debug("postInitialize: " + projectFile);
+
         try {
         	// if the projectFile is real..
             if (projectFile != null) {
@@ -103,10 +103,19 @@ public class ApplicationProject extends Project {
             	projectFile = projectFile.getCanonicalFile();
             }
 
-            this.configuration = new ProjectConfiguration(projectFile);
-        } catch (IOException e) {
+			ProjectConfiguration conf = new ProjectConfiguration(projectFile);
+
+			// try to initialize configuration
+			if (conf.canInitialize()) {
+				conf.initialize();
+				conf.didInitialize();
+			}
+
+			this.configuration = conf;
+        } catch (Exception e) {
             throw new ProjectException("Error creating ApplicationProject.", e);
         }
+
         super.postInitialize(projectFile);
     }
 

@@ -76,7 +76,9 @@ public class FileConfiguration extends DefaultConfiguration {
 	protected File projectFile;
 
 	/**
-	 * Disabled default constructor to force {@link FileConfiguration#FileConfiguration(File)}
+	 * Disabled default constructor to force use of
+	 * {@link FileConfiguration#FileConfiguration(File)} or
+	 * {@link FileConfiguration#FileConfiguration(String)}.
 	 */
 	private FileConfiguration() {
 		super();
@@ -85,6 +87,7 @@ public class FileConfiguration extends DefaultConfiguration {
 	/**
 	 * Creates a configuration that uses the provided file 
 	 * as the main project file, ignoring any other lookup strategies.
+	 * 
 	 * @throws ConfigurationException when projectFile is <code>null</code>,
 	 * a directory or not readable.
 	 * @see DefaultConfiguration#DefaultConfiguration()
@@ -96,46 +99,72 @@ public class FileConfiguration extends DefaultConfiguration {
 		// set the project file
 		this.setProjectFile(projectFile);
 
-		// try again
-		if (this.shouldInitialize()) {
-			try {
-				this.initialize();
-			} catch (Exception ex) {
-				throw new ConfigurationException(ex);
-			}
+		// configure the ResourceLocator for plain files
+		ResourceLocator l = this.getResourceLocator();
+		l.setSkipAbsolutePath(false);
+		l.setSkipClasspath(true);
+		l.setSkipCurrentDirectory(false);
+		l.setSkipHomeDirectory(true);
+
+		// normalize the file location & add it to the file search path
+		File projectDirectory = this.getProjectDirectory();
+		if (projectDirectory != null) {
+			l.addFilesystemPath(projectDirectory);
+		}
+	}
+
+	/**
+	 * Creates a configuration that uses the provided file name
+	 * as the main project file, ignoring any other lookup strategies.
+	 * The file name is <b>not</b> checked for existence and must not
+	 * contain relative or absolute paths, i.e. only the file name.
+	 * 
+	 * This allows adding of custom lookup paths after Constructor invocation:
+	 * <pre>
+	 * 	conf = new FileConfiguration("myconfig-cayenne.xml");
+	 *  ResourceLocator l = conf.getResourceLocator();
+	 *  l.addFilesystemPath(new File("a/relative/path"));
+	 *  l.addFilesystemPath(new File("/an/absolute/search/path"));
+	 *  Configuration.initializeSharedConfiguration(conf);
+	 * </pre>
+	 * The added file paths must exist.
+	 * 
+	 * @throws ConfigurationException when projectFile is <code>null</code>.
+	 * @see DefaultConfiguration#DefaultConfiguration()
+	 */
+	public FileConfiguration(String projectFileName) {
+		this();
+		logObj.debug("using project file name: " + projectFileName);
+
+		if (projectFileName == null) {
+			throw new ConfigurationException("cannot use null as project file name.");
+		}
+
+		// set the project file
+		this.projectFile = new File(projectFileName);
+		this.setDomainConfigurationName(this.projectFile.getName());
+
+		// configure the ResourceLocator for plain files
+		ResourceLocator l = this.getResourceLocator();
+		l.setSkipAbsolutePath(false);
+		l.setSkipClasspath(true);
+		l.setSkipCurrentDirectory(false);
+		l.setSkipHomeDirectory(true);
+
+		// normalize the file location & add it to the file search path
+		File projectDirectory = this.getProjectDirectory();
+		if (projectDirectory != null) {
+			l.addFilesystemPath(projectDirectory);
 		}
 	}
 
 	/**
 	 * Only returns <code>true</code> when {@link #getProjectFile} does not
-	 * return <code>null</code>. If so, also creates a {@link ResourceLocator}
-	 * configured for files in the file system.
+	 * return <code>null</code>.
 	 */
-	protected boolean shouldInitialize() {
+	public boolean canInitialize() {
 		// I can only initialize myself when I have a valid file
-		if (this.getProjectFile() != null) {
-			// create a new ResourceLocator suitable for plain files
-			ResourceLocator l = new ResourceLocator();
-			l.setSkipAbsolutePath(false);
-			l.setSkipClasspath(true);
-			l.setSkipCurrentDirectory(false);
-			l.setSkipHomeDirectory(true);
-
-			// normalize the file location & add it to the file search path
-			File projectDirectory = this.getProjectDirectory();
-			if (projectDirectory != null) {
-				l.addFilesystemPath(projectDirectory);
-			}
-	
-			// set the locator
-			this.setResourceLocator(l);
-
-			// go!
-			return true;
-		}
-		else {
-			return false;
-		}
+		return (this.getProjectFile() != null);
 	}
 
 	/**

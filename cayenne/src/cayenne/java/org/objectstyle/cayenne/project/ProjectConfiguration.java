@@ -70,20 +70,23 @@ import org.objectstyle.cayenne.conf.FileConfiguration;
 public class ProjectConfiguration extends FileConfiguration {
 
 	/**
+	 * Override parent implementation to ignore loading failures.
 	 * @see FileConfiguration#FileConfiguration(File)
 	 */
     public ProjectConfiguration(File projectFile) {
     	super(projectFile);
+
+		// ignore loading failures
+		this.setIgnoringLoadFailures(true);
 	}
 
 	/**
-	 * Override parent implementation to ignore loading failures and
-	 * prevent loading of nonexisting files.
-	 * @see FileConfiguration#shouldInitialize()
+	 * Override parent implementation to prevent loading of
+	 * nonexisting files.
+	 * @see FileConfiguration#canInitialize()
 	 */
-	public boolean shouldInitialize() {
-		this.setIgnoringLoadFailures(true);
-		return (super.shouldInitialize() && this.getProjectFile().isFile());
+	public boolean canInitialize() {
+		return (super.canInitialize() && this.getProjectFile().isFile());
 	}
 
 	/**
