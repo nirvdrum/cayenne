@@ -10,10 +10,10 @@
         <!-- Contributors section -->
         <section name="Downloads">
             <ul>
-                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=193736">Latest 
+                <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=205389">Latest 
                 Stable Release</a>
                 </li>
-                 <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=183082">Latest 
+                 <li><a href="http://sourceforge.net/project/showfiles.php?group_id=48132&amp;release_id=198045">Latest 
                 Cayenne Examples</a><br/><br/>
                 </li>
                 
@@ -21,7 +21,7 @@
                 <li><a href="http://objectstyle.org/downloads/cayenne/nightly/?M=D">Nightly Builds</a></li>
             </ul>
    
-            <p>All Cayenne distributions contain precompiled JAR files, full documentation and source code. 
+            <p>All Cayenne distribution contains precompiled JAR files, full documentation and source code. 
             Nightly builds undergo automated testing, but may contain incomplete features and unstable
             code. Use them at your own risk. Note that usually only about 7 latest nightly builds 
             are available, older ones are automatically deleted from the archive.
@@ -29,7 +29,7 @@
             
             <panel name="Cayenne Examples Note:">
             Cayenne Examples documentation is bundled with Cayenne and is available on the website.
-            But examples code should be downloaded separately, following the link above.
+            Examples code is downloadable separately, following the link above.
             </panel>
         </section>
     </body>
