@@ -894,21 +894,64 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
      * @throws ValidationException
      */
     public synchronized void validateUncommittedObjects() throws ValidationException {
+        
+        // we must iterate over a copy of object list,
+        // as calling validateFor* on DataObjects can have a side effect
+        // of modifying this ObjectStore, and thus resulting in
+        // ConcurrentModificationExceptions in the Iterator
+
+        Collection deleted = null;
+        Collection inserted = null;
+        Collection updated = null;
+
+        Iterator allIt = getObjectIterator();
+        while (allIt.hasNext()) {
+            DataObject dataObject = (DataObject) allIt.next();
+            switch (dataObject.getPersistenceState()) {
+                case PersistenceState.NEW:
+                    if (inserted == null) {
+                        inserted = new ArrayList();
+                    }
+                    inserted.add(dataObject);
+                    break;
+                case PersistenceState.MODIFIED:
+                    if (updated == null) {
+                        updated = new ArrayList();
+                    }
+                    updated.add(dataObject);
+                    break;
+                case PersistenceState.DELETED:
+                    if (deleted == null) {
+                        deleted = new ArrayList();
+                    }
+                    deleted.add(dataObject);
+                    break;
+            }
+        }
+        
         ValidationResult validationResult = new ValidationResult();
 
-        Iterator it = getObjectIterator();
-        while (it.hasNext()) {
-            DataObject dataObject = (DataObject) it.next();
-            switch (dataObject.getPersistenceState()) {
-                case PersistenceState.NEW :
-                    dataObject.validateForInsert(validationResult);
-                    break;
-                case PersistenceState.MODIFIED :
-                    dataObject.validateForUpdate(validationResult);
-                    break;
-                case PersistenceState.DELETED :
-                    dataObject.validateForDelete(validationResult);
-                    break;
+        if(deleted != null) {
+            Iterator it = deleted.iterator();
+            while(it.hasNext()) {
+                DataObject dataObject = (DataObject) it.next();
+                dataObject.validateForDelete(validationResult);
+            }
+        }
+        
+        if(inserted != null) {
+            Iterator it = inserted.iterator();
+            while(it.hasNext()) {
+                DataObject dataObject = (DataObject) it.next();
+                dataObject.validateForInsert(validationResult);
+            }
+        }
+        
+        if(updated != null) {
+            Iterator it = updated.iterator();
+            while(it.hasNext()) {
+                DataObject dataObject = (DataObject) it.next();
+                dataObject.validateForUpdate(validationResult);
             }
         }
 
@@ -916,10 +959,12 @@ public class ObjectStore implements Serializable, SnapshotEventListener {
             throw new ValidationException(validationResult);
         }
     }
+    
+    
 
     /**
-     * Initializes object with data from cache or from the database, if this
-     * object is not fully resolved.
+     * Initializes object with data from cache or from the database, if this object is not
+     * fully resolved.
      * 
      * @since 1.1
      */

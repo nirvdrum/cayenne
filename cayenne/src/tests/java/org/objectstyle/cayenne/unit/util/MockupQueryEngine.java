@@ -72,6 +72,9 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.query.Query;
 
 /**
+ * A query engine used for unit testing. Returns canned results instead of doing the
+ * actual query.
+ * 
  * @author Andrei Adamchik
  */
 public class MockupQueryEngine implements QueryEngine {
@@ -80,7 +83,7 @@ public class MockupQueryEngine implements QueryEngine {
     protected Map results = new HashMap();
     protected EntityResolver entityResolver;
     protected int runCount;
-    
+
     public void reset() {
         runCount = 0;
         results.clear();

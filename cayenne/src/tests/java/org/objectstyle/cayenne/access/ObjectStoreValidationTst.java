@@ -57,48 +57,98 @@ package org.objectstyle.cayenne.access;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.cayenne.CayenneDataObject;
+import org.objectstyle.cayenne.DataObject;
 import org.objectstyle.cayenne.ObjectId;
 import org.objectstyle.cayenne.PersistenceState;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
+import org.objectstyle.cayenne.unit.util.MockupDataDomain;
+import org.objectstyle.cayenne.unit.util.MockupQueryEngine;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
  * @author Andrei Adamchik
  */
 public class ObjectStoreValidationTst extends CayenneTestCase {
+
     private static int id = 1;
 
     public void testValidateUncommittedObjects() throws Exception {
-        TestDataObject deleted = createObject(PersistenceState.DELETED);
-        TestDataObject inserted = createObject(PersistenceState.NEW);
-        TestDataObject updated = createObject(PersistenceState.MODIFIED);
-        
+        MockupValidatingObject deleted = createObject(PersistenceState.DELETED);
+        MockupValidatingObject inserted = createObject(PersistenceState.NEW);
+        MockupValidatingObject updated = createObject(PersistenceState.MODIFIED);
+
         ObjectStore store = new ObjectStore(new DataRowStore("test"));
         store.addObject(deleted);
         store.addObject(inserted);
         store.addObject(updated);
-        
+
         store.validateUncommittedObjects();
-        
+
         // validateForSave should not be called on deleted
         assertFalse(deleted.validatedForSave);
         assertTrue(deleted.validatedForDelete);
-        
+
         assertTrue(inserted.validatedForSave);
         assertTrue(inserted.validatedForInsert);
-        
+
         assertTrue(updated.validatedForSave);
         assertTrue(updated.validatedForUpdate);
     }
-    
-    private TestDataObject createObject(int state) {
-        TestDataObject deleted = new TestDataObject();
-        deleted.setPersistenceState(state);
-        deleted.setObjectId(new ObjectId(Artist.class, "ARTIST_NAME", id++));
-        return deleted;
+
+    public void testValidateUncommittedObjectsConcurrency() throws Exception {
+        ObjectStore store = new ObjectStore(new DataRowStore("test"));
+        DataObject updated1 = createActiveValidatingObject(
+                store,
+                PersistenceState.MODIFIED);
+        DataObject updated2 = createActiveValidatingObject(
+                store,
+                PersistenceState.MODIFIED);
+        DataObject updated3 = createActiveValidatingObject(
+                store,
+                PersistenceState.MODIFIED);
+
+        store.addObject(updated1);
+        store.addObject(updated2);
+        store.addObject(updated3);
+        store.validateUncommittedObjects();
     }
 
-    class TestDataObject extends CayenneDataObject {
+    private MockupValidatingObject createObject(int state) {
+        MockupValidatingObject object = new MockupValidatingObject();
+        object.setPersistenceState(state);
+        object.setObjectId(new ObjectId(Artist.class, "ARTIST_NAME", id++));
+        return object;
+    }
+
+    private MockupActiveValidatingObject createActiveValidatingObject(
+            ObjectStore objectStore,
+            int state) {
+        MockupActiveValidatingObject object = new MockupActiveValidatingObject();
+        object.setPersistenceState(state);
+        object.setDataContext(createMockupDataContext(objectStore));
+        object.setObjectId(new ObjectId(Artist.class, "ARTIST_NAME", id++));
+        return object;
+    }
+
+    private DataContext createMockupDataContext(ObjectStore objectStore) {
+        MockupQueryEngine qe = new MockupQueryEngine();
+        qe.setEntityResolver(getDomain().getEntityResolver());
+        MockupDataDomain dd = new MockupDataDomain(qe);
+        return new DataContext(dd, objectStore);
+    }
+
+    class MockupActiveValidatingObject extends CayenneDataObject {
+
+        public void validateForSave(ValidationResult validationResult) {
+            // create a new object on validation... this will end up in the ObjectStore
+            // so lets see how the ObjectStore can handle this operation during
+            // validation....
+            getDataContext().createAndRegisterNewObject(Artist.class);
+        }
+    }
+
+    class MockupValidatingObject extends CayenneDataObject {
+
         boolean validatedForSave;
         boolean validatedForDelete;
         boolean validatedForInsert;

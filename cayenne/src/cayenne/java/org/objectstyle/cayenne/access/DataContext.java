@@ -281,16 +281,16 @@ public class DataContext implements QueryEngine, Serializable {
      * 
      * @since 1.1
      * @param parent parent QueryEngine used to communicate with the data source.
-     * @param snapshotCache DataRowStore used by DataContext's ObjectStore.
+     * @param objectStore ObjectStore used by DataContext.
      */
-    public DataContext(QueryEngine parent, DataRowStore snapshotCache) {
+    public DataContext(QueryEngine parent, ObjectStore objectStore) {
         setParent(parent);
 
-        this.objectStore = new ObjectStore(snapshotCache);
+        this.objectStore = objectStore;
         this.setTransactionEventsEnabled(transactionEventsEnabledDefault);
-        this.usingSharedSnaphsotCache =
-            getParentDataDomain() != null
-                && snapshotCache == getParentDataDomain().getSharedSnapshotCache();
+        this.usingSharedSnaphsotCache = getParentDataDomain() != null
+                && objectStore.getDataRowCache() == getParentDataDomain()
+                        .getSharedSnapshotCache();
     }
 
     /**

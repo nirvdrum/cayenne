@@ -27,8 +27,8 @@ public class DataContextSharedCacheEmpiricTst extends CayenneTestCase {
 
         DataRowStore cache = new DataRowStore("cacheTest");
 
-        c1 = new DataContext(getDomain(), cache);
-        c2 = new DataContext(getDomain(), cache);
+        c1 = new DataContext(getDomain(), new ObjectStore(cache));
+        c2 = new DataContext(getDomain(), new ObjectStore(cache));
 
         // prepare a single artist record
         SQLTemplate insert = new SQLTemplate(

@@ -467,7 +467,7 @@ public class DataDomain implements QueryEngine {
                 ? getSharedSnapshotCache()
                 : new DataRowStore(name, properties);
 
-        DataContext context = new DataContext(this, snapshotCache);
+        DataContext context = new DataContext(this, new ObjectStore(snapshotCache));
         context.setValidatingObjectsOnCommit(isValidatingObjectsOnCommit());
         return context;
     }
