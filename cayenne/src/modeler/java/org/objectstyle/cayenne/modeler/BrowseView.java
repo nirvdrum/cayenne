@@ -522,10 +522,8 @@ public class BrowseView
         if (node == null) {
             return;
         }
-        currentNode = node;
-        TreePath treePath = new TreePath(currentNode.getPath());
-        browseTree.scrollPathToVisible(treePath);
-        browseTree.setSelectionPath(treePath);
+
+		this.showNode(node);
     }
 
     protected void updateNode(Object[] path) {
