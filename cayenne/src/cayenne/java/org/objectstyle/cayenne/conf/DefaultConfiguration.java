@@ -107,8 +107,10 @@ public class DefaultConfiguration extends Configuration {
 	 */
 	public DefaultConfiguration(File projectFile) {
 		this();
-		this.projectFile = projectFile;
-		this.locator.addFilesystemPath(this.projectDirectory().getPath());
+		if (projectFile != null) {
+			this.projectFile = projectFile;
+			this.getResourceLocator().addFilesystemPath(this.projectDirectory().getPath());
+		}
 	}
 
 	public ResourceLocator getResourceLocator() {
