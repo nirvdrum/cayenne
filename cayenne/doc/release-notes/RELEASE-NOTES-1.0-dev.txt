@@ -6,6 +6,12 @@ For the latest information go to the project web site at
 http://objectstyle.org/cayenne/
 
 
-
 Changes in this release:
+
+1. Added the ability to "shutdown" Cayenne, closing all database connections. This only
+works if internal Cayenne connection pool is used.
+
+2. Changed arbitrary queue size in connection pool to unlimited.
+
+
 

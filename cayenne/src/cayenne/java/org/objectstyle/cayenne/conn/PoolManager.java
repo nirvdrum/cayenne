@@ -83,14 +83,6 @@ import org.objectstyle.cayenne.util.RequestQueue;
  * @author Andrei Adamchik
  */
 public class PoolManager implements DataSource, ConnectionEventListener {
-
-    /** 
-     * Defines a maximum number of threads that could wait in the
-     * connection queue at any given moment. In the future this 
-     * parameter should be made configurable.
-     */
-    public static final int MAX_QUEUE_SIZE = 25;
-
     /** 
      * Defines a maximum time in milliseconds that a connection
      * request could wait in the connection queue. After this period
@@ -220,7 +212,7 @@ public class PoolManager implements DataSource, ConnectionEventListener {
         this.poolDataSource = poolDataSource;
 
         // init pool
-        threadQueue = new RequestQueue(MAX_QUEUE_SIZE, MAX_QUEUE_WAIT);
+        threadQueue = new RequestQueue(-1, MAX_QUEUE_WAIT);
         usedPool = Collections.synchronizedList(new ArrayList(maxConnections));
         unusedPool =
             Collections.synchronizedList(new ArrayList(maxConnections));
