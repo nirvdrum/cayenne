@@ -67,3 +67,7 @@ since it breaks when relationships are modified.
 
 20. Added "readNestedProperty" to CayenneDataObject to facilitate
 advanced key-value coding access.
+
+21. Renamed DB_NAME expresison to DB_PATH, since there are cases where
+it is needed to be a path as opposed to a single column.
+

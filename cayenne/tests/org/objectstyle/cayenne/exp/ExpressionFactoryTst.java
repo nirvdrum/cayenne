@@ -126,7 +126,7 @@ public class ExpressionFactoryTst extends CayenneTestCase {
         
         assertTrue(ExpressionFactory.expressionOfType(Expression.RAW_SQL) instanceof UnaryExpression);
         assertTrue(ExpressionFactory.expressionOfType(Expression.OBJ_PATH) instanceof UnaryExpression);
-        assertTrue(ExpressionFactory.expressionOfType(Expression.DB_NAME) instanceof UnaryExpression);
+        assertTrue(ExpressionFactory.expressionOfType(Expression.DB_PATH) instanceof UnaryExpression);
         assertTrue(ExpressionFactory.expressionOfType(Expression.LIST) instanceof UnaryExpression);
         
         assertTrue(ExpressionFactory.expressionOfType(Expression.SUBQUERY) instanceof UnaryExpression);

@@ -101,27 +101,56 @@ public abstract class Expression implements Serializable {
     public static final int RAW_SQL = 25;
     
     
-    /** Expression describes a path relative to an ObjEntity.
-    * OBJ_PATH expression is resolved relative to some root ObjEntity. Path expression components
-    * are separated by "." (dot). Path can point to either one of these:
-    * <ul>
-    * <li> <i>An attribute of root ObjEntity.</i>
-    * For entity Gallery OBJ_PATH expression "galleryName" will point to ObjAttribute "galleryName" 
-    * <li> <i>Another ObjEntity related to root ObjEntity via a chain of relationships.</i>
-    * For entity Gallery OBJ_PATH expression "paintingArray.toArtist" will point to ObjEntity "Artist" 
-    * <li><i>ObjAttribute of another ObjEntity related to root ObjEntity via a chain of relationships.</i>
-    * For entity Gallery OBJ_PATH expression "paintingArray.toArtist.artistName" will point to ObjAttribute "artistName" 
-    * </ul>
-    */ 
+    /** 
+     * Expression describes a path relative to an ObjEntity.
+     * OBJ_PATH expression is resolved relative to some root ObjEntity. Path expression components
+     * are separated by "." (dot). Path can point to either one of these:
+     * <ul>
+     *    <li><i>An attribute of root ObjEntity.</i>
+     *    For entity Gallery OBJ_PATH expression "galleryName" will point to ObjAttribute "galleryName" 
+     *    <li><i>Another ObjEntity related to root ObjEntity via a chain of relationships.</i>
+     *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist" will point to ObjEntity "Artist" 
+     *    <li><i>ObjAttribute of another ObjEntity related to root ObjEntity via a chain of relationships.</i>
+     *    For entity Gallery OBJ_PATH expression "paintingArray.toArtist.artistName" will point to ObjAttribute "artistName" 
+     * </ul>
+     */ 
     public static final int OBJ_PATH = 26;
     
+    
+    /** 
+     * Expression describes a path relative to a DbEntity.
+     * DB_PATH expression is resolved relative to some root DbEntity. 
+     * Path expression components are separated by "." (dot). Path can 
+     * point to either one of these:
+     * <ul>
+     *    <li><i>An attribute of root DbEntity.</i>
+     *    For entity GALLERY, DB_PATH expression "GALLERY_NAME" will point 
+     *    to a DbAttribute "GALLERY_NAME".
+     * 	  </li>
+     * 
+     *    <li><i>Another DbEntity related to root DbEntity via a chain of relationships.</i>
+     *    For entity GALLERY DB_PATH expression "paintingArray.toArtist" will point to 
+     *    DbEntity "ARTIST".
+     *    </li>
+     * 
+     *    <li><i>DbAttribute of another ObjEntity related to root DbEntity via a chain 
+     *    of relationships.</i>
+     *    For entity GALLERY DB_PATH expression "paintingArray.toArtist.ARTIST_NAME" will point 
+     *    to DbAttribute "ARTIST_NAME".
+     *    </li>
+     * </ul>
+     */ 
+    public static final int DB_PATH = 27;
     
     /** 
      * Describes a table column name.
      * DB_NAME expression is resolved relative to a root 
      * DbEntity. 
+     * 
+     * @deprecated use DB_PATH instead
      */ 
-    public static final int DB_NAME = 27;
+    public static final int DB_NAME = DB_PATH;
+    
     
     
     /** Interpreted as a comma-separated list of literals. */ 

@@ -87,7 +87,7 @@ public final class QueryHelper {
 		while (it.hasNext()) {
 			String attr = (String) it.next();
 			Object value = map.get(attr);
-			Expression dbPathExp = ExpressionFactory.unaryExp(Expression.DB_NAME, attr);
+			Expression dbPathExp = ExpressionFactory.unaryExp(Expression.DB_PATH, attr);
 			list.add(ExpressionFactory.binaryExp(Expression.EQUAL_TO, dbPathExp, value));
 		}
 		return ExpressionFactory.joinExp(Expression.AND, list);
@@ -306,7 +306,7 @@ public final class QueryHelper {
 		 * from target to source.
 		 */
 		public String reverseDbPath(ObjEntity e, String relPath) {
-			Expression exp = ExpressionFactory.unaryExp(Expression.DB_NAME, relPath);
+			Expression exp = ExpressionFactory.unaryExp(Expression.DB_PATH, relPath);
 			Iterator it = e.resolvePathComponents(exp);
 			StringBuffer buf = new StringBuffer();
 			boolean hasRels = false;
@@ -358,7 +358,7 @@ public final class QueryHelper {
 				if (parentPeer.getType() == Expression.OBJ_PATH) {
 					operand = prependObjPath + Entity.PATH_SEPARATOR + operand;
 				}
-				else if(parentPeer.getType() == Expression.DB_NAME) {
+				else if(parentPeer.getType() == Expression.DB_PATH) {
 					operand = prependDbPath + Entity.PATH_SEPARATOR + operand;
 				}
 

@@ -241,7 +241,7 @@ public class QualifierTranslator
 			appendRawSql(leaf);
 		} else if (parentNode.getType() == Expression.OBJ_PATH) {
 			appendObjPath(qualBuf, parentNode);
-		} else if (parentNode.getType() == Expression.DB_NAME) {
+		} else if (parentNode.getType() == Expression.DB_PATH) {
 			appendDbPath(qualBuf, parentNode);
 		} else if (parentNode.getType() == Expression.LIST) {
 			appendList(parentNode, paramsDbType(parentNode));
@@ -261,7 +261,7 @@ public class QualifierTranslator
 		if (node.getType() == Expression.OBJ_PATH)
 			return false;
 
-		if (node.getType() == Expression.DB_NAME)
+		if (node.getType() == Expression.DB_PATH)
 			return false;
 
 		return true;

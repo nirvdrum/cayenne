@@ -96,7 +96,7 @@ public class ExpressionFactory {
                 Expression.ANY,
                 Expression.RAW_SQL,
                 Expression.OBJ_PATH,
-                Expression.DB_NAME,
+                Expression.DB_PATH,
                 Expression.LIST,
                 Expression.SUBQUERY,
                 Expression.COUNT,
@@ -156,7 +156,7 @@ public class ExpressionFactory {
         typeLookup[Expression.ANY] = UnaryExpression.class;
         typeLookup[Expression.RAW_SQL] = UnaryExpression.class;
         typeLookup[Expression.OBJ_PATH] = UnaryExpression.class;
-        typeLookup[Expression.DB_NAME] = UnaryExpression.class;
+        typeLookup[Expression.DB_PATH] = UnaryExpression.class;
         typeLookup[Expression.LIST] = UnaryExpression.class;
         typeLookup[Expression.SUBQUERY] = UnaryExpression.class;
         typeLookup[Expression.SUM] = UnaryExpression.class;
@@ -255,7 +255,7 @@ public class ExpressionFactory {
         int type,
         String pathSpec,
         Object value) {
-        return binaryExp(type, unaryExp(Expression.DB_NAME, pathSpec), value);
+        return binaryExp(type, unaryExp(Expression.DB_PATH, pathSpec), value);
     }
 
     /** 

@@ -174,7 +174,7 @@ public abstract class Entity {
 	public Iterator resolvePathComponents(Expression pathExp)
 		throws ExpressionException {
 		if (pathExp.getType() != Expression.OBJ_PATH
-			&& pathExp.getType() != Expression.DB_NAME) {
+			&& pathExp.getType() != Expression.DB_PATH) {
 			StringBuffer msg = new StringBuffer();
 			msg
 				.append("Invalid expression type: '")
@@ -182,7 +182,7 @@ public abstract class Entity {
 				.append("' ('")
 				.append(Expression.OBJ_PATH)
 				.append(" or ")
-				.append(Expression.DB_NAME)
+				.append(Expression.DB_PATH)
 				.append("' is expected).");
 
 			throw new ExpressionException(msg.toString());

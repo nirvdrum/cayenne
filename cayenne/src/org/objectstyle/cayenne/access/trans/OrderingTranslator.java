@@ -97,7 +97,7 @@ public class OrderingTranslator extends QueryAssemblerHelper {
 			if (exp.getType() == Expression.OBJ_PATH) {
 				appendObjPath(buf, exp);
 			}
-			else if(exp.getType() == Expression.DB_NAME) {
+			else if(exp.getType() == Expression.DB_PATH) {
 				appendDbPath(buf, exp);
 			}
 			else {
