@@ -144,7 +144,7 @@ public class DataDomain implements QueryEngine {
 			DataNode node = (DataNode) nodesByEntityName.get(text);
 			if (node == node_to_remove)
 				nodesByEntityName.remove(text);
-		} // End while()
+		}
 	}
 
 	/** Returns a list of registered DataMap objects. */
@@ -233,8 +233,9 @@ public class DataDomain implements QueryEngine {
 		while (it.hasNext()) {
 			DataMap map = (DataMap) it.next();
 			ObjEntity anEntity = map.getObjEntity(name);
-			if (anEntity != null)
+			if (anEntity != null) {
 				return anEntity;
+			}
 		}
 		return null;
 	}

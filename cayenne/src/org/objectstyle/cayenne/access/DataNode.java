@@ -189,8 +189,9 @@ public class DataNode implements QueryEngine {
 		int mapLen = maps.length;
 		for (int i = 0; i < mapLen; i++) {
 			ObjEntity anEntity = maps[i].getObjEntity(objEntityName);
-			if (anEntity != null)
+			if (anEntity != null) {
 				return anEntity;
+			}
 		}
 		return null;
 	}

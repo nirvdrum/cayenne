@@ -76,12 +76,11 @@ import org.xml.sax.InputSource;
  * Ant task to perform class generation from data map. 
  * This class is an Ant adapter to DefaultClassGenerator class.
  *
- *  @author Andrei Adamchik
+ * @author Andrei Adamchik
  */
 public class CayenneGenerator extends Task {
 
 	protected File map;
-	protected File project;
 	protected File[] mapDeps;
 	protected DefaultClassGenerator generator;
 	protected DisconnectedConfiguration config;
@@ -113,27 +112,10 @@ public class CayenneGenerator extends Task {
 		validateAttributes();
 
 		try {
-			if (project != null) {
-				processProject();
-			} else {
-				processMap();
-			}
+			processMap();
 		} catch (Exception ex) {
 			super.log("Error generating classes.");
 			throw new BuildException("Error generating classes.", ex);
-		}
-	}
-
-	protected void processProject() throws Exception {
-		DataMap[] dataMaps = loadDataMaps();
-
-		for (int i = 0; i < dataMaps.length; i++) {
-			File mapFile =
-				new File(config.projectDir(), dataMaps[i].getLocation());
-			generator.setTimestamp(mapFile.lastModified());
-			generator.setObjEntities(dataMaps[i].getObjEntitiesAsList());
-			generator.validateAttributes();
-			generator.execute();
 		}
 	}
 
@@ -143,23 +125,6 @@ public class CayenneGenerator extends Task {
 		generator.setObjEntities(dataMap.getObjEntitiesAsList());
 		generator.validateAttributes();
 		generator.execute();
-	}
-
-	/** Loads and returns DataMap based on <code>map</code> attribute. */
-	protected DataMap[] loadDataMaps() throws Exception {
-		// Configuration.setLogLevel(Level.SEVERE);
-		config = new DisconnectedConfiguration(project);
-		config.init();
-
-		ArrayList allMaps = new ArrayList();
-		Iterator domains = config.getDomainList().iterator();
-		while (domains.hasNext()) {
-			DataDomain dom = (DataDomain) domains.next();
-			allMaps.addAll(dom.getMapList());
-		}
-
-		DataMap[] maps = new DataMap[allMaps.size()];
-		return (DataMap[]) allMaps.toArray(maps);
 	}
 
 	/** Loads and returns DataMap based on <code>map</code> attribute. */
@@ -202,14 +167,6 @@ public class CayenneGenerator extends Task {
 	 */
 	public void setMap(File map) {
 		this.map = map;
-	}
-
-	/**
-	 * Sets the project.
-	 * @param project The project to set
-	 */
-	public void setProject(File project) {
-		this.project = project;
 	}
 
 	/**

@@ -32,27 +32,25 @@ pair.
 and other cross-map communications, both in the core and in the 
 modeler.
 
-10. Added "project" attribute to class generator
-
-11. "Query" is now an interface to allow more flexibility
+10. "Query" is now an interface to allow more flexibility
 for subclassing of queries. Its default implementation is 
 AbstractQuery.
 
-12. Removed GuiFacade from map package, instead created MapUtil
+11. Removed GuiFacade from map package, instead created MapUtil
 in gui.util.
 
-13. DataMap XML format changes for derived entities
+12. DataMap XML format changes for derived entities
 and attributes (see data-map.dtd). Note: older data maps
 are 100% compatible with the new format
 
-14. Implemented "failsafe" saving process in CayenneModeler.
+13. Implemented "failsafe" saving process in CayenneModeler.
 Now all files are first saved to the temporary file, and only
 on successful save, temp files will replace the master files.
 
-15. Fixed CayenneException and CayenneRuntimeException to report
+14. Fixed CayenneException and CayenneRuntimeException to report
 exception cause properly.
 
-16. Ordering now supports DB_NAME expressions. As a result,
+15. Ordering now supports DB_NAME expressions. As a result,
 setSortPathSpec and getSortPathSpec are deprecated.
 
 
