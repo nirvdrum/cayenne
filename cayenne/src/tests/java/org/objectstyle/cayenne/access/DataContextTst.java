@@ -58,6 +58,7 @@ package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -313,7 +314,7 @@ public class DataContextTst extends DataContextTestBase {
 
     public void testPerformQuery() throws Exception {
         SelectQuery query = new SelectQuery("Artist");
-        context.performQuery(query, opObserver);
+        context.performQueries(Collections.singletonList(query), opObserver);
         List objects = opObserver.objectsForQuery(query);
 
         assertNotNull(objects);

@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,18 +103,16 @@ public class DataContextExtrasTst extends CayenneTestCase {
         assertTrue(ctxt.newObjects().contains(a1));
     }
 
-
-
     public void testIdObjectFromDataRow() throws Exception {
         Map row = new HashMap();
         row.put("ARTIST_ID", new Integer(1));
         DataObject obj = ctxt.objectFromDataRow("Artist", row);
-		assertNotNull(obj);
+        assertNotNull(obj);
 
         // TODO
-         assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
-         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-         assertNull(obj.getCommittedSnapshot());
+        assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
+        assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        assertNull(obj.getCommittedSnapshot());
     }
 
     public void testPartialObjectFromDataRow() throws Exception {
@@ -121,12 +120,12 @@ public class DataContextExtrasTst extends CayenneTestCase {
         row.put("ARTIST_ID", new Integer(1));
         row.put("ARTIST_NAME", "ArtistXYZ");
         DataObject obj = ctxt.objectFromDataRow("Artist", row);
-		assertNotNull(obj);
+        assertNotNull(obj);
 
         // TODO
-		 assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
-         assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
-         assertNull(obj.getCommittedSnapshot());
+        assertTrue(ctxt.getObjectStore().getObjects().contains(obj));
+        assertEquals(PersistenceState.HOLLOW, obj.getPersistenceState());
+        assertNull(obj.getCommittedSnapshot());
     }
 
     public void testFullObjectFromDataRow() throws Exception {
@@ -142,8 +141,7 @@ public class DataContextExtrasTst extends CayenneTestCase {
     }
 
     public void testCommitChangesError() throws Exception {
-        JdbcPkGenerator gen =
-            (JdbcPkGenerator) getNode().getAdapter().getPkGenerator();
+        JdbcPkGenerator gen = (JdbcPkGenerator) getNode().getAdapter().getPkGenerator();
         int cache = gen.getPkCacheSize();
 
         // make sure we insert enough objects to exhaust the cache
@@ -154,22 +152,24 @@ public class DataContextExtrasTst extends CayenneTestCase {
         }
 
         // this should cause PK generation exception in commit later
-        DataMap map = (DataMap)getNode().getDataMaps().iterator().next();
+        DataMap map = (DataMap) getNode().getDataMaps().iterator().next();
 
         gen.dropAutoPk(getNode(), new ArrayList(map.getDbEntities()));
 
         // disable logging for thrown exceptions
-		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
         try {
             ctxt.commitChanges(Level.DEBUG);
             fail("Exception expected but not thrown due to missing PK generation routine.");
-        } catch (CayenneRuntimeException ex) {
+        }
+        catch (CayenneRuntimeException ex) {
             // exception expected
-        } finally {
+        }
+        finally {
             observerLogger.setLevel(oldLevel);
-			gen.createAutoPk(getNode(), new ArrayList(map.getDbEntities()));
+            gen.createAutoPk(getNode(), new ArrayList(map.getDbEntities()));
         }
     }
 
@@ -182,30 +182,33 @@ public class DataContextExtrasTst extends CayenneTestCase {
             new SqlSelectQuery("Artist", "SELECT * FROM NON_EXISTENT_TABLE");
 
         // disable logging for thrown exceptions
-		Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
+        Logger observerLogger = Logger.getLogger(DefaultOperationObserver.class);
         Level oldLevel = observerLogger.getLevel();
         observerLogger.setLevel(Level.ERROR);
         try {
-            ctxt.performQuery(q, new DataContextExtended().getSelectObserver());
+            ctxt.performQueries(
+                Collections.singletonList(q),
+                new DataContextExtended().getSelectObserver());
             fail("Query was invalid and was supposed to fail.");
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             // exception expected
-        } finally {
+        }
+        finally {
             observerLogger.setLevel(oldLevel);
         }
     }
 
-	public void testEntityResolver() {
-		EntityResolver er=ctxt.getEntityResolver();
-		assertNotNull(er);
-	}
-	
+    public void testEntityResolver() {
+        EntityResolver er = ctxt.getEntityResolver();
+        assertNotNull(er);
+    }
+
     /** Helper class to get access to DataContext inner classes. */
     class DataContextExtended extends DataContext {
         public OperationObserver getSelectObserver() {
             return new ContextSelectObserver(this, Level.DEBUG);
         }
     }
-    
-    
+
 }

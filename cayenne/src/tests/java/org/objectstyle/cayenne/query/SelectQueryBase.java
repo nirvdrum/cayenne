@@ -55,6 +55,8 @@
  */ 
 package org.objectstyle.cayenne.query;
 
+import java.util.Collections;
+
 import org.objectstyle.cayenne.TestOperationObserver;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
@@ -73,7 +75,7 @@ public abstract class SelectQueryBase extends CayenneTestCase {
     
     protected void performQuery() throws Exception {
         // run query
-        getDomain().performQuery(getQuery(), opObserver);
+        getDomain().performQueries(Collections.singletonList(getQuery()), opObserver);
         
         // check query errors
         opObserver.assertAllExceptions();

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.log4j.Level;
@@ -88,7 +89,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("paintingArray");
 
         SelectObserver o = new SelectObserver();
-        context.performQuery(q, o);
+        context.performQueries(Collections.singletonList(q), o);
 
         assertEquals(2, o.getSelectCount());
     }
@@ -105,7 +106,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("artistExhibitArray.toExhibit");
 
         SelectObserver o = new SelectObserver();
-        context.performQuery(q, o);
+        context.performQueries(Collections.singletonList(q), o);
 
         assertEquals(4, o.getSelectCount());
     }
@@ -145,7 +146,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("artistExhibitArray.toExhibit");
         SelectObserver o = new SelectObserver();
         try {
-            context.performQuery(q, o);
+            context.performQueries(Collections.singletonList(q), o);
         }
         finally {
             paintingEntity.addRelationship(paintingToArtistRel);
@@ -321,7 +322,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
 
         ContextSelectObserver o = new ContextSelectObserver(context, Level.WARN);
         try {
-            context.performQuery(q, o);
+            context.performQueries(Collections.singletonList(q), o);
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -354,7 +355,7 @@ public class DataContextPrefetchTst extends DataContextTestBase {
         q.addPrefetch("toArtist");
         ContextSelectObserver o = new ContextSelectObserver(context, Level.WARN);
         try {
-            context.performQuery(q, o);
+            context.performQueries(Collections.singletonList(q), o);
         }
         catch (Exception e) {
             e.printStackTrace();

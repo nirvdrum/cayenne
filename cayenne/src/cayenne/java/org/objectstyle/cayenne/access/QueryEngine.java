@@ -80,10 +80,12 @@ public interface QueryEngine {
      */
     public void performQueries(List queries, OperationObserver resultConsumer);
 
-    /** Executes a single query. Will notify <code>resultConsumer</code>
+    /**
+     * Executes a single query. Will notify <code>resultConsumer</code>
      * about query progress and results.
      *
-     * @see org.objectstyle.cayenne.access.OperationObserver
+     * @deprecated Since 1.1 use performQueries(List queries, OperationObserver resultConsumer).
+     * This method is redundant and doesn't add value.
      */
     public void performQuery(Query query, OperationObserver resultConsumer);
 

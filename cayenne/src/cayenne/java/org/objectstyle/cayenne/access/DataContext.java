@@ -906,11 +906,14 @@ public class DataContext implements QueryEngine, Serializable {
 
     }
 
-    /** Delegates query execution to parent QueryEngine. */
-    public void performQuery(Query query, OperationObserver resultConsumer) {
-        List qWrapper = new ArrayList(1);
-        qWrapper.add(query);
-        this.performQueries(qWrapper, resultConsumer);
+    /** 
+     * Delegates query execution to parent QueryEngine.
+     *  
+     * @deprecated Since 1.1 use performQueries(List, OperationObserver).
+     * This method is redundant and doesn't add value.
+     */
+    public void performQuery(Query query, OperationObserver operationObserver) {
+        this.performQueries(Collections.singletonList(query), operationObserver);
     }
 
     /**

@@ -57,6 +57,7 @@
 package org.objectstyle.cayenne.access;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +93,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         ProcedureQuery q = new ProcedureQuery(UPDATE_STORED_PROCEDURE);
         q.addParam("paintingPrice", new Integer(3000));
         DefaultOperationObserver observer = new DefaultOperationObserver();
-        ctxt.performQuery(q, observer);
+        ctxt.performQueries(Collections.singletonList(q), observer);
 
         // check that price have doubled
         SelectQuery select = new SelectQuery(Artist.class);
@@ -147,7 +148,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         QueryResult result = new QueryResult();
 
-        ctxt.performQuery(q, result);
+        ctxt.performQueries(Collections.singletonList(q), result);
 
         List artists = result.getFirstRows(q);
 
@@ -180,7 +181,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
 
         QueryResult result = new QueryResult();
 
-        ctxt.performQuery(q, result);
+        ctxt.performQueries(Collections.singletonList(q), result);
 
         List artists = result.getFirstRows(q);
 
@@ -206,7 +207,7 @@ public class DataContextStoredProcTst extends CayenneTestCase {
         q.addParam("in_param", new Integer(20));
 
         QueryResult resultHolder = new QueryResult();
-        ctxt.performQuery(q, resultHolder);
+        ctxt.performQueries(Collections.singletonList(q), resultHolder);
 
         // check the results
         List rows = resultHolder.getFirstRows(q);

@@ -224,9 +224,15 @@ public class DataNode implements QueryEngine {
             : null;
     }
 
-    public void performQuery(Query query, OperationObserver opObserver) {
-        this.performQueries(Collections.singletonList(query), opObserver);
-    }
+	/** 
+	 * Calls "performQueries()" wrapping a query argument into a list.
+	 * 
+	 * @deprecated Since 1.1 use performQueries(List, OperationObserver).
+	 * This method is redundant and doesn't add value.
+	 */
+	public void performQuery(Query query, OperationObserver operationObserver) {
+	   this.performQueries(Collections.singletonList(query), operationObserver);
+	}
 
     /** Run multiple queries using one of the pooled connections. */
     public void performQueries(List queries, OperationObserver opObserver) {

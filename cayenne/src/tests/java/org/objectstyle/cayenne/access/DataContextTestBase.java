@@ -59,6 +59,7 @@ package org.objectstyle.cayenne.access;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -123,9 +124,7 @@ public class DataContextTestBase extends CayenneTestCase {
 
     protected Artist fetchArtist(String name, boolean prefetchPaintings) {
         SelectQuery q =
-            new SelectQuery(
-                Artist.class,
-                ExpressionFactory.matchExp("artistName", name));
+            new SelectQuery(Artist.class, ExpressionFactory.matchExp("artistName", name));
         if (prefetchPaintings) {
             q.addPrefetch("paintingArray");
         }
@@ -164,7 +163,8 @@ public class DataContextTestBase extends CayenneTestCase {
 
             stmt.close();
             conn.commit();
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }
@@ -184,9 +184,7 @@ public class DataContextTestBase extends CayenneTestCase {
             for (int i = 1; i <= artistCount; i++) {
                 stmt.setInt(1, i);
                 stmt.setString(2, artistName(i));
-                stmt.setDate(
-                    3,
-                    new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
+                stmt.setDate(3, new java.sql.Date(dateBase + 1000 * 60 * 60 * 24 * i));
                 stmt.executeUpdate();
             }
 
@@ -205,7 +203,8 @@ public class DataContextTestBase extends CayenneTestCase {
 
             stmt.close();
             conn.commit();
-        } finally {
+        }
+        finally {
             conn.close();
         }
     }
@@ -214,28 +213,28 @@ public class DataContextTestBase extends CayenneTestCase {
      * Helper method to update a single column in a database row.
      */
     protected void updateRow(ObjectId id, String dbAttribute, Object newValue) {
-    
+
         UpdateQuery updateQuery = new UpdateQuery();
         updateQuery.setRoot(id.getObjClass());
         updateQuery.addUpdAttribute(dbAttribute, newValue);
-    
+
         // set qualifier
         updateQuery.setQualifier(
-            ExpressionFactory.matchAllDbExp(
-                id.getIdSnapshot(),
-                Expression.EQUAL_TO));
-    
-        getNode().performQuery(updateQuery, new DefaultOperationObserver());
+            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+
+        getNode().performQueries(
+            Collections.singletonList(updateQuery),
+            new DefaultOperationObserver());
     }
 
     protected void deleteRow(ObjectId id) {
         DeleteQuery deleteQuery = new DeleteQuery();
         deleteQuery.setRoot(id.getObjClass());
         deleteQuery.setQualifier(
-            ExpressionFactory.matchAllDbExp(
-                id.getIdSnapshot(),
-                Expression.EQUAL_TO));
-        getNode().performQuery(deleteQuery, new DefaultOperationObserver());
+            ExpressionFactory.matchAllDbExp(id.getIdSnapshot(), Expression.EQUAL_TO));
+        getNode().performQueries(
+            Collections.singletonList(deleteQuery),
+            new DefaultOperationObserver());
     }
 
     /**
@@ -245,32 +244,33 @@ public class DataContextTestBase extends CayenneTestCase {
      * DataContext.
      */
     protected Painting insertPaintingInContext(String paintingName) {
-        Painting painting =
-            (Painting) context.createAndRegisterNewObject("Painting");
+        Painting painting = (Painting) context.createAndRegisterNewObject("Painting");
         painting.setPaintingTitle(paintingName);
         painting.setToArtist(fetchArtist("artist2", false));
-    
+
         context.commitChanges();
-    
+
         return painting;
     }
 
-    protected void insertPaintingBypassingContext(String paintingName, String artistName) {
-    
+    protected void insertPaintingBypassingContext(
+        String paintingName,
+        String artistName) {
+
         Artist artist = fetchArtist(artistName, false);
-    
+
         Map snapshot = new HashMap();
-        snapshot.put(
-            "ARTIST_ID",
-            artist.getObjectId().getValueForAttribute("ARTIST_ID"));
+        snapshot.put("ARTIST_ID", artist.getObjectId().getValueForAttribute("ARTIST_ID"));
         snapshot.put("PAINTING_TITLE", paintingName);
-    
+
         ObjectId oid = new ObjectId(Painting.class, "PAINTING_ID", 10);
         InsertQuery ins = new InsertQuery();
         ins.setRoot(Painting.class);
         ins.setObjectSnapshot(snapshot);
         ins.setObjectId(oid);
-    
-        getNode().performQuery(ins, new DefaultOperationObserver());
+
+        getNode().performQueries(
+            Collections.singletonList(ins),
+            new DefaultOperationObserver());
     }
 }

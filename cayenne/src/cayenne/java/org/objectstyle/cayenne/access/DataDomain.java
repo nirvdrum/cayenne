@@ -91,10 +91,8 @@ public class DataDomain implements QueryEngine {
 
     /** Stores mapping of data nodes to DataNode name keys. */
     protected Map nodes = Collections.synchronizedMap(new HashMap());
-    protected Map nodesByDbEntityName =
-        Collections.synchronizedMap(new HashMap());
-    protected Collection nodesRef =
-        Collections.unmodifiableCollection(nodes.values());
+    protected Map nodesByDbEntityName = Collections.synchronizedMap(new HashMap());
+    protected Collection nodesRef = Collections.unmodifiableCollection(nodes.values());
 
     /** Stores DataMaps by name. */
     protected Map maps = Collections.synchronizedMap(new HashMap());
@@ -103,10 +101,8 @@ public class DataDomain implements QueryEngine {
     /** Stores mapping of data nodes to ObjEntity names.
       * Its goal is to speed up lookups for data operation
       * switching. */
-    protected Map nodesByEntityName =
-        Collections.synchronizedMap(new HashMap());
-    protected Map nodesByProcedureName =
-        Collections.synchronizedMap(new HashMap());
+    protected Map nodesByEntityName = Collections.synchronizedMap(new HashMap());
+    protected Map nodesByProcedureName = Collections.synchronizedMap(new HashMap());
 
     protected EntityResolver entityResolver;
 
@@ -297,7 +293,8 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             this.reindexNodes();
             return (DataNode) nodesByEntityName.get(objEntityName);
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -363,7 +360,8 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             reindexNodes();
             return (DataNode) nodesByDbEntityName.get(dbEntityName);
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -384,7 +382,8 @@ public class DataDomain implements QueryEngine {
         if (node == null) {
             reindexNodes();
             return (DataNode) nodesByProcedureName.get(procedureName);
-        } else {
+        }
+        else {
             return node;
         }
     }
@@ -435,8 +434,7 @@ public class DataDomain implements QueryEngine {
             }
             // try StoredProcedure root
             else {
-                Procedure procedure =
-                    this.getEntityResolver().lookupProcedure(nextQuery);
+                Procedure procedure = this.getEntityResolver().lookupProcedure(nextQuery);
                 if (procedure != null) {
                     aNode = this.dataNodeForProcedure(procedure);
                 }
@@ -467,17 +465,14 @@ public class DataDomain implements QueryEngine {
         }
     }
 
-    /** Analyzes a query and sends it to appropriate DataNode */
-    public void performQuery(Query query, OperationObserver resultCons) {
-        DbEntity dbe = this.getEntityResolver().lookupDbEntity(query);
-        DataNode aNode = this.dataNodeForDbEntity(dbe);
-
-        if (aNode == null) {
-            throw new CayenneRuntimeException(
-                "No DataNode to handle entity '" + dbe.getName() + "'.");
-        }
-
-        aNode.performQuery(query, resultCons);
+    /** 
+     * Calls "performQueries()" wrapping a query argument into a list.
+     * 
+     * @deprecated Since 1.1 use performQueries(List, OperationObserver).
+     * This method is redundant and doesn't add value.
+     */
+    public void performQuery(Query query, OperationObserver operationObserver) {
+        this.performQueries(Collections.singletonList(query), operationObserver);
     }
 
     public EntityResolver getEntityResolver() {
@@ -510,11 +505,12 @@ public class DataDomain implements QueryEngine {
      */
     public void shutdown() {
         Collection dataNodes = getDataNodes();
-        for (Iterator i = dataNodes.iterator(); i.hasNext(); ) {
-            DataNode node = (DataNode)i.next();
+        for (Iterator i = dataNodes.iterator(); i.hasNext();) {
+            DataNode node = (DataNode) i.next();
             try {
                 node.shutdown();
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
             }
         }
     }
