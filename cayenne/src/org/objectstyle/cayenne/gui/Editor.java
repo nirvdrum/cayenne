@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.filechooser.*;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.commons.collections.ExtendedProperties;
+
 import org.objectstyle.cayenne.conf.*;
 import org.objectstyle.cayenne.access.*;
 import org.objectstyle.cayenne.map.*;
@@ -26,7 +28,17 @@ implements ActionListener
 , DomainDisplayListener, DataNodeDisplayListener, DataMapDisplayListener
 , ObjEntityDisplayListener, DbEntityDisplayListener
 {
-
+	/** Directory for preferences in User home. */
+	public static final String CAYENNE_PREF_DIR = "cayenne";
+	/** Name of the preferences file in the CAYENNE_PREF_DIR.
+	  * General standard for keys in the preferences:
+	  * Use class name (optionally with the package name) and 
+	  * the name of the field which uses this preference. */
+	public static final String CAYENNE_PREF = ".preferences";
+	/* Keys for the preference file. */
+	/** The directory of the cayenne project edited last. */
+	public static final String LAST_DIR = "Editor.lastProject";
+	
     EditorView view;
     Mediator mediator;
     /** The object last selected in BrowseView. */
@@ -56,6 +68,8 @@ implements ActionListener
     //Create a file chooser
     final JFileChooser fileChooser   = new JFileChooser();
     XmlFilter xmlFilter    			 = new XmlFilter();
+    
+    ExtendedProperties pref = new ExtendedProperties();
 
 	private static Editor frame;
 
@@ -63,6 +77,7 @@ implements ActionListener
         super("Cayenne Modeler");
 
         init();
+        loadPreferences();
 		disableMenu();
 
         createProjectMenu.addActionListener(this);
@@ -85,14 +100,83 @@ implements ActionListener
         generateMenu.addActionListener(this);
 
 	    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    	setSize(600, 550);
+    	setSize(650, 550);
+    	
+    	this.addWindowListener(new WindowAdapter() {
+    		public void windowClosing(WindowEvent e) {
+    			storePreferences();
+    		}
+    	});
     }
 
+	/** Singleton implementation of getting Editor window. */
 	public static Editor getFrame() {
 		if (null == frame) {
 			frame = new Editor();
 		}
 		return frame;
+	}
+
+	public ExtendedProperties getPreferences() { return pref; }
+
+	private void loadPreferences() {
+		String home_dir = System.getProperty("user.home");
+		if (null == home_dir) {
+			JOptionPane.showMessageDialog(this
+							, "User home directory is not specified. "
+							+ " Loading from current directory");
+			home_dir = "";
+		}
+		String pref_dir = home_dir + File.separator + Editor.CAYENNE_PREF_DIR;
+		System.out.println("Editor::loadPreferences(), pref dir path is " + pref_dir);
+		File pref_dir_file = new File(pref_dir);
+		try {
+			if (!pref_dir_file.exists()) {
+				if (false == pref_dir_file.mkdir()) {
+					JOptionPane.showMessageDialog(this
+							, "Error creating preferences directory. ");
+					return;
+				}
+			}
+			String pref_file_name = pref_dir + File.separator + Editor.CAYENNE_PREF;
+			File pref_file = new File(pref_file_name);
+			if (!pref_file.exists()) {
+				if (false == pref_file.createNewFile()) {
+					JOptionPane.showMessageDialog(this
+							, "Error creating preferences file. ");
+					return;
+				}
+			}
+			pref.load(new FileInputStream(pref_file));
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(this
+							, "Error loading preferences. Preferences ignored. ");
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	/** Store preferences (when the Editor window closes down). 
+	  * Preferences stored to User Home\cayenne\.preferences file. */
+	private void storePreferences() {
+		System.out.println("Storing preferences");
+		String home_dir = System.getProperty("user.home");
+		if (null == home_dir)
+			home_dir = "";
+		String pref_dir = home_dir + File.separator + Editor.CAYENNE_PREF_DIR 
+						+ File.separator + Editor.CAYENNE_PREF;
+		File pref_file = new File(pref_dir);
+		try {
+			if (!pref_file.exists()) {
+				System.out.println("Cannot save preferences - file " 
+									+ pref_dir + " does not exist");
+				return;
+			}
+			pref.save(new FileOutputStream(pref_file), "");
+		} catch (IOException e) {
+			System.out.println("Error saving preferences: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
     private void init() {
@@ -162,6 +246,11 @@ implements ActionListener
             importDb();
         } else if (src == generateMenu) {
             generateClasses();
+        } else if (src == exitMenu) {
+        	storePreferences();
+            setVisible(false);
+            dispose();
+            System.exit(0);
         }
     }
 
@@ -215,7 +304,7 @@ implements ActionListener
 		              					dsi.getDataSourceUrl(),
 		                   				dsi.getUserName(),
 		                   				dsi.getPassword());
-			}catch (SQLException e) {
+			} catch (SQLException e) {
 				System.out.println(e.getMessage());
 				SQLException ex = e.getNextException();
 				if (ex != null) {
@@ -226,8 +315,7 @@ implements ActionListener
 							, e.getMessage(), "Error Connecting to the Database"
 							, JOptionPane.ERROR_MESSAGE);
 				continue;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(this
 							, e.getMessage(), "Error loading driver"
@@ -294,19 +382,28 @@ implements ActionListener
 	}
 
     private void createProject() {
+       	String init_dir = (String)getPreferences().getProperty(LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
             fileChooser.setFileFilter(new ProjFileFilter());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             fileChooser.setDialogTitle("Choose new project directory");
-            int ret_code = fileChooser.showOpenDialog(this);
+            if (null != init_dir) {
+            	File init_dir_file = new File(init_dir);
+            	if (init_dir_file.exists())
+            		fileChooser.setCurrentDirectory(init_dir_file);
+            }
+            int ret_code = fileChooser.showSaveDialog(this);
             if ( ret_code != JFileChooser.APPROVE_OPTION)
                 return;
             file = fileChooser.getSelectedFile();
 			System.out.println("File path is " + file.getAbsolutePath());
             if (!file.exists())
             	file.createNewFile();
+            // Save dir path to the preferences
+            getPreferences().setProperty(LAST_DIR, file.getAbsolutePath());
+            // Create project file (cayenne.xml)
             File proj_file = new File(file.getAbsolutePath() 
             							+ File.separator 
             							+ "cayenne.xml");
@@ -325,9 +422,7 @@ implements ActionListener
 			pw.close();
 			fw.close();
             GuiConfiguration.initSharedConfig(proj_file);
-			Configuration.initSharedConfig("org.objectstyle.cayenne.gui.GuiConfiguration");
-            GuiConfiguration config;
-            config = GuiConfiguration.getGuiConfig();
+            GuiConfiguration config = GuiConfiguration.getGuiConfig();
             Mediator mediator = Mediator.getMediator(config);
             project(mediator);
         } catch (Exception e) {
@@ -338,21 +433,27 @@ implements ActionListener
 
     /** Open specified cayenne.xml file. */
     private void openProject() {
+       	String init_dir = (String)getPreferences().getProperty(LAST_DIR);
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
             fileChooser.setFileFilter(new ProjFileFilter());
             fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
-            fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            if (null != init_dir) {
+            	File init_dir_file = new File(init_dir);
+            	if (init_dir_file.exists())
+            		fileChooser.setCurrentDirectory(init_dir_file);
+            }
             int ret_code = fileChooser.showOpenDialog(this);
             if ( ret_code != JFileChooser.APPROVE_OPTION)
                 return;
             file = fileChooser.getSelectedFile();
-	
+            // Save dir path to the preferences
+			getPreferences().setProperty(LAST_DIR, file.getParent());
 			System.out.println("File path is " + file.getAbsolutePath());
 			GuiConfiguration.initSharedConfig(file);
-            GuiConfiguration config;
-            config = GuiConfiguration.getGuiConfig();
+            GuiConfiguration config = GuiConfiguration.getGuiConfig();
             Mediator mediator = Mediator.getMediator(config);
             project(mediator);
 
@@ -399,7 +500,7 @@ implements ActionListener
             fc.setDialogTitle("Save data map - " + map.getName());
             if (null != proj_dir)
             	fc.setCurrentDirectory(proj_dir);
-            int ret_code = fc.showOpenDialog(this);
+            int ret_code = fc.showSaveDialog(this);
             if ( ret_code != JFileChooser.APPROVE_OPTION)
                 return;
             file = fc.getSelectedFile();
@@ -739,107 +840,5 @@ implements ActionListener
     	frame.setLocation((screenSize.width - frameSize.width) / 2
     					 ,(screenSize.height - frameSize.height) / 2);
    		frame.setVisible(true);
-   	}
-
-}
-
-
-
-class EditorView extends JPanel 
-implements ObjEntityDisplayListener, DbEntityDisplayListener
-, DomainDisplayListener, DataMapDisplayListener, DataNodeDisplayListener {
-    Mediator mediator;
-
-    private static final int INIT_DIVIDER_LOCATION = 170;
-
-    private static final String EMPTY_VIEW    = "Empty";
-    private static final String DOMAIN_VIEW   = "Domain";
-    private static final String NODE_VIEW   = "Node";
-    private static final String DATA_MAP_VIEW = "DataMap";
-    private static final String OBJ_VIEW    = "ObjView";
-    private static final String DB_VIEW    = "DbView";
-
-
-    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    BrowseView treePanel;
-    JPanel detailPanel = new JPanel();
-    JPanel emptyPanel = new JPanel();
-    DomainDetailView domainView;
-    DataNodeDetailView nodeView;
-    JPanel dataMapView = new JPanel();
-    ObjDetailView objDetailView;
-    DbDetailView dbDetailView;
-    CardLayout detailLayout;
-
-    public EditorView(Mediator temp_mediator) {
-        super(new BorderLayout());
-        mediator = temp_mediator;
-
-        add(splitPane, BorderLayout.CENTER);
-        treePanel = new BrowseView(temp_mediator);
-        splitPane.setLeftComponent(treePanel);
-        splitPane.setRightComponent(detailPanel);
-  		splitPane.setContinuousLayout(true);
-
-        detailLayout = new CardLayout();
-        detailPanel.setLayout(detailLayout);
-
-		JPanel temp = new JPanel(new FlowLayout());
-		detailPanel.add(temp, EMPTY_VIEW);
-		domainView = new DomainDetailView(temp_mediator);
-		detailPanel.add(domainView, DOMAIN_VIEW);
-		nodeView = new DataNodeDetailView(temp_mediator);
-		detailPanel.add(nodeView, NODE_VIEW);
-		
-        objDetailView = new ObjDetailView(temp_mediator);
-        detailPanel.add(objDetailView, OBJ_VIEW);
-        dbDetailView = new DbDetailView(temp_mediator);
-        detailPanel.add(dbDetailView, DB_VIEW);
-        
-        mediator.addDomainDisplayListener(this);
-        mediator.addDataNodeDisplayListener(this);
-        mediator.addDataMapDisplayListener(this);
-        mediator.addObjEntityDisplayListener(this);
-        mediator.addDbEntityDisplayListener(this);
-    }
-
-   	public void currentDomainChanged(DomainDisplayEvent e)
-   	{
-   		if (e.getDomain() == null)
-	   		detailLayout.show(detailPanel, EMPTY_VIEW);
-   		else
-	   		detailLayout.show(detailPanel, DOMAIN_VIEW);
-   	}
-
-   	public void currentDataNodeChanged(DataNodeDisplayEvent e)
-   	{
-   		if (e.getDataNode() == null)
-	   		detailLayout.show(detailPanel, EMPTY_VIEW);
-   		else
-   			detailLayout.show(detailPanel, NODE_VIEW);
-   	}
-    
-
-
-   	public void currentDataMapChanged(DataMapDisplayEvent e)
-   	{
-   		detailLayout.show(detailPanel, EMPTY_VIEW);
-   	}
-    
-   	public void currentObjEntityChanged(EntityDisplayEvent e)
-   	{
-   		if (e.getEntity() == null)
-	   		detailLayout.show(detailPanel, EMPTY_VIEW);
-   		else
-	   		detailLayout.show(detailPanel, OBJ_VIEW);
-   	}
-
-
-   	public void currentDbEntityChanged(EntityDisplayEvent e)
-   	{
-   		if (e.getEntity() == null)
-	   		detailLayout.show(detailPanel, EMPTY_VIEW);
-   		else
-	   		detailLayout.show(detailPanel, DB_VIEW);
    	}
 }
