@@ -60,6 +60,8 @@ import org.objectstyle.cayenne.access.trans.QualifierTranslator;
 import org.objectstyle.cayenne.access.trans.QueryAssembler;
 import org.objectstyle.cayenne.access.trans.TrimmingQualifierTranslator;
 import org.objectstyle.cayenne.dba.sybase.SybaseAdapter;
+import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Cayenne DbAdapter implementation for <a
@@ -102,10 +104,26 @@ public class SQLServerAdapter extends SybaseAdapter {
 
     /**
      * Returns SQLServerDataNode instance.
+     * 
+     * @since 1.1
      */
     public DataNode createDataNode(String name) {
         DataNode node = new SQLServerDataNode(name);
         node.setAdapter(this);
         return node;
+    }
+    
+    /**
+     * Returns SQLServerSelectTranslator class for object SELECT queries.
+     * 
+     * @since 1.1
+     */
+    protected Class queryTranslatorClass(Query q) {
+        if (q instanceof SelectQuery) {
+            return SQLServerSelectTranslator.class;
+        }
+        else {
+            return super.queryTranslatorClass(q);
+        }
     }
 }

@@ -53,7 +53,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.dba.sqlserver;
+package org.objectstyle.cayenne.access;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,34 +64,35 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectstyle.cayenne.CayenneException;
-import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 
 /**
  * A ResultIterator that does in-memory filtering of rows to return only distinct rows.
- * Its current limitation is that once switched to reading ids instead of rows, it can't
- * be switched back. This is pretty sensible for most things in Cayenne.
+ * Distinct comparison is done by comparing ObjectIds created from each row. Internally
+ * DistinctResultIterator wraps another ResultIterator that provides the actual rows. The
+ * current limitation is that once switched to reading ids instead of rows (i.e. when
+ * "nextObjectId()" is called for the first time), it can't be used to read data rows
+ * again. This is pretty sensible for most things in Cayenne.
  * 
  * @since 1.1
  * @author Andrei Adamchik
  */
-// TODO: move to generic utilities...
-class DistinctResultIterator implements ResultIterator {
+public class DistinctResultIterator implements ResultIterator {
 
-    ResultIterator wrappedIterator;
-    Set fetchedIds;
-    Map nextDataRow;
-    DbEntity defaultEntity;
-    boolean readingIds;
+    protected ResultIterator wrappedIterator;
+    protected Set fetchedIds;
+    protected Map nextDataRow;
+    protected DbEntity defaultEntity;
+    protected boolean readingIds;
 
     /**
-     * Creates new DistinctResultIterator.
+     * Creates new DistinctResultIterator wrapping another ResultIterator.
      * 
      * @param wrappedIterator
-     * @param defaultEntity an entity needed to build ObjectIds for comparison.
+     * @param defaultEntity an entity needed to build ObjectIds for distinct comparison.
      */
-    DistinctResultIterator(ResultIterator wrappedIterator, DbEntity defaultEntity)
+    public DistinctResultIterator(ResultIterator wrappedIterator, DbEntity defaultEntity)
             throws CayenneException {
         if (wrappedIterator == null) {
             throw new CayenneException("Null wrapped iterator.");
@@ -104,7 +105,7 @@ class DistinctResultIterator implements ResultIterator {
         this.wrappedIterator = wrappedIterator;
         this.defaultEntity = defaultEntity;
         this.fetchedIds = new HashSet();
-        
+
         checkNextRow();
     }
 
@@ -160,6 +161,10 @@ class DistinctResultIterator implements ResultIterator {
         return nextObjectId(defaultEntity);
     }
 
+    /**
+     * Returns a Map for the next ObjectId. After calling this method, calls to
+     * "nextDataRow()" will result in exceptions.
+     */
     public Map nextObjectId(DbEntity entity) throws CayenneException {
         if (!hasNextRow()) {
             throw new CayenneException(

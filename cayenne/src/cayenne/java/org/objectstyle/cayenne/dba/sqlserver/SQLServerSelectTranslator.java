@@ -62,9 +62,13 @@ import org.objectstyle.cayenne.access.trans.SelectTranslator;
 import org.objectstyle.cayenne.map.DbAttribute;
 
 /**
+ * A specialized translator for object select queries.
+ * 
+ * @since 1.1
  * @author Andrei Adamchik
  */
-class SQLServerSelectTranslator extends SelectTranslator {
+// class has to be public as intsances are created via reflection...
+public class SQLServerSelectTranslator extends SelectTranslator {
 
     private static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
             Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR

@@ -76,13 +76,18 @@ import org.apache.log4j.Level;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.access.DataNode;
+import org.objectstyle.cayenne.access.DefaultResultIterator;
+import org.objectstyle.cayenne.access.DistinctResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.QueryTranslator;
+import org.objectstyle.cayenne.access.ResultIterator;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBBatchQueryWrapper;
 import org.objectstyle.cayenne.access.trans.LOBInsertBatchQueryBuilder;
 import org.objectstyle.cayenne.access.trans.LOBUpdateBatchQueryBuilder;
+import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.util.ResultDescriptor;
 import org.objectstyle.cayenne.map.DbAttribute;
@@ -112,11 +117,10 @@ public class OracleDataNode extends DataNode {
      * Implements Oracle-specific handling of StoredProcedure OUT parameters reading.
      */
     protected void readStoredProcedureOutParameters(
-        CallableStatement statement,
-        ResultDescriptor descriptor,
-        Query query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            CallableStatement statement,
+            ResultDescriptor descriptor,
+            Query query,
+            OperationObserver delegate) throws SQLException, Exception {
 
         long t1 = System.currentTimeMillis();
 
@@ -134,19 +138,19 @@ public class OracleDataNode extends DataNode {
                 int index = outParamIndexes[i];
 
                 if (jdbcTypes[index] == resultSetType) {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere else
+                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
+                    // else
                     ResultSet rs = (ResultSet) statement.getObject(index + 1);
-                    ResultDescriptor nextDesc =
-                        ResultDescriptor.createDescriptor(
+                    ResultDescriptor nextDesc = ResultDescriptor.createDescriptor(
                             rs,
                             getAdapter().getExtendedTypes());
 
                     readResultSet(rs, nextDesc, (GenericSelectQuery) query, delegate);
                 }
                 else {
-                    // note: jdbc column indexes start from 1, not 0 unlike everywhere else
-                    Object val =
-                        converters[index].materializeObject(
+                    // note: jdbc column indexes start from 1, not 0 unlike everywhere
+                    // else
+                    Object val = converters[index].materializeObject(
                             statement,
                             index + 1,
                             jdbcTypes[index]);
@@ -155,20 +159,18 @@ public class OracleDataNode extends DataNode {
             }
 
             if (!dataRow.isEmpty()) {
-                QueryLogger.logSelectCount(
-                    query.getLoggingLevel(),
-                    1,
-                    System.currentTimeMillis() - t1);
+                QueryLogger.logSelectCount(query.getLoggingLevel(), 1, System
+                        .currentTimeMillis()
+                        - t1);
                 delegate.nextDataRows(query, Collections.singletonList(dataRow));
             }
         }
     }
 
     public void runBatchUpdateWithLOBColumns(
-        Connection con,
-        BatchQuery query,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            Connection con,
+            BatchQuery query,
+            OperationObserver delegate) throws SQLException, Exception {
 
         LOBBatchQueryBuilder queryBuilder;
         if (query instanceof InsertBatchQuery) {
@@ -236,11 +238,10 @@ public class OracleDataNode extends DataNode {
      * Selects a LOB row and writes LOB values.
      */
     protected void processLOBRow(
-        Connection con,
-        LOBBatchQueryBuilder queryBuilder,
-        LOBBatchQueryWrapper selectQuery,
-        List qualifierAttributes)
-        throws SQLException, Exception {
+            Connection con,
+            LOBBatchQueryBuilder queryBuilder,
+            LOBBatchQueryWrapper selectQuery,
+            List qualifierAttributes) throws SQLException, Exception {
 
         List lobAttributes = selectQuery.getDbAttributesForUpdatedLOBColumns();
         if (lobAttributes.size() == 0) {
@@ -255,15 +256,14 @@ public class OracleDataNode extends DataNode {
         int parametersSize = qualifierValues.size();
         int lobSize = lobAttributes.size();
 
-        String selectStr =
-            queryBuilder.createLOBSelectString(
+        String selectStr = queryBuilder.createLOBSelectString(
                 selectQuery.getQuery(),
                 lobAttributes,
                 qualifierAttributes);
 
         if (isLoggable) {
             QueryLogger.logQuery(logLevel, selectStr, qualifierValues);
-			QueryLogger.logQueryParameters(logLevel, "write LOB", lobValues);
+            QueryLogger.logQueryParameters(logLevel, "write LOB", lobValues);
         }
 
         PreparedStatement selectStatement = con.prepareStatement(selectStr);
@@ -273,11 +273,11 @@ public class OracleDataNode extends DataNode {
                 DbAttribute attribute = (DbAttribute) qualifierAttributes.get(i);
 
                 adapter.bindParameter(
-                    selectStatement,
-                    value,
-                    i + 1,
-                    attribute.getType(),
-                    attribute.getPrecision());
+                        selectStatement,
+                        value,
+                        i + 1,
+                        attribute.getType(),
+                        attribute.getPrecision());
             }
 
             ResultSet result = selectStatement.executeQuery();
@@ -312,15 +312,16 @@ public class OracleDataNode extends DataNode {
                             writeBlob(blob, (byte[]) blobVal);
                         }
                         else {
-                            String className =
-                                (blobVal != null) ? blobVal.getClass().getName() : null;
+                            String className = (blobVal != null) ? blobVal
+                                    .getClass()
+                                    .getName() : null;
                             throw new CayenneRuntimeException(
-                                "Unsupported class of BLOB value: " + className);
+                                    "Unsupported class of BLOB value: " + className);
                         }
                     }
                     else {
                         throw new CayenneRuntimeException(
-                            "Only BLOB or CLOB is expected here, got: " + type);
+                                "Only BLOB or CLOB is expected here, got: " + type);
                     }
                 }
 
@@ -346,39 +347,37 @@ public class OracleDataNode extends DataNode {
     }
 
     /**
-     * Configures BatchQueryBuilder to trim CHAR column values, and then invokes
-     * super implementation.
+     * Configures BatchQueryBuilder to trim CHAR column values, and then invokes super
+     * implementation.
      */
     protected void runBatchUpdateAsBatch(
-        Connection con,
-        BatchQuery query,
-        BatchQueryBuilder queryBuilder,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            Connection con,
+            BatchQuery query,
+            BatchQueryBuilder queryBuilder,
+            OperationObserver delegate) throws SQLException, Exception {
 
         queryBuilder.setTrimFunction(OracleAdapter.TRIM_FUNCTION);
         super.runBatchUpdateAsBatch(con, query, queryBuilder, delegate);
     }
 
     /**
-     * Configures BatchQueryBuilder to trim CHAR column values, and then invokes
-     * super implementation.
+     * Configures BatchQueryBuilder to trim CHAR column values, and then invokes super
+     * implementation.
      */
     protected void runBatchUpdateAsIndividualQueries(
-        Connection con,
-        BatchQuery query,
-        BatchQueryBuilder queryBuilder,
-        OperationObserver delegate)
-        throws SQLException, Exception {
+            Connection con,
+            BatchQuery query,
+            BatchQueryBuilder queryBuilder,
+            OperationObserver delegate) throws SQLException, Exception {
 
         queryBuilder.setTrimFunction(OracleAdapter.TRIM_FUNCTION);
         super.runBatchUpdateAsIndividualQueries(con, query, queryBuilder, delegate);
     }
 
     /**
-     * TODO: this may become an adapter method eventually. Writing of LOBs
-     * is not supported prior to JDBC 3.0 and has to be done using Oracle driver 
-     * utilities, using reflection.
+     * TODO: this may become an adapter method eventually. Writing of LOBs is not
+     * supported prior to JDBC 3.0 and has to be done using Oracle driver utilities, using
+     * reflection.
      */
     private void writeBlob(Blob blob, byte[] value) {
 
@@ -394,22 +393,19 @@ public class OracleDataNode extends DataNode {
             }
         }
         catch (InvocationTargetException e) {
-            throw new CayenneRuntimeException(
-                "Error processing BLOB.",
-                Util.unwindException(e));
+            throw new CayenneRuntimeException("Error processing BLOB.", Util
+                    .unwindException(e));
         }
         catch (Exception e) {
-            throw new CayenneRuntimeException(
-                "Error processing BLOB.",
-                Util.unwindException(e));
+            throw new CayenneRuntimeException("Error processing BLOB.", Util
+                    .unwindException(e));
         }
     }
 
     /**
-      * TODO: this may become an adapter method eventually. Writing of LOBs
-      * is not supported prior to JDBC 3.0 and has to be done using Oracle driver 
-      * utilities.
-      */
+     * TODO: this may become an adapter method eventually. Writing of LOBs is not
+     * supported prior to JDBC 3.0 and has to be done using Oracle driver utilities.
+     */
     private void writeClob(Clob clob, char[] value) {
         // obtain Writer and write CLOB
         Method getWriterMethod = OracleAdapter.getWriterFromClobMethod();
@@ -426,21 +422,18 @@ public class OracleDataNode extends DataNode {
 
         }
         catch (InvocationTargetException e) {
-            throw new CayenneRuntimeException(
-                "Error processing BLOB.",
-                Util.unwindException(e));
+            throw new CayenneRuntimeException("Error processing BLOB.", Util
+                    .unwindException(e));
         }
         catch (Exception e) {
-            throw new CayenneRuntimeException(
-                "Error processing BLOB.",
-                Util.unwindException(e));
+            throw new CayenneRuntimeException("Error processing BLOB.", Util
+                    .unwindException(e));
         }
     }
 
     /**
-     * TODO: this may become an adapter method eventually. Writing of LOBs
-     * is not supported prior to JDBC 3.0 and has to be done using Oracle driver 
-     * utilities.
+     * TODO: this may become an adapter method eventually. Writing of LOBs is not
+     * supported prior to JDBC 3.0 and has to be done using Oracle driver utilities.
      */
     private void writeClob(Clob clob, String value) {
         // obtain Writer and write CLOB
@@ -458,14 +451,69 @@ public class OracleDataNode extends DataNode {
 
         }
         catch (InvocationTargetException e) {
-            throw new CayenneRuntimeException(
-                "Error processing BLOB.",
-                Util.unwindException(e));
+            throw new CayenneRuntimeException("Error processing BLOB.", Util
+                    .unwindException(e));
         }
         catch (Exception e) {
-            throw new CayenneRuntimeException(
-                "Error processing BLOB.",
-                Util.unwindException(e));
+            throw new CayenneRuntimeException("Error processing BLOB.", Util
+                    .unwindException(e));
+        }
+    }
+
+    /**
+     * Overrides default implementation to handle queries that require DISTINCT
+     */
+    protected void runSelect(
+            Connection connection,
+            Query query,
+            OperationObserver delegate) throws SQLException, Exception {
+        long t1 = System.currentTimeMillis();
+
+        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(connection);
+
+        PreparedStatement prepStmt = transl.createStatement(query.getLoggingLevel());
+        ResultSet rs = prepStmt.executeQuery();
+
+        SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
+        DefaultResultIterator workerIterator = new DefaultResultIterator(
+                connection,
+                prepStmt,
+                rs,
+                assembler.getResultDescriptor(rs),
+                ((GenericSelectQuery) query).getFetchLimit());
+
+        ResultIterator it = workerIterator;
+
+        // CUSTOMIZATION: wrap result iterator if distinct has to be suppressed
+        if (assembler instanceof OracleSelectTranslator) {
+            OracleSelectTranslator customTranslator = (OracleSelectTranslator) assembler;
+            if (customTranslator.isSuppressingDistinct()) {
+                it = new DistinctResultIterator(workerIterator, customTranslator
+                        .getRootDbEntity());
+            }
+        }
+
+        if (!delegate.isIteratedResult()) {
+            // note that we don't need to close ResultIterator
+            // since "dataRows" will do it internally
+            List resultRows = it.dataRows(true);
+            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
+                    .currentTimeMillis()
+                    - t1);
+
+            delegate.nextDataRows(query, resultRows);
+        }
+        else {
+            try {
+                workerIterator.setClosingConnection(true);
+                delegate.nextDataRows(transl.getQuery(), it);
+            }
+            catch (Exception ex) {
+                it.close();
+                throw ex;
+            }
         }
     }
 }

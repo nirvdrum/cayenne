@@ -273,7 +273,9 @@ public class OracleAdapter extends JdbcAdapter {
         return attr;
     }
 
-    /** Returns Oracle-specific classes for SELECT queries. */
+    /** 
+     * Returns Oracle-specific translator for object SELECT queries. 
+     */
     protected Class queryTranslatorClass(Query q) {
         if (q instanceof SelectQuery) {
             return OracleSelectTranslator.class;

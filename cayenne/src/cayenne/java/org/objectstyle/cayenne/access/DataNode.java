@@ -372,45 +372,47 @@ public class DataNode implements QueryEngine {
     /**
      * Executes select query.
      */
-    protected void runSelect(Connection con, Query query, OperationObserver delegate)
+    protected void runSelect(Connection connection, Query query, OperationObserver delegate)
         throws SQLException, Exception {
+
+        // *** WARNING: Oracle and SQLServer DataNode subclasses override this method to
+        // implement translation customizations. Make sure those are updated whenever this
+        // method changes!! Ideally this should be reimplemented as a pluggable "strategy".
 
         long t1 = System.currentTimeMillis();
 
-        QueryTranslator transl = getAdapter().getQueryTranslator(query);
-        transl.setEngine(this);
-        transl.setCon(con);
+        QueryTranslator translator = getAdapter().getQueryTranslator(query);
+        translator.setEngine(this);
+        translator.setCon(connection);
 
-        PreparedStatement prepStmt = transl.createStatement(query.getLoggingLevel());
+        PreparedStatement prepStmt = translator.createStatement(query.getLoggingLevel());
         ResultSet rs = prepStmt.executeQuery();
 
-        SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
-        DefaultResultIterator it =
-            new DefaultResultIterator(
-                con,
+        SelectQueryTranslator assembler = (SelectQueryTranslator) translator;
+        DefaultResultIterator it = new DefaultResultIterator(
+                connection,
                 prepStmt,
                 rs,
                 assembler.getResultDescriptor(rs),
                 ((GenericSelectQuery) query).getFetchLimit());
 
-        // TODO: Should do something about closing ResultSet and PreparedStatement in this method,
-        // instead of relying on DefaultResultIterator to do that later
+        // TODO: Should do something about closing ResultSet and PreparedStatement in this
+        // method, instead of relying on DefaultResultIterator to do that later
 
         if (!delegate.isIteratedResult()) {
             // note that we don't need to close ResultIterator
             // since "dataRows" will do it internally
             List resultRows = it.dataRows(true);
-            QueryLogger.logSelectCount(
-                query.getLoggingLevel(),
-                resultRows.size(),
-                System.currentTimeMillis() - t1);
+            QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
+                    .currentTimeMillis()
+                    - t1);
 
             delegate.nextDataRows(query, resultRows);
         }
         else {
             try {
                 it.setClosingConnection(true);
-                delegate.nextDataRows(transl.getQuery(), it);
+                delegate.nextDataRows(translator.getQuery(), it);
             }
             catch (Exception ex) {
                 it.close();

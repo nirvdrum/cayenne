@@ -59,110 +59,164 @@ package org.objectstyle.cayenne.dba.oracle;
 import java.lang.reflect.Method;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Types;
+import java.util.Iterator;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.access.QueryLogger;
 import org.objectstyle.cayenne.access.trans.SelectTranslator;
+import org.objectstyle.cayenne.map.DbAttribute;
 
-/** 
+/**
  * Select translator that implements Oracle-specific optimizations.
  * 
  * @author Andrei Adamchik
  */
 public class OracleSelectTranslator extends SelectTranslator {
-	private static Logger logObj =
-		Logger.getLogger(OracleSelectTranslator.class);
 
-	private static boolean testedDriver;
-	private static boolean useOptimizations;
-	private static Method statementSetRowPrefetch;
+    private static Logger logObj = Logger.getLogger(OracleSelectTranslator.class);
 
-	private static final Object[] rowPrefetchArgs =
-		new Object[] { new Integer(100)};
+    private static boolean testedDriver;
+    private static boolean useOptimizations;
+    private static Method statementSetRowPrefetch;
 
-	/** 
-	 * Determines if we can use Oracle optimizations.
-	 * If yes, configure this object to use them via reflection.
-	 */
-	private static final synchronized void testDriver(Statement st) {
-		if (testedDriver) {
-			return;
-		}
+    private static final Object[] rowPrefetchArgs = new Object[] {
+        new Integer(100)
+    };
 
-		// invalid call.. give it another chance later
-		if (st == null) {
-			return;
-		}
+    private static final int[] UNSUPPORTED_DISTINCT_TYPES = new int[] {
+            Types.BLOB, Types.CLOB, Types.LONGVARBINARY, Types.LONGVARCHAR
+    };
 
-		testedDriver = true;
+    protected static boolean isUnsupportedForDistinct(int type) {
+        for (int i = 0; i < UNSUPPORTED_DISTINCT_TYPES.length; i++) {
+            if (UNSUPPORTED_DISTINCT_TYPES[i] == type) {
+                return true;
+            }
+        }
 
-		try {
-			// search for matching methods in class and its superclasses
+        return false;
+    }
 
-			Class[] args2 = new Class[] { Integer.TYPE };
-			statementSetRowPrefetch =
-				st.getClass().getMethod("setRowPrefetch", args2);
+    /**
+     * Determines if we can use Oracle optimizations. If yes, configure this object to use
+     * them via reflection.
+     */
+    private static final synchronized void testDriver(Statement st) {
+        if (testedDriver) {
+            return;
+        }
 
-			useOptimizations = true;
-		} catch (Exception ex) {
-			useOptimizations = false;
-			statementSetRowPrefetch = null;
+        // invalid call.. give it another chance later
+        if (st == null) {
+            return;
+        }
 
-			StringBuffer buf = new StringBuffer();
-			buf
-				.append("Unknown Oracle statement type: [")
-				.append(st.getClass().getName())
-				.append("]. No Oracle optimizations applied.");
+        testedDriver = true;
 
-			logObj.info(buf.toString());
-		}
-	}
+        try {
+            // search for matching methods in class and its superclasses
 
-	/** 
-	 * Translates internal query into PreparedStatement,
-	 * applying Oracle optimizations if possible.
-	 */
-	public PreparedStatement createStatement(Level logLevel) throws Exception {
-		String sqlStr = createSqlString();
-		QueryLogger.logQuery(logLevel, sqlStr, values);
-		PreparedStatement stmt = con.prepareStatement(sqlStr);
+            Class[] args2 = new Class[] {
+                Integer.TYPE
+            };
+            statementSetRowPrefetch = st.getClass().getMethod("setRowPrefetch", args2);
 
-		initStatement(stmt);
+            useOptimizations = true;
+        }
+        catch (Exception ex) {
+            useOptimizations = false;
+            statementSetRowPrefetch = null;
 
-		if (!testedDriver) {
-			testDriver(stmt);
-		}
+            StringBuffer buf = new StringBuffer();
+            buf
+                    .append("Unknown Oracle statement type: [")
+                    .append(st.getClass().getName())
+                    .append("]. No Oracle optimizations applied.");
 
-		if (useOptimizations) {
-			// apply Oracle optimization of the statement
+            logObj.info(buf.toString());
+        }
+    }
 
-			// Performance tests conducted by Arndt (bug #699966) show
-			// that using explicit "defineColumnType" slows things down,
-			// so this is disabled now
+    boolean suppressingDistinct;
 
-			// 1. name result columns
-			/*  List columns = getColumns();
-			  int len = columns.size();
-			  Object[] args = new Object[2];
-			  for (int i = 0; i < len; i++) {
-			      DbAttribute attr = (DbAttribute) columns.get(i);
-			      args[0] = new Integer(i + 1);
-			      args[1] = new Integer(attr.getType());
-			      statementDefineColumnType.invoke(stmt, args);
-			  } */
+    /**
+     * Customizes SELECT query creation to strip "DISTINCT" keyword if the result contains
+     * columns that do not support the use of DISTINCT. Caller can determine whether
+     * expected DISTINCT was suppressed by invoking "isSuppressingDistinct" after this
+     * method.
+     */
+    public String createSqlString() throws Exception {
+        suppressingDistinct = false;
 
-			// 2. prefetch bigger batches of rows
-			// [This optimization didn't give any measurable performance
-			// increase. Keeping it for the future research]
+        String string = super.createSqlString();
 
-			// Note that this is done by statement,
-			// instead of Connection, since we do not want to mess 
-			// with Connection that is potentially used by
-			// other people.
-			statementSetRowPrefetch.invoke(stmt, rowPrefetchArgs);
-		}
+        if (string.startsWith("SELECT DISTINCT ")) {
+            // check columns
+            Iterator it = getColumns().iterator();
+            while (it.hasNext()) {
+                DbAttribute attribute = (DbAttribute) it.next();
+                if (attribute != null && isUnsupportedForDistinct(attribute.getType())) {
 
-		return stmt;
-	}
+                    suppressingDistinct = true;
+                    string = "SELECT " + string.substring("SELECT DISTINCT ".length());
+                    break;
+                }
+            }
+        }
+
+        return string;
+    }
+
+    /**
+     * Returns whether DISTINCT was explicitly suppressed. This method can be invoked only
+     * after "createSqlString()", as before that this information is unknown.
+     */
+    boolean isSuppressingDistinct() {
+        return suppressingDistinct;
+    }
+
+    /**
+     * Translates internal query into PreparedStatement, applying Oracle optimizations if
+     * possible.
+     */
+    public PreparedStatement createStatement(Level logLevel) throws Exception {
+        String sqlStr = createSqlString();
+        QueryLogger.logQuery(logLevel, sqlStr, values);
+        PreparedStatement stmt = con.prepareStatement(sqlStr);
+
+        initStatement(stmt);
+
+        if (!testedDriver) {
+            testDriver(stmt);
+        }
+
+        if (useOptimizations) {
+            // apply Oracle optimization of the statement
+
+            // Performance tests conducted by Arndt (bug #699966) show
+            // that using explicit "defineColumnType" slows things down,
+            // so this is disabled now
+
+            // 1. name result columns
+            /*
+             * List columns = getColumns(); int len = columns.size(); Object[] args = new
+             * Object[2]; for (int i = 0; i < len; i++) { DbAttribute attr = (DbAttribute)
+             * columns.get(i); args[0] = new Integer(i + 1); args[1] = new
+             * Integer(attr.getType()); statementDefineColumnType.invoke(stmt, args); }
+             */
+
+            // 2. prefetch bigger batches of rows
+            // [This optimization didn't give any measurable performance
+            // increase. Keeping it for the future research]
+            // Note that this is done by statement,
+            // instead of Connection, since we do not want to mess
+            // with Connection that is potentially used by
+            // other people.
+            statementSetRowPrefetch.invoke(stmt, rowPrefetchArgs);
+        }
+
+        return stmt;
+    }
 }

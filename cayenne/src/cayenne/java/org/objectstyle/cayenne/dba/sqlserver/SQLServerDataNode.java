@@ -63,12 +63,14 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.DefaultResultIterator;
+import org.objectstyle.cayenne.access.DistinctResultIterator;
 import org.objectstyle.cayenne.access.OperationObserver;
 import org.objectstyle.cayenne.access.QueryLogger;
+import org.objectstyle.cayenne.access.QueryTranslator;
 import org.objectstyle.cayenne.access.ResultIterator;
+import org.objectstyle.cayenne.access.trans.SelectQueryTranslator;
 import org.objectstyle.cayenne.query.GenericSelectQuery;
 import org.objectstyle.cayenne.query.Query;
-import org.objectstyle.cayenne.query.SelectQuery;
 
 /**
  * Custom DataNode implementation for SQLServer.
@@ -95,51 +97,38 @@ public class SQLServerDataNode extends DataNode {
             Connection connection,
             Query query,
             OperationObserver delegate) throws SQLException, Exception {
-
-        if (query instanceof SelectQuery) {
-            // there is a possibility that we need special handling
-            runCustomSelect(connection, query, delegate);
-        }
-        else {
-            super.runSelect(connection, query, delegate);
-        }
-    }
-
-    protected void runCustomSelect(
-            Connection connection,
-            Query query,
-            OperationObserver delegate) throws SQLException, Exception {
-
-        // this method is a replica of super.runSelect...
-        // customized pieces have appropriate comments
         long t1 = System.currentTimeMillis();
 
-        // CUSTOMIZED: create custom translator
-        SQLServerSelectTranslator translator = new SQLServerSelectTranslator();
-        translator.setQuery(query);
-        translator.setAdapter(getAdapter());
-        translator.setEngine(this);
-        translator.setCon(connection);
+        QueryTranslator transl = getAdapter().getQueryTranslator(query);
+        transl.setEngine(this);
+        transl.setCon(connection);
 
-        PreparedStatement prepStmt = translator.createStatement(query.getLoggingLevel());
+        PreparedStatement prepStmt = transl.createStatement(query.getLoggingLevel());
         ResultSet rs = prepStmt.executeQuery();
 
-        // CUSTOMIZED: wrap iterator in distinct in-memory filter if translator detected
-        // the need to filter distinct in memory...
+        SelectQueryTranslator assembler = (SelectQueryTranslator) transl;
         DefaultResultIterator workerIterator = new DefaultResultIterator(
                 connection,
                 prepStmt,
                 rs,
-                translator.getResultDescriptor(rs),
+                assembler.getResultDescriptor(rs),
                 ((GenericSelectQuery) query).getFetchLimit());
-        ResultIterator filteredIterator = translator.isSuppressingDistinct()
-                ? new DistinctResultIterator(workerIterator, translator.getRootDbEntity())
-                : (ResultIterator) workerIterator;
+
+        ResultIterator it = workerIterator;
+
+        // CUSTOMIZATION: wrap result iterator if distinct has to be suppressed
+        if (assembler instanceof SQLServerSelectTranslator) {
+            SQLServerSelectTranslator customTranslator = (SQLServerSelectTranslator) assembler;
+            if (customTranslator.isSuppressingDistinct()) {
+                it = new DistinctResultIterator(workerIterator, customTranslator
+                        .getRootDbEntity());
+            }
+        }
 
         if (!delegate.isIteratedResult()) {
             // note that we don't need to close ResultIterator
             // since "dataRows" will do it internally
-            List resultRows = filteredIterator.dataRows(true);
+            List resultRows = it.dataRows(true);
             QueryLogger.logSelectCount(query.getLoggingLevel(), resultRows.size(), System
                     .currentTimeMillis()
                     - t1);
@@ -149,10 +138,10 @@ public class SQLServerDataNode extends DataNode {
         else {
             try {
                 workerIterator.setClosingConnection(true);
-                delegate.nextDataRows(translator.getQuery(), filteredIterator);
+                delegate.nextDataRows(transl.getQuery(), it);
             }
             catch (Exception ex) {
-                filteredIterator.close();
+                it.close();
                 throw ex;
             }
         }
