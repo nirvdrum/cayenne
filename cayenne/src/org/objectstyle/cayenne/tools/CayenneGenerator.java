@@ -240,15 +240,15 @@ public class CayenneGenerator extends Task {
 	/**
 	 * Sets <code>template</code> property.
 	 */
-	public void setTemplate(File template) {
-		generator.setTemplate(template);
+	public void setTemplate(String template) {
+		generator.setTemplate(new File(template));
 	}
 
 	/**
 	 * Sets <code>supertemplate</code> property.
 	 */
-	public void setSupertemplate(File supertemplate) {
-		generator.setSuperTemplate(supertemplate);
+	public void setSupertemplate(String supertemplate) {
+		generator.setSuperTemplate(new File(supertemplate));
 	}
 
 	/**

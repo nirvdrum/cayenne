@@ -133,7 +133,7 @@ public class CayenneGeneratorTst extends CayenneTestCase {
         task.setMap(map);
         task.setMakepairs(false);
         task.setUsepkgpath(true);
-        task.setTemplate(template);
+        task.setTemplate("velotemplate.vm");
 
         // run task
         task.execute();
