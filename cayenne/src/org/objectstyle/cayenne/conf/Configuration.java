@@ -85,6 +85,11 @@ public abstract class Configuration {
 
     private static Configuration sharedConfig;
 
+    /** Lookup map that stores DataDomains with names as keys. */
+    protected HashMap dataDomains = new HashMap();
+    protected Level logLevel = Level.FINER;
+
+
     /** Use this method as an entry point to all Cayenne access objects.
       * <p>Note that if you want to provide custom Configuration,
       * make sure you call one of <code>initSharedConfig</code> methods
@@ -135,12 +140,6 @@ public abstract class Configuration {
     }
 
 
-    // non-static code...
-
-    /** Lookup map that stores DataDomains with names as keys. */
-    protected HashMap dataDomains = new HashMap();
-
-
     /** Returns domain configuration as a stream or null if it
       * can not be found. */
     public abstract InputStream getDomainConfig();
@@ -148,6 +147,18 @@ public abstract class Configuration {
     /** Returns DataMap configuration from a specified location or null if it
       * can not be found. */
     public abstract InputStream getMapConfig(String location);
+
+
+    
+    /** Returns default log level of this configuration object. */
+    public Level getLogLevel() {
+        return logLevel;
+    }
+
+    /** Sets default log level of this configuration object. */
+    public void setLogLevel(Level logLevel) {
+        this.logLevel = logLevel;
+    }
 
 
     /** Initializes all Cayenne resources. Loads all configured domains and their
@@ -159,7 +170,7 @@ public abstract class Configuration {
                                       + DOMAIN_FILE
                                       + "\" is not found.");
 
-        DomainHelper helper = new DomainHelper(this);
+        DomainHelper helper = new DomainHelper(this, getLogLevel());
         if(!helper.loadDomains(in)) {
             throw new ConfigException("Failed to load domain and/or its maps/nodes.");
         }
