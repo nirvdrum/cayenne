@@ -65,7 +65,6 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.DataSourceFactory;
 import org.objectstyle.cayenne.dba.TypesMapping;
-import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
@@ -75,6 +74,7 @@ import org.objectstyle.cayenne.map.DerivedDbEntity;
 import org.objectstyle.cayenne.map.ObjAttribute;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.project.Project;
 
 /** 
  * Used for validating dirty elements in the Mediator.
@@ -84,9 +84,29 @@ import org.objectstyle.cayenne.map.ObjRelationship;
  * @author Andrei Adamchik
  */
 public class Validator {
+	protected Project project;
 	protected Vector errorMessages;
 	protected int errorSeverity;
 
+    public Validator() {}
+
+    /**
+     * Creates a new validator initialized with the project.
+     * 
+     * @param project
+     */
+    public Validator(Project project) {
+    	this.project = project;
+    }
+
+    /**
+     * Returns the project.
+     * @return Project
+     */
+    public Project getProject() {
+        return project;
+    }
+    
 	/** 
 	 * Resets internal state. 
 	 * Called internally before starting validation.
@@ -133,7 +153,7 @@ public class Validator {
 
 		// Validate domains. 
 		// This will recursively run validation on maps, nodes, etc.
-		validateDomains(Editor.getProject().getDomains());
+		validateDomains(project.getDomains());
 
 		return getErrorSeverity();
 	}

@@ -55,15 +55,21 @@
  */
 package org.objectstyle.cayenne.gui.validator;
 
+import java.io.File;
 import java.sql.Types;
-import java.util.Random;
 
 import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
-import org.objectstyle.cayenne.gui.event.Mediator;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbAttribute;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.DbRelationship;
+import org.objectstyle.cayenne.map.ObjAttribute;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.map.ObjRelationship;
+import org.objectstyle.cayenne.project.Project;
 
 /**
  * Test cases for the Validator class.
@@ -85,6 +91,12 @@ public class ValidatorTst extends CayenneTestCase {
 	public void setUp() throws Exception {
 		map = new DataMap();
 		validator = new Validator();
+	}
+	
+	public void testProject() throws Exception {
+		Project project = new Project("abc", new File(System.getProperty("user.dir")));
+		validator = new Validator(project);
+		assertSame(project, validator.getProject());
 	}
 
 	public void testValidateDomains() throws Exception {
