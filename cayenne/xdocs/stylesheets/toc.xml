@@ -198,7 +198,6 @@
 			<item name="3.1 CDataPort Ant Task" href="/examples/data-port/cdataport.html"/>
 		</item>
 		<item name="4. EJB Facade"  href="/examples/ejb-facade/index.html"/>
-		<item name="5. Servlet Filter"  href="/examples/servlet-filter/index.html"/>
-		<item name="6. Aggregate Functions"  href="/examples/aggregate-functions/index.html"/>
+		<item name="5. Aggregate Functions"  href="/examples/aggregate-functions/index.html"/>
     </toc-examples>
  </toc>

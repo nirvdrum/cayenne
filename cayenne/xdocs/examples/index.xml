@@ -45,14 +45,6 @@
 		</td>
 	</tr>
 	<tr>
-		<td><a href="servlet-filter/index.html">Servlet Filter</a></td>
-		<td>This is a contribution by Gary Jarrel to provide WebApplicationContextProvider functionality
-		(i.e. automatic binding of session DataContext to a thread) via a different servlet container hook - 
-		a filter - that is compatible with Servlet specification 2.3. This will be included in the core Cayenne
-		in the future release.
-		</td>
-	</tr>
-	<tr>
 		<td><a href="aggregate-functions/index.html">SQL Aggregate Functions</a></td>
 		<td>Demonstrates how to use "derived" DbEntities for SQL aggregate functions, such as
 		MIN, MAX, COUNT. With introduction of SQLTemplate this example should be considered 
