@@ -24,78 +24,73 @@
 		</p>
 		<table width="100%" border="1">
 		<tr valign="top">
-			<th width="28%">Cayenne term</th>
+			<th width="28%">Cayenne mapping concept</th>
 			<th width="78%">Definition</th>
 		</tr>
 		<tr valign="top">
-			<td>Db Entity</td>
-			<td>Database table</td>
+			<td>DbEntity</td>
+			<td>Database table or view.</td>
 		</tr>
 		<tr valign="top">
 			<td>DbAttribute</td>
-			<td>Field of the database table</td>
+			<td>Column of the database table or view.</td>
 		</tr>
 		<tr valign="top">
 			<td>DbRelationship</td>
-			<td>Relationship between database tables</td>
+			<td>PK-FK relationship between two database tables.</td>
 		</tr>
 		<tr valign="top">
 			<td>ObjEntity</td>
-			<td>Java data access class. May include reference to the
-				underlying database table (Db Entity)
+			<td>Java data access class. Normally includes a reference to the
+				underlying database table (DbEntity).
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>ObjAttribute</td>
-			<td>Java class member variable.
-				May include reference to the underlying database table field (Db
-				Attribute)
+			<td>Java class property (a pair of set/get methods).
+				May include reference to the underlying database column (DbAttribute)
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>ObjRelationship</td>
-			<td>Has a relationship between Java classes.
-				May include reference to the underlying relationship
-				between database tables (Db Relationship)
+			<td>A relationship between two persistent Java classes. 
+			In the java class modeled as a pair of set/get methods for
+			the relationship destination object.
+		    May include reference to the underlying relationship
+		    between database tables (DbRelationship). 
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>DataMap</td>
 			<td>Collection of the entities, attributes and relationships (Db and
-			Obj)
-				describing the database schema, corresponding data access
-				classes,
-				their relationships, etc. Cannot span more than one database
-				schema.
+			Obj) describing a mapping of a set of database tables to a
+			set of Java classes.
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>DataNode</td>
-			<td>Description of the information source.
-				Currently there are two types of Data Nodes.<br/>
-				<strong>JNDI</strong> - when it has the information
-					for accessing data source configured in the container
-					(e.g. your WebLogic or Tomcat server).<br/>
-				<strong>DIRECT</strong> - when it has all the information
-					for the direct connection to the database.
-					To enable data access classes to use the database
-					you have to associate (add) the corresponding data map to
-					the
-					data node describing the database.
+			<td>Description of a single physical data source, normally a database.
+			    Currently there are two types of DataNodes:<br/>
+				<strong>JNDI-based</strong> - node accessible via
+				JNDI DataSource provided by the container (e.g. your WebLogic or Tomcat server).<br/>
+				<strong>JDBC Driver-based</strong> - node accessible using provided
+				JDBC connection information. In this case Cayenne will provide its own pooling 
+				facilities using configured JDBC driver.
 			</td>
 		</tr>
 		<tr valign="top">
-			<td>Domain (DataDomain)</td>
+			<td>DataDomain</td>
 			<td>Virtual data source.
-				Cayenne's way to treat multiple databases as if they are one
-				data source.
-				Each domain contains data maps and data nodes
+				Cayenne's way to treat multiple databases as if they are a single
+				data source. Each domain contains data maps and data nodes. Most
+				projects will need only a single domain.
 			</td>
 		</tr>
 		<tr valign="top">
 			<td>Project</td>
-			<td>Application. Collection of domains to be used at the same time.
-			</td>
+			<td>A collection of domains used together. As mentioned earlier, normally 
+			only a single domain is used, but there may be cases (Application Service
+			Provider applications, for instance) when more than one domain may be desirable.</td>
 		</tr>
 		</table>
 
@@ -122,18 +117,17 @@
 			</td>
 		</tr>
 		<tr>
-			<td>Data node file</td>
-			<td>One per DIRECT data node
-				(see earlier in the section definitions of DIRECT and JNDI data
-				nodes).
+			<td>DataNode file</td>
+			<td>One per JDBC Driver-based DataNode
+				(see earlier in the section definitions of JDBC Driver-based and JNDI DataNodes).
 				JNDI data node information, as well as data node to data map
 				association
 				is stored directly in the project file.
 			</td>
 		</tr>
 		<tr>
-			<td>Data map file</td>
-			<td>One per data map. </td>
+			<td>DataMap file</td>
+			<td>One per data map.</td>
 		</tr>
 		</table>
 
