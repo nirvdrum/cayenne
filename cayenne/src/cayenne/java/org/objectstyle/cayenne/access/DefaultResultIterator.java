@@ -111,7 +111,6 @@ public class DefaultResultIterator implements ResultIterator {
         DbAdapter adapter,
         SelectQueryAssembler assembler)
         throws SQLException, CayenneException {
-
         this.prepStmt = prepStmt;
         this.connection = assembler.getCon();
         this.resultSet = prepStmt.executeQuery();
@@ -302,6 +301,8 @@ public class DefaultResultIterator implements ResultIterator {
                 e2.printStackTrace(out);
             }
 
+            // close connection, if this object was explicitly configured to be 
+            // responsible for doing it
             if (this.isClosingConnection()) {
                 try {
                     connection.close();

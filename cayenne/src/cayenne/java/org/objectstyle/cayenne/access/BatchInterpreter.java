@@ -54,7 +54,7 @@
  *
  */
 
-package org.objectstyle.cayenne.dba;
+package org.objectstyle.cayenne.access;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.BatchQueryBuilder;
 import org.objectstyle.cayenne.access.types.ExtendedType;
 import org.objectstyle.cayenne.access.types.ExtendedTypeMap;
+import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.query.BatchQuery;
 

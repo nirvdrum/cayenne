@@ -56,6 +56,7 @@
 
 package org.objectstyle.cayenne.dba;
 
+import org.objectstyle.cayenne.access.BatchInterpreter;
 import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.access.OperationSorter;
 import org.objectstyle.cayenne.access.QueryTranslator;

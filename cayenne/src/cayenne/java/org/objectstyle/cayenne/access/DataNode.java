@@ -69,7 +69,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneException;
 import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.dba.BatchInterpreter;
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
 import org.objectstyle.cayenne.map.DataMap;
