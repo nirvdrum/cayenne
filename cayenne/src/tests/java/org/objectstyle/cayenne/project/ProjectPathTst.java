@@ -53,58 +53,75 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.event;
+package org.objectstyle.cayenne.project;
 
-import java.util.EventObject;
-
-import org.objectstyle.cayenne.project.ProjectPath;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
 /**
  * @author Andrei Adamchik
  */
-public class DisplayEvent extends EventObject {
-    protected boolean changed;
-    protected Object[] path;
+public class ProjectPathTst extends CayenneTestCase {
 
     /**
-     * Constructor for DisplayEvent.
-     * @param source
+     * Constructor for ProjectPathTst.
+     * @param name
      */
-    public DisplayEvent(Object source, Object[] path) {
-        super(source);
-        changed = true;
-        this.path = path;
+    public ProjectPathTst(String name) {
+        super(name);
     }
 
-    public Object[] getPath() {
-        return path;
+    public void testConstructor() throws Exception {
+        Object[] path = new Object[0];
+        ProjectPath pp = new ProjectPath(path);
+        assertSame(path, pp.getPath());
     }
 
-    /**
-    * Returns the last object in the path.
-    */
-    public Object getObject() {
-        return ProjectPath.objectFromPath(getPath());
+    public void testObjectFromPath1() throws Exception {
+        Object[] path = new Object[] { new Object(), new Object()};
+        assertSame(path[1], ProjectPath.objectFromPath(path));
     }
 
-    /**
-     * Returns true if the path's last object has changed.
-     */
-    public boolean isChanged() {
-        return changed;
+    public void testObjectFromPath2() throws Exception {
+        Object[] path = new Object[] { new Object()};
+        assertSame(path[0], ProjectPath.objectFromPath(path));
     }
 
-    public void setChanged(boolean changed) {
-        this.changed = changed;
+    public void testObjectFromPath3() throws Exception {
+        assertNull(ProjectPath.objectFromPath(new Object[] {}));
     }
 
-    public boolean pointsTo(Class nodeClass) {
-        if (nodeClass == null) {
-            return false;
-        }
+    public void testAppendToPath1() throws Exception {
+        ProjectPath path = new ProjectPath();
+        Object obj1 = new Object();
+        path = path.appendToPath(obj1);
 
-        Object last = getObject();
-        return (last != null) ? last.getClass() == nodeClass : false;
+        Object[] p = path.getPath();
+        assertNotNull(p);
+        assertEquals(1, p.length);
+        assertSame(obj1, p[0]);
+    }
+
+    public void testAppendToPath2() throws Exception {
+        ProjectPath path = new ProjectPath();
+        path = path.appendToPath(new Object());
+        path = path.appendToPath(new Object());
+        
+        Object obj1 = new Object();
+        path = path.appendToPath(obj1);
+
+        Object[] p = path.getPath();
+        assertNotNull(p);
+        assertEquals(3, p.length);
+        assertSame(obj1, p[2]);
+    }
+
+    public void testObjectParentFromPath1() throws Exception {
+        Object[] path = new Object[] { new Object(), new Object()};
+        assertSame(path[0], ProjectPath.objectParentFromPath(path));
+    }
+
+    public void testObjectParentFromPath2() throws Exception {
+        Object[] path = new Object[] { new Object()};
+        assertNull(ProjectPath.objectParentFromPath(path));
     }
 }

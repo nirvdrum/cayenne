@@ -82,6 +82,7 @@ import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /**
@@ -94,7 +95,7 @@ public class TopModel {
 
     protected Project currentProject;
     protected String statusMessage;
-    protected Object[] selectedPath;
+    protected ProjectPath selectedPath;
     protected ActionMap actionMap;
 
     /**
@@ -203,10 +204,9 @@ public class TopModel {
     }
 
     /**
-     * Returns the selectedPath.
-     * @return Object[]
+     * Returns current project selection.
      */
-    public Object[] getSelectedPath() {
+    public ProjectPath getSelectedPath() {
         return selectedPath;
     }
 
@@ -230,16 +230,12 @@ public class TopModel {
      * Sets the selectedPath.
      * @param selectedPath The selectedPath to set
      */
-    public void setSelectedPath(Object[] selectedPath) {
+    public void setSelectedPath(ProjectPath selectedPath) {
         this.selectedPath = selectedPath;
     }
 
     public void setSelectedPath(Object obj) {
-        selectedPath = ProjectTraversal.buildPath(obj, null);
-    }
-
-    public void appendToSelectedPath(Object obj) {
-        selectedPath = ProjectTraversal.buildPath(obj, selectedPath);
+        selectedPath = new ProjectPath(obj);
     }
 
     /**

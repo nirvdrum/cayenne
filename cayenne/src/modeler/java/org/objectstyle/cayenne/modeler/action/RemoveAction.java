@@ -84,6 +84,7 @@ import org.objectstyle.cayenne.modeler.event.EntityEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.modeler.util.MapUtil;
 import org.objectstyle.cayenne.project.ApplicationProject;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 
 /** 
@@ -265,7 +266,7 @@ public class RemoveAction extends CayenneAction {
             return false;
         }
 
-        Object lastObject = ProjectTraversal.objectFromPath(path);
+        Object lastObject = ProjectPath.objectFromPath(path);
 
         if (lastObject instanceof DataDomain) {
             return true;

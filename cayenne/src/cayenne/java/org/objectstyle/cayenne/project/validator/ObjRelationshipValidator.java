@@ -61,7 +61,7 @@ import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DbRelationship;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.ObjRelationship;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -77,7 +77,7 @@ public class ObjRelationshipValidator extends TreeNodeValidator {
     }
 
     public void validateObject(Object[] path, Validator validator) {
-        ObjRelationship rel = (ObjRelationship) ProjectTraversal.objectFromPath(path);
+        ObjRelationship rel = (ObjRelationship) ProjectPath.objectFromPath(path);
         if (Util.isEmptyString(rel.getName())) {
             validator.registerError("Unnamed ObjRelationship.", path);
         }

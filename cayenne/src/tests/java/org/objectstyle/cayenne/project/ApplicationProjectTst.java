@@ -117,11 +117,9 @@ public class ApplicationProjectTst extends CayenneTestCase {
         // make assertions
         List files = p.buildFileList();
 
-        // logObj.warn("Files: " + files);
-
         assertNotNull(files);
 
         // list must have 3 files total
-        assertEquals(3, files.size());
+        assertEquals("Unexpected number of files: " + files, 3, files.size());
     }
 }

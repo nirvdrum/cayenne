@@ -66,6 +66,7 @@ import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.objectstyle.cayenne.project.ProjectTraversalHandler;
 
@@ -178,8 +179,8 @@ public class ProjectTreeModel extends DefaultTreeModel {
         }
 
         public void projectNode(Object[] nodePath) {
-            Object parent = ProjectTraversal.objectParentFromPath(nodePath);
-            Object nodeObj = ProjectTraversal.objectFromPath(nodePath);
+            Object parent = ProjectPath.objectParentFromPath(nodePath);
+            Object nodeObj = ProjectPath.objectFromPath(nodePath);
             DefaultMutableTreeNode node = new DefaultMutableTreeNode(nodeObj);
 
             if (parent == null) {

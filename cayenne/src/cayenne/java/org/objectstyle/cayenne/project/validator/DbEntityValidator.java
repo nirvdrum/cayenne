@@ -60,7 +60,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.DerivedDbEntity;
-import org.objectstyle.cayenne.project.ProjectTraversal;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.util.Util;
 
 /**
@@ -79,7 +79,7 @@ public class DbEntityValidator extends TreeNodeValidator {
      * @see org.objectstyle.cayenne.project.validator.TreeNodeValidator#validateObject(Object[], Validator)
      */
     public void validateObject(Object[] path, Validator validator) {
-        DbEntity ent = (DbEntity) ProjectTraversal.objectFromPath(path);
+        DbEntity ent = (DbEntity) ProjectPath.objectFromPath(path);
         validateName(ent, path, validator);
 
         if ((ent instanceof DerivedDbEntity)
@@ -100,7 +100,7 @@ public class DbEntityValidator extends TreeNodeValidator {
         } 
         
         
-        DataMap map = (DataMap) ProjectTraversal.objectParentFromPath(path);
+        DataMap map = (DataMap) ProjectPath.objectParentFromPath(path);
         if (map == null) {
             return;
         }

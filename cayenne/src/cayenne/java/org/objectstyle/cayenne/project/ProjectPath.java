@@ -53,9 +53,12 @@
  * <http://objectstyle.org/>.
  *
  */
-package org.objectstyle.cayenne.modeler.util;
+package org.objectstyle.cayenne.project;
 
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -64,103 +67,114 @@ import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.access.DataDomain;
+import org.objectstyle.cayenne.access.DataNode;
 import org.objectstyle.cayenne.conf.Configuration;
-import org.objectstyle.cayenne.project.ApplicationProject;
-import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.map.Attribute;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.Entity;
+import org.objectstyle.cayenne.map.Relationship;
 
 /**
- * Specialized tree object that can render Cayenne project trees.
+ * Immutable holder of a selection path within a Cayenne project.
  * 
  * @author Andrei Adamchik
  */
-public class ProjectTree extends JTree {
-    static Logger logObj = Logger.getLogger(ProjectTree.class);
+public class ProjectPath {
+    public static final Object[] EMPTY_PATH = new Object[0];
+
+    protected Object[] path;
 
     /**
-     * Factory method to create project tree.
+     * Expands path array, appending a treeNode at the end.
      */
-    public static ProjectTree createProjectTree(Project project) {
-        ProjectTree tree = new ProjectTree(project);
-        if (project instanceof ApplicationProject) {
-            tree.setRootVisible(false);
-        } else {
-            tree.setRootVisible(true);
-        }
-        return tree;
+    public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
+        ProjectPath path = new ProjectPath(parentTreeNodePath);
+        return path.appendToPath(treeNode).getPath();
     }
 
     /**
-     * Constructor for ProjectTree.
+     * Returns an object corresponding to the node represented
+     * by the path. This is the last object in the path.
      */
-    protected ProjectTree(Project project) {
-        // build model
-        ProjectTreeModel model = new ProjectTreeModel(project);
-        setModel(model);
+    public static Object objectFromPath(Object[] treeNodePath) {
+        return new ProjectPath(treeNodePath).getObject();
+    }
 
-        // expand top level
-        getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        Enumeration level = model.getRootNode().children();
-        while (level.hasMoreElements()) {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) level.nextElement();
-            TreePath path = new TreePath(node.getPath());
-            expandPath(path);
+    /**
+     * Returns an object corresponding to the parent node 
+     * of the node represented by the path. This is the object 
+     * next to last object in the path.
+     */
+    public static Object objectParentFromPath(Object[] treeNodePath) {
+        return new ProjectPath(treeNodePath).getObjectParent();
+    }
+
+    public ProjectPath() {
+        path = EMPTY_PATH;
+    }
+
+    /**
+     * Constructor for ProjectPath.
+     */
+    public ProjectPath(Object object) {
+        this();
+        appendToPath(object);
+    }
+
+    /**
+     * Constructor for ProjectPath.
+     */
+    public ProjectPath(Object[] path) {
+        this.path = (path != null) ? path : EMPTY_PATH;
+    }
+
+    public Object[] getPath() {
+        return path;
+    }
+
+    /**
+     * Returns a ne winstance of the path, expanding this one by 
+     * appending an object at the end.
+     */
+    public ProjectPath appendToPath(Object object) {    	
+        if (object != null) {
+            Object[] newPath = new Object[path.length + 1];
+
+            if (path.length > 0) {
+                System.arraycopy(path, 0, newPath, 0, path.length);
+            }
+            newPath[path.length] = object;
+            return new ProjectPath(newPath);
+        }
+        else {
+        	return new ProjectPath();
         }
     }
 
     /**
-     * Returns tree model cast to ProjectTreeModel.
+     * Returns selected object - the last object in the path.
      */
-    public ProjectTreeModel getProjectModel() {
-        return (ProjectTreeModel) getModel();
+    public Object getObject() {
+        if (path.length == 0) {
+            return null;
+        }
+
+        // return last object
+        return path[path.length - 1];
     }
 
     /**
-     * Returns a "name" property of the tree node.
+     * Returns an object corresponding to the parent node 
+     * of the node represented by the path. This is the object 
+     * next to last object in the path.
      */
-    public String convertValueToText(
-        Object value,
-        boolean selected,
-        boolean expanded,
-        boolean leaf,
-        int row,
-        boolean hasFocus) {
-
-        // unwrap
-        while (value instanceof DefaultMutableTreeNode) {
-            value = ((DefaultMutableTreeNode) value).getUserObject();
+    public Object getObjectParent() {
+        if (path.length == 0) {
+            return null;
         }
 
-        // String - just return it
-        if (value instanceof String) {
-            return value.toString();
-        }
-
-        // configuration - root node
-        if (value instanceof Configuration) {
-            return "";
-        }
-
-        // read name property
-        try {
-            return (value != null)
-                ? String.valueOf(PropertyUtils.getProperty(value, "name"))
-                : "";
-
-        } catch (Exception e) {
-            String objectClass =
-                (value == null) ? "(unknown)" : value.getClass().getName();
-            logObj.warn("Exception reading property 'name', class " + objectClass, e);
-            return "";
-        }
-
+        // return next to last object
+        return (path.length > 1) ? path[path.length - 2] : null;
     }
-
-    public String getName() {
-        return "";
-    }
-
-    public void insertObject(Object obj, DefaultMutableTreeNode parent) {
-        getProjectModel().insertObject(obj, parent);
-    }
-
 }

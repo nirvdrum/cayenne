@@ -78,62 +78,7 @@ import org.objectstyle.cayenne.map.Relationship;
  * @author Andrei Adamchik
  */
 public class ProjectTraversal {
-    public static final Object[] EMPTY_PATH = new Object[0];
-    
     protected ProjectTraversalHandler handler;
-
-    /**
-      * Expands path array, appending a treeNode at the end.
-      */
-    public static Object[] buildPath(Object treeNode, Object[] parentTreeNodePath) {
-        if (parentTreeNodePath == null || parentTreeNodePath.length == 0) {
-            return (treeNode != null) ? new Object[] { treeNode } : EMPTY_PATH;
-        }
-
-        if(treeNode == null) {
-        	return parentTreeNodePath;
-        }
-        
-        Object[] newPath = new Object[parentTreeNodePath.length + 1];
-        System.arraycopy(parentTreeNodePath, 0, newPath, 0, parentTreeNodePath.length);
-        newPath[parentTreeNodePath.length] = treeNode;
-        return newPath;
-    }
-
-    /**
-     * Returns an object corresponding to the node represented
-     * by the path. This is the last object in the path.
-     */
-    public static Object objectFromPath(Object[] treeNodePath) {
-        if (treeNodePath == null) {
-            throw new NullPointerException("Null path to object.");
-        }
-
-        if (treeNodePath.length == 0) {
-            throw new ProjectException("Path is empty.");
-        }
-
-        // return last object
-        return treeNodePath[treeNodePath.length - 1];
-    }
-
-    /**
-     * Returns an object corresponding to the parent node 
-     * of the node represented by the path. This is the object 
-     * next to last object in the path.
-     */
-    public static Object objectParentFromPath(Object[] treeNodePath) {
-        if (treeNodePath == null) {
-            throw new NullPointerException("Null path to object.");
-        }
-
-        if (treeNodePath.length == 0) {
-            throw new ProjectException("Path is empty.");
-        }
-
-        // return next to last object
-        return (treeNodePath.length > 1) ? treeNodePath[treeNodePath.length - 2] : null;
-    }
 
     public ProjectTraversal(ProjectTraversalHandler handler) {
         this.handler = handler;
@@ -169,7 +114,7 @@ public class ProjectTraversal {
      * Performs traversal starting from Configuration node.
      */
     public void traverseConfig(Configuration config, Object[] path) {
-        Object[] configPath = buildPath(config, path);
+        Object[] configPath = ProjectPath.buildPath(config, path);
         handler.projectNode(configPath);
 
         if (handler.shouldReadChildren(config, path)) {
@@ -184,7 +129,7 @@ public class ProjectTraversal {
         Iterator it = domains.iterator();
         while (it.hasNext()) {
             DataDomain domain = (DataDomain) it.next();
-            Object[] domainPath = buildPath(domain, path);
+            Object[] domainPath = ProjectPath.buildPath(domain, path);
             handler.projectNode(domainPath);
 
             if (handler.shouldReadChildren(domain, path)) {
@@ -197,7 +142,7 @@ public class ProjectTraversal {
     public void traverseNodes(List nodes, Object[] path) {
         Iterator it = nodes.iterator();
         while (it.hasNext()) {
-            handler.projectNode(buildPath(it.next(), path));
+            handler.projectNode(ProjectPath.buildPath(it.next(), path));
         }
     }
 
@@ -205,7 +150,7 @@ public class ProjectTraversal {
         Iterator it = maps.iterator();
         while (it.hasNext()) {
             DataMap map = (DataMap) it.next();
-            Object[] mapPath = buildPath(map, path);
+            Object[] mapPath = ProjectPath.buildPath(map, path);
             handler.projectNode(mapPath);
 
             if (handler.shouldReadChildren(map, path)) {
@@ -219,7 +164,7 @@ public class ProjectTraversal {
         Iterator it = entities.iterator();
         while (it.hasNext()) {
             Entity ent = (Entity) it.next();
-            Object[] entPath = buildPath(ent, path);
+            Object[] entPath = ProjectPath.buildPath(ent, path);
             handler.projectNode(entPath);
 
             if (handler.shouldReadChildren(ent, path)) {
@@ -232,14 +177,14 @@ public class ProjectTraversal {
     public void traverseAttributes(List attributes, Object[] path) {
         Iterator it = attributes.iterator();
         while (it.hasNext()) {
-            handler.projectNode(buildPath(it.next(), path));
+            handler.projectNode(ProjectPath.buildPath(it.next(), path));
         }
     }
 
     public void traverseRelationships(List relationships, Object[] path) {
         Iterator it = relationships.iterator();
         while (it.hasNext()) {
-            handler.projectNode(buildPath(it.next(), path));
+            handler.projectNode(ProjectPath.buildPath(it.next(), path));
         }
     }
 }

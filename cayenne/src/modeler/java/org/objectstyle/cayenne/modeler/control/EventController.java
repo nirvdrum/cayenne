@@ -101,6 +101,7 @@ import org.objectstyle.cayenne.modeler.event.ObjRelationshipListener;
 import org.objectstyle.cayenne.modeler.event.RelationshipDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.RelationshipEvent;
 import org.objectstyle.cayenne.project.Project;
+import org.objectstyle.cayenne.project.ProjectPath;
 import org.objectstyle.cayenne.project.ProjectTraversal;
 import org.scopemvc.core.Control;
 import org.scopemvc.core.ControlException;
@@ -189,7 +190,7 @@ public class EventController extends ModelerController {
         currentDbAttr = null;
         currentObjRel = null;
         currentDbRel = null;
-        getTopModel().setSelectedPath(ProjectTraversal.EMPTY_PATH);
+        getTopModel().setSelectedPath(ProjectPath.EMPTY_PATH);
     }
 
     public DataNode getCurrentDataNode() {
