@@ -74,11 +74,12 @@ import org.objectstyle.cayenne.map.*;
 public class CayenneGenerator extends Task {
 
     protected File map;
-    protected DefaultClassGenerator generator;
+    protected AntClassGenerator generator;
 
     public CayenneGenerator() {
         bootstrapVelocity();
         generator = new AntClassGenerator();
+        generator.setParentTask(this);
     }
 
     /** Initialize Velocity with class loader of the right class. */
@@ -180,31 +181,5 @@ public class CayenneGenerator extends Task {
      */
     public void setSuperpkg(String superpkg) {
         generator.setSuperPkg(superpkg);
-    }
-
-    /** 
-     * Ant-specific extension of DefaultClassGenerator that provides logging
-     * functions. 
-     */
-    final class AntClassGenerator extends DefaultClassGenerator {
-        protected File fileForSuperclass(String pkgName, String className)
-            throws Exception {
-
-            File outFile = super.fileForSuperclass(pkgName, className);
-            if (outFile != null) {
-                log("Generating superclass file: " + outFile.getCanonicalPath());
-            }
-            return outFile;
-        }
-
-        protected File fileForClass(String pkgName, String className)
-            throws Exception {
-                
-            File outFile = super.fileForClass(pkgName, className);
-            if (outFile != null) {
-                log("Generating class file: " + outFile.getCanonicalPath());
-            }
-            return outFile;
-        }
     }
 }

@@ -86,9 +86,21 @@ public abstract class MapClassGenerator {
     public MapClassGenerator(DataMap map) {
         this(map.getObjEntitiesAsList());
     }
-    
+
     public MapClassGenerator(List objEntities) {
         this.objEntities = objEntities;
+    }
+
+    protected String defaultSingleClassTemplate() {
+        return SINGLE_CLASS_TEMPLATE;
+    }
+
+    protected String defaultSubclassTemplate() {
+        return SUBCLASS_TEMPLATE;
+    }
+
+    protected String defaultSuperclassTemplate() {
+        return SUPERCLASS_TEMPLATE;
     }
 
     /** Provides child ClassGenerator with a Writer object
@@ -245,7 +257,6 @@ public abstract class MapClassGenerator {
     public void setSuperPkg(String superPkg) {
         this.superPkg = superPkg;
     }
-    
 
     public List getObjEntities() {
         return objEntities;
