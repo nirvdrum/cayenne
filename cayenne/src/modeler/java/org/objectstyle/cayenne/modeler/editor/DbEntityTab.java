@@ -355,7 +355,7 @@ public class DbEntityTab extends JPanel implements ExistingSelectionProcessor,
         else if (entity.getDataMap().getDbEntity(newName) == null) {
             // completely new name, set new name for entity
             EntityEvent e = new EntityEvent(this, entity, entity.getName());
-            ProjectUtil.setDbEntityName(entity.getDataMap(), entity, newName);
+            ProjectUtil.setDbEntityName(entity, newName);
             mediator.fireDbEntityEvent(e);
         }
         else {

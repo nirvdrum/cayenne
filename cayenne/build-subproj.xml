@@ -34,7 +34,6 @@
     
     <path id="classpath-tests">
 		<path refid="classpath-modeler"/>
-		<pathelement path="build/modeler/classes"/>
     </path>
     
     <path id="classpath-regression">
@@ -44,6 +43,10 @@
     
     <path id="classpath-tests-modeler">
 		<path refid="classpath-tests"/>
+		<pathelement path="build/modeler/classes"/>
+		<pathelement path="build/tests-modeler/classes"/>
+		<pathelement path="build/tests/classes"/>
+		<pathelement path="build/tests/deps"/>
     </path>
     
     <path id="classpath-performance">

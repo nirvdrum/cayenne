@@ -216,7 +216,10 @@ public class ProjectUtil {
         }
     }
 
-    public static void setDbEntityName(DataMap map, DbEntity entity, String newName) {
+    /**
+     * Renames a DbEntity and changes the name of all references.
+     */
+    public static void setDbEntityName(DbEntity entity, String newName) {
         String oldName = entity.getName();
 
         // If name hasn't changed, just return
@@ -225,22 +228,34 @@ public class ProjectUtil {
         }
 
         entity.setName(newName);
-        map.removeDbEntity(oldName, false);
-        map.addDbEntity(entity);
+        DataMap map = entity.getDataMap();
 
-        // important - clear parent namespace:
-        MappingNamespace ns = map.getNamespace();
-        if (ns instanceof EntityResolver) {
-            ((EntityResolver) ns).clearCache();
+        if (map != null) {
+            map.removeDbEntity(oldName, false);
+            map.addDbEntity(entity);
+
+            // important - clear parent namespace:
+            MappingNamespace ns = map.getNamespace();
+            if (ns instanceof EntityResolver) {
+                ((EntityResolver) ns).clearCache();
+            }
         }
     }
 
-    /** Changes the name of the attribute in all places in DataMap. */
-    public static void setAttributeName(Attribute attrib, String newName) {
-        Entity entity = attrib.getEntity();
-        entity.removeAttribute(attrib.getName());
-        attrib.setName(newName);
-        entity.addAttribute(attrib);
+    /**
+     * Changes the name of the attribute and all references to this attribute.
+     */
+    public static void setAttributeName(Attribute attribute, String newName) {
+        String oldName = attribute.getName();
+
+        attribute.setName(newName);
+
+        Entity entity = attribute.getEntity();
+
+        if (entity != null) {
+            entity.removeAttribute(oldName);
+            entity.addAttribute(attribute);
+        }
     }
 
     /** Changes the name of the attribute in all places in DataMap. */

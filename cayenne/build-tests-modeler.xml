@@ -11,17 +11,14 @@
 	<property name="test.filter" value="**/*Tst.class"/>
 	
 	<path id="classpath">
-    	<fileset dir="${otherlib.dir}">
-			<include name="${junit.jar}"/>
-		</fileset>
-	   	<fileset dir="${ant.home}/lib">
-			<include name="ant*.jar"/>
-			<include name="optional.jar"/>
-		</fileset>
-		<fileset dir="${dist}/lib">
-			<include name="**/*.jar"/>
-		</fileset>
+    	<fileset dir="${otherlib.dir}" includes="${junit.jar}"/>
+	   	<fileset dir="${ant.home}/lib" includes="ant*.jar,optional.jar"/>
+		<fileset dir="${dist}/lib" includes="**/*.jar"/>
+		
 		<pathelement path="build/tests-modeler/classes"/>
+		<pathelement path="build/tests/classes"/>
+		<pathelement path="build/tests/deps"/>
+		<pathelement path="${test.env.CLASSPATH}"/>
     </path>
     
 	<target name="compile">

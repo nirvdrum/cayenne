@@ -71,12 +71,16 @@ public abstract class Relationship extends MapObject {
         this.setName(name);
     }
 
-    /** Returns relationship source entity. */
+    /** 
+     * Returns relationship source entity. 
+     */
     public Entity getSourceEntity() {
         return (Entity) this.getParent();
     }
 
-    /** Sets relationship source entity. */
+    /** 
+     * Sets relationship source entity. 
+     */
     public void setSourceEntity(Entity sourceEntity) {
         setParent(sourceEntity);
     }
