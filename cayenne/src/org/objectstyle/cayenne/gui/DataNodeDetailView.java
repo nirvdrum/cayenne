@@ -86,6 +86,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
     static Logger logObj = Logger.getLogger(DataNodeDetailView.class.getName());
 
 	Mediator mediator;
+	// The node currently being edited on this screen.
+	DataNode node;
 	
 	JLabel		nameLabel;
 	JTextField	name;
@@ -202,13 +204,16 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 		fileBtn.setVisible(false);
 		
 		userNameLabel 	= new JLabel("User name: ");
-		userName		= new PreferenceField(Preferences.USER_NAME, true);
+		userName		= new PreferenceField(Preferences.USER_NAME);
+		userName.addActionListener(this);
 		passwordLabel	= new JLabel("Password: ");
 		password		= new JPasswordField(20);
 		driverLabel		= new JLabel("Driver class: ");
-		driver			= new PreferenceField(Preferences.JDBC_DRIVER, true);
+		driver			= new PreferenceField(Preferences.JDBC_DRIVER);
+		driver.addActionListener(this);
 		urlLabel		= new JLabel("Database URL: ");
-		url				= new PreferenceField(Preferences.DB_URL, true);
+		url				= new PreferenceField(Preferences.DB_URL);
+		url.addActionListener(this);
 		minConnectionsLabel = new JLabel("Min connections: ");
 		minConnections		= new JTextField(5);
 		maxConnectionsLabel	= new JLabel("Max connections: ");
@@ -259,7 +264,6 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	private void textFieldChanged(DocumentEvent e) {
 		if (ignoreChange)
 			return;
-		DataNode node = mediator.getCurrentDataNode();
 		if (null == node)
 			return;
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
@@ -282,28 +286,25 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == userName.getDocument()) {
-			logObj.fine("info.getUserName() is " + info.getUserName()
-					+ ", userName.getText() is " + userName.getText());
-			if (info.getUserName().equals(userName.getText()))
-				return;
+			logObj.fine(" userName.getText() is " + userName.getText());
 			info.setUserName(userName.getText());
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
+		} else if (e.getDocument() == driver.getDocument()) {
+			logObj.fine("Setting driver information in DataNode view");
+			Thread.dumpStack();
+			info.setJdbcDriver(driver.getText());
+			logObj.fine("Set jdbc driver to " + driver.getText());
+			event = new DataNodeEvent(this, node);
+			mediator.fireDataNodeEvent(event);
+		} else if (e.getDocument() == url.getDocument()) {
+			logObj.fine("Setting db url information in DataNode view");
+			info.setDataSourceUrl(url.getText());
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == password.getDocument()) {
 			String pswd = new String(password.getPassword());
 			info.setPassword(pswd);
-			event = new DataNodeEvent(this, node);
-			mediator.fireDataNodeEvent(event);
-		} else if (e.getDocument() == driver.getDocument()) {
-			if (info.getJdbcDriver().equals(driver.getText()))
-				return;
-			info.setJdbcDriver(driver.getText());
-			event = new DataNodeEvent(this, node);
-			mediator.fireDataNodeEvent(event);
-		} else if (e.getDocument() == url.getDocument()) {
-			if (info.getDataSourceUrl().equals(url.getText()))
-				return;
-			info.setDataSourceUrl(url.getText());
 			event = new DataNodeEvent(this, node);
 			mediator.fireDataNodeEvent(event);
 		} else if (e.getDocument() == minConnections.getDocument()) {
@@ -326,6 +327,11 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
+		if (null == node)
+			return;
+		GuiDataSource data_src = (GuiDataSource)node.getDataSource();
+		DataSourceInfo info = data_src.getDataSourceInfo();
+		DataNodeEvent event;
 		
 		if (src == factory) {
 			String ele = (String)factory.getModel().getSelectedItem();
@@ -358,11 +364,25 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			mediator.getCurrentDataNode().setAdapter(adapt);
 		} else if (src == fileBtn) {
 			selectNodeLocation();
+		} else if (src == driver) {
+			logObj.fine("Driver action performed");
+			ignoreChange = true;
+			driver.storePreferences();
+			ignoreChange = false;
+		} else if (src == url) {
+			logObj.fine("url action performed");
+			ignoreChange = true;
+			url.storePreferences();
+			ignoreChange = false;
+		} else if (src == userName) {
+			logObj.fine("userName action performed");
+			ignoreChange = true;
+			userName.storePreferences();
+			ignoreChange = false;
 		}
 	}// End actionPerformed()
 	
 	private void selectNodeLocation() {
-		DataNode node = mediator.getCurrentDataNode();
         try {
             // Get the project file name (always cayenne.xml)
             File file = null;
@@ -413,9 +433,11 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 	}
 	
 	public void currentDataNodeChanged(DataNodeDisplayEvent e) {
-		DataNode node = e.getDataNode();
-		if (null == node)
+		node = e.getDataNode();
+		if (null == node) {
+			logObj.fine("Node reset to null");
 			return;
+		}
 		GuiDataSource src = (GuiDataSource)node.getDataSource();
 		oldName = node.getName();
 		ignoreChange = true;

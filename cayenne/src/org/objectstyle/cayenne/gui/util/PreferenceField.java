@@ -72,7 +72,6 @@ public class PreferenceField extends JComboBox
     static Logger logObj = Logger.getLogger(PreferenceField.class.getName());
 
 	private String key;
-	private boolean dirty = false;
 	
 	/** Sets preference only on explicit call to storePreferences().*/
 	public PreferenceField(String temp_key) {
@@ -97,21 +96,6 @@ public class PreferenceField extends JComboBox
 			}
 		}
 		setSelectedItem(null);
-		if (set_on_focus) {
-			ComboBoxEditor editor = getEditor();
-			if (null != editor) {
-				editor.getEditorComponent().addFocusListener(new PreferenceFocus());
-				logObj.fine("Adding focus handler to fld " + key);
-			}
-		}
-	}
-	
-	public boolean isDirty() {
-		return dirty;
-	}
-	
-	public void setDirty(boolean temp) {
-		dirty = temp;
 	}
 	
 	/** Return the text of the selected item or "" if nothing is selected.*/
@@ -175,13 +159,4 @@ public class PreferenceField extends JComboBox
 		JTextComponent text_comp = (JTextComponent)comp;
 		return text_comp.getDocument();
 	}
-	
-	private class PreferenceFocus extends FocusAdapter {
-		public void focusLost(FocusEvent e) {
-			logObj.fine("In focusLost()");
-			storePreferences();
-		}
-	}// End class PreferenceFocus
-
-
 }
