@@ -251,7 +251,6 @@ public class DataPort {
             }
 
             try {
-                int count = 0;
 
                 // Split insertions into the same table into batches of 1000. 
                 // This will allow to process tables of arbitrary big size
@@ -265,7 +264,6 @@ public class DataPort {
                         destinationNode.performQuery(insert, insertObserver);
                         insert =
                             new InsertBatchQuery(entity, INSERT_BATCH_SIZE);
-                        count += insertObserver.getFirstUpdateCount(insert);
                         insertObserver.clear();
                     }
 
@@ -275,14 +273,13 @@ public class DataPort {
                     insert.add(nextRow);
                 }
 
-                // commit last batch if needed
+                // commit remaining batch if needed
                 if (insert.size() > 0) {
                     destinationNode.performQuery(insert, insertObserver);
-                    count += insertObserver.getFirstUpdateCount(insert);
                 }
 
                 if (delegate != null) {
-                    delegate.didPortEntity(this, entity, count);
+                    delegate.didPortEntity(this, entity, currentRow);
                 }
             } finally {
                 try {

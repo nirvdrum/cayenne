@@ -126,9 +126,9 @@ public class AntDataPortDelegate implements DataPortDelegate {
                 StringBuffer buffer = new StringBuffer();
 
                 // convert * into regex syntax
-                // e.g. abc*x becomes /abc.*x/
-                // or   abc?x becomes /abc.?x/
-                buffer.append('/');
+                // e.g. abc*x becomes /^abc.*x$/
+                // or   abc?x becomes /^abc.?x$/
+                buffer.append("/^");
                 for (int j = 0; j < nextPattern.length(); j++) {
                     char nextChar = nextPattern.charAt(j);
                     if (nextChar == '*' || nextChar == '?') {
@@ -136,7 +136,7 @@ public class AntDataPortDelegate implements DataPortDelegate {
                     }
                     buffer.append(nextChar);
                 }
-                buffer.append('/');
+                buffer.append("$/");
 
                 String finalPattern = buffer.toString();
 
