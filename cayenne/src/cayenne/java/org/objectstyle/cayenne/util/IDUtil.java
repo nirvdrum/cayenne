@@ -59,7 +59,6 @@ import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 
 /**
@@ -68,7 +67,6 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrei Adamchik
  */
 public class IDUtil {
-    private static Logger logObj = Logger.getLogger(IDUtil.class);
 
     private static volatile long currentId = Long.MIN_VALUE;
     private static MessageDigest md;
@@ -87,38 +85,6 @@ public class IDUtil {
             // use loopback interface
             ipAddress = new byte[] { 127, 0, 0, 1 };
         }
-    }
-    
-    /**
-     * Utility method to compare two byte[] for contents 
-     * equality.
-     * 
-     * @since 1.1
-     */
-    public static boolean byteArraysEqual(byte[] b1, byte[] b2) {
-        if (b1 == b2) {
-            return true;
-        }
-
-        if (b1 == null && b2 == null) {
-            return true;
-        }
-
-        if (b1 == null || b2 == null) {
-            return false;
-        }
-
-        if (b1.length != b2.length) {
-            return false;
-        }
-
-        for (int i = 0; i < b1.length; i++) {
-            if (b1[i] != b2[i]) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
