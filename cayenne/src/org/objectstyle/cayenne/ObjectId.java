@@ -76,11 +76,20 @@ public class ObjectId {
 	 * single Integer as their id.
 	 */
 	public ObjectId(String objEntityName, String keyName, int id) {
+		this(objEntityName, keyName, new Integer(id));
+	}
+
+	/**
+	 * Convenience constructor for entities that have a 
+	 * single column as their id.
+	 */
+	public ObjectId(String objEntityName, String keyName, Object id) {
 		this.objEntityName = objEntityName;
 		HashMap keys = new HashMap();
-		keys.put(keyName, new Integer(id));
+		keys.put(keyName, id);
 		setIdKeys(keys);
 	}
+
 
 	/** Creates new ObjectId */
 	public ObjectId(String objEntityName, Map idKeys) {

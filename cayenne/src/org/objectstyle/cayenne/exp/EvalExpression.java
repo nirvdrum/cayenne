@@ -52,72 +52,78 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
-/** 
- * Class that allows to walk through Expression nodes tree. 
- * It will notify registered handler when going through
- * individual nodes. 
+import java.util.ArrayList;
+
+/**
+ * Class that performs expression evaluation.
  * 
  * @author Andrei Adamchik
  */
-public class ExpressionTraversal {
-    private TraversalHandler handler;
-    
-    
-    /** Sets traversal handler. The whole expression traversal process
-      * is done for the benefit of handler, since ExpressionTraversal
-      * object itself does not use Expression information, it just parses it. */
-    public void setHandler(TraversalHandler handler) {
-        this.handler = handler;
-    }
-    
-    /** Returns TraversalHandler. */
-    public TraversalHandler getHandler() {
-        return handler;
-    }
-    
-    
-    /** Will walk through the expression node tree. 
-      * When passing through points of interest, will invoke callback
-      * methods on TraversalHandler. */
-    public void traverseExpression(Expression expr) {
-        traverseExpression(expr, null);
-    } 
-    
-    
-    protected void traverseExpression(Object expObj, Expression parentExp) {
-        // see if "expObj" is a leaf node
-        if(!(expObj instanceof Expression)) {
-            handler.objectNode(expObj, parentExp);
-            return;
-        }
-        
-        Expression exp = (Expression)expObj;
-        
-        // announce start node
-        int count = exp.getOperandCount();
-        switch(count) {
-            case 2: handler.startBinaryNode(exp, parentExp); break;
-            case 1: handler.startUnaryNode(exp, parentExp); break;
-            case 3: handler.startTernaryNode(exp, parentExp); break;
-        }
-        
-        // traverse each child
-        int count_1 = count - 1;
-        for(int i = 0; i <= count_1; i++) {
-            traverseExpression(exp.getOperand(i), exp);
-            
-            // announce finished child
-            handler.finishedChild(exp, i, i < count_1);
-        }
-        
-        switch(count) {
-            case 2: handler.endBinaryNode(exp, parentExp); break;
-            case 1: handler.endUnaryNode(exp, parentExp); break;
-            case 3: handler.endTernaryNode(exp, parentExp); break;
-        }
-    }
-    
+public class EvalExpression extends ExpressionTraversal {
+	protected Expression exp;
+	protected boolean stop;
+	protected boolean match;
+
+	/**
+	 * Constructor for EvalExpression.
+	 */
+	public EvalExpression(Expression exp) {
+		this.exp = exp;
+		this.setHandler(new EvalHandler());
+	}
+
+	/**
+	 * Evaluates internally stored expression for an object.
+	 * 
+	 * @return <code>true</code> if object matches the expression,
+	 * <code>false</code> otherwise.
+	 */
+	public boolean evaluate(Object o) {
+		reinit(o);
+		traverseExpression(exp);
+
+		return match;
+	}
+
+	protected void reinit(Object o) {
+		stop = false;
+		match = false;
+		((EvalHandler) getHandler()).reinit(o);
+	}
+
+	/** 
+	 * Stops early if needed.
+	 */
+	protected void traverseExpression(Object expObj, Expression parentExp) {
+		if (stop) {
+			return;
+		}
+
+		super.traverseExpression(expObj, parentExp);
+	}
+
+	class EvalHandler extends TraversalHelper {
+		protected ArrayList stack = new ArrayList(10);
+		protected int op;
+		protected Object obj;
+
+		protected void reinit(Object obj) {
+			stack.clear();
+			this.obj = obj;
+		}
+		
+		
+
+		/** Populates expression array with value. */
+		public void objectNode(Object leaf, Expression parentNode) {
+			if (parentNode.getType() == Expression.OBJ_PATH) {
+				
+			} else {
+				
+			}
+		}
+	}
 }

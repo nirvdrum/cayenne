@@ -181,11 +181,7 @@
     <!-- ========================================== -->
     <!-- Build "fat" JAR file with dependencies.    -->
     <!-- ========================================== -->
-    <target name="jar" depends="prepare,compile_subprojects">
-        <mkdir dir="src/${build}/unjar"/>
-        <unjar src="${velocity.jar}" dest="src/${build}/unjar"/>
-        <delete dir="src/${build}/unjar/META-INF"/>
-
+    <target name="jar" depends="prepare,compile_subprojects,prepare-dep">
         <jar jarfile="${dist}/lib/cayenne.jar">
             <fileset dir="src/${build}/classes"/>
             <fileset dir="src/${build}/templates"/>
@@ -205,6 +201,11 @@
             </manifest>
         </jar>
     </target>
+    
+    <target name="prepare-dep"> 
+    	<ant antfile="build-dep.xml" target="unjar"/>
+    </target>
+    
 
 
     <!-- ========================================== -->

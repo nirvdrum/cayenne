@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,9 +53,15 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.exp;
 
-/** Noop implementation of TraversalHandler. 
-  * Useful as a superclass for partial implementations of TraversalHandler. */
+/** 
+ * Noop implementation of TraversalHandler. 
+ * Useful as a superclass for partial implementations 
+ * of TraversalHandler. 
+ * 
+ * @author Andrei Adamchik
+ */
 public class TraversalHelper implements TraversalHandler {
     
     public void finishedChild(Expression node, int childIndex, boolean hasMoreChildren) {}

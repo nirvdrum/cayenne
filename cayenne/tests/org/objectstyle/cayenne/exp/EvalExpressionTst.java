@@ -52,72 +52,37 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.exp;
 
-/** 
- * Class that allows to walk through Expression nodes tree. 
- * It will notify registered handler when going through
- * individual nodes. 
- * 
+import junit.framework.TestCase;
+
+import org.objectstyle.art.Artist;
+
+/**
  * @author Andrei Adamchik
  */
-public class ExpressionTraversal {
-    private TraversalHandler handler;
-    
-    
-    /** Sets traversal handler. The whole expression traversal process
-      * is done for the benefit of handler, since ExpressionTraversal
-      * object itself does not use Expression information, it just parses it. */
-    public void setHandler(TraversalHandler handler) {
-        this.handler = handler;
+public class EvalExpressionTst extends TestCase {
+
+	/**
+	 * Constructor for EvalExpressionTst.
+	 * @param arg0
+	 */
+	public EvalExpressionTst(String arg0) {
+		super(arg0);
+	}
+
+    public void testEvaluateEquals() throws Exception {
+    	Expression e = ExpressionFactory.matchExp("artistName", "abc");
+    	EvalExpression eval = new EvalExpression(e);
+    	
+    	Artist match = new Artist();
+    	match.setArtistName("abc");
+    	// assertTrue(eval.evaluate(match));
+    	
+    	Artist noMatch = new Artist();
+    	noMatch.setArtistName("123");
+    	// assertTrue(!eval.evaluate(noMatch));
     }
-    
-    /** Returns TraversalHandler. */
-    public TraversalHandler getHandler() {
-        return handler;
-    }
-    
-    
-    /** Will walk through the expression node tree. 
-      * When passing through points of interest, will invoke callback
-      * methods on TraversalHandler. */
-    public void traverseExpression(Expression expr) {
-        traverseExpression(expr, null);
-    } 
-    
-    
-    protected void traverseExpression(Object expObj, Expression parentExp) {
-        // see if "expObj" is a leaf node
-        if(!(expObj instanceof Expression)) {
-            handler.objectNode(expObj, parentExp);
-            return;
-        }
-        
-        Expression exp = (Expression)expObj;
-        
-        // announce start node
-        int count = exp.getOperandCount();
-        switch(count) {
-            case 2: handler.startBinaryNode(exp, parentExp); break;
-            case 1: handler.startUnaryNode(exp, parentExp); break;
-            case 3: handler.startTernaryNode(exp, parentExp); break;
-        }
-        
-        // traverse each child
-        int count_1 = count - 1;
-        for(int i = 0; i <= count_1; i++) {
-            traverseExpression(exp.getOperand(i), exp);
-            
-            // announce finished child
-            handler.finishedChild(exp, i, i < count_1);
-        }
-        
-        switch(count) {
-            case 2: handler.endBinaryNode(exp, parentExp); break;
-            case 1: handler.endUnaryNode(exp, parentExp); break;
-            case 3: handler.endTernaryNode(exp, parentExp); break;
-        }
-    }
-    
 }
+

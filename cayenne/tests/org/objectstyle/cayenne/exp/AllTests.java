@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.exp;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,13 +53,14 @@ package org.objectstyle.cayenne.exp;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.exp;
 
-import junit.framework.*;
-import junit.runner.*;
+import junit.framework.TestSuite;
 
 public class AllTests {
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("Expression Package (org.objectstyle.cayenne.expr)");
+		suite.addTestSuite(EvalExpressionTst.class);
         suite.addTestSuite(UnaryExpressionTst.class);
         suite.addTestSuite(BinaryExpressionTst.class);
         suite.addTestSuite(TernaryExpressionTst.class);

@@ -12,3 +12,4 @@ Changes in this release:
 1. Added shortcut methods to Expression and ExpressionFactory
 to make API friendlier.
 
+2. Added convenience constructors to ObjectId

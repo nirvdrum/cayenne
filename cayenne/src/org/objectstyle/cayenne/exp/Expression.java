@@ -55,6 +55,9 @@
  */ 
 package org.objectstyle.cayenne.exp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Defines basic API of a generic data expression. */
 public abstract class Expression {
     
@@ -196,4 +199,34 @@ public abstract class Expression {
      * Operand indexing starts at 0.
      */
     public abstract void setOperand(int index, Object value);
+    
+    /** 
+     * Method for in-memory evaluation of expressions. 
+     * 
+     * @return <code>true</code> if object matches the expression,
+     * <code>false</code> otherwise.
+     */
+    public boolean eval(Object o) {
+    	return new EvalExpression(this).evaluate(o);
+    }
+    
+    /**
+     * Returns a list of objects that match the expression.
+     */
+    public List filterObjects(List objects) {
+    	int size = (objects != null) ? objects.size() : 0;
+    	ArrayList filtered = new ArrayList(size);
+    	
+    	if(size > 0) {
+    		EvalExpression eval = new EvalExpression(this);
+    		for(int i = 0; i < size; i++) {
+    			Object o = objects.get(i);
+    			if(eval.evaluate(o)) {
+    				filtered.add(o);
+    			}
+    		}
+    	}
+    	
+        return filtered;   	
+    }
 }

@@ -52,6 +52,13 @@
     		<p>- Copy <code>cayenne.jar</code> to the <code>WEB-INF/lib</code> subdirectory of 
     		the tutorial project directory.</p>
     		
+    		<p> - Doublecheck the JDBC driver installation for the target database. If you haven't installed
+    		it already, you may copy the driver jar file to 
+       		<code>WEB-INF/lib</code> subdirectory of the tutorial project. Alternatively if you want it to be 
+       		shared by all web applications and you are using Tomcat, you may copy it to
+       		<code>$CATALINA_HOME/common/lib</code> instead.
+       		</p>
+       		
     		<p>- Install Struts: 
     		<ul>
     		<li>Download Struts from <a href=
