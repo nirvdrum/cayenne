@@ -321,17 +321,13 @@ public class DataNode implements QueryEngine {
 		QueryTranslator transl)
 		throws Exception {
 
-		ResultSet rs = null;
-		DefaultResultIterator it = null;
-
 		SelectQueryAssembler assembler = (SelectQueryAssembler) transl;
-		it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
+		DefaultResultIterator it = new DefaultResultIterator(prepStmt, this.getAdapter(), assembler);
 
         // note that we don't need to close ResultIterator
         // since "dataRows" will do it internally
 		List resultRows = it.dataRows();
 		QueryLogger.logSelectCount(observer.queryLogLevel(), resultRows.size());
-
 		observer.nextDataRows(transl.getQuery(), resultRows);
 	}
 
@@ -345,7 +341,6 @@ public class DataNode implements QueryEngine {
 		QueryTranslator transl)
 		throws Exception {
 
-		ResultSet rs = null;
 		DefaultResultIterator it = null;
 
 		try {

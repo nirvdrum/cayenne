@@ -76,10 +76,10 @@ public class IteratorTestBase extends TestCase {
 
 	/**
 	 * Constructor for IteratorTestBase.
-	 * @param arg0
+	 * @param name TestCase name
 	 */
-	public IteratorTestBase(String arg0) {
-		super(arg0);
+	public IteratorTestBase(String name) {
+		super(name);
 	}
 
 	public void setUp() throws Exception {
@@ -95,7 +95,7 @@ public class IteratorTestBase extends TestCase {
     /** 
      * Initializes internal state.
      */
-	protected void initStatement() throws Exception {
+	protected void init() throws Exception {
 		conn = TestMain.getSharedConnection();
 
 		SelectQuery q = new SelectQuery("Artist");

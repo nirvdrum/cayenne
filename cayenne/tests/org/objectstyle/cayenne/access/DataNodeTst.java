@@ -57,25 +57,86 @@
 package org.objectstyle.cayenne.access;
 
 import org.objectstyle.TestMain;
-import org.objectstyle.cayenne.access.trans.SelectQueryAssembler;
-import org.objectstyle.cayenne.dba.DbAdapter;
-import org.objectstyle.cayenne.query.SelectQuery;
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.query.Query;
 
+/** 
+ * DataNode test cases.
+ * 
+ * @author Andrei Adamchik
+ */
 public class DataNodeTst extends IteratorTestBase {
+	protected DataNode node;
 
 	public DataNodeTst(String name) {
 		super(name);
 	}
 
 	public void testRunSelect() throws Exception {
-		// fail("Not implemented.");
+		SelectOperationObserver observer = new SelectOperationObserver();
+
+		try {
+			init();
+			node.runSelect(observer, st, transl);
+			assertEquals(
+				DataContextTst.artistCount,
+				observer.getResults(transl.getQuery()).size());
+		} finally {
+			cleanup();
+		}
 	}
 
-	public void testRunUpdate() throws Exception {
-		// fail("Not implemented.");
-	}
 
 	public void testRunIteratedSelect() throws Exception {
-		// fail("Not implemented.");
+		IteratedObserver observer = new IteratedObserver();
+
+		init();
+		node.runIteratedSelect(observer, st, transl);
+		assertEquals(DataContextTst.artistCount, observer.getResultCount());
+		
+		// no cleanup is needed, since observer will close the iterator
+	}
+
+	protected DataNode newDataNode() {
+		DataNode node = new DataNode("dummy");
+		node.setAdapter(TestMain.getSharedNode().getAdapter());
+		return node;
+	}
+
+	protected void init() throws Exception {
+		super.init();
+		node = newDataNode();
+	}
+
+	class IteratedObserver extends DefaultOperationObserver {
+		protected int count;
+
+		public void nextDataRows(Query q, ResultIterator it) {
+			super.nextDataRows(q, it);
+
+			try {
+				while (it.hasNextRow()) {
+					it.nextDataRow();
+					count++;
+				}
+			} catch (Exception ex) {
+				throw new CayenneRuntimeException(
+					"Error processing result iterator",
+					ex);
+			} finally {
+
+				try {
+					it.close();
+				} catch (Exception ex) {
+					throw new CayenneRuntimeException(
+						"Error closing result iterator",
+						ex);
+				}
+			}
+		}
+
+		public int getResultCount() {
+			return count;
+		}
 	}
 }

@@ -69,18 +69,18 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void setUp() throws Exception {
 		super.setUp();
-
 		it = null;
 	}
 
-	protected void initIterator() throws Exception {
-		super.initStatement();
+	protected void init() throws Exception {
+		super.init();
 		it =
 			new DefaultResultIterator(
 				st,
 				TestMain.getSharedNode().getAdapter(),
 				(SelectQueryAssembler) transl);
 	}
+	
 
 	protected void cleanup() throws Exception {
 		if (it != null) {
@@ -93,7 +93,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void testClose1() throws Exception {
 		try {
-			initIterator();
+			init();
 			assertTrue(!conn.isClosed());
 
 			it.setClosingConnection(false);
@@ -107,7 +107,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 	}
 
 	public void testClose2() throws Exception {
-		initIterator();
+		init();
 		assertTrue(!conn.isClosed());
 
 		it.setClosingConnection(true);
@@ -119,7 +119,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void testCheckNextRow() throws Exception {
 		try {
-			initIterator();
+			init();
 
 			assertNotNull(it.dataRow);
 			it.checkNextRow();
@@ -132,7 +132,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void testHasNextRow() throws java.lang.Exception {
 		try {
-			initIterator();
+			init();
 			assertTrue(it.hasNextRow());
 		} finally {
 			cleanup();
@@ -141,7 +141,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void testNextDataRow() throws java.lang.Exception {
 		try {
-			initIterator();
+			init();
 
 			// must be as many rows as we have artists
 			// inserted in the database
@@ -160,7 +160,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void testIsClosingConnection() throws java.lang.Exception {
 		try {
-			initIterator();
+			init();
 			assertTrue(!it.isClosingConnection());
 			it.setClosingConnection(true);
 			assertTrue(it.isClosingConnection());
@@ -172,7 +172,7 @@ public class DefaultResultIteratorTst extends IteratorTestBase {
 
 	public void testReadDataRow() throws java.lang.Exception {
 		try {
-			initIterator();
+			init();
 
 			// must be as many rows as we have artists
 			// inserted in the database
