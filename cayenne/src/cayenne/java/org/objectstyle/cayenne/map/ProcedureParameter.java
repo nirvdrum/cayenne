@@ -56,13 +56,15 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
  * A descriptor for the StoredProcedure parameter.
  * 
  * @author Andrei Adamchik
  */
-public class ProcedureParameter extends MapObject {
+public class ProcedureParameter extends MapObject implements XMLSerializable {
     public static final int IN_OUT_PARAMETER = 3;
     public static final int IN_PARAMETER = 1;
     public static final int OUT_PARAMETER = 2;
@@ -88,10 +90,48 @@ public class ProcedureParameter extends MapObject {
     }
 
     public ProcedureParameter(String name, int type, int direction) {
-
         super(name);
         setType(type);
         setDirection(direction);
+    }
+
+    /**
+     * Prints itself as XML to the provided PrintWriter.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<procedure-parameter name=\"" + getName() + '\"');
+
+        String type = TypesMapping.getSqlNameByType(getType());
+        if (type != null) {
+            encoder.print(" type=\"" + type + '\"');
+        }
+
+        if (getMaxLength() > 0) {
+            encoder.print(" length=\"");
+            encoder.print(getMaxLength());
+            encoder.print('\"');
+        }
+
+        if (getPrecision() > 0) {
+            encoder.print(" precision=\"");
+            encoder.print(getPrecision());
+            encoder.print('\"');
+        }
+
+        int direction = getDirection();
+        if (direction == ProcedureParameter.IN_PARAMETER) {
+            encoder.print(" direction=\"in\"");
+        }
+        else if (direction == ProcedureParameter.IN_OUT_PARAMETER) {
+            encoder.print(" direction=\"in_out\"");
+        }
+        else if (direction == ProcedureParameter.OUT_PARAMETER) {
+            encoder.print(" direction=\"out\"");
+        }
+
+        encoder.println("/>");
     }
 
     /**

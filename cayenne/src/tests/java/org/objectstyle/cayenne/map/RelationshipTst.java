@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 public class RelationshipTst extends CayenneTestCase {
     protected Relationship rel;
@@ -65,6 +66,10 @@ public class RelationshipTst extends CayenneTestCase {
         rel = new Relationship() {
             public Entity getTargetEntity() {
                 return null;
+            }
+
+            public void encodeAsXML(XMLEncoder encoder) {
+
             }
         };
     }

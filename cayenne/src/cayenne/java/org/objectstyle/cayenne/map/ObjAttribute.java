@@ -61,6 +61,7 @@ import java.util.Iterator;
 import org.apache.commons.collections.IteratorUtils;
 import org.apache.commons.lang.StringUtils;
 import org.objectstyle.cayenne.CayenneException;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * An ObjAttribute is a mapping descriptor of a Java class property.
@@ -72,70 +73,90 @@ public class ObjAttribute extends Attribute {
     protected String type;
     private String dbAttributePath;
 
-    
-	public ObjAttribute() {}
+    public ObjAttribute() {
+    }
 
-	public ObjAttribute(String name) {
-		super(name);
-	}
+    public ObjAttribute(String name) {
+        super(name);
+    }
 
+    public ObjAttribute(String name, String type, ObjEntity entity) {
+        setName(name);
+        setType(type);
+        setEntity(entity);
+    }
 
-	public ObjAttribute(String name, String type, ObjEntity entity) {
-		setName(name);
-		setType(type);
-		setEntity(entity);
-	}
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<obj-attribute name=\"" + getName() + '\"');
 
+        if (getType() != null) {
+            encoder.print(" type=\"");
+            encoder.print(getType());
+            encoder.print('\"');
+        }
 
-	/** 
+        // If this obj attribute is mapped to db attribute
+        if (getDbAttribute() != null) {
+            encoder.print(" db-attribute-path=\"");
+            encoder.print(getDbAttributePath());
+            encoder.print('\"');
+        }
+
+        encoder.println("/>");
+    }
+
+    /** 
      * Returns fully qualified Java class name of the data object property represented
      * by this attribute.
      */
-	public String getType() {
+    public String getType() {
         return type;
     }
 
-
-	/** 
+    /** 
      * Sets the type of the data object property.
      */
     public void setType(String type) {
         this.type = type;
     }
 
-
-	/**
-	 * Returns a DbAttribute mapped by this ObjAttribute.
-	 */
+    /**
+     * Returns a DbAttribute mapped by this ObjAttribute.
+     */
     public DbAttribute getDbAttribute() {
         Iterator pathIterator = getDbPathIterator();
         Object o = null;
         while (pathIterator.hasNext()) {
             o = pathIterator.next();
         }
-        return (DbAttribute)o;
+        return (DbAttribute) o;
     }
 
     public Iterator getDbPathIterator() {
-        if(dbAttributePath == null) {
+        if (dbAttributePath == null) {
             return IteratorUtils.EMPTY_ITERATOR;
         }
 
-        ObjEntity ent = (ObjEntity)getEntity();
-        if(ent == null) {
+        ObjEntity ent = (ObjEntity) getEntity();
+        if (ent == null) {
             return IteratorUtils.EMPTY_ITERATOR;
         }
 
         DbEntity dbEnt = ent.getDbEntity();
-        if(dbEnt == null) {
+        if (dbEnt == null) {
             return IteratorUtils.EMPTY_ITERATOR;
-    	}
+        }
 
         int lastPartStart = dbAttributePath.lastIndexOf('.');
         if (lastPartStart < 0) {
             Attribute attribute = dbEnt.getAttribute(dbAttributePath);
             if (attribute == null) {
-            	return IteratorUtils.EMPTY_ITERATOR;
+                return IteratorUtils.EMPTY_ITERATOR;
             }
             return IteratorUtils.singletonIterator(attribute);
         }
@@ -143,51 +164,49 @@ public class ObjAttribute extends Attribute {
         return dbEnt.resolvePathComponents(dbAttributePath);
     }
 
-
-	/**
+    /**
      * Set mapped DbAttribute.
      */
     public void setDbAttribute(DbAttribute dbAttribute) {
-    	if(dbAttribute == null) {
-    		this.setDbAttributePath(null);
-    	}
-    	else {
-    		this.setDbAttributePath(dbAttribute.getName());
-    	}
+        if (dbAttribute == null) {
+            this.setDbAttributePath(null);
+        }
+        else {
+            this.setDbAttributePath(dbAttribute.getName());
+        }
     }
 
-
-	/**
-	 * Returns the dbAttributeName.
-	 * @return String
-	 */
-	public String getDbAttributeName() {
-        if (dbAttributePath == null) return null;
+    /**
+     * Returns the dbAttributeName.
+     * @return String
+     */
+    public String getDbAttributeName() {
+        if (dbAttributePath == null)
+            return null;
         int lastPartStart = dbAttributePath.lastIndexOf('.');
-        String lastPart = StringUtils.substring(
+        String lastPart =
+            StringUtils.substring(
                 dbAttributePath,
                 lastPartStart + 1,
                 dbAttributePath.length());
-		return lastPart;
-	}
+        return lastPart;
+    }
 
-
-	/**
-	 * Sets the dbAttributeName.
-	 * @param dbAttributeName The dbAttributeName to set
-	 */
-	public void setDbAttributeName(String dbAttributeName) {
+    /**
+     * Sets the dbAttributeName.
+     * @param dbAttributeName The dbAttributeName to set
+     */
+    public void setDbAttributeName(String dbAttributeName) {
         if (dbAttributePath == null || dbAttributeName == null) {
             dbAttributePath = dbAttributeName;
             return;
         }
         int lastPartStart = dbAttributePath.lastIndexOf('.');
-        String newPath = (lastPartStart > 0
-        					? StringUtils.chomp(dbAttributePath, ".")
-        					: "");
+        String newPath =
+            (lastPartStart > 0 ? StringUtils.chomp(dbAttributePath, ".") : "");
         newPath += (newPath.length() > 0 ? "." : "") + dbAttributeName;
-		this.dbAttributePath = newPath;
-	}
+        this.dbAttributePath = newPath;
+    }
 
     public void setDbAttributePath(String dbAttributePath) {
         this.dbAttributePath = dbAttributePath;
@@ -203,19 +222,22 @@ public class ObjAttribute extends Attribute {
 
     public boolean mapsToDependentDbEntity() {
         Iterator i = getDbPathIterator();
-        if (!i.hasNext()) return false;
+        if (!i.hasNext())
+            return false;
         Object o = i.next();
-        if (!i.hasNext()) return false;
+        if (!i.hasNext())
+            return false;
         Object o1 = i.next();
-        if (!(o1 instanceof DbAttribute)) return false;
-        DbRelationship toDependent = (DbRelationship)o;
+        if (!(o1 instanceof DbAttribute))
+            return false;
+        DbRelationship toDependent = (DbRelationship) o;
         return toDependent.isToDependentPK();
     }
 
     public void validate() throws CayenneException {
         String head = "ObjAttribute: " + getName() + " ";
-        ObjEntity ent = (ObjEntity)getEntity();
-        if(ent == null) {
+        ObjEntity ent = (ObjEntity) getEntity();
+        if (ent == null) {
             throw new CayenneException(head + "Parent ObjEntity not defined.");
         }
         head += "ObjEntity: " + ent.getName() + " ";
@@ -232,19 +254,22 @@ public class ObjAttribute extends Attribute {
             while (i.hasNext()) {
                 Object pathPart = i.next();
                 if (pathPart instanceof DbRelationship) {
-                    DbRelationship r = (DbRelationship)pathPart;
+                    DbRelationship r = (DbRelationship) pathPart;
                     if (r.isToMany())
                         throw new CayenneException(
-                                head + "DbRelationship: " + r.getName() + " is to-many.");
-                } else if (pathPart instanceof DbAttribute) {
+                            head + "DbRelationship: " + r.getName() + " is to-many.");
+                }
+                else if (pathPart instanceof DbAttribute) {
                     dbAttributeFound = true;
                 }
             }
             if (!dbAttributeFound)
                 throw new CayenneException(head + "DbAttribute not found.");
-        } catch (CayenneException ex) {
+        }
+        catch (CayenneException ex) {
             throw ex;
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             throw new CayenneException(head + ex.getMessage(), ex);
         }
     }

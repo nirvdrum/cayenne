@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * DbEntity subclass that is based on another DbEntity
@@ -69,175 +70,201 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
  * @author Andrei Adamchik
  */
 public class DerivedDbEntity extends DbEntity {
-	protected String parentEntityName;
-	
-	/**
-	 * Constructor for DerivedDbEntity.
-	 */
-	public DerivedDbEntity() {
-		super();
-	}
+    protected String parentEntityName;
 
-	/**
-	 * Constructor for DerivedDbEntity.
-	 * @param name
-	 */
-	public DerivedDbEntity(String name) {
-		super(name);
-	}
+    /**
+     * Constructor for DerivedDbEntity.
+     */
+    public DerivedDbEntity() {
+        super();
+    }
 
-	/**
-	 * Constructor for DerivedDbEntity. Creates
-	 * a derived entity with the attribute set of a parent entity.
-	 */
-	public DerivedDbEntity(String name, DbEntity parentEntity) {
-		super(name);
+    /**
+     * Constructor for DerivedDbEntity.
+     * @param name
+     */
+    public DerivedDbEntity(String name) {
+        super(name);
+    }
 
-		this.setParentEntity(parentEntity);
-		this.resetToParentView();
-	}
+    /**
+     * Constructor for DerivedDbEntity. Creates
+     * a derived entity with the attribute set of a parent entity.
+     */
+    public DerivedDbEntity(String name, DbEntity parentEntity) {
+        super(name);
 
-	/**
-	 * Removes all attributes and relationships, 
-	 * and replaces them with the data of the parent entity.
-	 */
-	public void resetToParentView() {
-		this.clearAttributes();
-		this.clearRelationships();
+        this.setParentEntity(parentEntity);
+        this.resetToParentView();
+    }
 
-		// copy attributes
-		Iterator it = getParentEntity().getAttributes().iterator();
-		while (it.hasNext()) {
-			this.addAttribute(new DerivedDbAttribute(this, (DbAttribute)it.next()));
-		}
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<db-entity name=\"" + getName() + '\"');
+        if (getSchema() != null && getSchema().trim().length() > 0) {
+            encoder.print(" schema=\"");
+            encoder.print(getSchema().trim());
+            encoder.print('\"');
+        }
+        if (getCatalog() != null && getCatalog().trim().length() > 0) {
+            encoder.print(" catalog=\"");
+            encoder.print(getCatalog().trim());
+            encoder.print('\"');
+        }
 
-		// copy relationships
-		// Iterator rit = new ArrayList(this.getParentEntity().getRelationships()).iterator();
-		Iterator rit = this.getParentEntity().getRelationships().iterator();
-		while (rit.hasNext()) {
-			DbRelationship protoRel = (DbRelationship) rit.next();
-			DbRelationship rel = new DbRelationship();
-			rel.setName(protoRel.getName());
-			rel.setSourceEntity(this);
-			rel.setTargetEntity(protoRel.getTargetEntity());
+        DbEntity parent = getParentEntity();
+        String name = (parent != null) ? parent.getName() : "";
+        encoder.print(" parentName=\"");
+        encoder.print(name);
+        encoder.print("\">");
 
-			Iterator joins = protoRel.getJoins().iterator();
-			while (joins.hasNext()) {
-				DbAttributePair protoJoin = (DbAttributePair) joins.next();
-				DbAttribute src = (DbAttribute)getAttribute(protoJoin.getSource().getName());
-				DbAttributePair join = new DbAttributePair(src, protoJoin.getTarget());
-				rel.addJoin(join);
-			}
+        encoder.indent(1);
+        encoder.print(getAttributeMap());
+        encoder.indent(-1);
+        encoder.println("</db-entity>");
+    }
 
-			this.addRelationship(rel);
-		}
-	}
+    /**
+     * Removes all attributes and relationships, 
+     * and replaces them with the data of the parent entity.
+     */
+    public void resetToParentView() {
+        this.clearAttributes();
+        this.clearRelationships();
 
-	/**
-	 * Returns the parentEntity.
-	 * 
-	 * @return DbEntity
-	 */
-	public DbEntity getParentEntity() {
-		if(parentEntityName == null) {
-			return null;
-		}
-		
-		DataMap map = getDataMap();
-		if(map == null) {
-			return null;
-		}
-		
-		return map.getDbEntity(parentEntityName, true);
-	}
+        // copy attributes
+        Iterator it = getParentEntity().getAttributes().iterator();
+        while (it.hasNext()) {
+            this.addAttribute(new DerivedDbAttribute(this, (DbAttribute) it.next()));
+        }
 
-	/**
-	 * Sets the parentEntity.
-	 * 
-	 * @param parentEntity The parentEntity to set
-	 */
-	public void setParentEntity(DbEntity parentEntity) {
-		if(parentEntity == null) {
-			setParentEntityName(null);
-		}
-		else {
-		    setParentEntityName(parentEntity.getName());
-		}
-	}
+        // copy relationships
+        // Iterator rit = new ArrayList(this.getParentEntity().getRelationships()).iterator();
+        Iterator rit = this.getParentEntity().getRelationships().iterator();
+        while (rit.hasNext()) {
+            DbRelationship protoRel = (DbRelationship) rit.next();
+            DbRelationship rel = new DbRelationship();
+            rel.setName(protoRel.getName());
+            rel.setSourceEntity(this);
+            rel.setTargetEntity(protoRel.getTargetEntity());
 
-	/** 
-	 * Returns attributes used in GROUP BY as an unmodifiable list.
-	 */
-	public List getGroupByAttributes() {
-		List list = new ArrayList();
-		Iterator it = super.getAttributes().iterator();
-		while(it.hasNext()) {
-			DerivedDbAttribute attr = (DerivedDbAttribute)it.next();
-			if(attr.isGroupBy()) {
-				list.add(attr);
-			}
-		}
-		return list;
-	}
+            Iterator joins = protoRel.getJoins().iterator();
+            while (joins.hasNext()) {
+                DbAttributePair protoJoin = (DbAttributePair) joins.next();
+                DbAttribute src =
+                    (DbAttribute) getAttribute(protoJoin.getSource().getName());
+                DbAttributePair join = new DbAttributePair(src, protoJoin.getTarget());
+                rel.addJoin(join);
+            }
 
-	/**
-	 * @see org.objectstyle.cayenne.map.DbEntity#getFullyQualifiedName()
-	 */
-	public String getFullyQualifiedName() {
-		return (getParentEntity() != null)
-			? getParentEntity().getFullyQualifiedName()
-			: null;
-	}
+            this.addRelationship(rel);
+        }
+    }
 
-	/** 
-	 * Returns schema of the parent entity.
-	 */
-	public String getSchema() {
-		return (getParentEntity() != null)
-			? getParentEntity().getSchema()
-			: null;
-	}
+    /**
+     * Returns the parentEntity.
+     * 
+     * @return DbEntity
+     */
+    public DbEntity getParentEntity() {
+        if (parentEntityName == null) {
+            return null;
+        }
 
-	/** Throws exception. */
-	public void setSchema(String schema) {
-		throw new CayenneRuntimeException("Can't change schema of a derived entity.");
-	}
+        DataMap map = getDataMap();
+        if (map == null) {
+            return null;
+        }
 
-	/** 
-	 * Returns catalog of the parent entity.
-	 */
-	public String getCatalog() {
-		return (getParentEntity() != null)
-			? getParentEntity().getCatalog()
-			: null;
-	}
+        return map.getDbEntity(parentEntityName, true);
+    }
 
-	/** Throws exception. */
-	public void setCatalog(String catalog) {
-		throw new CayenneRuntimeException("Can't change catalogue of a derived entity.");
-	}
+    /**
+     * Sets the parentEntity.
+     * 
+     * @param parentEntity The parentEntity to set
+     */
+    public void setParentEntity(DbEntity parentEntity) {
+        if (parentEntity == null) {
+            setParentEntityName(null);
+        }
+        else {
+            setParentEntityName(parentEntity.getName());
+        }
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
-	 */
-	public void removeAttribute(String attrName) {
-		super.removeAttribute(attrName);
-	}
-	
-	/**
-	 * Returns the parentEntityName.
-	 * @return String
-	 */
-	public String getParentEntityName() {
-		return parentEntityName;
-	}
+    /** 
+     * Returns attributes used in GROUP BY as an unmodifiable list.
+     */
+    public List getGroupByAttributes() {
+        List list = new ArrayList();
+        Iterator it = super.getAttributes().iterator();
+        while (it.hasNext()) {
+            DerivedDbAttribute attr = (DerivedDbAttribute) it.next();
+            if (attr.isGroupBy()) {
+                list.add(attr);
+            }
+        }
+        return list;
+    }
 
+    /**
+     * @see org.objectstyle.cayenne.map.DbEntity#getFullyQualifiedName()
+     */
+    public String getFullyQualifiedName() {
+        return (getParentEntity() != null)
+            ? getParentEntity().getFullyQualifiedName()
+            : null;
+    }
 
-	/**
-	 * Sets the parentEntityName.
-	 * @param parentEntityName The parentEntityName to set
-	 */
-	public void setParentEntityName(String parentEntityName) {
-		this.parentEntityName = parentEntityName;
-	}
+    /** 
+     * Returns schema of the parent entity.
+     */
+    public String getSchema() {
+        return (getParentEntity() != null) ? getParentEntity().getSchema() : null;
+    }
+
+    /** Throws exception. */
+    public void setSchema(String schema) {
+        throw new CayenneRuntimeException("Can't change schema of a derived entity.");
+    }
+
+    /** 
+     * Returns catalog of the parent entity.
+     */
+    public String getCatalog() {
+        return (getParentEntity() != null) ? getParentEntity().getCatalog() : null;
+    }
+
+    /** Throws exception. */
+    public void setCatalog(String catalog) {
+        throw new CayenneRuntimeException("Can't change catalogue of a derived entity.");
+    }
+
+    /**
+     * @see org.objectstyle.cayenne.map.Entity#removeAttribute(String)
+     */
+    public void removeAttribute(String attrName) {
+        super.removeAttribute(attrName);
+    }
+
+    /**
+     * Returns the parentEntityName.
+     * @return String
+     */
+    public String getParentEntityName() {
+        return parentEntityName;
+    }
+
+    /**
+     * Sets the parentEntityName.
+     * @param parentEntityName The parentEntityName to set
+     */
+    public void setParentEntityName(String parentEntityName) {
+        this.parentEntityName = parentEntityName;
+    }
 }

@@ -58,7 +58,7 @@ package org.objectstyle.cayenne.map;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.SortedMap;
 import java.util.StringTokenizer;
 
 import org.objectstyle.cayenne.exp.Expression;
@@ -81,7 +81,7 @@ public abstract class Entity extends MapObject {
     // ====================================================
     protected CayenneMap attributes = new CayenneMap(this);
     //  read-through reference for public access
-    protected Map attributesMapRef = Collections.unmodifiableMap(attributes);
+    protected SortedMap attributesMapRef = Collections.unmodifiableSortedMap(attributes);
     //  read-through reference for public access
     protected Collection attributesRef =
         Collections.unmodifiableCollection(attributes.values());
@@ -90,6 +90,9 @@ public abstract class Entity extends MapObject {
     // Relationships
     // ====================================================
     protected CayenneMap relationships = new CayenneMap(this);
+    //  read-through reference for public access
+    protected SortedMap relationshipsMapRef =
+        Collections.unmodifiableSortedMap(relationships);
     //  read-through reference for public access
     protected Collection relationshipsRef =
         Collections.unmodifiableCollection(relationships.values());
@@ -213,8 +216,11 @@ public abstract class Entity extends MapObject {
         relationships.clear();
     }
 
-    public Map getRelationshipMap() {
-        return Collections.unmodifiableMap(relationships);
+    /**
+     * Returns a map of relationships sorted by name.
+     */
+    public SortedMap getRelationshipMap() {
+        return relationshipsMapRef;
     }
 
     /**
@@ -248,9 +254,10 @@ public abstract class Entity extends MapObject {
     }
 
     /**
-     * Returns entity attributes as an unmodifiable map.
+     * Returns entity attributes as an unmodifiable map. Since 1.1 returns
+     * a SortedMap.
      */
-    public Map getAttributeMap() {
+    public SortedMap getAttributeMap() {
         return attributesMapRef;
     }
 

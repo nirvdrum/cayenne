@@ -61,6 +61,7 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /** 
  * A DbAttribute defines a descriptor for a single database table column.
@@ -69,69 +70,106 @@ import org.objectstyle.cayenne.map.event.DbAttributeListener;
  * @author Andrei Adamchik
  */
 public class DbAttribute extends Attribute {
-	/** 
-	 * The type of the column. 
-	 */
-	protected int type = TypesMapping.NOT_DEFINED;
+    /** 
+     * The type of the column. 
+     */
+    protected int type = TypesMapping.NOT_DEFINED;
 
-	/**
-	 * If <code>true</code>, column corresponding to 
-	 * this attribute does not allows nulls.
-	 */
-	protected boolean mandatory;
+    /**
+     * If <code>true</code>, column corresponding to 
+     * this attribute does not allows nulls.
+     */
+    protected boolean mandatory;
 
-	/** 
-	 * If <code>true</code>, this attribute is 
-	 * a part of primary key.
-	 */
-	protected boolean primaryKey;
+    /** 
+     * If <code>true</code>, this attribute is 
+     * a part of primary key.
+     */
+    protected boolean primaryKey;
 
-	// The length of CHAR or VARCHAr or max num of digits for DECIMAL.
-	protected int maxLength = -1;
+    // The length of CHAR or VARCHAr or max num of digits for DECIMAL.
+    protected int maxLength = -1;
 
-	// The number of digits after period for DECIMAL.
-	protected int precision = -1;
+    // The number of digits after period for DECIMAL.
+    protected int precision = -1;
 
-	public DbAttribute() {
-		super();
-	}
-	
-	public DbAttribute(String name) {
-		super(name);
-	}
+    public DbAttribute() {
+        super();
+    }
 
-	public DbAttribute(String name, int type, DbEntity entity) {
-		this.setName(name);
-		this.setType(type);
-		this.setEntity(entity);
-	}
+    public DbAttribute(String name) {
+        super(name);
+    }
 
-	public String getAliasedName(String alias) {
-		return (alias != null) ? alias + '.' + this.getName() : this.getName();
-	}
+    public DbAttribute(String name, int type, DbEntity entity) {
+        this.setName(name);
+        this.setType(type);
+        this.setEntity(entity);
+    }
 
-	/** 
-	 * Returns the SQL type of the column.
-	 * 
-	 * @see java.sql.Types
-	 */
-	public int getType() {
-		return type;
-	}
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<db-attribute name=\"" + getName() + '\"');
 
-	/** 
-	 * Sets the SQL type for the column.
-	 * 
-	 * @see java.sql.Types
-	 */
-	public void setType(int type) {
-		this.type = type;
-	}
+        String type = TypesMapping.getSqlNameByType(getType());
+        if (type != null) {
+            encoder.print(" type=\"" + type + '\"');
+        }
 
-	public boolean isPrimaryKey() {
-		return primaryKey;
-	}
-    
+        // If attribute is part of primary key
+        if (isPrimaryKey()) {
+            encoder.print(" isPrimaryKey=\"true\"");
+        }
+
+        if (isMandatory()) {
+            encoder.print(" isMandatory=\"true\"");
+        }
+
+        if (getMaxLength() > 0) {
+            encoder.print(" length=\"");
+            encoder.print(getMaxLength());
+            encoder.print('\"');
+        }
+
+        if (getPrecision() > 0) {
+            encoder.print(" precision=\"");
+            encoder.print(getPrecision());
+            encoder.print('\"');
+        }
+
+        encoder.println("/>");
+    }
+
+    public String getAliasedName(String alias) {
+        return (alias != null) ? alias + '.' + this.getName() : this.getName();
+    }
+
+    /** 
+     * Returns the SQL type of the column.
+     * 
+     * @see java.sql.Types
+     */
+    public int getType() {
+        return type;
+    }
+
+    /** 
+     * Sets the SQL type for the column.
+     * 
+     * @see java.sql.Types
+     */
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public boolean isPrimaryKey() {
+        return primaryKey;
+    }
+
     /**
      * Returns <code>true</code> if the DB column represented by this
      * attribute is a foreign key, referencing another table.
@@ -156,61 +194,62 @@ public class DbAttribute extends Attribute {
         return false;
     }
 
-	public void setPrimaryKey(boolean primaryKey) {
-		this.primaryKey = primaryKey;
-		Entity e = this.getEntity();
-		if (e instanceof DbAttributeListener) {
-			((DbAttributeListener)e).dbAttributeChanged(new AttributeEvent(this, this, e));
-		}
-	}
+    public void setPrimaryKey(boolean primaryKey) {
+        this.primaryKey = primaryKey;
+        Entity e = this.getEntity();
+        if (e instanceof DbAttributeListener) {
+            ((DbAttributeListener) e).dbAttributeChanged(
+                new AttributeEvent(this, this, e));
+        }
+    }
 
-	public boolean isMandatory() {
-		return mandatory;
-	}
+    public boolean isMandatory() {
+        return mandatory;
+    }
 
-	public void setMandatory(boolean mandatory) {
-		this.mandatory = mandatory;
-	}
+    public void setMandatory(boolean mandatory) {
+        this.mandatory = mandatory;
+    }
 
-	/** 
+    /** 
      * Returns the length of database column described by this attribute. 
      */
-	public int getMaxLength() {
-		return maxLength;
-	}
+    public int getMaxLength() {
+        return maxLength;
+    }
 
-	/** 
+    /** 
      * Sets the length of character or binary type or max num of digits for DECIMAL.
      */
-	public void setMaxLength(int maxLength) {
-		this.maxLength = maxLength;
-	}
+    public void setMaxLength(int maxLength) {
+        this.maxLength = maxLength;
+    }
 
-	/** 
+    /** 
      * Returns the number of digits after period for DECIMAL.
      */
-	public int getPrecision() {
-		return precision;
-	}
+    public int getPrecision() {
+        return precision;
+    }
 
-	/** Sets the number of digits after period for DECIMAL.*/
-	public void setPrecision(int precision) {
-		this.precision = precision;
-	}
+    /** Sets the number of digits after period for DECIMAL.*/
+    public void setPrecision(int precision) {
+        this.precision = precision;
+    }
 
-	/** Appends string representation of attribute to a provided buffer.
-	 *  This is a variation of "toString" method. It may be more
-	 *  efficient in some cases. For example, when printing all
-	 *  attributes of a single entity together. */
-	public StringBuffer toStringBuffer(StringBuffer buf) {
-		buf.append("   Column name: " + this.getName() + "\n");
-		buf.append("   Column type: " + type + "\n");
-		return buf;
-	}
+    /** Appends string representation of attribute to a provided buffer.
+     *  This is a variation of "toString" method. It may be more
+     *  efficient in some cases. For example, when printing all
+     *  attributes of a single entity together. */
+    public StringBuffer toStringBuffer(StringBuffer buf) {
+        buf.append("   Column name: " + this.getName() + "\n");
+        buf.append("   Column type: " + type + "\n");
+        return buf;
+    }
 
-	public String toString() {
-		StringBuffer buf = new StringBuffer("DbAttribute\n");
-		return this.toStringBuffer(buf).toString();
-	}
+    public String toString() {
+        StringBuffer buf = new StringBuffer("DbAttribute\n");
+        return this.toStringBuffer(buf).toString();
+    }
 
 }

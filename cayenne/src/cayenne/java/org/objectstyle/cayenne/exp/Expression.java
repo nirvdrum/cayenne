@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.exp.parser.ExpressionParser;
 import org.objectstyle.cayenne.exp.parser.ParseException;
 import org.objectstyle.cayenne.util.ColnversionUtil;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /** 
@@ -595,11 +596,10 @@ public abstract class Expression implements Serializable, XMLSerializable {
      * Encodes itself, wrapping the string into XML CDATA section.
      * @since 1.1
      */
-    public void encodeAsXML(PrintWriter pw, String linePadding) {
-        pw.print(linePadding);
-        pw.print("<![CDATA[");
-        encodeAsString(pw);
-        pw.print("]]>");
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<![CDATA[");
+        encodeAsString(encoder.getPrintWriter());
+        encoder.print("]]>");
     }
 
     /**

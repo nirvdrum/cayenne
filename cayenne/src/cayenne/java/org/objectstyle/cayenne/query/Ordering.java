@@ -64,8 +64,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.exp.Expression;
-import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
 import org.objectstyle.cayenne.util.ColnversionUtil;
+import org.objectstyle.cayenne.util.DataObjectPropertyComparator;
+import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /** 
@@ -236,29 +237,29 @@ public class Ordering implements Comparator, Serializable, XMLSerializable {
      * 
      * @since 1.1
      */
-    public void encodeAsXML(PrintWriter pw, String linePadding) {
-        pw.print(linePadding);
-        pw.print("<ordering");
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<ordering");
 
         if (!ascending) {
-            pw.print(" descending=\"true\"");
+            encoder.print(" descending=\"true\"");
         }
 
         if (caseInsensitive) {
-            pw.print(" ignore-case=\"true\"");
+            encoder.print(" ignore-case=\"true\"");
         }
 
-        pw.print('>');
+        encoder.print(">");
         if (sortSpec != null) {
-            sortSpec.encodeAsXML(pw, "");
+            sortSpec.encodeAsXML(encoder);
         }
-        pw.println("</ordering>");
+        encoder.println("</ordering>");
     }
 
     public String toString() {
         StringWriter buffer = new StringWriter();
         PrintWriter pw = new PrintWriter(buffer);
-        encodeAsXML(pw, "");
+        XMLEncoder encoder = new XMLEncoder(pw);
+        encodeAsXML(encoder);
         pw.close();
         buffer.flush();
         return buffer.toString();

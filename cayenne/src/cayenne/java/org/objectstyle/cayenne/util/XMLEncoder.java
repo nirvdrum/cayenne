@@ -1,5 +1,5 @@
 /* ====================================================================
- * 
+ *
  * The ObjectStyle Group Software License, version 1.1
  * ObjectStyle Group - http://objectstyle.org/
  * 
@@ -53,108 +53,137 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
+package org.objectstyle.cayenne.util;
 
-package org.objectstyle.cayenne.map;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
-import org.objectstyle.cayenne.util.XMLEncoder;
-import org.objectstyle.cayenne.util.XMLSerializable;
-
-/** 
- * A DbAttributePair represents a join between two database tables. A PK/FK
- * relationship consists of one or more joins. Correspinding Cayenne descriptor
- * object, DbRelationship, contains one or more DbAtributePairs.
+/**
+ * A helper class to encode objects to XML.
  * 
- * @author Misha Shengaout
+ * @since 1.1
  * @author Andrei Adamchik
  */
-public class DbAttributePair implements XMLSerializable {
-    protected DbAttribute source;
-    protected DbAttribute target;
+public class XMLEncoder {
+    protected String indent;
+    protected PrintWriter out;
 
-    public DbAttributePair() {
+    protected boolean indentLine;
+    protected int indentTimes;
+
+    public XMLEncoder(PrintWriter out) {
+        this.out = out;
     }
 
-    public DbAttributePair(DbAttribute sourceAttribute, DbAttribute targetAttribute) {
-        this.setSource(sourceAttribute);
-        this.setTarget(targetAttribute);
+    public XMLEncoder(PrintWriter out, String indent) {
+        this.indent = indent;
+        this.out = out;
+    }
+
+    public PrintWriter getPrintWriter() {
+        return out;
+    }
+
+    public void indent(int i) {
+        indentTimes += i;
+        if (indentTimes < 0) {
+            indentTimes = 0;
+        }
     }
 
     /**
-     * Prints itself as XML to the provided XMLEncoder.
-     * 
-     * @since 1.1
+     * Utility method that prints all map values,
+     * assuming they are XMLSerializable objects.
      */
-    public void encodeAsXML(XMLEncoder encoder) {
-        encoder.print("<db-attribute-pair");
-
-        // sanity check
-        if (getSource() != null) {
-            encoder.print(" source=\"");
-            encoder.print(getSource().getName());
-            encoder.print("\"");
+    public void print(Map map) {
+        Iterator it = map.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            ((XMLSerializable) entry.getValue()).encodeAsXML(this);
         }
-
-        if (getTarget() != null) {
-            encoder.print(" target=\"");
-            encoder.print(getTarget().getName());
-            encoder.print("\"");
-        }
-
-        encoder.println("/>");
     }
 
     /**
-     * Creates and returns a new join going in reverse direction.
-     * 
-     * @since 1.0.5
+     * Utility method that prints all map values,
+     * assuming they are XMLSerializable objects.
      */
-    public DbAttributePair createReverseJoin() {
-        return new DbAttributePair(target, source);
-    }
-
-    /** Returns DbAttribute on on the left side of the join. */
-    public DbAttribute getSource() {
-        return source;
-    }
-
-    /** Set DbAttribute name on on the left side of the join. */
-    public void setSource(DbAttribute sourceAttribute) {
-        this.source = sourceAttribute;
-    }
-
-    /** Returns DbAttribute on on the right side of the join. */
-    public DbAttribute getTarget() {
-        return target;
-    }
-
-    /** Set DbAttribute name on on the right side of the join. */
-    public void setTarget(DbAttribute targetAttribute) {
-        this.target = targetAttribute;
-    }
-
-    public int hashCode() {
-        return super.hashCode() + source.hashCode() + target.hashCode();
+    public void print(Collection c) {
+        Iterator it = c.iterator();
+        while (it.hasNext()) {
+            ((XMLSerializable) it.next()).encodeAsXML(this);
+        }
     }
 
     /**
-     * Returns <code>true</code> if this join and 
-     * object parameter both represent joins between
-     * the same DbAttributes.
+     * Prints a common XML element - property with name and value.
      */
-    public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
+    public void printProperty(String name, String value) {
+        printIndent();
+        out.print("<property name=\"");
+        out.print(name);
+        out.print("\" value=\"");
+        out.print(value);
+        out.println("\"/>");
+        indentLine = true;
+    }
 
-        if (o.getClass() != DbAttributePair.class) {
-            return false;
-        }
+    /**
+     * Prints a common XML element - property with name and value.
+     */
+    public void printProperty(String name, boolean b) {
+        printProperty(name, String.valueOf(b));
+    }
 
-        if (o == this) {
-            return true;
-        }
+    /**
+     * Prints a common XML element - property with name and value.
+     */
+    public void printProperty(String name, int i) {
+        printProperty(name, String.valueOf(i));
+    }
 
-        DbAttributePair j = (DbAttributePair) o;
-        return j.source == this.source && j.target == this.target;
+    public void print(String text) {
+        printIndent();
+        out.print(text);
+    }
+
+    public void print(char c) {
+        printIndent();
+        out.print(c);
+    }
+
+    public void print(boolean b) {
+        printIndent();
+        out.print(b);
+    }
+
+    public void print(int i) {
+        printIndent();
+        out.print(i);
+    }
+
+    public void println(String text) {
+        printIndent();
+        out.println(text);
+        indentLine = true;
+    }
+
+    public void println(char c) {
+        printIndent();
+        out.println(c);
+        indentLine = true;
+    }
+
+    private void printIndent() {
+        if (indentLine) {
+            indentLine = false;
+
+            if (indentTimes > 0 && indent != null) {
+                for (int i = 0; i < indentTimes; i++) {
+                    out.print(indent);
+                }
+            }
+        }
     }
 }

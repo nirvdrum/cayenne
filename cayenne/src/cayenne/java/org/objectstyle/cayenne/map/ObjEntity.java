@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.Util;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * ObjEntity is a mapping descriptor for a DataObject Java class.
@@ -93,6 +94,45 @@ public class ObjEntity extends Entity {
     public ObjEntity(String name) {
         this();
         this.setName(name);
+    }
+
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<obj-entity name=\"");
+        encoder.print(getName());
+
+        if (getClassName() != null) {
+            encoder.print("\" className=\"");
+            encoder.print(getClassName());
+        }
+
+        if (isReadOnly()) {
+            encoder.print("\" readOnly=\"true");
+        }
+
+        encoder.print('\"');
+
+        if (getDbEntity() != null) {
+            encoder.print(" dbEntityName=\"");
+            encoder.print(getDbEntity().getName());
+            encoder.print('\"');
+        }
+
+        if (getSuperClassName() != null) {
+            encoder.print(" superClassName=\"");
+            encoder.print(getSuperClassName());
+            encoder.print("\"");
+        }
+
+        encoder.println('>');
+        encoder.indent(1);
+        encoder.print(getAttributeMap());
+        encoder.indent(-1);
+        encoder.println("</obj-entity>");
     }
 
     /**

@@ -55,8 +55,6 @@
  */
 package org.objectstyle.cayenne.util;
 
-import java.io.PrintWriter;
-
 /**
  * Interface for Cayenne objects that can be saved to XML.
  * 
@@ -65,9 +63,9 @@ import java.io.PrintWriter;
  */
 public interface XMLSerializable {
     /**
-     * Prints itself as XML to the provided PrintWriter.
+     * Prints itself as XML to the provided XMLEncoder.
      * 
      * @since 1.1
      */
-    public void encodeAsXML(PrintWriter pw, String linePadding);
+    public void encodeAsXML(XMLEncoder encoder);
 }

@@ -59,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.objectstyle.cayenne.util.XMLEncoder;
+
 /**
  * A mapping descriptor for a database stored procedure. 
  * 
@@ -82,6 +84,41 @@ public class Procedure extends MapObject {
      */
     public Procedure(String name) {
         super(name);
+    }
+
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<procedure name=\"");
+        encoder.print(getName());
+        encoder.print('\"');
+
+        if (getSchema() != null && getSchema().trim().length() > 0) {
+            encoder.print(" schema=\"");
+            encoder.print(getSchema().trim());
+            encoder.print('\"');
+        }
+
+        if (getCatalog() != null && getCatalog().trim().length() > 0) {
+            encoder.print(" catalog=\"");
+            encoder.print(getCatalog().trim());
+            encoder.print('\"');
+        }
+
+        if (isReturningValue()) {
+            encoder.print(" returningValue=\"true\"");
+        }
+
+        encoder.println('>');
+
+        encoder.indent(1);
+        encoder.print(getCallParameters());
+        encoder.indent(-1);
+        
+        encoder.println("</procedure>");
     }
 
     /**

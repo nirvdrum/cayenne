@@ -55,7 +55,6 @@
  */
 package org.objectstyle.cayenne.query;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,6 +69,7 @@ import org.objectstyle.cayenne.map.DbAttribute;
 import org.objectstyle.cayenne.map.DbEntity;
 import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.Procedure;
+import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
@@ -204,12 +204,11 @@ public class SelectQuery
      * 
      * @since 1.1
      */
-    public void encodeAsXML(PrintWriter pw, String linePadding) {
-        pw.print(linePadding);
-        pw.print("<query name=\"");
-        pw.print(getName());
-        pw.print("\" factory=\"");
-        pw.print(SelectQueryBuilder.class.getName());
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<query name=\"");
+        encoder.print(getName());
+        encoder.print("\" factory=\"");
+        encoder.print(SelectQueryBuilder.class.getName());
 
         String rootString = null;
         String rootType = null;
@@ -236,97 +235,71 @@ public class SelectQuery
         }
 
         if (rootType != null) {
-            pw.print("\" root=\"");
-            pw.print(rootType);
-            pw.print("\" root-name=\"");
-            pw.print(rootString);
+            encoder.print("\" root=\"");
+            encoder.print(rootType);
+            encoder.print("\" root-name=\"");
+            encoder.print(rootString);
         }
 
-        pw.println("\">");
+        encoder.println("\">");
+
+        encoder.indent(1);
 
         // print properties
+
         if (distinct != DISTINCT_DEFAULT) {
-            pw.print(linePadding);
-            pw.print("\t<property name=\"");
-            pw.print(DISTINCT_PROPERTY);
-            pw.print("\" value=\"");
-            pw.print(distinct);
-            pw.println("\"/>");
+            encoder.printProperty(DISTINCT_PROPERTY, distinct);
         }
 
         if (refreshingObjects != REFRESHING_OBJECTS_DEFAULT) {
-            pw.print(linePadding);
-            pw.print("\t<property name=\"");
-            pw.print(REFRESHING_OBJECTS_PROPERTY);
-            pw.print("\" value=\"");
-            pw.print(refreshingObjects);
-            pw.println("\"/>");
+            encoder.printProperty(REFRESHING_OBJECTS_PROPERTY, refreshingObjects);
         }
 
         if (fetchingDataRows != FETCHING_DATA_ROWS_DEFAULT) {
-            pw.print(linePadding);
-            pw.print("\t<property name=\"");
-            pw.print(FETCHING_DATA_ROWS_PROPERTY);
-            pw.print("\" value=\"");
-            pw.print(fetchingDataRows);
-            pw.println("\"/>");
+            encoder.printProperty(FETCHING_DATA_ROWS_PROPERTY, fetchingDataRows);
         }
 
         if (fetchLimit != FETCH_LIMIT_DEFAULT) {
-            pw.print(linePadding);
-            pw.print("\t<property name=\"");
-            pw.print(FETCH_LIMIT_PROPERTY);
-            pw.print("\" value=\"");
-            pw.print(fetchLimit);
-            pw.println("\"/>");
+            encoder.printProperty(FETCH_LIMIT_PROPERTY, fetchLimit);
         }
 
         if (pageSize != PAGE_SIZE_DEFAULT) {
-            pw.print(linePadding);
-            pw.print("\t<property name=\"");
-            pw.print(PAGE_SIZE_PROPERTY);
-            pw.print("\" value=\"");
-            pw.print(pageSize);
-            pw.println("\"/>");
+            encoder.printProperty(PAGE_SIZE_PROPERTY, pageSize);
         }
-        
-        String childPadding = linePadding + "\t";
-        
+
         // encode qualifier
         if (qualifier != null) {
-            pw.print(childPadding);
-            pw.print("<qualifier>");
-            qualifier.encodeAsXML(pw, "");
-            pw.println("</qualifier>");
+            encoder.print("<qualifier>");
+            qualifier.encodeAsXML(encoder);
+            encoder.println("</qualifier>");
         }
-        
+
         // encode orderings
-        if(orderings != null && !orderings.isEmpty()) {
+        if (orderings != null && !orderings.isEmpty()) {
             Iterator it = orderings.iterator();
-            while(it.hasNext()) {
+            while (it.hasNext()) {
                 Ordering ordering = (Ordering) it.next();
-                ordering.encodeAsXML(pw, childPadding);
-            }
-        }
-        
-        // encode prefecthes
-        if(prefetches != null && !prefetches.isEmpty()) {
-            Iterator it = prefetches.iterator();
-            while(it.hasNext()) {
-                String prefetch = (String) it.next();
-                
-                // currently prefetch is a String, but DTD 
-                // treats it as a path expression... I guess for now
-                // it will be an overkill to wrap it in "<![CDATA[.."
-                pw.print(childPadding);
-                pw.print("<prefetch>");
-                pw.print(prefetch);
-                pw.println("</prefetch>");
+                ordering.encodeAsXML(encoder);
             }
         }
 
-        pw.print(linePadding);
-        pw.println("</query>");
+        // encode prefecthes
+        if (prefetches != null && !prefetches.isEmpty()) {
+            Iterator it = prefetches.iterator();
+            while (it.hasNext()) {
+                String prefetch = (String) it.next();
+
+                // currently prefetch is a String, but DTD 
+                // treats it as a path expression... I guess for now
+                // it will be an overkill to wrap it in "<![CDATA[.."
+                encoder.print("<prefetch>");
+                encoder.print(prefetch);
+                encoder.println("</prefetch>");
+            }
+        }
+
+        encoder.indent(-1);
+        encoder.println("</query>");
     }
 
     /**

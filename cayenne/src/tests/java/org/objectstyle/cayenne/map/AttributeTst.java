@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 public class AttributeTst extends CayenneTestCase {
     protected Attribute attr;
@@ -68,6 +69,9 @@ public class AttributeTst extends CayenneTestCase {
             }
             public String getTypenameToDisplay() {
                 return null;
+            }
+            public void encodeAsXML(XMLEncoder encoder) {
+
             }
         };
     }

@@ -71,6 +71,7 @@ import org.objectstyle.cayenne.map.event.AttributeEvent;
 import org.objectstyle.cayenne.map.event.DbAttributeListener;
 import org.objectstyle.cayenne.map.event.MapEvent;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * A DbEntity is a mapping descriptor that defines a structure of a database table.
@@ -102,6 +103,38 @@ public class DbEntity extends Entity implements DbAttributeListener {
     public DbEntity(String name) {
         this();
         this.setName(name);
+    }
+
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<db-entity name=\"" + getName() + '\"');
+
+        if (getSchema() != null && getSchema().trim().length() > 0) {
+            encoder.print(" schema=\"");
+            encoder.print(getSchema().trim());
+            encoder.print('\"');
+        }
+        if (getCatalog() != null && getCatalog().trim().length() > 0) {
+            encoder.print(" catalog=\"");
+            encoder.print(getCatalog().trim());
+            encoder.print('\"');
+        }
+
+        encoder.println('>');
+
+        encoder.indent(1);
+        encoder.print(getAttributeMap());
+        
+        if(getPrimaryKeyGenerator() != null) {
+            getPrimaryKeyGenerator().encodeAsXML(encoder);
+        }
+
+        encoder.indent(-1);
+        encoder.println("</db-entity>");
     }
 
     /**

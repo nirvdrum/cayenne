@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.event.EventSubject;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * A DbRelationship is a descriptor of a database inter-table relationship
@@ -101,6 +102,31 @@ public class DbRelationship extends Relationship {
         this.setSourceEntity(src);
         this.setTargetEntity(target);
         this.addJoin(pr);
+    }
+
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<db-relationship name=\"");
+        encoder.print(getName());
+        encoder.print("\" source=\"");
+        encoder.print(getSourceEntity().getName());
+        encoder.print("\" target=\"");
+        encoder.print(getTargetEntityName());
+        encoder.print("\" toDependentPK=\"");
+        encoder.print(isToDependentPK());
+        encoder.print("\" toMany=\"");
+        encoder.print(isToMany());
+        encoder.println("\">");
+
+        encoder.indent(1);
+        encoder.print(getJoins());
+        encoder.indent(-1);
+
+        encoder.println("</db-relationship>");
     }
 
     public Entity getTargetEntity() {

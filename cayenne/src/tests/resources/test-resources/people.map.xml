@@ -44,17 +44,23 @@
 	</obj-entity>
 	<obj-entity name="Manager" className="org.objectstyle.cayenne.testdo.singletable.Manager" dbEntityName="PERSON">
 	</obj-entity>
-	<db-relationship name="employeeAddresses" source="PERSON" target="ADDRESS" toDependentPK="false" toMany="true">
+	<db-relationship name="toPerson" source="ADDRESS" target="PERSON" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="PERSON_ID" target="PERSON_ID"/>
+	</db-relationship>
+	<db-relationship name="representatives" source="CLIENT_COMPANY" target="PERSON" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="CLIENT_COMPANY_ID" target="CLIENT_COMPANY_ID"/>
 	</db-relationship>
 	<db-relationship name="employees" source="DEPARTMENT" target="PERSON" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="DEPARTMENT_ID" target="DEPARTMENT_ID"/>
 	</db-relationship>
+	<db-relationship name="toManager" source="DEPARTMENT" target="PERSON" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="MANAGER_ID" target="PERSON_ID"/>
+	</db-relationship>
+	<db-relationship name="employeeAddresses" source="PERSON" target="ADDRESS" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="PERSON_ID" target="PERSON_ID"/>
+	</db-relationship>
 	<db-relationship name="managedDepartments" source="PERSON" target="DEPARTMENT" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="PERSON_ID" target="MANAGER_ID"/>
-	</db-relationship>
-	<db-relationship name="representatives" source="CLIENT_COMPANY" target="PERSON" toDependentPK="false" toMany="true">
-		<db-attribute-pair source="CLIENT_COMPANY_ID" target="CLIENT_COMPANY_ID"/>
 	</db-relationship>
 	<db-relationship name="toClientCompany" source="PERSON" target="CLIENT_COMPANY" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="CLIENT_COMPANY_ID" target="CLIENT_COMPANY_ID"/>
@@ -62,20 +68,8 @@
 	<db-relationship name="toDepartment" source="PERSON" target="DEPARTMENT" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="DEPARTMENT_ID" target="DEPARTMENT_ID"/>
 	</db-relationship>
-	<db-relationship name="toManager" source="DEPARTMENT" target="PERSON" toDependentPK="false" toMany="false">
-		<db-attribute-pair source="MANAGER_ID" target="PERSON_ID"/>
-	</db-relationship>
-	<db-relationship name="toPerson" source="ADDRESS" target="PERSON" toDependentPK="false" toMany="false">
-		<db-attribute-pair source="PERSON_ID" target="PERSON_ID"/>
-	</db-relationship>
-	<obj-relationship name="addresses" source="Employee" target="Address" toMany="true">
-		<db-relationship-ref source="PERSON" target="ADDRESS" name="employeeAddresses"/>
-	</obj-relationship>
-	<obj-relationship name="employees" source="Department" target="Employee" toMany="true">
-		<db-relationship-ref source="DEPARTMENT" target="PERSON" name="employees"/>
-	</obj-relationship>
-	<obj-relationship name="managedDepartments" source="Manager" target="Department" toMany="true">
-		<db-relationship-ref source="PERSON" target="DEPARTMENT" name="managedDepartments"/>
+	<obj-relationship name="toEmployee" source="Address" target="Employee" toMany="false">
+		<db-relationship-ref source="ADDRESS" target="PERSON" name="toPerson"/>
 	</obj-relationship>
 	<obj-relationship name="representatives" source="ClientCompany" target="CustomerRepresentative" toMany="true">
 		<db-relationship-ref source="CLIENT_COMPANY" target="PERSON" name="representatives"/>
@@ -83,13 +77,19 @@
 	<obj-relationship name="toClientCompany" source="CustomerRepresentative" target="ClientCompany" toMany="false">
 		<db-relationship-ref source="PERSON" target="CLIENT_COMPANY" name="toClientCompany"/>
 	</obj-relationship>
-	<obj-relationship name="toDepartment" source="Employee" target="Department" toMany="false">
-		<db-relationship-ref source="PERSON" target="DEPARTMENT" name="toDepartment"/>
-	</obj-relationship>
-	<obj-relationship name="toEmployee" source="Address" target="Employee" toMany="false">
-		<db-relationship-ref source="ADDRESS" target="PERSON" name="toPerson"/>
+	<obj-relationship name="employees" source="Department" target="Employee" toMany="true">
+		<db-relationship-ref source="DEPARTMENT" target="PERSON" name="employees"/>
 	</obj-relationship>
 	<obj-relationship name="toManager" source="Department" target="Manager" toMany="true">
 		<db-relationship-ref source="DEPARTMENT" target="PERSON" name="employees"/>
+	</obj-relationship>
+	<obj-relationship name="addresses" source="Employee" target="Address" toMany="true">
+		<db-relationship-ref source="PERSON" target="ADDRESS" name="employeeAddresses"/>
+	</obj-relationship>
+	<obj-relationship name="toDepartment" source="Employee" target="Department" toMany="false">
+		<db-relationship-ref source="PERSON" target="DEPARTMENT" name="toDepartment"/>
+	</obj-relationship>
+	<obj-relationship name="managedDepartments" source="Manager" target="Department" toMany="true">
+		<db-relationship-ref source="PERSON" target="DEPARTMENT" name="managedDepartments"/>
 	</obj-relationship>
 </data-map>

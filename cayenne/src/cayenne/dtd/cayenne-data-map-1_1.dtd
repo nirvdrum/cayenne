@@ -53,11 +53,17 @@
 	name CDATA #REQUIRED
 >
 
+<!-- =================================================== 
+Defines an ObjEntity - a metadata element describing a persistent Java 
+class. Since 1.1 allows "superEntityName" to specify a parent in the inheritance
+hierarchy.
+-->
 <!ELEMENT obj-entity (obj-attribute+)>
 <!ATTLIST obj-entity
 	name CDATA #REQUIRED
 	className CDATA #REQUIRED
 	dbEntityName CDATA #REQUIRED
+	superEntityName CDATA #IMPLIED
 	superClassName CDATA #IMPLIED
 	readOnly (true | false) "false"
 >

@@ -56,6 +56,7 @@
 package org.objectstyle.cayenne.map;
 
 import org.objectstyle.cayenne.util.CayenneMapEntry;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
  * Superclass of DataMap objects. Provides a default implementation
@@ -63,48 +64,47 @@ import org.objectstyle.cayenne.util.CayenneMapEntry;
  * 
  * @author Andrei Adamchik
  */
-public abstract class MapObject implements CayenneMapEntry {
-	protected String objName;
-	protected Object objParent;
+public abstract class MapObject implements CayenneMapEntry, XMLSerializable {
+    protected String objName;
+    protected Object objParent;
 
-	/**
-	 * Constructor for MapObject.
-	 */
-	public MapObject() {
-		super();
-	}
-	
-	public MapObject(String name) {
-		setName(name);
-	}
+    /**
+     * Constructor for MapObject.
+     */
+    public MapObject() {
+        super();
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getName()
-	 */
-	public String getName() {
-		return objName;
-	}
+    public MapObject(String name) {
+        setName(name);
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#getParent()
-	 */
-	public Object getParent() {
-		return objParent;
-	}
+    /**
+     * @see org.objectstyle.cayenne.util.CayenneMapEntry#getName()
+     */
+    public String getName() {
+        return objName;
+    }
 
-	/**
-	 * @see org.objectstyle.cayenne.util.CayenneMapEntry#setParent(Object)
-	 */
-	public void setParent(Object parent) {
-		this.objParent = parent;
-	}
+    /**
+     * @see org.objectstyle.cayenne.util.CayenneMapEntry#getParent()
+     */
+    public Object getParent() {
+        return objParent;
+    }
 
-	/**
-	 * Sets the name.
-	 * @param name The name to set
-	 */
-	public void setName(String name) {
-		this.objName = name;
-	}
+    /**
+     * @see org.objectstyle.cayenne.util.CayenneMapEntry#setParent(Object)
+     */
+    public void setParent(Object parent) {
+        this.objParent = parent;
+    }
+
+    /**
+     * Sets the name.
+     * @param name The name to set
+     */
+    public void setName(String name) {
+        this.objName = name;
+    }
 }
-

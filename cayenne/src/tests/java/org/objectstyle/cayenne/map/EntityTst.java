@@ -62,6 +62,7 @@ import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionFactory;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 public class EntityTst extends CayenneTestCase {
     protected Entity ent;
@@ -84,6 +85,9 @@ public class EntityTst extends CayenneTestCase {
             public String getTypenameToDisplay() {
                 return null;
             }
+            public void encodeAsXML(XMLEncoder encoder) {
+
+            }
         };
         attr.setName("tst_name");
         ent.addAttribute(attr);
@@ -103,7 +107,7 @@ public class EntityTst extends CayenneTestCase {
      */
     public void testQuery() throws Exception {
         ent.setDataMap(new DataMap("t"));
-        
+
         SelectQuery q = new SelectQuery("Abc");
         ent.addQuery("Query1", q);
         assertSame(q, ent.getQuery("Query1"));
@@ -117,6 +121,9 @@ public class EntityTst extends CayenneTestCase {
         Relationship rel = new Relationship() {
             public Entity getTargetEntity() {
                 return null;
+            }
+            public void encodeAsXML(XMLEncoder encoder) {
+
             }
         };
         rel.setName("tst_name");
@@ -133,48 +140,44 @@ public class EntityTst extends CayenneTestCase {
 
     public void testResolveBadObjPath1() throws Exception {
         // test invalid expression path
-        Expression pathExpr =
-            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "invalid.invalid");
 
         // itertator should be returned, but when trying to read 1st component,
         // it should throw an exception....
-        ObjEntity galleryEnt =
-            getDomain().getEntityResolver().lookupObjEntity("Gallery");
+        ObjEntity galleryEnt = getDomain().getEntityResolver().lookupObjEntity("Gallery");
         Iterator it = galleryEnt.resolvePathComponents(pathExpr);
         assertTrue(it.hasNext());
 
         try {
             it.next();
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             // exception expected
         }
     }
 
     public void testResolveBadObjPath2() throws Exception {
         // test invalid expression type
-        Expression badPathExpr =
-            ExpressionFactory.expressionOfType(Expression.IN);
+        Expression badPathExpr = ExpressionFactory.expressionOfType(Expression.IN);
         badPathExpr.setOperand(0, "a.b.c");
-        ObjEntity galleryEnt =
-            getDomain().getEntityResolver().lookupObjEntity("Gallery");
+        ObjEntity galleryEnt = getDomain().getEntityResolver().lookupObjEntity("Gallery");
 
         try {
             galleryEnt.resolvePathComponents(badPathExpr);
             fail();
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             // exception expected
         }
     }
 
     public void testResolveObjPath1() throws Exception {
-        Expression pathExpr =
-            ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
+        Expression pathExpr = ExpressionFactory.expressionOfType(Expression.OBJ_PATH);
         pathExpr.setOperand(0, "galleryName");
 
-        ObjEntity galleryEnt =
-            getDomain().getEntityResolver().lookupObjEntity("Gallery");
+        ObjEntity galleryEnt = getDomain().getEntityResolver().lookupObjEntity("Gallery");
         Iterator it = galleryEnt.resolvePathComponents(pathExpr);
 
         // iterator must contain a single ObjAttribute

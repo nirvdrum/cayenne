@@ -61,9 +61,11 @@ import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.event.EventManager;
 import org.objectstyle.cayenne.map.event.RelationshipEvent;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * Describes navigational association between two ObjEntities. Stores
@@ -73,6 +75,7 @@ import org.objectstyle.cayenne.map.event.RelationshipEvent;
  * @author Andrei Adamchik
  */
 public class ObjRelationship extends Relationship implements EventListener {
+    private static Logger logObj = Logger.getLogger(ObjRelationship.class);
 
     // What to do with any inverse relationship when the source object
     // is deleted
@@ -108,6 +111,69 @@ public class ObjRelationship extends Relationship implements EventListener {
         else {
             this.setName("to" + target.getName());
         }
+    }
+
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        ObjEntity source = (ObjEntity) getSourceEntity();
+        if (source == null) {
+            logObj.warn(
+                "No source entity, will not encode ObjRelationship: " + getName());
+            return;
+        }
+
+        ObjEntity target = (ObjEntity) getTargetEntity();
+        if (target == null) {
+            logObj.warn("No target entity, will not encode ObjRelationship " + getName());
+            return;
+        }
+
+        encoder.print("<obj-relationship name=\"" + getName() + '\"');
+        encoder.print(" source=\"" + source.getName() + '\"');
+        encoder.print(" target=\"" + target.getName() + '\"');
+        encoder.print(" toMany=\"" + isToMany() + '\"');
+
+        String deleteRule = DeleteRule.deleteRuleName(getDeleteRule());
+        if (getDeleteRule() != DeleteRule.NO_ACTION && deleteRule != null) {
+            encoder.print(" deleteRule=\"" + deleteRule + '\"');
+        }
+
+        encoder.println('>');
+        encoder.indent(1);
+
+        // do the first empty run, to see that the chain of
+        // relationships is valid
+        boolean validChain = true;
+        Iterator dryRun = getDbRelationships().iterator();
+        while (dryRun.hasNext()) {
+            DbRelationship relationship = (DbRelationship) dryRun.next();
+            if (!dbRelationships.contains(relationship)) {
+                validChain = false;
+                break;
+            }
+        }
+
+        if (validChain) {
+            // TODO: this is dumb, store chain as a path expression...
+            Iterator iter = getDbRelationships().iterator();
+            while (iter.hasNext()) {
+                DbRelationship rel = (DbRelationship) iter.next();
+                encoder.print("<db-relationship-ref source=\"");
+                encoder.print(rel.getSourceEntity().getName());
+                encoder.print("\" target=\"");
+                encoder.print(rel.getTargetEntityName());
+                encoder.print("\" name=\"");
+                encoder.print(rel.getName());
+                encoder.println("\"/>");
+            }
+        }
+
+        encoder.indent(-1);
+        encoder.println("</obj-relationship>");
     }
 
     public Entity getTargetEntity() {

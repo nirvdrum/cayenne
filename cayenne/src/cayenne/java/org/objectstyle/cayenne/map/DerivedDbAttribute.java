@@ -57,7 +57,11 @@ package org.objectstyle.cayenne.map;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
+import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.util.XMLEncoder;
 
 /**
  * A DerivedDbAttribute is a DbAttribute that resolves to an SQL expression based on 
@@ -76,129 +80,193 @@ import java.util.List;
  * @author Andrei Adamchik
  */
 public class DerivedDbAttribute extends DbAttribute {
-	public static final String ATTRIBUTE_TOKEN = "%@";
+    public static final String ATTRIBUTE_TOKEN = "%@";
 
-	protected String expressionSpec;
-	protected List params = new ArrayList();
-	protected boolean groupBy;
+    protected String expressionSpec;
+    protected List params = new ArrayList();
+    protected boolean groupBy;
 
-	/**
-	 * Constructor for DerivedDbAttribute.
-	 */
-	public DerivedDbAttribute() {
-		super();
-	}
-	
-	/**
-	 * Constructor for DerivedDbAttribute.
-	 */
-	public DerivedDbAttribute(String name) {
-		super(name);
-	}
-	
-	/**
-	 * Constructor for DerivedDbAttribute.
-	 * 
-	 */
-	public DerivedDbAttribute(String name, int type, DbEntity entity, String spec) {
-		super(name, type, entity);
-		setExpressionSpec(spec);
-	}
-	
+    /**
+     * Constructor for DerivedDbAttribute.
+     */
+    public DerivedDbAttribute() {
+        super();
+    }
 
-	/**
-	 * Creates and initializes a derived attribute with 
-	 * an attribute of a parent entity.
-	 */
-	public DerivedDbAttribute(DbEntity entity, DbAttribute parentProto) {
-		setName(parentProto.getName());
-		setType(parentProto.getType());
-		setMandatory(parentProto.isMandatory());
-		setMaxLength(parentProto.getMaxLength());
-		setPrecision(parentProto.getPrecision());
-		setPrimaryKey(parentProto.isPrimaryKey());
+    /**
+     * Constructor for DerivedDbAttribute.
+     */
+    public DerivedDbAttribute(String name) {
+        super(name);
+    }
 
-		setExpressionSpec(ATTRIBUTE_TOKEN);
-		addParam(parentProto);
-		setEntity(entity);
-	}
+    /**
+     * Constructor for DerivedDbAttribute.
+     * 
+     */
+    public DerivedDbAttribute(String name, int type, DbEntity entity, String spec) {
+        super(name, type, entity);
+        setExpressionSpec(spec);
+    }
 
-	public String getAliasedName(String alias) {
-		if (expressionSpec == null) {
-			return super.getAliasedName(alias);
-		}
+    /**
+     * Creates and initializes a derived attribute with 
+     * an attribute of a parent entity.
+     */
+    public DerivedDbAttribute(DbEntity entity, DbAttribute parentProto) {
+        setName(parentProto.getName());
+        setType(parentProto.getType());
+        setMandatory(parentProto.isMandatory());
+        setMaxLength(parentProto.getMaxLength());
+        setPrecision(parentProto.getPrecision());
+        setPrimaryKey(parentProto.isPrimaryKey());
 
-		int len = params.size();
-		StringBuffer buf = new StringBuffer();
-		int ind = 0;
-		for (int i = 0; i < len; i++) {
-			// no bound checking
-			// expression is assumed to be valid
-			int match = expressionSpec.indexOf(ATTRIBUTE_TOKEN, ind);
-			DbAttribute at = (DbAttribute) params.get(i);
-			if (match > i) {
-				buf.append(expressionSpec.substring(ind, match));
-			}
-			buf.append(at.getAliasedName(alias));
-			ind = match + 2;
-		}
+        setExpressionSpec(ATTRIBUTE_TOKEN);
+        addParam(parentProto);
+        setEntity(entity);
+    }
 
-		if (ind < expressionSpec.length()) {
-			buf.append(expressionSpec.substring(ind));
-		}
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<db-attribute-derived name=\"" + getName() + '\"');
 
-		return buf.toString();
-	}
+        String type = TypesMapping.getSqlNameByType(getType());
+        if (type != null) {
+            encoder.print(" type=\"" + type + '\"');
+        }
 
-	/**
-	 * Returns true if this attribute is used in GROUP BY
-	 * clause of the parent entity.
-	 */
-	public boolean isGroupBy() {
-		return groupBy;
-	}
+        // If attribute is part of primary key
+        if (isPrimaryKey()) {
+            encoder.print(" isPrimaryKey=\"true\"");
+        }
 
-	public void setGroupBy(boolean flag) {
-		groupBy = flag;
-	}
+        if (isMandatory())
+            encoder.print(" isMandatory=\"true\"");
 
-	/**
-	 * Returns the params.
-	 * @return List
-	 */
-	public List getParams() {
-		return Collections.unmodifiableList(params);
-	}
+        if (getMaxLength() > 0) {
+            encoder.print(" length=\"");
+            encoder.print(getMaxLength());
+            encoder.print('\"');
+        }
 
-	/**
-	 * Returns the expressionSpec.
-	 * @return String
-	 */
-	public String getExpressionSpec() {
-		return expressionSpec;
-	}
+        if (getPrecision() > 0) {
+            encoder.print(" precision=\"");
+            encoder.print(getPrecision());
+            encoder.print('\"');
+        }
 
-	/**
-	 * Sets the params.
-	 * @param params The expParams to set
-	 */
-	public void addParam(DbAttribute param) {
-		params.add(param);
-	}
+        if (((DerivedDbEntity) getEntity()).getGroupByAttributes().contains(this)) {
+            encoder.print(" isGroupBy=\"true\"");
+        }
 
-	public void removeParam(DbAttribute param) {
-		params.remove(param);
-	}
+        String spec = getExpressionSpec();
+        if (spec != null && spec.trim().length() > 0) {
+            encoder.print(" spec=\"");
+            encoder.print(spec);
+            encoder.print('\"');
+        }
 
-	public void clearParams() {
-		params.clear();
-	}
+        List params = getParams();
 
-	/**
-	 * Sets the expressionSpec.
-	 * @param expressionSpec The expressionSpec to set
-	 */
-	public void setExpressionSpec(String expressionSpec) {
-		this.expressionSpec = expressionSpec;
-	}
+        if (params.size() > 0) {
+            encoder.println(">");
+
+            encoder.indent(1);
+
+            Iterator refs = params.iterator();
+            while (refs.hasNext()) {
+                DbAttribute ref = (DbAttribute) refs.next();
+                encoder.println("<db-attribute-ref name=\"" + ref.getName() + "\"/>");
+            }
+
+            encoder.indent(-1);
+            encoder.println("</db-attribute-derived>");
+        }
+        else {
+            encoder.println("/>");
+        }
+    }
+
+    public String getAliasedName(String alias) {
+        if (expressionSpec == null) {
+            return super.getAliasedName(alias);
+        }
+
+        int len = params.size();
+        StringBuffer buf = new StringBuffer();
+        int ind = 0;
+        for (int i = 0; i < len; i++) {
+            // no bound checking
+            // expression is assumed to be valid
+            int match = expressionSpec.indexOf(ATTRIBUTE_TOKEN, ind);
+            DbAttribute at = (DbAttribute) params.get(i);
+            if (match > i) {
+                buf.append(expressionSpec.substring(ind, match));
+            }
+            buf.append(at.getAliasedName(alias));
+            ind = match + 2;
+        }
+
+        if (ind < expressionSpec.length()) {
+            buf.append(expressionSpec.substring(ind));
+        }
+
+        return buf.toString();
+    }
+
+    /**
+     * Returns true if this attribute is used in GROUP BY
+     * clause of the parent entity.
+     */
+    public boolean isGroupBy() {
+        return groupBy;
+    }
+
+    public void setGroupBy(boolean flag) {
+        groupBy = flag;
+    }
+
+    /**
+     * Returns the params.
+     * @return List
+     */
+    public List getParams() {
+        return Collections.unmodifiableList(params);
+    }
+
+    /**
+     * Returns the expressionSpec.
+     * @return String
+     */
+    public String getExpressionSpec() {
+        return expressionSpec;
+    }
+
+    /**
+     * Sets the params.
+     * @param params The expParams to set
+     */
+    public void addParam(DbAttribute param) {
+        params.add(param);
+    }
+
+    public void removeParam(DbAttribute param) {
+        params.remove(param);
+    }
+
+    public void clearParams() {
+        params.clear();
+    }
+
+    /**
+     * Sets the expressionSpec.
+     * @param expressionSpec The expressionSpec to set
+     */
+    public void setExpressionSpec(String expressionSpec) {
+        this.expressionSpec = expressionSpec;
+    }
 }

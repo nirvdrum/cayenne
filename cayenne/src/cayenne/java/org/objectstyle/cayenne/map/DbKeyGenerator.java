@@ -56,6 +56,8 @@
 
 package org.objectstyle.cayenne.map;
 
+import org.objectstyle.cayenne.util.XMLEncoder;
+
 /**
  * DbKeyGenerator is an abstraction of a primary key generator
  * It configures the primary key generation per DbEntity in a RDBMS independent
@@ -76,6 +78,43 @@ public class DbKeyGenerator extends MapObject {
     public DbKeyGenerator() {
     }
 
+    /**
+     * Prints itself as XML to the provided XMLEncoder.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+
+        String type = getGeneratorType();
+        if (type == null) {
+            return;
+        }
+
+        encoder.println("<db-key-generator>");
+        encoder.indent(1);
+
+        encoder.print("<db-generator-type>");
+        encoder.print(type);
+        encoder.println("</db-generator-type>");
+
+        String name = getGeneratorName();
+        if (name != null) {
+            encoder.print("<db-generator-name>");
+            encoder.print(name);
+            encoder.println("</db-generator-name>");
+        }
+
+        Integer cacheSize = getKeyCacheSize();
+        if (cacheSize != null) {
+            encoder.print("<db-key-cache-size>");
+            encoder.print(String.valueOf(cacheSize));
+            encoder.println("</db-key-cache-size>");
+        }
+
+        encoder.indent(-1);
+        encoder.println("</db-key-generator>");
+    }
+
     public DbEntity getDbEntity() {
         return (DbEntity) getParent();
     }
@@ -83,7 +122,7 @@ public class DbKeyGenerator extends MapObject {
     public void setDbEntity(DbEntity entity) {
         setParent(entity);
     }
-    
+
     public void setGeneratorType(String generatorType) {
         this.generatorType = generatorType;
         if (this.generatorType != null) {
@@ -93,22 +132,22 @@ public class DbKeyGenerator extends MapObject {
                 this.generatorType = null;
         }
     }
-    
+
     public String getGeneratorType() {
         return generatorType;
     }
-    
+
     public void setKeyCacheSize(Integer keyCacheSize) {
         this.keyCacheSize = keyCacheSize;
         if (this.keyCacheSize != null && this.keyCacheSize.intValue() < 1) {
             this.keyCacheSize = null;
         }
     }
-    
+
     public Integer getKeyCacheSize() {
         return keyCacheSize;
     }
-    
+
     public void setGeneratorName(String generatorName) {
         this.generatorName = generatorName;
         if (this.generatorName != null) {
@@ -117,11 +156,11 @@ public class DbKeyGenerator extends MapObject {
                 this.generatorName = null;
         }
     }
-    
+
     public String getGeneratorName() {
         return generatorName;
     }
-    
+
     public String toString() {
         return "{Type="
             + generatorType

@@ -55,6 +55,7 @@
  */
 package org.objectstyle.cayenne.map;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,8 +65,11 @@ import java.util.Map;
 import java.util.SortedMap;
 
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.util.CayenneMap;
+import org.objectstyle.cayenne.util.XMLEncoder;
+import org.objectstyle.cayenne.util.XMLSerializable;
 
 /**
  * Stores a collection of related mapping objects that describe database and object layers
@@ -76,7 +80,7 @@ import org.objectstyle.cayenne.util.CayenneMap;
  * @author Andrei Adamchik  
  * @author Craig Miskell
  */
-public class DataMap {
+public class DataMap implements XMLSerializable {
     private static Logger logObj = Logger.getLogger(DataMap.class);
 
     protected String name;
@@ -130,15 +134,14 @@ public class DataMap {
     // Queries
     // ====================================================
     protected CayenneMap queries = new CayenneMap(this);
-    
+
     // read-through reference for public access
     private SortedMap queryMapRef = Collections.unmodifiableSortedMap(queries);
-    
+
     // read-through reference for public access
     private Collection queriesValuesRef =
         Collections.unmodifiableCollection(queries.values());
 
-    
     /** 
      * Creates an new unnamed DataMap. 
      */
@@ -152,9 +155,87 @@ public class DataMap {
         this.setName(mapName);
     }
 
+    /**
+     * Prints itself as a well-formed complete XML document. In comparison
+     * {@link #encodeAsXML(PrintWriter, String)} stores DataMap assuming it is 
+     * a part of a bigger document.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(PrintWriter pw) {
+        XMLEncoder encoder = new XMLEncoder(pw, "\t");
+        encoder.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+        encodeAsXML(encoder);
+    }
+
+    /**
+     * Prints itself as XML to the provided PrintWriter.
+     * 
+     * @since 1.1
+     */
+    public void encodeAsXML(XMLEncoder encoder) {
+        encoder.print("<data-map project-version=\"");
+        encoder.print(String.valueOf(Project.CURRENT_PROJECT_VERSION));
+        encoder.println("\">");
+
+        encoder.indent(1);
+
+        // procedures
+        encoder.print(getProcedureMap());
+
+        // DbEntities
+        boolean hasDerived = false;
+        Iterator dbEntities = getDbEntityMap().entrySet().iterator();
+        while (dbEntities.hasNext()) {
+            Map.Entry entry = (Map.Entry) dbEntities.next();
+            DbEntity dbe = (DbEntity) entry.getValue();
+
+            // skip derived, store them after regular DbEntities
+            if (dbe instanceof DerivedDbEntity) {
+                hasDerived = true;
+            }
+            else {
+                dbe.encodeAsXML(encoder);
+            }
+        }
+
+        // DerivedDbEntities
+        if (hasDerived) {
+            Iterator derivedDbEntities = getDbEntityMap().entrySet().iterator();
+            while (derivedDbEntities.hasNext()) {
+                Map.Entry entry = (Map.Entry) derivedDbEntities.next();
+                DbEntity dbe = (DbEntity) entry.getValue();
+
+                // only store derived...
+                if (dbe instanceof DerivedDbEntity) {
+                    dbe.encodeAsXML(encoder);
+                }
+            }
+        }
+
+        // others...
+        encoder.print(getObjEntityMap());
+        encodeRelationshipsAsXML(getDbEntityMap(), encoder);
+        encodeRelationshipsAsXML(getObjEntityMap(), encoder);
+        encoder.print(getQueryMap());
+
+        encoder.indent(-1);
+        encoder.println("</data-map>");
+    }
+
+    // stores relationships of for the map of entities
+    private final void encodeRelationshipsAsXML(Map entityMap, XMLEncoder encoder) {
+        Iterator it = entityMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry entry = (Map.Entry) it.next();
+            Entity entity = (Entity) entry.getValue();
+            encoder.print(entity.getRelationshipMap());
+        }
+    }
+
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        buf.append("DataMap '").append(name).append("'");
+        buf.append("[DataMap '").append(name).append("']");
         return buf.toString();
     }
 
@@ -289,8 +370,7 @@ public class DataMap {
     public SortedMap getDbEntityMap() {
         return dbEntityMapRef;
     }
-    
-    
+
     /**
      * Returns a named query associated with this DataMap.
      * 
@@ -332,14 +412,14 @@ public class DataMap {
     public void clearQueries() {
         queries.clear();
     }
-    
+
     /**
      * @since 1.1
      */
     public SortedMap getQueryMap() {
         return queryMapRef;
     }
-    
+
     /**
      * @since 1.1
      */
@@ -465,26 +545,26 @@ public class DataMap {
         }
         return null;
     }
-    
+
     /**
      * Returns an ObjEntity for a DataObject class name.
      * 
      * @since 1.1
      */
     public ObjEntity getObjEntityForJavaClass(String javaClassName) {
-        if(javaClassName == null) {
+        if (javaClassName == null) {
             return null;
         }
-        
+
         Iterator it = getObjEntityMap().entrySet().iterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Map.Entry entry = (Map.Entry) it.next();
             ObjEntity entity = (ObjEntity) entry.getValue();
-            if(javaClassName.equals(entity.getClassName())) {
+            if (javaClassName.equals(entity.getClassName())) {
                 return entity;
             }
         }
-        
+
         return null;
     }
 

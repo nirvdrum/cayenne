@@ -60,15 +60,20 @@ import java.util.Iterator;
 import org.objectstyle.cayenne.exp.Expression;
 import org.objectstyle.cayenne.exp.ExpressionException;
 import org.objectstyle.cayenne.query.Query;
+import org.objectstyle.cayenne.util.XMLEncoder;
 import org.objectstyle.cayenne.validation.ValidationResult;
 
 /**
- * A hleper class that implements all abstract Entity methods as noops.
+ * A helper class that implements all abstract Entity methods as noops.
  * Used as a mockup Entity test object in test cases.
  * 
  * @author Andrei Adamchik
  */
 public class GenericTestEntity extends Entity {
+
+    public void encodeAsXML(XMLEncoder encoder) {
+
+    }
 
     /**
      * @deprecated

@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,18 +67,14 @@ import java.util.Map;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.project.DataMapFile;
-import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.query.Query;
 import org.objectstyle.cayenne.query.QueryBuilder;
 import org.objectstyle.cayenne.query.SelectQueryBuilder;
 import org.objectstyle.cayenne.util.PropertyComparator;
 import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
-import org.objectstyle.cayenne.util.XMLSerializable;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -111,7 +106,7 @@ public class MapLoader extends DefaultHandler {
     public static final String DB_ATTRIBUTE_PAIR_TAG = "db-attribute-pair";
     public static final String PROCEDURE_TAG = "procedure";
     public static final String PROCEDURE_PARAMETER_TAG = "procedure-parameter";
-    
+
     // Query-related
     public static final String QUERY_TAG = "query";
     public static final String QUERY_PROPERTY_TAG = "property";
@@ -120,7 +115,6 @@ public class MapLoader extends DefaultHandler {
     public static final String QUERY_QUALIFIER_TAG = "qualifier";
     public static final String QUERY_ORDERING_TAG = "ordering";
     public static final String QUERY_PREFETCH_TAG = "prefetch";
-    
 
     public static final String TRUE = "true";
     public static final String FALSE = "false";
@@ -143,15 +137,9 @@ public class MapLoader extends DefaultHandler {
     private String descending;
     private String ignoreCase;
 
-
     private String currentTag;
     private StringBuffer charactersBuffer;
     private Map attributes;
-
-    // Saving to XML
-    private List objRelationships;
-    private List dbRelationships;
-    private List dbRelationshipRefs;
 
     /**
      * Returns <code>true</code> if this relationship's <code>toDependentPk</code>
@@ -179,6 +167,15 @@ public class MapLoader extends DefaultHandler {
     /** Loads the data map from the input source (usually file). */
     public synchronized DataMap loadDataMap(InputSource src) throws DataMapException {
         return loadDataMap(src, Collections.EMPTY_LIST);
+    }
+    
+
+    /** 
+     * Prints DataMap encoded as XML to a provided PrintWriter.
+     */
+    public synchronized void storeDataMap(PrintWriter out, DataMap map)
+        throws DataMapException {
+        map.encodeAsXML(out);
     }
 
     public synchronized DataMap loadDataMap(InputSource src, List deps)
@@ -423,7 +420,7 @@ public class MapLoader extends DefaultHandler {
             processEndQueryOrdering();
         }
         else if (local_name.equals(QUERY_PREFETCH_TAG)) {
-           processEndQueryPrefetch();
+            processEndQueryPrefetch();
         }
 
         resetCurrentTag();
@@ -458,485 +455,6 @@ public class MapLoader extends DefaultHandler {
                 + "\nMessage:"
                 + e.getMessage());
         throw new SAXException("Warning!");
-    }
-
-    /* * * STORE TO XML PART * * */
-
-    /** 
-     * Prints DataMap encoded as XML to a provided PrintWriter.
-     */
-    public synchronized void storeDataMap(PrintWriter out, DataMap map)
-        throws DataMapException {
-        objRelationships = new ArrayList();
-        dbRelationshipRefs = new ArrayList();
-        dbRelationships = new ArrayList();
-        out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
-        out.println(
-            "<data-map project-version=\"" + Project.CURRENT_PROJECT_VERSION + "\">");
-        storeProcedures(out, map);
-        storeDbEntities(out, map);
-        storeObjEntities(out, map);
-        storeDbRelationships(out);
-        storeObjRelationships(out);
-        storeQueries(out, map);
-        out.println("</data-map>");
-        objRelationships = null;
-        dbRelationships = null;
-        dbRelationshipRefs = null;
-    }
-    
-    private void storeQueries(PrintWriter out, DataMap map) {
-
-        // entry set must be sorted alphabetically, since the map is SortedMap
-        Iterator it = map.getQueryMap().entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry entry = (Map.Entry) it.next();
-            Query query = (Query) entry.getValue();
-
-            if (!(query instanceof XMLSerializable)) {
-                throw new CayenneRuntimeException(
-                    "Query can't be serialized to XML - " + entry.getKey());
-            }
-
-            ((XMLSerializable) query).encodeAsXML(out, "\t");
-        }
-    }
-
-    private void storeProcedures(PrintWriter out, DataMap map) {
-
-        Iterator iter = sortedProcedures(map).iterator();
-        while (iter.hasNext()) {
-            Procedure procedure = (Procedure) iter.next();
-            out.print("\t<procedure name=\"" + procedure.getName() + '\"');
-            if (procedure.getSchema() != null
-                && procedure.getSchema().trim().length() > 0) {
-                out.print(" schema=\"");
-                out.print(procedure.getSchema());
-                out.print('\"');
-            }
-
-            if (procedure.getCatalog() != null
-                && procedure.getCatalog().trim().length() > 0) {
-                out.print(" catalog=\"");
-                out.print(procedure.getCatalog());
-                out.print('\"');
-            }
-
-            if (procedure.isReturningValue()) {
-                out.print(" returningValue=\"true\"");
-            }
-
-            out.println('>');
-
-            storeProcedureParameters(out, procedure);
-            out.println("\t</procedure>");
-        }
-    }
-
-    private void storeProcedureParameters(PrintWriter out, Procedure procedure) {
-
-        Iterator iter = procedure.getCallParameters().iterator();
-
-        while (iter.hasNext()) {
-            ProcedureParameter parameter = (ProcedureParameter) iter.next();
-            out.print("\t\t<procedure-parameter name=\"" + parameter.getName() + '\"');
-
-            String type = TypesMapping.getSqlNameByType(parameter.getType());
-            if (type != null) {
-                out.print(" type=\"" + type + '\"');
-            }
-
-            if (parameter.getMaxLength() > 0) {
-                out.print(" length=\"");
-                out.print(parameter.getMaxLength());
-                out.print('\"');
-            }
-
-            if (parameter.getPrecision() > 0) {
-                out.print(" precision=\"");
-                out.print(parameter.getPrecision());
-                out.print('\"');
-            }
-
-            int direction = parameter.getDirection();
-            if (direction == ProcedureParameter.IN_PARAMETER) {
-                out.print(" direction=\"in\"");
-            }
-            else if (direction == ProcedureParameter.IN_OUT_PARAMETER) {
-                out.print(" direction=\"in_out\"");
-            }
-            else if (direction == ProcedureParameter.OUT_PARAMETER) {
-                out.print(" direction=\"out\"");
-            }
-
-            out.println("/>");
-        }
-    }
-
-    private void storeDbEntities(PrintWriter out, DataMap map) {
-
-        Iterator iter = sortedRegularDbEntities(map).iterator();
-        while (iter.hasNext()) {
-            DbEntity dbe = (DbEntity) iter.next();
-            out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-            if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
-                out.print(" schema=\"");
-                out.print(dbe.getSchema());
-                out.print('\"');
-            }
-            if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
-                out.print(" catalog=\"");
-                out.print(dbe.getCatalog());
-                out.print('\"');
-            }
-
-            out.println('>');
-
-            storeDbAttribute(out, dbe);
-            storeDbKeyGenerator(out, dbe.getPrimaryKeyGenerator());
-            out.println("\t</db-entity>");
-            dbRelationships.addAll(dbe.getRelationships());
-        }
-
-        Iterator diter = sortedDerivedDbEntities(map).iterator();
-        while (diter.hasNext()) {
-            DerivedDbEntity dbe = (DerivedDbEntity) diter.next();
-            out.print("\t<db-entity name=\"" + dbe.getName() + '\"');
-            if (dbe.getSchema() != null && dbe.getSchema().trim().length() > 0) {
-                out.print(" schema=\"");
-                out.print(dbe.getSchema());
-                out.print('\"');
-            }
-            if (dbe.getCatalog() != null && dbe.getCatalog().trim().length() > 0) {
-                out.print(" catalog=\"");
-                out.print(dbe.getCatalog());
-                out.print('\"');
-            }
-
-            DbEntity parent = dbe.getParentEntity();
-            String name = (parent != null) ? parent.getName() : "";
-            out.print(" parentName=\"");
-            out.print(name);
-            out.print('\"');
-
-            out.println('>');
-
-            storeDbAttribute(out, dbe);
-            out.println("\t</db-entity>");
-            dbRelationships.addAll(dbe.getRelationships());
-        }
-    }
-
-    private void storeDbAttribute(PrintWriter out, DbEntity dbe) {
-        Iterator iter = this.sortedAttributes(dbe).iterator();
-
-        while (iter.hasNext()) {
-            DbAttribute attr = (DbAttribute) iter.next();
-            if (attr instanceof DerivedDbAttribute) {
-                storeDerivedDbAttribute(out, (DerivedDbAttribute) attr);
-            }
-            else {
-                storeRegularDbAttribute(out, attr);
-            }
-        }
-
-    }
-
-    private void storeDerivedDbAttribute(PrintWriter out, DerivedDbAttribute attr) {
-        out.print("\t\t<db-attribute-derived name=\"" + attr.getName() + '\"');
-
-        String type = TypesMapping.getSqlNameByType(attr.getType());
-        if (type != null) {
-            out.print(" type=\"" + type + '\"');
-        }
-
-        // If attribute is part of primary key
-        if (attr.isPrimaryKey()) {
-            out.print(" isPrimaryKey=\"true\"");
-        }
-
-        if (attr.isMandatory())
-            out.print(" isMandatory=\"true\"");
-
-        if (attr.getMaxLength() > 0) {
-            out.print(" length=\"");
-            out.print(attr.getMaxLength());
-            out.print('\"');
-        }
-
-        if (attr.getPrecision() > 0) {
-            out.print(" precision=\"");
-            out.print(attr.getPrecision());
-            out.print('\"');
-        }
-
-        if (((DerivedDbEntity) attr.getEntity()).getGroupByAttributes().contains(attr)) {
-            out.print(" isGroupBy=\"true\"");
-        }
-
-        String spec = attr.getExpressionSpec();
-        if (spec != null && spec.trim().length() > 0) {
-            out.print(" spec=\"");
-            out.print(spec);
-            out.print('\"');
-        }
-
-        List params = attr.getParams();
-
-        if (params.size() > 0) {
-            out.println(">");
-
-            Iterator refs = params.iterator();
-            while (refs.hasNext()) {
-                DbAttribute ref = (DbAttribute) refs.next();
-                out.println("\t\t\t<db-attribute-ref name=\"" + ref.getName() + "\"/>");
-            }
-            out.println("\t\t</db-attribute-derived>");
-        }
-        else {
-            out.println("/>");
-        }
-    }
-
-    private void storeRegularDbAttribute(PrintWriter out, DbAttribute attr) {
-        out.print("\t\t<db-attribute name=\"" + attr.getName() + '\"');
-
-        String type = TypesMapping.getSqlNameByType(attr.getType());
-        if (type != null) {
-            out.print(" type=\"" + type + '\"');
-        }
-
-        // If attribute is part of primary key
-        if (attr.isPrimaryKey()) {
-            out.print(" isPrimaryKey=\"true\"");
-        }
-
-        if (attr.isMandatory()) {
-            out.print(" isMandatory=\"true\"");
-        }
-
-        if (attr.getMaxLength() > 0) {
-            out.print(" length=\"");
-            out.print(attr.getMaxLength());
-            out.print('\"');
-        }
-
-        if (attr.getPrecision() > 0) {
-            out.print(" precision=\"");
-            out.print(attr.getPrecision());
-            out.print('\"');
-        }
-
-        out.println("/>");
-    }
-
-    private void storeDbKeyGenerator(PrintWriter out, DbKeyGenerator pkGenerator) {
-        if (pkGenerator == null)
-            return;
-        String type = pkGenerator.getGeneratorType();
-        if (type == null)
-            return;
-        String name = pkGenerator.getGeneratorName();
-        Integer cacheSize = pkGenerator.getKeyCacheSize();
-        out.println("\t\t<" + DB_KEY_GENERATOR_TAG + '>');
-        out.print("\t\t\t<" + DB_GENERATOR_TYPE_TAG + '>');
-        out.print(type);
-        out.println("</" + DB_GENERATOR_TYPE_TAG + '>');
-        if (name != null) {
-            out.print("\t\t\t<" + DB_GENERATOR_NAME_TAG + '>');
-            out.print(name);
-            out.println("</" + DB_GENERATOR_NAME_TAG + '>');
-        }
-        if (cacheSize != null) {
-            out.print("\t\t\t<" + DB_KEY_CACHE_SIZE_TAG + '>');
-            out.print(cacheSize);
-            out.println("</" + DB_KEY_CACHE_SIZE_TAG + '>');
-        }
-        out.println("\t\t</" + DB_KEY_GENERATOR_TAG + '>');
-    }
-
-    private void storeObjEntities(PrintWriter out, DataMap map) {
-        Iterator iter = this.sortedObjEntities(map).iterator();
-        while (iter.hasNext()) {
-            ObjEntity temp = (ObjEntity) iter.next();
-            out.print("\t<obj-entity name=\"");
-            out.print(temp.getName());
-
-            if (temp.getClassName() != null) {
-                out.print("\" className=\"");
-                out.print(temp.getClassName());
-            }
-
-            if (temp.isReadOnly()) {
-                out.print("\" readOnly=\"true");
-            }
-
-            out.print('\"');
-
-            if (temp.getDbEntity() != null) {
-                out.print(" dbEntityName=\"");
-                out.print(temp.getDbEntity().getName());
-                out.print('\"');
-            }
-
-            if (temp.getSuperClassName() != null) {
-                out.print(" superClassName=\"");
-                out.print(temp.getSuperClassName());
-                out.print("\"");
-            }
-
-            out.println('>');
-            storeObjAttribute(out, temp);
-
-            out.println("\t</obj-entity>");
-            Collection objRels = temp.getRelationshipMap().values();
-            objRelationships.addAll(objRels);
-
-            Iterator relIt = objRels.iterator();
-            while (relIt.hasNext()) {
-                ObjRelationship objRel = (ObjRelationship) relIt.next();
-                dbRelationshipRefs.addAll(objRel.getDbRelationships());
-            }
-        }
-    }
-
-    private void storeObjAttribute(PrintWriter out, ObjEntity obj_entity) {
-        Iterator iter = this.sortedAttributes(obj_entity).iterator();
-        while (iter.hasNext()) {
-            ObjAttribute temp = (ObjAttribute) iter.next();
-            out.print("\t\t<obj-attribute name=\"" + temp.getName() + '\"');
-
-            if (temp.getType() != null) {
-                out.print(" type=\"");
-                out.print(temp.getType());
-                out.print('\"');
-            }
-
-            // If this obj attribute is mapped to db attribute
-            if (temp.getDbAttribute() != null) {
-                out.print(" db-attribute-path=\"");
-                out.print(temp.getDbAttributePath());
-                out.print('\"');
-            }
-            out.println("/>");
-        }
-    }
-
-    private void storeObjRelationships(PrintWriter out) throws DataMapException {
-        Iterator iter = this.sortedRelationships(objRelationships).iterator();
-        while (iter.hasNext()) {
-            ObjRelationship rel = (ObjRelationship) iter.next();
-            ObjEntity srcEnt = (ObjEntity) rel.getSourceEntity();
-            if (srcEnt == null) {
-                logObj.warn(
-                    "No source entity, ignoring ObjRelationship " + rel.getName());
-                return;
-            }
-
-            ObjEntity targetEnt = (ObjEntity) rel.getTargetEntity();
-            if (targetEnt == null) {
-                logObj.warn(
-                    "No target entity, ignoring ObjRelationship " + rel.getName());
-                return;
-            }
-
-            out.print("\t<obj-relationship name=\"" + rel.getName() + '\"');
-            out.print(" source=\"" + srcEnt.getName() + '\"');
-            out.print(" target=\"" + targetEnt.getName() + '\"');
-            out.print(" toMany=\"" + (rel.isToMany() ? TRUE : FALSE) + '\"');
-
-            String deleteRule = DeleteRule.deleteRuleName(rel.getDeleteRule());
-            if (rel.getDeleteRule() != DeleteRule.NO_ACTION && deleteRule != null) {
-                out.print(" deleteRule=\"" + deleteRule + '\"');
-            }
-            out.println('>');
-            this.storeDbRelationshipRef(out, rel);
-            out.println("\t</obj-relationship>");
-        }
-    }
-
-    private void storeDbRelationshipRef(PrintWriter out, ObjRelationship objRelationship)
-        throws DataMapException {
-
-        // do the first empty run, to see that the chain of
-        // relationships is valid
-        boolean validChain = true;
-        Iterator dryRun = objRelationship.getDbRelationships().iterator();
-        while (dryRun.hasNext()) {
-            DbRelationship relationship = (DbRelationship) dryRun.next();
-            if (!dbRelationships.contains(relationship)) {
-                validChain = false;
-                break;
-            }
-        }
-
-        if (!validChain) {
-            return;
-        }
-
-        Iterator iter = objRelationship.getDbRelationships().iterator();
-        while (iter.hasNext()) {
-            DbRelationship rel = (DbRelationship) iter.next();
-
-            out.print("\t\t<");
-            out.print(DB_RELATIONSHIP_REF_TAG);
-            out.print(" source=\"");
-            out.print(rel.getSourceEntity().getName());
-            out.print("\" target=\"");
-            out.print(rel.getTargetEntityName());
-            out.print("\" name=\"");
-            out.print(rel.getName());
-            out.println("\"/>");
-        } 
-    }
-
-    private void storeDbRelationships(PrintWriter out) throws DataMapException {
-        Iterator iter = this.sortedRelationships(dbRelationships).iterator();
-        while (iter.hasNext()) {
-            DbRelationship temp = (DbRelationship) iter.next();
-            out.print("\t<");
-            out.print(DB_RELATIONSHIP_TAG);
-            out.print(" name=\"");
-            out.print(temp.getName());
-            out.print("\" source=\"");
-            out.print(temp.getSourceEntity().getName());
-            out.print("\" target=\"");
-            out.print(temp.getTargetEntityName());
-            out.print("\" toDependentPK=\"");
-            out.print(temp.isToDependentPK() ? TRUE : FALSE);
-            out.print("\" toMany=\"");
-            out.print(temp.isToMany() ? TRUE : FALSE);
-            out.println("\">");
-            this.storeDbAttributePair(out, temp);
-            out.print("\t</");
-            out.print(DB_RELATIONSHIP_TAG);
-            out.println('>');
-        }
-    }
-
-    private void storeDbAttributePair(PrintWriter out, DbRelationship dbRel)
-        throws DataMapException {
-        Iterator iter = dbRel.getJoins().iterator();
-        while (iter.hasNext()) {
-            DbAttributePair pair = (DbAttributePair) iter.next();
-            out.print("\t\t<");
-            out.print(DB_ATTRIBUTE_PAIR_TAG);
-
-            // sanity check
-            if (pair.getSource() != null) {
-                out.print(" source=\"");
-                out.print(pair.getSource().getName());
-                out.print("\"");
-            }
-
-            if (pair.getTarget() != null) {
-                out.print(" target=\"");
-                out.print(pair.getTarget().getName());
-                out.print("\"");
-            }
-
-            out.println("/>");
-        }
     }
 
     private void processStartDbEntity(Attributes atts) throws SAXException {
@@ -1299,7 +817,7 @@ public class MapLoader extends DefaultHandler {
 
         procedure.addCallParameter(parameter);
     }
-    
+
     private void processStartQuery(Attributes attributes) throws SAXException {
         String name = attributes.getValue("", "name");
         if (null == name) {
@@ -1319,14 +837,14 @@ public class MapLoader extends DefaultHandler {
                     "MapLoader::processStartQuery(), invalid query builder: " + builder);
             }
         }
-        
+
         String rootType = attributes.getValue("", "root");
         String rootName = attributes.getValue("", "root-name");
-        
+
         queryBuilder.setName(name);
         queryBuilder.setRoot(dataMap, rootType, rootName);
     }
-    
+
     private void processStartQueryProperty(Attributes attributes) throws SAXException {
         String name = attributes.getValue("", "name");
         if (null == name) {
@@ -1340,7 +858,7 @@ public class MapLoader extends DefaultHandler {
 
         queryBuilder.addProperty(name, value);
     }
-    
+
     private void processStartQueryResultColumn(Attributes attributes)
         throws SAXException {
         String label = attributes.getValue("", "label");
@@ -1360,29 +878,29 @@ public class MapLoader extends DefaultHandler {
 
         queryBuilder.addResultColumn(label, dbType, javaType);
     }
-    
+
     private void processEndQueryPrefetch() throws SAXException {
         queryBuilder.addPrefetch(charactersBuffer.toString());
     }
-    
+
     private void processStartQueryOrdering(Attributes attributes) throws SAXException {
         descending = attributes.getValue("", "descending");
         ignoreCase = attributes.getValue("", "ignore-case");
     }
-    
+
     private void processEndQuery() throws SAXException {
         dataMap.addQuery(queryBuilder.getQuery());
         queryBuilder = null;
     }
-    
+
     private void processEndQuerySQL() throws SAXException {
-       queryBuilder.setSql(charactersBuffer.toString());
+        queryBuilder.setSql(charactersBuffer.toString());
     }
-    
+
     private void processEndQueryQualifier() throws SAXException {
-       queryBuilder.setQualifier(charactersBuffer.toString());
+        queryBuilder.setQualifier(charactersBuffer.toString());
     }
-    
+
     private void processEndQueryOrdering() throws SAXException {
         String path = charactersBuffer.toString();
         queryBuilder.addOrdering(path, descending, ignoreCase);
