@@ -73,6 +73,11 @@ import org.scopemvc.view.swing.SwingView;
  * @author Andrei Adamchik
  */
 public class SelectQueryDialog extends SPanel {
+    private static final String QUERY_TAB = "Select Query";
+    private static final String ORDERING_TAB = "Ordering";
+    private static final String PREFETCH_TAB = "Prefetch";
+
+    protected JTabbedPane tabbedPane;
 
     public SelectQueryDialog() {
         initView();
@@ -90,16 +95,16 @@ public class SelectQueryDialog extends SPanel {
         SButton cancelButton =
             new SButton(new SAction(SelectQueryController.CANCEL_CONTROL));
         cancelButton.setEnabled(true);
-        
+
         // assemble
         setLayout(new BorderLayout());
 
-        JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
-        tab.addTab("Select Query", mainPanel);
-        tab.addTab("Ordering", orderingPanel);
-        tab.addTab("Prefetch", prefetchPanel);
+        tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+        tabbedPane.addTab(QUERY_TAB, mainPanel);
+        tabbedPane.addTab(ORDERING_TAB, orderingPanel);
+        tabbedPane.addTab(PREFETCH_TAB, prefetchPanel);
 
-        add(tab, BorderLayout.CENTER);
+        add(tabbedPane, BorderLayout.CENTER);
         add(
             PanelFactory.createButtonPanel(new JButton[] { saveButton, cancelButton }),
             BorderLayout.SOUTH);

@@ -148,6 +148,9 @@ public class SelectQueryController extends BasicController {
 
         model.getOrderings().add(newOrdering);
         modified = true;
+
+        // select new row
+        model.setSelectedOrdering(newOrdering);
     }
 
     protected void removeOrdering() {
@@ -198,9 +201,15 @@ public class SelectQueryController extends BasicController {
 
     final class EventHelper implements ModelChangeListener {
         public void modelChanged(ModelChangeEvent event) {
-            // name change requires special handling
+
             Selector selector = event.getSelector();
-            if (selector.startsWith(QueryModel.NAME_SELECTOR)) {
+
+            // filter selectors that do not modify model
+            if (selector.startsWith(SelectQueryModel.SELECTED_ORDERING_SELECTOR)) {
+                return;
+            }
+            else if (selector.startsWith(QueryModel.NAME_SELECTOR)) {
+                // name change requires special handling
                 renamed = true;
             }
             else {

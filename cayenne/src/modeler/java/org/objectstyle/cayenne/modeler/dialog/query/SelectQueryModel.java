@@ -291,9 +291,9 @@ public class SelectQueryModel extends QueryModel {
     }
 
     public void setSelectedOrdering(OrderingModel selectedOrdering) {
-        this.selectedOrdering = selectedOrdering;
-
-        // don't fire an event - ordering selection only concerns
-        // this instance.... at least for now...
+        if (this.selectedOrdering != selectedOrdering) {
+            this.selectedOrdering = selectedOrdering;
+            fireModelChange(VALUE_CHANGED, SELECTED_ORDERING_SELECTOR);
+        }
     }
 }

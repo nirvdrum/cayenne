@@ -59,6 +59,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 
@@ -66,6 +68,7 @@ import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.map.Entity;
 import org.objectstyle.cayenne.modeler.util.EntityTreeModel;
 import org.objectstyle.cayenne.modeler.util.MultiColumnBrowser;
+import org.objectstyle.cayenne.modeler.util.UIUtil;
 import org.scopemvc.core.Selector;
 import org.scopemvc.view.swing.SAction;
 import org.scopemvc.view.swing.SButton;
@@ -151,11 +154,22 @@ public class SelectQueryOrderingPanel extends SPanel {
     }
 
     private void initController() {
-
+        // update model when a tree selection happens
         browser.addTreeSelectionListener(new TreeSelectionListener() {
             public void valueChanged(TreeSelectionEvent e) {
                 Object[] path = e.getPath() != null ? e.getPath().getPath() : null;
                 ((SelectQueryModel) getShownModel()).setNavigationPath(path);
+            }
+        });
+
+        // scroll to selected row whenever a selection even occurs
+        orderingsTable
+            .getSelectionModel()
+            .addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    UIUtil.scrollToSelectedRow(orderingsTable);
+                }
             }
         });
     }

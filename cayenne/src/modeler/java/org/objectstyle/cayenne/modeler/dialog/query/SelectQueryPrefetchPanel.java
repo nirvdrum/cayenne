@@ -66,6 +66,10 @@ import org.scopemvc.view.swing.SPanel;
 public class SelectQueryPrefetchPanel extends SPanel {
 
     public SelectQueryPrefetchPanel() {
+        initView();
+    }
+
+    private void initView() {
 
     }
 }
