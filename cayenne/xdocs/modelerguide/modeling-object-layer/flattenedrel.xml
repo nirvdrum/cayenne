@@ -1,10 +1,10 @@
 <document>
-<title>User Guide - Flattened Relationships</title>
+<title>CayenneModeler Guide - Flattened Relationships</title>
 <toc name="toc-modeler-guide" chapter="6. Modeling Object Layer"/>  
 <body>
     <section name="6. Modeling Object Layer">
    
-	<subsection name="6.2 Flattened Relationships">
+	<subsection name="6.3 Flattened Relationships">
 	<p>ObjRelationships that map to more than a single DbRelationship are called
 	"flattened".</p>
 	
@@ -25,92 +25,40 @@
 	read only. One particularly useful combination is read/write. It is many-to-many (n:m) 
 	relationships mentioned above.</p>
 	
-	<p>Scenario:<BR/>
-	Assume that we have an employee who can work on several projects and each project can have several Employees. 
-	Our database data model would look like:
+	<p>Coming back to an example with artists and exhibits, here is how the relationships would look like
+	if a DataMap was reverse engineered from the database schema: 
 	</p>
-	<img src="/images/nmlink.png" width="497" height="103" border="0" 
-        align="middle"/>
-    <p>
-	The database creation DDL would be:
-	</p>
-	<source>
-	create table EMPLOYEES 
-	( 	id       integer      primary key, 
-		fullname varchar(100));
-
-	create table PROJECTS
-	( 	id       integer      primary key, 
-		name     varchar(100));
-
-	create table PRJ_EMP
-	( 	emp_id   integer,
-		prj_id   integer);
-	</source>
 	
-	<p>
-	Our object model would look like:
-	</p>
-	<img src="/images/nmlinkobjmodel.png" width="391" height="121" border="0" 
-        align="middle" />
-	<p>
-	Cayenne Modeler:<BR/>
-	The first step is to recreate these models in the Cayenne modeler. There are several ways of accomplishing this 
-	and these are described in the user manual. I leave it up to you which one you pick. 
-	However, in this example, we will create the database tables, and reengineer the database schema. 
-
-	There are a couple of changes to be made after such an import:
-
-	<ol>
-		<li>Remove the ObjectEntity PrjEmp
-This object contains only identifiers, no business logic and is of no further use in our programming later.  In fact, one of the big
-advantages of Cayenne's support for n:m relationships is the lack of a requirement to have the intermediate ObjEntity lying 
-around cluttering up your model and your class hierarchy.</li>
-		<li>Mark the attributes of DbEntity emp_prj as primary key.
-If you leave this step out, your code will result in a CayenneRuntimeException: <br/>
-Cannot modify (add to) the read-only relationship [name relationship].  <br/>
-The reason for this is that Cayenne determines that a flattened relationship is read-write if and only if the first relationship
-is toMany, the second is toOne, and the intermediate table (the destination of the first relationship) consists solely of primary
-key attributes.  If any other attributes are present in the intermediate table, then it would not be valid for Cayenne to
-automatically create/delete records in that table.
-		</li>
-		<li>Verify that there are no primary key elements in your object model. 
-Normally, there should be no need for identifiers in the object model, so they can be removed.
-		</li>
-		<li>Rename the Objects Projects and Employees in the object model (not the database model!) to Project and Employee.
-		</li>
-		<li>Create the following relationships between the Db Entities:<BR/>
-	<code>
-   EMPLOYEES |(1:n)| EMP_PROJ<BR/>
-   PROJECTS  |(1:n)| EMP_PROJ<BR/>
-   PRJ_EMP   |(n:1)| EMPLOYEES<BR/>
-   PRJ_EMP   |(n:1)| PROJECTS<BR/>
-	</code>
-		</li>
-	</ol>
+	<img src="/images/modelerguide/flatten1.jpg" width="520" height="335"/>
 	
-	Besides the removal of the intermediate Object PrjEmp and the primary key marking of the emp_prj table, 
-	we have not done anything yet to enable usage of the many-to-may relationships. 
-	This is done in our object model. There are two relationships to be defined in the object model:<BR/>
-	<code>
-	Project  | (n:m) |  Employee<BR/>
-	Employee | (n:m) |  Project<BR/>
-	</code>
-	First we define the Project to Employee relationship. In the modeler, a toMany relationship should 
-	be created from Project to  Employee:<BR/>
+	<p>Note that a join table ARTIST_EXHIBIT is by default modeled as an ObjEntity ArtistExhibit 
+	and Artist has a to-many relationship to it. To create a straight many-to-many from Artist to Exhibit,
+	perform the following steps: 
 	</p>
-	<img src="/images/flatrelscrshot1.png" width="650" height="205" border="0" 
-        align="middle" />
-	<p>
-	When selecting the underlying database relationship take note that the relationship is going from the table 
-	prj_emp to employees: 
-	</p>
-	<img src="/images/flatrelscrshot2.png" width="415" height="116" border="0" 
-        align="middle" />
-     <p>
-     The definition of the Employee to Project relationship works exactly the same way, only in reverse.
-     After this we can finally generate our classes .
-     </p>
+	
+	<ul>
+		<li>Create a new relationship for Artist ObjEntity. Select "Exhibit" as a target. 
+		Name it something meaningful, e.g. "exhibits"</li>
+		
+		<li>Click "Database Mapping" button in the lower right corner. A pop up window opens with 
+		choices showing 
+		all possible paths from Artist to Exhibit entity. Select "artistExhibitArray.toExhibit"</li>
+	</ul>
+	
+	<img src="/images/modelerguide/flatten2.jpg" width="520" height="335"/>
+	
+	<ul>
+		<li>Delete unneeded "artistExhibitArray" relationship for the Artist ObjEntity.</li>
+		
+		<li>Repeat the above 3 steps for the Exhibit entity if the reverse relationship
+		is desired.</li>
+		
+		<li>Delete ArtistExhibit ObjEntity (but not ARTIST_EXHIBIT DbEntity!). It is no longer needed.
+		</li>
+		
+		<li>Regenerate Java classes for Artist and Exhibit, since their relationships where changed.</li>
+	</ul>
+	
 	</subsection>
     </section>
 </body>

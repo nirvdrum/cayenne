@@ -1,9 +1,9 @@
 <document>
-<title>User Guide - Many-to-Many Relationships</title>
+<title>CayenneModeler Guide - Many-to-Many Relationships</title>
 <toc name="toc-modeler-guide" chapter="6. Modeling Object Layer"/>  
 <body>
     <section name="6. Modeling Object Layer">
-    	<subsection name="6.1 Many-to-Many Relationships">
+    	<subsection name="6.2 Many-to-Many Relationships">
 	<p>Many-to-many relationships can be modeled in two different ways:</p>
 	
 	<ul>
