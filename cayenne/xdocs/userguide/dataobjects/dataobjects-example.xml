@@ -5,7 +5,7 @@
     <section name="8. Working with DataObjects">
     	<subsection name="8.3 DataObjects Example">
 	<p>As discussed in "DataContext" chapter, any changes made to the DataObjects
-	via "set*" methods can be synchronized with the database by calling 
+	via "set*" methods are synchronized with the database by calling 
 	<code>DataContext.commitChanges</code>.
 	Here is an example showing how the <code>Painting</code> object is fetched, 
 	modified and saved back.

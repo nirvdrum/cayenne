@@ -5,54 +5,11 @@
     <section name="8. Working with DataObjects">
     	<subsection name="8.2 Flattened Relationships">
     	<p>Working with flattened relationships is not much different 
-    	from working with normal relationships. Lets take the <a 
-    	href="../../modelerguide/modeling-object-layer/flattenedrel.html">example
-    	discussed in the modeler guide</a>. 
-		Assume that the following rows are manually inserted to the database prior
-		to running the Java code:<BR/>
+    	from working with normal relationships. Note that only many-to-many 
+    	flattened relationships are modifiable. In this case calling "addTo..." and
+    	"removeFrom..." will trigger creation or deletion of a join table record
+    	on commit.
 		</p>
-<source>insert into employees values ( 1,  'Scott');
-insert into projects values  ( 10, 'Cayenne');
-</source>
-		<p>
-		Lets link employee named Scott to the Cayenne Project. The steps we have to 
-		perform is first to get an instance of Scott, then we would have to get an 
-		instance of Cayenne project and finally we would have to add Scott to Cayenne.
-		</p>
-<source>...
-DataContext context =      
-Configuration.getSharedConfig().getDomain().createDataContext();
-
-// Get the first Employee you can find (Scott)
-SelectQuery qry = new SelectQuery (Employee.class);   
-List emps       = context.performQuery(qry);       
-Employee emp    = (Employee) emps.get(0);
-    
-// Get the first Project you can find (Cayenne)
-qry = new SelectQuery (Project.class);   
-List prjs = context.performQuery(qry);       
-Project prj = (Project) prjs.get(0);
-
-// Add Scott to the Cayenne project
-emp.addToProjects(prj);
-    
-// Commit changes.
-context.commitChanges();
-...
-</source>
-
-		<p>
-		That's it! Now you can query your database and see what happened there (mysql output below):
-		</p>
-<source>
-mysql> select * from prj_emp;
-+--------+--------+
-| emp_id | prj_id |
-+--------+--------+
-|      1 |     10 |
-+--------+--------+
-1 row in set (0.00 sec)
-</source>
 
 		<subsection name="8.2.1 Deleting Objects with Flattened Relationships">
 		<p>Given a many-to-many flattened relationship, deleting an object on one side of it

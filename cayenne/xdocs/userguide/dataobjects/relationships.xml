@@ -4,8 +4,59 @@
 <body>
     <section name="8. Working with DataObjects">
     	<subsection name="8.1 Relationships">
-    	<p>TO BE DONE
+    	
+    	<subsection name="8.1.1 To-One Relationships">
+    	<p>"Get" methods for to-one relationships return the target DataObject.
+    	If the object is not in memory yet, it will be fetched on demand. 
+    	Modifying to-one relationships is no different from modifying attributes 
+    	- just simple call to a "set" method:
     	</p>
+
+<source>
+Painting painting;
+
+// obtain artist for a given painting
+Artist originalArtist = painting.getToArtist();
+
+// replace with a new artist
+Artist newArtist = (Artist)context.createAndRegisterNewObject("Artist");
+painting.setToArtist(newArtist);
+
+// or temporarily remove Artist at all...
+// painting.setToArtist(null);
+</source>
+    	</subsection>
+    	
+    	<p></p>
+    	<panel name="Note:">
+		When adding or removing an object from any kind of relationship, Cayenne will
+		locate and modify an existing reverse relationship as appropriate.
+		</panel>
+		
+		<subsection name="8.1.2 To-Many Relationships"> 	
+    	<p>"Get" methods for <strong>to-many</strong> relationships return Lists of DataObjects. 
+    	Just like individual DataObjects, such lists are also resolved on demand (e.g. when 
+    	a user tries to read an element from the list). For modification there are special 
+    	"addTo..." and "removeFrom..." methods:
+    	</p>
+    	
+<source>
+Artist artist;
+
+// obtain a list of paintings
+List paintings = artist.getPaintingArray();
+
+// remove the first painting
+if(paintings.size() > 0) {
+   Painting firstPainting = (Painting)paintings.get(0);
+   artist.removeFromPaintingArray(firstPainting);
+}
+
+// add a new painting
+Painting newPainting = (Painting)context.createAndRegisterNewObject("Painting");
+artist.addToPaintingArray(newPainting);
+</source>
+    	</subsection>
     	</subsection>
     </section>
 </body>
