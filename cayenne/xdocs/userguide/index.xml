@@ -34,13 +34,14 @@
             <li><a href="design/index.html">4. Design</a>
             <ul>
                 <li><a href="design/index.html#or_map">4.1 Object Relational Mapping</a></li>
-                <li><a href="design/dataobj.html#do">4.2 Data Objects</a></li>
-                <li><a href="design/query.html#query">4.3 Select Queries: Retrieving Objects</a></li>
-                <li><a href="design/access.html#access_classes">4.4 Access Classes</a></li>
-                <li><a href="design/datasrc.html#connect">4.5 Cayenne DataSource</a></li>
-                <li><a href="design/crossdb.html#crossdb">4.6 Cross-Database Issues</a></li>
-                <li><a href="design/autopk.html#pk">4.7 Primary Key Generation</a></li>
-                <li><a href="design/config.html#config">4.8 Configuration</a></li>
+                <li><a href="design/graph.html#do">4.2 Object Graph</a></li>
+                <li><a href="design/dataobj.html#do">4.3 Data Objects</a></li>
+                <li><a href="design/query.html#query">4.4 Select Queries: Retrieving Objects</a></li>
+                <li><a href="design/access.html#access_classes">4.5 Access Classes</a></li>
+                <li><a href="design/datasrc.html#connect">4.6 Cayenne DataSource</a></li>
+                <li><a href="design/crossdb.html#crossdb">4.7 Cross-Database Issues</a></li>
+                <li><a href="design/autopk.html#pk">4.8 Primary Key Generation</a></li>
+                <li><a href="design/config.html#config">4.9 Configuration</a></li>
             </ul></li>
             
             <li><a href="appguide/index.html">5. Writing Cayenne Applications</a>

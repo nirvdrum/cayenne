@@ -7,7 +7,7 @@
 </navigator>
 <body>
     <section name="4. Design">
-        <subsection name="4.7 Primary Key Generation" anchor="pk">
+        <subsection name="4.8 Primary Key Generation" anchor="pk">
             <p>Depending on the type of persistent objects and the database
             design, primary key values can be handled in a few different. 
             A decision to use one or another technique will affect how 
@@ -42,7 +42,7 @@
             </tr>
             </table>
             
-            <subsection name="4.7.1 Meaningful Primary Key" anchor="pk-do">            
+            <subsection name="4.8.1 Meaningful Primary Key" anchor="pk-do">            
             <p>DataObjects can provide their own values for the primary key 
             columns. Sometimes this makes sense. For example if a primary
             key column conains meaningful data, like Social Security Number.
@@ -54,7 +54,7 @@
             </subsection>
             
                    
-          	<subsection name="4.7.2 Primary Key Derived From Realtionship" anchor="pk-rel">            
+          	<subsection name="4.8.2 Primary Key Derived From Realtionship" anchor="pk-rel">            
             	<p>A primary key column of a table may depend on a primary key 
             	column of another table. This is normally the case with "join"
             	tables used to resolve many-to-many relationships. In such cases 
@@ -64,7 +64,7 @@
             	</p>
         	</subsection>
         	       
-        	<subsection name="4.7.3 Generated Primary Key" anchor="pk-gen">            
+        	<subsection name="4.8.3 Generated Primary Key" anchor="pk-gen">            
             	<p>In most cases, database primary key is a purely relational concept that
             	has no correspondence in the object model. Normally this is a unique
             	sequential number that identifies a row in the database.

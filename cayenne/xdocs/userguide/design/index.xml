@@ -2,21 +2,20 @@
 <title>User Guide - Design</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/quickstart/index.html</prev>
-	<next>/userguide/design/dataobj.html</next>
+	<prev>/userguide/quickstart/tapestrywebapp.html</prev>
+	<next>/userguide/design/graph.html</next>
 </navigator>
 <body>
     <section name="4. Design">
         <subsection name="4.1 Object Relational Mapping" anchor="or_map">
-            <p>Normally mapping is done between Java class and a database table. This 
-            way instance of such class (an object) will map to a single database row.
-            Some properties of such object (properties in a "JavaBeans" sense) would map 
-            to table columns. For example String, and numeric properties. Other properties
-            would map to database primary-foreign key relationships. Summarizing possible 
-            mappings we have the following correspondence:</p>
+            <p>Normally mapping is done between a Java class and a database table or view. 
+            Instances of such class will correspond to single rows in the database.
+            Persistent properties of such object (properties in a "JavaBeans" sense) would map 
+            either to table columns or to database primary-foreign key relationships. 
+            Summarizing possible mappings, the most common cases are:</p>
             
             <ul>
-                <li>Java class -&gt; database table</li>
+                <li>Java class -&gt; database table or view</li>
                 <li>"simple" class property -&gt; table column</li>
                 <li>"complex" class property -&gt; related table via a database relationship</li>
             </ul>
@@ -25,23 +24,8 @@
                 <li>"simple" object property value -&gt; value of column in a row</li>
                 <li>"complex" object property value -&gt; another object or list of objects</li>
             </ul>
-        
-            <p>This way O/R 
-            framework allows programmer to get access to an "object tree" - objects 
-            interconnected via relationship properties. Object tree is a view of a subset
-            of database data and relationships between this data - all without 
-            the need to write SQL code in Java applications. The most important
-            property of the object tree is its ability to be synchronized with the database.
-            This works both ways - object tree can get updated when the database data has changed
-            or database will be updated when an object tree was changed by the Java application.</p>
-            
-            <p>The above statement doesn't mean that Caynne would automatically poll the database for 
-            the updated data, or automatically save the data. This would have killed the performance 
-            of the application and made it unpredictable. Instead Java application is always in full 
-            control of these operations.</p>
-            
-            <p>The following diagram shows how mapping is organized in Cayenne:
-            </p>
+
+            <p>The following diagram shows how mapping metadata is organized in Cayenne:</p>
             
             <img src="/images/map-class.gif" alt="Cayenne Map Class Diagram"/> 
             
@@ -61,7 +45,7 @@
             using WebObjects EOModel format. 
             Normally DataMaps are created and maintained using CayenneModeler GUI tool.
             </p>
-        </subsection>
+            </subsection>
     </section>
 </body>
 </document>

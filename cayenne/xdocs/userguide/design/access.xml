@@ -7,7 +7,7 @@
 </navigator>
 <body>
     <section name="4. Design">
-            <subsection name="4.4 Access Classes" anchor="access_classes">
+            <subsection name="4.5 Access Classes" anchor="access_classes">
             <p>Cayenne database access module consists of a stack of objects, 
             all implementing <a href=
             "../../api/cayenne/org/objectstyle/cayenne/access/QueryEngine.html">QueryEngine

@@ -2,12 +2,12 @@
 <title>User Guide - Design</title>
 <navigator>
 	<up>/userguide/index.html</up>
-	<prev>/userguide/design/index.html</prev>
+	<prev>/userguide/design/graph.html</prev>
 	<next>/userguide/design/query.html</next>
 </navigator>
 <body>
     <section name="4. Design">
-        <subsection name="4.2 Data Objects" anchor="do">
+        <subsection name="4.3 Data Objects" anchor="do">
             <p>Cayenne's main function is to provide object-based access
             to relational data sources. Data objects in Cayenne are fully portable and contain
             only data and business logic. It is a task of the framework to perform operations 
@@ -24,7 +24,7 @@
             
             <img src="/images/dataobject-class.gif" alt="Cayenne DataObject Class Diagram"/> 
 
-            <subsection name="4.2.1 ObjectId">
+            <subsection name="4.3.1 ObjectId">
             	<p>Each object in Cayenne is identified by <a href=
             	"../../api/cayenne/org/objectstyle/cayenne/ObjectId.html">ObjectId</a>. 
             	ObjectId is an abstraction similar to the Primary Key concept in
@@ -43,7 +43,7 @@
             	</panel>
             </subsection>
             
-            <subsection name="4.2.2 Object Persistence States">
+            <subsection name="4.3.2 Object Persistence States">
             	<p>DataObjects can be in 
             	one of the few persistence states. Transitions between the states occur when
             	user (or Cayenne framework on user's behalf) performs certain operations. 

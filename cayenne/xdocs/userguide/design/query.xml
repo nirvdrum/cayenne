@@ -7,7 +7,7 @@
 </navigator>
 <body>
     <section name="4. Design">
-       <subsection name="4.3 Select Queries: Retrieving Objects" anchor="query">
+       <subsection name="4.4 Select Queries: Retrieving Objects" anchor="query">
             <p>To give users access to the existing database data, Cayenne
             provides extensive query API. Queries in Cayenne are Java objects
             that create abstraction independent from SQL dialect used by the
@@ -18,7 +18,7 @@
             "../../api/cayenne/org/objectstyle/cayenne/query/SqlModifyQuery.html">SqlModfyQuery</a>).
             </p>
             
-            <subsection name="4.3.1 Cayenne Select Queries">
+            <subsection name="4.4.1 Cayenne Select Queries">
             <p>To fetch a list of objects from the database, a <a href=
             "../../api/cayenne/org/objectstyle/cayenne/query/SelectQuery.html">SelectQuery</a>
             must be created. It consists of a root entity, qualifier expression and orderings list.
@@ -56,7 +56,7 @@ SelectQuery query = new SelectQuery("Artist");
 </source>
 		</subsection>
 		
-		<subsection name="4.3.2 Qualifiers">
+		<subsection name="4.4.2 Qualifiers">
 			<p>Of course in the real life situations programmers would need a more fine-grained
 			control of what objects should be retrieved from the database. In this
 			case qualifier expression should be used. Qualifier is an instance of
@@ -133,7 +133,7 @@ query.setQualifier(qualifier);
             
             </subsection>
             
-            <subsection name="4.3.3 Orderings">
+            <subsection name="4.4.3 Orderings">
             <p>To sort query results returned from the database 
             server, orderings are used. Orderings use path expressions 
             discussed in the previous section to identify the attributes 
