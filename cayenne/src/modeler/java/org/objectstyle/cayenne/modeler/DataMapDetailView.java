@@ -308,7 +308,7 @@ public class DataMapDetailView
             }
 
             if (hasChanges) {
-                // maybe reindexing is an overkill in the modeler?
+                // TODO: maybe reindexing is an overkill in the modeler?
                 eventController.getCurrentDataDomain().reindexNodes();
             }
         }
