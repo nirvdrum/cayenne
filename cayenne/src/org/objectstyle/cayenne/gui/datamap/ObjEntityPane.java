@@ -56,23 +56,29 @@
 
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.text.Document;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.gui.PanelFactory;
-import org.objectstyle.cayenne.gui.event.*;
+import org.objectstyle.cayenne.gui.event.EntityDisplayEvent;
+import org.objectstyle.cayenne.gui.event.EntityEvent;
+import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.event.ObjEntityDisplayListener;
+import org.objectstyle.cayenne.gui.util.CayenneTextField;
 import org.objectstyle.cayenne.gui.util.EntityWrapper;
 import org.objectstyle.cayenne.gui.util.MapUtil;
-import org.objectstyle.cayenne.map.*;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.DbEntity;
+import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
 
 /** 
@@ -83,34 +89,32 @@ import org.objectstyle.cayenne.util.NamedObjectFactory;
  */
 public class ObjEntityPane
 	extends JPanel
-	implements
-		DocumentListener,
-		ActionListener,
-		ObjEntityDisplayListener,
-		ExistingSelectionProcessor {
-	Mediator mediator;
+	implements ActionListener, ObjEntityDisplayListener, ExistingSelectionProcessor {
 
-	JTextField name;
-	String oldName;
-	JTextField className;
-	JPanel dbPane;
-	JComboBox dbName;
-	JButton tableLabel;
+	static Logger logObj = Logger.getLogger(ObjEntityPane.class.getName());
+
+	protected Mediator mediator;
+	protected JTextField name;
+	protected JTextField className;
+	protected JPanel dbPane;
+	protected JComboBox dbName;
+	protected JButton tableLabel;
 
 	/** Cludge to prevent marking data map as dirty during initial load. */
 	private boolean ignoreChange = false;
 
-	public ObjEntityPane(Mediator temp_mediator) {
-		super();
-		mediator = temp_mediator;
+	public ObjEntityPane(Mediator mediator) {
+		this.mediator = mediator;
 		mediator.addObjEntityDisplayListener(this);
 
 		// Create and layout components
 		init();
 
 		// Add listeners
-		name.getDocument().addDocumentListener(this);
-		className.getDocument().addDocumentListener(this);
+		InputVerifier inputCheck = new FieldVerifier();
+		name.setInputVerifier(inputCheck);
+		className.setInputVerifier(inputCheck);
+
 		dbName.addActionListener(this);
 		tableLabel.addActionListener(this);
 	}
@@ -119,10 +123,10 @@ public class ObjEntityPane
 		setLayout(new BorderLayout());
 
 		JLabel nameLbl = new JLabel("Entity name: ");
-		name = new JTextField(25);
+		name = new CayenneTextField(25);
 
 		JLabel classNameLbl = new JLabel("Class name: ");
-		className = new JTextField(25);
+		className = new CayenneTextField(25);
 
 		tableLabel = PanelFactory.createLabelButton("Table name:");
 
@@ -152,16 +156,14 @@ public class ObjEntityPane
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 
-		// Change db entity for current obj entity
 		if (src == dbName) {
+			// Change DbEntity for current ObjEntity
 			ObjEntity entity = mediator.getCurrentObjEntity();
-			DbEntity db_entity;
-			EntityWrapper wrap;
-			wrap = (EntityWrapper) dbName.getSelectedItem();
-			db_entity = (DbEntity) wrap.getEntity();
-			entity.setDbEntity(db_entity);
+			EntityWrapper wrap = (EntityWrapper) dbName.getSelectedItem();
+			entity.setDbEntity((DbEntity) wrap.getEntity());
 			mediator.fireObjEntityEvent(new EntityEvent(this, entity));
 		} else if (tableLabel == src) {
+			// Jump to DbEntity of the current ObjEntity
 			DbEntity entity = mediator.getCurrentObjEntity().getDbEntity();
 			if (entity != null) {
 				DataDomain dom = mediator.getCurrentDataDomain();
@@ -185,7 +187,8 @@ public class ObjEntityPane
 		mediator.fireObjEntityEvent(event);
 
 		EntityWrapper wrapper = new EntityWrapper(entity);
-		// Add DbEntity to drop-down in alphabetical order
+
+		// Add DbEntity to dropdown in alphabetical order
 		DefaultComboBoxModel model = (DefaultComboBoxModel) dbName.getModel();
 		EntityWrapper wrap = new EntityWrapper(entity);
 		model.insertElementAt(wrap, model.getSize());
@@ -195,58 +198,19 @@ public class ObjEntityPane
 
 	}
 
-	public void insertUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-	public void changedUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-	public void removeUpdate(DocumentEvent e) {
-		textFieldChanged(e);
-	}
-
-	private void textFieldChanged(DocumentEvent e) {
-		if (ignoreChange)
-			return;
-		Document doc = e.getDocument();
-		DataMap map = mediator.getCurrentDataMap();
-		ObjEntity current_entity = mediator.getCurrentObjEntity();
-		if (doc == name.getDocument()) {
-			// Change the name of the current obj entity
-			MapUtil.setObjEntityName(
-				map,
-				(ObjEntity) current_entity,
-				name.getText());
-			// Make sure this name is propagated to wherever it needs to go
-			EntityEvent event = new EntityEvent(this, current_entity, oldName);
-			oldName = name.getText();
-			mediator.fireObjEntityEvent(event);
-		} else if (doc == className.getDocument()) {
-			String classText = className.getText();
-			if (classText != null && classText.trim().length() == 0) {
-				classText = null;
-			}
-
-			current_entity.setClassName(classText);
-			EntityEvent event = new EntityEvent(this, current_entity);
-			mediator.fireObjEntityEvent(event);
-		}
-	}
-
 	public void currentObjEntityChanged(EntityDisplayEvent e) {
 		ObjEntity entity = (ObjEntity) e.getEntity();
-		if (null == entity || e.isEntityChanged() == false)
+		if (entity == null || !e.isEntityChanged()) {
 			return;
+		}
+
 		ignoreChange = true;
 		name.setText(entity.getName());
-		oldName = entity.getName();
 		className.setText(
 			entity.getClassName() != null ? entity.getClassName() : "");
 
 		// Display DbEntity name in select box
-		DefaultComboBoxModel combo_model;
-		combo_model = createComboBoxModel(entity.getDbEntity());
-		dbName.setModel(combo_model);
+		dbName.setModel(createComboBoxModel(entity.getDbEntity()));
 		ignoreChange = false;
 	}
 
@@ -280,5 +244,65 @@ public class ObjEntityPane
 		DefaultComboBoxModel model = new DefaultComboBoxModel(combo_entries);
 		model.setSelectedItem(selected_entry);
 		return model;
+	}
+
+	class FieldVerifier extends InputVerifier {
+		public boolean verify(JComponent input) {
+			if (input == name) {
+				return verifyName();
+			} else if (input == className) {
+				return verifyClassName();
+			} else {
+				return true;
+			}
+		}
+
+		protected boolean verifyName() {
+			String text = name.getText();
+			if (text != null && text.trim().length() == 0) {
+				text = null;
+			}
+
+			DataMap map = mediator.getCurrentDataMap();
+			ObjEntity ent = mediator.getCurrentObjEntity();
+
+			ObjEntity matchingEnt = map.getObjEntity(text);
+
+			if (matchingEnt == null) {
+				// completely new name, set new name for entity
+				EntityEvent e = new EntityEvent(this, ent, ent.getName());
+				MapUtil.setObjEntityName(map, ent, text);
+				mediator.fireObjEntityEvent(e);
+				return true;
+			} else if (matchingEnt == ent) {
+				// no name changes, just return
+				return true;
+			} else {
+				// there is an entity with the same name
+				return false;
+			}
+		}
+
+		protected boolean verifyClassName() {
+			String classText = className.getText();
+			if (classText != null && classText.trim().length() == 0) {
+				classText = null;
+			}
+
+			ObjEntity ent = mediator.getCurrentObjEntity();
+
+			if (!org
+				.objectstyle
+				.cayenne
+				.util
+				.Util
+				.nullSafeEquals(ent.getClassName(), classText)) {
+
+				ent.setClassName(classText);
+				mediator.fireObjEntityEvent(new EntityEvent(this, ent));
+			}
+
+			return true;
+		}
 	}
 }

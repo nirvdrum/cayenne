@@ -139,15 +139,14 @@ public class BrowseView
 		};
 		browseTree.addMouseListener(ml);
 
-        // listen to tree events (since not al selections
-        // are done by clicking tree with mouse)
+		// listen to tree events (since not al selections
+		// are done by clicking tree with mouse)
 		TreeSelectionListener tsl = new TreeSelectionListener() {
 			public void valueChanged(TreeSelectionEvent e) {
 				processSelection(e.getPath());
 			}
 		};
 		browseTree.addTreeSelectionListener(tsl);
-		
 
 		mediator.addDomainListener(this);
 		mediator.addDomainDisplayListener(this);
@@ -496,24 +495,29 @@ public class BrowseView
 	 *  </ul>
 	 */
 	public void entityChanged(EntityEvent e) {
-		if (e.getSource() == this)
+		if (e.getSource() == this) {
 			return;
-		DefaultMutableTreeNode temp;
-		temp =
+		}
+
+		DefaultMutableTreeNode node =
 			getEntityNode(
 				mediator.getCurrentDataDomain(),
 				mediator.getCurrentDataMap(),
 				e.getEntity());
-		if (null != temp)
-			model.nodeChanged(temp);
-		temp =
+		if (node != null) {
+			model.nodeChanged(node);
+		}
+
+		node =
 			getEntityNode(
 				mediator.getCurrentDataDomain(),
 				mediator.getCurrentDataNode(),
 				mediator.getCurrentDataMap(),
 				e.getEntity());
-		if (null != temp)
-			model.nodeChanged(temp);
+
+		if (node != null) {
+			model.nodeChanged(node);
+		}
 	}
 
 	/** 
@@ -713,19 +717,26 @@ public class BrowseView
 		DataDomain domain,
 		DataMap map,
 		Entity entity) {
-		if (null == entity)
+			
+		if (null == entity) {
 			return null;
+		}
+		
 		DefaultMutableTreeNode map_node = getMapNode(domain, map);
-		if (null == map_node)
+		if (null == map_node) {
 			return null;
+		}
+		
 		Enumeration entities = map_node.children();
 		while (entities.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode) entities.nextElement();
 			EntityWrapper wrap = (EntityWrapper) temp_node.getUserObject();
-			if (wrap.getEntity() == entity)
+			if (wrap.getEntity() == entity) {
 				return temp_node;
+			}
 		}
+		
 		return null;
 	}
 
@@ -735,18 +746,24 @@ public class BrowseView
 		DataNode data,
 		DataMap map,
 		Entity entity) {
-		if (null == entity)
+		
+		if (null == entity) {
 			return null;
+		}
+		
 		DefaultMutableTreeNode map_node = getMapNode(domain, data, map);
-		if (null == map_node)
+		if (map_node == null) {
 			return null;
+		}
+		
 		Enumeration entities = map_node.children();
 		while (entities.hasMoreElements()) {
 			DefaultMutableTreeNode temp_node;
 			temp_node = (DefaultMutableTreeNode) entities.nextElement();
 			EntityWrapper wrap = (EntityWrapper) temp_node.getUserObject();
-			if (wrap.getEntity() == entity)
+			if (wrap.getEntity() == entity) {
 				return temp_node;
+			}
 		}
 		return null;
 	}
@@ -807,8 +824,7 @@ public class BrowseView
 						(DataNode) obj));
 			}
 		} else if (obj instanceof Entity) {
-			EntityDisplayEvent e =
-				new EntityDisplayEvent(this, (Entity) obj);
+			EntityDisplayEvent e = new EntityDisplayEvent(this, (Entity) obj);
 			e.setUnselectAttributes(true);
 			if (data.length == 4) {
 				e.setDataMap((DataMap) data[data.length - 2]);
