@@ -188,6 +188,23 @@ public class DatabaseSetup {
 			node.getDataMaps()[0].getDbEntitiesAsList());
 	}
 
+	/** 
+	 * Creates primary key support for all node DbEntities.
+	 * Will use its facilities provided by DbAdapter to generate
+	 * any necessary database objects and data for primary
+	 * key support.
+	 */
+	public void createPkSupportForMapEntities(DataNode node) throws Exception {
+		DataMap[] dataMaps = node.getDataMaps();
+		int len = dataMaps.length;
+		for (int i = 0; i < len; i++) {
+			DbEntity[] ents = dataMaps[i].getDbEntities();
+			node.getAdapter().getPkGenerator().createAutoPk(
+				node,
+				dataMaps[i].getDbEntitiesAsList());
+		}
+	}
+
 	/** Oracle 8i does not support more then 1 "LONG xx" column per table
 	  * PAINTING_INFO need to be fixed. */
 	private void applyOracleHack() {
