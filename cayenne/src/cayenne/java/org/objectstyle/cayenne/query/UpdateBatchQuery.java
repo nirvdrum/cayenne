@@ -71,85 +71,97 @@ import org.objectstyle.cayenne.map.DbEntity;
  */
 
 public class UpdateBatchQuery extends BatchQuery {
-  private List dataObjectIds;
-  private List updates;
-  private List dbAttributes;
-  private List updatedDbAttributes;
-  private List idDbAttributes;
-  private Iterator idIterator = IteratorUtils.EMPTY_ITERATOR;
-  private Map currentId = Collections.EMPTY_MAP;
-  private Iterator updateIterator = IteratorUtils.EMPTY_ITERATOR;
-  private Map currentUpdate = Collections.EMPTY_MAP;
+    private List dataObjectIds;
+    private List updates;
+    private List dbAttributes;
+    private List updatedDbAttributes;
+    private List idDbAttributes;
+    private Iterator idIterator = IteratorUtils.EMPTY_ITERATOR;
+    private Map currentId = Collections.EMPTY_MAP;
+    private Iterator updateIterator = IteratorUtils.EMPTY_ITERATOR;
+    private Map currentUpdate = Collections.EMPTY_MAP;
 
-  public UpdateBatchQuery(DbEntity objectEntity, List updatedDbAttributeNames, int batchCapacity) {
-    super(objectEntity);
-    this.updatedDbAttributes = new ArrayList(updatedDbAttributeNames.size());
-    Map attrMap = metadata.getAttributeMap();
-    for (Iterator i = updatedDbAttributeNames.iterator(); i.hasNext();) {
-      Object name = i.next();
-      updatedDbAttributes.add(attrMap.get(name));
+    public UpdateBatchQuery(
+        DbEntity objectEntity,
+        List updatedDbAttributeNames,
+        int batchCapacity) {
+        super(objectEntity);
+        this.updatedDbAttributes =
+            new ArrayList(updatedDbAttributeNames.size());
+        Map attrMap = metadata.getAttributeMap();
+        for (Iterator i = updatedDbAttributeNames.iterator(); i.hasNext();) {
+            Object name = i.next();
+            updatedDbAttributes.add(attrMap.get(name));
+        }
+        dataObjectIds = new ArrayList(batchCapacity);
+        updates = new ArrayList(batchCapacity);
+        prepareMetadata();
     }
-    dataObjectIds = new ArrayList(batchCapacity);
-    updates = new ArrayList(batchCapacity);
-    prepareMetadata();
-  }
 
-  public void reset() {
-    idIterator = dataObjectIds.iterator();
-    currentId = Collections.EMPTY_MAP;
-    updateIterator = updates.iterator();
-    currentUpdate = Collections.EMPTY_MAP;
-  }
+    public void reset() {
+        idIterator = dataObjectIds.iterator();
+        currentId = Collections.EMPTY_MAP;
+        updateIterator = updates.iterator();
+        currentUpdate = Collections.EMPTY_MAP;
+    }
 
-  public boolean next() {
-    if (!idIterator.hasNext()) return false;
-    currentId = (Map)idIterator.next();
-    currentId = (currentId != null ? currentId : Collections.EMPTY_MAP);
-    currentUpdate = (Map)updateIterator.next();
-    currentUpdate = (currentUpdate != null ? currentUpdate : Collections.EMPTY_MAP);
-    return true;
-  }
+    public boolean next() {
+        if (!idIterator.hasNext())
+            return false;
+        currentId = (Map) idIterator.next();
+        currentId = (currentId != null ? currentId : Collections.EMPTY_MAP);
+        currentUpdate = (Map) updateIterator.next();
+        currentUpdate =
+            (currentUpdate != null ? currentUpdate : Collections.EMPTY_MAP);
+        return true;
+    }
+    
+    public Object getObject(int dbAttributeIndex) {
+        DbAttribute attribute =
+            (DbAttribute) dbAttributes.get(dbAttributeIndex);
+        String name = attribute.getName();
 
-  public Object getObject(int dbAttributeIndex) {
-    DbAttribute attribute = (DbAttribute)dbAttributes.get(dbAttributeIndex);
-    String name = attribute.getName();
-    if (currentId.containsKey(name)) return currentId.get(name);
-    return currentUpdate.get(name);
-  }
+        // take value either from updated values or id's,
+        // depending on the index
+        return (dbAttributeIndex < updatedDbAttributes.size())
+            ? currentUpdate.get(name)
+            : currentId.get(name);
+    } 
 
-  public void add(Map dataObjectId, Map updateSnapshot) {
-    dataObjectIds.add(dataObjectId);
-    updates.add(updateSnapshot);
-  }
+    public void add(Map dataObjectId, Map updateSnapshot) {
+        dataObjectIds.add(dataObjectId);
+        updates.add(updateSnapshot);
+    }
 
-  public int size() {
-    return dataObjectIds.size();
-  }
+    public int size() {
+        return dataObjectIds.size();
+    }
 
-  public boolean isEmpty() {
-    return dataObjectIds.isEmpty();
-  }
+    public boolean isEmpty() {
+        return dataObjectIds.isEmpty();
+    }
 
-  public List getDbAttributes() {
-    return Collections.unmodifiableList(dbAttributes);
-  }
+    public List getDbAttributes() {
+        return Collections.unmodifiableList(dbAttributes);
+    }
 
-  public List getIdDbAttributes() {
-    return Collections.unmodifiableList(idDbAttributes);
-  }
+    public List getIdDbAttributes() {
+        return Collections.unmodifiableList(idDbAttributes);
+    }
 
-  public List getUpdatedDbAttributes() {
-    return Collections.unmodifiableList(updatedDbAttributes);
-  }
+    public List getUpdatedDbAttributes() {
+        return Collections.unmodifiableList(updatedDbAttributes);
+    }
 
-  private void prepareMetadata() {
-    idDbAttributes = metadata.getPrimaryKey();
-    dbAttributes = new ArrayList(updatedDbAttributes.size() + idDbAttributes.size());
-    dbAttributes.addAll(updatedDbAttributes);
-    dbAttributes.addAll(idDbAttributes);
-  }
+    private void prepareMetadata() {
+        idDbAttributes = metadata.getPrimaryKey();
+        dbAttributes =
+            new ArrayList(updatedDbAttributes.size() + idDbAttributes.size());
+        dbAttributes.addAll(updatedDbAttributes);
+        dbAttributes.addAll(idDbAttributes);
+    }
 
-  public int getQueryType() {
-    return Query.UPDATE_BATCH_QUERY;
-  }
+    public int getQueryType() {
+        return Query.UPDATE_BATCH_QUERY;
+    }
 }
