@@ -274,14 +274,14 @@ public class ObjEntity extends Entity {
     }
 
     /** 
-     * Returns the name of the corresponding data object class 
+     * Returns the name of DataObject class described by this entity.
      */
     public String getClassName() {
         return className;
     }
 
     /** 
-     * Sets the name of the data object class described by this obj entity.
+     * Sets the name of the DataObject class described by this entity.
      */
     public void setClassName(String className) {
         this.className = className;

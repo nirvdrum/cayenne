@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -75,7 +76,10 @@ import org.objectstyle.cayenne.map.ObjEntity;
 import org.objectstyle.cayenne.map.event.DataMapEvent;
 import org.objectstyle.cayenne.map.event.DataNodeEvent;
 import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.modeler.dialog.datamap.DataMapSchemaUpdateController;
+import org.objectstyle.cayenne.modeler.dialog.datamap.LockTypeUpdateController;
+import org.objectstyle.cayenne.modeler.dialog.datamap.PackageUpdateController;
+import org.objectstyle.cayenne.modeler.dialog.datamap.SchemaUpdateController;
+import org.objectstyle.cayenne.modeler.dialog.datamap.SuperclassUpdateController;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayEvent;
 import org.objectstyle.cayenne.modeler.event.DataMapDisplayListener;
 import org.objectstyle.cayenne.modeler.util.CayenneWidgetFactory;
@@ -105,6 +109,10 @@ public class DataMapView extends JPanel {
     protected TextFieldAdapter defaultPackage;
     protected TextFieldAdapter defaultSuperclass;
     protected JCheckBox defaultLockType;
+    protected JButton updateDefaultSchema;
+    protected JButton updateDefaultPackage;
+    protected JButton updateDefaultSuperclass;
+    protected JButton updateDefaultLockType;
 
     public DataMapView(EventController eventController) {
         this.eventController = eventController;
@@ -126,6 +134,7 @@ public class DataMapView extends JPanel {
         nodeSelector = CayenneWidgetFactory.createComboBox();
         nodeSelector.setRenderer(CellRenderers.listRendererWithIcons());
 
+        updateDefaultSchema = new JButton("Update...");
         defaultSchema = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
@@ -133,12 +142,15 @@ public class DataMapView extends JPanel {
             }
         };
 
+        updateDefaultPackage = new JButton("Update...");
         defaultPackage = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
                 setDefaultPackage(text);
             }
         };
+
+        updateDefaultSuperclass = new JButton("Update...");
         defaultSuperclass = new TextFieldAdapter(CayenneWidgetFactory.createTextField()) {
 
             protected void initModel(String text) {
@@ -146,27 +158,38 @@ public class DataMapView extends JPanel {
             }
         };
 
+        updateDefaultLockType = new JButton("Update...");
         defaultLockType = new JCheckBox();
 
         // assemble
         FormLayout layout = new FormLayout(
-                "right:max(50dlu;pref), 3dlu, fill:max(170dlu;pref)",
+                "right:max(50dlu;pref), 3dlu, left:max(110dlu;pref), 3dlu, left:90",
                 "");
         DefaultFormBuilder builder = new DefaultFormBuilder(layout);
         builder.setDefaultDialogBorder();
 
         builder.appendSeparator("DataMap Configuration");
-        builder.append("DataMap Name:", name.getTextField());
-        builder.append("File:", location);
-        builder.append("DataNode:", nodeSelector);
+        builder.append("DataMap Name:", name.getTextField(), 3);
+        builder.append("File:", location, 3);
+        builder.append("DataNode:", nodeSelector, 3);
 
         builder.appendSeparator("Default Entity Settings");
-        builder.append("Default DB Schema:", defaultSchema.getTextField());
-        builder.append("Default Java Package:", defaultPackage.getTextField());
-        builder
-                .append("Default DataObject Superclass:", defaultSuperclass
-                        .getTextField());
-        builder.append("Default Optimistic Locking:", defaultLockType);
+        builder.append(
+                "Default DB Schema:",
+                defaultSchema.getTextField(),
+                updateDefaultSchema);
+        builder.append(
+                "Default Java Package:",
+                defaultPackage.getTextField(),
+                updateDefaultPackage);
+        builder.append(
+                "Default DataObject Superclass:",
+                defaultSuperclass.getTextField(),
+                updateDefaultSuperclass);
+        builder.append(
+                "Default Optimistic Locking:",
+                defaultLockType,
+                updateDefaultLockType);
 
         this.setLayout(new BorderLayout());
         add(builder.getPanel(), BorderLayout.CENTER);
@@ -196,6 +219,34 @@ public class DataMapView extends JPanel {
                 setDefaultLockType(defaultLockType.isSelected()
                         ? ObjEntity.LOCK_TYPE_OPTIMISTIC
                         : ObjEntity.LOCK_TYPE_NONE);
+            }
+        });
+
+        updateDefaultSchema.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateDefaultSchema();
+            }
+        });
+
+        updateDefaultPackage.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateDefaultPackage();
+            }
+        });
+
+        updateDefaultSuperclass.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateDefaultSuperclass();
+            }
+        });
+
+        updateDefaultLockType.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                updateDefaultLockType();
             }
         });
     }
@@ -254,7 +305,7 @@ public class DataMapView extends JPanel {
         if (oldType == lockType) {
             return;
         }
-        
+
         dataMap.setDefaultLockType(lockType);
         eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
     }
@@ -297,11 +348,6 @@ public class DataMapView extends JPanel {
 
         dataMap.setDefaultSchema(newSchema);
         eventController.fireDataMapEvent(new DataMapEvent(this, dataMap));
-
-        // update DbEntities schema when this event processing is done...
-        if (dataMap.getDbEntities().size() > 0) {
-            new DataMapSchemaUpdateController(eventController, dataMap).startup();
-        }
     }
 
     void setDefaultSuperclass(String newSuperclass) {
@@ -389,6 +435,54 @@ public class DataMapView extends JPanel {
         if (hasChanges) {
             // TODO: maybe reindexing is an overkill in the modeler?
             eventController.getCurrentDataDomain().reindexNodes();
+        }
+    }
+
+    void updateDefaultSchema() {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (dataMap.getDbEntities().size() > 0) {
+            new SchemaUpdateController(eventController, dataMap).startup();
+        }
+    }
+
+    void updateDefaultSuperclass() {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (dataMap.getObjEntities().size() > 0) {
+            new SuperclassUpdateController(eventController, dataMap).startup();
+        }
+    }
+
+    void updateDefaultPackage() {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (dataMap.getObjEntities().size() > 0) {
+            new PackageUpdateController(eventController, dataMap).startup();
+        }
+    }
+
+    void updateDefaultLockType() {
+        DataMap dataMap = eventController.getCurrentDataMap();
+
+        if (dataMap == null) {
+            return;
+        }
+
+        if (dataMap.getObjEntities().size() > 0) {
+            new LockTypeUpdateController(eventController, dataMap).startup();
         }
     }
 }

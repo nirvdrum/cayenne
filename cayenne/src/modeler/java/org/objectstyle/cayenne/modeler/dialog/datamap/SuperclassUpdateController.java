@@ -53,90 +53,62 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  */
-package org.objectstyle.cayenne.modeler.action;
+package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import java.awt.event.ActionEvent;
 import java.util.Iterator;
-
-import javax.swing.JOptionPane;
 
 import org.objectstyle.cayenne.map.DataMap;
 import org.objectstyle.cayenne.map.ObjEntity;
-import org.objectstyle.cayenne.map.event.DataMapEvent;
-import org.objectstyle.cayenne.modeler.CayenneModelerFrame;
-import org.objectstyle.cayenne.project.ProjectPath;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.objectstyle.cayenne.util.Util;
+import org.scopemvc.core.Control;
+import org.scopemvc.core.ControlException;
+import org.scopemvc.view.swing.SPanel;
 
 /**
  * @author Andrei Adamchik
  */
-public class PackageMenuAction extends CayenneAction {
+public class SuperclassUpdateController extends DefaultsPreferencesController {
 
-	public static String getActionName() {
-		return "Set Package Name for Obj Entities";
-	}
+    public static final String ALL_CONTROL = "cayenne.modeler.datamap.defaultprefs.superclass.radio";
+    public static final String UNINIT_CONTROL = "cayenne.modeler.datamap.defaultprefs.superclassnull.radio";
 
-    /**
-     * Constructor for PackageMenuAction.
-     */
-    public PackageMenuAction() {
-        super(getActionName());
+    public SuperclassUpdateController(EventController mediator, DataMap dataMap) {
+        super(mediator, dataMap);
     }
 
     /**
-     * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
+     * Creates and runs superclass update dialog.
      */
-    public void performAction(ActionEvent e) {
-        setPackageName();
+    public void startup() {
+        SPanel view = new DefaultsPreferencesDialog(ALL_CONTROL, UNINIT_CONTROL);
+        view.setTitle("Update DataObjects Superclass");
+        setView(view);
+        super.startup();
     }
 
-    private void setPackageName() {
-        DataMap map = getMediator().getCurrentDataMap();
-        if (map == null) {
-            return;
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(UPDATE_CONTROL)) {
+            updateSuperclass();
         }
-        String package_name;
-        package_name =
-            JOptionPane.showInputDialog(CayenneModelerFrame.getFrame(), "Enter the new package name");
-        if (null == package_name || package_name.trim().length() == 0)
-            return;
-        // Append period to the end of package name, if it is not there.
-        if (package_name.charAt(package_name.length() - 1) != '.')
-            package_name = package_name + ".";
-        // If user cancelled, just return
-        if (null == package_name)
-            return;
-        // Go through all obj entities in the current data map and
-        // set their package names.
-        Iterator entities = map.getObjEntities().iterator();
-        while (entities.hasNext()) {
-        	ObjEntity entity = (ObjEntity)entities.next();
-            String name = entity.getClassName();
+        else {
+            super.doHandleControl(control);
+        }
+    }
 
-            // there may be entities with no class selected yet
-            if (name == null) {
-                continue;
+    protected void updateSuperclass() {
+        boolean doAll = ((DefaultsPreferencesModel) getModel()).isAllEntities();
+        String defaultSuperclass = dataMap.getDefaultSuperclass();
+
+        Iterator it = dataMap.getObjEntities().iterator();
+        while (it.hasNext()) {
+            ObjEntity entity = (ObjEntity) it.next();
+            if (doAll || Util.isEmptyString(entity.getSuperClassName())) {
+
             }
-
-            int idx = name.lastIndexOf('.');
-            if (idx > 0) {
-                name =
-                    (idx == name.length() - 1)
-                        ? entity.getName()
-                        : name.substring(idx + 1);
-            }
-			entity.setClassName(package_name + name);
-        }
-        getMediator().fireDataMapEvent(new DataMapEvent(this, map));
-    }
-
-    /**
-     * Returns <code>true</code> if path contains a DataMap object.
-     */
-    public boolean enableForPath(ProjectPath path) {
-        if (path == null) {
-            return false;
         }
 
-        return path.firstInstanceOf(DataMap.class) != null;
+        shutdown();
     }
+
 }

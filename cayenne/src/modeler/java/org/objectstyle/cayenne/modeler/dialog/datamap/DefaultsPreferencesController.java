@@ -55,65 +55,34 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JPanel;
-
-import org.scopemvc.view.swing.SButton;
-import org.scopemvc.view.swing.SPanel;
-import org.scopemvc.view.swing.SRadioButton;
-import org.scopemvc.view.swing.SwingView;
-
-import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.scopemvc.controller.basic.BasicController;
+import org.scopemvc.core.Control;
+import org.scopemvc.core.ControlException;
 
 /**
+ * An abstract controller for the DataMap defaults updates.
+ * 
  * @author Andrei Adamchik
  */
-public class DataMapSchemaUpdateDialog extends SPanel {
+public abstract class DefaultsPreferencesController extends BasicController {
 
-    public DataMapSchemaUpdateDialog() {
-        initView();
+    public static final String CANCEL_CONTROL = "cayenne.modeler.datamap.defaultprefs.cancel.button";
+    public static final String UPDATE_CONTROL = "cayenne.modeler.datamap.defaultprefs.update.button";
+
+    protected DataMap dataMap;
+    protected EventController mediator;
+
+    public DefaultsPreferencesController(EventController mediator, DataMap dataMap) {
+        setModel(new DefaultsPreferencesModel(true));
+        this.dataMap = dataMap;
+        this.mediator = mediator;
     }
 
-    protected void initView() {
-        SRadioButton updateAll = new SRadioButton(
-                DataMapSchemaUpdateController.UPDATE_ALL_RADIO_CONTROL,
-                DataMapSchemaUpdateModel.UPDATING_ALL_SELECTOR);
-
-        SRadioButton updateEmpty = new SRadioButton(
-                DataMapSchemaUpdateController.UPDATE_EMPTY_RADIO_CONTROL,
-                DataMapSchemaUpdateModel.UPDATING_EMPTY_SELECTOR);
-
-        ButtonGroup buttonGroup = new ButtonGroup();
-        buttonGroup.add(updateAll);
-        buttonGroup.add(updateEmpty);
-
-        SButton updateButton = new SButton(
-                DataMapSchemaUpdateController.UPDATE_SCHEMA_CONTROL);
-        SButton cancelButton = new SButton(DataMapSchemaUpdateController.CANCEL_CONTROL);
-
-        // assemble
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(updateButton);
-        buttonPanel.add(cancelButton);
-
-        CellConstraints cc = new CellConstraints();
-        FormLayout layout = new FormLayout("left:max(180dlu;pref)", "p, 3dlu, p, 3dlu");
-        PanelBuilder builder = new PanelBuilder(layout);
-        builder.setDefaultDialogBorder();
-
-        builder.add(updateAll, cc.xy(1, 1));
-        builder.add(updateEmpty, cc.xy(1, 3));
-
-        setLayout(new BorderLayout());
-        add(builder.getPanel(), BorderLayout.CENTER);
-        add(buttonPanel, BorderLayout.SOUTH);
-
-        setDisplayMode(SwingView.MODAL_DIALOG);
-        setTitle("Update DbEntities Schema");
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(CANCEL_CONTROL)) {
+            shutdown();
+        }
     }
 }

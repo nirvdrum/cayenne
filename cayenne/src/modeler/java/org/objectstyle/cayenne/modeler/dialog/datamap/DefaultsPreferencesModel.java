@@ -55,71 +55,49 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import java.util.Iterator;
-
-import org.objectstyle.cayenne.map.DataMap;
-import org.objectstyle.cayenne.map.DbEntity;
-import org.objectstyle.cayenne.map.event.EntityEvent;
-import org.objectstyle.cayenne.modeler.EventController;
-import org.objectstyle.cayenne.util.Util;
-import org.scopemvc.controller.basic.BasicController;
-import org.scopemvc.core.Control;
-import org.scopemvc.core.ControlException;
+import org.scopemvc.core.Selector;
 
 /**
+ * A model that describes entity update preferences when pushing DataMap defaults to the
+ * entities. Used by multiple views.
+ * 
  * @author Andrei Adamchik
  */
-public class DataMapSchemaUpdateController extends BasicController {
-
-    public static final String CANCEL_CONTROL = "cayenne.modeler.datamap.schemaupdate.cancel.button";
-    public static final String UPDATE_SCHEMA_CONTROL = "cayenne.modeler.datamap.schemaupdate.update.button";
-    public static final String UPDATE_ALL_RADIO_CONTROL = "cayenne.modeler.datamap.schemaupdate.updateall.radio";
-    public static final String UPDATE_EMPTY_RADIO_CONTROL = "cayenne.modeler.datamap.schemaupdate.updateempty.radio";
-
-    protected DataMap dataMap;
-    protected EventController mediator;
-
-    public DataMapSchemaUpdateController(EventController mediator, DataMap dataMap) {
-        setModel(new DataMapSchemaUpdateModel(true));
-        this.dataMap = dataMap;
-        this.mediator = mediator;
-    }
+public class DefaultsPreferencesModel {
 
     /**
-     * Creates and runs the class generation dialog.
+     * Selector for the boolean property that determines whether all Entities should be
+     * included in a particular default update.
      */
-    public void startup() {
-        setView(new DataMapSchemaUpdateDialog());
-        super.startup();
+    public static final Selector ALL_ENTITIES_SELECTOR = Selector
+            .fromString("allEntities");
+
+    /**
+     * Selector for the boolean property that determines whether only Entities with
+     * missing corresponding property should be included in a particular default update.
+     */
+    public static final Selector UNINITIALIZED_ENTITIES_SELECTOR = Selector
+            .fromString("uninitializedEntities");
+
+    protected boolean allEntities;
+
+    public DefaultsPreferencesModel(boolean flag) {
+        this.allEntities = flag;
     }
 
-    protected void doHandleControl(Control control) throws ControlException {
-        if (control.matchesID(CANCEL_CONTROL)) {
-            shutdown();
-        }
-        else if (control.matchesID(UPDATE_SCHEMA_CONTROL)) {
-            updateSchema();
-        }
+    public boolean isAllEntities() {
+        return allEntities;
     }
 
-    protected void updateSchema() {
-        boolean doAll = ((DataMapSchemaUpdateModel) getModel()).isUpdatingAllDbEntities();
-        String defaultSchema = dataMap.getDefaultSchema();
+    public void setAllEntities(boolean flag) {
+        this.allEntities = flag;
+    }
 
-        Iterator it = dataMap.getDbEntities().iterator();
-        while (it.hasNext()) {
-            DbEntity entity = (DbEntity) it.next();
-            if (doAll || Util.isEmptyString(entity.getSchema())) {
-                if (!Util.nullSafeEquals(defaultSchema, entity.getSchema())) {
-                    entity.setSchema(defaultSchema);
+    public boolean isUninitializedEntities() {
+        return !isAllEntities();
+    }
 
-                    // any way to batch events, a big change will flood the app with
-                    // entity events..?
-                    mediator.fireDbEntityEvent(new EntityEvent(this, entity));
-                }
-            }
-        }
-
-        shutdown();
+    public void setUninitializedEntities(boolean flag) {
+        setAllEntities(!flag);
     }
 }

@@ -95,7 +95,6 @@ import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
-import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
@@ -316,8 +315,6 @@ public class CayenneModelerFrame
         toolMenu.add(getAction(GenerateClassesAction.getActionName()).buildMenu());
         toolMenu.add(getAction(GenerateDbAction.getActionName()).buildMenu());
         toolMenu.addSeparator();
-        toolMenu.add(getAction(PackageMenuAction.getActionName()).buildMenu());
-        toolMenu.addSeparator();
         toolMenu.add(getAction(ConfigureClasspathAction.getActionName()).buildMenu());
 
         helpMenu.add(getAction(AboutAction.getActionName()).buildMenu());
@@ -490,7 +487,6 @@ public class CayenneModelerFrame
                     controller.getEventController().getCurrentDataDomain()));
         }
 
-        getAction(PackageMenuAction.getActionName()).setEnabled(true);
         getAction(GenerateClassesAction.getActionName()).setEnabled(true);
         getAction(CreateObjEntityAction.getActionName()).setEnabled(true);
         getAction(CreateDbEntityAction.getActionName()).setEnabled(true);

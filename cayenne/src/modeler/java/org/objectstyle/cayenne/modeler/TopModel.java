@@ -80,7 +80,6 @@ import org.objectstyle.cayenne.modeler.action.ImportEOModelAction;
 import org.objectstyle.cayenne.modeler.action.NewProjectAction;
 import org.objectstyle.cayenne.modeler.action.ObjEntitySyncAction;
 import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
-import org.objectstyle.cayenne.modeler.action.PackageMenuAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
@@ -191,9 +190,6 @@ public class TopModel {
         CayenneAction configClasspath = new ConfigureClasspathAction();
         configClasspath.setAlwaysOn(true);
         actionMap.put(configClasspath.getKey(), configClasspath);
-
-        CayenneAction pkgAction = new PackageMenuAction();
-        actionMap.put(pkgAction.getKey(), pkgAction);
 
         CayenneAction exitAction = new ExitAction();
         exitAction.setAlwaysOn(true);

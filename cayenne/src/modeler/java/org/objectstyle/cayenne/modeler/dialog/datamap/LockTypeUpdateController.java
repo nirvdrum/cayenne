@@ -55,38 +55,59 @@
  */
 package org.objectstyle.cayenne.modeler.dialog.datamap;
 
-import org.scopemvc.core.Selector;
+import java.util.Iterator;
+
+import org.objectstyle.cayenne.map.DataMap;
+import org.objectstyle.cayenne.map.ObjEntity;
+import org.objectstyle.cayenne.modeler.EventController;
+import org.scopemvc.core.Control;
+import org.scopemvc.core.ControlException;
+import org.scopemvc.view.swing.SPanel;
 
 /**
  * @author Andrei Adamchik
  */
-public class DataMapSchemaUpdateModel {
+public class LockTypeUpdateController extends DefaultsPreferencesController {
 
-    public static final Selector UPDATING_ALL_SELECTOR = Selector
-            .fromString("updatingAllDbEntities");
+    public static final String ALL_CONTROL = "cayenne.modeler.datamap.defaultprefs.locktype.radio";
+    public static final String UNINIT_CONTROL = "cayenne.modeler.datamap.defaultprefs.locktypenull.radio";
 
-    public static final Selector UPDATING_EMPTY_SELECTOR = Selector
-            .fromString("updatingEmptyDbEntities");
-
-    protected boolean updatingAllDbEntities;
-
-    public DataMapSchemaUpdateModel(boolean updatingAllDbEntities) {
-        this.updatingAllDbEntities = updatingAllDbEntities;
+    public LockTypeUpdateController(EventController mediator, DataMap dataMap) {
+        super(mediator, dataMap);
     }
 
-    public boolean isUpdatingAllDbEntities() {
-        return updatingAllDbEntities;
+    /**
+     * Creates and runs lock type update dialog.
+     */
+    public void startup() {
+        SPanel view = new DefaultsPreferencesDialog(ALL_CONTROL, UNINIT_CONTROL);
+        view.setTitle("Update ObjEntities Locking Policy");
+        setView(view);
+        super.startup();
     }
 
-    public void setUpdatingAllDbEntities(boolean flag) {
-        this.updatingAllDbEntities = flag;
+    protected void doHandleControl(Control control) throws ControlException {
+        if (control.matchesID(UPDATE_CONTROL)) {
+            updateLockType();
+        }
+        else {
+            super.doHandleControl(control);
+        }
     }
 
-    public boolean isUpdatingEmptyDbEntities() {
-        return !isUpdatingAllDbEntities();
+    protected void updateLockType() {
+        boolean doAll = ((DefaultsPreferencesModel) getModel()).isAllEntities();
+        int defaultLockType = dataMap.getDefaultLockType();
+
+        Iterator it = dataMap.getObjEntities().iterator();
+        while (it.hasNext()) {
+            ObjEntity entity = (ObjEntity) it.next();
+            if (doAll || entity.getLockType() == DataMap.DEFAULT_LOCK_TYPE_VALUE) {
+
+            }
+        }
+
+        shutdown();
     }
 
-    public void setUpdatingEmptyDbEntities(boolean flag) {
-        setUpdatingAllDbEntities(!flag);
-    }
 }
