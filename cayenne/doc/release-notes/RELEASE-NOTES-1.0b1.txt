@@ -9,6 +9,8 @@ http://objectstyle.org/cayenne/
 
 Changes in this release:
 ============================================
+0. JDK 1.3 compatibility is implemented.
+
 1. Added shortcut methods to Expression and ExpressionFactory
 to make API friendlier.
 
@@ -59,3 +61,6 @@ setSortPathSpec and getSortPathSpec are deprecated.
 public API is deprecated.
 
 18. Switched to Jakarta ORO from Java regex to be JDK 1.3 compatible. 
+
+19. ToManyList no longer uses WeakReference to hold relationship data,
+since it breaks when relationships are modified.

@@ -52,33 +52,46 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne;
 
-import junit.framework.TestSuite;
-
 /**
- * Cayenne package tests.
- * 
  * @author Andrei Adamchik
  */
-public class AllTests {
-	
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Cayenne Framework Tests");
-		suite.addTestSuite(QueryHelperTst.class);
-		suite.addTestSuite(CayenneDataObjectTst.class);
-		suite.addTestSuite(CayenneDataObjectInCtxtTst.class);
-		suite.addTestSuite(CayenneDataObjectRelTst.class);
-		suite.addTestSuite(CDOOneDep2OneTst.class);
-		suite.addTestSuite(CDOMany2OneTst.class);
-		suite.addTestSuite(CDOOne2ManyTst.class);
-		suite.addTestSuite(CDOOne2OneDepTst.class);
-		suite.addTestSuite(ObjectIdTst.class);
-		suite.addTestSuite(DOPrefetchTst.class);
-		suite.addTestSuite(CayenneExceptionTst.class);
-		suite.addTestSuite(CayenneRuntimeExceptionTst.class);
-		suite.addTestSuite(ConfigExceptionTst.class);
-		return suite;
+public class CayenneRuntimeExceptionTst extends CayenneTestCase {
+
+	/**
+	 * Constructor for CayenneRuntimeExceptionTst.
+	 * @param arg0
+	 */
+	public CayenneRuntimeExceptionTst(String arg0) {
+		super(arg0);
+	}
+
+	public void testConstructor1() throws Exception {
+		CayenneRuntimeException ex = new CayenneRuntimeException();
+		assertSame(ex, ex.getCause());
+		assertNull(ex.getMessage());
+	}
+
+	public void testConstructor2() throws Exception {
+		CayenneRuntimeException ex = new CayenneRuntimeException("abc");
+		assertSame(ex, ex.getCause());
+		assertEquals("abc", ex.getMessage());
+	}
+
+	public void testConstructor3() throws Exception {
+		Throwable cause = new Throwable();
+		CayenneRuntimeException ex = new CayenneRuntimeException(cause);
+		assertSame(cause, ex.getCause());
+		assertEquals(cause.toString(), ex.getMessage());
+	}
+
+	public void testConstructor4() throws Exception {
+	    Throwable cause = new Throwable();
+		CayenneRuntimeException ex = new CayenneRuntimeException("abc", cause);
+		assertSame(cause, ex.getCause());
+		assertSame("abc", ex.getMessage());
 	}
 }
+

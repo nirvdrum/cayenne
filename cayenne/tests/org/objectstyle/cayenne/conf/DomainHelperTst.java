@@ -127,28 +127,28 @@ public class DomainHelperTst extends CayenneTestCase {
 		if (info.getDataSourceUrl() != null) {
 			assertTrue(
 				"URL not saved: " + info.getDataSourceUrl(),
-				buf.indexOf("<url value=\"" + info.getDataSourceUrl() + "\"/>")
+				buf.toString().indexOf("<url value=\"" + info.getDataSourceUrl() + "\"/>")
 					>= 0);
 		}
 		
 		if (info.getJdbcDriver() != null) {
 			assertTrue(
 				"Driver not saved: " + info.getJdbcDriver(),
-				buf.indexOf("<driver class=\"" + info.getJdbcDriver() + "\">")
+				buf.toString().indexOf("<driver class=\"" + info.getJdbcDriver() + "\">")
 					>= 0);
 		}
 		
 		if (info.getUserName() != null) {
 			assertTrue(
 				"User name not saved: " + info.getUserName(),
-				buf.indexOf("userName=\"" + info.getUserName() + "\"")
+				buf.toString().indexOf("userName=\"" + info.getUserName() + "\"")
 					>= 0);
 		}
 		
 		if (info.getPassword() != null) {
 			assertTrue(
 				"Password not saved: " + info.getPassword(),
-				buf.indexOf("password=\"" + info.getPassword() + "\"")
+				buf.toString().indexOf("password=\"" + info.getPassword() + "\"")
 					>= 0);
 		}
 	}

@@ -52,33 +52,52 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
-package org.objectstyle.cayenne;
+ */
+package org.objectstyle.cayenne.access;
 
-import junit.framework.TestSuite;
+import java.util.ArrayList;
+
+import org.objectstyle.cayenne.CayenneTestCase;
 
 /**
- * Cayenne package tests.
- * 
  * @author Andrei Adamchik
  */
-public class AllTests {
+public class ToManyListExtrasTst extends CayenneTestCase {
+	protected ToManyList list;
+
+	/**
+	 * Constructor for ToManyListExtrasTst.
+	 * @param arg0
+	 */
+	public ToManyListExtrasTst(String arg0) {
+		super(arg0);
+	}
+
+	public void setUp() throws Exception {
+		ToManyListDataSource lds = new ToManyListDataSource() {
+			public void updateListData(ToManyList l) {
+				l.setObjectList(new ArrayList());
+			};
+		};
+
+		list = new ToManyList(lds, null, null);
+	}
 	
-	public static TestSuite suite() {
-		TestSuite suite = new TestSuite("Cayenne Framework Tests");
-		suite.addTestSuite(QueryHelperTst.class);
-		suite.addTestSuite(CayenneDataObjectTst.class);
-		suite.addTestSuite(CayenneDataObjectInCtxtTst.class);
-		suite.addTestSuite(CayenneDataObjectRelTst.class);
-		suite.addTestSuite(CDOOneDep2OneTst.class);
-		suite.addTestSuite(CDOMany2OneTst.class);
-		suite.addTestSuite(CDOOne2ManyTst.class);
-		suite.addTestSuite(CDOOne2OneDepTst.class);
-		suite.addTestSuite(ObjectIdTst.class);
-		suite.addTestSuite(DOPrefetchTst.class);
-		suite.addTestSuite(CayenneExceptionTst.class);
-		suite.addTestSuite(CayenneRuntimeExceptionTst.class);
-		suite.addTestSuite(ConfigExceptionTst.class);
-		return suite;
+	public void testAdd() throws Exception {
+		assertEquals(0, list.size());
+		Object o = new Object();
+		
+		list.add(o);
+		assertEquals(1, list.size());
+		assertSame(o, list.get(0));
+	}
+	
+	public void testRemove() throws Exception {
+		Object o = new Object();
+		list.add(o);
+		assertEquals(1, list.size());
+		
+		list.remove(o);
+		assertEquals(0, list.size());
 	}
 }

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -53,34 +52,46 @@ package org.objectstyle.cayenne;
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
+package org.objectstyle.cayenne;
 
-/** Generic Cayenne runtime exception. */
+/** 
+ * Generic Cayenne runtime exception. This exception class
+ * is compatible with JDK 1.3 and at the same time implements
+ * enhancements introduced in 1.4, namely chained exceptions.
+ */
 public class CayenneRuntimeException extends RuntimeException {
-    
-    /** Creates new <code>CayenneRuntimeException</code> without detail message. */
-    public CayenneRuntimeException() {}
-    
-    
-    /**
-     * Constructs an <code>CayenneRuntimeException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    public CayenneRuntimeException(String msg) {
+	private Throwable cause = this;
+
+	/** Creates new <code>CayenneRuntimeException</code> without detail message. */
+	public CayenneRuntimeException() {
+	}
+
+	/**
+	 * Constructs an <code>CayenneRuntimeException</code> with the specified detail message.
+	 * @param msg the detail message.
+	 */
+	public CayenneRuntimeException(String msg) {
+		super(msg);
+	}
+
+	/**
+	 * Constructs an <code>CayenneRuntimeException</code> that 
+	 * wraps <code>exception</code> thrown elsewhere.
+	 */
+	public CayenneRuntimeException(Throwable th) {
+		this(th == null ? (String)null : th.toString(), th);
+	}
+
+	public CayenneRuntimeException(String msg, Throwable th) {
         super(msg);
-    }
-    
-    /**
-     * Constructs an <code>CayenneRuntimeException</code> that wraps <code>exception</code>
-     * thrown elsewhere.
-     */
-    public CayenneRuntimeException(Throwable th) {
-        super(th);
-    }
-    
-    public CayenneRuntimeException(String msg, Throwable th) {
-        super(msg, th);
-    }
+        this.cause = th;
+	}
+
+	/**
+	 * @see java.lang.Throwable#getCause()
+	 */
+	public Throwable getCause() {
+		return cause;
+	}
 }
-
-

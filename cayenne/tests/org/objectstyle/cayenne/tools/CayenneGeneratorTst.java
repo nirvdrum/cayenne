@@ -60,10 +60,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
-import org.apache.log4j.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+import org.apache.oro.text.perl.Perl5Util;
 import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
 import org.objectstyle.cayenne.CayenneTestCase;
@@ -72,271 +71,291 @@ import org.objectstyle.cayenne.util.ResourceLocator;
 import org.objectstyle.cayenne.util.Util;
 
 public class CayenneGeneratorTst extends CayenneTestCase {
-    static Logger logObj = Logger.getLogger(CayenneGeneratorTst.class.getName());
+	static Logger logObj =
+		Logger.getLogger(CayenneGeneratorTst.class.getName());
 
-    private static final Pattern pkgPat =
-        Pattern.compile("^package\\s+([^\\s;]+);");
-    private static final Pattern classPat =
-        Pattern.compile("class\\s+([^\\s]+)\\s+extends\\s+([^\\s]+)");
+	private static final Perl5Util regexUtil = new Perl5Util();
+	private static final Project project = new Project();
+	private static final File baseDir = new File(".");
+	private static final File map = new File(baseDir, "antmap.xml");
+	private static final File template = new File(baseDir, "velotemplate.vm");
 
-    private static final Project project = new Project();
-    private static final File baseDir = new File(".");
-    private static final File map = new File(baseDir, "antmap.xml");
-    private static final File template = new File(baseDir, "velotemplate.vm");
-    
-    static {
-        extractFiles();
-        project.setBaseDir(baseDir);
-    }
+	static {
+		extractFiles();
+		project.setBaseDir(baseDir);
+	}
 
-    protected CayenneGenerator task;
+	protected CayenneGenerator task;
 
-    private static void extractFiles() {
-    	ResourceLocator locator = new ResourceLocator();
+	private static void extractFiles() {
+		ResourceLocator locator = new ResourceLocator();
 		locator.setSkipAbsPath(true);
 		locator.setSkipClasspath(false);
 		locator.setSkipCurDir(true);
 		locator.setSkipHomeDir(true);
-		
+
 		// Configuration superclass statically defines what 
 		// ClassLoader to use for resources. This
 		// allows applications to control where resources 
 		// are loaded from.
 		locator.setClassLoader(Configuration.getResourceLoader());
-		
-		
-        URL url1 = locator.findResource("test_resources/testmap.xml");
-        Util.copy(url1, map);
-        URL url2 = locator.findResource("test_resources/testtemplate.vm");
-        Util.copy(url2, template);
-    }
 
-    public CayenneGeneratorTst(String name) {
-        super(name);
-    }
+		URL url1 = locator.findResource("test_resources/testmap.xml");
+		Util.copy(url1, map);
+		URL url2 = locator.findResource("test_resources/testtemplate.vm");
+		Util.copy(url2, template);
+	}
 
-    public void setUp() throws java.lang.Exception {
-        task = new CayenneGenerator();
-        task.setProject(project);
-        task.setTaskName("Test");
-        task.setLocation(Location.UNKNOWN_LOCATION);
-    }
+	public CayenneGeneratorTst(String name) {
+		super(name);
+	}
 
-    /** Test single classes with a non-standard template. */
-    public void testSingleClassesCustTemplate() throws Exception {
-        // prepare destination directory
-        File mapDir = new File(baseDir, "single-classes-custtempl");
-        assertTrue(mapDir.mkdirs());
+	public void setUp() throws java.lang.Exception {
+		task = new CayenneGenerator();
+		task.setProject(project);
+		task.setTaskName("Test");
+		task.setLocation(Location.UNKNOWN_LOCATION);
+	}
 
-        // setup task
-        task.setDestDir(mapDir);
-        task.setMap(map);
-        task.setMakepairs(false);
-        task.setUsepkgpath(true);
-        task.setTemplate(template);
+	/** Test single classes with a non-standard template. */
+	public void testSingleClassesCustTemplate() throws Exception {
+		// prepare destination directory
+		File mapDir = new File(baseDir, "single-classes-custtempl");
+		assertTrue(mapDir.mkdirs());
 
-        // run task
-        task.execute();
+		// setup task
+		task.setDestDir(mapDir);
+		task.setMap(map);
+		task.setMakepairs(false);
+		task.setUsepkgpath(true);
+		task.setTemplate(template);
 
-        // check results
-        File a = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-        assertTrue(a.isFile());
-        assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
+		// run task
+		task.execute();
 
-        File _a = new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
-        assertTrue(!_a.exists());
-    }
-    
-     /** Test single classes generation including full package path. */
-    public void testSingleClasses1() throws Exception {
-        // prepare destination directory
-        File mapDir = new File(baseDir, "single-classes-tree");
-        assertTrue(mapDir.mkdirs());
+		// check results
+		File a =
+			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+		assertTrue(a.isFile());
+		assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
 
-        // setup task
-        task.setDestDir(mapDir);
-        task.setMap(map);
-        task.setMakepairs(false);
-        task.setUsepkgpath(true);
+		File _a =
+			new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
+		assertTrue(!_a.exists());
+	}
 
-        // run task
-        task.execute();
+	/** Test single classes generation including full package path. */
+	public void testSingleClasses1() throws Exception {
+		// prepare destination directory
+		File mapDir = new File(baseDir, "single-classes-tree");
+		assertTrue(mapDir.mkdirs());
 
-        // check results
-        File a = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-        assertTrue(a.isFile());
-        assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
+		// setup task
+		task.setDestDir(mapDir);
+		task.setMap(map);
+		task.setMakepairs(false);
+		task.setUsepkgpath(true);
 
-        File _a = new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
-        assertTrue(!_a.exists());
-    }
+		// run task
+		task.execute();
 
-    /** Test single classes generation ignoring package path. */
-    public void testSingleClasses2() throws Exception {
-        // prepare destination directory
-        File mapDir = new File(baseDir, "single-classes-flat");
-        assertTrue(mapDir.mkdirs());
+		// check results
+		File a =
+			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+		assertTrue(a.isFile());
+		assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
 
-        // setup task
-        task.setDestDir(mapDir);
-        task.setMap(map);
-        task.setMakepairs(false);
-        task.setUsepkgpath(false);
+		File _a =
+			new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
+		assertTrue(!_a.exists());
+	}
 
-        // run task
-        task.execute();
+	/** Test single classes generation ignoring package path. */
+	public void testSingleClasses2() throws Exception {
+		// prepare destination directory
+		File mapDir = new File(baseDir, "single-classes-flat");
+		assertTrue(mapDir.mkdirs());
 
-        // check results
-        File a = new File(mapDir, convertPath("Artist.java"));
-        assertTrue(a.exists());
-        assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
+		// setup task
+		task.setDestDir(mapDir);
+		task.setMap(map);
+		task.setMakepairs(false);
+		task.setUsepkgpath(false);
 
-        File _a = new File(mapDir, convertPath("_Artist.java"));
-        assertTrue(!_a.exists());
+		// run task
+		task.execute();
 
-        File pkga = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-        assertTrue(!pkga.exists());
-    }
+		// check results
+		File a = new File(mapDir, convertPath("Artist.java"));
+		assertTrue(a.exists());
+		assertContents(a, "Artist", "org.objectstyle.art", "CayenneDataObject");
 
-    /** Test pairs generation including full package path. */
-    public void testPairs1() throws Exception {
-        // prepare destination directory
-        File mapDir = new File(baseDir, "pairs-tree");
-        assertTrue(mapDir.mkdirs());
+		File _a = new File(mapDir, convertPath("_Artist.java"));
+		assertTrue(!_a.exists());
 
-        // setup task
-        task.setDestDir(mapDir);
-        task.setMap(map);
-        task.setMakepairs(true);
-        task.setUsepkgpath(true);
+		File pkga =
+			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+		assertTrue(!pkga.exists());
+	}
 
-        // run task
-        task.execute();
+	/** Test pairs generation including full package path. */
+	public void testPairs1() throws Exception {
+		// prepare destination directory
+		File mapDir = new File(baseDir, "pairs-tree");
+		assertTrue(mapDir.mkdirs());
 
-        // check results
-        File a = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-        assertTrue(a.isFile());
-        assertContents(a, "Artist", "org.objectstyle.art", "_Artist");
+		// setup task
+		task.setDestDir(mapDir);
+		task.setMap(map);
+		task.setMakepairs(true);
+		task.setUsepkgpath(true);
 
-        File _a = new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
-        assertTrue(_a.exists());
-        assertContents(_a, "_Artist", "org.objectstyle.art", "CayenneDataObject");
-    }
+		// run task
+		task.execute();
 
-    /** Test pairs generation in the same directory. */
-    public void testPairs2() throws Exception {
-        // prepare destination directory
-        File mapDir = new File(baseDir, "pairs-flat");
-        assertTrue(mapDir.mkdirs());
+		// check results
+		File a =
+			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+		assertTrue(a.isFile());
+		assertContents(a, "Artist", "org.objectstyle.art", "_Artist");
 
-        // setup task
-        task.setDestDir(mapDir);
-        task.setMap(map);
-        task.setMakepairs(true);
-        task.setUsepkgpath(false);
+		File _a =
+			new File(mapDir, convertPath("org/objectstyle/art/_Artist.java"));
+		assertTrue(_a.exists());
+		assertContents(
+			_a,
+			"_Artist",
+			"org.objectstyle.art",
+			"CayenneDataObject");
+	}
 
-        // run task
-        task.execute();
+	/** Test pairs generation in the same directory. */
+	public void testPairs2() throws Exception {
+		// prepare destination directory
+		File mapDir = new File(baseDir, "pairs-flat");
+		assertTrue(mapDir.mkdirs());
 
-        // check results
-        File a = new File(mapDir, convertPath("Artist.java"));
-        assertTrue(a.isFile());
-        assertContents(a, "Artist", "org.objectstyle.art", "_Artist");
+		// setup task
+		task.setDestDir(mapDir);
+		task.setMap(map);
+		task.setMakepairs(true);
+		task.setUsepkgpath(false);
 
-        File _a = new File(mapDir, convertPath("_Artist.java"));
-        assertTrue(_a.exists());
-        assertContents(_a, "_Artist", "org.objectstyle.art", "CayenneDataObject");
+		// run task
+		task.execute();
 
-        File pkga = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-        assertTrue(!pkga.exists());
-    }
+		// check results
+		File a = new File(mapDir, convertPath("Artist.java"));
+		assertTrue(a.isFile());
+		assertContents(a, "Artist", "org.objectstyle.art", "_Artist");
 
+		File _a = new File(mapDir, convertPath("_Artist.java"));
+		assertTrue(_a.exists());
+		assertContents(
+			_a,
+			"_Artist",
+			"org.objectstyle.art",
+			"CayenneDataObject");
 
-    /** 
-     * Test pairs generation including full package path with superclass 
-     * and subclass in different packages. 
-     */
-    public void testPairs3() throws Exception {
-        // prepare destination directory
-        File mapDir = new File(baseDir, "pairs-tree-split");
-        assertTrue(mapDir.mkdirs());
+		File pkga =
+			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+		assertTrue(!pkga.exists());
+	}
 
-        // setup task
-        task.setDestDir(mapDir);
-        task.setMap(map);
-        task.setMakepairs(true);
-        task.setUsepkgpath(true);
-        task.setSuperpkg("org.objectstyle.superart");
+	/** 
+	 * Test pairs generation including full package path with superclass 
+	 * and subclass in different packages. 
+	 */
+	public void testPairs3() throws Exception {
+		// prepare destination directory
+		File mapDir = new File(baseDir, "pairs-tree-split");
+		assertTrue(mapDir.mkdirs());
 
-        // run task
-        task.execute();
+		// setup task
+		task.setDestDir(mapDir);
+		task.setMap(map);
+		task.setMakepairs(true);
+		task.setUsepkgpath(true);
+		task.setSuperpkg("org.objectstyle.superart");
 
-        // check results
-        File a = new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
-        assertTrue(a.isFile());
-        assertContents(a, "Artist", "org.objectstyle.art", "org.objectstyle.superart._Artist");
+		// run task
+		task.execute();
 
-        File _a = new File(mapDir, convertPath("org/objectstyle/superart/_Artist.java"));
-        assertTrue(_a.exists());
-        assertContents(_a, "_Artist", "org.objectstyle.superart", "CayenneDataObject");
-    }
-    
+		// check results
+		File a =
+			new File(mapDir, convertPath("org/objectstyle/art/Artist.java"));
+		assertTrue(a.isFile());
+		assertContents(
+			a,
+			"Artist",
+			"org.objectstyle.art",
+			"org.objectstyle.superart._Artist");
 
-    private String convertPath(String unixPath) {
-        return unixPath.replace('/', File.separatorChar);
-    }
+		File _a =
+			new File(
+				mapDir,
+				convertPath("org/objectstyle/superart/_Artist.java"));
+		assertTrue(_a.exists());
+		assertContents(
+			_a,
+			"_Artist",
+			"org.objectstyle.superart",
+			"CayenneDataObject");
+	}
 
-    private void assertContents(
-        File f,
-        String className,
-        String packageName,
-        String extendsName)
-        throws Exception {
+	private String convertPath(String unixPath) {
+		return unixPath.replace('/', File.separatorChar);
+	}
 
-        BufferedReader in =
-            new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+	private void assertContents(
+		File f,
+		String className,
+		String packageName,
+		String extendsName)
+		throws Exception {
 
-        try {
-            assertPackage(in, packageName);
-            assertClass(in, className, extendsName);
-        }
-        finally {
-            in.close();
-        }
+		BufferedReader in =
+			new BufferedReader(new InputStreamReader(new FileInputStream(f)));
 
-    }
+		try {
+			assertPackage(in, packageName);
+			assertClass(in, className, extendsName);
+		} finally {
+			in.close();
+		}
 
-    private void assertPackage(BufferedReader in, String packageName)
-        throws Exception {
+	}
 
-        String s = null;
-        while ((s = in.readLine()) != null) {
-            Matcher m = pkgPat.matcher(s + '\n');
-            if (m.find()) {
-                assertEquals(packageName, m.group(1));
-                return;
-            }
-        }
+	private void assertPackage(BufferedReader in, String packageName)
+		throws Exception {
 
-        fail();
-    }
+		String s = null;
+		while ((s = in.readLine()) != null) {
+			if (regexUtil.match("/^package\\s+([^\\s;]+);/", s + '\n')) {
+				assertTrue(s.indexOf(packageName) > 0);
+				return;
+			}
+		}
 
-    private void assertClass(
-        BufferedReader in,
-        String className,
-        String extendsName)
-        throws Exception {
+		fail("No package declaration found.");
+	}
 
-        String s = null;
-        while ((s = in.readLine()) != null) {
-            Matcher m = classPat.matcher(s + '\n');
-            if (m.find()) {
-                assertEquals(className, m.group(1));
-                assertEquals(extendsName, m.group(2));
-                return;
-            }
-        }
+	private void assertClass(
+		BufferedReader in,
+		String className,
+		String extendsName)
+		throws Exception {
 
-        fail();
-    }
+		String s = null;
+		while ((s = in.readLine()) != null) {
+			if (regexUtil.match("/class\\s+([^\\s]+)\\s+extends\\s+([^\\s]+)/", s + '\n')) {
+				assertTrue(s.indexOf(className) > 0);
+				assertTrue(s.indexOf(extendsName) > 0);
+				assertTrue(s.indexOf(className) < s.indexOf(extendsName));
+				return;
+			}
+		}
+
+		fail("No class declaration found.");
+	}
 }

@@ -90,5 +90,5 @@ public class ToManyListTst extends CayenneTestCase {
         ToManyList list = new ToManyList(lds, null, null);
         assertEquals(0, list.size());
         assertTrue(flag);
-    }
+    }    
 }

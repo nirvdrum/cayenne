@@ -55,11 +55,9 @@ package org.objectstyle.cayenne.exp;
  *
  */ 
 
-import junit.framework.*;
-import org.apache.log4j.*;
-import java.util.*;
-import java.util.regex.*;
-import org.objectstyle.cayenne.*;
+import junit.framework.Assert;
+
+import org.objectstyle.cayenne.TranslationTestCase;
 
 
 public class TstExpressionCase extends TranslationTestCase {    

@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,14 +53,17 @@ package org.objectstyle.cayenne;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne;
 
 /**
  * Generic exception that may be thrown by cayenne framework. Subclasses of this exception
- * will be used in more specific cases.
- *
+ * will be used in more specific cases. This exception class
+ * is compatible with JDK 1.3 and at the same time implements
+ * enhancements introduced in 1.4, namely chained exceptions.
  */
 public class CayenneException extends Exception {
-    
+    private Throwable cause = this;
+    	
     /**
      * Creates new <code>CayenneException</code> without detail message.
      */
@@ -83,12 +85,20 @@ public class CayenneException extends Exception {
      * thrown elsewhere.
      */
     public CayenneException(Throwable th) {
-        super(th);
+        this(th == null ? (String)null : th.toString(), th);
     }
     
     public CayenneException(String msg, Throwable th) {
-        super(msg, th);
+        super(msg);
+        this.cause = th;
     }
+    
+    /**
+	 * @see java.lang.Throwable#getCause()
+	 */
+	public Throwable getCause() {
+		return cause;
+	}
 }
 
 

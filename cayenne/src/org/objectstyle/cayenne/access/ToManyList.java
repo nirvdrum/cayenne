@@ -56,17 +56,15 @@
 
 package org.objectstyle.cayenne.access;
 
-import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import org.objectstyle.cayenne.ObjectId;
 
 /**
  * Special List implementation to hold "to many" relationship data.
- *
- * <p>Encapsulates a list via a weak reference. This means that Java VM garbage collector can cleanup a relationship
- * list when it runs out of memory. This list can be restored later if it is requested again.
- * Such approach should prevent circular references between objects.</p>
  *
  * <p>To retain guaranteed immutable reference to the list, 
  * application might use "List.toArray()" method.</p>
@@ -79,7 +77,7 @@ import org.objectstyle.cayenne.ObjectId;
 public class ToManyList implements List {
     private ObjectId srcObjectId;
     private String relName;
-    private WeakReference destObjects;
+    private List objectList;
     private ToManyListDataSource listDataSource;
     
     /** Creates ToManyList. */
@@ -102,11 +100,11 @@ public class ToManyList implements List {
     }
     
     public boolean needsFetch() {
-        return destObjects == null || destObjects.get() == null;
+        return objectList == null;
     }
     
     public void setObjectList(List objectList) {
-        destObjects = new WeakReference(objectList);
+        this.objectList = objectList;
     }
     
     private List getObjectList() {
@@ -114,7 +112,7 @@ public class ToManyList implements List {
             listDataSource.updateListData(this);
         }
         
-        return (List)destObjects.get();
+        return objectList;
     }
     
     
@@ -247,5 +245,4 @@ public class ToManyList implements List {
     public Object[] toArray(Object[] a) {
         return getObjectList().toArray(a);
     }
-    
 }

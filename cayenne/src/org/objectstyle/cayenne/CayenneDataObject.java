@@ -199,8 +199,9 @@ public class CayenneDataObject implements DataObject {
         List relList = (List)readProperty(relName);
         relList.remove(val);
 
-        if(val != null && setReverse)
+        if(val != null && setReverse) {
             unsetReverseRelationship(relName, val);
+        }
     }
 
     public void addToManyTarget(String relName, DataObject val, boolean setReverse) {

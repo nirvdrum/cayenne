@@ -56,10 +56,11 @@ package org.objectstyle.cayenne;
  */ 
 
 
-/** RuntimeException subclass thrown in cases of invalid cayenne configuration 
-  * attempts. */
-public class ConfigException extends java.lang.RuntimeException {
-    private Exception exception;
+/** 
+ * RuntimeException subclass thrown in cases of failed
+ * cayenne configuration attempts. 
+ */
+public class ConfigException extends CayenneRuntimeException {
     
     /**
      * Creates new <code>ConfigException</code> without detail message.
@@ -78,21 +79,30 @@ public class ConfigException extends java.lang.RuntimeException {
     /**
      * Constructs an <code>ConfigException</code> that wraps <code>exception</code>
      * thrown elsewhere.
+     * 
+     * @deprecated use constructor with "Throwbale" parameter
      */
     public ConfigException(Exception exception) {
-        this.exception = exception;
+        super(exception);
     }
     
+    /**
+     * @deprecated use constructor with "Throwbale" parameter
+     */
     public ConfigException(String msg, Exception exception) {
-        super(msg);
-        this.exception = exception;
+        super(msg, exception);
     }
     
-    public String toString() {
-        if(exception != null)
-            return exception.toString();
-        else
-            return super.toString();
+    /**
+     * Constructs an <code>ConfigException</code> that wraps <code>exception</code>
+     * thrown elsewhere.
+     */
+    public ConfigException(Throwable th) {
+        super(th);
+    }
+    
+    public ConfigException(String msg, Throwable th) {
+        super(msg, th);
     }
 }
 

@@ -66,6 +66,7 @@ import javax.sql.DataSource;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.objectstyle.cayenne.CayenneTestCase;
 import org.objectstyle.cayenne.ConnectionSetup;
 import org.objectstyle.cayenne.DatabaseSetup;
 import org.objectstyle.cayenne.access.DataDomain;
@@ -119,6 +120,14 @@ public class TestMain implements TestConstants {
 
 		// configure properties
 		configureProps();
+		
+		// check JDK version
+		if(CayenneTestCase.hasJSDK14()) {
+			logObj.info("JDK 1.4 detected.");
+		}
+		else {
+			logObj.info("No JDK 1.4 detected, assuming JDK1.3.");
+		}
 
 		// initialize shared resources
 		try {
@@ -129,7 +138,7 @@ public class TestMain implements TestConstants {
 
 			resources.setSharedConnInfo(dsi);
 		} catch (Exception ex) {
-			logObj.log(Level.ERROR, "Can not load connection info.", ex);
+			logObj.error("Can not load connection info.", ex);
 			System.exit(1);
 		}
 

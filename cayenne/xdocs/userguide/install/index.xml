@@ -14,14 +14,14 @@
             and therefore should run out of the box on any Java-compatible platform. 
             More detailed requirements are listed below:</p>
             
-            <p><strong>- JSDK 1.4.</strong> Cayenne requires JSDK 1.4 or newer and will not
-            run with earlier versions. To download it from Sun go to <a href="http://java.sun.com/products/">
-            http://java.sun.com/products/</a> or directly to <a href="http://java.sun.com/j2se/1.4/index.html">
-            http://java.sun.com/j2se/1.4/index.html</a></p>		
+            <p><strong>- JDK.</strong> Cayenne applications can be deployed
+            under JDK version 1.3 or higher. Note that JSDK 1.4 or higher is required for development
+            GUI tools. Download JDK from Sun at <a href="http://java.sun.com/products/">
+            http://java.sun.com/products/</a></p>		
                 
-            <p><strong>- Operating System compatible with JSDK 1.4.</strong> Currently this is
-            Linux, Solaris and Windows 95 / 98 / ME / 2000 / NT 4.0. MacOS 
-            support should be coming soon.</p>
+            <p><strong>- Java Compatible Operating System.</strong> <i>MacOSX note: 
+            JSDK 1.4 support by Apple on MacOSX is pending, but JDK1.3 is
+            fully supported.</i></p>
                 
             <p><strong>- Access to a relational database and JDBC driver for 
             this database.</strong> Out of the box, Cayenne would 
@@ -34,6 +34,15 @@
             
             <i>Note that to run Cayenne unit tests you will need database privileges
             to create and drop tables.</i></p>
+            
+      		<p><strong>- XML SAX Parser (JDK1.3 only).</strong> If the system runs JDK1.3, a
+			third party SAX parser is required (JDK1.4 has a parser already bundled with it). Cayenne
+			was tested with Apache Xerces parser version 2.02. To install Xerces download it
+			from <a href="http://xml.apache.org/">
+            http://xml.apache.org/</a>, unpack the distribution, and then copy 
+            <code>xercesImpl.jar</code> and <code>xmlParserAPIs.jar</code> into the JRE 
+            extensions directory ($JRE_HOME/lib/ext).
+            </p>
             
             <p><strong>- (Optional) Ant 1.4.1 or newer.</strong> Ant can be downloaded from
             <a href="http://jakarta.apache.org/ant/index.html">http://jakarta.apache.org/ant/index.html</a>.
@@ -114,13 +123,20 @@
             at the same time).
             In most cases <code>cayenne.jar</code> is the best choice. It has 
             Cayenne classes as well as all the needed dependencies. 
-            Dependencies include <a href="http://jakarta.apache.org/velocity/">Velocity 
-            Template Engine</a> classes, and are bundled with Cayenne for simpler installation 
-            and configuration. A leaner <code>cayenne-nodeps.jar</code> file
-            should only be used if Velocity is already installed on the user machine
-            or a user wants to install it herself. 
-            <i>Note that Cayenne was tested with Velocity version 1.3. 
-            There is no guarantee that it will work with other versions.</i>
+            Dependencies are bundled for easier installation and configuration of Cayenne.
+            They include:
+            
+            <ul>
+            	<li><a href="http://jakarta.apache.org/velocity/">Jakarta Velocity Template 
+            	Engine</a>, version 1.3</li>
+				<li><a href="http://jakarta.apache.org/oro/">Jakarta ORO Regular Expressions 
+				package</a> <i>(also bundled with Velocity)</i></li>
+				<li><a href="http://jakarta.apache.org/oro/">Jakarta Log4J 
+				package</a>, version 1.2.6</li>
+			</ul>
+            
+            If a leaner <code>cayenne-nodeps.jar</code> file is used, all the dependencies
+            must be installed by the user manually.
             </p>
             
             <p>Make sure that <code>[cayenne_install_dir]/lib/cayenne.jar</code> is accessible by 
@@ -194,8 +210,10 @@ GRANT CREATE VIEW TO "AUSER"
         </subsection>
         
 		<subsection name="2.6 Compiling Cayenne from Source" anchor="compile">
-			<panel name="Note:">Normally users don't need to compile Cayenne. Prebuilt JAR's
-			are included with both source and binary distributions.</panel>
+		    <p><strong>JSDK1.4 must be present to compile Cayenne.</strong></p>
+		    
+			<panel name="Note:">Normally users don't need to build Cayenne from source. 
+            Prebuilt JAR's are included with both source and binary distributions.</panel>
 
 			<p>For those users who need to recompile Cayenne (for example if they modified the
 			source code to customize or test certain aspects), Cayenne source distribution

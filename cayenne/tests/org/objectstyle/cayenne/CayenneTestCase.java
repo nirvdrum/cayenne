@@ -72,13 +72,28 @@ import org.objectstyle.cayenne.access.DataSourceInfo;
  * @author Andrei Adamchik
  */
 public class CayenneTestCase extends TestCase {
-
+	static boolean hasJSDK14;
+	
+	static {
+		try {
+			Class c = Class.forName("java.sql.Savepoint");
+			hasJSDK14 = true;
+		}
+		catch(Exception ex) {
+			hasJSDK14 = false;
+		}		
+	}
+	
 	/**
 	 * Constructor for CayenneTestCase.
 	 * @param arg0
 	 */
 	public CayenneTestCase(String arg0) {
 		super(arg0);
+	}
+	
+	public static boolean hasJSDK14() {
+		return hasJSDK14;
 	}
 
 	public Connection getSharedConnection() {

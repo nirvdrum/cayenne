@@ -115,7 +115,7 @@ public class UtilTst extends CayenneTestCase {
     public void testCopyFileUrl() throws java.lang.Exception {
         assertTrue("Temp file " + fTmpFileCopy + " is on the way, please delete it manually.", !fTmpFileCopy.exists());
 
-        assertTrue(Util.copy(fTmpFileInCurrentDir.toURI().toURL(), fTmpFileCopy));
+        assertTrue(Util.copy(fTmpFileInCurrentDir.toURL(), fTmpFileCopy));
         assertTrue(fTmpFileCopy.exists());
         assertEquals(fTmpFileCopy.length(), fTmpFileInCurrentDir.length());
     }
