@@ -45,8 +45,6 @@
         </chmod>        
         
         <copy file="otherlib/scope-bin.jar" todir="${dist}/lib/modeler"/>
-     
-        <ant antfile="build-cayenne.xml" target="api"/>
 	</target>
 	
 	

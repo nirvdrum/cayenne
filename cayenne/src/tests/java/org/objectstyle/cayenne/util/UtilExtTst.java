@@ -131,34 +131,49 @@ public class UtilExtTst extends CayenneTestCase {
         assertTrue(!Util.nullSafeEquals(null, o1));
         assertTrue(Util.nullSafeEquals(null, null));
     }
-    
+
     public void testExtractFileExtension1() throws Exception {
-    	String fullName = "n.ext";
-    	assertEquals("ext", Util.extractFileExtension(fullName));
+        String fullName = "n.ext";
+        assertEquals("ext", Util.extractFileExtension(fullName));
     }
-    
+
     public void testExtractFileExtension2() throws Exception {
-    	String fullName = "n";
-    	assertNull(Util.extractFileExtension(fullName));
+        String fullName = "n";
+        assertNull(Util.extractFileExtension(fullName));
     }
-    
+
     public void testExtractFileExtension3() throws Exception {
-    	String fullName = ".ext";
-    	assertNull(Util.extractFileExtension(fullName));
+        String fullName = ".ext";
+        assertNull(Util.extractFileExtension(fullName));
     }
-    
+
     public void testStripFileExtension1() throws Exception {
-    	String fullName = "n.ext";
-    	assertEquals("n", Util.stripFileExtension(fullName));
+        String fullName = "n.ext";
+        assertEquals("n", Util.stripFileExtension(fullName));
     }
-    
+
     public void testStripFileExtension2() throws Exception {
-    	String fullName = "n";
-    	assertEquals("n", Util.stripFileExtension(fullName));
+        String fullName = "n";
+        assertEquals("n", Util.stripFileExtension(fullName));
     }
-    
+
     public void testStripFileExtension3() throws Exception {
-    	String fullName = ".ext";
-    	assertEquals(".ext", Util.stripFileExtension(fullName));
+        String fullName = ".ext";
+        assertEquals(".ext", Util.stripFileExtension(fullName));
+    }
+
+    public void testEncodeXmlAttribute1() throws Exception {
+        String unencoded = "normalstring";
+        assertEquals(unencoded, Util.encodeXmlAttribute(unencoded));
+    }
+
+    public void testEncodeXmlAttribute2() throws Exception {
+        String unencoded = "<a>";
+        assertEquals("&lt;a&gt;", Util.encodeXmlAttribute(unencoded));
+    }
+
+    public void testEncodeXmlAttribute3() throws Exception {
+        String unencoded = "a&b";
+        assertEquals("a&amp;b", Util.encodeXmlAttribute(unencoded));
     }
 }

@@ -333,7 +333,8 @@ public class DomainHelper {
 		out.println(">");
 
 		if (info.getDataSourceUrl() != null) {
-			out.println("\t<url value=\"" + info.getDataSourceUrl() + "\"/>");
+			String encoded = Util.encodeXmlAttribute(info.getDataSourceUrl());
+			out.println("\t<url value=\"" + encoded + "\"/>");
 		}
 
 		out.println(
