@@ -125,9 +125,9 @@ sub get_source() {
                 my $i = 0;
                  
                 # cvs checkouts are unreliable...give it a few tries
+		$ENV{"CVS_RSH"} = "ssh";
 		for($i = 0; $i < 5; $i++) {
                 	$status = run_command(
- 			"CVS_RSH=ssh ; " .
 			" cvs" . 
 			" -z3" .
 			" -q" .
