@@ -636,6 +636,8 @@ public class DataContext implements QueryEngine, Serializable {
         synchronized (objectStore) {
             List objectsToUnregister = new ArrayList();
             Iterator it = objectStore.getObjectIterator();
+
+			// collect candidates
             while (it.hasNext()) {
                 DataObject thisObject = (DataObject) it.next();
                 int objectState = thisObject.getPersistenceState();
@@ -661,10 +663,15 @@ public class DataContext implements QueryEngine, Serializable {
                         break;
                 }
             }
-            for (int i = 0; i < objectsToUnregister.size(); i++) {
-                this.unregisterObject((DataObject) objectsToUnregister.get(i));
+
+			// unregister candidates
+			it = objectsToUnregister.iterator(); 
+            while (it.hasNext()) {
+                this.unregisterObject((DataObject)it.next());
             }
 
+			// finally clear flattened inserts & deletes
+			this.clearFlattenedUpdateQueries();
         }
 
     }
