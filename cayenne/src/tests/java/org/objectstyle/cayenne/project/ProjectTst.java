@@ -90,6 +90,12 @@ public class ProjectTst extends CayenneTestCase {
         p = new TstProject(f);
     }
 
+    public void testModified() throws Exception {
+    	assertTrue(!p.isModified());
+    	p.setModified(true);
+    	assertTrue(p.isModified());    	
+    }
+    
     public void testValidator() throws Exception {
         Validator v1 = p.getValidator();
         assertSame(p, v1.getProject());

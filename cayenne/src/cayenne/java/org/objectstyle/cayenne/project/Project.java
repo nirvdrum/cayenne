@@ -334,10 +334,6 @@ public abstract class Project {
     public Iterator treeNodes() {
         return FlatProjectView.getInstance().flattenProjectTree(getRootNode()).iterator();
     }
-
-    /**
-     * Determines if a 
-    public abstract void checkForUpgrades();
     
     /** 
      * Saves project. All currently existing files are updated,
@@ -400,8 +396,14 @@ public abstract class Project {
         synchronized (upgradeMessages) {
             upgradeMessages.clear();
         }
+        
+        // update state 
+        setModified(false);
     }
 
+    /**
+     * Saves a list of modified files to temporary files.
+     */
     protected void processSave(List modifiedFiles) throws ProjectException {
         // notify that files will be saved
         Iterator willSave = modifiedFiles.iterator();
