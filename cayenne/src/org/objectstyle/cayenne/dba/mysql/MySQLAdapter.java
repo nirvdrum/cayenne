@@ -1,4 +1,3 @@
-package org.objectstyle.cayenne.dba.mysql;
 /* ====================================================================
  * 
  * The ObjectStyle Group Software License, Version 1.0 
@@ -54,6 +53,7 @@ package org.objectstyle.cayenne.dba.mysql;
  * <http://objectstyle.org/>.
  *
  */ 
+package org.objectstyle.cayenne.dba.mysql;
 
 import org.objectstyle.cayenne.CayenneRuntimeException;
 import org.objectstyle.cayenne.dba.JdbcAdapter;
@@ -68,5 +68,13 @@ public class MySQLAdapter extends JdbcAdapter {
     /** Throws an exception, since FK constraints are not supported by MySQL. */
     public String createFkConstraint(DbRelationship rel) {
         throw new CayenneRuntimeException("FK constraints are not supported.");
+    }
+    
+    /** 
+     * Returns null, since views are not yet supported in MySQL. Views
+     * support is promised in MySQL 4.1.
+     */
+    public String tableTypeForView() {
+        return null;
     }
 }

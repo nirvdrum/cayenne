@@ -153,4 +153,16 @@ public interface DbAdapter {
      * @param allowNulls database column nullable parameter
      */ 
     public DbAttribute buildAttribute(String name, int type, int size, int precision, boolean allowNulls);
+    
+    /** 
+     * Returns the name of the table type (as returned by 
+     * <code>DatabaseMetaData.getTableTypes</code>) for a simple user table.
+     */
+    public String tableTypeForTable();
+    
+    /** 
+     * Returns the name of the table type (as returned by 
+     * <code>DatabaseMetaData.getTableTypes</code>) for a view table.
+     */
+    public String tableTypeForView();
 }

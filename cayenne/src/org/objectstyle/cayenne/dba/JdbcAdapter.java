@@ -234,4 +234,13 @@ public class JdbcAdapter implements DbAdapter {
 
         return attr;
     }
+    
+
+    public String tableTypeForTable() {
+        return "TABLE";
+    }    
+
+    public String tableTypeForView() {
+        return "VIEW";
+    }
 }

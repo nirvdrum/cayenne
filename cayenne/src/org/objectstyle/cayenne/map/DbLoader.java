@@ -63,6 +63,7 @@ import java.util.logging.Logger;
 
 import org.objectstyle.cayenne.dba.DbAdapter;
 import org.objectstyle.cayenne.dba.TypesMapping;
+import org.objectstyle.cayenne.gui.util.NameGenerator;
 import org.objectstyle.cayenne.gui.util.YesNoToAllDialog;
 import org.objectstyle.util.NameConverter;
 
@@ -152,8 +153,7 @@ public class DbLoader {
         ArrayList types = new ArrayList();
         ResultSet rs = getMetaData().getTableTypes();
         while (rs.next()) {
-            String type = rs.getString("TABLE_TYPE");
-            types.add(type);
+            types.add(rs.getString("TABLE_TYPE").trim());
         }
         rs.close();
         return types;
@@ -217,8 +217,10 @@ public class DbLoader {
      * 
      * @return true if need to continue, false if must stop loading. 
      */
-    public boolean loadDbEntities(DataMap map, List tables)
-        throws SQLException {
+    public boolean loadDbEntities(DataMap map, List tables) throws SQLException {
+
+        // logObj.severe("Types: " + getTableTypes());
+
         boolean ret_code = true;
         dbEntityList = new ArrayList();
         Iterator iter = tables.iterator();
@@ -448,11 +450,33 @@ public class DbLoader {
         }
     }
 
-    /** Performs database reverse engineering and generates DataMap object
-      * that contains default mapping of the tables and views. By default will
-      * read all table types including tables, views, system tables, etc. */
+    /** 
+     * Performs database reverse engineering and generates DataMap
+     * that contains default mapping of the tables and views. 
+     * By default will include regular tables and views.
+     */
     public DataMap createDataMapFromDB(String schemaName) throws SQLException {
-        return createDataMapFromDB(schemaName, null);
+
+        String viewType = adapter.tableTypeForView();
+        String tableType = adapter.tableTypeForTable();
+
+        // use types that are not null
+        ArrayList list = new ArrayList();
+        if (viewType != null) {
+            list.add(viewType);
+        }
+        if (tableType != null) {
+            list.add(tableType);
+        }
+
+        if (list.size() == 0) {
+            throw new SQLException("No supported table types found.");
+        }
+
+        String[] types = new String[list.size()];
+        list.toArray(types);
+
+        return createDataMapFromDB(schemaName, types);
     }
 
     /** 
@@ -463,8 +487,7 @@ public class DbLoader {
     public DataMap createDataMapFromDB(String schemaName, String[] tableTypes)
         throws SQLException {
         DataMap dataMap;
-        dataMap =
-            new DataMap(org.objectstyle.cayenne.gui.util.NameGenerator.getDataMapName());
+        dataMap = new DataMap(NameGenerator.getDataMapName());
         return loadDataMapFromDB(schemaName, tableTypes, dataMap);
     }
 
@@ -478,11 +501,11 @@ public class DbLoader {
         String[] tableTypes,
         DataMap dataMap)
         throws SQLException {
-            
+
         if (!loadDbEntities(dataMap, getTables(null, schemaName, "%", tableTypes))) {
             return dataMap;
         }
-        
+
         loadDbRelationships(dataMap);
         loadObjEntities(dataMap);
         loadObjRelationships(dataMap);
