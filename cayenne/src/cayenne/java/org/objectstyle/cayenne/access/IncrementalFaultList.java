@@ -171,11 +171,17 @@ public class IncrementalFaultList implements List {
 
         fillIn(query);
     }
-
+    
+    private boolean resolvesFirstPage() {
+        return internalQuery.getPrefetches().isEmpty();
+    }
+    
     /**
      * Performs initialization of the internal list of objects.
      * Only the first page is fully resolved. For the rest of
      * the list, only ObjectIds are read.
+     * 
+     * @since 1.0.6
      */
     protected void fillIn(GenericSelectQuery query) {
         synchronized (elements) {
@@ -190,22 +196,26 @@ public class IncrementalFaultList implements List {
                 long t1 = System.currentTimeMillis();
                 ResultIterator it = dataContext.performIteratedQuery(query);
                 try {
-                    // read first page completely, the rest as ObjectIds
-                    List firstPage =
-                        (fetchesDataRows) ? elements : new ArrayList(pageSize);
-                    for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
-                        firstPage.add(it.nextDataRow());
-                    }
+                    
+                    rowWidth = it.getDataRowWidth();
+                    
+                    // resolve first page if we can
+                    if (resolvesFirstPage()) {
+                        // read first page completely, the rest as ObjectIds
+                        List firstPage =
+                            (fetchesDataRows) ? elements : new ArrayList(pageSize);
+                        for (int i = 0; i < pageSize && it.hasNextRow(); i++) {
+                            firstPage.add(it.nextDataRow());
+                        }
 
-                    // store row width
-                    if (firstPage.size() > 0) {
-                        rowWidth = ((Map) firstPage.get(0)).size();
-                    }
-
-                    // convert rows to objects
-                    if (!fetchesDataRows) {
-                        elements.addAll(
-                            dataContext.objectsFromDataRows(rootEntity, firstPage, true));
+                        // convert rows to objects
+                        if (!fetchesDataRows) {
+                            elements.addAll(
+                                dataContext.objectsFromDataRows(
+                                    rootEntity,
+                                    firstPage,
+                                    true));
+                        }
                     }
 
                     // continue reading ids
@@ -225,15 +235,8 @@ public class IncrementalFaultList implements List {
                 throw new CayenneRuntimeException("Error performing query.", e);
             }
 
-            // process prefetching
-            if (internalQuery.getPrefetches().size() > 0) {
-                int endOfPage = (elements.size() < pageSize) ? elements.size() : pageSize;
-                dataContext.prefetchRelationships(
-                    internalQuery,
-                    elements.subList(0, endOfPage));
-            }
-
-            unfetchedObjects = elements.size() - pageSize;
+            unfetchedObjects =
+                (resolvesFirstPage()) ? elements.size() - pageSize : elements.size();
         }
     }
 
@@ -338,6 +341,10 @@ public class IncrementalFaultList implements List {
                             quals.subList(fetchBegin, fetchEnd)));
 
                 query.setFetchingDataRows(fetchesDataRows);
+                
+                if (!query.isFetchingDataRows()) {
+                    query.addPrefetches(internalQuery.getPrefetches());
+                }
 
                 objects.addAll(dataContext.performQuery(query));
                 fetchBegin = fetchEnd;
@@ -392,14 +399,6 @@ public class IncrementalFaultList implements List {
             }
 
             unfetchedObjects -= objects.size();
-        }
-
-        // process prefetching
-        if (internalQuery.getPrefetches().size() > 0) {
-            int endOfPage = (elements.size() < toIndex) ? elements.size() : toIndex;
-            dataContext.prefetchRelationships(
-                internalQuery,
-                elements.subList(fromIndex, endOfPage));
         }
     }
 

@@ -202,6 +202,15 @@ public class DefaultResultIterator implements ResultIterator {
             throw new CayenneException("Exception reading ResultSet.", sqex);
         }
     }
+    
+    /**
+     * Returns the number of columns in the result row.
+     * 
+     * @since 1.0.6
+     */
+    public int getDataRowWidth() {
+        return descriptor.getResultWidth();
+    }
 
     /**
      * Returns all unread data rows from ResultSet, closing

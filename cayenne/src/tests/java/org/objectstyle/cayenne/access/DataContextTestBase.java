@@ -90,7 +90,7 @@ public class DataContextTestBase extends CayenneTestCase {
     protected DataContext context;
     protected TestOperationObserver opObserver;
 
-    protected void setUp() throws java.lang.Exception {
+    protected void setUp() throws Exception {
         super.setUp();
 
         CayenneTestDatabaseSetup setup = getDatabaseSetup();

@@ -107,5 +107,12 @@ public interface ResultIterator {
      * Otherwise unused database resources will not be released properly.
      */  
     public void close() throws CayenneException;
+    
+    /**
+     * Returns the number of columns in the result row.
+     * 
+     * @since 1.0.6
+     */
+    public int getDataRowWidth();
 }
 
