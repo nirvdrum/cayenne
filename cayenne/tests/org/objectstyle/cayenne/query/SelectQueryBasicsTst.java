@@ -110,6 +110,17 @@ public class SelectQueryBasicsTst extends TestCase {
     }
     
     public void testQueryAttributes() throws Exception {
-    	assertEquals(0, q.getQueryAttributes().size());
+    	assertEquals(0, q.getResultsDbAttributes().size());
+    	
+    	q.addResultDbAttribute("ARTIST_ID");
+    	assertEquals(1, q.getResultsDbAttributes().size());
+    	assertEquals("ARTIST_ID", q.getResultsDbAttributes().get(0));
+    }
+    
+    public void testUsingRootEntityAttributes() throws Exception {
+    	assertTrue(q.isUsingRootEntityAttributes());
+    	
+    	q.addResultDbAttribute("ARTIST_ID");
+    	assertTrue(!q.isUsingRootEntityAttributes());
     }
 }

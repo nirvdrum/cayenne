@@ -52,7 +52,7 @@
  * information on the ObjectStyle Group, please see
  * <http://objectstyle.org/>.
  *
- */ 
+ */
 package org.objectstyle.cayenne.query;
 
 import java.util.ArrayList;
@@ -62,86 +62,105 @@ import java.util.logging.Logger;
 import org.objectstyle.cayenne.exp.Expression;
 
 public class SelectQuery extends QualifiedQuery {
-    static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
-    
-    protected ArrayList orderings = new ArrayList();  
-    protected ArrayList prefetches = new ArrayList();
-    protected boolean distinct;
-    protected boolean fetchingDataRows;
-    
-    /** Creates empty SelectQuery. */
-    public SelectQuery() {}
-    
-    
-    /** Creates SelectQuery with <code>objEntityName</code> parameter. */
-    public SelectQuery(String objEntityName) {
-        setObjEntityName(objEntityName);
-    }
-    
-    
-    /** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
-    public SelectQuery(String objEntityName, Expression qualifier) {
-        setObjEntityName(objEntityName);
-        setQualifier(qualifier);
-    }
-    
-    /** 
-     * Returns <code>Query.SELECT_QUERY</code> type.
-     */
-    public int getQueryType() {
-        return SELECT_QUERY;
-    }
-    
-    
-    /** Adds ordering specification to this query orderings. */
-    public void addOrdering(Ordering ordering) {
-        orderings.add(ordering);
-    }
-    
-    /** Adds ordering specification to this query orderings. */
-    public void addOrdering(String sortPathSpec, boolean isAscending) {
-        addOrdering(new Ordering(sortPathSpec, isAscending)); 
-    }
-    
-    
-    /** Returns a list of orderings used by this query. */
-    public List getOrderingList() {
-        return orderings;
-    }
-    
-    
-    /** Returns true if this query returns distinct rows. */
-    public boolean isDistinct() {
-        return distinct;
-    }
-    
-    /** Sets <code>distinct</code> property. */
-    public void setDistinct(boolean distinct) {
-        this.distinct = distinct;
-    }
-    
-    public List getQueryAttributes() {
-    	return new ArrayList();
-    }
-    
-    
-    /**
-     * Returns a list of relationships that must be prefetched 
-     * as a part of this query.
-     */
-    public List getPrefetchList() {
-        return prefetches;
-    }
-    
-    /** 
-     * Adds a relationship path. ObjRelationship names are separated by ".".
-     * to the list of relationship paths that should be prefetched when the
-     * query is executed.
-     */
-    public void addPrefetch(String relPath) {
-        prefetches.add(relPath);
-    }
-    
+	static Logger logObj = Logger.getLogger(SelectQuery.class.getName());
+
+	protected ArrayList resultsDbAttributes = new ArrayList();
+	protected ArrayList orderings = new ArrayList();
+	protected ArrayList prefetches = new ArrayList();
+	protected boolean distinct;
+	protected boolean fetchingDataRows;
+
+	/** Creates empty SelectQuery. */
+	public SelectQuery() {
+	}
+
+	/** Creates SelectQuery with <code>objEntityName</code> parameter. */
+	public SelectQuery(String objEntityName) {
+		setObjEntityName(objEntityName);
+	}
+
+	/** Creates SelectQuery with <code>objEntityName</code> and <code>qualifier</code> parameters. */
+	public SelectQuery(String objEntityName, Expression qualifier) {
+		setObjEntityName(objEntityName);
+		setQualifier(qualifier);
+	}
+
+	/** 
+	 * Returns <code>Query.SELECT_QUERY</code> type.
+	 */
+	public int getQueryType() {
+		return SELECT_QUERY;
+	}
+
+	/** Adds ordering specification to this query orderings. */
+	public void addOrdering(Ordering ordering) {
+		orderings.add(ordering);
+	}
+
+	/** Adds ordering specification to this query orderings. */
+	public void addOrdering(String sortPathSpec, boolean isAscending) {
+		addOrdering(new Ordering(sortPathSpec, isAscending));
+	}
+
+	/** Returns a list of orderings used by this query. */
+	public List getOrderingList() {
+		return orderings;
+	}
+
+	/** Returns true if this query returns distinct rows. */
+	public boolean isDistinct() {
+		return distinct;
+	}
+
+	/** Sets <code>distinct</code> property. */
+	public void setDistinct(boolean distinct) {
+		this.distinct = distinct;
+	}
+
+	/**
+	 * Returns a list of attributes that will be included
+	 * in the results of this query.
+	 */
+	public List getResultsDbAttributes() {
+		return resultsDbAttributes;
+	}
+
+	/**
+	 * Adds a path to the DbAttribute that should be included 
+	 * in the results of this query. Valid paths would look like
+	 * <code>ARTIST_NAME</code>, <code>PAINTING_ARRAY.PAINTING_ID</code>,
+	 * etc.
+	 */
+	public void addResultDbAttribute(String attributePath) {
+		resultsDbAttributes.add(attributePath);
+	}
+	
+	/**
+	 * Returns <code>true</code> if there is no custom query 
+	 * attributes specified, and the query results
+	 * will contain only the root entity attributes.
+	 */
+	public boolean isUsingRootEntityAttributes() {
+		return resultsDbAttributes.size() == 0;
+	}
+
+	/**
+	 * Returns a list of relationships that must be prefetched 
+	 * as a part of this query.
+	 */
+	public List getPrefetchList() {
+		return prefetches;
+	}
+
+	/** 
+	 * Adds a relationship path. ObjRelationship names are separated by ".".
+	 * to the list of relationship paths that should be prefetched when the
+	 * query is executed.
+	 */
+	public void addPrefetch(String relPath) {
+		prefetches.add(relPath);
+	}
+
 	/**
 	 * Returns <code>true</code> if this query 
 	 * should produce a list of data rows as opposed
@@ -152,9 +171,11 @@ public class SelectQuery extends QualifiedQuery {
 		return fetchingDataRows;
 	}
 
-
-	/**	 */
-	public void setFetchingDataRows(boolean dataRowsResult) {
-		this.fetchingDataRows = dataRowsResult;
+	/**	
+	 * Sets query result type. If <code>flag</code> parameter is
+	 * <code>true</code>, then results will be in the form of data rows.
+	 */
+	public void setFetchingDataRows(boolean flag) {
+		this.fetchingDataRows = flag;
 	}
 }
