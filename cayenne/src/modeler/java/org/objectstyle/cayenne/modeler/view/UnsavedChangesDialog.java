@@ -60,12 +60,15 @@ import java.awt.Component;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
+import org.apache.log4j.Logger;
 import org.objectstyle.cayenne.modeler.util.ModelerUtil;
 
 /**
  * @author Andrei Adamchik
  */
 public class UnsavedChangesDialog {
+	private static Logger logObj = Logger.getLogger(UnsavedChangesDialog.class);
+	
     private static final String SAVE_AND_CLOSE = "Save Changes";
     private static final String CLOSE_WITHOUT_SAVE = "Ignore Changes";
     private static final String CANCEL = "Cancel";
@@ -91,7 +94,17 @@ public class UnsavedChangesDialog {
         dialog.show();
 
         Object selectedValue = pane.getValue();
-        result = (selectedValue != null) ? selectedValue.toString() : CANCEL;
+        // need to do an if..else chain, since
+        // sometimes values are unexpected
+        if(SAVE_AND_CLOSE.equals(selectedValue)) {
+        	result = SAVE_AND_CLOSE;
+        }
+        else if(CLOSE_WITHOUT_SAVE.equals(selectedValue)){
+        	result = CLOSE_WITHOUT_SAVE;
+        }
+        else {
+        	result = CANCEL;
+        }
     }
 
     public boolean shouldSave() {

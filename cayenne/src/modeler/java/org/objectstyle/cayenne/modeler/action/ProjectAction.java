@@ -105,7 +105,9 @@ public class ProjectAction extends CayenneAction {
         return true;
     }
 
-    /** Return false if cancel closing the window, true otherwise. */
+    /** 
+     * Returns false if cancel closing the window, true otherwise. 
+     */
     public boolean checkSaveOnClose() {
         EventController mediator = getMediator();
         if (mediator != null && mediator.isDirty()) {
@@ -113,11 +115,17 @@ public class ProjectAction extends CayenneAction {
             dialog.show();
 
             if (dialog.shouldCancel()) {
+            	// discard changes and DO NOT close
                 return false;
             } else if (dialog.shouldSave()) {
+                // save changes and close
                 ActionEvent e =
                     new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "SaveAll");
                 Editor.getFrame().getAction(SaveAction.ACTION_NAME).actionPerformed(e);
+				if(mediator.isDirty()) {
+					// save was canceled... do not close
+					return false;
+				}
             }
         }
 
