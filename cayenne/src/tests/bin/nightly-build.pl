@@ -14,13 +14,14 @@
 #   6. Entry in $HOME/.cayenne/connection.properties for "nightly-test"
 #
 # Command line:
-#     nightly-build.pl [-u] [-n] [-m email@example.com] 
+#     nightly-build.pl -d cvsroot [-u] [-n] [-m email@example.com] 
 #            -u - upload build and test results to the server
 #            -n - skip CVS checkout (used mostly for debugging)
+#            -d - CVSROOT to use for code checkout
 #
 # Crontab:
 #
-#     2 5 * * * /fullpathto/nightly-build.pl [-u] [-m email@example.com]  2>&1 > /dev/null
+#     2 5 * * * export CVS_RSH=ssh; /fullpathto/nightly-build.pl -d :ext:xyz@cvs.sourceforge.net:/cvsroot/cayenne [-u] [-m email@example.com]  2>&1 > /dev/null
 #
 
 use strict;
@@ -35,8 +36,10 @@ use Cwd;
 $ENV{'JAVA_HOME'} = "/opt/java";
 $ENV{'ANT_HOME'} = "/opt/ant";
 
-our ($opt_u, $opt_m, $opt_n);
-getopts('unm:');
+our ($opt_u, $opt_m, $opt_n, $opt_d);
+getopts('unm:d:');
+
+die_with_email("CVSROOT must be passed using -d option.") unless $opt_d;
 
 my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime();
 $year = 1900 + $year;
@@ -124,7 +127,7 @@ sub get_source() {
 		"cvs" . 
 		" -z3" .
 		" -q" .
-		" -d:pserver:anonymous\@cvs.sourceforge.net:/cvsroot/cayenne" .
+		" -d$opt_d" .
 		" export" .
 		" -D" .
 		" \"1 minute ago\"" .
