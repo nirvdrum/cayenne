@@ -66,7 +66,6 @@ import org.objectstyle.art.Painting;
 import org.objectstyle.cayenne.map.Procedure;
 import org.objectstyle.cayenne.map.ProcedureParam;
 import org.objectstyle.cayenne.query.ProcedureQuery;
-import org.objectstyle.cayenne.query.ProcedureSelectQuery;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unittest.CayenneTestCase;
 
