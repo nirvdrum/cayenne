@@ -85,3 +85,9 @@ setIsToMany has been removed.  The toMany checkbox in modeller is now disabled (
 24. Configuration exceptions are now much more informative.
 
 25. User Guide: long awaited chapter on logging congiguration and use.
+
+26. ServletConfiguration is deprecated and replaced by WebApplicationListener.
+Also it no longer inherits from Configuration, but rather delegates its tasks 
+to a Configuration object. This creates much more consistent interface for 
+using Cayenne in webapplications.
+
