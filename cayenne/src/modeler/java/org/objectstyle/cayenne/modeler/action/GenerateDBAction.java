@@ -67,9 +67,6 @@ import org.objectstyle.cayenne.project.ProjectPath;
 
 /** 
  * Action that generates database tables from a DataMap.
- * 
- * @author Misha Shengaout
- * @author Andrei Adamchik
  */
 public class GenerateDBAction extends CayenneAction {
 

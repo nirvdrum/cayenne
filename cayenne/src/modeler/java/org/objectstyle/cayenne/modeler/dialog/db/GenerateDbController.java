@@ -182,7 +182,6 @@ public class GenerateDbController extends BasicController {
             return;
         }
 
-        // TODO: reimplement GenerateDbDialog with Scope..
         GenerateDbDialog dialog =
             new GenerateDbDialog(dataSourceInfo, adapter, generator);
         dialog.show();

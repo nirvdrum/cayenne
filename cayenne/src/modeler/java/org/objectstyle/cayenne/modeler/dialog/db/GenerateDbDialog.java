@@ -95,9 +95,6 @@ import org.objectstyle.cayenne.util.Util;
 
 /**
  * Wizard for generating the database from the data map.
- * 
- * @author Michael Misha Shengaout
- * @author Andrei Adamchik
  */
 public class GenerateDbDialog extends CayenneDialog {
 
