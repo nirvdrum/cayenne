@@ -69,6 +69,15 @@ public class RequestDequeue {
 
     protected Object dequeueEventObject;
     protected int dequeueEventCode;
+    protected String name;
+
+    public RequestDequeue() {
+        this(null);
+    }
+
+    public RequestDequeue(String name) {
+        this.name = name;
+    }
 
     /**
      * Returns the dequeueEventCode.
@@ -120,15 +129,26 @@ public class RequestDequeue {
 
     public String toString() {
         StringBuffer buf = new StringBuffer();
-        buf.append('[').append(getClass().getName()).append(": ");
+        buf.append('[').append(getClass().getName()).append(":").append(getName());
         if (isDequeueSuccess()) {
-            buf.append("success");
+            buf.append(" success");
         } else if (isQueueFull()) {
-            buf.append("queue full");
+            buf.append(" queue full");
         } else if (isTimedOut()) {
-            buf.append("timeout or interrupted");
+            buf.append(" timeout or interrupted");
+        }
+        else {
+        	buf.append(" unknown state");
         }
         buf.append(']');
         return buf.toString();
+    }
+    
+    /**
+     * Returns the name.
+     * @return String
+     */
+    public String getName() {
+        return name;
     }
 }

@@ -93,6 +93,10 @@ public class RequestQueueTst extends CayenneTestCase {
                 // test dequeue 
                 Object dequeueObj = new Object();
                 assertTrue(testCase1.getQueue().dequeueFirst(dequeueObj));
+                
+                // this is needed due to some thread scheduling weirdness on Linux
+                testCase1.getLock().wait(1000);
+                
                 RequestDequeue result = testCase1.getResult();
                 assertNotNull(result);
                 assertTrue(result.isDequeueSuccess());

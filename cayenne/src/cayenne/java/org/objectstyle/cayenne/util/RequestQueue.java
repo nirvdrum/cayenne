@@ -112,7 +112,7 @@ public class RequestQueue {
      * caused 
      */
     public RequestDequeue queueThread() {
-        RequestDequeue result = new RequestDequeue();
+        RequestDequeue result = new RequestDequeue(Thread.currentThread().getName());
 
         // queue up request
         synchronized (queue) {
@@ -131,23 +131,13 @@ public class RequestQueue {
 
                 if (logObj.isDebugEnabled()) {
                     logObj.debug(
-                        "thread ["
-                            + Thread.currentThread().getName()
-                            + "] will wait in the queue for "
-                            + timeout);
+                        "thread [" + result.getName() + "] queued for " + timeout);
                 }
 
                 // release lock and wait
                 result.wait(timeout);
             } catch (InterruptedException e) {
                 interrupted = true;
-            }
-
-            if (logObj.isDebugEnabled()) {
-                logObj.debug(
-                    "thread ["
-                        + Thread.currentThread().getName()
-                        + "] finished waiting in the queue.");
             }
 
             // wait is over, remove itself from the queue
@@ -189,6 +179,9 @@ public class RequestQueue {
                 first.setDequeueEventObject(dequeuedObj);
                 first.setDequeueEventCode(RequestDequeue.DEQUEUE_SUCCESS);
                 first.notifyAll();
+                if (logObj.isDebugEnabled()) {
+                    logObj.debug("Dequeued thread: " + first.getName());
+                }
             }
 
             return true;
