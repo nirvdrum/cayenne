@@ -118,7 +118,35 @@
 		</ul>
         </subsection>
         
-        <subsection name="3.4 Configuration" anchor="config">
+        <subsection name="3.4 Database Connection" anchor="connect">
+        	<p><a href="../api/org/objectstyle/cayenne/access/DataNode.html">DataNode</a> 
+        	is the class closest to the database that is strictly a part of Cayenne access layer. 
+        	This class works directly with JDBC DataSource and Connections.
+            It can work with a DataSource provided by a deployment container 
+            (web or EJB), or it can use a DataSource created by Cayenne based on JDBC driver
+            information obtained via configuration classes. How DataSource is obtained is totally
+            transparent to DataNode.
+            </p>
+            
+            <p>Cayenne-provided DataSource functionality, including connection pooling,
+            is implemented in
+            <a href="../api/org/objectstyle/cayenne/conn/package-summary.html">org.objectstyle.cayenne.conn 
+            package</a>. This package has no dependencies on other Cayenne parts and can be
+            used separate from the main Cayenne functionality as a generic DataSource/connection
+            pool implementation. For example it can be used as a DataSource implementation
+            of Tomcat web container. <i>(For a sample configuration follow 
+            <a href="appguide/deploy.html#web">this link</a>, then scroll down to the sample
+            server.xml configuration file.)</i>
+            </p>
+            
+        	<p>To Be Done...</p>
+        </subsection>
+        
+        <subsection name="3.5 Cross-database issues" anchor="crossdb">
+        	<p>To Be Done...</p>
+        </subsection>
+        
+        <subsection name="3.6 Configuration" anchor="config">
             <p>Central piece in Cayenne configuration is 
             <a href="../api/org/objectstyle/cayenne/conf/Configuration.html">Configuration</a>
             class. It creates DataDomain objects used later to access the database. Database

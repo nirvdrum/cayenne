@@ -70,7 +70,7 @@ Configuration conf = Configuration.getSharedConfig();
 
            </subsection>
            
-           <subsection name="4.6.2 Web Applications" anchor="standalone">
+           <subsection name="4.6.2 Web Applications" anchor="web">
                <p>Though it is possible to use the procedure described for the standalone applications
                when deploying an application in a web container, Cayenne provides a better way
                to do that. Suggested way is to use <a href=
