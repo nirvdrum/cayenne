@@ -280,7 +280,8 @@ implements DocumentListener, ActionListener, DataNodeDisplayListener
 			oldName = new_name;
 		}// End changedName
 		else if (e.getDocument() == location.getDocument()) {
-			if (node.getDataSourceLocation().equals(location.getText()))
+			if (node.getDataSourceLocation() != null 
+				&& node.getDataSourceLocation().equals(location.getText()))
 				return;
 			node.setDataSourceLocation(location.getText());
 			event = new DataNodeEvent(this, node);
