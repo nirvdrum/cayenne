@@ -76,8 +76,12 @@ import org.objectstyle.cayenne.gui.event.*;
 import org.objectstyle.cayenne.gui.util.*;
 
 
-/** Table model for DbRelationship table.
- *  @author Michael Misha Shengaout. */
+/** 
+ * Table model for DbRelationship table.
+ * 
+ * @author Michael Misha Shengaout
+ * @author Andrei Adamchik
+ */
 class DbRelationshipTableModel extends AbstractTableModel {
 
 	Mediator mediator;
@@ -99,8 +103,7 @@ class DbRelationshipTableModel extends AbstractTableModel {
 	private Boolean bool = new Boolean(false);
 	
 	public DbRelationshipTableModel(DbEntity temp_entity
-	, Mediator temp_mediator, Object temp_src)
-	{
+	, Mediator temp_mediator, Object temp_src) {
 		entity = temp_entity;
 		relList = entity.getRelationshipList();
 		mediator = temp_mediator;

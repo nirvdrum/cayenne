@@ -55,41 +55,24 @@
  */
 package org.objectstyle.cayenne.gui.datamap;
 
-import java.util.Collections;
-
 import javax.swing.JOptionPane;
-import javax.swing.table.AbstractTableModel;
 
 import org.objectstyle.cayenne.dba.TypesMapping;
 import org.objectstyle.cayenne.gui.Editor;
 import org.objectstyle.cayenne.gui.event.AttributeEvent;
 import org.objectstyle.cayenne.gui.event.Mediator;
+import org.objectstyle.cayenne.gui.util.CayenneTableModel;
 import org.objectstyle.cayenne.map.*;
 import org.objectstyle.cayenne.util.NamedObjectFactory;
-import org.objectstyle.cayenne.util.PropertyComparator;
 
 /** 
- * Model for the Db Entity attributes.
- * Allows adding/removing attributes, modifying types 
- * and names. Add/remove changes are cached and saved 
- * into DbEntity only when commit() is called.
+ * Model for DbEntity attributes. Allows adding/removing 
+ * attributes, modifying types and names.
  * 
  * @author Misha Shengaout
  * @author Andrei Adamchik
  */
-class DbAttributeTableModel extends AbstractTableModel {
-	protected Mediator mediator;
-	protected Object src;
-
-	private DbEntity entity;
-	private DataMap dataMap;
-	/** Add/remove changes will be made not to entity but to attributeList.
-	 *  The changes will be copied to entity in commit().
-	 *  Assumption: the attributes themselves are passed by reference. 
-	 *  Any modification to the attribute from the list (change in name, type) 
-	 *  will be reflected in the entity. */
-	private java.util.List attributeList;
-
+class DbAttributeTableModel extends CayenneTableModel {
 	// Columns
 	static final int DB_ATTRIBUTE_NAME = 0;
 	static final int DB_ATTRIBUTE_TYPE = 1;
@@ -98,41 +81,37 @@ class DbAttributeTableModel extends AbstractTableModel {
 	static final int DB_ATTRIBUTE_MAX = 4;
 	static final int DB_ATTRIBUTE_PRECISION = 5;
 
-	/** To provide reference to String class. */
-	private String string = new String();
-	/** To provide reference to Boolean class. */
-	private Boolean bool = new Boolean(false);
+	protected DbEntity entity;
+	protected DataMap dataMap;
 
 	public DbAttributeTableModel(
 		DbEntity entity,
 		Mediator mediator,
-		Object src) {
+		Object eventSource) {
 
+		super(mediator, eventSource, entity.getAttributeList());
 		this.entity = entity;
-		this.mediator = mediator;
-		this.attributeList = entity.getAttributeList();
-		this.src = src;
 		this.dataMap = mediator.getCurrentDataMap();
+	}
 
-		Collections.sort(
-			attributeList,
-			new PropertyComparator("name", Attribute.class));
+	/**
+	 * Returns DbAttribute class.
+	 */
+	public Class getElementsClass() {
+		return DbAttribute.class;
+	}
+
+	/** 
+	 * Returns the number of columns in the table.
+	 */
+	public int getColumnCount() {
+		return 6;
 	}
 
 	public DbAttribute getAttribute(int row) {
-		if (row < 0 || row >= attributeList.size()) {
-			return null;
-		}
-
-		return (DbAttribute) attributeList.get(row);
-	}
-
-	public int getRowCount() {
-		return attributeList.size();
-	}
-
-	public int getColumnCount() {
-		return 6;
+		return (row >= 0 && row < objectList.size())
+			? (DbAttribute) objectList.get(row)
+			: null;
 	}
 
 	public String getColumnName(int column) {
@@ -152,18 +131,21 @@ class DbAttributeTableModel extends AbstractTableModel {
 			return "";
 	}
 
+
 	public Class getColumnClass(int col) {
 		switch (col) {
 			case DB_ATTRIBUTE_PRIMARY_KEY :
-			case DB_ATTRIBUTE_MANDATORY :
-				return bool.getClass();
+			case DB_ATTRIBUTE_MANDATORY : 
+			    return Boolean.class;
 			default :
-				return string.getClass();
+				return String.class;
 		}
 	}
 
+
 	public Object getValueAt(int row, int column) {
-		DbAttribute attrib = (DbAttribute) attributeList.get(row);
+		DbAttribute attrib = getAttribute(row);
+		
 		if (attrib == null) {
 			return "";
 		} else if (column == DB_ATTRIBUTE_NAME)
@@ -171,36 +153,21 @@ class DbAttributeTableModel extends AbstractTableModel {
 		else if (column == DB_ATTRIBUTE_TYPE) {
 			return TypesMapping.getSqlNameByType(attrib.getType());
 		} else if (column == DB_ATTRIBUTE_PRIMARY_KEY) {
-			if (attrib.isPrimaryKey())
-				return new Boolean(true);
-			else
-				return new Boolean(false);
+			return (attrib.isPrimaryKey()) ? Boolean.TRUE : Boolean.FALSE;
 		} else if (column == DB_ATTRIBUTE_PRECISION) {
-			if (-1 == attrib.getPrecision())
-				return "";
-			else
-				return String.valueOf(attrib.getPrecision());
+			return (attrib.getPrecision() == -1) ? "" : String.valueOf(attrib.getPrecision());
 		} else if (column == DB_ATTRIBUTE_MANDATORY) {
-			if (attrib.isMandatory())
-				return new Boolean(true);
-			else
-				return new Boolean(false);
+			return (attrib.isMandatory()) ? Boolean.TRUE : Boolean.FALSE;
 		} else if (column == DB_ATTRIBUTE_MAX) {
-			if (-1 == attrib.getMaxLength())
-				return "";
-			else
-				return String.valueOf(attrib.getMaxLength());
+			return (attrib.getMaxLength() == -1) ? "" : String.valueOf(attrib.getMaxLength());
 		} else {
-			System.out.println(
-				"DbAttributeTableModel::getValueAt(), column "
-					+ column
-					+ " does not exist");
 			return "";
 		}
-	} // End getValueAt()
-
+	} 
+	
+	
 	public void setValueAt(Object aValue, int row, int column) {
-		DbAttribute attrib = (DbAttribute) attributeList.get(row);
+		DbAttribute attrib = getAttribute(row);
 		AttributeEvent e = null;
 		if (null == attrib) {
 			JOptionPane.showMessageDialog(
@@ -213,7 +180,7 @@ class DbAttributeTableModel extends AbstractTableModel {
 			String new_name = ((String) aValue).trim();
 			String old_name = attrib.getName();
 			GuiFacade.setDbAttributeName(dataMap, attrib, new_name);
-			e = new AttributeEvent(src, attrib, entity, old_name);
+			e = new AttributeEvent(eventSource, attrib, entity, old_name);
 			mediator.fireDbAttributeEvent(e);
 			fireTableCellUpdated(row, column);
 		} // End DB_ATTRIBUTE column
@@ -272,9 +239,10 @@ class DbAttributeTableModel extends AbstractTableModel {
 			}
 		}
 		if (null == e)
-			e = new AttributeEvent(src, attrib, entity);
+			e = new AttributeEvent(eventSource, attrib, entity);
 		mediator.fireDbAttributeEvent(e);
-	} // End setValueAt()
+	}
+
 
 	/** 
 	 * Adds new attribute to the model and the table. 
@@ -285,20 +253,20 @@ class DbAttributeTableModel extends AbstractTableModel {
 			(DbAttribute) NamedObjectFactory.createObject(
 				DbAttribute.class,
 				entity);
-		attributeList.add(temp);
+		objectList.add(temp);
 		entity.addAttribute(temp);
 		mediator.fireDbAttributeEvent(
-			new AttributeEvent(src, temp, entity, AttributeEvent.ADD));
+			new AttributeEvent(eventSource, temp, entity, AttributeEvent.ADD));
 		fireTableDataChanged();
 	}
 
 	public void removeRow(int row) {
 		if (row < 0)
 			return;
-		Attribute attrib = (Attribute) attributeList.get(row);
+		Attribute attrib = getAttribute(row);
 		AttributeEvent e;
-		e = new AttributeEvent(src, attrib, entity, AttributeEvent.REMOVE);
-		attributeList.remove(row);
+		e = new AttributeEvent(eventSource, attrib, entity, AttributeEvent.REMOVE);
+		objectList.remove(row);
 		entity.removeAttribute(attrib.getName());
 		mediator.fireDbAttributeEvent(e);
 		fireTableDataChanged();
@@ -307,12 +275,12 @@ class DbAttributeTableModel extends AbstractTableModel {
 	/** Attribute just needs to be removed from the model. 
 	 *  It is already removed from the DataMap. */
 	void removeAttribute(Attribute attrib) {
-		attributeList.remove(attrib);
+		objectList.remove(attrib);
 		fireTableDataChanged();
 	}
 
 	public boolean isCellEditable(int row, int col) {
-		DbAttribute attrib = (DbAttribute) attributeList.get(row);
+		DbAttribute attrib = getAttribute(row);
 		if (null == attrib)
 			return false;
 		else if (col == DB_ATTRIBUTE_MANDATORY) {
@@ -320,6 +288,6 @@ class DbAttributeTableModel extends AbstractTableModel {
 				return false;
 		}
 		return true;
-	} // End isCellEditable()
+	}
 
-} // End DbAttributeTableModel
+}
