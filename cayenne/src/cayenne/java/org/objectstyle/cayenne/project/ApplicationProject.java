@@ -57,6 +57,8 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
+import org.objectstyle.cayenne.conf.Configuration;
+
 
 /**
  * @author Andrei Adamchik
@@ -65,11 +67,11 @@ public class ApplicationProject extends Project {
 
     /**
      * Constructor for ApplicationProject.
-     * @param name
+     * 
      * @param projectFile
      */
-    public ApplicationProject(String name, File projectFile) {
-        super(name, projectFile);
+    public ApplicationProject(File projectFile) {
+        super(projectFile);
     }
 }
 

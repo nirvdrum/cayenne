@@ -61,7 +61,6 @@ public class AllTests {
 	public static TestSuite suite() {
 		TestSuite suite = new TestSuite("Project Package Tests");
 		suite.addTestSuite(ProjectTst.class);
-		suite.addTestSuite(ProjectSetTst.class);
 		suite.addTestSuite(ProjectTraversalTst.class);
 		suite.addTestSuite(ProjectFileTst.class);
 		suite.addTestSuite(RootProjectFileTst.class);

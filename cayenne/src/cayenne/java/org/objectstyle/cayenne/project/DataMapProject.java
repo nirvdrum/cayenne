@@ -57,47 +57,20 @@ package org.objectstyle.cayenne.project;
 
 import java.io.File;
 
-import org.objectstyle.cayenne.CayenneTestCase;
-
 /**
+ * Cayenne project that consists of a single DataMap.
+ * 
  * @author Andrei Adamchik
  */
-public class ProjectSetTst extends CayenneTestCase {
-    protected ProjectSet set;
+public class DataMapProject extends Project {
 
     /**
-     * Constructor for ProjectSetTst.
-     * @param arg0
+     * Constructor for MapProject.
+     * 
+     * @param projectFile
      */
-    public ProjectSetTst(String arg0) {
-        super(arg0);
-    }
-
-    /**
-     * @see junit.framework.TestCase#setUp()
-     */
-    protected void setUp() throws Exception {
-        super.setUp();
-        set = new ProjectSet();
-    }
-
-    public void testProject() throws Exception {
-    	Project p = new TstProject("abc", new File("xyz"));
-    	set.addProject(p);
-    	
-    	assertSame(p, set.getProject(p.getName()));
-    	set.removeProject(p);
-    	assertNull(set.getProject(p.getName()));
-    }
-
-    public void testAllProjects() throws Exception {
-    	Project p1 = new TstProject("abc1", new File("xyz"));
-    	Project p2 = new TstProject("abc2", new File("xyz"));
-    	set.addProject(p1);
-    	set.addProject(p2);
-    	
-    	assertEquals(2, set.allProjects().size());
-    	assertNotNull(set.getProject(p1.getName()));
-    	assertNotNull(set.getProject(p2.getName()));
+    public DataMapProject(File projectFile) {
+        super(projectFile);
     }
 }
+

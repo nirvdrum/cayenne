@@ -76,7 +76,7 @@ public class ValidatorTst extends CayenneTestCase {
 	}
     
 	public void testProject() throws Exception {
-		Project project = new TstProject("abc", new File(System.getProperty("user.dir")));
+		Project project = new TstProject(new File(System.getProperty("user.dir")));
 		Validator validator = new Validator(project);
 		assertSame(project, validator.getProject());
 	}

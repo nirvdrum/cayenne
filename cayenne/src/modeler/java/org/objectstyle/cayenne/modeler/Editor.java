@@ -105,7 +105,6 @@ import org.objectstyle.cayenne.modeler.action.OpenProjectAction;
 import org.objectstyle.cayenne.modeler.action.ProjectAction;
 import org.objectstyle.cayenne.modeler.action.RemoveAction;
 import org.objectstyle.cayenne.modeler.action.SaveAction;
-import org.objectstyle.cayenne.modeler.control.StatusBarController;
 import org.objectstyle.cayenne.modeler.control.TopController;
 import org.objectstyle.cayenne.modeler.datamap.GenerateClassDialog;
 import org.objectstyle.cayenne.modeler.event.AttributeDisplayEvent;
@@ -131,7 +130,6 @@ import org.objectstyle.cayenne.modeler.util.XmlFilter;
 import org.objectstyle.cayenne.modeler.view.StatusBarView;
 import org.objectstyle.cayenne.project.CayenneUserDir;
 import org.objectstyle.cayenne.project.Project;
-import org.objectstyle.cayenne.project.ProjectSet;
 import org.objectstyle.cayenne.util.CayenneFileHandler;
 import org.scopemvc.core.Control;
 
@@ -164,7 +162,6 @@ public class Editor
      * the project has unsaved changes. 
      */
     public static final String DIRTY_STRING = "* - ";
-    public static final String DEFAULT_PROJECT_NAME = "Cayenne Project";
 
     protected static Editor frame;
 

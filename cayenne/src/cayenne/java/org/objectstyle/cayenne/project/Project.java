@@ -83,22 +83,34 @@ public abstract class Project {
  
     public static final String CURRENT_PROJECT_VERSION = "1.0";
 
-    protected String name;
     protected Object rootObject;
     protected File projectDir;
     protected List files;
     protected List upgradeMessages;
     protected ProjectFile mainProjectFile;
-    
+
+    /**
+     * Factory method to create the right project type given project file.
+     */
+    public static Project createProject(File projectFile) {
+    	String fileName = projectFile.getName();
+    	
+        if (Configuration.DOMAIN_FILE.equals(fileName)) {
+            return new ApplicationProject(projectFile);
+        } else if (fileName.endsWith(DataMapFile.LOCATION_SUFFIX)) {
+            return new DataMapProject(projectFile);
+        }
+        else {
+        	throw new ProjectException("Unsupported project file.");
+        }
+    }    
 
     /**
      * Constructor for Project. <code>projectFile</code> must denote 
      * a file (existent or non-existent) in an existing directory. 
      * If projectFile has no parent directory, current directory is assumed.
      */
-    public Project(String name, File projectFile) {
-        this.name = name;
-
+    public Project(File projectFile) {
         File parent = projectFile.getParentFile();
         if (parent == null) {
             parent = new File(System.getProperty("user.dir"));
@@ -288,14 +300,7 @@ public abstract class Project {
     public File getProjectDir() {
         return projectDir;
     }
-
-    /**
-     * Returns project name.
-     */
-    public String getName() {
-        return name;
-    }
-
+    
     public DataDomain[] getDomains() {
         List domains = getConfig().getDomainList();
         if (domains == null) {

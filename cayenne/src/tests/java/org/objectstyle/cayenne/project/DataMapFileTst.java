@@ -81,7 +81,7 @@ public class DataMapFileTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        pr = new TstProject("abc", new File("xyz"));
+        pr = new TstProject(new File("xyz"));
         map = new DataMap("m1");
         dmf = new DataMapFile(pr, map);
     }

@@ -69,6 +69,7 @@ import org.objectstyle.cayenne.map.MapLoader;
  * @author Andrei Adamchik
  */
 public class DataMapFile extends ProjectFile {
+	public static final String LOCATION_SUFFIX = ".map.xml";
     protected DataMap map;
 
     public DataMapFile() {}
@@ -128,6 +129,6 @@ public class DataMapFile extends ProjectFile {
      * Returns ".map.xml" that should be used as a file suffix for DataMaps.
      */
     public String getLocationSuffix() {
-        return ".map.xml";
+        return LOCATION_SUFFIX;
     }
 }

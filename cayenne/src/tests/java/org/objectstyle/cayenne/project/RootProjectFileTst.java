@@ -81,7 +81,7 @@ public class RootProjectFileTst extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        pr = new TstProject("abc", new File("xyz"));
+        pr = new TstProject(new File("xyz"));
         conf = new ProjectConfiguration(new File("tstproj.123"));
         rpf = new RootProjectFile(pr, conf);
     }

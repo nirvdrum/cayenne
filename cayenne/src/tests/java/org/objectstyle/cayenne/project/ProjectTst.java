@@ -92,7 +92,7 @@ public class ProjectTst extends CayenneTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         f = new File("xyz");
-        p = new TstProject("abc", f);
+        p = new TstProject(f);
     }
     
     public void testBuildFileList() throws Exception {
@@ -126,7 +126,6 @@ public class ProjectTst extends CayenneTestCase {
 
     public void testConstructor() throws Exception {
         assertEquals(f.getCanonicalFile(), p.getMainProjectFile());
-        assertEquals("abc", p.getName());
     }
 
     public void testValidator() throws Exception {

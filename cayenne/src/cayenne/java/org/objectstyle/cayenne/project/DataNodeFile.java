@@ -70,6 +70,8 @@ import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
  * @author Andrei Adamchik
  */
 public class DataNodeFile extends ProjectFile {
+    public static final String LOCATION_SUFFIX = ".driver.xml";
+
     protected DataNode node;
 
     public DataNodeFile() {}
@@ -125,23 +127,23 @@ public class DataNodeFile extends ProjectFile {
     public ProjectFile createProjectFile(Project project, Object obj) {
         return new DataNodeFile(project, (DataNode) obj);
     }
-    
+
     /**
      * Updates node location to match the name before save.
      */
     public void willSave() {
         super.willSave();
-        
-        if(node != null && canHandle(node)) {
-        	node.setDataSourceLocation(getLocation());
+
+        if (node != null && canHandle(node)) {
+            node.setDataSourceLocation(getLocation());
         }
     }
-    
+
     /**
      * Returns ".driver.xml" that should be used as a file suffix 
      * for DataNode driver files.
      */
     public String getLocationSuffix() {
-        return ".driver.xml";
+        return LOCATION_SUFFIX;
     }
 }

@@ -53,9 +53,7 @@
  * <http://objectstyle.org/>.
  *
  */
-
 package org.objectstyle.cayenne.modeler.action;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -75,61 +73,45 @@ import org.objectstyle.cayenne.modeler.util.ProjectFileFilter;
 import org.objectstyle.cayenne.modeler.util.RecentFileMenuItem;
 import org.objectstyle.cayenne.project.Project;
 import org.objectstyle.cayenne.project.ProjectException;
-import org.objectstyle.cayenne.project.ProjectSet;
-
 /**
  * @author Andrei Adamchik
  */
-
 public class OpenProjectAction extends ProjectAction {
-
     static Logger logObj = Logger.getLogger(OpenProjectAction.class.getName());
-
     public static final String ACTION_NAME = "Open Project";
-
     /**
      * Constructor for OpenProjectAction.
      */
     public OpenProjectAction() {
         super(ACTION_NAME);
     }
-
     public String getIconName() {
         return "icon-open.gif";
     }
-
     public KeyStroke getAcceleratorKey() {
         return KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
     }
-
     /**
      * @see org.objectstyle.cayenne.modeler.action.CayenneAction#performAction(ActionEvent)
      */
-
     public void performAction(ActionEvent e) {
         File f = null;
         if (e.getSource() instanceof RecentFileMenuItem) {
             RecentFileMenuItem menu = (RecentFileMenuItem) e.getSource();
             f = menu.getFile();
         }
-
         if (f == null) {
             openProject();
         } else {
             openProject(f);
         }
-
     }
-
     /** Opens cayenne.xml file using file chooser. */
-
     protected void openProject() {
         ModelerPreferences pref = ModelerPreferences.getPreferences();
         String init_dir = (String) pref.getProperty(ModelerPreferences.LAST_DIR);
         try {
-
             // Get the project file name (always cayenne.xml)
-
             File file = null;
             fileChooser.setFileFilter(new ProjectFileFilter());
             fileChooser.setDialogTitle("Choose project file (cayenne.xml)");
@@ -139,50 +121,32 @@ public class OpenProjectAction extends ProjectAction {
                 if (init_dir_file.exists())
                     fileChooser.setCurrentDirectory(init_dir_file);
             }
-
             int ret_code = fileChooser.showOpenDialog(Editor.getFrame());
             if (ret_code != JFileChooser.APPROVE_OPTION)
                 return;
-
             file = fileChooser.getSelectedFile();
             openProject(file);
-
         } catch (Exception e) {
             logObj.warn("Error loading project file.", e);
         }
-
     }
-
     /** Opens specified project file. File must already exist. */
-
     protected void openProject(File file) {
-
         // Save and close (if needed) currently open project.
-
         if (getMediator() != null && !closeProject()) {
             return;
         }
-
         ModelerPreferences pref = ModelerPreferences.getPreferences();
-
         try {
-
             // Save dir path to the preferences
-
             pref.setProperty(ModelerPreferences.LAST_DIR, file.getParent());
-
             Editor.getFrame().addToLastProjList(file.getAbsolutePath());
-
             // Initialize gui configuration
-
             // uncomment to debug GUI
-
             Configuration.setLoggingLevel(Level.INFO);
-            Project project = ProjectSet.createProject(Editor.DEFAULT_PROJECT_NAME, file);
+            Project project = Project.createProject(file);
             Editor.getFrame().getController().getTopModel().setCurrentProject(project);
-
             // if upgrade was canceled
-
             if (project.isUpgradeNeeded() && !processUpgrades(project)) {
                 closeProject();
             } else {
@@ -193,30 +157,23 @@ public class OpenProjectAction extends ProjectAction {
             logObj.warn("Error loading project file.", ex);
             ErrorDebugDialog.guiWarning(ex, "Error loading project");
         }
-
     }
-
     protected boolean processUpgrades(Project project) throws ProjectException {
         // must really concat all messages, this is a temp hack...
-
         String msg = (String) project.getUpgradeMessages().get(0);
         // need an upgrade
-
         int returnCode =
             JOptionPane.showConfirmDialog(
                 Editor.getFrame(),
                 "Project needs an upgrade to a newer version. " + msg + ". Upgrade?",
                 "Upgrade Needed",
                 JOptionPane.YES_NO_OPTION);
-
         if (returnCode == JOptionPane.NO_OPTION) {
             return false;
         }
-
         // perform upgrade
         logObj.info("Will upgrade project " + project.getMainProjectFile());
         project.save();
         return true;
-
     }
 }

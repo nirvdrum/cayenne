@@ -69,9 +69,9 @@ public class TstProject extends Project {
      * @param name
      * @param projectFile
      */
-    public TstProject(String name, File projectFile) {
-        super(name, projectFile);
+    public TstProject(File projectFile) {
+        super(projectFile);
+        
     }
-
 }
 

@@ -92,7 +92,7 @@ public class ValidatorTestBase extends CayenneTestCase {
      */
     protected void setUp() throws Exception {
         super.setUp();
-        Project project = new TstProject("abc", new File(System.getProperty("user.dir")));
+        Project project = new TstProject(new File(System.getProperty("user.dir")));
         validator = new Validator(project);
         conf = project.getConfig();
     }
