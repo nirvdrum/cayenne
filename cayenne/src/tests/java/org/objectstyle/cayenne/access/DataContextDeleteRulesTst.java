@@ -55,10 +55,14 @@
  */
 package org.objectstyle.cayenne.access;
 
+import java.util.Date;
+
 import org.objectstyle.art.ArtGroup;
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.ArtistAssets;
 import org.objectstyle.art.ArtistExhibit;
+import org.objectstyle.art.DeleteRuleTest1;
+import org.objectstyle.art.DeleteRuleTest2;
 import org.objectstyle.art.Exhibit;
 import org.objectstyle.art.Gallery;
 import org.objectstyle.art.Painting;
@@ -109,25 +113,33 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		assertEquals(parentGroup, childGroup.getToParentGroup());
 		assertTrue(parentGroup.getChildGroupsArray().contains(childGroup));
 
+		//Always good to commit before deleting... bad things happen otherwise
+		context.commitChanges();
+
 		context.deleteObject(childGroup);
 
 		//The things we are testing.
 		assertTrue(!parentGroup.getChildGroupsArray().contains(childGroup));
-
 		//Although deleted, the property should be null (good cleanup policy)
 		assertNull(childGroup.getToParentGroup());
+
+		//And be sure that the commit works afterwards, just for sanity
+		context.commitChanges();
 	}
 
 	public void testNullifyToManyFlattened() {
 		//ArtGroup artistArray
 		ArtGroup aGroup =
 			(ArtGroup) context.createAndRegisterNewObject("ArtGroup");
+		aGroup.setName("Group Name");
 		Artist anArtist = (Artist) context.createAndRegisterNewObject("Artist");
+		anArtist.setArtistName("A Name");
 		aGroup.addToArtistArray(anArtist);
 
 		//Preconditions - good to check to be sure
 		assertTrue(aGroup.getArtistArray().contains(anArtist));
 		assertTrue(anArtist.getGroupArray().contains(aGroup));
+		context.commitChanges();
 
 		context.deleteObject(aGroup);
 
@@ -136,6 +148,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		//Although the group is deleted, the array should still be 
 		//cleaned up correctly
 		assertTrue(!aGroup.getArtistArray().contains(anArtist));
+		context.commitChanges();
 
 	}
 
@@ -154,6 +167,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		assertEquals(parentGroup, childGroup.getToParentGroup());
 		assertTrue(parentGroup.getChildGroupsArray().contains(childGroup));
 
+		context.commitChanges();
 		context.deleteObject(parentGroup);
 
 		//The things we are testing.
@@ -161,7 +175,7 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 
 		//Although deleted, the property should be null (good cleanup policy)
 		assertTrue(!parentGroup.getChildGroupsArray().contains(childGroup));
-
+		context.commitChanges();
 	}
 
 	public void testCascadeToOne() {
@@ -169,15 +183,14 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		Painting painting =
 			(Painting) context.createAndRegisterNewObject("Painting");
 		painting.setPaintingTitle("A Title");
-		
+
 		PaintingInfo info =
 			(PaintingInfo) context.createAndRegisterNewObject("PaintingInfo");
 		painting.setToPaintingInfo(info);
-		
+
 		//Must commit before deleting.. this relationship is dependent,
 		// and everything must be committed for certain things to work.
-		context.commitChanges(); 
-		
+		context.commitChanges();
 
 		context.deleteObject(painting);
 
@@ -185,18 +198,24 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 		assertEquals(PersistenceState.DELETED, info.getPersistenceState());
 		assertNull(info.getPainting());
 		assertNull(painting.getToPaintingInfo());
+		context.commitChanges();
 	}
 
 	public void testCascadeToMany() {
 		//Artist artistExhibitArray
 		Artist anArtist = (Artist) context.createAndRegisterNewObject("Artist");
+		anArtist.setArtistName("A Name");
 		Exhibit anExhibit =
 			(Exhibit) context.createAndRegisterNewObject("Exhibit");
+		anExhibit.setClosingDate(new Date());
+		anExhibit.setOpeningDate(new Date());
+
 		ArtistExhibit artistExhibit =
 			(ArtistExhibit) context.createAndRegisterNewObject("ArtistExhibit");
 
 		artistExhibit.setToArtist(anArtist);
 		artistExhibit.setToExhibit(anExhibit);
+		context.commitChanges();
 
 		context.deleteObject(anArtist);
 
@@ -205,37 +224,48 @@ public class DataContextDeleteRulesTst extends CayenneTestCase {
 			PersistenceState.DELETED,
 			artistExhibit.getPersistenceState());
 		assertTrue(!anArtist.getArtistExhibitArray().contains(artistExhibit));
+		context.commitChanges();
 	}
 
 	public void testDenyToOne() {
-		//ArtistAssets toArtist
-		Artist anArtist = (Artist) context.createAndRegisterNewObject("Artist");
-		ArtistAssets asset =
-			(ArtistAssets) context.createAndRegisterNewObject("ArtistAssets");
-		asset.setToArtist(anArtist);
-		
+		//DeleteRuleTest1 test2
+		DeleteRuleTest1 test1 =
+			(DeleteRuleTest1) context.createAndRegisterNewObject(
+				"DeleteRuleTest1");
+		DeleteRuleTest2 test2 =
+			(DeleteRuleTest2) context.createAndRegisterNewObject(
+				"DeleteRuleTest2");
+		test1.setTest2(test2);
+		context.commitChanges();
+
 		try {
-			context.deleteObject(asset);
+			context.deleteObject(test1);
 			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			//GOOD!
 		}
+		context.commitChanges();
+
 	}
 
 	public void testDenyToMany() {
 		//Gallery paintingArray
 		Gallery gallery =
 			(Gallery) context.createAndRegisterNewObject("Gallery");
+		gallery.setGalleryName("A Name");
 		Painting painting =
 			(Painting) context.createAndRegisterNewObject("Painting");
+		painting.setPaintingTitle("A Title");
 		gallery.addToPaintingArray(painting);
-		
+		context.commitChanges();
+
 		try {
 			context.deleteObject(gallery);
 			fail("Should have thrown an exception");
 		} catch (Exception e) {
 			//GOOD!
 		}
+		context.commitChanges();
 	}
 
 }

@@ -18,6 +18,13 @@
 		<db-attribute name="ARTIST_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 		<db-attribute name="GROUP_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
 	</db-entity>
+	<db-entity name="DELETE_RULE_TEST1">
+		<db-attribute name="DEL_RULE_TEST1_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+		<db-attribute name="TEST2_ID" type="INTEGER" isMandatory="true"/>
+	</db-entity>
+	<db-entity name="DELETE_RULE_TEST2">
+		<db-attribute name="DEL_RULE_TEST2_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
+	</db-entity>
 	<db-entity name="EXHIBIT">
 		<db-attribute name="CLOSING_DATE" type="TIME" isMandatory="true"/>
 		<db-attribute name="EXHIBIT_ID" type="INTEGER" isPrimaryKey="true" isMandatory="true"/>
@@ -78,6 +85,10 @@
 	<obj-entity name="ArtistPaintingCounts" className="org.objectstyle.art.ArtistPaintingCounts" dbEntityName="ARTIST_ASSETS">
 		<obj-attribute name="paintingsCount" type="java.lang.Integer" db-attribute-name="PAINTINGS_COUNT"/>
 	</obj-entity>
+	<obj-entity name="DeleteRuleTest1" className="org.objectstyle.art.DeleteRuleTest1" dbEntityName="DELETE_RULE_TEST1">
+	</obj-entity>
+	<obj-entity name="DeleteRuleTest2" className="org.objectstyle.art.DeleteRuleTest2" dbEntityName="DELETE_RULE_TEST2">
+	</obj-entity>
 	<obj-entity name="Exhibit" className="org.objectstyle.art.Exhibit" dbEntityName="EXHIBIT">
 		<obj-attribute name="closingDate" type="java.sql.Time" db-attribute-name="CLOSING_DATE"/>
 		<obj-attribute name="openingDate" type="java.sql.Time" db-attribute-name="OPENING_DATE"/>
@@ -131,6 +142,12 @@
 	</db-relationship>
 	<db-relationship name="paintingArray" source="GALLERY" target="PAINTING" toDependentPK="false" toMany="true">
 		<db-attribute-pair source="GALLERY_ID" target="GALLERY_ID"/>
+	</db-relationship>
+	<db-relationship name="test1Array" source="DELETE_RULE_TEST2" target="DELETE_RULE_TEST1" toDependentPK="false" toMany="true">
+		<db-attribute-pair source="DEL_RULE_TEST2_ID" target="TEST2_ID"/>
+	</db-relationship>
+	<db-relationship name="test2" source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST2" toDependentPK="false" toMany="false">
+		<db-attribute-pair source="TEST2_ID" target="DEL_RULE_TEST2_ID"/>
 	</db-relationship>
 	<db-relationship name="toArtist" source="ARTIST_EXHIBIT" target="ARTIST" toDependentPK="false" toMany="false">
 		<db-attribute-pair source="ARTIST_ID" target="ARTIST_ID"/>
@@ -199,6 +216,12 @@
 	</obj-relationship>
 	<obj-relationship name="paintingArray" source="ROArtist" target="Painting" toMany="true" deleteRule="Deny">
 		<db-relationship-ref source="ARTIST" target="PAINTING" name="paintingArray"/>
+	</obj-relationship>
+	<obj-relationship name="test1Array" source="DeleteRuleTest2" target="DeleteRuleTest1" toMany="true" deleteRule="Nullify">
+		<db-relationship-ref source="DELETE_RULE_TEST2" target="DELETE_RULE_TEST1" name="test1Array"/>
+	</obj-relationship>
+	<obj-relationship name="test2" source="DeleteRuleTest1" target="DeleteRuleTest2" toMany="false" deleteRule="Deny">
+		<db-relationship-ref source="DELETE_RULE_TEST1" target="DELETE_RULE_TEST2" name="test2"/>
 	</obj-relationship>
 	<obj-relationship name="toArtist" source="ArtistAssets" target="Artist" toMany="false" deleteRule="Deny">
 		<db-relationship-ref source="ARTIST_ASSETS" target="ARTIST" name="toArtist"/>

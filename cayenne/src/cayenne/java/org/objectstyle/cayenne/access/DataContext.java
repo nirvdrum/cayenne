@@ -774,6 +774,7 @@ public class DataContext implements QueryEngine, Serializable {
 					obj.setObjectId(newId);
 				}
 			}
+			this.clearFlattenedUpdateQueries();
 		}
 	}
 

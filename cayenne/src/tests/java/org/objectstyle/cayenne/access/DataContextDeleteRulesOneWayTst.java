@@ -88,18 +88,24 @@ public class DataContextDeleteRulesOneWayTst extends OneWayMappingTestCase {
 	public void testNullifyToOne() {
 		Painting aPainting =
 			(Painting) context.createAndRegisterNewObject("Painting");
+		aPainting.setPaintingTitle("A Title");
+		
 		Gallery aGallery=(Gallery) context.createAndRegisterNewObject("Gallery");
+		aGallery.setGalleryName("Gallery Name");
 		
 		aPainting.setToGallery(aGallery);
-		
+		context.commitChanges();
+	
 		try {
 			context.deleteObject(aPainting);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("Should not have thrown an exception");
 		}
-		
 		//There's no reverse relationship, so there's nothing else to test
+		// except to be sure that the commit works
+		context.commitChanges();
+		
 	}
 
 }

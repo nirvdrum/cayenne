@@ -227,6 +227,43 @@ public class CayenneDataObjectRelTst extends CayenneDOTestBase {
 	}
 
 
+	//Test case to show up a bug in committing more than once
+	public void testDoubleCommitAddToFlattenedRelationship() throws Exception {
+		TestCaseDataFactory
+			.createArtistBelongingToGroups(artistName, new String[] {});
+		TestCaseDataFactory.createUnconnectedGroup(groupName);
+		Artist a1 = fetchArtist();
+
+		SelectQuery q =
+			new SelectQuery(
+				ArtGroup.class,
+				ExpressionFactory.binaryPathExp(
+					Expression.EQUAL_TO,
+					"name",
+					groupName));
+		List results = ctxt.performQuery(q);
+		assertEquals(1, results.size());
+
+		ArtGroup group = (ArtGroup) results.get(0);
+		a1.addToGroupArray(group);
+
+		List groupList = a1.getGroupArray();
+		assertEquals(1, groupList.size());
+		assertEquals(groupName, ((ArtGroup) groupList.get(0)).getName());
+
+		//Ensure that the commit doesn't fail
+		a1.getDataContext().commitChanges();
+
+		try {
+			//The bug caused the second commit to fail (the link record
+			// was inserted again)
+			a1.getDataContext().commitChanges();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("Should not have thrown an exception");
+		}
+
+	}
 	public void testRemoveFromFlattenedRelationship() throws Exception {
 		TestCaseDataFactory.createArtistBelongingToGroups(artistName, new String[] {groupName});
 		Artist a1 = fetchArtist();
