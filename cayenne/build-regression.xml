@@ -8,7 +8,7 @@
 	<property name="regression.build" value="build/regression"/>
 	<property name="regression.src" value="src/regression/java"/>
 	<property name="regression.bin" value="src/regression/bin"/>
-	<property environment="test.env"/>
+	<property environment="regression.env"/>
     
     <path id="classpath">
     	<fileset dir="${otherlib.dir}">
@@ -19,7 +19,7 @@
 		</fileset>
 		<pathelement path="${regression.build}/classes"/>
 		<pathelement path="${regression.src}"/>
-		<pathelement path="${test.env.CLASSPATH}"/>
+		<pathelement path="${regression.env.CLASSPATH}"/>
     </path>
     
     
