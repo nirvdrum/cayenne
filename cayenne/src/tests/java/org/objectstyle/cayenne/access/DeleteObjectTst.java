@@ -56,11 +56,17 @@
 
 package org.objectstyle.cayenne.access;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.objectstyle.art.Artist;
 import org.objectstyle.art.Painting;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.DataObjectUtils;
 import org.objectstyle.cayenne.PersistenceState;
+import org.objectstyle.cayenne.map.DeleteRule;
+import org.objectstyle.cayenne.map.ObjRelationship;
 import org.objectstyle.cayenne.query.SelectQuery;
 import org.objectstyle.cayenne.unit.CayenneTestCase;
 
@@ -68,6 +74,7 @@ import org.objectstyle.cayenne.unit.CayenneTestCase;
  * @author Andrei Adamchik
  */
 public class DeleteObjectTst extends CayenneTestCase {
+
     private DataContext context;
 
     protected void setUp() throws Exception {
@@ -75,6 +82,106 @@ public class DeleteObjectTst extends CayenneTestCase {
 
         deleteTestData();
         context = createDataContext();
+    }
+
+    public void testDeleteObject() throws Exception {
+        createTestData("testDeleteObject");
+
+        Artist artist = (Artist) DataObjectUtils.objectForPK(context, Artist.class, 1);
+        assertEquals(PersistenceState.COMMITTED, artist.getPersistenceState());
+        context.deleteObject(artist);
+        assertEquals(PersistenceState.DELETED, artist.getPersistenceState());
+    }
+
+    public void testDeleteObjects() throws Exception {
+        createTestData("testDeleteObjects");
+
+        List artists = context.performQuery(new SelectQuery(Artist.class));
+        assertEquals(2, artists.size());
+
+        Iterator it = artists.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
+        }
+
+        context.deleteObjects(artists);
+        it = artists.iterator();
+
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            assertEquals(PersistenceState.DELETED, object.getPersistenceState());
+        }
+    }
+
+    public void testDeleteObjectsRelationshipCollection() throws Exception {
+        createTestData("testDeleteObjectsRelationshipCollection");
+
+        Artist artist = (Artist) DataObjectUtils.objectForPK(context, Artist.class, 1);
+        List paintings = artist.getPaintingArray();
+
+        assertEquals(3, paintings.size());
+
+        // create a clone to be able to inspect paintings after deletion
+        List paintingsClone = new ArrayList(paintings);
+
+        Iterator it = paintingsClone.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
+        }
+
+        context.deleteObjects(paintings);
+
+        // as Painting -> Artist has Nullify rule, relationship list has to be cleaned up,
+        // and no exceptions thrown on concurrent modification...
+        ObjRelationship r = (ObjRelationship) context
+                .getEntityResolver()
+                .lookupObjEntity(Painting.class)
+                .getRelationship("toArtist");
+        assertEquals(DeleteRule.NULLIFY, r.getDeleteRule());
+        assertEquals(0, paintings.size());
+
+        it = paintingsClone.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            assertEquals(PersistenceState.DELETED, object.getPersistenceState());
+        }
+    }
+
+    public void testDeleteObjectInIterator() throws Exception {
+        createTestData("testDeleteObjectsRelationshipCollection");
+
+        Artist artist = (Artist) DataObjectUtils.objectForPK(context, Artist.class, 1);
+        List paintings = artist.getPaintingArray();
+
+        assertEquals(3, paintings.size());
+
+        // create a clone to be able to inspect paintings after deletion
+        List paintingsClone = new ArrayList(paintings);
+
+        Iterator it = paintingsClone.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            assertEquals(PersistenceState.COMMITTED, object.getPersistenceState());
+        }
+
+        Iterator deleteIt = paintings.iterator();
+        while (deleteIt.hasNext()) {
+            DataObject object = (DataObject) deleteIt.next();
+            deleteIt.remove();
+            context.deleteObject(object);
+        }
+
+        // relationship list has to be cleaned up,
+        // and no exceptions thrown on concurrent modification...
+        assertEquals(0, paintings.size());
+
+        it = paintingsClone.iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            assertEquals(PersistenceState.DELETED, object.getPersistenceState());
+        }
     }
 
     public void testDeleteHollow() throws Exception {
@@ -100,4 +207,5 @@ public class DeleteObjectTst extends CayenneTestCase {
         context.rollbackChanges();
         assertEquals(PersistenceState.TRANSIENT, artist.getPersistenceState());
     }
+
 }

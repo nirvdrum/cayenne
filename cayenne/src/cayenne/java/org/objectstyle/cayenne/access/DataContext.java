@@ -881,11 +881,42 @@ public class DataContext implements QueryEngine, Serializable {
     }
 
     /**
-     * Notifies data context that a registered object need to be deleted on next commit.
+     * Schedules all objects in the collection for deletion on the next commit of this
+     * DataContext. Object's persistence state is changed to PersistenceState.DELETED;
+     * objects related to this object are processed according to delete rules, i.e.
+     * relationships can be unset ("nullify" rule), deletion operation is cascaded
+     * (cascade rule).
+     * <p>
+     * <i>"Nullify" delete rule side effect: </i> passing a collection representing
+     * to-many relationship with nullify delete rule may result in objects being removed
+     * from collection.
+     * </p>
+     * 
+     * @since 1.2
+     */
+    public void deleteObjects(Collection objects) {
+        if (objects.isEmpty()) {
+            return;
+        }
+        
+        // clone object list... this maybe a relationship collection with nullify delete
+        // rule, so modifying 
+        Iterator it = new ArrayList(objects).iterator();
+        while (it.hasNext()) {
+            DataObject object = (DataObject) it.next();
+            deleteObject(object);
+        }
+    }
+    
+    /**
+     * Schedules an object for deletion on the next commit of this DataContext. Object's
+     * persistence state is changed to PersistenceState.DELETED; objects related to this object 
+     * are processed according to delete rules, i.e. relationships can be unset ("nullify" rule), 
+     * deletion operation is cascaded (cascade rule).
      * 
      * @param anObject data object that we want to delete.
+     * @throws DeleteDenyException if a DENY delete rule is applicable for object deletion.
      */
-
     public void deleteObject(DataObject anObject) {
         if (anObject.getPersistenceState() == PersistenceState.DELETED
                 || anObject.getPersistenceState() == PersistenceState.TRANSIENT) {
@@ -956,17 +987,11 @@ public class DataContext implements QueryEngine, Serializable {
             if (relationship.getDeleteRule() == DeleteRule.DENY) {
                 // Clean up - we shouldn't be deleting this object
                 anObject.setPersistenceState(oldState);
-                throw new DeleteDenyException("Cannot delete a "
-                        + getEntityResolver().lookupObjEntity(anObject).getName()
-                        + " because it has "
-                        + relatedObjects.size()
-                        + " object"
-                        + (relatedObjects.size() > 1 ? "s" : "")
-                        + "in it's "
-                        + relationship.getName()
-                        + " relationship"
-                        + " and this relationship has DENY "
-                        + "as it's delete rule");
+
+                String message = relatedObjects.size() == 1
+                        ? "1 related object"
+                        : relatedObjects.size() + " related objects";
+                throw new DeleteDenyException(anObject, relationship, message);
             }
 
             // process flattened with dependent join tables...

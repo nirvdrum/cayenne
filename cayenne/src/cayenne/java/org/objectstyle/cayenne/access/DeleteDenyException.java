@@ -56,11 +56,21 @@
 
 package org.objectstyle.cayenne.access;
 
+import org.objectstyle.cayenne.CayenneRuntimeException;
+import org.objectstyle.cayenne.DataObject;
+import org.objectstyle.cayenne.map.DeleteRule;
+import org.objectstyle.cayenne.map.ObjRelationship;
+
 /**
+ * An exception thrown during an attempt to delete an object that has a relationship to a
+ * non-null related object, that has a DENY delete rule.
  * 
  * @author Craig Miskell
  */
-public class DeleteDenyException extends RuntimeException {
+public class DeleteDenyException extends CayenneRuntimeException {
+
+    protected DataObject object;
+    protected ObjRelationship relationship;
 
     /**
      * Constructor for DeleteDenyException.
@@ -71,10 +81,58 @@ public class DeleteDenyException extends RuntimeException {
 
     /**
      * Constructor for DeleteDenyException.
+     * 
      * @param message
      */
     public DeleteDenyException(String message) {
         super(message);
     }
 
+    /**
+     * @since 1.2
+     */
+    public DeleteDenyException(DataObject object, ObjRelationship relationship,
+            String reason) {
+        super(reason);
+        this.object = object;
+        this.relationship = relationship;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public DataObject getObject() {
+        return object;
+    }
+
+    /**
+     * @since 1.2
+     */
+    public ObjRelationship getRelationship() {
+        return relationship;
+    }
+
+    public String getMessage() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("Can't delete object");
+
+        if (object != null && object.getObjectId() != null) {
+            buffer.append(" with OID ").append(object.getObjectId());
+        }
+
+        if (relationship != null) {
+            buffer
+                    .append(". Reason: relationship '")
+                    .append(relationship.getName())
+                    .append("' has ")
+                    .append(DeleteRule.deleteRuleName(relationship.getDeleteRule()));
+        }
+
+        String message = super.getUnlabeledMessage();
+        if (message != null) {
+            buffer.append(". Details: ").append(message);
+        }
+
+        return buffer.toString();
+    }
 }
