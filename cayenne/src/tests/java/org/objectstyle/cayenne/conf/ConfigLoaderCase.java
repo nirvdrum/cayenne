@@ -75,7 +75,7 @@ public class ConfigLoaderCase {
     public void test(ConfigLoader loader) throws Exception {
         InputStream in = new ByteArrayInputStream(configInfo.getBytes());
         loader.loadDomains(in);
-        RuntimeConfigDelegate delegate = (RuntimeConfigDelegate)loader.getDelegate();
+        RuntimeLoadDelegate delegate = (RuntimeLoadDelegate)loader.getDelegate();
         Assert.assertEquals(totalDomains, delegate.getDomains().size());
         Assert.assertEquals(failedMaps, delegate.getStatus().getFailedMaps().size());
         Assert.assertEquals(failedDataSources, delegate.getStatus().getFailedDataSources().size());

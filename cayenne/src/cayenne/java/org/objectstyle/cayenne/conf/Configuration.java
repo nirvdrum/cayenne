@@ -219,7 +219,7 @@ public abstract class Configuration {
     }
     
     public ConfigLoaderDelegate getLoaderDelegate() {
-    	return new RuntimeConfigDelegate(this, Configuration.getLoggingLevel());
+    	return new RuntimeLoadDelegate(this, Configuration.getLoggingLevel());
     }
 
     /** Returns domain configuration as a stream or null if it
@@ -251,7 +251,7 @@ public abstract class Configuration {
 
         ConfigLoaderDelegate delegate = getLoaderDelegate();
         if(delegate == null) {
-        	delegate = new RuntimeConfigDelegate(this, Configuration.getLoggingLevel());
+        	delegate = new RuntimeLoadDelegate(this, Configuration.getLoggingLevel());
         }
         
         ConfigLoader loader = new ConfigLoader(delegate);

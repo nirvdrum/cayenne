@@ -60,6 +60,7 @@ import java.util.List;
 
 import org.objectstyle.cayenne.access.DataDomain;
 import org.objectstyle.cayenne.conf.ConfigSaver;
+import org.objectstyle.cayenne.conf.RuntimeSaveDelegate;
 
 /**
  * ApplicationProjectFile is a ProjectFile abstraction of the 
@@ -106,7 +107,10 @@ public class ApplicationProjectFile extends ProjectFile {
         List children = getProject().getChildren();
         DataDomain[] domains = new DataDomain[children.size()];
         children.toArray(domains);
-        new ConfigSaver().storeDomains(out, domains);
+        
+        ApplicationProject project = (ApplicationProject)projectObj;
+        RuntimeSaveDelegate delegate = new RuntimeSaveDelegate(project.getConfig());
+        new ConfigSaver(delegate).storeDomains(out);
     }
 
     public boolean canHandle(Object obj) {

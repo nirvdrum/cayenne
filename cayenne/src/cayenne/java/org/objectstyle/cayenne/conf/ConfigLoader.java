@@ -125,7 +125,7 @@ public class ConfigLoader {
         parser.setErrorHandler(handler);
 
         try {
-        	delegate.startedLoading();
+            delegate.startedLoading();
             parser.parse(new InputSource(in));
             delegate.finishedLoading();
         } catch (IOException ioex) {
@@ -274,7 +274,10 @@ public class ConfigLoader {
             Attributes attrs)
             throws SAXException {
             if (localName.equals("dep-map-ref")) {
-                depMaps.add(attrs.getValue("", "name"));
+                new DepMapRefHandler(getParser(), this).init(
+                    localName,
+                    attrs,
+                    depMaps);
             } else {
                 throw new SAXParseException(
                     "<dep-map-ref> should be the only map child. <"
@@ -295,13 +298,6 @@ public class ConfigLoader {
         protected String nodeName;
         protected String domainName;
 
-        /**
-         * Constructor which just delegates to the superconstructor.
-         *
-         * @param parentHandler The handler which should be restored to the
-         *                      parser at the end of the element.
-         *                      Must not be <code>null</code>.
-         */
         public NodeHandler(XMLReader parser, ContentHandler parentHandler) {
             super(parser, parentHandler);
         }
@@ -330,8 +326,11 @@ public class ConfigLoader {
             throws SAXException {
 
             if (localName.equals("map-ref")) {
-                String mapName = attrs.getValue("", "name");
-                delegate.shouldLinkDataMap(domainName, nodeName, mapName);
+                new MapRefHandler(getParser(), this).init(
+                    localName,
+                    attrs,
+                    domainName,
+                    nodeName);
             } else {
                 throw new SAXParseException(
                     "<map-ref> should be the only node child. <"
@@ -339,6 +338,36 @@ public class ConfigLoader {
                         + "> is unexpected.",
                     null);
             }
+        }
+    }
+
+    private class DepMapRefHandler extends AbstractHandler {
+
+        public DepMapRefHandler(
+            XMLReader parser,
+            ContentHandler parentHandler) {
+            super(parser, parentHandler);
+        }
+
+        public void init(String name, Attributes attrs, List depMaps)
+            throws SAXException {
+            depMaps.add(attrs.getValue("", "name"));
+        }
+    }
+
+    private class MapRefHandler extends AbstractHandler {
+        public MapRefHandler(XMLReader parser, ContentHandler parentHandler) {
+            super(parser, parentHandler);
+        }
+
+        public void init(
+            String name,
+            Attributes attrs,
+            String domainName,
+            String nodeName)
+            throws SAXException {
+            String mapName = attrs.getValue("", "name");
+            delegate.shouldLinkDataMap(domainName, nodeName, mapName);
         }
     }
 }

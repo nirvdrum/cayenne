@@ -82,9 +82,9 @@ import org.xml.sax.InputSource;
  * 
  * @author Andrei Adamchik
  */
-public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
+public class RuntimeLoadDelegate implements ConfigLoaderDelegate {
     private static Logger logObj =
-        Logger.getLogger(RuntimeConfigDelegate.class);
+        Logger.getLogger(RuntimeLoadDelegate.class);
 
     protected Map domains = new HashMap();
     protected ConfigStatus status = new ConfigStatus();
@@ -92,7 +92,7 @@ public class RuntimeConfigDelegate implements ConfigLoaderDelegate {
     protected Level logLevel = Level.DEBUG;
     protected long startTime;
 
-    public RuntimeConfigDelegate(Configuration config, Level logLevel) {
+    public RuntimeLoadDelegate(Configuration config, Level logLevel) {
         this.config = config;
         this.logLevel = logLevel;
     }

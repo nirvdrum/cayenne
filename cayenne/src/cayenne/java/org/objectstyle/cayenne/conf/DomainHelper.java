@@ -92,7 +92,7 @@ public class DomainHelper extends ConfigLoader {
     /** @deprecated */
     public List getDomains() {
         return new ArrayList(
-            ((RuntimeConfigDelegate) getDelegate()).getDomains().values());
+            ((RuntimeLoadDelegate) getDelegate()).getDomains().values());
     }
 
     public Map getFailedAdapters() {
@@ -111,10 +111,14 @@ public class DomainHelper extends ConfigLoader {
         return getDelegate().getStatus().getFailedDataSources();
     }
 
-    /** Saves domains into the specified file.
-      * Assumes that the maps have already been saved.*/
+    /** @deprecated */
     public static void storeDomains(PrintWriter pw, DataDomain[] domains) {
-        new ConfigSaver().storeDomains(pw, domains);
+        logObj.warn(
+            "Using this method is unsafe, since it ignored 'domains' "
+                + "parameter and instead saves domain from shared config. Use ConfigSaver instead.");
+        RuntimeSaveDelegate delegate =
+            new RuntimeSaveDelegate(Configuration.getSharedConfig());
+        new ConfigSaver(delegate).storeDomains(pw);
     }
 
     /** 

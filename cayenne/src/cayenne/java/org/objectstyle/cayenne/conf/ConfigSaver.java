@@ -74,6 +74,7 @@ import org.objectstyle.cayenne.util.Util;
  * @author Andrei Adamchik
  */
 public class ConfigSaver {
+    protected ConfigSaverDelegate delegate;
 
     /**
      * Constructor for ConfigSaver.
@@ -82,82 +83,87 @@ public class ConfigSaver {
         super();
     }
 
-    /** Saves domains into the specified file.
-      * Assumes that the maps have already been saved.*/
-    public void storeDomains(PrintWriter pw, DataDomain[] domains) {
+    /**
+       * Constructor for ConfigSaver.
+       */
+    public ConfigSaver(ConfigSaverDelegate delegate) {
+        this.delegate = delegate;
+    }
+
+    /** 
+     * Saves domains into the specified file. Assumes that the maps have already
+     * been saved.
+     */
+    public void storeDomains(PrintWriter pw) {
         pw.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         pw.println(
             "<domains project-version=\""
                 + Project.CURRENT_PROJECT_VERSION
                 + "\">");
-        for (int i = 0; i < domains.length; i++) {
-            storeDomain(pw, domains[i]);
+
+        Iterator it = delegate.domainNames();
+        while(it.hasNext()) {
+            storeDomain(pw, (String) it.next());
         }
         pw.println("</domains>");
     }
 
-    protected void storeDomain(PrintWriter pw, DataDomain domain) {
-        pw.println("<domain name=\"" + domain.getName().trim() + "\">");
+    protected void storeDomain(PrintWriter pw, String domainName) {
+        pw.println("<domain name=\"" + domainName.trim() + "\">");
 
-        DataNode[] nodes = domain.getDataNodes();
-        List maps = domain.getMapList();
+        Iterator nodes = delegate.nodeNames(domainName);
+        Iterator maps = delegate.mapNames(domainName);
 
-        // sort to satisfy dependencies
-        OperationSorter.sortMaps(maps);
+        while (maps.hasNext()) {
+            String mapName = (String) maps.next();
+            String mapLocation = delegate.mapLocation(domainName, mapName);
+            Iterator depMaps = delegate.dependentMapNames(domainName, mapName);
 
-        Iterator iter = maps.iterator();
-        while (iter.hasNext()) {
-            DataMap map = (DataMap) iter.next();
-            List depMaps = map.getDependencies();
+            pw.print("\t<map name=\"" + mapName.trim());
+            pw.print("\" location=\"" + mapLocation.trim());
 
-            pw.print("\t<map name=\"" + map.getName().trim());
-            pw.print("\" location=\"" + map.getLocation().trim());
-
-            if (depMaps.size() == 0) {
+            if (!depMaps.hasNext()) {
                 pw.println("\"/>");
             } else {
                 pw.println("\">");
-                Iterator dit = depMaps.iterator();
-                while (dit.hasNext()) {
-                    DataMap dep = (DataMap) dit.next();
+                while (depMaps.hasNext()) {
+                    String depName = (String) depMaps.next();
                     pw.println(
-                        "\t\t<dep-map-ref name=\""
-                            + dep.getName().trim()
-                            + "\"/>");
+                        "\t\t<dep-map-ref name=\"" + depName.trim() + "\"/>");
                 }
 
                 pw.println("\t</map>");
             }
         }
 
-        for (int i = 0; i < nodes.length; i++) {
-            pw.println("\t<node name=\"" + nodes[i].getName().trim() + "\"");
-            String datasource = nodes[i].getDataSourceLocation();
+        while (nodes.hasNext()) {
+            String nodeName = (String) nodes.next();
+            String datasource =
+                delegate.nodeDataSourceName(domainName, nodeName);
+            String adapter = delegate.nodeAdapterName(domainName, nodeName);
+            String factory = delegate.nodeFactoryName(domainName, nodeName);
+            Iterator mapNames = delegate.linkedMapNames(domainName, nodeName);
+
+            pw.println("\t<node name=\"" + nodeName.trim() + "\"");
+
             if (datasource != null) {
                 datasource = datasource.trim();
                 pw.print("\t\t datasource=\"" + datasource + "\"");
             }
             pw.println("");
 
-            if (nodes[i].getAdapter() != null) {
-                pw.println(
-                    "\t\t adapter=\""
-                        + nodes[i].getAdapter().getClass().getName()
-                        + "\"");
+            if (adapter != null) {
+                pw.println("\t\t adapter=\"" + adapter + "\"");
             }
 
-            String factory = nodes[i].getDataSourceFactory();
-            if (null != factory)
-                factory = factory.trim();
-            else
-                factory = "";
-            pw.println("\t\t factory=\"" + factory + "\">");
-            DataMap[] map_arr = nodes[i].getDataMaps();
-            for (int j = 0; map_arr != null && j < map_arr.length; j++) {
-                pw.println(
-                    "\t\t\t<map-ref name=\""
-                        + map_arr[j].getName().trim()
-                        + "\"/>");
+            if (factory != null) {
+                pw.print("\t\t factory=\"" + factory.trim() + "\"");
+            }
+            pw.println(">");
+
+            while (mapNames.hasNext()) {
+                String mapName = (String) mapNames.next();
+                pw.println("\t\t\t<map-ref name=\"" + mapName.trim() + "\"/>");
             }
             pw.println("\t </node>");
         }

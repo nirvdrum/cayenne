@@ -61,15 +61,17 @@ import java.util.Iterator;
  * @author Andrei Adamchik
  */
 public interface ConfigSaverDelegate {
-    public String[] domainNames();
+    public Iterator domainNames();
     
-    public String[] mapNames(String domainName);
+    public Iterator mapNames(String domainName);
     
     public String mapLocation(String domainName, String mapName);
     
-    public String[] dependentMapNames(String domainName, String mapName);
+    public Iterator dependentMapNames(String domainName, String mapName);
     
-    public String[] nodeNames(String domainName); 
+    public Iterator linkedMapNames(String domainName, String nodeName);
+    
+    public Iterator nodeNames(String domainName); 
     
     public String nodeDataSourceName(String domainName, String nodeName);
     

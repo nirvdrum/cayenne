@@ -66,7 +66,7 @@ import org.objectstyle.cayenne.conf.ConfigLoader;
 import org.objectstyle.cayenne.conf.Configuration;
 import org.objectstyle.cayenne.conf.DefaultConfiguration;
 import org.objectstyle.cayenne.conf.DriverDataSourceFactory;
-import org.objectstyle.cayenne.conf.RuntimeConfigDelegate;
+import org.objectstyle.cayenne.conf.RuntimeLoadDelegate;
 import org.objectstyle.cayenne.conn.PoolManager;
 import org.objectstyle.cayenne.util.ResourceLocator;
 
